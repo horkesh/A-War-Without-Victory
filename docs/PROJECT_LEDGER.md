@@ -1,3 +1,53 @@
+## [2026-04-30] docs(roadmap): audit plan coverage and add missing architecture execution plans
+
+**Type:** Roadmap architecture / planning coverage. No code, data, canon, or scenario behavior changed.
+
+**Change:**
+- Audited every active Master Roadmap item against existing execution plans.
+- Added an architecture audit: `docs/plans/2026-04-30-roadmap-plan-coverage-and-system-integration-audit.md`.
+- Added missing v0.9 integration plans:
+  - `docs/plans/2026-04-30-v09-presidential-campaign-loop-closure-plan.md`
+  - `docs/plans/2026-04-30-v09-formation-life-believability-plan.md`
+- Added missing release / post-release planning coverage:
+  - `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md`
+  - `docs/plans/2026-04-30-post-1-0-content-execution-plan.md`
+  - `docs/plans/2026-04-30-roadmap-open-design-questions-resolution-plan.md`
+- Updated `MASTER_ROADMAP.md` to reference the new audit/plans in the v1.0, post-1.0, open-design-question, and key-plan sections.
+
+**Architecture findings:**
+- v0.9.0-v0.9.5 are mostly covered by existing milestone-grade plans.
+- The missing coverage was cross-system glue: presidential loop ownership, formation-life believability, v1.0 integration, post-1.0 child-plan triggers, and design-question governance.
+- The only direct plan conflict found is that `docs/plans/2026-03-16-v1.0.0-gold.md` has an old post-1.0 table that disagrees with the current Master Roadmap. The new v1.0 integration plan classifies that file as a launch-day checklist only; Master Roadmap remains authoritative for post-1.0 order.
+
+### Artifacts
+- `docs/plans/2026-04-30-roadmap-plan-coverage-and-system-integration-audit.md`
+- `docs/plans/2026-04-30-v09-presidential-campaign-loop-closure-plan.md`
+- `docs/plans/2026-04-30-v09-formation-life-believability-plan.md`
+- `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md`
+- `docs/plans/2026-04-30-post-1-0-content-execution-plan.md`
+- `docs/plans/2026-04-30-roadmap-open-design-questions-resolution-plan.md`
+- `docs/plans/MASTER_ROADMAP.md`
+
+## [2026-04-30] docs(roadmap): promote v0.9 closure loop, formation-life believability, and roadmap-sync cadence
+
+**Type:** Roadmap truth / planning clarification only. No code, data, canon, or scenario behavior changed.
+
+**Change:**
+- Updated `docs/plans/MASTER_ROADMAP.md` `Last Updated` to 2026-04-30.
+- Added a `v0.9 closure frame` under Planned v0.9: Warroom / Army HQ briefing -> map inspection -> order or review choice -> turn result -> consequence / cost / historical judgment.
+- Added a full-war proof requirement for `v0.9.0` / `v0.9.1` closure: 188w/200w evidence is required because 40w cannot validate Washington timing, HRHB/RBiH rupture, Orasje, consequence chains, negotiated peace, verdict, or Cost Ledger behavior.
+- Promoted formation-life believability into the active roadmap: brigade drift, far-from-home live ownership, active-never-fights formations, HRHB/HVO offensive emergence, and out-of-area corps behavior.
+- Added roadmap / repo-truth cadence to the current status table, explicitly tying post-run and post-integration roadmap refreshes to the Studio Health plan.
+- Updated the current status paragraph to distinguish the older recorded `n21` roadmap baseline from fresh local `n1579` 40w evidence (93.7% area-weighted, 27/27 anchors, 6/6 benchmarks, 0 invalid ops, consistency PASS), pending Claude's current scenario closeout.
+
+**Plan coverage checked:**
+- Presidential loop closure is covered by shell cohesion, product architecture simplification, command review UX, v0.9 consequence refresh, and v0.9.1 dynamic essay / endgame comparison plans.
+- Formation-life believability is covered enough to roadmap now by the A+++ scorecard, roadmap packet backlog, and prior brigade-drift investigations; it still needs packetization after the current scenario proof settles.
+- Roadmap truth cadence is covered by `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`.
+
+### Artifacts
+- Roadmap: `docs/plans/MASTER_ROADMAP.md`
+
 ## [2026-04-30] chore(git): resolve local↔origin divergence; cherry-pick negotiated_peace termination
 
 **Type:** Branch hygiene + behavior-additive cherry-pick. Local `main` had diverged 3 ahead / 55 behind `origin/main`. The 3 local commits represented a parallel, earlier implementation of the v0.9.0 Consequence System that remote PR #1 (`c9fb4b17`) superseded with a more developed design (1238-line `consequences.json` vs local 681; remote does not include `prosecutorial_narrative.ts` or `expire_timed_effects.ts`). Local was reset to `origin/main`; only the negotiated-peace termination wiring was salvaged via cherry-pick.

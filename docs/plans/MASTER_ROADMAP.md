@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-04-28
+**Last Updated:** 2026-04-30
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -402,6 +402,14 @@ No version bump by itself â€” this was the engineering closure band between
 
 **Theme:** Ahistorical choices produce realistic consequences. Ship preparation begins.
 
+**v0.9 closure frame (added 2026-04-30):** The next work should close one coherent presidential campaign loop, not scatter into unrelated feature expansion. The loop is: Warroom / Army HQ briefing -> map inspection -> order or review choice -> turn result -> consequence / cost / historical judgment. This is a cross-milestone product objective that consumes existing plans rather than creating a new milestone: shell cohesion (`docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md`), product architecture simplification (`docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md`), command review UX (`docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`), consequence refresh (`docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md`), and dynamic essay / endgame comparison (`docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`). Done means a player can complete a campaign arc and understand what happened, why it happened, what they influenced, what it cost, and how history judges the result.
+
+**Full-war proof requirement (added 2026-04-30):** Before closing `v0.9.0` or `v0.9.1`, validate beyond the healthy 40-week slice with 188w/200w evidence. The 40w run `n1579` on current `main` is strong (93.7% area-weighted, 27/27 anchors, 6/6 benchmarks, 0 invalid ops, consistency PASS), but `v0.9` depends on later-war behavior: Washington timing, HRHB/RBiH rupture, Orasje, consequence chains, negotiated peace, verdict, and Cost Ledger surfaces.
+
+**Formation-life believability lane (added 2026-04-30):** Treat brigade drift, far-from-home live ownership, "active but never fights" formations, HRHB/HVO offensive emergence, and out-of-area corps behavior as a `v0.9` simulation-believability lane. This is not a new broad mechanics milestone; it draws from the scorecard/backlog (`docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/plans/2026-04-14-roadmap-execution-packet-backlog.md`) and prior drift investigations. Done means remaining drift/never-fights warnings are either fixed by a canonical lifecycle owner or explicitly classified as accepted scenario variance with run evidence.
+
+**Roadmap truth cadence (added 2026-04-30):** After major scenario evidence, milestone closure, or remote branch integration, run a roadmap sync pass under `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`. Current example: the roadmap's 2026-04-28 calibration paragraph must be refreshed after Claude's current scenario setup/run work settles, because local `n1579` already supersedes the older `n21` 40w status.
+
 ### v0.9.0 â€” Consequence System
 
 Divergence events: ahistorical player decisions trigger realistic consequence chains. No cleansing leads to partisan resistance. Alliance holds eliminates Washington Agreement chain. Srebrenica defended changes NATO intervention calculus.
@@ -494,6 +502,8 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 **Ship it.** Full campaign from April 1992. Dynamic Codex. Command hierarchy. Consequence system. Tutorial. Ship it.
 
+**Integration plan:** `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md`. The older `docs/plans/2026-03-16-v1.0.0-gold.md` remains a launch-day checklist, but its post-1.0 table is superseded by this Master Roadmap.
+
 ### What ships in v1.0:
 - Complete 1992-1995 campaign (all phases, all factions playable)
 - Corps Commander Intelligence (PERCEIVE-DECIDE-EXECUTE)
@@ -525,6 +535,8 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 ## Post-1.0 Content Plan
 
+**Execution coverage:** `docs/plans/2026-04-30-post-1-0-content-execution-plan.md`. Each post-1.0 update must receive a scoped child plan before implementation starts; the table below defines order and ownership intent, not permission to implement directly.
+
 | Update | Codename | Content |
 |--------|----------|---------|
 | **1.0.x** | â€” | Day-one patch, critical bugfixes. No new features. |
@@ -542,6 +554,8 @@ Each 1.x.0 can have its own hotfix patches (1.1.1, 1.1.2, etc.).
 ---
 
 ## Open Design Questions
+
+**Resolution plan:** `docs/plans/2026-04-30-roadmap-open-design-questions-resolution-plan.md`. Questions remain blocked until that process produces a decision, deferral, or child-plan trigger.
 
 These need design sessions before implementation. Preserved from the original roadmap â€” each represents a genuine unsolved problem.
 
@@ -583,10 +597,12 @@ These need design sessions before implementation. Preserved from the original ro
 | Tactical map (React + MapLibre + Deck.gl) | Functional |
 | Warroom (React) | Complete â€” React migration landed 2026-04-04. `warroom.ts` retains launch/picker/iframe/bridge. |
 | Army HQ (4-tab command center) | Functional |
+| Presidential campaign loop | Partial - the pieces exist, but v0.9 closure must make Warroom / Army HQ / map / review / turn result / endgame judgment feel like one coherent player loop. Covered by shell cohesion, product architecture simplification, command-review UX, v0.9.0 consequence refresh, and v0.9.1 endgame comparison plans. |
 | Events/decisions | Functional (94 events, pressure system, 14 condition types) |
 | Historical essays (Codex) | Partial (96 certified; 13 missing 1992 foundation essays still tracked) |
 | Strategic dimensions | Functional (6 dimensions, Dayton merge) |
 | Scenarios (40w/52w/56w) | Complete |
+| Formation-life believability | Partial - sector ownership is now strong, but drift, far-from-home live ownership, active-never-fights formations, and HRHB/HVO offensive emergence remain `v0.9` believability work. Covered by the A+++ scorecard, roadmap packet backlog, and prior brigade-drift investigations; needs packetization after current scenario proof settles. |
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
@@ -608,8 +624,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | **Canonical 2026-04-16** — `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. `outcome_class`, `condemnation_flags`, Pyrrhic score, verdict display, termination-vs-judgment split, scenario fallback all settled. Remaining `v0.9.0` work is divergence-event matrix authoring, not the gate. |
 | Sensitive-history handling | **Canonical 2026-04-16** — `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three-ring boundary, rupture expansion rule, Cost Ledger wording constraints, and sign-off structure all settled. |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
+| Roadmap / repo-truth cadence | Active permanent lane - Studio Health owns roadmap sync after major runs, milestone closures, and remote branch integration. The next sync should record the post-2026-04-30 scenario evidence once Claude's current setup/run work settles. |
 
-**Current:** formal package semver is still `v0.8.1`, but roadmap state is now safely inside early `v0.9.x` development rather than the old transition band. Calibration as of 2026-04-28 (`n21` on `main` `a91ccc66`, post-Phase-1 + Orasje fix): 92.2% area-weighted, 27/27 anchors, 6/6 benchmarks, 712 OSIDs, 0 critical anomalies. Drift vs the previous `n1358` baseline (93.6%) is small (-1.4pp) and explained by intentional engine changes (event-flag wiring `#22`/`#23`/`#29`, WA timing recalibration, RBiH↔HRHB combat-gate centralization). Anchor and benchmark pass rates unchanged. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
+**Current:** formal package semver is still `v0.8.1`, but roadmap state is now safely inside early `v0.9.x` development rather than the old transition band. Calibration status has two layers: the last recorded roadmap baseline as of 2026-04-28 was `n21` on `main` `a91ccc66` at 92.2% area-weighted, 27/27 anchors, 6/6 benchmarks, 712 OSIDs, 0 critical anomalies; local 2026-04-30 evidence on current `main` (`n1579`, 40w) is stronger at 93.7% area-weighted, 27/27 anchors, 6/6 benchmarks, 0 invalid ops, and consistency validation PASS. Treat `n1579` as fresh evidence pending Claude's current scenario setup/run closeout and the next Studio Health roadmap sync. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, 188w/200w proof is required before those milestones close, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, formation-life believability remains a visible simulation gap, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
 
 ---
 
@@ -660,6 +677,7 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
 | `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` | Permanent side lane for repo-truth gates, roadmap/board sync, warning disposition, artifact policy, and calibration evidence retention |
+| `docs/plans/2026-04-30-roadmap-plan-coverage-and-system-integration-audit.md` | Architect audit of roadmap plan coverage and cross-plan dependencies |
 | `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md` | Cross-system gradecard that closed the v0.8-to-v0.9 hardening band and promoted residual work into v0.9.x |
 | `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
 | `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
@@ -678,6 +696,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/20_engineering/DEBUG_SURFACE_POLICY.md` | Debug-vs-player surface contract and leak-prevention rules |
 | `docs/20_engineering/FEATURE_DONE_MEANS.md` | Studio closeout contract for truth, verification, and visible ownership |
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
+| `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md` | v0.9.0 consequence-system refresh against current repo truth |
+| `docs/plans/2026-04-30-v09-presidential-campaign-loop-closure-plan.md` | v0.9 cross-system presidential campaign-loop closure |
+| `docs/plans/2026-04-30-v09-formation-life-believability-plan.md` | v0.9 formation-life believability and warning-family ownership |
 | `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` | v0.9.1 dynamic Codex divergence + endgame comparison |
 | `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md` | v0.9.0 victory conditions and Pyrrhic score |
 | `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md` | v0.9.0 sensitive-history / atrocity representation gate |
@@ -685,6 +706,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md` | v0.9.4 visual polish + legendary map features |
 | `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md` | v0.9.5 platform packaging + store |
 | `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md` | v0.9.2 tutorial and onboarding |
+| `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md` | v1.0 gold readiness integration gate |
+| `docs/plans/2026-04-30-post-1-0-content-execution-plan.md` | post-1.0 content update coverage and child-plan triggers |
+| `docs/plans/2026-04-30-roadmap-open-design-questions-resolution-plan.md` | open roadmap design-question resolution process |
 | `docs/plans/2026-03-29-concurrent-corps-operations.md` | v0.8.0 concurrent corps ops design |
 | `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md` | Simplification hit list |
 | `docs/plans/2026-03-21-tech-debt-backlog.md` | Technical debt backlog (simplification phase) |
