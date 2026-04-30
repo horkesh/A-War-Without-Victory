@@ -186,7 +186,6 @@ The decline from apr1994 88.4% → oct1995 63.2% is **not** a slow drift but a s
 |---|---|
 | `docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md` | This report (new). |
 | `docs/PROJECT_LEDGER.md` | Engine-health baseline entry. |
-| `working-on.md` | Continuation notes. |
 
 No engine code, scenario data, OOB, operation, combat, movement, or canon doc changed. No painted target file altered. No new tests.
 
@@ -215,27 +214,11 @@ No engine code, scenario data, OOB, operation, combat, movement, or canon doc ch
 
 ---
 
-## 11. Commit hash if committed
+## 11. Commits
 
-**Committed:** `5fbcea53` on main (2 files: this report + ledger entry).
+**Committed:** Primary report + ledger commit `5fbcea53`; follow-up annotation commit `09c394fb`. Final accepted report state includes both commits.
 
-**Commit guidance:** If the user wishes to commit, suggested message:
-
-```
-docs(40_reports): target-aware scenario health baseline (apr1994 / apr1995 / oct1995)
-
-Three target-aware runs against the new definitive painted-control set
-confirm engine substrate is healthy (deterministic, causal, date-aware).
-Headline finding: late-war target gap at oct1995 (63.2% area-weighted) is
-dominated by MISSING SCENARIO CONTENT — Operation Storm, HV-HVO Maestral,
-ARBiH 5th Corps Sana liberation, VRS Krivaja-95, VRS Stupčanica-95 are all
-absent from pre_planned_operations.ts / triggered_operations.ts.
-
-Recommended next product packet: a single scripted-ops packet adding the
-four late-1995 reversal ops, owner /operations-expert + /historian.
-```
-
-Files staged should be exactly: this report + PROJECT_LEDGER.md + working-on.md. Do not stage scenario runs (they are reproducible deterministic artifacts; the hashes in this report are the authoritative reference).
+Scenario runs remain reproducible artifacts and were not committed; the hashes in this report are the authoritative references.
 
 ---
 

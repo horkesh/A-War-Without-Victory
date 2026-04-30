@@ -30,7 +30,6 @@
 **Files changed (this packet):**
 - `docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md` — full report with run table, region trajectory table, six-family classification, recommended next packet.
 - `docs/PROJECT_LEDGER.md` — this entry.
-- `working-on.md` — continuation notes.
 
 No engine code, scenario data, OOB, operation, combat, movement, canon doc, or painted target file changed. No new tests. No fresh runs beyond the three documented above (all reproducible from the same scenarios).
 
