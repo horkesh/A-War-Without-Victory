@@ -1,3 +1,21 @@
+## [2026-04-30] tooling(calibration): add date-specific painted-control target painter
+
+**Type:** Tooling / evaluation correction. The late-war calibration loop had been comparing April 1994 / April 1995 / October 1995-style states against the Jan 1993 painted target, which is useful as a smoke check but wrong as a design yardstick. This packet adds a local map painter and a date-specific target resolver so scenario evaluation can use the correct painted truth before engine conclusions are drawn.
+
+**What changed:**
+- `tools/painted_control_targets.cjs` — shared deterministic target resolver, target slot listing, canonical control-map writer, and summary helpers.
+- `tools/paint_control_targets.cjs` + `tools/paint_control_targets.html` — local browser painter served at `http://127.0.0.1:4177/`; loads operational OSID geometry, paints RS/RBiH/HRHB control, seeds missing date slots from Jan 1993 or from a sim `final_save.json`, and writes `data/source/calibration/painted_control_<target>.json`.
+- `tools/compare_painted_vs_sim.cjs` — now supports `--target <id>`, `--painted <path>`, and `--list-targets`; default remains `jan1993` for backwards compatibility.
+- `package.json` — adds `npm run paint:control`.
+- `tests/painted_control_targets.test.ts` — covers canonical OSID ordering, late-war target slots, explicit painted-path comparison, and seedable painter API behavior.
+- `docs/40_reports/implemented/20260430_SCENARIO_PAINTED_CONTROL_TARGET_TOOL.md` — workflow and evaluation guidance.
+
+**Target slots:** `jan1993`, `apr1994`, `apr1995`, `oct1995`. Missing late-war files are not created until saved by the painter, avoiding fake "truth" targets.
+
+**Determinism:** No timestamps, no randomness. Target IDs are sanitized. Writer persists sorted OSID keys and only `RS` / `RBiH` / `HRHB` values.
+
+**Validation:** `npx tsc --noEmit` clean; `vitest tests/painted_control_targets.test.ts` passes; `node tools/compare_painted_vs_sim.cjs --list-targets` lists all four target slots.
+
 ## [2026-04-30] investigation(combat): DRINA / HERZEGOVINA RBiH-overgain root-cause trace — stop-at-plan, no code/data/canon change
 
 **Type:** Investigation-only packet downstream of `[2026-04-30] fix(combat): block cross-corps reconstitution drift`. Examines residual Goražde siege 1/2 ERROR + DRINA 70.6% / HERZEGOVINA 60.7% area-match in 188w n1587 (hash `09fc9beb9f0004c3`) to determine whether one bounded engine owner can repair the residual without violating the user prompt's scope-fence (no broad combat tuning, no global morale floors, no Path C cross-corps absorption).

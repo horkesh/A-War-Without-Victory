@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AWWV Painted Control Target Painter</title>
+  <style>
+    :root {
+      --bg: #10140f;
+      --panel: #e8e0c8;
+      --panel-2: #d5ccb4;
+      --ink: #171a17;
+      --muted: #667067;
+      --line: #918873;
+      --rs: #b33a34;
+      --rbih: #2f8b57;
+      --hrhb: #2e65a8;
+      --unknown: #8f8a7d;
+      --accent: #d69f35;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 13px/1.35 "Segoe UI", "IBM Plex Sans", sans-serif;
+      overflow: hidden;
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 340px;
+      height: 100vh;
+    }
+    aside, .right {
+      background: var(--panel);
+      border-right: 1px solid #6f695b;
+      padding: 14px;
+      overflow: auto;
+    }
+    .right {
+      border-right: 0;
+      border-left: 1px solid #6f695b;
+    }
+    h1, h2 {
+      margin: 0 0 10px;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+    h1 { font-size: 18px; }
+    h2 { font-size: 13px; margin-top: 18px; text-transform: uppercase; }
+    label { display: block; margin: 10px 0 4px; color: #30352f; font-weight: 700; }
+    select, input, textarea, button {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #f6f1df;
+      color: var(--ink);
+      border-radius: 4px;
+      padding: 8px 9px;
+      font: inherit;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    button {
+      cursor: pointer;
+      font-weight: 800;
+      background: #232a22;
+      color: #f5ecd0;
+      border-color: #232a22;
+    }
+    button.secondary {
+      background: #f6f1df;
+      color: var(--ink);
+      border-color: var(--line);
+    }
+    button:disabled { opacity: .45; cursor: default; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .palette { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .swatch {
+      height: 44px;
+      border-radius: 4px;
+      border: 3px solid transparent;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,.45);
+    }
+    .swatch.active { border-color: var(--accent); box-shadow: 0 0 0 1px #2d2b24 inset; }
+    .rs { background: var(--rs); }
+    .rbih { background: var(--rbih); }
+    .hrhb { background: var(--hrhb); }
+    .unknown { background: var(--unknown); }
+    .map-wrap {
+      position: relative;
+      min-width: 0;
+      background: #16201b;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+    .hud {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      padding: 8px 10px;
+      color: #f8f0d7;
+      background: rgba(15, 18, 14, .82);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 4px;
+      pointer-events: none;
+      max-width: min(560px, calc(100vw - 700px));
+    }
+    .top-hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .pill {
+      padding: 7px 10px;
+      border-radius: 4px;
+      color: #f8f0d7;
+      background: rgba(15, 18, 14, .82);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .stat {
+      display: grid;
+      grid-template-columns: 58px 1fr 48px;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0;
+    }
+    .bar {
+      height: 11px;
+      border-radius: 2px;
+      background: #c4bba2;
+      overflow: hidden;
+    }
+    .bar > div { height: 100%; }
+    .mini {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .list {
+      border: 1px solid var(--line);
+      background: #f6f1df;
+      max-height: 220px;
+      overflow: auto;
+      border-radius: 4px;
+    }
+    .item {
+      padding: 7px 9px;
+      border-bottom: 1px solid #ddd3b8;
+      cursor: pointer;
+    }
+    .item:hover { background: #eee4c8; }
+    .item:last-child { border-bottom: 0; }
+    .dirty { color: #8a3100; font-weight: 800; }
+    .ok { color: #24693e; font-weight: 800; }
+    code { background: #d9cfb5; padding: 1px 4px; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>Painted Control Targets</h1>
+      <div class="mini">Author date-specific historical control truth for scenario evaluation.</div>
+
+      <label for="target">Target date</label>
+      <select id="target"></select>
+
+      <div class="row">
+        <button id="load">Load</button>
+        <button id="save" class="secondary">Save</button>
+      </div>
+
+      <label for="label">Label</label>
+      <input id="label" placeholder="April 1994" />
+
+      <label for="notes">Notes</label>
+      <textarea id="notes" placeholder="Sources, assumptions, unresolved zones"></textarea>
+
+      <h2>Brush</h2>
+      <div class="palette">
+        <button class="swatch rs active" data-faction="RS">RS</button>
+        <button class="swatch rbih" data-faction="RBiH">RBiH</button>
+        <button class="swatch hrhb" data-faction="HRHB">HRHB</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button id="undo" class="secondary">Undo</button>
+        <button id="resetView" class="secondary">Reset view</button>
+      </div>
+
+      <h2>Seed From Run</h2>
+      <label for="runDir">Run directory</label>
+      <input id="runDir" list="runDirs" placeholder="runs/apr1992_definitive_188w__..."/>
+      <datalist id="runDirs"></datalist>
+      <div class="row">
+        <button id="loadRun" class="secondary">Preview run</button>
+        <button id="applyRun" class="secondary">Use run as draft</button>
+      </div>
+      <div class="mini">Use a sim final state as a starting draft, then paint corrections.</div>
+    </aside>
+
+    <main class="map-wrap">
+      <canvas id="map"></canvas>
+      <div class="top-hud">
+        <div class="pill" id="targetHud">target</div>
+        <div class="pill" id="dirtyHud">clean</div>
+      </div>
+      <div class="hud" id="hoverHud">Loading map...</div>
+    </main>
+
+    <section class="right">
+      <h2>Counts</h2>
+      <div id="stats"></div>
+
+      <h2>Selection</h2>
+      <div id="selection" class="mini">Click a polygon to inspect it.</div>
+
+      <h2>Search</h2>
+      <input id="search" placeholder="OSID, settlement, municipality" />
+      <div class="list" id="results"></div>
+
+      <h2>Compare Command</h2>
+      <div class="mini">After saving, compare a run against the selected target:</div>
+      <p><code id="compareCmd">node tools/compare_painted_vs_sim.cjs &lt;run_dir&gt; --target jan1993</code></p>
+
+      <h2>Status</h2>
+      <div id="status" class="mini">Starting...</div>
+    </section>
+  </div>
+
+  <script>
+    const COLORS = { RS: '#b33a34', RBiH: '#2f8b57', HRHB: '#2e65a8', unknown: '#8f8a7d' };
+    const state = {
+      features: [],
+      control: {},
+      runPreview: null,
+      target: 'jan1993',
+      label: 'January 1993',
+      brush: 'RS',
+      dirty: false,
+      hover: null,
+      selected: null,
+      history: [],
+      bounds: null,
+      view: { x: 0, y: 0, scale: 1 },
+      dragging: false,
+      panning: false,
+      last: null,
+    };
+
+    function strictCompare(a, b) {
+      const left = String(a);
+      const right = String(b);
+      if (left < right) return -1;
+      if (left > right) return 1;
+      return 0;
+    }
+
+    const canvas = document.getElementById('map');
+    const ctx = canvas.getContext('2d');
+    const els = {
+      target: document.getElementById('target'),
+      load: document.getElementById('load'),
+      save: document.getElementById('save'),
+      label: document.getElementById('label'),
+      notes: document.getElementById('notes'),
+      undo: document.getElementById('undo'),
+      resetView: document.getElementById('resetView'),
+      runDir: document.getElementById('runDir'),
+      runDirs: document.getElementById('runDirs'),
+      loadRun: document.getElementById('loadRun'),
+      applyRun: document.getElementById('applyRun'),
+      stats: document.getElementById('stats'),
+      selection: document.getElementById('selection'),
+      search: document.getElementById('search'),
+      results: document.getElementById('results'),
+      status: document.getElementById('status'),
+      hoverHud: document.getElementById('hoverHud'),
+      targetHud: document.getElementById('targetHud'),
+      dirtyHud: document.getElementById('dirtyHud'),
+      compareCmd: document.getElementById('compareCmd'),
+    };
+
+    function setStatus(text, kind) {
+      els.status.innerHTML = '<span class="' + (kind || '') + '">' + escapeHtml(text) + '</span>';
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    async function api(path, options) {
+      const res = await fetch(path, options);
+      const body = await res.json();
+      if (!res.ok || body.error) throw new Error(body.error || res.statusText);
+      return body;
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      render();
+    }
+
+    function computeBounds(features) {
+      const b = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+      for (const f of features) {
+        forEachPoint(f.geometry, ([x, y]) => {
+          b.minX = Math.min(b.minX, x);
+          b.maxX = Math.max(b.maxX, x);
+          b.minY = Math.min(b.minY, y);
+          b.maxY = Math.max(b.maxY, y);
+        });
+      }
+      return b;
+    }
+
+    function forEachPoint(geometry, fn) {
+      const polys = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+      for (const poly of polys) for (const ring of poly) for (const pt of ring) fn(pt);
+    }
+
+    function resetView() {
+      const rect = canvas.getBoundingClientRect();
+      const b = state.bounds;
+      const mapW = b.maxX - b.minX;
+      const mapH = b.maxY - b.minY;
+      const scale = Math.min((rect.width - 28) / mapW, (rect.height - 28) / mapH);
+      state.view = {
+        scale,
+        x: (rect.width - mapW * scale) / 2 - b.minX * scale,
+        y: (rect.height - mapH * scale) / 2 + b.maxY * scale,
+      };
+      render();
+    }
+
+    function project([x, y]) {
+      return [x * state.view.scale + state.view.x, -y * state.view.scale + state.view.y];
+    }
+
+    function unproject([x, y]) {
+      return [(x - state.view.x) / state.view.scale, -(y - state.view.y) / state.view.scale];
+    }
+
+    function drawFeature(f, fill, stroke, width) {
+      ctx.beginPath();
+      const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+      for (const poly of polys) {
+        for (const ring of poly) {
+          ring.forEach((pt, idx) => {
+            const [x, y] = project(pt);
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.closePath();
+        }
+      }
+      ctx.fillStyle = fill;
+      ctx.fill('evenodd');
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = width || 0.35;
+        ctx.stroke();
+      }
+    }
+
+    function render() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = '#16201b';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      for (const f of state.features) {
+        const osid = f.properties.osid;
+        const faction = state.control[osid] || 'unknown';
+        const previewControl = state.runPreview?.by_settlement_id;
+        const preview = previewControl && previewControl[osid] && previewControl[osid] !== faction;
+        drawFeature(f, COLORS[faction] || COLORS.unknown, preview ? '#f5e6a8' : 'rgba(20,20,20,.45)', preview ? 1.2 : 0.35);
+      }
+      if (state.hover) drawFeature(state.hover, 'rgba(255,255,255,.18)', '#ffffff', 1.4);
+      if (state.selected) drawFeature(state.selected, 'rgba(255,207,92,.24)', '#ffd35c', 2);
+      updateHud();
+    }
+
+    function pointInRing(point, ring) {
+      const [x, y] = point;
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0], yi = ring[i][1];
+        const xj = ring[j][0], yj = ring[j][1];
+        const intersect = ((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-12) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function pointInFeature(point, f) {
+      const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+      for (const poly of polys) {
+        if (!pointInRing(point, poly[0])) continue;
+        let inHole = false;
+        for (let i = 1; i < poly.length; i++) if (pointInRing(point, poly[i])) inHole = true;
+        if (!inHole) return true;
+      }
+      return false;
+    }
+
+    function featureAt(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const pt = unproject([clientX - rect.left, clientY - rect.top]);
+      for (let i = state.features.length - 1; i >= 0; i--) {
+        if (pointInFeature(pt, state.features[i])) return state.features[i];
+      }
+      return null;
+    }
+
+    function paintFeature(f) {
+      if (!f) return;
+      const osid = f.properties.osid;
+      const prev = state.control[osid];
+      if (prev === state.brush) return;
+      state.history.push({ osid, prev, next: state.brush });
+      state.control[osid] = state.brush;
+      state.selected = f;
+      state.dirty = true;
+      updatePanels();
+      render();
+    }
+
+    function updatePanels() {
+      const counts = { RS: 0, RBiH: 0, HRHB: 0, unknown: 0 };
+      for (const f of state.features) counts[state.control[f.properties.osid] || 'unknown']++;
+      const total = state.features.length || 1;
+      els.stats.innerHTML = ['RS', 'RBiH', 'HRHB', 'unknown'].map(faction => {
+        const pct = Math.round((counts[faction] / total) * 1000) / 10;
+        const cls = faction === 'RBiH' ? 'rbih' : faction.toLowerCase();
+        return '<div class="stat"><b>' + faction + '</b><div class="bar"><div class="' + cls + '" style="width:' + pct + '%"></div></div><span>' + counts[faction] + '</span></div>';
+      }).join('');
+      if (state.selected) {
+        const p = state.selected.properties;
+        const faction = state.control[p.osid] || 'unknown';
+        els.selection.innerHTML = '<b>' + escapeHtml(p.settlement_name || p.osid) + '</b><br>' +
+          '<code>' + escapeHtml(p.osid) + '</code><br>' +
+          escapeHtml(p.mun1990_name || p.mun1990_id || '') + '<br>' +
+          'Control: <b>' + escapeHtml(faction) + '</b>';
+      }
+      els.targetHud.textContent = state.target + ' / ' + state.label;
+      els.dirtyHud.textContent = state.dirty ? 'unsaved changes' : 'saved';
+      els.dirtyHud.className = 'pill ' + (state.dirty ? 'dirty' : 'ok');
+      els.compareCmd.textContent = 'node tools/compare_painted_vs_sim.cjs <run_dir> --target ' + state.target;
+    }
+
+    function updateHud() {
+      if (!state.hover) {
+        els.hoverHud.textContent = 'Drag to paint. Right-drag to pan. Mouse wheel to zoom.';
+        return;
+      }
+      const p = state.hover.properties;
+      els.hoverHud.textContent = (p.settlement_name || p.osid) + ' | ' + p.osid + ' | ' + (state.control[p.osid] || 'unknown');
+    }
+
+    async function loadTarget(id, seed) {
+      const target = await api('/api/target/' + id + (seed ? '?seed=' + encodeURIComponent(seed) : ''));
+      state.target = id;
+      state.label = target.label || id;
+      state.control = { ...target.by_settlement_id };
+      state.history = [];
+      state.dirty = Boolean(target.missing);
+      els.label.value = state.label;
+      els.notes.value = target.notes || '';
+      setStatus(target.missing ? 'New target seeded from ' + (target.seeded_from || 'jan1993') : 'Loaded ' + id, target.missing ? 'dirty' : 'ok');
+      updatePanels();
+      render();
+    }
+
+    async function saveTarget() {
+      const result = await api('/api/target/' + state.target, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          label: els.label.value || state.label,
+          notes: els.notes.value,
+          by_settlement_id: state.control,
+        }),
+      });
+      state.label = result.label;
+      state.dirty = false;
+      setStatus('Saved ' + result.path, 'ok');
+      updatePanels();
+    }
+
+    function search(query) {
+      const q = query.trim().toLowerCase();
+      if (!q) {
+        els.results.innerHTML = '';
+        return;
+      }
+      const hits = state.features.filter(f => {
+        const p = f.properties;
+        return [p.osid, p.settlement_name, p.mun1990_name, p.mun1990_id].some(v => String(v || '').toLowerCase().includes(q));
+      }).slice(0, 80);
+      els.results.innerHTML = hits.map(f => {
+        const p = f.properties;
+        return '<div class="item" data-osid="' + escapeHtml(p.osid) + '"><b>' + escapeHtml(p.settlement_name || p.osid) + '</b><br><span class="mini">' + escapeHtml(p.osid) + '</span></div>';
+      }).join('');
+    }
+
+    function focusOsid(osid) {
+      const f = state.features.find(x => x.properties.osid === osid);
+      if (!f) return;
+      state.selected = f;
+      let cx = 0, cy = 0, n = 0;
+      forEachPoint(f.geometry, ([x, y]) => { cx += x; cy += y; n++; });
+      if (n > 0) {
+        const rect = canvas.getBoundingClientRect();
+        state.view.scale = Math.max(state.view.scale, 75);
+        state.view.x = rect.width / 2 - (cx / n) * state.view.scale;
+        state.view.y = rect.height / 2 + (cy / n) * state.view.scale;
+      }
+      updatePanels();
+      render();
+    }
+
+    async function init() {
+      const [config, map, runs] = await Promise.all([
+        api('/api/config'),
+        api('/api/map'),
+        api('/api/run-dirs').catch(() => ({ dirs: [] })),
+      ]);
+      els.target.innerHTML = config.targets.map(t => '<option value="' + t.id + '">' + t.label + (t.exists ? '' : ' (new)') + '</option>').join('');
+      els.runDirs.innerHTML = runs.dirs.map(d => '<option value="' + d + '"></option>').join('');
+      state.features = map.features.slice().sort((a, b) => strictCompare(a.properties.osid, b.properties.osid));
+      state.bounds = computeBounds(state.features);
+      resize();
+      resetView();
+      await loadTarget('jan1993');
+    }
+
+    document.querySelectorAll('.swatch').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.brush = btn.dataset.faction;
+        document.querySelectorAll('.swatch').forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+    els.target.addEventListener('change', () => { state.target = els.target.value; });
+    els.load.addEventListener('click', () => loadTarget(els.target.value));
+    els.save.addEventListener('click', saveTarget);
+    els.undo.addEventListener('click', () => {
+      const op = state.history.pop();
+      if (!op) return;
+      state.control[op.osid] = op.prev;
+      state.dirty = true;
+      updatePanels();
+      render();
+    });
+    els.resetView.addEventListener('click', resetView);
+    els.search.addEventListener('input', () => search(els.search.value));
+    els.results.addEventListener('click', e => {
+      const item = e.target.closest('.item');
+      if (item) focusOsid(item.dataset.osid);
+    });
+    els.loadRun.addEventListener('click', async () => {
+      const run = await api('/api/sim-control?runDir=' + encodeURIComponent(els.runDir.value));
+      state.runPreview = run;
+      setStatus('Previewing ' + run.run_dir, 'ok');
+      render();
+    });
+    els.applyRun.addEventListener('click', async () => {
+      const run = state.runPreview || await api('/api/sim-control?runDir=' + encodeURIComponent(els.runDir.value));
+      state.control = { ...run.by_settlement_id };
+      state.dirty = true;
+      setStatus('Draft copied from ' + run.run_dir, 'dirty');
+      updatePanels();
+      render();
+    });
+
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    canvas.addEventListener('mousedown', e => {
+      state.last = [e.clientX, e.clientY];
+      if (e.button === 2 || e.shiftKey) state.panning = true;
+      else {
+        state.dragging = true;
+        paintFeature(featureAt(e.clientX, e.clientY));
+      }
+    });
+    window.addEventListener('mouseup', () => { state.dragging = false; state.panning = false; });
+    canvas.addEventListener('mousemove', e => {
+      if (state.panning && state.last) {
+        state.view.x += e.clientX - state.last[0];
+        state.view.y += e.clientY - state.last[1];
+        state.last = [e.clientX, e.clientY];
+        render();
+        return;
+      }
+      const f = featureAt(e.clientX, e.clientY);
+      state.hover = f;
+      if (state.dragging) paintFeature(f);
+      else render();
+    });
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const before = unproject([mx, my]);
+      const factor = e.deltaY < 0 ? 1.18 : 0.84;
+      state.view.scale = Math.max(4, Math.min(420, state.view.scale * factor));
+      const after = project(before);
+      state.view.x += mx - after[0];
+      state.view.y += my - after[1];
+      render();
+    }, { passive: false });
+    window.addEventListener('resize', resize);
+
+    init().catch(err => setStatus(err.message || String(err), 'dirty'));
+  </script>
+</body>
+</html>

@@ -408,20 +408,20 @@ After EVERY scenario run, the orchestrator:
    Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
-1. **[2026-03-08] NEVER override initial OSIDs — not an option**
+1. **[2026-04-30] Late-war runs need date-specific painted targets**
+   Do instead: Before judging Apr 1994 / Apr 1995 / Oct 1995 scenario health, create or select the matching target in `npm run paint:control` and compare with `tools/compare_painted_vs_sim.cjs <run_dir> --target <date>`; Jan 1993 is only a smoke check for late-war runs.
+2. **[2026-03-08] NEVER override initial OSIDs — not an option**
    Do instead: Initial OSID control from census/referendum is NEVER manually overridden. Fix engine, OOB, operations, or scenario params instead.
-2. **[2026-03-14] NEVER use avoided_osids_by_faction as a calibration fix — BANNED**
+3. **[2026-03-14] NEVER use avoided_osids_by_faction as a calibration fix — BANNED**
    Do instead: Fix bot_corps_directives.ts target priority, OOB terrain/personnel stats, or painted targets. `avoided_osids` hides broken engine behavior. Use `osid_control_overrides` only for factual initial-control corrections.
-3. **[2026-03-04] Override direction law — CRITICAL**
+4. **[2026-03-04] Override direction law — CRITICAL**
    Do instead: `osid_control_overrides` = fix initial UNDER-captures (factual data only, not bot suppression).
-4. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
+5. **[2026-03-07] HRHB-init cells CAN be fixed by RS overrides — add in isolated clusters only**
    Do instead: Add HRHB cells by isolated geographic cluster (KRAJINA only, then POSAVINA_NE only). Adding 10+ across regions causes cascade.
-5. **[2026-03-08] Rear pocket consolidation: cluster-aware version (post-w20)**
+6. **[2026-03-08] Rear pocket consolidation: cluster-aware version (post-w20)**
    Do instead: `rear_pocket_consolidation.ts` with BFS detection. 1-3 connected same-controller enemy OSIDs, ALL external neighbors faction-controlled. Paramilitary sweep handles w0-20.
-6. **[2026-03-07] Pre-planned operation target chains drive regional match rate**
+7. **[2026-03-07] Pre-planned operation target chains drive regional match rate**
    Do instead: Remaining misses are pre-planned-op/scenario-anchor bucket. Load-bearing overrides: turbe_2 enables Donji Vakuf consolidation; removing causes -3pp.
-7. **[2026-03-06] Pool surplus absorbs mobilization scale changes — use initial pool lever**
-   Do instead: Primary lever for initial strength is RS_JNA_INHERITANCE_BONUS and FACTION_POOL_SCALE, not mobilization scale.
 8. **[2026-03-05] Combat calibration needs causality, not just territory**
    Do instead: Verify non-zero attacks and battles in `weekly_report.jsonl` before trusting control deltas.
 9. **[2026-03-06] Live attribution replaces Phase I flip logs**

@@ -2,16 +2,24 @@
 
 /**
  * compare_painted_vs_sim.cjs
- * Compare painted historical control targets (Jan 1993) against a sim run's final_save.json.
+ * Compare a date-specific painted historical control target against a sim run's final_save.json.
  * Reports OSID-level match rate by region and highlights mismatches.
  *
- * Usage: node tools/compare_painted_vs_sim.cjs <run_dir>
+ * Usage:
+ *   node tools/compare_painted_vs_sim.cjs <run_dir> [--target jan1993|apr1994|apr1995|oct1995]
+ *   node tools/compare_painted_vs_sim.cjs <run_dir> --painted data/source/calibration/painted_control_apr1994.json
  *
  * CommonJS — runs with plain node, no tsx/ESM needed.
  */
 
 const fs   = require('fs');
 const path = require('path');
+const {
+  listPaintedTargets,
+  loadPaintedTarget,
+  resolvePaintedPath,
+  strictCompare,
+} = require('./painted_control_targets.cjs');
 
 // ---------------------------------------------------------------------------
 // Region mapping: municipality slug (middle part of OSID) → region name
@@ -215,18 +223,38 @@ function lpad(str, width) {
 
 function main() {
   const args = process.argv.slice(2);
+  if (args.includes('--list-targets')) {
+    console.log('Available painted control targets:');
+    for (const target of listPaintedTargets()) {
+      console.log(`  ${target.id}${target.exists ? '' : ' (missing)'}  ${target.path}`);
+    }
+    return;
+  }
   if (args.length < 1) {
-    console.error('Usage: node tools/compare_painted_vs_sim.cjs <run_dir>');
+    console.error('Usage: node tools/compare_painted_vs_sim.cjs <run_dir> [--target jan1993|apr1994|apr1995|oct1995] [--painted path]');
     process.exit(1);
   }
 
   const runDir = args[0];
+  let paintedArg = 'jan1993';
+  for (let i = 1; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--target' || arg === '--painted') {
+      if (!args[i + 1]) {
+        console.error(`ERROR: ${arg} requires a value`);
+        process.exit(1);
+      }
+      paintedArg = args[i + 1];
+      i++;
+    } else if (!arg.startsWith('--')) {
+      paintedArg = arg;
+    } else {
+      console.error(`ERROR: Unknown argument: ${arg}`);
+      process.exit(1);
+    }
+  }
 
-  // Resolve painted path relative to this script's directory
-  const paintedPath = path.resolve(
-    __dirname,
-    '../data/source/calibration/painted_control_jan1993.json'
-  );
+  const paintedPath = resolvePaintedPath(paintedArg);
   const simPath = path.resolve(runDir, 'final_save.json');
 
   if (!fs.existsSync(paintedPath)) {
@@ -238,7 +266,8 @@ function main() {
     process.exit(1);
   }
 
-  const paintedFile = JSON.parse(fs.readFileSync(paintedPath, 'utf8'));
+  const paintedTarget = loadPaintedTarget(paintedArg);
+  const paintedFile = paintedTarget.file;
   const simFile     = JSON.parse(fs.readFileSync(simPath, 'utf8'));
 
   const paintedCtrl = paintedFile.by_settlement_id; // osid → faction
@@ -254,7 +283,7 @@ function main() {
   }
 
   // Canonical sorted list of OSIDs from the painted ground truth
-  const paintedOsids = Object.keys(paintedCtrl).sort();
+  const paintedOsids = Object.keys(paintedCtrl).sort(strictCompare);
   const totalOsids   = paintedOsids.length;
 
   // ---------------------------------------------------------------------------
@@ -356,7 +385,7 @@ function main() {
   // OSIDs in sim but not in painted (informational only, do not affect match rate)
   const simOnlyOsids = Object.keys(simCtrl)
     .filter(k => !Object.prototype.hasOwnProperty.call(paintedCtrl, k))
-    .sort();
+    .sort(strictCompare);
 
   // Sort mismatches: by region order first, then osid alphabetically
   const regionIndex = {};
@@ -377,6 +406,8 @@ function main() {
 
   lines.push('=== Painted vs Sim Comparison ===');
   lines.push('Run: ' + runDir);
+  lines.push('Painted target: ' + paintedTarget.id + ' (' + paintedTarget.label + ')');
+  lines.push('Painted file: ' + path.relative(path.resolve(__dirname, '..'), paintedTarget.path).replace(/\\/g, '/'));
   lines.push('Total OSIDs: ' + totalOsids);
   lines.push('');
 
