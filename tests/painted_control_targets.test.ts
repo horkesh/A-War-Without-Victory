@@ -28,10 +28,14 @@ describe('painted control target tooling', () => {
 
   it('lists the late-war target slots the painter is meant to author', () => {
     const ids = listPaintedTargets().map((target: { id: string }) => target.id);
-    expect(ids).toContain('jan1993');
-    expect(ids).toContain('apr1994');
-    expect(ids).toContain('apr1995');
-    expect(ids).toContain('oct1995');
+    expect(ids.slice(0, 4)).toEqual(['jan1993', 'apr1994', 'apr1995', 'oct1995']);
+  });
+
+  it('keeps the painter dropdown synced to the loaded save target', () => {
+    const html = fs.readFileSync(path.join(process.cwd(), 'tools/paint_control_targets.html'), 'utf8');
+    expect(html).toContain('els.target.value = id;');
+    expect(html).toContain("els.target.addEventListener('change', () => loadSelectedTarget(false));");
+    expect(html).not.toContain("els.target.addEventListener('change', () => { state.target = els.target.value; });");
   });
 
   it('compare_painted_vs_sim accepts an explicit painted file path', () => {
@@ -83,8 +87,10 @@ describe('painted control target tooling', () => {
       const config = await (await fetch(`${base}/api/config`)).json();
       expect(config.targets.map((target: { id: string }) => target.id)).toContain('oct1995');
 
-      const seeded = await (await fetch(`${base}/api/target/apr1994?seed=jan1993`)).json();
-      expect(seeded.id).toBe('apr1994');
+      const seeded = await (await fetch(`${base}/api/target/apr1995?seed=jan1993`)).json();
+      expect(seeded.id).toBe('apr1995');
+      expect(seeded.label).toBe('April 1995');
+      expect(seeded.missing).toBe(true);
       expect(Object.keys(seeded.by_settlement_id).length).toBeGreaterThan(700);
     } finally {
       await new Promise<void>((resolve) => server.close(() => resolve()));

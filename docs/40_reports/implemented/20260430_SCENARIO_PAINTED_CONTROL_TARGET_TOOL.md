@@ -67,3 +67,15 @@ The writer never uses timestamps or system time. Target IDs are sanitized. OSID 
 ## Product impact
 
 This moves us back toward healthy-engine work: the engine should be judged against the scenario date it is trying to represent, not against one stale control map. Calibration packets should name their target date, and late-war scenario work should first create or select the matching painted target.
+
+## Follow-up Fix
+
+The first build exposed a startup sync bug: target slots were listed alphabetically, so April 1994 appeared first, while the app still loaded Jan 1993 internally. The fix makes built-in target order chronological, forces the dropdown to the loaded target in `loadTarget(id)`, and loads the selected target on dropdown change instead of only changing the eventual save path.
+
+The accidentally saved April 1994 paint was recovered into:
+
+```text
+data/source/calibration/painted_control_apr1994.json
+```
+
+`painted_control_jan1993.json` was restored to its committed Jan 1993 content.

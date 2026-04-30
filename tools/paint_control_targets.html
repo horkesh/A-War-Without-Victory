@@ -475,11 +475,22 @@
       state.control = { ...target.by_settlement_id };
       state.history = [];
       state.dirty = Boolean(target.missing);
+      els.target.value = id;
       els.label.value = state.label;
       els.notes.value = target.notes || '';
       setStatus(target.missing ? 'New target seeded from ' + (target.seeded_from || 'jan1993') : 'Loaded ' + id, target.missing ? 'dirty' : 'ok');
       updatePanels();
       render();
+    }
+
+    async function loadSelectedTarget(force) {
+      const id = els.target.value;
+      if (!force && id === state.target) return;
+      if (state.dirty && !window.confirm('Discard unsaved changes and load ' + id + '?')) {
+        els.target.value = state.target;
+        return;
+      }
+      await loadTarget(id);
     }
 
     async function saveTarget() {
@@ -551,8 +562,8 @@
         document.querySelectorAll('.swatch').forEach(b => b.classList.toggle('active', b === btn));
       });
     });
-    els.target.addEventListener('change', () => { state.target = els.target.value; });
-    els.load.addEventListener('click', () => loadTarget(els.target.value));
+    els.target.addEventListener('change', () => loadSelectedTarget(false));
+    els.load.addEventListener('click', () => loadSelectedTarget(true));
     els.save.addEventListener('click', saveTarget);
     els.undo.addEventListener('click', () => {
       const op = state.history.pop();

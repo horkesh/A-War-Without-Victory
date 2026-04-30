@@ -5,6 +5,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const {
+  BUILTIN_TARGETS,
   WORKSPACE_ROOT,
   canonicalizeControlMap,
   listPaintedTargets,
@@ -134,10 +135,11 @@ function createServer() {
           });
         } catch (err) {
           const seed = parsed.searchParams.get('seed') || 'jan1993';
+          const builtin = BUILTIN_TARGETS.find((target) => target.id === id);
           const target = loadPaintedTarget(seed);
           send(res, 200, {
             id,
-            label: id,
+            label: builtin?.label || id,
             path: `data/source/calibration/painted_control_${id}.json`,
             missing: true,
             seeded_from: seed,

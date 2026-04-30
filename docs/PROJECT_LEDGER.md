@@ -1,3 +1,17 @@
+## [2026-04-30] fix(tooling): sync painted-target dropdown with save target
+
+**Type:** Tooling bugfix + user-painted data recovery. The first painter build listed target slots alphabetically but auto-loaded `jan1993` on startup without updating the dropdown. That could make the UI visibly show `apr1994` while the in-memory save target was still `jan1993`, causing an April 1994 paint to overwrite `painted_control_jan1993.json`.
+
+**What changed:**
+- Recovered the accidentally saved April 1994 paint into `data/source/calibration/painted_control_apr1994.json` with `target_id: apr1994` and label `April 1994`.
+- Restored `data/source/calibration/painted_control_jan1993.json` content to the committed Jan 1993 target.
+- `tools/painted_control_targets.cjs` now returns built-in targets in chronological order: `jan1993`, `apr1994`, `apr1995`, `oct1995`.
+- `tools/paint_control_targets.html` now sets the dropdown value inside `loadTarget()` and loads the selected target on dropdown change instead of mutating only the save path.
+- `tools/paint_control_targets.cjs` now returns the built-in human label for missing target slots, so a new April 1994 target starts labeled `April 1994`.
+- `tests/painted_control_targets.test.ts` adds regression coverage for built-in target order, missing target labels, and the UI save-target sync guard.
+
+**Validation:** `vitest tests/painted_control_targets.test.ts` passes (5/5); `npx tsc --noEmit` clean; `node tools/compare_painted_vs_sim.cjs --list-targets` lists Jan 1993, April 1994, April 1995, and October 1995 in chronological order; `node tools/compare_painted_vs_sim.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1586 --target apr1994` loads the recovered April 1994 target successfully.
+
 ## [2026-04-30] tooling(calibration): add date-specific painted-control target painter
 
 **Type:** Tooling / evaluation correction. The late-war calibration loop had been comparing April 1994 / April 1995 / October 1995-style states against the Jan 1993 painted target, which is useful as a smoke check but wrong as a design yardstick. This packet adds a local map painter and a date-specific target resolver so scenario evaluation can use the correct painted truth before engine conclusions are drawn.

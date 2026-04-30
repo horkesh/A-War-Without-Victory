@@ -139,6 +139,7 @@ function writePaintedTarget(id, controlMap, meta = {}) {
 
 function listPaintedTargets() {
   const seen = new Map();
+  const builtinOrder = new Map(BUILTIN_TARGETS.map((target, index) => [target.id, index]));
   for (const target of BUILTIN_TARGETS) {
     seen.set(target.id, {
       ...target,
@@ -164,7 +165,12 @@ function listPaintedTargets() {
       });
     }
   }
-  return Array.from(seen.values()).sort((a, b) => strictCompare(a.id, b.id));
+  return Array.from(seen.values()).sort((a, b) => {
+    const leftOrder = builtinOrder.has(a.id) ? builtinOrder.get(a.id) : Number.MAX_SAFE_INTEGER;
+    const rightOrder = builtinOrder.has(b.id) ? builtinOrder.get(b.id) : Number.MAX_SAFE_INTEGER;
+    if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+    return strictCompare(a.id, b.id);
+  });
 }
 
 module.exports = {
