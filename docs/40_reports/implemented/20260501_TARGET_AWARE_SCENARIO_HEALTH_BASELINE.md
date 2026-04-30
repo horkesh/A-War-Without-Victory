@@ -217,7 +217,7 @@ No engine code, scenario data, OOB, operation, combat, movement, or canon doc ch
 
 ## 11. Commit hash if committed
 
-_(not yet committed; commit guidance below)_
+**Committed:** `5fbcea53` on main (2 files: this report + ledger entry).
 
 **Commit guidance:** If the user wishes to commit, suggested message:
 
