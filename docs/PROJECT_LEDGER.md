@@ -1,3 +1,53 @@
+## [2026-05-01] feat(operations): late-1995 scripted-op packet (Krivaja-95 / Stupčanica-95 / Mistral 2 / Sana)
+
+**Type:** Scripted operation infrastructure additions to `src/sim/combat/triggered_operations.ts`. Closes the Family-1 (missing scenario content) gap identified in `20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md`. **No engine code, combat tuning, OOB, painted target, or scenario init changed.**
+
+**Operations added (all turn-gated ≥ 168 to protect early-war runs):**
+- **Operation Krivaja-95** (RS, vrs_drina, w ≥ 168): 1 axis, 5 srebrenica:* OSIDs (donji_potocari_2, srebrenica_2, bostahovine_2, milacevici, suceska). Staging op:bratunac:bratunac_2.
+- **Operation Stupčanica-95** (RS, vrs_drina, w ≥ 172): 1 axis, single objective op:rogatica:zepa_2. Staging op:vlasenica:grabovica.
+- **Operation Mistral 2** (HRHB, hvo_main_staff primary + hvo_tomislavgrad axis 2, w ≥ 175): 2 axes, 20 objectives across Glamoč halapic/stekerovci, Drvar, Bosansko Grahovo, Šipovo, Mrkonjić Grad. Staging op:livno:misi_2.
+- **Operation Sana** (RBiH, arbih_5th_corps, w ≥ 175): 3 axes, 31 objectives across Krupa rear, Bihać–Petrovac corridor, Sanski Most, Ključ. Staging op:bihac:bihac_2.
+
+Every objective OSID was cross-checked against `painted_control_apr1995.json` and `painted_control_oct1995.json`: each is exactly an OSID that flipped in the painted truth between apr1995 and oct1995, i.e., an OSID the simulation cannot capture without these ops.
+
+**Tests added:**
+- `tests/triggered_operations_late_1995.test.ts` (new file, 12 tests): catalog shape, turn-gate protection, painted-flipped objective validity, deterministic ordering.
+- `tests/triggered_operations.test.ts`: catalog assertion updated 4 → 8 ops with new chronological ordering.
+
+**Validation:**
+- `npx tsc --noEmit`: clean.
+- `vitest tests/triggered_operations*.test.ts`: 27/27 pass (15 existing updated + 12 new).
+- 104w n1591 hash `6b6daa39dcaf66f7` = baseline ✓ (turn gate ≥168 protects early-war).
+- 156w n1592 hash `57f742a558d8e619` = baseline ✓ (run ends at w156 before any late-1995 op fires).
+- 183w n1593 hash `6a6570c525ae24a9` ≠ baseline `15f9740e253b42c2` (ops accepted into corps active_operations; state evolved differently; territorial outcome IDENTICAL to baseline because 0 attacks).
+
+**Captures observed in 183w n1593: 0.** The four new ops sit in the same execution-stage pattern as the existing `Operation Cerska-Kamenica` (which has been in the catalog since w40 and also produces `attempts=0, captured=0, provenance=no_objectives_held`). Two separable owners explain the 0-captures result:
+
+- **Owner A — Krivaja-95 brigade attrition:** `op_injection_warnings` show three of four assigned brigades (`rs_1st_zvornik`, `rs_5th_podrinje`, `rs_skelani_battalion`) are `status='inactive'` pre-fire (t168/t171). Only `rs_1st_bratunac` eligible. < MIN_OPERATION_PARTICIPANTS=2 → injection blocked. This is the same vrs_drina structural collapse documented in `20260430_DRINA_HERZEGOVINA_OVERGAIN_ROOT_CAUSE_PLAN.md` Family-2 four-owner stop-at-plan. Krivaja-95 op definition is correct; obstacle is upstream brigade survival (separate sign-off).
+
+- **Owner B — Stupčanica-95 / Mistral 2 / Sana 0 attacks:** Operations fire correctly (`triggered_operations_accepted` records all three at the right turn), AAR rows exist with valid axis_summaries and brigade lists, but `total_attacks=0`. Same pre-existing engine residual that affects the existing `Operation Cerska-Kamenica` — late-war scripted-op execution AI does not deliver objective attacks within planning + execution windows when brigades are far from staging. Out of scope for this packet (engine code change to op execution AI).
+
+**Known scope limitation:** `checkTriggeredOperations` line 447 hardcodes `assignOperationCommander(..., 'RS')`. RS ops (Krivaja-95, Stupčanica-95) get correct commander selection. Federation ops (Sana, Mistral 2) fire without an assigned commander_officer_id; territorial behavior unaffected, officer-effects neutral. Repairing the hardcode is engine code, out of packet scope.
+
+**Files changed:**
+- `src/sim/combat/triggered_operations.ts` — 4 new entries appended to `TRIGGERED_OPS` array, ~230 lines including comments + historical citations.
+- `tests/triggered_operations.test.ts` — catalog count + ordering assertion updated.
+- `tests/triggered_operations_late_1995.test.ts` — new file, 12 focused tests.
+- `docs/40_reports/implemented/20260501_LATE_1995_SCRIPTED_OPS_PACKET.md` — full report.
+- `docs/PROJECT_LEDGER.md` — this entry.
+
+No engine code, combat code, OOB, painted target, or scenario init changed.
+
+**Determinism:** No randomness, no timestamps, no nondeterministic iteration. Stable axis_id ordering, stable objective ordering, stable brigade ordering. 104w + 156w hashes preserved.
+
+**Open follow-ups:**
+- **Owner B packet (highest priority):** late-war scripted-op execution AI. Diagnostic entry: examine why Cerska-Kamenica (existing, t40) produces 0 attacks. Same root cause likely fixes Stupčanica + Mistral + Sana simultaneously. Owner: `/operations-expert` + `/qa-engineer`.
+- **Owner A packet (per prior 20260430 packet's roadmap):** vrs_drina structural rescue (formation-expert + operations-expert + sector-expert + qa-engineer). Unblocks Krivaja-95 specifically.
+- **Cincar 1994 packet (out of this packet's scope):** would close apr1995 Glamoč proper + Kupres gaps. `/operations-expert` + `/historian`.
+- **Sensitive-history consequences for Krivaja-95 / Stupčanica-95:** atrocity / narrative mechanics. Requires `/historian` + `/game-designer` per `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`.
+
+When Owners A + B both ship, the four ops in this packet should deliver: KRAJINA 60% → ~95% area (Sana), HERZEGOVINA SW 42.9% → higher (Mistral 2), DRINA enclaves Srebrenica + Žepa flip to RS (Krivaja + Stupčanica).
+
 ## [2026-05-01] evidence(scenario): target-aware engine health baseline (apr1994 / apr1995 / oct1995)
 
 **Type:** Evidence/report packet only — no engine, scenario, OOB, operation, combat, or canon change. First target-aware scenario evaluation against the new definitive painted-control set (apr1994/apr1995/oct1995), assessing engine health rather than chasing calibration percentages.

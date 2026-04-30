@@ -107,7 +107,7 @@ function makeState(turn: number): GameState {
 
 describe('triggered operations definitions', () => {
     it('defines the current triggered operation catalog', () => {
-        assert.equal(_TRIGGERED_OPS.length, 4);
+        assert.equal(_TRIGGERED_OPS.length, 8);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
@@ -115,6 +115,10 @@ describe('triggered operations definitions', () => {
                 'Operation Herzegovina Consolidation',
                 'Operation Kotor Varos',
                 'Operation Cerska-Kamenica',
+                'Operation Krivaja-95',
+                'Operation Stupčanica-95',
+                'Operation Mistral 2',
+                'Operation Sana',
             ],
         );
     });

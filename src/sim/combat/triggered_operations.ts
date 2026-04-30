@@ -285,6 +285,316 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
             },
         ],
     },
+    // ═════════════════════════════════════════════════════════════════════════
+    // Late-1995 historical reversal operations.
+    //
+    // Source: docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md
+    // identified four missing scripted ops as the dominant Family-1 (missing
+    // scenario content) gap at oct1995. These four operations close those gaps
+    // by adding turn-gated triggered ops at week >= 168 (Krivaja-95) through
+    // week >= 175 (Sana). They do not affect early-war runs (104w n1588, 156w
+    // n1589 hashes preserved by gate ≥ 168).
+    //
+    // Date math (Apr 1 1992 = w0):
+    //   w168 ≈ June 24 1995  → Krivaja-95 (Srebrenica fall, July 6–11 1995)
+    //   w172 ≈ July 22 1995  → Stupčanica-95 (Žepa fall, July 14–25 1995)
+    //   w175 ≈ Aug 12 1995   → Mistral 2 (Drvar/Šipovo/Mrkonjić push, Sep 8–15)
+    //   w175 ≈ Aug 12 1995   → Operation Sana (5th Corps liberation, Sep–Oct 1995)
+    //
+    // Objective OSIDs are constrained to the 712-OSID universe and are validated
+    // against `data/source/calibration/painted_control_oct1995.json` so that
+    // each objective is painted = the operation's faction at oct1995. OSID
+    // adjacency was verified against `data/derived/operational/operational_contact_graph.json`.
+    //
+    // Sensitive-history note: Krivaja-95 and Stupčanica-95 are TERRITORIAL
+    // representations of the operations that captured the Srebrenica and Žepa
+    // safe areas in July 1995. They model the territorial control flip only.
+    // Atrocity, narrative, and consequence mechanics are explicitly out of
+    // scope for this packet and require a separate /historian + /game-designer
+    // sign-off (see docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md).
+    //
+    // Known scope limitation: `checkTriggeredOperations` calls
+    // `assignOperationCommander(..., 'RS')` with a hardcoded faction. For RS
+    // ops (Krivaja-95, Stupčanica-95) this is correct. For RBiH (Sana) and
+    // HRHB (Mistral 2) the commander assignment returns no candidate (no RS
+    // officer matches a Federation corps), so those ops fire without an
+    // assigned named commander — territorial behavior is unaffected; officer
+    // effects default to neutral. Repairing this hardcode is engine code,
+    // explicitly out of this packet's scope.
+    // ═════════════════════════════════════════════════════════════════════════
+    {
+        // Operation Krivaja-95 — VRS Drina Corps captures the Srebrenica
+        // safe area, July 6–11 1995. Historical force: ≈ 2,000 VRS troops
+        // from Drina Corps + Skelani Battalion + Zvornik/Bratunac/Milici
+        // brigades. Territorial outcome: srebrenica_2 town + Potočari +
+        // surrounding enclave OSIDs flip RBiH→RS. (BB2 p.587–611, ICTY
+        // Krstić et al. trial.)
+        //
+        // Objectives are the five srebrenica:* OSIDs that flipped RBiH→RS
+        // between apr1995 and oct1995 painted truth (donji_potocari_2,
+        // srebrenica_2, bostahovine_2, milacevici, suceska). Other srebrenica
+        // OSIDs (luka_2, ljeskovik_2, obadi) were already RS-painted at apr1995
+        // — already captured under earlier ops (Cerska-Kamenica) or never RBiH.
+        //
+        // Staging at op:bratunac:bratunac_2 (RS-painted at all dates; physical
+        // VRS Drina Corps HQ proximity for the operation; 1 hop from
+        // donji_potocari_2). Adjacency: bratunac_2 ↔ donji_potocari_2 ↔
+        // srebrenica_2 ↔ {luka_2, ljeskovik_2, obadi, suceska, milacevici} ↔
+        // bostahovine_2.
+        name: 'Operation Krivaja-95',
+        faction: 'RS',
+        primary_corps: 'vrs_drina',
+        staging_osid: 'op:bratunac:bratunac_2',
+        planning_duration: 3,
+        min_attack_outcome: 'repulsed',
+        trigger: (_state, turn) => turn >= 168,
+        axes: [
+            {
+                axis_id: 'srebrenica_enclave',
+                name: 'Srebrenica Enclave',
+                corps: 'vrs_drina',
+                brigades: [
+                    'rs_1st_zvornik' as FormationId,
+                    'rs_1st_bratunac' as FormationId,
+                    'rs_5th_podrinje' as FormationId,
+                    'rs_skelani_battalion' as FormationId,
+                ],
+                objectives: [
+                    'op:srebrenica:donji_potocari_2',
+                    'op:srebrenica:srebrenica_2',
+                    'op:srebrenica:bostahovine_2',
+                    'op:srebrenica:milacevici',
+                    'op:srebrenica:suceska',
+                ],
+                staging_osid: 'op:bratunac:bratunac_2',
+            },
+        ],
+    },
+    {
+        // Operation Stupčanica-95 — VRS Drina Corps captures the Žepa safe
+        // area, July 14–25 1995, immediately after Krivaja-95. Historical
+        // force: VRS 1st Bircac/Milici/Vlasenica brigades + Drina Corps
+        // detachments. Territorial outcome: zepa_2 (the only Žepa-area
+        // OSID that flipped RBiH→RS in this op per painted truth).
+        // (BB2 p.611, ICTY Krstić verdict.)
+        //
+        // Single-objective op (zepa_2 was apr1995=RBiH, oct1995=RS). Other
+        // rogatica OSIDs were already RS at apr1995.
+        //
+        // Staging at op:vlasenica:grabovica (RS-painted at all dates;
+        // rs_1st_milii home; adjacent to vlasenica:bacici → pomol_2 → zepa_2).
+        // Adjacency chain verified: grabovica ↔ bacici ↔ pomol_2 ↔ zepa_2.
+        name: 'Operation Stupčanica-95',
+        faction: 'RS',
+        primary_corps: 'vrs_drina',
+        staging_osid: 'op:vlasenica:grabovica',
+        planning_duration: 3,
+        min_attack_outcome: 'repulsed',
+        trigger: (_state, turn) => turn >= 172,
+        axes: [
+            {
+                axis_id: 'zepa_pocket',
+                name: 'Žepa Pocket',
+                corps: 'vrs_drina',
+                brigades: [
+                    'rs_1st_vlasenica' as FormationId,
+                    'rs_1st_milii' as FormationId,
+                    'rs_1st_podrinje' as FormationId,
+                ],
+                objectives: [
+                    'op:rogatica:zepa_2',
+                ],
+                staging_osid: 'op:vlasenica:grabovica',
+            },
+        ],
+    },
+    {
+        // Operation Mistral 2 — HV-HVO joint offensive, September 8–15 1995.
+        // Historical thrust: Croatian Army (HV) crossed into western Bosnia
+        // and joined HVO 1st Guard + Tomislavgrad-area brigades to capture
+        // Drvar, Glamoč rear, Bosansko Grahovo, Šipovo, and approach
+        // Mrkonjić Grad. (BB2 p.629–642.)
+        //
+        // SCOPE NOTE: Glamoč proper (glamoc_2/kovacevci_2/pribelja/vidimlije_2)
+        // is painted=HRHB at apr1995, indicating Cincar 1994 capture. Per
+        // packet scope the Mistral 2 op only includes Glamoč OSIDs that
+        // flipped between apr1995 and oct1995 (halapic, stekerovci_2). A
+        // separate Cincar 1994 op packet would close the apr1995 Glamoč gap
+        // — out of scope here per user prompt.
+        //
+        // Two axes from Livno area (HRHB-held throughout the war):
+        //
+        // Axis 1 (Drvar/Grahovo): hvo_main_staff 1st Guard mechanized push
+        //   north through Glamoč rear into Drvar, Bosansko Grahovo. Staging
+        //   at op:livno:misi_2 (1st Guard home).
+        //
+        // Axis 2 (Šipovo/Mrkonjić Grad): hvo_tomislavgrad mountain brigades
+        //   push northeast through Glamoč rear and Šipovo into Mrkonjić Grad.
+        //   Staging at op:livno:livno_2 (HRHB town center).
+        //
+        // Cross-corps op (primary hvo_main_staff, secondary hvo_tomislavgrad).
+        // No HV (Croatian Army) brigades in OOB, so HV's contribution is
+        // implicitly absorbed into the HVO axes (historical accuracy is
+        // preserved at the territorial level).
+        name: 'Operation Mistral 2',
+        faction: 'HRHB',
+        primary_corps: 'hvo_main_staff',
+        staging_osid: 'op:livno:misi_2',
+        planning_duration: 4,
+        min_attack_outcome: 'repulsed',
+        trigger: (_state, turn) => turn >= 175,
+        axes: [
+            {
+                axis_id: 'mistral_drvar',
+                name: 'Drvar–Grahovo Axis',
+                corps: 'hvo_main_staff',
+                brigades: [
+                    'hvo_1st_guard_abb' as FormationId,
+                ],
+                objectives: [
+                    'op:glamoc:halapic',
+                    'op:glamoc:stekerovci_2',
+                    'op:titov_drvar:prekaja_2',
+                    'op:titov_drvar:drvar_2',
+                    'op:titov_drvar:sipovljani_2',
+                    'op:bosansko_grahovo:crni_lug',
+                    'op:bosansko_grahovo:bosansko_grahovo_2',
+                    'op:bosansko_grahovo:malesevci',
+                    'op:bosansko_grahovo:ugarci',
+                ],
+                staging_osid: 'op:livno:misi_2',
+            },
+            {
+                axis_id: 'mistral_sipovo',
+                name: 'Šipovo–Mrkonjić Axis',
+                corps: 'hvo_tomislavgrad',
+                brigades: [
+                    'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
+                    'hrhb_kralj_tomislav_brigade' as FormationId,
+                ],
+                objectives: [
+                    'op:sipovo:brdjani',
+                    'op:sipovo:gornji_mujdzici_2',
+                    'op:sipovo:sipovo_2',
+                    'op:sipovo:volari_2',
+                    'op:sipovo:pribeljci_2',
+                    'op:mrkonjic_grad:gerzovo_2',
+                    'op:mrkonjic_grad:mrkonjic_grad_2',
+                    'op:mrkonjic_grad:bjelajce_2',
+                    'op:mrkonjic_grad:baljvine_2',
+                    'op:mrkonjic_grad:majdan_2',
+                    'op:mrkonjic_grad:podrasnica_2',
+                ],
+                staging_osid: 'op:livno:livno_2',
+            },
+        ],
+    },
+    {
+        // Operation Sana — ARBiH 5th Corps liberation of Una-Sana, September–
+        // October 1995. Historical force: 5th Corps brigades from Bihać,
+        // Cazin, Krupa pocket, supported by 7th Corps from central Bosnia.
+        // Territorial outcome: liberation of Bihać–Petrovac corridor, Krupa
+        // muni rear, Bosanski Petrovac, Sanski Most, Ključ. (BB2 p.642–663.)
+        //
+        // Three axes:
+        //
+        // Axis 1 (Krupa Una Valley): two Krupa-pocket brigades sweep east
+        //   into the Krupa muni rear (ivanjska_2 → arapusa_2 → donji_dubovik_2
+        //   → vranjska_2 → jasenica_2 → gornja_suvaja). Staging at
+        //   op:bosanska_krupa:otoka_2 (5th Corps RBiH-held throughout).
+        //
+        // Axis 2 (Bihać–Petrovac): two Bihać-area brigades + Cazin light
+        //   support push south through Bihać rear into Bosanski Petrovac.
+        //   Staging at op:bihac:bihac_2 (5th Corps HQ).
+        //
+        // Axis 3 (Sanski Most/Ključ): four Cazin/Velika Kladuša brigades push
+        //   east through Krupa pocket into Sanski Most + Ključ munis. Staging
+        //   at op:bosanska_krupa:otoka_2 (long march into Petrovac/Sanski Most/
+        //   Ključ; engine routes brigades through chain).
+        //
+        // All objectives flipped RS→RBiH between apr1995 and oct1995 painted
+        // truth — these are exactly the OSIDs the engine cannot capture
+        // without scripted op support.
+        name: 'Operation Sana',
+        faction: 'RBiH',
+        primary_corps: 'arbih_5th_corps',
+        staging_osid: 'op:bihac:bihac_2',
+        planning_duration: 5,
+        min_attack_outcome: 'repulsed',
+        trigger: (_state, turn) => turn >= 175,
+        axes: [
+            {
+                axis_id: 'sana_krupa',
+                name: 'Krupa Una Valley',
+                corps: 'arbih_5th_corps',
+                brigades: [
+                    'arbih_511th_slavna_mountain' as FormationId,
+                    'arbih_505th_vitezka_mountain' as FormationId,
+                ],
+                objectives: [
+                    'op:bosanska_krupa:ivanjska_2',
+                    'op:bosanska_krupa:arapusa_2',
+                    'op:bosanska_krupa:donji_dubovik_2',
+                    'op:bosanska_krupa:vranjska_2',
+                    'op:bosanska_krupa:jasenica_2',
+                    'op:bosanska_krupa:gornja_suvaja',
+                ],
+                staging_osid: 'op:bosanska_krupa:otoka_2',
+            },
+            {
+                axis_id: 'sana_bihac_petrovac',
+                name: 'Bihać–Petrovac Corridor',
+                corps: 'arbih_5th_corps',
+                brigades: [
+                    'arbih_501st_slavna_mountain' as FormationId,
+                    'arbih_502nd_vitezka_mountain' as FormationId,
+                    'arbih_504th_cazin_light' as FormationId,
+                ],
+                objectives: [
+                    'op:bihac:ripac',
+                    'op:bihac:racic',
+                    'op:bihac:trubar',
+                    'op:bihac:orasac_2',
+                    'op:bosanski_petrovac:vrtoce',
+                    'op:bosanski_petrovac:bosanski_petrovac_2',
+                    'op:bosanski_petrovac:dobro_selo_2',
+                    'op:bosanski_petrovac:kolonic_2',
+                    'op:bosanski_petrovac:vodjenica',
+                    'op:bosanski_petrovac:prkosi',
+                    'op:bosanski_petrovac:krnjeusa',
+                    'op:bosanski_petrovac:jasenovac_2',
+                ],
+                staging_osid: 'op:bihac:bihac_2',
+            },
+            {
+                axis_id: 'sana_sanski_most_kljuc',
+                name: 'Sanski Most + Ključ Liberation',
+                corps: 'arbih_5th_corps',
+                brigades: [
+                    'arbih_503rd_slavna_mountain' as FormationId,
+                    'arbih_506th_mountain' as FormationId,
+                    'arbih_510th_bosnian_liberation' as FormationId,
+                    'arbih_517th_light' as FormationId,
+                ],
+                objectives: [
+                    'op:sanski_most:lusci_palanka_2',
+                    'op:sanski_most:budimlic_japra_2',
+                    'op:sanski_most:sanski_most_2',
+                    'op:sanski_most:ilidza_2',
+                    'op:sanski_most:jelasinovci',
+                    'op:sanski_most:kljevci',
+                    'op:sanski_most:ostra_luka',
+                    'op:sanski_most:skucani_vakuf_2',
+                    'op:sanski_most:stari_majdan',
+                    'op:kljuc:hadzici',
+                    'op:kljuc:kljuc_2',
+                    'op:kljuc:krasulje_2',
+                    'op:kljuc:sanica_2',
+                ],
+                staging_osid: 'op:bosanska_krupa:otoka_2',
+            },
+        ],
+    },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════

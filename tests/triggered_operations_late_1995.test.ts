@@ -1,0 +1,218 @@
+/**
+ * Late-1995 historical reversal operations contract tests.
+ *
+ * Source: docs/40_reports/implemented/20260501_LATE_1995_SCRIPTED_OPS_PACKET.md
+ *
+ * Verifies the four operations added to close the Family-1 (missing scenario
+ * content) gap identified in `20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE`:
+ *  - Operation Krivaja-95 (Srebrenica fall, w >= 168)
+ *  - Operation Stupčanica-95 (Žepa fall, w >= 172)
+ *  - Operation Mistral 2 (Drvar/Šipovo/Mrkonjić, w >= 175)
+ *  - Operation Sana (5th Corps Una-Sana liberation, w >= 175)
+ *
+ * Contract:
+ *   1. Each op exists with the correct faction / primary_corps / turn gate.
+ *   2. Each op's trigger returns false before its historical turn window.
+ *   3. Each op's objective OSIDs are 712-OSID universe canonical names.
+ *   4. Each op's objectives are painted-flipped between apr1995 and oct1995
+ *      (i.e., they are the OSIDs the simulation cannot capture without these
+ *      scripted ops).
+ *   5. No op fires before turn 168 (the earliest historical turn = Krivaja-95).
+ *   6. The four ops appear after the four legacy ops in the catalog (ordering
+ *      is part of the deterministic contract).
+ */
+
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { describe, it } from 'vitest';
+
+import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import type { GameState } from '../src/state/game_state.js';
+
+const NEW_OP_NAMES = [
+    'Operation Krivaja-95',
+    'Operation Stupčanica-95',
+    'Operation Mistral 2',
+    'Operation Sana',
+] as const;
+
+const PAINTED_OCT_1995 = JSON.parse(
+    readFileSync('data/source/calibration/painted_control_oct1995.json', 'utf8'),
+) as { by_settlement_id?: Record<string, string> } & Record<string, string>;
+const PAINTED_APR_1995 = JSON.parse(
+    readFileSync('data/source/calibration/painted_control_apr1995.json', 'utf8'),
+) as { by_settlement_id?: Record<string, string> } & Record<string, string>;
+
+const oct1995Map = (PAINTED_OCT_1995.by_settlement_id ?? PAINTED_OCT_1995) as Record<string, string>;
+const apr1995Map = (PAINTED_APR_1995.by_settlement_id ?? PAINTED_APR_1995) as Record<string, string>;
+
+function trivialState(turn: number): GameState {
+    // Minimal state for trigger-only tests. Triggers in this packet are pure
+    // turn comparisons, so we do not need a full game state to invoke them.
+    return {
+        meta: { turn } as unknown,
+        military: { corps_command: {}, formations: {} },
+        political: { political_controllers: {} },
+    } as unknown as GameState;
+}
+
+describe('late-1995 triggered operations — catalog', () => {
+    it('contains the four late-1995 reversal operations after the four legacy ops', () => {
+        const names = _TRIGGERED_OPS.map((def) => def.name);
+        for (const name of NEW_OP_NAMES) {
+            assert.ok(names.includes(name), `expected catalog to contain ${name}`);
+        }
+        // Ordering: legacy four first, late-1995 four after, chronologically by turn-gate.
+        assert.deepEqual(names.slice(-4), [...NEW_OP_NAMES]);
+    });
+
+    it('Operation Krivaja-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Krivaja-95');
+        assert.ok(def);
+        assert.equal(def!.faction, 'RS');
+        assert.equal(def!.primary_corps, 'vrs_drina');
+        assert.equal(def!.axes.length, 1);
+        assert.equal(def!.axes[0]!.axis_id, 'srebrenica_enclave');
+        assert.equal(def!.axes[0]!.corps, 'vrs_drina');
+        assert.equal(def!.staging_osid, 'op:bratunac:bratunac_2');
+        // Trigger gate: w >= 168
+        assert.equal(def!.trigger(trivialState(167), 167), false);
+        assert.equal(def!.trigger(trivialState(168), 168), true);
+    });
+
+    it('Operation Stupčanica-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
+        assert.ok(def);
+        assert.equal(def!.faction, 'RS');
+        assert.equal(def!.primary_corps, 'vrs_drina');
+        assert.equal(def!.axes.length, 1);
+        assert.equal(def!.axes[0]!.axis_id, 'zepa_pocket');
+        assert.equal(def!.staging_osid, 'op:vlasenica:grabovica');
+        assert.equal(def!.axes[0]!.objectives.length, 1);
+        assert.equal(def!.axes[0]!.objectives[0], 'op:rogatica:zepa_2');
+        // Trigger gate: w >= 172 (after Krivaja-95 completion)
+        assert.equal(def!.trigger(trivialState(171), 171), false);
+        assert.equal(def!.trigger(trivialState(172), 172), true);
+    });
+
+    it('Operation Mistral 2 has the expected faction/corps/turn-gate/two-axis shape', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Mistral 2');
+        assert.ok(def);
+        assert.equal(def!.faction, 'HRHB');
+        assert.equal(def!.primary_corps, 'hvo_main_staff');
+        assert.equal(def!.axes.length, 2);
+        const axisCorps = new Set(def!.axes.map((a) => a.corps));
+        assert.deepEqual(axisCorps, new Set(['hvo_main_staff', 'hvo_tomislavgrad']));
+        assert.equal(def!.staging_osid, 'op:livno:misi_2');
+        // Trigger gate: w >= 175 (Sep 1995 historical)
+        assert.equal(def!.trigger(trivialState(174), 174), false);
+        assert.equal(def!.trigger(trivialState(175), 175), true);
+    });
+
+    it('Operation Sana has the expected faction/corps/turn-gate/three-axis shape', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Sana');
+        assert.ok(def);
+        assert.equal(def!.faction, 'RBiH');
+        assert.equal(def!.primary_corps, 'arbih_5th_corps');
+        assert.equal(def!.axes.length, 3);
+        for (const axis of def!.axes) {
+            assert.equal(axis.corps, 'arbih_5th_corps');
+        }
+        // Trigger gate: w >= 175 (Sep 1995 historical)
+        assert.equal(def!.trigger(trivialState(174), 174), false);
+        assert.equal(def!.trigger(trivialState(175), 175), true);
+    });
+});
+
+describe('late-1995 triggered operations — turn gates protect early-war runs', () => {
+    it('no late-1995 op trigger returns true at any turn < 168', () => {
+        for (const name of NEW_OP_NAMES) {
+            const def = _TRIGGERED_OPS.find((d) => d.name === name);
+            assert.ok(def, name);
+            for (const t of [0, 10, 40, 52, 100, 104, 156, 167]) {
+                assert.equal(
+                    def!.trigger(trivialState(t), t),
+                    false,
+                    `${name} must not trigger at turn ${t}`,
+                );
+            }
+        }
+    });
+
+    it('all late-1995 op turn gates are >= 168 (Krivaja-95 earliest)', () => {
+        for (const name of NEW_OP_NAMES) {
+            const def = _TRIGGERED_OPS.find((d) => d.name === name);
+            assert.ok(def, name);
+            // Sweep from 168 upward and find the first turn where trigger flips true.
+            let firstTrue = -1;
+            for (let t = 168; t <= 200; t++) {
+                if (def!.trigger(trivialState(t), t)) {
+                    firstTrue = t;
+                    break;
+                }
+            }
+            assert.ok(firstTrue >= 168, `${name} first-true turn ${firstTrue} must be >= 168`);
+        }
+    });
+});
+
+describe('late-1995 triggered operations — objective OSIDs are valid + painted-flipped', () => {
+    it('Krivaja-95 objectives are exactly the apr1995=RBiH → oct1995=RS Srebrenica enclave OSIDs', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Krivaja-95');
+        assert.ok(def);
+        for (const osid of def!.axes[0]!.objectives) {
+            assert.equal(apr1995Map[osid], 'RBiH', `${osid} should be apr1995=RBiH`);
+            assert.equal(oct1995Map[osid], 'RS', `${osid} should be oct1995=RS`);
+        }
+    });
+
+    it('Stupčanica-95 objective op:rogatica:zepa_2 is apr1995=RBiH → oct1995=RS', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Stupčanica-95');
+        assert.ok(def);
+        const objective = def!.axes[0]!.objectives[0];
+        assert.equal(apr1995Map[objective!], 'RBiH');
+        assert.equal(oct1995Map[objective!], 'RS');
+    });
+
+    it('Mistral 2 objectives are all painted=HRHB at oct1995 (post-Mistral truth)', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Mistral 2');
+        assert.ok(def);
+        for (const axis of def!.axes) {
+            for (const osid of axis.objectives) {
+                assert.equal(
+                    oct1995Map[osid],
+                    'HRHB',
+                    `${osid} (${axis.axis_id}) should be oct1995=HRHB`,
+                );
+            }
+        }
+    });
+
+    it('Sana objectives are all painted=RBiH at oct1995 (post-liberation truth)', () => {
+        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Sana');
+        assert.ok(def);
+        for (const axis of def!.axes) {
+            for (const osid of axis.objectives) {
+                assert.equal(
+                    oct1995Map[osid],
+                    'RBiH',
+                    `${osid} (${axis.axis_id}) should be oct1995=RBiH`,
+                );
+            }
+        }
+    });
+
+    it('all new-op objectives are deterministic (each axis preserves declared order, no duplicates)', () => {
+        for (const name of NEW_OP_NAMES) {
+            const def = _TRIGGERED_OPS.find((d) => d.name === name);
+            assert.ok(def, name);
+            for (const axis of def!.axes) {
+                const seen = new Set<string>();
+                for (const osid of axis.objectives) {
+                    assert.ok(!seen.has(osid), `duplicate objective ${osid} in ${name}/${axis.axis_id}`);
+                    seen.add(osid);
+                }
+            }
+        }
+    });
+});
