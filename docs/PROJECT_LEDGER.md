@@ -1,3 +1,44 @@
+## [2026-04-30] investigation(combat): DRINA / HERZEGOVINA RBiH-overgain root-cause trace — stop-at-plan, no code/data/canon change
+
+**Type:** Investigation-only packet downstream of `[2026-04-30] fix(combat): block cross-corps reconstitution drift`. Examines residual Goražde siege 1/2 ERROR + DRINA 70.6% / HERZEGOVINA 60.7% area-match in 188w n1587 (hash `09fc9beb9f0004c3`) to determine whether one bounded engine owner can repair the residual without violating the user prompt's scope-fence (no broad combat tuning, no global morale floors, no Path C cross-corps absorption).
+
+**Verdict:** Stop-at-plan. The residual after closing the cross-corps drift cascade is structural and lives in four separable owners. No single bounded engine fix achieves Goražde 2/2 without expanding scope into the prompt's forbidden lanes.
+
+**Investigation outputs:**
+- Two-family OSID-mismatch decomposition: Family A — initial-vs-painted census mismatch (e.g., op:foca:miljevina_2 starts RBiH per apr1992 init_control but painted target says RS), forbidden to fix per CLAUDE rule "NEVER override initial OSIDs". Family B — late-war combat flips t67–t105 in deep south Herzegovina (Bileća, Gacko, Trebinje, Nevesinje, Ljubinje muni cores), real engine flips via attack_resolution_osid mechanism='combat' path with no operation involvement.
+- Brigade fate trace: 6 of 8 vrs_herzegovina brigades scripted forward via Op Visegrad / Op Foča / Op Herzegovina Consolidation. Pattern: brigades concentrate at forward pressure OSID (kalinovik:obalj defended by 4–5 brigades t21–t67 vs arbih_442nd_mountain), bleed cohesion across many "decisive_victory" defender battles (rs_foa_brigade took 565 cas across 3 decisive victories t88–t90), eventually collapse. With brigades destroyed forward, deep-south rear has no garrison; consolidation cascades through Bileća/Gacko/Trebinje/Nevesinje muni cores t78–t90.
+- rs_trebinje_brigade is the sole vrs_herzegovina survivor (no forward op assignment) — confirms the structural pattern.
+
+**Owner candidates with required sign-off (no single-touch fix):**
+1. `data/source/oob_brigades.json` — vrs_herzegovina 8 brigades / 92 OSIDs structural under-garrisoning. Owner: `/formation-expert` + `/historian`.
+2. `src/sim/combat/pre_planned_operations.ts` + `triggered_operations.ts` — Op Foča / Op Visegrad / Op Herzegovina Consolidation pull 6/8 brigades forward. Owner: `/operations-expert` + `/historian`.
+3. `src/sim/combat/brigade_front_distribution.ts` + `brigade_assignment.ts` — bot AI concentrates brigades at single highest-pressure forward OSID with no rear-garrison reservation. Owner: `/sector-expert` + `/corps-army-commander` + `/qa-engineer` cross-faction calibration sweep.
+4. `src/sim/combat/attack_resolution_osid.ts` — defender-attrition pattern (decisive victories still bleed enough cohesion to collapse). Forbidden by user prompt scope fence.
+
+**Acceptance target Goražde 1/2 → ≥ 2/2: NOT MET** (soft target). Real fix lives in Owners 1+2+3 simultaneously, each requiring its own expert sign-off and full validation sweep. Single-owner partial fix would not meaningfully shift Goražde detector.
+
+**Files changed (this packet):**
+- `docs/40_reports/implemented/20260430_DRINA_HERZEGOVINA_OVERGAIN_ROOT_CAUSE_PLAN.md` — new report with two-family decomposition, 17-brigade trace, four-owner plan, packet roadmap.
+- `docs/PROJECT_LEDGER.md` — this entry (investigation-only, no behavioral change).
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` — durable lesson on artifactual amplifier vs structural residual distinction.
+
+No engine code, no scenario data, no canon doc, no test, no run artifact changed.
+
+**Validation:** Re-confirmed all baselines from existing n1587 artifact (no fresh runs since no behavioral change):
+- 188w `compare_painted_vs_sim`: 80.5% area-weighted, DRINA 70.6%, HERZEGOVINA 60.7%
+- 188w `diagnose_run`: 1 ERROR (Goražde 1/2), 32 warnings
+- 188w `validate_run_consistency`: 18 failures, 0 undefended subsegments, 0 adjacent-uncontested
+- Probe `objective_capture_count` rows: 0 across 188 weeks (prior packet's fix intact)
+- Orasje (orasje/donja_mahala/ostra_luka): HRHB held
+
+**Determinism:** No code change → no determinism implication.
+
+**Open follow-ups:**
+- Packet 1 (formation-expert + historian): vrs_herzegovina rear-garrison OOB densification (3–4 TDF brigades for Ljubinje / east Trebinje / west Bileća / Gacko secondary, with BB1/BB2/ICTY citations).
+- Packet 2 (operations-expert + historian): Op Foča / Op Herzegovina Consolidation re-allocation (consider dropping rs_bilea_brigade from Op Foča foca_valley; consider JNA-phantom-only conversion for Op Herzegovina Consolidation axes).
+- Packet 3 (sector-expert + corps-army-commander + qa-engineer): minimum home-zone garrison rule in `brigade_front_distribution.ts` (MIN_HOME_GARRISON_PER_MUNI=1, MAX_CONCENTRATION_RATIO=0.4); cross-faction calibration sweep.
+- Packet 4 (combat-calibration, separate lane): defender-attrition tuning per `docs/40_reports/COMBAT_MASTER.md` P1 audit. Forbidden in this packet's scope.
+
 ## [2026-04-30] fix(combat): block cross-corps reconstitution drift in `findRefugeeMunicipality` — RS westward-drift mover fix
 
 **Type:** Bounded engine fix to brigade reconstitution refugee placement (`brigade_reconstitution.ts`) + targeted regression test. Closes the 188w long-run mover-trace investigation surfaced in `20260430_LONG_RUN_BELIEVABILITY_PACKET.md` Issues 3 Case C and 5 (Goražde siege erosion).
