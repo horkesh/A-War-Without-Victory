@@ -821,9 +821,29 @@ function buildOperations(
         ops.push(op);
     }
 
+    // Per-corps probe cooldown: probes are recon-by-force, not a continuous
+    // pressure tool. Without this gate, a corps with a stable surplus brigade
+    // re-emits a probe every ~2 turns against whichever enemy OSID is adjacent,
+    // turning probes into a probe-spam attrition channel. Considers both
+    // in-flight probes (active_operations) and previously-completed probes
+    // (previous_state.operation_history) to bridge the recovery transition.
+    const PROBE_COOLDOWN_TURNS = 4;
+    const recentProbeStartTurns: number[] = [];
+    for (const op of briefing.active_operations) {
+        if (op.type === 'probe') recentProbeStartTurns.push(op.started_turn);
+    }
+    for (const entry of briefing.previous_state?.operation_history ?? []) {
+        if (entry.type === 'probe') recentProbeStartTurns.push(entry.started_turn);
+    }
+    const lastProbeTurn = recentProbeStartTurns.length > 0
+        ? recentProbeStartTurns.reduce((max, t) => t > max ? t : max, -Infinity)
+        : -Infinity;
+    const probeOnCooldown = Number.isFinite(lastProbeTurn) && (briefing.turn - lastProbeTurn) < PROBE_COOLDOWN_TURNS;
+
     // If no plan but surplus and high-initiative commander: probe weak positions
     if (
         ops.length === 0 &&
+        !probeOnCooldown &&
         allocation.can_launch_ops &&
         allocation.surplus_pool.length > 0 &&
         personality.initiative > 0.3 &&

@@ -318,7 +318,10 @@ describe('probe territory flip gate', () => {
         expect(operation.battles_this_turn ?? 0).toBeGreaterThan(0);
     });
 
-    it('a probe that wins against an undefended enemy tile DOES flip political_controllers', () => {
+    it('a probe that wins against an undefended enemy tile does NOT flip political_controllers', () => {
+        // Probes are recon-by-force, not territorial seizure. Even an
+        // undefended hex must not be captured by a probe — capture requires
+        // a sector_attack or other offensive op type.
         const { state, edges } = makeUndefendedProbeScenario();
         const reverseMap = new Map<string, string[]>();
         const report = resolveAttackOrdersOsid(state, edges, reverseMap);
@@ -326,7 +329,7 @@ describe('probe territory flip gate', () => {
         expect(report.battles.length).toBe(1);
         expect(['decisive_victory', 'victory', 'costly_victory']).toContain(report.battles[0]!.outcome);
 
-        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
-        expect(report.flips_applied).toBe(1);
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RBiH');
+        expect(report.flips_applied).toBe(0);
     });
 });

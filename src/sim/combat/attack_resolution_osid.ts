@@ -771,10 +771,12 @@ export function resolveAttackOrdersOsid(
         }
         if (defenderFormation) applyOfficerCasualtyLoss(defenderFormation, finalDefenderCas, personnelDefender);
 
+        // Probes are recon-by-force and never capture territory. Capture
+        // requires a sector_attack or other offensive op type. See
+        // buildProbeOperation in corps_operation_helpers.ts.
         const isProbeOp = activeOp?.type === 'probe';
-        const defenderlessEnemyTile = defenderFormations.length === 0 && isEnemyControlled;
         let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
-            && (!isProbeOp || defenderlessEnemyTile);
+            && !isProbeOp;
 
         // === MORALE-BASED RETREAT RESISTANCE + HOMELAND DETERMINATION (extracted to attack_morale_absorption.ts) ===
         const { moraleAbsorbed, flip: updatedFlip } = evaluateAndApplyMoraleAbsorption({
