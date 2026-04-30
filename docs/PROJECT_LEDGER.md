@@ -1,3 +1,47 @@
+## [2026-05-01] evidence(scenario): target-aware engine health baseline (apr1994 / apr1995 / oct1995)
+
+**Type:** Evidence/report packet only — no engine, scenario, OOB, operation, combat, or canon change. First target-aware scenario evaluation against the new definitive painted-control set (apr1994/apr1995/oct1995), assessing engine health rather than chasing calibration percentages.
+
+**Runs (deterministic):**
+- 104w n1588 hash `6b6daa39dcaf66f7` (apr1994 target): **87.2% count / 88.4% area-weighted**, 0 diagnose errors, Goražde OK 4/2.
+- 156w n1589 hash `57f742a558d8e619` (apr1995 target): **81.5% / 77.8%**, 1 diagnose error (Goražde 1/2), 41 validate failures.
+- 183w n1590 hash `15f9740e253b42c2` (oct1995 target): **70.9% / 63.2%**, 1 diagnose error (Goražde 1/2), 23 validate failures.
+
+**Engine health verdict — substrate sound:** Determinism (per-run state hashes stable), causality (every flip in `political.control_events` has explicit `mechanism ∈ {combat, consolidation, event}`, no null-mechanism flips), date-awareness (faction-area trajectory monotonic and direction-correct across the three dates) all hold. No new engine bug surfaced.
+
+**Mismatch family classification (six families, confirmed by `/scenario-creator-runner-tester`):**
+- Family 1 — healthy engine + missing scenario content (highest priority for next product packet):
+  - **KRAJINA collapse oct1995** (43 OSIDs painted=RBiH/HRHB → sim=RS in Bihać, Bosanska Krupa, Bosanski Petrovac, Ključ, Mrkonjić Grad, Sanski Most, Šipovo): no scripted ARBiH 5th Corps Sana liberation, no HV-HVO Operation Storm/Maestral/Mistral 1995. `ARBIH_PRE_PLANNED = []`.
+  - **HERZEGOVINA southwest** (Glamoč/Kupres/Livno/Titov Drvar painted=HRHB, sim=RS): no HVO Cincar 1994 or Mistral 1995. `HRHB_PRE_PLANNED` contains only Op Jackal.
+  - **DRINA enclave fall** (Srebrenica + Žepa OSIDs painted=RS, sim=RBiH): no Operation Krivaja-95 or Stupčanica-95. Existing Cerska-Kamenica targets pocket OSIDs only, not srebrenica_2 / zepa_2.
+- Family 2 — late-war calibration residual (already documented stop-at-plan):
+  - HERZEGOVINA south persistent RS overgain (Bileća/Gacko/Trebinje/Foča/Kalinovik) + Goražde 1/2 detector failure: confirmed same root cause as `20260430_DRINA_HERZEGOVINA_OVERGAIN_ROOT_CAUSE_PLAN.md` four-owner structural pattern.
+- Family 1 side-effect:
+  - 156w intel-system fail "0 offensive_signs after turn 20": clears by 183w. The 156w window straddles a turn band where most VRS scripted ops have completed and Federation late-war ops are absent — detector reads zero offensive_signs because there are no offensives in this window, not because intel is broken.
+
+**Recommended next product packet:** Single scripted-ops packet adding four late-1995 historical reversal operations turn-gated ≥170. Owner: `/operations-expert` + `/historian`. Operations: ARBiH 5th Corps Sana liberation; HV-HVO joint Mistral/Maestral; VRS Krivaja-95; VRS Stupčanica-95. No engine code change, no global retune, clean owner. Resolves three of six mismatch families.
+
+**Items explicitly NOT fixed in this packet:**
+- Family 2 four-owner Herzegovina south structural residual (prior packet's roadmap, four sign-offs).
+- Combat resolution defender-attrition tuning (forbidden by scope).
+- War-front faction-side sector-layer coverage gaps for HRHB central Bosnia (separate sector-layer correctness packet).
+- Painted-vs-init Family A mismatches (CLAUDE rule "NEVER override initial OSIDs").
+
+**Files changed (this packet):**
+- `docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md` — full report with run table, region trajectory table, six-family classification, recommended next packet.
+- `docs/PROJECT_LEDGER.md` — this entry.
+- `working-on.md` — continuation notes.
+
+No engine code, scenario data, OOB, operation, combat, movement, canon doc, or painted target file changed. No new tests. No fresh runs beyond the three documented above (all reproducible from the same scenarios).
+
+**Validation:**
+- `npx tsc --noEmit`: clean.
+- `vitest tests/painted_control_targets.test.ts`: 6/6 pass.
+- `node tools/compare_painted_vs_sim.cjs --list-targets`: 4 targets present, 712-OSID universe-aligned.
+- Three target-aware compare_painted_vs_sim runs, three diagnose_run runs, three validate_run_consistency runs (full numbers in report).
+
+**Determinism:** No randomness, no timestamps. Per-run hashes are stable; all three runs reproducible.
+
 ## [2026-05-01] docs(calibration): propagate date-specific painted-target workflow to master
 
 **Type:** Documentation propagation. Promoted the new date-specific painted-control target workflow from the implemented report, ledger, and napkin into `docs/40_reports/CALIBRATION_MASTER.md`, so the calibration authority now states that late-war runs must use the matching painted target instead of Jan 1993 by default.
