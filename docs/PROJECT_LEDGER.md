@@ -1,3 +1,48 @@
+## [2026-04-30] docs(40_reports): formation-life warning classification + 188w long-run evidence
+
+**Type:** Evidence pass + classification report. No engine, scenario, or canon changed. Probe-capture fix from earlier today (`71dd825c`) re-verified deterministic; long-run evidence collected and gaps documented.
+
+**Verification of probe-capture packet (re-run):**
+- `npx tsc --noEmit`: clean
+- `npx vitest run tests/probe_territory_flip.test.ts tests/war_termination.test.ts tests/war_phase_step_order.test.ts tests/integration_anomaly.test.ts`: **35/35 pass**, 133s
+- 40w fresh run: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1581`, hash `4f872fcd535b6e98` = identical to n1580 (deterministic match confirmed)
+- 0 probe captures in 40w; gracanica_2 / malesici / tasovcici_2 / pomol_2 all stable
+
+**188w long-run proof (first since post-merge):**
+
+| Metric | n1582 (188w) | Reference / target |
+|---|---|---|
+| Run dir | `runs/apr1992_definitive_188w__210e69404d054959__w188_n1582` | new |
+| Hash | `288a1fdc92162594` | new |
+| Area-weighted match | **78.7%** (40398 / 51337 km²) | down vs 40w 93.2%; per formation-life plan, expected drift to be addressed |
+| OSID count match | 80.6% (574 / 712) | — |
+| Faction area share (sim vs painted) | RS 49.6% / 65.1% (−15.5pp), RBiH 40.2% / 23.5% (+16.7pp), HRHB 10.3% / 11.3% | RS underperformance, RBiH overperformance |
+| Region worst | DRINA 67.0% / HERZEGOVINA 58.0% | known long-run drift areas |
+| **WA timing** | ceasefire_since_turn=86, **washington_turn=90**, washington_signed=true | ✓ historically defensible (Mar 1994 ≈ w101) |
+| **Orasje final** | orasje, donja_mahala, ostra_luka all **HRHB** | ✓ regression closed (PR #37 holds) |
+| **Probe captures** | **0** (no probe op flipped any OSID across 188 turns) | ✓ probe-no-capture rule holds in long run |
+| HRHB attack orders | **17** / 423 total (RBiH 310, RS 104) | HRHB silence quantified; only 1 HRHB-led op (Op Jackal w8-w14, failure) |
+| Critical anomalies | 1 (`unassigned_frontline_brigades`: hrhb_111th + hrhb_travnik unreachable from home enclaves) | — |
+| Other warnings | 13 (incl. zero_combat_corps hvo_tomislavgrad, weaker_faction_attack_imbalance, 6 empty contested sectors, 5 undefended sub-segments, RS morale collapse 21+6+7 brigades) | calibration debt |
+
+**Formation-life warning classification:** `docs/40_reports/implemented/20260430_FORMATION_LIFE_WARNING_CLASSIFICATION.md`. Six warning families classified by owner (drift, far-from-home, active-never-fights, corps-out-of-area, density imbalance, HRHB/HVO emergence). Brief verdict: most drift is operational-success fingerprint (accepted variance); detector wording could be improved on far-from-home and active-never-fights; HRHB/HVO emergence has clear owner seam in `bot_corps_stance.ts` E3 + N1297 + `plan.ts:705`.
+
+**Optional fix NOT implemented in this packet** (per prompt criteria):
+- Preferred candidate (HRHB/HVO emergence) cannot be verified by a 40w run since HRHB-RBiH war doesn't open until ~w40. Criterion "verified with at least one fresh 40w run" rules it out.
+- Other detector-wording candidates were not user-prioritized.
+- 188w territorial drift requires broader formation lifecycle work the prompt explicitly excludes.
+
+**Open follow-ups surfaced (for next packet):**
+- 1 critical anomaly in 188w: hrhb_111th and hrhb_travnik brigades stuck at Mostar locations with home_osid in Zepce/Novi Travnik enclaves (unreachable). Lifecycle decision required from game-designer.
+- 8 RS brigades with `home_osid` in eastern enclaves (Zvornik, Vlasenica, Ugljevik, Lukavac) end up at Banja Luka (`dist=unreachable`) — same pattern as Srebrenica/HRHB enclaves but RS direction.
+- RS morale collapse cluster: vrs_1st_krajina 21 brigades morale<15, vrs_drina 6, vrs_east_bosnian 7 — engineering question, not formation-life directly.
+- HRHB/HVO emergence at 188w: Op Jackal is the only HVO-led op in 188 turns; corps stuck defensive via N1297 + E3 gates; will require dedicated 188w-bounded packet.
+
+### Artifacts
+- New: `docs/40_reports/implemented/20260430_FORMATION_LIFE_WARNING_CLASSIFICATION.md`
+- Verified runs: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1581/`, `runs/apr1992_definitive_188w__210e69404d054959__w188_n1582/`
+- `data/derived/latest_run_final_save.json` refreshed to **188w n1582** (was 40w n1580 / n1581)
+
 ## [2026-04-30] docs(roadmap): audit plan coverage and add missing architecture execution plans
 
 **Type:** Roadmap architecture / planning coverage. No code, data, canon, or scenario behavior changed.
