@@ -1,3 +1,23 @@
+## [2026-05-01] docs(audit): Force Quality Trajectory Evidence Audit — no behavior changes
+
+**Type:** Documentation/diagnostic evidence audit. Wrote `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` synthesizing a four-track investigation (live-consumer trace, officer learning_rate units, date-window metrics, owner classification) plus four targeted cross-checks (CC1 scenario-config drift; CC2 `faction_officer_maturity` consumers; CC3 `capability_profile` consumers; CC4 officer-numeric test pins). Added the reusable read-only diagnostic script and captured output under `tools/diagnostics/`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Key findings (4):**
+- **P0 confirmed:** `officer_quality_update.ts:108,124` reads `officer_config.learning_rate` as a multiplier on `COMBAT_GROWTH_BASE = 0.01`, but `data/scenarios/timelines/apr1992.json:386-411` supplies absolute-rate-shaped values (`RBiH=0.015`, `RS=0.007`, `HRHB=0.010`). When the timeline binds, effective per-turn officer growth is suppressed by exactly `100×` (i.e. `1/COMBAT_GROWTH_BASE`) versus the hardcoded multiplier fallback (`1.5`, `0.7`, `1.0`).
+- **`faction_officer_maturity` decorative in war phase.** Schema at `game_state.ts:1875`, writer at `officer_experience.ts:181-184`, zero readers in `src/sim/`. Confirmed via grep + CC2.
+- **`capability_profile` decorative in war phase.** Annual keyframes update correctly via `capability_progression.ts:145`, but `getFactionCapabilityModifier` is consumed only by `early_war/control_flip.ts:561,564` and `early_war/washington_agreement.ts:209-211`. No war-phase combat, operation, commander, or readiness path reads the profile. Confirmed via CC3.
+- **Operation readiness gates do not consume the doctrinal arc.** `army_hq_gathering.ts`, `bot_corps_directives.ts`, `sector_offensive.ts`, `operation_preparation.ts`, and `commander/` contain zero references to `officer_quality`, `capability_profile`, or `faction_officer_maturity`.
+
+**Diagnostic artifact:** `tools/diagnostics/force_quality_audit_metrics.cjs` is a permanent reusable read-only metrics extractor; the audit consumed its output at `tools/diagnostics/_force_quality_run_output.md` (40w / 104w / 156w / 183w / 188w runs with hashes `bd0d3a9c5c0c6b3e`, `6b6daa39dcaf66f7`, `57f742a558d8e619`, `dd2d560c3e68a443`, `09fc9beb9f0004c3`). Codex review tightened the script to use bytewise `strictCompare` for deterministic sort callbacks. Future force-quality audits should reuse the script rather than reimplement the extraction.
+
+**Railroad finding:** VRS brain drain at `officer_quality_update.ts:39-42` (`VRS_BRAIN_DRAIN_START_WEEK = 40`, `VRS_BRAIN_DRAIN_RATE = 0.001`) is a calendar-driven railroad applied unconditionally to all RS active brigades after week 40, violating the design rule from `CALIBRATION_MASTER.md` "Faction Doctrinal Arcs". The 156w/183w/188w RS p25 hitting the `0.05` floor is consistent with this railroad dominating late-war RS officer quality once the units bug suppresses combat-driven growth.
+
+**Cross-check CC1 finding (gap-finder gap #12 confirmed):** sibling scenarios diverge on whether `war_timeline` and `init_officers` are bound. `apr1992_definitive_40w.json` and `apr1992_definitive_188w.json` bind both. `apr1992_definitive_104w.json` binds neither, which fully explains the cross-scenario officer-quality anomaly (104w `RBiH=0.601` vs 188w `RBiH=0.092`). Recommended packet order: cross-cutting scenario harmonization first, then P0 units fix in isolation, then P1a (consumer wiring) / P1b (railroad replacement) / P1c (readiness consumers).
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected by this audit. The recommended P0/P1 packets in §10 of the report will deliberately move hash baselines for timeline-bound runs once authorized by Codex.
+
+**Codex review verdict:** Accepted as evidence. The next lane should be a larger integrated Force Quality Foundation implementation, not another small audit packet.
+
 ## [2026-05-01] docs(plan): late-war 5th Corps opportunity family design
 
 **Type:** Documentation/design only. Created `docs/plans/late-war-5th-corps-opportunities-design.md` and marked the 5th Corps backlog item as authored in `docs/research/2026-05-01-late-war-operation-opportunity-research.md`. Linked the family doc from the generic opportunity system doc, propagated the durable 5th Corps rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and refreshed `.claude/napkin.md` with the current architecture state. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
