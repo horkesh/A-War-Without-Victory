@@ -239,7 +239,7 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(sana!.status).toBe('eligible_pending_review');
         expect(sana!.proposal_id).toBe('OPP_180_sana_95');
         expect(sana!.approver_faction).toBe('RBiH');
-        expect(sana!.last_axis_evaluation).toHaveLength(9);
+        expect(sana!.last_axis_evaluation).toHaveLength(10);
         // Required axes all green:
         const required = sana!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);

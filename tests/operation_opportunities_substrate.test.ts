@@ -148,6 +148,7 @@ function fixtureSana(): OperationOpportunityDef {
             commander_confidence: 'n_a',
             enemy_weakness: 'optional',
             alliance_context: 'n_a',
+            force_quality: 'n_a',
             min_optional_axes: 0,
         },
         evaluators: {
@@ -160,6 +161,7 @@ function fixtureSana(): OperationOpportunityDef {
             commander_confidence: greenAxis,
             enemy_weakness: greenAxis,
             alliance_context: greenAxis,
+            force_quality: greenAxis,
         },
         staff_recommendation: 'approve',
     };
@@ -201,7 +203,7 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(proposals[0].status).toBe('eligible_pending_review');
         expect(proposals[0].proposal_id).toBe('OPP_175_fixture_sana_95');
         expect(proposals[0].approver_faction).toBe('RBiH' as FactionId);
-        expect(proposals[0].last_axis_evaluation).toHaveLength(9);
+        expect(proposals[0].last_axis_evaluation).toHaveLength(10);
     });
 
     it('persists a player-safe force-quality trait snapshot on surfaced proposals', () => {
@@ -922,5 +924,131 @@ describe('operation_opportunities — LANE C Phase 1 Substrate B (T3 early-retur
         expect(rows[0].opportunity_id).toBe(defT1.opportunity_id);
         expect(rows[1].opportunity_id).toBe(defT3.opportunity_id);
         expect(rows[1].exit_class).toBe('t3_authorized_no_offensive');
+    });
+});
+
+// ─── LANE E: ineligible-skip diagnostics ────────────────────────────────────
+
+describe('operation_opportunities — LANE E ineligible-skip diagnostics', () => {
+    function fixtureWithLogisticsRequiredRed(): OperationOpportunityDef {
+        const def = fixtureSana();
+        return {
+            ...def,
+            opportunity_id: 'fixture_t3_logistics_required',
+            tier: 'T3',
+            prerequisites: {
+                ...def.prerequisites,
+                logistics: 'required',
+                enemy_weakness: 'n_a',
+                min_optional_axes: 0,
+            },
+            evaluators: { ...def.evaluators, logistics: redAxis },
+        };
+    }
+
+    function fixtureWithOnlyOneOptionalAndItsRed(): OperationOpportunityDef {
+        const def = fixtureSana();
+        return {
+            ...def,
+            opportunity_id: 'fixture_t1_one_optional_red',
+            prerequisites: {
+                ...def.prerequisites,
+                logistics: 'optional',
+                enemy_weakness: 'n_a',
+                min_optional_axes: 1,
+            },
+            evaluators: { ...def.evaluators, logistics: redAxis },
+        };
+    }
+
+    it('emits diagnostic when in date_window but eligibility fails on required axis', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(1);
+        expect(diags[0].opportunity_id).toBe('fixture_t3_logistics_required');
+        expect(diags[0].turn).toBe(175);
+        expect(diags[0].failed_required_axes.map(a => a.axis)).toContain('logistics');
+        expect(diags[0].optional_green_count).toBe(0);
+        expect(diags[0].min_optional_axes).toBe(0);
+    });
+
+    it('emits diagnostic when in date_window but optional-axes count fails', () => {
+        const def = fixtureWithOnlyOneOptionalAndItsRed();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(1);
+        expect(diags[0].opportunity_id).toBe('fixture_t1_one_optional_red');
+        expect(diags[0].failed_required_axes).toHaveLength(0);
+        expect(diags[0].failed_optional_axes.map(a => a.axis)).toContain('logistics');
+        expect(diags[0].optional_green_count).toBe(0);
+        expect(diags[0].min_optional_axes).toBe(1);
+    });
+
+    it('does NOT emit diagnostic for out-of-window opportunities (would be log noise)', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const state = buildMinimalState(50); // before window opens (170-190)
+        runOpportunityEvaluationStep(state, 50, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(0);
+    });
+
+    it('does NOT emit diagnostic when opportunity is eligible (only misses are recorded)', () => {
+        const def = fixtureSana();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(0);
+    });
+
+    it('does NOT emit diagnostic when one-shot guard already blocks this entry (terminal status)', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const state = buildMinimalState(175);
+        // Pre-seed a terminal proposal so the one-shot guard fires.
+        state.military.operation_opportunities = [{
+            opportunity_id: def.opportunity_id,
+            proposal_id: 'OPP_PRESEED',
+            eligibility_turn: 174,
+            expires_turn: 199,
+            status: 'expired',
+            approver_faction: 'RBiH',
+            last_axis_evaluation: [],
+        }];
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(0);
+    });
+
+    it('appends across multiple turns (per-turn append-only log)', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        runOpportunityEvaluationStep(state, 176, [def]);
+        runOpportunityEvaluationStep(state, 177, [def]);
+        const diags = state.military.operation_opportunity_diagnostics ?? [];
+        expect(diags).toHaveLength(3);
+        expect(diags.map(d => d.turn)).toEqual([175, 176, 177]);
+    });
+
+    it('determinism: identical state produces identical diagnostics across re-invocations', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const stateA = buildMinimalState(175);
+        const stateB = buildMinimalState(175);
+        runOpportunityEvaluationStep(stateA, 175, [def]);
+        runOpportunityEvaluationStep(stateB, 175, [def]);
+        expect(JSON.stringify(stateA.military.operation_opportunity_diagnostics))
+            .toBe(JSON.stringify(stateB.military.operation_opportunity_diagnostics));
+    });
+
+    it('ineligibility skip does NOT spawn an op or write a resolution row (purity guard)', () => {
+        const def = fixtureWithLogisticsRequiredRed();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const cmd = state.military.corps_command?.['arbih_5th_corps'];
+        expect(cmd).toBeDefined();
+        expect(cmd!.active_operations).toHaveLength(0);
+        expect(state.military.operation_opportunity_resolutions ?? []).toHaveLength(0);
     });
 });

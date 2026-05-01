@@ -59,6 +59,10 @@ interface FixtureOpts {
     addCorpsReadinessInputs?: boolean;
     rbihSupplyPressure?: number;
     operationStormTriggered?: boolean;
+    /** LANE E: when true, the Bihać threat ring is cleared (no hostile control)
+     *  so the new `enemy_weakness: required` predicate evaluates RED. Default
+     *  false (historical state has hostile pressure on the pocket). */
+    threatRingClear?: boolean;
 }
 
 const POCKET_ANCHORS = [
@@ -102,6 +106,18 @@ function buildState(opts: FixtureOpts): GameState {
     } else {
         for (const osid of POCKET_ANCHORS) controllers[osid] = 'RBiH';
         controllers['op:bihac:bihac_2'] = 'RS';
+    }
+
+    // LANE E: T3 enemy_weakness reads the Bihać threat ring; default to
+    // historical RS pressure on the pocket. See una test fixture for the
+    // shared rationale.
+    if (!(opts.threatRingClear ?? false)) {
+        controllers['op:bihac:vrtoce_2'] = 'RS';
+        controllers['op:bihac:papari_2'] = 'RS';
+        controllers['op:bosanski_petrovac:bosanski_petrovac_2'] = 'RS';
+        controllers['op:bosanski_petrovac:vedro_polje_2'] = 'RS';
+        controllers['op:bosanska_krupa:arapusa_2'] = 'RS';
+        controllers['op:bosanska_krupa:donji_dubovik_2'] = 'RS';
     }
 
     const formations: Record<string, unknown> = {};
@@ -200,11 +216,25 @@ describe('Pauk/Spider 94-95 opportunity (LANE C Phase 4 — T3 defensive-crisis 
         expect(proposals.find(p => p.opportunity_id === 'pauk_94_95')).toBeUndefined();
     });
 
-    // ── 5. logistics pressure >= 95 ─────────────────────────────────────────
-    it('does not surface when RBiH supply pressure is critical (>= 95)', () => {
+    // ── 5. LANE E: logistics is now OPTIONAL severity, not a required gate ──
+    it('LANE E: surfaces even when RBiH supply pressure is critical (logistics is severity, not gate)', () => {
         const state = buildState({
             turn: 140,
             rbihSupplyPressure: 96,
+        });
+        runOpportunityEvaluationStep(state, 140);
+        const proposals = state.military.operation_opportunities ?? [];
+        const pauk = proposals.find(p => p.opportunity_id === 'pauk_94_95');
+        expect(pauk).toBeDefined();
+        const logisticsAxis = pauk!.last_axis_evaluation.find(a => a.axis === 'logistics');
+        expect(logisticsAxis?.green).toBe(false);
+    });
+
+    // ── 5b. LANE E: T3 does NOT surface when threat ring is clear ───────────
+    it('LANE E: does not surface when Bihać threat ring is clear (no enemy pressure to defend against)', () => {
+        const state = buildState({
+            turn: 140,
+            threatRingClear: true,
         });
         runOpportunityEvaluationStep(state, 140);
         const proposals = state.military.operation_opportunities ?? [];
@@ -245,7 +275,7 @@ describe('Pauk/Spider 94-95 opportunity (LANE C Phase 4 — T3 defensive-crisis 
         expect(pauk!.status).toBe('eligible_pending_review');
         expect(pauk!.proposal_id).toBe('OPP_140_pauk_94_95');
         expect(pauk!.approver_faction).toBe('RBiH');
-        expect(pauk!.last_axis_evaluation).toHaveLength(9);
+        expect(pauk!.last_axis_evaluation).toHaveLength(10);
         const required = pauk!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
     });

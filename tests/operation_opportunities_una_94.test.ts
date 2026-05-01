@@ -52,6 +52,10 @@ interface FixtureOpts {
     addCorpsReadinessInputs?: boolean;
     rbihSupplyPressure?: number;
     operationStormTriggered?: boolean;
+    /** LANE E: when true, the Bihać threat ring is cleared (no hostile control)
+     *  so the new `enemy_weakness: required` predicate evaluates RED. Default
+     *  false (historical state has hostile pressure on the pocket). */
+    threatRingClear?: boolean;
 }
 
 const POCKET_ANCHORS = [
@@ -96,6 +100,20 @@ function buildState(opts: FixtureOpts): GameState {
         for (const osid of POCKET_ANCHORS) controllers[osid] = 'RBiH';
         // Flip Bihać to RS to model pocket collapse.
         controllers['op:bihac:bihac_2'] = 'RS';
+    }
+
+    // LANE E: T3 enemy_weakness predicate (`threatPressureT3`) reads the
+    // Bihać threat ring — at least one ring OSID must be hostile-controlled
+    // for the defensive crisis to be eligible. Default to historically-true
+    // RS pressure on the pocket; tests that want to model "no threat"
+    // explicitly clear it via `threatRingClear`.
+    if (!(opts.threatRingClear ?? false)) {
+        controllers['op:bihac:vrtoce_2'] = 'RS';
+        controllers['op:bihac:papari_2'] = 'RS';
+        controllers['op:bosanski_petrovac:bosanski_petrovac_2'] = 'RS';
+        controllers['op:bosanski_petrovac:vedro_polje_2'] = 'RS';
+        controllers['op:bosanska_krupa:arapusa_2'] = 'RS';
+        controllers['op:bosanska_krupa:donji_dubovik_2'] = 'RS';
     }
 
     const formations: Record<string, unknown> = {};
@@ -194,11 +212,27 @@ describe('Una 94 opportunity (LANE C Phase 4 — T3 defensive-crisis triad)', ()
         expect(proposals.find(p => p.opportunity_id === 'una_94')).toBeUndefined();
     });
 
-    // ── 5. logistics pressure >= 95 ─────────────────────────────────────────
-    it('does not surface when RBiH supply pressure is critical (>= 95)', () => {
+    // ── 5. LANE E: logistics is now OPTIONAL severity, not a required gate ──
+    it('LANE E: surfaces even when RBiH supply pressure is critical (logistics is severity, not gate)', () => {
         const state = buildState({
             turn: 114,
             rbihSupplyPressure: 96,
+        });
+        runOpportunityEvaluationStep(state, 114);
+        const proposals = state.military.operation_opportunities ?? [];
+        const una = proposals.find(p => p.opportunity_id === 'una_94');
+        expect(una).toBeDefined();
+        // Logistics axis appears RED in the dossier as a severity warning,
+        // but it does NOT block eligibility under LANE E topology.
+        const logisticsAxis = una!.last_axis_evaluation.find(a => a.axis === 'logistics');
+        expect(logisticsAxis?.green).toBe(false);
+    });
+
+    // ── 5b. LANE E: T3 does NOT surface when threat ring is clear ───────────
+    it('LANE E: does not surface when Bihać threat ring is clear (no enemy pressure to defend against)', () => {
+        const state = buildState({
+            turn: 114,
+            threatRingClear: true,
         });
         runOpportunityEvaluationStep(state, 114);
         const proposals = state.military.operation_opportunities ?? [];
@@ -232,7 +266,7 @@ describe('Una 94 opportunity (LANE C Phase 4 — T3 defensive-crisis triad)', ()
         expect(una!.status).toBe('eligible_pending_review');
         expect(una!.proposal_id).toBe('OPP_114_una_94');
         expect(una!.approver_faction).toBe('RBiH');
-        expect(una!.last_axis_evaluation).toHaveLength(9);
+        expect(una!.last_axis_evaluation).toHaveLength(10);
         const required = una!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
     });

@@ -1842,6 +1842,12 @@ operation_opportunities?: import('../sim/combat/operation_opportunities.js').Ope
  *  (approve / delay / decline / redirect / under_resource / expire).
  *  AAR-loop closure fills executed_op_aar_id + exit_class when approved ops complete. */
 operation_opportunity_resolutions?: import('../sim/combat/operation_opportunities.js').OperationOpportunityResolution[];
+/** LANE E: append-only diagnostic log for in-window opportunity misses.
+ *  Owner: src/sim/combat/operation_opportunities.ts evaluator skip path.
+ *  Pure observability — does NOT affect eligibility, decisions, op spawning,
+ *  or AAR linkage. Read by tools/diagnostics/opportunity_health_audit.cjs and
+ *  any LANE-D-class stress audit. Bounded by len(catalog × in-window-turns). */
+operation_opportunity_diagnostics?: import('../sim/combat/operation_opportunities.js').OperationOpportunityIneligibilityDiagnostic[];
 /** Army-level stance per faction. */
 army_stance?: Record<FactionId, ArmyStance>;
 /** OG activation orders (consumed once per turn). */

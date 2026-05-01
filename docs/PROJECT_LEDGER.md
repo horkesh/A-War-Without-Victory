@@ -1,3 +1,29 @@
+## [2026-05-01] feat(operations): LANE E 5th Corps opportunity predicate topology + 188w validation
+
+**Type:** Substrate enum extension + per-entry predicate authoring + observability emit + 188w validation. No combat math, OOB, scenario data, painted targets, T4 sensitive-history, AAR aggregator, or hardcoded `<x>_completed → <y>_eligible` chains touched. All five LANE E stop gates preserved.
+
+**Why:** LANE D Gap-Finder identified railroad-by-omission in catalog predicate topology — under saturated RBiH supply pressure, T1 Tigar/APWB/Grmec had `logistics` as the SOLE optional axis with `min_optional_axes:1`, so 0 opportunities surfaced regardless of corps fitness or enemy state. T3 Una/Breza/Pauk had `logistics: required`, an even harder block. LANE E gives the catalog the topology it always needed.
+
+**Substrate change:** Added `'force_quality'` as 10th `PrereqAxis` enum value (designed for use as OPTIONAL alternative to `logistics` so a single saturating substrate signal cannot lock an entire opportunity family away). Predicate body should read specific traits from `computeCorpsOperationReadiness` (`staging_reliability`, `failure_recovery`, `axis_coordination`) — not `operation_readiness` which `corps_readiness` already gates on. Extended `AXES_IN_DETERMINISTIC_ORDER`. Added new `OperationOpportunityIneligibilityDiagnostic` type + per-turn emit at the evaluator skip path (LANE D recommended observability) — bounded by len(catalog × in-window-turns), excludes out-of-season entries.
+
+**Catalog content:** T1 Tigar gets `force_quality: optional` reading `staging_reliability` (floor 0.30); T1 APWB gets `failure_recovery` (floor 0.40); T1 Grmec gets `axis_coordination` (floor 0.40). Sana 95 keeps existing `commander_confidence: optional` partner. T3 Una/Breza/Pauk: `logistics: required → optional` (severity/risk only — defensive crisis isn't gated on supply); `enemy_weakness: n_a → required` with new `threatPressureT3` predicate reading the new `T3_BIHAC_THREAT_RING` of 6 historically RS/SVK-controlled OSIDs around the Bihać pocket. Defensive crisis fires only when enemy is actually pressing; correctly disappears if 5th Corps clears the entire ring.
+
+**188w validation (n1605, hash `488d2c6917e48fcb`, vs n1604 `dca64282334ae735`):** **4 of 7 entries surfaced (was 1 of 7)**. APWB Pressure 94 (t113, decisive_success, 5/5 captures, grade 5), Tigar-Sloboda 94 (t113, decisive_success, 4/4 captures, grade 5), Grmeč 94 (t133, failed, 0/6, grade 2), Sana 95 (t175, failed, 0/31, grade 3). Codex AAR fix `6ca0a0d2` confirmed working: Sana exit_class went from `did_not_launch` (n1604, misclassified) to `failed` (n1605, correct). LANE E P2 observability emitted 20 in-window ineligibility records (Una 3, Breza 6, Pauk 11) — all three T3 entries now blocked by `alliance_context: required` (`operation_storm_triggered=true` at w113-w145 despite Storm narrative event firing at w174). This is a NEW finding, out-of-LANE-E scope; recommend next-lane investigation of Storm-flag timing.
+
+**Hash drift classification:** BOTH additive shape (new diagnostics array, 10th axis evaluation slot, force_quality field, threat_pressure reason text) AND behavioral (3 new CorpsOperations spawned, 9 OSIDs flipped to RBiH from successful Tigar + APWB ops at t113). The behavioral component is the *intended* effect — closing the railroad-by-omission. Tigar/APWB targets (Cazin southern flank + Velika Kladuša ring) are historically RBiH 5th Corps captures Jul-Aug 1994; alignment likely improves apr1994 painted-target fit (confirm in next lane).
+
+**Determinism:** Preserved. Diagnostics sorted by `(turn, opportunity_id)` via `strictCompare`. Save shape backward-compatible (new fields optional). Predicate bodies are pure state reads; no Math.random / Date.now / locale ordering.
+
+**Verification:** Red first: tests authored to require force_quality optional, threatPressureT3 required, ineligibility diagnostic emit. Green: full opportunity test pack 178/178 across 9 suites (was 163/163 at LANE C close-out). `npx.cmd tsc --noEmit` clean (one pre-existing untracked Codex stub `tests/ui/turn_aftermath.test.ts` references missing module — not LANE E's responsibility). 188w run exit 0.
+
+**Single-owner discipline preserved:** zero overlap between `_TRIGGERED_OPS` and `FIFTH_CORPS_OPPORTUNITIES`. Sensitive-history T4 boundary intact.
+
+**Next-lane recommendations:** (1) Storm-flag timing investigation (BLOCKING T3 trio), owner `/operations-expert` + `/historian` + `/game-designer`; (2) Combat-execution gap on Grmeč (still open from LANE D §10 #4), owner `/corps-army-commander` + `/sector-expert`; (3) apr1994 painted-target compare on Tigar/APWB OSID flips, owner `/scenario-creator-runner-tester`; (4) supply-pressure scale debt (still open from LANE D §10 #3), owner `/systems-programmer` + `/war-or-game`.
+
+**Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
+
+---
+
 ## [2026-05-01] docs(architecture): promote v0.9 work to autonomous mega-lanes and product spine closure
 
 **Type:** Roadmap / process / product-architecture planning. Docs-only; no engine code, UI code, scenario data, painted targets, tests, or run artifacts changed.

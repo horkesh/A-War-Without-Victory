@@ -322,15 +322,25 @@ describe('APWB Pressure 94 opportunity (LANE C Phase 3)', () => {
         expect(proposals.find(p => p.opportunity_id === 'apwb_pressure_94')).toBeUndefined();
     });
 
-    // ── 5b. logistics critical → optional axis count fails ──────────────────
-    it('does not surface when RBiH supply pressure is critical (>= 95) — min_optional_axes:1 fails', () => {
+    // ── 5b. LANE E: logistics-red still surfaces via force_quality optional ─
+    it('LANE E: surfaces when supply pressure is critical IF force_quality is green (failure_recovery as second optional)', () => {
+        // Under LANE E topology, `force_quality` was added as a second
+        // optional axis backed by `failure_recovery` from
+        // computeCorpsOperationReadiness. With min_optional_axes:1, EITHER
+        // logistics OR force_quality being green is sufficient. Closes the
+        // LANE D railroad-by-omission for APWB Pressure 94.
         const state = buildState({
             turn: 115,
             rbihSupplyPressure: 96,
         });
         runOpportunityEvaluationStep(state, 115);
         const proposals = state.military.operation_opportunities ?? [];
-        expect(proposals.find(p => p.opportunity_id === 'apwb_pressure_94')).toBeUndefined();
+        const apwb = proposals.find(p => p.opportunity_id === 'apwb_pressure_94');
+        expect(apwb).toBeDefined();
+        const logisticsAxis = apwb!.last_axis_evaluation.find(a => a.axis === 'logistics');
+        const forceQualityAxis = apwb!.last_axis_evaluation.find(a => a.axis === 'force_quality');
+        expect(logisticsAxis?.green).toBe(false);
+        expect(forceQualityAxis?.green).toBe(true);
     });
 
     // ── 6. All required + 1+ optional → proposal surfaces ───────────────────
@@ -350,7 +360,7 @@ describe('APWB Pressure 94 opportunity (LANE C Phase 3)', () => {
         expect(apwb!.status).toBe('eligible_pending_review');
         expect(apwb!.proposal_id).toBe('OPP_115_apwb_pressure_94');
         expect(apwb!.approver_faction).toBe('RBiH');
-        expect(apwb!.last_axis_evaluation).toHaveLength(9);
+        expect(apwb!.last_axis_evaluation).toHaveLength(10);
         const required = apwb!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
     });

@@ -271,6 +271,7 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: 'optional',
         enemy_weakness: 'required',
         alliance_context: 'required',
+        force_quality: 'n_a',                    // LANE E: Sana already has commander_confidence as optional partner
         min_optional_axes: 1,
     },
     evaluators: {
@@ -283,6 +284,7 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: commanderConfidenceSana,
         enemy_weakness: enemyWeaknessSana,
         alliance_context: allianceContextSana,
+        force_quality: alwaysGreen,
     },
     staff_recommendation: 'approve',
 };
@@ -427,11 +429,31 @@ const logisticsTigar: AxisPredicate = (state) => {
     return { green: true, reason: 'RBiH supply pressure compatible with the June 1994 ceasefire dividend' };
 };
 
-// (Note: a separate optional staging-access predicate was considered but
-// folded into the single staging_access axis above — pocket-survival IS the
-// staging-access signal architecturally, and a second predicate would
-// double-count the same OSID set. The optional-axis ledger is satisfied by
-// the `logistics` axis; see prerequisites mapping below.)
+/** force_quality: institutional staging-reliability signal distinct from
+ *  `corps_readiness` (which gates on `operation_readiness` — gross capability).
+ *  This axis becomes green when the corps's staging chain is reliable enough
+ *  to capitalize on the deception thrust even if logistics is strained. The
+ *  axis exists to break LANE D's railroad-by-omission topology: under a
+ *  saturated supply substrate, `logistics` would otherwise be the only
+ *  optional axis with `min_optional_axes: 1`, locking eligibility to a single
+ *  saturating signal. */
+const TIGAR_STAGING_RELIABILITY_FLOOR = 0.30;
+const forceQualityTigar: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.staging_reliability < TIGAR_STAGING_RELIABILITY_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps staging reliability below the deception-thrust floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps staging chain reliable enough to reinforce the deception thrust',
+    };
+};
 
 // ─── Catalog entry ──────────────────────────────────────────────────────────
 
@@ -485,6 +507,7 @@ export const TIGAR_SLOBODA_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: 'required',        // Dudaković deception-doctrine premise
         enemy_weakness: 'n_a',                   // APWB cohesion not modelable through controller-faction signals
         alliance_context: 'n_a',                 // not gated on Storm/Oluja
+        force_quality: 'optional',               // LANE E: second optional so logistics-saturation alone cannot block
         min_optional_axes: 1,
     },
     evaluators: {
@@ -497,6 +520,7 @@ export const TIGAR_SLOBODA_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: commanderConfidenceTigar,
         enemy_weakness: alwaysGreen,
         alliance_context: alwaysGreen,
+        force_quality: forceQualityTigar,
     },
     staff_recommendation: 'approve',
 };
@@ -684,6 +708,29 @@ const logisticsApwb: AxisPredicate = (state) => {
     return { green: true, reason: 'RBiH supply pressure compatible with the June 1994 ceasefire dividend' };
 };
 
+/** force_quality: institutional `failure_recovery` signal. APWB Pressure is a
+ *  sustained drive across multiple axes; the corps's ability to absorb a
+ *  stalled axis and continue is the relevant force-quality trait (distinct
+ *  from `corps_readiness` which gates on `operation_readiness`). LANE E
+ *  second-optional so logistics-saturation alone cannot block. */
+const APWB_FAILURE_RECOVERY_FLOOR = 0.40;
+const forceQualityApwb: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.failure_recovery < APWB_FAILURE_RECOVERY_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps failure-recovery below threshold for a sustained multi-axis drive',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps failure-recovery sufficient to sustain the drive through a stalled axis',
+    };
+};
+
 // ─── Catalog entry ──────────────────────────────────────────────────────────
 
 export const APWB_PRESSURE_94_OPPORTUNITY: OperationOpportunityDef = {
@@ -739,6 +786,7 @@ export const APWB_PRESSURE_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: 'required',
         enemy_weakness: 'n_a',                   // see comment block above
         alliance_context: 'n_a',                 // not Storm-gated
+        force_quality: 'optional',               // LANE E: failure_recovery as second optional
         min_optional_axes: 1,
     },
     evaluators: {
@@ -751,6 +799,7 @@ export const APWB_PRESSURE_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: commanderConfidenceApwb,
         enemy_weakness: alwaysGreen,
         alliance_context: alwaysGreen,
+        force_quality: forceQualityApwb,
     },
     staff_recommendation: 'approve',
 };
@@ -825,11 +874,68 @@ const pocketSurvivalT3: AxisPredicate = (state) => {
     return { green: true, reason: 'Bihać pocket anchors held by 5th Corps' };
 };
 
-/** Shared logistics predicate: defender supply not collapsed. */
+/** LANE E (T3 topology fix): Bihać pocket THREAT RING — the band of OSIDs
+ *  immediately outside the pocket where VRS / SVK / APWB held territory in
+ *  1992-1995. The defensive-crisis opportunities (Una / Breza / Pauk) only
+ *  fire when at least one of these is hostile-controlled — i.e. the pocket
+ *  is actually under live pressure, not just calendar-eligible.
+ *
+ *  Curated from the historical anchor sectors in BB2 pp.534, 540-542, 556:
+ *    - Grabež plateau (Bihać east) — Una/Breza axis
+ *    - Bosanska Otoka — Breza/Pauk axis
+ *    - Bosanski Petrovac flank — VRS 2nd Krajina staging
+ *    - Buzim approaches — Breza/Pauk axis
+ *    - Velika Kladuša ring — APWB pressure
+ *  These OSIDs are RS-painted in jan1993 baseline and remain RS-controlled
+ *  through 1994 in any historically-tracking run; if 5th Corps somehow
+ *  liberates the entire ring, the defensive-crisis surface correctly
+ *  disappears (no enemy left to defend against). */
+const T3_BIHAC_THREAT_RING: readonly string[] = [
+    'op:bihac:vrtoce_2',                  // Bihać east — Grabež approach
+    'op:bihac:papari_2',                  // Bihać east — Grabež staging
+    'op:bosanski_petrovac:bosanski_petrovac_2',  // VRS 2nd Krajina anchor
+    'op:bosanski_petrovac:vedro_polje_2', // Petrovac approach
+    'op:bosanska_krupa:arapusa_2',        // Otoka–Krupa axis
+    'op:bosanska_krupa:donji_dubovik_2',  // Otoka approach
+];
+
+/** LANE E (T3 topology fix): live threat-pressure predicate. Replaces the
+ *  prior `logistics: required` hard blocker on the T3 triad — a defensive
+ *  crisis isn't gated on supply (you defend with what you have) but on
+ *  whether the enemy is actually pressing. Predicate goes red when every
+ *  threat-ring OSID is RBiH-controlled (the pocket has won outright; no
+ *  crisis to authorize) and goes green when at least one ring OSID is
+ *  hostile-controlled (the historical pressure is live). */
+const threatPressureT3: AxisPredicate = (state) => {
+    let hostile = 0;
+    for (const osid of T3_BIHAC_THREAT_RING) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== null && ctrl !== 'RBiH') hostile++;
+    }
+    if (hostile === 0) {
+        return {
+            green: false,
+            reason: 'Bihać threat ring fully recovered — no hostile pressure on the pocket',
+        };
+    }
+    return {
+        green: true,
+        reason: 'hostile pressure live on Bihać pocket perimeter — defensive commit is warranted',
+    };
+};
+
+/** Shared logistics predicate: defender supply not collapsed.
+ *
+ *  LANE E: this axis is now OPTIONAL on the T3 triad (was REQUIRED). The
+ *  player/bot still sees the pressure level in the dossier as a severity/risk
+ *  signal — high RBiH supply pressure means the defensive commit will hurt
+ *  the corps more — but it does NOT gate eligibility. A defensive crisis is
+ *  authorized on whether the threat is real (see `threatPressureT3`), not on
+ *  whether the supply pipeline is in good shape. */
 const logisticsT3: AxisPredicate = (state) => {
     const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
     if (pressure >= T3_LOGISTICS_PRESSURE_CEILING) {
-        return { green: false, reason: 'RBiH supply pressure critical for sustained pocket defense' };
+        return { green: false, reason: 'RBiH supply pressure critical — defensive commit will hurt' };
     }
     return { green: true, reason: 'RBiH supply pressure within sustainable defensive band' };
 };
@@ -918,12 +1024,23 @@ export const UNA_94_OPPORTUNITY: OperationOpportunityDef = {
         date_window: 'required',
         political_authorization: 'n_a',
         corps_readiness: 'required',
-        logistics: 'required',
+        // LANE E: was 'required' (hard blocker against saturated supply
+        // pressure); demoted to 'optional' as severity/risk signal — a
+        // defensive crisis isn't gated on supply, you defend with what you
+        // have. The new required gate is `enemy_weakness` (threat pressure).
+        logistics: 'optional',
         staging_access: 'required',           // pocket-survival (Sana mirror)
         weather_season: 'n_a',
         commander_confidence: 'n_a',
-        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        // LANE E: was 'n_a' with the comment "defender-polarity inverse not
+        // modelable." Repurposed: enemy_weakness now reads the inverse — live
+        // hostile-controller presence on the Bihać threat ring. Eligibility
+        // requires that the enemy is actually pressing the pocket; if 5th
+        // Corps somehow cleared every threat-ring OSID, the defensive crisis
+        // surface correctly disappears.
+        enemy_weakness: 'required',
         alliance_context: 'required',         // pre-Storm only
+        force_quality: 'n_a',                 // LANE E: T3 has no offensive lifecycle to gate
         min_optional_axes: 0,
     },
     evaluators: {
@@ -934,8 +1051,9 @@ export const UNA_94_OPPORTUNITY: OperationOpportunityDef = {
         staging_access: pocketSurvivalT3,
         weather_season: alwaysGreen,
         commander_confidence: alwaysGreen,
-        enemy_weakness: alwaysGreen,
+        enemy_weakness: threatPressureT3,
         alliance_context: allianceContextPreStorm,
+        force_quality: alwaysGreen,
     },
     staff_recommendation: 'approve',
 };
@@ -1012,12 +1130,13 @@ export const BREZA_94_OPPORTUNITY: OperationOpportunityDef = {
         date_window: 'required',
         political_authorization: 'n_a',
         corps_readiness: 'required',
-        logistics: 'required',
+        logistics: 'optional',                // LANE E: severity/risk only (was required)
         staging_access: 'required',           // pocket-survival (Sana mirror)
         weather_season: 'n_a',
         commander_confidence: 'n_a',
-        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        enemy_weakness: 'required',           // LANE E: live threat-pressure on Bihać ring
         alliance_context: 'required',         // pre-Storm only
+        force_quality: 'n_a',                 // LANE E: T3 has no offensive lifecycle to gate
         min_optional_axes: 0,
     },
     evaluators: {
@@ -1028,8 +1147,9 @@ export const BREZA_94_OPPORTUNITY: OperationOpportunityDef = {
         staging_access: pocketSurvivalT3,
         weather_season: alwaysGreen,
         commander_confidence: alwaysGreen,
-        enemy_weakness: alwaysGreen,
+        enemy_weakness: threatPressureT3,
         alliance_context: allianceContextPreStorm,
+        force_quality: alwaysGreen,
     },
     staff_recommendation: 'approve',
 };
@@ -1107,12 +1227,13 @@ export const PAUK_94_95_OPPORTUNITY: OperationOpportunityDef = {
         date_window: 'required',
         political_authorization: 'n_a',
         corps_readiness: 'required',
-        logistics: 'required',
+        logistics: 'optional',                // LANE E: severity/risk only (was required)
         staging_access: 'required',           // pocket-survival (Sana mirror)
         weather_season: 'n_a',
         commander_confidence: 'n_a',
-        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        enemy_weakness: 'required',           // LANE E: live threat-pressure on Bihać ring
         alliance_context: 'required',         // pre-Storm only — Pauk impossible after Oluja
+        force_quality: 'n_a',                 // LANE E: T3 has no offensive lifecycle to gate
         min_optional_axes: 0,
     },
     evaluators: {
@@ -1123,8 +1244,9 @@ export const PAUK_94_95_OPPORTUNITY: OperationOpportunityDef = {
         staging_access: pocketSurvivalT3,
         weather_season: alwaysGreen,
         commander_confidence: alwaysGreen,
-        enemy_weakness: alwaysGreen,
+        enemy_weakness: threatPressureT3,
         alliance_context: allianceContextPreStorm,
+        force_quality: alwaysGreen,
     },
     staff_recommendation: 'approve',
 };
@@ -1302,6 +1424,30 @@ const logisticsGrmec: AxisPredicate = (state) => {
     return { green: true, reason: 'RBiH supply pressure within deep-advance margin' };
 };
 
+/** force_quality: institutional `axis_coordination` signal. Grmeč 94 commits
+ *  6 of 9 brigades along a single deep-advance axis with 501st/502nd
+ *  spearhead and 503rd/505th/510th/511th in depth — multi-brigade
+ *  coordination on one axis is the relevant force-quality trait (distinct
+ *  from `corps_readiness` which gates on `operation_readiness`). LANE E
+ *  second-optional so logistics-saturation alone cannot block. */
+const GRMEC_AXIS_COORDINATION_FLOOR = 0.40;
+const forceQualityGrmec: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.axis_coordination < GRMEC_AXIS_COORDINATION_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps axis-coordination below threshold for a six-brigade deep advance',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps axis-coordination sufficient to mass spearhead + depth across one axis',
+    };
+};
+
 // ─── Catalog entry ──────────────────────────────────────────────────────────
 
 export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
@@ -1345,6 +1491,7 @@ export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: 'required',
         enemy_weakness: 'required',
         alliance_context: 'n_a',              // pre-Storm precursor; not Storm-gated
+        force_quality: 'optional',            // LANE E: axis_coordination as second optional
         min_optional_axes: 1,
     },
     evaluators: {
@@ -1357,6 +1504,7 @@ export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
         commander_confidence: commanderConfidenceGrmec,
         enemy_weakness: enemyWeaknessGrmec,
         alliance_context: alwaysGreen,
+        force_quality: forceQualityGrmec,
     },
     staff_recommendation: 'approve',
 };

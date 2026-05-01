@@ -258,18 +258,25 @@ describe('Tigar-Sloboda 94 opportunity (LANE C Phase 2)', () => {
         expect(proposals.find(p => p.opportunity_id === 'tigar_sloboda_94')).toBeUndefined();
     });
 
-    // ── 6. Date alone insufficient — logistics pressure ≥ 95 ────────────────
-    it('does not surface when RBiH supply pressure is critical (>= 95)', () => {
-        // logistics is OPTIONAL in this entry but min_optional_axes:1 requires
-        // it green; with no other optional axes, a red logistics blocks the
-        // proposal. This proves the optional-axis count is load-bearing.
+    // ── 6. LANE E: logistics-red still surfaces via force_quality optional ──
+    it('LANE E: surfaces when supply pressure is critical IF force_quality is green (logistics no longer sole optional)', () => {
+        // Under LANE E topology, `force_quality` was added as a second
+        // optional axis backed by `staging_reliability` from
+        // computeCorpsOperationReadiness. With min_optional_axes:1, EITHER
+        // logistics OR force_quality being green is sufficient. This proves
+        // the railroad-by-omission described in LANE D is closed.
         const state = buildState({
             turn: 115,
             rbihSupplyPressure: 96,
         });
         runOpportunityEvaluationStep(state, 115);
         const proposals = state.military.operation_opportunities ?? [];
-        expect(proposals.find(p => p.opportunity_id === 'tigar_sloboda_94')).toBeUndefined();
+        const tigar = proposals.find(p => p.opportunity_id === 'tigar_sloboda_94');
+        expect(tigar).toBeDefined();
+        const logisticsAxis = tigar!.last_axis_evaluation.find(a => a.axis === 'logistics');
+        const forceQualityAxis = tigar!.last_axis_evaluation.find(a => a.axis === 'force_quality');
+        expect(logisticsAxis?.green).toBe(false);
+        expect(forceQualityAxis?.green).toBe(true);
     });
 
     // ── 7. All required + 1+ optional → proposal surfaces ───────────────────
@@ -288,7 +295,7 @@ describe('Tigar-Sloboda 94 opportunity (LANE C Phase 2)', () => {
         expect(tigar!.status).toBe('eligible_pending_review');
         expect(tigar!.proposal_id).toBe('OPP_115_tigar_sloboda_94');
         expect(tigar!.approver_faction).toBe('RBiH');
-        expect(tigar!.last_axis_evaluation).toHaveLength(9);
+        expect(tigar!.last_axis_evaluation).toHaveLength(10);
         const required = tigar!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
     });

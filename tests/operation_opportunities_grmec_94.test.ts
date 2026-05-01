@@ -294,15 +294,25 @@ describe('Grmeč 94 opportunity (LANE C Phase 5)', () => {
         expect(proposals.find(p => p.opportunity_id === 'grmec_94')).toBeUndefined();
     });
 
-    // ── 6b. logistics critical → optional axis count fails ─────────────────
-    it('does not surface when RBiH supply pressure is too high (>= 90) — min_optional_axes:1 fails', () => {
+    // ── 6b. LANE E: logistics-red still surfaces via force_quality optional ─
+    it('LANE E: surfaces when supply pressure is too high IF force_quality is green (axis_coordination as second optional)', () => {
+        // Under LANE E topology, `force_quality` was added as a second
+        // optional axis backed by `axis_coordination` from
+        // computeCorpsOperationReadiness. With min_optional_axes:1, EITHER
+        // logistics OR force_quality being green is sufficient. Closes the
+        // LANE D railroad-by-omission for Grmeč 94.
         const state = buildState({
             turn: 135,
             rbihSupplyPressure: 91,
         });
         runOpportunityEvaluationStep(state, 135);
         const proposals = state.military.operation_opportunities ?? [];
-        expect(proposals.find(p => p.opportunity_id === 'grmec_94')).toBeUndefined();
+        const grmec = proposals.find(p => p.opportunity_id === 'grmec_94');
+        expect(grmec).toBeDefined();
+        const logisticsAxis = grmec!.last_axis_evaluation.find(a => a.axis === 'logistics');
+        const forceQualityAxis = grmec!.last_axis_evaluation.find(a => a.axis === 'force_quality');
+        expect(logisticsAxis?.green).toBe(false);
+        expect(forceQualityAxis?.green).toBe(true);
     });
 
     // ── 7. All required + 1 optional → proposal surfaces at mid-window ─────
@@ -322,7 +332,7 @@ describe('Grmeč 94 opportunity (LANE C Phase 5)', () => {
         expect(grmec!.status).toBe('eligible_pending_review');
         expect(grmec!.proposal_id).toBe('OPP_135_grmec_94');
         expect(grmec!.approver_faction).toBe('RBiH');
-        expect(grmec!.last_axis_evaluation).toHaveLength(9);
+        expect(grmec!.last_axis_evaluation).toHaveLength(10);
         const required = grmec!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
     });

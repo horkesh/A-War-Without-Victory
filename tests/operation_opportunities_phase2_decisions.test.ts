@@ -112,6 +112,7 @@ function fixtureOpp(overrides: Partial<OperationOpportunityDef> = {}): Operation
             commander_confidence: 'n_a',
             enemy_weakness: 'n_a',
             alliance_context: 'n_a',
+            force_quality: 'n_a',
             min_optional_axes: 0,
         },
         evaluators: {
@@ -124,6 +125,7 @@ function fixtureOpp(overrides: Partial<OperationOpportunityDef> = {}): Operation
             commander_confidence: greenAxis,
             enemy_weakness: greenAxis,
             alliance_context: greenAxis,
+            force_quality: greenAxis,
         },
         staff_recommendation: 'approve',
         ...overrides,

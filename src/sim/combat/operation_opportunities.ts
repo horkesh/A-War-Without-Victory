@@ -96,7 +96,17 @@ export type PrereqAxis =
     | 'weather_season'
     | 'commander_confidence'
     | 'enemy_weakness'
-    | 'alliance_context';
+    | 'alliance_context'
+    /**
+     * LANE E: institutional force-quality signal beyond gross `corps_readiness`.
+     * Designed for use as an OPTIONAL alternative to `logistics` so a single
+     * saturating substrate signal cannot lock an entire opportunity family
+     * away (LANE D railroad-by-omission finding). Predicate body should read
+     * specific traits from `computeCorpsOperationReadiness` (e.g.
+     * `staging_reliability`, `failure_recovery`, `axis_coordination`) — NOT
+     * `operation_readiness`, which `corps_readiness` already gates on.
+     */
+    | 'force_quality';
 
 /**
  * Tier mapping inherits from the late-war research catalog:
@@ -294,6 +304,29 @@ export interface OperationOpportunityState {
     last_force_quality_traits?: CorpsOperationReadinessTraits;
 }
 
+/**
+ * LANE E observability: per-turn diagnostic emitted by the evaluator when an
+ * opportunity is in its date_window but fails the eligibility check. Bounded
+ * by len(catalog × in-window-turns); excludes out-of-season entries to avoid
+ * log noise. Read by `tools/diagnostics/opportunity_health_audit.cjs` and any
+ * future LANE-D-class stress audit.
+ *
+ * Owner: `evaluateOperationOpportunities` skip path. Pure observability —
+ * does NOT affect eligibility, decision, op spawning, or AAR linkage.
+ */
+export interface OperationOpportunityIneligibilityDiagnostic {
+    readonly turn: number;
+    readonly opportunity_id: string;
+    /** Required axes that were red. Empty if eligibility failed only on optional count. */
+    readonly failed_required_axes: ReadonlyArray<{ readonly axis: PrereqAxis; readonly reason: string }>;
+    /** Optional axes that were red. Useful for "what would have helped" diagnosis. */
+    readonly failed_optional_axes: ReadonlyArray<{ readonly axis: PrereqAxis; readonly reason: string }>;
+    /** How many optional axes were green. */
+    readonly optional_green_count: number;
+    /** Catalog-defined min_optional_axes threshold. */
+    readonly min_optional_axes: number;
+}
+
 /** Resolution log entry written when a proposal exits the queue. */
 export interface OperationOpportunityResolution {
     readonly proposal_id: string;
@@ -396,6 +429,7 @@ const AXES_IN_DETERMINISTIC_ORDER: readonly PrereqAxis[] = [
     'commander_confidence',
     'enemy_weakness',
     'alliance_context',
+    'force_quality',
 ];
 
 /**
@@ -522,7 +556,17 @@ export function evaluateOperationOpportunities(
     state: GameState,
     turn: number,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
-): { proposals: OperationOpportunityState[]; newResolutions: OperationOpportunityResolution[] } {
+): {
+    proposals: OperationOpportunityState[];
+    newResolutions: OperationOpportunityResolution[];
+    /**
+     * LANE E observability: in-window ineligibility records for this turn only.
+     * The pipeline wrapper appends these to `state.military.operation_opportunity_diagnostics`.
+     * Empty when every catalog entry was either eligible, out of date_window,
+     * or already enqueued under the one-shot guard.
+     */
+    newDiagnostics: OperationOpportunityIneligibilityDiagnostic[];
+} {
     // Defensive shallow clone of each proposal record so this evaluator is a
     // pure function of the snapshot at call time. The pipeline-step wrapper
     // (`runOpportunityEvaluationStep`) re-assigns the result back to state.
@@ -569,6 +613,7 @@ export function evaluateOperationOpportunities(
     }
 
     const newResolutions: OperationOpportunityResolution[] = [];
+    const newDiagnostics: OperationOpportunityIneligibilityDiagnostic[] = [];
 
     const sortedCatalog = [...catalog].sort((a, b) =>
         strictCompare(a.opportunity_id, b.opportunity_id));
@@ -612,7 +657,41 @@ export function evaluateOperationOpportunities(
             continue;
         }
 
-        if (!eligible) continue;
+        if (!eligible) {
+            // LANE E observability: emit a diagnostic only when the entry is in
+            // its date_window — otherwise this writes ~7 records/turn for entries
+            // that are simply out of season. "In window" = date_window axis is
+            // present and green (every catalog entry uses date_window: 'required'
+            // today, but the policy is robust against future n_a / optional uses).
+            // Also skip if the one-shot guard would have blocked this entry
+            // anyway: a terminal-status proposal isn't an interesting "miss."
+            if (!seenOpportunityIds.has(def.opportunity_id)) {
+                const dateWindowAxis = axes.find(a => a.axis === 'date_window');
+                const inWindow = dateWindowAxis === undefined || dateWindowAxis.green;
+                if (inWindow) {
+                    const failedRequired: Array<{ axis: PrereqAxis; reason: string }> = [];
+                    const failedOptional: Array<{ axis: PrereqAxis; reason: string }> = [];
+                    let optionalGreen = 0;
+                    for (const a of axes) {
+                        if (a.mode === 'required' && !a.green) {
+                            failedRequired.push({ axis: a.axis, reason: a.reason });
+                        } else if (a.mode === 'optional') {
+                            if (a.green) optionalGreen++;
+                            else failedOptional.push({ axis: a.axis, reason: a.reason });
+                        }
+                    }
+                    newDiagnostics.push({
+                        turn,
+                        opportunity_id: def.opportunity_id,
+                        failed_required_axes: failedRequired,
+                        failed_optional_axes: failedOptional,
+                        optional_green_count: optionalGreen,
+                        min_optional_axes: def.prerequisites.min_optional_axes,
+                    });
+                }
+            }
+            continue;
+        }
 
         // One-shot guard: if this opportunity_id has ever been enqueued
         // (pending OR terminal), do not re-enqueue. This prevents the
@@ -647,7 +726,15 @@ export function evaluateOperationOpportunities(
         return strictCompare(a.proposal_id, b.proposal_id);
     });
 
-    return { proposals: sortedProposals, newResolutions };
+    // LANE E observability: sort diagnostics deterministically by
+    // (turn, opportunity_id) — the wrapper appends them to a per-turn
+    // log on state.military.
+    const sortedDiagnostics = newDiagnostics.sort((a, b) => {
+        if (a.turn !== b.turn) return a.turn - b.turn;
+        return strictCompare(a.opportunity_id, b.opportunity_id);
+    });
+
+    return { proposals: sortedProposals, newResolutions, newDiagnostics: sortedDiagnostics };
 }
 
 /**
@@ -659,13 +746,22 @@ export function runOpportunityEvaluationStep(
     turn: number,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
 ): void {
-    const { proposals, newResolutions } = evaluateOperationOpportunities(state, turn, catalog);
+    const { proposals, newResolutions, newDiagnostics } = evaluateOperationOpportunities(state, turn, catalog);
     state.military.operation_opportunities = proposals;
     if (newResolutions.length > 0) {
         if (!state.military.operation_opportunity_resolutions) {
             state.military.operation_opportunity_resolutions = [];
         }
         state.military.operation_opportunity_resolutions.push(...newResolutions);
+    }
+    // LANE E observability: append per-turn ineligibility records for
+    // in-window misses. Append-only; future audits / health-diagnostic tools
+    // read this for "why didn't opportunity X surface in window Y."
+    if (newDiagnostics.length > 0) {
+        if (!state.military.operation_opportunity_diagnostics) {
+            state.military.operation_opportunity_diagnostics = [];
+        }
+        state.military.operation_opportunity_diagnostics.push(...newDiagnostics);
     }
 }
 
