@@ -1,3 +1,19 @@
+## [2026-05-01] docs(research): propose force-quality trajectory levers
+
+**Type:** Documentation/research only. Created `docs/research/2026-05-01-force-quality-trajectory-research-and-proposals.md` as the research/proposal bridge between the open force-quality calibration issue and future implementation packets. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Research verdict:** The desired late-war effect should come from a linked force-quality system, not from naked calendar-scripting of Sana/Maestral/Krivaja/Stupcanica. The core levers are ARBiH corps-level professionalization, modest equipment/support thresholds, Federation/HV-HVO staging and artillery context, VRS sustained-system degradation, and opportunity proposals that can succeed or fail through normal command/combat systems.
+
+**Highest-priority audit seam:** `officer_quality_update.ts` treats timeline `officer_config.learning_rate` as a multiplier, while `data/scenarios/timelines/apr1992.json` uses values like `RBiH: 0.015`, `RS: 0.007`, `HRHB: 0.010` against fallback multipliers `1.5`, `0.7`, `1.0`. This may suppress officer learning by orders of magnitude if the JSON values were intended as absolute rates or if the field name changed semantics. The doc explicitly marks this as an audit target, not a confirmed fix.
+
+**Other owner seams identified:** `capability_progression.ts` encodes the desired 1992-1995 curves but appears thinly consumed in war-phase logic; `officer_experience.ts` stores `faction_officer_maturity` but does not obviously spend it in operations; `faction_progression.ts` creates modest equipment trickles but concentrates hardware on a best-equipped brigade rather than producing corps-level support readiness; `army_hq_gathering.ts` opportunity scoring does not obviously consume capability profile, officer maturity, or equipment-support thresholds.
+
+**Next prompt included:** The report contains an immediate Claude prompt for a Force Quality Trajectory Evidence Audit. It fences off tuning, scripted operations, OOB changes, painted-target changes, and operation-definition edits; the requested output is metrics/owner classification across 40w, 104w, 156w, and 183/188w.
+
+**Knowledge propagation:** Added a durable rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: professionalization belongs in operation delivery and command coherence, not raw combat inflation or forced map rails.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(plan): late-war operation opportunity system design
 
 **Type:** Documentation/design only. Created `docs/plans/late-war-operation-opportunity-system-design.md` as the first design doc on top of the 2026-05-01 research catalog. **No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.**

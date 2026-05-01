@@ -87,3 +87,14 @@ Create a **Force Quality Trajectory Audit** packet before any tuning:
 4. Stop at plan if multiple owners are implicated; do not apply global multipliers without evidence.
 
 Owner set: `/game-designer`, `/historian`, `/operations-expert`, `/corps-army-commander`, `/qa-engineer`, `/determinism-auditor`.
+
+## Research Addendum (2026-05-01)
+
+Follow-up research now lives in `docs/research/2026-05-01-force-quality-trajectory-research-and-proposals.md`.
+
+Key additions:
+
+- Treat late-war operations as opportunity tests for force quality, not substitutes for force quality.
+- Audit the suspicious `officer_config.learning_rate` unit mismatch before any tuning. The code fallback values are multiplier-shaped (`RBiH: 1.5`, `RS: 0.7`, `HRHB: 1.0`), while `apr1992.json` supplies small absolute-looking values (`RBiH: 0.015`, `RS: 0.007`, `HRHB: 0.010`) that the live formula currently consumes as multipliers.
+- Check whether `capability_profile` and `faction_officer_maturity` are decorative in war phase; both look like good owners for ARBiH professionalization and VRS degradation, but need consumer evidence.
+- Model ARBiH improvement through operation readiness, staging, multi-axis coordination, support thresholds, and capture delivery. Model VRS decline through sustained-system degradation while preserving local defense and counterattacks.
