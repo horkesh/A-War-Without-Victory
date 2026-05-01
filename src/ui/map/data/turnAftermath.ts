@@ -54,6 +54,17 @@ export interface TurnAftermathCostView {
   reasons: string[];
 }
 
+export interface TurnAftermathLedgerSummary {
+  recordCount: number;
+  netFriendlyTerritory: number;
+  totalFriendlyMilitaryCasualties: number;
+  totalTheaterMilitaryCasualties: number;
+  totalDisplaced: number;
+  totalOwnFormationsDestroyed: number;
+  criticalTurns: number;
+  severeTurns: number;
+}
+
 export interface TurnAftermathView {
   turn: number;
   dateLabel: string;
@@ -375,4 +386,30 @@ export function buildTurnAftermathRecordViews(input: TurnAftermathRecordsInput):
       includeNextActions: summary.turn === state.latestTurnSummary?.turn,
     }))
     .filter((view): view is TurnAftermathView => view != null);
+}
+
+export function buildTurnAftermathLedgerSummary(records: readonly TurnAftermathView[]): TurnAftermathLedgerSummary {
+  return records.reduce<TurnAftermathLedgerSummary>((summary, record) => {
+    summary.recordCount += 1;
+    summary.netFriendlyTerritory += record.territory.friendlyNet;
+    summary.totalFriendlyMilitaryCasualties += record.cost.friendlyMilitaryCasualties;
+    summary.totalTheaterMilitaryCasualties += record.cost.theaterMilitaryCasualties;
+    summary.totalDisplaced += record.cost.displacedThisTurn;
+    summary.totalOwnFormationsDestroyed += record.cost.ownFormationsDestroyed;
+    if (record.cost.severity === 'critical') {
+      summary.criticalTurns += 1;
+    } else if (record.cost.severity === 'severe') {
+      summary.severeTurns += 1;
+    }
+    return summary;
+  }, {
+    recordCount: 0,
+    netFriendlyTerritory: 0,
+    totalFriendlyMilitaryCasualties: 0,
+    totalTheaterMilitaryCasualties: 0,
+    totalDisplaced: 0,
+    totalOwnFormationsDestroyed: 0,
+    criticalTurns: 0,
+    severeTurns: 0,
+  });
 }

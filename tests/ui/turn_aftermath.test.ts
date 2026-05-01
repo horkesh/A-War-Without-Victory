@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
+import { buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -271,5 +271,53 @@ describe('buildTurnAftermathView', () => {
     expect(records.map((record) => record.turn)).toEqual([12, 11]);
     expect(records.map((record) => record.tone)).toEqual(['gain', 'quiet']);
     expect(records.map((record) => record.nextActions.actionableCount)).toEqual([1, 0]);
+  });
+
+  it('summarizes persistent aftermath records into a campaign ledger pulse', () => {
+    const records = [
+      buildTurnAftermathView({
+        nextState: makeState({
+          latestTurnSummary: makeSummary({
+            turn: 20,
+            territory_net: { RBiH: 2 },
+            displacement_total: 1200,
+            battles: [{
+              osid: 'op:test:a',
+              attacker_faction: 'RBiH',
+              defender_faction: 'RS',
+              primary_attacker_id: 'a',
+              primary_defender_id: 'b',
+              all_attacker_ids: ['a'],
+              outcome: 'victory' as never,
+              attacker_casualties: 90,
+              defender_casualties: 50,
+              territory_flipped: true,
+              was_concentrated: false,
+            }],
+          }),
+        }),
+      })!,
+      buildTurnAftermathView({
+        nextState: makeState({
+          latestTurnSummary: makeSummary({
+            turn: 19,
+            territory_net: { RBiH: -1 },
+            displacement_total: 25,
+            formation_destructions: [{ formation_id: 'lost', formation_name: 'Lost', faction: 'RBiH' }],
+          }),
+        }),
+      })!,
+    ];
+
+    expect(buildTurnAftermathLedgerSummary(records)).toEqual({
+      recordCount: 2,
+      netFriendlyTerritory: 1,
+      totalFriendlyMilitaryCasualties: 90,
+      totalTheaterMilitaryCasualties: 140,
+      totalDisplaced: 1225,
+      totalOwnFormationsDestroyed: 1,
+      criticalTurns: 2,
+      severeTurns: 0,
+    });
   });
 });

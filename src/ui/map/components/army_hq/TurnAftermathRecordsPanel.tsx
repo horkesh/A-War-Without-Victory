@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { buildTurnAftermathRecordViews, type TurnAftermathView } from '../../data/turnAftermath';
+import { buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
 
 function formatSigned(value: number): string {
@@ -109,6 +109,10 @@ export function TurnAftermathRecordsPanel() {
         () => buildTurnAftermathRecordViews({ state, osidNameMap, limit: 18 }),
         [state, osidNameMap],
     );
+    const summary = useMemo(
+        () => buildTurnAftermathLedgerSummary(records),
+        [records],
+    );
 
     if (records.length === 0) {
         return (
@@ -124,18 +128,28 @@ export function TurnAftermathRecordsPanel() {
         <div className="space-y-3">
             <div className="grid grid-cols-3 gap-2">
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Records</div>
-                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{records.length}</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Archive</div>
+                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.recordCount}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Latest Net</div>
-                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{formatSigned(latest.territory.friendlyNet)}</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Net Territory</div>
+                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{formatSigned(summary.netFriendlyTerritory)}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Latest Cost</div>
-                    <div className={`text-[16px] font-bold uppercase ${latest.cost.severity === 'low' ? 'text-text-primary' : latest.cost.severity === 'moderate' ? 'text-sky-300' : latest.cost.severity === 'severe' ? 'text-amber-300' : 'text-red-300'}`}>
-                        {latest.cost.severity}
-                    </div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Casualties</div>
+                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalFriendlyMilitaryCasualties}</div>
+                </div>
+                <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Displaced</div>
+                    <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalDisplaced}</div>
+                </div>
+                <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Lost Formations</div>
+                    <div className="text-[16px] font-bold tabular-nums text-red-300">{summary.totalOwnFormationsDestroyed}</div>
+                </div>
+                <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Hard Turns</div>
+                    <div className="text-[16px] font-bold tabular-nums text-amber-300">{summary.criticalTurns + summary.severeTurns}</div>
                 </div>
             </div>
 

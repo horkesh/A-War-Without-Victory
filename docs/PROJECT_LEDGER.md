@@ -153,6 +153,24 @@
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
 ---
 
+---
+
+## [2026-05-01] feat(ui): summarize Turn Aftermath records as a campaign pulse
+
+**Type:** Tactical-map UI / product-spine records summary. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** Persistent aftermath records were useful as individual cards, but still forced the player to scan manually for the campaign trend. Army HQ RECORDS needs a fast read of the recent archive: net territory, casualties, displacement, formations lost, and how many hard turns the player just endured.
+
+**Change:** Added `buildTurnAftermathLedgerSummary(...)`, a pure aggregation over `TurnAftermathView[]`. The Army HQ `TURN AFTERMATH` subtab now summarizes record count, cumulative net friendly territory, friendly casualties, displaced population, own formations destroyed, and severe/critical turn count above the individual cards.
+
+**Tests:** Red-first ledger-summary test added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts` = 6/6 pass.
+
+**Determinism:** Preserved. This is an order-stable aggregation over the already-built record views; it does not mutate state or re-read simulation internals.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
 ## [2026-05-01] feat(ui): add turn-cost packets to Turn Aftermath
 
 **Type:** Tactical-map UI / product-spine cost read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.

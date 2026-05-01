@@ -64,6 +64,21 @@ Turn Aftermath now carries a compact in-campaign cost packet without invoking th
 
 This is deliberately not a second endgame War Cost Summary. It is a per-turn projection over upstream summary truth so the player feels the price of each advance-turn before the final reckoning.
 
+## C4 Campaign Pulse Extension
+
+The persistent Army HQ records surface now has a summary pulse above the individual aftermath cards:
+
+- Added `buildTurnAftermathLedgerSummary(records)`, a pure aggregation over already-built `TurnAftermathView` records.
+- Army HQ `TURN AFTERMATH` now summarizes:
+  - archive record count
+  - cumulative net friendly territory
+  - cumulative friendly casualties in the archive
+  - cumulative displaced population in the archive
+  - own formations destroyed in the archive
+  - severe/critical turn count
+
+This keeps the player from manually scanning every card to understand recent trajectory, while preserving the one-way read-model contract.
+
 ## Files
 
 - `src/ui/map/data/turnAftermath.ts`
@@ -91,6 +106,8 @@ This is deliberately not a second endgame War Cost Summary. It is a per-turn pro
   - 43/43 pass after C2
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
   - 44/44 pass after C3
+- `npx.cmd vitest run tests/ui/turn_aftermath.test.ts`
+  - 6/6 pass after C4 ledger-summary helper
 - `npx.cmd tsc --noEmit`
   - clean
 - `npx.cmd tsc --noEmit -p tsconfig.json`
