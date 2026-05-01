@@ -19,6 +19,7 @@ import { useGameStore } from '../store/gameStore';
 import { InboxBadge } from './PresidentialInbox';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
@@ -110,7 +111,13 @@ export function PresidentialToolbar({
         if (!ipc.isAvailable || advancing) return;
         setAdvancing(true);
         try {
-            await advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError });
+            await advanceTurnAndSync({
+                ipc,
+                loadSave,
+                clearStagedOrders,
+                setLoadError,
+                ...getTurnAftermathAdvanceDeps(),
+            });
         } finally {
             setAdvancing(false);
         }

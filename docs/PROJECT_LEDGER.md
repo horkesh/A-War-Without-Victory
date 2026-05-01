@@ -151,6 +151,21 @@
 **Next-lane recommendations:** (1) Storm-flag timing investigation (BLOCKING T3 trio), owner `/operations-expert` + `/historian` + `/game-designer`; (2) Combat-execution gap on Grmeč (still open from LANE D §10 #4), owner `/corps-army-commander` + `/sector-expert`; (3) apr1994 painted-target compare on Tigar/APWB OSID flips, owner `/scenario-creator-runner-tester`; (4) supply-pressure scale debt (still open from LANE D §10 #3), owner `/systems-programmer` + `/war-or-game`.
 
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
+---
+
+## [2026-05-01] feat(ui): add Turn Aftermath product-spine bridge
+
+**Type:** Tactical-map UI / product-spine read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The C0 product-spine audit found that the campaign loop had live Brief / Inspect / Decide / Execute surfaces, but the post-execute handoff was still partial. The engine already persisted `latestTurnSummary` and desktop advance-turn already returned `turn-report-updated`; the missing owner was a dedicated "what just happened, what did it cost, what needs attention now" packet.
+
+**Change:** Added `buildTurnAftermathView(...)` in `src/ui/map/data/turnAftermath.ts` to compose `LoadedGameState.latestTurnSummary`, player faction, OSID display names, and unified inbox obligations into one player-facing report. Added `TurnAftermathModal` and mounted it from `App.tsx`. Extended `advanceTurnAndSync(...)` with optional aftermath hooks and added `getTurnAftermathAdvanceDeps()` so every tactical advance-turn entrypoint (PresidentialToolbar, Warroom calendar modal, spacebar shortcut, PeaceStatusPanel, legacy TopToolbar) opens the same report after a successful state load. Added `turnAftermath` / `turnAftermathOpen` store fields and reset them on fresh save load.
+
+**Tests:** Red-first builder/bridge/store tests and source wiring guard added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts tests/ui_turn_aftermath_wiring.test.ts` = 20/20 pass. `npx.cmd tsc --noEmit` clean.
+
+**Determinism:** Preserved. This reads already-persisted turn summary and inbox state only. It does not mutate sim state, operation execution, control, combat, scenario data, or run artifacts.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
 
 ---
 

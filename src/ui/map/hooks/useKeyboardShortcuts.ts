@@ -5,6 +5,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import { useIPC } from '../desktop/useIPC';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { useGameStore, type MapMode } from '../store/gameStore';
@@ -116,7 +117,13 @@ export function useKeyboardShortcuts(): void {
         const store = useGameStore.getState();
         if (!ipc.isAvailable || !store.loadedGameState) return;
         advancingRef.current = true;
-        advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError })
+        advanceTurnAndSync({
+          ipc,
+          loadSave,
+          clearStagedOrders,
+          setLoadError,
+          ...getTurnAftermathAdvanceDeps(),
+        })
           .finally(() => {
             advancingRef.current = false;
           });

@@ -19,6 +19,7 @@ import { AttackConfirmation } from './components/AttackConfirmation';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
 import { WarSummaryModal } from './components/WarSummaryModal';
+import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OpsPlanningModal } from './components/ops_modal/OpsPlanningModal';
 import { CommanderSelectionModal } from './components/CommanderSelectionModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
@@ -185,6 +186,9 @@ function App() {
   const loadSave = useGameStore((s) => s.loadSave);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const loadError = useGameStore((s) => s.loadError);
+  const turnAftermath = useGameStore((s) => s.turnAftermath);
+  const turnAftermathOpen = useGameStore((s) => s.turnAftermathOpen);
+  const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const mapMode = useGameStore((s) => s.mapMode);
   const railState = derivePanelRailState({
@@ -553,6 +557,21 @@ function App() {
     setEventLogOpen(false);
   };
 
+  const openInboxHome = () => {
+    const gs = useGameStore.getState();
+    setTurnAftermathOpen(false);
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+    gs.setSelectedOsid(null);
+    gs.setSelectedFormationId(null);
+    gs.setSelectedCorpsId(null);
+    gs.setSelectedCorpsFrontSectorId(null);
+    gs.setSelectedArmyId(null);
+    gs.setSelectedArmyHqId(null);
+    gs.setSelectedOperationKey(null);
+    gs.setSelectedOrbatCorpsId(null);
+  };
+
   useEffect(() => {
     const handleShellHandoff = (event: MessageEvent) => {
       // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
@@ -736,6 +755,20 @@ function App() {
         isOpen={summaryOpen}
         focusSection={summaryFocus}
         onClose={() => setSummaryOpen(false)}
+      />
+      <TurnAftermathModal
+        isOpen={turnAftermathOpen}
+        view={turnAftermath}
+        onClose={() => setTurnAftermathOpen(false)}
+        onOpenInbox={openInboxHome}
+        onOpenSummary={() => {
+          setTurnAftermathOpen(false);
+          openSummary();
+        }}
+        onOpenRecords={() => {
+          setTurnAftermathOpen(false);
+          openArmyHQRecords('aar');
+        }}
       />
       <ArmyHQModal />
       <ChronicleOverlay />

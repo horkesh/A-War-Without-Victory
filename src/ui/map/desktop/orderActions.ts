@@ -1,11 +1,36 @@
 import type { IPC } from './useIPC';
-import type { StagedOrder } from '../store/gameStore';
+import type { LoadedGameState } from '../data/types';
+import { buildTurnAftermathView, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
+import type { LastTurnReport, StagedOrder } from '../store/gameStore';
 
 interface AdvanceTurnDeps {
     ipc: IPC;
     loadSave: (jsonOrText: unknown | string) => Promise<void>;
     clearStagedOrders: () => void;
     setLoadError: (msg: string | null) => void;
+    getCurrentState?: () => LoadedGameState | null;
+    getOsidNameMap?: () => Record<string, string> | null;
+    setLastTurnReport?: (report: LastTurnReport | null) => void;
+    setTurnAftermath?: (view: TurnAftermathView | null) => void;
+    setTurnAftermathOpen?: (open: boolean) => void;
+}
+
+function normalizeTurnReport(report: unknown): (LastTurnReport & TurnAftermathReportInput) | null {
+    if (report == null || typeof report !== 'object') return null;
+    const candidate = report as Record<string, unknown>;
+    return {
+        phase: typeof candidate.phase === 'string' ? candidate.phase : undefined,
+        turn: typeof candidate.turn === 'number' ? candidate.turn : undefined,
+        player_faction: typeof candidate.player_faction === 'string' || candidate.player_faction === null
+            ? candidate.player_faction
+            : undefined,
+        probe: typeof candidate.probe === 'string' || candidate.probe === null
+            ? candidate.probe
+            : undefined,
+        details: candidate.details && typeof candidate.details === 'object'
+            ? candidate.details as LastTurnReport['details']
+            : undefined,
+    };
 }
 
 /**
@@ -17,15 +42,34 @@ export async function advanceTurnAndSync({
     loadSave,
     clearStagedOrders,
     setLoadError,
+    getCurrentState,
+    getOsidNameMap,
+    setLastTurnReport,
+    setTurnAftermath,
+    setTurnAftermathOpen,
 }: AdvanceTurnDeps): Promise<void> {
+    const previousState = getCurrentState?.() ?? null;
     const result = await ipc.advanceTurn();
     if (!result.ok || !result.stateJson) {
         setLoadError(result.error ?? 'Advance turn failed.');
         return;
     }
     clearStagedOrders();
+    const report = normalizeTurnReport(result.report);
+    if (report) setLastTurnReport?.(report);
     try {
         await loadSave(result.stateJson);
+        const nextState = getCurrentState?.() ?? null;
+        const aftermath = buildTurnAftermathView({
+            previousState,
+            nextState,
+            lastTurnReport: report,
+            osidNameMap: getOsidNameMap?.() ?? null,
+        });
+        if (aftermath) {
+            setTurnAftermath?.(aftermath);
+            setTurnAftermathOpen?.(true);
+        }
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setLoadError(message);
