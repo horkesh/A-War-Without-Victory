@@ -9,12 +9,13 @@
  *   - The legacy scripted Sana has been REMOVED from triggered_operations.ts
  *     — single ownership.
  *   - Sana does NOT surface before its date_window opens (turn < 175).
- *   - Sana does NOT surface when Operation Storm has not triggered, even if
- *     the date_window is open (alliance_context required).
+ *   - Sana does NOT surface before the Operation Storm event opens the
+ *     western theater, even if the date_window is open (alliance_context
+ *     required).
  *   - Sana does NOT surface when the Bihać pocket has structurally
  *     collapsed (any pocket-survival anchor controlled by RS).
- *   - Sana DOES surface when the date is open AND Storm has triggered AND
- *     pocket anchors are RBiH AND a sufficient enemy_weakness footprint
+ *   - Sana DOES surface when the date is open AND the Storm event has fired
+ *     AND pocket anchors are RBiH AND a sufficient enemy_weakness footprint
  *     exists AND corps readiness clears the soft floor.
  *   - The opportunity entry binds to arbih_5th_corps and the canonical
  *     Bihać staging anchor.
@@ -67,6 +68,7 @@ const VRS_TARGETS = [
 ];
 
 function buildState(opts: FixtureOpts): GameState {
+    const stormTurn = opts.stormTriggered ? Math.min(opts.turn, 174) : undefined;
     const cmd: CorpsCommandState = {
         command_span: 9,
         subordinate_count: 9,
@@ -148,6 +150,8 @@ function buildState(opts: FixtureOpts): GameState {
         ],
         military: {
             formations,
+            fired_event_ids: opts.stormTriggered ? ['operation_storm_1995'] : [],
+            event_last_fired_turn: stormTurn === undefined ? {} : { operation_storm_1995: stormTurn },
             front_segments: {},
             front_posture: {},
             front_posture_regions: {},
@@ -195,7 +199,7 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(state.military.operation_opportunities ?? []).toEqual([]);
     });
 
-    it('does not surface when Operation Storm has not yet triggered', () => {
+    it('does not surface before the Operation Storm event opens the western theater', () => {
         const state = buildState({ turn: 180, stormTriggered: false });
         runOpportunityEvaluationStep(state, 180);
         const proposals = state.military.operation_opportunities ?? [];

@@ -25,7 +25,7 @@
  *            unique owner — there is no calendar-only fallback.
  * ═══════════════════════════════════════════════════════════════
  *
- * READS:     state.meta.turn, state.meta.operation_storm_triggered,
+ * READS:     state.meta.turn, Operation Storm event/theater truth,
  *            state.political.political_controllers,
  *            state.military.formations[*].cohesion (for enemy_weakness proxy),
  *            corps_operation_readiness for arbih_5th_corps.
@@ -43,6 +43,7 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { isPreStormWesternTheater, isWesternTheaterRuptured } from './operation_storm_theater.js';
 
 const PRIMARY_CORPS = 'arbih_5th_corps';
 
@@ -163,9 +164,9 @@ const dateWindowSana: AxisPredicate = (_state, turn) => {
     return { green: true, reason: 'within Aug–Oct 1995 exploitation window' };
 };
 
-/** alliance_context: Operation Storm has triggered (HV/HVO western theater open). */
+/** alliance_context: Operation Storm event has opened the HV/HVO western theater. */
 const allianceContextSana: AxisPredicate = (state) => {
-    if (state.meta.operation_storm_triggered === true) {
+    if (isWesternTheaterRuptured(state)) {
         return { green: true, reason: 'Operation Storm has opened the western theater' };
     }
     return { green: false, reason: 'western theater not yet opened (Operation Storm pending)' };
@@ -823,7 +824,7 @@ export const APWB_PRESSURE_94_OPPORTUNITY: OperationOpportunityDef = {
 //     (defender supply not collapsed). The historical date window IS the
 //     "enemy pressure" signal — the crisis surfacing on its date is itself
 //     the structured player-decision moment.
-//   - `alliance_context` REQUIRED for all three: `state.meta.operation_storm_triggered !== true`
+//   - `alliance_context` REQUIRED for all three: Operation Storm event has not fired
 //     (pre-Storm only). Pauk historically impossible after Oluja (historian);
 //     Una and Breza are also pre-Storm by date_window but the alliance_context
 //     hedge makes it explicit.
@@ -943,7 +944,7 @@ const logisticsT3: AxisPredicate = (state) => {
 /** Shared alliance_context predicate: pre-Storm only. Pauk historically
  *  impossible after Oluja (historian); Una and Breza by date but explicit. */
 const allianceContextPreStorm: AxisPredicate = (state) => {
-    if (state.meta.operation_storm_triggered === true) {
+    if (!isPreStormWesternTheater(state)) {
         return { green: false, reason: 'western theater rupture has overtaken this pre-Storm crisis' };
     }
     return { green: true, reason: 'pre-Storm western theater configuration in effect' };

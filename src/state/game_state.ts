@@ -1230,8 +1230,14 @@ export interface StateMeta {
     war_entrenchment_init_turns?: number;
     /** Stuck-in-Peace-phase fallback: force transition after this many Peace phase turns since war_start_turn (e.g. 52). */
     war_force_transition_after_turns?: number;
-    /** War phase §11.3: Operation Storm (Oluja) has triggered (precondition step set). */
+    /** War phase §11.3: Operation Storm (Oluja) actual western-theater rupture has occurred. */
     operation_storm_triggered?: boolean;
+    /** War phase §11.3: Turn when abstract Operation Storm preconditions first aligned. */
+    operation_storm_precondition_turn?: number;
+    /** War phase §11.3: True once abstract Operation Storm preconditions have aligned. */
+    operation_storm_preconditions_met?: boolean;
+    /** War phase §11.3: Turn when the Operation Storm event opened the western theater. */
+    operation_storm_turn?: number;
     /** War phase §6.3: HV brigades have been spawned (one-shot flag, set after Washington + delay). */
     hv_brigades_spawned?: boolean;
     /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
