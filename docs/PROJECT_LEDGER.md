@@ -1,3 +1,15 @@
+## [2026-05-01] docs(process): establish autonomous parallel workstreams
+
+**Type:** Documentation/process and roadmap update. Created `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md`, updated `docs/plans/MASTER_ROADMAP.md`, and propagated the durable rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Operating decision:** Replace the small-packet loop with large milestone lanes. Claude should own implementation lanes with internal phase commits and keep going through expected tests/hash/docs updates; Codex should work non-overlapping architecture, review, roadmap, product-loop, and family-design lanes in parallel. Stop gates are limited to canon, sensitive-history, determinism failure, active file-ownership conflict, severe invariant break, or unresolved player-facing design meaning.
+
+**Current lane board:** Lane A Force Quality Foundation is active with Claude. Codex should work Lane C Presidential Campaign Loop audit/design in parallel, then review Lane A. Next implementation lane after Lane A should be Lane B Operation Opportunity MVP, followed by 5th Corps as the first family proof.
+
+**No-railroad posture:** The operating plan formalizes the acceptance test: no date-only outcomes, no hidden painted-target controller, no bypassing player/bot agency, no automatic faction arcs, and diagnostics/AAR must expose why events happen.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(audit): Force Quality Trajectory Evidence Audit — no behavior changes
 
 **Type:** Documentation/diagnostic evidence audit. Wrote `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` synthesizing a four-track investigation (live-consumer trace, officer learning_rate units, date-window metrics, owner classification) plus four targeted cross-checks (CC1 scenario-config drift; CC2 `faction_officer_maturity` consumers; CC3 `capability_profile` consumers; CC4 officer-numeric test pins). Added the reusable read-only diagnostic script and captured output under `tools/diagnostics/`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.

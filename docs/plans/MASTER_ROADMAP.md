@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-04-30
+**Last Updated:** 2026-05-01
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -407,6 +407,8 @@ No version bump by itself â€” this was the engineering closure band between
 **Full-war proof requirement (added 2026-04-30):** Before closing `v0.9.0` or `v0.9.1`, validate beyond the healthy 40-week slice with 188w/200w evidence. The 40w run `n1579` on current `main` is strong (93.7% area-weighted, 27/27 anchors, 6/6 benchmarks, 0 invalid ops, consistency PASS), but `v0.9` depends on later-war behavior: Washington timing, HRHB/RBiH rupture, Orasje, consequence chains, negotiated peace, verdict, and Cost Ledger surfaces.
 
 **Force-quality trajectory calibration issue (added 2026-05-01):** Open a separate calibration/design lane for the core full-war premise that VRS should deteriorate from professional army to degraded-but-dangerous force while ARBiH should mature from 1992 rabble into 1995 corps-level professionals. Recent late-war target and operation evidence shows that missing scripted operations are not the whole problem: the engine must produce asymmetric force-quality change through officer learning/brain drain, cohesion/morale, equipment maintenance, exhaustion, operation-readiness gates, corps coordination, and commander doctrine. Plan: `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`; tracked in `docs/40_reports/CALIBRATION_MASTER.md`.
+
+**Autonomous parallel workstream model (added 2026-05-01):** Active work should now be organized as large, phase-coherent lanes rather than 10-minute packets. Claude owns implementation lanes with internal phase commits; Codex owns architecture, roadmap truth, review, and non-overlapping product/design lanes while Claude runs. Stop only for canon, sensitive-history, determinism, active file-ownership conflict, or unresolved player-facing design meaning. Plan: `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md`.
 
 **Formation-life believability lane (added 2026-04-30):** Treat brigade drift, far-from-home live ownership, "active but never fights" formations, HRHB/HVO offensive emergence, and out-of-area corps behavior as a `v0.9` simulation-believability lane. This is not a new broad mechanics milestone; it draws from the scorecard/backlog (`docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/plans/2026-04-14-roadmap-execution-packet-backlog.md`) and prior drift investigations. Done means remaining drift/never-fights warnings are either fixed by a canonical lifecycle owner or explicitly classified as accepted scenario variance with run evidence.
 
