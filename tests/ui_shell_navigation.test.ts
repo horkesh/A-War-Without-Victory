@@ -57,6 +57,19 @@ describe('shellNavigation', () => {
     ]);
   });
 
+  it('routes opportunity records through Army HQ records sub-tabs', () => {
+    const state = createState('RBiH');
+
+    const ok = openArmyHQRecordsSubTab(state, 'opportunities');
+
+    expect(ok).toBe(true);
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'opportunities'],
+    ]);
+  });
+
   it('opens Army HQ briefing focused on the selected corps', () => {
     const state = createState('HRHB');
 
@@ -147,6 +160,7 @@ describe('shellNavigation', () => {
 
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'summary' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'records', recordsSubTab: 'opportunities' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'briefing', corpsId: 'arbih_3rd_corps' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'chronicle' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'codex' })).toBe(true);
@@ -160,6 +174,9 @@ describe('shellNavigation', () => {
       ['setArmyHQRecordsSubTab', 'ops'],
       ['setSelectedArmyId', 'RBiH'],
       ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'opportunities'],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
       ['setChronicleOpen', true],
@@ -168,12 +185,12 @@ describe('shellNavigation', () => {
   });
 
   it('round-trips shared shell handoff commands for cross-shell navigation', () => {
-    const encoded = encodeShellHandoffCommand({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' });
+    const encoded = encodeShellHandoffCommand({ kind: 'army-hq', tab: 'records', recordsSubTab: 'opportunities' });
 
     expect(decodeShellHandoffCommand(encoded)).toEqual({
       kind: 'army-hq',
       tab: 'records',
-      recordsSubTab: 'aar',
+      recordsSubTab: 'opportunities',
     });
     expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'chronicle' }))).toEqual({ kind: 'chronicle' });
     expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'codex' }))).toEqual({ kind: 'codex' });

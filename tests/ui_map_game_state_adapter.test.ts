@@ -690,6 +690,105 @@ test('parseGameState derives legacy AAR provenance when new provenance fields ar
     assert.deepEqual(parsed.operationHistory?.[0]?.objectives_held_without_logged_capture, ['osid_a', 'osid_b']);
 });
 
+test('parseGameState derives player-scoped operation opportunity records with AAR links', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 184,
+            phase: 'war',
+            player_faction: 'RBiH',
+            pending_proposal_reviews: [{
+                id: 'PROP_175_opportunity_0',
+                turn: 175,
+                faction: 'RBiH',
+                domain: 'ops',
+                description: 'Operation Sana — staff recommendation: approve',
+                proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+            }],
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [
+                {
+                    opportunity_id: 'sana_95',
+                    proposal_id: 'OPP_175_sana_95',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'approved',
+                    approver_faction: 'RBiH',
+                    last_axis_evaluation: [
+                        { axis: 'date_window', mode: 'required', green: true, reason: 'window open' },
+                        { axis: 'corps_readiness', mode: 'required', green: true, reason: 'ready' },
+                        { axis: 'enemy_weakness', mode: 'optional', green: false, reason: 'contested' },
+                    ],
+                },
+                {
+                    opportunity_id: 'enemy_opportunity',
+                    proposal_id: 'OPP_175_enemy_opportunity',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'approved',
+                    approver_faction: 'RS',
+                    last_axis_evaluation: [],
+                },
+            ],
+            operation_opportunity_resolutions: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    response: 'approve',
+                    response_turn: 175,
+                    executed_op_name: 'Operation Sana',
+                    executed_op_aar_id: 'arbih_5th_corps:Operation Sana:t175',
+                    exit_class: 'partial_success',
+                },
+            ],
+        } as any,
+        operation_history: [{
+            operation_id: 'arbih_5th_corps:Operation Sana:t175',
+            operation_name: 'Operation Sana',
+            corps_id: 'arbih_5th_corps',
+            faction: 'RBiH',
+            started_turn: 175,
+            ended_turn: 184,
+            outcome: 'partial',
+            objectives_targeted: ['op:prijedor:sanski_most', 'op:kljuc:kljuc_2'],
+            objectives_captured: ['op:prijedor:sanski_most'],
+            total_attacks: 7,
+            casualties_suffered: { killed: 0, wounded: 0 },
+            casualties_inflicted: { killed: 0, wounded: 0 },
+            equipment_lost: { tanks: 0, artillery: 0 },
+            equipment_destroyed: { tanks: 0, artillery: 0 },
+            equipment_captured: { tanks: 0, artillery: 0 },
+            grade: { stars: 3, verdict: 'solid', factors: {} },
+            duration_turns: 9,
+            weekly_log: [],
+        }],
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.operationOpportunityRecords?.length, 1);
+    const record = parsed.operationOpportunityRecords![0];
+    assert.equal(record.display_name, 'Operation Sana');
+    assert.equal(record.faction, 'RBiH');
+    assert.equal(record.executed_op_aar_id, 'arbih_5th_corps:Operation Sana:t175');
+    assert.equal(record.exit_class, 'partial_success');
+    assert.equal(record.total_attacks, 7);
+    assert.equal(record.objectives_targeted, 2);
+    assert.equal(record.objectives_captured, 1);
+    assert.equal(record.required_axes_green, 2);
+    assert.equal(record.required_axes_total, 2);
+    assert.equal(record.optional_axes_green, 0);
+    assert.equal(record.optional_axes_total, 1);
+    assert.deepEqual(parsed.operationOpportunitySummary, {
+        pendingCount: 0,
+        resolvedCount: 1,
+        completedCount: 1,
+        successCount: 1,
+        failedCount: 0,
+        didNotLaunchCount: 0,
+    });
+});
+
 test('parseGameState exposes municipality support orders for the player faction UI', () => {
     const parsed = parseGameState({
   meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

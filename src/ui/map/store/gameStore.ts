@@ -146,7 +146,7 @@ export interface GameStore {
   /** Army HQ modal state. */
   armyHQOpen: boolean;
   armyHQTab: 'briefing' | 'summary' | 'records' | 'personnel';
-  armyHQRecordsSubTab: 'aar' | 'ops';
+  armyHQRecordsSubTab: 'aar' | 'ops' | 'opportunities';
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
@@ -163,7 +163,7 @@ export interface GameStore {
   setForceInboxOpen: (v: boolean) => void;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
-  setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops') => void;
+  setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops' | 'opportunities') => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
   setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;

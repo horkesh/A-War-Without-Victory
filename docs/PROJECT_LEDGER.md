@@ -1,3 +1,19 @@
+## [2026-05-01] feat(ui): surface operation opportunity records in Army HQ
+
+**Type:** UI/data-consumer feature. No simulation behavior, combat math, opportunity catalog content, operation definitions, OOB, scenario data, or painted targets changed.
+
+**Why:** The opportunity system now persists `proposal -> decision -> AAR` truth, but the player-facing Army HQ records still only showed generic AAR and operation history. New opportunity families should not each need bespoke UI; they need one records surface that reads the generic opportunity ledger.
+
+**Change:** Added `operationOpportunityRecords` and `operationOpportunitySummary` to `LoadedGameState`, derived by `src/ui/map/data/operationOpportunityLedger.ts` from live proposals, resolution rows, pending proposal reviews, and linked AARs. Added an Army HQ Records `OPPORTUNITIES` subtab with a read-only ledger panel. Shell handoff/store types now accept `recordsSubTab: 'opportunities'`.
+
+**Invariants:** Player-facing records are scoped by faction where the faction is known. The UI consumes `executed_op_aar_id` + `exit_class` and does not infer opportunity outcomes from names. No approve/decline/spawn/halt controls were added to the records surface.
+
+**Verification:** `npx.cmd tsc --noEmit` clean. `npx.cmd vitest run tests/ui_map_game_state_adapter.test.ts tests/ui_shell_navigation.test.ts tests/ui/inbox_items.test.ts` -> 65/65 pass. `npm.cmd run desktop:map:build` -> pass with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_RECORDS_SURFACE.md`.
+
+---
+
 ## [2026-05-01] feat(operations): link opportunity resolutions to completed operation AARs
 
 **Type:** Simulation observability + persisted output fix. No combat math, OOB, scenario data, painted targets, operation definitions, or player-command semantics changed.

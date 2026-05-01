@@ -1,5 +1,5 @@
 export type ArmyHQTab = 'briefing' | 'summary' | 'records' | 'personnel';
-export type ArmyHQRecordsSubTab = 'aar' | 'ops';
+export type ArmyHQRecordsSubTab = 'aar' | 'ops' | 'opportunities';
 
 export type ShellHandoffCommand =
   | {
@@ -33,7 +33,12 @@ export function isShellHandoffCommand(value: unknown): value is ShellHandoffComm
   ) {
     return false;
   }
-  if (command.recordsSubTab != null && command.recordsSubTab !== 'aar' && command.recordsSubTab !== 'ops') {
+  if (
+    command.recordsSubTab != null
+    && command.recordsSubTab !== 'aar'
+    && command.recordsSubTab !== 'ops'
+    && command.recordsSubTab !== 'opportunities'
+  ) {
     return false;
   }
   if (command.corpsId != null && typeof command.corpsId !== 'string') {

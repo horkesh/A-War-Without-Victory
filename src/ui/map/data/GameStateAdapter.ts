@@ -58,6 +58,7 @@ import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, d
 import type { GameState } from '../../../state/game_state.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
+import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -1688,6 +1689,8 @@ export function parseGameState(json: unknown): LoadedGameState {
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
     });
+    const operationOpportunityRecords = deriveOperationOpportunityRecords(state, playerFaction);
+    const operationOpportunitySummary = deriveOperationOpportunitySummary(operationOpportunityRecords);
 
     return {
         label, turn, phase,
@@ -1754,6 +1757,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests,
         armyReserveQueue,
+        operationOpportunityRecords,
+        operationOpportunitySummary,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)

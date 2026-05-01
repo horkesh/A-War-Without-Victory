@@ -417,6 +417,51 @@ export interface ArmyReserveQueueView {
     leadCriticalDescription?: string;
 }
 
+export type OperationOpportunityRecordStatus =
+    | 'eligible_pending_review'
+    | 'delayed'
+    | 'approved'
+    | 'declined'
+    | 'expired'
+    | 'redirected'
+    | 'under_resourced_approved';
+
+export interface OperationOpportunityRecordView {
+    proposal_id: string;
+    opportunity_id: string;
+    display_name: string;
+    faction?: string;
+    status: OperationOpportunityRecordStatus;
+    eligibility_turn?: number;
+    expires_turn?: number;
+    response?: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline' | 'expire';
+    response_turn?: number;
+    executed_op_name?: string;
+    executed_op_aar_id?: string;
+    exit_class?: 'did_not_launch' | 'decisive_success' | 'partial_success' | 'failed' | 'aborted';
+    aar_outcome?: string;
+    started_turn?: number;
+    ended_turn?: number;
+    total_attacks?: number;
+    objectives_targeted?: number;
+    objectives_captured?: number;
+    grade_stars?: number;
+    grade_verdict?: string;
+    required_axes_green?: number;
+    required_axes_total?: number;
+    optional_axes_green?: number;
+    optional_axes_total?: number;
+}
+
+export interface OperationOpportunitySummaryView {
+    pendingCount: number;
+    resolvedCount: number;
+    completedCount: number;
+    successCount: number;
+    failedCount: number;
+    didNotLaunchCount: number;
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -703,6 +748,10 @@ export interface LoadedGameState {
     presidentialReviewQueue?: PresidentialReviewQueueView;
     /** Canonical Army Reserve management queue summary derived from pending reserve requests. */
     armyReserveQueue?: ArmyReserveQueueView;
+    /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */
+    operationOpportunityRecords?: OperationOpportunityRecordView[];
+    /** Summary counts for Army HQ opportunity records. */
+    operationOpportunitySummary?: OperationOpportunitySummaryView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */

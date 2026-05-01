@@ -5,10 +5,12 @@
 import { AARPanel } from '../AARPanel';
 import { OperationHistoryPanel } from '../OperationHistoryPanel';
 import { useGameStore } from '../../store/gameStore';
+import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
 
 const SUB_TABS = [
     { id: 'aar' as const, label: 'AFTER-ACTION REPORT' },
     { id: 'ops' as const, label: 'OPERATION HISTORY' },
+    { id: 'opportunities' as const, label: 'OPPORTUNITIES' },
 ];
 
 export function RecordsContent() {
@@ -53,6 +55,7 @@ export function RecordsContent() {
             {/* Content */}
             {subTab === 'aar' && <AARPanel isOpen={true} onClose={() => {}} embedded />}
             {subTab === 'ops' && <OperationHistoryPanel isOpen={true} onClose={() => {}} embedded />}
+            {subTab === 'opportunities' && <OpportunityLedgerPanel />}
         </div>
     );
 }

@@ -547,7 +547,7 @@ function App() {
     setSummaryOpen(false);
   };
 
-  const openArmyHQRecords = (subTab: 'aar' | 'ops') => {
+  const openArmyHQRecords = (subTab: 'aar' | 'ops' | 'opportunities') => {
     openArmyHQRecordsSubTab(useGameStore.getState(), subTab);
     setSummaryOpen(false);
     setEventLogOpen(false);
