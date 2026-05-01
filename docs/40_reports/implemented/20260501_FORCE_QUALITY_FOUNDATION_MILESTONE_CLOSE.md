@@ -65,7 +65,7 @@ Make AWWV simulate why the war developed as it did — deterministically, no rai
 ## 4. Tests / runs / hashes
 
 ### Test summary
-- New tests: 23 cases across 4 new files (Shape C, no-calendar-railroad, corps-operation-readiness, trace-persistence).
+- New tests: 29 cases across 5 new files (scenario-family consistency, Shape C, no-calendar-railroad, corps-operation-readiness, trace-persistence).
 - Modified tests: 4 cases in `officer_quality.test.ts`, 2 entries in `officer_config_consumers.test.ts`.
 - Smoke triad after each phase: `tsc --noEmit` clean, vitest green, `desktop:map:build` not run during this lane (no UI/map changes).
 - Phase 4 fix-up smoke: 47/47 pass across protection suite.
@@ -166,7 +166,7 @@ RS share within Dayton tolerance. Federation internal balance is the failure mod
 - 188w RS painted share within +1.8pp of Dayton (substantial improvement).
 - ARBiH first multi-axis op (Operation Sana w175-187) — first in the audit corpus.
 - `faction_officer_maturity` and `capability_profile` converted from decorative-in-war-phase to live force-quality inputs.
-- 23 new test cases; smoke triad green at every phase.
+- 29 new test cases; smoke triad green at every phase.
 - All five Phase 5a runs deterministic; manifest baselines refreshed deliberately at every phase.
 
 ## 9. Determinism statement

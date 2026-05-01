@@ -19,8 +19,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { execSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
 
 // Faction-keyed metadata fields that are not consumer-side runtime config.
@@ -54,21 +53,38 @@ interface WarTimeline {
     officer_config?: Record<string, OfficerConfigEntry>;
 }
 
-function countReadSites(fieldName: string): number {
-    // Grep src/ for `\.fieldName\b` (excluding type definitions in officer_types.ts
-    // and tests) — counts actual consumer-side reads.
-    try {
-        const result = execSync(
-            `grep -rnE '\\.${fieldName}\\b' src/ --include='*.ts' --include='*.tsx' ` +
-            `| grep -v 'officer_types\\.ts' ` +
-            `| grep -v 'test\\.' ` +
-            `| wc -l`,
-            { encoding: 'utf8', cwd: process.cwd() }
-        );
-        return parseInt(result.trim(), 10) || 0;
-    } catch {
-        return 0;
+function listSourceFiles(dir: string): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(dir).sort()) {
+        const full = join(dir, entry);
+        const stat = statSync(full);
+        if (stat.isDirectory()) {
+            out.push(...listSourceFiles(full));
+            continue;
+        }
+        if (!stat.isFile()) continue;
+        if (!/\.(ts|tsx)$/.test(entry)) continue;
+        if (entry === 'officer_types.ts') continue;
+        if (/\.test\.(ts|tsx)$/.test(entry)) continue;
+        out.push(full);
     }
+    return out;
+}
+
+function escapeRegex(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const SOURCE_TEXT = listSourceFiles(join(process.cwd(), 'src'))
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('\n');
+
+function countReadSites(fieldName: string): number {
+    // Scan src/ for `\.fieldName\b` (excluding type definitions in
+    // officer_types.ts and tests) in-process so this protection suite is
+    // Windows-safe.
+    const pattern = new RegExp(`\\.${escapeRegex(fieldName)}\\b`, 'g');
+    return SOURCE_TEXT.match(pattern)?.length ?? 0;
 }
 
 describe('officer_config consumers (issue #25 sub-task D)', () => {

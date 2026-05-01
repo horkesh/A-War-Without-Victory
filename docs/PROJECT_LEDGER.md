@@ -1,3 +1,15 @@
+## [2026-05-01] test(force-quality): make officer_config consumer guard Windows-safe
+
+**Type:** Test-harness portability fix. No simulation behavior, scenario data, painted targets, OOB, canon, or run artifacts changed.
+
+**Defect:** `tests/officer_config_consumers.test.ts` used a Unix shell pipeline (`grep ... | wc -l`) to count source read sites. On the repo's Windows/PowerShell environment that command fails, so the force-quality protection suite reported false dead `officer_config` fields even though the runtime consumers exist.
+
+**Fix:** Replaced the shell pipeline with a deterministic in-process scanner: recursively stable-sorts `src/`, reads `.ts`/`.tsx` files, excludes `officer_types.ts` and test files, caches the joined source text once, then matches `\.fieldName\b`. This preserves the test's owner intent while removing the Unix-tool dependency.
+
+**Verification:** `npx.cmd vitest run tests/officer_learning_rate_shape_c.test.ts tests/officer_quality_no_calendar_railroad.test.ts tests/officer_quality.test.ts tests/officer_config_consumers.test.ts tests/corps_operation_readiness.test.ts tests/force_quality_trace_persistence.test.ts tests/scenario_apr1992_family_consistency.test.ts` -> 53/53 pass. `npx.cmd tsc --noEmit` clean. `git diff --check` clean except the repo's normal CRLF warning on the edited test file.
+
+---
+
 ## [2026-05-01] milestone(force-quality): FORCE QUALITY FOUNDATION closed
 
 **Type:** Milestone close-out. Five-phase lane delivered + one fix-up + verification panel. Canon-restorative (Forbidden-Shape calendar railroad removed). No FORAWWV touch. No painted-target overrides. Determinism preserved at every phase.
@@ -11,7 +23,7 @@
 - Phase 4 — `computeCorpsOperationReadiness` deterministic helper + 7 named traits + soft gate in `commander/plan.ts` + AAR + `decision_trace` diagnostic surfaces. Previously-decorative `faction_officer_maturity` and `capability_profile` made live.
 - Phase 4 fix-up — `decision_trace.force_quality_traits` persistence across non-offensive early-return turns (one-way merge in `emit.ts buildUpdatedState`).
 
-**Tests:** 23 new cases across 4 new files (`tests/scenario_apr1992_family_consistency.test.ts`, `officer_learning_rate_shape_c.test.ts`, `officer_quality_no_calendar_railroad.test.ts`, `corps_operation_readiness.test.ts`, `force_quality_trace_persistence.test.ts`). `officer_quality.test.ts` 21/21 (with two brain-drain assertions rewritten); `officer_config_consumers.test.ts` allow-list extended for inert timeline `brain_drain_*` fields. `tsc --noEmit` clean at every phase.
+**Tests:** 29 new cases across 5 new files (`tests/scenario_apr1992_family_consistency.test.ts`, `officer_learning_rate_shape_c.test.ts`, `officer_quality_no_calendar_railroad.test.ts`, `corps_operation_readiness.test.ts`, `force_quality_trace_persistence.test.ts`). `officer_quality.test.ts` 21/21 (with two brain-drain assertions rewritten); `officer_config_consumers.test.ts` allow-list extended for inert timeline `brain_drain_*` fields. `tsc --noEmit` clean at every phase.
 
 **Verification (Phase 5a):** five deterministic runs at 40w/104w/156w/183w/188w. Hashes — 40w `cbd7d61db0bfbe97`, 104w `f4f03385770f06d1`, 188w `2c851756827d5906` (156w/183w via 188w `--video` weekly saves). Audit-baseline → post-milestone deltas: RBiH 188w mean officer_quality 0.092 → 0.806 (+0.714); RS 188w mean 0.261 → 0.549 (+0.288); HRHB 188w mean 0.212 → 0.648 (+0.436). ARBiH first multi-axis op (Operation Sana, `arbih_5th_corps`, w175-187, 3 axes) — first in audit corpus. VRS late-war ops emerging from absolute zero (3 in 104-156w window). 188w painted-vs-Dayton: RS +1.8% (within tolerance), ARBiH +7.5% / HRHB -9.4% (Federation-internal balance follow-up).
 
