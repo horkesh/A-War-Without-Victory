@@ -1129,10 +1129,242 @@ export const PAUK_94_95_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// ═════════════════════════════════════════════════════════════════════════════
+// Operation Grmeč 94 — LANE C Phase 5.
+//
+// Family doc §4.5. Citation: BB2 pp.546-547, 555.
+//
+// Historical anchor: 25 October 1994 surprise breakout from the Bihać pocket.
+// 5th Corps under Atif Dudaković attacks south-east, capturing the Grabež
+// plateau barracks day 1 and Kulen Vakuf within days; Bosanska Krupa is
+// encircled but not captured by 31 Oct. High-water territorial gain ≈ 250 km²
+// roughly 30 km SE of Bihać. Spearheaded by 501st & 502nd Bihać Mountain
+// brigades with assault sub-units; supported by 503rd Cazin Mountain, 511th
+// Bos.Krupa Mountain, 505th Buzim Motorized, 1st Bosnian Liberation. VRS
+// counter under Milovanović from late Oct onward; territory progressively
+// rolled back through December.
+//
+// AWWV mapping: 25 Oct 1994 ≈ w133 (Apr 1992 = w0, ~7 days/turn). Counter
+// begins late Oct ≈ w134-138. Window w133-w138 (6-turn breakout-to-high-water
+// arc). Historical exit class is `partial_success` — the territorial gain
+// will likely not hold, but the AAR records partial_success at the time of
+// closure; the subsequent VRS counter / Pauk crisis surfaces emergently via
+// the existing combat pipeline + the Phase 4 `pauk_94_95` entry whose window
+// opens at w135 (overlapping by design).
+//
+// Vanilla T1 offensive — NO substrate change. All six target OSIDs are
+// RS-painted in jan1993 baseline (verified against
+// data/source/calibration/painted_control_jan1993.json), so the standard
+// friendly-controller filter is the right behavior; no
+// `targets_friendly_overrides` is set.
+//
+// Emergent dependency on Pauk 94/95 (NOT hardcoded):
+//   - Both this entry and `pauk_94_95` exist in the same `fifth_corps` family
+//     and overlap by one turn (Grmeč w133-w138 vs Pauk w135-w145).
+//   - Both consume the same 5th Corps brigade pool, so Grmeč's brigade
+//     commitment naturally degrades `corps_readiness` for any subsequent
+//     post-Grmeč op (including Pauk's defensive readiness floor).
+//   - Pauk's pocket-survival predicate is a live-state check; Grmeč
+//     overextension that historically cost Krupa is captured as actual
+//     pocket-anchor erosion at the live-state level.
+// No "grmec_completed → pauk_eligible" predicate exists. Emergent only.
+// ═════════════════════════════════════════════════════════════════════════════
+
+const GRMEC_DATE_MIN = 133;        // 25 Oct 1994 surprise breakout
+const GRMEC_DATE_MAX = 138;        // VRS counter consolidates; high-water window closes
+const GRMEC_READINESS_FLOOR = 0.40;        // deep-advance floor (mirrors Sana 95's exploitation depth)
+const GRMEC_LOGISTICS_PRESSURE_CEILING = 90;        // tighter than Tigar-Sloboda (95) — deep advances need supply margin
+
+/** Grmeč ridge breakout objectives (RS-painted in jan1993 baseline; verified
+ *  via lines 13-16, 51-53, 89, 100-103, 111 of painted_control_jan1993.json).
+ *  All six are present in data/derived/operational/operational_contact_graph.json
+ *  and form a connected Bihać → Grabež plateau → Krupa-southern advance. */
+const GRMEC_OBJECTIVES: readonly string[] = [
+    'op:bihac:ripac',                            // Grabež plateau approach east of Bihać (adj bihac_2 ← staging anchor)
+    'op:bihac:racic',                            // Grabež crest center (adj ripac, orasac_2, krnjeusa, gornja_suvaja)
+    'op:bihac:orasac_2',                         // Grabež SE shoulder, BB2 p.546 day-1 capture
+    'op:bosanski_petrovac:vodjenica',            // Petrovac approach (historian-cited target)
+    'op:bosanski_petrovac:prkosi',               // Ridge spur (historian-cited target)
+    'op:bosanska_krupa:gornja_suvaja',           // Krupa southern-flank encirclement axis
+];
+
+/** Pocket-survival anchors (matches the Tigar-Sloboda / APWB / T3 set —
+ *  identical architectural meaning: pocket integrity check). */
+const GRMEC_POCKET_SURVIVAL_OSIDS: readonly string[] = [
+    'op:bihac:bihac_2',
+    'op:cazin:cazin_2',
+    'op:bosanska_krupa:bosanska_krupa_2',
+    'op:velika_kladusa:velika_kladusa_2',
+];
+
+const GRMEC_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'grmec_ridge_breakout',
+        name: 'Grmeč Ridge Breakout',
+        corps: PRIMARY_CORPS,
+        // Brigade IDs cross-referenced against data/source/oob_brigades.json
+        // (lines 1099-1247): the BB2 p.546-547 spearhead pair (501st/502nd) plus
+        // depth brigades the historian roster cites (503rd Cazin, 505th Buzim,
+        // 510th Bosnian Liberation, 511th Bos.Krupa). The 504th/506th/517th are
+        // intentionally excluded from this offensive — the historical Grmeč 94
+        // committed Bihać/Cazin/VK garrisons only thinly (one of the structural
+        // causes of the post-Grmeč Pauk overextension). That exclusion is the
+        // architectural hook for the emergent Pauk dependency: brigade-pool
+        // scarcity + live-state pocket-anchor drift, NOT a hardcoded chain.
+        brigades: [
+            'arbih_501st_slavna_mountain' as FormationId,        // Spearhead (BB2 p.546)
+            'arbih_502nd_vitezka_mountain' as FormationId,       // Spearhead (BB2 p.546)
+            'arbih_503rd_slavna_mountain' as FormationId,        // Depth (BB2 p.547)
+            'arbih_505th_vitezka_mountain' as FormationId,       // Depth (BB2 p.547)
+            'arbih_510th_bosnian_liberation' as FormationId,     // Depth (BB2 p.547)
+            'arbih_511th_slavna_mountain' as FormationId,        // Krupa axis depth (BB2 p.547)
+        ],
+        objectives: GRMEC_OBJECTIVES,
+        staging_osid: 'op:bihac:bihac_2',
+    },
+];
+
+// ─── Predicates ─────────────────────────────────────────────────────────────
+
+/** date_window: w133 ≈ 25 Oct 1994 (surprise breakout), w138 ≈ early Nov 1994
+ *  (VRS counter consolidates; high-water territorial window closes). */
+const dateWindowGrmec: AxisPredicate = (_state, turn) => {
+    if (turn < GRMEC_DATE_MIN) return { green: false, reason: 'late-October 1994 breakout window not yet open' };
+    if (turn > GRMEC_DATE_MAX) return { green: false, reason: 'late-October 1994 high-water window has closed' };
+    return { green: true, reason: 'within late Oct – early Nov 1994 breakout window' };
+};
+
+/** staging_access: pocket integrity (mirrors Sana / Tigar / APWB pattern). */
+const stagingAccessGrmec: AxisPredicate = (state) => {
+    for (const osid of GRMEC_POCKET_SURVIVAL_OSIDS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== null && ctrl !== 'RBiH') {
+            return { green: false, reason: 'Bihać pocket integrity has broken (anchor lost)' };
+        }
+    }
+    return { green: true, reason: 'Bihać pocket anchors held by 5th Corps' };
+};
+
+/** corps_readiness: 5th Corps operational readiness clears 0.40 — deep-advance
+ *  floor (mirrors Sana 95's exploitation depth, higher than Tigar-Sloboda's
+ *  0.30 deception floor). */
+const corpsReadinessGrmec: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.operation_readiness < GRMEC_READINESS_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps operational readiness below the deep-advance floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps operational readiness sufficient for a deep ridge breakout',
+    };
+};
+
+/** enemy_weakness: at least one Grmeč ridge target OSID is RS-controlled
+ *  (live state). If VRS already lost Grmeč to other emergent causes, the
+ *  opportunity disappears — this is a real signal, not a calendar surface. */
+const enemyWeaknessGrmec: AxisPredicate = (state) => {
+    let rs = 0;
+    for (const osid of GRMEC_OBJECTIVES) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl === 'RS') rs++;
+    }
+    if (rs === 0) {
+        return { green: false, reason: 'no Grmeč ridge targets remain in enemy hands' };
+    }
+    return { green: true, reason: 'Grmeč ridge targets still in enemy hands — breakout windows remain' };
+};
+
+/** commander_confidence: live 5th Corps commander state present (Dudaković's
+ *  surprise-doctrine premise — the op only makes sense if the corps has a
+ *  live commander state). */
+const commanderConfidenceGrmec: AxisPredicate = (state) => {
+    const cs = state.military.corps_command?.[PRIMARY_CORPS]?.commander_state;
+    if (!cs) {
+        return { green: false, reason: 'no 5th Corps commander state available' };
+    }
+    return { green: true, reason: '5th Corps commander state present' };
+};
+
+/** logistics: optional. Tighter ceiling (90) than Tigar-Sloboda's 95 — a deep
+ *  advance into the Grmeč ridge needs supply margin. Satisfies
+ *  min_optional_axes:1. */
+const logisticsGrmec: AxisPredicate = (state) => {
+    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    if (pressure >= GRMEC_LOGISTICS_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure too high for a deep ridge breakout' };
+    }
+    return { green: true, reason: 'RBiH supply pressure within deep-advance margin' };
+};
+
+// ─── Catalog entry ──────────────────────────────────────────────────────────
+
+export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'grmec_94',
+    name: 'Operation Grmeč 94',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: GRMEC_AXES,
+    staging_osid: 'op:bihac:bihac_2',
+    planning_duration: 4,
+    min_attack_outcome: 'repulsed',
+    citations: [
+        'BB2 pp.546-547, 555 — 25 Oct 1994 5th Corps surprise breakout from Bihać pocket; Grabež plateau barracks captured day 1; Kulen Vakuf taken; Bosanska Krupa encircled but not captured by 31 Oct; ~250 km² high-water gain SE of Bihać; spearheaded by 501st/502nd with 503rd/505th/510th/511th in support; VRS counter under Milovanović from late Oct',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.5 (Grmeč 94 precursor)',
+    ],
+    historical_exit_class: 'partial_success',
+    // CANONICAL prerequisite mapping — design-doc §4.5 prereq wishlist mapped
+    // to the 9-axis substrate vocabulary:
+    //   - "pocket_survival" (design wishlist)  → folded into staging_access
+    //     REQUIRED (matches Sana / Tigar / APWB architectural pattern).
+    //   - "corps_readiness"                    → required (deep-advance floor 0.40).
+    //   - "enemy_weakness"                     → required (at least one ridge target
+    //     RS-controlled — real live signal, not calendar gate).
+    //   - "commander_confidence"               → required (Dudaković surprise-doctrine
+    //     premise; commander_state must be present).
+    //   - "logistics"                          → optional (deep-advance supply margin;
+    //     satisfies min_optional_axes:1).
+    //   - "alliance_context"                   → n_a (Grmeč 94 is pre-Storm and does
+    //     NOT depend on Storm/Oluja unlike Sana 95 — historian: Grmeč is the precursor
+    //     that historically triggers Pauk crisis).
+    //   - political_authorization, weather_season: n_a per prompt.
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',           // pocket-survival (Sana mirror)
+        weather_season: 'n_a',
+        commander_confidence: 'required',
+        enemy_weakness: 'required',
+        alliance_context: 'n_a',              // pre-Storm precursor; not Storm-gated
+        min_optional_axes: 1,
+    },
+    evaluators: {
+        date_window: dateWindowGrmec,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessGrmec,
+        logistics: logisticsGrmec,
+        staging_access: stagingAccessGrmec,
+        weather_season: alwaysGreen,
+        commander_confidence: commanderConfidenceGrmec,
+        enemy_weakness: enemyWeaknessGrmec,
+        alliance_context: alwaysGreen,
+    },
+    staff_recommendation: 'approve',
+};
+
 /** Catalog export for this family. Sana 95 (Phase 3) + Tigar-Sloboda 94
  *  (LANE C Phase 2) + APWB Pressure 94 (LANE C Phase 3) + T3 defensive triad
- *  Una 94 / Breza 94 / Pauk 94/95 (LANE C Phase 4) are live; Grmeč 94 is
- *  pending Phase 5 of the family doc's implementation order. */
+ *  Una 94 / Breza 94 / Pauk 94/95 (LANE C Phase 4) + Grmeč 94 precursor
+ *  (LANE C Phase 5) are live. */
 export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_95_OPPORTUNITY,
     TIGAR_SLOBODA_94_OPPORTUNITY,
@@ -1140,4 +1372,5 @@ export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     UNA_94_OPPORTUNITY,
     BREZA_94_OPPORTUNITY,
     PAUK_94_95_OPPORTUNITY,
+    GRMEC_94_OPPORTUNITY,
 ];
