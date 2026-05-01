@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
+import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -318,6 +318,124 @@ describe('buildTurnAftermathView', () => {
       totalOwnFormationsDestroyed: 1,
       criticalTurns: 2,
       severeTurns: 0,
+    });
+  });
+
+  it('extracts strategic signals from archived turn summaries', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 31,
+          events_fired: [{ id: 'washington', text: 'Washington Agreement signed.' }],
+          notable_events: [{
+            kind: 'siege_broken',
+            description: 'Corridor reopened around Bihac.',
+            faction: 'RBiH',
+            osid: 'op:bihac:izaic',
+          }],
+          decoration_awards: [{
+            formation_id: 'arbih_501st',
+            formation_name: '501st Mountain Brigade',
+            faction: 'RBiH',
+            decoration: 'order_of_heroism' as never,
+          }],
+          arc_transitions: [{
+            formation_id: 'arbih_502nd',
+            formation_name: '502nd Brigade',
+            faction: 'RBiH',
+            from_arc: 'shaken' as never,
+            to_arc: 'veteran' as never,
+          }],
+          supply_transitions: [{ osid: 'op:bihac:izaic', from: 'strained', to: 'adequate' }],
+          movements: [{
+            formation_id: 'arbih_503rd',
+            formation_name: '503rd Brigade',
+            from_osid: 'op:bihac:cazin',
+            to_osid: 'op:bihac:izaic',
+          }],
+        }),
+      }),
+      osidNameMap: {
+        'op:bihac:izaic': 'Izacic (Bihac)',
+        'op:bihac:cazin': 'Cazin',
+      },
+    });
+
+    expect(view?.signals.map((signal) => signal.kind)).toEqual([
+      'event',
+      'event',
+      'decoration',
+      'arc',
+      'supply',
+      'movement',
+    ]);
+    expect(view?.signals[1]).toMatchObject({
+      label: 'Corridor reopened around Bihac.',
+      detail: 'Siege Broken / Izacic (Bihac)',
+      severity: 'notable',
+    });
+    expect(view?.signals[5]).toMatchObject({
+      label: '503rd Brigade moved',
+      detail: 'Cazin -> Izacic (Bihac)',
+    });
+  });
+
+  it('classifies campaign momentum from the visible aftermath archive', () => {
+    const records = [
+      buildTurnAftermathView({
+        nextState: makeState({
+          latestTurnSummary: makeSummary({
+            turn: 33,
+            territory_net: { RBiH: 2 },
+            events_fired: [{ id: 'event_a', text: 'Operational window opened.' }],
+          }),
+        }),
+      })!,
+      buildTurnAftermathView({
+        nextState: makeState({
+          latestTurnSummary: makeSummary({
+            turn: 32,
+            territory_net: { RBiH: 1 },
+            decoration_awards: [{
+              formation_id: 'arbih_501st',
+              formation_name: '501st Brigade',
+              faction: 'RBiH',
+              decoration: 'order_of_heroism' as never,
+            }],
+          }),
+        }),
+      })!,
+      buildTurnAftermathView({
+        nextState: makeState({
+          latestTurnSummary: makeSummary({
+            turn: 31,
+            territory_net: { RBiH: 0 },
+            battles: [{
+              osid: 'op:test:a',
+              attacker_faction: 'RBiH',
+              defender_faction: 'RS',
+              primary_attacker_id: 'a',
+              primary_defender_id: 'b',
+              all_attacker_ids: ['a'],
+              outcome: 'stalemate' as never,
+              attacker_casualties: 10,
+              defender_casualties: 11,
+              territory_flipped: false,
+              was_concentrated: false,
+            }],
+          }),
+        }),
+      })!,
+    ];
+
+    expect(buildTurnAftermathCampaignPulse(records)).toMatchObject({
+      recordCount: 3,
+      momentum: 'advancing',
+      netFriendlyTerritory: 3,
+      totalFriendlyMilitaryCasualties: 10,
+      signalCount: 2,
+      eventCount: 1,
+      decorationCount: 1,
     });
   });
 });

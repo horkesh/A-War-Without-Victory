@@ -35,6 +35,14 @@ describe('turn aftermath UI wiring', () => {
     expect(panel).toContain('friendlyMilitaryCasualties');
   });
 
+  it('surfaces campaign pulse and strategic signals in records', () => {
+    const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
+
+    expect(panel).toContain('buildTurnAftermathCampaignPulse');
+    expect(panel).toContain('Campaign pulse');
+    expect(panel).toContain('Strategic signals');
+  });
+
   it('routes all tactical advance-turn entrypoints through the aftermath dependency bundle', () => {
     const files = [
       '../src/ui/map/components/PresidentialToolbar.tsx',

@@ -6,6 +6,9 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
+export type TurnAftermathSignalKind = 'event' | 'decoration' | 'arc' | 'supply' | 'movement';
+export type TurnAftermathSignalSeverity = 'routine' | 'notable' | 'urgent';
+export type TurnAftermathCampaignMomentum = 'advancing' | 'contested' | 'bleeding' | 'quiet';
 
 export interface TurnAftermathReportInput {
   turn?: number;
@@ -54,6 +57,14 @@ export interface TurnAftermathCostView {
   reasons: string[];
 }
 
+export interface TurnAftermathSignalView {
+  id: string;
+  kind: TurnAftermathSignalKind;
+  label: string;
+  detail: string;
+  severity: TurnAftermathSignalSeverity;
+}
+
 export interface TurnAftermathLedgerSummary {
   recordCount: number;
   netFriendlyTerritory: number;
@@ -63,6 +74,21 @@ export interface TurnAftermathLedgerSummary {
   totalOwnFormationsDestroyed: number;
   criticalTurns: number;
   severeTurns: number;
+}
+
+export interface TurnAftermathCampaignPulse {
+  recordCount: number;
+  windowLabel: string;
+  momentum: TurnAftermathCampaignMomentum;
+  briefing: string;
+  netFriendlyTerritory: number;
+  totalFriendlyMilitaryCasualties: number;
+  totalTheaterMilitaryCasualties: number;
+  totalDisplaced: number;
+  hardTurnCount: number;
+  signalCount: number;
+  eventCount: number;
+  decorationCount: number;
 }
 
 export interface TurnAftermathView {
@@ -99,6 +125,7 @@ export interface TurnAftermathView {
     ownHeavyMunitionsDelta: number;
   };
   cost: TurnAftermathCostView;
+  signals: TurnAftermathSignalView[];
   nextActions: {
     actionableCount: number;
     blockingCount: number;
@@ -261,6 +288,86 @@ function buildTurnCost(input: {
   };
 }
 
+function buildStrategicSignals(
+  summary: TurnSummary | null,
+  osidNameMap: Record<string, string> | null,
+): TurnAftermathSignalView[] {
+  if (!summary) return [];
+
+  const signals: TurnAftermathSignalView[] = [];
+
+  for (const event of summary.events_fired) {
+    signals.push({
+      id: `event:${event.id}`,
+      kind: 'event',
+      label: event.text,
+      detail: 'Historical event',
+      severity: 'notable',
+    });
+  }
+
+  summary.notable_events.forEach((event, index) => {
+    const kindLabel = humanizeToken(event.kind) ?? 'Notable Event';
+    const osidLabel = event.osid ? getOsidDisplayName(event.osid, osidNameMap) : null;
+    const urgentKinds = new Set(['truce_broken', 'siege_formed']);
+    signals.push({
+      id: `notable:${event.kind}:${event.osid ?? 'none'}:${index}`,
+      kind: 'event',
+      label: event.description,
+      detail: osidLabel ? `${kindLabel} / ${osidLabel}` : kindLabel,
+      severity: urgentKinds.has(event.kind) ? 'urgent' : 'notable',
+    });
+  });
+
+  for (const award of summary.decoration_awards) {
+    signals.push({
+      id: `decoration:${award.formation_id}:${award.decoration}`,
+      kind: 'decoration',
+      label: `${award.formation_name} decorated`,
+      detail: humanizeToken(String(award.decoration)) ?? 'Decoration',
+      severity: 'notable',
+    });
+  }
+
+  for (const arc of summary.arc_transitions) {
+    const from = humanizeToken(String(arc.from_arc)) ?? String(arc.from_arc);
+    const to = humanizeToken(String(arc.to_arc)) ?? String(arc.to_arc);
+    signals.push({
+      id: `arc:${arc.formation_id}:${arc.from_arc}:${arc.to_arc}`,
+      kind: 'arc',
+      label: `${arc.formation_name} changed arc`,
+      detail: `${from} -> ${to}`,
+      severity: 'routine',
+    });
+  }
+
+  summary.supply_transitions.forEach((transition, index) => {
+    const label = getOsidDisplayName(transition.osid, osidNameMap);
+    const toState = transition.to.toLowerCase();
+    signals.push({
+      id: `supply:${transition.osid}:${transition.from}:${transition.to}:${index}`,
+      kind: 'supply',
+      label: `${label} supply changed`,
+      detail: `${humanizeToken(transition.from) ?? transition.from} -> ${humanizeToken(transition.to) ?? transition.to}`,
+      severity: toState.includes('critical') || toState.includes('strained') ? 'urgent' : 'routine',
+    });
+  });
+
+  summary.movements.slice(0, 6).forEach((movement) => {
+    const from = getOsidDisplayName(movement.from_osid, osidNameMap);
+    const to = getOsidDisplayName(movement.to_osid, osidNameMap);
+    signals.push({
+      id: `movement:${movement.formation_id}:${movement.from_osid}:${movement.to_osid}`,
+      kind: 'movement',
+      label: `${movement.formation_name} moved`,
+      detail: `${from} -> ${to}`,
+      severity: 'routine',
+    });
+  });
+
+  return signals.slice(0, 12);
+}
+
 function emptyNextActions(): TurnAftermathView['nextActions'] {
   return {
     actionableCount: 0,
@@ -354,6 +461,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       friendlyMilitaryCasualties: friendlyCasualties,
       ownFormationsDestroyed,
     }),
+    signals: buildStrategicSignals(summary, input.osidNameMap ?? null),
     nextActions: input.includeNextActions === false
       ? emptyNextActions()
       : buildNextActions(nextState, input.osidNameMap ?? null),
@@ -412,4 +520,81 @@ export function buildTurnAftermathLedgerSummary(records: readonly TurnAftermathV
     criticalTurns: 0,
     severeTurns: 0,
   });
+}
+
+function classifyCampaignMomentum(
+  summary: TurnAftermathLedgerSummary,
+  signalCount: number,
+): TurnAftermathCampaignMomentum {
+  if (summary.recordCount === 0) return 'quiet';
+  const hardTurnCount = summary.criticalTurns + summary.severeTurns;
+  if (summary.netFriendlyTerritory >= 2 && hardTurnCount <= Math.floor(summary.recordCount / 2)) {
+    return 'advancing';
+  }
+  if (
+    summary.netFriendlyTerritory < 0
+    && (hardTurnCount > 0 || summary.totalFriendlyMilitaryCasualties > 0 || summary.totalDisplaced > 0)
+  ) {
+    return 'bleeding';
+  }
+  if (
+    Math.abs(summary.netFriendlyTerritory) <= 1
+    && (summary.totalFriendlyMilitaryCasualties > 0 || summary.totalDisplaced > 0 || signalCount > 0)
+  ) {
+    return 'contested';
+  }
+  return 'quiet';
+}
+
+function buildCampaignBriefing(
+  momentum: TurnAftermathCampaignMomentum,
+  summary: TurnAftermathLedgerSummary,
+  signalCount: number,
+): string {
+  if (summary.recordCount === 0) return 'No archived turn records are available.';
+  if (momentum === 'advancing') {
+    return `Archive window is moving forward: ${summary.netFriendlyTerritory >= 0 ? '+' : ''}${summary.netFriendlyTerritory} net OSIDs with ${signalCount} strategic signals.`;
+  }
+  if (momentum === 'bleeding') {
+    return `Archive window is costly: ${summary.netFriendlyTerritory} net OSIDs, ${summary.totalFriendlyMilitaryCasualties} friendly casualties, ${summary.totalDisplaced} displaced.`;
+  }
+  if (momentum === 'contested') {
+    return `Archive window is contested: little net ground movement, but ${summary.totalFriendlyMilitaryCasualties} friendly casualties and ${signalCount} strategic signals.`;
+  }
+  return 'Archive window is quiet: no major movement or costs in the visible records.';
+}
+
+export function buildTurnAftermathCampaignPulse(records: readonly TurnAftermathView[]): TurnAftermathCampaignPulse {
+  const summary = buildTurnAftermathLedgerSummary(records);
+  const signalCount = records.reduce((total, record) => total + record.signals.length, 0);
+  const eventCount = records.reduce(
+    (total, record) => total + record.signals.filter((signal) => signal.kind === 'event').length,
+    0,
+  );
+  const decorationCount = records.reduce(
+    (total, record) => total + record.signals.filter((signal) => signal.kind === 'decoration').length,
+    0,
+  );
+  const hardTurnCount = summary.criticalTurns + summary.severeTurns;
+  const momentum = classifyCampaignMomentum(summary, signalCount);
+  const latest = records[0]?.dateLabel ?? null;
+  const oldest = records[records.length - 1]?.dateLabel ?? null;
+  const windowLabel = latest && oldest
+    ? latest === oldest ? latest : `${oldest} - ${latest}`
+    : 'No records';
+
+  return {
+    recordCount: summary.recordCount,
+    windowLabel,
+    momentum,
+    briefing: buildCampaignBriefing(momentum, summary, signalCount),
+    netFriendlyTerritory: summary.netFriendlyTerritory,
+    totalFriendlyMilitaryCasualties: summary.totalFriendlyMilitaryCasualties,
+    totalTheaterMilitaryCasualties: summary.totalTheaterMilitaryCasualties,
+    totalDisplaced: summary.totalDisplaced,
+    hardTurnCount,
+    signalCount,
+    eventCount,
+    decorationCount,
+  };
 }

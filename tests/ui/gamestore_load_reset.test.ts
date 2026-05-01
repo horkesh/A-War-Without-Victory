@@ -108,6 +108,7 @@ function dirtyStoreState(): void {
                 severity: 'low',
                 reasons: ['No major costs recorded'],
             },
+            signals: [],
             nextActions: { actionableCount: 0, blockingCount: 0, opportunityCount: 0, reserveCount: 0, officerCount: 0, eventDecisionCount: 0, peaceCount: 0, topItems: [] },
         },
         turnAftermathOpen: true,

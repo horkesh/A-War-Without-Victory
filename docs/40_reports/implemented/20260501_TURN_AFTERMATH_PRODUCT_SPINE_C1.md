@@ -1,4 +1,4 @@
-# Turn Aftermath Product Spine C1-C2
+# Turn Aftermath Product Spine C1-C6
 
 **Date:** 2026-05-01
 **Type:** UI/product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
@@ -66,7 +66,7 @@ This is deliberately not a second endgame War Cost Summary. It is a per-turn pro
 
 ## C4 Campaign Pulse Extension
 
-The persistent Army HQ records surface now has a summary pulse above the individual aftermath cards:
+The persistent Army HQ records surface now has a ledger summary above the individual aftermath cards:
 
 - Added `buildTurnAftermathLedgerSummary(records)`, a pure aggregation over already-built `TurnAftermathView` records.
 - Army HQ `TURN AFTERMATH` now summarizes:
@@ -78,6 +78,41 @@ The persistent Army HQ records surface now has a summary pulse above the individ
   - severe/critical turn count
 
 This keeps the player from manually scanning every card to understand recent trajectory, while preserving the one-way read-model contract.
+
+## C5 Strategic Signals Extension
+
+Archived turn packets now carry a scan-friendly strategic signal stack derived from existing `TurnSummary` fields:
+
+- scenario/historical `events_fired`
+- `notable_events` such as siege formation/breakage, first battles, truce breaks, and Operation Storm
+- decoration awards
+- formation arc transitions
+- supply transitions
+- notable brigade movements
+
+The signal stack is deliberately read-only. It does not create a second event log, second history writer, or second source of truth. It converts the already persisted turn summary into an Army HQ briefing surface so records explain not only "how many casualties / OSIDs" but why the turn mattered.
+
+## C6 Campaign Momentum Pulse Extension
+
+The Army HQ `TURN AFTERMATH` archive now classifies the visible record window as:
+
+- `advancing`
+- `contested`
+- `bleeding`
+- `quiet`
+
+The classifier uses the existing record views: net friendly territory, friendly casualties, displacement, hard-turn count, and strategic signal count. It is an explanatory read model over archived turns, not a balance input.
+
+The records surface now shows:
+
+- date window
+- momentum band
+- short briefing sentence
+- signal count
+- event count
+- decoration count
+- severe/critical turn count
+- theater cost in the visible archive
 
 ## Files
 
@@ -108,12 +143,16 @@ This keeps the player from manually scanning every card to understand recent tra
   - 44/44 pass after C3
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts`
   - 6/6 pass after C4 ledger-summary helper
+- `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts`
+  - 13/13 pass after C5-C6 strategic signals and momentum pulse
+- `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
+  - 48/48 pass after C5-C6
 - `npx.cmd tsc --noEmit`
   - clean
 - `npx.cmd tsc --noEmit -p tsconfig.json`
-  - clean after C2
+  - clean after C2 and after C5-C6
 - `npm.cmd run desktop:map:build`
-  - succeeded after C2; Vite emitted existing chunk-size/dynamic-import warnings only.
+  - succeeded after C2 and after C5-C6; Vite emitted existing chunk-size/dynamic-import warnings only.
 
 No scenario run is required: this is a UI/read-model bridge over already-persisted state. It does not alter the turn pipeline, combat, control, operation execution, or saved simulation truth except for existing UI store state after load.
 

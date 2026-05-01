@@ -152,6 +152,21 @@
 
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
 ---
+---
+
+## [2026-05-01] feat(ui): add Turn Aftermath strategic signals and momentum pulse
+
+**Type:** Tactical-map UI / product-spine records intelligence. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The Turn Aftermath archive had durable cards and aggregate totals, but still did not explain why a turn mattered or what the recent campaign window feels like. A Paradox-grade command surface needs strategic memory: events, unit honors, formation maturation, supply shocks, movements, and a fast momentum read.
+
+**Change:** Extended `TurnAftermathView` with `signals`, a read-only stack derived from existing `TurnSummary` fields (`events_fired`, `notable_events`, `decoration_awards`, `arc_transitions`, `supply_transitions`, and `movements`). Added `buildTurnAftermathCampaignPulse(...)`, which classifies the visible archive window as `advancing`, `contested`, `bleeding`, or `quiet` and produces a short briefing. Army HQ `TURN AFTERMATH` now shows the campaign pulse and per-turn strategic signals above the record cards.
+
+**Tests:** Red-first read-model tests added for signal extraction and campaign momentum classification. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 48/48 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This is a stable read-model projection over already-persisted `TurnSummary` arrays and already-built aftermath records. It does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, type TurnAftermathView } from '../../data/turnAftermath';
+import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
 
 function formatSigned(value: number): string {
@@ -21,6 +21,19 @@ function costClass(severity: TurnAftermathView['cost']['severity']): string {
     return 'border-neutral-500/35 text-text-secondary bg-neutral-500/10';
 }
 
+function momentumClass(momentum: ReturnType<typeof buildTurnAftermathCampaignPulse>['momentum']): string {
+    if (momentum === 'advancing') return 'border-emerald-400/35 text-emerald-300 bg-emerald-400/10';
+    if (momentum === 'bleeding') return 'border-red-400/35 text-red-300 bg-red-400/10';
+    if (momentum === 'contested') return 'border-amber-400/35 text-amber-300 bg-amber-400/10';
+    return 'border-neutral-500/35 text-text-secondary bg-neutral-500/10';
+}
+
+function signalClass(severity: TurnAftermathView['signals'][number]['severity']): string {
+    if (severity === 'urgent') return 'border-red-400/35 text-red-300 bg-red-400/10';
+    if (severity === 'notable') return 'border-amber-400/35 text-amber-300 bg-amber-400/10';
+    return 'border-panel-border/50 text-text-secondary bg-black/10';
+}
+
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
@@ -34,6 +47,7 @@ function RecordMetric({ label, value, detail }: { label: string; value: string; 
 function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; isLatest: boolean }) {
     const firstFlip = view.territory.notable[0] ?? null;
     const firstAction = isLatest ? (view.nextActions.topItems[0] ?? null) : null;
+    const signalPreview = view.signals.slice(0, 3);
 
     return (
         <article className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
@@ -79,6 +93,20 @@ function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; 
                 />
             </div>
 
+            {signalPreview.length > 0 && (
+                <div className="mt-2 rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
+                    <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">Strategic signals</div>
+                    <div className="grid gap-1.5 md:grid-cols-3">
+                        {signalPreview.map((signal) => (
+                            <div key={signal.id} className={`min-w-0 rounded border px-2 py-1 ${signalClass(signal.severity)}`}>
+                                <div className="truncate text-[10px] font-semibold">{signal.label}</div>
+                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{signal.kind} / {signal.detail}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {(firstFlip || firstAction) && (
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                     {firstFlip && (
@@ -113,6 +141,10 @@ export function TurnAftermathRecordsPanel() {
         () => buildTurnAftermathLedgerSummary(records),
         [records],
     );
+    const pulse = useMemo(
+        () => buildTurnAftermathCampaignPulse(records),
+        [records],
+    );
 
     if (records.length === 0) {
         return (
@@ -126,7 +158,26 @@ export function TurnAftermathRecordsPanel() {
 
     return (
         <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
+            <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Campaign pulse</div>
+                        <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{pulse.windowLabel}</div>
+                        <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{pulse.briefing}</div>
+                    </div>
+                    <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${momentumClass(pulse.momentum)}`}>
+                        {pulse.momentum}
+                    </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
+                    <RecordMetric label="Signals" value={String(pulse.signalCount)} detail={`${pulse.eventCount} events`} />
+                    <RecordMetric label="Decorations" value={String(pulse.decorationCount)} detail="Archive window" />
+                    <RecordMetric label="Hard Turns" value={String(pulse.hardTurnCount)} detail="Severe / critical" />
+                    <RecordMetric label="Theater Cost" value={String(pulse.totalTheaterMilitaryCasualties)} detail={`${pulse.totalDisplaced} displaced`} />
+                </div>
+            </section>
+
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
                     <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Archive</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.recordCount}</div>
