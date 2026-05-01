@@ -1,3 +1,23 @@
+## [2026-05-01] milestone(operations): LANE C 5th Corps Opportunity Family Expansion CLOSED
+
+**Type:** Lane close-out (content-only). Five-phase content lane delivered on top of the LANE B substrate. **No combat math, no new lifecycle, no IPC contracts, no scenario data, no painted targets, no canon, no FORAWWV touch, no new UI surfaces.** Determinism preserved. Single-owner discipline preserved (zero overlap between `_TRIGGERED_OPS` and any of the 5 new opportunity_ids).
+
+**Commit chain:** `14dc48e1` (Phase 1 substrate: `targets_friendly_overrides` flag + T3 early-return) → `77e68d0a` (Phase 2 Tigar-Sloboda 94 T1) → `34211f9c` (Phase 3 APWB Pressure 94 T1, AMBER prose-guarded) → `f22c743e` (Phase 4 Una/Breza/Pauk T3 triad) → `2a790255` (Phase 5 Grmeč 94 precursor T1) → this commit (Phase 6 close-out).
+
+**What shipped (cumulative):**
+- 5 new entries in `FIFTH_CORPS_OPPORTUNITIES` (catalog 1 → 7): Tigar-Sloboda 94 + APWB Pressure 94 + Una 94 + Breza 94 + Pauk 94/95 + Grmeč 94 (3 T1 + 3 T3, alongside the LANE B Sana 95 MVP).
+- 2 substrate primitives consumed: `targets_friendly_overrides?: string[]` on `OperationOpportunityDef` (scope-restricted apply at T1+fifth_corps; lets APWB-controlled OSIDs paint as RBiH yet route as enemy targets without modeling APWB as a fourth faction; consumed by Phase 2 + Phase 3); T3 early-return in `applyOpportunityDecision` (approve = `exit_class: 't3_authorized_no_offensive'`, `executed_op_aar_id: undefined`, no `CorpsOperation` pushed; consumed by Phase 4 triad).
+- AMBER guardrails carried for APWB Pressure 94: lowercase-includes scan against `civilian / refugee / displaced / column / fled / flee / expelled / cleansing` returned 0 hits; comment block uses neutral term "non-combatant outflow"; Aug 1995 VK civilian column explicitly excluded from opportunity surface (Phase 0 canon-compliance verdict #4 AMBER scope-narrowed).
+- Single-owner discipline verified per phase: `rg -i 'tigar|sloboda|pecigrad|apwb|kladus|abdi|una_94|breza_94|pauk|spider|grme' triggered_operations.ts` → 0 matches. `_TRIGGERED_OPS` retains exactly its 7 LANE-B-era entries (Posavina Corridor, Herzegovina Consolidation, Kotor Varos, Cerska-Kamenica, Krivaja-95, Stupčanica-95, Mistral 2).
+- Test pack final state: 9 suites, 163/163 PASS. `tsc --noEmit` clean. `tests/operation_opportunities_substrate.test.ts` (+11 LANE C cases on top of LANE B 17 + AAR-loop 4 = 32), `tests/operation_opportunities_phase2_decisions.test.ts` (11), `tests/operation_opportunities_5th_corps_sana.test.ts` (15), `tests/operation_opportunities_tigar_sloboda_94.test.ts` (18), `tests/operation_opportunities_apwb_pressure_94.test.ts` (20 incl. 2 AMBER guardrails), `tests/operation_opportunities_una_94.test.ts` (15), `tests/operation_opportunities_breza_94.test.ts` (15), `tests/operation_opportunities_pauk_94_95.test.ts` (16 incl. alliance_context pre/post-Storm gate), `tests/operation_opportunities_grmec_94.test.ts` (21).
+- No scenario-scale 40w/188w rerun needed: changes are additive (catalog content + tests). Substrate primitives are tier+family-gated. The opportunity-evaluator walk simply iterates one larger catalog. Behavior in 40w is unchanged (no LANE C entry fires before w113); behavior in 188w would diverge only when LANE C predicates align with live state — a calibration-class question for a future packet, not a close-out blocker.
+
+**Sensitive-history boundary preserved:** No T4 sign-off chain required. Krivaja-95 / Stupčanica-95 / Goražde / Aug 1995 VK civilian column remain calendar-triggered or Ring-2 narrative-only.
+
+**Close-out report:** `docs/40_reports/implemented/20260501_LANE_C_FIFTH_CORPS_OPPORTUNITY_FAMILY.md`.
+
+---
+
 ## [2026-05-01] tool(diagnostics): add operation opportunity health audit
 
 **Type:** Read-only diagnostic tooling. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.
