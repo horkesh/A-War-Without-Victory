@@ -219,6 +219,21 @@ describe('degradeEquipment', () => {
         expect(tc.non_operational).toBeGreaterThanOrEqual(0);
         expect(tc.non_operational).toBeLessThanOrEqual(1);
     });
+
+    it('respects an operational floor during routine degradation', () => {
+        const f = makeFormation('rs1', 'RS', 'hq1');
+        f.composition = makeComposition({
+            tank_condition: { operational: 0.61, degraded: 0.30, non_operational: 0.09 },
+            artillery_condition: { operational: 0.61, degraded: 0.30, non_operational: 0.09 }
+        });
+
+        for (let i = 0; i < 20; i++) {
+            degradeEquipment(f, 'assault', 0.0, 0.60);
+        }
+
+        expect(f.composition.tank_condition.operational).toBeGreaterThanOrEqual(0.60);
+        expect(f.composition.artillery_condition.operational).toBeGreaterThanOrEqual(0.60);
+    });
 });
 
 describe('captureEquipment', () => {

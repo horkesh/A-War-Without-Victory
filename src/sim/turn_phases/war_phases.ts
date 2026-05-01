@@ -153,7 +153,12 @@ import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
-import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
+import {
+    PARAMILITARY_FADE_WEEK,
+    OFFENSIVE_PARA_FADE_WEEK,
+    VRS_EQUIPMENT_DECAY_FLOOR,
+    VRS_EQUIPMENT_DECAY_START_WEEK
+} from '../../state/formation_constants.js';
 import { generateLevel1StanceProposals, generateLevel1OpProposals } from '../ai_commander/proposal_generation.js';
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
@@ -185,6 +190,14 @@ import type { EffectivePressureEdge } from '../pressure/phase3a_pressure_eligibi
 interface WarPhaseContextExtensions {
     effectivePosture?: Record<FactionId, EffectivePostureState>;
     phase3aEffectiveEdges?: EffectivePressureEdge[];
+}
+
+function getRoutineEquipmentOperationalFloor(state: GameState, formation: FormationState, turn: number): number {
+    if (formation.faction !== 'RS') return 0;
+    const timelineDecay = state.military.war_timeline?.equipment_decay?.find(c => c.faction === 'RS');
+    const startWeek = timelineDecay?.start_week ?? VRS_EQUIPMENT_DECAY_START_WEEK;
+    if (turn < startWeek) return 0;
+    return timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
 }
 
 // ---------------------------------------------------------------------------
@@ -1446,7 +1459,8 @@ export const warPhases: NamedPhase[] = [
                 // C3: RS maintenance capacity decays over time (spare parts depletion)
                 const maintenanceMult = f.faction === 'RS' ? getRSMaintenanceCapacityMult(turn, context.state.military.war_timeline) : 1.0;
                 const maintenance = (baseMaintenance / 100) * maintenanceMult;
-                degradeEquipment(f, f.posture, maintenance);
+                const operationalFloor = getRoutineEquipmentOperationalFloor(context.state, f, turn);
+                degradeEquipment(f, f.posture, maintenance, operationalFloor);
             }
         }
     },

@@ -129,10 +129,12 @@ export function computeEquipmentMultiplier(
 export function degradeEquipment(
     formation: FormationState,
     posture: BrigadePosture | undefined,
-    maintenanceCapacity: number // [0,1] from faction maintenance
+    maintenanceCapacity: number, // [0,1] from faction maintenance
+    operationalFloor: number = 0
 ): void {
     const comp = formation.composition;
     if (!comp) return;
+    const floor = Math.max(0, Math.min(1, operationalFloor));
 
     const tempoMult = posture === 'assault' ? 1.60
         : posture === 'attack' ? 1.50
@@ -143,11 +145,11 @@ export function degradeEquipment(
 
     // Tank degradation (faster under combat tempo)
     const tankDeg = baseDegradation * tempoMult * (1.5 - maintenanceCapacity * 0.5);
-    applyConditionDegradation(comp.tank_condition, tankDeg);
+    applyConditionDegradation(comp.tank_condition, tankDeg, floor);
 
     // Artillery degradation (slower, more resilient)
     const artDeg = baseDegradation * tempoMult * 0.7 * (1.5 - maintenanceCapacity * 0.5);
-    applyConditionDegradation(comp.artillery_condition, artDeg);
+    applyConditionDegradation(comp.artillery_condition, artDeg, floor);
 
     // Maintenance repairs
     const repairCapacity = maintenanceCapacity * 0.05;
@@ -159,8 +161,13 @@ export function degradeEquipment(
     writeOffNonOperational(comp, 'artillery');
 }
 
-function applyConditionDegradation(cond: EquipmentCondition, rate: number): void {
-    const shift = Math.min(cond.operational, rate);
+function applyConditionDegradation(
+    cond: EquipmentCondition,
+    rate: number,
+    operationalFloor: number = 0
+): void {
+    const degradableOperational = Math.max(0, cond.operational - operationalFloor);
+    const shift = Math.min(degradableOperational, Math.max(0, rate));
     cond.operational -= shift;
     cond.degraded += shift * 0.7;
     cond.non_operational += shift * 0.3;

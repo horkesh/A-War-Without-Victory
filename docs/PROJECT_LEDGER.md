@@ -1,3 +1,19 @@
+## [2026-05-01] fix(equipment): apply VRS decay floor to routine heavy-equipment condition
+
+**Type:** Simulation behavior fix + diagnostic. Bounded to routine maintenance degradation. No OOB, painted targets, scenario definitions, operation definitions, combat-loss rates, or player-command surfaces changed.
+
+**Defect:** VRS had two equipment signals that drifted apart. The canon `formation.equipment_decay` scalar correctly floors at 0.60 after week 26, but `composition.tank_condition.operational` and `composition.artillery_condition.operational` kept degrading with no floor. Since combat math, corps operation readiness, diagnostics, and UI use the condition fractions, the 188w post-force-quality baseline had RS active brigades at `equipment_decay ~= 0.60` while live heavy support had collapsed to `tank_op=1` and `art_op=14`. This contradicted the desired "degraded but still capable" VRS arc.
+
+**Fix:** `degradeEquipment` now accepts an optional `operationalFloor` and routine condition degradation can only shift operational condition above that floor. `war_phases.ts` passes the RS timeline equipment-decay floor into routine degradation after the configured start week. Combat losses, capture, write-offs from combat, and raw scenario content remain untouched.
+
+**Diagnostic:** Added `tools/diagnostics/equipment_decay_audit.cjs`, a read-only deterministic markdown extractor for raw tanks/artillery, condition-weighted operational counts, operational fractions, and `equipment_decay` min/mean/max.
+
+**Verification:** Regression test was red first, then green. `vitest tests/brigade_composition.test.ts` -> 23/23 pass. `vitest tests/brigade_composition.test.ts tests/corps_operation_readiness.test.ts tests/attack_equipment_effects.test.ts` -> 87/87 pass. `npx.cmd tsc --noEmit` clean. 40w deterministic rerun: `7fc9c97801e5aecf` twice, painted Jan 1993 = 91.3% count / 93.3% area, `diagnose_run` 0 errors, `validate_run_consistency` PASS. 188w run `55d655efa6322a54`: RS `tank_op` 1 -> 324 and `art_op` 14 -> 598 vs baseline n1599; Oct 1995 painted fit 69.7%/62.0% -> 70.8%/63.2%; `diagnose_run` improved from Gorazde ERROR to 0 errors; `validate_run_consistency` improved from 59 to 18 failures.
+
+**Report:** `docs/40_reports/implemented/20260501_VRS_EQUIPMENT_DECAY_FLOOR_FIX.md`.
+
+---
+
 ## [2026-05-01] milestone(operations): LANE B Operation Opportunity MVP CLOSED (Phase 4 verification)
 
 **Type:** Lane close-out. Four-phase lane delivered + one fix-up + analyst panel verdicts. **No combat math, no scenario data, no painted targets, no canon, no FORAWWV touch, no painted-target overrides.** Determinism preserved at every phase. Single-owner enforcement verified.
@@ -218,7 +234,6 @@ if (seenOpportunityIds.has(def.opportunity_id)) continue;
 - No migration of the existing scripted Sana — that is Phase 3's single-owner work.
 
 **Hash impact:** None expected. The pipeline step writes `state.military.operation_opportunities` only when the catalog is non-empty; with empty catalog the step does nothing observable. Save shape gains two optional fields that default to omitted on existing saves.
-
 ---
 
 ## [2026-05-01] test(force-quality): make officer_config consumer guard Windows-safe
