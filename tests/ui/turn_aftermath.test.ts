@@ -204,6 +204,16 @@ describe('buildTurnAftermathView', () => {
     });
     expect(view?.formations).toMatchObject({ spawned: 2, destroyed: 1, ownSpawned: 1, ownDestroyed: 1 });
     expect(view?.supply).toEqual({ ownSupplyDelta: -4, ownHeavyMunitionsDelta: 2 });
+    expect(view?.cost).toEqual({
+      friendlyMilitaryCasualties: 40,
+      theaterMilitaryCasualties: 94,
+      displacedThisTurn: 350,
+      ownFormationsDestroyed: 1,
+      ownSupplySpent: 4,
+      ownHeavyMunitionsSpent: 0,
+      severity: 'critical',
+      reasons: ['40 friendly casualties', '1 formation destroyed', '350 displaced'],
+    });
     expect(view?.nextActions).toMatchObject({
       actionableCount: 5,
       blockingCount: 1,
@@ -240,6 +250,7 @@ describe('buildTurnAftermathView', () => {
     expect(view?.tone).toBe('quiet');
     expect(view?.headline).toBe('Turn advanced.');
     expect(view?.nextActions.actionableCount).toBe(0);
+    expect(view?.cost.severity).toBe('low');
   });
 
   it('builds newest-first persistent records from turn summaries with latest-summary fallback', () => {

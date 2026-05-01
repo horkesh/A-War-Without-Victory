@@ -153,6 +153,21 @@
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
 ---
 
+## [2026-05-01] feat(ui): add turn-cost packets to Turn Aftermath
+
+**Type:** Tactical-map UI / product-spine cost read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The post-advance report and Army HQ aftermath records now persist what happened, but the stated product loop also needs "what did that turn cost?" before the final endgame War Cost Summary. The engine already persists the relevant per-turn truth in `TurnSummary`; the missing piece was a player-facing turn-cost projection.
+
+**Change:** Extended `TurnAftermathView` with a `cost` packet derived from `TurnSummary`: friendly military casualties, theater military casualties, displaced population this turn, own formations destroyed, own supply/heavy munitions spent, a scan-friendly severity band (`low | moderate | severe | critical`), and short reason strings. The modal now includes a compact `Turn Cost` panel. Army HQ `TURN AFTERMATH` records now show cost severity and cost metrics per turn. Older records remain archived turn packets; only the latest record carries live inbox obligations.
+
+**Tests:** Red-first read-model and UI visibility guards added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 44/44 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean.
+
+**Determinism:** Preserved. This is a UI/read-model aggregation over already-persisted `TurnSummary` and current inbox state only. It does not mutate GameState, operation execution, combat, control, scenario data, or saved sim truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
 ## [2026-05-01] feat(ui): persist Turn Aftermath in Army HQ records
 
 **Type:** Tactical-map UI / product-spine records surface. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.

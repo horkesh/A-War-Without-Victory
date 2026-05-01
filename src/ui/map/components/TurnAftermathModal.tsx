@@ -27,6 +27,13 @@ function actionTone(action: TurnAftermathTopAction): string {
   return 'text-text-primary border-white/10 bg-white/[0.03]';
 }
 
+function costSeverityClasses(severity: TurnAftermathView['cost']['severity']): string {
+  if (severity === 'critical') return 'border-red-400/40 text-red-300 bg-red-950/30';
+  if (severity === 'severe') return 'border-amber-400/40 text-amber-300 bg-amber-950/30';
+  if (severity === 'moderate') return 'border-sky-400/35 text-sky-300 bg-sky-950/25';
+  return 'border-white/15 text-text-secondary bg-white/5';
+}
+
 export function TurnAftermathModal({
   isOpen,
   view,
@@ -96,6 +103,26 @@ export function TurnAftermathModal({
           </section>
 
           <section className="space-y-4">
+            <div className="border border-white/10 bg-black/20">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
+                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
+                  Turn Cost
+                </div>
+                <span className={`rounded border px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.16em] ${costSeverityClasses(view.cost.severity)}`}>
+                  {view.cost.severity}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 p-3 text-sm">
+                <Metric label="Own Casualties" value={String(view.cost.friendlyMilitaryCasualties)} detail={`${view.cost.theaterMilitaryCasualties} theater`} compact />
+                <Metric label="Displaced" value={String(view.cost.displacedThisTurn)} detail="This turn" compact />
+                <Metric label="Destroyed" value={String(view.cost.ownFormationsDestroyed)} detail="Own formations" compact />
+                <Metric label="Supply Spent" value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={`${view.cost.ownHeavyMunitionsSpent} heavy`} compact />
+              </div>
+              <div className="border-t border-white/10 px-3 py-2 text-[10px] text-text-secondary">
+                {view.cost.reasons.slice(0, 3).join(' / ')}
+              </div>
+            </div>
+
             <div className="border border-white/10 bg-black/20">
               <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
                 Command Desk

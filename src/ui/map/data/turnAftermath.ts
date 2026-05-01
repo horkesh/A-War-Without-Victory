@@ -5,6 +5,7 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
+export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
 
 export interface TurnAftermathReportInput {
   turn?: number;
@@ -42,6 +43,17 @@ export interface TurnAftermathTopAction {
   action: InboxItem['action'];
 }
 
+export interface TurnAftermathCostView {
+  friendlyMilitaryCasualties: number;
+  theaterMilitaryCasualties: number;
+  displacedThisTurn: number;
+  ownFormationsDestroyed: number;
+  ownSupplySpent: number;
+  ownHeavyMunitionsSpent: number;
+  severity: TurnAftermathCostSeverity;
+  reasons: string[];
+}
+
 export interface TurnAftermathView {
   turn: number;
   dateLabel: string;
@@ -75,6 +87,7 @@ export interface TurnAftermathView {
     ownSupplyDelta: number;
     ownHeavyMunitionsDelta: number;
   };
+  cost: TurnAftermathCostView;
   nextActions: {
     actionableCount: number;
     blockingCount: number;
@@ -162,6 +175,81 @@ function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, st
   };
 }
 
+function pluralize(value: number, singular: string, plural: string = `${singular}s`): string {
+  return value === 1 ? singular : plural;
+}
+
+function buildTurnCost(input: {
+  summary: TurnSummary | null;
+  playerFaction: string | null;
+  friendlyMilitaryCasualties: number;
+  ownFormationsDestroyed: number;
+}): TurnAftermathCostView {
+  const theaterMilitaryCasualties = (input.summary?.battles ?? []).reduce(
+    (total, battle) => total + battle.attacker_casualties + battle.defender_casualties,
+    0,
+  );
+  const ownSupplyDelta = input.playerFaction
+    ? (input.summary?.supply_deltas?.[input.playerFaction] ?? 0)
+    : 0;
+  const ownHeavyMunitionsDelta = input.playerFaction
+    ? (input.summary?.heavy_munitions_deltas?.[input.playerFaction] ?? 0)
+    : 0;
+  const ownSupplySpent = Math.max(0, -ownSupplyDelta);
+  const ownHeavyMunitionsSpent = Math.max(0, -ownHeavyMunitionsDelta);
+  const displacedThisTurn = input.summary?.displacement_total ?? 0;
+
+  let severity: TurnAftermathCostSeverity = 'low';
+  if (
+    input.ownFormationsDestroyed > 0
+    || input.friendlyMilitaryCasualties >= 100
+    || displacedThisTurn >= 1000
+  ) {
+    severity = 'critical';
+  } else if (
+    input.friendlyMilitaryCasualties >= 50
+    || displacedThisTurn >= 500
+    || ownSupplySpent + ownHeavyMunitionsSpent >= 10
+  ) {
+    severity = 'severe';
+  } else if (
+    input.friendlyMilitaryCasualties > 0
+    || theaterMilitaryCasualties > 0
+    || displacedThisTurn > 0
+    || ownSupplySpent + ownHeavyMunitionsSpent > 0
+  ) {
+    severity = 'moderate';
+  }
+
+  const reasons: string[] = [];
+  if (input.friendlyMilitaryCasualties > 0) {
+    reasons.push(`${input.friendlyMilitaryCasualties} friendly ${pluralize(input.friendlyMilitaryCasualties, 'casualty', 'casualties')}`);
+  }
+  if (input.ownFormationsDestroyed > 0) {
+    reasons.push(`${input.ownFormationsDestroyed} ${pluralize(input.ownFormationsDestroyed, 'formation')} destroyed`);
+  }
+  if (displacedThisTurn > 0) {
+    reasons.push(`${displacedThisTurn} displaced`);
+  }
+  if (reasons.length === 0 && ownSupplySpent + ownHeavyMunitionsSpent > 0) {
+    reasons.push(`${ownSupplySpent + ownHeavyMunitionsSpent} supply spent`);
+  }
+  if (reasons.length === 0) {
+    reasons.push('No major costs recorded');
+  }
+
+  return {
+    friendlyMilitaryCasualties: input.friendlyMilitaryCasualties,
+    theaterMilitaryCasualties,
+    displacedThisTurn,
+    ownFormationsDestroyed: input.ownFormationsDestroyed,
+    ownSupplySpent,
+    ownHeavyMunitionsSpent,
+    severity,
+    reasons,
+  };
+}
+
 function emptyNextActions(): TurnAftermathView['nextActions'] {
   return {
     actionableCount: 0,
@@ -213,6 +301,8 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     friendlyCasualties += result.friendlyCasualties;
     opposingCasualties += result.opposingCasualties;
   }
+  const ownFormationsDestroyed = (summary?.formation_destructions ?? [])
+    .filter((formation) => formation.faction === playerFaction).length;
 
   return {
     turn,
@@ -241,12 +331,18 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       spawned: summary?.formation_spawns.length ?? 0,
       destroyed: summary?.formation_destructions.length ?? 0,
       ownSpawned: (summary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
-      ownDestroyed: (summary?.formation_destructions ?? []).filter((formation) => formation.faction === playerFaction).length,
+      ownDestroyed: ownFormationsDestroyed,
     },
     supply: {
       ownSupplyDelta: playerFaction ? (summary?.supply_deltas?.[playerFaction] ?? 0) : 0,
       ownHeavyMunitionsDelta: playerFaction ? (summary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
     },
+    cost: buildTurnCost({
+      summary,
+      playerFaction,
+      friendlyMilitaryCasualties: friendlyCasualties,
+      ownFormationsDestroyed,
+    }),
     nextActions: input.includeNextActions === false
       ? emptyNextActions()
       : buildNextActions(nextState, input.osidNameMap ?? null),

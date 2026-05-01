@@ -14,6 +14,13 @@ function toneClass(tone: TurnAftermathView['tone']): string {
     return 'border-neutral-500/35 text-text-secondary bg-neutral-500/10';
 }
 
+function costClass(severity: TurnAftermathView['cost']['severity']): string {
+    if (severity === 'critical') return 'border-red-400/35 text-red-300 bg-red-400/10';
+    if (severity === 'severe') return 'border-amber-400/35 text-amber-300 bg-amber-400/10';
+    if (severity === 'moderate') return 'border-sky-400/35 text-sky-300 bg-sky-400/10';
+    return 'border-neutral-500/35 text-text-secondary bg-neutral-500/10';
+}
+
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
@@ -37,6 +44,9 @@ function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; 
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${toneClass(view.tone)}`}>
                             {view.tone}
                         </span>
+                        <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
+                            Cost {view.cost.severity}
+                        </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>
                 </div>
@@ -58,9 +68,9 @@ function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; 
                     detail={`${view.combat.battleCount} theater-wide`}
                 />
                 <RecordMetric
-                    label="Casualties"
-                    value={String(view.combat.friendlyCasualties)}
-                    detail={`${view.combat.opposingCasualties} opposing`}
+                    label="Cost"
+                    value={String(view.cost.friendlyMilitaryCasualties)}
+                    detail={`${view.cost.displacedThisTurn} displaced`}
                 />
                 <RecordMetric
                     label={isLatest ? 'Desk' : 'Archive'}
@@ -122,8 +132,10 @@ export function TurnAftermathRecordsPanel() {
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{formatSigned(latest.territory.friendlyNet)}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Desk Items</div>
-                    <div className="text-[16px] font-bold tabular-nums text-amber-300">{latest.nextActions.actionableCount}</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Latest Cost</div>
+                    <div className={`text-[16px] font-bold uppercase ${latest.cost.severity === 'low' ? 'text-text-primary' : latest.cost.severity === 'moderate' ? 'text-sky-300' : latest.cost.severity === 'severe' ? 'text-amber-300' : 'text-red-300'}`}>
+                        {latest.cost.severity}
+                    </div>
                 </div>
             </div>
 

@@ -25,6 +25,16 @@ describe('turn aftermath UI wiring', () => {
     expect(panel).toContain('No turn aftermath records');
   });
 
+  it('surfaces turn-cost packets in the modal and records surface', () => {
+    const modal = read('../src/ui/map/components/TurnAftermathModal.tsx');
+    const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
+
+    expect(modal).toContain('Turn Cost');
+    expect(modal).toContain('view.cost.severity');
+    expect(panel).toContain('view.cost.severity');
+    expect(panel).toContain('friendlyMilitaryCasualties');
+  });
+
   it('routes all tactical advance-turn entrypoints through the aftermath dependency bundle', () => {
     const files = [
       '../src/ui/map/components/PresidentialToolbar.tsx',

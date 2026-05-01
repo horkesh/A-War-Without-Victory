@@ -47,6 +47,23 @@ Turn Aftermath is now durable inside Army HQ RECORDS instead of only appearing a
 - The modal's records action now opens `recordsSubTab: 'aftermath'` instead of dropping the player into generic AAR records.
 - Shared shell handoff and game-store typing now accept `ArmyHQRecordsSubTab = 'aftermath' | 'aar' | 'ops' | 'opportunities'`.
 
+## C3 Turn-Cost Packet Extension
+
+Turn Aftermath now carries a compact in-campaign cost packet without invoking the endgame Cost Ledger:
+
+- Added `TurnAftermathView.cost`, derived from existing `TurnSummary` fields only:
+  - friendly military casualties this turn
+  - theater military casualties this turn
+  - displaced population this turn
+  - own formations destroyed
+  - own supply and heavy-munitions spent
+  - severity band: `low | moderate | severe | critical`
+  - short reason strings for the scan line
+- Added a `Turn Cost` panel to `TurnAftermathModal`.
+- Added cost severity and cost metrics to the persistent Army HQ `TURN AFTERMATH` records.
+
+This is deliberately not a second endgame War Cost Summary. It is a per-turn projection over upstream summary truth so the player feels the price of each advance-turn before the final reckoning.
+
 ## Files
 
 - `src/ui/map/data/turnAftermath.ts`
@@ -64,7 +81,7 @@ Turn Aftermath is now durable inside Army HQ RECORDS instead of only appearing a
   - `tests/ui_map_order_actions.test.ts`
   - `tests/ui/gamestore_load_reset.test.ts`
   - `tests/ui_turn_aftermath_wiring.test.ts`
-  - `tests/ui_shell_navigation.test.ts`
+- `tests/ui_shell_navigation.test.ts`
 
 ## Verification
 
@@ -72,6 +89,8 @@ Turn Aftermath is now durable inside Army HQ RECORDS instead of only appearing a
   - 20/20 pass
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
   - 43/43 pass after C2
+- `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
+  - 44/44 pass after C3
 - `npx.cmd tsc --noEmit`
   - clean
 - `npx.cmd tsc --noEmit -p tsconfig.json`
