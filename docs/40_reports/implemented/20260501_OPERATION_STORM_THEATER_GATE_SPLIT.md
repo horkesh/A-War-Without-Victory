@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-01
 **Branch:** `codex/storm-theater-gate`
-**Baseline:** LANE E 5th Corps predicate topology (`d8b22e7c`, n1605)
+**Baseline:** Current main after combat-math defender-modifier foundation (`8b5a2902`) plus LANE E 5th Corps predicate topology.
 **Result:** Storm precondition readiness is no longer treated as actual western-theater rupture.
 
 ## Summary
@@ -65,15 +65,15 @@ Updated 5th Corps opportunity fixtures so `operationStormTriggered` / `stormTrig
 
 | Checkpoint | Run | Hash | Storm readiness | Theater rupture | Painted compare |
 |---|---|---:|---|---|---|
-| 40w | `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n2` | `cf92202315f1f09b` | false | false | Jan1993 91.3% / 93.3% area |
-| 104w | `runs/apr1992_definitive_104w__13abfd609800bba2__w104_n1` | `5572fffd83a2b89e` | true at w85 | false | Apr1994 82.6% / 79.6% area |
-| 188w | `runs/apr1992_definitive_188w__210e69404d054959__w188_n0` | `f11f18b45f50f2f0` | true at w85 | true at w174 | Oct1995 70.8% / 63.2% area |
+| 40w | `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` | `c6677e7ea3c7d3a4` | false | false | Jan1993 91.3% / 93.3% area |
+| 104w | `runs/apr1992_definitive_104w__13abfd609800bba2__w104_n3` | `9dc1a087c86a99e1` | true at w85 | false | Apr1994 82.6% / 79.6% area |
+| 188w | `runs/apr1992_definitive_188w__210e69404d054959__w188_n4` | `164ea509d7168b24` | true at w85 | true at w174 | Oct1995 70.8% / 63.2% area |
 
 The 104w hash changes because the save now records the additive precondition-readiness meta field. It does not open the western theater or surface Storm-dependent opportunities.
 
 ## 188w Opportunity Health
 
-`node tools/diagnostics/opportunity_health_audit.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n0`
+`node tools/diagnostics/opportunity_health_audit.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n4`
 
 | Turn | Opportunity | Exit | AAR | Outcome | Objectives |
 |---:|---|---|---|---|---:|
@@ -89,13 +89,13 @@ Health summary: 7 decisions, 7 approvals, 7 completed, 2 successes, 3 T3 defensi
 
 ## Diagnostics
 
-`node tools/diagnose_run.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n0`:
+`node tools/diagnose_run.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n4`:
 
 - 0 errors, 35 warnings.
 - Sarajevo siege health OK.
 - Gorazde siege health OK with 2 brigades near target.
 
-`node tools/validate_run_consistency.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n0`:
+`node tools/validate_run_consistency.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n4`:
 
 - 18 failures remain.
 - Failure class: known war-front faction-side coverage / one empty contested sector in the sector layer.
