@@ -7,6 +7,7 @@
 - `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`
 - `docs/research/2026-05-01-force-quality-trajectory-research-and-proposals.md`
 - `docs/plans/late-war-operation-opportunity-system-design.md`
+- `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`
 - `docs/40_reports/CALIBRATION_MASTER.md`
 
 ## Purpose
@@ -146,6 +147,8 @@ The player should experience force quality through staff language and operation 
 - "The corps can approve the operation, but under-resourcing will likely produce a failed launch or partial success."
 
 That means the eventual implementation needs a reporting path, not just a simulation path. At minimum, operation diagnostics and AAR should expose the traits above in compact form.
+
+The player-facing owner for those traits is the Army HQ opportunity dossier defined in `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`. The traits should appear as player-safe bands and staff reasons, not raw hidden formulas.
 
 ## Implementation Packet Rules
 

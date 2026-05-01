@@ -5,7 +5,7 @@
 **Authority:** Below canon (Engine Invariants > Phase Specs > Systems Manual > Rulebook > Game Bible). Inherits the Sensitive History Design Gate and the v0.9.0 Consequence System gate.
 **Source catalog:** `docs/research/2026-05-01-late-war-operation-opportunity-research.md`
 **Knowledge anchor:** `docs/PROJECT_LEDGER_KNOWLEDGE.md` top entry, *"Late-war operations should be opportunity proposals, not calendar-forced scripts (2026-05-01)"*
-**Related plans:** `docs/plans/2026-04-08-operations-system-a-plus-plan.md`, `docs/plans/MASTER_ROADMAP.md` (v0.9.0 Consequence System), `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`, `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
+**Related plans:** `docs/plans/2026-04-08-operations-system-a-plus-plan.md`, `docs/plans/MASTER_ROADMAP.md` (v0.9.0 Consequence System), `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`, `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`, `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`
 **Sensitive-history gate:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (binding; this doc does not modify it)
 
 ---
@@ -309,7 +309,7 @@ interface OperationOpportunityResolution {
 Three integration touchpoints (proposed; not implemented in this doc):
 
 - **A war-pipeline step** that evaluates the catalog against `GameState` once per turn, surfaces newly-eligible proposals, expires stale ones, and re-evaluates delayed ones. Step name to be assigned by `/operations-expert` + `/sector-expert`.
-- **An IPC / autonomy bridge** that feeds eligible proposals into the existing `pending_proposal_reviews` queue with the autonomy-domain `'ops'` tag (Phase D / Phase E precedent). No new IPC contract is required.
+- **An IPC / autonomy bridge** that feeds eligible proposals into the existing Army HQ / autonomy review surfaces with the autonomy-domain `'ops'` tag (Phase D / Phase E precedent). No new operation lifecycle or command owner is required. A future UI packet may add a richer mutating decision invoke for Delay / Redirect / Under-resource if the current accept/reject bridge is too narrow.
 - **An AAR / opportunity-resolution log writer** that closes the loop at op completion and persists the resolution record for the Cost Ledger / Codex / Wrapped consumers.
 
 ---

@@ -1,3 +1,17 @@
+## [2026-05-01] docs(ui): design operation opportunity review surface
+
+**Type:** Documentation/product architecture only. Created `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`, updated the late-war opportunity design doc, linked the surface from the force-quality architecture contract, refreshed `docs/40_reports/GUI_MASTER.md`, and propagated the durable ownership rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Architecture decision:** Operation opportunity review belongs in Army HQ as a staff dossier. The tactical map visualizes staging/objective footprint; the map-local `OperationsPanel` remains a field snapshot and HQ handoff; `OpsPlanningModal` is reused only for authored redirect/edit variants; `OperationBriefingModal` remains the post-creation launch/postpone/probe/abort gate.
+
+**Player-facing contract:** The dossier should show why the opportunity exists, prerequisite chips, force-quality trait bands, staff recommendation, map footprint, and five canonical actions: Approve, Delay, Redirect, Under-resource, Decline. The view-model must be player-safe: display names instead of raw OSIDs, no hidden enemy rosters, deterministic ordering, and sensitive-history T4 opportunities without forbidden atrocity/civilian-harm levers.
+
+**IPC posture:** The read path can ride through `game-state-updated` and `GameStateAdapter`. A future implementation packet should add or extend a mutating decision bridge for the five actions; that bridge must resolve back into existing operation factories and lifecycle, not create a second operation owner.
+
+**Knowledge propagation:** Added a durable rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: opportunity review belongs to Army HQ, not the map-local operations snapshot.
+
+**Determinism / behavior:** No simulation or UI behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(architecture): define force-quality operation contract
 
 **Type:** Documentation/architecture only. Created `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` and linked it from the open force-quality calibration issue. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
