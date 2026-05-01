@@ -287,9 +287,224 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
-/** Catalog export for this family. Other 5th Corps opportunities (Tigar-
- *  Sloboda, Pecigrad, Breza, Pauk, Grmec) are deferred per the family doc's
- *  implementation order; Sana is the MVP single-content for Phase 3. */
+// ═════════════════════════════════════════════════════════════════════════════
+// Operation Tigar-Sloboda 94 — LANE C Phase 2.
+//
+// Family doc §4.1. Citation: BB2 pp.532-534, 541, 555.
+//
+// Historical anchor: 7-10 July 1994, Atif Dudaković's 5th Corps mounts a
+// deception-and-thrust against APWB armed formations along the Cazin southern
+// flank. Real-world arc: mid-Jan 1994 Skokovi → 16 Feb APWB+VRS counterattack
+// (5th Corps "near critical") → 2-22 June 5th Corps advance to Pecigrad
+// outskirts → 7-10 July deception → 4 Aug Pecigrad falls. Captured ~3000
+// small arms + 200,000 rounds.
+//
+// Engine framing — pure military: APWB armed formations on the Cazin southern
+// flank. The 21-22 Aug 1994 refugee column is OUT OF SCOPE here (Phase 3 AMBER
+// territory, not this T1 surface).
+//
+// Substrate primitive consumed: `targets_friendly_overrides`. APWB rides as
+// RS-aligned auxiliary per late-war design §10; the southern Cazin OSIDs
+// painted RBiH in jan1993 are in APWB control during this arc, so the
+// override exempts them from the friendly-controller filter at the
+// `buildCorpsOperation` seam (scope-restricted to T1 + family `fifth_corps`).
+// ═════════════════════════════════════════════════════════════════════════════
+
+const TIGAR_DATE_MIN = 113;
+const TIGAR_DATE_MAX = 122;
+const TIGAR_READINESS_FLOOR = 0.30;
+const TIGAR_LOGISTICS_PRESSURE_CEILING = 95;
+
+/** Cazin southern-flank objectives toward the historical Pecigrad approach.
+ *  All four are painted RBiH in jan1993 baseline (lines 169-172 of
+ *  data/source/calibration/painted_control_jan1993.json) yet historically sit
+ *  inside the APWB-held southern Cazin pocket during the Tigar-Sloboda arc.
+ *  All four are present in data/derived/operational/operational_contact_graph.json
+ *  and form a connected approach via the contact graph. */
+const TIGAR_SLOBODA_OBJECTIVES: readonly string[] = [
+    'op:cazin:coralici',     // Northern flank toward Velika Kladuša (adjacent to cazin_2, mutnik_2, vejinac_2, zboriste_2)
+    'op:cazin:liskovac_2',   // Mid-flank approach (adjacent to coralici, mutnik_2, sturlic_2, vejinac_2)
+    'op:cazin:mutnik_2',     // Southern flank toward Pecigrad (adjacent to coralici, sturlic_2, liskovac_2)
+    'op:cazin:sturlic_2',    // Šturlić — historical anchor of the Pecigrad approach (adjacent to mutnik_2, liskovac_2, vejinac_2)
+];
+
+/** Bihać pocket survival anchors for Tigar-Sloboda (subset of the Sana set —
+ *  same architectural meaning: if any one is RS-controlled, the pocket has
+ *  structurally collapsed and the opportunity should not surface). */
+const TIGAR_POCKET_SURVIVAL_OSIDS: readonly string[] = [
+    'op:bihac:bihac_2',
+    'op:cazin:cazin_2',
+    'op:bosanska_krupa:bosanska_krupa_2',
+    'op:velika_kladusa:velika_kladusa_2',
+];
+
+const TIGAR_SLOBODA_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'tigar_cazin_salient',
+        name: 'Cazin Salient — Tigar-Sloboda',
+        corps: PRIMARY_CORPS,
+        // Brigade IDs cross-referenced against data/source/oob_brigades.json:
+        //   arbih_501st_slavna_mountain     (oob line 1099) — 5th Corps, home Bihać
+        //   arbih_502nd_vitezka_mountain    (oob line 1117) — 5th Corps, home Brekovica
+        //   arbih_503rd_slavna_mountain     (oob line 1134) — 5th Corps, home Cazin
+        //   arbih_505th_vitezka_mountain    (oob line 1152) — 5th Corps, home Bužim/Otoka
+        //   arbih_510th_bosnian_liberation  (oob line 1185) — 5th Corps, home Cazin
+        //   arbih_517th_light               (oob line 1218) — 5th Corps, home Šturlić/Cazin
+        // (Note: prompt suggested *_bihac_mountain / *_cazin_mountain /
+        // *_buzim_motorized / *_first names. OOB-canonical names are above.)
+        brigades: [
+            'arbih_501st_slavna_mountain' as FormationId,
+            'arbih_502nd_vitezka_mountain' as FormationId,
+            'arbih_503rd_slavna_mountain' as FormationId,
+            'arbih_505th_vitezka_mountain' as FormationId,
+            'arbih_510th_bosnian_liberation' as FormationId,
+            'arbih_517th_light' as FormationId,
+        ],
+        objectives: TIGAR_SLOBODA_OBJECTIVES,
+        staging_osid: 'op:cazin:cazin_2',
+    },
+];
+
+// ─── Predicates ─────────────────────────────────────────────────────────────
+
+/** date_window: w113 ≈ early Jul 1994, w122 ≈ early Aug 1994 (10-week arc
+ *  covers the historical 7-10 July deception → early Aug Pecigrad fall). */
+const dateWindowTigar: AxisPredicate = (_state, turn) => {
+    if (turn < TIGAR_DATE_MIN) return { green: false, reason: 'July 1994 deception window not yet open' };
+    if (turn > TIGAR_DATE_MAX) return { green: false, reason: 'July–early August 1994 window has closed' };
+    return { green: true, reason: 'within Jul–early Aug 1994 deception window' };
+};
+
+/** pocket_survival → maps to staging_access axis (same architectural axis
+ *  Sana uses for the Bihać pocket integrity check). */
+const pocketSurvivalTigar: AxisPredicate = (state) => {
+    for (const osid of TIGAR_POCKET_SURVIVAL_OSIDS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== null && ctrl !== 'RBiH') {
+            return { green: false, reason: 'Bihać pocket integrity has broken (anchor lost)' };
+        }
+    }
+    return { green: true, reason: 'Bihać pocket anchors held by 5th Corps' };
+};
+
+/** corps_readiness: 5th Corps still hardening — lower floor (0.30) than Sana's
+ *  (0.40) because Tigar-Sloboda is a deception-heavy thrust needing fewer
+ *  ready brigades than a deep exploitation advance. */
+const corpsReadinessTigar: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.operation_readiness < TIGAR_READINESS_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps operational readiness below the deception-thrust floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps operational readiness sufficient for a deception thrust',
+    };
+};
+
+/** commander_confidence: models Dudaković's deception-doctrine premise — the
+ *  op only makes sense if the corps has a live commander state. */
+const commanderConfidenceTigar: AxisPredicate = (state) => {
+    const cs = state.military.corps_command?.[PRIMARY_CORPS]?.commander_state;
+    if (!cs) {
+        return { green: false, reason: 'no 5th Corps commander state available' };
+    }
+    return { green: true, reason: '5th Corps commander state present' };
+};
+
+/** logistics: the June 1994 BiH-VRS ceasefire frees 5th Corps reserves; the
+ *  axis goes red only if RBiH supply pressure is critical (>= 95). */
+const logisticsTigar: AxisPredicate = (state) => {
+    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    if (pressure >= TIGAR_LOGISTICS_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure critical for the deception thrust' };
+    }
+    return { green: true, reason: 'RBiH supply pressure compatible with the June 1994 ceasefire dividend' };
+};
+
+// (Note: a separate optional staging-access predicate was considered but
+// folded into the single staging_access axis above — pocket-survival IS the
+// staging-access signal architecturally, and a second predicate would
+// double-count the same OSID set. The optional-axis ledger is satisfied by
+// the `logistics` axis; see prerequisites mapping below.)
+
+// ─── Catalog entry ──────────────────────────────────────────────────────────
+
+export const TIGAR_SLOBODA_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'tigar_sloboda_94',
+    name: 'Operation Tigar-Sloboda',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: TIGAR_SLOBODA_AXES,
+    staging_osid: 'op:cazin:cazin_2',
+    planning_duration: 3,
+    min_attack_outcome: 'repulsed',
+    citations: [
+        'BB2 pp.532-534, 541, 555 — Atif Dudaković, 7-10 July 1994 Bihać deception, ~3000 small arms + 200,000 rounds captured, Pecigrad fall 4 Aug 1994',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.1 (Tigar-Sloboda 94)',
+    ],
+    historical_exit_class: 'partial_success',
+    // CANONICAL: per late-war design §10, APWB rides as RS-aligned auxiliary;
+    // these Cazin southern-flank OSIDs are RBiH-painted in jan1993 baseline
+    // (lines 169-172 of painted_control_jan1993.json) yet are in APWB control
+    // during the Tigar-Sloboda arc. The override exempts them from the
+    // friendly-controller filter inside spawnCorpsOperationFromOpportunity.
+    // Scope-restricted: the substrate honors this only when tier === 'T1' AND
+    // family === 'fifth_corps' (both true here).
+    targets_friendly_overrides: TIGAR_SLOBODA_OBJECTIVES,
+    // CANONICAL prerequisite mapping — design-doc §4.1 prereq wishlist mapped
+    // to the 9-axis substrate vocabulary:
+    //   - "pocket_survival" (design wishlist)  → staging_access REQUIRED
+    //     (Sana 95 uses the same architectural mapping; the staging_access
+    //     predicate here checks the Bihać pocket anchor set, which is the
+    //     pocket-survival signal.)
+    //   - "logistics"                          → logistics OPTIONAL
+    //     (Models the June 1994 BiH-VRS ceasefire as a soft dividend, not a
+    //     hard gate. RBiH ≥95 supply pressure flips it red. Demoted from
+    //     REQUIRED so min_optional_axes:1 has a real axis to count against —
+    //     the prompt's prereq wishlist had no genuine OPTIONAL axes.)
+    //   - "staging_access" (design wishlist)   → folded into the same axis as
+    //     pocket-survival per Sana's architectural pattern (single axis carries
+    //     pocket integrity; redundant Cazin-staging echo would double-count).
+    // Other axes per prompt: n_a where the family doc says n_a; required where
+    // the prompt marks REQUIRED.
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',          // intra-Bosniak; no Sarajevo gating
+        corps_readiness: 'required',
+        logistics: 'optional',                   // June 1994 BiH-VRS ceasefire dividend (soft)
+        staging_access: 'required',              // pocket-survival (Sana mirror)
+        weather_season: 'n_a',
+        commander_confidence: 'required',        // Dudaković deception-doctrine premise
+        enemy_weakness: 'n_a',                   // APWB cohesion not modelable through controller-faction signals
+        alliance_context: 'n_a',                 // not gated on Storm/Oluja
+        min_optional_axes: 1,
+    },
+    evaluators: {
+        date_window: dateWindowTigar,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessTigar,
+        logistics: logisticsTigar,
+        staging_access: pocketSurvivalTigar,
+        weather_season: alwaysGreen,
+        commander_confidence: commanderConfidenceTigar,
+        enemy_weakness: alwaysGreen,
+        alliance_context: alwaysGreen,
+    },
+    staff_recommendation: 'approve',
+};
+
+/** Catalog export for this family. Sana 95 (Phase 3) + Tigar-Sloboda 94
+ *  (LANE C Phase 2) are live; Pecigrad / Una / Breza / Pauk / Grmeč are
+ *  pending later phases of the family doc's implementation order. */
 export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_95_OPPORTUNITY,
+    TIGAR_SLOBODA_94_OPPORTUNITY,
 ];
