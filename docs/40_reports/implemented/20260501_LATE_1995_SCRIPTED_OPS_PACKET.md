@@ -98,14 +98,14 @@ No engine code, combat code, OOB, painted target file, or scenario init changed.
 
 **Headline:** 183w n1593 painted-vs-sim numbers are **identical** to baseline n1590: 70.9% count / **63.2% area-weighted**, KRAJINA 60.0%, DRINA 60.6%, HERZEGOVINA 42.9%. The four new ops fire correctly but produce 0 captures.
 
-### Per-op behavior (from `runs/.../n1593/operation_aars.json` + `op_injection_warnings`)
+### Per-op behavior (from `runs/.../n1593/operation_aars.json`, final-save active operations, and `op_injection_warnings`)
 
-| Op | Trigger | Accepted? | Started | Ended | total_attacks | Captures | Diagnosis |
+| Op | Trigger | Accepted? | Started | Ended | Attacks / attempts | Captures | Diagnosis |
 |---|---|---|---|---|---|---|---|
 | Krivaja-95 | YES (t168) | **NO** | n/a | n/a | n/a | n/a | 3 of 4 brigades (`rs_1st_zvornik`, `rs_5th_podrinje`, `rs_skelani_battalion`) already `status='inactive'` pre-fire. Only `rs_1st_bratunac` eligible. < MIN_OPERATION_PARTICIPANTS=2 → injection blocked. |
 | Stupčanica-95 | YES (t172) | YES | t172 | t176 | **0** | 0 | Op fired and ran for 4 turns; brigades selected; planning_duration=3 + 1 turn execution; no attacks delivered. |
-| Mistral 2 | YES (t175) | YES | t175 | t182 | **0** | 0 | Op fired and ran for 7 turns; 20 objectives across 2 axes; 0 attacks delivered. |
-| Sana | YES (t175) | YES | t175 | (still in `phase='recovery'` at t183) | **0** | 0 | Op fired and is still active at run end; 31 objectives across 3 axes; 0 attacks delivered. |
+| Mistral 2 | YES (t175) | YES | t175 | t182 | **0** | 0 | Op fired and ran for 7 turns; 20 objectives across 2 axes; completed AAR records no attacks. |
+| Sana | YES (t175) | YES | t175 | active recovery at t183 | **7 final-save attempts, no completed AAR yet** | 0 | Op fired and entered recovery by t183; final active operation has `attack_attempt_count=7` across 3 axes but no captures. |
 
 ### Root cause classification
 
@@ -125,15 +125,15 @@ The new ops match the **identical execution-stage outcome shape** of the pre-exi
 Operation Cerska-Kamenica: started=40, ended=44, attempts=0, captured=0, provenance=no_objectives_held
 ```
 
-Cerska-Kamenica is a known late-1992/early-1993 op that fires correctly but executes 0 attacks. The late-war scripted-op execution AI is a pre-existing engine residual that affects long-distance operations — when brigades are far from staging or planning duration is short, the engine routes brigades but the `predictAllAdjacentTargets` pipeline does not deliver objective attacks within the execution window.
+Cerska-Kamenica is a known late-1992/early-1993 op that fires correctly but executes 0 attacks. Stupčanica-95 and Mistral 2 match that no-attack AAR shape. Sana differs slightly: by t183 it has no completed AAR yet, but the final active operation is already in recovery with 7 execution attempts and 0 captures. The common residual is therefore "scripted ops do not deliver objective captures," with two likely subfamilies to separate in the next packet: no attack orders at all (Cerska/Stupčanica/Mistral) versus attacks/approach attempts that fail to capture (Sana).
 
-This is **not a packet defect** — it is the engine state at fire time interacting with the existing operation execution AI. The new ops sit in the same residual class as Cerska-Kamenica.
+This is **not a packet defect** — it is the engine state at fire time interacting with the existing operation execution AI. The new ops exposed the residual more clearly because the definitions now exist and fire on schedule.
 
 ### Determinism and causality both hold
 
 - `triggered_operations_accepted` shows the new ops were accepted on schedule (Stupčanica at t172, Mistral 2 + Sana at t175).
 - `political.control_events` log no late-1995-op-mediated flips (mechanism field is `combat`/`consolidation`/`event` only); no spurious flips.
-- AAR rows for Stupčanica + Mistral 2 + Sana exist with valid axis_summaries, capture_provenance, casualty rows (all zero), participating_brigade lists, and started/ended_turn timestamps.
+- AAR rows for Stupčanica + Mistral 2 exist with valid axis_summaries, capture_provenance, casualty rows (all zero), participating_brigade lists, and started/ended_turn timestamps. Sana remains in final-save active operation state at t183 with 7 attempts and 0 captures.
 - Hash differs from baseline because op injection mutates `corps_command[*].active_operations`, `triggered_operations_accepted`, and `operation_history` even when 0 attacks occur. State evolved differently; territorial outcome unchanged.
 
 ---
@@ -204,7 +204,7 @@ This is documented in the catalog comment block above the new ops.
 ## 10. Items explicitly NOT fixed (this packet)
 
 1. **Owner A (Krivaja-95 brigade attrition):** vrs_drina structural collapse — separate Family-2 packet, four sign-offs required (prior packet's roadmap).
-2. **Owner B (Stupčanica/Mistral/Sana 0 attacks):** late-war scripted-op execution AI — separate engine packet, `/operations-expert` + `/qa-engineer` sign-off.
+2. **Owner B (late-war scripted-op execution / capture delivery):** Stupčanica + Mistral complete with no AAR attacks; Sana reaches recovery with 7 final-save attempts and 0 captures. Separate engine packet, `/operations-expert` + `/qa-engineer` sign-off.
 3. **Cincar 1994:** apr1995 Glamoč proper, Kupres muni — out of scope per user prompt.
 4. **Sensitive-history consequences for Krivaja-95 + Stupčanica-95:** atrocity / narrative / scoring mechanics — out of scope; territorial control only.
 5. **Hardcoded `'RS'` faction in `assignOperationCommander` call:** engine code, out of scope. Documented in op comment block.
@@ -214,7 +214,7 @@ This is documented in the catalog comment block above the new ops.
 
 ## 11. Recommended next packet
 
-**Owner B (late-war scripted-op execution AI) is the highest-priority follow-up.** Without it, the four new ops sit as infrastructure but cannot deliver territorial captures. Diagnostic entry point: examine why Cerska-Kamenica (already in catalog at t40) produces 0 attacks despite all infrastructure being correct. Same root cause likely fixes Stupčanica + Mistral + Sana simultaneously.
+**Owner B (late-war scripted-op execution / capture delivery) is the highest-priority follow-up.** Without it, the four new ops sit as infrastructure but cannot deliver territorial captures. Diagnostic entry points: first examine why Cerska-Kamenica (already in catalog at t40), Stupčanica, and Mistral produce 0 AAR attacks despite infrastructure being correct; then compare Sana, which reaches recovery with 7 final-save attempts and 0 captures. The shared fix may live in operation directive generation, attack eligibility/reachability, execution-window length, or AAR/attempt accounting, but the next packet must prove the exact owner before changing code.
 
 Owner A (vrs_drina rescue) is the prior packet's roadmap and remains stop-at-plan. It unblocks Krivaja-95 specifically.
 
