@@ -204,6 +204,29 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(proposals[0].last_axis_evaluation).toHaveLength(9);
     });
 
+    it('persists a player-safe force-quality trait snapshot on surfaced proposals', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureSana();
+
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const traits = state.military.operation_opportunities![0].last_force_quality_traits;
+        expect(Object.keys(traits ?? {}).sort()).toEqual([
+            'axis_coordination',
+            'collapse_susceptibility',
+            'failure_recovery',
+            'operation_readiness',
+            'reserve_response',
+            'staging_reliability',
+            'support_delivery',
+        ]);
+        for (const value of Object.values(traits ?? {})) {
+            expect(typeof value).toBe('number');
+            expect(value).toBeGreaterThanOrEqual(0);
+            expect(value).toBeLessThanOrEqual(1);
+        }
+    });
+
     it('does not duplicate-enqueue an already-pending opportunity on the next turn', () => {
         const state = buildMinimalState(175);
         const def = fixtureSana();

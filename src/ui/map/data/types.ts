@@ -479,6 +479,15 @@ export interface OperationOpportunityProposalActionView {
     enabled: boolean;
 }
 
+export type OperationOpportunityForceTraitBand = 'strong' | 'adequate' | 'strained' | 'poor';
+
+export interface OperationOpportunityForceTraitView {
+    trait: string;
+    label: string;
+    band: OperationOpportunityForceTraitBand;
+    reason: string;
+}
+
 export interface OperationOpportunityProposalView {
     proposal_id: string;
     opportunity_id: string;
@@ -496,6 +505,7 @@ export interface OperationOpportunityProposalView {
     optional_axes_green?: number;
     optional_axes_total?: number;
     prerequisite_axes: OperationOpportunityPrerequisiteAxisView[];
+    force_quality_traits: OperationOpportunityForceTraitView[];
     available_actions: OperationOpportunityProposalActionView[];
 }
 

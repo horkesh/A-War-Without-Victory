@@ -1,9 +1,29 @@
 import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportunityProposalView } from './types';
 
 type RawRecord = Record<string, unknown>;
+type ForceTraitBand = OperationOpportunityProposalView['force_quality_traits'][number]['band'];
 
 const REVIEW_ACTION_PREFIX = 'OPPORTUNITY:';
 const LIVE_PROPOSAL_STATUSES = new Set(['eligible_pending_review', 'delayed']);
+const FORCE_TRAIT_ORDER = [
+    'operation_readiness',
+    'staging_reliability',
+    'axis_coordination',
+    'support_delivery',
+    'failure_recovery',
+    'reserve_response',
+    'collapse_susceptibility',
+] as const;
+
+const FORCE_TRAIT_LABELS: Record<typeof FORCE_TRAIT_ORDER[number], string> = {
+    operation_readiness: 'Operation readiness',
+    staging_reliability: 'Staging reliability',
+    axis_coordination: 'Axis coordination',
+    support_delivery: 'Support delivery',
+    failure_recovery: 'Failure recovery',
+    reserve_response: 'Reserve response',
+    collapse_susceptibility: 'Collapse susceptibility',
+};
 
 function strictCompare(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
@@ -36,6 +56,46 @@ function axisState(mode: string, green: boolean): OperationOpportunityAxisState 
     if (mode === 'required') return 'blocked';
     if (mode === 'optional') return 'strained';
     return 'not_applicable';
+}
+
+function traitBand(trait: typeof FORCE_TRAIT_ORDER[number], rawValue: number): ForceTraitBand {
+    const value = trait === 'collapse_susceptibility' ? 1 - rawValue : rawValue;
+    if (value >= 0.75) return 'strong';
+    if (value >= 0.55) return 'adequate';
+    if (value >= 0.35) return 'strained';
+    return 'poor';
+}
+
+function bandReason(trait: typeof FORCE_TRAIT_ORDER[number], band: ForceTraitBand): string {
+    if (trait === 'collapse_susceptibility') {
+        if (band === 'strong') return 'low collapse risk under pressure';
+        if (band === 'adequate') return 'manageable collapse risk';
+        if (band === 'strained') return 'elevated collapse risk';
+        return 'severe collapse risk';
+    }
+    if (band === 'strong') return 'strong institutional signal';
+    if (band === 'adequate') return 'adequate institutional signal';
+    if (band === 'strained') return 'strained institutional signal';
+    return 'poor institutional signal';
+}
+
+function forceTraitViews(rawTraits: unknown): OperationOpportunityProposalView['force_quality_traits'] {
+    if (!rawTraits || typeof rawTraits !== 'object') return [];
+    const source = rawTraits as RawRecord;
+    const result: OperationOpportunityProposalView['force_quality_traits'] = [];
+    for (const trait of FORCE_TRAIT_ORDER) {
+        const value = source[trait];
+        if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+        const clamped = Math.max(0, Math.min(1, value));
+        const band = traitBand(trait, clamped);
+        result.push({
+            trait,
+            label: FORCE_TRAIT_LABELS[trait],
+            band,
+            reason: bandReason(trait, band),
+        });
+    }
+    return result;
 }
 
 function axisCounts(axes: RawRecord[]): Pick<OperationOpportunityProposalView,
@@ -135,6 +195,7 @@ export function deriveOperationOpportunityProposals(
                     reason: typeof axis.reason === 'string' ? axis.reason : '',
                 };
             }),
+            force_quality_traits: forceTraitViews(proposal.last_force_quality_traits),
             available_actions: [
                 { id: 'approve', label: 'Authorize', enabled: hasLiveReview },
                 { id: 'delay', label: 'Delay', enabled: hasLiveReview },

@@ -833,6 +833,15 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
                         { axis: 'corps_readiness', mode: 'required', green: false, reason: '5th Corps still staging' },
                         { axis: 'enemy_weakness', mode: 'optional', green: false, reason: 'opposing line intact' },
                     ],
+                    last_force_quality_traits: {
+                        operation_readiness: 0.82,
+                        staging_reliability: 0.62,
+                        axis_coordination: 0.48,
+                        support_delivery: 0.22,
+                        failure_recovery: 0.75,
+                        reserve_response: 0.54,
+                        collapse_susceptibility: 0.78,
+                    },
                 },
                 {
                     opportunity_id: 'enemy_opportunity',
@@ -866,6 +875,18 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
             ['date_window', 'ready'],
             ['corps_readiness', 'blocked'],
             ['enemy_weakness', 'strained'],
+        ],
+    );
+    assert.deepEqual(
+        proposal.force_quality_traits.map((trait) => [trait.trait, trait.band]),
+        [
+            ['operation_readiness', 'strong'],
+            ['staging_reliability', 'adequate'],
+            ['axis_coordination', 'strained'],
+            ['support_delivery', 'poor'],
+            ['failure_recovery', 'strong'],
+            ['reserve_response', 'strained'],
+            ['collapse_susceptibility', 'poor'],
         ],
     );
     assert.deepEqual(

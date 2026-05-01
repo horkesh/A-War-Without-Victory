@@ -17,6 +17,13 @@ const AXIS_STYLES: Record<OperationOpportunityAxisState, string> = {
     not_applicable: 'border-panel-border bg-panel-bg text-text-secondary',
 };
 
+const TRAIT_STYLES: Record<OperationOpportunityProposalView['force_quality_traits'][number]['band'], string> = {
+    strong: 'border-green-500/30 bg-green-500/10 text-green-300',
+    adequate: 'border-sky-500/30 bg-sky-500/10 text-sky-300',
+    strained: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+    poor: 'border-red-500/30 bg-red-500/10 text-red-300',
+};
+
 function statusLabel(status: string): string {
     return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
@@ -39,6 +46,23 @@ function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisi
         >
             <div className="text-[8px] font-bold uppercase tracking-[0.12em]">{axis.label}</div>
             <div className="text-[9px] leading-snug opacity-90 line-clamp-2">{axis.reason || statusLabel(axis.state)}</div>
+        </div>
+    );
+}
+
+function TraitPill({ trait }: { trait: OperationOpportunityProposalView['force_quality_traits'][number] }) {
+    return (
+        <div
+            className={`rounded border px-2 py-1 ${TRAIT_STYLES[trait.band]}`}
+            title={trait.reason}
+        >
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-[8px] font-bold uppercase tracking-[0.12em]">{trait.label}</span>
+                <span className="text-[8px] font-bold uppercase tracking-[0.12em] opacity-80">
+                    {statusLabel(trait.band)}
+                </span>
+            </div>
+            <div className="mt-0.5 text-[9px] leading-snug opacity-90 line-clamp-2">{trait.reason}</div>
         </div>
     );
 }
@@ -93,6 +117,19 @@ function DossierCard({
                     {proposal.prerequisite_axes.map((axis) => (
                         <AxisPill key={`${proposal.proposal_id}:${axis.axis}`} axis={axis} />
                     ))}
+                </div>
+            )}
+
+            {proposal.force_quality_traits.length > 0 && (
+                <div className="space-y-1.5">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                        Force Quality
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5">
+                        {proposal.force_quality_traits.map((trait) => (
+                            <TraitPill key={`${proposal.proposal_id}:${trait.trait}`} trait={trait} />
+                        ))}
+                    </div>
                 </div>
             )}
 

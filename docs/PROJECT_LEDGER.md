@@ -1,3 +1,21 @@
+## [2026-05-01] feat(ops-ui): surface force-quality bands in opportunity dossiers
+
+**Type:** Opportunity proposal observability + Army HQ UI. No combat math, opportunity catalog content, operation execution, desktop IPC, OOB, scenario data, painted targets, or canon changed.
+
+**Why:** The late-war opportunity architecture depends on force-quality traits being legible to the player. Before this change, Army HQ opportunity dossiers showed prerequisite chips and staff recommendation, but hid the seven-trait institutional profile that explains whether a corps can stage, coordinate, support, recover, and sustain the proposed operation.
+
+**Change:** `OperationOpportunityState` now persists `last_force_quality_traits` from `computeCorpsOperationReadiness(state, def.primary_corps)` whenever a proposal is surfaced or refreshed. `OperationOpportunityProposalView` now exposes player-safe `force_quality_traits` bands (`strong`, `adequate`, `strained`, `poor`) instead of raw formulas; `collapse_susceptibility` is inverted into a health band. `OperationOpportunityDossierPanel` renders a compact Force Quality board inside each Army HQ dossier.
+
+**Limits:** This is observability only. It does not alter eligibility predicates, staff recommendations, operation creation, combat resolution, or bot decisions. Scenario hashes may move when live opportunity proposals serialize the new trait snapshot; that is an expected additive save-shape change, not a control/combat behavior change.
+
+**Determinism:** Preserved. Trait derivation is pure and internally deterministic; proposal queues remain sorted by existing opportunity order; no random/time/locale ordering introduced.
+
+**Verification:** Red first: focused tests failed on missing `last_force_quality_traits`, missing DTO bands, and missing Force Quality dossier section. Green: focused opportunity/UI pack 61/61 pass; `npx.cmd tsc --noEmit` clean; broader opportunity/UI/catalog pack 227/227 pass; `npm.cmd run desktop:map:build` pass with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`.
+
+---
+
 ## [2026-05-01] feat(ops-ui): add rich operation opportunity decision bridge
 
 **Type:** Desktop IPC + war-pipeline consumer + Army HQ UI action expansion. No combat math, OOB, scenario data, painted targets, opportunity catalog content, or operation definitions changed.

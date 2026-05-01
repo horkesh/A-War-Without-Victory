@@ -72,6 +72,10 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
+import {
+    computeCorpsOperationReadiness,
+    type CorpsOperationReadinessTraits,
+} from './corps_operation_readiness.js';
 import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
 
@@ -270,6 +274,8 @@ export interface OperationOpportunityState {
      * whether to re-surface; cleared on response.
      */
     reevaluate_at_turn?: number;
+    /** Latest player-safe force-quality trait snapshot for the primary corps. */
+    last_force_quality_traits?: CorpsOperationReadinessTraits;
 }
 
 /** Resolution log entry written when a proposal exits the queue. */
@@ -469,7 +475,13 @@ export function evaluateOperationOpportunities(
     // pure function of the snapshot at call time. The pipeline-step wrapper
     // (`runOpportunityEvaluationStep`) re-assigns the result back to state.
     const working: OperationOpportunityState[] = (state.military.operation_opportunities ?? [])
-        .map(p => ({ ...p, last_axis_evaluation: [...p.last_axis_evaluation] }));
+        .map(p => ({
+            ...p,
+            last_axis_evaluation: [...p.last_axis_evaluation],
+            last_force_quality_traits: p.last_force_quality_traits
+                ? { ...p.last_force_quality_traits }
+                : undefined,
+        }));
 
     // Track every opportunity_id that already has a proposal in the queue —
     // whether pending, delayed, OR terminal. Terminal-status opportunities
@@ -499,9 +511,15 @@ export function evaluateOperationOpportunities(
         const live = liveByOpportunityId.get(def.opportunity_id);
         const axes = evaluateAxes(state, turn, def);
         const eligible = isOpportunityEligible(def, axes);
+        let forceQualityTraits: CorpsOperationReadinessTraits | undefined;
+        const getForceQualityTraits = (): CorpsOperationReadinessTraits => {
+            forceQualityTraits ??= computeCorpsOperationReadiness(state, def.primary_corps);
+            return forceQualityTraits;
+        };
 
         if (live) {
             live.last_axis_evaluation = axes;
+            live.last_force_quality_traits = getForceQualityTraits();
 
             if (live.status === 'delayed'
                 && live.reevaluate_at_turn !== undefined
@@ -543,6 +561,7 @@ export function evaluateOperationOpportunities(
             status: 'eligible_pending_review',
             approver_faction: def.faction,
             last_axis_evaluation: axes,
+            last_force_quality_traits: getForceQualityTraits(),
         };
         working.push(fresh);
         seenOpportunityIds.add(def.opportunity_id);

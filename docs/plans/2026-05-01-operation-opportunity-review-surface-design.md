@@ -12,6 +12,7 @@
 - `docs/40_reports/GUI_MASTER.md`
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`
+- `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`
 
 ## Purpose
 
@@ -23,7 +24,7 @@ The goal is not to make a new combat path or a new free-form planner. The goal i
 
 ## Implementation Checkpoint - 2026-05-01
 
-The live read-path MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`. The rich decision bridge is implemented in `resolve-operation-opportunity-decision` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`.
+The live read-path MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`. The rich decision bridge is implemented in `resolve-operation-opportunity-decision` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`. The Force Quality board is implemented through persisted proposal trait snapshots and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`.
 
 Implemented:
 
@@ -32,12 +33,13 @@ Implemented:
 - Presidential Inbox routing for `OPPORTUNITY:<proposal_id>` rows to Army HQ briefing
 - Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, Delay, Under-resource, and Decline
 - dedicated decision IPC that writes `opportunity_decision` / `opportunity_decision_options` onto the pending review row for war-pipeline consumption
+- persisted `last_force_quality_traits` on opportunity proposals and player-safe trait bands in the Army HQ dossier
 
 Still planned:
 
 - player-safe redirect variant DTOs and redirect button rendering
 - map footprint highlighting
-- persisted force-quality trait bands and objective/staging labels in the player-safe DTO
+- objective/staging labels in the player-safe DTO
 
 ## Architecture Decision
 

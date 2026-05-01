@@ -166,6 +166,8 @@ describe('Army HQ / presidential review coherence', () => {
 
     expect(panelSource).toContain('operationOpportunityProposals');
     expect(dossierSource).toContain('Operational Opportunities');
+    expect(dossierSource).toContain('Force Quality');
+    expect(dossierDataSource).toContain('force_quality_traits');
     expect(dossierSource).toContain('ipc.resolveOperationOpportunityDecision');
     expect(dossierDataSource).toContain("label: 'Delay'");
     expect(dossierDataSource).toContain("label: 'Under-resource'");
