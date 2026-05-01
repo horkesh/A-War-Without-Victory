@@ -153,6 +153,21 @@
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
 ---
 ---
+---
+
+## [2026-05-01] feat(ui): show strategic signals in Turn Aftermath modal
+
+**Type:** Tactical-map UI / product-spine immediate report. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** C5-C7 made strategic signals available in the persistent Army HQ archive, but the immediate post-advance modal still hid them. The player should see major events, decorations, arc changes, supply shocks, and movements at the moment the turn resolves, not only after opening records.
+
+**Change:** Added a `Strategic Signals` panel to `TurnAftermathModal`, using the same `TurnAftermathView.signals` read model as Army HQ records. Empty turns show an explicit no-signal row.
+
+**Tests:** Red-first wiring guard added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 51/51 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This only renders an existing read-model field; it does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
 
 ---
 

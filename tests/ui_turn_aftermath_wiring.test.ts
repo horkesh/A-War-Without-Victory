@@ -35,6 +35,13 @@ describe('turn aftermath UI wiring', () => {
     expect(panel).toContain('friendlyMilitaryCasualties');
   });
 
+  it('surfaces strategic signals in the immediate turn aftermath modal', () => {
+    const modal = read('../src/ui/map/components/TurnAftermathModal.tsx');
+
+    expect(modal).toContain('Strategic Signals');
+    expect(modal).toContain('view.signals.slice');
+  });
+
   it('surfaces campaign pulse and strategic signals in records', () => {
     const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
 

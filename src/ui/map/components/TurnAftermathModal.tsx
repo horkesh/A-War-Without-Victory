@@ -34,6 +34,12 @@ function costSeverityClasses(severity: TurnAftermathView['cost']['severity']): s
   return 'border-white/15 text-text-secondary bg-white/5';
 }
 
+function signalTone(severity: TurnAftermathView['signals'][number]['severity']): string {
+  if (severity === 'urgent') return 'border-red-400/30 text-red-300 bg-red-950/20';
+  if (severity === 'notable') return 'border-amber-400/30 text-amber-300 bg-amber-950/20';
+  return 'border-white/10 text-text-secondary bg-white/[0.03]';
+}
+
 export function TurnAftermathModal({
   isOpen,
   view,
@@ -45,6 +51,7 @@ export function TurnAftermathModal({
   if (!isOpen || !view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
+  const signalPreview = view.signals.slice(0, 4);
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 px-4">
@@ -103,6 +110,22 @@ export function TurnAftermathModal({
           </section>
 
           <section className="space-y-4">
+            <div className="border border-white/10 bg-black/20">
+              <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
+                Strategic Signals
+              </div>
+              <div className="divide-y divide-white/10">
+                {signalPreview.length === 0 ? (
+                  <div className="px-3 py-3 text-sm text-text-secondary">No strategic signals recorded this turn.</div>
+                ) : signalPreview.map((signal) => (
+                  <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
+                    <div className="truncate text-sm font-semibold">{signal.label}</div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{signal.kind} / {signal.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="border border-white/10 bg-black/20">
               <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
                 <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">

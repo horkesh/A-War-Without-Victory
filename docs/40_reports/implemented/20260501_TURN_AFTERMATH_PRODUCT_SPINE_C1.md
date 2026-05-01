@@ -1,4 +1,4 @@
-# Turn Aftermath Product Spine C1-C7
+# Turn Aftermath Product Spine C1-C8
 
 **Date:** 2026-05-01
 **Type:** UI/product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
@@ -126,6 +126,12 @@ The Army HQ `TURN AFTERMATH` archive now has commander review filters:
 
 The filter owner is `filterTurnAftermathRecords(records, mode)`, a pure helper over already-built views. The UI shows per-filter counts and recomputes the campaign pulse, ledger summary, and record list from the visible set. This keeps long campaigns navigable without adding a second archive, second query store, or simulation-side state.
 
+## C8 Immediate Strategic Signals Extension
+
+The post-advance `TurnAftermathModal` now renders a `Strategic Signals` panel from the same `TurnAftermathView.signals` read model used by Army HQ records.
+
+This closes the immediate-report gap: the player sees major events, decorations, arc changes, supply shocks, and notable movements as soon as the turn resolves, before deciding whether to continue, review records, open the War Summary, or inspect the Inbox.
+
 ## Files
 
 - `src/ui/map/data/turnAftermath.ts`
@@ -158,9 +164,11 @@ The filter owner is `filterTurnAftermathRecords(records, mode)`, a pure helper o
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts`
   - 13/13 pass after C5-C6 strategic signals and momentum pulse
   - 15/15 pass after C7 review filters
+  - `tests/ui_turn_aftermath_wiring.test.ts` 7/7 pass after C8 immediate strategic signals
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
   - 48/48 pass after C5-C6
   - 50/50 pass after C7
+  - 51/51 pass after C8
 - `npx.cmd tsc --noEmit`
   - clean
 - `npx.cmd tsc --noEmit -p tsconfig.json`
