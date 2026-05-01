@@ -1,3 +1,19 @@
+## [2026-05-01] docs(plan): late-war operation opportunity system design
+
+**Type:** Documentation/design only. Created `docs/plans/late-war-operation-opportunity-system-design.md` as the first design doc on top of the 2026-05-01 research catalog. **No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.**
+
+**Scope:** Generic opportunity-layer design that replaces naked turn-gated scripted operations with historical opportunity proposals. Defines the prerequisite vocabulary (date window, political authorization, corps readiness, logistics, staging access, weather/season, commander confidence, enemy weakness, alliance context), the player/bot choice surface (Approve / Delay / Redirect / Under-resource / Decline), the execution path through existing corps/army operation systems (`buildCorpsOperation`, `sector_offensive.ts`, attack resolution, AAR), the failure model (failed operations as first-class outcomes), the painted-target relationship (dated paints are evaluation references, not destiny), and the sensitive-history boundary for T4 opportunities (Krivaja-95 / Stupčanica-95 / Goražde pressure).
+
+**Sensitive-history posture:** Inherits and reaffirms `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. T4 opportunities authorize the territorial military operation only. No "commit genocide" choice, no atrocity-policy lever, no benefit term tied to civilian harm, no path to suppress or trade away the locked Srebrenica rupture. Civilian-harm consequences continue to flow through the existing locked systems (`paramilitary_sweep.ts`, `enclave_resilience.ts`, `rupture_consequences.ts`, displacement, Cost Ledger).
+
+**Determinism posture:** Doc binds future implementation to no `Math.random()`, no timestamps, sorted iteration via `strictCompare`, deterministic proposal queue order keyed on `(turn_min, opportunity_id)`, and replay-stable opportunity-resolution records persisted alongside AAR. Inherits the durable rule that brigade-side op resolution must use `findBrigadeOperationAnywhere` for cross-corps participants.
+
+**Followups proposed (not authored here):** Five family docs from the research catalog backlog — 5th Corps, Central Bosnia / Vlasic / Kupres, HV/HVO western Bosnia, failed VRS offensives, and safe-area / sensitive-history. Each will be a separate doc on top of this generic system; the safe-area family doc explicitly requires `/historian` + `/game-designer` + `/war-or-game` review and user approval before any code, per the sensitive-history gate.
+
+**Knowledge propagation:** No new `PROJECT_LEDGER_KNOWLEDGE.md` entry. The 2026-05-01 catalog entry already canonicalizes the opportunity-not-script rule; this design doc refines that rule into a system-level vocabulary without introducing a separate durable rule.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(calibration): open force-quality trajectory issue
 
 **Type:** Documentation / calibration issue tracking only. Created `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`, updated `docs/40_reports/CALIBRATION_MASTER.md`, and added the lane to `docs/plans/MASTER_ROADMAP.md`. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
