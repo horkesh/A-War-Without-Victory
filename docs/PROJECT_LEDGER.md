@@ -1,3 +1,31 @@
+## [2026-05-01] feat+evidence(operations): Late-War Operation Combat Delivery Mega-Lane
+
+**Type:** Multi-phase mega-lane delivering: a per-launched-op delivery diagnostic tool (read-only), AAR enrichment with `recovery_reason` + per-axis `staging_osid` (additive shape), and an engine diagnostic that surfaces silently-skipped front-unreachable axes at the launch-readiness check (`OperationAxis.unreachable_at_launch`, additive shape, write-only — silent-skip execution flow preserved). Four phase commits (A/B/C/E). NO combat math, OOB, scenario data, painted targets, T4 sensitive-history, opportunity catalog content, or AAR aggregator touched. All lane stop gates honored.
+
+**Why:** Post-LANE-E 188w `n1605` evidence showed Sana 95 (t175) and Grmeč 94 (t133) launched but failed to deliver. Six-investigator synthesis attributed Grmeč to combat math (HONEST FAIL, OUT-of-lane: P14 / `estimateForceRatio` blind to defender modifiers — the next recommended mega-lane). Sana 95 had three axes; the third (`sana_sanski_most_kljuc`) had its first objective `op:sanski_most:lusci_palanka_2` polygon-interior with zero front edges anywhere. The launch-readiness check at `sector_offensive_launch_helpers.ts:215-243` silently skipped that axis (`if (axisApproachOsids.size === 0) continue;`); the OUTER op still launched on its other axes; the skipped axis stayed in `'executing'` and never attacked. The failure mode was un-investigatable from the AAR alone — `recovery_reason` was on `CorpsOperation` but not on `OperationAAR`; per-axis `staging_osid` lived on `OperationAxis` but not on `AxisAAR`; the silent-skip left no diagnostic at all.
+
+**Phase A (`693ef166`):** New `tools/diagnostics/operation_delivery_audit.cjs` (CommonJS, read-only) — derives per-launched-op delivery truth from final_save + operation_aars + weekly_report. 25 columns including `Unreach@Launch` (now populated from persisted AxisAAR field after Phase C). Golden output: `docs/40_reports/diagnostics/20260501_operation_delivery_audit_n1605.md`.
+
+**Phase B (`dd083454`):** `OperationAAR.recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | ...` and `AxisAAR.staging_osid?: string` — diagnostic carryover from `CorpsOperation` and `OperationAxis` at finalize. Red-first regressions in `tests/operation_aar.test.ts` (44 → 48 tests).
+
+**Phase C (`0a28762e`):** New `OperationAxis.unreachable_at_launch?: boolean` (write-only diagnostic, set at `sector_offensive_launch_helpers.ts:227-233` when an axis's first objective has zero approach OSIDs); new `AxisAAR.unreachable_at_launch?: boolean` carryover at finalize. Silent-skip execution flow PRESERVED — the op still launches on its other axes; this axis stays in `'executing'` but never attacks. The diagnostic is what changes; the behavior does not. Red-first regressions in new `tests/operation_axis_unreachable_diagnostic.test.ts`: write-side proof, no-write-when-reachable, AAR carryover (3 tests).
+
+**Determinism:** Preserved. All new fields optional (`?:`). No `Math.random`, no `Date.now`, no `new Date()`, no locale `.sort`. Sorted iteration via `strictCompare` retained where iteration touched. Hash drift class is purely additive shape (write-only diagnostic fields on serialized state); no execution-flow change.
+
+**Verification:** `npx.cmd tsc --noEmit` clean (only pre-existing untracked Codex stub `tests/ui/turn_aftermath.test.ts` references missing module — not this lane's responsibility). 183/183 op-suite tests across 10 suites PASS. 40w smoke: `n1606` hash `8692ee345b682598`, anchors **26/27** (unchanged from n1603 hash `de0673d30a0381d3`, also 26/27). `opportunity_health_audit.cjs` 0 unlinked / 0 broken AAR / 0 duplicates. `operation_delivery_audit.cjs` 25 axes total (11 DELIV / 6 UNDERDELIV / 5 NO-CONTACT-OTHER / 3 PRE-FRIENDLY). 188w skipped per lane brief ("optionally run 188w if 40w is clean") — additive-shape drift confirmed at 40w.
+
+**Hash drift classification:** **Additive shape only.** No anchor change. New persisted optional fields in n1606 final_save: `unreachable_at_launch` 0 → 2, `staging_osid` (on AAR) 19 → 40, `recovery_reason` (on AAR) 11 → 26. No controller flips, no battle changes, no captures changes.
+
+**Process discipline:** All four phase commits used the LANE E set-aside pattern (`mv tests/ui/turn_aftermath.test.ts tests/ui/turn_aftermath.test.ts.set_aside` → commit → `mv` back). No `--no-verify`. Codex WIP untouched.
+
+**Next-lane handoff:** Combat-Math `estimateForceRatio` Defender-Modifier Integration — rows 1, 2, 4 of the root-cause table collapse to this single P14 / BRIEF-GAP-1 / COMBAT-P14 gap (cited in MEMORY.md "Engine Health Audit 2026-04-02"). The current predictor is a personnel-only ratio that produces fantasy values like 7.19 for ARBiH light_infantry vs entrenched VRS — that function is the upstream cause of every combat repulse documented in n1605.
+
+**Other handoffs:** Codex (5th Corps catalog axis-staging reachability for Sana axis C); `/corps-army-commander` + `/operations-expert` (`plan.ts ai_recommended_stance` corps-stance gate timing); `/operations-expert` + `/scenario-harness-engineer` (failed-objective cooldown ↔ opportunity predicate communication); Codex (force-quality brigade-fitness aggregate catalog content).
+
+**Report:** `docs/40_reports/implemented/20260501_LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE.md`.
+
+---
+
 ## [2026-05-01] feat(operations): LANE E 5th Corps opportunity predicate topology + 188w validation
 
 **Type:** Substrate enum extension + per-entry predicate authoring + observability emit + 188w validation. No combat math, OOB, scenario data, painted targets, T4 sensitive-history, AAR aggregator, or hardcoded `<x>_completed → <y>_eligible` chains touched. All five LANE E stop gates preserved.
