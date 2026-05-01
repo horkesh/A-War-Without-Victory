@@ -211,7 +211,7 @@ This section governs how the opportunity layer interacts with `SENSITIVE_HISTORY
 
 ### 9.3 What the player decides at a T4 proposal
 
-Exactly the same as any other opportunity: Approve, Delay, Redirect, Under-resource, Decline. The territorial operation is a real military operation. Whether it is wise to launch it is a real strategic question. Whether the war crimes that historically followed are a player-authorizable trade is **not** a question the engine asks. They are consequence content, governed by the existing systems (`paramilitary_sweep.ts`, `enclave_resilience.ts`, `rupture_consequences.ts`, displacement, the Cost Ledger).
+Exactly the same as any other opportunity: Approve, Delay, Redirect, Under-resource, Decline. The territorial operation is a real military operation. Whether it is wise to launch it is a real strategic question. Whether the war crimes that historically followed are a player-authorizable trade is **not** a question the engine asks. They are consequence content, governed by the existing systems (`src/sim/combat/paramilitary_sweep.ts`, `src/sim/combat/enclave_resilience.ts`, `src/sim/negotiation/rupture_consequences.ts`, displacement, the Cost Ledger).
 
 ### 9.4 What the bot decides at a T4 proposal
 
