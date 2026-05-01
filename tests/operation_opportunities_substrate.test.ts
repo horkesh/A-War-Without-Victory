@@ -173,6 +173,39 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(state.military.operation_opportunities).toHaveLength(1);
     });
 
+    it('one-shot guard: does NOT re-enqueue after approval (Phase 3.5 fix)', () => {
+        // Regression for 188w n1601 bug: Sana was approved at t175 and the
+        // evaluator re-proposed it every turn after because `live` filter only
+        // included pending/delayed. The fix extends the filter to all-seen
+        // opportunity_ids so a one-shot historical operation is consumed for
+        // the rest of the scenario.
+        const state = buildMinimalState(175);
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def]);
+        // Advance several turns — the catalog must NOT enqueue another sana_95.
+        for (let t = 176; t <= 188; t++) runOpportunityEvaluationStep(state, t, [def]);
+        const sanaProposals = state.military.operation_opportunities!
+            .filter(p => p.opportunity_id === def.opportunity_id);
+        expect(sanaProposals).toHaveLength(1);
+        expect(sanaProposals[0].status).toBe('approved');
+        // And the corps_command should have ONE Sana CorpsOperation, not 14.
+        const cmd = state.military.corps_command![def.primary_corps];
+        expect(cmd.active_operations.filter(o => o.name === def.name)).toHaveLength(1);
+    });
+
+    it('one-shot guard: does NOT re-enqueue after decline either', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(state, 175, buildProposalId(def.opportunity_id, 175), 'decline', [def]);
+        for (let t = 176; t <= 188; t++) runOpportunityEvaluationStep(state, t, [def]);
+        const sanaProposals = state.military.operation_opportunities!
+            .filter(p => p.opportunity_id === def.opportunity_id);
+        expect(sanaProposals).toHaveLength(1);
+        expect(sanaProposals[0].status).toBe('declined');
+    });
+
     it('proposal queue is sorted by (eligibility_turn, opportunity_id, proposal_id)', () => {
         const state = buildMinimalState(175);
         const a: OperationOpportunityDef = { ...fixtureSana(), opportunity_id: 'b_op', name: 'B' };

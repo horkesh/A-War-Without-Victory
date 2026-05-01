@@ -397,8 +397,20 @@ export function evaluateOperationOpportunities(
     const working: OperationOpportunityState[] = (state.military.operation_opportunities ?? [])
         .map(p => ({ ...p, last_axis_evaluation: [...p.last_axis_evaluation] }));
 
+    // Track every opportunity_id that already has a proposal in the queue —
+    // whether pending, delayed, OR terminal. Terminal-status opportunities
+    // (approved, under_resourced_approved, redirected, declined, expired)
+    // must NOT be re-enqueued: a one-shot historical operation that has
+    // already been authorized, declined, or expired is consumed for the
+    // remainder of the scenario. (Future packets may add re-eligibility
+    // cooldowns per design doc §5; for the MVP one-shot is correct.)
+    //
+    // The `live` map (only pending/delayed) is the subset that can transition
+    // back to eligible via reevaluate_at_turn or be marked expired.
+    const seenOpportunityIds = new Set<string>();
     const liveByOpportunityId = new Map<string, OperationOpportunityState>();
     for (const p of working) {
+        seenOpportunityIds.add(p.opportunity_id);
         if (p.status === 'eligible_pending_review' || p.status === 'delayed') {
             liveByOpportunityId.set(p.opportunity_id, p);
         }
@@ -440,6 +452,13 @@ export function evaluateOperationOpportunities(
 
         if (!eligible) continue;
 
+        // One-shot guard: if this opportunity_id has ever been enqueued
+        // (pending OR terminal), do not re-enqueue. This prevents the
+        // post-approval re-enqueue bug surfaced in 188w n1601 verification
+        // where Sana was approved at t175, then re-proposed every turn
+        // because the prior `live` filter only looked at pending/delayed.
+        if (seenOpportunityIds.has(def.opportunity_id)) continue;
+
         const proposalId = buildProposalId(def.opportunity_id, turn);
         const expiresTurn = defaultExpiryTurn(turn);
         const fresh: OperationOpportunityState = {
@@ -452,6 +471,7 @@ export function evaluateOperationOpportunities(
             last_axis_evaluation: axes,
         };
         working.push(fresh);
+        seenOpportunityIds.add(def.opportunity_id);
         liveByOpportunityId.set(def.opportunity_id, fresh);
     }
 

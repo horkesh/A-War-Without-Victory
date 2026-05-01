@@ -1,3 +1,44 @@
+## [2026-05-01] fix(operations): one-shot opportunity guard (LANE B Phase 3.5 fix-up)
+
+**Type:** Substrate bug fix surfaced by Phase 4 verification. One file changed (the evaluator) + two new tests. **No combat math, no canon, no painted targets, no scenario data.**
+
+**Defect:** `evaluateOperationOpportunities` (Phase 1 substrate) tracked "live" opportunity ids in a Map filtered to `eligible_pending_review` and `delayed` only. After a proposal moved to a terminal-success status (`approved` / `under_resourced_approved` / `redirected`) or a terminal-decline (`declined` / `expired`), the evaluator considered the opportunity_id "free" and re-enqueued a fresh proposal at the next turn. With Phase 3 catalog content, `SANA_95_OPPORTUNITY` was approved at t175 and then re-proposed every turn through t188, with the bot auto-approving each one and `buildCorpsOperation` spawning a new corps op each time (5 distinct turn-suffixed ops in `runs/.../n1601/operation_aars.json` lines 12448-14578).
+
+**Surfacing:** Phase 4 188w verification dispatched `/scenario-creator-runner-tester`. Analyst verdict: SANA_FIRED_DIFFERENTLY (AMBER). Quote: *"After `executed_op_id: 'Operation Sana'` is set on the t175 proposal, the catalog continues to enqueue new proposals (`OPP_176_sana_95`, `OPP_177_sana_95`, ...) at t176+. The bot's `defaultBotDecisionForOpportunity` keeps returning `approve`, and `buildCorpsOperation` keeps creating new corps ops with the same brigade roster."* Critically: territorial outcome was byte-identical to the calendar-baseline (HRHB 74 / RBiH 322 / RS 316; engagement metric identical to last digit) — the bug only inflated op records, did not change sim outcome. AMBER, not RED.
+
+**Fix:** Single-owner one-line semantic in `evaluateOperationOpportunities`. New `seenOpportunityIds: Set<string>` tracks ALL opportunity_ids that have ever been enqueued (pending OR terminal). Catalog walk skips any opportunity_id present in the seen set. The pre-existing `liveByOpportunityId` map (only pending/delayed) is retained for the live-transition logic (delay → eligible).
+
+```typescript
+const seenOpportunityIds = new Set<string>();
+const liveByOpportunityId = new Map<string, OperationOpportunityState>();
+for (const p of working) {
+    seenOpportunityIds.add(p.opportunity_id);
+    if (p.status === 'eligible_pending_review' || p.status === 'delayed') {
+        liveByOpportunityId.set(p.opportunity_id, p);
+    }
+}
+// ... later in the catalog walk ...
+if (seenOpportunityIds.has(def.opportunity_id)) continue;
+```
+
+**MVP semantic:** A historical operation that has been authorized, declined, or expired is consumed for the rest of the scenario (one-shot). Future packets may add re-eligibility cooldowns (per design doc §5: declined opportunities re-eligible after 8 turns); the MVP one-shot is correct because the live opportunity is a historically-anchored event whose context typically does not recur.
+
+**Tests added (`tests/operation_opportunities_substrate.test.ts`):**
+1. `'one-shot guard: does NOT re-enqueue after approval (Phase 3.5 fix)'` — runs evaluator t175-t188 after approving the t175 proposal; asserts exactly one Sana proposal in the queue (status `approved`) and exactly one Sana CorpsOperation on the corps's `active_operations`.
+2. `'one-shot guard: does NOT re-enqueue after decline either'` — same pattern with `decline` decision; asserts one Sana proposal (status `declined`).
+
+**Verification:** `npx.cmd vitest run tests/operation_opportunities_substrate.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/operation_opportunities_5th_corps_sana.test.ts` → 45/45 pass (was 43, now +2 one-shot guard cases). `npx.cmd tsc --noEmit` clean. 188w scenario re-run pending — expected to show ONE Sana CorpsOperation in `operation_aars.json` (vs 5 in n1601) with same territorial outcome.
+
+**Singular ownership:** Only `evaluateOperationOpportunities` (canonical evaluator) changed. Catalog files, decision applier, autonomy bridge, IPC, and lifecycle owner all untouched.
+
+**Determinism self-review:**
+1. `Set<string>` insertion is content-determined; iteration via `for ... of working` (already sorted by Phase 1 contract).
+2. No `Math.random` / `Date.now` / `localeCompare` introduced.
+3. Save-shape unchanged.
+4. The fix is purely a re-enqueue gate — never modifies an existing proposal's status or a corps's active_operations.
+
+---
+
 ## [2026-05-01] feat(operations): 5th Corps / Sana 95 opportunity + single-owner migration (LANE B Phase 3)
 
 **Type:** First content family on top of the Phase 1 substrate + Phase 2 decision surface. Migrates Operation Sana from `triggered_operations.ts` (calendar-only `turn >= 175`) to the opportunity catalog (`SANA_95_OPPORTUNITY` with REAL prerequisite predicates). **No combat math change, no canon edits, no painted-target overrides, no FORAWWV touch.** Behavior on `main`: when run prerequisites hold (Storm triggered + pocket intact + corps readiness ≥ 0.40 + enemy targets RS-controlled), Sana surfaces and (as a player decision at autonomy_level=1) routes through `applyOpportunityDecision` → `buildCorpsOperation` exactly as before — same brigade roster, same axis layout, same staging anchor. Below the threshold, Sana does NOT fire. **This is the design intent (the engine telling the truth about the war the player produced) — expected hash drift on long-window scenarios is documented in Phase 4 verification.**
