@@ -111,7 +111,7 @@ These names should not become implementation scope until citations are stronger 
 1. `docs/plans/late-war-operation-opportunity-system-design.md`
    Defines the generic opportunity model: triggers, proposal UI, bot authorization, staging, decline/delay, and AAR.
 2. `docs/plans/late-war-5th-corps-opportunities-design.md`
-   Tigar-Sloboda, Pecigrad/Velika Kladusa, Breza, Grmec, Pauk/Shield, Sana.
+   Authored 2026-05-01. Treats 5th Corps as a special isolated-pocket family: APWB politics, pocket hardening, Breza/Pauk pressure, Grmec overextension, Storm/Oluja theater opening, and Sana exploitation.
 3. `docs/plans/late-war-central-bosnia-vlasic-kupres-design.md`
    Kupres/Cincar, Domet-95 failure window, Domet-1/Vlasic success window.
 4. `docs/plans/late-war-western-bosnia-hv-hvo-design.md`

@@ -1,3 +1,15 @@
+## [2026-05-01] docs(plan): late-war 5th Corps opportunity family design
+
+**Type:** Documentation/design only. Created `docs/plans/late-war-5th-corps-opportunities-design.md` and marked the 5th Corps backlog item as authored in `docs/research/2026-05-01-late-war-operation-opportunity-research.md`. Linked the family doc from the generic opportunity system doc, propagated the durable 5th Corps rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and refreshed `.claude/napkin.md` with the current architecture state. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Architecture decision:** 5th Corps is a special isolated-pocket family, not a normal ARBiH corps with a late-war buff. The design sequence is pocket isolation and hardening -> APWB / VRS / SVK pressure -> Breza/Pauk defensive crises -> Grmec breakout with overextension -> Storm/Oluja theater opening -> Sana exploitation through live readiness/staging/support checks.
+
+**Historical-source posture:** The family doc anchors to local BB evidence: BB2 pp.532-535 for APWB, Tigar-Sloboda, Pecigrad/Velika Kladusa, and Una/Grabez pressure; BB2 pp.540-542 for Breza; BB2 pp.546-548 and 555-556 for Grmec/Pauk/5th Corps quality; BB1 pp.417 and 419-420 for Sana.
+
+**Implementation direction:** Future packets should start with OSID/family-state mapping, then pocket/APWB substrate, then Tigar/Pecigrad, Breza/Pauk crises, Grmec overextension, and finally Storm/Oluja-gated Sana. Date-only Sana and generic ARBiH 1995 combat multipliers are explicitly forbidden shapes.
+
+**Determinism / behavior:** No simulation or UI behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(ui): design operation opportunity review surface
 
 **Type:** Documentation/product architecture only. Created `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`, updated the late-war opportunity design doc, linked the surface from the force-quality architecture contract, refreshed `docs/40_reports/GUI_MASTER.md`, and propagated the durable ownership rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.

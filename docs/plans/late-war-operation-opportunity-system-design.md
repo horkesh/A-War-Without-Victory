@@ -5,12 +5,14 @@
 **Authority:** Below canon (Engine Invariants > Phase Specs > Systems Manual > Rulebook > Game Bible). Inherits the Sensitive History Design Gate and the v0.9.0 Consequence System gate.
 **Source catalog:** `docs/research/2026-05-01-late-war-operation-opportunity-research.md`
 **Knowledge anchor:** `docs/PROJECT_LEDGER_KNOWLEDGE.md` top entry, *"Late-war operations should be opportunity proposals, not calendar-forced scripts (2026-05-01)"*
-**Related plans:** `docs/plans/2026-04-08-operations-system-a-plus-plan.md`, `docs/plans/MASTER_ROADMAP.md` (v0.9.0 Consequence System), `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`, `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`, `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`
+**Related plans:** `docs/plans/2026-04-08-operations-system-a-plus-plan.md`, `docs/plans/MASTER_ROADMAP.md` (v0.9.0 Consequence System), `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`, `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`, `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`, `docs/plans/late-war-5th-corps-opportunities-design.md`
 **Sensitive-history gate:** `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (binding; this doc does not modify it)
 
 ---
 
 ## 0. What this doc is, and is not
+
+**Family-doc status:** The first concrete family doc is now `docs/plans/late-war-5th-corps-opportunities-design.md`. It specializes this generic contract for the isolated Bihac pocket, APWB pressure, Storm/Oluja theater opening, and Sana exploitation arc.
 
 This is the **generic system design** that sits underneath every future late-war operation family doc (5th Corps, Vlasic/Kupres, HV/HVO western Bosnia, failed VRS offensives, safe-area / Krivaja-95 / Stupčanica-95). The family docs in the research catalog backlog are intentionally **not** in this doc; they will be authored separately on top of this one.
 
