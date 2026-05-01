@@ -67,6 +67,10 @@ export interface AxisAAR {
     equipment_lost: EquipmentTally;
     equipment_destroyed: EquipmentTally;
     equipment_captured: EquipmentTally;
+    /** Friendly OSID where this axis's brigades stage during planning.
+     *  Diagnostic carryover from `OperationAxis.staging_osid` — preserved on AAR
+     *  so post-mortem tools can reason about staging without source spelunking. */
+    staging_osid?: string;
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -134,6 +138,11 @@ export interface OperationAAR {
     force_quality_blocked_at_launch?: boolean;
     /** Phase 4: max axes cap from axis_coordination soft gate. */
     force_quality_max_axes_at_launch?: number;
+    /** Why the operation entered recovery — diagnostic carryover from
+     *  `CorpsOperation.recovery_reason`. Preserved on AAR so post-mortem tools
+     *  can distinguish completed vs max_failures vs orphaned vs no_logged_attempt
+     *  without source spelunking through the lifecycle. */
+    recovery_reason?: CorpsOperation['recovery_reason'];
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -662,7 +671,7 @@ export function finalizeOperationAAR(
                 }
             }
 
-            axisSummaries.push({
+            const axisSummary: AxisAAR = {
                 axis_id: axis.axis_id,
                 axis_name: axis.name,
                 brigades: [...axis.assigned_brigades],
@@ -674,7 +683,12 @@ export function finalizeOperationAAR(
                 equipment_lost: axEqLost,
                 equipment_destroyed: axEqDestroyed,
                 equipment_captured: axEqCaptured,
-            });
+            };
+            // Diagnostic carryover (Phase B): preserve axis staging OSID on the AAR.
+            if (axis.staging_osid) {
+                axisSummary.staging_osid = axis.staging_osid;
+            }
+            axisSummaries.push(axisSummary);
         }
     }
 
@@ -731,6 +745,12 @@ export function finalizeOperationAAR(
     }
     if (typeof op.force_quality_max_axes_at_launch === 'number') {
         aar.force_quality_max_axes_at_launch = op.force_quality_max_axes_at_launch;
+    }
+
+    // Phase B: diagnostic carryover for recovery_reason. Pure transfer — no
+    // recomputation. Preserves the lifecycle reason for post-mortem tools.
+    if (op.recovery_reason) {
+        aar.recovery_reason = op.recovery_reason;
     }
 
     if (!state.operation_history) state.operation_history = [];

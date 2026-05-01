@@ -1432,4 +1432,142 @@ describe('finalizeOperationAAR', () => {
         expect(state.operation_history[0].operation_id).toBe('existing');
         expect(state.operation_history[1].operation_id).toBe('corps_1kr:Op Corridor:t5');
     });
+
+    // ─── Phase B: diagnostic carryover ─────────────────────────────────────
+    // Late-War Operation Combat Delivery mega-lane. Failures like Sana 95
+    // (recovery_reason='max_failures') must be intelligible from the AAR alone
+    // without spelunking the lifecycle.
+
+    it('persists recovery_reason on AAR (max_failures shape)', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'max_failures' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RBiH', 'op:brcko:brcko_2': 'RBiH' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.recovery_reason).toBe('max_failures');
+    });
+
+    it('persists recovery_reason on AAR (completed shape)', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'completed' });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.recovery_reason).toBe('completed');
+    });
+
+    it('persists per-axis staging_osid on AxisAAR', () => {
+        const op = makeFinalizableOp({
+            objectives: undefined,
+            recovery_reason: 'completed',
+            axes: [
+                {
+                    axis_id: 'axis_north',
+                    name: 'Northern Push',
+                    assigned_brigades: ['bde_1'] as any[],
+                    objectives: ['op:brcko:brcko_1'],
+                    current_objective_index: 0,
+                    status: 'complete',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 2,
+                    attack_attempt_count: 3,
+                    objective_capture_count: 1,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                    staging_osid: 'op:brcko:brcko_north_staging',
+                },
+                {
+                    axis_id: 'axis_south',
+                    name: 'Southern Push',
+                    assigned_brigades: ['bde_2'] as any[],
+                    objectives: ['op:brcko:brcko_2'],
+                    current_objective_index: 0,
+                    status: 'complete',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 1,
+                    attack_attempt_count: 2,
+                    objective_capture_count: 1,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                    staging_osid: 'op:brcko:brcko_south_staging',
+                },
+            ],
+            weekly_log: [],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.axis_summaries).toBeDefined();
+        const north = aar.axis_summaries!.find(a => a.axis_id === 'axis_north')!;
+        const south = aar.axis_summaries!.find(a => a.axis_id === 'axis_south')!;
+        expect(north.staging_osid).toBe('op:brcko:brcko_north_staging');
+        expect(south.staging_osid).toBe('op:brcko:brcko_south_staging');
+    });
+
+    it('omits staging_osid on AxisAAR when axis lacks one', () => {
+        const op = makeFinalizableOp({
+            objectives: undefined,
+            recovery_reason: 'completed',
+            axes: [
+                {
+                    axis_id: 'axis_only',
+                    name: 'Only Push',
+                    assigned_brigades: ['bde_1'] as any[],
+                    objectives: ['op:brcko:brcko_1'],
+                    current_objective_index: 0,
+                    status: 'complete',
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                    momentum: 1,
+                    attack_attempt_count: 1,
+                    objective_capture_count: 1,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                    // no staging_osid
+                },
+            ],
+            weekly_log: [],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RBiH' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        const only = aar.axis_summaries!.find(a => a.axis_id === 'axis_only')!;
+        expect(only.staging_osid).toBeUndefined();
+    });
 });
