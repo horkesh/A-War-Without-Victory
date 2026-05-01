@@ -59,6 +59,7 @@ import type { GameState } from '../../../state/game_state.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
+import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -1759,6 +1760,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,
+        operationOpportunityProposals: deriveOperationOpportunityProposals(state, playerFaction),
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)
@@ -2522,6 +2524,9 @@ function derivePendingProposalReviews(
             faction: String(r.faction ?? ''),
             domain: String(r.domain ?? ''),
             description: String(r.description ?? ''),
+            proposed_action: typeof r.proposed_action === 'string' ? r.proposed_action : undefined,
+            current_value: typeof r.current_value === 'string' ? r.current_value : undefined,
+            proposed_value: typeof r.proposed_value === 'string' ? r.proposed_value : undefined,
         }));
     return pending.length > 0 ? pending : undefined;
 }

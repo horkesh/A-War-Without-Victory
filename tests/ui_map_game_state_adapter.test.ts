@@ -789,6 +789,94 @@ test('parseGameState derives player-scoped operation opportunity records with AA
     });
 });
 
+test('parseGameState derives player-scoped pending operation opportunity proposal dossiers', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 176,
+            phase: 'war',
+            player_faction: 'RBiH',
+            pending_proposal_reviews: [
+                {
+                    id: 'PROP_176_opportunity_0',
+                    turn: 176,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: 'Operation Sana - staff recommendation: approve',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+                {
+                    id: 'PROP_176_enemy_0',
+                    turn: 176,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Enemy opportunity',
+                    proposed_action: 'OPPORTUNITY:OPP_175_enemy_opportunity',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+            ],
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [
+                {
+                    opportunity_id: 'sana_95',
+                    proposal_id: 'OPP_175_sana_95',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'eligible_pending_review',
+                    approver_faction: 'RBiH',
+                    last_axis_evaluation: [
+                        { axis: 'date_window', mode: 'required', green: true, reason: 'window open' },
+                        { axis: 'corps_readiness', mode: 'required', green: false, reason: '5th Corps still staging' },
+                        { axis: 'enemy_weakness', mode: 'optional', green: false, reason: 'opposing line intact' },
+                    ],
+                },
+                {
+                    opportunity_id: 'enemy_opportunity',
+                    proposal_id: 'OPP_175_enemy_opportunity',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'eligible_pending_review',
+                    approver_faction: 'RS',
+                    last_axis_evaluation: [],
+                },
+            ],
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.pendingProposalReviews?.[0]?.proposed_action, 'OPPORTUNITY:OPP_175_sana_95');
+    assert.equal(parsed.pendingProposalReviews?.[0]?.proposed_value, 'approve');
+
+    assert.equal(parsed.operationOpportunityProposals?.length, 1);
+    const proposal = parsed.operationOpportunityProposals![0];
+    assert.equal(proposal.display_name, 'Operation Sana');
+    assert.equal(proposal.review_id, 'PROP_176_opportunity_0');
+    assert.equal(proposal.recommendation, 'approve');
+    assert.equal(proposal.required_axes_green, 1);
+    assert.equal(proposal.required_axes_total, 2);
+    assert.equal(proposal.optional_axes_green, 0);
+    assert.equal(proposal.optional_axes_total, 1);
+    assert.deepEqual(
+        proposal.prerequisite_axes.map((axis) => [axis.axis, axis.state]),
+        [
+            ['date_window', 'ready'],
+            ['corps_readiness', 'blocked'],
+            ['enemy_weakness', 'strained'],
+        ],
+    );
+    assert.deepEqual(
+        proposal.available_actions.map((action) => [action.id, action.enabled]),
+        [
+            ['approve', true],
+            ['decline', true],
+        ],
+    );
+});
+
 test('parseGameState exposes municipality support orders for the player faction UI', () => {
     const parsed = parseGameState({
   meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

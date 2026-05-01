@@ -43,6 +43,7 @@ const TYPE_LABELS: Record<string, string> = {
     peace_plan: 'PEACE PLAN',
     reserve_request: 'RESERVE',
     officer_event: 'PERSONNEL',
+    operation_opportunity: 'OPPORTUNITY',
     autonomy_proposal: 'PROPOSAL',
     situation: 'SITUATION',
 };

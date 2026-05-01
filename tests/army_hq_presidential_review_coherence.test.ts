@@ -43,6 +43,7 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('PRESIDENTIAL ATTENTION');
     expect(panelSource).toContain('This queue owns live military review work. Situation briefing below is context, not the action queue.');
     expect(panelSource).toContain('Presidential Decisions');
+    expect(panelSource).toContain('OperationOpportunityDossierPanel');
     expect(panelSource).toContain('Command Reactions');
     expect(panelSource).toContain('Personnel Directives');
   });
@@ -136,11 +137,34 @@ describe('Army HQ / presidential review coherence', () => {
     expect(appSource).toContain("action === 'army_reserve'");
     expect(appSource).toContain("action === 'army_hq_personnel'");
     expect(appSource).toContain("action === 'event_modal'");
+    expect(appSource).toContain("action === 'army_hq_opportunity'");
     expect(appSource).toContain("action === 'peace_plan_modal'");
     expect(appSource).toContain("action === 'autonomy_panel'");
 
     // event_modal routes to Army HQ briefing — where PresidentialAttentionPanel
     // renders and executes. Routing is navigation only; no IPC here.
     expect(appSource).toContain("openArmyHQTab(gs, 'briefing')");
+  });
+
+  it('keeps opportunity decisions on the Army HQ briefing surface, not generic autonomy cards', () => {
+    const panelSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const dossierSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OperationOpportunityDossierPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const inboxSource = readFileSync(
+      new URL('../src/ui/map/data/inboxItems.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(panelSource).toContain('operationOpportunityProposals');
+    expect(dossierSource).toContain('Operational Opportunities');
+    expect(dossierSource).toContain('ipc.acceptProposal');
+    expect(dossierSource).toContain('ipc.rejectProposal');
+    expect(inboxSource).toContain('operation_opportunity');
+    expect(inboxSource).toContain('army_hq_opportunity');
   });
 });

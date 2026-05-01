@@ -462,6 +462,43 @@ export interface OperationOpportunitySummaryView {
     didNotLaunchCount: number;
 }
 
+export type OperationOpportunityAxisState = 'ready' | 'blocked' | 'strained' | 'not_applicable';
+
+export interface OperationOpportunityPrerequisiteAxisView {
+    axis: string;
+    label: string;
+    mode: string;
+    green: boolean;
+    state: OperationOpportunityAxisState;
+    reason: string;
+}
+
+export interface OperationOpportunityProposalActionView {
+    id: 'approve' | 'decline';
+    label: string;
+    enabled: boolean;
+}
+
+export interface OperationOpportunityProposalView {
+    proposal_id: string;
+    opportunity_id: string;
+    display_name: string;
+    faction?: string;
+    status: OperationOpportunityRecordStatus;
+    eligibility_turn?: number;
+    expires_turn?: number;
+    review_id?: string;
+    description?: string;
+    recommendation?: string;
+    proposed_action?: string;
+    required_axes_green?: number;
+    required_axes_total?: number;
+    optional_axes_green?: number;
+    optional_axes_total?: number;
+    prerequisite_axes: OperationOpportunityPrerequisiteAxisView[];
+    available_actions: OperationOpportunityProposalActionView[];
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -752,6 +789,8 @@ export interface LoadedGameState {
     operationOpportunityRecords?: OperationOpportunityRecordView[];
     /** Summary counts for Army HQ opportunity records. */
     operationOpportunitySummary?: OperationOpportunitySummaryView;
+    /** Live Army HQ opportunity dossiers awaiting presidential review. */
+    operationOpportunityProposals?: OperationOpportunityProposalView[];
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */
@@ -1026,6 +1065,9 @@ export interface LoadedGameState {
         faction: string;
         domain: string;
         description: string;
+        proposed_action?: string;
+        current_value?: string;
+        proposed_value?: string;
     }>;
 }
 

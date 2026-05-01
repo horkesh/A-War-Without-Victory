@@ -9,10 +9,11 @@
  */
 
 import type { LoadedGameState } from './types';
+import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'autonomy_proposal' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -22,9 +23,23 @@ export interface InboxItem {
     title: string;
     subtitle: string;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'autonomy_panel' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'autonomy_panel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
+}
+
+function splitOpportunityDescription(description: string): { title: string; detail: string } {
+    const trimmed = description.trim();
+    if (!trimmed) return { title: 'Operation Opportunity', detail: 'ops proposal requires your review.' };
+    const emDashIndex = trimmed.indexOf('\u2014');
+    const hyphenIndex = trimmed.indexOf(' - ');
+    const splitAt = emDashIndex >= 0 ? emDashIndex : hyphenIndex >= 0 ? hyphenIndex : -1;
+    if (splitAt < 0) return { title: trimmed, detail: 'ops proposal requires your review.' };
+    const delimiterLength = emDashIndex >= 0 ? 1 : 3;
+    return {
+        title: trimmed.slice(0, splitAt).trim() || 'Operation Opportunity',
+        detail: trimmed.slice(splitAt + delimiterLength).trim() || 'ops proposal requires your review.',
+    };
 }
 
 /**
@@ -73,6 +88,19 @@ export function deriveInboxItems(
     const proposals = state.pendingProposalReviews;
     if (proposals && proposals.length > 0) {
         for (const prop of proposals) {
+            if (isOperationOpportunityReview(prop)) {
+                const { title, detail } = splitOpportunityDescription(prop.description || '');
+                items.push({
+                    id: `opportunity:${prop.id}`,
+                    type: 'operation_opportunity',
+                    severity: 'normal',
+                    title,
+                    subtitle: detail,
+                    action: 'army_hq_opportunity',
+                    priority: 32,
+                });
+                continue;
+            }
             items.push({
                 id: `proposal:${prop.id}`,
                 type: 'autonomy_proposal',

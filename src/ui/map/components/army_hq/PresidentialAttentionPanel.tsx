@@ -4,6 +4,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { getArmyReserveAttentionSummary } from '../../utils/armyReserveSeverity';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { OperationOpportunityDossierPanel } from './OperationOpportunityDossierPanel';
 import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 
 interface PresidentialAttentionPanelProps {
@@ -34,6 +35,10 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     const reviewQueue = gameState.presidentialReviewQueue;
     const armyReserveQueue = gameState.armyReserveQueue;
     const reserveSummary = armyReserveQueue ? getArmyReserveAttentionSummary(armyReserveQueue) : null;
+    const opportunityDossierCount = (gameState.operationOpportunityProposals ?? [])
+        .filter((proposal) => !proposal.faction || proposal.faction === playerFaction)
+        .length;
+    const liveReviewCount = (reviewQueue?.pendingCount ?? 0) + opportunityDossierCount;
 
     const pendingDecisions = useMemo(
         () =>
@@ -82,7 +87,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         }
     };
 
-    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue) {
+    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue && opportunityDossierCount === 0) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
@@ -104,20 +109,21 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                             PRESIDENTIAL ATTENTION
                         </div>
                         <div className="text-[12px] font-bold text-text-primary">
-                            {reviewQueue && reviewQueue.pendingCount > 0
-                                ? `${reviewQueue.pendingCount} matter${reviewQueue.pendingCount === 1 ? '' : 's'} await command review`
+                            {liveReviewCount > 0
+                                ? `${liveReviewCount} matter${liveReviewCount === 1 ? '' : 's'} await command review`
                                 : 'No presidential military reviews pending'}
                         </div>
                         <div className="text-[10px] text-text-secondary mt-1">
                             This queue owns live military review work. Situation briefing below is context, not the action queue.
                         </div>
                     </div>
-                    {reviewQueue && reviewQueue.pendingCount > 0 && (
+                    {liveReviewCount > 0 && (
                         <div className="grid grid-cols-2 gap-2 min-w-[15rem]">
-                            <CountCard label="Critical" value={reviewQueue.criticalCount} tone="critical" />
-                            <CountCard label="Event Decisions" value={reviewQueue.eventDecisionCount} tone={reviewQueue.eventDecisionCount > 0 ? 'critical' : 'neutral'} />
-                            <CountCard label="Command Reactions" value={reviewQueue.commandInterpretationCount} tone={reviewQueue.commandInterpretationCount > 0 ? 'warning' : 'neutral'} />
-                            <CountCard label="Personnel Directives" value={reviewQueue.personnelDirectiveCount} tone={reviewQueue.personnelDirectiveCount > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label="Critical" value={reviewQueue?.criticalCount ?? 0} tone="critical" />
+                            <CountCard label="Event Decisions" value={reviewQueue?.eventDecisionCount ?? 0} tone={(reviewQueue?.eventDecisionCount ?? 0) > 0 ? 'critical' : 'neutral'} />
+                            <CountCard label="Command Reactions" value={reviewQueue?.commandInterpretationCount ?? 0} tone={(reviewQueue?.commandInterpretationCount ?? 0) > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label="Personnel Directives" value={reviewQueue?.personnelDirectiveCount ?? 0} tone={(reviewQueue?.personnelDirectiveCount ?? 0) > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label="Op Dossiers" value={opportunityDossierCount} tone={opportunityDossierCount > 0 ? 'warning' : 'neutral'} />
                         </div>
                     )}
                 </div>
@@ -157,6 +163,8 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     </section>
                 )}
             </div>
+
+            <OperationOpportunityDossierPanel gameState={gameState} playerFaction={playerFaction} />
 
             {pendingDecisions.length > 0 && (
                 <section className="space-y-2">

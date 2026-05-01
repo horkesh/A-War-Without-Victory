@@ -10,6 +10,7 @@
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
 - `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`
 
 ## Purpose
 
@@ -18,6 +19,23 @@ The late-war opportunity model says historical operations should surface as prop
 This doc defines the missing player-facing bridge: how an operation opportunity becomes a readable, actionable Army HQ dossier that the player can approve, delay, redirect, under-resource, or decline.
 
 The goal is not to make a new combat path or a new free-form planner. The goal is to make the existing command shell show the player why an opportunity exists, what the staff thinks, what institutional traits matter, and what decision is being made.
+
+## Implementation Checkpoint - 2026-05-01
+
+The live MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`.
+
+Implemented:
+
+- adapter DTO `LoadedGameState.operationOpportunityProposals`
+- pending-review preservation of `proposed_action`, `current_value`, and `proposed_value`
+- Presidential Inbox routing for `OPPORTUNITY:<proposal_id>` rows to Army HQ briefing
+- Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, and Decline
+
+Still planned:
+
+- dedicated decision IPC for Delay / Redirect / Under-resource
+- map footprint highlighting
+- persisted force-quality trait bands and objective/staging labels in the player-safe DTO
 
 ## Architecture Decision
 

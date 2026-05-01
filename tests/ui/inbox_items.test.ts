@@ -7,6 +7,7 @@
  *  - Reserve requests produce army_reserve action items
  *  - Officer events produce army_hq_personnel action items
  *  - Autonomy proposals produce autonomy_panel action items from pendingProposalReviews
+ *  - Operation opportunities route to Army HQ dossiers, not the generic autonomy panel
  *  - Opening brief appears when openingBriefDismissed is false and player_faction is set
  *  - Empty state returns only date marker
  */
@@ -233,6 +234,32 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(proposalItems[0].title).toBe('Command Proposal');
         expect(proposalItems[0].subtitle).toBe('Launch operation Corridor');
         expect(proposalItems[1].id).toBe('proposal:PROP_5_ops_1');
+    });
+
+    it('routes OPPORTUNITY proposals to Army HQ opportunity dossiers', () => {
+        const state = makeStub({
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_176_opportunity_0',
+                    turn: 176,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: 'Operation Sana - staff recommendation: approve',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const opportunityItems = items.filter(i => i.type === 'operation_opportunity');
+        expect(opportunityItems).toHaveLength(1);
+        expect(opportunityItems[0].id).toBe('opportunity:PROP_176_opportunity_0');
+        expect(opportunityItems[0].severity).toBe('normal');
+        expect(opportunityItems[0].action).toBe('army_hq_opportunity');
+        expect(opportunityItems[0].title).toBe('Operation Sana');
+        expect(opportunityItems[0].subtitle).toBe('staff recommendation: approve');
+        expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
     });
 
     it('does not produce items when pendingProposalReviews is undefined', () => {

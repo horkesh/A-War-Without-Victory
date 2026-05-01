@@ -1,3 +1,19 @@
+## [2026-05-01] feat(ui): surface pending operation opportunities as Army HQ dossiers
+
+**Type:** UI/data-consumer feature. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.
+
+**Why:** The opportunity system now has proposal, decision, AAR, records, diagnostics, and Cost Ledger truth, but live player review still appeared as a generic autonomy proposal. Named historical opportunities need a command dossier at Army HQ so the player can see why the opportunity exists before authorizing it.
+
+**Change:** Added `operationOpportunityProposals` to `LoadedGameState`, derived by `src/ui/map/data/operationOpportunityDossiers.ts` from live opportunity proposals plus `OPPORTUNITY:<proposal_id>` pending review rows. `pendingProposalReviews` now preserves `proposed_action`, `current_value`, and `proposed_value`. The presidential inbox routes opportunity reviews to Army HQ briefing (`operation_opportunity` / `army_hq_opportunity`) instead of the generic autonomy panel. Army HQ briefing now renders `OperationOpportunityDossierPanel`, showing staff recommendation, expiry, required/optional prerequisite counts, player-safe prerequisite chips, and existing Authorize/Decline actions through `ipc.acceptProposal` / `ipc.rejectProposal`.
+
+**Limits:** This is the MVP review surface. It intentionally exposes only Authorize and Decline because the richer `stage-operation-opportunity-decision` IPC for Delay / Redirect / Under-resource does not exist yet. No map footprint highlighting or objective/staging DTO persistence was added.
+
+**Verification:** Red first: focused UI tests failed on missing `proposed_action` preservation, missing opportunity inbox route, and missing Army HQ dossier component. Green: `npx.cmd vitest run tests/ui_map_game_state_adapter.test.ts tests/ui/inbox_items.test.ts tests/army_hq_presidential_review_coherence.test.ts` -> 55/55 pass; `npx.cmd tsc --noEmit` clean; broader UI/opportunity routing pack -> 81/81 pass; `npm.cmd run desktop:map:build` pass with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`.
+
+---
+
 ## [2026-05-01] milestone(operations): LANE C 5th Corps Opportunity Family Expansion CLOSED
 
 **Type:** Lane close-out (content-only). Five-phase content lane delivered on top of the LANE B substrate. **No combat math, no new lifecycle, no IPC contracts, no scenario data, no painted targets, no canon, no FORAWWV touch, no new UI surfaces.** Determinism preserved. Single-owner discipline preserved (zero overlap between `_TRIGGERED_OPS` and any of the 5 new opportunity_ids).

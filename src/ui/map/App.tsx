@@ -676,6 +676,9 @@ function App() {
           // here. Inbox is navigation-only for this family; the panel owns IPC.
           openArmyHQTab(gs, 'briefing');
         }
+        if (action === 'army_hq_opportunity') {
+          openArmyHQTab(gs, 'briefing');
+        }
         if (action === 'peace_plan_modal') {
           // Reset dismissal so the PeacePlanModal renders again
           setPeacePlanDismissed(false);
