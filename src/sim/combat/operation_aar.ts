@@ -71,6 +71,12 @@ export interface AxisAAR {
      *  Diagnostic carryover from `OperationAxis.staging_osid` — preserved on AAR
      *  so post-mortem tools can reason about staging without source spelunking. */
     staging_osid?: string;
+    /** Diagnostic carryover from `OperationAxis.unreachable_at_launch` (Phase C of
+     *  the Late-War Operation Combat Delivery mega-lane). True if at the launch-readiness
+     *  check the axis's first objective had zero approach OSIDs (front-unreachable),
+     *  i.e. the silent-skip path was taken. The op still launches on its other axes;
+     *  this axis never attacks. Surfaced on AAR so post-mortem tools see it. */
+    unreachable_at_launch?: boolean;
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -687,6 +693,10 @@ export function finalizeOperationAAR(
             // Diagnostic carryover (Phase B): preserve axis staging OSID on the AAR.
             if (axis.staging_osid) {
                 axisSummary.staging_osid = axis.staging_osid;
+            }
+            // Diagnostic carryover (Phase C): preserve unreachable_at_launch flag.
+            if (axis.unreachable_at_launch) {
+                axisSummary.unreachable_at_launch = true;
             }
             axisSummaries.push(axisSummary);
         }

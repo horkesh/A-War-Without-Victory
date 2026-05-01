@@ -224,7 +224,14 @@ export function areParticipantsReadyForExecution(
             const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
             if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
             const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective]);
-            if (axisApproachOsids.size === 0) continue;
+            if (axisApproachOsids.size === 0) {
+                // Phase C diagnostic (Late-War Operation Combat Delivery mega-lane):
+                // mark axis as front-unreachable at launch. Write-only — silent-skip
+                // behavior preserved (op still launches on other axes; this axis
+                // stays in 'executing' but never attacks). Persisted to AxisAAR.
+                axis.unreachable_at_launch = true;
+                continue;
+            }
 
             for (const brigadeId of axis.assigned_brigades) {
                 const brigade = state.military.formations?.[brigadeId];

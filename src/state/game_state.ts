@@ -250,6 +250,13 @@ export interface OperationAxis {
     consecutive_catastrophic_on_current?: number;
     /** Friendly OSID where this axis's brigades stage during planning. */
     staging_osid?: string;
+    /** Diagnostic (write-only): set true at launch-readiness check when this axis's
+     *  current objective has zero approach OSIDs (front-unreachable from any friendly
+     *  position). Does NOT change execution flow — silent-skip behavior is preserved.
+     *  The op still launches on its other axes; this axis stays in 'executing' but
+     *  never attacks. Persists through to AxisAAR for post-mortem visibility.
+     *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
+    unreachable_at_launch?: boolean;
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */
