@@ -598,9 +598,10 @@ function detectPhantomSectorAdvantage(state: GameState): AnomalyReport[] {
  * A completed operation in operation_history (total_attacks === 0 and outcome !== 'orphaned')
  * means brigades never reached staging during any execution turn — the "eligible=0 stall" pattern.
  *
- * Uses OperationAAR.total_attacks (aggregated from weekly_log) which persists in
- * state.operation_history after an operation ends. Orphaned ops are excluded because
- * their sector was dissolved, not because brigades failed to stage.
+ * Uses OperationAAR.total_attacks (copied from operation/axis lifecycle counters,
+ * with weekly-log fallback for old shapes) which persists in state.operation_history
+ * after an operation ends. Orphaned ops are excluded because their sector was
+ * dissolved, not because brigades failed to stage.
  */
 function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];

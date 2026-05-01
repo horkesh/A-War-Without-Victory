@@ -1097,6 +1097,118 @@ describe('finalizeOperationAAR', () => {
         expect(aar.equipment_captured.artillery).toBe(0);
     });
 
+    it('uses the canonical operation attack counter when weekly log attacks are missing', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:brcko:brcko_1'],
+            attack_attempt_count: 7,
+            weekly_log: [
+                {
+                    turn: 6,
+                    phase: 'execution',
+                    attacks_this_turn: 0,
+                    objectives_captured_this_turn: [],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: 0, wounded: 0 },
+                    casualties_inflicted: { killed: 0, wounded: 0 },
+                    equipment_lost: { tanks: 0, artillery: 0 },
+                    equipment_destroyed: { tanks: 0, artillery: 0 },
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                    brigade_count: 2,
+                    momentum: 0,
+                    notable_events: [],
+                },
+            ],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.total_attacks).toBe(7);
+        expect(aar.objectives_held_without_logged_capture).toEqual(['op:brcko:brcko_1']);
+        expect(aar.capture_provenance).toBe('held_without_logged_capture');
+    });
+
+    it('uses canonical axis attack counters when weekly axis rows are missing', () => {
+        const op = makeFinalizableOp({
+            objectives: undefined,
+            axes: [
+                {
+                    axis_id: 'axis_north',
+                    name: 'Northern Push',
+                    assigned_brigades: ['bde_1'] as any[],
+                    objectives: ['op:brcko:brcko_1'],
+                    current_objective_index: 0,
+                    status: 'stalled',
+                    failure_count: 3,
+                    consecutive_failures_on_current: 3,
+                    momentum: 0,
+                    attack_attempt_count: 3,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+                {
+                    axis_id: 'axis_south',
+                    name: 'Southern Push',
+                    assigned_brigades: ['bde_2'] as any[],
+                    objectives: ['op:brcko:brcko_2'],
+                    current_objective_index: 0,
+                    status: 'stalled',
+                    failure_count: 4,
+                    consecutive_failures_on_current: 4,
+                    momentum: 0,
+                    attack_attempt_count: 4,
+                    objective_capture_count: 0,
+                    movement_only_execution_turns: 0,
+                    idle_execution_turn_streak: 0,
+                },
+            ],
+            recovery_reason: 'max_failures',
+            weekly_log: [
+                {
+                    turn: 6,
+                    phase: 'execution',
+                    attacks_this_turn: 0,
+                    objectives_captured_this_turn: [],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: 0, wounded: 0 },
+                    casualties_inflicted: { killed: 0, wounded: 0 },
+                    equipment_lost: { tanks: 0, artillery: 0 },
+                    equipment_destroyed: { tanks: 0, artillery: 0 },
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                    brigade_count: 2,
+                    momentum: 0,
+                    notable_events: [],
+                },
+            ],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RBiH', 'op:brcko:brcko_2': 'RBiH' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.total_attacks).toBe(7);
+        expect(aar.axis_summaries?.map(a => [a.axis_id, a.total_attacks])).toEqual([
+            ['axis_north', 3],
+            ['axis_south', 4],
+        ]);
+    });
+
     it('records logged capture provenance separately from final held objectives', () => {
         const op = makeFinalizableOp({
             objectives: ['op:brcko:brcko_1', 'op:brcko:brcko_2'],
@@ -1270,12 +1382,12 @@ describe('finalizeOperationAAR', () => {
         expect(north.brigades).toEqual(['bde_1']);
         expect(north.objectives_targeted).toEqual(['op:brcko:brcko_1']);
         expect(north.objectives_captured).toEqual(['op:brcko:brcko_1']);
-        expect(north.total_attacks).toBe(1);
+        expect(north.total_attacks).toBe(3);
         expect(north.casualties_suffered.killed).toBe(5);
 
         const south = aar.axis_summaries!.find(a => a.axis_id === 'axis_south')!;
         expect(south.axis_name).toBe('Southern Push');
-        expect(south.total_attacks).toBe(1);
+        expect(south.total_attacks).toBe(2);
         expect(south.casualties_suffered.killed).toBe(3);
     });
 

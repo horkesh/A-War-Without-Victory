@@ -1,3 +1,19 @@
+## [2026-05-01] fix(operations): make AAR attack totals read canonical lifecycle counters
+
+**Type:** Operation AAR / reporting truth fix. No combat math, control-flip logic, OOB, scenario data, painted targets, opportunity catalog predicates, or UI changed.
+
+**Why:** LANE D proved the AAR layer could classify a launched operation as `did_not_launch`: Operation Sana had `op.attack_attempt_count=7` across three axes and `recovery_reason='max_failures'`, but its AAR reported `total_attacks=0` because `finalizeOperationAAR(...)` summed `weekly_log[*].attacks_this_turn`. That weekly field is not the canonical lifecycle counter and is not populated consistently for every operation path.
+
+**Change:** `src/sim/combat/operation_aar.ts` now derives operation AAR `total_attacks` from lifecycle counters: multi-axis ops sum `axis.attack_attempt_count`; legacy flat ops use `op.attack_attempt_count`; old/partial shapes fall back to weekly-log totals. Axis summaries now use each axis lifecycle counter. Casualties and equipment ledgers still aggregate from `weekly_log`. `src/scenario/anomaly_detector.ts` comment updated to match the new truth source.
+
+**Tests:** Red-first regressions added to `tests/operation_aar.test.ts`: (1) operation-level counter reports 7 attacks while weekly rows report 0; (2) multi-axis counters report 3+4 attacks while weekly axis rows are absent. Green: `npx.cmd vitest run tests/operation_aar.test.ts` 44/44; `npx.cmd tsc --noEmit` clean; broader AAR/opportunity/anomaly pack 116/116 pass.
+
+**Determinism:** Preserved. No randomness, timestamps, locale ordering, or new unstable iteration. Scenario final-state hashes may change where operation AARs are serialized, but this is a reporting/save-truth correction only; no operation execution, territorial control, or combat outcome logic is changed.
+
+**Report:** `docs/40_reports/implemented/20260501_AAR_CANONICAL_ATTACK_COUNTER_FIX.md`.
+
+---
+
 ## [2026-05-01] evidence(operations): LANE D 5th Corps opportunity family 188w stress + health audit
 
 **Type:** Read-only orchestration evidence packet. No engine code, combat math, OOB, scenario data, painted targets, opportunity catalog, IPC, UI, or canon changed. Three subagents (Operations Expert, Gap-Finder, Canon-Compliance Reviewer) dispatched read-only.
@@ -5,6 +21,8 @@
 **Why:** LANE C closed with 7 entries in `FIFTH_CORPS_OPPORTUNITIES` but no scenario-scale stress. The substrate / catalog / decision / AAR / health-audit chain needed end-to-end proof under a fresh 188w run, not just unit tests.
 
 **Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1604`. Final-state hash `dca64282334ae735` (vs n1602 `c18c909fbb6fb62b` — additive opportunity-state shape change since LANE C added 6 catalog entries with `last_force_quality_traits` / `last_footprint` / `redirect_variants` snapshots; not a behavioral drift).
+
+**Codex review correction:** n1604 started at `ad20e735`, before Codex commit `f7091d62`; therefore `last_footprint` / `redirect_variants` are not contributors to this run's hash drift. The hash explanation should be read as LANE C catalog expansion + Force-Quality Dossier proposal snapshot state, not the later footprint/redirect DTO lane.
 
 **Findings (substrate health = GREEN):**
 - Only 1 of 7 entries surfaced as a proposal in 188 weeks: sana_95 at t175 (RBiH approve → CorpsOperation → AAR `arbih_5th_corps:Operation Sana:t175`).
@@ -21,6 +39,8 @@
 - Cross-validation: 21 of 43 AARs in n1604 (49%) have `total_attacks=0` despite weekly_log entries. Operation Prijedor with outcome=success + 10/10 captures shows `total_attacks=0`. NOT opportunity-specific.
 - Root cause: AAR aggregator at `operation_aar.ts:519-528` reads `weekly_log[*].attacks_this_turn` instead of canonical `op.attack_attempt_count`. Sector_offensive write-side and AAR read-side disagree on which counter is canonical.
 - Crosses `>1 owner without Codex review` stop gate; recommend dedicated lane owned by `/scenario-harness-engineer` + `/operations-expert`.
+
+**Codex review correction:** the 21/43 number is the zero-`total_attacks` symptom set. Sana and Operation Prijedor are proven false negatives; do not read the whole 21-row set as proof that every row executed canonical attack attempts without a dedicated counter-reconciliation pass.
 
 **Bounded fix in scope but NOT shipped:** Fix B at `operation_opportunities.ts:614-615` would add an observability breadcrumb on the silent ineligible-skip path. Single-substrate-file scope, write-only diagnostic, no behavioral change. All three reviewers (Ops Expert, Gap-Finder, Canon-Compliance) said SAFE. Not shipped because it is observability, not a "bug fix" per the lane's narrow code-commit criterion. Recommended as a single-commit follow-up.
 

@@ -5,7 +5,7 @@
 **Predecessor lanes (closed):** LANE B opportunity MVP, LANE C 5th Corps family expansion, Health Diagnostic, Decision Bridge, Force-Quality Dossier
 **HEAD at run start:** `ad20e735` (force-quality dossier)
 **Run dir:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1604`
-**Final-state hash:** `dca64282334ae735` (vs n1602 `c18c909fbb6fb62b`; differs by additive opportunity-state shape since LANE C added 6 catalog entries with `last_force_quality_traits` / `last_footprint` / `redirect_variants` snapshots)
+**Final-state hash:** `dca64282334ae735` (vs n1602 `c18c909fbb6fb62b`; differs by additive opportunity-state shape since LANE C expanded the catalog and Force-Quality Dossier added `last_force_quality_traits` snapshots. Note: this run started at `ad20e735`, before Codex commit `f7091d62`, so `last_footprint` / `redirect_variants` are not contributors to n1604.)
 
 ## 1. Headline
 
@@ -22,7 +22,7 @@ Substrate health is **GREEN** on every architectural axis the lane was meant to 
 
 **Catalog content health is YELLOW**: predicate topology blocks 6 of 7 entries from surfacing, traceable to a single live-state signal that pins 6 outcomes through railroad-by-omission. This is a content/calibration concern with multi-owner sign-off, not a substrate bug.
 
-**Engine-wide AAR aggregator is RED but out of scope**: 21 of 43 AARs in this run (49%) misreport `total_attacks=0` despite executing real combat (e.g. Operation Prijedor success / 10 captures / 0 reported attacks). Sana's `did_not_launch` exit_class is a false negative caused by this same aggregator. NOT opportunity-specific; touching it would change `exit_class` derivation for every op in the engine and crosses the lane-D `>1 owner without Codex review` stop gate.
+**Engine-wide AAR aggregator is RED but out of scope**: 21 of 43 AARs in this run (49%) report `total_attacks=0`. At least the Sana and Prijedor rows are proven false negatives (`op.attack_attempt_count=7` for Sana; Operation Prijedor succeeded with 10 captures while reporting 0 attacks). The 21-row count is the symptom set, not proof that all 21 had canonical attack attempts. Sana's `did_not_launch` exit_class is a false negative caused by this same aggregator. NOT opportunity-specific; touching it would change `exit_class` derivation for every op in the engine and crosses the lane-D `>1 owner without Codex review` stop gate.
 
 ## 2. Run Pipeline
 
@@ -93,7 +93,7 @@ All four broken-row predicates pass on the substrate's own terms. The Sana row t
 
 ### Fix A — AAR aggregator misreports `total_attacks=0` (DEMOTED)
 **Location:** `src/sim/combat/operation_aar.ts:519-528`
-**Symptom:** AAR `total_attacks` is summed from `weekly_log[*].attacks_this_turn` instead of canonical `op.attack_attempt_count`. 21 of 43 AARs in n1604 (49%) misreport — Operation Prijedor with outcome=success + 10/10 captures shows `total_attacks=0`.
+**Symptom:** AAR `total_attacks` is summed from `weekly_log[*].attacks_this_turn` instead of canonical lifecycle counters (`op.attack_attempt_count` / `axis.attack_attempt_count`). 21 of 43 AARs in n1604 (49%) report zero attacks; Sana and Prijedor are proven false negatives.
 **Why demoted from Lane D:** Affects every op in the engine, not just opportunity-spawned ops. Sector_offensive owners and AAR owners disagree on which counter is canonical. Touching this changes `exit_class` derivation for the entire `_TRIGGERED_OPS` family + every commander-spawned op, not just opportunities. Crosses lane-D `>1 owner without Codex review` stop gate.
 **Recommended next-lane:** dedicated AAR-aggregator audit owned by `/scenario-harness-engineer` + `/operations-expert`, with `/qa-engineer` regression on every AAR row in 40w + 188w runs.
 
@@ -110,13 +110,11 @@ All four broken-row predicates pass on the substrate's own terms. The Sana row t
 
 ## 8. Hash Drift Classification
 
-`dca64282334ae735` (n1604) vs `c18c909fbb6fb62b` (n1602) is **additive opportunity-state shape change**, NOT behavioral. The catalog grew from 1 entry (Sana 95 only) at n1602 to 7 entries (LANE C) at n1604, and the LANE C / Decision Bridge / Force-Quality Dossier substrate evolutions added the following per-proposal serialized fields:
+`dca64282334ae735` (n1604) vs `c18c909fbb6fb62b` (n1602) is **additive opportunity-state shape change**, NOT behavioral. The catalog grew from 1 entry (Sana 95 only) at n1602 to 7 entries (LANE C) at n1604, and the Decision Bridge / Force-Quality Dossier substrate evolution added the following serialized truth:
 - `last_force_quality_traits` (force-quality dossier)
-- `last_footprint` (Codex parallel lane footprint snapshot)
-- `redirect_variants` (Codex parallel lane redirect snapshot)
 - `t3_authorized_no_offensive` exit_class string (LANE C T3 substrate)
 
-Painted-control behavior unchanged: same scenario, same OOB, same combat math. Five of seven catalog entries silently ineligible therefore produce zero state-shape contribution; only Sana 95's proposal record + resolution row + AAR link contribute the actual byte difference, all of which are expected per the LANE C "additive shape change is the correct hash drift to record" durable rule.
+`last_footprint` / `redirect_variants` are intentionally absent from n1604 because the run started before Codex commit `f7091d62`; they are a later UI/DTO lane, not a cause of this run's hash drift. Painted-control behavior unchanged: same scenario, same OOB, same combat math. Five of seven catalog entries silently ineligible therefore produce zero state-shape contribution; only Sana 95's proposal record + resolution row + AAR link contribute the actual byte difference, all of which are expected per the LANE C "additive shape change is the correct hash drift to record" durable rule.
 
 ## 9. Sensitive-History Compliance (re-verified)
 

@@ -272,6 +272,31 @@ function collectObjectives(op: CorpsOperation): string[] {
     return objs;
 }
 
+function canonicalOperationAttackCount(op: CorpsOperation, weeklyFallback: number): number {
+    if (op.axes && op.axes.length > 0) {
+        let total = 0;
+        let hasAxisCounter = false;
+        for (const axis of op.axes) {
+            if (typeof axis.attack_attempt_count === 'number') {
+                total += axis.attack_attempt_count;
+                hasAxisCounter = true;
+            }
+        }
+        if (hasAxisCounter) return total;
+    }
+    if (typeof op.attack_attempt_count === 'number') return op.attack_attempt_count;
+    return weeklyFallback;
+}
+
+function canonicalAxisAttackCount(
+    axis: NonNullable<CorpsOperation['axes']>[number],
+    weeklyFallback: number,
+): number {
+    return typeof axis.attack_attempt_count === 'number'
+        ? axis.attack_attempt_count
+        : weeklyFallback;
+}
+
 /** Get the overall momentum of an operation. */
 function getOperationMomentum(op: CorpsOperation): number {
     if (op.axes) {
@@ -515,9 +540,10 @@ export function finalizeOperationAAR(
         outcome = 'failure';
     }
 
-    // 5. Aggregate totals from weekly_log
+    // 5. Aggregate totals. Attack attempts belong to the operation lifecycle
+    // counters; weekly_log remains the casualty/equipment ledger.
     const log = op.weekly_log ?? [];
-    let totalAttacks = 0;
+    let weeklyTotalAttacks = 0;
     const totalSuffered: CasualtyTally = { killed: 0, wounded: 0 };
     const totalInflicted: CasualtyTally = { killed: 0, wounded: 0 };
     const totalEqLost: EquipmentTally = { tanks: 0, artillery: 0 };
@@ -525,7 +551,7 @@ export function finalizeOperationAAR(
     const totalEqCaptured: EquipmentTally = { tanks: 0, artillery: 0 };
 
     for (const entry of log) {
-        totalAttacks += entry.attacks_this_turn;
+        weeklyTotalAttacks += entry.attacks_this_turn;
         totalSuffered.killed += entry.casualties_suffered.killed;
         totalSuffered.wounded += entry.casualties_suffered.wounded;
         totalInflicted.killed += entry.casualties_inflicted.killed;
@@ -537,6 +563,7 @@ export function finalizeOperationAAR(
         totalEqCaptured.tanks += entry.equipment_captured.tanks;
         totalEqCaptured.artillery += entry.equipment_captured.artillery;
     }
+    const totalAttacks = canonicalOperationAttackCount(op, weeklyTotalAttacks);
 
     const loggedCaptureSet = new Set<string>();
     for (const entry of log) {
@@ -641,7 +668,7 @@ export function finalizeOperationAAR(
                 brigades: [...axis.assigned_brigades],
                 objectives_targeted: [...axis.objectives],
                 objectives_captured: axisObjsHeld,
-                total_attacks: axAttacks,
+                total_attacks: canonicalAxisAttackCount(axis, axAttacks),
                 casualties_suffered: axSuffered,
                 casualties_inflicted: axInflicted,
                 equipment_lost: axEqLost,
