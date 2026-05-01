@@ -561,7 +561,8 @@ function resolveOperationSectorId(
  */
 export function advanceSectorOffensives(
     state: GameState,
-    supplyByOsid?: SupplyStateByOsidReport | null
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -668,7 +669,9 @@ export function advanceSectorOffensives(
                     autoResolveProbe(state, op, faction);
                 }
 
-                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0);
+                // LANE-2026-05-02: thread supplyByOsid + terrainMultByOsid into preparation
+                // for honest defender-modifier-aware force-ratio estimation.
+                const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid);
 
                 // Collect preparation event for turn report
                 prepEvents.push({

@@ -125,6 +125,8 @@ import { correctMarchOrders, correctTransitStates } from '../combat/commander_ma
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+// LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
+import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
@@ -871,10 +873,25 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'advance-sector-offensives',
-        run: (context) => {
+        // LANE-2026-05-02: build terrain cache once per turn so estimateForceRatio
+        // can honor terrain/urban/forest defender modifiers via combat_math helpers.
+        run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid);
+            // LANE-2026-05-02: build defender terrain multiplier cache (mirrors
+            // combat_predictor.buildTerrainCache call shape used elsewhere).
+            let terrainMultByOsid: Record<string, number> | undefined;
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical) {
+                let terrainData;
+                try {
+                    terrainData = await loadTerrainScalars();
+                } catch {
+                    terrainData = { by_sid: {} };
+                }
+                terrainMultByOsid = buildTerrainCache(od.opData.operationalToCanonical, terrainData);
+            }
+            const prepEvents = advanceSectorOffensives(context.state, supplyByOsid, terrainMultByOsid);
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }

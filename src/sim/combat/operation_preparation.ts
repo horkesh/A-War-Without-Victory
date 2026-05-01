@@ -47,6 +47,7 @@ import type {
     CorpsOperation,
     FactionId,
     FormationId,
+    FormationState,
     GameState,
     PreparationSubPhase,
     CommanderAssessment,
@@ -56,6 +57,9 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
 import { getEquipmentOffensivePriority } from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
+// LANE-2026-05-02: estimateForceRatio defender-modifier integration
+import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } from './combat_math.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -188,21 +192,37 @@ function collectObjectiveEnemySectorIds(
 /**
  * Estimate force ratio based on intel confidence and competence.
  * High confidence → close to ground truth. Low confidence → inaccurate estimate.
+ *
+ * LANE-2026-05-02: estimateForceRatio defender-modifier integration.
+ * Now sums COMBAT POWER (computeAttackerPower / rankDefendersByPower) instead of
+ * raw personnel — honors the same defender modifiers the resolver uses
+ * (entrenchment, terrain, urban/forest, equipment, supply, posture, morale,
+ * fatigue, officer, corps stance, home distance, disruption). Bilateral by
+ * construction: faction-agnostic call shape. Threading: optional supplyByOsid /
+ * terrainMultByOsid passed from war_phases.ts → advanceSectorOffensives →
+ * tickPreparation. Backward-compatible: undefined → neutral 1.0 lookup.
+ *
+ * Sentinel decision (enemyStrength === 0):
+ *   confidence >= 0.5 → 3.0 (confident "no known enemy" stays open-road)
+ *   confidence  < 0.5 → 1.0 (blind belief becomes cautious)
  */
 export function estimateForceRatio(
     state: GameState,
     op: CorpsOperation,
     competence: number,
     confidence: number,
+    supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
+    terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
 ): number {
-    // Count own brigade strength
-    let ownStrength = 0;
+    // LANE-2026-05-02: collect attacker formations (active only) once for both
+    // power summation and the artillery-suppression input to defender ranking.
+    const attackerFormations: FormationState[] = [];
     for (const bid of op.participating_brigades) {
         const b = state.military.formations?.[bid];
         if (!b || b.status !== 'active') continue;
-        ownStrength += b.personnel ?? 1000;
+        attackerFormations.push(b);
     }
-    if (ownStrength === 0) return 0;
+    if (attackerFormations.length === 0) return 0;
 
     const objectives = new Set(op.objectives ?? []);
     if (objectives.size === 0 && op.axes) {
@@ -211,32 +231,87 @@ export function estimateForceRatio(
         }
     }
 
+    // LANE-2026-05-02: pick a single primary objective OSID for terrain/supply lookups.
+    // Stable: lowest sorted objective string. Defender power is summed across the
+    // facing enemy sector (covering multiple OSIDs); the primary OSID is the
+    // representative for terrain/urban/forest cache lookups.
+    const sortedObjectives = Array.from(objectives).sort(strictCompare);
+    const primaryTargetOsid = sortedObjectives[0];
+
+    // LANE-2026-05-02: backward-compatible neutral terrain lookup when caller
+    // does not pass terrainMultByOsid. Matches combat_math.ts default.
+    const terrainCache = terrainMultByOsid ?? {};
+    const targetTerrainMult = primaryTargetOsid ? (terrainCache[primaryTargetOsid] ?? 1.0) : 1.0;
+
+    // LANE-2026-05-02: sum attacker COMBAT POWER (override posture to 'attack' so
+    // dig_in / defend brigades contribute their offensive value). Each brigade
+    // gets supply/terrain/officer/morale/fatigue applied via combat_math.
+    const attackerFaction = (attackerFormations[0]!.faction as string) || 'RBiH';
+    let ownStrength = 0;
+    for (const a of attackerFormations) {
+        ownStrength += computeAttackerPower(state, a, supplyByOsid, 'attack', targetTerrainMult, primaryTargetOsid);
+    }
+    if (ownStrength === 0) {
+        // LANE-2026-05-02: every attacker had postureMult <= 0 OR base power 0.
+        // Predictor cannot offer a meaningful ratio.
+        return 0;
+    }
+
     const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives);
 
-    // Estimate enemy strength from sector data
-    let enemyStrength = 0;
+    // LANE-2026-05-02: collect defender brigades from the facing enemy sector(s).
+    const defenderFormations: FormationState[] = [];
     if (op.sector_id && state.military.corps_front_sectors) {
         const sector = state.military.corps_front_sectors[op.sector_id];
         if (sector) {
-            // Look at enemy sectors facing ours
             const intel = state.military.sector_intel?.[op.sector_id];
             if (intel) {
                 for (const rec of intel) {
                     if (objectiveEnemySectors.size > 0 && !objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
                     const enemySector = state.military.corps_front_sectors?.[rec.enemy_sector_id];
                     if (!enemySector) continue;
-                    // Count enemy brigades in that sector
                     for (const bid of enemySector.assigned_brigade_ids ?? []) {
                         const b = state.military.formations?.[bid];
                         if (!b || b.status !== 'active') continue;
-                        enemyStrength += b.personnel ?? 1000;
+                        defenderFormations.push(b);
                     }
                 }
             }
         }
     }
 
-    if (enemyStrength === 0) return 3.0; // No known enemy → optimistic estimate
+    // LANE-2026-05-02: deterministic ordering of defenders before passing to
+    // rankDefendersByPower (which sorts by power desc internally; sort by id
+    // first to make ties deterministic).
+    defenderFormations.sort((a, b) => strictCompare(a.id, b.id));
+
+    // LANE-2026-05-02: sentinel — no known defenders. Tighten the previous
+    // unconditional 3.0 fantasy to confidence-gated honest estimate.
+    if (defenderFormations.length === 0 || !primaryTargetOsid) {
+        return confidence >= 0.5 ? 3.0 : 1.0;
+    }
+
+    // LANE-2026-05-02: rank defender power using shared combat_math.
+    // computeDefenderPower honors entrenchment, urban/forest, supply, posture,
+    // corps stance, terrain, equipment, morale, fatigue, officer, home distance.
+    const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
+    const noEthnicBonus = (_d: FormationState) => 0; // ethnic composition not threaded; matches combat_predictor "no sector" path
+    const { totalPower: enemyStrength } = rankDefendersByPower(
+        defenderFormations,
+        state,
+        primaryTargetOsid,
+        terrainCache,
+        artSuppression,
+        supplyByOsid,
+        noEthnicBonus,
+    );
+
+    if (enemyStrength <= 0) {
+        // LANE-2026-05-02: defenders present but power resolved to 0 (e.g. all in
+        // terminal disruption + critical supply). Same sentinel rule: confidence
+        // gate, not an unconditional optimistic 3.0.
+        return confidence >= 0.5 ? 3.0 : 1.0;
+    }
 
     const trueRatio = ownStrength / enemyStrength;
 
@@ -404,6 +479,8 @@ export function tickPreparation(
     corpsId: FormationId,
     faction: FactionId,
     supplyReadiness: number,
+    supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
+    terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
 ): PreparationTickResult {
     const commander = getOpsCommander(state, op);
     const competence = commander?.data.competence ?? 3;
@@ -425,7 +502,8 @@ export function tickPreparation(
     op.preparation_turns_elapsed = (op.preparation_turns_elapsed ?? 0) + 1;
 
     const confidence = getOperationIntelConfidence(state, op);
-    const forceRatio = estimateForceRatio(state, op, competence, confidence);
+    // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
+    const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);
     const requiredConfidence = getRequiredConfidence(competence, aggressiveness);
     const requiredForceRatio = getRequiredForceRatio(competence, aggressiveness);
 

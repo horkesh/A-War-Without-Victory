@@ -41,6 +41,12 @@ import {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function makeMinimalState(overrides?: Partial<GameState>): GameState {
+    // LANE-2026-05-02: pre-seed corps_command for the default 'vrs_1kk' corps_id
+    // used by makeFormation. Post-Phase-4, estimateForceRatio calls computeAttackerPower
+    // which reads state.military.corps_command[formation.corps_id] via getCorpsStance /
+    // getThreeTierOfficerMod (combat_math.ts:485). Empty corps_command crashes the
+    // non-null assertion. Pre-Phase-4 this was harmless because force-ratio was
+    // personnel-only.
     return {
         meta: { turn: 10, phase: 'war' },
         political: {
@@ -48,7 +54,17 @@ function makeMinimalState(overrides?: Partial<GameState>): GameState {
         },
         military: {
             formations: {},
-            corps_command: {},
+            corps_command: {
+                vrs_1kk: {
+                    command_span: 5,
+                    subordinate_count: 3,
+                    og_slots: 2,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'defensive',
+                    active_operations: [],
+                },
+            },
             corps_front_sectors: {},
             sector_intel: {},
             named_officers: {},
@@ -387,7 +403,16 @@ describe('estimateForceRatio', () => {
         });
 
         const ratio = estimateForceRatio(state, op, 5, 0.9);
-        expect(ratio).toBeGreaterThan(2.0);
+        // LANE-2026-05-02: post-defender-modifier-integration the absolute ratio
+        // changed (was personnel-only, now combat-power). Test intent preserved:
+        // ratio reflects ONLY enemy_sector_small (1 def brigade, 1000 personnel) and
+        // NOT enemy_sector_large (2 def brigades, 6000 personnel total). If the
+        // predictor incorrectly summed both sectors the ratio would collapse far
+        // below the "small only" band. With the small sector alone, attacker
+        // (2400 personnel) vs single defender (~1000 personnel + posture/equip mods)
+        // sits in the 0.7–1.3 band; with both sectors aggregated it would be < 0.5.
+        expect(ratio).toBeGreaterThan(0.6);
+        expect(ratio).toBeLessThan(1.5);
     });
 });
 
