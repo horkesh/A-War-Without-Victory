@@ -1,3 +1,23 @@
+## [2026-05-01] chore(scenarios): harmonize apr1992_definitive family on war_timeline+init_officers
+
+**Type:** Scenario configuration only — Phase 1 of FORCE QUALITY FOUNDATION milestone (Lane A). Bound `war_timeline: "apr1992"` and `init_officers: "apr1992"` in `data/scenarios/apr1992_definitive_52w.json`, `apr1992_definitive_56w.json`, and `apr1992_definitive_104w.json`. Added `tests/scenario_apr1992_family_consistency.test.ts` to lock the agreement against future drift. No engine code, UI code, OOB, operation definitions, painted targets, or canon files changed.
+
+**Why:** The Force Quality Trajectory Evidence Audit (`docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §6 CC1) confirmed the sibling scenarios diverged on whether they bind the apr1992 timeline at all: `40w` and `188w` bound both fields; `52w` and `56w` bound only `init_officers`; `104w` bound neither. Without a binding the engine silently routes that scenario through the hardcoded fallback officer-learning multipliers (`officer_quality_update.ts:46-49`, `RBiH=1.5 / RS=0.7 / HRHB=1.0`) instead of the timeline values in `data/scenarios/timelines/apr1992.json:386-411`, producing irreconcilable cross-window comparisons (the audit observed 104w `RBiH=0.601` vs 188w `RBiH=0.092`). Phase 2 of the milestone fixes the `learning_rate` unit semantics; harmonizing the family must precede that fix, otherwise the deliberate post-Phase-2 hash refresh would only land on two of the five family scenarios.
+
+**Investigation:** Confirmed silent omission, not intentional fallback. `tools/perf/profile_scenario.ts` does not reference 104w. No script, harness, or doc declares any sibling as a fallback-test scenario; the only references are diagnostic tools that consume runs of these scenarios. The audit's open question on whether 104w was an intentional fallback is settled as omission. `scenario_registry.ts` only surfaces 40w and 52w as playable; the others are research/diagnostic siblings of the same starting state.
+
+**Files changed:** `data/scenarios/apr1992_definitive_52w.json` (+1 line, war_timeline adjacent to existing init_officers), `data/scenarios/apr1992_definitive_56w.json` (+1 line, same convention), `data/scenarios/apr1992_definitive_104w.json` (single-line JSON; both fields inserted adjacent to `init_formations_oob` matching 188w convention), `tests/scenario_apr1992_family_consistency.test.ts` (new). No other field touched. `apr1992_definitive_40w_backup_n48base.json` deliberately untouched.
+
+**Test:** `tests/scenario_apr1992_family_consistency.test.ts` auto-discovers every `apr1992_definitive_*.json` (excluding `*_backup_*.json`), sorts deterministically via the project's `strictCompare`, and asserts each member binds `war_timeline === "apr1992"` and `init_officers === "apr1992"`. A discovery-sanity assert guards against accidental glob regressions. Adding a new family member later that lacks either field will fail the test with a per-file diagnostic. Result: 6/6 pass; `npx tsc --noEmit` clean.
+
+**Determinism / behavior:** Engine code unchanged, but binding the timeline changes which `officer_config` block the engine consumes for the three previously-divergent scenarios. Expected hash impact:
+- `apr1992_definitive_104w.json`: hashes will move (officer-learning path now reads timeline values instead of the hardcoded fallback multipliers).
+- `apr1992_definitive_52w.json`: hashes may move slightly (was reading fallback `learning_rate` while consuming `init_officers` from timeline; now also consumes timeline `learning_rate`). The 52w manifest baseline at `data/derived/scenario/baselines/manifest.json` will need a deliberate refresh as part of Phase 2.
+- `apr1992_definitive_56w.json`: hashes may move (same reason); 56w not currently tracked in the manifest.
+- `apr1992_definitive_40w.json` and `apr1992_definitive_188w.json`: unchanged.
+
+**Phase 2 follows:** officer `learning_rate` units fix in isolation (Shape C — split `learning_rate_abs` and `learning_rate_mult` per audit §4) with a deliberate baseline refresh covering all five family members at once. Phase 1 deliberately does not refresh `data/derived/scenario/baselines/manifest.json` — that is Phase 2's responsibility per the audit's "Recommended Packet Order" (`§10`).
+
 ## [2026-05-01] docs(process): establish autonomous parallel workstreams
 
 **Type:** Documentation/process and roadmap update. Created `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md`, updated `docs/plans/MASTER_ROADMAP.md`, and propagated the durable rule into `docs/PROJECT_LEDGER_KNOWLEDGE.md`. No engine code, UI code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
