@@ -9,6 +9,7 @@ export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critica
 export type TurnAftermathSignalKind = 'event' | 'decoration' | 'arc' | 'supply' | 'movement';
 export type TurnAftermathSignalSeverity = 'routine' | 'notable' | 'urgent';
 export type TurnAftermathCampaignMomentum = 'advancing' | 'contested' | 'bleeding' | 'quiet';
+export type TurnAftermathRecordFilter = 'all' | 'hard' | 'signals' | 'actions' | 'territory';
 
 export interface TurnAftermathReportInput {
   turn?: number;
@@ -597,4 +598,26 @@ export function buildTurnAftermathCampaignPulse(records: readonly TurnAftermathV
     eventCount,
     decorationCount,
   };
+}
+
+export function filterTurnAftermathRecords(
+  records: readonly TurnAftermathView[],
+  filter: TurnAftermathRecordFilter,
+): TurnAftermathView[] {
+  if (filter === 'all') return [...records];
+  return records.filter((record) => {
+    if (filter === 'hard') {
+      return record.cost.severity === 'critical' || record.cost.severity === 'severe';
+    }
+    if (filter === 'signals') {
+      return record.signals.length > 0;
+    }
+    if (filter === 'actions') {
+      return record.nextActions.actionableCount > 0;
+    }
+    if (filter === 'territory') {
+      return record.territory.friendlyNet !== 0;
+    }
+    return true;
+  });
 }

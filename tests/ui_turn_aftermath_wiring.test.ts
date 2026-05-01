@@ -43,6 +43,14 @@ describe('turn aftermath UI wiring', () => {
     expect(panel).toContain('Strategic signals');
   });
 
+  it('exposes commander review filters for long aftermath archives', () => {
+    const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
+
+    expect(panel).toContain('filterTurnAftermathRecords');
+    expect(panel).toContain('Hard turns');
+    expect(panel).toContain('No aftermath records match this review filter.');
+  });
+
   it('routes all tactical advance-turn entrypoints through the aftermath dependency bundle', () => {
     const files = [
       '../src/ui/map/components/PresidentialToolbar.tsx',

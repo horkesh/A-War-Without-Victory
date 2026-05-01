@@ -1,4 +1,4 @@
-# Turn Aftermath Product Spine C1-C6
+# Turn Aftermath Product Spine C1-C7
 
 **Date:** 2026-05-01
 **Type:** UI/product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
@@ -114,6 +114,18 @@ The records surface now shows:
 - severe/critical turn count
 - theater cost in the visible archive
 
+## C7 Review Filters Extension
+
+The Army HQ `TURN AFTERMATH` archive now has commander review filters:
+
+- `All`
+- `Hard turns`
+- `Signals`
+- `Actions`
+- `Territory`
+
+The filter owner is `filterTurnAftermathRecords(records, mode)`, a pure helper over already-built views. The UI shows per-filter counts and recomputes the campaign pulse, ledger summary, and record list from the visible set. This keeps long campaigns navigable without adding a second archive, second query store, or simulation-side state.
+
 ## Files
 
 - `src/ui/map/data/turnAftermath.ts`
@@ -145,8 +157,10 @@ The records surface now shows:
   - 6/6 pass after C4 ledger-summary helper
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts`
   - 13/13 pass after C5-C6 strategic signals and momentum pulse
+  - 15/15 pass after C7 review filters
 - `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
   - 48/48 pass after C5-C6
+  - 50/50 pass after C7
 - `npx.cmd tsc --noEmit`
   - clean
 - `npx.cmd tsc --noEmit -p tsconfig.json`

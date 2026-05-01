@@ -154,6 +154,24 @@
 ---
 ---
 
+---
+
+## [2026-05-01] feat(ui): filter Turn Aftermath records by review mode
+
+**Type:** Tactical-map UI / product-spine records navigation. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** A long campaign archive cannot stay useful as an unfiltered stack. Once Turn Aftermath records carry cost and strategic signals, the player needs commander review modes to jump to hard turns, signal-bearing turns, pending-action turns, and territorial movement.
+
+**Change:** Added `filterTurnAftermathRecords(...)` with stable modes: `all`, `hard`, `signals`, `actions`, and `territory`. Army HQ `TURN AFTERMATH` now exposes filter buttons with per-mode counts; the campaign pulse, ledger summary, and record list update against the visible filtered set.
+
+**Tests:** Red-first filter-helper test added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 50/50 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This is local UI state plus a pure filter over already-built record views. It does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
 ## [2026-05-01] feat(ui): add Turn Aftermath strategic signals and momentum pulse
 
 **Type:** Tactical-map UI / product-spine records intelligence. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.

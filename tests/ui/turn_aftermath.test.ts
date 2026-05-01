@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
+import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView, filterTurnAftermathRecords } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -437,5 +437,51 @@ describe('buildTurnAftermathView', () => {
       eventCount: 1,
       decorationCount: 1,
     });
+  });
+
+  it('filters aftermath records by commander review mode', () => {
+    const quiet = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({ turn: 40, territory_net: { RBiH: 0 } }),
+      }),
+    })!;
+    const hard = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 41,
+          territory_net: { RBiH: -1 },
+          displacement_total: 1000,
+        }),
+      }),
+    })!;
+    const signal = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 42,
+          territory_net: { RBiH: 0 },
+          events_fired: [{ id: 'event_signal', text: 'Event fired.' }],
+        }),
+      }),
+    })!;
+    const action = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({ turn: 43, territory_net: { RBiH: 0 } }),
+        pendingEventDecisions: [
+          { event_id: 'evt_action', event_title: 'Decision', turn_fired: 43, faction: 'RBiH', response_options: [{ id: 'yes', label: 'Yes', effects: [] }] },
+        ],
+      }),
+    })!;
+    const territory = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({ turn: 44, territory_net: { RBiH: 2 } }),
+      }),
+    })!;
+    const records = [territory, action, signal, hard, quiet];
+
+    expect(filterTurnAftermathRecords(records, 'all').map((record) => record.turn)).toEqual([44, 43, 42, 41, 40]);
+    expect(filterTurnAftermathRecords(records, 'hard').map((record) => record.turn)).toEqual([41]);
+    expect(filterTurnAftermathRecords(records, 'signals').map((record) => record.turn)).toEqual([42]);
+    expect(filterTurnAftermathRecords(records, 'actions').map((record) => record.turn)).toEqual([43]);
+    expect(filterTurnAftermathRecords(records, 'territory').map((record) => record.turn)).toEqual([44, 41]);
   });
 });

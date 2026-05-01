@@ -1,6 +1,14 @@
-import { useMemo } from 'react';
-import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, type TurnAftermathView } from '../../data/turnAftermath';
+import { useMemo, useState } from 'react';
+import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
+
+const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; label: string }> = [
+    { id: 'all', label: 'All' },
+    { id: 'hard', label: 'Hard turns' },
+    { id: 'signals', label: 'Signals' },
+    { id: 'actions', label: 'Actions' },
+    { id: 'territory', label: 'Territory' },
+];
 
 function formatSigned(value: number): string {
     if (value > 0) return `+${value}`;
@@ -130,6 +138,7 @@ function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; 
 }
 
 export function TurnAftermathRecordsPanel() {
+    const [filter, setFilter] = useState<TurnAftermathRecordFilter>('all');
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
 
@@ -137,13 +146,17 @@ export function TurnAftermathRecordsPanel() {
         () => buildTurnAftermathRecordViews({ state, osidNameMap, limit: 18 }),
         [state, osidNameMap],
     );
+    const visibleRecords = useMemo(
+        () => filterTurnAftermathRecords(records, filter),
+        [records, filter],
+    );
     const summary = useMemo(
-        () => buildTurnAftermathLedgerSummary(records),
-        [records],
+        () => buildTurnAftermathLedgerSummary(visibleRecords),
+        [visibleRecords],
     );
     const pulse = useMemo(
-        () => buildTurnAftermathCampaignPulse(records),
-        [records],
+        () => buildTurnAftermathCampaignPulse(visibleRecords),
+        [visibleRecords],
     );
 
     if (records.length === 0) {
@@ -158,6 +171,27 @@ export function TurnAftermathRecordsPanel() {
 
     return (
         <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+                {RECORD_FILTERS.map((option) => {
+                    const count = filterTurnAftermathRecords(records, option.id).length;
+                    const active = filter === option.id;
+                    return (
+                        <button
+                            key={option.id}
+                            type="button"
+                            onClick={() => setFilter(option.id)}
+                            className={`rounded border px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] transition ${
+                                active
+                                    ? 'border-amber-400/35 bg-amber-400/15 text-amber-300'
+                                    : 'border-panel-border/60 bg-panel-card/60 text-text-secondary hover:border-white/20 hover:text-text-primary'
+                            }`}
+                        >
+                            {option.label} <span className="ml-1 tabular-nums opacity-75">{count}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
             <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -205,7 +239,11 @@ export function TurnAftermathRecordsPanel() {
             </div>
 
             <div className="space-y-2">
-                {records.map((record) => (
+                {visibleRecords.length === 0 ? (
+                    <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
+                        No aftermath records match this review filter.
+                    </div>
+                ) : visibleRecords.map((record) => (
                     <TurnAftermathRecordCard key={record.turn} view={record} isLatest={record.turn === latest.turn} />
                 ))}
             </div>
