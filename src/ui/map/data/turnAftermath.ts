@@ -16,6 +16,13 @@ export interface TurnAftermathBuildInput {
   nextState: LoadedGameState | null;
   lastTurnReport?: TurnAftermathReportInput | null;
   osidNameMap?: Record<string, string> | null;
+  includeNextActions?: boolean;
+}
+
+export interface TurnAftermathRecordsInput {
+  state: LoadedGameState | null;
+  osidNameMap?: Record<string, string> | null;
+  limit?: number;
 }
 
 export interface TurnAftermathFlipView {
@@ -155,6 +162,19 @@ function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, st
   };
 }
 
+function emptyNextActions(): TurnAftermathView['nextActions'] {
+  return {
+    actionableCount: 0,
+    blockingCount: 0,
+    opportunityCount: 0,
+    reserveCount: 0,
+    officerCount: 0,
+    eventDecisionCount: 0,
+    peaceCount: 0,
+    topItems: [],
+  };
+}
+
 export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAftermathView | null {
   const nextState = input.nextState;
   if (!nextState) return null;
@@ -227,6 +247,36 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       ownSupplyDelta: playerFaction ? (summary?.supply_deltas?.[playerFaction] ?? 0) : 0,
       ownHeavyMunitionsDelta: playerFaction ? (summary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
     },
-    nextActions: buildNextActions(nextState, input.osidNameMap ?? null),
+    nextActions: input.includeNextActions === false
+      ? emptyNextActions()
+      : buildNextActions(nextState, input.osidNameMap ?? null),
   };
+}
+
+export function buildTurnAftermathRecordViews(input: TurnAftermathRecordsInput): TurnAftermathView[] {
+  const state = input.state;
+  if (!state) return [];
+
+  const summariesByTurn = new Map<number, TurnSummary>();
+  for (const summary of state.turnSummaries ?? []) {
+    summariesByTurn.set(summary.turn, summary);
+  }
+  if (state.latestTurnSummary) {
+    summariesByTurn.set(state.latestTurnSummary.turn, state.latestTurnSummary);
+  }
+
+  const limit = Math.max(0, Math.floor(input.limit ?? 12));
+  return [...summariesByTurn.values()]
+    .sort((a, b) => b.turn - a.turn)
+    .slice(0, limit)
+    .map((summary) => buildTurnAftermathView({
+      nextState: {
+        ...state,
+        turn: summary.turn,
+        latestTurnSummary: summary,
+      },
+      osidNameMap: input.osidNameMap ?? null,
+      includeNextActions: summary.turn === state.latestTurnSummary?.turn,
+    }))
+    .filter((view): view is TurnAftermathView => view != null);
 }

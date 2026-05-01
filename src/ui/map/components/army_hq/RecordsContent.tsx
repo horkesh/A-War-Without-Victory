@@ -6,8 +6,10 @@ import { AARPanel } from '../AARPanel';
 import { OperationHistoryPanel } from '../OperationHistoryPanel';
 import { useGameStore } from '../../store/gameStore';
 import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
+import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
 
 const SUB_TABS = [
+    { id: 'aftermath' as const, label: 'TURN AFTERMATH' },
     { id: 'aar' as const, label: 'AFTER-ACTION REPORT' },
     { id: 'ops' as const, label: 'OPERATION HISTORY' },
     { id: 'opportunities' as const, label: 'OPPORTUNITIES' },
@@ -53,6 +55,7 @@ export function RecordsContent() {
             </div>
 
             {/* Content */}
+            {subTab === 'aftermath' && <TurnAftermathRecordsPanel />}
             {subTab === 'aar' && <AARPanel isOpen={true} onClose={() => {}} embedded />}
             {subTab === 'ops' && <OperationHistoryPanel isOpen={true} onClose={() => {}} embedded />}
             {subTab === 'opportunities' && <OpportunityLedgerPanel />}

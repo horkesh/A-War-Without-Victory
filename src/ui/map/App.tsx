@@ -66,7 +66,7 @@ import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './deskt
 import type { SummaryFocusSection } from './data/types';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { isWarroomLocalCommand } from './utils/warroomNavigation';
-import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
+import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -551,7 +551,7 @@ function App() {
     setSummaryOpen(false);
   };
 
-  const openArmyHQRecords = (subTab: 'aar' | 'ops' | 'opportunities') => {
+  const openArmyHQRecords = (subTab: ArmyHQRecordsSubTab) => {
     openArmyHQRecordsSubTab(useGameStore.getState(), subTab);
     setSummaryOpen(false);
     setEventLogOpen(false);
@@ -767,7 +767,7 @@ function App() {
         }}
         onOpenRecords={() => {
           setTurnAftermathOpen(false);
-          openArmyHQRecords('aar');
+          openArmyHQRecords('aftermath');
         }}
       />
       <ArmyHQModal />

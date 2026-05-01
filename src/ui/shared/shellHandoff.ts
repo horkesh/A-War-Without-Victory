@@ -1,5 +1,5 @@
 export type ArmyHQTab = 'briefing' | 'summary' | 'records' | 'personnel';
-export type ArmyHQRecordsSubTab = 'aar' | 'ops' | 'opportunities';
+export type ArmyHQRecordsSubTab = 'aftermath' | 'aar' | 'ops' | 'opportunities';
 
 export type ShellHandoffCommand =
   | {
@@ -35,6 +35,7 @@ export function isShellHandoffCommand(value: unknown): value is ShellHandoffComm
   }
   if (
     command.recordsSubTab != null
+    && command.recordsSubTab !== 'aftermath'
     && command.recordsSubTab !== 'aar'
     && command.recordsSubTab !== 'ops'
     && command.recordsSubTab !== 'opportunities'

@@ -12,6 +12,17 @@ describe('turn aftermath UI wiring', () => {
     expect(app).toContain('const turnAftermath = useGameStore');
     expect(app).toContain('<TurnAftermathModal');
     expect(app).toContain('openInboxHome');
+    expect(app).toContain("openArmyHQRecords('aftermath')");
+  });
+
+  it('persists aftermath packets in Army HQ records', () => {
+    const records = read('../src/ui/map/components/army_hq/RecordsContent.tsx');
+    const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
+
+    expect(records).toContain("{ id: 'aftermath' as const, label: 'TURN AFTERMATH' }");
+    expect(records).toContain("subTab === 'aftermath'");
+    expect(panel).toContain('buildTurnAftermathRecordViews');
+    expect(panel).toContain('No turn aftermath records');
   });
 
   it('routes all tactical advance-turn entrypoints through the aftermath dependency bundle', () => {

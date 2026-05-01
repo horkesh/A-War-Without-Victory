@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
+import { buildTurnAftermathRecordViews, buildTurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -240,5 +240,25 @@ describe('buildTurnAftermathView', () => {
     expect(view?.tone).toBe('quiet');
     expect(view?.headline).toBe('Turn advanced.');
     expect(view?.nextActions.actionableCount).toBe(0);
+  });
+
+  it('builds newest-first persistent records from turn summaries with latest-summary fallback', () => {
+    const turn10 = makeSummary({ turn: 10, territory_net: { RBiH: -1 } });
+    const turn11 = makeSummary({ turn: 11, territory_net: { RBiH: 0 } });
+    const turn12 = makeSummary({ turn: 12, territory_net: { RBiH: 2 } });
+    const state = makeState({
+      turn: 12,
+      latestTurnSummary: turn12,
+      turnSummaries: [turn10, turn11],
+      pendingEventDecisions: [
+        { event_id: 'evt_latest', event_title: 'Latest Decision', turn_fired: 12, faction: 'RBiH', response_options: [{ id: 'yes', label: 'Yes', effects: [] }] },
+      ],
+    });
+
+    const records = buildTurnAftermathRecordViews({ state, limit: 2 });
+
+    expect(records.map((record) => record.turn)).toEqual([12, 11]);
+    expect(records.map((record) => record.tone)).toEqual(['gain', 'quiet']);
+    expect(records.map((record) => record.nextActions.actionableCount)).toEqual([1, 0]);
   });
 });

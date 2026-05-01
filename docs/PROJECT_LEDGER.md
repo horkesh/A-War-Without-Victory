@@ -153,6 +153,21 @@
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
 ---
 
+## [2026-05-01] feat(ui): persist Turn Aftermath in Army HQ records
+
+**Type:** Tactical-map UI / product-spine records surface. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** Turn Aftermath C1 gave the player an immediate post-advance report, but it was still ephemeral. A dismissed modal should not erase the president's access to "what happened last turn" history. Army HQ RECORDS already owns military history, so Turn Aftermath needs to live there as a persistent review surface.
+
+**Change:** Added `buildTurnAftermathRecordViews(...)` in `src/ui/map/data/turnAftermath.ts` to compose newest-first records from `LoadedGameState.turnSummaries`, with `latestTurnSummary` as a fallback for freshly loaded saves. Only the latest record carries live inbox obligations; older records stay archived turn packets. Added `TurnAftermathRecordsPanel` and mounted it as a new Army HQ RECORDS subtab (`aftermath`). The Turn Aftermath modal's records action now lands on that subtab instead of generic AARs. Extended shared shell handoff and store types so Warroom/Tactical navigation can route directly to `recordsSubTab: 'aftermath'`.
+
+**Tests:** Focused UI/read-model/navigation pack green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 43/43 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with only pre-existing Vite chunk/dynamic-import warnings.
+
+**Determinism:** Preserved. This is a UI/read-model projection over already-persisted summaries and inbox state. It does not mutate GameState, operation execution, combat, control, scenario data, or saved sim truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
 ## [2026-05-01] feat(ui): add Turn Aftermath product-spine bridge
 
 **Type:** Tactical-map UI / product-spine read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.

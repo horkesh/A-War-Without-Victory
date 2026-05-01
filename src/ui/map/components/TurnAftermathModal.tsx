@@ -130,7 +130,7 @@ export function TurnAftermathModal({
             War Summary
           </button>
           <button type="button" onClick={onOpenRecords} className="rounded border border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary">
-            AAR Records
+            Turn Records
           </button>
           <button type="button" onClick={onOpenInbox} className="rounded border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-300 hover:bg-amber-400/20">
             Review Inbox
