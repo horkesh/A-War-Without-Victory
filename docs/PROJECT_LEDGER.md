@@ -1,3 +1,71 @@
+## [2026-05-01] feat(operations): corps_operation_readiness foundation (Phase 4 of FORCE QUALITY FOUNDATION)
+
+**Type:** Engine addition + decision-layer wiring — Phase 4 of FORCE QUALITY FOUNDATION milestone (Lane A). Implements the "readiness/execution layer" between historical opportunity and the existing `CorpsOperation` lifecycle, per `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` §"Minimum Viable Slice". Converts `faction_officer_maturity` and `capability_profile` from decorative-in-war-phase (audit §3 + CC2 + CC3 in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md`) to live force-quality inputs without touching combat math. No tuning, no canon edits, no painted-target overrides.
+
+**Why:** The audit confirmed the design seam — readiness gating against the doctrinal arc — was structurally absent: `army_hq_gathering.ts`, `bot_corps_directives.ts`, `commander/plan.ts`, and the entire `commander/` tree contained zero references to `officer_quality`, `capability_profile`, or `faction_officer_maturity`. Phase 2 fixed the units bug; Phase 3 removed the calendar railroad; Phase 4 closes the seam by deriving seven explicit `[0,1]` traits per corps and applying three soft gates at proposal/staging time only — combat math is untouched.
+
+**New helper (`src/sim/combat/corps_operation_readiness.ts`):**
+- `CorpsOperationReadinessTraits`: seven named `[0,1]` traits — `operation_readiness`, `staging_reliability`, `axis_coordination`, `support_delivery`, `failure_recovery`, `reserve_response`, `collapse_susceptibility`. Six positive, one inverse (`collapse_susceptibility` higher = worse — JSDoc'd).
+- `CorpsOperationReadinessInputSnapshot`: structured record of the inputs that produced the traits (mean/p25 officer quality, normalized faction maturity, capability fields, cohesion/morale, exhaustion, pool pressure, consecutive failures, equipment-support fraction). Player-safe — same numbers already in state.
+- `computeCorpsOperationReadiness(state, corpsId)`: pure deterministic function. Reads brigade `officer_quality` distribution, `faction_officer_maturity` (normalized around 3.0 neutral on `[1, 5]`), `capability_profile` (training_quality / organizational_maturity / equipment_access|equipment_operational / doctrine_effectiveness.ATTACK with COORDINATED_STRIKE fallback for HRHB), per-brigade cohesion + morale, `corps_command[*].corps_exhaustion`, `political.war_supply_pressure[*]`, commander-state operation history (consecutive failure streak), and per-brigade tank/artillery operational fraction. Trait formulas are explicit linear weighted sums clamped to `[0, 1]` — weights chosen to be balanced/additive, NOT tuned (tuning is a separate packet, P2 in audit). Defaults to neutral 0.5 when an input is missing.
+- `buildCorpsOperationReadinessInputSnapshot(state, corpsId)`: companion helper for diagnostic surfaces.
+
+**Wiring hook chosen:** `src/sim/combat/commander/plan.ts:managePlan` — specifically a new `applyForceQualitySoftGates(decision, briefing)` helper invoked on the freshly-created plan returned by `tryCreateFromPrePlanned` and `tryCreateFromOpportunity` (lines 832-840 in pre-edit numbering). Three soft gates with explicit thresholds (placeholder values, not tuned):
+- `operation_readiness < 0.30` → set `plan.force_quality_blocked = true` (proposal proceeds; flag is for diagnostics + downstream decision making — does not delete the plan).
+- `axis_coordination < 0.45` → cap `plan.force_quality_max_axes = 1` (single-axis only).
+- `staging_reliability < 0.40` → extend `target_ready_turn` by 50% (longer staging).
+
+The gate is read-only with respect to combat math: it touches the plan struct only. Combat resolution, attack share, and equipment effectiveness paths are untouched.
+
+**Save-shape additions (all optional / zero-default for back-compat):**
+- `CommanderPlan` (`src/sim/combat/commander/commander_state.ts`): `force_quality_blocked?`, `force_quality_traits?`, `force_quality_max_axes?` + new `ForceQualityPlanSnapshot` interface.
+- `CommanderDecisionTrace`: `force_quality_traits?` field (per-turn diagnostic surface).
+- `CorpsOperation` (`src/state/game_state.ts`): `force_quality_traits_at_launch?`, `force_quality_blocked_at_launch?`, `force_quality_max_axes_at_launch?` (carried through the operation lifecycle).
+- `OperationAAR` (`src/sim/combat/operation_aar.ts`): same three fields, copied from `CorpsOperation` at finalize.
+
+**Snapshot transfer chain (single direction, no recomputation):**
+1. `applyForceQualitySoftGates` in `plan.ts` builds the snapshot at plan-creation time and attaches it to the `CommanderPlan`.
+2. `augmentTraceWithForceQuality` in `plan.ts` augments the per-turn `CommanderDecisionTrace`.
+3. `buildOperations` in `commander/emit.ts` (after `ops.push(op)` guard) copies plan→op fields when the op is emitted.
+4. `finalizeOperationAAR` in `operation_aar.ts` copies op→AAR fields when the operation completes.
+
+This converts `faction_officer_maturity` (audit §3 row "DECORATIVE — never read", CC2 zero readers) and `capability_profile` (audit §3 row "DECORATIVE in war phase", CC3 zero war-phase readers) into live force-quality inputs. Both fields now have a war-phase consumer.
+
+**Files changed:**
+- `src/sim/combat/corps_operation_readiness.ts` — NEW. Pure helper file.
+- `src/sim/combat/commander/commander_state.ts` — added `ForceQualityPlanSnapshot` interface; extended `CommanderPlan` with three optional fields; extended `CommanderDecisionTrace` with `force_quality_traits?`.
+- `src/sim/combat/commander/plan.ts` — added `applyForceQualitySoftGates`, `augmentTraceWithForceQuality`, three explicit threshold constants; wired into `managePlan` at the offensive-winner branch (post-pre-planned and post-opportunity).
+- `src/sim/combat/commander/emit.ts` — copy snapshot from `planDecision.plan` to the freshly-built `CorpsOperation` (after conflict-overlap guard).
+- `src/state/game_state.ts` — three optional fields added to `CorpsOperation`.
+- `src/sim/combat/operation_aar.ts` — copy snapshot from `op` to `OperationAAR` at finalize.
+- `tests/corps_operation_readiness.test.ts` — NEW. Nine cases per task spec (determinism / clamp range / officer dominance / capability coupling / faction maturity coupling / exhaustion coupling / failure feedback / equipment support / soft-gate trigger condition) + one bonus purity test (state untouched). 10/10 pass.
+- `data/derived/scenario/baselines/manifest.json` — refreshed for apr1992_52w.
+
+**Tests:** 10/10 new cases pass (`tests/corps_operation_readiness.test.ts`). Phase 2/3 protections green: `tests/officer_quality_no_calendar_railroad.test.ts` 4/4, `tests/officer_learning_rate_shape_c.test.ts` 6/6, `tests/officer_quality.test.ts` 21/21, `tests/officer_config_consumers.test.ts` 3/3, `tests/scenario_apr1992_family_consistency.test.ts` 6/6 — total 40/40 across protection suites. `npx tsc --noEmit` clean.
+
+**Hash impact (deliberate):** Only `apr1992_52w` (the timeline-bound 52w baseline scenario) drifted, and only on artifacts whose contents reflect plan/op/AAR shape changes:
+- `activity_summary.json`: `0edd556c…` → `f72cb260…`
+- `control_delta.json`: `bce69f2d…` → `9b082ab8…`
+- `end_report.md`: `5f19b402…` → `1d3d8703…`
+- `final_save.json`: `45100df1…` → `89437713…`
+- `run_summary.json`: `c5a1d7c9…` → `0cd7f49c…`
+- `weekly_report.jsonl`: `87df9787…` → `842369f9…`
+- `formation_delta.json`: UNCHANGED (`7b9bf8a3…`) — formation totals unaffected because the gate is decision-layer only.
+- `baseline_ops_4w` and `noop_4w`: UNCHANGED — these scenarios do not bind the apr1992 timeline and do not reach commander plan creation in 4 weeks, so the soft gate is never invoked.
+- `tools/scenario_runner/run_baseline_regression.ts` confirms "all scenarios match" after refresh.
+
+**Calibration impact (not yet calibrated):** Trait weights are explicit placeholders. The architecture contract is "wiring exists"; tuning lives in a separate packet (P2 in audit, `Implementation Packet Rules > Metrics before acceptance`). Phase 4 deliberately does not adjust thresholds to match a target metric — that is Phase 5's responsibility (40w/104w/156w/183w/188w evidence run + before/after operation/capture/multi-axis comparison).
+
+**Determinism self-review:**
+1. No `Math.random`, `Date.now`, `new Date(`, or `localeCompare` in any new code.
+2. All iteration uses `strictCompare` for sorting (formations sorted by `id`; operation history sorted by `(ended_turn desc, operation_name asc)`).
+3. Save-shape compatible — all new fields are optional with neutral defaults. Old saves load unchanged.
+4. Helper purity verified by test "helper purity: state is not mutated" — JSON-stringify before/after equality assertion.
+
+**Singular-ownership check:** New file `corps_operation_readiness.ts` is the sole owner of `computeCorpsOperationReadiness`, `buildCorpsOperationReadinessInputSnapshot`, `CorpsOperationReadinessTraits`, and `CorpsOperationReadinessInputSnapshot`. `ForceQualityPlanSnapshot` is owned by `commander_state.ts` (where it embeds in `CommanderPlan`); the other modules import it. No duplicate computation paths; the helper is called exactly once per offensive plan creation, then the snapshot is copied (not recomputed) through the lifecycle.
+
+**Phase 5 follows:** verification — full vitest run, `tsc --noEmit`, `desktop:map:build`, then 40w / 104w / 156w / 183w / 188w scenario runs with before/after metrics on operation attempts, captures, multi-axis op count, and trait distributions. If gate thresholds prove too aggressive at MVP scale, Phase 5 may deliberately raise them and refresh manifest hashes once more — but no other change in this packet.
+
 ## [2026-05-01] refactor(officer-quality): remove VRS calendar brain-drain railroad (Phase 3 of FORCE QUALITY FOUNDATION)
 
 **Type:** Engine change — Phase 3 of FORCE QUALITY FOUNDATION milestone (Lane A). Deletes the unconditional `turn >= 40` RS officer-quality decay confirmed as a calendar railroad in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §8. No tuning of constants, no canon edits, no painted-target overrides, no Phase 4 territory entered. Game-designer consultation pass (per skill briefing) verified compliance with `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` §"Forbidden Shapes" + §"Faction Shape > VRS" before commit.

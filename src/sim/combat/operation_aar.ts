@@ -125,6 +125,15 @@ export interface OperationAAR {
     ca_cost_at_launch?: number;
     /** Snapshot of commander's recommendation at the moment of presidential decision. */
     commander_assessment_at_launch?: CommanderAssessment;
+    /** Phase 4 (Force Quality Foundation): snapshot of the seven readiness traits at
+     *  plan-creation time (when this op was emitted from a commander plan), plus the
+     *  input snapshot that produced them. Copied from CorpsOperation.force_quality_traits_at_launch
+     *  at finalize. Player-safe diagnostic — same numbers already in state. */
+    force_quality_traits_at_launch?: import('./commander/commander_state.js').ForceQualityPlanSnapshot;
+    /** Phase 4: true if force-quality readiness gated the proposal at launch. */
+    force_quality_blocked_at_launch?: boolean;
+    /** Phase 4: max axes cap from axis_coordination soft gate. */
+    force_quality_max_axes_at_launch?: number;
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -683,6 +692,18 @@ export function finalizeOperationAAR(
     }
     if (op.commander_assessment_at_launch != null) {
         aar.commander_assessment_at_launch = op.commander_assessment_at_launch;
+    }
+
+    // Phase 4 (Force Quality Foundation): copy readiness trait snapshot if present.
+    // Pure transfer — no recomputation. Snapshot was taken at plan-creation time.
+    if (op.force_quality_traits_at_launch) {
+        aar.force_quality_traits_at_launch = op.force_quality_traits_at_launch;
+    }
+    if (op.force_quality_blocked_at_launch) {
+        aar.force_quality_blocked_at_launch = true;
+    }
+    if (typeof op.force_quality_max_axes_at_launch === 'number') {
+        aar.force_quality_max_axes_at_launch = op.force_quality_max_axes_at_launch;
     }
 
     if (!state.operation_history) state.operation_history = [];

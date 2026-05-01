@@ -190,6 +190,27 @@ export interface CommanderPlan {
     /** Turn when the plan was first suspended. Used for MAX_SUSPENSION_TURNS timeout. */
     readonly suspended_since_turn?: number;
     readonly source: 'pre_planned' | 'reactive' | 'opportunity';
+    /** Phase 4 (Force Quality Foundation): true when force-quality readiness gated this plan
+     *  (operation_readiness < threshold). The plan is downgraded — concentration window extended,
+     *  axis count capped — but not deleted. See `../corps_operation_readiness.ts`. */
+    readonly force_quality_blocked?: boolean;
+    /** Phase 4: snapshot of the seven readiness traits at plan-creation time + the input
+     *  snapshot that produced them. Carried into the operation lifecycle so it can be
+     *  copied into the AAR at finalize and surfaced in decision_trace. */
+    readonly force_quality_traits?: ForceQualityPlanSnapshot;
+    /** Phase 4: max axes cap derived from `axis_coordination` (1 when low). 0 = no cap. */
+    readonly force_quality_max_axes?: number;
+}
+
+/**
+ * Phase 4 (Force Quality Foundation): per-plan snapshot of readiness traits +
+ * the inputs that produced them. Embedded in CommanderPlan and copied into
+ * the AAR at finalize. Player-safe diagnostic — same numbers already in state.
+ */
+export interface ForceQualityPlanSnapshot {
+    readonly traits: import('../corps_operation_readiness.js').CorpsOperationReadinessTraits;
+    readonly inputs: import('../corps_operation_readiness.js').CorpsOperationReadinessInputSnapshot;
+    readonly applied_gate: 'none' | 'soft_block' | 'axis_cap' | 'staging_extended' | 'soft_block+axis_cap' | 'soft_block+staging_extended' | 'axis_cap+staging_extended' | 'soft_block+axis_cap+staging_extended';
 }
 
 // ---------------------------------------------------------------------------
@@ -400,6 +421,10 @@ export interface CommanderDecisionTrace {
     readonly lessons_applied: readonly string[];
     /** Relationship modifiers applied this turn (e.g. 'player_trust:stage_operation'). Phase 5. */
     readonly relationships_applied: readonly string[];
+    /** Phase 4 (Force Quality Foundation): per-turn snapshot of force-quality readiness traits +
+     *  the input snapshot that produced them. Player-safe diagnostic — same numbers already in
+     *  state. Engineering-only surface; not displayed to the player without further surface work. */
+    readonly force_quality_traits?: ForceQualityPlanSnapshot;
 }
 
 // ---------------------------------------------------------------------------

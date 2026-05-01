@@ -46,6 +46,7 @@ import type {
     CommanderLesson,
     CommanderPlan,
     CommanderPlanStatus,
+    ForceQualityPlanSnapshot,
     ZoneAssessment,
     ZoneId,
     ForceAssessment,
@@ -55,6 +56,10 @@ import type {
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
+import {
+    buildCorpsOperationReadinessInputSnapshot,
+    computeCorpsOperationReadiness,
+} from '../corps_operation_readiness.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -682,6 +687,106 @@ export function selectWinningIntent(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 4 (Force Quality Foundation) — Force-quality soft gate
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Phase 4: thresholds for force-quality soft gates. Placeholder/explicit values
+ *  (not tuned). Tuning is a separate packet (P2 in audit). When raising these
+ *  thresholds, refresh manifest baselines deliberately. */
+const FORCE_QUALITY_OPERATION_READINESS_GATE = 0.30;
+const FORCE_QUALITY_AXIS_COORDINATION_GATE = 0.45;
+const FORCE_QUALITY_STAGING_RELIABILITY_GATE = 0.40;
+const FORCE_QUALITY_STAGING_EXTENSION = 0.5; // 50% extension to planning duration
+
+/**
+ * Apply Phase 4 force-quality soft gates to a freshly-created plan.
+ *
+ * Pure helper (mutates nothing) — returns a possibly-modified PlanDecision plus
+ * the trait snapshot. Implements three soft gates per architecture contract
+ * (`docs/plans/2026-05-01-force-quality-operation-architecture-contract.md`):
+ *
+ * 1. operation_readiness < 0.30 → flag plan as `force_quality_blocked` (proposal
+ *    still proceeds; the flag is for diagnostics + downstream decision making).
+ * 2. axis_coordination < 0.45 → cap max axes to 1 (recorded for emit consumers).
+ * 3. staging_reliability < 0.40 → extend planning duration by 50%.
+ *
+ * No combat math is touched; only the proposal/staging gate path.
+ */
+function applyForceQualitySoftGates(
+    decision: PlanDecision,
+    briefing: CommanderBriefing,
+): PlanDecision {
+    const plan = decision.plan;
+    if (!plan) return decision;
+    const state = briefing.state_ref;
+    if (!state) return decision; // unit-test fallback: skip gate when state is absent
+
+    const traits = computeCorpsOperationReadiness(state, briefing.corps_id);
+    const inputs = buildCorpsOperationReadinessInputSnapshot(state, briefing.corps_id);
+
+    const blocked = traits.operation_readiness < FORCE_QUALITY_OPERATION_READINESS_GATE;
+    const lowAxisCoord = traits.axis_coordination < FORCE_QUALITY_AXIS_COORDINATION_GATE;
+    const lowStaging = traits.staging_reliability < FORCE_QUALITY_STAGING_RELIABILITY_GATE;
+
+    const gateLabels: string[] = [];
+    if (blocked) gateLabels.push('soft_block');
+    if (lowAxisCoord) gateLabels.push('axis_cap');
+    if (lowStaging) gateLabels.push('staging_extended');
+    const appliedGate = (gateLabels.length === 0
+        ? 'none'
+        : gateLabels.join('+')) as ForceQualityPlanSnapshot['applied_gate'];
+
+    const snapshot: ForceQualityPlanSnapshot = {
+        traits,
+        inputs,
+        applied_gate: appliedGate,
+    };
+
+    // Compute updated plan fields. Plans are readonly, so spread + replace.
+    const concentrationDuration = plan.target_ready_turn - plan.created_turn;
+    const extendedConcentration = lowStaging
+        ? Math.max(1, Math.ceil(concentrationDuration * (1 + FORCE_QUALITY_STAGING_EXTENSION)))
+        : concentrationDuration;
+    const newTargetReadyTurn = lowStaging
+        ? plan.created_turn + extendedConcentration
+        : plan.target_ready_turn;
+
+    const updatedPlan: CommanderPlan = {
+        ...plan,
+        target_ready_turn: newTargetReadyTurn,
+        force_quality_blocked: blocked || undefined,
+        force_quality_traits: snapshot,
+        ...(lowAxisCoord ? { force_quality_max_axes: 1 } : {}),
+    };
+
+    const reasonSuffix = gateLabels.length > 0
+        ? ` (force_quality: ${gateLabels.join(', ')})`
+        : '';
+
+    return {
+        ...decision,
+        plan: updatedPlan,
+        reason: decision.reason + reasonSuffix,
+    };
+}
+
+/**
+ * Phase 4 (Force Quality Foundation): augment a CommanderDecisionTrace with the
+ * force-quality readiness snapshot. Pure helper — returns a new trace object
+ * with the snapshot field set when present; returns the input trace untouched
+ * when no snapshot is available.
+ */
+function augmentTraceWithForceQuality(
+    trace: CommanderDecisionTrace | undefined,
+    snapshot: ForceQualityPlanSnapshot | undefined,
+): CommanderDecisionTrace | undefined {
+    if (!trace) return trace;
+    if (!snapshot) return trace;
+    return { ...trace, force_quality_traits: snapshot };
+}
+
+/**
  * Manage the commander's multi-turn plan:
  * 1. If no plan exists, evaluate whether to create one (pre-planned ops first, then opportunity).
  * 2. If plan exists, advance it (check viability, update concentration progress).
@@ -830,11 +935,19 @@ export function managePlan(
     if (offensiveWinner) {
         // Priority 1: pre-planned operations (always attempted first when eligible)
         const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
-        if (prePlannedDecision) return { ...prePlannedDecision, decision_trace: trace };
+        if (prePlannedDecision) {
+            const gated = applyForceQualitySoftGates(prePlannedDecision, briefing);
+            const augmentedTrace = augmentTraceWithForceQuality(trace, gated.plan?.force_quality_traits);
+            return { ...gated, decision_trace: augmentedTrace };
+        }
 
         // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
         const opportunityDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
-        if (opportunityDecision) return { ...opportunityDecision, decision_trace: trace };
+        if (opportunityDecision) {
+            const gated = applyForceQualitySoftGates(opportunityDecision, briefing);
+            const augmentedTrace = augmentTraceWithForceQuality(trace, gated.plan?.force_quality_traits);
+            return { ...gated, decision_trace: augmentedTrace };
+        }
 
         // Offensive winner but underlying plan functions returned null (e.g. no reachable targets).
         return { plan: null, action: 'none', reason: 'no viable plan available', concentration_orders: [], decision_trace: trace };

@@ -407,6 +407,18 @@ export interface CorpsOperation {
         active_brigades: number;
         total_personnel: number;
     }>;
+
+    // --- Phase 4 (Force Quality Foundation) — readiness trait snapshot ---
+    /** Snapshot of force-quality readiness traits + the input snapshot at plan-creation
+     *  time. Populated when the operation was emitted from a commander plan with
+     *  force_quality_traits attached. Carried through the lifecycle and copied into
+     *  the AAR at finalize. Optional + zero-default for back-compat with prior saves. */
+    force_quality_traits_at_launch?: import('../sim/combat/commander/commander_state.js').ForceQualityPlanSnapshot;
+    /** Phase 4: true if force-quality readiness gated the proposal (operation_readiness < threshold).
+     *  Diagnostic flag — does not affect combat math. */
+    force_quality_blocked_at_launch?: boolean;
+    /** Phase 4: max axes derived from axis_coordination soft gate; 1 means single-axis only. */
+    force_quality_max_axes_at_launch?: number;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */

@@ -818,6 +818,20 @@ function buildOperations(
             return ops;
         }
 
+        // Phase 4 (Force Quality Foundation): copy the readiness trait snapshot
+        // taken at plan-creation time into the operation lifecycle. This is the
+        // single transfer point — sector_offensive's finalizeOperationAAR reads
+        // it back into the AAR. No new computation here; pure copy.
+        if (planDecision.plan.force_quality_traits) {
+            op.force_quality_traits_at_launch = planDecision.plan.force_quality_traits;
+        }
+        if (planDecision.plan.force_quality_blocked) {
+            op.force_quality_blocked_at_launch = true;
+        }
+        if (typeof planDecision.plan.force_quality_max_axes === 'number') {
+            op.force_quality_max_axes_at_launch = planDecision.plan.force_quality_max_axes;
+        }
+
         ops.push(op);
     }
 
