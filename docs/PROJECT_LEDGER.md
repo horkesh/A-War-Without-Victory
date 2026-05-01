@@ -1,3 +1,50 @@
+## [2026-05-01] fix(operations): preserve force_quality_traits across non-offensive turns (Phase 4 fix-up)
+
+**Type:** Diagnostic-surface persistence bug fix — Phase 4 fix-up identified by FORCE QUALITY FOUNDATION milestone Tier 2 gap-finder (panel synthesis: `tools/diagnostics/_force_quality_phase5b_tier1.md`). One file changed. No formula/threshold/weight modified. No canon edits. No painted-target overrides.
+
+**Defect:** The `decision_trace` assignment in `buildUpdatedState` at `src/sim/combat/commander/emit.ts:1222` was
+
+    decision_trace: planDecision.decision_trace ?? briefing.previous_state?.decision_trace
+
+`planDecision.decision_trace` is set on every turn that calls `managePlan` — including the early-return defensive / exhaustion / fatigue / role / major-op-active branches at `plan.ts:810-920`. Each of those branches returns a non-null `decision_trace` but **without** a `force_quality_traits` field, because `augmentTraceWithForceQuality` only fires inside the offensive-winner branch at `plan.ts:940` and `:948`. As a result, any post-launch turn (corps now has `hasLiveMajorOp` so `plan.ts:905` early-returns with a bare trace) silently overwrites the previous turn's gated readiness snapshot. Empirical verification: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1599/final_save.json` contains 25 hits for `force_quality_traits_at_launch` (the `OperationAAR` field, working correctly) and **zero** hits for the bare `force_quality_traits` field on `decision_trace` — Tier 2's diagnosis confirmed.
+
+**Strategy A — one-way merge:** A new trace with explicit `force_quality_traits` always wins; if the new trace lacks the field, fall back to the previous trace's value. Recompute on a fresh offensive turn always wins (fresh traits replace preserved ones via `augmentTraceWithForceQuality`). The merge preserves all OTHER trace fields exactly.
+
+    const newTrace = planDecision.decision_trace ?? briefing.previous_state?.decision_trace;
+    const previousTraits = briefing.previous_state?.decision_trace?.force_quality_traits;
+    const mergedTrace = newTrace
+        ? { ...newTrace, force_quality_traits: newTrace.force_quality_traits ?? previousTraits }
+        : undefined;
+    // ...
+    decision_trace: mergedTrace,
+
+**Files changed:**
+- `src/sim/combat/commander/emit.ts` — added 16-line merge block at the head of the `buildUpdatedState` return; `decision_trace:` field reassigned to `mergedTrace`. Inline comment cites the Phase 4 fix-up provenance and Strategy A rationale.
+- `tests/force_quality_trace_persistence.test.ts` — NEW. Three cases:
+  1. Preserve previous traits across non-offensive turn (early-return branch with bare trace + previous-state traits at `operation_readiness=0.55` → merged trace carries 0.55 forward).
+  2. Recompute on fresh offensive turn (previous traits at 0.55 + new trace traits at 0.70 → merged trace carries 0.70).
+  3. Determinism — repeated invocation produces identical serialized output.
+- `data/derived/scenario/baselines/manifest.json` — refreshed for `apr1992_52w` (final_save + run_summary only).
+
+**Tests:** 3/3 new cases pass. Phase 4 protections still green: `tests/corps_operation_readiness.test.ts` 10/10, `tests/officer_quality_no_calendar_railroad.test.ts` 4/4, `tests/officer_learning_rate_shape_c.test.ts` 6/6, `tests/officer_quality.test.ts` 21/21, `tests/scenario_apr1992_family_consistency.test.ts` 6/6 — total 47/47 across protection suites. `npx tsc --noEmit` clean.
+
+**Hash impact (deliberate; bounded; minimum possible):**
+- `apr1992_52w`:
+  - `final_save.json`: `89437713…` → `7d97a37e…` (preserves the previously-missing `force_quality_traits` field on `decision_trace`)
+  - `run_summary.json`: `0cd7f49c…` → `8292f83d…` (digest of final_save changed)
+  - `activity_summary.json`, `control_delta.json`, `end_report.md`, `formation_delta.json`, `weekly_report.jsonl`: UNCHANGED.
+- `baseline_ops_4w`, `noop_4w`: UNCHANGED (no decision_trace lifecycle in those short scenarios).
+
+This is the minimum possible drift: only the artifacts that serialize the persisted decision_trace move. The fix is additive (preserves data that was being silently dropped), not transformational (no value is recomputed differently).
+
+**Singular-ownership check:** Only `emit.ts` (canonical owner of `buildUpdatedState`) and the new test file changed. `plan.ts`, `corps_operation_readiness.ts`, `commander_state.ts`, and `operation_aar.ts` were intentionally not touched — Phase 4 plumbing remains untouched; this fix only patches the persistence site at the end of the chain.
+
+**Determinism self-review:**
+1. No `Math.random`, `Date.now`, `new Date(`, or `localeCompare` introduced.
+2. No iteration added (single spread + nullish-coalesce expression).
+3. Save-shape unchanged — `force_quality_traits` remains optional on `CommanderDecisionTrace`; the field that was previously missing post-launch is now correctly preserved.
+4. The merge is purely a fallback — when `newTrace.force_quality_traits` is set (offensive turn), behavior is identical to pre-fix; when it is unset (non-offensive turn after a launch), the previous turn's snapshot is preserved instead of being dropped.
+
 ## [2026-05-01] feat(operations): corps_operation_readiness foundation (Phase 4 of FORCE QUALITY FOUNDATION)
 
 **Type:** Engine addition + decision-layer wiring — Phase 4 of FORCE QUALITY FOUNDATION milestone (Lane A). Implements the "readiness/execution layer" between historical opportunity and the existing `CorpsOperation` lifecycle, per `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` §"Minimum Viable Slice". Converts `faction_officer_maturity` and `capability_profile` from decorative-in-war-phase (audit §3 + CC2 + CC3 in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md`) to live force-quality inputs without touching combat math. No tuning, no canon edits, no painted-target overrides.

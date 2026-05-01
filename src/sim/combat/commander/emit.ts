@@ -1202,6 +1202,30 @@ function buildUpdatedState(
         garrisonBudget[zone.zone_id] = zone.garrison_budget;
     }
 
+    // Phase 4 fix-up (FORCE QUALITY FOUNDATION): preserve the most-recent
+    // force_quality_traits across non-offensive turns. `planDecision.decision_trace`
+    // is set on every turn that calls `managePlan` — including the early-return
+    // defensive/exhaustion/fatigue/role/major-op-active branches in plan.ts. Those
+    // branches return a bare trace WITHOUT a `force_quality_traits` field
+    // (augmentTraceWithForceQuality only fires inside the offensive-winner branch).
+    // Without this merge, any non-offensive turn after a launch would silently drop
+    // the gated readiness snapshot, leaving decision_trace.force_quality_traits empty
+    // in final_save.json even though the wiring at plan.ts emits it on offensive turns.
+    //
+    // Strategy A: one-way merge. A new trace with explicit `force_quality_traits`
+    // always wins; if the new trace lacks the field, fall back to the previous
+    // trace's value. This preserves the live-reasoning surface for diagnostic
+    // visibility without leaking stale data into a fresh offensive turn that
+    // recomputes traits via augmentTraceWithForceQuality.
+    const newTrace = planDecision.decision_trace ?? briefing.previous_state?.decision_trace;
+    const previousTraits = briefing.previous_state?.decision_trace?.force_quality_traits;
+    const mergedTrace = newTrace
+        ? {
+            ...newTrace,
+            force_quality_traits: newTrace.force_quality_traits ?? previousTraits,
+        }
+        : undefined;
+
     return {
         zone_assessments: zones,
         threat_assessment: threats,
@@ -1219,7 +1243,7 @@ function buildUpdatedState(
         belief_state: beliefState ?? undefined,
         relationships: briefing.previous_state?.relationships,
         lessons: buildUpdatedLessons(briefing, cappedHistory, planDecision),
-        decision_trace: planDecision.decision_trace ?? briefing.previous_state?.decision_trace,
+        decision_trace: mergedTrace,
     };
 }
 
