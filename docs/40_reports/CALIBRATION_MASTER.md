@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-05-01 (date-specific painted-control targets established; 40w baseline notes below remain historical)
+**Updated:** 2026-05-01 (force-quality trajectory issue opened; date-specific painted-control targets established; 40w baseline notes below remain historical)
 
 ## Review Methodology
 
@@ -39,6 +39,21 @@ node tools/compare_painted_vs_sim.cjs runs/<run_dir> --target oct1995
 The painter UI loads 744 operational geometry features, but the current simulation controller/evaluation universe is 712 OSIDs. Built-in painted targets must stay aligned to the 712-key Jan 1993/current-sim universe until the political-controller substrate is intentionally expanded. Geometry-only exposed features are a map/substrate backlog item, not scenario-date variation.
 
 Relevant report: `docs/40_reports/implemented/20260430_SCENARIO_PAINTED_CONTROL_TARGET_TOOL.md`.
+
+## Open P1: Force-Quality Trajectory Calibration
+
+**Opened:** 2026-05-01
+**Plan:** `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`
+
+The current long-run evidence suggests the engine is under-realizing the full-war faction arcs recorded later in this file:
+
+- **VRS:** professional / JNA-inheriting army -> degraded but still locally dangerous force.
+- **ARBiH:** 1992 militia / Territorial Defense fragments -> competent 1995 corps-level army.
+- **HRHB/HVO:** capable militia -> overstretched and increasingly dependent on Croatian support.
+
+Late-war painted targets and operation experiments are evaluation tools, not the fix. If 1994-1995 territorial movement only appears when historical operations are forced as naked calendar scripts, then the deeper calibration failure is the force-quality trajectory model: officer learning/brain drain, cohesion/morale, equipment maintenance, war exhaustion, operation-readiness gates, corps coordination, and commander doctrine are not yet producing enough asymmetric change over time.
+
+**Classification:** separate calibration/design issue, not a scripted-op content issue. Next work should be a Force Quality Trajectory Audit across 40w, 104w, 156w, and 183/188w before any tuning. Do not apply global multipliers or forced late-war map rails without owner evidence.
 
 ## n1572 (2026-04-14) — Exhaustion Rescale + HRHB Directive Scope + Pressure Floor
 

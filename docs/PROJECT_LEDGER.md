@@ -1,3 +1,17 @@
+## [2026-05-01] docs(calibration): open force-quality trajectory issue
+
+**Type:** Documentation / calibration issue tracking only. Created `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`, updated `docs/40_reports/CALIBRATION_MASTER.md`, and added the lane to `docs/plans/MASTER_ROADMAP.md`. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Issue recorded:** The engine is not yet proving the obvious full-war force-quality premise on its own: VRS should deteriorate from a professional JNA-inheriting army into a degraded but still locally dangerous force, while ARBiH should mature from 1992 militia / Territorial Defense fragments into a competent 1995 corps-level army. Late-war painted targets and scripted-op experiments expose the gap; they do not solve it.
+
+**Classification:** Separate P1 calibration/design issue, not a missing-operation-content issue. Historical operations should become opportunity proposals, but if those opportunities require naked calendar forcing to create any late-war movement, the deeper owner is force-quality trajectory: officer learning/brain drain, cohesion/morale, equipment maintenance, war exhaustion, operation-readiness gates, corps coordination, and commander doctrine.
+
+**Next required packet:** Force Quality Trajectory Audit across 40w, 104w, 156w, and 183/188w. Audit first; no global multipliers or forced late-war map rails without owner evidence.
+
+**Knowledge propagation:** Added the durable rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: a static late-war map is force-trajectory evidence, not automatically an operation-content gap.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(research): late-war operation opportunity catalog after Washington Agreement
 
 **Type:** Documentation/research only. Created `docs/research/2026-05-01-late-war-operation-opportunity-research.md` as the source catalog for future late-war operation design docs. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
