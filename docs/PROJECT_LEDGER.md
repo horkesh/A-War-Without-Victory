@@ -1,3 +1,25 @@
+## [2026-05-01] docs(research): late-war operation opportunity catalog after Washington Agreement
+
+**Type:** Documentation/research only. Created `docs/research/2026-05-01-late-war-operation-opportunity-research.md` as the source catalog for future late-war operation design docs. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Design direction recorded:** Late-war operations should be historical opportunities and command proposals, not forced calendar scripts. The player/bot should approve, delay, redirect, under-resource, or decline operation opportunities; the engine should then resolve outcomes through normal corps/army command, staging, supply, combat, morale, commander, and AAR systems. Date-specific painted targets remain evaluation references, not destiny.
+
+**Coverage researched:** Post-Washington Agreement operation families across eastern Bosnia / safe areas, Central Bosnia / Vlasic / Kupres, Bihac and 5th Corps, HV/HVO western Bosnia, Posavina, NATO/international pressure, and failed VRS pressure operations. The catalog explicitly includes Vlasic, the 5th Corps arc, and failed VRS operations such as Zvezda 94, Breza 94, Pauk/Shield pressure, and Orasje.
+
+**Follow-up design backlog proposed:**
+- `docs/plans/late-war-operation-opportunity-system-design.md`
+- `docs/plans/late-war-5th-corps-opportunities-design.md`
+- `docs/plans/late-war-central-bosnia-vlasic-kupres-design.md`
+- `docs/plans/late-war-western-bosnia-hv-hvo-design.md`
+- `docs/plans/late-war-vrs-failed-offensives-design.md`
+- `docs/plans/late-war-safe-area-and-sensitive-history-design.md`
+
+**Historical-source posture:** Local BB citations are recorded where available. Secondary web sources are used only as discovery scaffolding for operations beyond the currently indexed BB page range; implementation-grade design docs should prefer BB, ICTY, NATO, UN, or other primary/near-primary sources.
+
+**Knowledge propagation:** Added the durable rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: late-war operations should be opportunity proposals, not calendar-forced scripts, and failed operations are first-class engine-health content.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] fix(operations): multi-corps operation visibility in brigade-AI hot path
 
 **Type:** Bounded engine fix to brigade-AI op-visibility lookup. Closes the multi-corps op visibility bug identified in `20260501_LATE_1995_SCRIPTED_OPS_PACKET.md` execution-stage analysis. **No combat tuning, OOB, painted target, scenario init, or operation objective lists changed.**
