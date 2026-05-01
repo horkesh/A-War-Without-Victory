@@ -112,8 +112,23 @@ const VRS_HELD_TARGETS_FOR_WEAKNESS: readonly string[] = [
     'op:kljuc:kljuc_2',
 ];
 
-// ─── Axis definitions (identical to legacy Sana so the post-approval
-//     CorpsOperation has the same brigade/objective shape). ─────────────────
+/** Live corridor anchors that make the Sanski Most / Kljuc interior axis
+ *  reachable. In n1605 these are all enemy-held, so the interior axis has no
+ *  front-edge approach and should not be bundled into the initial Sana offer. */
+const SANA_FOLLOW_ON_APPROACH_OSIDS: readonly string[] = [
+    'op:bosanska_krupa:jasenica_2',
+    'op:bosanski_petrovac:vrtoce',
+    'op:bosanski_petrovac:dobro_selo_2',
+];
+
+const SANA_FOLLOW_ON_TARGETS: readonly string[] = [
+    'op:sanski_most:lusci_palanka_2',
+    'op:sanski_most:sanski_most_2',
+    'op:kljuc:kljuc_2',
+];
+
+// ─── Axis definitions. Initial Sana owns the reachable breakthrough axes;
+//     the interior Sanski/Kljuc axis is authored as a live-corridor follow-on.
 const SANA_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'sana_krupa',
@@ -138,6 +153,9 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         objectives: BIHAC_PETROVAC_OBJECTIVES,
         staging_osid: STAGING_BIHAC,
     },
+];
+
+const SANA_FOLLOW_ON_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'sana_sanski_most_kljuc',
         name: 'Sanski Most + Ključ Liberation',
@@ -183,6 +201,18 @@ const stagingAccessSana: AxisPredicate = (state) => {
     return { green: true, reason: 'Bihać pocket staging anchors held by 5th Corps' };
 };
 
+const stagingAccessSanaFollowOn: AxisPredicate = (state, turn, def) => {
+    const pocket = stagingAccessSana(state, turn, def);
+    if (!pocket.green) return pocket;
+    for (const osid of SANA_FOLLOW_ON_APPROACH_OSIDS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl === 'RBiH') {
+            return { green: true, reason: 'western breakthrough has opened an approach corridor' };
+        }
+    }
+    return { green: false, reason: 'Sanski/Kljuc interior axis has no live approach corridor' };
+};
+
 /** corps_readiness: 5th Corps operation_readiness clears the soft floor. */
 const SANA_READINESS_FLOOR = 0.40;
 const corpsReadinessSana: AxisPredicate = (state) => {
@@ -220,6 +250,16 @@ const enemyWeaknessSana: AxisPredicate = (state) => {
         green: true,
         reason: 'enemy western posture stretched — exploitation targets still in enemy hands',
     };
+};
+
+const enemyWeaknessSanaFollowOn: AxisPredicate = (state) => {
+    for (const osid of SANA_FOLLOW_ON_TARGETS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl === 'RS') {
+            return { green: true, reason: 'interior liberation targets remain in enemy hands' };
+        }
+    }
+    return { green: false, reason: 'no Sanski/Kljuc follow-on targets remain in enemy hands' };
 };
 
 /** logistics: optional. 5th Corps faction supply pressure not in the bottom band. */
@@ -284,6 +324,51 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
         weather_season: alwaysGreen,
         commander_confidence: commanderConfidenceSana,
         enemy_weakness: enemyWeaknessSana,
+        alliance_context: allianceContextSana,
+        force_quality: alwaysGreen,
+    },
+    staff_recommendation: 'approve',
+};
+
+export const SANA_95_FOLLOW_ON_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'sana_95_follow_on',
+    name: 'Operation Sana Follow-On',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: SANA_FOLLOW_ON_AXES,
+    staging_osid: STAGING_KRUPA_OTOKA,
+    planning_duration: 3,
+    min_attack_outcome: 'repulsed',
+    citations: [
+        'BB1 pp.417, 419-420 - Sana 95 follow-on toward Sanski Most and Kljuc',
+        'docs/40_reports/implemented/20260501_LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE.md - n1605 axis C no-contact-path evidence',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.7 (Sana 95)',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'n_a',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'n_a',
+        min_optional_axes: 1,
+    },
+    evaluators: {
+        date_window: dateWindowSana,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessSana,
+        logistics: logisticsSana,
+        staging_access: stagingAccessSanaFollowOn,
+        weather_season: alwaysGreen,
+        commander_confidence: commanderConfidenceSana,
+        enemy_weakness: enemyWeaknessSanaFollowOn,
         alliance_context: allianceContextSana,
         force_quality: alwaysGreen,
     },
@@ -1516,6 +1601,7 @@ export const GRMEC_94_OPPORTUNITY: OperationOpportunityDef = {
  *  (LANE C Phase 5) are live. */
 export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_95_OPPORTUNITY,
+    SANA_95_FOLLOW_ON_OPPORTUNITY,
     TIGAR_SLOBODA_94_OPPORTUNITY,
     APWB_PRESSURE_94_OPPORTUNITY,
     UNA_94_OPPORTUNITY,

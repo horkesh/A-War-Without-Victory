@@ -236,7 +236,12 @@ These should be deterministic derived or persisted fields, never ad hoc date che
 - HV/HVO western-theater pressure or equivalent counterfactual pressure has degraded VRS 2nd Krajina response.
 - The player/bot authorizes exploitation and accepts overextension risk.
 
-**Objectives to map later:** Bosanska Krupa, Bosanski Petrovac, Kljuc, Sanski Most, pressure toward Prijedor / Bosanski Novi as a risk corridor rather than guaranteed conquest.
+**Implementation split (2026-05-01):** Sana is authored as two T1 opportunities, not one monolithic three-axis package.
+
+- `sana_95` is the initial reachable breakthrough: Bosanska Krupa / Una valley plus Bihac-Petrovac. It requires the pocket to survive, Storm/Oluja theater opening, 5th Corps readiness, and enemy targets still in RS hands.
+- `sana_95_follow_on` is the Sanski Most / Kljuc interior push. It keeps the legacy interior objective roster, but surfaces only after live control opens an approach corridor via western breakthrough anchors. It is not hard-chained to the initial Sana resolution; any player/bot path that creates the corridor can unlock it.
+
+**Objectives:** Bosanska Krupa and Bosanski Petrovac belong to the initial breakthrough; Kljuc and Sanski Most belong to the follow-on; pressure toward Prijedor / Bosanski Novi remains a risk corridor rather than guaranteed conquest.
 
 **Possible outcomes:**
 
@@ -259,7 +264,8 @@ These should be deterministic derived or persisted fields, never ad hoc date che
 | Breza 94 | Required | Required | Required | Defender check | Helpful | N/A | No |
 | Grmec 94 | Required | Required | Optional | Required | Helpful | Required | No |
 | Pauk / Shield 94 | Required | Required | Required/restored | Defender check | Helpful | N/A | No |
-| Sana 95 | Required | Required/relieved | Optional | Required | Required | Required | Required |
+| Sana 95 initial | Required | Required/relieved | Optional | Required | Required | Required | Required |
+| Sana 95 follow-on | Required | Required/relieved | Optional | Required | Required | Required plus live approach corridor | Required |
 
 The exact numeric thresholds belong in implementation packets after the force-quality audit lands. This doc defines the shape, not the constants.
 
