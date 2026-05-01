@@ -755,12 +755,389 @@ export const APWB_PRESSURE_94_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// ═════════════════════════════════════════════════════════════════════════════
+// T3 DEFENSIVE-CRISIS TRIAD — LANE C Phase 4
+//
+// Three catalog entries — `una_94`, `breza_94`, `pauk_94_95` — that consume the
+// Phase 1 T3 substrate early-return branch in `applyOpportunityDecision`
+// (operation_opportunities.ts ~lines 692-703). Per design doc §§4.3, 4.4, 4.6:
+//
+//   - Tier `T3`. Approve = "commit reserves to defend, accept the strain."
+//     Resolution row gets `executed_op_aar_id = undefined`,
+//     `exit_class = 't3_authorized_no_offensive'`. NO `CorpsOperation` is
+//     spawned at the catalog level; the existing reactive defense / sector
+//     morale chain handles outcome.
+//   - Decline = "do not formally commit." Behaves identically to T1 decline.
+//   - The defender-polarity problem (no `enemy_concentration_required` axis):
+//     resolved by using `date_window` + `pocket_survival` (folded into
+//     staging_access) + `corps_readiness` (defender baseline) + `logistics`
+//     (defender supply not collapsed). The historical date window IS the
+//     "enemy pressure" signal — the crisis surfacing on its date is itself
+//     the structured player-decision moment.
+//   - `alliance_context` REQUIRED for all three: `state.meta.operation_storm_triggered !== true`
+//     (pre-Storm only). Pauk historically impossible after Oluja (historian);
+//     Una and Breza are also pre-Storm by date_window but the alliance_context
+//     hedge makes it explicit.
+//   - `brigades_committed` documents the reserves the player is authorizing if
+//     they Approve. Phase 1 T3 branch skips `buildCorpsOperation` so this list
+//     is documentation, not consumed at catalog level.
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ─── Shared T3 inputs ────────────────────────────────────────────────────────
+
+/** Bihać pocket survival anchors used across all three T3 entries. Identical to
+ *  Tigar-Sloboda / APWB Pressure pocket sets — same architectural meaning. */
+const T3_POCKET_SURVIVAL_OSIDS: readonly string[] = [
+    'op:bihac:bihac_2',
+    'op:cazin:cazin_2',
+    'op:bosanska_krupa:bosanska_krupa_2',
+    'op:velika_kladusa:velika_kladusa_2',
+];
+
+/** Full 5th Corps brigade pool authorized as defending reserves on T3 approve.
+ *  Cross-referenced against data/source/oob_brigades.json (lines 1099–1247): all
+ *  nine 5th Corps brigades + the post-w18 504th. T3 substrate skips
+ *  buildCorpsOperation so this roster is documentation, not consumed for
+ *  axes-build at the catalog level. */
+const T3_FIFTH_CORPS_DEFENDING_RESERVES: readonly FormationId[] = [
+    'arbih_501st_slavna_mountain' as FormationId,
+    'arbih_502nd_vitezka_mountain' as FormationId,
+    'arbih_503rd_slavna_mountain' as FormationId,
+    'arbih_504th_cazin_light' as FormationId,
+    'arbih_505th_vitezka_mountain' as FormationId,
+    'arbih_506th_mountain' as FormationId,
+    'arbih_510th_bosnian_liberation' as FormationId,
+    'arbih_511th_slavna_mountain' as FormationId,
+    'arbih_517th_light' as FormationId,
+];
+
+const T3_LOGISTICS_PRESSURE_CEILING = 95;
+
+/** Shared pocket-survival predicate for the three T3 entries (folded into
+ *  staging_access per Sana / Tigar / APWB pattern). */
+const pocketSurvivalT3: AxisPredicate = (state) => {
+    for (const osid of T3_POCKET_SURVIVAL_OSIDS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== null && ctrl !== 'RBiH') {
+            return { green: false, reason: 'Bihać pocket integrity has broken (anchor lost)' };
+        }
+    }
+    return { green: true, reason: 'Bihać pocket anchors held by 5th Corps' };
+};
+
+/** Shared logistics predicate: defender supply not collapsed. */
+const logisticsT3: AxisPredicate = (state) => {
+    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    if (pressure >= T3_LOGISTICS_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure critical for sustained pocket defense' };
+    }
+    return { green: true, reason: 'RBiH supply pressure within sustainable defensive band' };
+};
+
+/** Shared alliance_context predicate: pre-Storm only. Pauk historically
+ *  impossible after Oluja (historian); Una and Breza by date but explicit. */
+const allianceContextPreStorm: AxisPredicate = (state) => {
+    if (state.meta.operation_storm_triggered === true) {
+        return { green: false, reason: 'western theater rupture has overtaken this pre-Storm crisis' };
+    }
+    return { green: true, reason: 'pre-Storm western theater configuration in effect' };
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Operation Una 94 Defense — T3.
+//
+// Family doc §4.3. Citation: BB2 p.534.
+//
+// Historical anchor: 11-15 July 1994. VRS 2nd Krajina probe along the Grabež
+// plateau, repulsed by 5th Corps. AWWV window: w113-w115 (3-turn window — short
+// crisis). T3 = "commit reserves to stiffen Bihać/Cazin/Krupa/Otoka against
+// early VRS pressure."
+//
+// Readiness floor 0.25 (defender baseline; lower than Tigar-Sloboda's 0.30
+// offensive thrust floor — Una is the stiffening of an existing posture, not a
+// new offensive).
+// ═════════════════════════════════════════════════════════════════════════════
+
+const UNA_DATE_MIN = 113;
+const UNA_DATE_MAX = 115;
+const UNA_READINESS_FLOOR = 0.25;
+
+const UNA_DEFENSIVE_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'una_grabez_stiffening',
+        name: 'Grabež Plateau Stiffening',
+        corps: PRIMARY_CORPS,
+        brigades: T3_FIFTH_CORPS_DEFENDING_RESERVES,
+        // T3 substrate skips buildCorpsOperation; the empty objective list is
+        // a deliberate signal that this is a defensive-commitment authorization,
+        // not a target list. (T3 substrate does not iterate objectives.)
+        objectives: [],
+        staging_osid: 'op:bihac:bihac_2',
+    },
+];
+
+const dateWindowUna: AxisPredicate = (_state, turn) => {
+    if (turn < UNA_DATE_MIN) return { green: false, reason: 'July 1994 VRS probe window not yet open' };
+    if (turn > UNA_DATE_MAX) return { green: false, reason: 'July 1994 VRS probe window has closed' };
+    return { green: true, reason: 'within 11-15 July 1994 VRS probe window' };
+};
+
+const corpsReadinessUna: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.operation_readiness < UNA_READINESS_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps operational readiness below the defensive-stiffening floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps operational readiness sufficient to stiffen Grabež defenses',
+    };
+};
+
+export const UNA_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'una_94',
+    name: 'Operation Una 94 Defense',
+    tier: 'T3',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: UNA_DEFENSIVE_AXES,
+    staging_osid: 'op:bihac:bihac_2',
+    planning_duration: 1,
+    citations: [
+        'BB2 p.534 — VRS 2nd Krajina probe along the Grabež plateau, 11-15 July 1994 (repulsed by 5th Corps)',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.3 (Una 94 / Grabež pressure, T3 defensive crisis)',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'required',
+        staging_access: 'required',           // pocket-survival (Sana mirror)
+        weather_season: 'n_a',
+        commander_confidence: 'n_a',
+        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        alliance_context: 'required',         // pre-Storm only
+        min_optional_axes: 0,
+    },
+    evaluators: {
+        date_window: dateWindowUna,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessUna,
+        logistics: logisticsT3,
+        staging_access: pocketSurvivalT3,
+        weather_season: alwaysGreen,
+        commander_confidence: alwaysGreen,
+        enemy_weakness: alwaysGreen,
+        alliance_context: allianceContextPreStorm,
+    },
+    staff_recommendation: 'approve',
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Operation Breza 94 Defense — T3.
+//
+// Family doc §4.4. Citation: BB2 pp.540-542.
+//
+// Historical anchor: 31 August - ~15 September 1994. Three-axis VRS-SVK
+// offensive: Grabež plateau (2nd Krajina), Bosanska Otoka (1st Krajina), Buzim
+// (1st Krajina "Panthers" + SVK 33rd Dvor). 12 Sept ARBiH counterattack nearly
+// captures Mladić. AWWV window: w125-w130. T3 = "commit reserves to defend
+// three-axis pressure."
+//
+// Readiness floor 0.30 (slightly higher than Una — three-axis Breza fight
+// requires more reserves to stiffen all three sectors simultaneously).
+// ═════════════════════════════════════════════════════════════════════════════
+
+const BREZA_DATE_MIN = 125;
+const BREZA_DATE_MAX = 130;
+const BREZA_READINESS_FLOOR = 0.30;
+
+const BREZA_DEFENSIVE_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'breza_three_axis_defense',
+        name: 'Grabež – Otoka – Buzim Defense',
+        corps: PRIMARY_CORPS,
+        brigades: T3_FIFTH_CORPS_DEFENDING_RESERVES,
+        objectives: [],
+        staging_osid: 'op:bihac:bihac_2',
+    },
+];
+
+const dateWindowBreza: AxisPredicate = (_state, turn) => {
+    if (turn < BREZA_DATE_MIN) return { green: false, reason: 'late-Aug–Sep 1994 Breza window not yet open' };
+    if (turn > BREZA_DATE_MAX) return { green: false, reason: 'Sep 1994 Breza window has closed' };
+    return { green: true, reason: 'within 31 Aug – mid-Sep 1994 Breza window' };
+};
+
+const corpsReadinessBreza: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.operation_readiness < BREZA_READINESS_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps operational readiness below the three-axis-defense floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps operational readiness sufficient to stiffen all three Breza sectors',
+    };
+};
+
+export const BREZA_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'breza_94',
+    name: 'Operation Breza 94 Defense',
+    tier: 'T3',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: BREZA_DEFENSIVE_AXES,
+    staging_osid: 'op:bihac:bihac_2',
+    planning_duration: 1,
+    citations: [
+        'BB2 pp.540-542 — Breza 94 plan (Grabež / Otoka / Buzim three-axis), 31 Aug – ~15 Sep 1994; 12 Sep ARBiH counterattack near-capture of Mladić',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.4 (Breza 94, T3 major defensive crisis)',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'required',
+        staging_access: 'required',           // pocket-survival (Sana mirror)
+        weather_season: 'n_a',
+        commander_confidence: 'n_a',
+        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        alliance_context: 'required',         // pre-Storm only
+        min_optional_axes: 0,
+    },
+    evaluators: {
+        date_window: dateWindowBreza,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessBreza,
+        logistics: logisticsT3,
+        staging_access: pocketSurvivalT3,
+        weather_season: alwaysGreen,
+        commander_confidence: alwaysGreen,
+        enemy_weakness: alwaysGreen,
+        alliance_context: allianceContextPreStorm,
+    },
+    staff_recommendation: 'approve',
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Operation Spider Defense (Pauk 94/95) — T3.
+//
+// Family doc §4.6. Citations: BB1 p.417, BB2 p.556.
+//
+// Historical anchor: ~25 November 1994 - Spring 1995. VRS+SVK+APWB-restored
+// joint pressure following Grmeč 94 overextension; up to ~25,000 enemy vs
+// ~15,000 5th Corps. AWWV window: w135-w145 (10-turn window — sustained siege
+// phase). T3 = "endure the broadest siege phase."
+//
+// alliance_context: REQUIRED — Pauk historically impossible after Oluja
+// (historian: "Pauk impossible after Oluja"). The pre-Storm gate is the
+// hardest constraint of the three T3 entries.
+// ═════════════════════════════════════════════════════════════════════════════
+
+const PAUK_DATE_MIN = 135;
+const PAUK_DATE_MAX = 145;
+const PAUK_READINESS_FLOOR = 0.30;
+
+const PAUK_DEFENSIVE_AXES: readonly OpportunityAxisDef[] = [
+    {
+        axis_id: 'pauk_siege_endurance',
+        name: 'Pocket-Wide Siege Endurance',
+        corps: PRIMARY_CORPS,
+        brigades: T3_FIFTH_CORPS_DEFENDING_RESERVES,
+        objectives: [],
+        staging_osid: 'op:bihac:bihac_2',
+    },
+];
+
+const dateWindowPauk: AxisPredicate = (_state, turn) => {
+    if (turn < PAUK_DATE_MIN) return { green: false, reason: 'late-1994 Pauk siege window not yet open' };
+    if (turn > PAUK_DATE_MAX) return { green: false, reason: 'spring 1995 Pauk siege window has closed' };
+    return { green: true, reason: 'within Nov 1994 – spring 1995 Pauk siege window' };
+};
+
+const corpsReadinessPauk: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[PRIMARY_CORPS]) {
+        return { green: false, reason: '5th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS);
+    if (traits.operation_readiness < PAUK_READINESS_FLOOR) {
+        return {
+            green: false,
+            reason: '5th Corps operational readiness below the siege-endurance floor',
+        };
+    }
+    return {
+        green: true,
+        reason: '5th Corps operational readiness sufficient to endure sustained siege pressure',
+    };
+};
+
+export const PAUK_94_95_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'pauk_94_95',
+    name: 'Operation Spider Defense',
+    tier: 'T3',
+    faction: 'RBiH',
+    primary_corps: PRIMARY_CORPS,
+    family: 'fifth_corps',
+    axes: PAUK_DEFENSIVE_AXES,
+    staging_osid: 'op:bihac:bihac_2',
+    planning_duration: 1,
+    citations: [
+        'BB1 p.417 — Pauk/Shield siege of the Bihać pocket, ~25 Nov 1994 – spring 1995 (VRS+SVK+APWB-restored joint pressure)',
+        'BB2 p.556 — siege scale: ~25,000 enemy vs ~15,000 5th Corps following Grmeč 94 overextension',
+        'docs/plans/late-war-5th-corps-opportunities-design.md §4.6 (Pauk / Shield 94, T3 defensive crisis)',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'required',
+        staging_access: 'required',           // pocket-survival (Sana mirror)
+        weather_season: 'n_a',
+        commander_confidence: 'n_a',
+        enemy_weakness: 'n_a',                // defender-polarity inverse not modelable
+        alliance_context: 'required',         // pre-Storm only — Pauk impossible after Oluja
+        min_optional_axes: 0,
+    },
+    evaluators: {
+        date_window: dateWindowPauk,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessPauk,
+        logistics: logisticsT3,
+        staging_access: pocketSurvivalT3,
+        weather_season: alwaysGreen,
+        commander_confidence: alwaysGreen,
+        enemy_weakness: alwaysGreen,
+        alliance_context: allianceContextPreStorm,
+    },
+    staff_recommendation: 'approve',
+};
+
 /** Catalog export for this family. Sana 95 (Phase 3) + Tigar-Sloboda 94
- *  (LANE C Phase 2) + APWB Pressure 94 (LANE C Phase 3) are live; Una /
- *  Breza / Pauk / Grmeč are pending later phases of the family doc's
- *  implementation order. */
+ *  (LANE C Phase 2) + APWB Pressure 94 (LANE C Phase 3) + T3 defensive triad
+ *  Una 94 / Breza 94 / Pauk 94/95 (LANE C Phase 4) are live; Grmeč 94 is
+ *  pending Phase 5 of the family doc's implementation order. */
 export const FIFTH_CORPS_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     SANA_95_OPPORTUNITY,
     TIGAR_SLOBODA_94_OPPORTUNITY,
     APWB_PRESSURE_94_OPPORTUNITY,
+    UNA_94_OPPORTUNITY,
+    BREZA_94_OPPORTUNITY,
+    PAUK_94_95_OPPORTUNITY,
 ];
