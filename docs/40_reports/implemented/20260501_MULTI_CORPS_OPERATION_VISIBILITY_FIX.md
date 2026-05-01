@@ -255,4 +255,4 @@ These are the residuals named in §6 below.
 
 ## 9. Commit hash
 
-_(to be filled in after commit)_
+**Committed:** `ea59cd25` on main (6 files: 2 source + 1 test + this report + ledger entry + knowledge entry).
