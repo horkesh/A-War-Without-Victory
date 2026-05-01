@@ -33,6 +33,15 @@ export interface CorpsOperationOrderPayload {
     }>;
 }
 
+export interface OperationOpportunityDecisionPayload {
+    reviewId: string;
+    proposalId: string;
+    decision: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline';
+    delayTurns?: number;
+    redirectVariantId?: string;
+    commitmentProfile?: 'minimum' | 'standard' | 'reinforced';
+}
+
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -103,6 +112,7 @@ interface WindowAwwv {
     overrideAiDecision: (level: number, targetId: string, faction: string) => Promise<{ ok: boolean; error?: string }>;
     acceptProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    resolveOperationOpportunityDecision: (payload: OperationOpportunityDecisionPayload) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -389,6 +399,10 @@ export function useIPC() {
             rejectProposal: awwv
                 ? (proposalId: string) => awwv.rejectProposal(proposalId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            resolveOperationOpportunityDecision: awwv
+                ? (payload: OperationOpportunityDecisionPayload) => awwv.resolveOperationOpportunityDecision(payload)
+                : (_payload: OperationOpportunityDecisionPayload) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
         };
     }, []); // stable — never changes reference
 }

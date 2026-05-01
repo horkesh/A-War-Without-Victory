@@ -137,6 +137,8 @@ export function deriveOperationOpportunityProposals(
             }),
             available_actions: [
                 { id: 'approve', label: 'Authorize', enabled: hasLiveReview },
+                { id: 'delay', label: 'Delay', enabled: hasLiveReview },
+                { id: 'under_resource', label: 'Under-resource', enabled: hasLiveReview },
                 { id: 'decline', label: 'Decline', enabled: hasLiveReview },
             ],
         });

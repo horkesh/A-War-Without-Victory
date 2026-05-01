@@ -148,6 +148,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: player decision during Operation Briefing. `launch` sets `force_launch=true` on the operation; `postpone` increments `postponement_count`; `abort` sets `recovery_reason='commander_abort'`; `probe` creates `active_probe` on the operation. Triggered from OperationBriefingModal. Reserializes, sends state via `game-state-updated`.
 
+- `resolve-operation-opportunity-decision` (invoke)
+    - Payload: `{ reviewId: string, proposalId: string, decision: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline', delayTurns?: number, redirectVariantId?: string, commitmentProfile?: 'minimum' | 'standard' | 'reinforced' }`
+    - Returns: `{ ok: boolean, error?: string }`
+    - Behavior: player decision during Army HQ opportunity dossier review. Validates that `reviewId` belongs to the active player faction, that the review's `proposed_action` is exactly `OPPORTUNITY:<proposalId>`, that the decision/options are valid, and that the review is unresolved. Mutates only the review row by setting `opportunity_decision`, `opportunity_decision_options`, and `resolved_turn`; the next war turn's `apply-resolved-opportunity-decisions` step is the sole owner that routes this intent through `applyOpportunityDecision`. Reserializes, sends state via `game-state-updated`. Triggered from `OperationOpportunityDossierPanel`.
+
 - `approve-reserve-request` (invoke)
     - Payload: `{ corpsId: string, brigadeId: string }`
     - Returns: `{ ok: boolean, error?: string }`

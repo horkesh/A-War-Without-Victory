@@ -1,3 +1,21 @@
+## [2026-05-01] feat(ops-ui): add rich operation opportunity decision bridge
+
+**Type:** Desktop IPC + war-pipeline consumer + Army HQ UI action expansion. No combat math, OOB, scenario data, painted targets, opportunity catalog content, or operation definitions changed.
+
+**Why:** The Army HQ opportunity dossier MVP made live opportunity reviews legible, but still used binary `acceptProposal` / `rejectProposal` buttons. The opportunity architecture needs five canonical responses - approve, delay, redirect, under-resource, decline - without creating a second desktop-side operation lifecycle.
+
+**Change:** Added optional `opportunity_decision` and `opportunity_decision_options` fields to `PendingProposalReview`. `applyResolvedOpportunityDecisions(...)` now consumes explicit rich opportunity decisions with normalized options while preserving legacy `accepted` approve/decline fallback. Added `resolve-operation-opportunity-decision` desktop IPC plus preload / `useIPC` bridge and a validating `resolveOpportunityDecisionPayload(...)` helper. `OperationOpportunityDossierPanel` now uses the rich bridge and renders Authorize, Delay, Under-resource, and Decline from `OperationOpportunityProposalView.available_actions`.
+
+**Limits:** Redirect is validated by the backend bridge but not rendered in the current dossier because redirect variants are not yet persisted into the player-safe DTO. No scenario-scale run was required because the new behavior only activates when a desktop player resolves an opportunity review row.
+
+**Determinism:** Preserved. The canonical mutation owner is still the war-pipeline `apply-resolved-opportunity-decisions` step, review rows are consumed in deterministic id order, and no randomness/time/locale ordering was introduced.
+
+**Verification:** Red first: focused tests failed on missing explicit decision consumption, missing IPC bridge, missing action DTOs, and dossier still using binary proposal IPC. Green: 47/47 focused bridge tests pass; `npx.cmd tsc --noEmit` clean; broader opportunity/UI pack 154/154 pass; `npm.cmd run desktop:map:build` pass with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`.
+
+---
+
 ## [2026-05-01] feat(ui): surface pending operation opportunities as Army HQ dossiers
 
 **Type:** UI/data-consumer feature. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.

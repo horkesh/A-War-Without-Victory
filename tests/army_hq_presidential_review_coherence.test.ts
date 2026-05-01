@@ -155,6 +155,10 @@ describe('Army HQ / presidential review coherence', () => {
       new URL('../src/ui/map/components/army_hq/OperationOpportunityDossierPanel.tsx', import.meta.url),
       'utf8',
     );
+    const dossierDataSource = readFileSync(
+      new URL('../src/ui/map/data/operationOpportunityDossiers.ts', import.meta.url),
+      'utf8',
+    );
     const inboxSource = readFileSync(
       new URL('../src/ui/map/data/inboxItems.ts', import.meta.url),
       'utf8',
@@ -162,8 +166,9 @@ describe('Army HQ / presidential review coherence', () => {
 
     expect(panelSource).toContain('operationOpportunityProposals');
     expect(dossierSource).toContain('Operational Opportunities');
-    expect(dossierSource).toContain('ipc.acceptProposal');
-    expect(dossierSource).toContain('ipc.rejectProposal');
+    expect(dossierSource).toContain('ipc.resolveOperationOpportunityDecision');
+    expect(dossierDataSource).toContain("label: 'Delay'");
+    expect(dossierDataSource).toContain("label: 'Under-resource'");
     expect(inboxSource).toContain('operation_opportunity');
     expect(inboxSource).toContain('army_hq_opportunity');
   });

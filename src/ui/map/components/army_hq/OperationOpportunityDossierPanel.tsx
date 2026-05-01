@@ -3,6 +3,8 @@ import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportuni
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 
+type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
+
 interface OperationOpportunityDossierPanelProps {
     gameState: LoadedGameState;
     playerFaction: string;
@@ -17,6 +19,16 @@ const AXIS_STYLES: Record<OperationOpportunityAxisState, string> = {
 
 function statusLabel(status: string): string {
     return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function actionButtonClass(actionId: OpportunityUiDecision): string {
+    if (actionId === 'decline') {
+        return 'border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20';
+    }
+    if (actionId === 'approve') {
+        return 'border-green-500/30 bg-green-500/10 text-green-300 hover:bg-green-500/20';
+    }
+    return 'border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20';
 }
 
 function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisite_axes'][number] }) {
@@ -34,13 +46,11 @@ function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisi
 function DossierCard({
     proposal,
     busy,
-    onAuthorize,
-    onDecline,
+    onResolve,
 }: {
     proposal: OperationOpportunityProposalView;
     busy: boolean;
-    onAuthorize: (proposal: OperationOpportunityProposalView) => void;
-    onDecline: (proposal: OperationOpportunityProposalView) => void;
+    onResolve: (proposal: OperationOpportunityProposalView, decision: OpportunityUiDecision) => void;
 }) {
     const requiredSummary =
         proposal.required_axes_total != null
@@ -87,23 +97,18 @@ function DossierCard({
             )}
 
             {canAct && (
-                <div className="flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={() => onDecline(proposal)}
-                        disabled={busy}
-                        className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-red-500/30 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/20 disabled:opacity-50"
-                    >
-                        Decline
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => onAuthorize(proposal)}
-                        disabled={busy}
-                        className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-green-500/30 bg-green-500/10 text-green-300 transition-colors hover:bg-green-500/20 disabled:opacity-50"
-                    >
-                        Authorize
-                    </button>
+                <div className="flex flex-wrap justify-end gap-2">
+                    {proposal.available_actions.map((action) => (
+                        <button
+                            key={`${proposal.proposal_id}:${action.id}`}
+                            type="button"
+                            onClick={() => onResolve(proposal, action.id)}
+                            disabled={busy || !action.enabled}
+                            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border transition-colors disabled:opacity-50 ${actionButtonClass(action.id)}`}
+                        >
+                            {action.label}
+                        </button>
+                    ))}
                 </div>
             )}
         </div>
@@ -129,15 +134,18 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
 
     if (proposals.length === 0) return null;
 
-    const resolveProposal = async (proposal: OperationOpportunityProposalView, decision: 'approve' | 'decline') => {
+    const resolveProposal = async (proposal: OperationOpportunityProposalView, decision: OpportunityUiDecision) => {
         if (!ipc.isAvailable || !proposal.review_id) return;
         setBusyProposalId(proposal.proposal_id);
         try {
-            const result = decision === 'approve'
-                ? await ipc.acceptProposal(proposal.review_id)
-                : await ipc.rejectProposal(proposal.review_id);
+            const result = await ipc.resolveOperationOpportunityDecision({
+                reviewId: proposal.review_id,
+                proposalId: proposal.proposal_id,
+                decision,
+                ...(decision === 'delay' ? { delayTurns: 2 } : {}),
+            });
             if (!result.ok) {
-                setLoadError(result.error ?? `Failed to ${decision === 'approve' ? 'authorize' : 'decline'} opportunity.`);
+                setLoadError(result.error ?? `Failed to ${decision === 'approve' ? 'authorize' : decision} opportunity.`);
             }
         } finally {
             setBusyProposalId(null);
@@ -160,8 +168,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                         key={proposal.proposal_id}
                         proposal={proposal}
                         busy={busyProposalId === proposal.proposal_id}
-                        onAuthorize={(p) => { void resolveProposal(p, 'approve'); }}
-                        onDecline={(p) => { void resolveProposal(p, 'decline'); }}
+                        onResolve={(p, decision) => { void resolveProposal(p, decision); }}
                     />
                 ))}
             </div>

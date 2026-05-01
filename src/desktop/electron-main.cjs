@@ -17,6 +17,7 @@ const http = require('http');
 const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
+  resolveOpportunityDecisionPayload,
 } = require('./autonomy_ipc_contract.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
@@ -2831,7 +2832,7 @@ app.whenReady().then(() => {
     if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
     const idx = proposalAccess.index;
     const proposal = proposals[idx];
-    if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
+    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) return { ok: false, error: 'already_resolved' };
 
     // Mark accepted
     proposal.accepted = true;
@@ -2876,7 +2877,7 @@ app.whenReady().then(() => {
     if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
     const idx = proposalAccess.index;
     const proposal = proposals[idx];
-    if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
+    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) return { ok: false, error: 'already_resolved' };
 
     // Mark rejected
     proposal.accepted = false;
@@ -2905,6 +2906,26 @@ app.whenReady().then(() => {
       // accepted=false above; the war-pipeline step on the next turn routes
       // it through applyOpportunityDecision('decline'). No state mutation here.
     }
+
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
+  ipcMain.handle('resolve-operation-opportunity-decision', async (event, payload) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    const proposals = state.meta?.pending_proposal_reviews ?? [];
+    const playerFaction = state.meta?.player_faction ?? null;
+    const decisionAccess = resolveOpportunityDecisionPayload(proposals, payload, playerFaction);
+    if (decisionAccess.index === -1) return { ok: false, error: decisionAccess.error };
+    const proposal = proposals[decisionAccess.index];
+
+    // Rich operation-opportunity responses are still consumed by the canonical
+    // war-pipeline step. The desktop bridge records player intent only.
+    proposal.opportunity_decision = decisionAccess.decision;
+    proposal.opportunity_decision_options = decisionAccess.options;
+    proposal.resolved_turn = state.meta.turn;
 
     writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };

@@ -872,6 +872,8 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
         proposal.available_actions.map((action) => [action.id, action.enabled]),
         [
             ['approve', true],
+            ['delay', true],
+            ['under_resource', true],
             ['decline', true],
         ],
     );

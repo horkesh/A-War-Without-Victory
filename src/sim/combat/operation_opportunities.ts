@@ -240,6 +240,14 @@ export type OpportunityDecision =
     | 'under_resource'
     | 'decline';
 
+const OPPORTUNITY_DECISION_SET: ReadonlySet<string> = new Set([
+    'approve',
+    'delay',
+    'redirect',
+    'under_resource',
+    'decline',
+]);
+
 /** Live state of one opportunity instance in the proposal queue. */
 export interface OperationOpportunityState {
     readonly opportunity_id: string;
@@ -580,6 +588,36 @@ export interface OpportunityDecisionOptions {
     readonly delay_turns?: number;
     /** Reduces brigade roster on under-resource; "minimum" cuts to half (rounded down). */
     readonly commitment_profile?: 'minimum' | 'standard' | 'reinforced';
+}
+
+function normalizeOpportunityDecision(value: unknown): OpportunityDecision | null {
+    if (typeof value !== 'string') return null;
+    return OPPORTUNITY_DECISION_SET.has(value) ? value as OpportunityDecision : null;
+}
+
+function normalizeOpportunityDecisionOptions(value: unknown): OpportunityDecisionOptions {
+    const raw = value && typeof value === 'object'
+        ? value as Record<string, unknown>
+        : {};
+    const out: {
+        redirect_variant_id?: string;
+        delay_turns?: number;
+        commitment_profile?: 'minimum' | 'standard' | 'reinforced';
+    } = {};
+    if (typeof raw.redirect_variant_id === 'string' && raw.redirect_variant_id.length > 0) {
+        out.redirect_variant_id = raw.redirect_variant_id;
+    }
+    if (typeof raw.delay_turns === 'number' && Number.isFinite(raw.delay_turns)) {
+        out.delay_turns = raw.delay_turns;
+    }
+    if (
+        raw.commitment_profile === 'minimum'
+        || raw.commitment_profile === 'standard'
+        || raw.commitment_profile === 'reinforced'
+    ) {
+        out.commitment_profile = raw.commitment_profile;
+    }
+    return out;
 }
 
 /**
@@ -948,8 +986,10 @@ export function generateOpportunityProposalReviews(
 
 /**
  * Consume any `pending_proposal_reviews` rows whose `proposed_action` starts
- * with `OPPORTUNITY:` and whose `accepted` flag is set. Routes accepted →
- * `approve` and rejected → `decline` through `applyOpportunityDecision`.
+ * with `OPPORTUNITY:` and which carry either an explicit rich
+ * `opportunity_decision` or the legacy binary `accepted` flag. Rich decisions
+ * let the desktop bridge expose delay / redirect / under_resource without
+ * moving opportunity state ownership out of the war pipeline.
  *
  * Runs at the START of each war turn, before `apply-autonomy-transition` GCs
  * the prior turn's resolved proposals. The IPC handler only marks `accepted`;
@@ -967,11 +1007,15 @@ export function applyResolvedOpportunityDecisions(
     const targets = reviews
         .filter(r =>
             r.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)
-            && r.accepted !== undefined)
+            && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted !== undefined))
         .sort((a, b) => strictCompare(a.id, b.id));
     for (const r of targets) {
         const proposalId = r.proposed_action.slice(OPPORTUNITY_PROPOSAL_ACTION_PREFIX.length);
-        const decision: OpportunityDecision = r.accepted ? 'approve' : 'decline';
-        applyOpportunityDecision(state, turn, proposalId, decision, catalog);
+        const explicitDecision = normalizeOpportunityDecision(r.opportunity_decision);
+        const decision: OpportunityDecision = explicitDecision ?? (r.accepted ? 'approve' : 'decline');
+        const options = explicitDecision
+            ? normalizeOpportunityDecisionOptions(r.opportunity_decision_options)
+            : {};
+        applyOpportunityDecision(state, turn, proposalId, decision, catalog, options);
     }
 }

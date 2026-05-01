@@ -1159,6 +1159,17 @@ export interface PendingProposalReview {
     proposed_action: string;
     /** Set when player responds; absent = pending. */
     accepted?: boolean;
+    /**
+     * Rich decision for operation-opportunity reviews. This preserves the
+     * war-pipeline ownership boundary: desktop IPC records intent here, then
+     * apply-resolved-opportunity-decisions consumes it next turn.
+     */
+    opportunity_decision?: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline';
+    opportunity_decision_options?: {
+        redirect_variant_id?: string;
+        delay_turns?: number;
+        commitment_profile?: 'minimum' | 'standard' | 'reinforced';
+    };
     /** Turn when player responded. */
     resolved_turn?: number;
     /** The value currently active (e.g. current corps stance). */

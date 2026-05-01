@@ -11,6 +11,7 @@
 - `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
 - `docs/40_reports/GUI_MASTER.md`
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`
+- `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`
 
 ## Purpose
 
@@ -22,18 +23,19 @@ The goal is not to make a new combat path or a new free-form planner. The goal i
 
 ## Implementation Checkpoint - 2026-05-01
 
-The live MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`.
+The live read-path MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`. The rich decision bridge is implemented in `resolve-operation-opportunity-decision` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`.
 
 Implemented:
 
 - adapter DTO `LoadedGameState.operationOpportunityProposals`
 - pending-review preservation of `proposed_action`, `current_value`, and `proposed_value`
 - Presidential Inbox routing for `OPPORTUNITY:<proposal_id>` rows to Army HQ briefing
-- Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, and Decline
+- Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, Delay, Under-resource, and Decline
+- dedicated decision IPC that writes `opportunity_decision` / `opportunity_decision_options` onto the pending review row for war-pipeline consumption
 
 Still planned:
 
-- dedicated decision IPC for Delay / Redirect / Under-resource
+- player-safe redirect variant DTOs and redirect button rendering
 - map footprint highlighting
 - persisted force-quality trait bands and objective/staging labels in the player-safe DTO
 
@@ -179,6 +181,7 @@ The mutation path needs one richer decision endpoint. The implementation packet 
 
 ```ts
 interface StageOperationOpportunityDecisionPayload {
+  reviewId: string;
   proposalId: string;
   decision: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline';
   redirectVariantId?: string;
@@ -192,7 +195,7 @@ Preferred implementation options:
 | Option | Shape | Recommendation |
 |---|---|---|
 | Extend autonomy proposal handlers | Encode opportunity decisions through `acceptProposal` / `rejectProposal` plus proposal metadata | Too cramped for redirect, delay, and under-resource. Useful only as a fallback. |
-| Add `stage-operation-opportunity-decision` | One mutating IPC handler that resolves a pending proposal into existing operation/order state | Recommended. It is a small bridge, not a new lifecycle. |
+| Add `resolve-operation-opportunity-decision` | One mutating IPC handler that records a pending proposal's rich decision for the existing war-pipeline consumer | Implemented. It is a small review-row bridge, not a new lifecycle. |
 | Reuse `stage-operation-decision` | Add pre-operation decisions to the existing launch/postpone/abort channel | Reject. That channel owns decisions after a `CorpsOperation` exists. |
 
 Adding a decision invoke does not create a new operation owner. It only stages the player's response to the opportunity proposal, after which the existing operation factories and lifecycle own the work.
@@ -235,7 +238,7 @@ Do not place the primary review in Warroom reports. Warroom may mention that Arm
 | P0 | Add static fixture/story for `OperationOpportunityProposalView` and dossier layout | Lets us evaluate density and player language before engine wiring | Storybook/render smoke, a11y labels, no raw OSIDs in fixture text |
 | P1 | Adapter read path from proposed opportunity state to player-safe DTO | Real proposals become visible without decisions | Unit tests for filtering, sorting, labels, player-faction scoping |
 | P2 | Army HQ queue and dossier read-only surface | Player can inspect opportunities and map footprint | Component tests for queue, dossier sections, empty states |
-| P3 | Mutating decision IPC | Player can approve/delay/decline; redirect/under-resource can land behind feature flags | IPC tests: sorted deterministic mutation, invalid proposal refusal, no state mutation on bad payload |
+| P3 | Mutating decision IPC | Player can approve/delay/under-resource/decline; redirect is backend-validated and waits for variant DTOs | IPC tests: sorted deterministic mutation, invalid proposal refusal, no state mutation on bad payload |
 | P4 | Existing operation lifecycle linkage | Approved opportunity becomes normal `CorpsOperation`; AAR links back | Operation lifecycle tests, opportunity-resolution record tests |
 | P5 | Force-quality trait display | Claude audit outputs become visible in the dossier | Trait band tests, diagnostic/AAR evidence tests |
 | P6 | Bot/autonomy parity | Bot factions use same proposal and response vocabulary | Determinism tests for bot decisions and replay |

@@ -98,4 +98,5 @@ contextBridge.exposeInMainWorld('awwv', {
   // v0.8.4 Phase C: Proposal review
   acceptProposal: (proposalId) => ipcRenderer.invoke('accept-proposal', proposalId),
   rejectProposal: (proposalId) => ipcRenderer.invoke('reject-proposal', proposalId),
+  resolveOperationOpportunityDecision: (payload) => ipcRenderer.invoke('resolve-operation-opportunity-decision', payload),
 });

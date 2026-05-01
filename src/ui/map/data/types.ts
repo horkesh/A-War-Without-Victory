@@ -474,7 +474,7 @@ export interface OperationOpportunityPrerequisiteAxisView {
 }
 
 export interface OperationOpportunityProposalActionView {
-    id: 'approve' | 'decline';
+    id: 'approve' | 'delay' | 'redirect' | 'under_resource' | 'decline';
     label: string;
     enabled: boolean;
 }

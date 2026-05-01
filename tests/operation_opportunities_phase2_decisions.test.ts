@@ -9,14 +9,15 @@
  *     and player-safe descriptions (no raw OSIDs).
  *   - The accept/reject IPC marks `accepted` on the proposal row; the
  *     `applyResolvedOpportunityDecisions` step routes it through
- *     applyOpportunityDecision (approve/decline only — delay/redirect/
- *     under_resource land in a future packet).
+ *     applyOpportunityDecision. Rich opportunity decisions can also be written
+ *     explicitly on the review row so IPC can expose delay / redirect /
+ *     under_resource without bypassing the war-pipeline owner.
  *   - Bot decisions are deterministic across replay (same state -> same
  *     decision in same order).
  *
- * Phase 2 ships approve/decline only via the binary accept/reject IPC.
- * Delay/redirect/under_resource are reachable through the direct
- * applyOpportunityDecision API and are tested in the Phase 1 substrate suite.
+ * Legacy accept/reject IPC remains supported for approve/decline. The richer
+ * opportunity IPC writes `opportunity_decision` and optional decision options
+ * onto the review row; this consumer owns the state mutation on the next turn.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -220,6 +221,53 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         expect(cmd.active_operations).toHaveLength(0);
         const resolutions = state.military.operation_opportunity_resolutions!;
         expect(resolutions.some(r => r.response === 'decline')).toBe(true);
+    });
+
+    it('apply-resolved consumer routes explicit opportunity_decision=delay without spawning an op', () => {
+        const state = buildMinimalState(175, 'RBiH', 1);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+        state.meta.pending_proposal_reviews = reviews.map(r => ({
+            ...r,
+            opportunity_decision: 'delay',
+            opportunity_decision_options: { delay_turns: 2 },
+            resolved_turn: 175,
+        } as any));
+        state.meta.turn = 176;
+
+        applyResolvedOpportunityDecisions(state, 176, [def]);
+
+        const proposal = state.military.operation_opportunities!.find(
+            p => p.opportunity_id === def.opportunity_id);
+        expect(proposal!.status).toBe('delayed');
+        expect(proposal!.reevaluate_at_turn).toBe(178);
+        expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
+        expect(state.military.operation_opportunity_resolutions ?? []).toEqual([]);
+    });
+
+    it('apply-resolved consumer routes explicit opportunity_decision=under_resource through the normal approval path', () => {
+        const state = buildMinimalState(175, 'RBiH', 1);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+        state.meta.pending_proposal_reviews = reviews.map(r => ({
+            ...r,
+            opportunity_decision: 'under_resource',
+            opportunity_decision_options: { commitment_profile: 'minimum' },
+            resolved_turn: 175,
+        } as any));
+        state.meta.turn = 176;
+
+        applyResolvedOpportunityDecisions(state, 176, [def]);
+
+        const proposal = state.military.operation_opportunities!.find(
+            p => p.opportunity_id === def.opportunity_id);
+        expect(proposal!.status).toBe('under_resourced_approved');
+        const cmd = state.military.corps_command![def.primary_corps];
+        expect(cmd.active_operations).toHaveLength(1);
+        const resolutions = state.military.operation_opportunity_resolutions!;
+        expect(resolutions.some(r => r.response === 'under_resource')).toBe(true);
     });
 
     it('apply-resolved ignores rows that have not been resolved by the player yet', () => {
