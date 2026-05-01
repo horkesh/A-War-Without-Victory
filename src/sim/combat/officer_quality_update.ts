@@ -3,7 +3,11 @@
  *
  * Officer quality [0, 1] on FormationState represents abstracted command competence
  * at brigade level. Growth comes from combat experience and frontline service;
- * loss comes from casualties and VRS brain drain.
+ * loss comes from per-battle casualty attrition (`applyOfficerCasualtyLoss` in
+ * `attack_post_battle_effects.ts`). The previous per-turn calendar-driven VRS
+ * "brain drain" railroad was removed in Phase 3 of the FORCE QUALITY FOUNDATION
+ * milestone (2026-05-01); see § "VRS_BRAIN_DRAIN_*" deprecation note below and
+ * `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §8.
  *
  * Deterministic: sorted iteration, pure arithmetic, no randomness.
  */
@@ -35,10 +39,24 @@ export const OFFICER_QUALITY_FLOOR = 0.05;
 /** Cap: officer quality never exceeds this. */
 export const OFFICER_QUALITY_CAP = 0.90;
 
-/** VRS brain drain: weekly loss after this week. */
+/**
+ * @deprecated Calendar railroad removed Phase 3 of FORCE QUALITY FOUNDATION milestone;
+ * VRS late-war erosion now flows through casualty-driven attrition in
+ * `attack_post_battle_effects.ts` (`applyOfficerCasualtyLoss`) and operation_readiness
+ * in Phase 4. Constant retained for backward compatibility with external imports
+ * (e.g. tests); the engine no longer reads it. See
+ * `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §8.
+ */
 export const VRS_BRAIN_DRAIN_START_WEEK = 40;
 
-/** VRS brain drain rate per turn. */
+/**
+ * @deprecated Calendar railroad removed Phase 3 of FORCE QUALITY FOUNDATION milestone;
+ * VRS late-war erosion now flows through casualty-driven attrition in
+ * `attack_post_battle_effects.ts` (`applyOfficerCasualtyLoss`) and operation_readiness
+ * in Phase 4. Constant retained for backward compatibility with external imports
+ * (e.g. tests); the engine no longer reads it. See
+ * `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §8.
+ */
 export const VRS_BRAIN_DRAIN_RATE = 0.001;
 
 /** Faction learning rate multipliers. */
@@ -70,7 +88,10 @@ export interface OfficerQualityReport {
  * - Growth is diminished at higher quality: × (1.0 - quality × 0.5)
  *
  * Loss sources:
- * - VRS brain drain: -VRS_BRAIN_DRAIN_RATE per turn after w40
+ * - Per-battle casualty attrition is owned by `applyOfficerCasualtyLoss` in
+ *   `attack_post_battle_effects.ts`; this function does NOT apply per-turn loss.
+ *   The previous VRS calendar railroad (`turn >= 40` unconditional decay) was
+ *   removed in Phase 3 of the FORCE QUALITY FOUNDATION milestone (2026-05-01).
  *
  * @param engagedFormationIds — formation IDs that fought this turn (from attack resolution report)
  */
@@ -148,12 +169,11 @@ export function updateBrigadeOfficerQuality(
             quality += growth;
         }
 
-        // VRS brain drain after configured start week
-        const brainDrainStart = timelineConfig?.brain_drain_start_week ?? VRS_BRAIN_DRAIN_START_WEEK;
-        const brainDrainRate = timelineConfig?.brain_drain_rate ?? VRS_BRAIN_DRAIN_RATE;
-        if (faction === 'RS' && turn >= brainDrainStart) {
-            quality -= brainDrainRate;
-        }
+        // VRS brain drain (calendar railroad) removed in Phase 3 of FORCE QUALITY
+        // FOUNDATION; degradation now emerges from casualty-driven attrition
+        // (applyOfficerCasualtyLoss in attack_post_battle_effects.ts) +
+        // operation_readiness (Phase 4). Timeline brain_drain_* fields and the
+        // VRS_BRAIN_DRAIN_* constants remain inert/deprecated for compat — see file header.
 
         // Clamp
         quality = Math.max(OFFICER_QUALITY_FLOOR, Math.min(OFFICER_QUALITY_CAP, quality));

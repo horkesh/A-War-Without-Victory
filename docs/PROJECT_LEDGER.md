@@ -1,3 +1,37 @@
+## [2026-05-01] refactor(officer-quality): remove VRS calendar brain-drain railroad (Phase 3 of FORCE QUALITY FOUNDATION)
+
+**Type:** Engine change — Phase 3 of FORCE QUALITY FOUNDATION milestone (Lane A). Deletes the unconditional `turn >= 40` RS officer-quality decay confirmed as a calendar railroad in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §8. No tuning of constants, no canon edits, no painted-target overrides, no Phase 4 territory entered. Game-designer consultation pass (per skill briefing) verified compliance with `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` §"Forbidden Shapes" + §"Faction Shape > VRS" before commit.
+
+**Why:** The block at `officer_quality_update.ts:134-136` (pre-Phase-3) fired `quality -= brain_drain_rate` for every active RS brigade on every turn at or after `brain_drain_start_week`, regardless of casualties, supply, exhaustion, alliance posture, or any battlefield signal. This violated the canonized rule that faction arcs must emerge from mechanics (`CALIBRATION_MASTER.md` §"Faction Doctrinal Arcs") and the architecture contract's "no calendar victory rails" + "no total VRS collapse switch" prohibitions. The audit observed RS p25 hitting the `OFFICER_QUALITY_FLOOR = 0.05` clamp at 156w/183w/188w precisely because the railroad dominated late-war RS officer quality once Phase 2 had not yet fixed the units bug suppressing combat-driven growth.
+
+**Strategy: pure removal (Strategy A per the Phase 3 task spec).** Investigation confirmed `attack_post_battle_effects.ts:61-67` (`applyOfficerCasualtyLoss`) is the LIVE mechanic-coupled officer-attrition path: per-formation post-combat, it mutates `f.officer_quality` proportional to `casualtyRatio * OFFICER_CASUALTY_MULT * (1 - quality * 0.3)`, clamped at the floor. Phase 3 keeps that path untouched and depends on it for VRS late-war erosion of brigades that actually take casualties — VRS brigades that hold prepared positions without casualties now correctly preserve quality (matches contract's "preserves local counterattack ability by intact quality formations"). Strategy B (conditional gate) was rejected: any thin signal at this layer would duplicate `applyOfficerCasualtyLoss` or become the next railroad. The audit §10 item 4 explicitly recommends "rely on existing casualty/officer loss and move degradation into operation readiness" (Phase 4).
+
+**Files changed:**
+- `src/sim/combat/officer_quality_update.ts` — file header + `updateBrigadeOfficerQuality` JSDoc updated to point at `applyOfficerCasualtyLoss` as the canonical loss owner; deleted the calendar block at lines 134-136 (replaced with a 5-line transitional comment citing Phase 3 and Phase 4); `VRS_BRAIN_DRAIN_START_WEEK` and `VRS_BRAIN_DRAIN_RATE` retained as exported `@deprecated` constants for compat (no engine consumer; only `tests/officer_quality.test.ts` still imports `VRS_BRAIN_DRAIN_START_WEEK` for the no-decay assertion).
+- `tests/officer_quality.test.ts` — two pre-Phase-3 brain-drain assertions rewritten to assert the OPPOSITE behavior (no calendar decay) with explicit transitional comments; `VRS_BRAIN_DRAIN_RATE` import removed (no longer referenced).
+- `tests/officer_quality_no_calendar_railroad.test.ts` — NEW. 4 test cases: (§1) no unconditional decay across turns 39 / 41 / 100 with no combat and no frontline; (§2) timeline `brain_drain_*` override is inert (`brain_drain_rate: 0.5` + `brain_drain_start_week: 1` cannot reintroduce the railroad); (§3) combat-engaged growth still works (mechanic-coupled growth intact); (§4) determinism (two runs byte-identical).
+- `tests/officer_config_consumers.test.ts` — `DEAD_FIELDS_ALLOW_LIST` extended with `RS.brain_drain_rate` and `RS.brain_drain_start_week` (Phase 3 cite in comment).
+- `data/derived/scenario/baselines/manifest.json` — refreshed.
+
+**Tests:** 4 new cases (`tests/officer_quality_no_calendar_railroad.test.ts`) + 21 rewritten/existing (`tests/officer_quality.test.ts`) + 6 Shape-C (`tests/officer_learning_rate_shape_c.test.ts`, Phase 2 protection) + 3 consumers (`tests/officer_config_consumers.test.ts`) + 6 family-consistency (`tests/scenario_apr1992_family_consistency.test.ts`, Phase 1 protection) all green. `npx tsc --noEmit` clean.
+
+**Hash impact (deliberate):** Only `apr1992_52w` (the timeline-bound baseline scenario) moved, and only on the artifacts that capture late-window state where the railroad fired:
+- `end_report.md`: `7f1aad04…` → `5f19b40225a0a4e690159e98ba46ea485ef38dcac59ef664aa868c5a9c661964`
+- `final_save.json`: `c0ac7b56…` → `45100df12cb4365877b436ca5f444bd38d8bc0a013267065f7cf83fcc41bb62b`
+- `run_summary.json`: `e552cddb…` → `c5a1d7c9431c6d5d1dee925334cdef2ccf4c4a0e55931f6669f1ce742d497f12`
+- `weekly_report.jsonl`: `bf8033c5…` → `87df97878ea33e6a9690fff1c1cdec95351984b25fa8d7e20f9d3833a3d56e65`
+- `activity_summary.json`, `control_delta.json`, `formation_delta.json` for apr1992_52w UNCHANGED from Phase 2 (these capture activity/control/formation events that were not driven by the per-turn decay).
+- `baseline_ops_4w` and `noop_4w` UNCHANGED — neither binds the apr1992 timeline so the calendar block was never eligible to fire there.
+- Re-running `tools/scenario_runner/run_baseline_regression.ts` confirms "all scenarios match" after refresh.
+
+**Calibration impact (deliberate; accepted by milestone scope):** Late-war RS officer-quality painted-target fit will worsen temporarily until Phase 4 wires `computeCorpsOperationReadiness`. The architecture contract explicitly accepts this: "the fact that late-war painted fit worsens temporarily while removing railroads" is not a stop condition. VRS systemic late-war reduction in broad offensive cadence, multi-front coordination, reserve redeployment reliability, and recovery becomes a corps-level trait in Phase 4 rather than a per-brigade calendar tax.
+
+**Determinism:** Sorted iteration via `strictCompare` preserved at `officer_quality_update.ts:117,190`. No `Math.random`, `Date.now`, `new Date(`, or `localeCompare` introduced. Save shape unchanged — `formation.officer_quality` remains a single `number`. Determinism §4 test asserts byte-identical output across two runs.
+
+**Game-designer consultation verdict (pre-commit, per task spec):** GREEN. Compliance with all five "Forbidden Shapes" entries; faction shape preserves prepared defense / artillery danger / local counterattack as required; canon hierarchy honored (no FORAWWV touched); accepted late-war painted-fit drift falls within the milestone's explicit scope.
+
+**Phase 4 follows:** add deterministic `computeCorpsOperationReadiness(...)` helper consuming `officer_quality`, named-officer competence, `capability_profile`, cohesion, morale, equipment condition, and exhaustion; emit traceable trait object; consume in operation eligibility / multi-axis limits / staging tolerance; surface in AAR.
+
 ## [2026-05-01] fix(officer-quality): split learning_rate into per_turn (absolute) + multiplier; deprecate legacy field
 
 **Type:** Engine + schema + scenario data change — Phase 2 of FORCE QUALITY FOUNDATION milestone (Lane A). Resolves the 100× officer-learning suppression bug confirmed in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §4 by introducing explicit precedence over three timeline-config fields. No tuning of constants, no canon edits, no painted-target overrides.

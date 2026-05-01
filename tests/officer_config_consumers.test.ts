@@ -34,6 +34,16 @@ const DEAD_FIELDS_ALLOW_LIST = new Set<string>([
     'RBiH.pool_regeneration_interval',
     'RBiH.pool_generated_base_competence',
     'RBiH.pool_generated_max_competence',
+    // Phase 3 of FORCE QUALITY FOUNDATION milestone (2026-05-01) removed the
+    // calendar-driven VRS brain drain at officer_quality_update.ts:134-136
+    // (see docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md §8).
+    // The timeline brain_drain_* fields are retained as inert/no-op for backward
+    // compat (existing scenario JSON, schema, and any external loaders unchanged).
+    // VRS late-war erosion now flows through casualty-driven attrition in
+    // attack_post_battle_effects.ts (`applyOfficerCasualtyLoss`) and Phase 4
+    // operation_readiness.
+    'RS.brain_drain_rate',
+    'RS.brain_drain_start_week',
 ]);
 
 interface OfficerConfigEntry {

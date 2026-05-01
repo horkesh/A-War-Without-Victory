@@ -18,8 +18,10 @@ import {
     OFFICER_QUALITY_CAP,
     COMBAT_GROWTH_BASE,
     FRONTLINE_GROWTH_BASE,
+    // VRS_BRAIN_DRAIN_START_WEEK retained for the no-decay assertion (Phase 3 of
+    // FORCE QUALITY FOUNDATION); VRS_BRAIN_DRAIN_RATE is no longer referenced
+    // because the calendar railroad was deleted from the engine in Phase 3.
     VRS_BRAIN_DRAIN_START_WEEK,
-    VRS_BRAIN_DRAIN_RATE,
     FACTION_LEARNING_RATE,
 } from '../src/sim/combat/officer_quality_update.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
@@ -222,11 +224,22 @@ describe('updateBrigadeOfficerQuality', () => {
             `RBiH ${fRBiH.officer_quality} should be > RS ${fRS.officer_quality}`);
     });
 
-    it('VRS brain drain kicks in after w40', () => {
+    it('VRS calendar brain drain (railroad) is REMOVED — no decay after w40 without combat (Phase 3 of FORCE QUALITY FOUNDATION)', () => {
+        // Pre-Phase-3 behavior: turn>=VRS_BRAIN_DRAIN_START_WEEK unconditionally
+        // subtracted a fixed brain-drain rate every turn for RS brigades regardless
+        // of casualties/supply/etc. That calendar railroad was deleted in
+        // src/sim/combat/officer_quality_update.ts as part of Phase 3 of the
+        // FORCE QUALITY FOUNDATION milestone (2026-05-01). RS brigades that take
+        // no casualties and don't fight should preserve quality. See
+        // docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md §8.
         const f = makeFormation({ faction: 'RS', officer_quality: 0.55, kind: 'brigade' });
         const state = makeState({ test_brigade_1: f }, VRS_BRAIN_DRAIN_START_WEEK + 5);
         updateBrigadeOfficerQuality(state, new Set());
-        assert.ok(f.officer_quality! < 0.55, `Expected brain drain, got ${f.officer_quality}`);
+        assert.strictEqual(
+            f.officer_quality,
+            0.55,
+            `Calendar railroad removed: expected 0.55 unchanged, got ${f.officer_quality}`,
+        );
     });
 
     it('VRS brain drain does not apply before w40', () => {
@@ -238,10 +251,21 @@ describe('updateBrigadeOfficerQuality', () => {
     });
 
     it('quality respects floor', () => {
+        // Phase 3 note: per-turn calendar decay was removed; this test now exercises
+        // the floor only when growth on a low-quality brigade would push it past
+        // the floor in the wrong direction (it cannot — growth is positive). The
+        // floor remains live for casualty-driven attrition in
+        // attack_post_battle_effects.ts (applyOfficerCasualtyLoss).
         const f = makeFormation({ faction: 'RS', officer_quality: OFFICER_QUALITY_FLOOR + 0.001, kind: 'brigade' });
-        const state = makeState({ test_brigade_1: f }, 200); // far in future — brain drain applies
+        const state = makeState({ test_brigade_1: f }, 200); // far future — proves no calendar decay
         updateBrigadeOfficerQuality(state, new Set());
         assert.ok(f.officer_quality! >= OFFICER_QUALITY_FLOOR, `Floor violated: ${f.officer_quality}`);
+        // Pre-Phase-3 this would have decayed below the start; now stays at start.
+        assert.strictEqual(
+            f.officer_quality,
+            OFFICER_QUALITY_FLOOR + 0.001,
+            `Calendar railroad removed: expected unchanged, got ${f.officer_quality}`,
+        );
     });
 
     it('quality respects cap', () => {
