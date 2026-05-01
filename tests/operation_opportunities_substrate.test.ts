@@ -135,8 +135,13 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(state.military.operation_opportunity_resolutions).toBeUndefined();
     });
 
-    it('production catalog is empty in Phase 1 (Phase 3 fills it)', () => {
-        expect(OPERATION_OPPORTUNITY_CATALOG).toEqual([]);
+    it('production catalog is non-empty since Phase 3 (5th Corps / Sana 95)', () => {
+        // Phase 1 shipped empty; Phase 3 added the 5th Corps / Sana 95 family
+        // (`SANA_95_OPPORTUNITY` in operation_opportunity_catalog_5th_corps.ts).
+        // The substrate generic tests below all use inline fixture catalogs,
+        // so production catalog content is independent of substrate behavior.
+        expect(OPERATION_OPPORTUNITY_CATALOG.length).toBeGreaterThan(0);
+        expect(OPERATION_OPPORTUNITY_CATALOG.every(d => d.opportunity_id.length > 0)).toBe(true);
     });
 
     it('opportunity does not surface before date_window opens', () => {

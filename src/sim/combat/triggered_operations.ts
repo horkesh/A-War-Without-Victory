@@ -489,112 +489,16 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
             },
         ],
     },
-    {
-        // Operation Sana — ARBiH 5th Corps liberation of Una-Sana, September–
-        // October 1995. Historical force: 5th Corps brigades from Bihać,
-        // Cazin, Krupa pocket, supported by 7th Corps from central Bosnia.
-        // Territorial outcome: liberation of Bihać–Petrovac corridor, Krupa
-        // muni rear, Bosanski Petrovac, Sanski Most, Ključ. (BB2 p.642–663.)
-        //
-        // Three axes:
-        //
-        // Axis 1 (Krupa Una Valley): two Krupa-pocket brigades sweep east
-        //   into the Krupa muni rear (ivanjska_2 → arapusa_2 → donji_dubovik_2
-        //   → vranjska_2 → jasenica_2 → gornja_suvaja). Staging at
-        //   op:bosanska_krupa:otoka_2 (5th Corps RBiH-held throughout).
-        //
-        // Axis 2 (Bihać–Petrovac): two Bihać-area brigades + Cazin light
-        //   support push south through Bihać rear into Bosanski Petrovac.
-        //   Staging at op:bihac:bihac_2 (5th Corps HQ).
-        //
-        // Axis 3 (Sanski Most/Ključ): four Cazin/Velika Kladuša brigades push
-        //   east through Krupa pocket into Sanski Most + Ključ munis. Staging
-        //   at op:bosanska_krupa:otoka_2 (long march into Petrovac/Sanski Most/
-        //   Ključ; engine routes brigades through chain).
-        //
-        // All objectives flipped RS→RBiH between apr1995 and oct1995 painted
-        // truth — these are exactly the OSIDs the engine cannot capture
-        // without scripted op support.
-        name: 'Operation Sana',
-        faction: 'RBiH',
-        primary_corps: 'arbih_5th_corps',
-        staging_osid: 'op:bihac:bihac_2',
-        planning_duration: 5,
-        min_attack_outcome: 'repulsed',
-        trigger: (_state, turn) => turn >= 175,
-        axes: [
-            {
-                axis_id: 'sana_krupa',
-                name: 'Krupa Una Valley',
-                corps: 'arbih_5th_corps',
-                brigades: [
-                    'arbih_511th_slavna_mountain' as FormationId,
-                    'arbih_505th_vitezka_mountain' as FormationId,
-                ],
-                objectives: [
-                    'op:bosanska_krupa:ivanjska_2',
-                    'op:bosanska_krupa:arapusa_2',
-                    'op:bosanska_krupa:donji_dubovik_2',
-                    'op:bosanska_krupa:vranjska_2',
-                    'op:bosanska_krupa:jasenica_2',
-                    'op:bosanska_krupa:gornja_suvaja',
-                ],
-                staging_osid: 'op:bosanska_krupa:otoka_2',
-            },
-            {
-                axis_id: 'sana_bihac_petrovac',
-                name: 'Bihać–Petrovac Corridor',
-                corps: 'arbih_5th_corps',
-                brigades: [
-                    'arbih_501st_slavna_mountain' as FormationId,
-                    'arbih_502nd_vitezka_mountain' as FormationId,
-                    'arbih_504th_cazin_light' as FormationId,
-                ],
-                objectives: [
-                    'op:bihac:ripac',
-                    'op:bihac:racic',
-                    'op:bihac:trubar',
-                    'op:bihac:orasac_2',
-                    'op:bosanski_petrovac:vrtoce',
-                    'op:bosanski_petrovac:bosanski_petrovac_2',
-                    'op:bosanski_petrovac:dobro_selo_2',
-                    'op:bosanski_petrovac:kolonic_2',
-                    'op:bosanski_petrovac:vodjenica',
-                    'op:bosanski_petrovac:prkosi',
-                    'op:bosanski_petrovac:krnjeusa',
-                    'op:bosanski_petrovac:jasenovac_2',
-                ],
-                staging_osid: 'op:bihac:bihac_2',
-            },
-            {
-                axis_id: 'sana_sanski_most_kljuc',
-                name: 'Sanski Most + Ključ Liberation',
-                corps: 'arbih_5th_corps',
-                brigades: [
-                    'arbih_503rd_slavna_mountain' as FormationId,
-                    'arbih_506th_mountain' as FormationId,
-                    'arbih_510th_bosnian_liberation' as FormationId,
-                    'arbih_517th_light' as FormationId,
-                ],
-                objectives: [
-                    'op:sanski_most:lusci_palanka_2',
-                    'op:sanski_most:budimlic_japra_2',
-                    'op:sanski_most:sanski_most_2',
-                    'op:sanski_most:ilidza_2',
-                    'op:sanski_most:jelasinovci',
-                    'op:sanski_most:kljevci',
-                    'op:sanski_most:ostra_luka',
-                    'op:sanski_most:skucani_vakuf_2',
-                    'op:sanski_most:stari_majdan',
-                    'op:kljuc:hadzici',
-                    'op:kljuc:kljuc_2',
-                    'op:kljuc:krasulje_2',
-                    'op:kljuc:sanica_2',
-                ],
-                staging_osid: 'op:bosanska_krupa:otoka_2',
-            },
-        ],
-    },
+    // Operation Sana — MIGRATED to opportunity catalog (LANE B Phase 3, 2026-05-01).
+    // Single owner is now `src/sim/combat/operation_opportunity_catalog_5th_corps.ts`
+    // (`SANA_95_OPPORTUNITY`). The opportunity layer evaluates pocket survival,
+    // Storm/Oluja theater opening, corps readiness, staging access, and live
+    // enemy posture — none of which the calendar-only `turn >= 175` trigger
+    // could express. Player/bot decision routes through
+    // `applyOpportunityDecision` -> `buildCorpsOperation`, producing a
+    // CorpsOperation with the same brigade roster, axis layout, and objective
+    // set this entry shipped — but only when the opportunity preconditions
+    // are satisfied. Removal is the single-owner enforcement.
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════

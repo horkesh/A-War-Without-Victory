@@ -71,6 +71,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
+import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -273,12 +274,17 @@ export interface OperationOpportunityResolution {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Canonical opportunity catalog. Phase 1 ships EMPTY — Phase 3 adds 5th Corps
- * / Sana 95 content. Sensitive-history T4 entries (Krivaja-95, Stupcanica-95,
- * Gorazde) require historian + game-designer + war-or-game sign-off before
- * appearing here.
+ * Canonical opportunity catalog. Phase 3 adds the 5th Corps / Sana 95 family.
+ * Sensitive-history T4 entries (Krivaja-95, Stupcanica-95, Gorazde) require
+ * historian + game-designer + war-or-game sign-off before appearing here.
+ *
+ * The catalog is composed from family-scoped sub-catalogs so each family doc
+ * has a single source file. Ordering is irrelevant — the evaluator sorts by
+ * opportunity_id deterministically.
  */
-export const OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] = [];
+export const OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] = [
+    ...FIFTH_CORPS_OPPORTUNITIES,
+];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers

@@ -1,3 +1,52 @@
+## [2026-05-01] feat(operations): 5th Corps / Sana 95 opportunity + single-owner migration (LANE B Phase 3)
+
+**Type:** First content family on top of the Phase 1 substrate + Phase 2 decision surface. Migrates Operation Sana from `triggered_operations.ts` (calendar-only `turn >= 175`) to the opportunity catalog (`SANA_95_OPPORTUNITY` with REAL prerequisite predicates). **No combat math change, no canon edits, no painted-target overrides, no FORAWWV touch.** Behavior on `main`: when run prerequisites hold (Storm triggered + pocket intact + corps readiness ≥ 0.40 + enemy targets RS-controlled), Sana surfaces and (as a player decision at autonomy_level=1) routes through `applyOpportunityDecision` → `buildCorpsOperation` exactly as before — same brigade roster, same axis layout, same staging anchor. Below the threshold, Sana does NOT fire. **This is the design intent (the engine telling the truth about the war the player produced) — expected hash drift on long-window scenarios is documented in Phase 4 verification.**
+
+**Why:** Per `docs/plans/late-war-5th-corps-opportunities-design.md` §0–4.7. The 5th Corps arc is the proof case for the opportunity model: an isolated pocket whose late-war exploitation must emerge from pocket survival + theater opening, not from a calendar trigger. Sana 95 was selected as the MVP single content because it is non-sensitive (vs. Krivaja-95 / Stupčanica-95 / Goražde T4 which are gated behind `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 sign-offs).
+
+**New file (`src/sim/combat/operation_opportunity_catalog_5th_corps.ts`):** the 5th Corps family catalog. Exports `SANA_95_OPPORTUNITY` and `FIFTH_CORPS_OPPORTUNITIES`. Predicates read live state only:
+- `date_window` (175-200): late-summer/autumn 1995.
+- `corps_readiness` (REQUIRED): `computeCorpsOperationReadiness(state, 'arbih_5th_corps').operation_readiness ≥ 0.40` — soft floor; consumes Phase 4 force-quality output.
+- `staging_access` (REQUIRED): every one of 5 pocket-survival anchors (`op:bihac:bihac_2`, `op:bihac:bihac_3`, `op:cazin:cazin_2`, `op:bosanska_krupa:bosanska_krupa_2`, `op:bosanska_krupa:otoka_2`) controlled by RBiH. If RS captures any anchor, the pocket has structurally collapsed and the opportunity does not surface.
+- `enemy_weakness` (REQUIRED): at least one of 4 western theater target OSIDs (Petrovac/Sanski/Ključ) is RS-controlled (something to liberate). If all are already RBiH, the predicate goes red.
+- `alliance_context` (REQUIRED): `state.meta.operation_storm_triggered === true`. The Storm/Oluja flag pre-existed at game_state.ts:1216 — no new state needed.
+- `logistics` (optional): RBiH `war_supply_pressure < 90`.
+- `commander_confidence` (optional): 5th Corps `commander_state` is present.
+- `political_authorization`, `weather_season`: `n_a` per family doc §4.7.
+- `min_optional_axes: 1` — at least one optional axis must be green.
+- Brigade roster + axis layout (3 axes: sana_krupa 2 brigades / 6 obj, sana_bihac_petrovac 3/12, sana_sanski_most_kljuc 4/13) IDENTICAL to legacy scripted Sana so the post-approval CorpsOperation has the same shape.
+- Citations: BB1 pp.417, 419-420 + family design doc.
+- `historical_exit_class: 'partial_success'` — divergence reporting only; not a forced outcome.
+
+**Single-owner migration (`src/sim/combat/triggered_operations.ts`):** removed the entire `Operation Sana` entry from `_TRIGGERED_OPS`. Replacement marker comment names the new owner. Catalog count went 8 → 7.
+
+**Catalog wiring (`src/sim/combat/operation_opportunities.ts`):** `OPERATION_OPPORTUNITY_CATALOG` now spreads `FIFTH_CORPS_OPPORTUNITIES` (one entry, Sana). Type-only import from the catalog file → no runtime cycle.
+
+**Tests (`tests/operation_opportunities_5th_corps_sana.test.ts`):** 15 cases. Catalog contains exactly one Sana entry; legacy scripted Sana is gone (single-owner enforcement); faction/corps/staging bound correctly; does NOT surface before turn 175; does NOT surface when Storm not triggered; does NOT surface when pocket anchor lost to RS; does NOT surface when all targets already RBiH; DOES surface when all required predicates align; expires past `expires_turn`; axis reasons contain no raw OSIDs (`'op:'` substring absent); `isOpportunityEligible` accepts the family fixture; brigade + objective counts match the migrated shape (2/6, 3/12, 4/13); citations include BB1 + family doc; `historical_exit_class === 'partial_success'`.
+
+**Migrated adjacent tests:**
+- `tests/triggered_operations.test.ts` — catalog length 8 → 7; `'Operation Sana'` removed from expected names list with migration comment.
+- `tests/triggered_operations_late_1995.test.ts` — `NEW_OP_NAMES` 4 → 3; `slice(-4)` → `slice(-3)`; Sana shape + painted-truth tests removed with migration comments pointing to the new owner.
+- `tests/operation_opportunities_substrate.test.ts` — "production catalog is empty" assertion replaced with "non-empty since Phase 3" guard.
+
+**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts tests/triggered_operations_late_1995.test.ts tests/operation_opportunities_substrate.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/operation_opportunities_5th_corps_sana.test.ts` → 68/68 pass. `npx.cmd vitest run tests/corps_operation_readiness.test.ts tests/force_quality_trace_persistence.test.ts tests/multi_corps_operation_visibility.test.ts tests/scenario_apr1992_family_consistency.test.ts tests/war_phase_step_order.test.ts tests/ui/inbox_items.test.ts` → 54/54 pass (Phase 4 force-quality + scenario family consistency + step-order + inbox-items unaffected). `npx.cmd tsc --noEmit` clean.
+
+**Determinism self-review:**
+1. No `Math.random` / `Date.now` / `localeCompare` in catalog or predicates.
+2. Predicates read state in fixed iteration order (loops over a const array of OSIDs).
+3. Sorted iteration in evaluator preserved from Phase 1 substrate (no change).
+4. Save shape unchanged. Opportunity proposal queue uses the same fields added in Phase 1.
+
+**Singular ownership enforcement:**
+- `tests/operation_opportunities_5th_corps_sana.test.ts` asserts `_TRIGGERED_OPS.filter(op => op.name === 'Operation Sana').length === 0` so a future change cannot silently re-add the legacy path without breaking this guard.
+- `tests/triggered_operations.test.ts` deepEqual on the 7-name list will catch any re-addition.
+
+**Sensitive-history boundary preserved:** Krivaja-95 / Stupčanica-95 / Goražde remain in `_TRIGGERED_OPS` as calendar-triggered entries — they are explicitly out of scope for this packet and remain pending the SENSITIVE_HISTORY_DESIGN_GATE.md §6 sign-off chain (`/historian` + `/game-designer` + `/war-or-game` + user approval).
+
+**Hash impact:** Long-window scenario (188w) hash will move when a run produces a state where Sana would have fired under the calendar gate but does NOT meet the new prerequisites — that is the design intent. Phase 4 verification documents the expected drift.
+
+---
+
 ## [2026-05-01] feat(operations): operation_opportunity decision surface (LANE B Phase 2)
 
 **Type:** Engine + IPC bridge — wires the Phase 1 substrate into the existing autonomy / pending_proposal_reviews surface so the player can approve or decline opportunities at autonomy_level=1, and bot factions resolve their opportunities synchronously through deterministic default decisions. **No combat math, no scenario data, no painted targets, no canon, no OOB, no run artifacts changed.** Catalog is still empty (Phase 3 fills it), so the new pipeline steps are observably no-ops on `main`.
