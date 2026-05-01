@@ -1,3 +1,19 @@
+## [2026-05-01] feat(operations): link opportunity resolutions to completed operation AARs
+
+**Type:** Simulation observability + persisted output fix. No combat math, OOB, scenario data, painted targets, operation definitions, or player-command semantics changed.
+
+**Why:** Lane B shipped the opportunity `proposal -> authorization -> CorpsOperation` path, but the close-out report left the final `CorpsOperation -> AAR -> opportunity resolution` link as next-lane work. Without that link, `operation_opportunity_resolutions` knew an op was approved and spawned, but endgame/Cost Ledger consumers had to infer the result from operation names.
+
+**Fix:** `finalizeOperationAAR(...)` now returns the `OperationAAR` it appends. `sector_offensive.ts` passes that AAR to `linkOpportunityResolutionToAAR(...)`, which writes `executed_op_aar_id` and `exit_class` onto the matching `OperationOpportunityResolution` row. Matching is deterministic and narrow: same `executed_op_name`, same `response_turn` / AAR `started_turn`, unresolved AAR link, stable sort by response turn and proposal id.
+
+**Exit-class mapping:** AAR `success -> decisive_success`; `partial -> partial_success`; `failure` with zero attacks -> `did_not_launch`; `failure` with attacks -> `failed`; `orphaned -> aborted`.
+
+**Verification:** Red first: `npx.cmd vitest run tests/operation_opportunities_substrate.test.ts -t "links a completed operation AAR"` failed because `linkOpportunityResolutionToAAR` did not exist. Green: linker suite 21/21 pass; sector-offensive integration test added in `tests/operation_completion_truth.test.ts`; `npx.cmd tsc --noEmit` clean; focused regression pack 152/152 pass; `git diff --check` clean aside from line-ending warnings.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_AAR_LOOP_CLOSURE.md`.
+
+---
+
 ## [2026-05-01] fix(equipment): apply VRS decay floor to routine heavy-equipment condition
 
 **Type:** Simulation behavior fix + diagnostic. Bounded to routine maintenance degradation. No OOB, painted targets, scenario definitions, operation definitions, combat-loss rates, or player-command surfaces changed.

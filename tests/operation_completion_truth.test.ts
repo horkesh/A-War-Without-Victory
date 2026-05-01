@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -220,5 +220,50 @@ describe('operation completion truth', () => {
         const op = state.military.corps_command?.corps_1?.active_operations[0];
         expect(op?.phase).toBe('recovery');
         expect(op?.recovery_reason).toBe('no_logged_attempt');
+    });
+
+    it('links opportunity resolution to AAR when an approved opportunity operation completes recovery', () => {
+        const state = makeStateWithOperation({
+            name: 'Fixture Sana',
+            type: 'sector_attack',
+            phase: 'recovery',
+            started_turn: 175,
+            phase_started_turn: 176,
+            participating_brigades: ['b1'],
+            objectives: ['op:enemy:objective'],
+            current_objective_index: 1,
+            objective_capture_count: 1,
+            attack_attempt_count: 1,
+            initial_strength: 1200,
+            weekly_log: [{
+                turn: 175,
+                attacks_this_turn: 1,
+                objectives_captured_this_turn: ['op:enemy:objective'],
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+            }],
+            recovery_reason: 'completed',
+            sector_id: 'sector:corps_1:0',
+        });
+        state.meta.turn = 178;
+        state.political.political_controllers!['op:enemy:objective'] = 'RS';
+        state.military.operation_opportunity_resolutions = [{
+            proposal_id: 'OPP_175_fixture_sana_95',
+            opportunity_id: 'fixture_sana_95',
+            response: 'approve',
+            response_turn: 175,
+            executed_op_name: 'Fixture Sana',
+        }];
+
+        advanceSectorOffensives(state, null);
+
+        expect(state.operation_history?.[0]?.operation_id).toBe('corps_1:Fixture Sana:t175');
+        expect(state.military.operation_opportunity_resolutions[0].executed_op_aar_id)
+            .toBe('corps_1:Fixture Sana:t175');
+        expect(state.military.operation_opportunity_resolutions[0].exit_class)
+            .toBe('decisive_success');
     });
 });

@@ -66,6 +66,7 @@ import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
+import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
@@ -877,12 +878,12 @@ export function advanceSectorOffensives(
                     recordFailedObjectives(cmd, op, turn);
                 }
                 if (op.type === 'sector_attack') {
-                    finalizeOperationAAR(state, corpsId, op);
+                    const finalizedAAR = finalizeOperationAAR(state, corpsId, op);
+                    linkOpportunityResolutionToAAR(state, finalizedAAR);
                     // Apply experience gain to operation commander based on AAR grade
                     if (op.commander_officer_id && state.operation_history?.length) {
-                        const latestAAR = state.operation_history[state.operation_history.length - 1];
-                        if (latestAAR && latestAAR.commander_officer_id === op.commander_officer_id) {
-                            const outcome = gradeStarsToOutcome(latestAAR.grade.stars);
+                        if (finalizedAAR.commander_officer_id === op.commander_officer_id) {
+                            const outcome = gradeStarsToOutcome(finalizedAAR.grade.stars);
                             applyOperationExperience(state, op.commander_officer_id, outcome);
                         }
                     }

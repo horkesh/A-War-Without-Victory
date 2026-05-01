@@ -28,12 +28,15 @@ import {
     buildProposalId,
     defaultBotDecisionForOpportunity,
     evaluateOperationOpportunities,
+    exitClassFromOperationAAR,
     isOpportunityEligible,
+    linkOpportunityResolutionToAAR,
     runOpportunityEvaluationStep,
     type AxisPredicate,
     type OperationOpportunityDef,
     type OperationOpportunityState,
 } from '../src/sim/combat/operation_opportunities.js';
+import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
@@ -78,6 +81,43 @@ const dateWindow = (min: number, max: number): AxisPredicate =>
                 ? 'window has closed'
                 : 'window open',
     });
+
+function fakeAar(overrides: Partial<OperationAAR>): OperationAAR {
+    return {
+        operation_id: 'arbih_5th_corps:Fixture Sana:t175',
+        operation_name: 'Fixture Sana',
+        corps_id: 'arbih_5th_corps',
+        faction: 'RBiH',
+        type: 'sector_attack',
+        started_turn: 175,
+        ended_turn: 184,
+        outcome: 'partial',
+        objectives_targeted: ['op:bihac:bihac_2', 'op:bihac:bihac_3'],
+        objectives_captured: ['op:bihac:bihac_2'],
+        duration_turns: 9,
+        total_attacks: 3,
+        casualties_suffered: { killed: 0, wounded: 0 },
+        casualties_inflicted: { killed: 0, wounded: 0 },
+        equipment_lost: { tanks: 0, artillery: 0 },
+        equipment_destroyed: { tanks: 0, artillery: 0 },
+        equipment_captured: { tanks: 0, artillery: 0 },
+        participating_brigades: ['arbih_5_brigade_a'],
+        initial_strength: 1000,
+        final_strength: 900,
+        grade: {
+            stars: 3,
+            verdict: 'solid',
+            factors: {
+                objective_completion: 0.5,
+                exchange_ratio: 1,
+                tempo: 1,
+                preservation: 0.9,
+            },
+        },
+        weekly_log: [],
+        ...overrides,
+    };
+}
 
 function fixtureSana(): OperationOpportunityDef {
     return {
@@ -277,6 +317,51 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(op.axes?.[0].assigned_brigades).toEqual(['arbih_5_brigade_a', 'arbih_5_brigade_b']);
         expect(op.axes?.[0].status).toBe('executing');
         expect(updated!.executed_op_id).toBe(def.name);
+    });
+
+    it('links a completed operation AAR back to the opportunity resolution', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+
+        const linked = linkOpportunityResolutionToAAR(state, fakeAar({}));
+
+        expect(linked).toBe(true);
+        const resolution = state.military.operation_opportunity_resolutions![0];
+        expect(resolution.executed_op_aar_id).toBe('arbih_5th_corps:Fixture Sana:t175');
+        expect(resolution.exit_class).toBe('partial_success');
+    });
+
+    it('maps operation AAR outcomes into opportunity exit classes', () => {
+        expect(exitClassFromOperationAAR(fakeAar({
+            outcome: 'success',
+            total_attacks: 3,
+        }))).toBe('decisive_success');
+        expect(exitClassFromOperationAAR(fakeAar({
+            outcome: 'partial',
+            total_attacks: 3,
+        }))).toBe('partial_success');
+        expect(exitClassFromOperationAAR(fakeAar({
+            outcome: 'failure',
+            total_attacks: 4,
+            objectives_captured: [],
+        }))).toBe('failed');
+        expect(exitClassFromOperationAAR(fakeAar({
+            outcome: 'failure',
+            total_attacks: 0,
+            objectives_captured: [],
+        }))).toBe('did_not_launch');
+        expect(exitClassFromOperationAAR(fakeAar({
+            outcome: 'orphaned',
+            total_attacks: 0,
+        }))).toBe('aborted');
     });
 
     it('decline writes a resolution and does NOT spawn a corps operation', () => {

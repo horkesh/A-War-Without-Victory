@@ -71,6 +71,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
+import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -270,6 +271,49 @@ export interface OperationOpportunityResolution {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+type OpportunityExitClass = NonNullable<OperationOpportunityResolution['exit_class']>;
+
+export function exitClassFromOperationAAR(aar: OperationAAR): OpportunityExitClass {
+    if (aar.outcome === 'success') return 'decisive_success';
+    if (aar.outcome === 'partial') return 'partial_success';
+    if (aar.outcome === 'orphaned') return 'aborted';
+    if (aar.total_attacks === 0) return 'did_not_launch';
+    return 'failed';
+}
+
+/**
+ * Close the opportunity observability loop after sector_offensive finalizes a
+ * normal OperationAAR. Matching is intentionally narrow: same operation name,
+ * same response/start turn, and an unresolved AAR link.
+ */
+export function linkOpportunityResolutionToAAR(
+    state: GameState,
+    aar: OperationAAR,
+): boolean {
+    const resolutions = state.military.operation_opportunity_resolutions;
+    if (!resolutions || resolutions.length === 0) return false;
+
+    const matches = resolutions
+        .map((resolution, index) => ({ resolution, index }))
+        .filter(({ resolution }) =>
+            resolution.executed_op_aar_id === undefined
+            && resolution.executed_op_name === aar.operation_name
+            && resolution.response_turn === aar.started_turn)
+        .sort((a, b) => {
+            const turnDelta = a.resolution.response_turn - b.resolution.response_turn;
+            if (turnDelta !== 0) return turnDelta;
+            const proposalDelta = strictCompare(a.resolution.proposal_id, b.resolution.proposal_id);
+            if (proposalDelta !== 0) return proposalDelta;
+            return a.index - b.index;
+        });
+    const target = matches[0]?.resolution;
+    if (!target) return false;
+
+    target.executed_op_aar_id = aar.operation_id;
+    target.exit_class = exitClassFromOperationAAR(aar);
+    return true;
+}
+
 // Catalog
 // ═══════════════════════════════════════════════════════════════════════════
 

@@ -477,7 +477,7 @@ export function finalizeOperationAAR(
     state: GameState,
     corpsId: string,
     op: CorpsOperation,
-): void {
+): OperationAAR {
     // 1. Collect all objectives
     const objectives = collectObjectives(op);
 
@@ -708,4 +708,5 @@ export function finalizeOperationAAR(
 
     if (!state.operation_history) state.operation_history = [];
     state.operation_history.push(aar);
+    return aar;
 }
