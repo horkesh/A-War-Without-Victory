@@ -1,3 +1,17 @@
+## [2026-05-01] tool(diagnostics): add operation opportunity health audit
+
+**Type:** Read-only diagnostic tooling. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.
+
+**Why:** Opportunity content is now expanding in parallel, and architecture review needs a fast way to verify whether each family flows through the intended proposal -> decision -> AAR chain. Hand-scraping `final_save.json` is slow and error-prone.
+
+**Change:** Added `tools/diagnostics/opportunity_health_audit.cjs`, which reads a run directory and emits markdown counts/tables for opportunity decisions, completed rows, successes, T3 defensive sentinels, approved rows without AAR links, broken AAR links, and duplicate proposal-resolution rows. Added `tests/opportunity_health_diagnostic.test.ts` with a temp-run fixture covering linked AAR, T3 sentinel, and dangling approved resolution shapes.
+
+**Verification:** Red first: the new test failed on missing script. Green: `npx.cmd vitest run tests/opportunity_health_diagnostic.test.ts` -> 1/1 pass; `npx.cmd tsc --noEmit` clean; focused opportunity/endgame pack 35/35 pass. Manual smoke on `runs/apr1992_definitive_188w__210e69404d054959__w188_n1602` emitted the expected markdown and flagged the existing Sana approved-without-AAR-link row.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_HEALTH_DIAGNOSTIC.md`.
+
+---
+
 ## [2026-05-01] feat(endgame): add opportunity decisions to the Cost Ledger
 
 **Type:** Endgame observability + UI display. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.
