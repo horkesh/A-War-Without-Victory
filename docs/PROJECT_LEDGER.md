@@ -1,3 +1,47 @@
+## [2026-05-01] feat(operations): operation_opportunities substrate (LANE B Phase 1)
+
+**Type:** Engine addition — generic substrate for the late-war Operation Opportunity layer. **No combat math, no scenario data, no painted targets, no canon, no OOB, no run artifacts changed.** Catalog ships **EMPTY** in this phase; Phase 3 fills the 5th Corps / Sana 95 family. The substrate is behaviorally a no-op on `main` until catalog content lands.
+
+**Why:** Lane B per `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md` and `docs/plans/late-war-operation-opportunity-system-design.md`. Late-war operations should be opportunity proposals (player/bot can approve / delay / redirect / under_resource / decline) — not naked calendar-triggered scripts. Phase 1 ships the typed substrate + deterministic evaluator so Phase 2 (autonomy/IPC review surface) and Phase 3 (5th Corps content) can land cleanly on top.
+
+**New file (`src/sim/combat/operation_opportunities.ts`):**
+- Types: `PrereqMode`, `PrereqAxis` (9 canonical axes per design doc §4), `OpportunityTier` (T1/T3/T4 only — T4 reserved behind `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 sign-off), `OperationOpportunityDef` (catalog-level), `OperationOpportunityState` (live proposal), `OperationOpportunityResolution` (decision log), `AxisEvaluation`, `OpportunityVariant`, `OpportunityDecision`.
+- `OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] = []` — empty in Phase 1.
+- `evaluateOperationOpportunities(state, turn, catalog)` — pure deterministic evaluator. Defensive shallow-clone of previous proposals; sorted iteration via `strictCompare`; sorts queue by (eligibility_turn, opportunity_id, proposal_id); never enqueues a duplicate of an already-pending opportunity; expires past-window proposals; drops `delayed` back to `eligible_pending_review` once the reevaluate turn arrives.
+- `runOpportunityEvaluationStep(state, turn, catalog)` — pipeline-step wrapper that mutates `state.military.operation_opportunities` and appends to `state.military.operation_opportunity_resolutions`.
+- `applyOpportunityDecision(state, turn, proposalId, decision, catalog, options)` — five-branch decision applier. **Approval ALWAYS routes through `buildCorpsOperation` (corps_operation_helpers.ts:138)** — the only canonical CorpsOperation factory. `is_pre_planned: false` so opportunity ops never occupy slot 0. Decline / delay never spawn a corps op. Redirect picks an authored variant; under_resource trims the brigade pool to floor(N/2) (≥1).
+- `defaultBotDecisionForOpportunity(proposal, def)` — returns `delay` if any required axis is red; otherwise the catalog's `staff_recommendation`. Deterministic, no personality lookup.
+
+**State shape (`src/state/game_state.ts`):**
+- Added `operation_opportunities?: OperationOpportunityState[]` and `operation_opportunity_resolutions?: OperationOpportunityResolution[]` to `MilitaryState` (after `declined_operations`). Lazy `import('...').` pointer avoids cycles. Both optional, save-shape backward-compatible (existing saves omit the fields and load cleanly).
+
+**War-pipeline wiring (`src/sim/turn_phases/war_phases.ts`):**
+- New step `evaluate-operation-opportunities` immediately before `generate-level1-op-proposals`. Phase 1 ships an empty catalog so the step is observably a no-op; Phase 2 hooks the autonomy / IPC bridge into the resulting queue, Phase 3 fills the catalog.
+- One new import.
+
+**Tests (`tests/operation_opportunities_substrate.test.ts`):** 17 cases. Empty catalog → zero proposals; pre-window opportunity does not surface; aligned prerequisites surface a proposal with the expected proposal_id (`OPP_<turn>_<opportunity_id>`); no duplicate enqueue across consecutive turns; deterministic queue ordering; expiry past `expires_turn`; approve routes through `buildCorpsOperation` and pushes a fully-initialized `OperationAxis` (mirrors `createSingleAxis` shape) onto `cmd.active_operations` with `is_pre_planned` undefined; decline writes a resolution row but never spawns an op; delay sets `reevaluate_at_turn`; under_resource trims to floor(N/2); missing primary corps yields a status change without an op spawn; bot default returns `delay` when required axes are red and `staff_recommendation` otherwise; evaluator is byte-stable across repeated invocations on identical state; **no political-controller flips and no formation/sector mutations occur as a side-effect of evaluation or decision** (invariant test).
+
+**Verification:** `npx.cmd vitest run tests/operation_opportunities_substrate.test.ts` → 17/17 pass. `npx.cmd vitest run tests/corps_operation_readiness.test.ts tests/force_quality_trace_persistence.test.ts tests/officer_quality_no_calendar_railroad.test.ts tests/scenario_apr1992_family_consistency.test.ts tests/multi_corps_operation_visibility.test.ts` → 28/28 pass (Phase 4 force-quality + cross-corps brigade lookup unaffected). `npx.cmd tsc --noEmit` clean.
+
+**Determinism self-review:**
+1. No `Math.random`, `Date.now`, `new Date(`, or `localeCompare` in the substrate.
+2. Sorted iteration via `strictCompare` for catalog walk, queue sort, and brigade-pool trim. Tie-break: opportunity_id then proposal_id.
+3. Save-shape backward-compatible — both new fields optional with neutral defaults (omitted = empty).
+4. Approval is the ONLY mutation that touches `cmd.active_operations`, and it does so via `buildCorpsOperation`.
+5. Catalog walk skips opportunities whose `evaluators[axis]` predicate is missing (returns red), so a half-authored catalog never surfaces silently.
+
+**Singular ownership / what is NOT in this commit:**
+- No catalog content (Phase 3).
+- No autonomy / IPC / Army HQ surface wiring (Phase 2).
+- No combat math change.
+- No new lifecycle — `sector_offensive.ts` is the unchanged lifecycle owner downstream of approval.
+- No sensitive-history T4 entries (Krivaja-95 / Stupcanica-95 / Gorazde) — explicitly out of scope per `SENSITIVE_HISTORY_DESIGN_GATE.md` §6.
+- No migration of the existing scripted Sana — that is Phase 3's single-owner work.
+
+**Hash impact:** None expected. The pipeline step writes `state.military.operation_opportunities` only when the catalog is non-empty; with empty catalog the step does nothing observable. Save shape gains two optional fields that default to omitted on existing saves.
+
+---
+
 ## [2026-05-01] test(force-quality): make officer_config consumer guard Windows-safe
 
 **Type:** Test-harness portability fix. No simulation behavior, scenario data, painted targets, OOB, canon, or run artifacts changed.

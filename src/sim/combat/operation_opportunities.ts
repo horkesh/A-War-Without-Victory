@@ -1,0 +1,717 @@
+/**
+ * operation_opportunities.ts — Phase 1 of LANE B (Operation Opportunity MVP).
+ *
+ * Generic substrate for the late-war Operation Opportunity system. An operation
+ * opportunity is a typed proposal that:
+ *
+ *   (a) appears when its prerequisite axes are satisfied,
+ *   (b) waits for an authorization decision from the player or bot,
+ *   (c) on approval, instantiates a normal CorpsOperation through the canonical
+ *       `buildCorpsOperation` factory, and
+ *   (d) on completion, writes an OperationOpportunityResolution record so the
+ *       Cost Ledger / Codex / Wrapped consumers can observe the catalog truth.
+ *
+ * This file is the SUBSTRATE only:
+ *   - Types
+ *   - Empty catalog (Phase 3 adds 5th Corps / Sana 95 content)
+ *   - Pure deterministic evaluator (`evaluateOperationOpportunities`)
+ *   - Pipeline step (`runOpportunityEvaluationStep`)
+ *   - Decision applier (`applyOpportunityDecision`) routing approval through
+ *     `buildCorpsOperation` — ONE owner path.
+ *
+ * It is NOT:
+ *   - A combat-math change.
+ *   - A new lifecycle (sector_offensive.ts remains the lifecycle owner).
+ *   - A parallel CorpsOperation factory (corps_operation_helpers.ts is the
+ *     ONLY factory; we call it).
+ *   - A sensitive-history surface (Krivaja-95 / Stupcanica-95 / Gorazde T4 are
+ *     out of scope per SENSITIVE_HISTORY_DESIGN_GATE.md §6).
+ *
+ * Design source: docs/plans/late-war-operation-opportunity-system-design.md
+ * Architecture contract: docs/plans/2026-05-01-force-quality-operation-architecture-contract.md
+ *
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical owner of operation-opportunity proposal lifecycle.
+ * DOMAIN:    Authorization shell on top of CorpsOperation execution.
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * READS:     GameState (catalog predicates may read any field; evaluator
+ *            itself reads only state.meta + state.military.operation_opportunities).
+ * WRITES:    state.military.operation_opportunities (proposal queue),
+ *            state.military.operation_opportunity_resolutions (decision log),
+ *            state.military.corps_command[primary_corps].active_operations
+ *            (only via buildCorpsOperation, on approval).
+ * MUST NOT:  Touch combat math, attack share, or any combat multiplier.
+ *            Write directly to map / political control. Build CorpsOperation
+ *            objects bypassing the factory. Apply effects without going
+ *            through the existing sector_offensive lifecycle.
+ *
+ * UPSTREAM:  war_phases.ts (`evaluate-operation-opportunities` step).
+ * DOWNSTREAM: corps_operation_helpers.ts (`buildCorpsOperation`),
+ *            sector_offensive.ts (lifecycle takes over after approval).
+ *
+ * TRUTH INVARIANTS:
+ * - Pure evaluator: no Math.random, no Date.now, no localeCompare.
+ * - Sorted iteration via strictCompare for catalog and proposal queues.
+ * - Proposal IDs deterministic: "OPP_<turn>_<opportunity_id>".
+ * - Approval ALWAYS routes through `buildCorpsOperation`.
+ * - Sensitive-history T4 opportunities (Krivaja-95, Stupcanica-95, Gorazde)
+ *   are NOT in this catalog and will require explicit historian +
+ *   game-designer + war-or-game sign-off before being added.
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+import type {
+    CorpsOperation,
+    FactionId,
+    FormationId,
+    GameState,
+    OperationAxis,
+} from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
+import { buildCorpsOperation } from './corps_operation_helpers.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Public types
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Whether a prerequisite axis is required, optional, or not applicable. */
+export type PrereqMode = 'required' | 'optional' | 'n_a';
+
+/** The nine prerequisite axes per the design doc §4. */
+export type PrereqAxis =
+    | 'date_window'
+    | 'political_authorization'
+    | 'corps_readiness'
+    | 'logistics'
+    | 'staging_access'
+    | 'weather_season'
+    | 'commander_confidence'
+    | 'enemy_weakness'
+    | 'alliance_context';
+
+/**
+ * Tier mapping inherits from the late-war research catalog:
+ *   T1 = first-class operation opportunity (offensive)
+ *   T3 = defensive crisis subtype (counterattack/relief authorization)
+ *   T4 = sensitive-history operation (territorial only; locked in §9)
+ *
+ * T4 is reserved for future authoring under the Sensitive History Design
+ * Gate. The MVP content (5th Corps / Sana 95) is T1.
+ */
+export type OpportunityTier = 'T1' | 'T3' | 'T4';
+
+/** Result of a single axis evaluation against current state. */
+export interface AxisEvaluation {
+    readonly axis: PrereqAxis;
+    readonly mode: PrereqMode;
+    /** True iff the axis is satisfied. */
+    readonly green: boolean;
+    /** Player-safe reason text (no raw OSIDs). */
+    readonly reason: string;
+}
+
+/** Player-safe display surface for a single objective on the dossier. */
+export interface OpportunityObjective {
+    readonly osid: string;
+    readonly label: string;
+    readonly risk?: 'low' | 'medium' | 'high';
+}
+
+/**
+ * One axis of attack within an opportunity. Mirrors `TriggeredAxisDef` shape
+ * but lives here so the catalog has no cross-import to triggered_operations.ts.
+ */
+export interface OpportunityAxisDef {
+    readonly axis_id: string;
+    readonly name: string;
+    /** Which corps provides the brigades for this axis. */
+    readonly corps: string;
+    /** Pre-authored brigade pool (catalog-time defaults; evaluator may filter). */
+    readonly brigades: readonly FormationId[];
+    /** OSID objectives in priority order. */
+    readonly objectives: readonly string[];
+    /** Optional per-axis staging override (otherwise the opportunity-level staging is used). */
+    readonly staging_osid?: string;
+}
+
+/**
+ * A named alternative variant the player can pick under "Redirect".
+ * Catalog-only; the player UI maps this to a sub-decision.
+ */
+export interface OpportunityVariant {
+    readonly variant_id: string;
+    readonly name: string;
+    /** The axes this variant uses (subset / alternative axis configuration). */
+    readonly axes: readonly OpportunityAxisDef[];
+    /** Optional staging override for the variant. */
+    readonly staging_osid?: string;
+}
+
+/**
+ * Catalog-level opportunity definition. Authored in family docs and loaded into
+ * `OPERATION_OPPORTUNITY_CATALOG`. Predicates are pure functions of GameState.
+ */
+export interface OperationOpportunityDef {
+    /** Stable identifier. Lowercase snake_case. e.g. "sana_95". */
+    readonly opportunity_id: string;
+    /** Player-safe display name. e.g. "Operation Sana". */
+    readonly name: string;
+    readonly tier: OpportunityTier;
+    readonly faction: FactionId;
+    /** Primary corps that owns the operation. */
+    readonly primary_corps: string;
+    /** Default axes. Variants may override. */
+    readonly axes: readonly OpportunityAxisDef[];
+    /** Default staging OSID. Per-axis or per-variant overrides take precedence. */
+    readonly staging_osid: string;
+    /** Planning duration once approved. */
+    readonly planning_duration: number;
+    /** Optional minimum-attack-outcome override on the resulting CorpsOperation. */
+    readonly min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+    /** Family identifier — multiple opportunities may share a family (e.g. "5th_corps"). */
+    readonly family: string;
+    /** BB / ICTY / primary citation strings. */
+    readonly citations: readonly string[];
+    /** Catalog historical-reference outcome — for divergence reporting only. */
+    readonly historical_exit_class:
+        | 'did_not_launch'
+        | 'decisive_success'
+        | 'partial_success'
+        | 'failed'
+        | 'aborted';
+    /**
+     * Per-axis prerequisite mode mapping. Every axis must be listed (or `n_a`)
+     * so reviewers can see how the family interpreted the generic vocabulary.
+     */
+    readonly prerequisites: Readonly<Record<PrereqAxis, PrereqMode>> & {
+        /** How many `optional` axes must be green to consider the opportunity eligible. */
+        readonly min_optional_axes: number;
+    };
+    /** Per-axis predicate. Returns the green flag + a player-safe reason. */
+    readonly evaluators: Readonly<Record<PrereqAxis, AxisPredicate>>;
+    /** Optional named alternative variants for the "Redirect" decision. */
+    readonly variants?: readonly OpportunityVariant[];
+    /**
+     * Default staff recommendation when all required axes are green. The bot
+     * default decision routes from this; player can override.
+     */
+    readonly staff_recommendation: 'approve' | 'delay' | 'under_resource' | 'decline';
+}
+
+/** Pure predicate: returns whether an axis is green + a player-safe reason. */
+export type AxisPredicate = (
+    state: GameState,
+    turn: number,
+    def: OperationOpportunityDef,
+) => { green: boolean; reason: string };
+
+/** Lifecycle status of a live opportunity proposal. */
+export type OpportunityStatus =
+    | 'eligible_pending_review'
+    | 'delayed'
+    | 'approved'
+    | 'declined'
+    | 'expired'
+    | 'redirected'
+    | 'under_resourced_approved';
+
+/** Decision the player or bot can register against a proposal. */
+export type OpportunityDecision =
+    | 'approve'
+    | 'delay'
+    | 'redirect'
+    | 'under_resource'
+    | 'decline';
+
+/** Live state of one opportunity instance in the proposal queue. */
+export interface OperationOpportunityState {
+    readonly opportunity_id: string;
+    /** Deterministic: "OPP_<eligibility_turn>_<opportunity_id>". */
+    readonly proposal_id: string;
+    readonly eligibility_turn: number;
+    /** Hard expiry — derived from `prerequisites.date_window.turn_max` if any. */
+    readonly expires_turn: number;
+    status: OpportunityStatus;
+    /** Faction that decides — usually the opportunity's own faction. */
+    readonly approver_faction: FactionId;
+    response_turn?: number;
+    redirect_variant_id?: string;
+    /** Set once approval has spawned the CorpsOperation. */
+    executed_op_id?: string;
+    /** Last full axis evaluation (re-snapshotted each turn the proposal sits in queue). */
+    last_axis_evaluation: AxisEvaluation[];
+    /**
+     * Re-evaluation turn when in `delayed` status. Bot uses this to decide
+     * whether to re-surface; cleared on response.
+     */
+    reevaluate_at_turn?: number;
+}
+
+/** Resolution log entry written when a proposal exits the queue. */
+export interface OperationOpportunityResolution {
+    readonly proposal_id: string;
+    readonly opportunity_id: string;
+    readonly response: OpportunityDecision | 'expire';
+    readonly response_turn: number;
+    /** Linked CorpsOperation name if approval spawned one. */
+    executed_op_name?: string;
+    /** Filled when the spawned op completes — set by AAR closer (Phase 4 wiring). */
+    executed_op_aar_id?: string;
+    /** Filled at AAR close — see design doc §7 exit classes. */
+    exit_class?:
+        | 'did_not_launch'
+        | 'decisive_success'
+        | 'partial_success'
+        | 'failed'
+        | 'aborted';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Catalog
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Canonical opportunity catalog. Phase 1 ships EMPTY — Phase 3 adds 5th Corps
+ * / Sana 95 content. Sensitive-history T4 entries (Krivaja-95, Stupcanica-95,
+ * Gorazde) require historian + game-designer + war-or-game sign-off before
+ * appearing here.
+ */
+export const OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+const AXES_IN_DETERMINISTIC_ORDER: readonly PrereqAxis[] = [
+    'date_window',
+    'political_authorization',
+    'corps_readiness',
+    'logistics',
+    'staging_access',
+    'weather_season',
+    'commander_confidence',
+    'enemy_weakness',
+    'alliance_context',
+];
+
+/**
+ * Default expiry-turn extractor — reads `evaluators.date_window` if present
+ * via a probe and falls back to a wide horizon otherwise. The catalog can
+ * always store the actual window inside the evaluator closure.
+ *
+ * For the substrate we accept a separate explicit field via the catalog
+ * (Phase 3 sets it). The default fallback is current_turn + 24 (≈6 months).
+ */
+function defaultExpiryTurn(currentTurn: number): number {
+    return currentTurn + 24;
+}
+
+/** Build the deterministic proposal id for one opportunity at one turn. */
+export function buildProposalId(opportunityId: string, eligibilityTurn: number): string {
+    return `OPP_${eligibilityTurn}_${opportunityId}`;
+}
+
+/**
+ * Evaluate every axis predicate. Pure read of state. Returns the axis records
+ * in canonical (deterministic) order.
+ */
+export function evaluateAxes(
+    state: GameState,
+    turn: number,
+    def: OperationOpportunityDef,
+): AxisEvaluation[] {
+    const results: AxisEvaluation[] = [];
+    for (const axis of AXES_IN_DETERMINISTIC_ORDER) {
+        const mode = def.prerequisites[axis];
+        if (mode === 'n_a') {
+            results.push({ axis, mode, green: true, reason: 'not applicable' });
+            continue;
+        }
+        const predicate = def.evaluators[axis];
+        if (!predicate) {
+            // Catalog gap — treat as red so we do not silently surface broken opportunities.
+            results.push({
+                axis,
+                mode,
+                green: false,
+                reason: 'no predicate authored',
+            });
+            continue;
+        }
+        const result = predicate(state, turn, def);
+        results.push({ axis, mode, green: result.green, reason: result.reason });
+    }
+    return results;
+}
+
+/**
+ * Determine whether an opportunity is eligible given its axis evaluation.
+ * Required axes must all be green; optional axes must meet the
+ * `min_optional_axes` threshold; n_a axes are ignored.
+ */
+export function isOpportunityEligible(
+    def: OperationOpportunityDef,
+    axes: readonly AxisEvaluation[],
+): boolean {
+    let optionalGreen = 0;
+    for (const a of axes) {
+        if (a.mode === 'required' && !a.green) return false;
+        if (a.mode === 'optional' && a.green) optionalGreen++;
+    }
+    return optionalGreen >= def.prerequisites.min_optional_axes;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Evaluator (pipeline step body)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Pure evaluator. Given the state and the catalog, produce the next state
+ * for `state.military.operation_opportunities`:
+ *
+ *   - Existing proposals: refresh `last_axis_evaluation`. Move to `expired`
+ *     once `turn > expires_turn`. Move out of `delayed` once
+ *     `reevaluate_at_turn <= turn`. Resolved/terminal statuses are preserved.
+ *   - New proposals: any catalog entry that is currently eligible AND has no
+ *     live (non-terminal) proposal in the queue is enqueued at this turn.
+ *
+ * Determinism: catalog walked in stable id order; the returned proposal queue
+ * is sorted by (eligibility_turn, opportunity_id, proposal_id).
+ */
+export function evaluateOperationOpportunities(
+    state: GameState,
+    turn: number,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+): { proposals: OperationOpportunityState[]; newResolutions: OperationOpportunityResolution[] } {
+    // Defensive shallow clone of each proposal record so this evaluator is a
+    // pure function of the snapshot at call time. The pipeline-step wrapper
+    // (`runOpportunityEvaluationStep`) re-assigns the result back to state.
+    const working: OperationOpportunityState[] = (state.military.operation_opportunities ?? [])
+        .map(p => ({ ...p, last_axis_evaluation: [...p.last_axis_evaluation] }));
+
+    const liveByOpportunityId = new Map<string, OperationOpportunityState>();
+    for (const p of working) {
+        if (p.status === 'eligible_pending_review' || p.status === 'delayed') {
+            liveByOpportunityId.set(p.opportunity_id, p);
+        }
+    }
+
+    const newResolutions: OperationOpportunityResolution[] = [];
+
+    const sortedCatalog = [...catalog].sort((a, b) =>
+        strictCompare(a.opportunity_id, b.opportunity_id));
+
+    for (const def of sortedCatalog) {
+        const live = liveByOpportunityId.get(def.opportunity_id);
+        const axes = evaluateAxes(state, turn, def);
+        const eligible = isOpportunityEligible(def, axes);
+
+        if (live) {
+            live.last_axis_evaluation = axes;
+
+            if (live.status === 'delayed'
+                && live.reevaluate_at_turn !== undefined
+                && turn >= live.reevaluate_at_turn
+                && eligible) {
+                live.status = 'eligible_pending_review';
+                live.reevaluate_at_turn = undefined;
+            }
+
+            if (turn > live.expires_turn
+                && (live.status === 'eligible_pending_review' || live.status === 'delayed')) {
+                live.status = 'expired';
+                newResolutions.push({
+                    proposal_id: live.proposal_id,
+                    opportunity_id: live.opportunity_id,
+                    response: 'expire',
+                    response_turn: turn,
+                });
+            }
+            continue;
+        }
+
+        if (!eligible) continue;
+
+        const proposalId = buildProposalId(def.opportunity_id, turn);
+        const expiresTurn = defaultExpiryTurn(turn);
+        const fresh: OperationOpportunityState = {
+            opportunity_id: def.opportunity_id,
+            proposal_id: proposalId,
+            eligibility_turn: turn,
+            expires_turn: expiresTurn,
+            status: 'eligible_pending_review',
+            approver_faction: def.faction,
+            last_axis_evaluation: axes,
+        };
+        working.push(fresh);
+        liveByOpportunityId.set(def.opportunity_id, fresh);
+    }
+
+    const sortedProposals = working.sort((a, b) => {
+        if (a.eligibility_turn !== b.eligibility_turn) return a.eligibility_turn - b.eligibility_turn;
+        const cmpId = strictCompare(a.opportunity_id, b.opportunity_id);
+        if (cmpId !== 0) return cmpId;
+        return strictCompare(a.proposal_id, b.proposal_id);
+    });
+
+    return { proposals: sortedProposals, newResolutions };
+}
+
+/**
+ * War-pipeline step entry point. Mutates state.military in place per the
+ * deterministic evaluator's output.
+ */
+export function runOpportunityEvaluationStep(
+    state: GameState,
+    turn: number,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+): void {
+    const { proposals, newResolutions } = evaluateOperationOpportunities(state, turn, catalog);
+    state.military.operation_opportunities = proposals;
+    if (newResolutions.length > 0) {
+        if (!state.military.operation_opportunity_resolutions) {
+            state.military.operation_opportunity_resolutions = [];
+        }
+        state.military.operation_opportunity_resolutions.push(...newResolutions);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Decision applier (Phase 2 wires this from the IPC; Phase 1 ships the body)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Optional knobs passed alongside a decision. */
+export interface OpportunityDecisionOptions {
+    readonly redirect_variant_id?: string;
+    readonly delay_turns?: number;
+    /** Reduces brigade roster on under-resource; "minimum" cuts to half (rounded down). */
+    readonly commitment_profile?: 'minimum' | 'standard' | 'reinforced';
+}
+
+/**
+ * Apply a player or bot decision to a pending proposal. Single owner path:
+ * approval ALWAYS routes through `buildCorpsOperation` so the resulting op is
+ * indistinguishable from any other in `sector_offensive.ts`.
+ *
+ * Returns the updated proposal record (or null if the proposal id was not
+ * found / was already terminal).
+ */
+export function applyOpportunityDecision(
+    state: GameState,
+    turn: number,
+    proposalId: string,
+    decision: OpportunityDecision,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+    options: OpportunityDecisionOptions = {},
+): OperationOpportunityState | null {
+    const proposals = state.military.operation_opportunities;
+    if (!proposals) return null;
+    const proposal = proposals.find(p => p.proposal_id === proposalId);
+    if (!proposal) return null;
+    if (proposal.status !== 'eligible_pending_review' && proposal.status !== 'delayed') {
+        return null;
+    }
+    const def = catalog.find(d => d.opportunity_id === proposal.opportunity_id);
+    if (!def) return null;
+
+    if (!state.military.operation_opportunity_resolutions) {
+        state.military.operation_opportunity_resolutions = [];
+    }
+
+    switch (decision) {
+        case 'delay': {
+            const delayTurns = Math.max(1, options.delay_turns ?? 4);
+            proposal.status = 'delayed';
+            proposal.reevaluate_at_turn = Math.min(turn + delayTurns, proposal.expires_turn + 1);
+            return proposal;
+        }
+        case 'decline': {
+            proposal.status = 'declined';
+            proposal.response_turn = turn;
+            state.military.operation_opportunity_resolutions.push({
+                proposal_id: proposal.proposal_id,
+                opportunity_id: proposal.opportunity_id,
+                response: 'decline',
+                response_turn: turn,
+            });
+            return proposal;
+        }
+        case 'redirect': {
+            const variantId = options.redirect_variant_id;
+            if (!variantId || !def.variants?.some(v => v.variant_id === variantId)) {
+                // Unknown variant → no-op, leaves proposal pending so caller can retry.
+                return null;
+            }
+            proposal.status = 'redirected';
+            proposal.response_turn = turn;
+            proposal.redirect_variant_id = variantId;
+            // Spawning the redirected op is the same approval path with overridden axes.
+            const variant = def.variants.find(v => v.variant_id === variantId)!;
+            const opName = spawnCorpsOperationFromOpportunity(
+                state,
+                turn,
+                def,
+                variant.axes,
+                variant.staging_osid ?? def.staging_osid,
+                'standard',
+            );
+            if (opName) proposal.executed_op_id = opName;
+            state.military.operation_opportunity_resolutions.push({
+                proposal_id: proposal.proposal_id,
+                opportunity_id: proposal.opportunity_id,
+                response: 'redirect',
+                response_turn: turn,
+                executed_op_name: opName ?? undefined,
+            });
+            return proposal;
+        }
+        case 'under_resource': {
+            proposal.status = 'under_resourced_approved';
+            proposal.response_turn = turn;
+            const opName = spawnCorpsOperationFromOpportunity(
+                state,
+                turn,
+                def,
+                def.axes,
+                def.staging_osid,
+                'minimum',
+            );
+            if (opName) proposal.executed_op_id = opName;
+            state.military.operation_opportunity_resolutions.push({
+                proposal_id: proposal.proposal_id,
+                opportunity_id: proposal.opportunity_id,
+                response: 'under_resource',
+                response_turn: turn,
+                executed_op_name: opName ?? undefined,
+            });
+            return proposal;
+        }
+        case 'approve': {
+            proposal.status = 'approved';
+            proposal.response_turn = turn;
+            const opName = spawnCorpsOperationFromOpportunity(
+                state,
+                turn,
+                def,
+                def.axes,
+                def.staging_osid,
+                options.commitment_profile ?? 'standard',
+            );
+            if (opName) proposal.executed_op_id = opName;
+            state.military.operation_opportunity_resolutions.push({
+                proposal_id: proposal.proposal_id,
+                opportunity_id: proposal.opportunity_id,
+                response: 'approve',
+                response_turn: turn,
+                executed_op_name: opName ?? undefined,
+            });
+            return proposal;
+        }
+    }
+}
+
+/**
+ * Build a CorpsOperation through the canonical factory and attach it to the
+ * primary corps's active operations. Single owner path — never builds a
+ * CorpsOperation directly; never bypasses `buildCorpsOperation`.
+ *
+ * Returns the operation name on success, null if the primary corps does not
+ * exist or no axis has any participating brigades.
+ */
+function spawnCorpsOperationFromOpportunity(
+    state: GameState,
+    turn: number,
+    def: OperationOpportunityDef,
+    axesIn: readonly OpportunityAxisDef[],
+    stagingOsid: string,
+    commitment: 'minimum' | 'standard' | 'reinforced',
+): string | null {
+    const cmd = state.military.corps_command?.[def.primary_corps];
+    if (!cmd) return null;
+
+    const builtAxes: OperationAxis[] = [];
+    const allParticipating: FormationId[] = [];
+    for (const axis of axesIn) {
+        const brigadesForAxis = applyCommitmentProfile(axis.brigades, commitment);
+        if (brigadesForAxis.length === 0) continue;
+        // Full OperationAxis init shape — mirrors createSingleAxis() in
+        // sector_offensive_axis_helpers.ts so the lifecycle owner can advance
+        // these axes without ever distinguishing opportunity-spawned ops from
+        // any other corps op.
+        builtAxes.push({
+            axis_id: axis.axis_id,
+            name: axis.name,
+            assigned_brigades: brigadesForAxis,
+            objectives: [...axis.objectives],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            ...(axis.staging_osid ? { staging_osid: axis.staging_osid } : {}),
+        });
+        for (const b of brigadesForAxis) allParticipating.push(b);
+    }
+    if (builtAxes.length === 0) return null;
+
+    const op = buildCorpsOperation(
+        {
+            name: def.name,
+            planning_duration: def.planning_duration,
+            staging_osid: stagingOsid,
+            ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
+        },
+        builtAxes,
+        allParticipating,
+        turn,
+        false,            // is_pre_planned: false — opportunity ops do NOT occupy slot 0.
+        undefined,
+    );
+
+    cmd.active_operations.push(op);
+    return op.name;
+}
+
+/** "minimum" trims the brigade pool to the floor of half the authored set. */
+function applyCommitmentProfile(
+    brigades: readonly FormationId[],
+    commitment: 'minimum' | 'standard' | 'reinforced',
+): FormationId[] {
+    if (commitment === 'minimum') {
+        const cut = Math.max(1, Math.floor(brigades.length / 2));
+        return [...brigades].sort(strictCompare).slice(0, cut);
+    }
+    // standard + reinforced both ship the authored pool. "reinforced" is reserved
+    // for a future reserve-loan integration (army HQ pulls extra brigades into
+    // the op). Phase 1 keeps reinforced == standard at the catalog boundary.
+    return [...brigades].sort(strictCompare);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Bot default decision (Phase 2 will wire this; Phase 1 ships the body)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Deterministic default decision for a bot-controlled faction. Reads only the
+ * proposal's own state + the catalog's `staff_recommendation`. No randomness;
+ * no faction personality look-ups (those land in Phase 2 if needed).
+ *
+ * The default is the catalog's `staff_recommendation` when all required axes
+ * are green; otherwise `delay`. The bot will never `redirect` or
+ * `under_resource` by default — those require explicit personality wiring.
+ */
+export function defaultBotDecisionForOpportunity(
+    proposal: OperationOpportunityState,
+    def: OperationOpportunityDef,
+): OpportunityDecision {
+    const allRequiredGreen = proposal.last_axis_evaluation
+        .filter(a => a.mode === 'required')
+        .every(a => a.green);
+    if (!allRequiredGreen) return 'delay';
+    return def.staff_recommendation;
+}

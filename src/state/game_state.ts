@@ -1823,6 +1823,13 @@ op_injection_warnings?: OpInjectionWarning[];
 triggered_operations_accepted?: Record<string, number>;
 /** Triggered operations that have been declined (operation name → { declined_turn, decline_count }). */
 declined_operations?: Record<string, { declined_turn: number; decline_count: number }>;
+/** LANE B Phase 1 (Operation Opportunity MVP): live opportunity proposal queue.
+ *  Owner: src/sim/combat/operation_opportunities.ts. Sorted deterministically by
+ *  (eligibility_turn, opportunity_id, proposal_id). Optional + safe to omit. */
+operation_opportunities?: import('../sim/combat/operation_opportunities.js').OperationOpportunityState[];
+/** LANE B Phase 1: append-only resolution log for opportunity decisions
+ *  (approve / delay / decline / redirect / under_resource / expire). */
+operation_opportunity_resolutions?: import('../sim/combat/operation_opportunities.js').OperationOpportunityResolution[];
 /** Army-level stance per faction. */
 army_stance?: Record<FactionId, ArmyStance>;
 /** OG activation orders (consumed once per turn). */

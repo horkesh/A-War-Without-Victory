@@ -3,6 +3,7 @@
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
+import { runOpportunityEvaluationStep } from '../combat/operation_opportunities.js';
 import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
@@ -1182,6 +1183,25 @@ export const warPhases: NamedPhase[] = [
             context.state.meta.pending_proposal_reviews = context.state.meta.pending_proposal_reviews
                 .filter(p => p.turn !== context.state.meta.turn);
             context.state.meta.pending_proposal_reviews.push(...proposals);
+        },
+    },
+    {
+        // LANE B Phase 1 (Operation Opportunity MVP): pure deterministic evaluator
+        // that surfaces / refreshes / expires operation opportunity proposals from
+        // the catalog (src/sim/combat/operation_opportunities.ts).
+        //
+        // Phase 1 ships an empty catalog, so this step is a substrate no-op on the
+        // current main. Phase 3 fills the catalog with the 5th Corps / Sana 95
+        // family. Phase 2 wires the autonomy / IPC bridge that reads
+        // state.military.operation_opportunities into the player review surface.
+        //
+        // Runs BEFORE generate-level1-op-proposals so future autonomy wiring
+        // can read freshly evaluated opportunities for the same turn.
+        // Runs in war phase only — peace phase has no opportunity surface.
+        name: 'evaluate-operation-opportunities',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            runOpportunityEvaluationStep(context.state, context.state.meta.turn);
         },
     },
     {
