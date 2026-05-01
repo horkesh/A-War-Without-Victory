@@ -156,6 +156,18 @@ export interface OpportunityVariant {
     readonly staging_osid?: string;
 }
 
+/** Persisted map footprint for one opportunity proposal. UI resolves labels on read. */
+export interface OperationOpportunityFootprintSnapshot {
+    readonly objectives: readonly string[];
+    readonly staging_osids: readonly string[];
+}
+
+/** Persisted player-selectable redirect variant surface for one proposal. */
+export interface OperationOpportunityRedirectVariantSnapshot extends OperationOpportunityFootprintSnapshot {
+    readonly variant_id: string;
+    readonly name: string;
+}
+
 /**
  * Catalog-level opportunity definition. Authored in family docs and loaded into
  * `OPERATION_OPPORTUNITY_CATALOG`. Predicates are pure functions of GameState.
@@ -269,6 +281,10 @@ export interface OperationOpportunityState {
     executed_op_id?: string;
     /** Last full axis evaluation (re-snapshotted each turn the proposal sits in queue). */
     last_axis_evaluation: AxisEvaluation[];
+    /** Latest authored objective/staging footprint snapshot for UI map highlighting. */
+    last_footprint?: OperationOpportunityFootprintSnapshot;
+    /** Latest authored redirect choices, if this opportunity has safe variants. */
+    redirect_variants?: OperationOpportunityRedirectVariantSnapshot[];
     /**
      * Re-evaluation turn when in `delayed` status. Bot uses this to decide
      * whether to re-surface; cleared on response.
@@ -449,6 +465,42 @@ export function isOpportunityEligible(
     return optionalGreen >= def.prerequisites.min_optional_axes;
 }
 
+function pushUniqueOsid(out: string[], osid: string | undefined): void {
+    if (!osid || out.includes(osid)) return;
+    out.push(osid);
+}
+
+export function buildOpportunityFootprintSnapshot(
+    axes: readonly OpportunityAxisDef[],
+    stagingOsid: string | undefined,
+): OperationOpportunityFootprintSnapshot {
+    const objectives: string[] = [];
+    const staging_osids: string[] = [];
+    pushUniqueOsid(staging_osids, stagingOsid);
+    for (const axis of axes) {
+        for (const objective of axis.objectives) pushUniqueOsid(objectives, objective);
+        pushUniqueOsid(staging_osids, axis.staging_osid);
+    }
+    return { objectives, staging_osids };
+}
+
+export function buildOpportunityRedirectVariantSnapshots(
+    def: OperationOpportunityDef,
+): OperationOpportunityRedirectVariantSnapshot[] {
+    return (def.variants ?? []).map((variant) => {
+        const footprint = buildOpportunityFootprintSnapshot(
+            variant.axes,
+            variant.staging_osid ?? def.staging_osid,
+        );
+        return {
+            variant_id: variant.variant_id,
+            name: variant.name,
+            objectives: footprint.objectives,
+            staging_osids: footprint.staging_osids,
+        };
+    });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Evaluator (pipeline step body)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -481,6 +533,20 @@ export function evaluateOperationOpportunities(
             last_force_quality_traits: p.last_force_quality_traits
                 ? { ...p.last_force_quality_traits }
                 : undefined,
+            last_footprint: p.last_footprint
+                ? {
+                    objectives: [...p.last_footprint.objectives],
+                    staging_osids: [...p.last_footprint.staging_osids],
+                }
+                : undefined,
+            redirect_variants: p.redirect_variants
+                ? p.redirect_variants.map(v => ({
+                    variant_id: v.variant_id,
+                    name: v.name,
+                    objectives: [...v.objectives],
+                    staging_osids: [...v.staging_osids],
+                }))
+                : undefined,
         }));
 
     // Track every opportunity_id that already has a proposal in the queue —
@@ -511,6 +577,8 @@ export function evaluateOperationOpportunities(
         const live = liveByOpportunityId.get(def.opportunity_id);
         const axes = evaluateAxes(state, turn, def);
         const eligible = isOpportunityEligible(def, axes);
+        const footprint = buildOpportunityFootprintSnapshot(def.axes, def.staging_osid);
+        const redirectVariants = buildOpportunityRedirectVariantSnapshots(def);
         let forceQualityTraits: CorpsOperationReadinessTraits | undefined;
         const getForceQualityTraits = (): CorpsOperationReadinessTraits => {
             forceQualityTraits ??= computeCorpsOperationReadiness(state, def.primary_corps);
@@ -520,6 +588,8 @@ export function evaluateOperationOpportunities(
         if (live) {
             live.last_axis_evaluation = axes;
             live.last_force_quality_traits = getForceQualityTraits();
+            live.last_footprint = footprint;
+            live.redirect_variants = redirectVariants;
 
             if (live.status === 'delayed'
                 && live.reevaluate_at_turn !== undefined
@@ -562,6 +632,8 @@ export function evaluateOperationOpportunities(
             approver_faction: def.faction,
             last_axis_evaluation: axes,
             last_force_quality_traits: getForceQualityTraits(),
+            last_footprint: footprint,
+            redirect_variants: redirectVariants,
         };
         working.push(fresh);
         seenOpportunityIds.add(def.opportunity_id);

@@ -13,6 +13,7 @@
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`
 - `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`
+- `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md`
 
 ## Purpose
 
@@ -24,7 +25,7 @@ The goal is not to make a new combat path or a new free-form planner. The goal i
 
 ## Implementation Checkpoint - 2026-05-01
 
-The live read-path MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`. The rich decision bridge is implemented in `resolve-operation-opportunity-decision` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`. The Force Quality board is implemented through persisted proposal trait snapshots and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`.
+The live read-path MVP is implemented in `OperationOpportunityDossierPanel.tsx` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DOSSIER_SURFACE.md`. The rich decision bridge is implemented in `resolve-operation-opportunity-decision` and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_DECISION_BRIDGE.md`. The Force Quality board is implemented through persisted proposal trait snapshots and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FORCE_QUALITY_DOSSIER.md`. The map-footprint and redirect DTO slice is implemented through persisted objective/staging and redirect variant snapshots and documented in `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md`.
 
 Implemented:
 
@@ -34,12 +35,15 @@ Implemented:
 - Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, Delay, Under-resource, and Decline
 - dedicated decision IPC that writes `opportunity_decision` / `opportunity_decision_options` onto the pending review row for war-pipeline consumption
 - persisted `last_force_quality_traits` on opportunity proposals and player-safe trait bands in the Army HQ dossier
+- persisted `last_footprint` and `redirect_variants` snapshots on opportunity proposals
+- objective/staging labels in the player-safe DTO
+- Map Footprint highlight/clear controls using the existing operation-target map layer
+- variant-specific Redirect buttons that send `redirectVariantId` through the rich review-row bridge
 
 Still planned:
 
-- player-safe redirect variant DTOs and redirect button rendering
-- map footprint highlighting
-- objective/staging labels in the player-safe DTO
+- optional G-2 prediction snapshot for opportunities with enough axis data
+- map hover/detail treatment for highlighted opportunity footprints
 
 ## Architecture Decision
 

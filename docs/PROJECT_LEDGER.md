@@ -1,3 +1,21 @@
+## [2026-05-01] feat(ops-ui): add opportunity footprint and redirect DTOs
+
+**Type:** Opportunity proposal DTO + Army HQ UI. No combat math, opportunity catalog content, operation execution, OOB, scenario data, painted targets, or calibration outputs changed.
+
+**Why:** The operation opportunity architecture intentionally avoids calendar railroads, but the player still needs to see what an opportunity is asking for on the map and choose safe redirect variants. Before this change, Redirect was backend-validated but hidden because the UI had no player-safe variant DTOs or footprint labels.
+
+**Change:** `OperationOpportunityState` now persists `last_footprint` and `redirect_variants` snapshots from authored opportunity axes/variants. `OperationOpportunityProposalView` exposes player-safe objective/staging label arrays and redirect variant views. Army HQ opportunity dossiers now render a **Map Footprint** section with objective/staging chips, `Highlight` / `Clear` controls wired to the existing operation-target map layer, and variant-specific **Redirect Options** that send `redirectVariantId` through the existing rich opportunity decision bridge.
+
+**Limits:** This is read-model/UI plus additive proposal save shape. It does not author new operations, alter eligibility predicates, tune force quality, launch operations differently, or create a second opportunity mutation path. UI still does not import sim catalog files; catalog truth is projected through the proposal snapshot.
+
+**Determinism:** Preserved. Snapshot derivation is pure and catalog-authored; proposal queues remain sorted by the existing evaluator; no randomness/time/locale ordering introduced. Scenario final-state hashes can move only when live proposals serialize the new additive fields.
+
+**Verification:** Red first: focused tests failed on missing `last_footprint`, missing DTO fields, and missing Army HQ footprint/redirect surface. Green: focused pack 62/62 pass; `npx.cmd tsc --noEmit` clean; broader opportunity/UI pack 228/228 pass; `npm.cmd run desktop:map:build` pass with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md`.
+
+---
+
 ## [2026-05-01] feat(ops-ui): surface force-quality bands in opportunity dossiers
 
 **Type:** Opportunity proposal observability + Army HQ UI. No combat math, opportunity catalog content, operation execution, desktop IPC, OOB, scenario data, painted targets, or canon changed.

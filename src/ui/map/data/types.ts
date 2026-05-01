@@ -488,6 +488,19 @@ export interface OperationOpportunityForceTraitView {
     reason: string;
 }
 
+export interface OperationOpportunityFootprintOsidView {
+    osid: string;
+    label: string;
+    role: 'objective' | 'staging';
+}
+
+export interface OperationOpportunityRedirectVariantView {
+    variant_id: string;
+    label: string;
+    objectives: OperationOpportunityFootprintOsidView[];
+    staging: OperationOpportunityFootprintOsidView[];
+}
+
 export interface OperationOpportunityProposalView {
     proposal_id: string;
     opportunity_id: string;
@@ -506,6 +519,9 @@ export interface OperationOpportunityProposalView {
     optional_axes_total?: number;
     prerequisite_axes: OperationOpportunityPrerequisiteAxisView[];
     force_quality_traits: OperationOpportunityForceTraitView[];
+    objectives: OperationOpportunityFootprintOsidView[];
+    staging: OperationOpportunityFootprintOsidView[];
+    redirect_variants: OperationOpportunityRedirectVariantView[];
     available_actions: OperationOpportunityProposalActionView[];
 }
 

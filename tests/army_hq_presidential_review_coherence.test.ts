@@ -167,9 +167,14 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('operationOpportunityProposals');
     expect(dossierSource).toContain('Operational Opportunities');
     expect(dossierSource).toContain('Force Quality');
+    expect(dossierSource).toContain('Map Footprint');
+    expect(dossierSource).toContain('setOperationTargetOsids');
+    expect(dossierSource).toContain('redirectVariantId');
     expect(dossierDataSource).toContain('force_quality_traits');
+    expect(dossierDataSource).toContain('redirect_variants');
     expect(dossierSource).toContain('ipc.resolveOperationOpportunityDecision');
     expect(dossierDataSource).toContain("label: 'Delay'");
+    expect(dossierDataSource).toContain("label: 'Redirect'");
     expect(dossierDataSource).toContain("label: 'Under-resource'");
     expect(inboxSource).toContain('operation_opportunity');
     expect(inboxSource).toContain('army_hq_opportunity');

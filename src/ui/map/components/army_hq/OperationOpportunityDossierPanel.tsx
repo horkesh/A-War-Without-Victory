@@ -4,6 +4,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
+type OpportunityResolveOptions = { redirectVariantId?: string };
 
 interface OperationOpportunityDossierPanelProps {
     gameState: LoadedGameState;
@@ -34,6 +35,9 @@ function actionButtonClass(actionId: OpportunityUiDecision): string {
     }
     if (actionId === 'approve') {
         return 'border-green-500/30 bg-green-500/10 text-green-300 hover:bg-green-500/20';
+    }
+    if (actionId === 'redirect') {
+        return 'border-sky-500/30 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20';
     }
     return 'border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20';
 }
@@ -67,14 +71,37 @@ function TraitPill({ trait }: { trait: OperationOpportunityProposalView['force_q
     );
 }
 
+function FootprintPill({ label, muted = false }: { label: string; muted?: boolean }) {
+    return (
+        <span
+            className={`rounded border px-2 py-0.5 text-[9px] leading-snug ${
+                muted
+                    ? 'border-panel-border bg-panel-card text-text-secondary'
+                    : 'border-sky-500/25 bg-sky-500/10 text-sky-200'
+            }`}
+            title={label}
+        >
+            {label}
+        </span>
+    );
+}
+
 function DossierCard({
     proposal,
     busy,
     onResolve,
+    onHighlightFootprint,
+    onClearFootprint,
 }: {
     proposal: OperationOpportunityProposalView;
     busy: boolean;
-    onResolve: (proposal: OperationOpportunityProposalView, decision: OpportunityUiDecision) => void;
+    onResolve: (
+        proposal: OperationOpportunityProposalView,
+        decision: OpportunityUiDecision,
+        options?: OpportunityResolveOptions,
+    ) => void;
+    onHighlightFootprint: (proposal: OperationOpportunityProposalView) => void;
+    onClearFootprint: () => void;
 }) {
     const requiredSummary =
         proposal.required_axes_total != null
@@ -85,6 +112,10 @@ function DossierCard({
             ? `${proposal.optional_axes_green ?? 0}/${proposal.optional_axes_total} optional`
             : null;
     const canAct = Boolean(proposal.review_id && proposal.available_actions.some((action) => action.enabled));
+    const footprintOsids = [
+        ...proposal.objectives.map((objective) => objective.osid),
+        ...proposal.staging.map((staging) => staging.osid),
+    ];
 
     return (
         <div className="rounded border border-panel-border bg-panel-bg p-3 space-y-3">
@@ -112,6 +143,53 @@ function DossierCard({
                 <div className="text-[10px] leading-relaxed text-text-secondary">{proposal.description}</div>
             )}
 
+            {(proposal.objectives.length > 0 || proposal.staging.length > 0) && (
+                <div className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                            Map Footprint
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => onHighlightFootprint(proposal)}
+                                disabled={footprintOsids.length === 0}
+                                className="rounded border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
+                            >
+                                Highlight
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onClearFootprint}
+                                className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:bg-panel-hover"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    {proposal.objectives.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
+                                Objectives
+                            </span>
+                            {proposal.objectives.map((objective) => (
+                                <FootprintPill key={`${proposal.proposal_id}:obj:${objective.osid}`} label={objective.label} />
+                            ))}
+                        </div>
+                    )}
+                    {proposal.staging.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
+                                Staging
+                            </span>
+                            {proposal.staging.map((staging) => (
+                                <FootprintPill key={`${proposal.proposal_id}:stage:${staging.osid}`} label={staging.label} muted />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
             {proposal.prerequisite_axes.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
                     {proposal.prerequisite_axes.map((axis) => (
@@ -133,9 +211,37 @@ function DossierCard({
                 </div>
             )}
 
+            {canAct && proposal.redirect_variants.length > 0 && (
+                <div className="space-y-1.5">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                        Redirect Options
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {proposal.redirect_variants.map((variant) => {
+                            const detail = [
+                                ...variant.objectives.map((objective) => objective.label),
+                                ...variant.staging.map((staging) => staging.label),
+                            ].join(', ');
+                            return (
+                                <button
+                                    key={`${proposal.proposal_id}:redirect:${variant.variant_id}`}
+                                    type="button"
+                                    onClick={() => onResolve(proposal, 'redirect', { redirectVariantId: variant.variant_id })}
+                                    disabled={busy}
+                                    title={detail || variant.label}
+                                    className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
+                                >
+                                    {variant.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {canAct && (
                 <div className="flex flex-wrap justify-end gap-2">
-                    {proposal.available_actions.map((action) => (
+                    {proposal.available_actions.filter((action) => action.id !== 'redirect').map((action) => (
                         <button
                             key={`${proposal.proposal_id}:${action.id}`}
                             type="button"
@@ -155,6 +261,7 @@ function DossierCard({
 export function OperationOpportunityDossierPanel({ gameState, playerFaction }: OperationOpportunityDossierPanelProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const setOperationTargetOsids = useGameStore((s) => s.setOperationTargetOsids);
     const [busyProposalId, setBusyProposalId] = useState<string | null>(null);
     const proposals = useMemo(
         () =>
@@ -171,7 +278,11 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
 
     if (proposals.length === 0) return null;
 
-    const resolveProposal = async (proposal: OperationOpportunityProposalView, decision: OpportunityUiDecision) => {
+    const resolveProposal = async (
+        proposal: OperationOpportunityProposalView,
+        decision: OpportunityUiDecision,
+        options: OpportunityResolveOptions = {},
+    ) => {
         if (!ipc.isAvailable || !proposal.review_id) return;
         setBusyProposalId(proposal.proposal_id);
         try {
@@ -180,6 +291,9 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                 proposalId: proposal.proposal_id,
                 decision,
                 ...(decision === 'delay' ? { delayTurns: 2 } : {}),
+                ...(decision === 'redirect' && options.redirectVariantId
+                    ? { redirectVariantId: options.redirectVariantId }
+                    : {}),
             });
             if (!result.ok) {
                 setLoadError(result.error ?? `Failed to ${decision === 'approve' ? 'authorize' : decision} opportunity.`);
@@ -205,7 +319,14 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                         key={proposal.proposal_id}
                         proposal={proposal}
                         busy={busyProposalId === proposal.proposal_id}
-                        onResolve={(p, decision) => { void resolveProposal(p, decision); }}
+                        onResolve={(p, decision, options) => { void resolveProposal(p, decision, options); }}
+                        onHighlightFootprint={(p) => {
+                            setOperationTargetOsids([
+                                ...p.objectives.map((objective) => objective.osid),
+                                ...p.staging.map((staging) => staging.osid),
+                            ]);
+                        }}
+                        onClearFootprint={() => setOperationTargetOsids([])}
                     />
                 ))}
             </div>

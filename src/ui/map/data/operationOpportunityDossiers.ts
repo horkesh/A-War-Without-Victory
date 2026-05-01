@@ -1,4 +1,10 @@
-import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportunityProposalView } from './types';
+import type {
+    LoadedGameState,
+    OperationOpportunityAxisState,
+    OperationOpportunityFootprintOsidView,
+    OperationOpportunityProposalView,
+} from './types';
+import { humanizeOsid } from '../utils/osidDisplayName';
 
 type RawRecord = Record<string, unknown>;
 type ForceTraitBand = OperationOpportunityProposalView['force_quality_traits'][number]['band'];
@@ -98,6 +104,49 @@ function forceTraitViews(rawTraits: unknown): OperationOpportunityProposalView['
     return result;
 }
 
+function stringArray(value: unknown): string[] {
+    if (!Array.isArray(value)) return [];
+    const out: string[] = [];
+    for (const entry of value) {
+        if (typeof entry !== 'string' || entry.length === 0 || out.includes(entry)) continue;
+        out.push(entry);
+    }
+    return out;
+}
+
+function footprintViews(
+    rawOsids: unknown,
+    role: OperationOpportunityFootprintOsidView['role'],
+): OperationOpportunityFootprintOsidView[] {
+    return stringArray(rawOsids).map((osid) => ({
+        osid,
+        label: humanizeOsid(osid),
+        role,
+    }));
+}
+
+function redirectVariantViews(rawVariants: unknown): OperationOpportunityProposalView['redirect_variants'] {
+    if (!Array.isArray(rawVariants)) return [];
+    const out: OperationOpportunityProposalView['redirect_variants'] = [];
+    for (const rawVariant of rawVariants) {
+        if (!rawVariant || typeof rawVariant !== 'object') continue;
+        const variant = rawVariant as RawRecord;
+        const variantId = typeof variant.variant_id === 'string' ? variant.variant_id : '';
+        if (!variantId) continue;
+        const name = typeof variant.name === 'string' && variant.name.trim()
+            ? variant.name.trim()
+            : humanizeId(variantId);
+        out.push({
+            variant_id: variantId,
+            label: name,
+            objectives: footprintViews(variant.objectives, 'objective'),
+            staging: footprintViews(variant.staging_osids, 'staging'),
+        });
+    }
+    out.sort((a, b) => strictCompare(a.variant_id, b.variant_id));
+    return out;
+}
+
 function axisCounts(axes: RawRecord[]): Pick<OperationOpportunityProposalView,
     'required_axes_green' | 'required_axes_total' | 'optional_axes_green' | 'optional_axes_total'> {
     let requiredGreen = 0;
@@ -168,6 +217,10 @@ export function deriveOperationOpportunityProposals(
             ? proposal.last_axis_evaluation as RawRecord[]
             : [];
         const hasLiveReview = Boolean(review && status === 'eligible_pending_review');
+        const footprint = proposal.last_footprint && typeof proposal.last_footprint === 'object'
+            ? proposal.last_footprint as RawRecord
+            : {};
+        const redirectVariants = redirectVariantViews(proposal.redirect_variants);
 
         result.push({
             proposal_id: proposalId,
@@ -196,9 +249,15 @@ export function deriveOperationOpportunityProposals(
                 };
             }),
             force_quality_traits: forceTraitViews(proposal.last_force_quality_traits),
+            objectives: footprintViews(footprint.objectives, 'objective'),
+            staging: footprintViews(footprint.staging_osids, 'staging'),
+            redirect_variants: redirectVariants,
             available_actions: [
                 { id: 'approve', label: 'Authorize', enabled: hasLiveReview },
                 { id: 'delay', label: 'Delay', enabled: hasLiveReview },
+                ...(redirectVariants.length > 0
+                    ? [{ id: 'redirect' as const, label: 'Redirect', enabled: hasLiveReview }]
+                    : []),
                 { id: 'under_resource', label: 'Under-resource', enabled: hasLiveReview },
                 { id: 'decline', label: 'Decline', enabled: hasLiveReview },
             ],

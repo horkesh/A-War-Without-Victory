@@ -842,6 +842,18 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
                         reserve_response: 0.54,
                         collapse_susceptibility: 0.78,
                     },
+                    last_footprint: {
+                        objectives: ['op:bihac:bihac_2', 'op:bosanska_krupa:bosanska_krupa_2'],
+                        staging_osids: ['op:bihac:izacic'],
+                    },
+                    redirect_variants: [
+                        {
+                            variant_id: 'north_hook',
+                            name: 'Northern Hook',
+                            objectives: ['op:bosanska_krupa:otoka_2'],
+                            staging_osids: ['op:bihac:bihac_3'],
+                        },
+                    ],
                 },
                 {
                     opportunity_id: 'enemy_opportunity',
@@ -890,10 +902,37 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
         ],
     );
     assert.deepEqual(
+        proposal.objectives.map((objective) => [objective.osid, objective.label, objective.role]),
+        [
+            ['op:bihac:bihac_2', 'Bihac', 'objective'],
+            ['op:bosanska_krupa:bosanska_krupa_2', 'Bosanska Krupa', 'objective'],
+        ],
+    );
+    assert.deepEqual(
+        proposal.staging.map((staging) => [staging.osid, staging.label, staging.role]),
+        [
+            ['op:bihac:izacic', 'Izacic (Bihac)', 'staging'],
+        ],
+    );
+    assert.equal(proposal.objectives.some((objective) => objective.label.includes('op:')), false);
+    assert.equal(proposal.staging.some((staging) => staging.label.includes('op:')), false);
+    assert.deepEqual(
+        proposal.redirect_variants.map((variant) => [
+            variant.variant_id,
+            variant.label,
+            variant.objectives.map((objective) => objective.label),
+            variant.staging.map((staging) => staging.label),
+        ]),
+        [
+            ['north_hook', 'Northern Hook', ['Otoka (Bosanska Krupa)'], ['Bihac']],
+        ],
+    );
+    assert.deepEqual(
         proposal.available_actions.map((action) => [action.id, action.enabled]),
         [
             ['approve', true],
             ['delay', true],
+            ['redirect', true],
             ['under_resource', true],
             ['decline', true],
         ],

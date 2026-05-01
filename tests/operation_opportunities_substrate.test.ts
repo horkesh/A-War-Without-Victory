@@ -227,6 +227,49 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         }
     });
 
+    it('persists default map footprint and redirect variant snapshots on surfaced proposals', () => {
+        const state = buildMinimalState(175);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            staging_osid: 'op:bihac:cazin_2',
+            axes: [{
+                axis_id: 'fixture_main',
+                name: 'Main',
+                corps: 'arbih_5th_corps',
+                brigades: ['arbih_5_brigade_a', 'arbih_5_brigade_b'],
+                objectives: ['op:bihac:bihac_2', 'op:bosanski_petrovac:vrtoce'],
+                staging_osid: 'op:bihac:izacic',
+            }],
+            variants: [{
+                variant_id: 'north_hook',
+                name: 'Northern Hook',
+                staging_osid: 'op:bihac:bihac_3',
+                axes: [{
+                    axis_id: 'north',
+                    name: 'North',
+                    corps: 'arbih_5th_corps',
+                    brigades: ['arbih_5_brigade_a'],
+                    objectives: ['op:bosanska_krupa:bosanska_krupa_2'],
+                    staging_osid: 'op:bihac:otoka_2',
+                }],
+            }],
+        };
+
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const proposal = state.military.operation_opportunities![0];
+        expect(proposal.last_footprint).toEqual({
+            objectives: ['op:bihac:bihac_2', 'op:bosanski_petrovac:vrtoce'],
+            staging_osids: ['op:bihac:cazin_2', 'op:bihac:izacic'],
+        });
+        expect(proposal.redirect_variants).toEqual([{
+            variant_id: 'north_hook',
+            name: 'Northern Hook',
+            objectives: ['op:bosanska_krupa:bosanska_krupa_2'],
+            staging_osids: ['op:bihac:bihac_3', 'op:bihac:otoka_2'],
+        }]);
+    });
+
     it('does not duplicate-enqueue an already-pending opportunity on the next turn', () => {
         const state = buildMinimalState(175);
         const def = fixtureSana();
