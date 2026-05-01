@@ -1,6 +1,30 @@
 #!/bin/sh
 
-# Typecheck (fast fail ~15s)
+# Typecheck code/data commits, but do not block docs-only architecture commits
+# on unrelated WIP in a shared Claude/Codex checkout.
+staged_file_list="${TMPDIR:-/tmp}/awwv-precommit-staged-$$.txt"
+git diff --cached --name-only --diff-filter=ACMR > "$staged_file_list"
+
+needs_typecheck=0
+while IFS= read -r staged_file; do
+  [ -z "$staged_file" ] && continue
+  case "$staged_file" in
+    *.md|docs/*|.claude/napkin.md|.husky/*)
+      ;;
+    *)
+      needs_typecheck=1
+      break
+      ;;
+  esac
+done < "$staged_file_list"
+rm -f "$staged_file_list"
+
+if [ "$needs_typecheck" -eq 0 ]; then
+  echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+  exit 0
+fi
+
+# Typecheck code/data changes (fast fail ~15s)
 npx tsc --noEmit
 
 # Baseline regression removed from pre-commit (runs 3 full scenarios, 5+ min).

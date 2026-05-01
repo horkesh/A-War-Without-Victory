@@ -410,6 +410,10 @@ No version bump by itself â€” this was the engineering closure band between
 
 **Autonomous parallel workstream model (added 2026-05-01):** Active work should now be organized as large, phase-coherent lanes rather than 10-minute packets. Claude owns implementation lanes with internal phase commits; Codex owns architecture, roadmap truth, review, and non-overlapping product/design lanes while Claude runs. Stop only for canon, sensitive-history, determinism, active file-ownership conflict, or unresolved player-facing design meaning. Plan: `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md`.
 
+**Mega-lane execution board (added 2026-05-01):** The active v0.9 work board is now organized around substantial mega-lanes: Full-War Trajectory Foundation, Operation Opportunity Families, Presidential Product Spine, and Full-War Proof Platform. Future Claude prompts should normally dispatch parallel agents up front and continue through internal phases/commits rather than stopping after a single seam. Plan: `docs/plans/2026-05-01-v09-product-spine-megalane-plan.md`.
+
+**Presidential Product Spine C0 audit (added 2026-05-01):** C0 confirms the shell ingredients are live but the product loop is not closed: Brief / Inspect / Decide / Execute are live, while Report / Cost / Judge / Next are partial. The missing owner is a Turn Aftermath packet linking `TurnSummary` + `lastTurnReport` to cost, records, and next reviews. Audit: `docs/40_reports/audits/20260501_PRESIDENTIAL_PRODUCT_SPINE_C0_AUDIT.md`.
+
 **Formation-life believability lane (added 2026-04-30):** Treat brigade drift, far-from-home live ownership, "active but never fights" formations, HRHB/HVO offensive emergence, and out-of-area corps behavior as a `v0.9` simulation-believability lane. This is not a new broad mechanics milestone; it draws from the scorecard/backlog (`docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/plans/2026-04-14-roadmap-execution-packet-backlog.md`) and prior drift investigations. Done means remaining drift/never-fights warnings are either fixed by a canonical lifecycle owner or explicitly classified as accepted scenario variance with run evidence.
 
 **Roadmap truth cadence (added 2026-04-30):** After major scenario evidence, milestone closure, or remote branch integration, run a roadmap sync pass under `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`. Current example: the roadmap's 2026-04-28 calibration paragraph must be refreshed after Claude's current scenario setup/run work settles, because local `n1579` already supersedes the older `n21` 40w status.
@@ -702,6 +706,8 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
 | `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md` | v0.9.0 consequence-system refresh against current repo truth |
 | `docs/plans/2026-04-30-v09-presidential-campaign-loop-closure-plan.md` | v0.9 cross-system presidential campaign-loop closure |
+| `docs/plans/2026-05-01-v09-product-spine-megalane-plan.md` | Active v0.9 mega-lane board for large autonomous work: trajectory foundation, opportunity families, product spine, proof platform |
+| `docs/plans/2026-05-01-autonomous-parallel-workstreams-operating-plan.md` | Operating discipline for Claude/Codex parallel autonomous mega-lanes and stop gates |
 | `docs/plans/2026-04-30-v09-formation-life-believability-plan.md` | v0.9 formation-life believability and warning-family ownership |
 | `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` | v0.9.1 dynamic Codex divergence + endgame comparison |
 | `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md` | v0.9.0 victory conditions and Pyrrhic score |

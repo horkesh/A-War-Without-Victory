@@ -13,6 +13,8 @@ AWWV is no longer in a mode where every useful change should stop after one narr
 
 The target is not to force the map to match history. The target is to make the engine deterministically explain why the war develops the way it does. Historical outcomes should emerge from institutions, logistics, officers, politics, exhaustion, equipment, geography, command friction, international pressure, and player/bot decisions. Calendar scripts and painted-target rails are evidence tools at best, never the product model.
 
+**Codex addendum 2026-05-01:** The "large lane" rule is now stricter. Future Claude prompts should normally be mega-lanes with internal parallel-agent dispatch, 4-8 phases, phase commits, tests, docs, ledger/knowledge propagation, and scenario/UI proof where relevant. A single helper, single test, single diagnostic, or single report is an internal phase, not the whole assignment, unless the user explicitly asks for a small patch.
+
 **TL;DR:** Claude should own large implementation lanes. Codex should own architecture, roadmap, product integration, review, and non-overlapping design lanes while Claude runs. Both keep working; neither waits every 10 minutes.
 
 ---
@@ -67,6 +69,21 @@ Prefer work items shaped like:
 
 Each lane should be able to contain 3-7 phase commits.
 
+### Minimum Parallel Dispatch
+
+Any future Claude mega-lane prompt should ask Claude to dispatch parallel agents up front unless there is a concrete reason not to. Default minimum:
+
+| Role | Why |
+|---|---|
+| `/architect` or `/technical-architect` | owner boundaries, integration risk, stale architecture |
+| `/qa-engineer` or `/scenario-harness-engineer` | tests, diagnostics, run evidence |
+| `/game-designer` | player meaning, non-railroad test, option/cost shape |
+| `/historian` | required when operation, OOB, scenario, or historical prose/content is touched |
+| `/determinism-auditor` | required when state, serialization, ordering, run hashes, or scenario output can change |
+| domain expert (`/operations-expert`, `/formation-expert`, `/sector-expert`, `/systems-programmer`) | chosen by lane owner |
+
+Claude should synthesize those agents, not stop after each report. Only the stop gates below require user input.
+
 ---
 
 ## 4. Stop Gates
@@ -103,6 +120,8 @@ If a lane fails this table, it is not ready even if map-fit improves.
 ---
 
 ## 6. Active Large Lanes
+
+**Current board authority:** `docs/plans/2026-05-01-v09-product-spine-megalane-plan.md` is the live mega-lane board after the 2026-05-01 Force Quality Foundation, Operation Opportunity MVP, 5th Corps expansion, Lane D stress audit, and AAR counter fix. The lane descriptions below are retained as historical operating-plan context, not the freshest board.
 
 ### Lane A - Force Quality Foundation
 

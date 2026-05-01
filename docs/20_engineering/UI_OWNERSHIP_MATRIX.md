@@ -71,6 +71,19 @@ The player is the faction president (wartime political leader). Shell ownership 
 - live operations command
 - live tactical selection logic
 
+### Presidential Loop Concepts
+
+| Concept | Canonical owner | Allowed summaries / links | Notes |
+|---|---|---|---|
+| Campaign shell | Warroom | Tactical toolbar return affordance | Warroom is the president's desk, not a records browser. |
+| Battlespace inspection | Tactical Map | Army HQ map links and highlights | Tactical Map owns spatial truth and selection context. |
+| Military command review | Army HQ | Toolbar alerts, Inbox rows, Warroom hotspots | Army HQ owns depth; other shells route into it. |
+| Presidential decision queue | Presidential Inbox | Toolbar badge, Army HQ attention count | The queue should derive from existing pending state, not own mutation. |
+| Operation opportunity dossiers | Army HQ briefing | Inbox rows, Records, Cost Ledger | Family-specific UI should not fork the generic opportunity surface. |
+| Turn aftermath | Dedicated aftermath surface | Chronicle, War Summary, Army HQ Records | This is the current C0 gap: the surface should bridge `TurnSummary` + `lastTurnReport` to next reviews. |
+| Active-campaign cost so far | Turn aftermath + War Summary | Records and Chronicle | Final historical comparison remains game-over-only until intentionally expanded. |
+| Final campaign judgment | VerdictScreen | Chronicle, Wrapped, Codex | VerdictScreen owns endgame presentation; other shells may point to it or feed context. |
+
 ## Ownership rules
 
 1. If a concept appears in multiple places, one surface must be named canonical.

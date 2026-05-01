@@ -37,6 +37,23 @@ It is one command experience with specialized shells:
 
 If any shell starts behaving like a second owner of another shell's job, the product drifts.
 
+## Presidential campaign loop
+
+The v0.9 product spine is the campaign loop, not any individual shell.
+
+| Step | Player question | Canonical owner | Secondary surfaces |
+|---|---|---|---|
+| Brief | What is the situation? | Warroom + Army HQ briefing | Tactical command briefing banner |
+| Inspect | Where is it happening? | Tactical Map | Army HQ links and map highlights |
+| Decide | What can I do? | Presidential Inbox + Army HQ attention | Toolbar badges and Warroom hotspots |
+| Execute | What happens when I end the turn? | Desktop `advance-turn` + canonical turn pipeline | Warroom calendar and tactical toolbar |
+| Report | What happened this turn? | Turn aftermath surface | Chronicle and Army HQ records |
+| Cost | What did it cost? | Turn aftermath + War Summary; final Cost Ledger at game over | Army HQ records and VerdictScreen |
+| Judge | How does history read this? | VerdictScreen at game over; Chronicle/Codex during play | Warroom and Army HQ links |
+| Next | What needs attention now? | Presidential Inbox + Army HQ attention | Command briefing banner |
+
+The missing v0.9 handoff, as of the 2026-05-01 C0 audit, is the **Turn Aftermath** owner. The engine already writes `TurnSummary` and the desktop already pushes `turn-report-updated`; the product still needs one player-facing packet that bridges a completed turn into costs, records, and next reviews.
+
 ## Shell hierarchy
 
 ### 1. Warroom
@@ -190,6 +207,10 @@ No shell may hide Codex behind an accidental or debug-only path.
   - owner: Codex
 - `return destination from standalone map`
   - owner: Warroom
+- `turn aftermath`
+  - owner: dedicated aftermath surface, with links into Army HQ Records, War Summary, Chronicle, and Inbox
+- `active-campaign cost so far`
+  - owner: aftermath / War Summary; final historical reckoning stays with VerdictScreen
 
 ## Player-truth rule inside the shell hierarchy
 
