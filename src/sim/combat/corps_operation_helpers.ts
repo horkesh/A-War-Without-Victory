@@ -20,7 +20,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, FormationState, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
@@ -45,6 +45,50 @@ export function hasAvailableSlot(cmd: CorpsCommandState, activeBrigadeCount: num
 export function findBrigadeOperation(cmd: CorpsCommandState, brigadeId: string): CorpsOperation | null {
     for (const op of cmd.active_operations) {
         if (op.participating_brigades.includes(brigadeId)) return op;
+    }
+    return null;
+}
+
+/**
+ * State-wide variant of findBrigadeOperation. Searches every corps's
+ * active_operations and returns the first match in deterministic
+ * (sorted-corps-id) order.
+ *
+ * USE THIS when a brigade may participate in a multi-corps operation. The
+ * triggered-operation injector pushes joint ops onto the primary corps's
+ * active_operations only (`triggered_operations.ts:checkTriggeredOperations`),
+ * so a brigade whose `corps_id` matches an op's secondary axis will not find
+ * its op via the corps-local `findBrigadeOperation`.
+ *
+ * Determinism: corps_command keys are iterated via `strictCompare` to keep
+ * resolution stable when two operations could theoretically claim the same
+ * brigade (the alphabetically-earliest corps wins).
+ *
+ * Returned `cmd` is the corps that physically hosts the operation in
+ * `active_operations`, not necessarily the brigade's own corps. Callers that
+ * need the brigade's own command for stance / sector reads should still
+ * resolve those via `state.military.corps_command[brigade.corps_id]`.
+ *
+ * Owner cross-reference: `bot_brigade_ai_osid.ts` evaluation hot path uses
+ * this helper so secondary-axis brigades can see their op during planning
+ * and execution. See `tests/multi_corps_operation_visibility.test.ts` for
+ * the contract.
+ */
+export function findBrigadeOperationAnywhere(
+    state: GameState,
+    brigadeId: string,
+): { cmd: CorpsCommandState; op: CorpsOperation } | null {
+    const corpsCommand = state.military?.corps_command;
+    if (!corpsCommand) return null;
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const cmd = corpsCommand[cid];
+        if (!cmd) continue;
+        for (const op of cmd.active_operations) {
+            if (op.participating_brigades.includes(brigadeId)) {
+                return { cmd, op };
+            }
+        }
     }
     return null;
 }

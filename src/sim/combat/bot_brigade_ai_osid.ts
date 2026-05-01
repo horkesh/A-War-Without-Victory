@@ -58,7 +58,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { getCorpsStance } from './combat_math.js';
-import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
@@ -420,7 +420,17 @@ function executeFactionDirectives(
         const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
         const corpsId = loanedTo ?? brigade.corps_id;
         const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
-        const activeOp = cmd ? findBrigadeOperation(cmd, brigade.id) : null;
+        // First try corps-local lookup (fast path). For multi-corps triggered ops
+        // (op pushed onto primary corps only; secondary-axis brigade lives in a
+        // foreign corps_command), corps-local lookup misses — fall back to a
+        // state-wide search so secondary-axis brigades see their op during
+        // planning + execution. Determinism: state-wide search iterates corps
+        // ids via strictCompare. See tests/multi_corps_operation_visibility.test.ts.
+        let activeOp = cmd ? findBrigadeOperation(cmd, brigade.id) : null;
+        if (!activeOp) {
+            const found = findBrigadeOperationAnywhere(state, brigade.id);
+            if (found) activeOp = found.op;
+        }
         const isActiveSectorOperationParticipant =
             (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe') &&
             isOperationParticipant(activeOp, brigade.id);

@@ -1,3 +1,48 @@
+## [2026-05-01] fix(operations): multi-corps operation visibility in brigade-AI hot path
+
+**Type:** Bounded engine fix to brigade-AI op-visibility lookup. Closes the multi-corps op visibility bug identified in `20260501_LATE_1995_SCRIPTED_OPS_PACKET.md` execution-stage analysis. **No combat tuning, OOB, painted target, scenario init, or operation objective lists changed.**
+
+**Bug:** When a triggered operation with axes from multiple corps fires, `checkTriggeredOperations` (triggered_operations.ts:756) pushes the op onto **primary corps only**. Brigades belonging to a secondary axis-corps then call `findBrigadeOperation(brigade.own_corps_cmd, brigade_id)` (corps-local lookup at corps_operation_helpers.ts:45) and get `null` — they never see the op.
+
+In `bot_brigade_ai_osid.ts:421-426`, this means `isActiveSectorOperationParticipant` is `false` for cross-corps brigades, so they fall through every operation-aware evaluation in `bot_brigade_eval_attack.ts:97-308` (planning-phase column-march, execution-phase attack-launch, recovery-phase posture).
+
+**First op to expose the bug:** `Operation Mistral 2` in the late-1995 packet — first multi-corps triggered op in the catalog (primary `hvo_main_staff`, axis 2 `hvo_tomislavgrad`). All four legacy TRIGGERED_OPS plus the new RS-only `Krivaja-95`/`Stupčanica-95` are single-corps and don't expose the bug.
+
+**Bounded fix:**
+- Added `findBrigadeOperationAnywhere(state, brigadeId): { cmd, op } | null` in `corps_operation_helpers.ts`. Deterministic state-wide search via `Object.keys(corps_command).sort(strictCompare)`.
+- Updated `bot_brigade_ai_osid.ts:421-432` to fall back to state-wide search when corps-local lookup misses. Fast path unchanged for single-corps ops; slow path triggers only for cross-corps participants.
+- No change to op injection (still primary push), no change to op cleanup (op still lives in one place).
+
+**Tests:**
+- Added `tests/multi_corps_operation_visibility.test.ts` (5 tests): bug exposure (corps-local lookup misses), fix contract (state-wide search finds), determinism (alphabetically-earliest corps wins), defensive cases (empty corps_command, missing brigade).
+- Targeted vitest pack (5 suites: multi_corps + triggered + late_1995 + idle_recovery + scenario_op_diagnostics): **64/64 pass**.
+
+**Validation:**
+- `npx tsc --noEmit`: clean.
+- 104w n1594 hash `6b6daa39dcaf66f7` = baseline ✓ (determinism preserved; no late-war ops fire pre-w168).
+- 156w n1595 hash `57f742a558d8e619` = baseline ✓ (run ends at w156 before any late-1995 op fires).
+- 183w n1596 hash `dd2d560c3e68a443` (≠ prior `6a6570c525ae24a9`): hvo_tomislavgrad brigades' planning-phase column-march orders evolve differently when they can see Mistral 2. Hash change confirms the visibility unblock is observable in engine state.
+
+**Painted-vs-sim oct1995 unchanged:** 70.9% count / 63.2% area-weighted in both n1593 and n1596. The visibility fix delivers the test contract but additional residuals (secondary-corps stance gating, brigade-to-staging distance, Cincar 1994 corridor unmodeled) prevent capture-level territorial improvement on this scenario state. These residuals are documented as separate owners in the report.
+
+**Determinism:** No randomness, no timestamps, no nondeterministic iteration. `strictCompare` corps iteration. Inner-loop iterates `active_operations` in insertion order. Fast-path/slow-path split preserves the existing semantics for single-corps ops.
+
+**Files changed:**
+- `src/sim/combat/corps_operation_helpers.ts` — `findBrigadeOperationAnywhere` helper + `GameState` import.
+- `src/sim/combat/bot_brigade_ai_osid.ts` — fallback wiring at lines 421-432.
+- `tests/multi_corps_operation_visibility.test.ts` — new 5-test suite.
+- `docs/40_reports/implemented/20260501_MULTI_CORPS_OPERATION_VISIBILITY_FIX.md` — full report.
+- `docs/PROJECT_LEDGER.md` — this entry.
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` — durable lesson on op-visibility / state-wide vs corps-local lookup.
+
+No combat code, OOB, painted target, scenario init, or operation objective list changed.
+
+**Open follow-ups (separate sign-offs):**
+- **Owner B2 — secondary-corps stance gating:** when triggered op fires, only `primaryCmd.stance = 'offensive'` is set (`triggered_operations.ts:758`); secondary-corps brigades may be stance-filtered even after visibility is restored. Owner: `/operations-expert` + `/sector-expert`.
+- **Owner C1/C2 — long-distance brigade staging window:** Cerska/Stupčanica/Mistral 2 axis 2 brigades with multi-hop march to staging cannot reach in `planning_duration + execution` window. Owner: `/operations-expert` + `/qa-engineer`.
+- **Owner C3 — Sana 7 attempts / 0 captures:** combat resolution / attack-through path selection. Different failure mode from visibility/stance/staging. Owner: `/operations-expert` + `/qa-engineer`.
+- **Cincar 1994** (Glamoč proper + Kupres): would unblock Mistral 2 axis 2's path. Out of scope per prior packet's user prompt.
+
 ## [2026-05-01] feat(operations): late-1995 scripted-op packet (Krivaja-95 / Stupčanica-95 / Mistral 2 / Sana)
 
 **Type:** Scripted operation infrastructure additions to `src/sim/combat/triggered_operations.ts`. Closes the Family-1 (missing scenario content) gap identified in `20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md`. **No engine code, combat tuning, OOB, painted target, or scenario init changed.**
