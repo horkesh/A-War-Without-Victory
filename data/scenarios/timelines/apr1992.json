@@ -386,14 +386,14 @@
   "officer_config": {
     "RS": {
       "faction": "RS",
-      "learning_rate": 0.007,
+      "learning_rate_per_turn": 0.007,
       "brain_drain_rate": 0.001,
       "brain_drain_start_week": 40,
       "generic_replacement_competence": 2
     },
     "RBiH": {
       "faction": "RBiH",
-      "learning_rate": 0.015,
+      "learning_rate_per_turn": 0.015,
       "pool_regeneration_interval": 12,
       "pool_generated_base_competence": 2,
       "pool_generated_max_competence": 4,
@@ -402,7 +402,7 @@
     },
     "HRHB": {
       "faction": "HRHB",
-      "learning_rate": 0.010,
+      "learning_rate_per_turn": 0.010,
       "zagreb_cadre_interval": 15,
       "roso_restructuring_week": 52,
       "political_replacement_delay": 4,

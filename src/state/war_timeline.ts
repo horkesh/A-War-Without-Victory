@@ -283,8 +283,19 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                 throw new Error(`WarTimeline: officer_config["${faction}"] must be an object`);
             }
             const c = config as Record<string, unknown>;
-            if (typeof c.learning_rate !== 'number') {
-                throw new Error(`WarTimeline: officer_config["${faction}"].learning_rate must be a number`);
+            // Shape C precedence: at least one of the three learning-rate fields must be present
+            // and a number. `learning_rate_per_turn` (absolute) is the preferred new field;
+            // `learning_rate_multiplier` is the explicit multiplier; `learning_rate` is the
+            // deprecated legacy field treated as a multiplier for backward compat.
+            const hasPerTurn = typeof c.learning_rate_per_turn === 'number';
+            const hasMultiplier = typeof c.learning_rate_multiplier === 'number';
+            const hasLegacy = typeof c.learning_rate === 'number';
+            if (!hasPerTurn && !hasMultiplier && !hasLegacy) {
+                throw new Error(
+                    `WarTimeline: officer_config["${faction}"] must define one of ` +
+                    `learning_rate_per_turn (absolute), learning_rate_multiplier (multiplier on COMBAT_GROWTH_BASE), ` +
+                    `or learning_rate (DEPRECATED legacy multiplier).`
+                );
             }
             if (typeof c.faction !== 'string') {
                 throw new Error(`WarTimeline: officer_config["${faction}"].faction must be a string`);

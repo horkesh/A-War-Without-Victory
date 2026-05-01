@@ -179,8 +179,25 @@ export interface PendingOfficerEvent {
 
 export interface FactionOfficerConfig {
     faction: FactionId;
-    /** Per-battle competence gain for faction-generated officers. */
-    learning_rate: number;
+    /**
+     * Absolute per-turn combat-growth rate for brigade officer quality (before
+     * quality dampening `(1 - quality * 0.5)`). Preferred field for new scenarios.
+     * Frontline growth scales by `FRONTLINE_GROWTH_BASE / COMBAT_GROWTH_BASE` (= 0.5).
+     */
+    learning_rate_per_turn?: number;
+    /**
+     * Multiplier on `COMBAT_GROWTH_BASE` (= 0.01). Use when an explicit relative
+     * factor is desired. Mutually exclusive with `learning_rate_per_turn` in
+     * effect — `learning_rate_per_turn` wins if both are set.
+     */
+    learning_rate_multiplier?: number;
+    /**
+     * @deprecated Ambiguous unit (treated as multiplier on `COMBAT_GROWTH_BASE`
+     * for backward compatibility). New scenarios MUST use `learning_rate_per_turn`
+     * (absolute) or `learning_rate_multiplier` (multiplier). See
+     * `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §4.
+     */
+    learning_rate?: number;
     /** VRS brain drain: officers leaving per 20 turns after w40. */
     brain_drain_rate?: number;
     /** VRS brain drain start week. */

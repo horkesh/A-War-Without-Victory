@@ -1,3 +1,36 @@
+## [2026-05-01] fix(officer-quality): split learning_rate into per_turn (absolute) + multiplier; deprecate legacy field
+
+**Type:** Engine + schema + scenario data change — Phase 2 of FORCE QUALITY FOUNDATION milestone (Lane A). Resolves the 100× officer-learning suppression bug confirmed in `docs/40_reports/implemented/20260501_FORCE_QUALITY_TRAJECTORY_EVIDENCE_AUDIT.md` §4 by introducing explicit precedence over three timeline-config fields. No tuning of constants, no canon edits, no painted-target overrides.
+
+**Why:** The audit confirmed `officer_quality_update.ts:108` read `officer_config.learning_rate` from the timeline as a multiplier on `COMBAT_GROWTH_BASE = 0.01`, but `data/scenarios/timelines/apr1992.json` supplied absolute-rate-shaped values (`RBiH=0.015`, `RS=0.007`, `HRHB=0.010`). When the timeline bound, effective per-turn officer growth was suppressed by exactly `1/COMBAT_GROWTH_BASE = 100×` versus the hardcoded multiplier fallback (`1.5`, `0.7`, `1.0`). Phase 1's harmonization closed CC1 (now 100% of the apr1992_definitive family binds the timeline); Phase 2 closes the unit semantics so the timeline values are consumed at their authored rate.
+
+**Shape C precedence (in `src/sim/combat/officer_quality_update.ts` lines 105-128):**
+- `learning_rate_per_turn` (absolute combat growth-per-turn before quality dampening) — preferred new field.
+- `learning_rate_multiplier` (multiplier on `COMBAT_GROWTH_BASE`) — explicit-multiplier path.
+- `learning_rate` (DEPRECATED) — compat-path treats as multiplier; `@deprecated` JSDoc on the field; compat path emits no runtime warning.
+- Hardcoded fallback `FACTION_LEARNING_RATE` — multiplier on `COMBAT_GROWTH_BASE` when no timeline config is bound for the faction.
+- Frontline growth scales by `FRONTLINE_GROWTH_BASE / COMBAT_GROWTH_BASE` (= 0.5×) relative to combat growth regardless of which input shape is used.
+
+**Files changed:**
+- `src/sim/combat/officer_quality_update.ts` (precedence rewrite at lines 105-128; constants `COMBAT_GROWTH_BASE`, `FRONTLINE_GROWTH_BASE`, `OFFICER_QUALITY_FLOOR`, `OFFICER_QUALITY_CAP`, `FACTION_LEARNING_RATE`, `VRS_BRAIN_DRAIN_*` UNCHANGED).
+- `src/state/officer_types.ts` (`FactionOfficerConfig` extended: `learning_rate_per_turn?` added, `learning_rate_multiplier?` added, `learning_rate?` retained but `@deprecated`).
+- `src/state/war_timeline.ts` (validator now requires at-least-one of the three learning-rate fields; previously required only `learning_rate`).
+- `data/scenarios/timelines/apr1992.json` (`learning_rate` → `learning_rate_per_turn` for RS/RBiH/HRHB; values unchanged at `0.007/0.015/0.010` and now consumed as absolute per-turn rates).
+- `tests/officer_learning_rate_shape_c.test.ts` (new; 6 cases — absolute, multiplier, legacy compat, fallback, frontline scaling, precedence).
+- `data/derived/scenario/baselines/manifest.json` (refreshed).
+
+**Tests:** 6 new cases under `tests/officer_learning_rate_shape_c.test.ts` cover all three timeline paths plus the fallback, the 0.5× frontline ratio, and the absolute > multiplier > legacy precedence. Existing `tests/officer_quality.test.ts` (21 tests) all pass unchanged — its synthetic states do not bind a timeline `officer_config`, so they exercise the fallback path which is mathematically identical to the prior implementation. `tests/officer_config_consumers.test.ts` passes with `learning_rate_per_turn` correctly detected as a consumed field. `tests/scenario_apr1992_family_consistency.test.ts` (Phase 1 protection) still passes. `npx tsc --noEmit` clean.
+
+**Hash impact (deliberate):**
+- `apr1992_52w` manifest baseline: ALL 7 artifacts moved (this scenario binds apr1992 timeline; growth rates went from `0.0001275/0.0000595/0.0000850` per turn to `0.015/0.007/0.010` per turn at quality 0.30). New hashes: activity_summary `0edd556c…`, control_delta `bce69f2d…`, end_report `7f1aad04…`, final_save `c0ac7b56…`, formation_delta `7b9bf8a3…`, run_summary `e552cddb…`, weekly_report `bf8033c5…`.
+- `baseline_ops_4w` manifest baseline: `final_save.json` and `run_summary.json` refreshed (pre-existing staleness; this scenario does not bind apr1992 timeline so the engine change does not affect officer growth here, but the manifest had drifted).
+- `noop_4w` manifest baseline: `end_report.md`, `final_save.json`, `run_summary.json` refreshed (same — pre-existing staleness, no timeline binding).
+- `npm run` `tools/scenario_runner/run_baseline_regression.ts` confirms "all scenarios match" after refresh — re-run reproduces identical hashes.
+
+**Determinism:** Sorted iteration via `strictCompare` preserved (lines 96, 170 of `officer_quality_update.ts`). No `Math.random`, `Date.now`, `new Date(`, or `localeCompare` introduced. Save shape unchanged — `formation.officer_quality` remains a single `number`. Self-review verdict: 5/5 checks pass.
+
+**Phase 3 follows:** remove `VRS_BRAIN_DRAIN_*` calendar railroad (`officer_quality_update.ts:39-42,134-136`) and replace with mechanic-coupled erosion (cumulative casualties, supply state, exhaustion, isolation). Phase 2 deliberately leaves the railroad untouched.
+
 ## [2026-05-01] chore(scenarios): harmonize apr1992_definitive family on war_timeline+init_officers
 
 **Type:** Scenario configuration only — Phase 1 of FORCE QUALITY FOUNDATION milestone (Lane A). Bound `war_timeline: "apr1992"` and `init_officers: "apr1992"` in `data/scenarios/apr1992_definitive_52w.json`, `apr1992_definitive_56w.json`, and `apr1992_definitive_104w.json`. Added `tests/scenario_apr1992_family_consistency.test.ts` to lock the agreement against future drift. No engine code, UI code, OOB, operation definitions, painted targets, or canon files changed.

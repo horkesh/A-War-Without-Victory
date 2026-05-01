@@ -103,9 +103,29 @@ export function updateBrigadeOfficerQuality(
         if (f.kind !== 'brigade' && f.kind !== 'militia' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
 
         const faction = f.faction as string;
-        // D.3: Read learning rate from war_timeline if available, else hardcoded fallback
+        // Shape C precedence (Phase 2 of FORCE QUALITY FOUNDATION; see audit §4):
+        //   1. timeline `learning_rate_per_turn` — absolute per-turn combat growth
+        //      (preferred field; consumed before the quality-dampening factor).
+        //   2. timeline `learning_rate_multiplier` — multiplier on COMBAT_GROWTH_BASE.
+        //   3. timeline `learning_rate` — DEPRECATED, treated as multiplier for
+        //      backward compatibility (matches legacy code path).
+        //   4. hardcoded fallback `FACTION_LEARNING_RATE` — multiplier on COMBAT_GROWTH_BASE.
+        // Frontline growth scales by FRONTLINE_GROWTH_BASE / COMBAT_GROWTH_BASE relative to
+        // combat growth (= 0.5×) regardless of which input shape is used.
         const timelineConfig = state.military.war_timeline?.officer_config?.[faction];
-        const learningRate = timelineConfig?.learning_rate ?? (FACTION_LEARNING_RATE[faction] ?? 1.0);
+        let combatGrowthPerTurn: number;
+        if (typeof timelineConfig?.learning_rate_per_turn === 'number') {
+            combatGrowthPerTurn = timelineConfig.learning_rate_per_turn;
+        } else if (typeof timelineConfig?.learning_rate_multiplier === 'number') {
+            combatGrowthPerTurn = COMBAT_GROWTH_BASE * timelineConfig.learning_rate_multiplier;
+        } else if (typeof timelineConfig?.learning_rate === 'number') {
+            // DEPRECATED legacy field — treat as multiplier for backward compat.
+            combatGrowthPerTurn = COMBAT_GROWTH_BASE * timelineConfig.learning_rate;
+        } else {
+            combatGrowthPerTurn = COMBAT_GROWTH_BASE * (FACTION_LEARNING_RATE[faction] ?? 1.0);
+        }
+        const frontlineGrowthPerTurn =
+            combatGrowthPerTurn * (FRONTLINE_GROWTH_BASE / COMBAT_GROWTH_BASE);
 
         // Ensure officer_quality is initialized
         if (f.officer_quality === undefined) {
@@ -121,10 +141,10 @@ export function updateBrigadeOfficerQuality(
             : f.posture !== undefined && f.posture !== 'defend';
 
         if (inCombat) {
-            const growth = COMBAT_GROWTH_BASE * learningRate * (1.0 - quality * 0.5);
+            const growth = combatGrowthPerTurn * (1.0 - quality * 0.5);
             quality += growth;
         } else if (onFrontline) {
-            const growth = FRONTLINE_GROWTH_BASE * learningRate * (1.0 - quality * 0.5);
+            const growth = frontlineGrowthPerTurn * (1.0 - quality * 0.5);
             quality += growth;
         }
 
