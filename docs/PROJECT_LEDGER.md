@@ -1,3 +1,39 @@
+## [2026-05-01] evidence(operations): LANE D 5th Corps opportunity family 188w stress + health audit
+
+**Type:** Read-only orchestration evidence packet. No engine code, combat math, OOB, scenario data, painted targets, opportunity catalog, IPC, UI, or canon changed. Three subagents (Operations Expert, Gap-Finder, Canon-Compliance Reviewer) dispatched read-only.
+
+**Why:** LANE C closed with 7 entries in `FIFTH_CORPS_OPPORTUNITIES` but no scenario-scale stress. The substrate / catalog / decision / AAR / health-audit chain needed end-to-end proof under a fresh 188w run, not just unit tests.
+
+**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1604`. Final-state hash `dca64282334ae735` (vs n1602 `c18c909fbb6fb62b` — additive opportunity-state shape change since LANE C added 6 catalog entries with `last_force_quality_traits` / `last_footprint` / `redirect_variants` snapshots; not a behavioral drift).
+
+**Findings (substrate health = GREEN):**
+- Only 1 of 7 entries surfaced as a proposal in 188 weeks: sana_95 at t175 (RBiH approve → CorpsOperation → AAR `arbih_5th_corps:Operation Sana:t175`).
+- Six LANE C entries (Tigar-Sloboda 94, APWB Pressure 94, Una 94, Breza 94, Pauk 94/95, Grmeč 94) never reached `eligible_pending_review`.
+- Substrate one-shot guard at `operation_opportunities.ts:562-568` works (no re-enqueue post-approval). T1→buildCorpsOperation path works (Sana spawned 3-axis / 9-brigade op). T3 early-return code path intact (untestable in this run — none surfaced). AAR linker works (`linkOpportunityResolutionToAAR` correctly bound the Sana AAR). Force-quality snapshot persisted on Sana proposal. Health-audit script clean (0 unlinked, 0 broken AAR, 0 duplicate, 0 T3 sentinel).
+
+**Findings (catalog content health = YELLOW, multi-owner, OUT OF SCOPE for Lane D):**
+- Six entries silently fail eligibility because the `logistics` axis predicate (ceiling 90-95) trips against RBiH `war_supply_pressure` pinned at 100 from turn 1 onward. T3 entries (`logistics: required`) → unconditional fail. T1 Tigar/APWB/Grmeč have `logistics` as the SOLE optional axis with `min_optional_axes:1` → unconditional fail.
+- Gap-Finder classified as **railroad-by-omission** in catalog predicate topology — the substrate is correct, but the catalog's predicate shape locks 6 outcomes to a single live-state signal regardless of corps fitness, enemy weakness, or alliance context.
+- Recommend dedicated next-lane: add a second genuine optional axis to T1 Tigar/APWB/Grmeč (e.g. force-quality trait); demote T3 logistics from required to optional. Owner: `/operations-expert` + `/game-designer`.
+
+**Findings (engine-wide AAR aggregator = RED, OUT OF SCOPE for Lane D):**
+- Sana AAR misreports `total_attacks=0` despite `op.attack_attempt_count=7` across 3 axes with `force_ratio_estimate=7.19` and `recovery_reason='max_failures'`. Sana actually launched and was repulsed; the ledger says it didn't launch.
+- Cross-validation: 21 of 43 AARs in n1604 (49%) have `total_attacks=0` despite weekly_log entries. Operation Prijedor with outcome=success + 10/10 captures shows `total_attacks=0`. NOT opportunity-specific.
+- Root cause: AAR aggregator at `operation_aar.ts:519-528` reads `weekly_log[*].attacks_this_turn` instead of canonical `op.attack_attempt_count`. Sector_offensive write-side and AAR read-side disagree on which counter is canonical.
+- Crosses `>1 owner without Codex review` stop gate; recommend dedicated lane owned by `/scenario-harness-engineer` + `/operations-expert`.
+
+**Bounded fix in scope but NOT shipped:** Fix B at `operation_opportunities.ts:614-615` would add an observability breadcrumb on the silent ineligible-skip path. Single-substrate-file scope, write-only diagnostic, no behavioral change. All three reviewers (Ops Expert, Gap-Finder, Canon-Compliance) said SAFE. Not shipped because it is observability, not a "bug fix" per the lane's narrow code-commit criterion. Recommended as a single-commit follow-up.
+
+**Sensitive-history compliance:** Re-verified all five canon checks PASS (T3 sentinel intact, single-owner discipline preserved, AMBER prose guardrail intact, T4 sensitive-history entries still excluded from catalog).
+
+**Determinism:** Preserved. No engine code mutated. Run reproducible from HEAD `ad20e735`.
+
+**Verification:** 188w run exit 0 (`b0xtwunhr`); health audit `node tools/diagnostics/opportunity_health_audit.cjs <run_dir>` clean; n1602 baseline diagnostic captured for control comparison.
+
+**Report:** `docs/40_reports/implemented/20260501_LANE_D_FIFTH_CORPS_OPPORTUNITY_188W_STRESS.md`.
+
+---
+
 ## [2026-05-01] feat(ops-ui): add opportunity footprint and redirect DTOs
 
 **Type:** Opportunity proposal DTO + Army HQ UI. No combat math, opportunity catalog content, operation execution, OOB, scenario data, painted targets, or calibration outputs changed.
