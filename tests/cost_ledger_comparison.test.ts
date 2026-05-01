@@ -45,6 +45,9 @@ function makeState(overrides: {
     factionBreakdowns?: Record<string, Partial<NegotiationBreakdown>>;
     ruptures?: RuptureConsequence[];
     civilianCasualties?: Record<string, { killed: number; fled_abroad: number }>;
+    opportunityResolutions?: unknown[];
+    opportunities?: unknown[];
+    operationHistory?: unknown[];
 } = {}): GameState {
     const {
         turn = 40,
@@ -52,6 +55,9 @@ function makeState(overrides: {
         factionBreakdowns = {},
         ruptures = [],
         civilianCasualties = {},
+        opportunityResolutions = [],
+        opportunities = [],
+        operationHistory = [],
     } = overrides;
 
     const cl = casualtyLedger ?? initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
@@ -63,7 +69,10 @@ function makeState(overrides: {
             formations: {},
             negotiation: makeNegotiationState(factionBreakdowns, ruptures),
             casualty_ledger: cl,
+            operation_opportunity_resolutions: opportunityResolutions,
+            operation_opportunities: opportunities,
         },
+        operation_history: operationHistory,
         political: {
             political_controllers: {},
         },
@@ -186,6 +195,106 @@ describe('buildCostLedger', () => {
         const ledger2 = buildCostLedger(state);
 
         expect(JSON.stringify(ledger1)).toBe(JSON.stringify(ledger2));
+    });
+
+    it('summarizes opportunity decisions and linked AAR outcomes', () => {
+        const state = makeState({
+            opportunityResolutions: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    response: 'approve',
+                    response_turn: 175,
+                    executed_op_name: 'Operation Sana',
+                    executed_op_aar_id: 'aar_sana_95',
+                    exit_class: 'partial_success',
+                },
+                {
+                    proposal_id: 'OPP_178_failed_probe',
+                    opportunity_id: 'failed_probe',
+                    response: 'decline',
+                    response_turn: 178,
+                },
+            ],
+            opportunities: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    approver_faction: 'RBiH',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'approved',
+                    last_axis_evaluation: [],
+                },
+                {
+                    proposal_id: 'OPP_178_failed_probe',
+                    opportunity_id: 'failed_probe',
+                    approver_faction: 'RS',
+                    eligibility_turn: 178,
+                    expires_turn: 202,
+                    status: 'declined',
+                    last_axis_evaluation: [],
+                },
+            ],
+            operationHistory: [
+                {
+                    operation_id: 'aar_sana_95',
+                    operation_name: 'Operation Sana',
+                    corps_id: 'arbih_5th_corps',
+                    faction: 'RBiH',
+                    type: 'offensive',
+                    started_turn: 175,
+                    ended_turn: 187,
+                    outcome: 'partial',
+                    objectives_targeted: ['op:sanski_most:sanski_most_2', 'op:kljuc:kljuc_2'],
+                    objectives_captured: ['op:sanski_most:sanski_most_2'],
+                    duration_turns: 12,
+                    total_attacks: 7,
+                    casualties_suffered: { killed: 80, wounded: 220 },
+                    casualties_inflicted: { killed: 140, wounded: 300 },
+                    equipment_lost: { tanks: 0, artillery: 1 },
+                    equipment_destroyed: { tanks: 1, artillery: 2 },
+                    equipment_captured: { tanks: 0, artillery: 1 },
+                    participating_brigades: ['arbih_501st_slavna_mountain'],
+                    initial_strength: 4200,
+                    final_strength: 3900,
+                    grade: {
+                        stars: 3,
+                        verdict: 'Partial Success',
+                        factors: {
+                            objective_completion: 50,
+                            exchange_ratio: 60,
+                            tempo: 70,
+                            preservation: 92,
+                        },
+                    },
+                    weekly_log: [],
+                },
+            ],
+        });
+
+        const ledger = buildCostLedger(state);
+        const opportunities = ledger.operation_opportunities!;
+
+        expect(opportunities.total_decisions).toBe(2);
+        expect(opportunities.approved).toBe(1);
+        expect(opportunities.declined).toBe(1);
+        expect(opportunities.completed).toBe(1);
+        expect(opportunities.successes).toBe(1);
+        expect(opportunities.by_faction.RBiH.successes).toBe(1);
+        expect(opportunities.by_faction.RS.declined).toBe(1);
+        expect(opportunities.entries[0]).toMatchObject({
+            proposal_id: 'OPP_175_sana_95',
+            opportunity_id: 'sana_95',
+            faction: 'RBiH',
+            response: 'approve',
+            exit_class: 'partial_success',
+            aar_outcome: 'partial',
+            total_attacks: 7,
+            objectives_targeted: 2,
+            objectives_captured: 1,
+            grade_stars: 3,
+        });
     });
 });
 

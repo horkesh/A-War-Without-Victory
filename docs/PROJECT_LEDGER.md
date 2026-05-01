@@ -1,3 +1,19 @@
+## [2026-05-01] feat(endgame): add opportunity decisions to the Cost Ledger
+
+**Type:** Endgame observability + UI display. No simulation behavior, combat math, opportunity catalog content, OOB, scenario data, painted targets, or operation definitions changed.
+
+**Why:** The opportunity system now records proposal decisions and links approved operations back to completed AARs, but the final War Reckoning still showed only casualties, duration, territory divergence, and rupture consequences. Opportunity choices needed to be visible in the endgame accounting without creating family-specific UI or inferring outcomes from operation names.
+
+**Change:** `buildCostLedger(...)` now derives an optional `operation_opportunities` packet from `state.military.operation_opportunity_resolutions`, `state.military.operation_opportunities`, and linked `state.operation_history` rows. It records totals, per-faction decision counts, linked AAR outcomes, exit classes, attack/objective counts, and grade stars. `WarCostSummary` renders an `Opportunity Decisions` block when the packet is present.
+
+**Invariants:** Cost Ledger remains read-only/reflection-only. Ordering is deterministic by response turn, opportunity id, and proposal id. The UI consumes Cost Ledger output only; it does not re-read raw opportunity queues or AARs. Outcomes are derived from `executed_op_aar_id + exit_class`.
+
+**Verification:** Red first: targeted Cost Ledger/UI tests failed on missing opportunity summary/rendering. Green: `npx.cmd tsc --noEmit` clean; focused Cost Ledger/UI pack 34/34 pass; broader endgame proof pack 122/122 pass; `npm.cmd run desktop:map:build` passes with pre-existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260501_OPERATION_OPPORTUNITY_COST_LEDGER_RECKONING.md`.
+
+---
+
 ## [2026-05-01] feat(ui): surface operation opportunity records in Army HQ
 
 **Type:** UI/data-consumer feature. No simulation behavior, combat math, opportunity catalog content, operation definitions, OOB, scenario data, or painted targets changed.

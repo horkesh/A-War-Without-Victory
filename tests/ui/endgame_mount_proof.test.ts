@@ -115,6 +115,48 @@ function makeCostLedger(): CostLedger {
         rupture_consequences: [
             { id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of the Srebrenica safe area' },
         ],
+        operation_opportunities: {
+            total_decisions: 2,
+            approved: 1,
+            declined: 1,
+            expired: 0,
+            completed: 1,
+            successes: 1,
+            failures: 0,
+            by_faction: {
+                RBiH: { total_decisions: 1, approved: 1, declined: 0, expired: 0, completed: 1, successes: 1, failures: 0, did_not_launch: 0, t3_authorized: 0 },
+                RS: { total_decisions: 1, approved: 0, declined: 1, expired: 0, completed: 0, successes: 0, failures: 0, did_not_launch: 0, t3_authorized: 0 },
+            },
+            entries: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    display_name: 'Operation Sana',
+                    faction: 'RBiH',
+                    response: 'approve',
+                    response_turn: 175,
+                    exit_class: 'partial_success',
+                    executed_op_name: 'Operation Sana',
+                    executed_op_aar_id: 'aar_sana_95',
+                    aar_outcome: 'partial',
+                    total_attacks: 7,
+                    objectives_targeted: 2,
+                    objectives_captured: 1,
+                    grade_stars: 3,
+                },
+                {
+                    proposal_id: 'OPP_178_failed_probe',
+                    opportunity_id: 'failed_probe',
+                    display_name: 'failed probe',
+                    faction: 'RS',
+                    response: 'decline',
+                    response_turn: 178,
+                    total_attacks: 0,
+                    objectives_targeted: 0,
+                    objectives_captured: 0,
+                },
+            ],
+        },
     } as CostLedger;
 }
 
@@ -353,5 +395,16 @@ describe('WarCostSummary — direct component mount proof', () => {
             comparison: makeComparison(),
         });
         expect(html).toContain('Historical Divergence');
+    });
+
+    it('renders operation opportunity reckoning when present', () => {
+        const html = renderComponent(WarCostSummary, {
+            costLedger: makeCostLedger(),
+            comparison: makeComparison(),
+        });
+        expect(html).toContain('Opportunity Decisions');
+        expect(html).toContain('Operation Sana');
+        expect(html).toContain('Partial Success');
+        expect(html).toContain('7 attacks');
     });
 });

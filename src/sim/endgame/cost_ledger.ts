@@ -10,10 +10,160 @@
 
 import type { GameState } from '../../state/game_state.js';
 import type { RuptureConsequence, OutcomeClass } from '../../state/negotiation_types.js';
+import type { OperationAAR } from '../combat/operation_aar.js';
+import type {
+    OperationOpportunityResolution,
+    OperationOpportunityState,
+} from '../combat/operation_opportunities.js';
 import { computeFactionVerdict } from '../negotiation/scoring.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const CANONICAL_FACTIONS: readonly string[] = ['HRHB', 'RBiH', 'RS'] as const;
+
+function emptyOpportunityFactionSummary(): OpportunityCostFactionSummary {
+    return {
+        total_decisions: 0,
+        approved: 0,
+        declined: 0,
+        expired: 0,
+        completed: 0,
+        successes: 0,
+        failures: 0,
+        did_not_launch: 0,
+        t3_authorized: 0,
+    };
+}
+
+function emptyOpportunityCostLedger(): OpportunityCostLedger {
+    return {
+        total_decisions: 0,
+        approved: 0,
+        declined: 0,
+        expired: 0,
+        completed: 0,
+        successes: 0,
+        failures: 0,
+        by_faction: {},
+        entries: [],
+    };
+}
+
+function isApprovedResponse(response: OperationOpportunityResolution['response']): boolean {
+    return response === 'approve'
+        || response === 'redirect'
+        || response === 'under_resource';
+}
+
+function isSuccessExit(entry: OpportunityCostLedgerEntry): boolean {
+    return entry.exit_class === 'decisive_success'
+        || entry.exit_class === 'partial_success'
+        || entry.aar_outcome === 'success'
+        || entry.aar_outcome === 'partial';
+}
+
+function isFailureExit(entry: OpportunityCostLedgerEntry): boolean {
+    return entry.exit_class === 'failed'
+        || entry.exit_class === 'aborted'
+        || entry.aar_outcome === 'failure'
+        || entry.aar_outcome === 'orphaned';
+}
+
+function displayNameForOpportunity(resolution: OperationOpportunityResolution, aar?: OperationAAR): string {
+    if (resolution.executed_op_name) return resolution.executed_op_name;
+    if (aar?.operation_name) return aar.operation_name;
+    return resolution.opportunity_id.replace(/_/g, ' ');
+}
+
+function buildOpportunityCostLedger(state: GameState): OpportunityCostLedger {
+    const resolutions = [...(state.military?.operation_opportunity_resolutions ?? [])];
+    if (resolutions.length === 0) return emptyOpportunityCostLedger();
+
+    const proposalsById = new Map<string, OperationOpportunityState>();
+    for (const proposal of state.military?.operation_opportunities ?? []) {
+        proposalsById.set(proposal.proposal_id, proposal);
+    }
+
+    const aarById = new Map<string, OperationAAR>();
+    for (const aar of state.operation_history ?? []) {
+        aarById.set(aar.operation_id, aar);
+    }
+
+    const entries = resolutions
+        .map((resolution): OpportunityCostLedgerEntry => {
+            const proposal = proposalsById.get(resolution.proposal_id);
+            const aar = resolution.executed_op_aar_id
+                ? aarById.get(resolution.executed_op_aar_id)
+                : undefined;
+            const faction = proposal?.approver_faction ?? aar?.faction ?? 'unknown';
+            return {
+                proposal_id: resolution.proposal_id,
+                opportunity_id: resolution.opportunity_id,
+                display_name: displayNameForOpportunity(resolution, aar),
+                faction,
+                response: resolution.response,
+                response_turn: resolution.response_turn,
+                executed_op_name: resolution.executed_op_name,
+                executed_op_aar_id: resolution.executed_op_aar_id,
+                exit_class: resolution.exit_class,
+                aar_outcome: aar?.outcome,
+                total_attacks: aar?.total_attacks ?? 0,
+                objectives_targeted: aar?.objectives_targeted?.length ?? 0,
+                objectives_captured: aar?.objectives_captured?.length ?? 0,
+                grade_stars: aar?.grade?.stars,
+            };
+        })
+        .sort((a, b) => {
+            if (a.response_turn !== b.response_turn) return a.response_turn - b.response_turn;
+            const oppDelta = strictCompare(a.opportunity_id, b.opportunity_id);
+            if (oppDelta !== 0) return oppDelta;
+            return strictCompare(a.proposal_id, b.proposal_id);
+        });
+
+    const ledger = emptyOpportunityCostLedger();
+    ledger.entries = entries;
+    for (const entry of entries) {
+        ledger.total_decisions++;
+
+        if (!ledger.by_faction[entry.faction]) {
+            ledger.by_faction[entry.faction] = emptyOpportunityFactionSummary();
+        }
+        const faction = ledger.by_faction[entry.faction];
+        faction.total_decisions++;
+
+        if (isApprovedResponse(entry.response)) {
+            ledger.approved++;
+            faction.approved++;
+        }
+        if (entry.response === 'decline') {
+            ledger.declined++;
+            faction.declined++;
+        }
+        if (entry.response === 'expire') {
+            ledger.expired++;
+            faction.expired++;
+        }
+        if (entry.executed_op_aar_id || entry.exit_class === 't3_authorized_no_offensive') {
+            ledger.completed++;
+            faction.completed++;
+        }
+        if (isSuccessExit(entry)) {
+            ledger.successes++;
+            faction.successes++;
+        }
+        if (isFailureExit(entry)) {
+            ledger.failures++;
+            faction.failures++;
+        }
+        if (entry.exit_class === 'did_not_launch') {
+            faction.did_not_launch++;
+        }
+        if (entry.exit_class === 't3_authorized_no_offensive') {
+            faction.t3_authorized++;
+        }
+    }
+
+    return ledger;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -33,10 +183,52 @@ export interface CostLedgerEntry {
     condemnation_flags: string[];
 }
 
+export interface OpportunityCostLedgerEntry {
+    proposal_id: string;
+    opportunity_id: string;
+    display_name: string;
+    faction: string;
+    response: OperationOpportunityResolution['response'];
+    response_turn: number;
+    executed_op_name?: string;
+    executed_op_aar_id?: string;
+    exit_class?: OperationOpportunityResolution['exit_class'];
+    aar_outcome?: OperationAAR['outcome'];
+    total_attacks: number;
+    objectives_targeted: number;
+    objectives_captured: number;
+    grade_stars?: OperationAAR['grade']['stars'];
+}
+
+export interface OpportunityCostFactionSummary {
+    total_decisions: number;
+    approved: number;
+    declined: number;
+    expired: number;
+    completed: number;
+    successes: number;
+    failures: number;
+    did_not_launch: number;
+    t3_authorized: number;
+}
+
+export interface OpportunityCostLedger {
+    total_decisions: number;
+    approved: number;
+    declined: number;
+    expired: number;
+    completed: number;
+    successes: number;
+    failures: number;
+    by_faction: Record<string, OpportunityCostFactionSummary>;
+    entries: OpportunityCostLedgerEntry[];
+}
+
 export interface CostLedger {
     war_duration_weeks: number;
     entries: CostLedgerEntry[];
     rupture_consequences: { id: string; perpetrator_faction: string; description: string }[];
+    operation_opportunities?: OpportunityCostLedger;
     total_military_killed: number;
     total_civilian_killed: number;
 }
@@ -114,6 +306,7 @@ export function buildCostLedger(state: GameState): CostLedger {
         war_duration_weeks: turn,
         entries,
         rupture_consequences: ruptureEntries,
+        operation_opportunities: buildOpportunityCostLedger(state),
         total_military_killed: totalMilitaryKilled,
         total_civilian_killed: totalCivilianKilled,
     };
