@@ -1,3 +1,46 @@
+## [2026-05-01] milestone(force-quality): FORCE QUALITY FOUNDATION closed
+
+**Type:** Milestone close-out. Five-phase lane delivered + one fix-up + verification panel. Canon-restorative (Forbidden-Shape calendar railroad removed). No FORAWWV touch. No painted-target overrides. Determinism preserved at every phase.
+
+**Commit chain:** `1f9e1a64` (Phase 1) → `21dd1f53` (Phase 2) → `a11dc0bc` (Phase 3) → `4002f2f3` (Phase 4) → `cd009a56` (Phase 4 fix-up).
+
+**What shipped:**
+- Phase 1 — `apr1992_definitive_{52w,56w,104w}.json` bound to `war_timeline:"apr1992"` and `init_officers:"apr1992"`. Auto-discovering family-consistency test added.
+- Phase 2 — Shape C officer-learning-rate semantics. 100× unit bug eliminated. `FactionOfficerConfig` schema split into `learning_rate_per_turn` (absolute) + `learning_rate_multiplier` (mult) + deprecated `learning_rate` (compat). `apr1992.json` migrated.
+- Phase 3 — VRS calendar brain-drain railroad removed. `VRS_BRAIN_DRAIN_*` deprecated; per-brigade casualty path in `attack_post_battle_effects.ts:applyOfficerCasualtyLoss` is the live mechanic-coupled signal.
+- Phase 4 — `computeCorpsOperationReadiness` deterministic helper + 7 named traits + soft gate in `commander/plan.ts` + AAR + `decision_trace` diagnostic surfaces. Previously-decorative `faction_officer_maturity` and `capability_profile` made live.
+- Phase 4 fix-up — `decision_trace.force_quality_traits` persistence across non-offensive early-return turns (one-way merge in `emit.ts buildUpdatedState`).
+
+**Tests:** 23 new cases across 4 new files (`tests/scenario_apr1992_family_consistency.test.ts`, `officer_learning_rate_shape_c.test.ts`, `officer_quality_no_calendar_railroad.test.ts`, `corps_operation_readiness.test.ts`, `force_quality_trace_persistence.test.ts`). `officer_quality.test.ts` 21/21 (with two brain-drain assertions rewritten); `officer_config_consumers.test.ts` allow-list extended for inert timeline `brain_drain_*` fields. `tsc --noEmit` clean at every phase.
+
+**Verification (Phase 5a):** five deterministic runs at 40w/104w/156w/183w/188w. Hashes — 40w `cbd7d61db0bfbe97`, 104w `f4f03385770f06d1`, 188w `2c851756827d5906` (156w/183w via 188w `--video` weekly saves). Audit-baseline → post-milestone deltas: RBiH 188w mean officer_quality 0.092 → 0.806 (+0.714); RS 188w mean 0.261 → 0.549 (+0.288); HRHB 188w mean 0.212 → 0.648 (+0.436). ARBiH first multi-axis op (Operation Sana, `arbih_5th_corps`, w175-187, 3 axes) — first in audit corpus. VRS late-war ops emerging from absolute zero (3 in 104-156w window). 188w painted-vs-Dayton: RS +1.8% (within tolerance), ARBiH +7.5% / HRHB -9.4% (Federation-internal balance follow-up).
+
+**Two-tier panel verdict (Phase 5b–5c):**
+- Tier 1: war-or-game P1 RBiH cap saturation + P1 Federation balance, historian P0 VRS equipment-decay (separate audit) + P1 HRHB officer mean too high, operations-expert Phase 4 partial wiring (pre-planned bypass + decision_trace persistence + composite flat).
+- Tier 2: canon-compliance-reviewer APPROVE (8/8 Review Checklist + 5/5 Forbidden Shapes PASS; sensitive-history gate PASS — Krivaja-95 zero matches in milestone diffs); gap-finder GO-WITH-CAVEAT-RESOLVED (one PHASE-4-DEFECT fixed by `cd009a56`, all other findings NEXT-LANE per audit §10); game-designer AS-DESIGNED for milestone scope, three NEXT-LANE bug packets named.
+
+**Manifest hash impact:** `apr1992_52w` artifacts deliberately refreshed at each phase (final_save.json, run_summary.json moved at every phase; full 7-artifact set moved at Phase 2 + Phase 4). `baseline_ops_4w` and `noop_4w` partial drift at Phase 2 only (one-time staleness cleanup), unchanged thereafter. No painted targets touched.
+
+**NEXT-LANE follow-ups** (priority order; all maps to audit §10 sequence):
+1. Officer-Quality Dilution & Cap Discipline (RBiH cap saturation + Shape-C long-horizon audit + composite mean→p25 aggregation). Folds composite reweighting and `support_delivery` gate dimension.
+2. Frontline-Tenure vs Combat-Test Decoupling (HRHB silent-strength fix; gate frontline growth on combat tests).
+3. Pre-planned/triggered ops coverage in Phase 4 trait wiring (audit §10 P1c).
+4. Endogenous VRS Strain Channels (audit §10 P1b — replacement officer-pool dilution, FRY recall, defection).
+5. Equipment decay audit (historian P0; audit §10 P3).
+6. Federation internal balance / HVO authored-op pipeline (Issue #20 / Option K family).
+7. War-exhaustion faction asymmetry + late-war ops dropoff (audit §10 P2).
+8. Sensitive-history surfacing review (one-pass canon check on AAR `force_quality_traits_at_launch` exposure for Krivaja-95 / Stupčanica-95).
+
+**Close-out report:** `docs/40_reports/implemented/20260501_FORCE_QUALITY_FOUNDATION_MILESTONE_CLOSE.md`.
+
+**Companion artifacts (committed alongside this entry):** `tools/diagnostics/_force_quality_post_phase4_runs.md` (raw-data report), `_force_quality_post_phase4_metrics.md` (metrics extractor output), `_force_quality_phase5b_tier1.md` (Tier 1 panel synthesis), `_phase5a_painted_compares/painted_*.txt` (5 painted-compare files).
+
+**Determinism statement:** No `Math.random` / `Date.now` / `localeCompare`. All iteration uses `strictCompare`. Save shape backward-compatible (new fields optional with neutral defaults). Manifest refreshes deliberate; harness-level baseline regression re-pass after each phase. Phase 5a single-run; full re-verify deferred to a future calibration packet.
+
+**Architecture contract Implementation Packet Rules:** all four followed. (#1 unit semantics first → Phase 2; #2 consumers before tuning → Phase 4 wires consumers without tuning; #3 one trait family per packet → each phase ships a single coherent change; #4 metrics before acceptance → Phase 5 evidence run with two-tier panel.)
+
+---
+
 ## [2026-05-01] fix(operations): preserve force_quality_traits across non-offensive turns (Phase 4 fix-up)
 
 **Type:** Diagnostic-surface persistence bug fix — Phase 4 fix-up identified by FORCE QUALITY FOUNDATION milestone Tier 2 gap-finder (panel synthesis: `tools/diagnostics/_force_quality_phase5b_tier1.md`). One file changed. No formula/threshold/weight modified. No canon edits. No painted-target overrides.
