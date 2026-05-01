@@ -520,3 +520,341 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(afterMilitarySerialized).toBe(beforeMilitarySerialized);
     });
 });
+
+// ─── LANE C Phase 1: Substrate A — targets_friendly_overrides ───────────────
+//   Wires the friendly-controller exemption hatch on the opportunity-spawn
+//   path so APWB-paint-as-RBiH OSIDs may be ARBiH 5th Corps targets without
+//   leaking the exemption into other tiers/families.
+
+function buildStateWithControllers(
+    turn: number,
+    controllers: Readonly<Record<string, FactionId>>,
+    primaryCorps = 'arbih_5th_corps',
+): GameState {
+    const state = buildMinimalState(turn, primaryCorps);
+    (state as unknown as { political: { political_controllers: Record<string, FactionId> } }).political = {
+        political_controllers: { ...controllers },
+    };
+    return state;
+}
+
+function fixtureFifthCorpsT1WithFriendlyTarget(
+    overrides: Partial<OperationOpportunityDef> = {},
+): OperationOpportunityDef {
+    return {
+        ...fixtureSana(),
+        opportunity_id: 'fixture_fifth_corps_apwb',
+        name: 'Fixture APWB',
+        tier: 'T1',
+        family: 'fifth_corps',
+        axes: [{
+            axis_id: 'apwb_main',
+            name: 'APWB Main',
+            corps: 'arbih_5th_corps',
+            brigades: ['arbih_5_brigade_a', 'arbih_5_brigade_b'],
+            // First objective is RBiH-painted (APWB-aligned in catalog); second is unpainted.
+            objectives: ['op:velika_kladusa:velika_kladusa_2', 'op:cazin:cazin_3'],
+        }],
+        ...overrides,
+    };
+}
+
+describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friendly_overrides)', () => {
+    it('targets_friendly_overrides=undefined is no-op (Sana parity — no friendly objectives kept)', () => {
+        // Sana 95 fixture has its objectives controlled by RS/null in test state.
+        // With override undefined and no friendly-controlled objective, the spawned
+        // op preserves all objectives — byte-identical to pre-LANE-C behavior.
+        const state = buildStateWithControllers(175, {
+            'op:bihac:bihac_2': 'RS',  // enemy-painted — keep
+        });
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        expect(updated!.status).toBe('approved');
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        expect(op.axes![0].objectives).toEqual(['op:bihac:bihac_2']);
+        expect(updated!.executed_op_id).toBe(def.name);
+    });
+
+    it('without override, friendly-controlled OSIDs are filtered out of axes', () => {
+        // VK is RBiH-painted (modeling APWB-paint-as-RBiH); cazin_3 is RS-painted.
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        expect(updated!.status).toBe('approved');
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        // VK filtered out (RBiH-painted, no override); cazin_3 retained (RS-painted).
+        expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+    });
+
+    it('T1 + family=fifth_corps + override: friendly-painted OSID is RETAINED as axis target', () => {
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',  // friendly-painted (APWB)
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget({
+            targets_friendly_overrides: ['op:velika_kladusa:velika_kladusa_2'],
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        expect(updated!.status).toBe('approved');
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        // Both retained — VK exempted by override, cazin_3 normal enemy target.
+        expect(op.axes![0].objectives).toEqual([
+            'op:velika_kladusa:velika_kladusa_2',
+            'op:cazin:cazin_3',
+        ]);
+    });
+
+    it('T2 with override is IGNORED (scope-restriction: override only honored on T1)', () => {
+        // T2 does not exist as an OpportunityTier today, but the scope check is
+        // tier === 'T1', so any non-T1 must drop the override. We use T3 here
+        // since T2 isn't in the type — but T3 also short-circuits approve, so
+        // we exercise scope by attempting under_resource (which still spawns).
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget({
+            tier: 'T3',
+            targets_friendly_overrides: ['op:velika_kladusa:velika_kladusa_2'],
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'under_resource',
+            [def],
+        );
+        expect(updated!.status).toBe('under_resourced_approved');
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        // VK dropped (override ignored on non-T1 even with fifth_corps family); cazin_3 retained.
+        expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+    });
+
+    it('non-fifth_corps family with override is IGNORED (scope-restriction: family must match)', () => {
+        const state = buildStateWithControllers(175, {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH',
+            'op:cazin:cazin_3': 'RS',
+        });
+        const def = fixtureFifthCorpsT1WithFriendlyTarget({
+            family: 'posavina',
+            targets_friendly_overrides: ['op:velika_kladusa:velika_kladusa_2'],
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        expect(updated!.status).toBe('approved');
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        // VK dropped — override ignored because family is not fifth_corps.
+        expect(op.axes![0].objectives).toEqual(['op:cazin:cazin_3']);
+    });
+
+    it('determinism: two evaluator runs over identical state produce identical resolution rows', () => {
+        const ctrl = {
+            'op:velika_kladusa:velika_kladusa_2': 'RBiH' as FactionId,
+            'op:cazin:cazin_3': 'RS' as FactionId,
+        };
+        const stateA = buildStateWithControllers(175, ctrl);
+        const stateB = buildStateWithControllers(175, ctrl);
+        const def = fixtureFifthCorpsT1WithFriendlyTarget({
+            targets_friendly_overrides: ['op:velika_kladusa:velika_kladusa_2'],
+        });
+        runOpportunityEvaluationStep(stateA, 175, [def]);
+        runOpportunityEvaluationStep(stateB, 175, [def]);
+        applyOpportunityDecision(
+            stateA, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+        applyOpportunityDecision(
+            stateB, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def],
+        );
+        expect(JSON.stringify(stateA.military.operation_opportunity_resolutions))
+            .toBe(JSON.stringify(stateB.military.operation_opportunity_resolutions));
+        // Also assert the spawned op axes are identical byte-for-byte.
+        const opA = stateA.military.corps_command![def.primary_corps].active_operations[0];
+        const opB = stateB.military.corps_command![def.primary_corps].active_operations[0];
+        expect(JSON.stringify(opA.axes)).toBe(JSON.stringify(opB.axes));
+    });
+});
+
+// ─── LANE C Phase 1: Substrate B — T3 early-return on approve ───────────────
+//   Approve on a T3 (defensive-crisis) opportunity records resolution but does
+//   NOT build a CorpsOperation — outcome flows through reactive defense.
+
+function fixtureT3DefensiveCrisis(
+    overrides: Partial<OperationOpportunityDef> = {},
+): OperationOpportunityDef {
+    return {
+        ...fixtureSana(),
+        opportunity_id: 'fixture_t3_pauk_94',
+        name: 'Fixture T3 Crisis',
+        tier: 'T3',
+        family: 'fifth_corps',
+        axes: [{
+            axis_id: 't3_main',
+            name: 'T3 Main',
+            corps: 'arbih_5th_corps',
+            brigades: ['arbih_5_brigade_a'],
+            objectives: ['op:bihac:bihac_2'],
+        }],
+        ...overrides,
+    };
+}
+
+describe('operation_opportunities — LANE C Phase 1 Substrate B (T3 early-return)', () => {
+    it('T3 approve does NOT push to corps_command.active_operations', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureT3DefensiveCrisis();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const cmd = state.military.corps_command![def.primary_corps];
+        expect(cmd.active_operations).toHaveLength(0);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        expect(updated!.status).toBe('approved');
+        // No CorpsOperation pushed.
+        expect(cmd.active_operations).toHaveLength(0);
+        // Proposal carries no executed_op_id either.
+        expect(updated!.executed_op_id).toBeUndefined();
+    });
+
+    it('T3 approve resolution row has executed_op_aar_id=undefined and exit_class=t3_authorized_no_offensive', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureT3DefensiveCrisis();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+        const resolutions = state.military.operation_opportunity_resolutions!;
+        expect(resolutions).toHaveLength(1);
+        const row = resolutions[0];
+        expect(row.response).toBe('approve');
+        expect(row.opportunity_id).toBe(def.opportunity_id);
+        expect(row.response_turn).toBe(175);
+        expect(row.executed_op_aar_id).toBeUndefined();
+        expect(row.executed_op_name).toBeUndefined();
+        expect(row.exit_class).toBe('t3_authorized_no_offensive');
+    });
+
+    it('T3 decline path is identical to T1 decline (regression guard)', () => {
+        const stateT1 = buildMinimalState(175);
+        const stateT3 = buildMinimalState(175);
+        const defT1 = fixtureSana();
+        const defT3 = fixtureT3DefensiveCrisis();
+        runOpportunityEvaluationStep(stateT1, 175, [defT1]);
+        runOpportunityEvaluationStep(stateT3, 175, [defT3]);
+        applyOpportunityDecision(
+            stateT1, 175, buildProposalId(defT1.opportunity_id, 175), 'decline', [defT1],
+        );
+        applyOpportunityDecision(
+            stateT3, 175, buildProposalId(defT3.opportunity_id, 175), 'decline', [defT3],
+        );
+        // Both should produce a single decline resolution with no exit_class and no aar id.
+        const t1Row = stateT1.military.operation_opportunity_resolutions![0];
+        const t3Row = stateT3.military.operation_opportunity_resolutions![0];
+        expect(t1Row.response).toBe('decline');
+        expect(t3Row.response).toBe('decline');
+        expect(t1Row.exit_class).toBeUndefined();
+        expect(t3Row.exit_class).toBeUndefined();
+        expect(t1Row.executed_op_aar_id).toBeUndefined();
+        expect(t3Row.executed_op_aar_id).toBeUndefined();
+        expect(t1Row.executed_op_name).toBeUndefined();
+        expect(t3Row.executed_op_name).toBeUndefined();
+        // Neither spawns a corps op.
+        expect(stateT1.military.corps_command![defT1.primary_corps].active_operations).toHaveLength(0);
+        expect(stateT3.military.corps_command![defT3.primary_corps].active_operations).toHaveLength(0);
+    });
+
+    it('T3 + targets_friendly_overrides: override is IGNORED on T3 (only T1 fifth_corps gets it)', () => {
+        // The T3 approve never reaches the spawn path, but if the player redirected
+        // / under_resourced a T3, the spawn path WOULD run. Verify the override
+        // does not leak through scope-restriction even on T3 fifth_corps.
+        const state = buildStateWithControllers(175, {
+            'op:bihac:bihac_2': 'RBiH',
+        });
+        const def = fixtureT3DefensiveCrisis({
+            axes: [{
+                axis_id: 't3_main',
+                name: 'T3 Main',
+                corps: 'arbih_5th_corps',
+                brigades: ['arbih_5_brigade_a'],
+                objectives: ['op:bihac:bihac_2'],
+            }],
+            targets_friendly_overrides: ['op:bihac:bihac_2'],
+        });
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'under_resource',
+            [def],
+        );
+        expect(updated!.status).toBe('under_resourced_approved');
+        // Override ignored: friendly-painted bihac_2 was filtered, no axis survives,
+        // so spawn returns null.
+        expect(updated!.executed_op_id).toBeUndefined();
+        expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
+    });
+
+    it('determinism: T3 and T1 resolutions are sorted-stable across re-invocation', () => {
+        const stateA = buildMinimalState(175);
+        const stateB = buildMinimalState(175);
+        const defT1 = fixtureSana();
+        const defT3 = fixtureT3DefensiveCrisis();
+        // Approve both in deterministic order on each state.
+        for (const state of [stateA, stateB]) {
+            runOpportunityEvaluationStep(state, 175, [defT1, defT3]);
+            applyOpportunityDecision(
+                state, 175, buildProposalId(defT1.opportunity_id, 175), 'approve', [defT1, defT3],
+            );
+            applyOpportunityDecision(
+                state, 175, buildProposalId(defT3.opportunity_id, 175), 'approve', [defT1, defT3],
+            );
+        }
+        expect(JSON.stringify(stateA.military.operation_opportunity_resolutions))
+            .toBe(JSON.stringify(stateB.military.operation_opportunity_resolutions));
+        // And resolutions has exactly the two rows in the order they were applied.
+        const rows = stateA.military.operation_opportunity_resolutions!;
+        expect(rows).toHaveLength(2);
+        expect(rows[0].opportunity_id).toBe(defT1.opportunity_id);
+        expect(rows[1].opportunity_id).toBe(defT3.opportunity_id);
+        expect(rows[1].exit_class).toBe('t3_authorized_no_offensive');
+    });
+});

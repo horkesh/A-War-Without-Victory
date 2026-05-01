@@ -438,7 +438,7 @@ export interface OperationOpportunityRecordView {
     response_turn?: number;
     executed_op_name?: string;
     executed_op_aar_id?: string;
-    exit_class?: 'did_not_launch' | 'decisive_success' | 'partial_success' | 'failed' | 'aborted';
+    exit_class?: 'did_not_launch' | 'decisive_success' | 'partial_success' | 'failed' | 'aborted' | 't3_authorized_no_offensive';
     aar_outcome?: string;
     started_turn?: number;
     ended_turn?: number;

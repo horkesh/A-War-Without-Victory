@@ -70,6 +70,7 @@ import type {
     PendingProposalReview,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
 import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
@@ -200,6 +201,18 @@ export interface OperationOpportunityDef {
      * default decision routes from this; player can override.
      */
     readonly staff_recommendation: 'approve' | 'delay' | 'under_resource' | 'decline';
+    /**
+     * CANONICAL: per late-war design §10, APWB / SVK ride as RS-aligned auxiliaries;
+     * APWB-controlled OSIDs may be RBiH-painted in jan1993 baseline yet still
+     * represent enemy targets. This override exempts them from the friendly-controller
+     * filter at the buildCorpsOperation seam.
+     *
+     * SCOPE-RESTRICTED: only honored when `tier === 'T1'` AND `family === 'fifth_corps'`.
+     * Outside that scope the override is ignored to prevent cross-family contamination.
+     *
+     * Default `undefined` — Sana 95 and any other entry not setting this is unaffected.
+     */
+    readonly targets_friendly_overrides?: readonly string[];
 }
 
 /** Pure predicate: returns whether an axis is green + a player-safe reason. */
@@ -261,13 +274,22 @@ export interface OperationOpportunityResolution {
     executed_op_name?: string;
     /** Filled when the spawned op completes — set by AAR closer (Phase 4 wiring). */
     executed_op_aar_id?: string;
-    /** Filled at AAR close — see design doc §7 exit classes. */
+    /**
+     * Filled at AAR close — see design doc §7 exit classes.
+     *
+     * CANONICAL: `'t3_authorized_no_offensive'` is the T3 sentinel. T3 = defensive-crisis
+     * subtype (per design doc §10): approve = "commit reserves to defend, accept the strain."
+     * Resolution flows through the existing reactive defense / sector morale chain.
+     * NO offensive CorpsOperation is built, so there is no AAR to link — the resolution
+     * carries this sentinel instead. UI/records consumers must handle it explicitly.
+     */
     exit_class?:
         | 'did_not_launch'
         | 'decisive_success'
         | 'partial_success'
         | 'failed'
-        | 'aborted';
+        | 'aborted'
+        | 't3_authorized_no_offensive';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -661,6 +683,24 @@ export function applyOpportunityDecision(
         case 'approve': {
             proposal.status = 'approved';
             proposal.response_turn = turn;
+            // CANONICAL: T3 = defensive-crisis subtype. Approve = "commit reserves to
+            // defend, accept the strain." Resolution flows through existing reactive
+            // defense / sector morale chain. NO offensive CorpsOperation, NO new
+            // lifecycle, NO new combat math. Decline / delay / under_resource / redirect
+            // for T3 are unchanged and behave identically to T1 — only `approve` short-
+            // circuits.
+            if (def.tier === 'T3') {
+                state.military.operation_opportunity_resolutions.push({
+                    proposal_id: proposal.proposal_id,
+                    opportunity_id: proposal.opportunity_id,
+                    response: 'approve',
+                    response_turn: turn,
+                    executed_op_name: undefined,
+                    executed_op_aar_id: undefined,
+                    exit_class: 't3_authorized_no_offensive',
+                });
+                return proposal;
+            }
             const opName = spawnCorpsOperationFromOpportunity(
                 state,
                 turn,
@@ -701,11 +741,33 @@ function spawnCorpsOperationFromOpportunity(
     const cmd = state.military.corps_command?.[def.primary_corps];
     if (!cmd) return null;
 
+    // CANONICAL: scope-restricted to T1 fifth_corps to prevent cross-family contamination.
+    // Other tiers / families ignore the override even if authored, so an accidental copy
+    // into (e.g.) a T1 posavina entry cannot cross-target friendly OSIDs.
+    const overrideActive = def.tier === 'T1' && def.family === 'fifth_corps';
+    const overrideSet: ReadonlySet<string> = overrideActive && def.targets_friendly_overrides
+        ? new Set(def.targets_friendly_overrides)
+        : new Set<string>();
+
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
     for (const axis of axesIn) {
         const brigadesForAxis = applyCommitmentProfile(axis.brigades, commitment);
         if (brigadesForAxis.length === 0) continue;
+
+        // Friendly-controller filter — mirrors triggered_operations.ts:buildOperation
+        // (lines 542-545). Objectives painted/controlled by the acting faction or its
+        // ally are skipped UNLESS the OSID is in `targets_friendly_overrides` AND the
+        // override scope (T1 fifth_corps) holds. This is the single seam where
+        // APWB-paint-as-RBiH OSIDs get exempted for the 5th Corps family.
+        const filteredObjectives = axis.objectives.filter((osid) => {
+            const controller = getPoliticalControllerOSID(state, osid, undefined);
+            if (controller === null) return true;            // unpainted / unknown → keep
+            if (controller !== def.faction) return true;     // enemy-controlled → keep
+            return overrideSet.has(osid);                    // friendly-controlled → keep iff override
+        });
+
+        if (filteredObjectives.length === 0) continue;
         // Full OperationAxis init shape — mirrors createSingleAxis() in
         // sector_offensive_axis_helpers.ts so the lifecycle owner can advance
         // these axes without ever distinguishing opportunity-spawned ops from
@@ -714,7 +776,7 @@ function spawnCorpsOperationFromOpportunity(
             axis_id: axis.axis_id,
             name: axis.name,
             assigned_brigades: brigadesForAxis,
-            objectives: [...axis.objectives],
+            objectives: [...filteredObjectives],
             current_objective_index: 0,
             status: 'executing',
             failure_count: 0,

@@ -30,6 +30,8 @@ const EXIT_LABEL: Record<NonNullable<OperationOpportunityRecordView['exit_class'
     failed: 'Failed',
     aborted: 'Aborted',
     did_not_launch: 'Did Not Launch',
+    // T3 sentinel: defensive-crisis approval that committed reserves but launched no offensive.
+    t3_authorized_no_offensive: 'Defensive Reserves Committed',
 };
 
 const EXIT_CLASS: Record<NonNullable<OperationOpportunityRecordView['exit_class']>, string> = {
@@ -38,6 +40,7 @@ const EXIT_CLASS: Record<NonNullable<OperationOpportunityRecordView['exit_class'
     failed: 'text-red-300',
     aborted: 'text-neutral-300',
     did_not_launch: 'text-neutral-400',
+    t3_authorized_no_offensive: 'text-sky-300',
 };
 
 function RecordBadge({ record }: { record: OperationOpportunityRecordView }) {
