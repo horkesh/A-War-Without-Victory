@@ -1,3 +1,50 @@
+## [2026-05-01] milestone(operations): LANE B Operation Opportunity MVP CLOSED (Phase 4 verification)
+
+**Type:** Lane close-out. Four-phase lane delivered + one fix-up + analyst panel verdicts. **No combat math, no scenario data, no painted targets, no canon, no FORAWWV touch, no painted-target overrides.** Determinism preserved at every phase. Single-owner enforcement verified.
+
+**Commit chain:** `5dd20678` (Phase 1 substrate) → `b0c6277c` (Phase 2 decision surface) → `fc5a4bd7` (Phase 3 5th Corps Sana) → `7fca3888` (Phase 3.5 one-shot guard fix) → this commit (Phase 4 close-out).
+
+**What shipped (cumulative):**
+- Phase 1 — `src/sim/combat/operation_opportunities.ts` (new): types, evaluator, decision applier, bot default. Catalog empty. New war-pipeline step `evaluate-operation-opportunities`. State shape extended with `operation_opportunities?` + `operation_opportunity_resolutions?` on MilitaryState.
+- Phase 2 — autonomy / IPC bridge. Three new pipeline steps (`apply-resolved-opportunity-decisions` BEFORE `apply-autonomy-transition`; `apply-bot-opportunity-decisions` + `generate-level1-opportunity-proposals` AFTER evaluator). Existing accept/reject IPC dumb-passes `OPPORTUNITY:<id>` actions; war-pipeline consumer routes accept→approve / reject→decline.
+- Phase 3 — 5th Corps / Sana 95 first content. `src/sim/combat/operation_opportunity_catalog_5th_corps.ts` with REAL predicates (date_window, corps_readiness via Phase 4 force-quality helper, staging_access, enemy_weakness, alliance_context via state.meta.operation_storm_triggered, logistics, commander_confidence). Operation Sana REMOVED from `triggered_operations.ts:_TRIGGERED_OPS` — single-owner migration enforced by test guard.
+- Phase 3.5 — one-shot opportunity guard. `seenOpportunityIds: Set<string>` in `evaluateOperationOpportunities` prevents re-enqueue of any opportunity_id with a terminal status (approved / declined / expired / redirected / under_resourced_approved). Surfaced by Phase 4 188w analyst.
+
+**Tests:** 45 substrate cases + 6 migrated. New files: `tests/operation_opportunities_substrate.test.ts` (19 — was 17, +2 one-shot guard), `tests/operation_opportunities_phase2_decisions.test.ts` (11), `tests/operation_opportunities_5th_corps_sana.test.ts` (15). Migrated: `tests/triggered_operations.test.ts` (Sana name removed), `tests/triggered_operations_late_1995.test.ts` (NEW_OP_NAMES 4→3 + Sana shape/painted-truth tests removed with migration comments), `tests/operation_opportunities_substrate.test.ts` ("catalog empty" assertion replaced), `tests/war_phase_step_order.test.ts` (167→171 step count). Adjacent suites green: `corps_operation_readiness.test.ts` 10/10, `force_quality_trace_persistence.test.ts` 3/3, `multi_corps_operation_visibility.test.ts` 5/5, `scenario_apr1992_family_consistency.test.ts` 6/6, `ui/inbox_items.test.ts` 26/26.
+
+**Phase 4 verification analyst panel:**
+
+| Run | Hash | Analyst Verdict | Risk |
+|---|---|---|---|
+| 40w n1600 (vs Phase 5a baseline `cbd7d61db0bfbe97`) | `18994397e5b3b8ae` | NO_BEHAVIOR_DRIFT — combat / control / formation / battle / op lifecycle byte-identical; drift is purely additive state shape | GREEN |
+| 188w n1601 pre-fix (vs baseline `2c851756827d5906`) | `ea745064dbd9b59e` | SANA_FIRED_DIFFERENTLY — re-enqueue bug; Sana approved at t175 then re-proposed every turn through t188; 5 stalled corps ops vs 1 baseline; territorial outcome BYTE-IDENTICAL (HRHB 74 / RBiH 322 / RS 316) so contained but needed fix | AMBER → fixed @ `7fca3888` |
+| 188w n1602 post-fix | `c18c909fbb6fb62b` | PHASE_3_5_FIX_VERIFIED — Sana fires exactly once; control_delta + formation_delta + activity_summary BYTE-IDENTICAL to baseline; hash drift fully explained (1 sana_95 entry + cosmetic OiC field + 1 weekly snapshot field at w175) | GREEN |
+
+**Single-owner enforcement (verified by tests + analyst):**
+- `_TRIGGERED_OPS.filter(op => op.name === 'Operation Sana').length === 0` (asserted in `operation_opportunities_5th_corps_sana.test.ts`).
+- `OPERATION_OPPORTUNITY_CATALOG.filter(d => d.opportunity_id === 'sana_95').length === 1` (asserted same suite).
+- `triggered_operations.test.ts` deepEquals the 7-name list — re-adding Sana to `_TRIGGERED_OPS` would break the guard.
+- `seenOpportunityIds` guard prevents the same opportunity_id from being enqueued more than once per scenario (asserted in `operation_opportunities_substrate.test.ts` "one-shot guard: does NOT re-enqueue after approval").
+
+**Sensitive-history boundary preserved:** Krivaja-95 / Stupčanica-95 / Goražde remain calendar-triggered in `_TRIGGERED_OPS` pending `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 sign-off chain. Lane B did not touch them.
+
+**NEXT-LANE follow-ups (named, not blockers):**
+1. **AAR-loop closure** (recommended next lane). One war-pipeline step writing `executed_op_aar_id` + `exit_class` onto `OperationOpportunityResolution` rows when the spawned op completes in `sector_offensive.ts`. Closes the design-doc end-to-end loop and unlocks Cost Ledger / Codex consumption of opportunity history.
+2. **Sana 0-attack failure** — pre-existing in calendar baseline (n1599 too). The Sana CorpsOperation enters `phase: planning` and never advances to attack execution. Belongs to operations-expert; not Lane B regression.
+3. **Force-quality trait wiring on opportunity-spawned ops** — opportunity-spawned ops have the same `force_quality_traits_at_launch` gap as pre-planned/triggered ops (Force Quality Foundation milestone close-out §10 P1c). Future packet.
+4. **Army HQ React dossier modal** per `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md`. Opportunities surface in the existing autonomy queue today; a richer dossier with prerequisite chips, force-quality bands, and map-footprint highlighting is the next user-visible improvement.
+5. **Richer mutating IPC for delay/redirect/under_resource** — the binary accept/reject path currently maps only to approve/decline. The other branches are reachable via direct `applyOpportunityDecision` API.
+6. **Other 5th Corps family content** (Tigar-Sloboda, Pecigrad/Velika Kladuša, Una/Breza/Pauk crises, Grmec) per `docs/plans/late-war-5th-corps-opportunities-design.md`.
+7. **Sensitive-history T4 family work** (Krivaja-95 / Stupčanica-95 / Goražde) — gated behind SENSITIVE_HISTORY_DESIGN_GATE.md §6 sign-off chain.
+
+**Close-out report:** `docs/40_reports/implemented/20260501_LANE_B_OPERATION_OPPORTUNITY_MVP.md`.
+
+**Determinism statement:** No `Math.random` / `Date.now` / `localeCompare` in any new file. All sorting via `strictCompare` (catalog walk, queue sort, decision target sort, brigade-pool trim). Approval is the only mutation that touches `cmd.active_operations`, and it does so via `buildCorpsOperation` (canonical factory). Save shape backward-compatible (both new fields optional, default omitted on existing saves).
+
+**Hash impact:** 40w drift is purely additive shape (one optional field on MilitaryState). 188w drift fully explained by analyst panel (1 sana_95 entry + cosmetic OiC + 1 weekly snapshot field). Territorial outcome byte-identical to calendar-trigger baseline (HRHB 74 / RBiH 322 / RS 316 / engagement metric to last digit). No painted-target rebaselines.
+
+---
+
 ## [2026-05-01] fix(operations): one-shot opportunity guard (LANE B Phase 3.5 fix-up)
 
 **Type:** Substrate bug fix surfaced by Phase 4 verification. One file changed (the evaluator) + two new tests. **No combat math, no canon, no painted targets, no scenario data.**
