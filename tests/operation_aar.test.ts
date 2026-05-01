@@ -1531,6 +1531,47 @@ describe('finalizeOperationAAR', () => {
         expect(south.staging_osid).toBe('op:brcko:brcko_south_staging');
     });
 
+    // ─── LANE-2026-05-02 Phase 5a: force_ratio_estimate carryover ────────
+    // Combat-Math estimateForceRatio Defender-Modifier Integration mega-lane.
+    // The honest predictor's force_ratio_estimate is written by tickPreparation
+    // per turn but was previously discarded on op completion, leaving the
+    // predictor's output unobservable in operation_aars.json. Mirror predecessor
+    // LANE B's recovery_reason carryover pattern (commit dd083454).
+
+    it('persists force_ratio_estimate on AAR when set on op', () => {
+        const op = makeFinalizableOp({ force_ratio_estimate: 1.234 });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.force_ratio_estimate).toBe(1.234);
+    });
+
+    it('omits force_ratio_estimate on AAR when op has none (additive optional)', () => {
+        const op = makeFinalizableOp(); // no force_ratio_estimate
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.force_ratio_estimate).toBeUndefined();
+    });
+
     it('omits staging_osid on AxisAAR when axis lacks one', () => {
         const op = makeFinalizableOp({
             objectives: undefined,

@@ -149,6 +149,14 @@ export interface OperationAAR {
      *  can distinguish completed vs max_failures vs orphaned vs no_logged_attempt
      *  without source spelunking through the lifecycle. */
     recovery_reason?: CorpsOperation['recovery_reason'];
+    /** Commander's estimated force ratio at finalize — diagnostic carryover from
+     *  `CorpsOperation.force_ratio_estimate` (LANE-2026-05-02 Phase 5a, Combat-Math
+     *  estimateForceRatio Defender-Modifier Integration mega-lane). Written each
+     *  preparation tick by tickPreparation; previously discarded on op completion.
+     *  Preserved on AAR so post-mortem tools can validate predictor honesty
+     *  (war-or-game GREEN-case ranges, Grmeč/Sana fantasy-ratio bug-proof) from
+     *  disk artifacts without source spelunking. */
+    force_ratio_estimate?: number;
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -761,6 +769,15 @@ export function finalizeOperationAAR(
     // recomputation. Preserves the lifecycle reason for post-mortem tools.
     if (op.recovery_reason) {
         aar.recovery_reason = op.recovery_reason;
+    }
+
+    // LANE-2026-05-02 Phase 5a: diagnostic carryover for force_ratio_estimate.
+    // Pure transfer — no recomputation. Surfaces the predictor's last honest
+    // ratio (written by tickPreparation per turn) so post-mortem tools can
+    // validate predictor calibration from operation_aars.json without
+    // spelunking the live op state. Mirrors recovery_reason carryover above.
+    if (typeof op.force_ratio_estimate === 'number') {
+        aar.force_ratio_estimate = op.force_ratio_estimate;
     }
 
     if (!state.operation_history) state.operation_history = [];
