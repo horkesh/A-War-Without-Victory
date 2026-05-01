@@ -92,6 +92,8 @@ Owner set: `/game-designer`, `/historian`, `/operations-expert`, `/corps-army-co
 
 Follow-up research now lives in `docs/research/2026-05-01-force-quality-trajectory-research-and-proposals.md`.
 
+Architecture contract: `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md`.
+
 Key additions:
 
 - Treat late-war operations as opportunity tests for force quality, not substitutes for force quality.

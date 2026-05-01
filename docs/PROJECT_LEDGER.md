@@ -1,3 +1,17 @@
+## [2026-05-01] docs(architecture): define force-quality operation contract
+
+**Type:** Documentation/architecture only. Created `docs/plans/2026-05-01-force-quality-operation-architecture-contract.md` and linked it from the open force-quality calibration issue. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
+
+**Architecture decision:** Force quality is a readiness/execution layer between historical operation opportunities and the existing `CorpsOperation` lifecycle. ARBiH professionalization should affect operation readiness, staging reliability, multi-axis coordination, support delivery, and failure recovery; VRS degradation should affect sustained offensive cadence, reserve response, recovery, replacement quality, and collapse susceptibility while preserving local defense and counterattack danger.
+
+**Forbidden shapes recorded:** no calendar victory rails, no raw 1995 ARBiH combat multiplier, no total VRS collapse switch, no painted-target feedback loop, and no sensitive-history bypass.
+
+**Next implementation shape:** After Claude's evidence audit, repair/wire existing signals one trait at a time. The minimum viable slice is officer-learning semantics, then a deterministic `computeCorpsOperationReadiness(...)` helper with diagnostics/AAR evidence, then date-window verification at 40w/104w/156w/183w.
+
+**Knowledge propagation:** Added a durable rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: force-quality packets must expose trait evidence and preserve counterfactual agency.
+
+**Determinism / behavior:** No simulation behavior changed. No run hashes or scenario outputs are affected.
+
 ## [2026-05-01] docs(research): propose force-quality trajectory levers
 
 **Type:** Documentation/research only. Created `docs/research/2026-05-01-force-quality-trajectory-research-and-proposals.md` as the research/proposal bridge between the open force-quality calibration issue and future implementation packets. No engine code, scenario data, OOB, operation definitions, painted targets, tests, or canon files changed.
