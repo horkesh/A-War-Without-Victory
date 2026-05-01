@@ -140,6 +140,10 @@ describe('war-phase step ordering', () => {
         // +1 from apply-guerrilla-attrition (v0.9.0 Consequence System, 2026-04-22)
         // +1 from snapshot-alliance-at-turn-start (issue #13 zone posture inertia, 2026-04-23)
         // +1 from bilateral-flip-count-war (issue #23 fix A: war-phase bilateral counter, 2026-04-27)
-        expect(stepNames.length).toBe(167);
+        // +1 from apply-resolved-opportunity-decisions (LANE B Phase 2 Operation Opportunity MVP, 2026-05-01)
+        // +1 from evaluate-operation-opportunities (LANE B Phase 1 substrate, 2026-05-01)
+        // +1 from apply-bot-opportunity-decisions (LANE B Phase 2 deterministic bot decisions, 2026-05-01)
+        // +1 from generate-level1-opportunity-proposals (LANE B Phase 2 player review surface, 2026-05-01)
+        expect(stepNames.length).toBe(171);
     });
 });

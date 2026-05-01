@@ -2854,6 +2854,12 @@ app.whenReady().then(() => {
       if (cc) {
         cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
       }
+    } else if (proposal.proposed_action.startsWith('OPPORTUNITY:')) {
+      // LANE B Phase 2 (Operation Opportunity MVP): Player approves an opportunity.
+      // The handler ONLY marks accepted=true above; the war-pipeline step
+      // `apply-resolved-opportunity-decisions` reads the accepted flag on the next
+      // turn and routes to applyOpportunityDecision -> buildCorpsOperation.
+      // No state mutation here — single-owner consumption is in src/sim/combat/operation_opportunities.ts.
     }
 
     writeCanonicalCurrentState(sim, state, event.sender);
@@ -2894,6 +2900,10 @@ app.whenReady().then(() => {
       if (cc) {
         cc.player_op_response = { plan_id: planId, approved: false, turn: state.meta.turn };
       }
+    } else if (proposal.proposed_action.startsWith('OPPORTUNITY:')) {
+      // LANE B Phase 2: Player declines an opportunity.
+      // accepted=false above; the war-pipeline step on the next turn routes
+      // it through applyOpportunityDecision('decline'). No state mutation here.
     }
 
     writeCanonicalCurrentState(sim, state, event.sender);

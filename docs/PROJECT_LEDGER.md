@@ -1,3 +1,45 @@
+## [2026-05-01] feat(operations): operation_opportunity decision surface (LANE B Phase 2)
+
+**Type:** Engine + IPC bridge — wires the Phase 1 substrate into the existing autonomy / pending_proposal_reviews surface so the player can approve or decline opportunities at autonomy_level=1, and bot factions resolve their opportunities synchronously through deterministic default decisions. **No combat math, no scenario data, no painted targets, no canon, no OOB, no run artifacts changed.** Catalog is still empty (Phase 3 fills it), so the new pipeline steps are observably no-ops on `main`.
+
+**Why:** Per `docs/plans/late-war-operation-opportunity-system-design.md` §5 (Choice surface) and `docs/plans/2026-05-01-operation-opportunity-review-surface-design.md` (IPC Boundary table). Phase 2 surfaces opportunities into Army HQ via the existing autonomy seam — it does NOT add a new richer IPC for delay/redirect/under_resource. Those branches are reachable only through the direct `applyOpportunityDecision` API and remain available for a future Phase E packet that authors a richer dossier mutating handler.
+
+**New entry points (`src/sim/combat/operation_opportunities.ts`):**
+- `OPPORTUNITY_PROPOSAL_ACTION_PREFIX = 'OPPORTUNITY:'` — exported constant; the IPC parses on this prefix.
+- `applyBotOpportunityDecisions(state, turn, playerFaction, catalog)` — for every pending proposal whose `approver_faction !== playerFaction`, call `defaultBotDecisionForOpportunity` and apply via `applyOpportunityDecision`. Sorted by proposal_id for replay stability. Bot opportunities never enter the player review queue.
+- `generateOpportunityProposalReviews(state, playerFaction, catalog)` — produces `PendingProposalReview[]` rows for player-faction opportunities pending review at `autonomy_level === 1`. Returns `[]` at any other autonomy level. proposed_action format = `OPPORTUNITY:<proposal_id>`. Description is the player-safe opportunity name + staff recommendation; raw OSIDs never leak.
+- `applyResolvedOpportunityDecisions(state, turn, catalog)` — single owner of the accept/reject → opportunity-decision translation. For each pending_proposal_review whose proposed_action begins with `OPPORTUNITY:` and whose `accepted` flag is set, route accepted=true → `approve` and accepted=false → `decline` through `applyOpportunityDecision`. Sorted by review id for replay stability.
+
+**War-pipeline wiring (`src/sim/turn_phases/war_phases.ts`):** four new steps total (substrate phase 1 added one; phase 2 adds three more):
+- `apply-resolved-opportunity-decisions` — IMMEDIATELY BEFORE `apply-autonomy-transition` (must consume prior-turn accepts before that step's GC clears the proposals).
+- `apply-bot-opportunity-decisions` — IMMEDIATELY AFTER `evaluate-operation-opportunities` so bot decisions are synchronous with eligibility.
+- `generate-level1-opportunity-proposals` — after bot apply, before `generate-level1-op-proposals`. Player-faction opportunities only; gated by `autonomy_level === 1`. Bot opportunities (already terminal after the bot apply step) are filtered out.
+
+**IPC documentation (`src/desktop/electron-main.cjs`):** added documentation branches in `accept-proposal` / `reject-proposal` for the `OPPORTUNITY:` prefix. The handler ONLY marks `accepted` (already done by the shared code path); the war-pipeline consumer is the single owner of the side effect. NO state mutation in the IPC for opportunity proposals.
+
+**Tests (`tests/operation_opportunities_phase2_decisions.test.ts`):** 11 cases. Bot opportunity is auto-approved on the same turn it becomes eligible AND never appears in `pending_proposal_reviews`; bot apply is no-op on empty catalog; player opportunity surfaces at `autonomy_level=1` only (autonomy=0 yields no rows); `proposed_action === 'OPPORTUNITY:OPP_<turn>_<opportunity_id>'`; description contains player-safe name + recommendation but NO raw OSIDs (asserted by absence of `'op:'` substring); accept→approve routes through buildCorpsOperation; reject→decline writes a resolution row with no op spawn; rows lacking an `accepted` flag are ignored; bot decisions reproducible across two independent runs (byte-equal); bot apply respects deterministic proposal_id sort when multiple opportunities are eligible (a_op spawns before b_op); generate-level1 with empty catalog yields no rows.
+
+**Verification:** `npx.cmd vitest run tests/operation_opportunities_substrate.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/war_phase_step_order.test.ts tests/ui/inbox_items.test.ts` → 58/58 pass. `npx.cmd vitest run tests/corps_operation_readiness.test.ts tests/force_quality_trace_persistence.test.ts tests/multi_corps_operation_visibility.test.ts tests/scenario_apr1992_family_consistency.test.ts` → 24/24 pass (Phase 4 force-quality + scenario family consistency unaffected). `npx.cmd tsc --noEmit` clean.
+
+**Step-count guard:** `tests/war_phase_step_order.test.ts` count assertion bumped 167 → 171 with named comments for each of the four new steps (one from Phase 1 + three from Phase 2). All other step-order checks pass unchanged.
+
+**Determinism self-review:**
+1. No `Math.random` / `Date.now` / `localeCompare` in any new entry point.
+2. Every iteration sorted via `strictCompare` (proposal id, review id).
+3. Bot apply mutates `state.military.operation_opportunities` only via `applyOpportunityDecision`; no parallel state writers introduced.
+4. Save shape unchanged — Phase 2 only consumes the `operation_opportunities` field added in Phase 1.
+5. The IPC handler still writes `accepted` exactly the same way as for SET_STANCE / APPROVE_OP. The only new contract is the war-pipeline consumer.
+
+**Singular ownership / what is NOT in this commit:**
+- No catalog content (Phase 3).
+- No richer IPC for delay/redirect/under_resource. The five-branch decision API is reachable only through `applyOpportunityDecision`. UI dossier work is a separate future packet.
+- No combat math change. No new lifecycle.
+- No Army HQ React UI changes. The DTO adapter / dossier modal land in Phase 3 / 4 once content surfaces it.
+
+**Hash impact:** None expected. Empty catalog → all four pipeline steps are no-ops. Save shape unchanged from Phase 1.
+
+---
+
 ## [2026-05-01] feat(operations): operation_opportunities substrate (LANE B Phase 1)
 
 **Type:** Engine addition — generic substrate for the late-war Operation Opportunity layer. **No combat math, no scenario data, no painted targets, no canon, no OOB, no run artifacts changed.** Catalog ships **EMPTY** in this phase; Phase 3 fills the 5th Corps / Sana 95 family. The substrate is behaviorally a no-op on `main` until catalog content lands.

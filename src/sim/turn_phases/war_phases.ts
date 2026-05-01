@@ -3,7 +3,12 @@
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
-import { runOpportunityEvaluationStep } from '../combat/operation_opportunities.js';
+import {
+    applyBotOpportunityDecisions,
+    applyResolvedOpportunityDecisions,
+    generateOpportunityProposalReviews,
+    runOpportunityEvaluationStep,
+} from '../combat/operation_opportunities.js';
 import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
@@ -944,6 +949,22 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // LANE B Phase 2 (Operation Opportunity MVP): consume any prior-turn
+        // OPPORTUNITY:<proposal_id> proposals that the player accepted/rejected
+        // via the IPC. MUST run BEFORE apply-autonomy-transition because that
+        // step GCs prior-turn proposals.
+        //
+        // The IPC handler (electron-main.cjs accept-proposal/reject-proposal)
+        // only sets `accepted` on the proposal row; this step is the single
+        // owner that translates that into a decision on the opportunity queue
+        // by routing through applyOpportunityDecision -> buildCorpsOperation.
+        name: 'apply-resolved-opportunity-decisions',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyResolvedOpportunityDecisions(context.state, context.state.meta.turn);
+        },
+    },
+    {
         name: 'apply-autonomy-transition',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1202,6 +1223,37 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             runOpportunityEvaluationStep(context.state, context.state.meta.turn);
+        },
+    },
+    {
+        // LANE B Phase 2: bot factions decide their own opportunities synchronously
+        // — they never sit in the player review queue. Player faction's opportunities
+        // are skipped here and surfaced via generate-level1-opportunity-proposals
+        // below (autonomy_level === 1 only).
+        name: 'apply-bot-opportunity-decisions',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction ?? null;
+            applyBotOpportunityDecisions(context.state, context.state.meta.turn, playerFaction as FactionId | null);
+        },
+    },
+    {
+        // LANE B Phase 2: surface player-faction opportunities into the autonomy
+        // review queue at autonomy_level=1. Format: proposed_action =
+        // "OPPORTUNITY:<proposal_id>". The accept/reject IPC marks `accepted`;
+        // apply-resolved-opportunity-decisions on the next turn applies the
+        // decision via applyOpportunityDecision.
+        name: 'generate-level1-opportunity-proposals',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            const reviews = generateOpportunityProposalReviews(context.state, playerFaction as FactionId);
+            if (reviews.length === 0) return;
+            if (!context.state.meta.pending_proposal_reviews) {
+                context.state.meta.pending_proposal_reviews = [];
+            }
+            context.state.meta.pending_proposal_reviews.push(...reviews);
         },
     },
     {

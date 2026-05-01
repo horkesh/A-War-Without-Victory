@@ -67,6 +67,7 @@ import type {
     FormationId,
     GameState,
     OperationAxis,
+    PendingProposalReview,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
@@ -699,7 +700,7 @@ function applyCommitmentProfile(
 /**
  * Deterministic default decision for a bot-controlled faction. Reads only the
  * proposal's own state + the catalog's `staff_recommendation`. No randomness;
- * no faction personality look-ups (those land in Phase 2 if needed).
+ * no faction personality look-ups (those land in a future packet).
  *
  * The default is the catalog's `staff_recommendation` when all required axes
  * are green; otherwise `delay`. The bot will never `redirect` or
@@ -714,4 +715,131 @@ export function defaultBotDecisionForOpportunity(
         .every(a => a.green);
     if (!allRequiredGreen) return 'delay';
     return def.staff_recommendation;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 2 — autonomy / IPC review surface
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Proposed_action prefix for opportunity decisions in `pending_proposal_reviews`.
+ * Format: "OPPORTUNITY:<proposal_id>" — the IPC accept/reject handler simply
+ * marks `accepted` on the proposal row; the war-pipeline consumer
+ * `applyResolvedOpportunityDecisions` reads the accepted flag and routes to
+ * `applyOpportunityDecision`. Phase E may add a richer IPC for the
+ * delay/redirect/under_resource branches; the binary accept/reject path here
+ * intentionally maps to approve/decline only.
+ */
+export const OPPORTUNITY_PROPOSAL_ACTION_PREFIX = 'OPPORTUNITY:';
+
+/**
+ * Apply default bot decisions for any pending opportunity whose
+ * `approver_faction` is NOT the player. Runs synchronously after the
+ * evaluator so bot opportunities are resolved on the same turn they become
+ * eligible — never sitting in the player's review queue.
+ *
+ * Player faction may be null (no human player) — in which case all factions'
+ * opportunities are bot-decided.
+ */
+export function applyBotOpportunityDecisions(
+    state: GameState,
+    turn: number,
+    playerFaction: FactionId | null,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+): void {
+    const proposals = state.military.operation_opportunities;
+    if (!proposals || proposals.length === 0) return;
+    // Snapshot the proposal ids first — the apply mutates the underlying array.
+    const targets: Array<{ proposalId: string; def: OperationOpportunityDef; proposal: OperationOpportunityState }> = [];
+    for (const p of proposals) {
+        if (p.status !== 'eligible_pending_review') continue;
+        if (playerFaction !== null && p.approver_faction === playerFaction) continue;
+        const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
+        if (!def) continue;
+        targets.push({ proposalId: p.proposal_id, def, proposal: p });
+    }
+    // Sort deterministically so bot decisions are stable across replays.
+    targets.sort((a, b) => strictCompare(a.proposalId, b.proposalId));
+    for (const t of targets) {
+        const decision = defaultBotDecisionForOpportunity(t.proposal, t.def);
+        applyOpportunityDecision(state, turn, t.proposalId, decision, catalog);
+    }
+}
+
+/**
+ * Build `PendingProposalReview` rows for any opportunity whose
+ * `approver_faction === playerFaction` AND status is
+ * `eligible_pending_review`. Returns an empty array when autonomy is disabled
+ * (level 0) or when the player faction is undefined.
+ *
+ * The proposed_action format is `OPPORTUNITY:<proposal_id>`. The accept/reject
+ * IPC handlers (electron-main.cjs) simply mark `accepted` on the row; the
+ * `applyResolvedOpportunityDecisions` step consumes those marks on the next
+ * turn and routes to `applyOpportunityDecision`.
+ *
+ * The description is the player-safe opportunity name plus a short staff line
+ * derived from the catalog's `staff_recommendation`. NO raw OSIDs leak.
+ */
+export function generateOpportunityProposalReviews(
+    state: GameState,
+    playerFaction: FactionId,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+): PendingProposalReview[] {
+    if (state.meta.autonomy_level !== 1) return [];
+    const proposals = state.military.operation_opportunities;
+    if (!proposals || proposals.length === 0) return [];
+
+    const pending = proposals
+        .filter(p => p.status === 'eligible_pending_review' && p.approver_faction === playerFaction)
+        .sort((a, b) => strictCompare(a.proposal_id, b.proposal_id));
+
+    const out: PendingProposalReview[] = [];
+    for (let i = 0; i < pending.length; i++) {
+        const p = pending[i];
+        const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
+        if (!def) continue;
+        const recommendation = def.staff_recommendation;
+        const desc = `${def.name} — staff recommendation: ${recommendation}`;
+        out.push({
+            id: `PROP_${state.meta.turn}_opportunity_${i}`,
+            turn: state.meta.turn,
+            faction: playerFaction,
+            domain: 'ops',
+            description: desc,
+            proposed_action: `${OPPORTUNITY_PROPOSAL_ACTION_PREFIX}${p.proposal_id}`,
+            current_value: 'pending_review',
+            proposed_value: recommendation,
+        });
+    }
+    return out;
+}
+
+/**
+ * Consume any `pending_proposal_reviews` rows whose `proposed_action` starts
+ * with `OPPORTUNITY:` and whose `accepted` flag is set. Routes accepted →
+ * `approve` and rejected → `decline` through `applyOpportunityDecision`.
+ *
+ * Runs at the START of each war turn, before `apply-autonomy-transition` GCs
+ * the prior turn's resolved proposals. The IPC handler only marks `accepted`;
+ * this step is the single owner that translates that into a decision on the
+ * opportunity queue.
+ */
+export function applyResolvedOpportunityDecisions(
+    state: GameState,
+    turn: number,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+): void {
+    const reviews = state.meta.pending_proposal_reviews;
+    if (!reviews || reviews.length === 0) return;
+    // Sort deterministically so the order of decisions is replay-stable.
+    const targets = reviews
+        .filter(r =>
+            r.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)
+            && r.accepted !== undefined)
+        .sort((a, b) => strictCompare(a.id, b.id));
+    for (const r of targets) {
+        const proposalId = r.proposed_action.slice(OPPORTUNITY_PROPOSAL_ACTION_PREFIX.length);
+        const decision: OpportunityDecision = r.accepted ? 'approve' : 'decline';
+        applyOpportunityDecision(state, turn, proposalId, decision, catalog);
+    }
 }
