@@ -1,3 +1,32 @@
+## [2026-05-03] docs(roadmap): roadmap truth cadence sync for trip session 1 (2026-05-02/03)
+
+**Type:** Pure docs sync. No engine code, scenario data, OOB, painted targets, FORAWWV, or sensitive-history surface touched.
+
+**Why:** MASTER_ROADMAP.md's own self-rule fires here — *"After major scenario evidence, milestone closure, or remote branch integration, run a roadmap sync pass."* Trip session 1 shipped 10 commits (TRIGGERED_OP_TEMPORAL_TRACE, KRIVAJA_BRIGADE_LIFECYCLE, A1, B-2, B-1, B-3, D#1, plus 3 maintenance refreshes) with n1621 188w + n1622 40w as fresh evidence. The roadmap was last touched 2026-05-01; multiple source-of-truth docs were stale.
+
+**Changes:**
+- `docs/plans/MASTER_ROADMAP.md`: Last Updated → 2026-05-03; new "Mid-trip evidence + lanes" paragraph in v0.9 active section attributing each commit to its v0.9 mega-lane theme. Explicit note none of these close a milestone — substrate / observability / mechanic-honesty for future v0.9 lanes. Records the 99.946% vitest baseline + 2 known remaining failures with owners.
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`: 5 new durable lessons at top — (1) `planning_invalidated` defaults to feeding `failed_offensive_objectives` cooldown; (2) `subtype` field for distinct root causes within anomaly type; (3) wire flag producers at source decision-resolution function; (4) per-turn observability emits live in harness, never engine; (5) structural-test pattern over `warPhases` step indices retires pipeline-ordering hypotheses.
+- `docs/40_reports/CALIBRATION_MASTER.md`: bumped Updated to 2026-05-03; new run-record sections for n1622 (40w post-B-1 hash `322bb9ed33e30006`, faction-balanced delta verified, brcko anchor flip registered) + n1621 (188w post-A1 hash `4ba56cfd4fae9824` byte-identical, observability null-result).
+- `docs/40_reports/REAL_WAR_MASTER.md`: appended LANE-B1 update to the n58 ARBiH 5th Corps Bihać/Ripac entry — closes the `planning_invalidated` loophole that the n58 cooldown left open.
+
+**Verification:** pre-commit hook docs/process-only path runs no tsc/vitest. The doc-sync content is internal cross-reference of already-committed lanes (`1e68d8dc` through `018cacd3`); no claims about uncommitted state. Singular-ownership preserved (no doc supersedes another's authority).
+
+**Sensitive-history verdict:** NEUTRAL by construction — pure documentation reconciliation; no engine behavior, no run hash, no controller flips, no rupture / enclave / OOB touch.
+
+**Hash drift:** NONE.
+
+**Files:**
+- `docs/plans/MASTER_ROADMAP.md` (PATCH)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (PATCH, 5 lessons prepended)
+- `docs/40_reports/CALIBRATION_MASTER.md` (PATCH, 2 run-record sections + Updated bump)
+- `docs/40_reports/REAL_WAR_MASTER.md` (PATCH, n58 entry update note)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Commit:** `b0ecde64` (the docs themselves) + this ledger entry.
+
+---
+
 ## [2026-05-02] feat(negotiation): wire war_ended_early producer (LANE-2026-05-02-D1-WAR-ENDED-EARLY-PRODUCER)
 
 **Type:** Defense-in-depth event-flag wire. No engine behavior change at the termination layer (game already terminates via `meta.game_over=true`); fills a previously phantom `flags.war_ended_early` branch that `war_termination.ts:62` was reading without any producer.
