@@ -319,7 +319,17 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
     if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
     if (op.recovery_reason === 'political_blocked') return; // Truce/political block is not a failed assault
-    if (op.recovery_reason === 'planning_invalidated') return; // Never became an executable assault
+    // LANE-2026-05-02-B1-PLANNING-INVALIDATED-COOLDOWN: planning_invalidated NOW
+    // counts toward objective failure cooldown. Per /operations-expert n1621 evidence
+    // (6 sequential vrs_1st_krajina commander ops at boljanic_2/zelinja_gornja_2 all
+    // recovering planning_invalidated against identical target_osids), the prior
+    // skip silently allowed unbounded re-emission of the same dead plan every turn.
+    // The OBJECTIVE_FAILURE_THRESHOLD=2 + 8-turn cooldown bounds the loop without
+    // suppressing legitimate first-attempt retries (one planning_invalidated still
+    // does not trigger cooldown). Faction-agnostic, corps-agnostic, OSID-agnostic.
+    // Systems Manual §6.4 distinction (probe-miss → planning_invalidated) is
+    // diagnostic-only and unaffected; CO objective-failure cooldown is a separate
+    // concern from execution-attempt logging.
 
     const failedOsids: string[] = [];
     if (isMultiAxis(op) && op.axes) {

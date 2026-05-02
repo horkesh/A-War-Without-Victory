@@ -1,3 +1,42 @@
+## [2026-05-02] feat(combat): planning_invalidated feeds CO objective-failure cooldown (LANE-2026-05-02-B1-PLANNING-INVALIDATED-COOLDOWN)
+
+**Type:** Engine mechanic correction. Removes the explicit `planning_invalidated` skip in `recordFailedObjectives` (`sector_offensive.ts:322`) so failed planning ops feed the existing `failed_offensive_objectives` cooldown system (threshold=2, 8-turn cooldown). No new constants, no new state shape, no combat math, no rupture / enclave / OOB / painted-target touch.
+
+**Why:** Successor handoff #1 from Mission B Tier 1 panel on n1621. /operations-expert + /anomaly-triage convergent finding: 6 sequential `vrs_1st_krajina_main` commander ops at boljanic_2/zelinja_gornja_2 between t125 and t166 ALL `recovery_reason: 'planning_invalidated'`, all `total_attacks: 0`, all sharing identical `target_osids: [op:doboj:brijesnica_velika, op:doboj:grapska_gornja_2]` (Operacija Jesen, Hrast, Gvožđe, Obruč, Štit, Sadejstvo). The skip silently allowed unbounded re-emission of the same dead plan every turn. /historian classified as Ring 1 / no § 6 (predictor-honesty parity with IN-TRANSIT-PREDICTOR / IN-TRANSIT-COMBAT-POWER-CONTEXT predecessor lanes).
+
+**Pre-merge gate (parallel):**
+- /game-designer APPROVED. § 8.3 (a) honest mechanic correction restoring symmetry with `max_failures` and `brigade_attrition`. Faction-agnostic, corps-agnostic, OSID-agnostic. Player command model unchanged.
+- /canon-compliance-reviewer APPROVED-CONDITIONAL. Engine Invariants / Phase Specs silent on cooldown semantics; Systems Manual §6.4 distinction (probe-miss → planning_invalidated) is DIAGNOSTIC NOT COOLDOWN; canon intent preserved. Conditions: (1) capture pre/post faction-balanced delta; (2) propagate Systems Manual §6.4 with one line clarifying CO objective-failure cooldown vs execution diagnostic distinction. BOTH conditions honored.
+
+**Implementation:** `sector_offensive.ts:322` skip removed; replaced with lane-tagged comment block citing n1621 evidence + design rationale. `probe_complete` (recon-by-force) and `political_blocked` (truce-induced) remain genuinely skipped. Behavior change applies to ANY corps emitting a `planning_invalidated` op — no faction or OSID hardcode.
+
+**Verification:**
+- `tests/sector_offensive_planning_invalidated_cooldown.test.ts` 4/4 PASS in 7ms (T1 first failure recorded; T2 second triggers cooldown=current+8; T3 multi-axis records each axis objective; T4 probe_complete + political_blocked still skip — regression guard).
+- Focused regression 120/120 across 12 suites: sector_offensive_planning_invalidated_cooldown + sector_offensive_idle_recovery + sector_offensive + sector_offensive_in_transit_predictor + triggered_operations + triggered_operations_late_1995 + krivaja_roster_and_prestage + krivaja_brigade_lifecycle_diagnostic + triggered_op_temporal_contract + brigade_temporal_emit + operation_preparation_force_ratio + operation_preparation_in_transit_context.
+- `npx tsc --noEmit -p tsconfig.json` clean.
+- 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1622` hash `322bb9ed33e30006` (drift from predecessor 40w lineage `0c2fc264112dec1f` — expected behavioral surface registered).
+- Faction-balanced delta: pre-fix n1620 RS=3/15 ops; post-fix n1622 RS=3/15 ops. Same `planning_invalidated` raw count in 40w window — fix doesn't suppress / introduce events; it bounds RE-EMISSION (visible only over longer 188w window where 6× loop manifests). Hash drift is from new `failed_offensive_objectives` entries persisted on CorpsCommandState.
+
+**Sensitive-history verdict:** Ring 1 NEUTRAL by construction (no rupture/enclave/OOB/controller flips). § 8.3 (a) honest mechanic correction; not lane-tuning toward Srebrenica. Bug first observed at Doboj corridor (Posavina, vrs_1st_krajina) — not Srebrenica.
+
+**Hash drift class:** BEHAVIORAL global narrow-scope. Bot AI for ops failing planning-invalidation now enters cooldown after 2 failures.
+
+**Files:**
+- `src/sim/combat/sector_offensive.ts` (PATCH, ~10/-1 lane-tagged comment block; skip removed)
+- `tests/sector_offensive_planning_invalidated_cooldown.test.ts` (NEW, 4/4 GREEN)
+- `docs/40_reports/implemented/20260502_PLANNING_INVALIDATED_COOLDOWN.md` (NEW lane report)
+- `docs/10_canon/Systems_Manual_v0_7_0.md` (PATCH, §6.4 implementation-note clarification per /canon-compliance condition 2)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State prepended)
+
+**Successor handoffs (carrying over from Mission B Tier 1 ranking):**
+- B-3 anomaly check #19 enrichment (Ring 1, /sector-expert) — Type A pool-exhausted / B misallocated / C structural orphan.
+- B-4 morale-zombie dissolution override (Ring 1, /formation-expert) — bound dissolution above personnel cap when morale ≤15 for ≥N turns.
+- B-5 reconstitution policy review (Ring 1 if corps-agnostic, full calibration regression required).
+- A2 Stupčanica defender-stack honesty (predictor-honesty parity, NO § 6 per /historian) — op-side launch gate per /operations-expert (no combat_math touch).
+
+---
+
 ## [2026-05-02] feat(harness): per-turn brigade-keyed snapshot emit (LANE-2026-05-02-A1-PER-TURN-BRIGADE-SNAPSHOT)
 
 **Type:** Pure observability emit added to scenario harness. No engine state mutation, no GameState shape change, no save/load impact, no run-hash impact.
