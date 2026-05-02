@@ -28,8 +28,11 @@
 - `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`
   - Added a `Source Handoffs` side section with direct buttons into the existing owning surfaces.
 - `src/ui/map/components/warroom/WarroomStatusBar.tsx`
-  - Added compact source-handoff chips to the priority docket tray.
-  - Kept row-level actions routed through the existing App-owned Decision Room target handler.
+  - Added compact source-handoff buttons to the priority docket tray.
+  - Kept row-level and source-handoff actions routed through App-owned Decision Room target handlers.
+- `src/ui/map/App.tsx`
+  - Added `reviewPreAdvanceTarget(...)`, which receives a preserved `PresidentialDecisionRoomNavigationTarget` from Warroom source handoffs and routes it through `openPresidentialDecisionRoomNavigationTarget(...)`.
+  - Passed the target callback into `WarroomStatusBar` without teaching Warroom how to open Army HQ, Turn Aftermath, corps briefing, or Chronicle directly.
 
 ### Tests
 
@@ -40,6 +43,7 @@
 - `tests/ui/warroom_priority_docket.test.ts`
   - Proves Warroom docket summary and handoff projection stay in sync with the pre-advance packet.
 - Static wiring guards prove the model and UI do not create `sourceHandoffQueue` or `sourceHandoffLedger`, do not import combat/sensitive-history internals, and render the source handoff surface.
+- Follow-up wiring guards prove Warroom source handoff buttons route through App-owned target handling, not a Warroom-local router.
 
 ## Verification
 
@@ -47,6 +51,11 @@
 - GREEN before docs:
   - `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui_pre_advance_command_review_wiring.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui_warroom_priority_docket_wiring.test.ts`
   - 26/26 tests passed.
+- Follow-up RED/GREEN:
+  - RED: `npx.cmd vitest run tests/ui_warroom_priority_docket_wiring.test.ts tests/ui_warroom_priority_pulse_wiring.test.ts`
+  - Failed as expected on missing `onReviewTarget` / `reviewPreAdvanceTarget`.
+  - GREEN: same command after implementation.
+  - 6/6 tests passed.
 - Final verification:
   - `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui_pre_advance_command_review_wiring.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui_warroom_priority_docket_wiring.test.ts tests/ui_warroom_priority_pulse_wiring.test.ts tests/ui_shell_navigation.test.ts`
   - 51/51 tests passed.
@@ -65,7 +74,8 @@
 | `src/ui/map/data/preAdvanceCommandReview.ts` | Added source handoffs for the advance-readiness item slice. |
 | `src/ui/map/data/warroomPriorityDocket.ts` | Added source handoffs and handoff summary. |
 | `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx` | Rendered source handoff buttons in the Army HQ Decision Room. |
-| `src/ui/map/components/warroom/WarroomStatusBar.tsx` | Rendered source handoff chips in the Warroom priority docket. |
+| `src/ui/map/components/warroom/WarroomStatusBar.tsx` | Rendered source handoff buttons in the Warroom priority docket. |
+| `src/ui/map/App.tsx` | Routed Warroom source handoff targets through the centralized Decision Room target helper. |
 | `tests/ui/presidential_decision_room.test.ts` | Added deterministic source-handoff model coverage. |
 | `tests/ui/pre_advance_command_review.test.ts` | Added pre-advance source-handoff coverage. |
 | `tests/ui/warroom_priority_docket.test.ts` | Added Warroom docket handoff coverage. |

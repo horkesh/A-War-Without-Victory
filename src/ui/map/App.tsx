@@ -65,6 +65,7 @@ import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
+import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { isWarroomLocalCommand } from './utils/warroomNavigation';
@@ -574,6 +575,13 @@ function App() {
     setEventLogOpen(false);
   };
 
+  const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
   const openInboxHome = () => {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
@@ -891,6 +899,7 @@ function App() {
           <WarroomStatusBar
             onReviewPriorities={reviewPreAdvancePriorities}
             onReviewItem={reviewPreAdvanceItem}
+            onReviewTarget={reviewPreAdvanceTarget}
           />
         </div>
       )}

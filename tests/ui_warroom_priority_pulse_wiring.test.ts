@@ -27,6 +27,7 @@ describe('Warroom priority pulse wiring', () => {
     expect(app).toContain('<WarroomStatusBar');
     expect(app).toContain('onReviewPriorities={reviewPreAdvancePriorities}');
     expect(app).toContain('onReviewItem={reviewPreAdvanceItem}');
+    expect(app).toContain('onReviewTarget={reviewPreAdvanceTarget}');
     expect(app).toContain("openArmyHQTab(gs, 'briefing')");
     expect(app).toContain('openPresidentialDecisionRoomNavigationTarget');
     expect(app).toContain("setAppScreen('game')");

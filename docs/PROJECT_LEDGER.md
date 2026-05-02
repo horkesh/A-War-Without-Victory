@@ -1,3 +1,27 @@
+## [2026-05-02] feat(ui): route Warroom source handoffs through App target handling
+
+**Type:** UI/product shell routing change. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** `WarroomStatusBar` now accepts `onReviewTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void`, renders `sourceHandoffs` as compact buttons instead of passive chips, closes the docket on click, and passes the handoff's preserved Decision Room `navigationTarget` upward. `App.tsx` handles that target through `openPresidentialDecisionRoomNavigationTarget(...)`, matching existing row-level docket routing and avoiding a Warroom-owned router.
+
+**Ownership guardrails:** Warroom remains a compact command summary. It does not create another Decision Room, source router, records browser, or action owner. Source handoff actions still route to the owning Army HQ / Turn Aftermath / Corps Briefing / Chronicle surface through the same centralized helper.
+
+**Verification:** Red-first wiring tests added to `tests/ui_warroom_priority_docket_wiring.test.ts` and `tests/ui_warroom_priority_pulse_wiring.test.ts`; initial RED failed on missing `onReviewTarget` / `reviewPreAdvanceTarget`; GREEN pass ran 6/6. Full verification is recorded in `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`.
+
+**Files:**
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/warroom/WarroomStatusBar.tsx`
+- `tests/ui_warroom_priority_docket_wiring.test.ts`
+- `tests/ui_warroom_priority_pulse_wiring.test.ts`
+- `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+---
 ## [2026-05-02] feat(ui): add Decision Room source handoffs
 
 **Type:** UI/product read-model and shell presentation change. No simulation, combat, scenario, or sensitive-history logic changed.

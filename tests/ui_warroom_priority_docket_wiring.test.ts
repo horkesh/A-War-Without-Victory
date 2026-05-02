@@ -19,16 +19,22 @@ describe('Warroom priority docket wiring', () => {
     expect(source).toContain('docket.sourceHandoffs.map');
   });
 
-  it('routes docket row actions through the same App-owned Decision Room target handler', () => {
+  it('routes docket row and source-handoff actions through App-owned Decision Room target handlers', () => {
     const source = read('../src/ui/map/components/warroom/WarroomStatusBar.tsx');
     const app = read('../src/ui/map/App.tsx');
 
     expect(source).toContain('onReviewItem');
     expect(source).toContain('handleReviewItem');
     expect(source).toContain('onReviewItem?.(item)');
+    expect(source).toContain('onReviewTarget');
+    expect(source).toContain('handleReviewTarget');
+    expect(source).toContain('onReviewTarget?.(target)');
+    expect(source).toContain('onClick={() => onReviewTarget(handoff.navigationTarget)}');
     expect(app).toContain('<WarroomStatusBar');
     expect(app).toContain('onReviewPriorities={reviewPreAdvancePriorities}');
     expect(app).toContain('onReviewItem={reviewPreAdvanceItem}');
+    expect(app).toContain('const reviewPreAdvanceTarget');
+    expect(app).toContain('onReviewTarget={reviewPreAdvanceTarget}');
   });
 
   it('keeps the docket as a UI read model without combat or nondeterministic imports', () => {

@@ -6,7 +6,7 @@
  * and an advance-turn affordance.
  *
  * Reads directly from useGameStore for campaign context. Navigation out of
- * the Warroom stays App-owned through onReviewPriorities/onReviewItem.
+ * the Warroom stays App-owned through onReviewPriorities/onReviewItem/onReviewTarget.
  * Canonical owner: src/ui/map/components/warroom/WarroomStatusBar.tsx
  */
 
@@ -18,10 +18,12 @@ import {
   type WarroomPriorityDocketItem,
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
+import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 
 export interface WarroomStatusBarProps {
   onReviewPriorities?: () => void;
   onReviewItem?: (item: WarroomPriorityDocketItem) => void;
+  onReviewTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void;
 }
 
 function priorityClass(tone: WarroomPriorityDocketTone): string {
@@ -53,11 +55,13 @@ function PriorityDocketPanel({
   canReviewPriorities,
   onOpenBoard,
   onReviewItem,
+  onReviewTarget,
 }: {
   docket: ReturnType<typeof buildWarroomPriorityDocketView>;
   canReviewPriorities: boolean;
   onOpenBoard: () => void;
   onReviewItem: (item: WarroomPriorityDocketItem) => void;
+  onReviewTarget: (target: PresidentialDecisionRoomNavigationTarget) => void;
 }) {
   return (
     <div className="absolute bottom-full right-0 mb-2 w-[min(26rem,calc(100vw-2rem))] rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50">
@@ -114,13 +118,16 @@ function PriorityDocketPanel({
         {docket.sourceHandoffs.length > 0 && (
           <div className="mt-1 grid gap-1 sm:grid-cols-2">
             {docket.sourceHandoffs.map((handoff) => (
-              <div
+              <button
                 key={handoff.id}
-                className="min-w-0 rounded border border-amber-900/35 bg-black/35 px-2 py-1"
+                type="button"
+                onClick={() => onReviewTarget(handoff.navigationTarget)}
+                disabled={handoff.navigationTarget.kind === 'none'}
+                className="min-w-0 rounded border border-amber-900/35 bg-black/35 px-2 py-1 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
               >
                 <div className="truncate text-[9px] font-bold text-amber-100">{handoff.label}</div>
                 <div className="truncate text-[7px] uppercase tracking-[0.08em] text-amber-300/60">{handoff.summary}</div>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -141,7 +148,7 @@ function PriorityDocketPanel({
   );
 }
 
-export function WarroomStatusBar({ onReviewPriorities, onReviewItem }: WarroomStatusBarProps) {
+export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTarget }: WarroomStatusBarProps) {
   const [priorityDocketOpen, setPriorityDocketOpen] = useState(false);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -173,6 +180,11 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem }: WarroomSt
     onReviewItem?.(item);
   };
 
+  const handleReviewTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
+    setPriorityDocketOpen(false);
+    onReviewTarget?.(target);
+  };
+
   return (
     <div
       className="fixed bottom-4 right-4 z-[60] flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded bg-black/70 px-3 py-1.5 font-mono text-[10px] text-amber-400 pointer-events-auto select-none"
@@ -184,6 +196,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem }: WarroomSt
           canReviewPriorities={canReviewPriorities}
           onOpenBoard={handleOpenBoard}
           onReviewItem={handleReviewItem}
+          onReviewTarget={handleReviewTarget}
         />
       )}
 

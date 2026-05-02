@@ -58,7 +58,7 @@ The next-action gap is also closed at the command-review layer: **Presidential D
 
 The advance-turn confirmation now participates in that same loop. The Warroom/tactical `AdvanceTurnModal` consumes a pure pre-advance projection of the Decision Room `advanceReadiness` packet, shows what should be reviewed before the turn advances, carries grouped source handoffs for the items that may be buried, routes `Review Priorities` to Army HQ BRIEFING, and routes individual row actions to their preserved Decision Room source targets. It does not create a new blocker, queue, cost owner, or history owner; the existing advance-turn pipeline remains canonical.
 
-The Warroom may expose a compact priority docket, but not the priority board itself. `WarroomStatusBar` consumes a small `warroomPriorityDocket` projection over the same pre-advance/Decision Room readiness packet. Its `PRIORITIES` action opens a Warroom tray with top rows and source-handoff chips, `Open Decision Room` routes to Army HQ BRIEFING through `App`, and each row routes to its preserved Decision Room source target. The Warroom summarizes urgency; Army HQ owns review.
+The Warroom may expose a compact priority docket, but not the priority board itself. `WarroomStatusBar` consumes a small `warroomPriorityDocket` projection over the same pre-advance/Decision Room readiness packet. Its `PRIORITIES` action opens a Warroom tray with top rows and source-handoff buttons, `Open Decision Room` routes to Army HQ BRIEFING through `App`, and each row or source handoff routes to its preserved Decision Room source target. The Warroom summarizes urgency; Army HQ owns review.
 
 ## Shell hierarchy
 
