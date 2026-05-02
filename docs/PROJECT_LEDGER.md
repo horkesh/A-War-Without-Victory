@@ -1,3 +1,15 @@
+## [2026-05-02] feat(ui): add Decision Room priority lenses
+
+**Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** `buildPresidentialDecisionRoomView(...)` now returns deterministic priority lenses derived from the same sorted Decision Room card archive: `all` plus non-empty source categories. Each lens carries count, urgent count, top card id, action label, and the top card's existing navigation target. `PresidentialDecisionRoomPanel` renders the lenses as compact local filters over the visible card stack and the `Inspect Next` list; global advance readiness remains unfiltered.
+
+**Player impact:** The Strategic Priorities board is easier to scan when it contains mixed urgency: the player can look at decisions, opportunities, SITREP, briefing items, hard turns, active cost, or Chronicle memory without leaving Army HQ or losing the exact source handoffs.
+
+**Ownership guardrails:** Lenses are derived presentation state only. They do not create another inbox, opportunity ledger, cost ledger, Chronicle, event log, or history owner; every card still routes through the existing Decision Room navigation target.
+
+**Verification:** Red-first tests added to `tests/ui/presidential_decision_room.test.ts` and `tests/ui_presidential_decision_room_wiring.test.ts`; focused green run passed 10/10 before docs. Full type/build verification recorded in the implementation report.
+
 ## [2026-05-02] fix(operations): Krivaja-95 catalog ICTY-citation correction + pre-stage helper overwrite contract (Codex review #1+#2)
 
 **Type:** Corrective patch on top of `68b56d1f` after Codex code review flagged two blockers: (1) ICTY citation accuracy — historian agent fabricated "Krstić §123 W-axis force" claim about 1st Milici and "Zvornik post-fall only" claim that contradicts the actual ICTY paragraphs; (2) `prestageBrigadesForTriggeredOp` silently overwrote existing `brigade_movement_orders`, could reset in-transit progress.

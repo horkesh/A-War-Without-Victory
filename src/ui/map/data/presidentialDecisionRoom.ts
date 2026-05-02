@@ -54,10 +54,23 @@ export interface PresidentialDecisionRoomMetrics {
   advanceReviewCount: number;
 }
 
+export type PresidentialDecisionRoomLensId = 'all' | PresidentialDecisionRoomCategory;
+
+export interface PresidentialDecisionRoomLens {
+  id: PresidentialDecisionRoomLensId;
+  label: string;
+  count: number;
+  urgentCount: number;
+  topCardId: string | null;
+  actionLabel: string;
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+}
+
 export interface PresidentialDecisionRoomView {
   hasPlayerFaction: boolean;
   emptyState: string | null;
   cards: PresidentialDecisionRoomCard[];
+  lenses: PresidentialDecisionRoomLens[];
   inspectNext: PresidentialDecisionRoomCard[];
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness;
   metrics: PresidentialDecisionRoomMetrics;
@@ -91,6 +104,19 @@ const CATEGORY_RANK: Record<PresidentialDecisionRoomCategory, number> = {
   cost: 5,
   memory: 6,
 };
+
+const CATEGORY_LABEL: Record<PresidentialDecisionRoomCategory, string> = {
+  decision: 'Decision',
+  opportunity: 'Opportunity',
+  operational: 'SITREP',
+  briefing: 'Briefing',
+  turn: 'Turn',
+  cost: 'Cost',
+  memory: 'Memory',
+};
+
+const CATEGORY_ORDER = (Object.keys(CATEGORY_RANK) as PresidentialDecisionRoomCategory[])
+  .sort((a, b) => CATEGORY_RANK[a] - CATEGORY_RANK[b]);
 
 function strictCompare(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
@@ -449,6 +475,38 @@ function buildAdvanceReadiness(
   };
 }
 
+function isUrgentCard(card: PresidentialDecisionRoomCard): boolean {
+  return card.severity === 'blocking' || card.severity === 'critical';
+}
+
+function buildLens(
+  id: PresidentialDecisionRoomLensId,
+  label: string,
+  cards: PresidentialDecisionRoomCard[],
+): PresidentialDecisionRoomLens {
+  const topCard = cards[0] ?? null;
+  return {
+    id,
+    label,
+    count: cards.length,
+    urgentCount: cards.filter(isUrgentCard).length,
+    topCardId: topCard?.id ?? null,
+    actionLabel: topCard?.actionLabel ?? 'Review',
+    navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
+  };
+}
+
+function buildLenses(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRoomLens[] {
+  if (cards.length === 0) return [];
+  const lenses: PresidentialDecisionRoomLens[] = [buildLens('all', 'All', cards)];
+  for (const category of CATEGORY_ORDER) {
+    const categoryCards = cards.filter((card) => card.category === category);
+    if (categoryCards.length === 0) continue;
+    lenses.push(buildLens(category, CATEGORY_LABEL[category], categoryCards));
+  }
+  return lenses;
+}
+
 export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoomInput): PresidentialDecisionRoomView {
   const state = input.state;
   const playerFaction = state?.player_faction ?? null;
@@ -457,6 +515,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       hasPlayerFaction: false,
       emptyState: 'No game state loaded.',
       cards: [],
+      lenses: [],
       inspectNext: [],
       advanceReadiness: {
         headline: 'No state loaded',
@@ -477,6 +536,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       hasPlayerFaction: false,
       emptyState: 'No player faction loaded.',
       cards: [],
+      lenses: [],
       inspectNext: [],
       advanceReadiness: {
         headline: 'No player faction loaded',
@@ -505,11 +565,13 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
 
   const cards = finalizeCards(candidates);
   const advanceReadiness = buildAdvanceReadiness(state, cards);
+  const lenses = buildLenses(cards);
 
   return {
     hasPlayerFaction: true,
     emptyState: cards.length === 0 ? 'No urgent command priorities.' : null,
     cards,
+    lenses,
     inspectNext: cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5),
     advanceReadiness,
     metrics: {

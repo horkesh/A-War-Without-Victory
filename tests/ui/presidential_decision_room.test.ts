@@ -241,6 +241,55 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('builds deterministic priority lenses over the same card archive', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_beta', display_name: 'Beta Window', expires_turn: 30 }),
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 25 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: 1 },
+        displacement_total: 1000,
+      }),
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const lensIds = view.lenses.map((lens) => lens.id);
+    const byId = Object.fromEntries(view.lenses.map((lens) => [lens.id, lens]));
+
+    expect(lensIds[0]).toBe('all');
+    expect(lensIds).toContain('decision');
+    expect(lensIds).toContain('opportunity');
+    expect(lensIds).toContain('operational');
+    expect(lensIds).toContain('turn');
+    expect(lensIds).toContain('cost');
+    expect(lensIds).toContain('memory');
+    expect(byId.all).toMatchObject({
+      count: view.cards.length,
+      topCardId: view.cards[0]?.id,
+      navigationTarget: view.cards[0]?.navigationTarget,
+    });
+    expect(byId.opportunity).toMatchObject({
+      count: 2,
+      topCardId: 'opportunity:opp_alpha',
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(byId.turn).toMatchObject({
+      topCardId: 'turn:24:hard-turn',
+      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+    });
+  });
+
   it('marks what should be reviewed before advancing without blocking beyond existing systems', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
@@ -287,6 +336,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(view.hasPlayerFaction).toBe(false);
     expect(view.cards).toEqual([]);
+    expect(view.lenses).toEqual([]);
     expect(view.emptyState).toBe('No player faction loaded.');
   });
 });

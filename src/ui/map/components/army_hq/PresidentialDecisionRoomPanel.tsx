@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
+  type PresidentialDecisionRoomCategory,
+  type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomSeverity,
 } from '../../data/presidentialDecisionRoom';
 import { useGameStore } from '../../store/gameStore';
@@ -32,6 +34,44 @@ function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: 
         {value}
       </div>
     </div>
+  );
+}
+
+type ActiveDecisionRoomLens = 'all' | PresidentialDecisionRoomCategory;
+
+function LensButton({
+  lens,
+  active,
+  onSelect,
+}: {
+  lens: PresidentialDecisionRoomLens;
+  active: boolean;
+  onSelect: (id: ActiveDecisionRoomLens) => void;
+}) {
+  const isAllLens = lens.id === 'all';
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(lens.id)}
+      className={`flex h-9 min-w-[5.75rem] shrink-0 items-center justify-between gap-2 rounded border px-2 text-left transition ${active
+        ? 'border-amber-400/45 bg-amber-400/12 text-amber-200'
+        : 'border-panel-border/55 bg-panel-card/45 text-text-secondary hover:border-amber-400/25 hover:bg-white/[0.04]'}`}
+    >
+      <span className="min-w-0">
+        <span className="block truncate text-[9px] font-bold uppercase tracking-[0.11em]">
+          {isAllLens ? 'All' : lens.label}
+        </span>
+        <span className="block text-[8px] uppercase tracking-[0.08em] text-text-muted">
+          {lens.count} item{lens.count === 1 ? '' : 's'}
+        </span>
+      </span>
+      <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${lens.urgentCount > 0
+        ? 'border-red-400/35 bg-red-500/10 text-red-300'
+        : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
+      >
+        {lens.urgentCount}
+      </span>
+    </button>
   );
 }
 
@@ -99,6 +139,7 @@ function CompactLink({ card }: { card: PresidentialDecisionRoomCard }) {
 export function PresidentialDecisionRoomPanel() {
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
+  const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
 
   const view = useMemo(
     () => buildPresidentialDecisionRoomView({ state, osidNameMap }),
@@ -115,8 +156,15 @@ export function PresidentialDecisionRoomPanel() {
     );
   }
 
-  const mainCards = view.cards.slice(0, 7);
-  const inspectNext = view.inspectNext.slice(0, 5);
+  const availableLensIds = new Set(view.lenses.map((lens) => lens.id));
+  const effectiveLens: ActiveDecisionRoomLens = activeLens === 'all' || availableLensIds.has(activeLens) ? activeLens : 'all';
+  const filteredCards = effectiveLens === 'all'
+    ? view.cards
+    : view.cards.filter((card) => card.category === effectiveLens);
+  const mainCards = filteredCards.slice(0, 7);
+  const inspectNext = (effectiveLens === 'all'
+    ? view.inspectNext
+    : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
 
   return (
     <section className="mb-2" data-testid="presidential-decision-room">
@@ -137,6 +185,19 @@ export function PresidentialDecisionRoomPanel() {
         <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
         <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
       </div>
+
+      {view.lenses.length > 0 && (
+        <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
+          {view.lenses.map((lens) => (
+            <LensButton
+              key={lens.id}
+              lens={lens}
+              active={effectiveLens === lens.id}
+              onSelect={setActiveLens}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-2 lg:grid-cols-[minmax(0,1.55fr)_minmax(20rem,0.8fr)]">
         <div className="space-y-2">

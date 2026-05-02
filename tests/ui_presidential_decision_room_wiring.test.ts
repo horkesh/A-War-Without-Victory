@@ -48,6 +48,17 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('setChronicleOpen(true)');
   });
 
+  it('renders priority lenses as local filters over the Decision Room card list', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+
+    expect(panel).toContain('useState');
+    expect(panel).toContain('activeLens');
+    expect(panel).toContain('setActiveLens');
+    expect(panel).toContain('view.lenses.map');
+    expect(panel).toContain('filteredCards');
+    expect(panel).toContain("lens.id === 'all'");
+  });
+
   it('does not import or expose sensitive-history/combat-lane internals', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
