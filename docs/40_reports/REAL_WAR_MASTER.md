@@ -688,6 +688,8 @@ Sector :2 (Rogatica/Sokolac, 18 edges) has 0 assigned brigades. SCR still shows 
 
 **Status:** FIXED (engine-sprint n58).
 
+**Update (2026-05-02, LANE-2026-05-02-B1):** the cooldown system was honest for combat-failure recoveries (`max_failures`, `brigade_attrition`) but had a latent loophole — `recordFailedObjectives` in `sector_offensive.ts:322` explicitly skipped `recovery_reason === 'planning_invalidated'`. Operations that consumed a planning cycle without producing an attack (force-ratio gate failed; participants never reached staging; opening-attack predicate failed at launch) were therefore invisible to the cooldown. n1621 188w surfaced 6 sequential `vrs_1st_krajina_main` commander ops at boljanic_2/zelinja_gornja_2 between t125 and t166 ALL `planning_invalidated` / 0 attacks against identical `target_osids: [op:doboj:brijesnica_velika, op:doboj:grapska_gornja_2]` (Operacija Jesen, Hrast, Gvožđe, Obruč, Štit, Sadejstvo). The skip is now removed; `planning_invalidated` feeds the same threshold/cooldown as combat-failure modes. `probe_complete` (recon-by-force) and `political_blocked` (truce-induced) remain genuinely skipped per regression guard. Systems Manual §6.4 patched with the diagnostic-vs-cooldown distinction. Registered behavioral consequence: brcko anchor flip RBiH→RS at 40w, anticipated by /game-designer pre-merge gate. Commit: `4ed59457`. Report: `docs/40_reports/implemented/20260502_PLANNING_INVALIDATED_COOLDOWN.md`.
+
 ---
 
 ### 33. ARBiH 1st Corps — Foča as offensive target (n54 observation)

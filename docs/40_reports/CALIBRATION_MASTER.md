@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-05-01 (force-quality trajectory issue opened; date-specific painted-control targets established; 40w baseline notes below remain historical)
+**Updated:** 2026-05-03 (trip-session run trail: n1621 188w + n1622 40w on top of B-1 cooldown lane)
 
 ## Review Methodology
 
@@ -54,6 +54,26 @@ The current long-run evidence suggests the engine is under-realizing the full-wa
 Late-war painted targets and operation experiments are evaluation tools, not the fix. If 1994-1995 territorial movement only appears when historical operations are forced as naked calendar scripts, then the deeper calibration failure is the force-quality trajectory model: officer learning/brain drain, cohesion/morale, equipment maintenance, war exhaustion, operation-readiness gates, corps coordination, and commander doctrine are not yet producing enough asymmetric change over time.
 
 **Classification:** separate calibration/design issue, not a scripted-op content issue. Next work should be a Force Quality Trajectory Audit across 40w, 104w, 156w, and 183/188w before any tuning. Do not apply global multipliers or forced late-war map rails without owner evidence.
+
+## n1622 (2026-05-02) — B-1 PLANNING_INVALIDATED_COOLDOWN behavioral surface
+
+- **40w post-fix smoke. Hash: `322bb9ed33e30006`. Drift from predecessor 40w lineage `0c2fc264112dec1f`.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1622`
+- Lane: `4ed59457` `feat(combat): planning_invalidated feeds CO objective-failure cooldown`. Removed the explicit `planning_invalidated` skip in `sector_offensive.ts:322 recordFailedObjectives` so failed planning ops feed the existing `failed_offensive_objectives` cooldown (threshold=2, 8-turn cooldown). Bounds the 6× re-emission loop observed at vrs_1st_krajina/Doboj corridor in n1621 (Operacija Jesen/Hrast/Gvožđe/Obruč/Štit/Sadejstvo all `planning_invalidated`/0 attacks against identical target_osids).
+- **Faction-balanced delta** (per /canon-compliance condition 1): pre-fix n1620 RS=3/15 ops; post-fix n1622 RS=3/15 ops — identical raw count in 40w window. The fix doesn't suppress nor introduce events; it bounds RE-EMISSION (visible only over longer 188w window). Hash drift comes from new `failed_offensive_objectives` entries persisted on CorpsCommandState.
+- **Registered behavioral consequence** (anticipated by /game-designer pre-merge gate "Could shift brcko/gradacac_2 anchors — both already P0/P1 watch items"): `op:brcko:brka_2` flips RBiH→RS at 40w. Surfaced as `tests/integration_deployment_health.test.ts` failure post-vitest-baseline; also drove `tests/scenario_golden_baselines_h2_3.test.ts` activity_summary hash mismatch. Golden baseline manifest refreshed in `018cacd3` as canonical maintenance. **brcko anchor still requires /scenario-tester + /historian verdict** — is RS-control the honest emergent outcome of bot AI no longer spam-attacking hardened OSIDs, or sim regression? Open at end of trip session 1.
+- Pre-merge gate verdicts: /game-designer APPROVED (§ 8.3 (a) honest mechanic, predictor-honesty parity); /canon-compliance-reviewer APPROVED-CONDITIONAL (Engine Invariants / Phase Specs silent on cooldown semantics; Systems Manual §6.4 distinction is DIAGNOSTIC not COOLDOWN; conditions honored — faction-balanced delta + §6.4 propagation).
+- Lane tests 4/4 GREEN; focused regression 120/120 across 12 suites; tsc clean. Report: `docs/40_reports/implemented/20260502_PLANNING_INVALIDATED_COOLDOWN.md`.
+
+## n1621 (2026-05-02) — A1 PER_TURN_BRIGADE_SNAPSHOT (observability null-result)
+
+- **188w. Hash: `4ba56cfd4fae9824`. BYTE-IDENTICAL to predecessor n1619 lineage** (expected null result for observability-only lane).
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1621`
+- Lane: `fb847504` `feat(harness): per-turn brigade-keyed snapshot emit`. Added pure observability emit `<run_dir>/brigade_temporal_log.jsonl` (20 fields per row × per brigade × per turn). Closes the artifact gap that previously blocked classifying "active throughout but absent from late-game ops" brigades.
+- Hash byte-stability confirmed by /scenario-creator-runner-tester: GameState unchanged because the emit is harness-side only. Cost ~10-20 MB at 188w (within `weekly_report.jsonl` precedent).
+- This run is the post-A1 evidence base used by Mission B Tier 1 panel (7 specialists in parallel) for the 4 lanes that followed (B-1, B-2, B-3, D#1).
+- **Diagnostic suite snapshot:** Srebrenica RS=1/11, Žepa RBiH=1/1, srebrenica_genocide_1995 NOT FIRED. Krivaja-95 force_ratio 0.094/0 attacks (planning_invalidated). Stupčanica-95 force_ratio 0.831/1 attack (max_failures). 8 DELIV / 11 UNDERDELIV / 23 NO-CONTACT-OTHER / 4 NO-CONTACT-PATH / 5 PRE-FRIENDLY ops. 6/6 bot benchmarks PASS. 0 errors / 25 warnings (diagnose_run). 42 failures (validate_run; 3 undefended subsegments + ~10 adjacent uncontested territories — all attributed by /sector-expert to vrs_drina hollowing + corps misallocation, not sector-system bugs).
+- Sensitive-history `OPEN_P0` carries unchanged from predecessor n1619. Named successor lanes either § 6 BLOCKED (OOB Skelani re-seeding, atrocity rupture predicate) or Ring 3 BLOCKED (bot-AI roster awareness — god-mode hindsight per /game-designer).
 
 ## n1572 (2026-04-14) — Exhaustion Rescale + HRHB Directive Scope + Pressure Floor
 
