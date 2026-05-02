@@ -151,11 +151,12 @@ export interface OperationAAR {
     recovery_reason?: CorpsOperation['recovery_reason'];
     /** Commander's estimated force ratio at finalize — diagnostic carryover from
      *  `CorpsOperation.force_ratio_estimate` (LANE-2026-05-02 Phase 5a, Combat-Math
-     *  estimateForceRatio Defender-Modifier Integration mega-lane). Written each
-     *  preparation tick by tickPreparation; previously discarded on op completion.
-     *  Preserved on AAR so post-mortem tools can validate predictor honesty
-     *  (war-or-game GREEN-case ranges, Grmeč/Sana fantasy-ratio bug-proof) from
-     *  disk artifacts without source spelunking. */
+     *  estimateForceRatio Defender-Modifier Integration mega-lane). Written when
+     *  preparation reaches assessment or anti-paralysis forced decision; previously
+     *  discarded on op completion. Preserved on AAR so post-mortem tools can
+     *  validate decision-time predictor honesty (war-or-game GREEN-case ranges,
+     *  Grmeč/Sana fantasy-ratio bug-proof) from disk artifacts without source
+     *  spelunking. */
     force_ratio_estimate?: number;
 }
 
@@ -772,10 +773,10 @@ export function finalizeOperationAAR(
     }
 
     // LANE-2026-05-02 Phase 5a: diagnostic carryover for force_ratio_estimate.
-    // Pure transfer — no recomputation. Surfaces the predictor's last honest
-    // ratio (written by tickPreparation per turn) so post-mortem tools can
-    // validate predictor calibration from operation_aars.json without
-    // spelunking the live op state. Mirrors recovery_reason carryover above.
+    // Pure transfer — no recomputation. Surfaces the predictor's decision-time
+    // ratio (assessment or forced-decision tick) so post-mortem tools can validate
+    // predictor calibration from operation_aars.json without spelunking the live
+    // op state. Mirrors recovery_reason carryover above.
     if (typeof op.force_ratio_estimate === 'number') {
         aar.force_ratio_estimate = op.force_ratio_estimate;
     }

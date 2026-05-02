@@ -1533,10 +1533,10 @@ describe('finalizeOperationAAR', () => {
 
     // ─── LANE-2026-05-02 Phase 5a: force_ratio_estimate carryover ────────
     // Combat-Math estimateForceRatio Defender-Modifier Integration mega-lane.
-    // The honest predictor's force_ratio_estimate is written by tickPreparation
-    // per turn but was previously discarded on op completion, leaving the
-    // predictor's output unobservable in operation_aars.json. Mirror predecessor
-    // LANE B's recovery_reason carryover pattern (commit dd083454).
+    // The honest predictor's force_ratio_estimate is written at assessment or
+    // forced-decision time but was previously discarded on op completion, leaving
+    // the predictor's output unobservable in operation_aars.json. Mirror
+    // predecessor LANE B's recovery_reason carryover pattern (commit dd083454).
 
     it('persists force_ratio_estimate on AAR when set on op', () => {
         const op = makeFinalizableOp({ force_ratio_estimate: 1.234 });
