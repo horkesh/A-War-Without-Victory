@@ -35,19 +35,21 @@ Fresh 188w proof recommended next session (not gated for this commit per Codex r
 **Predecessor:** `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`) — closed PARTIAL on 2026-05-02 with six handoffs.
 **Lane brief:** Krivaja-95 / Srebrenica modeled-fall opening-attack and brigade-roster repair (handoffs #1, #3, #5 from the predecessor's six-lane fan-out).
 
-## Lane Summary
+## Lane Summary (canonical — reflects current main after corrective patch `98446604`)
 
 Two narrow repairs inside `src/sim/combat/triggered_operations.ts`, no other engine code touched, no UI/Codex files touched, no `combat_math.ts` / `enclave_resilience.ts` / `rupture_consequences.ts` mutation:
 
-1. **Catalog historical correction.** Replace `rs_1st_zvornik` with `rs_1st_milii` in the Krivaja-95 axis brigade roster. Per ICTY *Krstić* IT-98-33-T §122–139 + *Popović* IT-05-88 §242 + BB2 p.414, 1st Zvornik LIB held the Zvornik/Sapna shoulder vs ARBiH 2nd Corps and joined Krivaja-95 only post-fall (12–18 July 1995) for column interdiction north of Konjević Polje. The Krstić §123 W-axis supporting force was 1st Milici LIB. Catalog comment block rewritten with full ICTY citation.
+1. **Catalog historical correction (per direct ICTY verbatim text — see Verification updates 1+2 at top of file).** Restore `rs_1st_zvornik` to the Krivaja-95 axis AND keep `rs_1st_milii`; net 5-brigade roster `[rs_1st_zvornik, rs_1st_bratunac, rs_1st_milii, rs_5th_podrinje, rs_skelani_battalion]` — all five named in Popović IT-05-88-T §244's eight-brigade preparatory-order list. Specific opening-assault tasks per Popović §245 fn 757 (Battalion of the Zvornik Brigade along the Zeleni Jadar–Pusmulići–Bojna axis; Bratunac Brigade Potočari-blocking task) and §247 (Pandurević, Commander of the Zvornik Brigade, in command of TG-1, opening assault from south on 5–6 July). Catalog comment block fully rewritten with verbatim Popović citations; Krstić §§122–123 do NOT name brigades and are no longer cited as authority for OOB granularity.
 
-2. **Trigger-turn pre-stage helper.** New exported function `prestageBrigadesForTriggeredOp(state, def)` in `triggered_operations.ts`. Iterates `def.axes` in declaration order; for each axis, `strictCompare`-sorts participant brigade IDs; for each brigade whose location is not the axis staging OSID and which is eligible per `isEligibleOperationFormation`, writes `state.military.brigade_movement_orders[brigadeId] = { destination_sids: [staging], stance: 'column' }`. Faction-agnostic, deterministic, mirrors the planning-window design intent of `pre_planned_operations.ts:69`. Wired into `checkTriggeredOperations` between successful `buildOperation` and `active_operations.push` (one call site, fires exactly once per def via `triggered_operations_accepted` book-keeping). Phase B distribution honors the in-transit guard at `brigade_assignment.ts:1809/1876/1992` so pre-staged brigades are not redirected.
+2. **Trigger-turn pre-stage helper.** New exported function `prestageBrigadesForTriggeredOp(state, def)` in `triggered_operations.ts`. Iterates `def.axes` in declaration order; for each axis, `strictCompare`-sorts participant brigade IDs; for each eligible brigade whose `location_osid !== axis.staging_osid` AND which is NOT already in_transit (any destination) AND which has NO existing `brigade_movement_orders[id]` (any destination), writes `state.military.brigade_movement_orders[brigadeId] = { destination_sids: [staging], stance: 'column' }`. Faction-agnostic, deterministic, mirrors the planning-window design intent of `pre_planned_operations.ts:69`. Wired into `checkTriggeredOperations` between successful `buildOperation` and `active_operations.push` (one call site, fires exactly once per def via `triggered_operations_accepted` book-keeping). Helper has NO priority over other movement-order owners; pre-stage fills the gap for participants without movement plans, brigades with plans keep theirs.
 
-## Phase 0 — Six-Investigator Synthesis
+## Phase 0 — Six-Investigator Synthesis (historical record of FIRST iteration `68b56d1f`)
+
+> **SUPERSEDED — see Verification updates 1+2 at top of file.** The historian agent's claims about brigade attack-axis assignments below are **fabricated**: Krstić §§122–123 do not name brigades or assign axes (those paragraphs discuss only strategic objectives), and Popović §244+§245 fn 757+§247 documents Zvornik Brigade involvement in the OPENING ASSAULT (not "post-fall column interdiction only"). The Phase 0 synthesis below is preserved as a record of how the FIRST iteration was executed; the corrective patch `98446604` repaired the catalog accordingly. Read this section as historical lane evolution, not current OOB authority.
 
 Dispatched in parallel:
 
-- **`/historian`** — ICTY *Krstić* §122–139 + *Popović* §242 + BB2 p.414 establishes the Drina Corps Krivaja-95 OOB. 1st Zvornik did NOT participate in opening assault; 1st Milici was the W-axis supporting force; minimum participant set is 1st Bratunac + 1st Milici + 5th Podrinje + Skelani Bn. Skelani was historically active (low-quality but committed) — its n1612 inactive status is engine-side, not historical. Sign-off candidates: (a) restore brigade, (b) pre-stage, (c) generic feasibility relaxation — all parity per § 6 framing for predictor-honesty corrections that do not touch enclave mechanics or rupture predicate.
+- **`/historian`** [SUPERSEDED CLAIM] — ICTY *Krstić* §122–139 + *Popović* §242 + BB2 p.414 establishes the Drina Corps Krivaja-95 OOB. 1st Zvornik did NOT participate in opening assault; 1st Milici was the W-axis supporting force; minimum participant set is 1st Bratunac + 1st Milici + 5th Podrinje + Skelani Bn. Skelani was historically active (low-quality but committed) — its n1612 inactive status is engine-side, not historical. Sign-off candidates: (a) restore brigade, (b) pre-stage, (c) generic feasibility relaxation — all parity per § 6 framing for predictor-honesty corrections that do not touch enclave mechanics or rupture predicate. [The two italicised assertions ("1st Zvornik did NOT participate in opening assault" and "1st Milici was the W-axis supporting force") are the disproven historian-agent fabrications. The "minimum participant set" was incomplete — actual Popović §244 names eight brigades including Zvornik. See corrective patch `98446604` for the corrected 5-brigade catalog.]
 
 - **`/game-designer`** — Sensitive History Design Gate § 6 row analysis: (a)+(b) parity with existing engine consumers, (c) parity if generic, (d) needs `/historian` chain (rupture-eligible op OOB claim), (e) STOP — scripted recall is the railroad shape § 1 refuses. § 8.3 trigger conditions itemized. Closeability matrix: RESOLVED iff diagnostic verdict flips and Krivaja attacks ≥ 1 with no GREEN-case regression; PARTIAL iff Krivaja moves mechanically and remaining blocker is a named out-of-scope mechanic; STOP iff fix requires combat_math.ts retune or scripted controller flip.
 
@@ -61,35 +63,38 @@ Dispatched in parallel:
 
 **Synthesis verdict:** GO. Owner = `triggered_operations.ts`. Two changes: catalog row edit + new pre-stage helper. Stop gates honored.
 
-## Phase 1 — Red-first Tests
+## Phase 1 — Red-first Tests (historical record of FIRST iteration `68b56d1f`)
 
-`tests/krivaja_roster_and_prestage.test.ts` (315 lines, 7 test cases):
+> **SUPERSEDED — see "Tests added/updated" near the top of this file.** T1 and T2 below were authored against the disproven historian-agent claims and were inverted by the corrective patch `98446604`: T1 now requires the 5-brigade Popović §244 roster (including `rs_1st_zvornik`), T2 now requires Popović §244/§245 citation and explicitly retracts the Krstić §123 brigade-naming fabrication. T7–T10 were added as movement-order preservation tests in the corrective patch.
 
-- **T1** — Catalog historical correction: `TRIGGERED_OPS['Operation Krivaja-95'].axes[0].brigades` includes `rs_1st_milii`, excludes `rs_1st_zvornik`.
-- **T2** — Catalog comment cites Krstić + identifies 1st Milici + notes Zvornik post-fall column-interdiction role.
-- **T3** — `prestageBrigadesForTriggeredOp` exported as a function.
-- **T4** — Helper writes deterministic movement orders for non-staged eligible participants; skips staged (`rs_1st_bratunac`) and inactive (`rs_skelani_battalion`).
-- **T5** — Helper deterministic across two re-runs (byte-identical JSON).
-- **T6** — `checkTriggeredOperations` invokes the helper between `buildOperation` and `active_operations.push`.
-- **D3** — Static-grep assertion: helper source contains no `Math.random` / `Date.now` / `new Date(`.
+`tests/krivaja_roster_and_prestage.test.ts` (FIRST iteration: 315 lines, 7 test cases — current-main has 11 tests after corrective patch):
 
-Pre-implementation run: 6 RED + 1 D3 GREEN (D3 was GREEN because pre-existing source was already clean; it now also protects the new helper).
+- **T1** [INVERTED in `98446604`] — Catalog historical correction: `TRIGGERED_OPS['Operation Krivaja-95'].axes[0].brigades` includes `rs_1st_milii`, excludes `rs_1st_zvornik`. **Current-main T1 requires all 5 brigades per Popović §244.**
+- **T2** [INVERTED in `98446604`] — Catalog comment cites Krstić + identifies 1st Milici + notes Zvornik post-fall column-interdiction role. **Current-main T2 requires Popović §244/§245 citation and FORBIDS the post-fall-only claim.**
+- **T3** — `prestageBrigadesForTriggeredOp` exported as a function. (unchanged)
+- **T4** — Helper writes deterministic movement orders for non-staged eligible participants; skips staged (`rs_1st_bratunac`) and inactive (`rs_skelani_battalion`). (current-main T4 also asserts `rs_1st_zvornik` order)
+- **T5** — Helper deterministic across two re-runs (byte-identical JSON). (unchanged)
+- **T6** — `checkTriggeredOperations` invokes the helper between `buildOperation` and `active_operations.push`. (current-main T6 also asserts `rs_1st_zvornik` order)
+- **T7–T10** [NEW in `98446604`] — Movement-order preservation contract: in_transit not reset; in_transit toward different destination not overridden; existing orders not silently stomped; existing-order-toward-staging is no-op.
+- **D3** — Static-grep assertion: helper source contains no `Math.random` / `Date.now` / `new Date(`. (unchanged)
 
-Post-implementation run: **7/7 PASS.**
+FIRST-iteration pre-implementation run: 6 RED + 1 D3 GREEN. FIRST-iteration post-implementation run: 7/7 PASS. Current-main run after corrective patch: **11/11 PASS.**
 
-## Phase 2 — Implementation
+## Phase 2 — Implementation (historical record of FIRST iteration `68b56d1f`)
 
-### 2a. Catalog correction
+> **SUPERSEDED — see Lane Summary above and "Catalog repair decision" / "Helper repair decision" near top of file.** §2a's "replace zvornik with milici" framing reflects the FIRST iteration's disproven historian-agent claim and is no longer the current-main shape. The corrective patch `98446604` restored `rs_1st_zvornik` to the catalog (5-brigade roster) per direct ICTY paragraph verification, and added an explicit overwrite contract to `prestageBrigadesForTriggeredOp` (skips when in_transit OR existing order present).
 
-`src/sim/combat/triggered_operations.ts:357-385`. Comment block lines 326-356 rewritten with ICTY citation; brigade array line 370 changed from `'rs_1st_zvornik'` to `'rs_1st_milii'`. Lane marker on every changed line.
+### 2a. Catalog correction (FIRST iteration — replaced by corrective patch)
+
+[FIRST ITERATION] `src/sim/combat/triggered_operations.ts:357-385`. Comment block lines 326-356 rewritten with ICTY citation; brigade array line 370 changed from `'rs_1st_zvornik'` to `'rs_1st_milii'`. **Current-main shape (after `98446604`): catalog comment block fully rewritten again with verbatim Popović §244/§245/§247 citations; brigade array now contains all five `[rs_1st_zvornik, rs_1st_bratunac, rs_1st_milii, rs_5th_podrinje, rs_skelani_battalion]`.**
 
 ### 2b. New helper
 
-`src/sim/combat/triggered_operations.ts:600-643`. `prestageBrigadesForTriggeredOp(state, def)` exported. JSDoc cites the predecessor PARTIAL handoff #5 + the Phase B in-transit-exclusion contract + the planning-window design intent. Determinism: sorted iteration via `strictCompare`; no `Math.random` / `Date.now` / `new Date(`. `SettlementId` added to type-only imports.
+`src/sim/combat/triggered_operations.ts:600-643` (FIRST iteration). `prestageBrigadesForTriggeredOp(state, def)` exported. JSDoc cites the predecessor PARTIAL handoff #5 + the Phase B in-transit-exclusion contract + the planning-window design intent. Determinism: sorted iteration via `strictCompare`; no `Math.random` / `Date.now` / `new Date(`. `SettlementId` added to type-only imports. **Current-main shape (after `98446604`): helper now SKIPS when brigade is `brigade_movement_state[id].status === 'in_transit'` (any destination) OR has existing `brigade_movement_orders[id]` (any destination). Triggered-op pre-stage has NO priority over other movement-order owners.**
 
 ### 2c. Wiring
 
-`src/sim/combat/triggered_operations.ts:725` — single call inserted between `buildOperation` success and `primaryCmd.active_operations.push(...)`.
+`src/sim/combat/triggered_operations.ts:725` — single call inserted between `buildOperation` success and `primaryCmd.active_operations.push(...)`. (unchanged in `98446604`)
 
 ## Verification (in progress)
 
@@ -98,7 +103,9 @@ Post-implementation run: **7/7 PASS.**
 - 40w smoke scenario — **DONE + CONFIRMED**: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1613`, hash `0c2fc264112dec1f`. Byte-identical to predecessor n1610 baseline. **`/scenario-creator-runner-tester` verdict: GO TO 188w.** Zero triggered ops fire in the 40w window (Krivaja t168, Stupčanica t172, Cerska-Kamenica t≥40 didn't accept in window, all Mistral/Maestral/Storm post-t40). All 15 pre-planned `sector_attack` ops match n1610 exactly. `prestageBrigadesForTriggeredOp` never invoked in 40w → no `brigade_movement_orders` writes → behaviorally inert before t168. No new `validate_run_consistency` failures, no new injection failures, no stop-gate-touching diffs.
 - 188w proof scenario — DONE: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1614`, hash `58fa7f585caab31e` (changed from predecessor n1612 `a86614b8e9afd1c1`).
 
-### 188w n1614 — RAW NUMBERS (no interpretation yet)
+### 188w n1614 — RAW NUMBERS (snapshot from FIRST iteration `68b56d1f`; superseded by corrective patch `98446604`)
+
+> **SUPERSEDED.** This run was executed against the FIRST iteration's catalog (which had `rs_1st_milii` instead of `rs_1st_zvornik` and a helper that overwrote movement orders). Numbers below are factual for that run but do NOT reflect current-main behavior after the corrective patch. Fresh 188w on the corrected code is recommended next session.
 
 **`tools/diagnostics/sensitive_history_status.cjs`:**
 - Verdict: `OPEN_P0` (vs n1612 `OPEN_P0`)
@@ -136,13 +143,15 @@ Post-implementation run: **7/7 PASS.**
 4. More brigades at enclave perimeter for Krivaja (4 OSIDs vs 1 in n1612).
 5. Audit-layer counts byte-stable.
 
-### Expert Verdicts (Phase 6)
+### Expert Verdicts (Phase 6, on FIRST iteration `68b56d1f` only — see top-of-file verification updates 1+2 for the corrective scope)
 
-**`/war-or-game` — APPROVED with caveat:**
-- Catalog correction better matches ICTY *Krstić* §123 / *Popović* §242 / BB2 p.414 truth.
-- Pre-stage helper is defensible (mirrors real corps staff prep against a planned axis days before D-day, exactly what `planning_duration: 3` represents). Not railroaded — same Phase B in-transit guard, attrition, and feasibility checks apply.
-- No Ring 3 surface; no scripted-fall (fall did NOT happen, rupture did NOT fire); no VRS atrocity flatter (Krivaja capacity went DOWN); no player-optimization surface.
-- Force_ratio 0.05 is its own REAL_WAR_MASTER class — sim under-rates VRS at Srebrenica by ~100× (historical 3.5–6× attacker dominance vs sim ~0.05 = inverted sign). Distinct from Phase 4d defender-stack but caused by it.
+> **CONTEXT.** These verdicts were rendered on the FIRST iteration's 188w n1614 results, before Codex code review caught the historian-agent ICTY citation fabrication and the helper overwrite issue. Both expert reads were partially valid for what they observed; neither had access to the direct ICTY paragraph text that proved the catalog change should have been "restore Zvornik AND add Milici" rather than "replace Zvornik with Milici". The corrective patch `98446604` integrates the verified ICTY truth and the helper preservation contract.
+
+**`/war-or-game` — APPROVED with caveat (FIRST ITERATION CONTEXT):**
+- [SUPERSEDED CLAIM] Catalog correction better matches ICTY *Krstić* §123 / *Popović* §242 / BB2 p.414 truth. **Disproven by direct paragraph verification — Krstić §123 does not name brigades; Popović §244 names BOTH Zvornik and Milici.**
+- Pre-stage helper is defensible (mirrors real corps staff prep against a planned axis days before D-day, exactly what `planning_duration: 3` represents). Not railroaded — same Phase B in-transit guard, attrition, and feasibility checks apply. (claim retained — corrective patch made the helper even more deferential)
+- No Ring 3 surface; no scripted-fall (fall did NOT happen, rupture did NOT fire); no VRS atrocity flatter (Krivaja capacity went DOWN); no player-optimization surface. (claim retained)
+- Force_ratio 0.05 is its own REAL_WAR_MASTER class — sim under-rates VRS at Srebrenica by ~100× (historical 3.5–6× attacker dominance vs sim ~0.05 = inverted sign). Distinct from Phase 4d defender-stack but caused by it. (claim retained)
 - Final verdict: **APPROVED for PARTIAL close with Phase 4d as named blocker**, AND open new REAL_WAR_MASTER entry for "Srebrenica/Žepa attacker-defender ratio sign inversion".
 
 **`/scenario-creator-runner-tester` — WORSE:**
@@ -153,11 +162,13 @@ Post-implementation run: **7/7 PASS.**
 - Krivaja perimeter footprint widened 1 OSID → 4 OSIDs (physical-positioning win). Acceptance metric (`total_attacks ≥ 1`) unmoved.
 - Final verdict: **WORSE — pre-stage helper + predictor in-transit exclusion + milii double-roster ping-pong dropped force_ratio without producing attacks; physical-perimeter footprint improved but is not on the acceptance path.**
 
-### Orchestrator Synthesis Decision
+### Orchestrator Synthesis Decision (FIRST iteration `68b56d1f`; corrected in `98446604`)
 
-Close **PARTIAL**. Two binding blockers removed and proven:
-1. Krivaja-95 catalog historical error (`rs_1st_zvornik` wrongly listed) — verified swap landed in n1614.
-2. Missing trigger-turn pre-stage mechanism for triggered ops — verified via brigade perimeter footprint expansion (1 → 4 OSIDs).
+> **PARTIALLY SUPERSEDED.** Blocker #1's framing ("`rs_1st_zvornik` wrongly listed") was itself wrong per direct Popović §244 verification — Zvornik IS a Krivaja-95 preparatory-order brigade, and §245 fn 757 + §247 document Zvornik Brigade involvement in the opening assault. The corrected canonical claim is: "the FIRST-iteration catalog was historically incomplete (4 brigades, missing Zvornik or Milici depending on framing); the current-main catalog has 5 brigades from Popović §244". Blocker #2 (missing pre-stage mechanism) remains valid; the corrective patch added the overwrite contract on top.
+
+Close **PARTIAL** (FIRST ITERATION FRAMING). Two binding blockers removed and proven:
+1. [SUPERSEDED CLAIM] Krivaja-95 catalog historical error (`rs_1st_zvornik` wrongly listed) — verified swap landed in n1614. **Re-stated correctly: catalog roster historical incompleteness — original 4-brigade roster mapped imperfectly to Popović §244's 8-named-brigade preparatory order; corrective patch adopts a defensible 5-brigade subset.**
+2. Missing trigger-turn pre-stage mechanism for triggered ops — verified via brigade perimeter footprint expansion (1 → 4 OSIDs). (claim retained; corrective patch made the mechanism overwrite-safe)
 
 Per the lane brief: "remove one proven binding blocker, close PARTIAL". Two are removed.
 
@@ -203,9 +214,16 @@ Three handoffs (in addition to the predecessor's six):
 - **PARTIAL iff** verdict still `OPEN_P0` but Krivaja moves mechanically (`total_attacks ≥ 1` OR `force_ratio ≥` launch threshold) and remaining blocker is a named out-of-scope mechanic (Phase 4d defender-stack compounding handoff #2 from predecessor).
 - **STOP iff** any stop gate crossed.
 
-## Files Changed
+## Files Changed (cumulative across both iterations)
 
+FIRST iteration `68b56d1f`:
 - `src/sim/combat/triggered_operations.ts` (+74 / −5)
 - `tests/krivaja_roster_and_prestage.test.ts` (new, +315)
 
-(To be appended at Phase 7: `docs/40_reports/implemented/20260502_KRIVAJA_ROSTER_AND_PRESTAGE.md` (this file), `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `.claude/napkin.md`.)
+Corrective patch `98446604`:
+- `src/sim/combat/triggered_operations.ts` (catalog comment fully rewritten + helper overwrite-contract; ~+75 / −30 vs `68b56d1f`)
+- `tests/krivaja_roster_and_prestage.test.ts` (T1 expanded; T2 inverted; buildSyntheticState includes zvornik + brigade_movement_state + brigade_movement_orders; T4/T6 extended; T7/T8/T9/T10 new; ~+180 vs `68b56d1f`)
+- `docs/40_reports/implemented/20260502_KRIVAJA_ROSTER_AND_PRESTAGE.md` (REOPENED status + verification updates 1+2 + repair decisions; this file)
+- `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `.claude/napkin.md`
+
+Docs cleanup `01425c21` and the docs-only follow-up to this commit: stale claim labeling in this file + napkin Current State deduplication.
