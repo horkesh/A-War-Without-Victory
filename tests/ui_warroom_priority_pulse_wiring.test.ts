@@ -8,22 +8,27 @@ function read(path: string): string {
 describe('Warroom priority pulse wiring', () => {
   it('projects Decision Room readiness into the Warroom status bar', () => {
     const source = read('../src/ui/map/components/warroom/WarroomStatusBar.tsx');
+    const docket = read('../src/ui/map/data/warroomPriorityDocket.ts');
 
-    expect(source).toContain('buildPreAdvanceCommandReviewView');
-    expect(source).toContain('loadedGameState.presidentialReviewQueue?.pendingCount');
+    expect(source).toContain('buildWarroomPriorityDocketView');
+    expect(docket).toContain('buildPreAdvanceCommandReviewView');
     expect(source).toContain('osidDisplayNames');
     expect(source).toContain('advanceReviewCount');
     expect(source).toContain('urgentCount');
     expect(source).toContain('Review priorities');
     expect(source).toContain('onReviewPriorities');
+    expect(source).toContain('PriorityDocketPanel');
   });
 
-  it('routes the status-bar priority action through the App shell into Army HQ briefing', () => {
+  it('routes the status-bar priority actions through the App shell into Army HQ briefing or source targets', () => {
     const app = read('../src/ui/map/App.tsx');
 
     expect(app).toContain('const reviewPreAdvancePriorities');
-    expect(app).toContain('<WarroomStatusBar onReviewPriorities={reviewPreAdvancePriorities} />');
+    expect(app).toContain('<WarroomStatusBar');
+    expect(app).toContain('onReviewPriorities={reviewPreAdvancePriorities}');
+    expect(app).toContain('onReviewItem={reviewPreAdvanceItem}');
     expect(app).toContain("openArmyHQTab(gs, 'briefing')");
+    expect(app).toContain('openPresidentialDecisionRoomNavigationTarget');
     expect(app).toContain("setAppScreen('game')");
   });
 

@@ -1,3 +1,15 @@
+## [2026-05-02] feat(ui): add Warroom priority docket
+
+**Type:** UI/product read-model and Warroom presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** Added `buildWarroomPriorityDocketView(...)` as a pure projection over the existing pre-advance Decision Room readiness packet. `WarroomStatusBar` now toggles a compact `Review Before Advance` docket from the `PRIORITIES` control, showing top source-backed rows, summary counts, source owners, an `Open Decision Room` action, and row actions. `App` passes the existing `reviewPreAdvanceItem` router into the status bar so row actions use the same preserved Decision Room navigation targets as the advance-turn modal.
+
+**Player impact:** The Warroom no longer only says that priorities exist; it can show the top desk items immediately and let the player jump to the exact owning surface.
+
+**Ownership guardrails:** The docket is a shell summary only. It does not create another inbox, opportunity ledger, cost ledger, Chronicle, event log, Decision Room, combat/planning owner, or turn blocker. It consumes `preAdvanceCommandReview` / Decision Room read models and routes through existing App/shell helpers.
+
+**Verification:** Red-first tests added to `tests/ui/warroom_priority_docket.test.ts` and `tests/ui_warroom_priority_docket_wiring.test.ts`; focused Decision Room/pre-advance/Warroom shell run passed 42/42. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` passed with existing Vite browser-external / dynamic-import / chunk-size warnings only.
+
 ## [2026-05-02] feat(ui): add Decision Room priority lenses
 
 **Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, or sensitive-history logic changed.

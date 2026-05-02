@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-04-02
+**Updated:** 2026-05-02
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -90,6 +90,8 @@
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
 - **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records. The old desk-map `OperationalSituationModal` has been retired; the desk map now goes straight to the tactical shell.
 
+- **Priority docket (2026-05-02):** The React Warroom status bar shows `PRIORITIES` counts and can open a compact docket tray derived from the Decision Room pre-advance packet. The tray is a shell summary only: `Open Decision Room` routes to Army HQ BRIEFING, and row actions route to the preserved Decision Room source targets through the App shell.
+
 ---
 
 ## Modals: implemented vs proposed
@@ -153,6 +155,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-05-02 | **Warroom priority docket:** the Warroom status bar now opens a compact `Review Before Advance` tray with source-backed rows and deep links to existing Decision Room targets, while Army HQ remains the command-review owner. | [implemented/20260502_WARROOM_PRIORITY_DOCKET.md](implemented/20260502_WARROOM_PRIORITY_DOCKET.md) |
 | 2026-04-03 | **Player-scoped operation summaries + honest enemy contact:** Warroom no longer relies on raw `CorpsOperation` payloads or enemy casualty-ledger inference. `extractWarData()` now emits summary-only corps operation data and derives hostile contact from engaged front edges, keeping Warroom aligned with a believable headquarters information model. | [implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md](implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md) |
 | 2026-04-02 | **Tactical-map return restoration:** the live mounted tactical toolbar now exposes a visible `WARROOM` return path in standalone desktop and embedded tactical-map modes, using the real shell bridge instead of dead legacy toolbar code. | [implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md](implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md) |
 | 2026-04-02 | **Warroom faction shell handoff:** the war-phase Faction Overview no longer acts like a second Army HQ. Detailed formations, officer rosters, and commander reassignment were removed from Warroom and replaced with a compact `COMMAND SHELL` summary that points detailed review back to Army HQ via the desk map. | [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md) |
