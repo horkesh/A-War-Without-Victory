@@ -1136,7 +1136,7 @@
         "corps_exhaustion": 0,
         "og_slots": 2,
         "stance": "balanced",
-        "subordinate_count": 12
+        "subordinate_count": 14
       },
       "arbih_3rd_corps": {
         "active_ogs": [],
@@ -3466,12 +3466,13 @@
       },
       "sector:arbih_2nd_corps:0": {
         "assigned_brigade_ids": [
-          "arbih_252nd_slavna_mountain",
+          "arbih_221st_mountain",
+          "arbih_222nd_liberation",
           "arbih_253rd_mountain"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 10.200816326530614,
-        "density": 0.09523809523809523,
+        "defensive_power": 17.142857142857142,
+        "density": 0.14285714285714285,
         "edge_ids": [
           "op:banovici:seona__op:lukavac:brijesnica_donja_2",
           "op:banovici:seona__op:zavidovici:vozuca_2",
@@ -3582,7 +3583,7 @@
           "op:srebrenik:sladna_2",
           "op:zavidovici:ribnica_dio"
         ],
-        "threat_ratio": 588.1882202304737
+        "threat_ratio": 350
       },
       "sector:arbih_2nd_corps:1": {
         "assigned_brigade_ids": [
@@ -3711,7 +3712,9 @@
           "RS"
         ],
         "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
+        "reserve_brigade_ids": [
+          "arbih_252nd_slavna_mountain"
+        ],
         "sector_id": "sector:arbih_2nd_corps:10",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -8621,7 +8624,7 @@
           "op:maglaj:gornja_bocinja",
           "op:zavidovici:vozuca_2"
         ],
-        "threat_ratio": 24.597755901344343
+        "threat_ratio": 12.298877950672171
       },
       "sector:vrs_1st_krajina:15": {
         "assigned_brigade_ids": [
@@ -9312,7 +9315,7 @@
           "op:doboj:zelinja_gornja_2",
           "op:gracanica:petrovo_2"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 29.25373134328358
       },
       "sector:vrs_1st_krajina:24": {
         "assigned_brigade_ids": [
@@ -15016,6 +15019,154 @@
           "placement:fixed_home_osid"
         ]
       },
+      "arbih_221st_mountain": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:arbih_2nd_corps:0"
+        },
+        "cohesion": 48,
+        "composition": {
+          "aa_systems": 0,
+          "artillery": 1,
+          "artillery_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "tanks": 0
+        },
+        "corps_id": "arbih_2nd_corps",
+        "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
+        "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
+        "faction": "RBiH",
+        "force_label": "ARBiH",
+        "home_osid": "op:gracanica:dzakule",
+        "hq_sid": "op:gracanica:dzakule",
+        "id": "arbih_221st_mountain",
+        "kind": "brigade",
+        "location_osid": "op:gracanica:dzakule",
+        "max_personnel": 1800,
+        "morale": 60,
+        "name": "221st Mountain",
+        "officer_quality": 0.05,
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "origin_mun": "gracanica",
+        "personnel": 600,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "corps:arbih_2nd_corps",
+          "equip:light_infantry",
+          "mun:gracanica",
+          "placement:fixed_home_osid"
+        ]
+      },
+      "arbih_222nd_liberation": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:arbih_2nd_corps:0"
+        },
+        "cohesion": 48,
+        "composition": {
+          "aa_systems": 0,
+          "artillery": 1,
+          "artillery_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "tanks": 0
+        },
+        "corps_id": "arbih_2nd_corps",
+        "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
+        "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
+        "faction": "RBiH",
+        "force_label": "ARBiH",
+        "home_osid": "op:gracanica:gracanica_2",
+        "hq_sid": "op:gracanica:dzakule",
+        "id": "arbih_222nd_liberation",
+        "kind": "brigade",
+        "location_osid": "op:gracanica:gracanica_2",
+        "max_personnel": 1800,
+        "morale": 60,
+        "name": "222nd Liberation",
+        "officer_quality": 0.05,
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "origin_mun": "gracanica",
+        "personnel": 600,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "corps:arbih_2nd_corps",
+          "equip:light_infantry",
+          "mun:gracanica",
+          "placement:fixed_home_osid"
+        ]
+      },
       "arbih_246th_vitezka_mountain": {
         "activation_gated": false,
         "activation_turn": null,
@@ -15170,8 +15321,8 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
-          "sector_id": "sector:arbih_2nd_corps:0"
+          "role": "reserve",
+          "sector_id": "sector:arbih_2nd_corps:10"
         },
         "cohesion": 48,
         "composition": {
@@ -15204,7 +15355,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -15220,7 +15370,7 @@
         "hq_sid": "op:tuzla:gornja_tuzla",
         "id": "arbih_252nd_slavna_mountain",
         "kind": "brigade",
-        "location_osid": "op:lukavac:bikodze",
+        "location_osid": "op:tuzla:husino_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "252nd Slavna Mountain",
@@ -28460,8 +28610,8 @@
         "updated_turn": 0
       },
       "gracanica:RBiH": {
-        "available": 207,
-        "committed": 0,
+        "available": 0,
+        "committed": 988,
         "exhausted": 0,
         "faction": "RBiH",
         "fatigue": 0,
@@ -28470,7 +28620,7 @@
       },
       "gracanica:RS": {
         "available": 0,
-        "committed": 217,
+        "committed": 227,
         "exhausted": 0,
         "faction": "RS",
         "fatigue": 0,
@@ -33380,6 +33530,8 @@
         "arbih_213th_vitezka_mountain",
         "arbih_215th_vitezka_mountain",
         "arbih_217th_vitezka_mountain",
+        "arbih_221st_mountain",
+        "arbih_222nd_liberation",
         "arbih_246th_vitezka_mountain",
         "arbih_250th_liberation",
         "arbih_252nd_slavna_mountain",
@@ -33532,6 +33684,20 @@
     ],
     "war_front_edges_osid": [
       {
+        "a": "op:banovici:seona",
+        "b": "op:lukavac:brijesnica_donja_2",
+        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
+        "a": "op:banovici:seona",
+        "b": "op:zavidovici:vozuca_2",
+        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
         "a": "op:banja_luka:banja_luka_2",
         "b": "op:banja_luka:dragocaj",
         "edge_id": "op:banja_luka:banja_luka_2__op:banja_luka:dragocaj",
@@ -33621,20 +33787,6 @@
         "edge_id": "op:banja_luka:rekavice_2__op:mrkonjic_grad:baljvine_2",
         "side_a": "RS",
         "side_b": "HRHB"
-      },
-      {
-        "a": "op:banovici:seona",
-        "b": "op:lukavac:brijesnica_donja_2",
-        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
-        "a": "op:banovici:seona",
-        "b": "op:zavidovici:vozuca_2",
-        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
       },
       {
         "a": "op:bihac:bihac_2",
@@ -36395,20 +36547,6 @@
         "side_b": "HRHB"
       },
       {
-        "a": "op:ljubinje:bancici",
-        "b": "op:neum:gornje_hrasno_2",
-        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
-        "side_a": "RS",
-        "side_b": "HRHB"
-      },
-      {
-        "a": "op:ljubinje:bancici",
-        "b": "op:stolac:prenj",
-        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
-        "side_a": "RS",
-        "side_b": "HRHB"
-      },
-      {
         "a": "op:lopare:celic_3",
         "b": "op:lopare:koraj_4",
         "edge_id": "op:lopare:celic_3__op:lopare:koraj_4",
@@ -36505,6 +36643,20 @@
         "edge_id": "op:lukavac:brijesnica_donja_2__op:lukavac:orahovica_2",
         "side_a": "RS",
         "side_b": "RBiH"
+      },
+      {
+        "a": "op:ljubinje:bancici",
+        "b": "op:neum:gornje_hrasno_2",
+        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
+        "side_a": "RS",
+        "side_b": "HRHB"
+      },
+      {
+        "a": "op:ljubinje:bancici",
+        "b": "op:stolac:prenj",
+        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
+        "side_a": "RS",
+        "side_b": "HRHB"
       },
       {
         "a": "op:maglaj:cobe_2",
@@ -37207,6 +37359,13 @@
         "side_b": "RS"
       },
       {
+        "a": "op:srebrenica:luka_2",
+        "b": "op:vlasenica:sebiocina",
+        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:srebrenica:obadi",
         "edge_id": "op:srebrenica:ljeskovik_2__op:srebrenica:obadi",
@@ -37217,13 +37376,6 @@
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:visegrad:zlijeb",
         "edge_id": "op:srebrenica:ljeskovik_2__op:visegrad:zlijeb",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
-        "a": "op:srebrenica:luka_2",
-        "b": "op:vlasenica:sebiocina",
-        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
         "side_a": "RBiH",
         "side_b": "RS"
       },
@@ -37935,9 +38087,9 @@
         "RS": 25.9
       },
       "gracanica": {
-        "HRHB": 26.2,
-        "RBiH": 25,
-        "RS": 37.1
+        "HRHB": 29,
+        "RBiH": 46.8,
+        "RS": 40
       },
       "gradacac": {
         "HRHB": 0,
@@ -38308,6 +38460,491 @@
         "HRHB": 29,
         "RBiH": 44,
         "RS": 52.1
+      }
+    },
+    "war_timeline": {
+      "cohesion_ceiling": {
+        "HRHB": 100,
+        "RBiH": 100,
+        "RS": [
+          [
+            0,
+            85
+          ],
+          [
+            13,
+            82
+          ],
+          [
+            26,
+            78
+          ],
+          [
+            39,
+            73
+          ],
+          [
+            52,
+            68
+          ]
+        ]
+      },
+      "cohesion_drift": {
+        "HRHB": [
+          {
+            "end_turn": 53,
+            "start_turn": 0,
+            "value": 0.05
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 53,
+            "value": 0
+          }
+        ],
+        "RBiH": [
+          {
+            "end_turn": 13,
+            "start_turn": 0,
+            "value": 0.4
+          },
+          {
+            "end_turn": 27,
+            "start_turn": 13,
+            "value": 0.3
+          },
+          {
+            "end_turn": 53,
+            "start_turn": 27,
+            "value": 0.15
+          },
+          {
+            "end_turn": 79,
+            "start_turn": 53,
+            "value": 0.1
+          },
+          {
+            "end_turn": 105,
+            "start_turn": 79,
+            "value": 0.05
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 105,
+            "value": 0.03
+          }
+        ],
+        "RS": [
+          {
+            "end_turn": 20,
+            "start_turn": 0,
+            "value": 0.05
+          },
+          {
+            "end_turn": 40,
+            "start_turn": 20,
+            "value": 0.05
+          },
+          {
+            "end_turn": 53,
+            "start_turn": 40,
+            "value": 0
+          },
+          {
+            "end_turn": 79,
+            "start_turn": 53,
+            "value": -0.1
+          },
+          {
+            "end_turn": 105,
+            "start_turn": 79,
+            "value": -0.2
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 105,
+            "value": -0.35
+          }
+        ]
+      },
+      "cohesion_floor": {
+        "HRHB": [
+          [
+            0,
+            40
+          ],
+          [
+            52,
+            40
+          ],
+          [
+            53,
+            30
+          ]
+        ],
+        "RBiH": [
+          [
+            0,
+            35
+          ],
+          [
+            13,
+            42
+          ],
+          [
+            26,
+            50
+          ],
+          [
+            39,
+            56
+          ],
+          [
+            52,
+            62
+          ]
+        ],
+        "RS": [
+          [
+            0,
+            35
+          ],
+          [
+            40,
+            35
+          ],
+          [
+            60,
+            25
+          ],
+          [
+            80,
+            20
+          ]
+        ]
+      },
+      "doctrine_phases": {
+        "HRHB": [
+          {
+            "aggression_modifier": 0.1,
+            "default_corps_stance": "offensive",
+            "end_week": 12,
+            "max_attack_share_override": 0.3,
+            "start_week": 0
+          },
+          {
+            "aggression_modifier": 0.05,
+            "default_corps_stance": "offensive",
+            "end_week": 26,
+            "max_attack_share_override": 0.25,
+            "start_week": 12
+          },
+          {
+            "aggression_modifier": 0,
+            "default_corps_stance": "balanced",
+            "end_week": 9999,
+            "max_attack_share_override": 0.3,
+            "start_week": 26
+          }
+        ],
+        "RBiH": [
+          {
+            "aggression_modifier": -0.1,
+            "default_corps_stance": "defensive",
+            "end_week": 15,
+            "max_attack_share_override": 0.1,
+            "start_week": 0
+          },
+          {
+            "aggression_modifier": -0.05,
+            "default_corps_stance": "balanced",
+            "end_week": 40,
+            "max_attack_share_override": 0.18,
+            "start_week": 15
+          },
+          {
+            "aggression_modifier": -0.03,
+            "default_corps_stance": "balanced",
+            "end_week": 56,
+            "max_attack_share_override": 0.15,
+            "start_week": 40
+          },
+          {
+            "aggression_modifier": 0.05,
+            "default_corps_stance": "balanced",
+            "end_week": 80,
+            "max_attack_share_override": 0.25,
+            "start_week": 56
+          },
+          {
+            "aggression_modifier": 0.15,
+            "default_corps_stance": "offensive",
+            "end_week": 9999,
+            "max_attack_share_override": 0.35,
+            "start_week": 80
+          }
+        ],
+        "RS": [
+          {
+            "aggression_modifier": 0.15,
+            "default_corps_stance": "offensive",
+            "end_week": 12,
+            "max_attack_share_override": 0.35,
+            "start_week": 0
+          },
+          {
+            "aggression_modifier": 0.08,
+            "default_corps_stance": "offensive",
+            "end_week": 26,
+            "max_attack_share_override": 0.25,
+            "start_week": 12
+          },
+          {
+            "aggression_modifier": 0.05,
+            "default_corps_stance": "offensive",
+            "end_week": 9999,
+            "max_attack_share_override": 0.2,
+            "start_week": 26
+          }
+        ]
+      },
+      "equipment_decay": [
+        {
+          "faction": "RS",
+          "floor": 0.6,
+          "rate_per_week": 0.005,
+          "start_week": 26
+        }
+      ],
+      "external_support": [
+        {
+          "combat_multiplier": 1.26,
+          "end_turn": 26,
+          "faction": "RS",
+          "municipalities": [
+            "bijeljina",
+            "zvornik",
+            "foca",
+            "vlasenica",
+            "bratunac",
+            "visegrad",
+            "rogatica",
+            "prijedor"
+          ]
+        }
+      ],
+      "id": "apr1992",
+      "maintenance_decay": [
+        {
+          "divisor": 200,
+          "faction": "RS",
+          "floor": 0.5,
+          "formula": "linear_decay"
+        }
+      ],
+      "officer_config": {
+        "HRHB": {
+          "combat_death_replacement_delay": 1,
+          "faction": "HRHB",
+          "generic_replacement_competence": 2,
+          "learning_rate_per_turn": 0.01,
+          "political_replacement_delay": 4,
+          "roso_restructuring_week": 52,
+          "zagreb_cadre_interval": 15
+        },
+        "RBiH": {
+          "faction": "RBiH",
+          "generic_replacement_competence": 2,
+          "learning_rate_per_turn": 0.015,
+          "pool_generated_base_competence": 2,
+          "pool_generated_max_competence": 4,
+          "pool_regeneration_interval": 12,
+          "warlord_friction_end_week": 78
+        },
+        "RS": {
+          "brain_drain_rate": 0.001,
+          "brain_drain_start_week": 40,
+          "faction": "RS",
+          "generic_replacement_competence": 2,
+          "learning_rate_per_turn": 0.007
+        }
+      },
+      "patron_directives": {
+        "HRHB": [
+          {
+            "corps_ids": [
+              "hvo_southeast_herzegovina",
+              "hvo_central_bosnia",
+              "hvo_tomislavgrad"
+            ],
+            "description": "Zagreb: secure Herzegovina, maintain RBiH alliance. Posavina exempt (fighting for survival).",
+            "end_week": 40,
+            "name": "Consolidate Herzegovina",
+            "stance_ceiling": "defensive",
+            "start_week": 0
+          },
+          {
+            "corps_ids": [
+              "hvo_southeast_herzegovina"
+            ],
+            "description": "Zagreb: take Mostar hinterland",
+            "end_week": 999,
+            "name": "Herzegovina Offensive",
+            "stance_ceiling": "offensive",
+            "start_week": 40
+          },
+          {
+            "corps_ids": [
+              "hvo_central_bosnia"
+            ],
+            "description": "Zagreb: prepare positions, avoid premature escalation",
+            "end_week": 50,
+            "name": "Central Bosnia Restraint",
+            "stance_ceiling": "balanced",
+            "start_week": 40
+          },
+          {
+            "corps_ids": [
+              "hvo_central_bosnia"
+            ],
+            "description": "Zagreb: secure Lasva Valley",
+            "end_week": 999,
+            "name": "Central Bosnia Offensive",
+            "stance_ceiling": "offensive",
+            "start_week": 50
+          },
+          {
+            "corps_ids": [
+              "hvo_tomislavgrad"
+            ],
+            "description": "Zagreb: maintain western positions",
+            "end_week": 999,
+            "name": "Tomislavgrad Hold",
+            "stance_ceiling": "balanced",
+            "start_week": 40
+          }
+        ]
+      },
+      "reinforcement_mult": {
+        "HRHB": [
+          {
+            "end_turn": 12,
+            "start_turn": 0,
+            "value": 0.5
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 12,
+            "value": 0.75
+          }
+        ],
+        "RBiH": [
+          {
+            "end_turn": 12,
+            "start_turn": 0,
+            "value": 0.25
+          },
+          {
+            "end_turn": 26,
+            "start_turn": 12,
+            "value": 0.5
+          },
+          {
+            "end_turn": 52,
+            "start_turn": 26,
+            "value": 0.75
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 52,
+            "value": 1
+          }
+        ],
+        "RS": [
+          {
+            "end_turn": 9999,
+            "start_turn": 0,
+            "value": 1
+          }
+        ]
+      },
+      "standing_orders": {
+        "HRHB": [
+          {
+            "army_stance": "balanced",
+            "description": "Secure the Croat heartland. No army-wide override — local commanders secure their sectors.",
+            "end_week": 12,
+            "name": "Consolidate Herzegovina",
+            "start_week": 0
+          },
+          {
+            "army_stance": "balanced",
+            "description": "No bilateral war — focus on defending Croat territory against RS. Maintain alliance with RBiH.",
+            "end_week": 26,
+            "name": "Anti-RS Defense",
+            "start_week": 12
+          },
+          {
+            "army_stance": "balanced",
+            "description": "Post-Washington Agreement. Cease offensive ops against RBiH, defend territory, cooperate with ARBiH against VRS. Counter-attacks and probing permitted against RS.",
+            "end_week": 9999,
+            "name": "Washington Pivot",
+            "start_week": 26
+          }
+        ],
+        "RBiH": [
+          {
+            "army_stance": "general_defensive",
+            "description": "Preserve forces. No offensive operations. Hold what you can, reorganize TO into brigades.",
+            "end_week": 12,
+            "name": "Survival Defense",
+            "start_week": 0
+          },
+          {
+            "army_stance": "balanced",
+            "description": "Corps forming. Local counterattacks permitted to reclaim lost territory. No general offensives.",
+            "end_week": 40,
+            "name": "Local Counterattacks",
+            "start_week": 12
+          },
+          {
+            "army_stance": "balanced",
+            "description": "Corps structure mature. Active defense with counterattack capability.",
+            "end_week": 56,
+            "name": "Corps Reorganization",
+            "start_week": 40
+          },
+          {
+            "army_stance": "balanced",
+            "description": "Pinprick attacks begin. Probe VRS lines, test weaknesses, stretch reserves. Not breakthroughs.",
+            "end_week": 80,
+            "name": "Active Defense",
+            "start_week": 56
+          },
+          {
+            "army_stance": "general_offensive",
+            "description": "Full counteroffensives. Corps-level coordinated operations (1994-1995 campaigns).",
+            "end_week": 9999,
+            "name": "Controlled Counteroffensive",
+            "start_week": 80
+          }
+        ],
+        "RS": [
+          {
+            "army_stance": "general_offensive",
+            "description": "Exploit JNA equipment handover for maximum territorial gain before international response.",
+            "end_week": 26,
+            "name": "Territorial Seizure",
+            "start_week": 0
+          },
+          {
+            "army_stance": "balanced",
+            "description": "Consolidate gains, targeted operations on strategic objectives. Tempo constrained by supply, fatigue, and overstretch — not by standing order.",
+            "end_week": 9999,
+            "name": "Targeted Operations",
+            "start_week": 26
+          }
+        ]
       }
     }
   },
@@ -40316,11 +40953,11 @@
           "hdz_penetration": 20,
           "paramilitary_hrhb": 5,
           "paramilitary_rs": 40,
-          "patriotska_liga": 25,
-          "police_loyalty": "mixed",
-          "sda_penetration": 75,
+          "patriotska_liga": 60,
+          "police_loyalty": "loyal",
+          "sda_penetration": 85,
           "sds_penetration": 30,
-          "to_control": "contested"
+          "to_control": "controlled"
         }
       },
       "gradacac": {
