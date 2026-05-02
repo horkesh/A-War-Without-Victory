@@ -12,6 +12,8 @@ describe('pre-advance command review wiring', () => {
     expect(model).toContain('buildPreAdvanceCommandReviewView');
     expect(model).toContain('buildPresidentialDecisionRoomView');
     expect(model).toContain('advanceReadiness');
+    expect(model).toContain('buildPresidentialDecisionRoomSourceHandoffs');
+    expect(model).toContain('sourceHandoffs');
     expect(model).not.toMatch(/from ['"].*src\/sim\/combat/);
     expect(model).not.toMatch(/from ['"].*combat\//);
     expect(model).not.toContain('Math.random');

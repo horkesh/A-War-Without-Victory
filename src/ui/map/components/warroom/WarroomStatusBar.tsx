@@ -104,6 +104,28 @@ function PriorityDocketPanel({
         ))}
       </div>
 
+      <div className="mt-2 border-t border-amber-900/45 pt-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">Source Handoffs</div>
+          <div className="truncate text-[8px] uppercase tracking-[0.08em] text-amber-300/60">
+            {docket.sourceHandoffSummary}
+          </div>
+        </div>
+        {docket.sourceHandoffs.length > 0 && (
+          <div className="mt-1 grid gap-1 sm:grid-cols-2">
+            {docket.sourceHandoffs.map((handoff) => (
+              <div
+                key={handoff.id}
+                className="min-w-0 rounded border border-amber-900/35 bg-black/35 px-2 py-1"
+              >
+                <div className="truncate text-[9px] font-bold text-amber-100">{handoff.label}</div>
+                <div className="truncate text-[7px] uppercase tracking-[0.08em] text-amber-300/60">{handoff.summary}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="mt-2 flex justify-end border-t border-amber-900/45 pt-2">
         <button
           type="button"

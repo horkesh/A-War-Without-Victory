@@ -6,6 +6,7 @@ import {
   type PresidentialDecisionRoomCommandQuestion,
   type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomSeverity,
+  type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
 import { useGameStore } from '../../store/gameStore';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
@@ -172,6 +173,33 @@ function CompactLink({ card }: { card: PresidentialDecisionRoomCard }) {
   );
 }
 
+function SourceHandoffLink({ handoff }: { handoff: PresidentialDecisionRoomSourceHandoff }) {
+  const disabled = handoff.navigationTarget.kind === 'none';
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => openPresidentialDecisionRoomNavigationTarget(handoff.navigationTarget)}
+      className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
+    >
+      <span className="min-w-0">
+        <span className="block truncate text-[10px] font-semibold text-text-primary">{handoff.label}</span>
+        <span className="block truncate text-[8px] uppercase tracking-[0.1em] text-text-muted">{handoff.summary}</span>
+      </span>
+      <span className="flex shrink-0 items-center gap-1">
+        {handoff.urgentCount > 0 && (
+          <span className="rounded border border-red-400/35 bg-red-500/10 px-1.5 py-0.5 text-[8px] font-bold tabular-nums text-red-300">
+            {handoff.urgentCount}
+          </span>
+        )}
+        <span className="rounded border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.09em] text-amber-300">
+          {handoff.actionLabel}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export function PresidentialDecisionRoomPanel() {
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
@@ -267,6 +295,19 @@ export function PresidentialDecisionRoomPanel() {
                 </div>
               ) : inspectNext.map((card) => (
                 <CompactLink key={card.id} card={card} />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Source Handoffs</div>
+            <div className="space-y-1.5">
+              {view.sourceHandoffs.length === 0 ? (
+                <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
+                  No source handoffs available.
+                </div>
+              ) : view.sourceHandoffs.map((handoff) => (
+                <SourceHandoffLink key={handoff.id} handoff={handoff} />
               ))}
             </div>
           </div>

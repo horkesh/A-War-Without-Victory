@@ -170,6 +170,16 @@ describe('buildPreAdvanceCommandReviewView', () => {
       actionLabel: 'Open Turn Record',
       navigationTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
     });
+    expect(view.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'army-hq-briefing',
+      'army-hq-summary',
+      'turn-aftermath-records',
+    ]);
+    expect(view.sourceHandoffs[0]).toMatchObject({
+      label: 'Army HQ Briefing',
+      count: 2,
+      cardIds: ['review:pending', 'opportunity:opp_pre_advance'],
+    });
   });
 
   it('returns a quiet clear state when no player-facing review items exist', () => {
@@ -183,6 +193,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('clear');
     expect(view.headline).toBe('Clear to advance');
     expect(view.items).toEqual([]);
+    expect(view.sourceHandoffs).toEqual([]);
     expect(view.metrics.advanceReviewCount).toBe(0);
     expect(view.canReviewPriorities).toBe(true);
   });
@@ -193,6 +204,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('unavailable');
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
+    expect(view.sourceHandoffs).toEqual([]);
     expect(view.canReviewPriorities).toBe(false);
   });
 });

@@ -72,6 +72,20 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('commandLoopQueue');
   });
 
+  it('renders source handoffs as grouped shell routes without creating another records owner', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
+
+    expect(model).toContain('sourceHandoffs');
+    expect(model).toContain('buildPresidentialDecisionRoomSourceHandoffs');
+    expect(panel).toContain('SourceHandoffLink');
+    expect(panel).toContain('view.sourceHandoffs.map');
+    expect(panel).toContain('Source Handoffs');
+    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(handoff.navigationTarget)');
+    expect(panel).not.toContain('sourceHandoffQueue');
+    expect(panel).not.toContain('sourceHandoffLedger');
+  });
+
   it('does not import or expose sensitive-history/combat-lane internals', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');

@@ -241,6 +241,75 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('groups source handoffs by existing inspection surface without creating a new owner', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_beta', display_name: 'Beta Window', expires_turn: 30 }),
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      commandBriefing: {
+        headline: 'Critical command alert.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'briefing:zeta',
+            kind: 'command',
+            severity: 'critical',
+            title: 'Corps command strain rising',
+            detail: 'Staff reports command friction around the main effort.',
+            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
+          },
+        ],
+      },
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: -1 },
+        displacement_total: 1600,
+      }),
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+    const byId = Object.fromEntries(first.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+
+    expect(second.sourceHandoffs).toEqual(first.sourceHandoffs);
+    expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'army-hq-briefing',
+      'army-hq-summary',
+      'army-hq-corps-briefings',
+      'turn-aftermath-records',
+      'army-hq-records-aftermath',
+      'chronicle',
+    ]);
+    expect(byId['army-hq-briefing']).toMatchObject({
+      label: 'Army HQ Briefing',
+      count: 3,
+      urgentCount: 2,
+      cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(byId['turn-aftermath-records']).toMatchObject({
+      label: 'Turn Aftermath Records',
+      cardIds: ['turn:24:hard-turn'],
+      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+    });
+    expect(byId.chronicle).toMatchObject({
+      label: 'Chronicle',
+      cardIds: ['chronicle:review-memory'],
+      navigationTarget: { kind: 'chronicle' },
+    });
+  });
+
   it('builds deterministic priority lenses over the same card archive', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -411,6 +480,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards).toEqual([]);
     expect(view.lenses).toEqual([]);
     expect(view.commandQuestions).toEqual([]);
+    expect(view.sourceHandoffs).toEqual([]);
     expect(view.emptyState).toBe('No player faction loaded.');
   });
 });

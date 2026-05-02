@@ -85,12 +85,24 @@ export interface PresidentialDecisionRoomCommandQuestion {
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
 }
 
+export interface PresidentialDecisionRoomSourceHandoff {
+  id: string;
+  label: string;
+  summary: string;
+  count: number;
+  urgentCount: number;
+  cardIds: string[];
+  actionLabel: string;
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+}
+
 export interface PresidentialDecisionRoomView {
   hasPlayerFaction: boolean;
   emptyState: string | null;
   cards: PresidentialDecisionRoomCard[];
   lenses: PresidentialDecisionRoomLens[];
   commandQuestions: PresidentialDecisionRoomCommandQuestion[];
+  sourceHandoffs: PresidentialDecisionRoomSourceHandoff[];
   inspectNext: PresidentialDecisionRoomCard[];
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness;
   metrics: PresidentialDecisionRoomMetrics;
@@ -513,6 +525,121 @@ function isUrgentCard(card: PresidentialDecisionRoomCard): boolean {
   return card.severity === 'blocking' || card.severity === 'critical';
 }
 
+interface SourceHandoffDescriptor {
+  id: string;
+  label: string;
+  actionLabel: string;
+}
+
+interface SourceHandoffAccumulator extends SourceHandoffDescriptor {
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  topSortKey: number;
+  cards: PresidentialDecisionRoomCard[];
+}
+
+function armyHqTabLabel(tab: ArmyHQTab): string {
+  if (tab === 'briefing') return 'Army HQ Briefing';
+  if (tab === 'summary') return 'Army HQ Summary';
+  if (tab === 'records') return 'Army HQ Records';
+  return 'Army HQ Personnel';
+}
+
+function armyHqRecordsLabel(recordsSubTab: ArmyHQRecordsSubTab): string {
+  if (recordsSubTab === 'aftermath') return 'Army HQ Records';
+  if (recordsSubTab === 'aar') return 'Army HQ AAR Records';
+  if (recordsSubTab === 'ops') return 'Army HQ Operations Records';
+  return 'Army HQ Opportunity Records';
+}
+
+function describeSourceHandoffTarget(
+  target: PresidentialDecisionRoomNavigationTarget,
+): SourceHandoffDescriptor | null {
+  if (target.kind === 'army-hq-tab') {
+    return {
+      id: `army-hq-${target.tab}`,
+      label: armyHqTabLabel(target.tab),
+      actionLabel: `Open ${target.tab === 'briefing' ? 'Briefing' : target.tab === 'summary' ? 'Summary' : target.tab === 'records' ? 'Records' : 'Personnel'}`,
+    };
+  }
+  if (target.kind === 'army-hq-records') {
+    return {
+      id: `army-hq-records-${target.recordsSubTab}`,
+      label: armyHqRecordsLabel(target.recordsSubTab),
+      actionLabel: 'Open Records',
+    };
+  }
+  if (target.kind === 'army-hq-aftermath-record') {
+    return {
+      id: 'turn-aftermath-records',
+      label: 'Turn Aftermath Records',
+      actionLabel: 'Open Turn Record',
+    };
+  }
+  if (target.kind === 'army-hq-corps-briefing') {
+    return {
+      id: 'army-hq-corps-briefings',
+      label: 'Corps Briefings',
+      actionLabel: 'Inspect Corps',
+    };
+  }
+  if (target.kind === 'chronicle') {
+    return {
+      id: 'chronicle',
+      label: 'Chronicle',
+      actionLabel: 'Open Chronicle',
+    };
+  }
+  return null;
+}
+
+function sourceHandoffSummary(count: number, urgentCount: number): string {
+  const itemText = `${count} ${pluralize(count, 'item')}`;
+  return urgentCount > 0 ? `${itemText} / ${urgentCount} urgent` : itemText;
+}
+
+export function buildPresidentialDecisionRoomSourceHandoffs(
+  cards: PresidentialDecisionRoomCard[],
+): PresidentialDecisionRoomSourceHandoff[] {
+  const groups = new Map<string, SourceHandoffAccumulator>();
+
+  for (const card of cards) {
+    const descriptor = describeSourceHandoffTarget(card.navigationTarget);
+    if (!descriptor) continue;
+
+    const existing = groups.get(descriptor.id);
+    if (existing) {
+      existing.cards.push(card);
+      continue;
+    }
+
+    groups.set(descriptor.id, {
+      ...descriptor,
+      navigationTarget: card.navigationTarget,
+      topSortKey: card.sortKey,
+      cards: [card],
+    });
+  }
+
+  return [...groups.values()]
+    .sort((a, b) => {
+      if (a.topSortKey !== b.topSortKey) return a.topSortKey - b.topSortKey;
+      return strictCompare(a.id, b.id);
+    })
+    .map((group) => {
+      const urgentCount = group.cards.filter(isUrgentCard).length;
+      return {
+        id: group.id,
+        label: group.label,
+        summary: sourceHandoffSummary(group.cards.length, urgentCount),
+        count: group.cards.length,
+        urgentCount,
+        cardIds: group.cards.map((card) => card.id),
+        actionLabel: group.actionLabel,
+        navigationTarget: group.navigationTarget,
+      };
+    });
+}
+
 function buildLens(
   id: PresidentialDecisionRoomLensId,
   label: string,
@@ -631,6 +758,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       cards: [],
       lenses: [],
       commandQuestions: [],
+      sourceHandoffs: [],
       inspectNext: [],
       advanceReadiness: {
         headline: 'No state loaded',
@@ -653,6 +781,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       cards: [],
       lenses: [],
       commandQuestions: [],
+      sourceHandoffs: [],
       inspectNext: [],
       advanceReadiness: {
         headline: 'No player faction loaded',
@@ -683,6 +812,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const advanceReadiness = buildAdvanceReadiness(state, cards);
   const lenses = buildLenses(cards);
   const inspectNext = cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5);
+  const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
   const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
 
   return {
@@ -691,6 +821,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     cards,
     lenses,
     commandQuestions,
+    sourceHandoffs,
     inspectNext,
     advanceReadiness,
     metrics: {

@@ -161,6 +161,12 @@ describe('buildWarroomPriorityDocketView', () => {
       actionLabel: 'Review Queue',
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
+    expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+      'army-hq-briefing',
+      'army-hq-summary',
+      'turn-aftermath-records',
+    ]);
+    expect(first.sourceHandoffSummary).toBe('3 source handoffs / 4 urgent');
     expect(first.openBoardLabel).toBe('Open Decision Room');
   });
 
@@ -177,6 +183,8 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.headline).toBe('Clear to advance');
     expect(view.summary).toBe('0 advance items / 0 urgent / 0 pending');
     expect(view.items).toEqual([]);
+    expect(view.sourceHandoffs).toEqual([]);
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
     expect(view.canOpenBoard).toBe(true);
   });
 
@@ -187,6 +195,8 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.tone).toBe('quiet');
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
+    expect(view.sourceHandoffs).toEqual([]);
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
     expect(view.canOpenBoard).toBe(false);
   });
 });

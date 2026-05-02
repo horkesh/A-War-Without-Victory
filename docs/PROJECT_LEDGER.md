@@ -1,3 +1,37 @@
+## [2026-05-02] feat(ui): add Decision Room source handoffs
+
+**Type:** UI/product read-model and shell presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** `buildPresidentialDecisionRoomView(...)` now derives deterministic `sourceHandoffs` from the same sorted Strategic Priorities card archive. Cards are grouped by their existing owning inspection surface (`Army HQ Briefing`, `Army HQ Summary`, `Corps Briefings`, `Turn Aftermath Records`, Army HQ Records, Chronicle), preserving the first card's existing `navigationTarget` and carrying count, urgent count, summary, and card ids.
+
+**Loop continuity:** `buildPreAdvanceCommandReviewView(...)` groups source handoffs over `advanceReadiness.items`, and `buildWarroomPriorityDocketView(...)` carries those grouped handoffs plus a compact `sourceHandoffSummary`. Army HQ renders direct `Source Handoffs` buttons; the Warroom docket shows compact handoff chips while row-level actions continue to route through the App-owned Decision Room target handler.
+
+**Ownership guardrails:** Source handoffs are projections only. They do not create another records owner, inbox, cost ledger, Chronicle, event log, or turn blocker. The owning source remains the same player-facing surface each Decision Room card already linked to.
+
+**Verification:** Red-first tests added to `tests/ui/presidential_decision_room.test.ts`, `tests/ui/pre_advance_command_review.test.ts`, `tests/ui/warroom_priority_docket.test.ts`, and three wiring guards. Initial RED failed on missing `sourceHandoffs` / `sourceHandoffSummary`; focused GREEN run passed 26/26 before docs. Full type/build verification is recorded in `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`.
+
+**Files:**
+- `src/ui/map/data/presidentialDecisionRoom.ts`
+- `src/ui/map/data/preAdvanceCommandReview.ts`
+- `src/ui/map/data/warroomPriorityDocket.ts`
+- `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`
+- `src/ui/map/components/warroom/WarroomStatusBar.tsx`
+- `tests/ui/presidential_decision_room.test.ts`
+- `tests/ui/pre_advance_command_review.test.ts`
+- `tests/ui/warroom_priority_docket.test.ts`
+- `tests/ui_presidential_decision_room_wiring.test.ts`
+- `tests/ui_pre_advance_command_review_wiring.test.ts`
+- `tests/ui_warroom_priority_docket_wiring.test.ts`
+- `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+---
+
 ## [2026-05-02] feat(combat): predictor / combat-power context honest for committed-in-transit operation participants (LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT)
 
 **Type:** Bounded engine-only context-honesty repair across `combat_math.ts` and `operation_preparation.ts`. Successor handoff to predecessor `87062cc4` (named remaining blocker: `computeAttackerPower` reads brigade `location_osid` for context lookups). No `enclave_resilience.ts`, no `rupture_consequences.ts`, no outcome-formula changes (defender stack, entrenchment, terrain, Lanchester all UNCHANGED), no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads.

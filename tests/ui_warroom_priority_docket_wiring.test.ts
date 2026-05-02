@@ -15,6 +15,8 @@ describe('Warroom priority docket wiring', () => {
     expect(source).toContain('Review Before Advance');
     expect(source).toContain('Open Decision Room');
     expect(source).toContain('docket.items.map');
+    expect(source).toContain('Source Handoffs');
+    expect(source).toContain('docket.sourceHandoffs.map');
   });
 
   it('routes docket row actions through the same App-owned Decision Room target handler', () => {
@@ -35,6 +37,8 @@ describe('Warroom priority docket wiring', () => {
     const combined = `${model}\n${source}`;
 
     expect(model).toContain('buildPreAdvanceCommandReviewView');
+    expect(model).toContain('sourceHandoffSummary');
+    expect(model).toContain('sourceHandoffs');
     expect(model).not.toMatch(/from ['"].*src\/sim\/combat/);
     expect(combined).not.toMatch(/src\/sim\/combat|sim\\combat|triggered|rupture|drina|srebrenica|krivaja/i);
     expect(combined).not.toContain('Math.random');

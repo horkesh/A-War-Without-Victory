@@ -1,10 +1,12 @@
 import {
+  buildPresidentialDecisionRoomSourceHandoffs,
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
   type PresidentialDecisionRoomMetrics,
   type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
+  type PresidentialDecisionRoomSourceHandoff,
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
 
@@ -24,12 +26,14 @@ export interface PreAdvanceCommandReviewItem {
 }
 
 export type PreAdvanceCommandReviewMetrics = PresidentialDecisionRoomMetrics;
+export type PreAdvanceCommandReviewSourceHandoff = PresidentialDecisionRoomSourceHandoff;
 
 export interface PreAdvanceCommandReviewView {
   status: PreAdvanceCommandReviewStatus;
   headline: string;
   canReviewPriorities: boolean;
   items: PreAdvanceCommandReviewItem[];
+  sourceHandoffs: PreAdvanceCommandReviewSourceHandoff[];
   metrics: PreAdvanceCommandReviewMetrics;
 }
 
@@ -67,6 +71,7 @@ function statusFor(
 export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewInput): PreAdvanceCommandReviewView {
   const decisionRoom = buildPresidentialDecisionRoomView(input);
   const items = decisionRoom.advanceReadiness.items.map(mapReadinessItem);
+  const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(decisionRoom.advanceReadiness.items);
 
   return {
     status: statusFor(
@@ -77,6 +82,7 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
     headline: decisionRoom.advanceReadiness.headline,
     canReviewPriorities: decisionRoom.hasPlayerFaction,
     items,
+    sourceHandoffs,
     metrics: decisionRoom.metrics,
   };
 }
