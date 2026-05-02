@@ -1,3 +1,36 @@
+## [2026-05-02] docs(combat): diagnose Krivaja-95 brigade-roster lifecycle; close as diagnostic with named handoffs
+
+**Type:** Read-only diagnostic + structural test + report. No engine code, scenario data, painted targets, OOB, combat math, rupture/enclave logic, or calibration tuning changed.
+
+**Why:** Successor handoff #1 from `1e68d8dc` TRIGGERED_OP_TEMPORAL_TRACE. The temporal-trace lane proved the Krivaja-95 binding blocker is brigade-roster lifecycle (3 of 5 named participants INACTIVE/0-personnel by t179 in n1619; 2 active drift away from staging). This lane explains exactly when and how each watched brigade reached that state, and decides whether any generic, canon-safe, deterministic engine repair is implementable inside lane stop gates.
+
+**Phase 0 audit (4 parallel investigators):**
+- /historian: all 5 Krivaja-95 brigades grounded in direct ICTY Popović §244 paragraph text + §245 fn 757 / §247 supplementary citations. Roster citation-SAFE; § 6 grandfathered by `98446604`. No substitutions proposed.
+- /operations-expert (n1619 trace): `rs_1st_zvornik` destroyed t95 in honest combat (catastrophic battle on Zvornik–Brčko corridor, 2358 cas / 6 battles). `rs_1st_bratunac` destroyed t101 in honest combat (1335 cas / 4 battles, reactive defense attrition). `rs_skelani_battalion` destroyed t171 by NON-COMBAT attrition — NEVER op participant, fought 0 battles, bled out via frontline_attrition / supply / morale. `rs_1st_milii` and `rs_5th_podrinje` survive but post-Krivaja-conclusion idle at non-staging OSIDs. Krivaja-95 runtime AAR participant list = exactly `[rs_1st_milii, rs_5th_podrinje]`.
+- /formation-expert: 10 lifecycle paths inventoried; canonical INACTIVE predicate is `formation.status === 'inactive'` AND `lifecycle_status === 'destroyed'`. Bratunac+Zvornik = Path #1 `dissolveCombatIneffectiveBrigades` (`brigade_dissolution.ts:76-177`). Skelani = Path #2 `updateStrandedBrigadeLifecycle` collapse (`stranded_brigade_lifecycle.ts:140-265`, homed inside Srebrenica enclave at scenario start). **No generic lifecycle bug** — each subsystem operates correctly given upstream inputs.
+- /scenario-harness-engineer: artifacts MOSTLY SUFFICIENT for 4 of 5 watched brigades; built `tools/diagnostics/krivaja_brigade_lifecycle.cjs` (read-only, parametric watch-list, deterministic strictCompare) + `tests/krivaja_brigade_lifecycle_diagnostic.test.ts` (4/4 GREEN, schema + classification + byte-stability + negative-case).
+
+**Phase 2 closure review:**
+- /game-designer: close-as-diagnostic verdict CORRECT. Player command model: bot AI burning brigades pre-trigger does NOT violate constrained-agency. "Preserve Krivaja-95 roster t1→t168" framed as a hard preservation rule IS god-mode hindsight and would railroad the outcome. Successor handoffs classified by Ring + § 6 sign-off; recommended priority (4)→(2)→(3)→(1).
+- /determinism-auditor: SAFE TO COMMIT. Both diagnostic and test PASS all checks (no forbidden tokens, deterministic sort comparators via `strictCompare`, stable iteration, stable JSON output, no `fs.readdir`/glob, watch-list parametric semantics genuinely faction-agnostic via `Set.has(bid)`, test idempotence via `it.skipIf(!HAS_RUN_DIR)`).
+
+**Sensitive-history verdict:** No movement attributable to this lane — by construction, since no engine code changed. Last status (n1619, predecessor lineage): OPEN_P0 unchanged.
+
+**Successor handoffs (named, prioritized, Ring-classified):**
+1. **Per-turn brigade-keyed snapshot emission** (Ring 1, no § 6, pure observability) — owner /scenario-harness-engineer.
+2. **Reconstitution policy review** (Ring 1 if corps-agnostic, no § 6) — owner /systems-programmer + /game-designer Ring-boundary check; full calibration regression required.
+3. **OOB seeding for enclave-homed brigades** (Ring 2, § 6 REQUIRED) — owner /historian + /game-designer; question: was `rs_skelani_battalion` historically based at Skelani town vs inside the Srebrenica enclave per ICTY?
+4. **Bot AI op-generator awareness of triggered-op rosters** (Ring 3, § 6 REQUIRED, BLOCKED until reframed) — owner /corps-army-commander + /operations-expert + /game-designer; "preserve roster t1→t168" framing IS god-mode hindsight per /game-designer; any acceptable framing must be faction-agnostic and motivated by emergent organic-continuity preference, not triggered-op catalog awareness.
+
+**Files:**
+- `tools/diagnostics/krivaja_brigade_lifecycle.cjs` (NEW, read-only deterministic diagnostic)
+- `tests/krivaja_brigade_lifecycle_diagnostic.test.ts` (NEW, 4/4 GREEN)
+- `docs/40_reports/implemented/20260502_KRIVAJA_BRIGADE_LIFECYCLE.md` (NEW lane report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State entry)
+
+---
+
 ## [2026-05-02] feat(ui): add Decision Room priority dossier
 
 **Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, OOB, sensitive-history, or calibration logic changed.
