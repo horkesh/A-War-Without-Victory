@@ -1,3 +1,37 @@
+## [2026-05-02] docs(combat): retire queued-order predicate hypothesis; pipeline order disproves predecessor closeout
+
+**Type:** Documentation correction + read-only diagnostic + structural test. No engine code, scenario data, painted targets, OOB, combat math, or rupture/enclave logic changed.
+
+**Why:** Codex review P2 flagged that the closeout of `LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT` (commit `8dec8f58`) named a successor blocker — extend `isCommittedInTransitTo` to accept queued `brigade_movement_orders` before `in_transit` conversion — but `war_phases.ts` actually orders `apply-brigade-movement` BEFORE `advance-sector-offensives` and `check-triggered-operations` AFTER both, which would invert the predecessor's claim and disprove the predicate-extension hypothesis.
+
+**Phase 1 audit (3 parallel investigators):**
+- /gameplay-programmer: pipeline order in `src/sim/turn_phases/war_phases.ts` is `apply-brigade-movement` (L641) → `advance-sector-offensives` (L875) → `inject-queued-operations` (L946) → `check-triggered-operations` (L964). `prestageBrigadesForTriggeredOp` (`triggered_operations.ts:705-708`) writes orders LAST in the trigger turn, then pushes the op into `active_operations`.
+- /operations-expert: on the trigger turn (e.g., t179 Krivaja-95) the op does not yet exist in `active_operations` when `tickPreparation`/`estimateForceRatio` runs in `advance-sector-offensives`; it gets inserted later by `check-triggered-operations`. On the next turn, `apply-brigade-movement` converts the prestage orders to `mv_state='in_transit'` BEFORE `advance-sector-offensives` runs. Therefore `estimateForceRatio` never observes a triggered-op participant in raw queued-order state. Final-save evidence at t188 (n1619): 3 of 5 Krivaja participants are INACTIVE/0-personnel by t179; 2 active drift away from Krivaja relevance OSIDs after Stupčanica cascade.
+- /scenario-harness-engineer: per-turn brigade-keyed snapshots are not preserved in run artifacts; built `tools/diagnostics/triggered_op_temporal_trace.cjs` (read-only, deterministic, strictCompare ordering) recovering AAR-level + per-turn aggregate evidence; built `tests/triggered_op_temporal_contract.test.ts` (5/5 GREEN) — structural assertion over `warPhases` step indices that goes RED only if someone reorders the pipeline.
+
+**Synthesis:** Codex P2 is correct; predecessor's queued-order predicate hypothesis is structurally impossible. No predicate change implemented. Real evidence-backed Krivaja-95 binding blocker is **brigade-roster lifecycle** (3 of 5 INACTIVE pre-trigger; 2 active drift away from staging), upstream of `combat_math.ts` and upstream of `operation_preparation.ts` predicate semantics. Stupčanica-95's force_ratio 0.831 / max_failures path is defender combat-math stack territory, already named as next-lane handoff (Phase 4d) by `20260502_DRINA_LATE_WAR_ENCLAVE_PARTIAL.md`.
+
+**Determinism:** Diagnostic + test are off-pipeline read-only artifacts. Structural test asserts pipeline-step ordering invariants directly via the live `warPhases` export; no synthetic GameState construction; no random / timestamps / locale sort.
+
+**Predecessor patched:** `docs/40_reports/implemented/20260502_IN_TRANSIT_COMBAT_POWER_CONTEXT.md` closeout marked SUPERSEDED with pointer to the temporal-trace lane report.
+
+**Sensitive-history verdict:** No movement attributable to this lane — by construction, since no engine code changed. Last sensitive-history status (n1619, predecessor): OPEN_P0 unchanged.
+
+**Successor handoffs (named, evidence-backed):**
+1. Krivaja-95 brigade-roster repair (Phase 4c) — owner /historian + /game-designer (ICTY-grounded participant rosters require Sensitive-History Design Gate § 6 sign-off chain).
+2. Stupčanica-95 defender combat-math stack honesty (Phase 4d) — owner /technical-architect + /game-designer + /war-or-game.
+3. Per-turn brigade-keyed snapshot emission — deferred until a future lane proves it necessary; out of scope.
+
+**Files:**
+- `tools/diagnostics/triggered_op_temporal_trace.cjs` (NEW)
+- `tests/triggered_op_temporal_contract.test.ts` (NEW)
+- `docs/40_reports/implemented/20260502_TRIGGERED_OP_TEMPORAL_TRACE.md` (NEW)
+- `docs/40_reports/implemented/20260502_IN_TRANSIT_COMBAT_POWER_CONTEXT.md` (PATCH — superseded callout)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State entry)
+
+---
+
 ## [2026-05-02] feat(ui): route Warroom source handoffs through App target handling
 
 **Type:** UI/product shell routing change. No simulation, combat, scenario, or sensitive-history logic changed.
@@ -22,6 +56,7 @@
 - `.claude/napkin.md`
 
 ---
+
 ## [2026-05-02] feat(ui): add Decision Room source handoffs
 
 **Type:** UI/product read-model and shell presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
