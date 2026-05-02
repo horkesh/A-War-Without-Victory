@@ -557,6 +557,14 @@ function App() {
     setEventLogOpen(false);
   };
 
+  const reviewPreAdvancePriorities = () => {
+    const gs = useGameStore.getState();
+    openArmyHQTab(gs, 'briefing');
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
   const openInboxHome = () => {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
@@ -839,7 +847,7 @@ function App() {
       <PeaceWarTransitionOverlay />
       <VerdictScreen />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
-      <AdvanceTurnModal />
+      <AdvanceTurnModal onReviewPriorities={reviewPreAdvancePriorities} />
       <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />

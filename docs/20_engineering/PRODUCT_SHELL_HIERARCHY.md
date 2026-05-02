@@ -56,6 +56,8 @@ The C0-audit gap is now partially closed: **Turn Aftermath** is live as a tactic
 
 The next-action gap is also closed at the command-review layer: **Presidential Decision Room / Strategic Priorities** lives at the top of Army HQ BRIEFING. It is a deterministic synthesis over existing read models (`presidentialReviewQueue`, opportunity dossiers, command briefing, operational SITREP, Turn Aftermath records, active cost, and Chronicle availability) and routes cards to existing owners. It is not a second inbox, cost ledger, Chronicle, event log, or combat-planning system.
 
+The advance-turn confirmation now participates in that same loop. The Warroom/tactical `AdvanceTurnModal` consumes a pure pre-advance projection of the Decision Room `advanceReadiness` packet, shows what should be reviewed before the turn advances, and routes `Review Priorities` to Army HQ BRIEFING. It does not create a new blocker, queue, cost owner, or history owner; the existing advance-turn pipeline remains canonical.
+
 ## Shell hierarchy
 
 ### 1. Warroom
@@ -216,6 +218,8 @@ No shell may hide Codex behind an accidental or debug-only path.
   - owner: aftermath / War Summary; final historical reckoning stays with VerdictScreen
 - `strategic priorities / next-action board`
   - owner: Army HQ BRIEFING Presidential Decision Room; source truth remains with review queue, opportunity dossiers, operational SITREP, Turn Aftermath, active cost, and Chronicle
+- `pre-advance review reminder`
+  - owner: advance-turn confirmation consuming Presidential Decision Room readiness; action routes to Army HQ BRIEFING, and source truth remains with the Decision Room's underlying owners
 
 ## Player-truth rule inside the shell hierarchy
 

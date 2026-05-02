@@ -6609,3 +6609,19 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Report:** `docs/40_reports/implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md`.
 
 ---
+
+## [2026-05-02] feat(ui): add pre-advance command review
+
+**Type:** UI/product-spine read-model implementation. No simulation mechanics, combat logic, scenario data, OOB, painted targets, operation catalog content, sensitive-history content, or run artifacts changed.
+
+**Why:** The Decision Room answered what to inspect next, but the actual turn-advance confirmation still asked for irreversible commitment without surfacing the current `Review Before Advance` list. The player needed the same command-loop reminder at the moment of ending the turn.
+
+**What changed:** Added `buildPreAdvanceCommandReviewView(...)`, a pure projection of `buildPresidentialDecisionRoomView(...).advanceReadiness`. `AdvanceTurnModal` now shows urgent, pending, opportunity, and hard-turn counters plus the top review-before-advance rows. `Review Priorities` dismisses the confirmation and opens Army HQ BRIEFING through the existing shell navigation helper, while `Advance Turn` remains on the canonical `advanceTurnAndSync` + Turn Aftermath dependency path.
+
+**Determinism / scope:** UI/read-model only. No new blocker was added, no sim state is mutated, no random/time/locale sorting was introduced, and no combat/catalog/sensitive-history imports were added. The modal remains a handoff surface, not a second inbox, second cost ledger, second Chronicle, or second turn-history owner.
+
+**Verification:** Focused pre-advance, Decision Room, shell navigation, Warroom, and Turn Aftermath wiring tests passed during implementation. Final closeout verification is recorded in `docs/40_reports/implemented/20260502_PRE_ADVANCE_COMMAND_REVIEW.md`.
+
+**Report:** `docs/40_reports/implemented/20260502_PRE_ADVANCE_COMMAND_REVIEW.md`.
+
+---
