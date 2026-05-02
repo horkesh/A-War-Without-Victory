@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-02
 **Status:** CLOSED PARTIAL — two binding blockers removed; force_ratio behavioral-narrow drop documented; three successor lanes chartered.
-**Verification commit:** (this commit)
+**Verification commit:** `68b56d1f`
 **Predecessor:** `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`) — closed PARTIAL on 2026-05-02 with six handoffs.
 **Lane brief:** Krivaja-95 / Srebrenica modeled-fall opening-attack and brigade-roster repair (handoffs #1, #3, #5 from the predecessor's six-lane fan-out).
 
