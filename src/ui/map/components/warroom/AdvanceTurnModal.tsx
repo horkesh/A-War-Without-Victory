@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
 import { advanceTurnAndSync } from '../../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../../desktop/turnAftermathAdvanceDeps';
 
 export function AdvanceTurnModal() {
   const pending = useGameStore((s) => s.advanceTurnPending);
@@ -32,7 +33,13 @@ export function AdvanceTurnModal() {
     if (advancing) return;
     setAdvancing(true);
     try {
-      await advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError });
+      await advanceTurnAndSync({
+        ipc,
+        loadSave,
+        clearStagedOrders,
+        setLoadError,
+        ...getTurnAftermathAdvanceDeps(),
+      });
     } finally {
       setAdvancing(false);
       setPending(false);

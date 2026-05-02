@@ -52,7 +52,7 @@ The v0.9 product spine is the campaign loop, not any individual shell.
 | Judge | How does history read this? | VerdictScreen at game over; Chronicle/Codex during play | Warroom and Army HQ links |
 | Next | What needs attention now? | Presidential Inbox + Army HQ attention | Command briefing banner |
 
-The missing v0.9 handoff, as of the 2026-05-01 C0 audit, is the **Turn Aftermath** owner. The engine already writes `TurnSummary` and the desktop already pushes `turn-report-updated`; the product still needs one player-facing packet that bridges a completed turn into costs, records, and next reviews.
+The C0-audit gap is now partially closed: **Turn Aftermath** is live as a tactical-shell modal opened after successful `advance-turn`. It is a composition surface over `LoadedGameState.latestTurnSummary`, the desktop turn report, and unified Inbox obligations. It does not write sim truth; it bridges a completed turn into records, costs, and next reviews.
 
 ## Shell hierarchy
 

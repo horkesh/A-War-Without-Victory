@@ -87,6 +87,31 @@ function dirtyStoreState(): void {
         expandedStackOsid: 'op:sarajevo:sarajevo_1',
         tooltipTarget: { type: 'osid', id: 'op:sarajevo:sarajevo_1' },
         tooltipPosition: { x: 100, y: 200 },
+        turnAftermath: {
+            turn: 5,
+            dateLabel: '6 May 1992',
+            playerFaction: 'RBiH',
+            headline: 'Test aftermath',
+            tone: 'quiet',
+            territory: { friendlyNet: 0, gains: 0, losses: 0, notable: [] },
+            combat: { battleCount: 0, friendlyBattleCount: 0, friendlyCasualties: 0, opposingCasualties: 0, territoryFlipsFromBattles: 0 },
+            humanitarian: { displacedThisTurn: 0 },
+            formations: { spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0 },
+            supply: { ownSupplyDelta: 0, ownHeavyMunitionsDelta: 0 },
+            cost: {
+                friendlyMilitaryCasualties: 0,
+                theaterMilitaryCasualties: 0,
+                displacedThisTurn: 0,
+                ownFormationsDestroyed: 0,
+                ownSupplySpent: 0,
+                ownHeavyMunitionsSpent: 0,
+                severity: 'low',
+                reasons: ['No major costs recorded'],
+            },
+            signals: [],
+            nextActions: { actionableCount: 0, blockingCount: 0, opportunityCount: 0, reserveCount: 0, officerCount: 0, eventDecisionCount: 0, peaceCount: 0, topItems: [] },
+        },
+        turnAftermathOpen: true,
     });
 }
 
@@ -146,6 +171,9 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.flashOsid).toBeNull();
         expect(s.tooltipTarget).toBeNull();
         expect(s.tooltipPosition).toBeNull();
+        // Turn-after-action reports belong to the prior save payload.
+        expect(s.turnAftermath).toBeNull();
+        expect(s.turnAftermathOpen).toBe(false);
     });
 
     it('resets openingBriefDismissed after loading a save', async () => {

@@ -7,6 +7,7 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import {
     getPlayerSafeMilitaryFactionName,
     getPlayerSafePoliticalFactionName,
@@ -66,7 +67,13 @@ export function PeaceStatusPanel() {
     const handleEndTurn = useCallback(async () => {
         if (!ipc.isAvailable || advancing) return;
         setAdvancing(true);
-        await advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError });
+        await advanceTurnAndSync({
+            ipc,
+            loadSave,
+            clearStagedOrders,
+            setLoadError,
+            ...getTurnAftermathAdvanceDeps(),
+        });
         setAdvancing(false);
     }, [ipc, loadSave, clearStagedOrders, setLoadError, advancing]);
 

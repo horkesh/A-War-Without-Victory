@@ -1,3 +1,17 @@
+## [2026-05-02] feat(ui): land Turn Aftermath product spine with browser proof
+
+**Type:** Product-spine UI/read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog, combat code, or run artifacts changed.
+
+**Why:** The presidential loop already had Brief / Inspect / Decide / Execute, but the player still returned from advance-turn without a coherent "what happened, what did it cost, what records matter, what needs attention next" surface. This lane closes that post-execute gap with a dedicated Turn Aftermath modal plus persistent Army HQ records.
+
+**What changed:** Added the pure `turnAftermath` read model, the post-advance `TurnAftermathModal`, the persistent Army HQ `TURN AFTERMATH` records panel, shared desktop advance-turn aftermath hooks, store state/reset behavior, shell handoff support, turn-cost packet, campaign pulse, strategic signals, filters, and top-action routing to War Summary / Turn Records / Inbox. The modal footer now uses a three-column mobile-safe action grid after browser proof found flex wrapping could clip `Review Inbox` on a 390px viewport.
+
+**Verification:** Current-main rebase proof: 51/51 focused UI tests pass (`turn_aftermath`, wiring, shell navigation, order actions, gamestore load reset); `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` succeeds with existing Vite warnings only. Live Vite browser smoke on `127.0.0.1:5176` verified desktop and 390px mobile render; mobile text scan confirmed `TURN AFTERMATH`, `WAR SUMMARY`, `TURN RECORDS`, and `REVIEW INBOX` all visible. Dev-console noise limited to the existing missing local tile 404 / PMTiles metadata logs.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
 ## [2026-05-02] evidence(operations): verify Sana follow-on reachability split after current-main rebase
 
 **Type:** Scenario verification + documentation propagation for the 5th Corps Sana catalog split. No additional engine behavior changed in this evidence addendum beyond the already-implemented `sana_95` / `sana_95_follow_on` split.
@@ -151,6 +165,117 @@
 **Next-lane recommendations:** (1) Storm-flag timing investigation (BLOCKING T3 trio), owner `/operations-expert` + `/historian` + `/game-designer`; (2) Combat-execution gap on Grmeč (still open from LANE D §10 #4), owner `/corps-army-commander` + `/sector-expert`; (3) apr1994 painted-target compare on Tigar/APWB OSID flips, owner `/scenario-creator-runner-tester`; (4) supply-pressure scale debt (still open from LANE D §10 #3), owner `/systems-programmer` + `/war-or-game`.
 
 **Report:** `docs/40_reports/implemented/20260501_LANE_E_FIFTH_CORPS_OPPORTUNITY_PREDICATE_TOPOLOGY.md`.
+---
+---
+---
+
+## [2026-05-01] feat(ui): show strategic signals in Turn Aftermath modal
+
+**Type:** Tactical-map UI / product-spine immediate report. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** C5-C7 made strategic signals available in the persistent Army HQ archive, but the immediate post-advance modal still hid them. The player should see major events, decorations, arc changes, supply shocks, and movements at the moment the turn resolves, not only after opening records.
+
+**Change:** Added a `Strategic Signals` panel to `TurnAftermathModal`, using the same `TurnAftermathView.signals` read model as Army HQ records. Empty turns show an explicit no-signal row.
+
+**Tests:** Red-first wiring guard added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 51/51 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This only renders an existing read-model field; it does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
+## [2026-05-01] feat(ui): filter Turn Aftermath records by review mode
+
+**Type:** Tactical-map UI / product-spine records navigation. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** A long campaign archive cannot stay useful as an unfiltered stack. Once Turn Aftermath records carry cost and strategic signals, the player needs commander review modes to jump to hard turns, signal-bearing turns, pending-action turns, and territorial movement.
+
+**Change:** Added `filterTurnAftermathRecords(...)` with stable modes: `all`, `hard`, `signals`, `actions`, and `territory`. Army HQ `TURN AFTERMATH` now exposes filter buttons with per-mode counts; the campaign pulse, ledger summary, and record list update against the visible filtered set.
+
+**Tests:** Red-first filter-helper test added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 50/50 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This is local UI state plus a pure filter over already-built record views. It does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
+## [2026-05-01] feat(ui): add Turn Aftermath strategic signals and momentum pulse
+
+**Type:** Tactical-map UI / product-spine records intelligence. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The Turn Aftermath archive had durable cards and aggregate totals, but still did not explain why a turn mattered or what the recent campaign window feels like. A Paradox-grade command surface needs strategic memory: events, unit honors, formation maturation, supply shocks, movements, and a fast momentum read.
+
+**Change:** Extended `TurnAftermathView` with `signals`, a read-only stack derived from existing `TurnSummary` fields (`events_fired`, `notable_events`, `decoration_awards`, `arc_transitions`, `supply_transitions`, and `movements`). Added `buildTurnAftermathCampaignPulse(...)`, which classifies the visible archive window as `advancing`, `contested`, `bleeding`, or `quiet` and produces a short briefing. Army HQ `TURN AFTERMATH` now shows the campaign pulse and per-turn strategic signals above the record cards.
+
+**Tests:** Red-first read-model tests added for signal extraction and campaign momentum classification. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 48/48 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with pre-existing Vite warnings only.
+
+**Determinism:** Preserved. This is a stable read-model projection over already-persisted `TurnSummary` arrays and already-built aftermath records. It does not mutate GameState, operation execution, combat, control, scenario data, or saved simulation truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
+## [2026-05-01] feat(ui): summarize Turn Aftermath records as a campaign pulse
+
+**Type:** Tactical-map UI / product-spine records summary. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** Persistent aftermath records were useful as individual cards, but still forced the player to scan manually for the campaign trend. Army HQ RECORDS needs a fast read of the recent archive: net territory, casualties, displacement, formations lost, and how many hard turns the player just endured.
+
+**Change:** Added `buildTurnAftermathLedgerSummary(...)`, a pure aggregation over `TurnAftermathView[]`. The Army HQ `TURN AFTERMATH` subtab now summarizes record count, cumulative net friendly territory, friendly casualties, displaced population, own formations destroyed, and severe/critical turn count above the individual cards.
+
+**Tests:** Red-first ledger-summary test added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts` = 6/6 pass.
+
+**Determinism:** Preserved. This is an order-stable aggregation over the already-built record views; it does not mutate state or re-read simulation internals.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
+## [2026-05-01] feat(ui): add turn-cost packets to Turn Aftermath
+
+**Type:** Tactical-map UI / product-spine cost read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The post-advance report and Army HQ aftermath records now persist what happened, but the stated product loop also needs "what did that turn cost?" before the final endgame War Cost Summary. The engine already persists the relevant per-turn truth in `TurnSummary`; the missing piece was a player-facing turn-cost projection.
+
+**Change:** Extended `TurnAftermathView` with a `cost` packet derived from `TurnSummary`: friendly military casualties, theater military casualties, displaced population this turn, own formations destroyed, own supply/heavy munitions spent, a scan-friendly severity band (`low | moderate | severe | critical`), and short reason strings. The modal now includes a compact `Turn Cost` panel. Army HQ `TURN AFTERMATH` records now show cost severity and cost metrics per turn. Older records remain archived turn packets; only the latest record carries live inbox obligations.
+
+**Tests:** Red-first read-model and UI visibility guards added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 44/44 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean.
+
+**Determinism:** Preserved. This is a UI/read-model aggregation over already-persisted `TurnSummary` and current inbox state only. It does not mutate GameState, operation execution, combat, control, scenario data, or saved sim truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+## [2026-05-01] feat(ui): persist Turn Aftermath in Army HQ records
+
+**Type:** Tactical-map UI / product-spine records surface. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** Turn Aftermath C1 gave the player an immediate post-advance report, but it was still ephemeral. A dismissed modal should not erase the president's access to "what happened last turn" history. Army HQ RECORDS already owns military history, so Turn Aftermath needs to live there as a persistent review surface.
+
+**Change:** Added `buildTurnAftermathRecordViews(...)` in `src/ui/map/data/turnAftermath.ts` to compose newest-first records from `LoadedGameState.turnSummaries`, with `latestTurnSummary` as a fallback for freshly loaded saves. Only the latest record carries live inbox obligations; older records stay archived turn packets. Added `TurnAftermathRecordsPanel` and mounted it as a new Army HQ RECORDS subtab (`aftermath`). The Turn Aftermath modal's records action now lands on that subtab instead of generic AARs. Extended shared shell handoff and store types so Warroom/Tactical navigation can route directly to `recordsSubTab: 'aftermath'`.
+
+**Tests:** Focused UI/read-model/navigation pack green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts` = 43/43 pass. `npx.cmd tsc --noEmit -p tsconfig.json` clean. `npm.cmd run desktop:map:build` succeeded with only pre-existing Vite chunk/dynamic-import warnings.
+
+**Determinism:** Preserved. This is a UI/read-model projection over already-persisted summaries and inbox state. It does not mutate GameState, operation execution, combat, control, scenario data, or saved sim truth.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+## [2026-05-01] feat(ui): add Turn Aftermath product-spine bridge
+
+**Type:** Tactical-map UI / product-spine read model. No simulation mechanics, scenario data, OOB, painted targets, calibration constants, or run artifacts changed.
+
+**Why:** The C0 product-spine audit found that the campaign loop had live Brief / Inspect / Decide / Execute surfaces, but the post-execute handoff was still partial. The engine already persisted `latestTurnSummary` and desktop advance-turn already returned `turn-report-updated`; the missing owner was a dedicated "what just happened, what did it cost, what needs attention now" packet.
+
+**Change:** Added `buildTurnAftermathView(...)` in `src/ui/map/data/turnAftermath.ts` to compose `LoadedGameState.latestTurnSummary`, player faction, OSID display names, and unified inbox obligations into one player-facing report. Added `TurnAftermathModal` and mounted it from `App.tsx`. Extended `advanceTurnAndSync(...)` with optional aftermath hooks and added `getTurnAftermathAdvanceDeps()` so every tactical advance-turn entrypoint (PresidentialToolbar, Warroom calendar modal, spacebar shortcut, PeaceStatusPanel, legacy TopToolbar) opens the same report after a successful state load. Added `turnAftermath` / `turnAftermathOpen` store fields and reset them on fresh save load.
+
+**Tests:** Red-first builder/bridge/store tests and source wiring guard added. Green: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts tests/ui_turn_aftermath_wiring.test.ts` = 20/20 pass. `npx.cmd tsc --noEmit` clean.
+
+**Determinism:** Preserved. This reads already-persisted turn summary and inbox state only. It does not mutate sim state, operation execution, control, combat, scenario data, or run artifacts.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
 
 ---
 

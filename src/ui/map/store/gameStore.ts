@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
+import type { TurnAftermathView } from '../data/turnAftermath';
+import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -146,7 +148,7 @@ export interface GameStore {
   /** Army HQ modal state. */
   armyHQOpen: boolean;
   armyHQTab: 'briefing' | 'summary' | 'records' | 'personnel';
-  armyHQRecordsSubTab: 'aar' | 'ops' | 'opportunities';
+  armyHQRecordsSubTab: ArmyHQRecordsSubTab;
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
@@ -163,7 +165,7 @@ export interface GameStore {
   setForceInboxOpen: (v: boolean) => void;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
-  setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops' | 'opportunities') => void;
+  setArmyHQRecordsSubTab: (subTab: ArmyHQRecordsSubTab) => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
   setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;
@@ -232,6 +234,11 @@ export interface GameStore {
   /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
   lastTurnReport: LastTurnReport | null;
   setLastTurnReport: (report: LastTurnReport | null) => void;
+  /** Player-facing after-action bridge opened immediately after a successful turn advance. */
+  turnAftermath: TurnAftermathView | null;
+  turnAftermathOpen: boolean;
+  setTurnAftermath: (view: TurnAftermathView | null) => void;
+  setTurnAftermathOpen: (open: boolean) => void;
   /** Last load error message (cleared when a new load starts or succeeds). */
   loadError: string | null;
   setLoadError: (message: string | null) => void;
@@ -481,6 +488,10 @@ export const useGameStore = create<GameStore>((set) => ({
 
   lastTurnReport: null,
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
+  turnAftermath: null,
+  turnAftermathOpen: false,
+  setTurnAftermath: (view) => set({ turnAftermath: view }),
+  setTurnAftermathOpen: (open) => set({ turnAftermathOpen: open }),
 
   loadError: null,
   lastLoadedStateFingerprint: null,
@@ -590,6 +601,9 @@ export const useGameStore = create<GameStore>((set) => ({
               ghostLinePoint: null,
               // Flash highlight from stale ORBAT-map sync
               flashOsid: null,
+              // Turn aftermath belongs to the previous save/turn payload.
+              turnAftermath: null,
+              turnAftermathOpen: false,
             });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();

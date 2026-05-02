@@ -11,6 +11,7 @@ import { openCodex } from '../utils/shellNavigation';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import { formatTurnLabel } from '../utils/formatters';
 import { getFactionCrest } from '../utils/factionAssets';
 import { OfficerEventBadge } from './OfficerEventBadge';
@@ -188,6 +189,7 @@ export function TopToolbar({
       loadSave,
       clearStagedOrders,
       setLoadError,
+      ...getTurnAftermathAdvanceDeps(),
     });
     setAdvancing(false);
   }, [ipc, loadedGameState, loadSave, clearStagedOrders, setLoadError]);
