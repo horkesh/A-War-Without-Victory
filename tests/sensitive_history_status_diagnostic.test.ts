@@ -1,0 +1,132 @@
+import { afterEach, describe, expect, it } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const TMP_ROOT = join(process.cwd(), '.tmp_sensitive_history_status');
+
+function writeJson(path: string, value: unknown): void {
+    writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+describe('sensitive_history_status diagnostic script', () => {
+    afterEach(() => {
+        rmSync(TMP_ROOT, { recursive: true, force: true });
+    });
+
+    it('reports unresolved Srebrenica/Zepa controller and rupture status', () => {
+        const runDir = join(TMP_ROOT, 'run_a');
+        mkdirSync(runDir, { recursive: true });
+        writeJson(join(runDir, 'run_summary.json'), {
+            weeks: 188,
+            final_state_hash: 'abc123',
+        });
+        writeJson(join(runDir, 'final_save.json'), {
+            meta: { turn: 188 },
+            political: {
+                political_controllers: {
+                    'op:srebrenica:bostahovine_2': 'RBiH',
+                    'op:srebrenica:brezovice_2': 'RBiH',
+                    'op:srebrenica:donji_potocari_2': 'RBiH',
+                    'op:srebrenica:ljeskovik_2': 'RBiH',
+                    'op:srebrenica:luka_2': 'RBiH',
+                    'op:srebrenica:mala_daljegosta_2': 'RBiH',
+                    'op:srebrenica:milacevici': 'RBiH',
+                    'op:srebrenica:radovcici': 'RBiH',
+                    'op:srebrenica:srebrenica_2': 'RBiH',
+                    'op:srebrenica:suceska': 'RBiH',
+                    'op:srebrenica:sulice_2': 'RBiH',
+                    'op:rogatica:zepa_2': 'RBiH',
+                },
+            },
+            military: {
+                event_fire_counts: {
+                    srebrenica_falls_1995: 1,
+                    zepa_falls_1995: 1,
+                },
+                event_last_fired_turn: {
+                    srebrenica_falls_1995: 162,
+                    zepa_falls_1995: 164,
+                },
+                fired_event_ids: ['srebrenica_falls_1995', 'zepa_falls_1995'],
+                formations: {
+                    rs_skelani_battalion: {
+                        status: 'inactive',
+                        personnel: 0,
+                        cohesion: 65,
+                        morale: 10,
+                        corps_id: 'vrs_drina',
+                        location_osid: 'op:srebrenica:mala_daljegosta_2',
+                    },
+                    rs_1st_bratunac: {
+                        status: 'active',
+                        personnel: 1800,
+                        cohesion: 40,
+                        morale: 32,
+                        corps_id: 'vrs_drina',
+                        location_osid: 'op:bratunac:bratunac_2',
+                    },
+                },
+            },
+        });
+        writeJson(join(runDir, 'operation_aars.json'), [
+            {
+                operation_id: 'vrs_drina:Operation Krivaja-95:t168',
+                operation_name: 'Operation Krivaja-95',
+                started_turn: 168,
+                outcome: 'failure',
+                recovery_reason: 'planning_invalidated',
+                total_attacks: 0,
+                objectives_targeted: ['op:srebrenica:srebrenica_2'],
+                objectives_captured: [],
+                force_ratio_estimate: 0.08,
+                axis_summaries: [
+                    {
+                        axis_id: 'srebrenica_enclave',
+                        staging_osid: 'op:bratunac:bratunac_2',
+                        total_attacks: 0,
+                        objectives_targeted: ['op:srebrenica:srebrenica_2'],
+                        objectives_captured: [],
+                        brigades: ['rs_1st_bratunac'],
+                    },
+                ],
+            },
+        ]);
+
+        const output = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+
+        expect(output).toContain('# Sensitive-History Enclave Status');
+        expect(output).toContain('- Verdict: **OPEN_P0**');
+        expect(output).toContain('| srebrenica | 0/11 | 11/11 | 0 | RBiH | no | RBiH:11 |');
+        expect(output).toContain('| zepa | 0/1 | 1/1 | 0 | RBiH | no | RBiH:1 |');
+        expect(output).toContain('| srebrenica_genocide_1995 | no | 0 | - | - |');
+        expect(output).toContain('| Operation Krivaja-95 | 168 | failure | planning_invalidated | 0 | 0/1 | 0.080 | srebrenica_enclave:0/1@op:bratunac:bratunac_2 |');
+        expect(output).toContain('| rs_skelani_battalion | inactive | 0 | 65 | 10 | vrs_drina | op:srebrenica:mala_daljegosta_2 |');
+    });
+
+    it('exports deterministic run summaries', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/sensitive_history_status.cjs') as {
+            summarizeEnclave: (
+                name: string,
+                osids: string[],
+                controllers: Record<string, string>,
+                capitalOsid: string,
+            ) => { controller_summary: string; all_rs: boolean };
+        };
+
+        const summary = diagnostic.summarizeEnclave(
+            'demo',
+            ['b', 'a'],
+            { a: 'RS', b: 'RBiH' },
+            'a',
+        );
+
+        expect(summary.controller_summary).toBe('RBiH:1, RS:1');
+        expect(summary.all_rs).toBe(false);
+    });
+});

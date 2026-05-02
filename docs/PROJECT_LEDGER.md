@@ -1,3 +1,17 @@
+## [2026-05-02] tools(diagnostics): add sensitive-history enclave status verifier
+
+**Type:** Read-only diagnostics/tooling. No simulation mechanics, scenario data, OOB, painted targets, combat code, operation catalog content, or run artifacts changed.
+
+**Why:** The Srebrenica/Žepa late-war enclave lane closed partial. Future successor lanes need one deterministic proof surface that verifies controllers, rupture state, watched operation AARs, and Drina brigade status instead of manually spelunking `final_save.json` and `operation_aars.json` after each 188w run.
+
+**What changed:** Added `tools/diagnostics/sensitive_history_status.cjs` with Markdown/JSON output. It reports canonical Srebrenica/Žepa OSID controller counts, capital controller, all-RS verdict, narrative/rupture events, Cerska/Krivaja/Stupčanica AAR outcomes, and watched Drina brigade status. Added `tests/sensitive_history_status_diagnostic.test.ts` and captured n1612 output in `docs/40_reports/diagnostics/20260502_sensitive_history_status_n1612.md`.
+
+**Verification:** `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts` = 2/2 pass; focused diagnostic pack (`sensitive_history_status`, `opportunity_campaign_proof`, `opportunity_health`) = 5/5 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean. Running the tool on n1612 prints `OPEN_P0`: Srebrenica 1/11 RS, 10/11 RBiH with capital RBiH; Žepa 0/1 RS; narrative fall events fired; `srebrenica_genocide_1995` not fired.
+
+**Report:** `docs/40_reports/implemented/20260502_SENSITIVE_HISTORY_STATUS_DIAGNOSTIC.md`.
+
+---
+
 ## [2026-05-02] feat(ui): add Chronicle review filters
 
 **Type:** UI/read-model product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
