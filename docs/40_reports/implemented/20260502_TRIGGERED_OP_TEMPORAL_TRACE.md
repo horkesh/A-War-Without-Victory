@@ -3,7 +3,7 @@
 **Date:** 2026-05-02
 **Status:** RESOLVED — predecessor lane's named successor blocker (extend `isCommittedInTransitTo` to accept queued `brigade_movement_orders` before `in_transit` conversion) is **structurally impossible** under current pipeline ordering. Codex review P2 is correct. No engine code changed. Docs/test/diagnostic only.
 **Predecessor:** `8dec8f58` IN-TRANSIT-COMBAT-POWER-CONTEXT (PARTIAL) — its closeout hypothesis is superseded by this lane's evidence.
-**Verification commit:** *(this commit)*
+**Verification commit:** `1e68d8dc`.
 
 ## Lane summary
 
