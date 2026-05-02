@@ -212,6 +212,34 @@ export function collectObjectiveApproachOsids(
     return collectSectorSubsegmentApproachOsids(state, corpsId, objectives);
 }
 
+// LANE-2026-05-02-IN-TRANSIT-PREDICTOR: shared predicate.
+// A brigade is "committed-in-transit toward a relevant destination" when its
+// `brigade_movement_state.status === 'in_transit'` AND any of its
+// `destination_sids` is in the relevance set. The relevance set is supplied by
+// the caller (axis approach OSIDs for readiness; objective-adjacent OSIDs for
+// the opening-attack feasibility gate). Faction-agnostic; reads only existing
+// state shape. Preserves the `prestageBrigadesForTriggeredOp` overwrite
+// contract from commit `98446604` — this helper does not mutate any movement
+// state, it only reclassifies skip semantics for participants the engine has
+// already committed to the operation.
+function isCommittedInTransitTo(
+    state: GameState,
+    brigadeId: FormationId,
+    relevantOsids: ReadonlySet<string>,
+): boolean {
+    const movement = state.military.brigade_movement_state?.[brigadeId];
+    if (movement?.status !== 'in_transit') return false;
+    const dests = movement.destination_sids ?? [];
+    // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: scan all of destination_sids per
+    // determinism-auditor recommendation — `[0]`-only depends on whether `[0]`
+    // is "next hop" or "final destination" and could brittle under future route
+    // planners; `.some()` is order-agnostic-result and stays correct.
+    for (const dest of dests) {
+        if (relevantOsids.has(dest)) return true;
+    }
+    return false;
+}
+
 export function areParticipantsReadyForExecution(
     state: GameState,
     corpsId: FormationId,
@@ -239,7 +267,15 @@ export function areParticipantsReadyForExecution(
                 if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
                 if ((brigade.disrupted_turns ?? 0) > 0) continue;
                 const movementState = state.military.brigade_movement_state?.[brigadeId];
-                if (movementState?.status === 'in_transit') continue;
+                if (movementState?.status === 'in_transit') {
+                    // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: a brigade en-route
+                    // to a relevant approach OSID is committed to this op and
+                    // counts as ready. Pre-fix: every in_transit brigade was
+                    // silently skipped, defeating the planning_duration grace.
+                    if (!isCommittedInTransitTo(state, brigadeId, axisApproachOsids)) continue;
+                    readyAxisCount += 1;
+                    break;
+                }
                 const location = brigade.location_osid;
                 if (typeof location !== 'string' || location.length === 0) continue;
                 if (!axisApproachOsids.has(location)) continue;
@@ -263,7 +299,13 @@ export function areParticipantsReadyForExecution(
         if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
         if ((brigade.disrupted_turns ?? 0) > 0) continue;
         const movementState = state.military.brigade_movement_state?.[brigadeId];
-        if (movementState?.status === 'in_transit') continue;
+        if (movementState?.status === 'in_transit') {
+            // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: as multi-axis branch above.
+            // In-transit-to-unrelated still does not count (relevance check fails).
+            if (!isCommittedInTransitTo(state, brigadeId, objectiveApproachOsids)) continue;
+            eligibleParticipantCount += 1;
+            continue;
+        }
         const location = brigade.location_osid;
         if (typeof location !== 'string' || location.length === 0) return false;
         eligibleParticipantCount += 1;
@@ -277,6 +319,67 @@ export function getPlanningAttackThreshold(op: CorpsOperation): PredictedOutcome
     return op.min_attack_outcome ?? 'costly_victory';
 }
 
+// LANE-2026-05-02-IN-TRANSIT-PREDICTOR: helper — set of OSIDs adjacent to the
+// objective per front-edge adjacency. The adjacency map is bidirectional
+// (see `buildOsidAdjacencyFromFrontEdges`), so neighbors-of-objective is the
+// canonical set of "adjacent" OSIDs for the opening-attack feasibility gate.
+function objectiveAdjacentOsids(
+    adjacency: Map<string, string[]>,
+    objective: string,
+): Set<string> {
+    return new Set(adjacency.get(objective) ?? []);
+}
+
+// LANE-2026-05-02-IN-TRANSIT-PREDICTOR: count brigades whose CURRENT
+// `location_osid` is adjacent to `objective`. This is the staged-adjacent
+// count used to drive the concentrated-outcome stack size in
+// `axisHasExecutableOpeningAttack` (only physically present brigades
+// concentrate; en-route brigades cannot pile on yet).
+export function countAdjacentStagedParticipants(
+    state: GameState,
+    brigadeIds: FormationId[],
+    adjacency: Map<string, string[]>,
+    objective: string,
+): number {
+    const adjacentSet = objectiveAdjacentOsids(adjacency, objective);
+    let count = 0;
+    for (const brigadeId of brigadeIds) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade?.location_osid || brigade.status !== 'active') continue;
+        if (adjacentSet.has(brigade.location_osid)) count += 1;
+    }
+    return count;
+}
+
+// LANE-2026-05-02-IN-TRANSIT-PREDICTOR: count brigades that ARE eligible to
+// satisfy the opening-attack feasibility gate. Includes (a) brigades currently
+// at an objective-adjacent OSID AND (b) brigades committed-in-transit toward
+// an objective-adjacent OSID per existing `brigade_movement_state` truth.
+// Used only for the `<= 0` early-exit gate; the concentrated-outcome stack
+// uses the staged-only count above (per QA T6b semantic split — en-route
+// brigades raise the gate but cannot inflate the predicted concentrated
+// outcome until they arrive).
+export function countAdjacentGateParticipants(
+    state: GameState,
+    brigadeIds: FormationId[],
+    adjacency: Map<string, string[]>,
+    objective: string,
+): number {
+    const adjacentSet = objectiveAdjacentOsids(adjacency, objective);
+    let count = 0;
+    for (const brigadeId of brigadeIds) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        const loc = brigade.location_osid;
+        if (loc && adjacentSet.has(loc)) {
+            count += 1;
+            continue;
+        }
+        if (isCommittedInTransitTo(state, brigadeId, adjacentSet)) count += 1;
+    }
+    return count;
+}
+
 export function axisHasExecutableOpeningAttack(
     state: GameState,
     faction: FactionId,
@@ -287,12 +390,19 @@ export function axisHasExecutableOpeningAttack(
 ): boolean {
     if (typeof objective !== 'string' || objective.length === 0) return false;
 
-    const adjacentParticipants = brigadeIds.filter((brigadeId) => {
-        const brigade = state.military.formations?.[brigadeId];
-        if (!brigade?.location_osid || brigade.status !== 'active') return false;
-        return (adjacency.get(brigade.location_osid) ?? []).includes(objective);
-    }).length;
-    if (adjacentParticipants <= 0) return false;
+    // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: gate count includes brigades
+    // committed-in-transit toward objective-adjacent OSIDs. Pre-fix the gate
+    // saw only currently-adjacent brigades and silent-skipped en-route
+    // participants, defeating the planning_duration grace window.
+    const gateAdjacent = countAdjacentGateParticipants(state, brigadeIds, adjacency, objective);
+    if (gateAdjacent <= 0) return false;
+
+    // LANE-2026-05-02-IN-TRANSIT-PREDICTOR: concentrated stack is staged-only.
+    // En-route brigades raise the gate (above) but do not concentrate combat
+    // power until they physically arrive at an adjacent OSID — keeping this
+    // count at staged-only avoids fantasy-ratio inflation in
+    // `estimateConcentratedOutcome(...)`.
+    const stagedAdjacent = countAdjacentStagedParticipants(state, brigadeIds, adjacency, objective);
 
     for (const brigadeId of brigadeIds) {
         const brigade = state.military.formations?.[brigadeId];
@@ -310,8 +420,8 @@ export function axisHasExecutableOpeningAttack(
         ).find((target) => target.osid === objective);
         if (!directObjectiveAttack) continue;
 
-        const concentratedOutcome = adjacentParticipants > 1
-            ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, adjacentParticipants - 1)
+        const concentratedOutcome = stagedAdjacent > 1
+            ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, stagedAdjacent - 1)
             : null;
         if (
             isOutcomeSufficientForAttack(directObjectiveAttack.prediction.predicted_outcome, threshold)

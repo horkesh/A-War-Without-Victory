@@ -1,3 +1,67 @@
+## [2026-05-02] feat(combat): predictor / readiness gates count operation participants in_transit toward axis-relevant OSIDs (LANE-2026-05-02-IN-TRANSIT-PREDICTOR)
+
+**Type:** Bounded predictor-honesty correction in `src/sim/combat/sector_offensive_launch_helpers.ts`. Successor handoff #7 from Krivaja PARTIAL `98446604` ("Predictor in-transit-numerator-exclusion fix"). No `combat_math.ts`, no `enclave_resilience.ts`, no `rupture_consequences.ts`, no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads.
+
+**Bug:** Two readiness/launch predicates in `sector_offensive_launch_helpers.ts` silently treated in-transit operation participants as "not present" even when those participants were committed-by-existing-op-truth and en-route to a relevant destination during the planning_duration grace window. For triggered ops, this defeated the `prestageBrigadesForTriggeredOp` helper (commit `98446604`): pre-stage writes column-march orders → brigades enter `in_transit` next turn → readiness gate (`areParticipantsReadyForExecution`) silently dropped them → op `planning_invalidated` even though the engine had committed them and would deliver them within the planning grace.
+
+**Note on prior /scenario-tester hypothesis:** The Krivaja PARTIAL Phase 6 verdict cited "predictor in-transit-numerator-exclusion" as the cleanest mechanical fit for the n1614 force_ratio drop, attributing it to `estimateForceRatio`. Phase 0 of THIS lane proves that hypothesis was misattributed: `estimateForceRatio` (`operation_preparation.ts:250-254`) does NOT exclude in-transit brigades from the numerator (no in_transit skip; only `status !== 'active'` skip). The actual readiness/predictor exclusion was in `sector_offensive_launch_helpers.ts` — different file, same effect class.
+
+**Phase 0 four-investigator synthesis** (`/operations-expert+/sector-expert`, `/qa-engineer`, `/determinism-auditor`, `/game-designer`): all four converge. Two callsites confirmed exhaustive (`areParticipantsReadyForExecution` lines 241-242 + 265-266 pre-fix; `axisHasExecutableOpeningAttack` lines 290-294 pre-fix). Use existing `collectObjectiveApproachOsids` for relevance set. Use `destination_sids.some(...)` not `[0]`-only (determinism-auditor). **QA T6b semantic split:** gate count includes in-transit-toward-relevant; concentrated-outcome stack stays staged-only — en-route brigades cannot inflate predicted concentrated combat power. Game-designer Ring 1 honest correction; no § 6 sign-off chain; § 8.3 distinction (a) — historical OOB + correct mechanic produces emergent fall, not a scripted Ring 3 surface.
+
+**Implementation (single file `sector_offensive_launch_helpers.ts`):**
+1. New private `isCommittedInTransitTo(state, brigadeId, relevantOsids)` — returns true iff `brigade_movement_state[id].status === 'in_transit'` AND `destination_sids.some(d => relevantOsids.has(d))`.
+2. `areParticipantsReadyForExecution`: replaced unconditional in_transit skip in BOTH multi-axis and single-axis branches with relevance check using already-computed `axisApproachOsids` / `objectiveApproachOsids`.
+3. `axisHasExecutableOpeningAttack`: split into `countAdjacentGateParticipants` (gate; counts in-transit-toward-objective-adjacent) + `countAdjacentStagedParticipants` (concentrated stack; staged-only). Per-brigade `predictAllAdjacentTargets` loop unchanged (still uses brigade's current `location_osid` — predicting from intermediate transit OSIDs is fantasy and out of scope).
+4. New private `objectiveAdjacentOsids(adjacency, objective)` helper.
+
+Every changed/added line tagged `LANE-2026-05-02-IN-TRANSIT-PREDICTOR`. Faction-agnostic; deterministic via `strictCompare` + `Set.has()`; no `Math.random` / `Date.now` / `new Date(`.
+
+**Tests:** `tests/sector_offensive_in_transit_predictor.test.ts` (14 tests):
+- T1 multi-axis + single-axis: in_transit-to-staging counts as ready.
+- T2: in_transit-to-approach-OSID counts as ready.
+- T3: in_transit-to-unrelated does NOT count (predicate boundary).
+- T4: already-staged still counts (regression guard).
+- T5: inactive / low-personnel / disrupted still excluded (regression guard ×3).
+- T6: `axisHasExecutableOpeningAttack` gate counts in-transit-to-adjacent; staged-only count stays correct (T6b semantic split).
+- D1: deterministic across re-runs.
+- G: static-grep guards — no `Math.random` / `Date.now` / `new Date(`; LANE-tagged lines reference no Krivaja/Srebrenica/Drina/Zvornik/etc. (faction-agnostic enforcement).
+
+Pre-implementation: 5 RED + 9 GREEN regression guards. Post-implementation: **14/14 GREEN.**
+
+**Follow-up audit (`tests/krivaja_stupcanica_milii_double_roster_audit.test.ts`):** rs_1st_milii double-roster ping-pong audit per brief. Three audit cases:
+- A: in_transit-toward-Krivaja-staging at Stupčanica trigger → `98446604` rule 2 skips. Contract NEUTRALIZES.
+- B: existing-order-toward-Krivaja-staging at Stupčanica trigger → `98446604` rule 3 skips. Contract NEUTRALIZES.
+- C: post-Krivaja-conclusion (milii at bratunac_2, no transit/order); Stupčanica's helper rule 4 fires → fresh column-march toward grabovica.
+
+**Audit interpretation: AUDIT C is historically correct sequential redeployment per Popović §244, NOT a structural ping-pong bug.** Per Popović §244 the Krivaja-95 preparatory order included 1st Milici LIB (Krivaja 6-11 July); per documented historical sequence the same brigade redeployed during the 12-13 July regroup window for Stupčanica-95 (14-25 July). The engine's t168→t172 trigger gap is 4 weekly ticks — maps to the historical regroup. Removing milii from one of the two catalogs would be canon-silent historical reassignment (brief stop gate). **No arbitration rule implemented.** Follow-up handoff: if force_ratio drops are ultimately attributed to in-transit terrain/supply context in `computeAttackerPower` (Phase 4d combat-math territory), arbitration is moot — fixing the underlying combat-math context resolves the symptom without catalog mutation.
+
+**Verification:**
+- Lane tests `tests/sector_offensive_in_transit_predictor.test.ts` 14/14 PASS.
+- Audit tests `tests/krivaja_stupcanica_milii_double_roster_audit.test.ts` 3/3 PASS.
+- Focused regression: 92/92 across 8 suites (in-transit predictor, operation_preparation_force_ratio, krivaja_roster_and_prestage, triggered_operations, triggered_operations_late_1995, operation_axis_unreachable_diagnostic, sector_offensive, sector_offensive_idle_recovery).
+- `npx tsc --noEmit -p tsconfig.json` clean.
+- 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1616` hash `0c2fc264112dec1f` byte-identical to predecessor 40w baselines (n1610, n1613, n1615). `/scenario-creator-runner-tester` confirmed: EXPECTED null result for this lane — triggered-op pre-stage gated w≥168, no in_transit-toward-axis-OSID activations in 40w window, new branches correctly never exercised.
+- 188w proof `runs/apr1992_definitive_188w__210e69404d054959__w188_n1617` hash `17a11e99ff114aca`. Verdict OPEN_P0; Srebrenica + Žepa controllers byte-identical to predecessor; rupture not fired. **Mechanical movement vs n1614:** Stupčanica-95 attacks 0→1, outcome planning_invalidated→max_failures, ratio 0.209→0.831 (≥ launch threshold) — predicate-fix attributable per /scenario-tester (trigger turn t172 identical across n1612/n1614/n1617 isolates A/B); Krivaja-95 trigger turn shifted t168→t179 (upstream cascade), ratio 0.052→0.094 (+81% predicate-fix attributable but still below launch threshold), 0 attacks. Cerska-Kamenica ratio sentinel 1.0→0.600 (sentinel→honest). GREEN-regression audits: `operation_delivery_audit` 8 DELIV / 11 UNDERDELIV / 23 NO-CONTACT-OTHER / 4 NO-CONTACT-PATH / 5 PRE-FRIENDLY (BEHAVIORAL drift on Stupčanica/Krivaja/cascade ops, consistent with declared drift class); `opportunity_campaign_proof` 8 observed / 4 surfaced+executed / 1 blocked / 0 reachability / 0 broken AAR — **byte-stable to n1614**; `compare_painted_vs_sim` Herzegovina mismatches preserved (pre-existing class).
+- /scenario-creator-runner-tester verdict: PARTIAL with named blocker — predicate-fix lands; Krivaja gated by `computeAttackerPower` reading in-transit intermediate-OSID terrain/supply context (Phase 4d / `combat_math.ts` territory).
+- /war-or-game verdict: APPROVED with caveat — Ring 1 honest correction (mechanic eligible + outcome decided by combat math = exactly §8.3(a)); flag rs_1st_bratunac + rs_1st_zvornik INACTIVE and Krivaja t168→t179 drift as P1 calibration follow-up to corps-army-commander.
+
+**Hash drift class:** BEHAVIORAL global narrow-scope. Only ops with at least one in-transit participant fire the new branch. For ops with all-staged participants: zero delta. For ops where pre-stage helper or any other movement-order owner has put participants in_transit toward a relevant OSID: readiness/gate flips earlier, possibly enabling a launch one or more turns sooner. No new persisted field; STATE-SHAPE clean.
+
+**Stop-gate compliance:** No `combat_math.ts`, no `enclave_resilience.ts`, no `rupture_consequences.ts`, no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads, no `--no-verify`, no `FORAWWV.md` touch. Determinism preserved.
+
+**Sensitive-history compliance:** Ring 1 honest correction. No rupture trigger touched. No enclave mechanic mutation. No atrocity-as-tactic. Faction-agnostic mechanic. § 8.3 distinction (a): historical OOB + correct readiness mechanic produces emergent fall, not a scripted Ring 3 surface.
+
+**Files:**
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (+~70 / -10 lines)
+- `tests/sector_offensive_in_transit_predictor.test.ts` (new, ~440 lines)
+- `tests/krivaja_stupcanica_milii_double_roster_audit.test.ts` (new, ~155 lines)
+- `docs/40_reports/implemented/20260502_SREBRENICA_IN_TRANSIT_PREDICTOR.md` (this lane's report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (one durable lesson)
+- `.claude/napkin.md` (Current State updated)
+
+---
+
 ## [2026-05-02] feat(ui): add Warroom priority docket
 
 **Type:** UI/product read-model and Warroom presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
