@@ -175,14 +175,14 @@ export function TurnAftermathModal({
           </section>
         </div>
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-white/10 bg-black/30 px-5 py-4">
-          <button type="button" onClick={onOpenSummary} className="rounded border border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary">
+        <div className="grid grid-cols-3 gap-2 border-t border-white/10 bg-black/30 px-5 py-4">
+          <button type="button" onClick={onOpenSummary} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
             War Summary
           </button>
-          <button type="button" onClick={onOpenRecords} className="rounded border border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary">
+          <button type="button" onClick={onOpenRecords} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
             Turn Records
           </button>
-          <button type="button" onClick={onOpenInbox} className="rounded border border-amber-400/35 bg-amber-400/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-300 hover:bg-amber-400/20">
+          <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]">
             Review Inbox
           </button>
         </div>

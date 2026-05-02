@@ -176,10 +176,27 @@ This closes the immediate-report gap: the player sees major events, decorations,
 - `npm.cmd run desktop:map:build`
   - succeeded after C2 and after C5-C6; Vite emitted existing chunk-size/dynamic-import warnings only.
 
+## 2026-05-02 Current-Main Rebase + Browser Proof
+
+The branch was rebased over current `main` after the combat-math / Sana follow-on integration work landed. The implementation remains UI/read-model-only: no simulation mechanics, scenario data, operation catalog, painted targets, OOB, or run artifacts changed.
+
+Fresh verification after the rebase:
+
+- `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_map_order_actions.test.ts tests/ui/gamestore_load_reset.test.ts`
+  - 51/51 pass
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+  - clean
+- `npm.cmd run desktop:map:build`
+  - succeeded; Vite emitted existing dynamic-import/chunk-size/browser-external warnings only.
+- Browser proof through the live Vite map shell on `127.0.0.1:5176`:
+  - desktop viewport: modal renders the immediate aftermath packet with metrics, notable territory, strategic signals, turn cost, command desk, and the three review actions.
+  - 390px mobile viewport: modal remains readable and all footer actions (`War Summary`, `Turn Records`, `Review Inbox`) are visible without wrapping or clipping.
+
+The browser pass found one responsive defect: the modal footer used a wrapping flex row, so `Review Inbox` could clip on narrow mobile viewports inside the fixed-height modal. The footer now uses a stable three-column grid with smaller mobile type and spacing, restoring the normal size at `sm` breakpoints.
+
 No scenario run is required: this is a UI/read-model bridge over already-persisted state. It does not alter the turn pipeline, combat, control, operation execution, or saved simulation truth except for existing UI store state after load.
 
 ## Remaining Product-Spine Work
 
 - Add richer per-turn cost deltas when Cost Ledger gains an in-campaign read model, not only game-over aggregation.
-- Add visual browser proof for the modal inside the desktop map shell after current Claude lanes settle.
 - Consider a Chronicle cross-link once Chronicle gets a unified campaign timeline filter.

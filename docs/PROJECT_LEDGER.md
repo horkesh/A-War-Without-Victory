@@ -1,3 +1,17 @@
+## [2026-05-02] feat(ui): land Turn Aftermath product spine with browser proof
+
+**Type:** Product-spine UI/read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog, combat code, or run artifacts changed.
+
+**Why:** The presidential loop already had Brief / Inspect / Decide / Execute, but the player still returned from advance-turn without a coherent "what happened, what did it cost, what records matter, what needs attention next" surface. This lane closes that post-execute gap with a dedicated Turn Aftermath modal plus persistent Army HQ records.
+
+**What changed:** Added the pure `turnAftermath` read model, the post-advance `TurnAftermathModal`, the persistent Army HQ `TURN AFTERMATH` records panel, shared desktop advance-turn aftermath hooks, store state/reset behavior, shell handoff support, turn-cost packet, campaign pulse, strategic signals, filters, and top-action routing to War Summary / Turn Records / Inbox. The modal footer now uses a three-column mobile-safe action grid after browser proof found flex wrapping could clip `Review Inbox` on a 390px viewport.
+
+**Verification:** Current-main rebase proof: 51/51 focused UI tests pass (`turn_aftermath`, wiring, shell navigation, order actions, gamestore load reset); `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` succeeds with existing Vite warnings only. Live Vite browser smoke on `127.0.0.1:5176` verified desktop and 390px mobile render; mobile text scan confirmed `TURN AFTERMATH`, `WAR SUMMARY`, `TURN RECORDS`, and `REVIEW INBOX` all visible. Dev-console noise limited to the existing missing local tile 404 / PMTiles metadata logs.
+
+**Report:** `docs/40_reports/implemented/20260501_TURN_AFTERMATH_PRODUCT_SPINE_C1.md`.
+
+---
+
 ## [2026-05-02] evidence(operations): verify Sana follow-on reachability split after current-main rebase
 
 **Type:** Scenario verification + documentation propagation for the 5th Corps Sana catalog split. No additional engine behavior changed in this evidence addendum beyond the already-implemented `sana_95` / `sana_95_follow_on` split.
