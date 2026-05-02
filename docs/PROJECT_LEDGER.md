@@ -6260,3 +6260,17 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 - Response-order fix: `data/scenarios/events/war_1992.json`
 - Tests: `tests/consequence_chains.test.ts` (+9 tests, 46 total)
 - Manifest: `data/derived/scenario/baselines/manifest.json` (apr1992_52w refresh)
+
+## [2026-05-02] tool(diagnostics): add opportunity campaign proof matrix
+
+**Type:** Read-only diagnostic tooling + tests + report artifact. No simulation behavior, scenario data, painted targets, operation catalog entries, or baseline hashes changed.
+
+**Why:** Opportunity work now crosses proposal eligibility, player/bot authorization, `buildCorpsOperation`, operation lifecycle, combat delivery, AAR finalization, UI records, and Cost Ledger. The existing health and delivery audits were useful but separate. The architect-level need is one deterministic proof surface that answers why each opportunity did or did not become campaign history.
+
+**Change:** Added `tools/diagnostics/opportunity_campaign_proof.cjs`, which fuses `operation_opportunities`, `operation_opportunity_diagnostics`, `operation_opportunity_resolutions`, linked AARs, per-axis delivery predicates, and reachability warnings into a markdown or JSON campaign matrix. Added focused regression coverage in `tests/opportunity_campaign_proof_diagnostic.test.ts`.
+
+**n1605 baseline artifact:** Generated `docs/40_reports/diagnostics/20260502_opportunity_campaign_proof_n1605.md` from `runs/apr1992_definitive_188w__210e69404d054959__w188_n1605`. It classifies 7 observed 5th Corps opportunities: 4 surfaced/executed, 3 blocked in-window, 1 reachability warning, 0 broken AAR links, 0 unlinked approved rows. Sana 95 remains a failed executed opportunity with one no-contact-path axis; Una/Breza/Pauk remain blocked by `alliance_context` plus `logistics`.
+
+**Determinism:** Script execution is read-only. It performs no writes, uses no timestamps, no `Math.random`, no locale sorting, and sorts all derived ids/rows/blocker summaries with stable string ordering. JSON mode serializes the same derived structure that markdown mode prints.
+
+**Artifacts:** `tools/diagnostics/opportunity_campaign_proof.cjs`, `tests/opportunity_campaign_proof_diagnostic.test.ts`, `docs/40_reports/diagnostics/20260502_opportunity_campaign_proof_n1605.md`, `docs/40_reports/implemented/20260502_OPPORTUNITY_CAMPAIGN_PROOF_PLATFORM.md`.
