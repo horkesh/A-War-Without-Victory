@@ -1,3 +1,21 @@
+## [2026-05-02] merge(architecture): integrate Codex proof platform + Storm gate split after combat-math mega-lane
+
+**Type:** Architecture integration / review close-out. Codex reviewed Claude's Combat-Math `estimateForceRatio` mega-lane, accepted it, and shipped one wording-only correction clarifying that `OperationAAR.force_ratio_estimate` is a decision-time / launch-tick carryover (assessment or anti-paralysis forced decision), not a post-mortem recompute. Then merged two Codex parallel branches onto current `main`: `codex/opportunity-proof-platform` (read-only campaign proof matrix) and `codex/storm-theater-gate` (split abstract Operation Storm readiness from actual western-theater rupture).
+
+**Files:** `src/sim/combat/operation_aar.ts`, `tests/operation_aar.test.ts`, `tools/diagnostics/opportunity_campaign_proof.cjs`, `tests/opportunity_campaign_proof_diagnostic.test.ts`, `src/sim/combat/operation_storm.ts`, `src/sim/combat/operation_storm_theater.ts`, `src/sim/combat/operation_opportunity_catalog_5th_corps.ts`, `src/sim/compile_turn_summary.ts`, `src/state/game_state.ts`, 5th Corps opportunity tests, Storm gate tests, canon docs, reports, ledger, knowledge, napkin.
+
+**Commits:** `857abdb6` (AAR timing wording), `5c551d12` (opportunity proof platform merge), `e8da4b5b` (Storm theater gate split merge), plus this close-out report commit.
+
+**Verification:** `npx.cmd vitest run` focused pack 130/130 PASS; `npx.cmd tsc --noEmit` clean. Fresh 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1609` hash `0c2fc264112dec1f`, Jan1993 91.3% count / 93.3% area, `diagnose_run` 0 ERR / 30 WARN, `validate_run_consistency` PASS. Direct n1607->n1609 JSON diff showed 15 diffs, all `operation_history[*].force_ratio_estimate` additive carryover fields. Fresh 188w `runs/apr1992_definitive_188w__210e69404d054959__w188_n1610` hash `9bfbcc19f7191ad6`, Oct1995 70.8% count / 63.2% area, `diagnose_run` 0 ERR / 35 WARN, `validate_run_consistency` 18 known sector-layer failures, `opportunity_health_audit` 7 decisions / 7 completed / 2 successes / 3 T3 sentinels / 0 broken links, `opportunity_campaign_proof` 7 observed opportunities / 4 surfaced-executed / 3 T3-authorized / 1 reachability warning / 0 broken links.
+
+**Storm gate proof:** n1610 records `operation_storm_preconditions_met=true` at turn 85 and actual `operation_storm_turn=174` with `event_last_fired_turn.operation_storm_1995=174`. The 5th Corps T3 crisis opportunities now surface as intended before Storm (`Una 94`, `Breza 94`, `Pauk 94/95` all `t3_authorized_no_offensive`), while `Sana 95` still waits for the actual Storm event and then fails in combat/execution rather than predicate topology.
+
+**Remaining open problems:** Srebrenica/Zepa P0 is pre-existing and unchanged (controllers remain RBiH in n1608 and n1610); Krivaja-95/Stupcanica-95 still fail to deliver; Sana and Mistral still fail late-war execution. Ownership is clearer now: proof-system blindness is closed, combat/content delivery remains.
+
+**Report:** `docs/40_reports/implemented/20260502_CODEX_PARALLEL_ARCHITECTURE_INTEGRATION.md`.
+
+---
+
 ## [2026-05-02] feat(combat): integrate defender modifiers into estimateForceRatio (MEGA-LANE close)
 
 **Type:** Multi-phase mega-lane integrating defender-side combat modifiers (terrain, urban/forest, entrenchment, supply, equipment, posture, morale, officer, fatigue, corps stance) into the launch-readiness force-ratio predictor at `src/sim/combat/operation_preparation.ts:192-249`. Substitutes personnel-only sums with `computeAttackerPower` + `rankDefendersByPower` from `combat_math.ts`. Sentinel branch tightened (`enemyStrength === 0 → confidence >= 0.5 ? 3.0 : 1.0`). Optional `supplyByOsid` + `terrainMultByOsid` threaded through `tickPreparation` → `advanceSectorOffensives` → `war_phases.ts`. Phase 5a 1-line additive AAR carryover ships the launch-tick predictor value to `OperationAAR.force_ratio_estimate` for post-mortem observability. Four phase commits (3/4/5a/6). NO combat math edited (`combat_math.ts` is CALLED, not modified), NO Layer-1 (`checkLaunchFeasibility`) or Layer-2 (`predictCombatOutcome`) touched, NO OOB, scenario data, painted targets, sensitive-history changes, or opportunity catalog content touched. All lane stop gates honored. Codex-owned 5th Corps catalog files untouched.
