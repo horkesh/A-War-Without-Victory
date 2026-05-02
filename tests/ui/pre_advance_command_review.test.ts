@@ -164,6 +164,11 @@ describe('buildPreAdvanceCommandReviewView', () => {
       category: 'decision',
       actionLabel: 'Review Queue',
       sourceOwner: 'Presidential review queue',
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(view.items.find((item) => item.id === 'turn:31:hard-turn')).toMatchObject({
+      actionLabel: 'Open Turn Record',
+      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
     });
   });
 

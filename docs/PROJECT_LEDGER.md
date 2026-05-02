@@ -6710,3 +6710,14 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Report:** `docs/40_reports/implemented/20260502_WARROOM_PRIORITY_PULSE.md`.
 
 ---
+## [2026-05-02] feat(ui): add pre-advance review item deep links
+
+**Type:** UI/product read-model handoff. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** `src/ui/map/data/preAdvanceCommandReview.ts` now preserves each Decision Room card's `navigationTarget` when projecting `Review Before Advance` rows. New `src/ui/map/utils/presidentialDecisionRoomNavigation.ts` centralizes Decision Room target routing through existing shell helpers (`openArmyHQTab`, `openArmyHQRecordsSubTab`, `openArmyHQAftermathRecord`, `openArmyHQBriefingForCorps`, `openChronicle`). `PresidentialDecisionRoomPanel` and `AdvanceTurnModal` both use that shared router, and `App.tsx` wires modal row actions so an urgent pre-advance item opens its exact owner instead of collapsing every row into the global Army HQ BRIEFING handoff.
+
+**Player impact:** The advance-turn confirmation now answers "what should I inspect before I advance?" with actionable rows. Pending reviews still go to Army HQ/Inbox, hard turns open focused Turn Aftermath records, corps cues open corps briefings, and Chronicle items open Chronicle. `Review Priorities` remains the broad Army HQ route.
+
+**Ownership guardrails:** This is still a reminder/handoff surface only. It does not create a second inbox, cost ledger, Chronicle, event log, or turn blocker, and it imports no sim/combat/catalog code.
+
+**Verification:** `npx.cmd vitest run tests/ui/pre_advance_command_review.test.ts tests/ui_pre_advance_command_review_wiring.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_warroom_priority_pulse_wiring.test.ts tests/army_hq_presidential_review_coherence.test.ts` passed 43/43 before docs. Full type/build verification recorded in the implementation report.

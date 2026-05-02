@@ -22,9 +22,11 @@ import {
   type PreAdvanceCommandReviewItem,
   type PreAdvanceCommandReviewStatus,
 } from '../../data/preAdvanceCommandReview';
+import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 
 export interface AdvanceTurnModalProps {
   onReviewPriorities?: () => void;
+  onReviewItem?: (item: PreAdvanceCommandReviewItem) => void;
 }
 
 function statusClass(status: PreAdvanceCommandReviewStatus): string {
@@ -55,7 +57,17 @@ function MetricCell({ label, value, urgent = false }: { label: string; value: nu
   );
 }
 
-function ReviewItemRow({ item }: { item: PreAdvanceCommandReviewItem }) {
+function ReviewItemRow({
+  item,
+  disabled,
+  onReview,
+}: {
+  item: PreAdvanceCommandReviewItem;
+  disabled: boolean;
+  onReview: (item: PreAdvanceCommandReviewItem) => void;
+}) {
+  const canReview = item.navigationTarget.kind !== 'none';
+
   return (
     <div className="border border-neutral-300 bg-white px-2 py-1.5">
       <div className="flex min-w-0 items-start justify-between gap-2">
@@ -72,7 +84,14 @@ function ReviewItemRow({ item }: { item: PreAdvanceCommandReviewItem }) {
           <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-neutral-600">{item.explanation}</div>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-[8px] font-bold uppercase tracking-[0.1em] text-neutral-500">{item.actionLabel}</div>
+          <button
+            type="button"
+            onClick={() => onReview(item)}
+            disabled={disabled || !canReview}
+            className="border border-amber-500 bg-amber-100 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-800 transition-colors hover:bg-amber-200 disabled:cursor-default disabled:border-neutral-300 disabled:bg-neutral-100 disabled:text-neutral-400"
+          >
+            {item.actionLabel}
+          </button>
           <div className="mt-1 max-w-[8rem] truncate text-[8px] uppercase tracking-[0.1em] text-neutral-400">
             {item.sourceOwner}
           </div>
@@ -82,7 +101,7 @@ function ReviewItemRow({ item }: { item: PreAdvanceCommandReviewItem }) {
   );
 }
 
-export function AdvanceTurnModal({ onReviewPriorities }: AdvanceTurnModalProps) {
+export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTurnModalProps) {
   const pending = useGameStore((s) => s.advanceTurnPending);
   const setPending = useGameStore((s) => s.setAdvanceTurnPending);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -127,6 +146,16 @@ export function AdvanceTurnModal({ onReviewPriorities }: AdvanceTurnModalProps) 
     onReviewPriorities?.();
   };
 
+  const handleReviewItem = (item: PreAdvanceCommandReviewItem) => {
+    if (advancing) return;
+    setPending(false);
+    if (onReviewItem) {
+      onReviewItem(item);
+      return;
+    }
+    openPresidentialDecisionRoomNavigationTarget(item.navigationTarget);
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 px-4">
       <div className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border-2 border-neutral-400 bg-neutral-50 shadow-xl">
@@ -167,7 +196,12 @@ export function AdvanceTurnModal({ onReviewPriorities }: AdvanceTurnModalProps) 
                 No live desk item will be buried by the next turn.
               </div>
             ) : review.items.map((item) => (
-              <ReviewItemRow key={item.id} item={item} />
+              <ReviewItemRow
+                key={item.id}
+                item={item}
+                disabled={advancing}
+                onReview={handleReviewItem}
+              />
             ))}
           </section>
         </div>

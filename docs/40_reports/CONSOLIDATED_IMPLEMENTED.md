@@ -2,7 +2,7 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest presidential decision room:** [implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md](implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md) - Army HQ BRIEFING now opens with a deterministic Strategic Priorities board that prioritizes existing review, opportunity, SITREP, briefing, hard-turn, active-cost, and Chronicle signals and routes each card to an existing owner.
+**Latest presidential decision room:** [implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md](implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md), [implemented/20260502_PRE_ADVANCE_REVIEW_ITEM_DEEP_LINKS.md](implemented/20260502_PRE_ADVANCE_REVIEW_ITEM_DEEP_LINKS.md) - Army HQ BRIEFING now opens with a deterministic Strategic Priorities board that prioritizes existing review, opportunity, SITREP, briefing, hard-turn, active-cost, and Chronicle signals and routes each card to an existing owner; pre-advance review rows preserve those source targets and deep-link back to the owning surface.
 
 **Latest opportunity surface:** [implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md](implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md) - pending opportunity proposals now persist objective/staging footprints and redirect variant snapshots; Army HQ dossiers render player-safe labels, map highlighting, and variant-specific Redirect controls.
 

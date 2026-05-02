@@ -3,6 +3,7 @@ import {
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
   type PresidentialDecisionRoomMetrics,
+  type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
@@ -19,6 +20,7 @@ export interface PreAdvanceCommandReviewItem {
   sourceLabel: string;
   actionLabel: string;
   evidence: string[];
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
 }
 
 export type PreAdvanceCommandReviewMetrics = PresidentialDecisionRoomMetrics;
@@ -47,6 +49,7 @@ function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommand
     sourceLabel: card.sourceLabel,
     actionLabel: card.actionLabel,
     evidence: card.evidence,
+    navigationTarget: card.navigationTarget,
   };
 }
 

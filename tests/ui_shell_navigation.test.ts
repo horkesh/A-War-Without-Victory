@@ -9,6 +9,7 @@ import {
   openCodex,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
+import { openPresidentialDecisionRoomNavigationTarget } from '../src/ui/map/utils/presidentialDecisionRoomNavigation.js';
 import { isWarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation.js';
 import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
 import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
@@ -198,6 +199,26 @@ describe('shellNavigation', () => {
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
       ['setChronicleOpen', true],
       ['setCodexOpen', true],
+    ]);
+  });
+
+  it('routes Presidential Decision Room targets through the shared shell helpers', () => {
+    const state = createState('RBiH');
+
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'army-hq-aftermath-record', turn: 31 }, state)).toBe(true);
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'army-hq-corps-briefing', corpsId: 'arbih_3rd_corps' }, state)).toBe(true);
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'chronicle' }, state)).toBe(true);
+
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setChronicleOpen', false],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'briefing'],
+      ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+      ['setChronicleOpen', true],
     ]);
   });
 

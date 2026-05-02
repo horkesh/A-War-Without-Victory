@@ -26,20 +26,24 @@ describe('pre-advance command review wiring', () => {
     const modal = read('../src/ui/map/components/warroom/AdvanceTurnModal.tsx');
 
     expect(modal).toContain('buildPreAdvanceCommandReviewView');
+    expect(modal).toContain('openPresidentialDecisionRoomNavigationTarget');
     expect(modal).toContain('loadedGameState');
     expect(modal).toContain('osidDisplayNames');
     expect(modal).toContain('Review Before Advance');
     expect(modal).toContain('Review Priorities');
+    expect(modal).toContain('onReviewItem');
     expect(modal).toContain('onReviewPriorities');
     expect(modal).toContain('getTurnAftermathAdvanceDeps');
   });
 
-  it('routes review-priorities action through the App shell into Army HQ briefing', () => {
+  it('routes review actions through the App shell into Army HQ or the card target', () => {
     const app = read('../src/ui/map/App.tsx');
 
     expect(app).toContain('const reviewPreAdvancePriorities');
+    expect(app).toContain('const reviewPreAdvanceItem');
+    expect(app).toContain('openPresidentialDecisionRoomNavigationTarget');
     expect(app).toContain("openArmyHQTab(gs, 'briefing')");
     expect(app).toContain("setAppScreen('game')");
-    expect(app).toContain('<AdvanceTurnModal onReviewPriorities={reviewPreAdvancePriorities} />');
+    expect(app).toContain('onReviewItem={reviewPreAdvanceItem}');
   });
 });

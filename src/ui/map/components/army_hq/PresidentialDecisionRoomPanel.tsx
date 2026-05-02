@@ -2,17 +2,10 @@ import { useMemo } from 'react';
 import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
-  type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
 } from '../../data/presidentialDecisionRoom';
 import { useGameStore } from '../../store/gameStore';
-import {
-  openArmyHQAftermathRecord,
-  openArmyHQBriefingForCorps,
-  openArmyHQRecordsSubTab,
-  openArmyHQTab,
-  openChronicle,
-} from '../../utils/shellNavigation';
+import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 
 function severityClass(severity: PresidentialDecisionRoomSeverity): string {
   if (severity === 'blocking') return 'border-red-400/45 bg-red-500/10 text-red-300';
@@ -42,29 +35,6 @@ function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: 
   );
 }
 
-function dispatchNavigation(target: PresidentialDecisionRoomNavigationTarget): void {
-  const state = useGameStore.getState();
-  if (target.kind === 'army-hq-tab') {
-    openArmyHQTab(state, target.tab);
-    return;
-  }
-  if (target.kind === 'army-hq-records') {
-    openArmyHQRecordsSubTab(state, target.recordsSubTab);
-    return;
-  }
-  if (target.kind === 'army-hq-aftermath-record') {
-    openArmyHQAftermathRecord(state, target.turn);
-    return;
-  }
-  if (target.kind === 'army-hq-corps-briefing') {
-    openArmyHQBriefingForCorps(state, target.corpsId);
-    return;
-  }
-  if (target.kind === 'chronicle') {
-    openChronicle(state);
-  }
-}
-
 function PriorityCard({ card }: { card: PresidentialDecisionRoomCard }) {
   const disabled = card.navigationTarget.kind === 'none';
 
@@ -86,7 +56,7 @@ function PriorityCard({ card }: { card: PresidentialDecisionRoomCard }) {
         <button
           type="button"
           disabled={disabled}
-          onClick={() => dispatchNavigation(card.navigationTarget)}
+          onClick={() => openPresidentialDecisionRoomNavigationTarget(card.navigationTarget)}
           className="shrink-0 rounded border border-amber-400/30 bg-amber-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.11em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border disabled:bg-panel-bg/60 disabled:text-text-muted"
         >
           {card.actionLabel}
@@ -112,7 +82,7 @@ function CompactLink({ card }: { card: PresidentialDecisionRoomCard }) {
   return (
     <button
       type="button"
-      onClick={() => dispatchNavigation(card.navigationTarget)}
+      onClick={() => openPresidentialDecisionRoomNavigationTarget(card.navigationTarget)}
       className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04]"
     >
       <span className="min-w-0">

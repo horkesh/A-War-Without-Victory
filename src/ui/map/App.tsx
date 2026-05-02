@@ -64,7 +64,9 @@ import { useIPC } from './desktop/useIPC';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
+import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { isWarroomLocalCommand } from './utils/warroomNavigation';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
 import {
@@ -565,6 +567,13 @@ function App() {
     setEventLogOpen(false);
   };
 
+  const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
+    openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
+    setAppScreen('game');
+    setSummaryOpen(false);
+    setEventLogOpen(false);
+  };
+
   const openInboxHome = () => {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
@@ -847,7 +856,10 @@ function App() {
       <PeaceWarTransitionOverlay />
       <VerdictScreen />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
-      <AdvanceTurnModal onReviewPriorities={reviewPreAdvancePriorities} />
+      <AdvanceTurnModal
+        onReviewPriorities={reviewPreAdvancePriorities}
+        onReviewItem={reviewPreAdvanceItem}
+      />
       <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />

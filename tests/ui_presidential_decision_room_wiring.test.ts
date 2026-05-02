@@ -34,13 +34,15 @@ describe('Presidential Decision Room wiring', () => {
 
   it('routes card actions through canonical shell navigation helpers', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const router = read('../src/ui/map/utils/presidentialDecisionRoomNavigation.ts');
 
     expect(panel).toContain('buildPresidentialDecisionRoomView');
-    expect(panel).toContain('openArmyHQTab');
-    expect(panel).toContain('openArmyHQRecordsSubTab');
-    expect(panel).toContain('openArmyHQAftermathRecord');
-    expect(panel).toContain('openArmyHQBriefingForCorps');
-    expect(panel).toContain('openChronicle');
+    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget');
+    expect(router).toContain('openArmyHQTab');
+    expect(router).toContain('openArmyHQRecordsSubTab');
+    expect(router).toContain('openArmyHQAftermathRecord');
+    expect(router).toContain('openArmyHQBriefingForCorps');
+    expect(router).toContain('openChronicle');
     expect(panel).not.toContain('setArmyHQTab');
     expect(panel).not.toContain('setArmyHQRecordsSubTab');
     expect(panel).not.toContain('setChronicleOpen(true)');
