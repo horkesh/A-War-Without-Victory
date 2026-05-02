@@ -39,6 +39,7 @@ const DOT_COLORS: Record<ChronicleCardType, string> = {
     military: '#4a9a55',
     diplomatic: '#8855aa',
     narrative: '#d5c9bc',
+    cost: '#d28a3a',
 };
 
 export function ChronicleOverlay() {

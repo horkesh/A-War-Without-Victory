@@ -9,6 +9,7 @@ const CARD_ACCENT: Record<ChronicleCardType, { border: string; badge: string; ba
     military:     { border: '#4a9a55', badge: 'bg-green-900/40',  badgeText: 'text-green-300' },
     diplomatic:   { border: '#8855aa', badge: 'bg-purple-900/40', badgeText: 'text-purple-300' },
     narrative:    { border: '#d5c9bc', badge: 'bg-stone-800/40',  badgeText: 'text-stone-300' },
+    cost:         { border: '#d28a3a', badge: 'bg-orange-900/40', badgeText: 'text-orange-300' },
 };
 
 const CARD_LABELS: Record<ChronicleCardType, string> = {
@@ -18,6 +19,7 @@ const CARD_LABELS: Record<ChronicleCardType, string> = {
     military: 'MILITARY',
     diplomatic: 'DIPLOMATIC',
     narrative: 'NARRATIVE',
+    cost: 'COST',
 };
 
 interface ChronicleCardProps {

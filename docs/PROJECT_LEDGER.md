@@ -6521,6 +6521,22 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Docs:** Added `docs/40_reports/implemented/20260501_FIFTH_CORPS_SANA_FOLLOW_ON_REACHABILITY.md`; updated `docs/plans/late-war-5th-corps-opportunities-design.md`; added a durable knowledge rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`; updated `.claude/napkin.md`.
 
 ---
+## [2026-05-02] feat(ui): add Chronicle cost memory cards
+
+**Type:** UI/product-spine read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
+
+**Why:** Active cost was visible in Army HQ Records and War Summary, but the Chronicle still recorded costly turns only indirectly through battle, displacement, and formation-destruction cards. The campaign memory layer needed an explicit "this turn was costly" entry so hard weeks remain visible in the historical record.
+
+**What changed:** `generateChronicleEntries.ts` now emits `cost` entries for severe or critical player-scoped campaign cost using existing `turnSummaries`: friendly casualties, opposing casualties, displacement, own formations destroyed, and net friendly territory. `ChronicleCard` and `ChronicleOverlay` gained `COST` label/accent support. Quiet minor turns do not produce cost cards.
+
+**Determinism / scope:** UI/read-model only. No new state writer, no final Cost Ledger scoring, no sim behavior, and no serialization shape changed. Chronicle entries still sort by turn as before.
+
+**Verification:** `npx.cmd vitest run tests/chronicle_entries.test.ts tests/ui/chronicle_endgame_mount.test.ts` = 17/17 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean.
+
+**Report:** `docs/40_reports/implemented/20260502_CHRONICLE_COST_MEMORY.md`.
+
+---
+
 ## [2026-05-02] feat(ui): surface active campaign cost before endgame reckoning
 
 **Type:** UI/product-spine read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.

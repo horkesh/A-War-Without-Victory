@@ -115,6 +115,76 @@ describe('generateChronicleEntries', () => {
         expect(humanitarian[0].detail).toContain('1500 displaced');
     });
 
+    it('creates a cost card for severe player-scoped campaign cost', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 14,
+            turnSummaries: [{
+                turn: 14,
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'breakthrough',
+                    attacker_casualties: 35,
+                    defender_casualties: 120,
+                    territory_flipped: true,
+                }],
+                notable_flips: [], notable_events: [],
+                events_fired: [],
+                decoration_awards: [], arc_transitions: [], formation_spawns: [],
+                formation_destructions: [{ formation_id: 'arbih_lost', formation_name: 'Lost Brigade', faction: 'RBiH' }],
+                displacement_total: 1250, displacement_by_ethnicity: {},
+                territory_net: { RBiH: -2, RS: 2 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                movements: [], supply_transitions: [],
+            }],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+        const cost = entries.find(e => e.type === 'cost');
+
+        expect(cost).toBeDefined();
+        expect(cost?.headline).toBe(true);
+        expect(cost?.title).toBe('Critical campaign cost');
+        expect(cost?.detail).toContain('120 friendly casualties');
+        expect(cost?.detail).toContain('35 opposing casualties');
+        expect(cost?.detail).toContain('1250 displaced');
+        expect(cost?.detail).toContain('1 own formation destroyed');
+        expect(cost?.detail).toContain('-2 net OSIDs');
+        expect(cost?.metadata).toMatchObject({
+            casualties: 120,
+            displaced: 1250,
+            costSeverity: 'critical',
+            netFriendlyTerritory: -2,
+            ownFormationsDestroyed: 1,
+        });
+    });
+
+    it('does not create cost cards for quiet minor turns', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turnSummaries: [{
+                turn: 9,
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'RS',
+                    outcome: 'stalemate',
+                    attacker_casualties: 8,
+                    defender_casualties: 9,
+                    territory_flipped: false,
+                }],
+                notable_flips: [], notable_events: [], events_fired: [],
+                decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
+                displacement_total: 25, displacement_by_ethnicity: {},
+                territory_net: { RBiH: 0 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                movements: [], supply_transitions: [],
+            }],
+        };
+
+        expect(generateChronicleEntries(state as any).some(e => e.type === 'cost')).toBe(false);
+    });
+
     it('creates military card for formation spawn', () => {
         const state = {
             turn: 6,

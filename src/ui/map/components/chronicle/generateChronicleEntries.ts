@@ -1,4 +1,4 @@
-export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative';
+export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost';
 
 export interface ChronicleEntry {
     turn: number;
@@ -14,6 +14,9 @@ export interface ChronicleEntry {
         dimensionShifts?: Array<{ dimension: string; delta: number }>;
         casualties?: number;
         displaced?: number;
+        costSeverity?: 'severe' | 'critical';
+        netFriendlyTerritory?: number;
+        ownFormationsDestroyed?: number;
     };
 }
 
@@ -27,6 +30,9 @@ const HEADLINE_EVENT_PATTERNS = ['strategic_goals', 'state_identity', 'political
 const DIPLOMATIC_EVENT_PATTERNS = ['graz', 'ceasefire', 'alliance', 'embargo', 'conference'];
 const CASUALTY_THRESHOLD = 100;
 const DISPLACEMENT_THRESHOLD = 500;
+const COST_FRIENDLY_CASUALTY_THRESHOLD = 50;
+const COST_THEATER_CASUALTY_THRESHOLD = 150;
+const COST_DISPLACEMENT_THRESHOLD = 1000;
 
 function formatOutcome(outcome: string): string {
     return outcome.replace(/_/g, ' ');
@@ -38,6 +44,92 @@ function isDiplomaticEvent(id: string): boolean {
 
 function isHeadlineEvent(id: string): boolean {
     return HEADLINE_EVENT_PATTERNS.some(p => id.includes(p));
+}
+
+function summarizeBattleCost(summary: any, playerFaction: string | null): {
+    friendlyCasualties: number;
+    opposingCasualties: number;
+    theaterCasualties: number;
+} {
+    let friendlyCasualties = 0;
+    let opposingCasualties = 0;
+    let theaterCasualties = 0;
+
+    for (const battle of Array.isArray(summary?.battles) ? summary.battles : []) {
+        const attackerCasualties = Number(battle?.attacker_casualties ?? 0);
+        const defenderCasualties = Number(battle?.defender_casualties ?? 0);
+        theaterCasualties += attackerCasualties + defenderCasualties;
+        if (!playerFaction) continue;
+        if (battle?.attacker_faction === playerFaction) {
+            friendlyCasualties += attackerCasualties;
+            opposingCasualties += defenderCasualties;
+        } else if (battle?.defender_faction === playerFaction) {
+            friendlyCasualties += defenderCasualties;
+            opposingCasualties += attackerCasualties;
+        }
+    }
+
+    return { friendlyCasualties, opposingCasualties, theaterCasualties };
+}
+
+function buildTurnCostEntry(summary: any, playerFaction: string | null): ChronicleEntry | null {
+    const turn = Number(summary?.turn ?? 0);
+    const { friendlyCasualties, opposingCasualties, theaterCasualties } = summarizeBattleCost(summary, playerFaction);
+    const displaced = Number(summary?.displacement_total ?? 0);
+    const ownFormationsDestroyed = Array.isArray(summary?.formation_destructions)
+        ? summary.formation_destructions.filter((formation: any) => formation?.faction === playerFaction).length
+        : 0;
+    const netFriendlyTerritory = playerFaction
+        ? Number(summary?.territory_net?.[playerFaction] ?? 0)
+        : 0;
+
+    const playerScopedCost = playerFaction
+        ? friendlyCasualties >= COST_FRIENDLY_CASUALTY_THRESHOLD
+            || ownFormationsDestroyed > 0
+            || displaced >= COST_DISPLACEMENT_THRESHOLD
+        : theaterCasualties >= COST_THEATER_CASUALTY_THRESHOLD
+            || displaced >= COST_DISPLACEMENT_THRESHOLD;
+    if (!playerScopedCost) return null;
+
+    const severity: 'severe' | 'critical' = ownFormationsDestroyed > 0
+        || friendlyCasualties >= CASUALTY_THRESHOLD
+        || displaced >= COST_DISPLACEMENT_THRESHOLD
+        ? 'critical'
+        : 'severe';
+
+    const reasons: string[] = [];
+    if (playerFaction && friendlyCasualties > 0) {
+        reasons.push(`${friendlyCasualties} friendly casualties`);
+    } else if (!playerFaction && theaterCasualties > 0) {
+        reasons.push(`${theaterCasualties} battlefield casualties`);
+    }
+    if (opposingCasualties > 0) {
+        reasons.push(`${opposingCasualties} opposing casualties`);
+    }
+    if (displaced > 0) {
+        reasons.push(`${displaced} displaced`);
+    }
+    if (ownFormationsDestroyed > 0) {
+        reasons.push(`${ownFormationsDestroyed} own ${ownFormationsDestroyed === 1 ? 'formation' : 'formations'} destroyed`);
+    }
+    if (playerFaction && netFriendlyTerritory !== 0) {
+        reasons.push(`${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory} net OSIDs`);
+    }
+
+    return {
+        turn,
+        type: 'cost',
+        headline: severity === 'critical',
+        title: severity === 'critical' ? 'Critical campaign cost' : 'Costly campaign turn',
+        detail: reasons.join(' | '),
+        metadata: {
+            casualties: playerFaction ? friendlyCasualties : theaterCasualties,
+            displaced,
+            costSeverity: severity,
+            netFriendlyTerritory: playerFaction ? netFriendlyTerritory : undefined,
+            ownFormationsDestroyed,
+        },
+    };
 }
 
 function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
@@ -106,6 +198,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
     }
 
     const entries: ChronicleEntry[] = [];
+    const playerFaction = typeof state.player_faction === 'string' ? state.player_faction : null;
 
     for (const summary of state.turnSummaries) {
         const turn = summary.turn;
@@ -153,6 +246,11 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     });
                 }
             }
+        }
+
+        const costEntry = buildTurnCostEntry(summary, playerFaction);
+        if (costEntry) {
+            entries.push(costEntry);
         }
 
         if (summary.displacement_total > DISPLACEMENT_THRESHOLD) {
