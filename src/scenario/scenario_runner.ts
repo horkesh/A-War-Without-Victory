@@ -140,6 +140,7 @@ import type {
     WeeklyReportRow
 } from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
+import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
@@ -327,6 +328,8 @@ export interface RunScenarioResult {
         destroyed_brigades: string;
         /** Operation AARs (completed operations). */
         operation_aars: string;
+        /** LANE-2026-05-02-A1: Per-turn brigade-keyed snapshot (read-only observability). */
+        brigade_temporal_log: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
         weekly_saves?: string[];
         /** Optional replay timeline bundle for tactical-map animation playback/export. */
@@ -1567,6 +1570,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     initial_save: initialSavePath,
                     final_save: initialSavePath,
                     weekly_report: join(outDir, 'weekly_report.jsonl'),
+                    brigade_temporal_log: join(outDir, 'brigade_temporal_log.jsonl'),
                     replay: '',
                     run_summary: join(outDir, 'run_summary.json'),
                     control_delta: join(outDir, 'control_delta.json'),
@@ -1591,9 +1595,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         const weeklyReportPath = join(outDir, 'weekly_report.jsonl');
+        const brigadeTemporalLogPath = join(outDir, 'brigade_temporal_log.jsonl');
         const replayPath = emitWeeklySavesForVideo ? join(outDir, 'replay.jsonl') : null;
         await ensureRunOutputDir(outDir);
         const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
+        // LANE-2026-05-02-A1: per-turn brigade-keyed snapshot stream. Pure observability,
+        // mirrors weekly_report.jsonl pattern; no engine state mutation, no save scope.
+        const brigadeTemporalStream = createWriteStream(brigadeTemporalLogPath, { flags: 'w' });
         const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
 
         let final_state_hash = '';
@@ -2117,6 +2125,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');
 
+            // LANE-2026-05-02-A1: brigade temporal snapshot — per-turn × per-brigade row.
+            // Pure read-only projection over state.military.formations after all turn
+            // reconciliation. strictCompare-sorted by brigade_id for byte-stability.
+            const brigadeTemporalRows = buildBrigadeTemporalRows(state, week_index);
+            for (const row of brigadeTemporalRows) {
+                brigadeTemporalStream.write(stableStringify(row) + '\n');
+            }
+
             if (week_index === weeks - 1) {
                 const serialized = serializeState(state);
                 final_state_hash = createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16);
@@ -2152,6 +2168,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         reportStream.end();
+        brigadeTemporalStream.end();
         if (replayStream) replayStream.end();
         await new Promise<void>((resolve, reject) => {
             if (replayStream) {
@@ -2518,6 +2535,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 initial_save: initialSavePath,
                 final_save: finalSavePath,
                 weekly_report: weeklyReportPath,
+                brigade_temporal_log: brigadeTemporalLogPath,
                 replay: replayPath ?? '',
                 run_summary: runSummaryPath,
                 control_delta: controlDeltaPath,

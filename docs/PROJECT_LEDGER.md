@@ -1,3 +1,41 @@
+## [2026-05-02] feat(harness): per-turn brigade-keyed snapshot emit (LANE-2026-05-02-A1-PER-TURN-BRIGADE-SNAPSHOT)
+
+**Type:** Pure observability emit added to scenario harness. No engine state mutation, no GameState shape change, no save/load impact, no run-hash impact.
+
+**Why:** Successor handoff #1 from `173dd94d` KRIVAJA_BRIGADE_LIFECYCLE. The Krivaja-95 lifecycle and triggered-op temporal-trace lanes both encountered the same artifact gap: per-turn brigade-keyed snapshots are NOT preserved in run artifacts (only weekly_report.jsonl op-aggregate counters + final_save.json terminal state + destroyed_brigades.json terminal aggregate). This blocks classification of "active throughout but absent from late-game ops" gaps such as `rs_1st_milii` in n1619.
+
+**Phase 0 design (3 parallel investigators):**
+- /scenario-harness-engineer: 20-field row schema (turn, week_index, brigade_id, faction, corps_id, kind, status, lifecycle_status, location_osid, home_osid, sector_id, assigned_sub_segment_id, mv_state, mv_destinations, active_op_id, current_op_phase, personnel, morale, cohesion, fatigue); cost ~1.8 MB at 40w / ~10–20 MB at 188w; output `<run_dir>/brigade_temporal_log.jsonl`; brigade-kind only.
+- /determinism-auditor: WELL-PRECEDENTED, no novel determinism plumbing; strictCompare imported from `src/state/turn_phases.ts`; mirrors existing weekly_report.jsonl emit pattern at `scenario_runner.ts:1593-1597 / :2118 / :2154`; save/load + run-hash unaffected.
+- /technical-architect: harness owns emit (NOT engine pipeline); placement at `scenario_runner.ts:2118` after `runTurn` returns; pattern (a) callback / direct harness call (NOT pattern (b) transient state field — would violate Engine Invariants §13.1); always-on (no flag), within `weekly_report.jsonl` precedent.
+
+**Implementation:** new `src/scenario/brigade_temporal_emit.ts` exports `BrigadeTemporalRow` type + `buildBrigadeTemporalRows(state, weekIndex)` pure function; harness wiring in `src/scenario/scenario_runner.ts` (7 small edits: import, type, early-return paths block, path constant, WriteStream open, per-turn emit, close + final-return).
+
+**Verification:**
+- `tests/brigade_temporal_emit.test.ts` 9/9 PASS in 8ms (T1 schema_lock, T2 deterministic_byte_identity, T3 stable_brigade_ordering, T4 active_op_attribution, T5 mv_state_passthrough, T6 lifecycle_status_passthrough, T7 empty_state, T8 forbidden_token_grep, T9 non_brigade_kind_filter).
+- Focused regression 18/18 across 3 suites.
+- `npx tsc --noEmit -p tsconfig.json` clean.
+- 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1620` hash `0c2fc264112dec1f` — byte-identical to predecessor 40w lineage (n1610 / n1616 / n1618). brigade_temporal_log.jsonl emitted at 4,277,040 bytes / 8,539 lines.
+- /scenario-creator-runner-tester verdict: PASS. Hash byte-stability confirmed; cost in-band; no anomalies; schema validated.
+
+**Sensitive-history verdict:** Ring 1 / NEUTRAL by construction (no engine code changed). No § 6 sign-off required (pre-classified by /game-designer in predecessor lane closure verdict).
+
+**Hash drift:** None. By construction.
+
+**Files:**
+- `src/scenario/brigade_temporal_emit.ts` (NEW, pure builder)
+- `tests/brigade_temporal_emit.test.ts` (NEW, 9/9 GREEN)
+- `src/scenario/scenario_runner.ts` (PATCH, 7 small edits, lane-tagged)
+- `docs/40_reports/implemented/20260502_PER_TURN_BRIGADE_SNAPSHOT.md` (NEW lane report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State prepended)
+
+**Future use:** the existing `tools/diagnostics/krivaja_brigade_lifecycle.cjs` can be enhanced in a future lane to consume `brigade_temporal_log.jsonl` for per-turn classification of `unknown_inactive` brigades like `rs_1st_milii`. Out of scope for this lane.
+
+**Successor handoffs (carrying over from `173dd94d`):** (2) reconstitution policy review (Ring 1 corps-agnostic, calibration regression required); (3) OOB seeding for `rs_skelani_battalion` (Ring 2, § 6 REQUIRED, /historian + /game-designer); (1) bot AI op-generator roster awareness (Ring 3, BLOCKED until reframed).
+
+---
+
 ## [2026-05-02] docs(combat): diagnose Krivaja-95 brigade-roster lifecycle; close as diagnostic with named handoffs
 
 **Type:** Read-only diagnostic + structural test + report. No engine code, scenario data, painted targets, OOB, combat math, rupture/enclave logic, or calibration tuning changed.
