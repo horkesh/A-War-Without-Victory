@@ -59,6 +59,8 @@ import { getEquipmentOffensivePriority } from './sector_offensive_launch_helpers
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration
 import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } from './combat_math.js';
+// LANE-2026-05-02-DRINA: enclave-scoped defender aggregation
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -189,6 +191,34 @@ function collectObjectiveEnemySectorIds(
     return objectiveEnemySectors;
 }
 
+// LANE-2026-05-02-DRINA: helper — return the enclave that contains ALL of an
+// operation's objectives, or null if no single enclave covers them. Faction-
+// agnostic: iterates ENCLAVE_DEFINITIONS in canonical order. Used by
+// estimateForceRatio to scope defender aggregation to enclave-interior brigades
+// when the operation's objectives sit wholly inside one enclave.
+function allObjectivesInOneEnclave(
+    op: CorpsOperation,
+): typeof ENCLAVE_DEFINITIONS[number] | null {
+    const objectives = new Set<string>(op.objectives ?? []);
+    if (op.axes) {
+        for (const ax of op.axes) {
+            for (const o of ax.objectives) objectives.add(o);
+        }
+    }
+    if (objectives.size === 0) return null;
+    for (const enclave of ENCLAVE_DEFINITIONS) {
+        let allMatch = true;
+        for (const obj of objectives) {
+            if (!osidBelongsToEnclave(obj, enclave)) {
+                allMatch = false;
+                break;
+            }
+        }
+        if (allMatch) return enclave;
+    }
+    return null;
+}
+
 /**
  * Estimate force ratio based on intel confidence and competence.
  * High confidence → close to ground truth. Low confidence → inaccurate estimate.
@@ -276,6 +306,27 @@ export function estimateForceRatio(
                         defenderFormations.push(b);
                     }
                 }
+            }
+        }
+    }
+
+    // LANE-2026-05-02-DRINA: enclave-scoped defender filter.
+    // When all objectives target one enclave's interior, restrict defender
+    // aggregation to formations physically inside the enclave. Mirrors the
+    // historical reality that only enclave-interior brigades can defend the
+    // enclave; outer-corps formations in the same sector cannot project power
+    // across the encirclement ring. Faction-agnostic predicate; pre-fix the
+    // entire facing corps was aggregated, drowning out the small enclave
+    // garrison and producing fantasy-low ratios that said Krivaja-95 was
+    // infeasible. Reverse-iteration splice preserves order for the
+    // surviving (enclave-interior) defenders so deterministic ordering below
+    // is unaffected.
+    const enclaveScope = allObjectivesInOneEnclave(op);
+    if (enclaveScope !== null) {
+        for (let i = defenderFormations.length - 1; i >= 0; i--) {
+            const loc = defenderFormations[i]!.location_osid;
+            if (!loc || !osidBelongsToEnclave(loc, enclaveScope)) {
+                defenderFormations.splice(i, 1);
             }
         }
     }
