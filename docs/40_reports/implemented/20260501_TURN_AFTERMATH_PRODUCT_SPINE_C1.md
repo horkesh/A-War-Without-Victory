@@ -132,6 +132,16 @@ The post-advance `TurnAftermathModal` now renders a `Strategic Signals` panel fr
 
 This closes the immediate-report gap: the player sees major events, decorations, arc changes, supply shocks, and notable movements as soon as the turn resolves, before deciding whether to continue, review records, open the War Summary, or inspect the Inbox.
 
+## C9 Active Campaign Cost Extension
+
+The Turn Aftermath archive now feeds an active campaign cost-so-far read model:
+
+- Added `buildTurnAftermathCampaignCost(...)`, which aggregates the full archived turn set into cumulative friendly/opposing/theater casualties, displacement, own formations destroyed, hard-turn count, net OSIDs, casualty exchange, top cost drivers, and the costliest archived turn.
+- Army HQ `TURN AFTERMATH` records now show a `Campaign cost so far` section above the archive metrics.
+- War Summary overview now has a compact `Campaign Cost` block for severity, friendly casualties, displacement, and net OSIDs.
+
+This remains a read model over `turnSummaries` / `latestTurnSummary`. It is not a second endgame Cost Ledger and does not write simulation truth.
+
 ## Files
 
 - `src/ui/map/data/turnAftermath.ts`
@@ -198,5 +208,5 @@ No scenario run is required: this is a UI/read-model bridge over already-persist
 
 ## Remaining Product-Spine Work
 
-- Add richer per-turn cost deltas when Cost Ledger gains an in-campaign read model, not only game-over aggregation.
 - Consider a Chronicle cross-link once Chronicle gets a unified campaign timeline filter.
+- If final Cost Ledger grows an active-campaign API, use it for richer reckoning details while keeping the Turn Aftermath cost surface as the scan-line campaign view.

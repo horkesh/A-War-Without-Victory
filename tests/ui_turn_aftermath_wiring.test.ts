@@ -50,6 +50,18 @@ describe('turn aftermath UI wiring', () => {
     expect(panel).toContain('Strategic signals');
   });
 
+  it('surfaces active campaign cost in records and war summary', () => {
+    const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
+    const summary = read('../src/ui/map/components/army_hq/WarSummaryContent.tsx');
+
+    expect(panel).toContain('buildTurnAftermathCampaignCost');
+    expect(panel).toContain('Campaign cost so far');
+    expect(panel).toContain('data-testid="campaign-cost-spine"');
+    expect(summary).toContain('buildTurnAftermathCampaignCost');
+    expect(summary).toContain('Campaign Cost');
+    expect(summary).toContain('data-testid="war-summary-campaign-cost"');
+  });
+
   it('exposes commander review filters for long aftermath archives', () => {
     const panel = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
 

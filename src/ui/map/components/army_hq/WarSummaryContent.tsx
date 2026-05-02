@@ -11,6 +11,7 @@ import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { SituationTab } from '../SituationTab';
 import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
+import { buildTurnAftermathCampaignCost } from '../../data/turnAftermath';
 
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['overview', 'Overview'],
@@ -39,6 +40,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
     const { label, casualtyLedger, civilianCasualties } = loadedGameState;
 
     const data = useMemo(() => buildWarSummaryOverviewModel(loadedGameState), [loadedGameState]);
+    const campaignCost = useMemo(() => buildTurnAftermathCampaignCost({ state: loadedGameState }), [loadedGameState]);
     const sitrep = loadedGameState.operationalSitrep;
 
     const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction, warExhaustionByFaction } = data;
@@ -128,6 +130,29 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </div>
                                 </div>
                             </SummarySection>
+
+                            {campaignCost.recordCount > 0 && (
+                                <SummarySection title="Campaign Cost">
+                                    <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-cost">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Severity</span>
+                                            <span className="text-text-primary uppercase tabular-nums">{campaignCost.severity}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Friendly casualties</span>
+                                            <span className="text-text-primary tabular-nums">{fmtK(campaignCost.totalFriendlyMilitaryCasualties)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Displaced</span>
+                                            <span className="text-text-primary tabular-nums">{fmtK(campaignCost.totalDisplaced)}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Net OSIDs</span>
+                                            <span className="text-text-primary tabular-nums">{campaignCost.netFriendlyTerritory >= 0 ? '+' : ''}{campaignCost.netFriendlyTerritory}</span>
+                                        </div>
+                                    </div>
+                                </SummarySection>
+                            )}
 
                             {hasElevatedWarExhaustion && (
                                 <SummarySection title="Campaign Drag">

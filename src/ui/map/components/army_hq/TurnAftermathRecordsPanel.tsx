@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
+import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
 
 const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; label: string }> = [
@@ -13,6 +13,11 @@ const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; label: string }> = 
 function formatSigned(value: number): string {
     if (value > 0) return `+${value}`;
     return String(value);
+}
+
+function formatRatio(value: number | null): string {
+    if (value == null) return '-';
+    return value.toFixed(2);
 }
 
 function toneClass(tone: TurnAftermathView['tone']): string {
@@ -158,6 +163,10 @@ export function TurnAftermathRecordsPanel() {
         () => buildTurnAftermathCampaignPulse(visibleRecords),
         [visibleRecords],
     );
+    const campaignCost = useMemo(
+        () => buildTurnAftermathCampaignCost({ state, osidNameMap }),
+        [state, osidNameMap],
+    );
 
     if (records.length === 0) {
         return (
@@ -209,6 +218,57 @@ export function TurnAftermathRecordsPanel() {
                     <RecordMetric label="Hard Turns" value={String(pulse.hardTurnCount)} detail="Severe / critical" />
                     <RecordMetric label="Theater Cost" value={String(pulse.totalTheaterMilitaryCasualties)} detail={`${pulse.totalDisplaced} displaced`} />
                 </div>
+            </section>
+
+            <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2" data-testid="campaign-cost-spine">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Campaign cost so far</div>
+                        <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{campaignCost.headline}</div>
+                        <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{campaignCost.briefing}</div>
+                    </div>
+                    <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.severity)}`}>
+                        {campaignCost.severity}
+                    </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+                    <RecordMetric label="Window" value={String(campaignCost.recordCount)} detail={campaignCost.windowLabel} />
+                    <RecordMetric label="Friendly Cost" value={String(campaignCost.totalFriendlyMilitaryCasualties)} detail={`${campaignCost.averageFriendlyMilitaryCasualties.toFixed(1)} per turn`} />
+                    <RecordMetric label="Exchange" value={formatRatio(campaignCost.casualtyExchangeRatio)} detail={`${campaignCost.totalOpposingMilitaryCasualties} opposing`} />
+                    <RecordMetric label="Displaced" value={String(campaignCost.totalDisplaced)} detail="Archived turns" />
+                    <RecordMetric label="Lost Formations" value={String(campaignCost.totalOwnFormationsDestroyed)} detail={`${campaignCost.hardTurnCount} hard turns`} />
+                    <RecordMetric label="Net OSIDs" value={formatSigned(campaignCost.netFriendlyTerritory)} detail={`${campaignCost.totalTheaterMilitaryCasualties} theater casualties`} />
+                </div>
+                {(campaignCost.topDrivers.length > 0 || campaignCost.mostCostlyTurn) && (
+                    <div className="mt-2 grid gap-2 lg:grid-cols-[1.2fr_0.8fr]">
+                        {campaignCost.topDrivers.length > 0 && (
+                            <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
+                                <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">Cost drivers</div>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {campaignCost.topDrivers.map((driver) => (
+                                        <span key={driver} className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[9px] text-text-secondary">
+                                            {driver}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {campaignCost.mostCostlyTurn && (
+                            <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
+                                <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Costliest turn</div>
+                                <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                                    <span className="text-[11px] font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
+                                    <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
+                                        {campaignCost.mostCostlyTurn.severity}
+                                    </span>
+                                </div>
+                                <div className="mt-1 text-[9px] text-text-secondary">
+                                    {campaignCost.mostCostlyTurn.friendlyMilitaryCasualties} casualties / {campaignCost.mostCostlyTurn.displacedThisTurn} displaced / {campaignCost.mostCostlyTurn.ownFormationsDestroyed} formations
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </section>
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">

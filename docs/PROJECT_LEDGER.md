@@ -6521,3 +6521,18 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Docs:** Added `docs/40_reports/implemented/20260501_FIFTH_CORPS_SANA_FOLLOW_ON_REACHABILITY.md`; updated `docs/plans/late-war-5th-corps-opportunities-design.md`; added a durable knowledge rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`; updated `.claude/napkin.md`.
 
 ---
+## [2026-05-02] feat(ui): surface active campaign cost before endgame reckoning
+
+**Type:** UI/product-spine read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
+
+**Why:** Turn Aftermath made each turn legible, and final War Reckoning owns game-over cost judgment, but the active campaign still lacked a cumulative "what is this war costing so far?" view. The player had to mentally add up archived casualties, displacement, destroyed formations, hard turns, and net territory before reaching the final Cost Ledger.
+
+**What changed:** `turnAftermath.ts` now exposes `buildTurnAftermathCampaignCost(...)`, a pure aggregation over `latestTurnSummary` / `turnSummaries` that produces record window, severity, cumulative friendly/opposing/theater casualties, displacement, own formations destroyed, hard turns, net OSIDs, average casualties, casualty exchange, deterministic top drivers, and most costly turn. Army HQ `TURN AFTERMATH` records now show a detailed `Campaign cost so far` panel. War Summary overview now shows a compact `Campaign Cost` block when archive records exist.
+
+**Determinism / scope:** UI/read-model only. No sim state, pipeline, serialization shape, combat, control, event, scenario, or calibration output changed. Driver tie-breaks use deterministic string comparison; no `Math.random`, wall-clock time, or locale sorting introduced.
+
+**Verification:** `npx.cmd vitest run tests/ui/turn_aftermath.test.ts` = 11/11 pass; `npx.cmd vitest run tests/ui/turn_aftermath.test.ts tests/ui_turn_aftermath_wiring.test.ts` = 19/19 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` succeeded with existing Vite warnings only.
+
+**Report:** `docs/40_reports/implemented/20260502_ACTIVE_CAMPAIGN_COST_SPINE.md`.
+
+---

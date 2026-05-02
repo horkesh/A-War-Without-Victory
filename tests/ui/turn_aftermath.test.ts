@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView, filterTurnAftermathRecords } from '../../src/ui/map/data/turnAftermath.js';
+import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView, filterTurnAftermathRecords } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -318,6 +318,109 @@ describe('buildTurnAftermathView', () => {
       totalOwnFormationsDestroyed: 1,
       criticalTurns: 2,
       severeTurns: 0,
+    });
+  });
+
+  it('builds an active campaign cost view from the full turn archive', () => {
+    const turn18 = makeSummary({
+      turn: 18,
+      territory_net: { RBiH: -2 },
+      displacement_total: 4000,
+      formation_destructions: [{ formation_id: 'arbih_lost_a', formation_name: 'Lost A', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:a',
+        attacker_faction: 'RBiH',
+        defender_faction: 'RS',
+        primary_attacker_id: 'a',
+        primary_defender_id: 'b',
+        all_attacker_ids: ['a'],
+        outcome: 'defeat' as never,
+        attacker_casualties: 40,
+        defender_casualties: 10,
+        territory_flipped: false,
+        was_concentrated: false,
+      }],
+    });
+    const turn19 = makeSummary({ turn: 19, territory_net: { RBiH: 1 } });
+    const turn20 = makeSummary({
+      turn: 20,
+      territory_net: { RBiH: 3 },
+      displacement_total: 1200,
+      formation_destructions: [{ formation_id: 'arbih_lost_b', formation_name: 'Lost B', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:b',
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        primary_attacker_id: 'c',
+        primary_defender_id: 'd',
+        all_attacker_ids: ['c'],
+        outcome: 'breakthrough' as never,
+        attacker_casualties: 40,
+        defender_casualties: 120,
+        territory_flipped: true,
+        was_concentrated: false,
+      }],
+    });
+
+    const cost = buildTurnAftermathCampaignCost({
+      state: makeState({
+        turn: 20,
+        latestTurnSummary: turn20,
+        turnSummaries: [turn18, turn19],
+      }),
+    });
+
+    expect(cost).toMatchObject({
+      recordCount: 3,
+      severity: 'critical',
+      headline: 'Campaign cost is critical.',
+      netFriendlyTerritory: 2,
+      totalFriendlyMilitaryCasualties: 160,
+      totalOpposingMilitaryCasualties: 50,
+      totalTheaterMilitaryCasualties: 210,
+      totalDisplaced: 5200,
+      totalOwnFormationsDestroyed: 2,
+      hardTurnCount: 2,
+      averageFriendlyMilitaryCasualties: 160 / 3,
+      casualtyExchangeRatio: 50 / 160,
+    });
+    expect(cost.windowLabel).toContain(' - ');
+    expect(cost.topDrivers).toEqual([
+      '5200 displaced',
+      '2 own formations destroyed',
+      '2 hard turns',
+      '160 friendly casualties',
+    ]);
+    expect(cost.mostCostlyTurn).toMatchObject({
+      turn: 18,
+      severity: 'critical',
+      friendlyMilitaryCasualties: 40,
+      displacedThisTurn: 4000,
+      ownFormationsDestroyed: 1,
+    });
+  });
+
+  it('returns a quiet active campaign cost shell without archived records', () => {
+    const cost = buildTurnAftermathCampaignCost({
+      state: makeState({ latestTurnSummary: null, turnSummaries: [] }),
+    });
+
+    expect(cost).toMatchObject({
+      recordCount: 0,
+      windowLabel: 'No records',
+      severity: 'low',
+      headline: 'No campaign cost records yet.',
+      netFriendlyTerritory: 0,
+      totalFriendlyMilitaryCasualties: 0,
+      totalOpposingMilitaryCasualties: 0,
+      totalTheaterMilitaryCasualties: 0,
+      totalDisplaced: 0,
+      totalOwnFormationsDestroyed: 0,
+      hardTurnCount: 0,
+      averageFriendlyMilitaryCasualties: 0,
+      casualtyExchangeRatio: null,
+      topDrivers: [],
+      mostCostlyTurn: null,
     });
   });
 

@@ -92,6 +92,33 @@ export interface TurnAftermathCampaignPulse {
   decorationCount: number;
 }
 
+export interface TurnAftermathCampaignCostView {
+  recordCount: number;
+  windowLabel: string;
+  severity: TurnAftermathCostSeverity;
+  headline: string;
+  briefing: string;
+  netFriendlyTerritory: number;
+  totalFriendlyMilitaryCasualties: number;
+  totalOpposingMilitaryCasualties: number;
+  totalTheaterMilitaryCasualties: number;
+  totalDisplaced: number;
+  totalOwnFormationsDestroyed: number;
+  hardTurnCount: number;
+  averageFriendlyMilitaryCasualties: number;
+  casualtyExchangeRatio: number | null;
+  topDrivers: string[];
+  mostCostlyTurn: {
+    turn: number;
+    dateLabel: string;
+    severity: TurnAftermathCostSeverity;
+    friendlyMilitaryCasualties: number;
+    displacedThisTurn: number;
+    ownFormationsDestroyed: number;
+    headline: string;
+  } | null;
+}
+
 export interface TurnAftermathView {
   turn: number;
   dateLabel: string;
@@ -137,6 +164,10 @@ export interface TurnAftermathView {
     peaceCount: number;
     topItems: TurnAftermathTopAction[];
   };
+}
+
+function strictStringCompare(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function humanizeToken(value: string | undefined): string | undefined {
@@ -565,6 +596,138 @@ function buildCampaignBriefing(
   return 'Archive window is quiet: no major movement or costs in the visible records.';
 }
 
+function classifyCampaignCost(
+  summary: TurnAftermathLedgerSummary,
+  averageFriendlyMilitaryCasualties: number,
+): TurnAftermathCostSeverity {
+  if (summary.recordCount === 0) return 'low';
+  const hardTurnCount = summary.criticalTurns + summary.severeTurns;
+  if (
+    summary.totalOwnFormationsDestroyed >= 2
+    || summary.criticalTurns >= 2
+    || averageFriendlyMilitaryCasualties >= 100
+    || summary.totalDisplaced >= 5000
+  ) {
+    return 'critical';
+  }
+  if (
+    summary.totalOwnFormationsDestroyed >= 1
+    || summary.criticalTurns >= 1
+    || summary.severeTurns >= 2
+    || averageFriendlyMilitaryCasualties >= 50
+    || summary.totalDisplaced >= 2000
+  ) {
+    return 'severe';
+  }
+  if (
+    hardTurnCount > 0
+    || summary.totalFriendlyMilitaryCasualties > 0
+    || summary.totalDisplaced > 0
+    || summary.totalTheaterMilitaryCasualties > 0
+  ) {
+    return 'moderate';
+  }
+  return 'low';
+}
+
+function buildCampaignCostHeadline(
+  severity: TurnAftermathCostSeverity,
+  summary: TurnAftermathLedgerSummary,
+): string {
+  if (summary.recordCount === 0) return 'No campaign cost records yet.';
+  if (severity === 'critical') return 'Campaign cost is critical.';
+  if (severity === 'severe') return 'Campaign cost is severe.';
+  if (severity === 'moderate') return 'Campaign cost is accumulating.';
+  return 'Campaign cost is light.';
+}
+
+function buildCampaignCostBriefing(input: {
+  severity: TurnAftermathCostSeverity;
+  summary: TurnAftermathLedgerSummary;
+  totalOpposingMilitaryCasualties: number;
+  casualtyExchangeRatio: number | null;
+}): string {
+  const { severity, summary, casualtyExchangeRatio } = input;
+  if (summary.recordCount === 0) return 'No archived turn records are available.';
+  const exchange = casualtyExchangeRatio == null
+    ? 'no clear casualty exchange'
+    : `${casualtyExchangeRatio.toFixed(2)} opposing casualties per friendly casualty`;
+  const territory = summary.netFriendlyTerritory >= 0
+    ? `+${summary.netFriendlyTerritory}`
+    : String(summary.netFriendlyTerritory);
+  if (severity === 'critical' || severity === 'severe') {
+    return `${summary.recordCount} recorded turns: ${summary.totalFriendlyMilitaryCasualties} friendly casualties, ${summary.totalDisplaced} displaced, ${territory} net OSIDs, ${exchange}.`;
+  }
+  if (severity === 'moderate') {
+    return `${summary.recordCount} recorded turns: cost is present but not dominant, with ${territory} net OSIDs and ${exchange}.`;
+  }
+  return `${summary.recordCount} recorded turns: no major costs recorded, with ${territory} net OSIDs.`;
+}
+
+function buildCampaignCostDrivers(input: {
+  summary: TurnAftermathLedgerSummary;
+  totalOpposingMilitaryCasualties: number;
+  casualtyExchangeRatio: number | null;
+}): string[] {
+  const drivers: Array<{ label: string; weight: number }> = [];
+  const { summary, totalOpposingMilitaryCasualties, casualtyExchangeRatio } = input;
+  if (summary.totalFriendlyMilitaryCasualties > 0) {
+    drivers.push({
+      label: `${summary.totalFriendlyMilitaryCasualties} friendly casualties`,
+      weight: summary.totalFriendlyMilitaryCasualties * 10,
+    });
+  }
+  if (totalOpposingMilitaryCasualties > 0) {
+    drivers.push({
+      label: `${totalOpposingMilitaryCasualties} opposing casualties`,
+      weight: totalOpposingMilitaryCasualties * 6,
+    });
+  }
+  if (summary.totalDisplaced > 0) {
+    drivers.push({
+      label: `${summary.totalDisplaced} displaced`,
+      weight: summary.totalDisplaced,
+    });
+  }
+  if (summary.totalOwnFormationsDestroyed > 0) {
+    drivers.push({
+      label: `${summary.totalOwnFormationsDestroyed} own ${pluralize(summary.totalOwnFormationsDestroyed, 'formation')} destroyed`,
+      weight: summary.totalOwnFormationsDestroyed * 2500,
+    });
+  }
+  const hardTurnCount = summary.criticalTurns + summary.severeTurns;
+  if (hardTurnCount > 0) {
+    drivers.push({
+      label: `${hardTurnCount} hard ${pluralize(hardTurnCount, 'turn')}`,
+      weight: hardTurnCount * 1500,
+    });
+  }
+  if (casualtyExchangeRatio != null && casualtyExchangeRatio < 0.75 && summary.totalFriendlyMilitaryCasualties > 0) {
+    drivers.push({
+      label: `${casualtyExchangeRatio.toFixed(2)} casualty exchange`,
+      weight: 1200,
+    });
+  }
+
+  return drivers
+    .sort((a, b) => b.weight - a.weight || strictStringCompare(a.label, b.label))
+    .slice(0, 4)
+    .map((driver) => driver.label);
+}
+
+function campaignCostScore(record: TurnAftermathView): number {
+  const severityScore: Record<TurnAftermathCostSeverity, number> = {
+    low: 0,
+    moderate: 1,
+    severe: 2,
+    critical: 3,
+  };
+  return severityScore[record.cost.severity] * 100000
+    + record.cost.ownFormationsDestroyed * 5000
+    + record.cost.friendlyMilitaryCasualties * 20
+    + record.cost.displacedThisTurn;
+}
+
 export function buildTurnAftermathCampaignPulse(records: readonly TurnAftermathView[]): TurnAftermathCampaignPulse {
   const summary = buildTurnAftermathLedgerSummary(records);
   const signalCount = records.reduce((total, record) => total + record.signals.length, 0);
@@ -597,6 +760,75 @@ export function buildTurnAftermathCampaignPulse(records: readonly TurnAftermathV
     signalCount,
     eventCount,
     decorationCount,
+  };
+}
+
+export function buildTurnAftermathCampaignCost(input: TurnAftermathRecordsInput): TurnAftermathCampaignCostView {
+  const records = buildTurnAftermathRecordViews({
+    state: input.state,
+    osidNameMap: input.osidNameMap ?? null,
+    limit: input.limit ?? Number.MAX_SAFE_INTEGER,
+  });
+  const summary = buildTurnAftermathLedgerSummary(records);
+  const totalOpposingMilitaryCasualties = records.reduce(
+    (total, record) => total + record.combat.opposingCasualties,
+    0,
+  );
+  const hardTurnCount = summary.criticalTurns + summary.severeTurns;
+  const averageFriendlyMilitaryCasualties = summary.recordCount > 0
+    ? summary.totalFriendlyMilitaryCasualties / summary.recordCount
+    : 0;
+  const casualtyExchangeRatio = summary.totalFriendlyMilitaryCasualties > 0
+    ? totalOpposingMilitaryCasualties / summary.totalFriendlyMilitaryCasualties
+    : null;
+  const severity = classifyCampaignCost(summary, averageFriendlyMilitaryCasualties);
+  const latest = records[0]?.dateLabel ?? null;
+  const oldest = records[records.length - 1]?.dateLabel ?? null;
+  const windowLabel = latest && oldest
+    ? latest === oldest ? latest : `${oldest} - ${latest}`
+    : 'No records';
+  const mostCostlyRecord = records.reduce<TurnAftermathView | null>((best, record) => {
+    if (!best) return record;
+    const score = campaignCostScore(record);
+    const bestScore = campaignCostScore(best);
+    if (score !== bestScore) return score > bestScore ? record : best;
+    return record.turn > best.turn ? record : best;
+  }, null);
+
+  return {
+    recordCount: summary.recordCount,
+    windowLabel,
+    severity,
+    headline: buildCampaignCostHeadline(severity, summary),
+    briefing: buildCampaignCostBriefing({
+      severity,
+      summary,
+      totalOpposingMilitaryCasualties,
+      casualtyExchangeRatio,
+    }),
+    netFriendlyTerritory: summary.netFriendlyTerritory,
+    totalFriendlyMilitaryCasualties: summary.totalFriendlyMilitaryCasualties,
+    totalOpposingMilitaryCasualties,
+    totalTheaterMilitaryCasualties: summary.totalTheaterMilitaryCasualties,
+    totalDisplaced: summary.totalDisplaced,
+    totalOwnFormationsDestroyed: summary.totalOwnFormationsDestroyed,
+    hardTurnCount,
+    averageFriendlyMilitaryCasualties,
+    casualtyExchangeRatio,
+    topDrivers: buildCampaignCostDrivers({
+      summary,
+      totalOpposingMilitaryCasualties,
+      casualtyExchangeRatio,
+    }),
+    mostCostlyTurn: mostCostlyRecord ? {
+      turn: mostCostlyRecord.turn,
+      dateLabel: mostCostlyRecord.dateLabel,
+      severity: mostCostlyRecord.cost.severity,
+      friendlyMilitaryCasualties: mostCostlyRecord.cost.friendlyMilitaryCasualties,
+      displacedThisTurn: mostCostlyRecord.cost.displacedThisTurn,
+      ownFormationsDestroyed: mostCostlyRecord.cost.ownFormationsDestroyed,
+      headline: mostCostlyRecord.headline,
+    } : null,
   };
 }
 
