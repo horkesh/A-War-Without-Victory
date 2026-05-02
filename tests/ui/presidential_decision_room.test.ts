@@ -290,6 +290,79 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('builds command-loop question lanes from the same priority card archive', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_beta', display_name: 'Beta Window', expires_turn: 30 }),
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      commandBriefing: {
+        headline: 'Critical command alert.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'briefing:zeta',
+            kind: 'command',
+            severity: 'critical',
+            title: 'Corps command strain rising',
+            detail: 'Staff reports command friction around the main effort.',
+            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
+          },
+        ],
+      },
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: -1 },
+        displacement_total: 1600,
+      }),
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+    const byId = Object.fromEntries(first.commandQuestions.map((question) => [question.id, question]));
+
+    expect(first.commandQuestions.map((question) => question.id)).toEqual([
+      'urgent',
+      'pending',
+      'fronts',
+      'inspect',
+      'advance',
+    ]);
+    expect(second.commandQuestions).toEqual(first.commandQuestions);
+    expect(byId.urgent).toMatchObject({
+      label: 'Urgent',
+      count: 5,
+      urgentCount: 5,
+      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed'],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(byId.pending).toMatchObject({
+      label: 'Decisions',
+      cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
+    });
+    expect(byId.fronts).toMatchObject({
+      label: 'Fronts',
+      cardIds: ['sitrep:front-exposed', 'briefing:briefing:zeta'],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+    });
+    expect(byId.inspect.cardIds).toEqual(first.inspectNext.map((card) => card.id));
+    expect(byId.advance).toMatchObject({
+      label: 'Advance',
+      headline: 'Review before advance',
+      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
+    });
+  });
+
   it('marks what should be reviewed before advancing without blocking beyond existing systems', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
@@ -337,6 +410,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.hasPlayerFaction).toBe(false);
     expect(view.cards).toEqual([]);
     expect(view.lenses).toEqual([]);
+    expect(view.commandQuestions).toEqual([]);
     expect(view.emptyState).toBe('No player faction loaded.');
   });
 });

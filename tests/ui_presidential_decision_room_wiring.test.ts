@@ -59,6 +59,19 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain("lens.id === 'all'");
   });
 
+  it('renders command-loop lanes without creating another queue owner', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
+
+    expect(model).toContain('commandQuestions');
+    expect(model).toContain('buildCommandQuestions');
+    expect(panel).toContain('CommandQuestionLane');
+    expect(panel).toContain('view.commandQuestions.map');
+    expect(panel).toContain('Command Loop');
+    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(question.navigationTarget)');
+    expect(panel).not.toContain('commandLoopQueue');
+  });
+
   it('does not import or expose sensitive-history/combat-lane internals', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');

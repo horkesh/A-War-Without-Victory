@@ -3,6 +3,7 @@ import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
+  type PresidentialDecisionRoomCommandQuestion,
   type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomSeverity,
 } from '../../data/presidentialDecisionRoom';
@@ -72,6 +73,41 @@ function LensButton({
         {lens.urgentCount}
       </span>
     </button>
+  );
+}
+
+function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomCommandQuestion }) {
+  const disabled = question.navigationTarget.kind === 'none';
+  return (
+    <article className="min-w-0 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="truncate text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">
+            {question.label}
+          </div>
+          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">
+            {question.headline}
+          </div>
+        </div>
+        <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${question.urgentCount > 0
+          ? 'border-red-400/35 bg-red-500/10 text-red-300'
+          : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
+        >
+          {question.count}
+        </span>
+      </div>
+      <div className="mt-1 truncate text-[9px] uppercase tracking-[0.08em] text-text-secondary">
+        {question.summary}
+      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => openPresidentialDecisionRoomNavigationTarget(question.navigationTarget)}
+        className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+      >
+        {question.actionLabel}
+      </button>
+    </article>
   );
 }
 
@@ -185,6 +221,17 @@ export function PresidentialDecisionRoomPanel() {
         <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
         <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
       </div>
+
+      {view.commandQuestions.length > 0 && (
+        <div className="mb-2">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Command Loop</div>
+          <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-5">
+            {view.commandQuestions.map((question) => (
+              <CommandQuestionLane key={question.id} question={question} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {view.lenses.length > 0 && (
         <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">

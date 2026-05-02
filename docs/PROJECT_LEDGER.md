@@ -1,3 +1,30 @@
+## [2026-05-02] feat(ui): add Decision Room command-loop lanes
+
+**Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, or sensitive-history logic changed.
+
+**Change:** `buildPresidentialDecisionRoomView(...)` now derives five command-loop lanes from the existing sorted Strategic Priorities card archive: `Urgent`, `Decisions`, `Fronts`, `Inspect`, and `Advance`. Each lane carries deterministic card ids, counts, urgent counts, headline, summary, action label, and the top card's existing Decision Room navigation target. `PresidentialDecisionRoomPanel` renders the lanes above the local priority lenses so the player can answer the core command-loop questions without scanning the full card stack first.
+
+**Pre-advance refinement:** `advanceReadiness.items` now selects one item per source category before filling duplicate categories. This keeps a second opportunity dossier from hiding a hard-turn or operational warning in the "Review Before Advance" list, while still preserving the same card source owners and existing navigation targets.
+
+**Ownership guardrails:** The lanes are projections only. They do not create another inbox, opportunity ledger, cost ledger, Chronicle, event log, turn blocker, or combat-planning owner. Source truth remains in the same Decision Room inputs and source surfaces; actions route through `openPresidentialDecisionRoomNavigationTarget(...)`.
+
+**Verification:** Red-first tests added to `tests/ui/presidential_decision_room.test.ts` and `tests/ui_presidential_decision_room_wiring.test.ts`; focused run passed 12/12 before docs. Full type/build verification is recorded in `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`.
+
+**Files:**
+- `src/ui/map/data/presidentialDecisionRoom.ts`
+- `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`
+- `tests/ui/presidential_decision_room.test.ts`
+- `tests/ui_presidential_decision_room_wiring.test.ts`
+- `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+---
+
 ## [2026-05-02] feat(combat): predictor / readiness gates count operation participants in_transit toward axis-relevant OSIDs (LANE-2026-05-02-IN-TRANSIT-PREDICTOR)
 
 **Type:** Bounded predictor-honesty correction in `src/sim/combat/sector_offensive_launch_helpers.ts`. Successor handoff #7 from Krivaja PARTIAL `98446604` ("Predictor in-transit-numerator-exclusion fix"). No `combat_math.ts`, no `enclave_resilience.ts`, no `rupture_consequences.ts`, no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads.
