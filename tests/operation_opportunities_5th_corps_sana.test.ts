@@ -34,6 +34,7 @@ import {
 } from '../src/sim/combat/operation_opportunities.js';
 import {
     FIFTH_CORPS_OPPORTUNITIES,
+    SANA_95_FOLLOW_ON_OPPORTUNITY,
     SANA_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_5th_corps.js';
 import type {
@@ -49,6 +50,7 @@ interface FixtureOpts {
     stormTriggered?: boolean;
     pocketAnchorsHeldByRBiH?: boolean;
     enemyTargetsRsControlled?: boolean;
+    followOnApproachControlled?: boolean;
     addCorpsReadinessInputs?: boolean;
 }
 
@@ -65,6 +67,12 @@ const VRS_TARGETS = [
     'op:bosanski_petrovac:vrtoce',
     'op:sanski_most:sanski_most_2',
     'op:kljuc:kljuc_2',
+];
+
+const SANA_FOLLOW_ON_APPROACHES = [
+    'op:bosanska_krupa:jasenica_2',
+    'op:bosanski_petrovac:vrtoce',
+    'op:bosanski_petrovac:dobro_selo_2',
 ];
 
 function buildState(opts: FixtureOpts): GameState {
@@ -93,6 +101,12 @@ function buildState(opts: FixtureOpts): GameState {
     }
     if (opts.enemyTargetsRsControlled ?? true) {
         for (const osid of VRS_TARGETS) controllers[osid] = 'RS';
+        for (const osid of SANA_FOLLOW_ON_APPROACHES) {
+            controllers[osid] = 'RS';
+        }
+        if (opts.followOnApproachControlled ?? false) {
+            controllers['op:bosanska_krupa:jasenica_2'] = 'RBiH';
+        }
     } else {
         // All targets liberated — enemy_weakness predicate goes red ("nothing
         // left to liberate" branch).
@@ -182,6 +196,11 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95')).toBe(true);
     });
 
+    it('FIFTH_CORPS_OPPORTUNITIES exposes the Sanski/Kljuc follow-on separately', () => {
+        expect(FIFTH_CORPS_OPPORTUNITIES.some(d => d.opportunity_id === 'sana_95_follow_on')).toBe(true);
+        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.family).toBe('fifth_corps');
+    });
+
     it('legacy scripted Sana has been removed from triggered_operations.ts', () => {
         const sanaInTriggered = _TRIGGERED_OPS.filter((op: { name: string }) => op.name === 'Operation Sana');
         expect(sanaInTriggered).toHaveLength(0);
@@ -244,6 +263,7 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(sana!.proposal_id).toBe('OPP_180_sana_95');
         expect(sana!.approver_faction).toBe('RBiH');
         expect(sana!.last_axis_evaluation).toHaveLength(10);
+        expect(proposals.find(p => p.opportunity_id === 'sana_95_follow_on')).toBeUndefined();
         // Required axes all green:
         const required = sana!.last_axis_evaluation.filter(a => a.mode === 'required');
         for (const r of required) expect(r.green).toBe(true);
@@ -290,7 +310,7 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(isOpportunityEligible(SANA_95_OPPORTUNITY, axes)).toBe(true);
     });
 
-    it('axis brigades and objectives match the legacy scripted Sana shape', () => {
+    it('initial Sana axes cover only the reachable Krupa and Bihac-Petrovac breakthrough', () => {
         // Krupa axis: 2 brigades, 6 objectives.
         const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
         expect(krupa.brigades).toHaveLength(2);
@@ -300,9 +320,46 @@ describe('Sana 95 opportunity (LANE B Phase 3)', () => {
         expect(bp.brigades).toHaveLength(3);
         expect(bp.objectives).toHaveLength(12);
         // Sanski-Most/Ključ axis: 4 brigades, 13 objectives.
-        const sk = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
+        expect(SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')).toBeUndefined();
+    });
+
+    it('Sanski-Most/Kljuc is a follow-on axis with the legacy interior objective shape', () => {
+        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.opportunity_id).toBe('sana_95_follow_on');
+        expect(SANA_95_FOLLOW_ON_OPPORTUNITY.staging_osid).toBe('op:bosanska_krupa:otoka_2');
+        const sk = SANA_95_FOLLOW_ON_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
         expect(sk.brigades).toHaveLength(4);
         expect(sk.objectives).toHaveLength(13);
+    });
+
+    it('does not surface the follow-on before a live approach corridor exists', () => {
+        const state = buildState({
+            turn: 180,
+            stormTriggered: true,
+            pocketAnchorsHeldByRBiH: true,
+            enemyTargetsRsControlled: true,
+            followOnApproachControlled: false,
+            addCorpsReadinessInputs: true,
+        });
+        runOpportunityEvaluationStep(state, 180);
+        const proposals = state.military.operation_opportunities ?? [];
+        expect(proposals.find(p => p.opportunity_id === 'sana_95_follow_on')).toBeUndefined();
+    });
+
+    it('surfaces the follow-on when a live approach corridor reaches Sanski/Kljuc objectives', () => {
+        const state = buildState({
+            turn: 180,
+            stormTriggered: true,
+            pocketAnchorsHeldByRBiH: true,
+            enemyTargetsRsControlled: true,
+            followOnApproachControlled: true,
+            addCorpsReadinessInputs: true,
+        });
+        runOpportunityEvaluationStep(state, 180);
+        const proposals = state.military.operation_opportunities ?? [];
+        const followOn = proposals.find(p => p.opportunity_id === 'sana_95_follow_on');
+        expect(followOn).toBeDefined();
+        expect(followOn!.proposal_id).toBe('OPP_180_sana_95_follow_on');
+        expect(followOn!.last_axis_evaluation.find(a => a.axis === 'staging_access')?.green).toBe(true);
     });
 
     it('citations include both BB1 and the family design doc', () => {

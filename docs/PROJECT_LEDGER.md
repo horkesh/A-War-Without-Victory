@@ -1,3 +1,17 @@
+## [2026-05-02] evidence(operations): verify Sana follow-on reachability split after current-main rebase
+
+**Type:** Scenario verification + documentation propagation for the 5th Corps Sana catalog split. No additional engine behavior changed in this evidence addendum beyond the already-implemented `sana_95` / `sana_95_follow_on` split.
+
+**Why:** The original Sana follow-on branch was authored before the combat-math mega-lane, Storm theater gate split, and campaign proof platform were integrated on `main`. Because parallel lanes can be locally green but still need current-main proof, Codex rebased `codex/fifth-corps-reachability` onto `main` and reran the relevant tests plus 40w/188w scenario evidence.
+
+**Verification:** Focused proof pack 70/70 PASS (`operation_opportunities_5th_corps_sana`, Una/Breza/Pauk opportunity suites, campaign proof diagnostic); `npx.cmd tsc --noEmit` clean. 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0c2fc264112dec1f` matches the current main integration baseline, Jan1993 91.3% count / 93.3% area, `diagnose_run` 0 ERR / 30 WARN, `validate_run_consistency` PASS. 188w proof `runs/apr1992_definitive_188w__210e69404d054959__w188_n1` hash `b2426eb412f4422e`, Oct1995 70.8% count / 63.2% area, `diagnose_run` 0 ERR / 35 WARN, `validate_run_consistency` 18 known sector-layer failures, `opportunity_health_audit` 7 decisions / 7 completed / 2 successes / 3 T3 sentinels / 0 broken links.
+
+**Sana proof:** `opportunity_campaign_proof` now observes 8 5th Corps opportunities: 4 surfaced-executed, 3 T3-authorized, 1 blocked in-window, and 0 reachability warnings. `sana_95` fires at t175 as a reachable 2-axis / 18-objective operation (`sana_bihac_petrovac`, `sana_krupa`) and fails by normal combat underdelivery (4 attacks, 0/18 captures, `UNDERDELIV:2`). `sana_95_follow_on` does not surface; it is blocked turns 175-188 by live `staging_access x14` and `logistics x14`, which is the intended non-railroad behavior when the corridor never opens.
+
+**Artifacts:** Updated `docs/40_reports/implemented/20260501_FIFTH_CORPS_SANA_FOLLOW_ON_REACHABILITY.md`; added `docs/40_reports/diagnostics/20260502_sana_follow_on_n1_evidence.md`; updated knowledge/napkin with the staged-operation live-corridor rule.
+
+---
+
 ## [2026-05-02] merge(architecture): integrate Codex proof platform + Storm gate split after combat-math mega-lane
 
 **Type:** Architecture integration / review close-out. Codex reviewed Claude's Combat-Math `estimateForceRatio` mega-lane, accepted it, and shipped one wording-only correction clarifying that `OperationAAR.force_ratio_estimate` is a decision-time / launch-tick carryover (assessment or anti-paralysis forced decision), not a post-mortem recompute. Then merged two Codex parallel branches onto current `main`: `codex/opportunity-proof-platform` (read-only campaign proof matrix) and `codex/storm-theater-gate` (split abstract Operation Storm readiness from actual western-theater rupture).
@@ -6294,7 +6308,6 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 - Response-order fix: `data/scenarios/events/war_1992.json`
 - Tests: `tests/consequence_chains.test.ts` (+9 tests, 46 total)
 - Manifest: `data/derived/scenario/baselines/manifest.json` (apr1992_52w refresh)
-
 ## [2026-05-02] tool(diagnostics): add opportunity campaign proof matrix
 
 **Type:** Read-only diagnostic tooling + tests + report artifact. No simulation behavior, scenario data, painted targets, operation catalog entries, or baseline hashes changed.
@@ -6308,3 +6321,19 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Determinism:** Script execution is read-only. It performs no writes, uses no timestamps, no `Math.random`, no locale sorting, and sorts all derived ids/rows/blocker summaries with stable string ordering. JSON mode serializes the same derived structure that markdown mode prints.
 
 **Artifacts:** `tools/diagnostics/opportunity_campaign_proof.cjs`, `tests/opportunity_campaign_proof_diagnostic.test.ts`, `docs/40_reports/diagnostics/20260502_opportunity_campaign_proof_n1605.md`, `docs/40_reports/implemented/20260502_OPPORTUNITY_CAMPAIGN_PROOF_PLATFORM.md`.
+
+## [2026-05-01] feat(operations): split Sana 95 interior push into live-corridor follow-on
+
+**Type:** Operation Opportunity catalog content + tests + design propagation. No combat math, OOB, scenario data, painted targets, sensitive-history content, or operation lifecycle code changed.
+
+**Why:** The Late-War Operation Combat Delivery mega-lane proved Sana axis C (`sana_sanski_most_kljuc`) was structurally unreachable at launch in n1605: its first objective had no live approach corridor, so the engine silently skipped it until the new `unreachable_at_launch` diagnostic made the failure visible. The engine diagnostic was correct, but the 5th Corps catalog was still bundling an interior Sanski Most / Kljuc push into the initial Sana breakthrough. That made the next combat-math lane debug an impossible axis instead of real reachable attacks.
+
+**Change:** `SANA_95_OPPORTUNITY` now contains only the reachable Krupa Una Valley and Bihac-Petrovac breakthrough axes. Added `SANA_95_FOLLOW_ON_OPPORTUNITY` (`opportunity_id: 'sana_95_follow_on'`) with the legacy Sanski Most / Kljuc 4-brigade / 13-objective axis. The follow-on requires the same pocket / Storm / readiness gates plus a new live-corridor staging predicate: at least one western approach anchor (`jasenica_2`, `vrtoce`, or `dobro_selo_2`) must be RBiH-controlled. It also requires at least one interior target to remain RS-controlled. No hardcoded `sana_95_completed -> follow_on` chain was added; any live path that creates the corridor can surface the follow-on.
+
+**Tests:** Red-first `tests/operation_opportunities_5th_corps_sana.test.ts` failed against the old catalog (5 failures: missing follow-on, initial Sana still carried the interior axis, follow-on could not surface). After implementation the same suite passed 19/19. Broader opportunity pack passed 169/169 across 8 suites; `tsc --noEmit` passed after linking the isolated worktree to the existing root + map UI dependency installs.
+
+**Determinism:** Preserved. New predicates are pure state reads; no randomness, timestamps, locale ordering, or painted-target reads. Expected hash drift after w175 if Sana fires, because the catalog footprint changes and a second proposal may surface only when live control creates the corridor. Earlier date gates should prevent scenario behavior drift before the late-war window.
+
+**Docs:** Added `docs/40_reports/implemented/20260501_FIFTH_CORPS_SANA_FOLLOW_ON_REACHABILITY.md`; updated `docs/plans/late-war-5th-corps-opportunities-design.md`; added a durable knowledge rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`; updated `.claude/napkin.md`.
+
+---
