@@ -1,3 +1,57 @@
+## [2026-05-02] feat(combat): integrate defender modifiers into estimateForceRatio (MEGA-LANE close)
+
+**Type:** Multi-phase mega-lane integrating defender-side combat modifiers (terrain, urban/forest, entrenchment, supply, equipment, posture, morale, officer, fatigue, corps stance) into the launch-readiness force-ratio predictor at `src/sim/combat/operation_preparation.ts:192-249`. Substitutes personnel-only sums with `computeAttackerPower` + `rankDefendersByPower` from `combat_math.ts`. Sentinel branch tightened (`enemyStrength === 0 → confidence >= 0.5 ? 3.0 : 1.0`). Optional `supplyByOsid` + `terrainMultByOsid` threaded through `tickPreparation` → `advanceSectorOffensives` → `war_phases.ts`. Phase 5a 1-line additive AAR carryover ships the launch-tick predictor value to `OperationAAR.force_ratio_estimate` for post-mortem observability. Four phase commits (3/4/5a/6). NO combat math edited (`combat_math.ts` is CALLED, not modified), NO Layer-1 (`checkLaunchFeasibility`) or Layer-2 (`predictCombatOutcome`) touched, NO OOB, scenario data, painted targets, sensitive-history changes, or opportunity catalog content touched. All lane stop gates honored. Codex-owned 5th Corps catalog files untouched.
+
+**Files:** `src/sim/combat/operation_preparation.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/combat/operation_aar.ts`, `tests/operation_preparation_force_ratio.test.ts` (new), `tests/probe_preparation.test.ts`, `tests/operation_aar.test.ts`. Plus Phase 6 docs: `docs/40_reports/implemented/20260502_COMBAT_MATH_FORCE_RATIO_DEFENDER_MODIFIER_INTEGRATION.md`, `docs/40_reports/diagnostics/20260502_phase5_force_ratio_n1607_evidence.md`, `docs/40_reports/diagnostics/20260502_phase5b_force_ratio_188w_evidence.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `.claude/napkin.md`.
+
+**Status:** VERIFIED — Phase 3 RED→GREEN (4/12 → 12/12), full op suites 138/138 + 214/214 wider sweep + 121/121 combat sweep all PASS, 40w n1607 hash `c6677e7ea3c7d3a4` + 188w n1608 hash `75da76dbe69ccf24` byte-identical to predecessors at every calibration/outcome surface (anchors, area-weighted, ZEA, battles, attacks, captures, casualties, faction orders, AAR outcomes, opp_health decisions, sector validate failures), `npx tsc --noEmit` clean across all phases, sensitive history NEUTRAL (Srebrenica/Žepa controllers BYTE-IDENTICAL n1605=n1608 per orchestrator's direct query of `political_controllers` at t188).
+
+**Predecessor handoff context:** Late-War Operation Combat Delivery Mega-Lane (closed 2026-05-01) handed off rows 1, 2, 4 of its root-cause table to this lane — Grmeč ripac repulse 1:6, Sana A/B repulse, force_ratio 7.19 vs reality — all collapsing to the single P14 / BRIEF-GAP-1 / COMBAT-P14 gap from MEMORY.md "Engine Health Audit 2026-04-02". Predecessor cited this as "the next recommended mega-lane."
+
+**Why:** `estimateForceRatio` was personnel-only — produced fantasy ratios like 7.19 for ARBiH light_infantry attacking entrenched VRS with artillery + tanks. The corps commander's "go" decision was made against a value with no relationship to actual combat outcome. Phase 1 six-investigator synthesis (`/corps-army-commander`, `/sector-expert`, `/game-designer`, `/qa-engineer`, `/determinism-auditor`, `/war-or-game`) all converged on GO. `/technical-architect` Phase 2 contract chose smallest-seam in-place rewrite, calling `combat_math.ts`'s already-tested defender-power library.
+
+**Phase 4 implementation summary:** in-place rewrite of `estimateForceRatio` body — substitute personnel sums with `computeAttackerPower(state, b, supplyStateByOsid, undefined, terrainMultByOsid, primaryTargetOsid)` summed over op brigades + `rankDefendersByPower(...)` summed over enemy sector. Pulls in posture/supply/terrain/urban/forest/entrenchment/corps stance/officer/fatigue/morale/disruption + env-cap protection in ONE call — all already wired and tested. Bilateral by construction (faction-agnostic call shape). Two-tier preserved (Layer 1 + Layer 2 source files UNTOUCHED in commit). 22 `LANE-2026-05-02` markers across 3 src files.
+
+**Phase 5a implementation summary:** at `src/sim/combat/operation_aar.ts:~764`, 1-line additive optional carryover: `if (typeof op.force_ratio_estimate === 'number') aar.force_ratio_estimate = op.force_ratio_estimate;` + `force_ratio_estimate?: number` field decl. Pattern parity with predecessor LANE B `recovery_reason` carryover (commit `dd083454`). Determinism-safe; no schema migration.
+
+**Verification matrix:**
+
+| Phase | Verification | Result |
+|---|---|---|
+| 3 | Red-first 12-test matrix `npm run test:vitest -- tests/operation_preparation_force_ratio.test.ts` pre-impl | 4/12 PASS / 8/12 FAIL (bug proven) |
+| 4 | Same matrix post-impl | 12/12 PASS (Grmeč 5.748→1.68, Sana 3.48→1.10) |
+| 4 | 138/138 op-suite | 0 regressions |
+| 4 | 214/214 wider op-touching sweep (18 files) | 0 regressions |
+| 4 | 121/121 broader combat sanity (9 files) | 0 regressions |
+| 4 | `npx tsc --noEmit` | clean |
+| 5a | Red-first AAR carryover test | RED pre-fix → GREEN post-fix |
+| 5a | 140/140 op-suite | 0 regressions |
+| 5b | 40w n1607 calibration vs n1606 | byte-identical (anchors 26/27, area 91.3%, ZEA 0/0, battles 100, captures 81, AAR set deep-equal) |
+| 5b | 188w n1608 calibration vs n1605 | byte-identical (anchors 23/27 same 4 fail, area 79.4%, ZEA 3, battles 270, captures 61, AAR count 46, faction orders identical) |
+| 5b | n1605 vs n1608 Srebrenica/Žepa controllers at t188 | BYTE-IDENTICAL (21 OSIDs verified — sensitive history NEUTRAL) |
+
+**Bug-proof:** Grmeč 94 5.748 (synthetic pre-fix) → 1.10 (188w production) = **5.2× honest correction** in production. Bilateral confirmed across VRS/ARBiH/HVO/JNA (9 ops across 5 corps with predictor deltas in n1607). Two-tier preserved (Layer 1 + Layer 2 source files empty in commit diff).
+
+**Hash drift class:** **BEHAVIORAL+ADDITIVE.** Phase 4 = formula change → `force_ratio_estimate` values on `CorpsOperation.active_operations` differ. Phase 5a = additive `OperationAAR.force_ratio_estimate?: number` field (45/46 AARs in n1608 carry it; Mistral 2 lacks — see handoff #6). 40w hash `c6677e7ea3c7d3a4` (was `8692ee345b682598`); 188w hash `75da76dbe69ccf24` (was `488d2c6917e48fcb`). Calibration outcomes byte-identical to predecessor at every measurable surface.
+
+**Process discipline:** All four phase commits with pre-commit hook PASSING (no `--no-verify`). LANE E set-aside pattern AVAILABLE; not needed (Codex WIP file `tests/ui/turn_aftermath.test.ts` ABSENT in this session). Codex-owned files (`operation_opportunity_catalog_5th_corps.ts`, `operation_storm.ts`, 5 test files) UNTOUCHED.
+
+**Acceptance criteria assessment:** all 4 met. (1) `estimateForceRatio` no longer gives fantasy "go" — Grmeč 5.748→1.10. (2) Commander launch confidence honest — Pravda Δ=−0.0298 confirms predictor reaches assessment formula; 11/46 sentinel flips in 188w confirm tightened sentinel firing. (3) Tests prove old bug — Phase 3 4/12→12/12. (4) Scenario evidence explains behavior — n1607 + n1608 packets resolve all 5 surface "breaches."
+
+**Six next-lane handoffs (P1×4 + P2×2):**
+1. **P1** AAR launch-tick semantics (staleness contract for Prsten/Pravda/Krivaja-95-class artifacts) — `/sector-expert` + `/operations-expert` + `/game-designer`
+2. **P1** VRS-Bihać 94-95 op-absence — `/operations-expert` + `/scenario-harness-engineer`
+3. **P1** Posture asymmetry blocks sub-1.5 ratios (Layer-2 attrition needed for Grmeč's 0.30–0.60 spec) — `/game-designer` + `/sector-expert` + `/corps-army-commander`
+4. **P1** Krivaja-95 / Stupčanica-95 catalog/predictor mismatch (PRE-EXISTING, not lane-induced; routes to SENSITIVE_HISTORY_DESIGN_GATE.md §6) — `/historian` + `/game-designer` + `/operations-expert`
+5. **P2** Sentinel binary cliff (`confidence < 0.5 → 1.0; >= 0.5 → 3.0`) — `/operations-expert` + `/war-or-game`
+6. **P2** Mistral 2 missing `force_ratio_estimate` field — `/operations-expert` + `/scenario-harness-engineer`
+
+**Spec-definition mismatches** (4 found in Phase 5b, for next war-or-game spec lane): Jackal 1992/1993 historical-event mismatch; Eastern Bosnia 92 god-mode-vs-commander-mode; Krivaja-95 outcome-vs-prospective ratio; Sana axes-vs-corps granularity.
+
+**Report:** `docs/40_reports/implemented/20260502_COMBAT_MATH_FORCE_RATIO_DEFENDER_MODIFIER_INTEGRATION.md`. Evidence packets: `docs/40_reports/diagnostics/20260502_phase5_force_ratio_n1607_evidence.md` + `docs/40_reports/diagnostics/20260502_phase5b_force_ratio_188w_evidence.md`.
+
+---
+
 ## [2026-05-01] feat+evidence(operations): Late-War Operation Combat Delivery Mega-Lane
 
 **Type:** Multi-phase mega-lane delivering: a per-launched-op delivery diagnostic tool (read-only), AAR enrichment with `recovery_reason` + per-axis `staging_osid` (additive shape), and an engine diagnostic that surfaces silently-skipped front-unreachable axes at the launch-readiness check (`OperationAxis.unreachable_at_launch`, additive shape, write-only — silent-skip execution flow preserved). Four phase commits (A/B/C/E). NO combat math, OOB, scenario data, painted targets, T4 sensitive-history, opportunity catalog content, or AAR aggregator touched. All lane stop gates honored.
