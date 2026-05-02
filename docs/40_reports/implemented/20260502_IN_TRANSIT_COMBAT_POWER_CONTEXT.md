@@ -3,6 +3,7 @@
 **Date:** 2026-05-02
 **Status:** PARTIAL — context-honesty fix ships clean (hash drift proves override fires for non-sensitive ops; behavioral global narrow-scope per declared drift class). NEW named blocker for Krivaja-95: at t179 trigger, all participants are dispersed across post-Stupčanica-cascade locations with `mv_state=none` and `mv_order=none` — `isCommittedInTransitTo` returns false for every participant, so override never fires for Krivaja's predictor. Upstream of `combat_math.ts`; movement-orders / pre-stage / trigger-turn-orders-not-yet-converted-to-transit territory.
 **Predecessor:** `87062cc4` In-Transit Predictor lane — successor handoff (named remaining blocker: `computeAttackerPower` reads brigade `location_osid` for context lookups, evaluating committed-in-transit participants against intermediate transit OSID).
+**Verification commit:** `8dec8f58`.
 
 ## Lane Summary
 
