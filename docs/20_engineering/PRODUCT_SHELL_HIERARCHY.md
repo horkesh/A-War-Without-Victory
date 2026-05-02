@@ -58,6 +58,8 @@ The next-action gap is also closed at the command-review layer: **Presidential D
 
 The advance-turn confirmation now participates in that same loop. The Warroom/tactical `AdvanceTurnModal` consumes a pure pre-advance projection of the Decision Room `advanceReadiness` packet, shows what should be reviewed before the turn advances, and routes `Review Priorities` to Army HQ BRIEFING. It does not create a new blocker, queue, cost owner, or history owner; the existing advance-turn pipeline remains canonical.
 
+The Warroom may expose a compact priority pulse, but not the priority board itself. `WarroomStatusBar` consumes the same pre-advance/Decision Room projection for counts and routes its `PRIORITIES` action to Army HQ BRIEFING through `App`. The Warroom summarizes urgency; Army HQ owns review.
+
 ## Shell hierarchy
 
 ### 1. Warroom
@@ -220,6 +222,8 @@ No shell may hide Codex behind an accidental or debug-only path.
   - owner: Army HQ BRIEFING Presidential Decision Room; source truth remains with review queue, opportunity dossiers, operational SITREP, Turn Aftermath, active cost, and Chronicle
 - `pre-advance review reminder`
   - owner: advance-turn confirmation consuming Presidential Decision Room readiness; action routes to Army HQ BRIEFING, and source truth remains with the Decision Room's underlying owners
+- `Warroom priority pulse`
+  - owner: Warroom status strip as a summary affordance only; action routes to Army HQ BRIEFING, and source truth remains with the Decision Room readiness projection
 
 ## Player-truth rule inside the shell hierarchy
 

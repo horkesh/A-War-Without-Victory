@@ -6625,3 +6625,19 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Report:** `docs/40_reports/implemented/20260502_PRE_ADVANCE_COMMAND_REVIEW.md`.
 
 ---
+
+## [2026-05-02] feat(ui): add Warroom priority pulse
+
+**Type:** UI/product-spine shell wiring. No simulation mechanics, combat logic, scenario data, OOB, painted targets, operation catalog content, sensitive-history content, or run artifacts changed.
+
+**Why:** The Decision Room and advance confirmation now expose priority readiness, but the Warroom's always-visible status strip still reduced presidential urgency to a tiny pending-review dot. The campaign shell needed a compact pulse that answers whether anything deserves attention before the player leaves or advances.
+
+**What changed:** `WarroomStatusBar` now consumes `buildPreAdvanceCommandReviewView(...)`, showing a `PRIORITIES` control with advance-review and urgent counts plus the existing pending-review pulse. `App` passes the same `reviewPreAdvancePriorities` handoff used by `AdvanceTurnModal`, so the status-bar action opens Army HQ BRIEFING through `openArmyHQTab(gs, 'briefing')`.
+
+**Determinism / scope:** UI/read-model only. Warroom summarizes Decision Room readiness but does not own the priority board, add new state, mutate the sim, or import combat/sensitive-history code.
+
+**Verification:** `npx.cmd vitest run tests/ui_warroom_priority_pulse_wiring.test.ts tests/army_hq_presidential_review_coherence.test.ts` passed 11/11 during implementation. Final closeout verification is recorded in `docs/40_reports/implemented/20260502_WARROOM_PRIORITY_PULSE.md`.
+
+**Report:** `docs/40_reports/implemented/20260502_WARROOM_PRIORITY_PULSE.md`.
+
+---

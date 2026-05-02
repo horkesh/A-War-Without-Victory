@@ -876,7 +876,7 @@ function App() {
               }
             }}
           />
-          <WarroomStatusBar />
+          <WarroomStatusBar onReviewPriorities={reviewPreAdvancePriorities} />
         </div>
       )}
 
