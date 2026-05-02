@@ -393,6 +393,7 @@ export interface PresidentialReviewQueueView {
     eventDecisionCount: number;
     commandInterpretationCount: number;
     personnelDirectiveCount: number;
+    operationOpportunityCount: number;
 }
 
 export interface ArmyReserveQueueView {
