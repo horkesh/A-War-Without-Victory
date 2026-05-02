@@ -1,3 +1,48 @@
+## [2026-05-02] feat(combat): scope estimateForceRatio defender aggregation to enclave (PARTIAL — Srebrenica/Žepa P0 progressed not resolved)
+
+**Type:** P0 sensitive-history modeled-fall mega-lane PARTIAL CLOSE. Predictor enclave-aware mechanic shipped; acceptance criterion (Srebrenica/Žepa controllers flip + rupture fires) NOT MET. Six handoffs to successor lanes.
+
+**Predecessor handoff:** From `docs/40_reports/implemented/20260502_COMBAT_MATH_FORCE_RATIO_DEFENDER_MODIFIER_INTEGRATION.md` P1 handoff #4 (Krivaja-95 / Stupčanica-95 catalog/predictor mismatch — historian: real ratio 3.5–6× VRS dominance; sim catalog 0.0838 / 0.0475; Srebrenica un-fallen in n1605 + n1608; routes to SENSITIVE_HISTORY_DESIGN_GATE.md §6).
+
+**Single behavioral commit:** Phase 4b `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`). 2 files: `src/sim/combat/operation_preparation.ts` (+30 lines, all `// LANE-2026-05-02-DRINA:` markers — 1 import + 25-line `allObjectivesInOneEnclave()` helper + 11-line in-place reverse-iteration splice filter) + `tests/operation_preparation_force_ratio.test.ts` (+178 lines, Family 6 — T13 RED→GREEN, T14 GREEN no-op, T15 determinism). Reads `ENCLAVE_DEFINITIONS` + `osidBelongsToEnclave` from `enclave_resilience.ts` (CONSUMER, no enclave mechanic mutation).
+
+**Phase 4b implementation summary:** When ALL operation objectives lie inside one enclave, scope defender aggregation to formations physically inside the enclave's OSID list. Trigger predicate faction-agnostic (iterates `ENCLAVE_DEFINITIONS`). Sentinel honored as predecessor (`enemyStrength === 0 → confidence>=0.5 ? 3.0 : 1.0`). Two-tier preserved: Layer 1 `checkLaunchFeasibility` + Layer 2 `predictCombatOutcome` UNTOUCHED. Bilateral by construction. No new persisted field. **17× synthetic-test honest correction (T13 0.546 → 9.55).** **6× production correction on Stupčanica-95 (0.0475 → 0.282).**
+
+**Phase 6 validation: BYTE-IDENTICAL Srebrenica/Žepa controllers (acceptance miss documented).** n1612 188w hash `a86614b8e9afd1c1` vs n1610 `9bfbcc19f7191ad6`. All 7 Srebrenica/Žepa enclave OSIDs still RBiH at t188 (BYTE-IDENTICAL to n1610). Rupture `srebrenica_genocide_1995` NOT fired (`negotiation.rupture_consequences = empty`). Narrative events `srebrenica_falls_1995` t162 + `zepa_falls_1995` t164 fired (pressure-only narratives, do NOT flip controllers per /historian Phase 1 audit). Krivaja-95 force_ratio byte-identical (0.0838); Stupčanica-95 6× higher (0.282) but still below ~1.5 launch threshold. Audits clean at audit layer: `compare_painted_vs_sim oct1995` Herzegovina mismatches pre-existing class; `diagnose_run` 0 Errors / 35 Warnings; `validate_run_consistency` 18 pre-existing-class failures; `opportunity_health_audit` 7/7/0 broken; `operation_delivery_audit` 10 DELIV stable; `opportunity_campaign_proof` all 7 5th Corps opportunities surface.
+
+**Why partial (`/sector-expert` diagnostic):** Phase 4b is structurally correct (matches `/technical-architect` contract verbatim) but a NO-OP for Krivaja-95 because n1610 sector aggregation was ALREADY enclave-narrow for Krivaja's sub-segment (the original Phase 1 over-aggregation hypothesis was correct for Stupčanica but WRONG for Krivaja). Krivaja's binding gate is brigade roster (`rs_skelani_battalion` destroyed pre-t168 + `rs_5th_podrinje` co-located at Stupčanica's `bacici` not Krivaja's `bratunac` approach) — Phase 4c territory; out of original lane scope per stop gate 3 (Drina-specific changes only, ICTY-cited). Stupčanica's binding gate is defender combat-math stack compounding (entrench × enclave × urban × forest × posture × home on tiny depleted brigade) defeating 22:1 historical dominance — Phase 4d territory; touches `combat_math.ts` which is stop gate 4 territory unless lane proves it owns the gap (it does not — Phase 6 evidence ≠ Phase 1 ownership proof).
+
+**Six next-lane handoffs:**
+1. **Krivaja brigade-roster repair** (Phase 4c, `/historian` sign-off per Design Gate § 6 + lane stop gate 3, ICTY-cited Drina-specific only).
+2. **Defender combat-math stack compounding for enclave singletons** (Phase 4d, separate lane requiring own `combat_math.ts` ownership proof; cascades globally; needs own Phase 1 with `/sector-expert` + `/game-designer` + `/historian` + `/determinism-auditor` + `/qa-engineer` pre-engagement).
+3. **`hasExecutableOpeningAttack` brigade-roster gate** (Phase 4c-adjacent, `/operations-expert` + `/sector-expert`).
+4. **Stupčanica defender-stack honesty review** (Phase 4d-adjacent, `/sector-expert` + `/war-or-game` + `/game-designer`).
+5. **Brigade co-location for triggered ops** (Phase 4c-adjacent, `/operations-expert` + `/historian` if OOB-touching).
+6. **Žepa surrender mechanic** (successor v0.9 milestone — REAL_WAR_MASTER §HIST-GAP-1/2 UNPROFOR + "strangle not capture"; sensitive-history sign-off required).
+
+**Hash drift class:** **BEHAVIORAL narrow scope.** Only enclave-targeting operations affected. Calibration outcomes byte-identical at audit layer; behavioral surface = Stupčanica + Cerska-Kamenica + Podrinje Sweep `force_ratio_estimate` field VALUES, NOT state shape, NOT downstream gating outcome.
+
+**Sign-off chain (Phase 1 synthesis + closeability):**
+- **`/historian`** — Phase 1 ICTY/NIOD source-pass complete; Phase 4b sign-off verdict (A): no sensitive-history sign-off required (read-only consumer of enclave data; MUTATION-IS-CHANGE canonical interpretation; predecessor lane parity); rupture predicate untouched; no Ring 3 surface. Caveat (binding for implementer): if scope creeps to `enclave_resilience.ts` itself or new persisted field exposing predictor data to UI/save, STOP and re-escalate.
+- **`/game-designer`** — Phase 1 war-or-game boundaries: predictor honesty correction sits in Ring 1, not Ring 3. Closeability verdict (b): CLOSE AS PARTIAL with documented handoffs; § 8.3 inapplicable; stop gate 4 blocks Phase 4d in-lane.
+- **`/sector-expert`** — Phase 1 topology audit: vrs_drina sectors 3 + 4 cover all enclave objectives; 15 front edges touch enclave at t188; failure cause is not topology but predictor over-aggregation (correct for Stupčanica) + brigade roster (correct for Krivaja). Phase 6 diagnostic: Phase 4b code matches contract verbatim; Krivaja's filter is no-op because sub-segment already enclave-narrow.
+- **`/scenario-harness-engineer`** — Phase 1 validation matrix design; Phase 6 dispatched n1612 188w + audit suite execution.
+- **`/determinism-auditor`** — Phase 1 hash drift pre-classification: BEHAVIORAL narrow scope; no new persisted field; pure compute fix; read-only consumer.
+- **`/operations-expert`** — Phase 1 op-definition forensics on Krivaja-95 + Stupčanica-95 AARs (n1610): both `outcome=failure recovery_reason=planning_invalidated total_attacks=0 force_ratio_estimate ~0.084 / ~0.047`; never reached execution; brigades empirically present in OOB (corrected /historian's wrong-OOB-file audit).
+
+**Sensitive-history compliance:** No Ring 3 surface; rupture trigger untouched; no enclave mechanic mutation; no atrocity-as-tactic. P0 sensitive-history gap progressed (Stupčanica 6× honest correction; predictor mechanic now enclave-aware) but NOT resolved (controllers byte-identical, rupture not fired). Successor lanes chartered.
+
+**Files:**
+- `src/sim/combat/operation_preparation.ts` (Phase 4b, +30 lines)
+- `tests/operation_preparation_force_ratio.test.ts` (Phase 4b, +178 lines)
+- `docs/40_reports/implemented/20260502_DRINA_LATE_WAR_ENCLAVE_PARTIAL.md` (Phase 7)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (three durable lessons)
+- `.claude/napkin.md` (Current State updated)
+- `working-on.md` (DELETED, lane closed per session-closeout)
+
+---
+
 ## [2026-05-02] fix(ui): include operation dossiers in the presidential review queue
 
 **Type:** UI/read-model coherence fix. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
