@@ -25,7 +25,10 @@ function formationIdsFromState(state: { military: { formations?: Record<string, 
     return Object.keys(formations).sort((a, b) => a.localeCompare(b));
 }
 
-test('init_formations: apr1992_4w has 3 formations and run is deterministic', { timeout: 30000 }, async () => {
+// Timeout bumped from 30000 to 60000 ms (2026-05-02): the test runs a 4-week
+// scenario which takes ~29s isolated; under full vitest parallel load (580+
+// suites) the original 30s ceiling tipped over. 60s gives 2x headroom.
+test('init_formations: apr1992_4w has 3 formations and run is deterministic', { timeout: 60000 }, async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) {
         return;
