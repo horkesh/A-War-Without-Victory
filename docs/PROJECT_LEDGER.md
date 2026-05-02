@@ -1,3 +1,30 @@
+## [2026-05-02] feat(negotiation): wire war_ended_early producer (LANE-2026-05-02-D1-WAR-ENDED-EARLY-PRODUCER)
+
+**Type:** Defense-in-depth event-flag wire. No engine behavior change at the termination layer (game already terminates via `meta.game_over=true`); fills a previously phantom `flags.war_ended_early` branch that `war_termination.ts:62` was reading without any producer.
+
+**Why:** Mission D#1 finding from /technical-architect endgame audit: `war_ended_early` and `early_peace_implemented` flags were tested in `tests/war_termination.test.ts:228+` but no production code path ever wrote them. `resolvePeacePlan` set `meta.game_over=true` directly (which already terminates), but downstream consumers (UI, AAR, Cost Ledger, future event pipelines) reading the flag rather than the meta state would never see the signal. This lane converts the phantom branch into a real producer.
+
+**Implementation:** in `src/sim/negotiation/peace_plans.ts:235` (the `if (allAccepted)` branch), in addition to the pre-existing `meta.game_over=true` and `meta.outcome` writes, also set `state.military.event_flags.war_ended_early = true` and `event_flags.early_peace_implemented = planId`. Faction-agnostic; only fires when ALL factions accept the plan. Flag NOT set on rejection (regression-guarded by T2).
+
+**Verification:**
+- `tests/peace_plans_war_ended_early_producer.test.ts` 2/2 PASS (T1 all-accept sets both flags + meta.game_over; T2 any-reject sets none).
+- Focused regression 50/50 across 3 suites (peace_plans + war_termination + this lane).
+- `npx tsc --noEmit -p tsconfig.json` clean.
+
+**Sensitive-history verdict:** Ring 1 NEUTRAL. Negotiated peace path; faction-agnostic; no Section 6 surface.
+
+**Hash drift:** Effectively NONE in current scenarios — peace plans rarely (if ever) achieve all-accept in the apr1992 baseline. Hash drift would only register on a campaign where all factions accept a peace plan; the previous direct-`meta.game_over` already terminated such cases identically.
+
+**Files:**
+- `src/sim/negotiation/peace_plans.ts` (PATCH, ~15 lane-tagged lines)
+- `tests/peace_plans_war_ended_early_producer.test.ts` (NEW)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State prepended)
+
+**Successor:** D#2 persist derived endgame snapshot in save (Ring 1, /technical-architect proposed) — freezes gameVerdict / costLedger / historicalComparison at game-over so post-Dayton bot drift doesn't perturb the verdict on save/load round-trip.
+
+---
+
 ## [2026-05-02] feat(scenario): anomaly check sector subtype classification (LANE-2026-05-02-B3-ANOMALY-SECTOR-SUBTYPE)
 
 **Type:** Read-side anomaly enrichment. No engine state mutation, no scenario data, no combat math, no sensitive-history surface. Adds optional `subtype?: string;` field on `AnomalyReport` and emits one report per subtype when distinct root causes occur within the same anomaly type.

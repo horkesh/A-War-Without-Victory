@@ -231,9 +231,23 @@ export function resolvePeacePlan(
     }
 
     if (allAccepted) {
-        // All factions accepted — game ends with peace plan outcome
+        // All factions accepted — game ends with peace plan outcome.
         state.meta.game_over = true;
         state.meta.outcome = `peace_plan:${planId}`;
+        // LANE-2026-05-02-D1-WAR-ENDED-EARLY-PRODUCER:
+        // Also set the `war_ended_early` event flag that
+        // `src/sim/war_termination.ts:62` reads. The direct
+        // `meta.game_over=true` write above already terminates the game
+        // (war_termination short-circuits at the same-turn check), but
+        // downstream consumers (UI, AAR, Cost Ledger, future event
+        // pipelines) may read the flag rather than the meta state.
+        // Setting both keeps the signal consistent across all consumers,
+        // and converts a previously-phantom `flags.war_ended_early` branch
+        // into a real producer. Faction-agnostic; only fires when ALL
+        // factions accept the plan.
+        if (!state.military.event_flags) state.military.event_flags = {};
+        state.military.event_flags['war_ended_early'] = true;
+        state.military.event_flags['early_peace_implemented'] = planId;
     } else {
         // Apply rejection consequences
         applyRejectionConsequences(state, plan, rejectionFactions);
