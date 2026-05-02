@@ -1,3 +1,17 @@
+## [2026-05-02] fix(ui): include operation dossiers in the presidential review queue
+
+**Type:** UI/read-model coherence fix. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
+
+**Why:** Operation opportunity dossiers were live in Army HQ, but `presidentialReviewQueue.pendingCount` did not include them. Army HQ manually added a local opportunity count while the tactical toolbar and Warroom status indicator read the narrower adapter count, so the product could show pending operation dossiers in one surface while another surface implied no presidential review work existed.
+
+**What changed:** `GameStateAdapter` now derives player-scoped `operationOpportunityProposals` before building `presidentialReviewQueue`; `PresidentialReviewQueueView` gained `operationOpportunityCount`; `pendingCount` includes event decisions, command reactions, personnel directives, and operation opportunity dossiers. `PresidentialAttentionPanel` now reads `reviewQueue.operationOpportunityCount` instead of doing a local `+ opportunityDossierCount`. Army reserve requests remain separate with their own toolbar/HQ reserve signal.
+
+**Verification:** 83/83 focused tests pass (`ui_map_game_state_adapter`, `army_hq_presidential_review_coherence`, `inbox_items`, `ui_turn_aftermath_wiring`, `ui_shell_navigation`); `npx.cmd tsc --noEmit -p tsconfig.json` clean after worktree dependency junctions were restored.
+
+**Report:** `docs/40_reports/implemented/20260502_PRESIDENTIAL_REVIEW_QUEUE_OPPORTUNITY_UNIFICATION.md`.
+
+---
+
 ## [2026-05-02] feat(ui): land Turn Aftermath product spine with browser proof
 
 **Type:** Product-spine UI/read-model implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog, combat code, or run artifacts changed.

@@ -413,6 +413,7 @@ test('parseGameState derives presidential review queue counts from pending milit
         eventDecisionCount: 1,
         commandInterpretationCount: 1,
         personnelDirectiveCount: 1,
+        operationOpportunityCount: 0,
     });
 });
 
@@ -873,6 +874,14 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
     assert.equal(parsed.pendingProposalReviews?.[0]?.proposed_value, 'approve');
 
     assert.equal(parsed.operationOpportunityProposals?.length, 1);
+    assert.deepEqual(parsed.presidentialReviewQueue, {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+    });
     const proposal = parsed.operationOpportunityProposals![0];
     assert.equal(proposal.display_name, 'Operation Sana');
     assert.equal(proposal.review_id, 'PROP_176_opportunity_0');

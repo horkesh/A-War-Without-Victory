@@ -38,10 +38,17 @@ describe('Army HQ / presidential review coherence', () => {
       new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
       'utf8',
     );
+    const adapterSource = readFileSync(
+      new URL('../src/ui/map/data/GameStateAdapter.ts', import.meta.url),
+      'utf8',
+    );
 
     expect(modalSource).toContain('PresidentialAttentionPanel');
     expect(panelSource).toContain('PRESIDENTIAL ATTENTION');
     expect(panelSource).toContain('This queue owns live military review work. Situation briefing below is context, not the action queue.');
+    expect(adapterSource).toContain('operationOpportunityCount');
+    expect(panelSource).toContain('reviewQueue?.operationOpportunityCount');
+    expect(panelSource).not.toContain('+ opportunityDossierCount');
     expect(panelSource).toContain('Presidential Decisions');
     expect(panelSource).toContain('OperationOpportunityDossierPanel');
     expect(panelSource).toContain('Command Reactions');
@@ -164,7 +171,7 @@ describe('Army HQ / presidential review coherence', () => {
       'utf8',
     );
 
-    expect(panelSource).toContain('operationOpportunityProposals');
+    expect(dossierSource).toContain('operationOpportunityProposals');
     expect(dossierSource).toContain('Operational Opportunities');
     expect(dossierSource).toContain('Force Quality');
     expect(dossierSource).toContain('Map Footprint');

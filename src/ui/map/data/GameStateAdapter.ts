@@ -1682,9 +1682,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         : undefined;
     const pendingOfficerEvents = derivePendingOfficerEvents(state);
     const pendingEventDecisions = derivePendingEventDecisions(state);
+    const pendingProposalReviews = derivePendingProposalReviews(state, playerFaction);
+    const operationOpportunityProposals = deriveOperationOpportunityProposals(state, playerFaction);
     const presidentialReviewQueue = derivePresidentialReviewQueue({
         pendingOfficerEvents,
         pendingEventDecisions,
+        operationOpportunityProposals,
     });
     const pendingReserveRequests = derivePendingReserveRequests(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
@@ -1760,7 +1763,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,
-        operationOpportunityProposals: deriveOperationOpportunityProposals(state, playerFaction),
+        operationOpportunityProposals,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)
@@ -1769,7 +1772,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
-        pendingProposalReviews: derivePendingProposalReviews(state, playerFaction),
+        pendingProposalReviews,
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
@@ -2251,9 +2254,11 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
 function derivePresidentialReviewQueue({
     pendingOfficerEvents,
     pendingEventDecisions,
+    operationOpportunityProposals,
 }: {
     pendingOfficerEvents: LoadedGameState['pendingOfficerEvents'];
     pendingEventDecisions: LoadedGameState['pendingEventDecisions'];
+    operationOpportunityProposals: LoadedGameState['operationOpportunityProposals'];
 }): LoadedGameState['presidentialReviewQueue'] {
     const eventDecisionCount = pendingEventDecisions?.length ?? 0;
     const commandInterpretationCount = (pendingOfficerEvents ?? []).filter((event) =>
@@ -2262,7 +2267,8 @@ function derivePresidentialReviewQueue({
     const personnelDirectiveCount = (pendingOfficerEvents ?? []).filter((event) =>
         event.type === 'officer_available' || event.type === 'replacement_suggested' || event.type === 'officer_relieved',
     ).length;
-    const pendingCount = eventDecisionCount + commandInterpretationCount + personnelDirectiveCount;
+    const operationOpportunityCount = operationOpportunityProposals?.length ?? 0;
+    const pendingCount = eventDecisionCount + commandInterpretationCount + personnelDirectiveCount + operationOpportunityCount;
 
     if (pendingCount === 0) return undefined;
 
@@ -2276,6 +2282,7 @@ function derivePresidentialReviewQueue({
         eventDecisionCount,
         commandInterpretationCount,
         personnelDirectiveCount,
+        operationOpportunityCount,
     };
 }
 

@@ -35,10 +35,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     const reviewQueue = gameState.presidentialReviewQueue;
     const armyReserveQueue = gameState.armyReserveQueue;
     const reserveSummary = armyReserveQueue ? getArmyReserveAttentionSummary(armyReserveQueue) : null;
-    const opportunityDossierCount = (gameState.operationOpportunityProposals ?? [])
-        .filter((proposal) => !proposal.faction || proposal.faction === playerFaction)
-        .length;
-    const liveReviewCount = (reviewQueue?.pendingCount ?? 0) + opportunityDossierCount;
+    const liveReviewCount = reviewQueue?.pendingCount ?? 0;
 
     const pendingDecisions = useMemo(
         () =>
@@ -87,7 +84,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         }
     };
 
-    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue && opportunityDossierCount === 0) {
+    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
@@ -123,7 +120,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                             <CountCard label="Event Decisions" value={reviewQueue?.eventDecisionCount ?? 0} tone={(reviewQueue?.eventDecisionCount ?? 0) > 0 ? 'critical' : 'neutral'} />
                             <CountCard label="Command Reactions" value={reviewQueue?.commandInterpretationCount ?? 0} tone={(reviewQueue?.commandInterpretationCount ?? 0) > 0 ? 'warning' : 'neutral'} />
                             <CountCard label="Personnel Directives" value={reviewQueue?.personnelDirectiveCount ?? 0} tone={(reviewQueue?.personnelDirectiveCount ?? 0) > 0 ? 'warning' : 'neutral'} />
-                            <CountCard label="Op Dossiers" value={opportunityDossierCount} tone={opportunityDossierCount > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label="Op Dossiers" value={reviewQueue?.operationOpportunityCount ?? 0} tone={(reviewQueue?.operationOpportunityCount ?? 0) > 0 ? 'warning' : 'neutral'} />
                         </div>
                     )}
                 </div>
