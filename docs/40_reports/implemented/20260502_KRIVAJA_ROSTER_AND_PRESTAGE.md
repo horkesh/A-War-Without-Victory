@@ -31,7 +31,7 @@ The historian agent's claim that "1st Zvornik LIB held the Sapna shoulder vs ARB
 40w smoke n1615 hash `0c2fc264112dec1f` — byte-identical to predecessor 40w baselines (n1610, n1613). Byte-identity is the expected null signature: zero triggered ops fire in the 40w window (Krivaja t168, Stupčanica t172, Cerska-Kamenica t≥40 all post-window or right at window-end with no acceptance), so the catalog and helper changes are correctly inert. Same inference established by `/scenario-creator-runner-tester` on the prior 40w n1613.
 
 Fresh 188w proof recommended next session (not gated for this commit per Codex review brief — focused tests + tsc are the mandatory gate; "if you run a scenario proof, include sensitive_history_status output").
-**Verification commit (initial):** `68b56d1f`
+**Verification commits:** `68b56d1f` (initial PARTIAL close); `98446604` (Codex review #1+#2 corrective patch — catalog ICTY-citation correction + pre-stage helper overwrite contract).
 **Predecessor:** `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`) — closed PARTIAL on 2026-05-02 with six handoffs.
 **Lane brief:** Krivaja-95 / Srebrenica modeled-fall opening-attack and brigade-roster repair (handoffs #1, #3, #5 from the predecessor's six-lane fan-out).
 
