@@ -20,9 +20,15 @@
  *   4. lifecycle_path values are drawn from the closed classification set.
  *   5. n1619 baseline truth (proves diagnostic computed correct values):
  *        - rs_1st_zvornik       => destroyed_in_combat, inactive_turn=95
+ *                                  (battles_fought=6, casualties=2358 — real combat)
  *        - rs_1st_bratunac      => destroyed_in_combat, inactive_turn=101
- *        - rs_skelani_battalion => destroyed_in_combat, inactive_turn=171,
- *                                  no op appearances (silent participant)
+ *                                  (battles_fought=4, casualties=1335 — real combat)
+ *        - rs_skelani_battalion => dissolved_no_combat, inactive_turn=171,
+ *                                  no op appearances; battles_fought=0 means
+ *                                  the destroyed_brigades row reflects pure
+ *                                  attrition / dissolution rather than combat
+ *                                  destruction (LANE-A-Tier1 /formation-expert
+ *                                  + /anomaly-triage classifier mis-tag fix).
  *        - rs_5th_podrinje      => dissolved,           inactive_turn=86
  *        - rs_1st_milii         => unknown_inactive,    inactive_turn=null
  *          (artifact-gap case: brigade goes inactive without surfacing in either
@@ -60,6 +66,7 @@ const WATCH_LIST = [
 
 const ALLOWED_LIFECYCLE_PATHS = new Set([
     'destroyed_in_combat',
+    'dissolved_no_combat',
     'dissolved',
     'active_throughout',
     'silent_inactive',
@@ -137,13 +144,20 @@ describe('LANE-2026-05-02-KRIVAJA-BRIGADE-LIFECYCLE diagnostic contract', () => 
             assert.equal(bratunac.lifecycle_path, 'destroyed_in_combat');
             assert.equal(bratunac.inactive_turn, 101);
 
-            // destroyed_in_combat with zero op participations — pure dissolution
-            // event records the only per-turn signal before the destroyed row.
+            // dissolved_no_combat — destroyed_brigades row present BUT
+            // battles_fought === 0 (or total_casualties_taken === 0); brigade
+            // bled out via attrition/dissolution rather than combat destruction.
+            // Distinguishes pure-attrition cases from combat-destroyed cases for
+            // downstream root-cause analysis (LANE-A-Tier1 classifier mis-tag fix).
             const skelani = byId.get('rs_skelani_battalion');
-            assert.equal(skelani.lifecycle_path, 'destroyed_in_combat');
+            assert.equal(skelani.lifecycle_path, 'dissolved_no_combat');
             assert.equal(skelani.inactive_turn, 171);
             assert.equal(skelani.op_appearance_count, 0);
             assert.equal(skelani.first_op_appearance_turn, null);
+            // The destroyed_brigades row IS still present; the new enum captures
+            // the destroyed-with-zero-battles signature without losing the row.
+            assert.notEqual(skelani.destroyed_record, null);
+            assert.equal(skelani.destroyed_record.battles_fought, 0);
 
             // dissolved path — brigade_dissolution row, no destroyed row.
             const podrinje = byId.get('rs_5th_podrinje');

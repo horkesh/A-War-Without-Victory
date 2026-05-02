@@ -20,7 +20,16 @@
  *     (turn_destroyed, total_casualties_taken, location_osid, battles_fought,
  *     corps_id, faction). Authoritative INACTIVE turn for combat-destroy path.
  *   - lifecycle_path: classified from the cross-product of evidence:
- *       'destroyed_in_combat' — destroyed_brigades.json row present
+ *       'destroyed_in_combat' — destroyed_brigades.json row present AND
+ *                                battles_fought > 0 AND
+ *                                total_casualties_taken > 0
+ *       'dissolved_no_combat' — destroyed_brigades.json row present BUT
+ *                                battles_fought === 0 OR
+ *                                total_casualties_taken === 0
+ *                                (LANE-A-Tier1 classifier mis-tag fix per
+ *                                 /formation-expert + /anomaly-triage; brigade
+ *                                 bled out via attrition / dissolution /
+ *                                 stranded-collapse rather than combat).
  *       'dissolved'           — brigade_dissolution row present, no destroyed row
  *       'active_throughout'   — last_op_appearance_turn == final week and no
  *                                dissolution / destroy evidence
@@ -167,7 +176,19 @@ function scanWeekly(weeklyPath, watchSet) {
 }
 
 function classify({ opEntry, dissolutionTurns, destroyedRecord, lastWeekIndex }) {
-    if (destroyedRecord) return 'destroyed_in_combat';
+    if (destroyedRecord) {
+        // LANE-A-Tier1 mis-tag fix: distinguish combat destruction from pure
+        // attrition / dissolution / stranded-collapse cases. The destroyed
+        // row is canonical for both, but the cause differs sharply.
+        const battlesFought = typeof destroyedRecord.battles_fought === 'number'
+            ? destroyedRecord.battles_fought : 0;
+        const totalCasualties = typeof destroyedRecord.total_casualties_taken === 'number'
+            ? destroyedRecord.total_casualties_taken : 0;
+        if (battlesFought === 0 || totalCasualties === 0) {
+            return 'dissolved_no_combat';
+        }
+        return 'destroyed_in_combat';
+    }
     if (dissolutionTurns.length > 0 && opEntry) return 'dissolved';
     if (dissolutionTurns.length > 0 && !opEntry) return 'silent_inactive';
     if (opEntry && opEntry.last >= lastWeekIndex) return 'active_throughout';
