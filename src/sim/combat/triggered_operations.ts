@@ -325,23 +325,56 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     // ═════════════════════════════════════════════════════════════════════════
     {
         // Operation Krivaja-95 — VRS Drina Corps captures the Srebrenica
-        // safe area, July 6–11 1995. Historical force: ≈ 2,000 VRS troops
-        // from Drina Corps + Skelani Battalion + Bratunac/Milici brigades.
-        // Territorial outcome: srebrenica_2 town + Potočari + surrounding
-        // enclave OSIDs flip RBiH→RS. (BB2 p.414, ICTY Krstić IT-98-33-T
-        // §122–139, ICTY Popović IT-05-88 §242.)
+        // safe area, July 6–11 1995. Territorial outcome: srebrenica_2 town
+        // + Potočari + surrounding enclave OSIDs flip RBiH→RS.
         //
-        // LANE-2026-05-02-KRIVAJA: roster historical correction. The
-        // 1st Milici LIB (rs_1st_milii) was the Krstić §123 W-axis
-        // supporting force for Krivaja-95, replacing the previously listed
-        // 1st Zvornik LIB. The 1st Zvornik LIB (rs_1st_zvornik) was NOT in
-        // Krivaja-95's opening assault — per Krstić §123 / Popović §242 /
-        // BB2 p.414 it held the Zvornik/Sapna shoulder vs ARBiH 2nd Corps
-        // and joined only post-fall (12–18 July 1995) for column
-        // interdiction north of Konjević Polje. Listing it as an opening-
-        // assault participant was a catalog error in the predecessor lane
-        // (commit 9ff4f352) and is the proximate cause of the t168
-        // planning_invalidated / 0-attacks failure observed at n1612.
+        // LANE-2026-05-02-KRIVAJA (REVISED 2026-05-02 follow-up after Codex
+        // review found the prior catalog comment cited Krstić §123 for a
+        // brigade attack-axis claim that paragraph does not actually make,
+        // and asserted a Zvornik-LIB-not-in-opening-assault claim that
+        // contradicts Popović §245 fn 757 + §247):
+        //
+        // The Drina Corps preparatory order for Krivaja-95 (issued 2 July
+        // 1995 in the name of Drina Corps Commander Živanović) was addressed
+        // to "the Zvornik, Birac, Romanija, Vlasenica, Podrinje, Bratunac,
+        // Milici and Skelani brigades of the Drina Corps" — ICTY Popović
+        // IT-05-88-T Trial Judgment §244 (verbatim), citing Ex. 5DP00106
+        // "Drina Corps Order No. 01/04-156-1 Preparatory Order No. 1, 2 July
+        // 1995". Specific opening-assault tasks per the combat order
+        // (Ex. P00107 "Operations Order No. 1 Krivaja-95, 2 July 1995"),
+        // ICTY Popović §245 fn 757 verbatim: "a part of the Bratunac Brigade
+        // was given the task to prevent the intervention of the ABiH from
+        // Potočari towards Srebrenica, and the Battalion of the Zvornik
+        // Brigade was given the task to attack ABiH forces along the axis
+        // of three wooded hills (500 metres north of Zeleni Jadar) –
+        // Pusmulići village – Bojna – Srebrenica." Tactical Group 1, the
+        // principal opening-assault tactical group, was commanded by
+        // Pandurević, Commander of the Zvornik Brigade; TG-1 left the
+        // Standard Barracks in Zvornik 4 July and arrived in Zeleni Jadar
+        // 5 July; opening assault commenced 6 July 0400 hrs (ICTY Popović
+        // §247 + §249 verbatim). The Zvornik Brigade is therefore
+        // documented as an opening-assault participant — at battalion
+        // level along the southern Zeleni Jadar–Pusmulići–Bojna axis, and
+        // through TG-1 command at brigade level.
+        //
+        // Catalog brigades reflect a defensible Drina Corps subset of
+        // Popović §244's eight named brigades, mapped to existing OOB
+        // formation_ids: rs_1st_zvornik (Battalion-of-Zvornik per §245 fn
+        // 757; Pandurević / TG-1 per §247), rs_1st_bratunac (Bratunac
+        // Brigade Potočari-blocking task per §245 fn 757), rs_1st_milii
+        // (Milici brigade per §244), rs_5th_podrinje (Podrinje brigade per
+        // §244), rs_skelani_battalion (Skelani brigade per §244). 1st Birac
+        // and Romanija Brigade (also in §244) are not added: 1st Birac was
+        // in the Krivaja-95 preparatory list but engine integration would
+        // require a separate Birac OOB cross-corps audit; the Romanija
+        // Brigade (TG-2 commander Trivić per §247) belongs to
+        // vrs_sarajevo_romanija corps and is out of vrs_drina scope.
+        //
+        // NOTE: ICTY Krstić IT-98-33-T §§122–123, contrary to a prior
+        // version of this comment, do NOT name brigades or assign attack
+        // axes — those paragraphs discuss only Krivaja-95's STRATEGIC
+        // OBJECTIVES (split the enclaves; reduce them to urban cores).
+        // Brigade-granularity citations are in Popović, not Krstić §123.
         //
         // Objectives are the five srebrenica:* OSIDs that flipped RBiH→RS
         // between apr1995 and oct1995 painted truth (donji_potocari_2,
@@ -367,8 +400,10 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 name: 'Srebrenica Enclave',
                 corps: 'vrs_drina',
                 brigades: [
-                    'rs_1st_milii' as FormationId, // LANE-2026-05-02-KRIVAJA: replaces rs_1st_zvornik (Krstić §123 W-axis force)
+                    // LANE-2026-05-02-KRIVAJA: per Popović §244 + §245 fn 757 + §247.
+                    'rs_1st_zvornik' as FormationId,
                     'rs_1st_bratunac' as FormationId,
+                    'rs_1st_milii' as FormationId,
                     'rs_5th_podrinje' as FormationId,
                     'rs_skelani_battalion' as FormationId,
                 ],
@@ -611,6 +646,32 @@ function buildOperation(
  * formations (filtered by `isEligibleOperationFormation` already, but enforced
  * here too for defense-in-depth — also filters `kind` to brigade/og/phantom).
  *
+ * Overwrite contract (REVISED 2026-05-02 follow-up after Codex review):
+ * The helper NEVER overwrites existing movement plans. Specifically:
+ *   1. Brigade already at staging → SKIP (no-op).
+ *   2. Brigade `brigade_movement_state[id].status === 'in_transit'` → SKIP
+ *      regardless of current `destination_sids`. This preserves accumulated
+ *      transit progress (`turns_remaining`, `path`) and respects whatever
+ *      system originally set the brigade in motion (Phase B distribution,
+ *      column-march, commander correction). Re-issuing an order at trigger
+ *      turn would reset transit state per architecture lesson 2026-04-01
+ *      (Phase B re-orders in-transit brigades unless guarded).
+ *   3. Brigade has an existing `brigade_movement_orders[id]` entry → SKIP
+ *      regardless of destination. The triggered-op pre-stage does NOT have
+ *      priority over other movement-order owners; if the engine has already
+ *      written an order, that owner has reason for it (e.g. emergency
+ *      defensive deployment, commander correction of a wrong march, army-
+ *      reserve recall). Silent overwrite would corrupt those owners.
+ *   4. Otherwise (no transit, no order, not at staging) → write the column-
+ *      march order toward the axis `staging_osid`.
+ *
+ * Net effect: triggered-op pre-stage fills the GAP for participants the
+ * engine has not given a movement plan to yet. Brigades already with a plan
+ * keep theirs. This is the conservative shape that does not regress
+ * `estimateForceRatio` numerator bookkeeping for already-in-transit brigades
+ * (predecessor handoff #7 still applies for participants who become
+ * in_transit AFTER pre-stage fires).
+ *
  * Mutates `state.military.brigade_movement_orders` in place. Returns void.
  */
 export function prestageBrigadesForTriggeredOp(
@@ -618,6 +679,7 @@ export function prestageBrigadesForTriggeredOp(
     def: TriggeredOpDef,
 ): void {
     const formations = state.military.formations ?? {}; // LANE-2026-05-02-KRIVAJA
+    const movementState = state.military.brigade_movement_state ?? {}; // LANE-2026-05-02-KRIVAJA: in-transit guard
     for (const axis of def.axes) { // LANE-2026-05-02-KRIVAJA: axes order is the catalog-declared order, deterministic
         // LANE-2026-05-02-KRIVAJA: sort participant brigade IDs for deterministic write order
         const sortedBrigades = [...axis.brigades].sort(strictCompare);
@@ -628,6 +690,12 @@ export function prestageBrigadesForTriggeredOp(
             if (!formation) continue; // LANE-2026-05-02-KRIVAJA: roster lists brigade absent from OOB at this turn
             if (!isEligibleOperationFormation(formation)) continue; // LANE-2026-05-02-KRIVAJA: skip inactive / non-brigade kinds
             if (formation.location_osid === stagingOsid) continue; // LANE-2026-05-02-KRIVAJA: already at staging
+            // LANE-2026-05-02-KRIVAJA contract rule 2: do not reset in_transit brigades.
+            // Re-issuing a movement order resets transit state per architecture lesson 2026-04-01.
+            if (movementState[brigadeId]?.status === 'in_transit') continue;
+            // LANE-2026-05-02-KRIVAJA contract rule 3: do not silently stomp an existing order.
+            // Other owners (commander correction, emergency defense, army reserve recall) have priority.
+            if (state.military.brigade_movement_orders?.[brigadeId]) continue;
             if (!state.military.brigade_movement_orders) { // LANE-2026-05-02-KRIVAJA
                 state.military.brigade_movement_orders = {}; // LANE-2026-05-02-KRIVAJA
             }

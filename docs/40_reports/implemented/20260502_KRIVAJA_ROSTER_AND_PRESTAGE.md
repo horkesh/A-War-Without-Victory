@@ -1,8 +1,37 @@
 # LANE-2026-05-02-KRIVAJA — Krivaja-95 Roster Correction + Trigger-Turn Pre-stage Helper
 
 **Date:** 2026-05-02
-**Status:** CLOSED PARTIAL — two binding blockers removed; force_ratio behavioral-narrow drop documented; three successor lanes chartered.
-**Verification commit:** `68b56d1f`
+**Status:** REOPENED — Codex review flagged two blockers (2026-05-02 follow-up): (1) ICTY citation accuracy challenged — Codex says Popović §§242–249 actually documents Zvornik Brigade battalion participation along an attack axis, contradicting my historian's "1st Milici W-axis" claim citing Krstić §123; (2) `prestageBrigadesForTriggeredOp` silently overwrites existing `brigade_movement_orders`, can reset in-transit progress. Verification + fix in progress on top of `fb8119de`.
+
+**Verification update 1 (2026-05-02 follow-up):** Direct fetch of Krstić IT-98-33-T §§122–123 from `https://www.icty.org/x/cases/krstic/tjug/en/krs-tj010802e-1.htm` CONFIRMS Codex: those paragraphs discuss the Krivaja-95 STRATEGIC OBJECTIVES (split the Srebrenica/Žepa enclaves and reduce them to urban cores) — they do NOT name any brigade or assign any attack axis. The historian agent's "1st Milici LIB was the Krstić §123 W-axis supporting force" claim is fabricated specificity.
+
+**Verification update 2 (2026-05-02 follow-up):** Direct extraction (`pdftotext -layout`) of Popović IT-05-88-T from the official ICTY PDF `https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf` §§240–250 fully confirms Codex on issue #1:
+- **§244 verbatim:** "On 2 July 1995, two orders, 'Krivaja-95', were issued in the name of Živanović, the Drina Corps Commander. The first order was a preparatory order addressed to the **Zvornik, Birac, Romanija, Vlasenica, Podrinje, Bratunac, Milici and Skelani brigades** of the Drina Corps."
+- **§245 footnote 757 verbatim:** "...a part of the Bratunac Brigade was given the task to prevent the intervention of the ABiH from Potočari towards Srebrenica, and **the Battalion of the Zvornik Brigade was given the task to attack ABiH forces along the axis of three wooded hills (500 metres north of Zeleni Jadar) – Pusmulići village – Bojna – Srebrenica.**"
+- **§247 verbatim:** "On 2 July ... TG-1 was established to 'separate the forces of the 28th Division between the Srebrenica and Žepa enclaves and to reduce the enclaves themselves.' ... Pandurević was given an oral order by Krstić to command TG-1 ... On 4 July, when TG-1 left the **Standard Barracks in Zvornik** ... On 5 July 1995, the segment of Tactical Group 1, led by Pandurević and Tactical Group 2, led by Trivić arrived in Zeleni Jadar, in the south of the Srebrenica enclave."
+
+The historian agent's claim that "1st Zvornik LIB held the Sapna shoulder vs ARBiH 2nd Corps and joined Krivaja-95 only post-fall (12–18 July) for column interdiction" is **factually wrong**: Pandurević (Commander of Zvornik Brigade, fn 767) commanded TG-1 in the opening assault from the south (Zeleni Jadar), and a Battalion of the Zvornik Brigade had a specific opening-assault attack axis per §245 fn 757.
+
+**Catalog repair decision:** RESTORE `rs_1st_zvornik` AND keep `rs_1st_milii`. Per Popović §244, both brigades were named in the Krivaja-95 preparatory order. Per §245 fn 757, the Zvornik Brigade battalion had a documented opening-assault axis. Net catalog: 5 brigades (Zvornik, Bratunac, Milici, 5th Podrinje, Skelani) — broader than predecessor (4) and broader than my prior fix (4); all sourced from Popović §244/§245.
+
+**Helper repair decision:** Add explicit overwrite contract — `prestageBrigadesForTriggeredOp` now SKIPS when the brigade is already `in_transit` (any destination) OR has an existing `brigade_movement_orders[id]` entry (any destination). Triggered-op pre-stage has NO priority over other movement-order owners. Net behavior: pre-stage fills the gap for participants without movement plans; brigades already with a plan keep theirs. Mitigates Codex blocker #2.
+
+**Tests added/updated (test file `tests/krivaja_roster_and_prestage.test.ts`):**
+- T1 expanded: catalog must include all 5 brigades (Zvornik, Bratunac, Milici, 5th Podrinje, Skelani) per Popović §244.
+- T2 inverted: catalog comment must cite Popović §244/§245, must explicitly retract the Krstić §123 brigade-naming fabrication, must NOT claim Zvornik joined post-fall only.
+- T4 + T6 extended: `rs_1st_zvornik` must also receive a movement order from non-staging.
+- T7 NEW: brigade in_transit toward staging is preserved (no order rewrite, transit progress unaffected).
+- T8 NEW: brigade in_transit toward different destination is not overridden.
+- T9 NEW: pre-existing brigade_movement_orders toward different OSID not silently stomped.
+- T10 NEW: pre-existing order toward staging is no-op (helper does not double-write).
+- D3 unchanged.
+
+11/11 tests pass after both repairs. Full focused suite (Krivaja + predecessor triggered_operations + predecessor 4b force_ratio): 51/51 PASS. `npx tsc --noEmit -p tsconfig.json` clean.
+
+40w smoke n1615 hash `0c2fc264112dec1f` — byte-identical to predecessor 40w baselines (n1610, n1613). Byte-identity is the expected null signature: zero triggered ops fire in the 40w window (Krivaja t168, Stupčanica t172, Cerska-Kamenica t≥40 all post-window or right at window-end with no acceptance), so the catalog and helper changes are correctly inert. Same inference established by `/scenario-creator-runner-tester` on the prior 40w n1613.
+
+Fresh 188w proof recommended next session (not gated for this commit per Codex review brief — focused tests + tsc are the mandatory gate; "if you run a scenario proof, include sensitive_history_status output").
+**Verification commit (initial):** `68b56d1f`
 **Predecessor:** `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`) — closed PARTIAL on 2026-05-02 with six handoffs.
 **Lane brief:** Krivaja-95 / Srebrenica modeled-fall opening-attack and brigade-roster repair (handoffs #1, #3, #5 from the predecessor's six-lane fan-out).
 

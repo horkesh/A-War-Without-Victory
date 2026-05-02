@@ -1,3 +1,53 @@
+## [2026-05-02] fix(operations): Krivaja-95 catalog ICTY-citation correction + pre-stage helper overwrite contract (Codex review #1+#2)
+
+**Type:** Corrective patch on top of `68b56d1f` after Codex code review flagged two blockers: (1) ICTY citation accuracy — historian agent fabricated "Krstić §123 W-axis force" claim about 1st Milici and "Zvornik post-fall only" claim that contradicts the actual ICTY paragraphs; (2) `prestageBrigadesForTriggeredOp` silently overwrote existing `brigade_movement_orders`, could reset in-transit progress.
+
+**Direct ICTY paragraph verification (via WebFetch + local pdftotext):**
+- **Krstić IT-98-33-T §§122–123** (verbatim from `https://www.icty.org/x/cases/krstic/tjug/en/krs-tj010802e-1.htm`): discusses Krivaja-95 STRATEGIC OBJECTIVES only (split the Srebrenica/Žepa enclaves; reduce them to urban cores). Does NOT name brigades or assign attack axes.
+- **Popović IT-05-88-T §244** (verbatim from `https://www.icty.org/x/cases/popovic/tjug/en/100610judgement.pdf`): "On 2 July 1995, two orders, 'Krivaja-95', were issued in the name of Živanović, the Drina Corps Commander. The first order was a preparatory order addressed to the Zvornik, Birac, Romanija, Vlasenica, Podrinje, Bratunac, Milici and Skelani brigades of the Drina Corps."
+- **Popović §245 fn 757** (verbatim): "a part of the Bratunac Brigade was given the task to prevent the intervention of the ABiH from Potočari towards Srebrenica, and the Battalion of the Zvornik Brigade was given the task to attack ABiH forces along the axis of three wooded hills (500 metres north of Zeleni Jadar) – Pusmulići village – Bojna – Srebrenica."
+- **Popović §247** (verbatim): TG-1 commanded by Pandurević, Commander of the Zvornik Brigade; TG-1 left Standard Barracks Zvornik 4 July, arrived Zeleni Jadar 5 July; opening assault commenced 6 July 0400 hrs (§249).
+
+**Codex was right on both blockers.** Krstić §123 does NOT support the "1st Milici W-axis" attribution. Popović §244+§245 fn 757+§247 documents Zvornik Brigade involvement in the OPENING ASSAULT — not "post-fall only" as the historian agent fabricated.
+
+**Two changes (single file `src/sim/combat/triggered_operations.ts` + tests):**
+
+1. **Catalog repair.** RESTORE `rs_1st_zvornik` to Krivaja-95 axis brigades AND keep `rs_1st_milii`. Net catalog: 5 brigades (Zvornik, Bratunac, Milici, 5th Podrinje, Skelani) — all five named in Popović §244's eight-brigade preparatory-order list. Catalog comment block fully rewritten with verbatim Popović citations and explicit retraction of the prior Krstić §123 + post-fall fabrications.
+
+2. **Helper overwrite contract.** `prestageBrigadesForTriggeredOp` now SKIPS when:
+   - Brigade is `brigade_movement_state[id].status === 'in_transit'` (any destination — preserves transit progress).
+   - Brigade has existing `brigade_movement_orders[id]` (any destination — triggered-op pre-stage has NO priority over commander-correction / emergency-defense / army-reserve-recall owners).
+   Net: helper now fills the GAP for participants without movement plans; brigades already with a plan keep theirs.
+
+**Tests added/updated (`tests/krivaja_roster_and_prestage.test.ts`):**
+- T1 expanded: catalog must include all 5 brigades.
+- T2 inverted: catalog comment must cite Popović §244/§245, must explicitly retract Krstić §123 brigade-naming claim, must NOT claim Zvornik joined post-fall only.
+- T4 + T6 extended: rs_1st_zvornik must also receive a movement order.
+- T7 NEW: brigade in_transit toward staging is preserved (no order rewrite).
+- T8 NEW: brigade in_transit toward different destination is not overridden.
+- T9 NEW: pre-existing brigade_movement_orders toward different OSID not silently stomped.
+- T10 NEW: pre-existing order toward staging is no-op.
+
+**Verification:** `npx vitest run` on the 4 focused suites → **51/51 PASS** (Krivaja 11/11; predecessor suites 25/25; predecessor 4b 15/15). `npx tsc --noEmit -p tsconfig.json` → clean. 40w smoke run for early-game regression check (does not exercise t168 Krivaja or t172 Stupčanica triggers).
+
+**Hash drift class:** BEHAVIORAL narrow scope. Helper now strictly more conservative (never overwrites) → cohort affected is a SUBSET of `68b56d1f`. Catalog has 5 brigades vs `68b56d1f` 4 → adds rs_1st_zvornik back. Fresh 188w proof recommended next session (not gated for this commit per brief — focused tests + tsc are the mandatory gate).
+
+**Stop-gate compliance:** No `enclave_resilience.ts`, no `combat_math.ts`, no `rupture_consequences.ts`, no `oob_brigades.json`, no UI/Codex files, no hardcoded controller flip, no painted-target read, no `--no-verify`, no `FORAWWV.md` touch. Determinism preserved.
+
+**Sensitive-history compliance:** No Ring 3 surface. The catalog repair MORE FAITHFULLY represents the historical OOB per ICTY direct citation. The helper repair makes triggered-op pre-stage more deferential. Both Ring 1 honesty corrections.
+
+**Files:**
+- `src/sim/combat/triggered_operations.ts` (catalog comment rewrite + helper contract; ~75/-30 lines from `68b56d1f`)
+- `tests/krivaja_roster_and_prestage.test.ts` (T1/T2/buildSyntheticState/T4/T6 updated; T7/T8/T9/T10 new; ~+180 lines)
+- `docs/40_reports/implemented/20260502_KRIVAJA_ROSTER_AND_PRESTAGE.md` (REOPENED status + verification updates 1+2 + repair decisions)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (two durable lessons: agent-citation verification; helper overwrite contract)
+- `.claude/napkin.md` (Current State updated)
+
+**Codex review surface:** Direct ICTY citations now verbatim in the catalog comment. Helper overwrite contract documented in JSDoc with four numbered rules. Both blockers raised by Codex are addressed.
+
+---
+
 ## [2026-05-02] feat(operations): Krivaja-95 catalog historical correction + trigger-turn pre-stage helper for triggered ops (PARTIAL — two binding blockers removed; Srebrenica/Žepa P0 still open)
 
 **Type:** P0 sensitive-history successor lane PARTIAL CLOSE (predecessor `9ff4f352` Drina enclave PARTIAL handoffs #1, #3, #5). Two binding blockers removed inside `src/sim/combat/triggered_operations.ts` only — no `combat_math.ts`, no `enclave_resilience.ts`, no `rupture_consequences.ts`, no UI/Codex files, no OOB mutation.
