@@ -1,3 +1,16 @@
+## [2026-05-02] feat(ui): add Chronicle review filters
+
+**Type:** UI/read-model product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
+
+**Why:** Chronicle cost memory made hard campaign weeks visible, but the overlay still forced the player to scan the whole ribbon. The archive needed review lenses so a player can isolate Cost, Headlines, Combat, Political, Humanitarian, Military, Diplomatic, or Narrative entries without creating a second history store.
+
+**What changed:** `ChronicleOverlay.tsx` now keeps one canonical `allEntries` list from `generateChronicleEntries(...)`, derives deterministic per-filter counts, projects `filteredEntries`, and uses that projection for turn groups, event dots, timeline cards, and the side dossier. `ChronicleReviewFilters.ts` owns the pure filter/count helpers. The header gained compact count-bearing filter buttons with `aria-pressed` state; the dossier gained a Lens cell and a filtered-empty state. Added `tests/ui_chronicle_review_tools.test.ts` to guard the filter set, counts, and type/headline filtering.
+
+**Verification:** 20/20 focused Chronicle tests pass (`chronicle_entries`, `chronicle_endgame_mount`, `ui_chronicle_review_tools`); `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` succeeds with existing Vite/browser-external/chunk-size warnings only.
+
+**Report:** `docs/40_reports/implemented/20260502_CHRONICLE_REVIEW_TOOLS.md`.
+
+---
 ## [2026-05-02] feat(combat): scope estimateForceRatio defender aggregation to enclave (PARTIAL — Srebrenica/Žepa P0 progressed not resolved)
 
 **Type:** P0 sensitive-history modeled-fall mega-lane PARTIAL CLOSE. Predictor enclave-aware mechanic shipped; acceptance criterion (Srebrenica/Žepa controllers flip + rupture fires) NOT MET. Six handoffs to successor lanes.

@@ -3,8 +3,10 @@ import { useGameStore } from '../../store/gameStore.js';
 import { generateChronicleEntries } from './generateChronicleEntries.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
+import { CHRONICLE_FILTERS, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
+import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -52,24 +54,31 @@ export function ChronicleOverlay() {
     const [viewportOffset, setViewportOffset] = useState(0);
     const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
     const [selectedTurn, setSelectedTurn] = useState<number | null>(null);
+    const [activeFilter, setActiveFilter] = useState<ChronicleFilterId>('all');
 
     const turnSummaries = state?.turnSummaries ?? [];
 
-    const entries = useMemo(() =>
+    const allEntries = useMemo(() =>
         turnSummaries.length > 0 ? generateChronicleEntries(state) : [],
-        [turnSummaries]
+        [state, turnSummaries.length]
     );
 
-    // Group entries by turn
+    const entryCounts = useMemo(() => countChronicleEntriesByFilter(allEntries), [allEntries]);
+
+    const filteredEntries = useMemo(() => filterChronicleEntries(allEntries, activeFilter), [activeFilter, allEntries]);
+
+    const activeFilterLabel = CHRONICLE_FILTERS.find(filter => filter.id === activeFilter)?.label ?? 'All';
+
+    // Group filtered entries by turn
     const turnGroups = useMemo(() => {
         const groups = new Map<number, ChronicleEntry[]>();
-        for (const entry of entries) {
+        for (const entry of filteredEntries) {
             const existing = groups.get(entry.turn) ?? [];
             existing.push(entry);
             groups.set(entry.turn, existing);
         }
         return groups;
-    }, [entries]);
+    }, [filteredEntries]);
 
     // Compute turn range
     const minTurn = useMemo(() => {
@@ -84,6 +93,12 @@ export function ChronicleOverlay() {
 
     useEffect(() => {
         if (!open) return;
+        if (filteredEntries.length > 0) {
+            if (selectedTurn == null || !turnGroups.has(selectedTurn)) {
+                setSelectedTurn(filteredEntries[filteredEntries.length - 1].turn);
+            }
+            return;
+        }
         if (selectedTurn == null) {
             setSelectedTurn(maxTurn);
             return;
@@ -91,7 +106,7 @@ export function ChronicleOverlay() {
         if (selectedTurn < minTurn || selectedTurn > maxTurn) {
             setSelectedTurn(maxTurn);
         }
-    }, [open, selectedTurn, minTurn, maxTurn]);
+    }, [open, selectedTurn, minTurn, maxTurn, filteredEntries, turnGroups]);
 
     // Compute column widths: hybrid (empty=narrow, events=wide)
     const turnWidths = useMemo(() => {
@@ -303,20 +318,44 @@ export function ChronicleOverlay() {
         <div className="fixed inset-0 z-[1000] bg-black/92 backdrop-blur-sm flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-2.5 border-b border-white/8">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
                     <h1
-                        className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400/90"
+                        className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400/90 shrink-0"
                         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                     >
                         War Chronicle
                     </h1>
-                    <span className="text-[9px] font-mono text-stone-500">
-                        {entries.length} events — {turnToFullDate(minTurn)} – {turnToFullDate(maxTurn)}
+                    <span className="text-[9px] font-mono text-stone-500 shrink-0">
+                        {filteredEntries.length}/{allEntries.length} events — {turnToFullDate(minTurn)} – {turnToFullDate(maxTurn)}
                     </span>
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        {CHRONICLE_FILTERS.map(filter => {
+                            const active = filter.id === activeFilter;
+                            const count = entryCounts[filter.id];
+                            return (
+                                <button
+                                    key={filter.id}
+                                    type="button"
+                                    aria-pressed={active}
+                                    title={`${filter.label}: ${count}`}
+                                    onClick={() => setActiveFilter(filter.id)}
+                                    className={[
+                                        'h-6 min-w-[54px] rounded-sm border px-2 font-mono text-[8px] uppercase transition-colors',
+                                        active
+                                            ? 'border-amber-400/70 bg-amber-400/15 text-amber-200'
+                                            : 'border-white/10 bg-black/25 text-stone-500 hover:border-stone-500/60 hover:text-stone-300',
+                                    ].join(' ')}
+                                >
+                                    <span>{filter.label}</span>
+                                    <span className="ml-1 text-stone-500">{count}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
                 <button
                     onClick={handleClose}
-                    className="text-[10px] font-mono text-stone-500 hover:text-red-400 transition-colors uppercase tracking-wider"
+                    className="ml-3 shrink-0 text-[10px] font-mono text-stone-500 hover:text-red-400 transition-colors uppercase tracking-wider"
                 >
                     Close [ESC]
                 </button>
@@ -329,7 +368,7 @@ export function ChronicleOverlay() {
                     className="flex-1 overflow-x-auto overflow-y-auto border-r border-white/8"
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#555 #1a1a1a' }}
                 >
-                    {entries.length === 0 ? (
+                    {allEntries.length === 0 ? (
                         <div className="flex items-center justify-center h-full">
                             <p className="text-stone-600 text-xs font-mono">
                                 No events recorded yet. Advance turns to build your chronicle.
@@ -348,9 +387,17 @@ export function ChronicleOverlay() {
                             </div>
 
                             {/* Turn columns with stems and cards */}
-                            <div className="flex">
-                                {columns}
-                            </div>
+                            {filteredEntries.length === 0 ? (
+                                <div className="flex items-center justify-center" style={{ minHeight: '320px' }}>
+                                    <p className="text-stone-600 text-xs font-mono">
+                                        No Chronicle entries match this filter.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex">
+                                    {columns}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -364,7 +411,7 @@ export function ChronicleOverlay() {
                             {selectedTurn != null ? turnToFullDate(selectedTurn) : 'No turn selected'}
                         </div>
                     </div>
-                    <div className="px-4 py-3 grid grid-cols-2 gap-2 border-b border-white/8 text-[10px]">
+                    <div className="px-4 py-3 grid grid-cols-3 gap-2 border-b border-white/8 text-[10px]">
                         <div className="bg-black/20 border border-panel-border/40 rounded p-2">
                             <div className="text-text-secondary uppercase tracking-wide">Events</div>
                             <div className="text-text-primary font-bold">
@@ -379,10 +426,20 @@ export function ChronicleOverlay() {
                                     : 'No'}
                             </div>
                         </div>
+                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
+                            <div className="text-text-secondary uppercase tracking-wide">Lens</div>
+                            <div className="text-text-primary font-bold truncate" title={activeFilterLabel}>
+                                {activeFilterLabel}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-                        {selectedTurn == null || (turnGroups.get(selectedTurn)?.length ?? 0) === 0 ? (
+                        {allEntries.length > 0 && filteredEntries.length === 0 ? (
+                            <div className="text-[11px] text-text-secondary italic">
+                                No Chronicle entries match this filter.
+                            </div>
+                        ) : selectedTurn == null || (turnGroups.get(selectedTurn)?.length ?? 0) === 0 ? (
                             <div className="text-[11px] text-text-secondary italic">
                                 Select a turn on the timeline to inspect its event dossier.
                             </div>
@@ -401,7 +458,7 @@ export function ChronicleOverlay() {
             </div>
 
             {/* Scrubber strip */}
-            {entries.length > 0 && (
+            {allEntries.length > 0 && (
                 <ChronicleRibbonScrubber
                     turnSummaries={turnSummaries}
                     minTurn={minTurn}
