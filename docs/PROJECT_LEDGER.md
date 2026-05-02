@@ -1,3 +1,66 @@
+## [2026-05-02] feat(combat): predictor / combat-power context honest for committed-in-transit operation participants (LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT)
+
+**Type:** Bounded engine-only context-honesty repair across `combat_math.ts` and `operation_preparation.ts`. Successor handoff to predecessor `87062cc4` (named remaining blocker: `computeAttackerPower` reads brigade `location_osid` for context lookups). No `enclave_resilience.ts`, no `rupture_consequences.ts`, no outcome-formula changes (defender stack, entrenchment, terrain, Lanchester all UNCHANGED), no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads.
+
+**Bug:** Predecessor `87062cc4` made readiness/predictor gates count operation participants `in_transit` toward axis-relevant OSIDs. Named remaining blocker (cited in predecessor's Successor Lane #7): `computeAttackerPower(state, formation, ...)` evaluates location-dependent context via `getSupplyMult` (reads `formation.location_osid` for supply state) and `getHomeDistanceMultFromCache` (cached from current location). For an in-transit brigade en-route to staging, `location_osid` is the intermediate transit OSID, so the brigade's predicted attacker power is computed against unfavorable transit-OSID supply state instead of the destination it is committed to reach. Krivaja-95 evidence: predecessor n1617 hash `17a11e99ff114aca` showed Krivaja `force_ratio=0.094`, far below launch threshold `1.5` despite the in-transit-aware readiness gate.
+
+**Phase 0 four-investigator synthesis** (`/systems-programmer`, `/determinism-auditor`, `/qa-engineer`, `/game-designer`) all converge:
+- `getSupplyMult` and `getHomeDistanceMultFromCache` are the only location-dependent helpers in `computeAttackerPower`.
+- Override applies to `getSupplyMult` branch (a) supply-state-by-osid lookup only. **Skip home-distance** — cache is per-formation/opaque from call site; recomputing in hot path is layer violation; effect marginal vs supply binary cliff.
+- Override OSID = `op.staging_osid` first (canonical "where committed to assemble"); else `strictCompare`-sorted first relevance OSID. Avoid `destination_sids[0]` semantics (could brittle under future route planners).
+- Default-undefined parameter preserves byte-stability for `attack_resolution_osid.ts`, `combat_predictor.ts`, `sector_combat_rating.ts` (resolver/predictor/rating evaluate against current physical location, must remain so).
+- Import `isCommittedInTransitTo` from predecessor lane (single source of truth — duplication risks logic skew).
+- /game-designer: APPROVED Ring 1. Honest mechanic correction at predictor layer; same shape as predecessor `87062cc4`. Not tuning — context honesty evaluates power at the OSID where the engine has committed the brigade to operate from. § 6 sign-off chain not required (parity with existing predictor-honesty consumers).
+
+**Implementation:**
+1. `sector_offensive_launch_helpers.ts`: `isCommittedInTransitTo` now exported (was private). Cross-lane attribution comment.
+2. `combat_math.ts`: `getSupplyMult(formation, state, mode, supply?, contextLocationOverride?)` 5th parameter plumbed into branch (a) lookup only; branch (b) `last_supplied_turn` fallback unchanged. `computeAttackerPower(... contextLocationOverride?)` 7th parameter plumbed into `getSupplyMult` only; other helpers UNCHANGED. JSDoc explains lane intent + non-overrides + byte-stability for non-overriding callers.
+3. `operation_preparation.ts` `estimateForceRatio`: imports predicate + `collectObjectiveApproachOsids`; derives `attackerCorpsId` from `attackerFormations[0].corps_id` (op-architecture invariant); builds per-op relevance set (`op.staging_osid` ∪ each `axis.staging_osid` ∪ approach OSIDs across all axes for current launch objectives); deterministic override OSID selection (op staging first, else `strictCompare`-sorted first); per-attacker gate `useOverride = overrideOsid !== undefined && a.location_osid !== overrideOsid && isCommittedInTransitTo(state, a.id, relevanceOsids)`.
+
+Every changed/added line tagged `LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT`. Faction-agnostic; deterministic via `strictCompare` + `Set.has()`; no `Math.random`/`Date.now`/`new Date(`.
+
+**Tests** (`tests/operation_preparation_in_transit_context.test.ts`, 9 tests):
+- T1 unit (RED→GREEN): `computeAttackerPower` with override = staging returns higher power than without override (intermediate `critical`, staging `adequate`); ratio 2.0–2.5×.
+- T3 regression: staged brigade idempotent (location === override → with-override === without-override).
+- T4 regression: `postureMult <= 0` guard preserved (inactive `defend` posture in attacker mode → 0 power).
+- T5 determinism: re-runs identical.
+- T6 static-grep: no `Math.random`/`Date.now`/`new Date(`/`performance.now(`; no faction hardcode in lane-tagged lines.
+- T7 caller integration (RED→GREEN): `estimateForceRatio` ratio higher when participant is in-transit-to-staging vs in-transit-to-unrelated; factor ≥ 1.5×.
+- Predicate sanity ×2: `isCommittedInTransitTo` correctly returns true/false for relevant/unrelated destinations.
+
+Pre-implementation: 2 RED + 7 GREEN regression guards. Post-implementation: **9/9 GREEN.**
+
+**Verification:**
+- Lane tests `tests/operation_preparation_in_transit_context.test.ts` 9/9 PASS.
+- Focused regression suite **104/104 PASS** across 10 suites: this lane + `sector_offensive_in_transit_predictor` 14/14 + `operation_preparation_force_ratio` 15/15 + `krivaja_roster_and_prestage` 11/11 + `krivaja_stupcanica_milii_double_roster_audit` 3/3 + `triggered_operations` 15/15 + `triggered_operations_late_1995` 10/10 + `operation_axis_unreachable_diagnostic` 3/3 + `sector_offensive` 12/12 + `sector_offensive_idle_recovery` 12/12.
+- `npx tsc --noEmit -p tsconfig.json` clean (initial pass revealed `CorpsOperation` lacks top-level `corps_id`/`faction` — fixed by deriving `attackerCorpsId` from `attackerFormations[0].corps_id` per op-architecture invariant; second pass clean).
+- 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1618` hash `0c2fc264112dec1f` byte-identical to predecessor 40w baselines (EXPECTED null per /scenario-tester — relevance set is strict superset of predecessor's; triggered-op pre-stage gated outside 40w window).
+- 188w proof `runs/apr1992_definitive_188w__210e69404d054959__w188_n1619` hash `4ba56cfd4fae9824` (different from predecessor n1617 `17a11e99ff114aca`). Verdict OPEN_P0; Srebrenica + Žepa controllers byte-identical to predecessor; rupture not fired. **Hash drift WITHOUT visible gating-outcome change** — exact signature of declared BEHAVIORAL global narrow-scope. Krivaja-95 ratio 0.094 unchanged (override never fires at t179 — see /scenario-tester diagnosis below); Stupčanica-95 ratio 0.831 / attacks=1 unchanged (predecessor `87062cc4` attribution); Cerska-Kamenica ratio 0.600 unchanged. GREEN-regression audits: `operation_delivery_audit` 8/11/23/4/5 byte-stable; `opportunity_campaign_proof` byte-stable; brigade locations byte-identical.
+
+**`/scenario-creator-runner-tester` (NULL at acceptance / PARTIAL at mechanic):** Direct `final_save.json` inspection reveals at Krivaja's t179 trigger, `rs_1st_milii` is at `op:sekovici:sekovici_2` (`mv_state=none`, `mv_order=none`), `rs_5th_podrinje` is at `op:vlasenica:sebiocina` (1336 personnel, degraded by Stupčanica cascade, `mv_state=none`, `mv_order=none`). The `isCommittedInTransitTo` predicate (`status === 'in_transit'` requirement) returns FALSE for every Krivaja participant. Per-attacker gate `useOverride` is false; override never plumbs through; Krivaja's 0.094 ratio holds by construction of the predicate gate, not by supply-state coincidence. For Stupčanica at t172: rs_1st_milii was in_transit toward Krivaja staging (NOT Stupčanica's relevance set — predicate false); rs_1st_podrinje already at staging; rs_1st_vlasenica not in_transit. Override fires for zero sensitive-history-op participants at trigger turns; hash drift comes from override firing on non-sensitive-history ops elsewhere.
+
+**`/war-or-game` (APPROVED with caveat):** § 8.3 (a) honest correction at the named layer. Named blocker (`computeAttackerPower` reading wrong OSID for context) is CLOSED. Absence of effect on Krivaja's 0.094 ratio means the NEXT blocker surfaces — which is how a layered honesty pass is supposed to work. No acceptance regression, no GREEN-case regression, no Ring 3 surface.
+
+**Closeability — PARTIAL with new named blocker.** Different blocker than originally hypothesized: NOT Phase 4d defender combat-math stack (war-or-game's hypothesis), but rather upstream movement-orders / pre-stage / trigger-turn-orders-not-yet-in-transit (per /scenario-tester's `final_save` inspection). At trigger-turn, the `prestageBrigadesForTriggeredOp` helper from `98446604` writes column-march orders, but `estimateForceRatio` runs in the same preparation sub-phase loop before `apply-brigade-movement` converts orders to `in_transit` state. The predicate `isCommittedInTransitTo` (status===`in_transit` requirement) is too strict for trigger-turn evaluation. Successor handoff: extend predicate to also accept brigades with `brigade_movement_orders[id].destination_sids` pointing at relevance set even before `in_transit` state transition. Out of scope for this lane (predicate is owned by `87062cc4`; extending it is a sibling lane).
+
+**Hash drift class:** BEHAVIORAL global narrow-scope. Only ops with at least one in-transit-to-relevant participant fire the override branch. For ops with all-staged participants: zero delta. For ops with in-transit-to-unrelated participants: zero delta (caller predicate returns false). For committed-in-transit-to-relevant: per-formation power values shift toward "would-be at destination" (typically higher when staging is better-supplied than transit territory). No new persisted field; STATE-SHAPE clean.
+
+**Stop-gate compliance:** No outcome-formula changes (defender stack, entrenchment, terrain, urban, forest, posture, Lanchester all UNCHANGED — only `getSupplyMult` parameter plumbing + `computeAttackerPower` parameter plumbing). No `enclave_resilience.ts`, no `rupture_consequences.ts`, no OOB JSON, no UI/Codex files, no hardcoded controller flips, no painted-target reads. Determinism preserved.
+
+**Sensitive-history compliance:** Ring 1 honest correction. No rupture trigger touched. No enclave mechanic mutation. No atrocity-as-tactic. Faction-agnostic mechanic. § 8.3 distinction (a): historical OOB + correct readiness mechanic + correct combat-power context produces emergent fall (or non-fall), NOT a scripted Ring 3 surface.
+
+**Files:**
+- `src/sim/combat/sector_offensive_launch_helpers.ts` (+~5 lines: export + cross-lane comment)
+- `src/sim/combat/combat_math.ts` (+~20 lines: parameter plumbing + JSDoc)
+- `src/sim/combat/operation_preparation.ts` (+~50 lines: relevance set + override selection + per-attacker gate)
+- `tests/operation_preparation_in_transit_context.test.ts` (new, ~530 lines, 9 tests)
+- `docs/40_reports/implemented/20260502_IN_TRANSIT_COMBAT_POWER_CONTEXT.md` (this lane's report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (one durable lesson)
+- `.claude/napkin.md` (Current State updated)
+
+---
+
 ## [2026-05-02] feat(ui): add Decision Room command-loop lanes
 
 **Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, or sensitive-history logic changed.

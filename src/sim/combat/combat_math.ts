@@ -724,14 +724,27 @@ export function basePower(formation: FormationState): number {
  * Supply mult from OSID report when available; else last_supplied_turn fallback.
  * When supply_reserves_enabled, combines OSID reachability with faction reserve level
  * per SUPPLY_AMMO_SYSTEM_PLAN.md §3.4 interaction table.
+ *
+ * LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: optional `contextLocationOverride`
+ * shifts the supply-state-by-osid lookup (branch (a)) to the override OSID instead
+ * of `formation.location_osid`. Used by `computeAttackerPower` when the caller
+ * (`estimateForceRatio`) determines the brigade is committed-in-transit toward an
+ * operation-relevant OSID — the brigade is en-route to the destination it has been
+ * committed to, so context should be evaluated there rather than at the intermediate
+ * march OSID. Branch (b) `last_supplied_turn` fallback is faction/turn-keyed and
+ * unaffected by the override (semantically "when did this brigade last receive
+ * supply" — destination-independent).
  */
 export function getSupplyMult(
     formation: FormationState,
     state: GameState,
     mode: 'attack' | 'defend',
-    supplyStateByOsid?: SupplyStateByOsidReport | null
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    contextLocationOverride?: string,
 ): number {
-    const locationOsid = (formation as { location_osid?: string }).location_osid;
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: prefer override when caller supplies it.
+    const locationOsid = contextLocationOverride
+        ?? (formation as { location_osid?: string }).location_osid;
     const factionId = formation.faction as string;
     if (supplyStateByOsid?.factions && locationOsid) {
         const facEntry = supplyStateByOsid.factions.find((f) => f.faction_id === factionId);
@@ -958,6 +971,20 @@ export function classifyOutcome(powerRatio: number): CombatOutcome {
  * Compute attacker power for a single formation.
  * @param overridePosture — optional posture override (predictor uses this for 'attack'/'assault')
  * @param targetTerrainMult — defender terrain multiplier for the target OSID; gates tank effectiveness
+ * @param contextLocationOverride — LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT.
+ *   Optional OSID override that shifts location-dependent context lookups
+ *   (currently `getSupplyMult` branch (a)) to evaluate against the override
+ *   OSID instead of `formation.location_osid`. Used by `estimateForceRatio`
+ *   when the brigade is committed-in-transit toward an operation-relevant OSID —
+ *   the brigade is en-route to that destination, so its predicted attacker
+ *   context is the destination it will arrive at, not the intermediate march
+ *   OSID. Default-undefined preserves byte-stable behavior for resolver
+ *   (`attack_resolution_osid.ts`), predictor (`combat_predictor.ts`), and
+ *   sector-rating (`sector_combat_rating.ts`) callers — all of which evaluate
+ *   formations against their CURRENT physical location and must remain so.
+ *   Home-distance context is intentionally NOT overridden (cache is per-formation
+ *   keyed and recomputing in this hot path is a layer violation; effect is
+ *   marginal vs the supply-state binary cliff 1.0 → 0.45).
  */
 export function computeAttackerPower(
     state: GameState,
@@ -965,13 +992,15 @@ export function computeAttackerPower(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     overridePosture?: string,
     targetTerrainMult = 1.0,
-    targetOsid?: string
+    targetOsid?: string,
+    contextLocationOverride?: string,
 ): number {
     const base = basePower(formation);
     const posture = overridePosture ?? formation.posture ?? 'defend';
     const postureMult = POSTURE_ATTACK[posture] ?? 0;
     if (postureMult <= 0) return 0;
-    const supplyMult = getSupplyMult(formation, state, 'attack', supplyStateByOsid);
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: thread override into supply context.
+    const supplyMult = getSupplyMult(formation, state, 'attack', supplyStateByOsid, contextLocationOverride);
     const corpsStance = getCorpsStance(state, formation);
     const corpsMult = corpsStance ? CORPS_STANCE_ATTACK[corpsStance] ?? 1 : 1;
     const opMult = getOperationsMult(state, formation);

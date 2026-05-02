@@ -55,7 +55,15 @@ import type {
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
-import { getEquipmentOffensivePriority } from './sector_offensive_launch_helpers.js';
+import {
+    getEquipmentOffensivePriority,
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: shared predicate +
+    // approach-OSID collector are reused at the caller layer to gate the
+    // committed-in-transit context override. Single source of truth — see
+    // `sector_offensive_launch_helpers.ts` JSDoc on `isCommittedInTransitTo`.
+    isCommittedInTransitTo,
+    collectObjectiveApproachOsids,
+} from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration
 import { computeAttackerPower, rankDefendersByPower, getArtillerySuppression } from './combat_math.js';
@@ -277,9 +285,84 @@ export function estimateForceRatio(
     // dig_in / defend brigades contribute their offensive value). Each brigade
     // gets supply/terrain/officer/morale/fatigue applied via combat_math.
     const attackerFaction = (attackerFormations[0]!.faction as string) || 'RBiH';
+
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: derive corps_id + faction
+    // from the first attacker formation. CorpsOperation has no top-level
+    // corps_id/faction fields; participants share a primary corps and faction
+    // by op-architecture invariant, so the first attacker is canonical and
+    // deterministic (op.participating_brigades is a catalog-ordered array).
+    const attackerCorpsId = (attackerFormations[0]!.corps_id ?? '') as FormationId;
+
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: build per-op relevance set
+    // for committed-in-transit context override. A brigade is "committed-in-transit
+    // toward a relevant destination" when its `brigade_movement_state.status ===
+    // 'in_transit'` AND any of its `destination_sids` is in this relevance set.
+    // Set composition: op.staging_osid + every axis.staging_osid + approach OSIDs
+    // for current launch objectives across all axes (single-axis or multi-axis).
+    // Faction-agnostic; deterministic — no Map iteration introduced, all sources
+    // are catalog-ordered arrays + deterministic sub-segment lookups in
+    // `collectObjectiveApproachOsids`.
+    const relevanceOsids = new Set<string>();
+    if (op.staging_osid) relevanceOsids.add(op.staging_osid);
+    if (op.axes && op.axes.length > 0) {
+        for (const ax of op.axes) {
+            if (ax.staging_osid) relevanceOsids.add(ax.staging_osid);
+            const currentObjective = ax.objectives[ax.current_objective_index ?? 0];
+            if (typeof currentObjective === 'string' && currentObjective.length > 0
+                && attackerCorpsId
+            ) {
+                const approach = collectObjectiveApproachOsids(
+                    state,
+                    attackerCorpsId,
+                    attackerFaction as FactionId,
+                    [currentObjective],
+                );
+                for (const o of approach) relevanceOsids.add(o);
+            }
+        }
+    } else if (attackerCorpsId) {
+        const launchObjectives = op.objectives ?? [];
+        if (launchObjectives.length > 0) {
+            const approach = collectObjectiveApproachOsids(
+                state,
+                attackerCorpsId,
+                attackerFaction as FactionId,
+                launchObjectives,
+            );
+            for (const o of approach) relevanceOsids.add(o);
+        }
+    }
+    // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: deterministic override
+    // OSID selection — prefer op.staging_osid (canonical "where committed to
+    // assemble"); else strictCompare-sorted first relevance OSID. Per
+    // /determinism-auditor recommendation: avoids dependence on
+    // `destination_sids[0]` semantics ("next hop" vs "final destination"), which
+    // could brittle under future route planners.
+    const sortedRelevance = Array.from(relevanceOsids).sort(strictCompare);
+    const overrideOsid: string | undefined = op.staging_osid && relevanceOsids.has(op.staging_osid)
+        ? op.staging_osid
+        : sortedRelevance[0];
+
     let ownStrength = 0;
     for (const a of attackerFormations) {
-        ownStrength += computeAttackerPower(state, a, supplyByOsid, 'attack', targetTerrainMult, primaryTargetOsid);
+        // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: per-formation override
+        // gated on the predecessor predicate. Brigades not in_transit toward a
+        // relevant OSID get no override (default-undefined → byte-stable). The
+        // caller restriction is intentional: only `estimateForceRatio` knows the
+        // operation-relevance set; resolver/predictor/sector-rating evaluate
+        // formations against their CURRENT physical location and must remain so.
+        const useOverride = overrideOsid !== undefined
+            && a.location_osid !== overrideOsid
+            && isCommittedInTransitTo(state, a.id as FormationId, relevanceOsids);
+        ownStrength += computeAttackerPower(
+            state,
+            a,
+            supplyByOsid,
+            'attack',
+            targetTerrainMult,
+            primaryTargetOsid,
+            useOverride ? overrideOsid : undefined,
+        );
     }
     if (ownStrength === 0) {
         // LANE-2026-05-02: every attacker had postureMult <= 0 OR base power 0.

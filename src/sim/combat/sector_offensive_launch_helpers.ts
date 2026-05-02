@@ -222,7 +222,13 @@ export function collectObjectiveApproachOsids(
 // contract from commit `98446604` — this helper does not mutate any movement
 // state, it only reclassifies skip semantics for participants the engine has
 // already committed to the operation.
-function isCommittedInTransitTo(
+//
+// LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: exported so the
+// `estimateForceRatio` caller in `operation_preparation.ts` can gate the
+// per-formation supply-context override on the same predicate. Single source
+// of truth — duplicating the predicate would risk drift (per determinism-
+// auditor recommendation).
+export function isCommittedInTransitTo(
     state: GameState,
     brigadeId: FormationId,
     relevantOsids: ReadonlySet<string>,
