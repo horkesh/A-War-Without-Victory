@@ -414,31 +414,92 @@ function detectOperationStagnation(state: GameState): AnomalyReport[] {
 }
 
 /**
+ * LANE-2026-05-02-B3-ANOMALY-SECTOR-SUBTYPE classifier.
+ *
+ * Classify whether a corps's empty/undefended sector or sub-segment is caused
+ * by a genuinely thin brigade pool (`pool_exhausted`) or by misallocation of
+ * available brigades (`misallocated`). Per /sector-expert Tier 1 finding on
+ * n1621, these two root causes route to different specialists:
+ *   - pool_exhausted → operations/formation expert (replacement pool)
+ *   - misallocated   → corps-army-commander (rebalance)
+ *
+ * Heuristic: count active brigade-kind formations belonging to the corps,
+ * subtract those already attached to any sector (assigned or reserve). If
+ * surplus >= 1, the corps has unassigned brigades that could fill the gap.
+ *
+ * Read-only over GameState; deterministic via sortedKeys + strictCompare.
+ */
+function classifyCorpsBrigadeAvailability(
+    state: GameState,
+    corpsId: string,
+): 'pool_exhausted' | 'misallocated' {
+    const formations = state.military.formations as Record<string, any>;
+    let activeBrigades = 0;
+    for (const fid of sortedKeys(formations)) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        if (f.corps_id !== corpsId) continue;
+        activeBrigades += 1;
+    }
+    const sectors = (state.military.corps_front_sectors ?? {}) as Record<string, any>;
+    const sectorAssigned = new Set<string>();
+    for (const sectorId of sortedKeys(sectors)) {
+        const sec = sectors[sectorId];
+        if (!sec || sec.corps_id !== corpsId) continue;
+        for (const bid of sec.assigned_brigade_ids ?? []) sectorAssigned.add(bid);
+        for (const bid of sec.reserve_brigade_ids ?? []) sectorAssigned.add(bid);
+    }
+    return activeBrigades > sectorAssigned.size ? 'misallocated' : 'pool_exhausted';
+}
+
+/**
  * 8. empty_contested_sector (warning)
  * Sector with >0 front edges and 0 assigned+reserve brigades.
+ *
+ * LANE-2026-05-02-B3: emits one report per `subtype` to distinguish
+ * pool_exhausted (no surplus brigades anywhere in corps) from
+ * misallocated (corps has surplus brigades sitting in other sectors).
  */
 function detectEmptyContestedSector(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const sectors = state.military.corps_front_sectors ?? {};
 
-    const emptySectors: string[] = [];
+    const emptyByCorps: Record<string, string[]> = {};
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
         if (sector.unstaffed_front === true) continue;
         const totalBrigades = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
         if (totalBrigades === 0) {
-            emptySectors.push(sectorId);
+            const corpsId = sector.corps_id;
+            if (!emptyByCorps[corpsId]) emptyByCorps[corpsId] = [];
+            emptyByCorps[corpsId].push(sectorId);
         }
     }
 
-    if (emptySectors.length > 0) {
+    // Group by subtype across corps; emit one report per subtype found.
+    const bySubtype: Record<'pool_exhausted' | 'misallocated', string[]> = {
+        pool_exhausted: [],
+        misallocated: [],
+    };
+    for (const corpsId of sortedKeys(emptyByCorps as Record<string, unknown>)) {
+        const subtype = classifyCorpsBrigadeAvailability(state, corpsId);
+        for (const sectorId of emptyByCorps[corpsId]) {
+            bySubtype[subtype].push(sectorId);
+        }
+    }
+    for (const subtype of ['misallocated', 'pool_exhausted'] as const) {
+        const ids = bySubtype[subtype];
+        if (ids.length === 0) continue;
+        ids.sort(strictCompare);
         reports.push({
             category: 'deployment',
             severity: 'warning',
             type: 'empty_contested_sector',
-            description: `${emptySectors.length} sector(s) have front edges but 0 assigned or reserve brigades.`,
-            entities: emptySectors,
+            subtype,
+            description: `${ids.length} sector(s) [${subtype}] have front edges but 0 assigned or reserve brigades.`,
+            entities: ids,
         });
     }
     return reports;
@@ -1124,6 +1185,9 @@ function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
 /**
  * 19. undefended_front_subsegments (warning)
  * Sub-segments with gap=true that have many edges — large unmanned front sections.
+ *
+ * LANE-2026-05-02-B3: emits one report per `subtype` (pool_exhausted vs
+ * misallocated) classified by the owning corps's brigade availability.
  */
 function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
@@ -1148,17 +1212,34 @@ function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
 
     if (flagged.length > 0) {
         flagged.sort((a, b) => strictCompare(a.subSegId, b.subSegId));
-        const detail = flagged.slice(0, 10).map(f =>
-            `${f.subSegId} (sector ${f.sectorId}, corps ${f.corpsId}, ${f.edgeCount} edges)`
-        ).join(', ');
-        const suffix = flagged.length > 10 ? `, ... +${flagged.length - 10} more` : '';
-        reports.push({
-            category: 'deployment',
-            severity: 'warning',
-            type: 'undefended_front_subsegments',
-            description: `${flagged.length} sub-segment(s) are gap=true with >2 edges (unmanned front sections): ${detail}${suffix}.`,
-            entities: flagged.map(f => f.subSegId),
-        });
+        // LANE-B3: group by subtype based on owning-corps brigade availability.
+        const corpsSubtypeCache: Record<string, 'pool_exhausted' | 'misallocated'> = {};
+        const bySubtype: Record<'pool_exhausted' | 'misallocated', typeof flagged> = {
+            pool_exhausted: [],
+            misallocated: [],
+        };
+        for (const f of flagged) {
+            if (!(f.corpsId in corpsSubtypeCache)) {
+                corpsSubtypeCache[f.corpsId] = classifyCorpsBrigadeAvailability(state, f.corpsId);
+            }
+            bySubtype[corpsSubtypeCache[f.corpsId]].push(f);
+        }
+        for (const subtype of ['misallocated', 'pool_exhausted'] as const) {
+            const items = bySubtype[subtype];
+            if (items.length === 0) continue;
+            const detail = items.slice(0, 10).map(f =>
+                `${f.subSegId} (sector ${f.sectorId}, corps ${f.corpsId}, ${f.edgeCount} edges)`
+            ).join(', ');
+            const suffix = items.length > 10 ? `, ... +${items.length - 10} more` : '';
+            reports.push({
+                category: 'deployment',
+                severity: 'warning',
+                type: 'undefended_front_subsegments',
+                subtype,
+                description: `${items.length} sub-segment(s) [${subtype}] are gap=true with >2 edges (unmanned front sections): ${detail}${suffix}.`,
+                entities: items.map(f => f.subSegId),
+            });
+        }
     }
     return reports;
 }

@@ -1,3 +1,35 @@
+## [2026-05-02] feat(scenario): anomaly check sector subtype classification (LANE-2026-05-02-B3-ANOMALY-SECTOR-SUBTYPE)
+
+**Type:** Read-side anomaly enrichment. No engine state mutation, no scenario data, no combat math, no sensitive-history surface. Adds optional `subtype?: string;` field on `AnomalyReport` and emits one report per subtype when distinct root causes occur within the same anomaly type.
+
+**Why:** /sector-expert Tier 1 finding on n1621: 3 empty sectors + 3 undefended front subsegments emit one warning each, conflating distinct root causes — pool_exhausted (corps has 0 unassigned brigades) vs misallocated (corps has surplus brigades sitting in another sector). The single-warning shape masks routing intent: pool_exhausted should route to /operations-expert + /formation-expert (replacement pool), misallocated should route to /corps-army-commander (rebalance).
+
+**Implementation:**
+- `src/scenario/anomaly_types.ts`: added `subtype?: string;` to `AnomalyReport`.
+- `src/scenario/anomaly_detector.ts`: added pure read-only `classifyCorpsBrigadeAvailability(state, corpsId)` helper. Modified `detectEmptyContestedSector` (anomaly #8) and `detectUndefendedFrontSubsegments` (anomaly #19) to group by owning-corps subtype and emit one `AnomalyReport` per subtype found. When both subtypes occur, two reports of the same type are emitted, each carrying its own entity list.
+
+**Verification:**
+- `tests/anomaly_detector_sector_subtype.test.ts` 4/4 PASS in 78ms (T1 pool_exhausted, T2 misallocated, T3 undefended subsegment subtype split, T4 both subtypes coexist → two distinct reports).
+- Anomaly regression 19/19 PASS across 5 suites (sector_subtype + deployment_truth + morale_collapse_truth + integration_anomaly + territorial_anomaly_sector_coverage_truth).
+- `npx tsc --noEmit -p tsconfig.json` clean.
+- No scenario re-run required (read-side over GameState, no behavior change).
+
+**Sensitive-history verdict:** Ring 1 read-side enrichment. No § 6 sign-off required (parity with existing diagnostic enrichment patterns).
+
+**Hash drift:** None. GameState unchanged; only post-run anomaly report shape.
+
+**Files:**
+- `src/scenario/anomaly_types.ts` (PATCH)
+- `src/scenario/anomaly_detector.ts` (PATCH, classifier + 2 detect functions)
+- `tests/anomaly_detector_sector_subtype.test.ts` (NEW)
+- `docs/40_reports/implemented/20260502_ANOMALY_SECTOR_SUBTYPE.md` (NEW lane report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `.claude/napkin.md` (Current State prepended)
+
+**Successor handoffs:** Type C structural orphan detection (sub-segment exists but no sector covers); Cost Ledger / Records subtype-filtered UI surfaces.
+
+---
+
 ## [2026-05-02] feat(combat): planning_invalidated feeds CO objective-failure cooldown (LANE-2026-05-02-B1-PLANNING-INVALIDATED-COOLDOWN)
 
 **Type:** Engine mechanic correction. Removes the explicit `planning_invalidated` skip in `recordFailedObjectives` (`sector_offensive.ts:322`) so failed planning ops feed the existing `failed_offensive_objectives` cooldown system (threshold=2, 8-turn cooldown). No new constants, no new state shape, no combat math, no rupture / enclave / OOB / painted-target touch.
