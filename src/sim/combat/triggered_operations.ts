@@ -17,6 +17,7 @@ import type {
     FormationId,
     GameState,
     OperationAxis,
+    SettlementId, // LANE-2026-05-02-KRIVAJA: for prestageBrigadesForTriggeredOp brigade_movement_orders writes
 } from '../../state/game_state.js';
 import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -325,10 +326,22 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     {
         // Operation Krivaja-95 — VRS Drina Corps captures the Srebrenica
         // safe area, July 6–11 1995. Historical force: ≈ 2,000 VRS troops
-        // from Drina Corps + Skelani Battalion + Zvornik/Bratunac/Milici
-        // brigades. Territorial outcome: srebrenica_2 town + Potočari +
-        // surrounding enclave OSIDs flip RBiH→RS. (BB2 p.587–611, ICTY
-        // Krstić et al. trial.)
+        // from Drina Corps + Skelani Battalion + Bratunac/Milici brigades.
+        // Territorial outcome: srebrenica_2 town + Potočari + surrounding
+        // enclave OSIDs flip RBiH→RS. (BB2 p.414, ICTY Krstić IT-98-33-T
+        // §122–139, ICTY Popović IT-05-88 §242.)
+        //
+        // LANE-2026-05-02-KRIVAJA: roster historical correction. The
+        // 1st Milici LIB (rs_1st_milii) was the Krstić §123 W-axis
+        // supporting force for Krivaja-95, replacing the previously listed
+        // 1st Zvornik LIB. The 1st Zvornik LIB (rs_1st_zvornik) was NOT in
+        // Krivaja-95's opening assault — per Krstić §123 / Popović §242 /
+        // BB2 p.414 it held the Zvornik/Sapna shoulder vs ARBiH 2nd Corps
+        // and joined only post-fall (12–18 July 1995) for column
+        // interdiction north of Konjević Polje. Listing it as an opening-
+        // assault participant was a catalog error in the predecessor lane
+        // (commit 9ff4f352) and is the proximate cause of the t168
+        // planning_invalidated / 0-attacks failure observed at n1612.
         //
         // Objectives are the five srebrenica:* OSIDs that flipped RBiH→RS
         // between apr1995 and oct1995 painted truth (donji_potocari_2,
@@ -354,7 +367,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 name: 'Srebrenica Enclave',
                 corps: 'vrs_drina',
                 brigades: [
-                    'rs_1st_zvornik' as FormationId,
+                    'rs_1st_milii' as FormationId, // LANE-2026-05-02-KRIVAJA: replaces rs_1st_zvornik (Krstić §123 W-axis force)
                     'rs_1st_bratunac' as FormationId,
                     'rs_5th_podrinje' as FormationId,
                     'rs_skelani_battalion' as FormationId,
@@ -582,6 +595,53 @@ function buildOperation(
     return { op, corpsAxes };
 }
 
+// LANE-2026-05-02-KRIVAJA: trigger-turn pre-stage helper.
+/**
+ * LANE-2026-05-02-KRIVAJA: Trigger-turn pre-stage helper.
+ *
+ * Triggered ops historically relied on bot AI + `planning_duration` grace to
+ * drift participant brigades to the staging OSID, but Phase B distribution
+ * (`brigade_assignment.ts:1809/1876/1992`) is blind to op participation —
+ * see PROJECT_LEDGER 20260502 DRINA PARTIAL handoff #5. This helper emits
+ * column-march `brigade_movement_orders` for any participant whose
+ * `location_osid` is not the axis `staging_osid`, allowing brigades to march
+ * during the planning window. Faction-agnostic; deterministic via
+ * `strictCompare`-sorted participant iteration. Mirrors the planning_duration
+ * design intent of `pre_planned_operations.ts:69`. Skips inactive / destroyed
+ * formations (filtered by `isEligibleOperationFormation` already, but enforced
+ * here too for defense-in-depth — also filters `kind` to brigade/og/phantom).
+ *
+ * Mutates `state.military.brigade_movement_orders` in place. Returns void.
+ */
+export function prestageBrigadesForTriggeredOp(
+    state: GameState,
+    def: TriggeredOpDef,
+): void {
+    const formations = state.military.formations ?? {}; // LANE-2026-05-02-KRIVAJA
+    for (const axis of def.axes) { // LANE-2026-05-02-KRIVAJA: axes order is the catalog-declared order, deterministic
+        // LANE-2026-05-02-KRIVAJA: sort participant brigade IDs for deterministic write order
+        const sortedBrigades = [...axis.brigades].sort(strictCompare);
+        const stagingOsid = axis.staging_osid; // LANE-2026-05-02-KRIVAJA
+        if (!stagingOsid) continue; // LANE-2026-05-02-KRIVAJA: no staging means nothing to march toward
+        for (const brigadeId of sortedBrigades) { // LANE-2026-05-02-KRIVAJA
+            const formation = formations[brigadeId]; // LANE-2026-05-02-KRIVAJA
+            if (!formation) continue; // LANE-2026-05-02-KRIVAJA: roster lists brigade absent from OOB at this turn
+            if (!isEligibleOperationFormation(formation)) continue; // LANE-2026-05-02-KRIVAJA: skip inactive / non-brigade kinds
+            if (formation.location_osid === stagingOsid) continue; // LANE-2026-05-02-KRIVAJA: already at staging
+            if (!state.military.brigade_movement_orders) { // LANE-2026-05-02-KRIVAJA
+                state.military.brigade_movement_orders = {}; // LANE-2026-05-02-KRIVAJA
+            }
+            // LANE-2026-05-02-KRIVAJA: stance:'column' is mandatory for multi-hop destinations
+            // (architecture lesson 2026-04-04: omitting stance routes to wrong movement system).
+            // Cast mirrors brigade_front_distribution.ts:255-257 / commander_march_correction.ts:113-116.
+            state.military.brigade_movement_orders[brigadeId] = {
+                destination_sids: [stagingOsid as SettlementId], // LANE-2026-05-02-KRIVAJA
+                stance: 'column', // LANE-2026-05-02-KRIVAJA
+            } as { destination_sids: SettlementId[] };
+        }
+    }
+}
+
 /**
  * Check triggered operation conditions and auto-inject for bot factions.
  * Called each turn from the pipeline. Returns names of newly injected ops.
@@ -654,6 +714,15 @@ export function checkTriggeredOperations(state: GameState): string[] {
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(effectiveDef, state, turn);
         if (!result) continue;
+
+        // LANE-2026-05-02-KRIVAJA: emit column-march orders for any participant
+        // whose location_osid is not the axis staging_osid. Phase B distribution
+        // (brigade_assignment.ts:1809/1876/1992) treats existing
+        // brigade_movement_orders as exclusion gates, so this prevents Phase B
+        // drift from re-tasking participants away from the operation during the
+        // planning_duration grace window. Triggered_operations_accepted (set
+        // below) ensures this fires once per def.
+        prestageBrigadesForTriggeredOp(state, effectiveDef); // LANE-2026-05-02-KRIVAJA
 
         // For single-corps ops: inject directly
         // For joint ops: inject into primary corps (all axes), set participating brigades

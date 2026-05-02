@@ -1,3 +1,72 @@
+## [2026-05-02] feat(operations): Krivaja-95 catalog historical correction + trigger-turn pre-stage helper for triggered ops (PARTIAL — two binding blockers removed; Srebrenica/Žepa P0 still open)
+
+**Type:** P0 sensitive-history successor lane PARTIAL CLOSE (predecessor `9ff4f352` Drina enclave PARTIAL handoffs #1, #3, #5). Two binding blockers removed inside `src/sim/combat/triggered_operations.ts` only — no `combat_math.ts`, no `enclave_resilience.ts`, no `rupture_consequences.ts`, no UI/Codex files, no OOB mutation.
+
+**Predecessor handoff received:** From `docs/40_reports/implemented/20260502_DRINA_LATE_WAR_ENCLAVE_PARTIAL.md` Phase 7 — Krivaja brigade-roster repair (#1), `hasExecutableOpeningAttack` brigade-roster gate (#3), brigade co-location for triggered ops (#5). Lane resolves #1 + #5 via narrow Drina-only ICTY-cited correction + faction-agnostic generic mechanism; defers #3 to Phase 4d (which is also predecessor handoff #2).
+
+**Two changes (single file `src/sim/combat/triggered_operations.ts`):**
+
+1. **Catalog historical correction.** Krivaja-95 axis brigades line 357 `rs_1st_zvornik` → `rs_1st_milii`. Per ICTY *Krstić* IT-98-33-T §122–139 + *Popović* IT-05-88 §242 + BB2 p.414, 1st Zvornik LIB held the Zvornik/Sapna shoulder vs ARBiH 2nd Corps and joined Krivaja-95 only post-fall (12–18 July 1995) for column interdiction north of Konjević Polje. The Krstić §123 W-axis supporting force was 1st Milici LIB. Catalog comment block rewritten with full ICTY citation. `/historian` sign-off candidate (a) per Design Gate § 6: parity with existing predictor-honesty consumers, no chain required.
+
+2. **`prestageBrigadesForTriggeredOp` helper.** New exported function lines 600–643. `strictCompare`-sorted iteration over `def.axes` then `axis.brigades`; for each eligible brigade whose `location_osid !== axis.staging_osid`, writes `state.military.brigade_movement_orders[brigadeId] = { destination_sids: [staging], stance: 'column' }`. Faction-agnostic, deterministic, mirrors `planning_duration` design intent of `pre_planned_operations.ts:69`. Wired into `checkTriggeredOperations` at line 725, between successful `buildOperation` and `active_operations.push`. Phase B distribution honors the in-transit guard at `brigade_assignment.ts:1809/1876/1992` so pre-staged brigades are not redirected before launch claim. Mirrors `commander_march_correction.ts:113-116` and `brigade_front_distribution.ts:255-257` write shape verbatim.
+
+**Phase 0 six-investigator synthesis:** `/historian` (catalog has historical error; minimum participant set 1st Bratunac + 1st Milici + 5th Podrinje + Skelani Bn; Skelani permanently dead in engine due to enclave-stranding-into-RBiH-territory at scenario start, out-of-lane to revive). `/game-designer` (closeability matrix + § 8.3 analysis; (a)+(b) parity, (e) STOP — scripted recall is railroad). `/operations-expert` (catalog file:line + planning_invalidated owner + NO PRE-STAGE MECHANISM exists for triggered ops). `/formation-expert` (Skelani lifecycle path = `stranded_brigade_lifecycle.ts:249` permanent dead; Phase B drift via `brigade_front_distribution.ts:660` is op-blind). `/sector-expert` (topology NON-BLOCKING; pre-stage feasibility CONDITIONAL on writing orders early enough + Phase B in-transit exclusion). `/qa+/determinism-auditor` (hash drift class + test matrix T1–T6 + D1–D3).
+
+**Phase 1 red-first tests:** `tests/krivaja_roster_and_prestage.test.ts` (315 lines, 7 tests). T1 catalog row swap, T2 ICTY citation in comment, T3 helper exported as function, T4 deterministic order writes / skip already-staged / skip inactive, T5 cross-run determinism, T6 helper invoked from `checkTriggeredOperations`, D3 static-grep no `Math.random` / `Date.now` / `new Date(`. Pre-implementation: 6 RED + 1 GREEN. Post-implementation: 7/7 PASS.
+
+**Phase 6 validation (188w n1614 hash `58fa7f585caab31e` vs n1612 `a86614b8e9afd1c1`):**
+
+| Surface | n1614 | vs n1612 | Class |
+|---|---|---|---|
+| Verdict | OPEN_P0 | OPEN_P0 | unchanged |
+| Srebrenica controllers | 1/11 RS | 1/11 RS | byte-identical |
+| Žepa controllers | 0/1 RS | 0/1 RS | byte-identical |
+| `srebrenica_genocide_1995` | not fired | not fired | unchanged |
+| Krivaja-95 force_ratio | 0.052 | 0.084 | DROPPED (BEHAVIORAL narrow) |
+| Stupčanica-95 force_ratio | 0.209 | 0.282 | DROPPED (BEHAVIORAL narrow) |
+| Krivaja participating_brigades | [bratunac, milii] | [bratunac, zvornik] | catalog swap landed |
+| Krivaja perimeter footprint | 4 OSIDs | 1 OSID | EXPANDED |
+| operation_delivery_audit | 10/13/26/6/5 | 10/13/26/6/5 | byte-stable |
+| opportunity_campaign_proof | 8 obs / 4 surf+exec / 1 blocked / 0 broken | identical | byte-stable |
+| compare_painted oct1995 | Herzegovina mismatches pre-existing class | unchanged | unchanged |
+
+**Two contradictory expert verdicts on closeability:**
+
+- **`/war-or-game` APPROVED for PARTIAL** with caveat: catalog correction better matches ICTY truth; pre-stage helper is defensible (mirrors real corps staff prep, not railroaded — same Phase B / attrition / feasibility checks apply). No Ring 3 surface; no scripted-fall (fall did NOT happen, rupture did NOT fire); no VRS atrocity flatter (Krivaja capacity went DOWN); no player-optimization surface. The 0.05 force_ratio is its own REAL_WAR_MASTER class (sim under-rates VRS at Srebrenica by ~100×), distinct from but caused by Phase 4d defender-stack.
+- **`/scenario-creator-runner-tester` WORSE:** Hypothesis (b) — predictor in-transit-numerator-exclusion. Helper writes column-march orders → brigades enter `in_transit` → `estimateForceRatio` drops in-transit from numerator → ratio falls. `rs_1st_milii` double-roster (Krivaja t168 + Stupčanica t172) creates t168↔t172 ping-pong. Krivaja perimeter footprint widened 1 → 4 OSIDs (physical-positioning win). Acceptance metric (`total_attacks ≥ 1`) unmoved.
+
+**Orchestrator synthesis decision: PARTIAL close.** Two binding blockers proven removed: (a) Krivaja-95 catalog historical error (`rs_1st_zvornik` listed wrongly per ICTY *Krstić* §123) — verified swap landed in n1614 AAR `participating_brigades`; (b) missing trigger-turn pre-stage mechanism for triggered ops — verified via brigade perimeter footprint expansion (1 → 4 OSIDs adjacent to staging). Per the lane brief: "remove one proven binding blocker, close PARTIAL". Two are removed. Force_ratio drop is BEHAVIORAL narrow scope per predecessor n1610→n1612 accounting (predecessor accepted +6× ratio bump as BEHAVIORAL narrow; inverse direction same magnitude class same accounting). Audit-layer byte-stable. /war-or-game APPROVED. /scenario-tester's Hypothesis (b) is a legitimate finding for a successor lane.
+
+**Three NEW successor handoffs (in addition to the predecessor's six):**
+
+7. **Predictor in-transit-numerator-exclusion** (Phase 4d-adjacent, NEW). `estimateForceRatio` and/or `predictAllAdjacentTargets` should count brigades that are `in_transit` AND destined for the op's staging/axis-staging OSID as numerator participants — they are committed to the op even if not physically arrived. Owner: `operation_preparation.ts` + `sector_offensive_launch_helpers.ts`. Sign-off: `/sector-expert` + `/operations-expert` + `/determinism-auditor`.
+8. **`rs_1st_milii` double-roster ping-pong** (Phase 4c-adjacent, NEW). 1st Milici is in BOTH Krivaja-95 + Stupčanica-95 catalogs. Pre-stage helper ping-pongs the brigade between staging OSIDs at t168 and t172. Either deduplicate (one op gets it, other substitutes a historical alternative such as 1st Birac for Krivaja's W flank) OR add explicit op-priority assignment in the helper. Owner: `triggered_operations.ts` catalog. Sign-off: `/historian` (which historical alternative for the loser).
+9. **REAL_WAR_MASTER new entry**: "Srebrenica/Žepa attacker-defender force-ratio sign inversion" — sim under-rates VRS by ~100× at the enclaves. /war-or-game-recommended; distinct from Phase 4d defender-stack mechanism but caused by it.
+
+**Stop-gate compliance:** No `enclave_resilience.ts` mutation; no rupture trigger touch; no `combat_math.ts` retune; no atrocity scoring / Ring 3 surface; no hardcoded controller flip / scripted success / painted-target read; no `oob_brigades.json` mutation; no Codex-owned UI/product files (ArmyHQModal.tsx in working tree is uncommitted Codex work — NOT staged in this commit); no `--no-verify`; no `FORAWWV.md` touch. Determinism preserved (no `Math.random` / `Date.now` / `new Date(`; sorted iteration via `strictCompare`).
+
+**Sensitive-history compliance:** No Ring 3 surface created (predictor-honesty + missing-mechanism corrections, invisible to player). No rupture predicate touched. No enclave mechanic mutation. No atrocity-as-tactic. /war-or-game four-check audit clean (a/b/c/d).
+
+**Verification:** `npx vitest run tests/krivaja_roster_and_prestage.test.ts tests/triggered_operations.test.ts tests/triggered_operations_late_1995.test.ts tests/operation_preparation_force_ratio.test.ts` → 47/47 PASS. `npx tsc --noEmit -p tsconfig.json` → clean. 40w smoke n1613 hash `0c2fc264112dec1f` byte-identical to n1610 baseline (zero triggered ops in 40w window — expected null result, /scenario-creator-runner-tester GO TO 188w). 188w proof n1614 hash `58fa7f585caab31e`. All four diagnostics ran clean (sensitive-history-status, operation-delivery-audit, opportunity-campaign-proof, compare-painted-vs-sim).
+
+**Hash drift class:** BEHAVIORAL narrow scope. Only triggered-ops-targeting cohort affected. Calibration outcomes byte-identical at audit layer (anchors, area, ZEA, battles, attacks, captures, casualties, faction orders, AAR outcomes, opp_health decisions). The behavioral surface = Krivaja-95 + Stupčanica-95 `force_ratio_estimate` field VALUES + brigade-position trajectory, NOT state shape, NOT downstream gating outcome.
+
+**Files:**
+- `src/sim/combat/triggered_operations.ts` (Phase 2, +74 / −5 lines)
+- `tests/krivaja_roster_and_prestage.test.ts` (Phase 1, new, +315 lines)
+- `docs/40_reports/implemented/20260502_KRIVAJA_ROSTER_AND_PRESTAGE.md` (Phase 7, this lane's report)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` (one durable lesson)
+- `.claude/napkin.md` (Current State updated)
+
+**Run dirs and hashes:**
+- 40w smoke: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1613` hash `0c2fc264112dec1f`
+- 188w proof: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1614` hash `58fa7f585caab31e`
+
+**Codex review surface:** This lane is engine-only; Codex's parallel UI work (ArmyHQModal.tsx, Warroom Priority Pulse, etc.) is not affected. Codex should review the catalog correction (single-line ICTY-cited swap + comment block rewrite) and the new pre-stage helper (40 lines + wiring) for: (a) ICTY citation accuracy if there is contention, (b) helper determinism (sorted iteration, no time/random), (c) Phase B in-transit-exclusion contract preservation. The expert disagreement (war-or-game APPROVED vs scenario-tester WORSE) is documented above; if Codex prefers to revert the helper and ship only the catalog correction (no force_ratio regression), say so and we will follow up.
+
+---
+
 ## [2026-05-02] feat(ui): link Chronicle entries to Turn Aftermath records
 
 **Type:** UI/read-model product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
