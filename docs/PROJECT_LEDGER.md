@@ -1,3 +1,17 @@
+## [2026-05-02] feat(ui): link Chronicle entries to Turn Aftermath records
+
+**Type:** UI/read-model product-spine implementation. No simulation mechanics, scenario data, OOB, painted targets, operation catalog content, combat code, or run artifacts changed.
+
+**Why:** Chronicle filters made campaign memory searchable, but a Chronicle event still did not take the player to the evidence packet for that same turn. The product loop needed a direct path from remembered event to Army HQ `TURN AFTERMATH` record so the player can investigate cost, territory, signals, and pending decisions without manual archive hunting.
+
+**What changed:** Added `openArmyHQAftermathRecord(state, turn)` in `shellNavigation.ts`, `focusedAftermathTurn` in `gameStore.ts`, and `Open Turn Record` dossier actions in `ChronicleOverlay.tsx`. `TurnAftermathRecordsPanel.tsx` now resets to the All filter, expands beyond the latest-18 archive cap for focused older turns, scrolls the focused record into view, and renders a focused border/data attribute. Added `tests/ui_chronicle_turn_record_link.test.ts`.
+
+**Verification:** Red-first `tests/ui_chronicle_turn_record_link.test.ts` failed before implementation on the missing helper/store/wiring assertions; after implementation it passes 4/4. Wider GUI verification is recorded in the commit handoff.
+
+**Report:** `docs/40_reports/implemented/20260502_CHRONICLE_TURN_RECORD_DEEP_LINK.md`.
+
+---
+
 ## [2026-05-02] tools(diagnostics): add sensitive-history enclave status verifier
 
 **Type:** Read-only diagnostics/tooling. No simulation mechanics, scenario data, OOB, painted targets, combat code, operation catalog content, or run artifacts changed.

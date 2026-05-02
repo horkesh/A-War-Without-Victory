@@ -237,8 +237,10 @@ export interface GameStore {
   /** Player-facing after-action bridge opened immediately after a successful turn advance. */
   turnAftermath: TurnAftermathView | null;
   turnAftermathOpen: boolean;
+  focusedAftermathTurn: number | null;
   setTurnAftermath: (view: TurnAftermathView | null) => void;
   setTurnAftermathOpen: (open: boolean) => void;
+  setFocusedAftermathTurn: (turn: number | null) => void;
   /** Last load error message (cleared when a new load starts or succeeds). */
   loadError: string | null;
   setLoadError: (message: string | null) => void;
@@ -384,6 +386,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setArmyHQTab: (tab) => set({
     armyHQTab: tab,
     ...(tab !== 'records' ? { armyHQRecordsSubTab: 'aar' } : {}),
+    ...(tab !== 'records' ? { focusedAftermathTurn: null } : {}),
     armyHQExpandedCorpsId: null,
     armyHQExpandedSections: {},
     armyHQOfficerSelectionCorpsId: null,
@@ -391,6 +394,7 @@ export const useGameStore = create<GameStore>((set) => ({
   setArmyHQRecordsSubTab: (subTab) => set({
     armyHQTab: 'records',
     armyHQRecordsSubTab: subTab,
+    ...(subTab === 'aftermath' ? {} : { focusedAftermathTurn: null }),
     armyHQExpandedCorpsId: null,
     armyHQExpandedSections: {},
     armyHQOfficerSelectionCorpsId: null,
@@ -490,8 +494,10 @@ export const useGameStore = create<GameStore>((set) => ({
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
   turnAftermath: null,
   turnAftermathOpen: false,
+  focusedAftermathTurn: null,
   setTurnAftermath: (view) => set({ turnAftermath: view }),
   setTurnAftermathOpen: (open) => set({ turnAftermathOpen: open }),
+  setFocusedAftermathTurn: (turn) => set({ focusedAftermathTurn: turn }),
 
   loadError: null,
   lastLoadedStateFingerprint: null,
@@ -604,6 +610,7 @@ export const useGameStore = create<GameStore>((set) => ({
               // Turn aftermath belongs to the previous save/turn payload.
               turnAftermath: null,
               turnAftermathOpen: false,
+              focusedAftermathTurn: null,
             });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();

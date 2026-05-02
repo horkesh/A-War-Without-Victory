@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
 
@@ -57,13 +57,21 @@ function RecordMetric({ label, value, detail }: { label: string; value: string; 
     );
 }
 
-function TurnAftermathRecordCard({ view, isLatest }: { view: TurnAftermathView; isLatest: boolean }) {
+function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAftermathView; isLatest: boolean; isFocused: boolean }) {
     const firstFlip = view.territory.notable[0] ?? null;
     const firstAction = isLatest ? (view.nextActions.topItems[0] ?? null) : null;
     const signalPreview = view.signals.slice(0, 3);
 
     return (
-        <article className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
+        <article
+            data-focused-aftermath-turn={isFocused ? view.turn : undefined}
+            className={[
+                'rounded border px-3 py-2 transition-colors',
+                isFocused
+                    ? 'border-amber-300/70 bg-amber-400/10 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]'
+                    : 'border-panel-border/50 bg-panel-card/50',
+            ].join(' ')}
+        >
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -146,15 +154,27 @@ export function TurnAftermathRecordsPanel() {
     const [filter, setFilter] = useState<TurnAftermathRecordFilter>('all');
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
+    const focusedAftermathTurn = useGameStore((s) => s.focusedAftermathTurn);
 
     const records = useMemo(
-        () => buildTurnAftermathRecordViews({ state, osidNameMap, limit: 18 }),
-        [state, osidNameMap],
+        () => buildTurnAftermathRecordViews({ state, osidNameMap, limit: focusedAftermathTurn == null ? 18 : 1000 }),
+        [state, osidNameMap, focusedAftermathTurn],
     );
+
+    useEffect(() => {
+        if (focusedAftermathTurn != null) setFilter('all');
+    }, [focusedAftermathTurn]);
+
     const visibleRecords = useMemo(
         () => filterTurnAftermathRecords(records, filter),
         [records, filter],
     );
+
+    useEffect(() => {
+        if (focusedAftermathTurn == null || typeof document === 'undefined') return;
+        const el = document.querySelector(`[data-focused-aftermath-turn="${focusedAftermathTurn}"]`);
+        el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, [focusedAftermathTurn, visibleRecords.length]);
     const summary = useMemo(
         () => buildTurnAftermathLedgerSummary(visibleRecords),
         [visibleRecords],
@@ -304,7 +324,12 @@ export function TurnAftermathRecordsPanel() {
                         No aftermath records match this review filter.
                     </div>
                 ) : visibleRecords.map((record) => (
-                    <TurnAftermathRecordCard key={record.turn} view={record} isLatest={record.turn === latest.turn} />
+                    <TurnAftermathRecordCard
+                        key={record.turn}
+                        view={record}
+                        isLatest={record.turn === latest.turn}
+                        isFocused={record.turn === focusedAftermathTurn}
+                    />
                 ))}
             </div>
         </div>

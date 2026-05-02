@@ -17,6 +17,8 @@ export interface ShellNavigationState {
   setArmyHQTab: (tab: ArmyHQTab) => void;
   setArmyHQRecordsSubTab: (subTab: ArmyHQRecordsSubTab) => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
+  /** Optional: focuses a specific Turn Aftermath record after routing to Army HQ Records. */
+  setFocusedAftermathTurn?: (turn: number | null) => void;
   setCodexOpen: (open: boolean) => void;
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
@@ -46,6 +48,17 @@ export function openArmyHQRecordsSubTab(state: ShellNavigationState, subTab: Arm
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);
   state.setArmyHQRecordsSubTab(subTab);
+  return true;
+}
+
+export function openArmyHQAftermathRecord(state: ShellNavigationState, turn: number): boolean {
+  const faction = getPlayerFaction(state);
+  if (!faction) return false;
+  state.setSelectedArmyId(faction);
+  state.setArmyHQOpen(true);
+  state.setArmyHQRecordsSubTab('aftermath');
+  state.setFocusedAftermathTurn?.(turn);
+  state.setChronicleOpen(false);
   return true;
 }
 

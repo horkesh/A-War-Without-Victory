@@ -5,6 +5,7 @@ import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
+import { openArmyHQAftermathRecord } from '../../utils/shellNavigation.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 
@@ -206,6 +207,10 @@ export function ChronicleOverlay() {
         }
         el.scrollTo({ left: offset, behavior: 'smooth' });
     }, [minTurn, turnWidths]);
+
+    const handleOpenTurnRecord = useCallback((turn: number) => {
+        openArmyHQAftermathRecord(useGameStore.getState(), turn);
+    }, []);
 
     if (!open || !state) return null;
 
@@ -450,6 +455,13 @@ export function ChronicleOverlay() {
                                     className="border border-panel-border/30 rounded p-2 bg-black/15"
                                 >
                                     <ChronicleCard entry={entry} />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenTurnRecord(entry.turn)}
+                                        className="mt-2 h-7 w-full rounded-sm border border-amber-400/30 bg-amber-400/10 px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-200 transition-colors hover:border-amber-300/70 hover:bg-amber-400/15"
+                                    >
+                                        Open Turn Record
+                                    </button>
                                 </div>
                             ))
                         )}
