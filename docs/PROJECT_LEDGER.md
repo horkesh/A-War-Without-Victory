@@ -6593,3 +6593,19 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Report:** `docs/40_reports/implemented/20260502_ACTIVE_CAMPAIGN_COST_SPINE.md`.
 
 ---
+
+## [2026-05-02] feat(ui): add Presidential Decision Room strategic priorities
+
+**Type:** UI/product-spine read-model implementation. No simulation mechanics, combat logic, scenario data, OOB, painted targets, operation catalog content, sensitive-history content, or run artifacts changed.
+
+**Why:** The product spine had review queues, opportunity dossiers, Turn Aftermath records, active cost, Chronicle memory, command briefing, and operational SITREP, but the player still lacked one high-level command surface that answered "what should I inspect or decide next?" before advancing.
+
+**What changed:** Added `buildPresidentialDecisionRoomView(...)`, a pure deterministic read model over existing `LoadedGameState` DTOs. Army HQ BRIEFING now mounts `PresidentialDecisionRoomPanel` above the existing attention and briefing sections. Priority cards cover pending presidential reviews, operation opportunity dossiers, operational SITREP alerts, command briefing cues, hard recent turns, campaign cost, and Chronicle memory, with every action routed through existing `shellNavigation` helpers to Army HQ tabs, focused Turn Aftermath records, corps briefings, or Chronicle.
+
+**Determinism / scope:** UI/read-model only. No state writer, no random/time/locale sorting, no sim mutation, no combat/catalog imports, and no hidden enemy truth. The Decision Room is a synthesis and handoff surface, not a second inbox, cost ledger, Chronicle, event log, or operations owner.
+
+**Verification:** Focused read-model and wiring tests passed during implementation. Final closeout verification is recorded in `docs/40_reports/implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md`.
+
+**Report:** `docs/40_reports/implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md`.
+
+---

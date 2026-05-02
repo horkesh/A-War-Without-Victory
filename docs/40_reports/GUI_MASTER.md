@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Presidential Decision Room / Strategic Priorities** | [implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md](implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md), `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx` - Army HQ BRIEFING now opens with a deterministic next-action board composed from existing player-facing owners: review queue, opportunity dossiers, command briefing, operational SITREP, Turn Aftermath records, active cost, and Chronicle. |
 | **Implementation spec + §0 status table** | [AWWV_GUI_ARCHITECTURE_REWORK_v2.md](../20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md) — Phases 1–5, component inventory, done/not yet |
 | **Warroom (scene, modals, hotspots)** | [WARROOM_MASTER.md](WARROOM_MASTER.md) — warroom living reference; modals implemented vs proposed, commander assignment, nano banana brief |
 | **Warroom external handover (single file)** | [handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md](handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md) — consolidated external-facing brief: modals, prompts, overlay contracts, assets, code entrypoints |
@@ -29,6 +30,7 @@
 
 ## Current status (summary)
 
+- **Presidential Decision Room / Strategic Priorities (2026-05-02):** Army HQ BRIEFING now starts with `PresidentialDecisionRoomPanel`, a dense command surface over `buildPresidentialDecisionRoomView(...)`. It answers urgent priorities, pending decisions, source evidence, inspection handoffs, and what should be reviewed before advancing by linking to existing owners through `shellNavigation` instead of duplicating inbox, opportunity, cost, Chronicle, or Turn Aftermath data.
 - **Canonical GUI:** React + MapLibre map app in `src/ui/map/`; warroom in `src/ui/warroom/`. Run map via `npm run dev:map`, desktop via `npm run desktop:map:build` (or Electron).
 - **Live tactical shell authority:** `PresidentialToolbar` is the mounted top shell for tactical-map play. `TopToolbar.tsx` still exists in the repo but is not the live shell and should be treated as legacy/non-authoritative until deliberately revived.
 - **Panel rail:** One right-side rail (`panelRail.ts`); App mounts primary/secondary detail (settlement, army, corps, sector, formation, operation). Settlement panel: 3 horizontal tabs (Overview | Municipality | Timeline). Overview: OSID-level population, displacement, pre-war+current ethnic (with absolute numbers), stationed units, sector. Municipality: mun-level population, displacement totals, pre-war+current ethnic structure. Timeline: "The Story of This Place" — 12-event-type chronological history (control flips, battles, displacement, kills, brigade movements, supply changes, operations, ethnic shifts, historical events). Deck.gl TextLayer for 27 settlement labels (MapLibre symbols broken). See [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md).
@@ -53,6 +55,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-02 | **Presidential Decision Room / Strategic Priorities** - Army HQ BRIEFING now opens with a deterministic next-action board that prioritizes existing review, opportunity, SITREP, briefing, hard-turn, cost, and Chronicle signals and routes every card to an existing inspection surface. | [implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md](implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md) |
 | 2026-05-02 | **Chronicle to Turn Record deep link** - Chronicle dossier entries now open the matching Army HQ `TURN AFTERMATH` record, focus the turn, and expand the record window for older linked turns. | [implemented/20260502_CHRONICLE_TURN_RECORD_DEEP_LINK.md](implemented/20260502_CHRONICLE_TURN_RECORD_DEEP_LINK.md) |
 | 2026-05-02 | **Chronicle review filters** - War Chronicle now has counted filters for all events, headlines, cost, combat, politics, humanitarian, military, diplomacy, and narrative, with the side dossier following the active lens. | [implemented/20260502_CHRONICLE_REVIEW_TOOLS.md](implemented/20260502_CHRONICLE_REVIEW_TOOLS.md) |
 | 2026-05-02 | **Chronicle cost memory** - the Chronicle now emits `COST` cards for severe/critical player-scoped campaign-cost turns derived from `turnSummaries`, making hard weeks visible in campaign memory before final judgment. | [implemented/20260502_CHRONICLE_COST_MEMORY.md](implemented/20260502_CHRONICLE_COST_MEMORY.md) |

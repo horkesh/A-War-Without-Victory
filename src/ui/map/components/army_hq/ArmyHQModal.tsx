@@ -16,6 +16,7 @@ import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
+import { PresidentialDecisionRoomPanel } from './PresidentialDecisionRoomPanel';
 import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
@@ -299,6 +300,10 @@ export function ArmyHQModal() {
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
+                            {!expandedCorpsId && (
+                                <PresidentialDecisionRoomPanel />
+                            )}
+
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                             {!expandedCorpsId && (
                                 <div className="grid grid-cols-1 gap-1.5 mb-2 items-start lg:grid-cols-12 lg:gap-2">

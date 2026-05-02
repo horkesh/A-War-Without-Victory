@@ -50,9 +50,11 @@ The v0.9 product spine is the campaign loop, not any individual shell.
 | Report | What happened this turn? | Turn aftermath surface | Chronicle and Army HQ records |
 | Cost | What did it cost? | Turn aftermath + War Summary; final Cost Ledger at game over | Army HQ records and VerdictScreen |
 | Judge | How does history read this? | VerdictScreen at game over; Chronicle/Codex during play | Warroom and Army HQ links |
-| Next | What needs attention now? | Presidential Inbox + Army HQ attention | Command briefing banner |
+| Next | What needs attention now? | Presidential Decision Room + Presidential Inbox | Army HQ attention, command briefing banner |
 
 The C0-audit gap is now partially closed: **Turn Aftermath** is live as a tactical-shell modal opened after successful `advance-turn`. It is a composition surface over `LoadedGameState.latestTurnSummary`, the desktop turn report, and unified Inbox obligations. It does not write sim truth; it bridges a completed turn into records, costs, and next reviews.
+
+The next-action gap is also closed at the command-review layer: **Presidential Decision Room / Strategic Priorities** lives at the top of Army HQ BRIEFING. It is a deterministic synthesis over existing read models (`presidentialReviewQueue`, opportunity dossiers, command briefing, operational SITREP, Turn Aftermath records, active cost, and Chronicle availability) and routes cards to existing owners. It is not a second inbox, cost ledger, Chronicle, event log, or combat-planning system.
 
 ## Shell hierarchy
 
@@ -109,6 +111,7 @@ It owns:
 - corps-level operational summaries
 - records / AAR ownership
 - explanation surfaces for command decisions
+- strategic-priority synthesis and handoff routing through the Presidential Decision Room
 
 It may summarize:
 - tactical-map state
@@ -211,6 +214,8 @@ No shell may hide Codex behind an accidental or debug-only path.
   - owner: dedicated aftermath surface, with links into Army HQ Records, War Summary, Chronicle, and Inbox
 - `active-campaign cost so far`
   - owner: aftermath / War Summary; final historical reckoning stays with VerdictScreen
+- `strategic priorities / next-action board`
+  - owner: Army HQ BRIEFING Presidential Decision Room; source truth remains with review queue, opportunity dossiers, operational SITREP, Turn Aftermath, active cost, and Chronicle
 
 ## Player-truth rule inside the shell hierarchy
 

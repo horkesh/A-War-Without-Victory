@@ -3,7 +3,7 @@
 **Project:** A War Without Victory (AWWV)
 **Location:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
-**Date:** 2026-02-08 | **Canonical GUI update:** 2026-03-20
+**Date:** 2026-02-08 | **Canonical GUI update:** 2026-05-02
 
 ---
 
@@ -21,6 +21,8 @@ The **canonical player-facing map and GUI** is the **React + MapLibre map app** 
 - **OSID selection highlight (2026-03-20):** On `selectedOsid`, **`osid-selected-fill`** + **`osid-selected-mun-sibling-fill`** (same `mun1990_id`) + **`osid-selected-outline`**; **`mun-borders-selection`** shows that municipality’s adm3 ring even when global Borders is off (`osidPropertiesMap` / `MapContainer.tsx`). Map mode fills insert below `osid-selected-mun-sibling-fill`. Detail: [MAP_UI_MASTER.md](MAP_UI_MASTER.md) §7.
 
 **Operation opportunity footprint highlighting (2026-05-01):** Army HQ opportunity dossiers use `operationTargetOsids` / `setOperationTargetOsids` in `gameStore.ts` to highlight proposal objective and staging OSIDs on the existing `operation-target-*` map layers. The DTO source is `LoadedGameState.operationOpportunityProposals[*].objectives/staging/redirect_variants`; UI must not import sim catalog files or render raw `op:` strings.
+
+**Presidential Decision Room / Strategic Priorities (2026-05-02):** Army HQ BRIEFING now begins with `PresidentialDecisionRoomPanel`, backed by pure `src/ui/map/data/presidentialDecisionRoom.ts`. The read model synthesizes existing player-facing DTOs only: `presidentialReviewQueue`, `operationOpportunityProposals`, `commandBriefing`, `operationalSitrep`, `latestTurnSummary` / `turnSummaries`, Turn Aftermath records, active campaign cost, and Chronicle availability. Card actions route through `src/ui/map/utils/shellNavigation.ts` into existing Army HQ tabs, focused Turn Aftermath records, corps briefings, or Chronicle. It must remain a deterministic UI read model: no sim writes, no combat/catalog imports, no raw hidden enemy truth, and no second inbox/cost/history owner.
 
 **Desktop map runtime (2026-03-03):** In Electron, the **same** map app is used as in dev: there is **one** codebase (`src/ui/map/`), no separate "player-facing" map. When you run `npm run dev:map` (Vite on port 3002), the desktop app prefers that URL for the map iframe so the in-app map is identical to the dev map. When the dev server is not running, Electron serves the built bundle from `dist/tactical-map` (local HTTP server on 127.0.0.1). Map assets (PMTiles, style, GeoJSON) and Load run data are served via that server; MapLibre blob workers do not work under the `awwv://` protocol. Rebuild with `npm run desktop:map:build` and restart Electron to refresh the built bundle when not using the dev server.
 
