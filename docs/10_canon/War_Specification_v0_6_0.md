@@ -69,7 +69,7 @@ Determinism: same state + inputs → same outputs; no randomness; no timestamps.
 
 ## 9. War Termination and End-Game
 
-Terminal conditions: (1) Negotiated settlement (treaty accepted per Rulebook §13), (2) Faction collapse (exhaustion + fragmented authority + below viability threshold), (3) Timeout/stalemate (scenario max duration, e.g. 208 weeks). No total victory. Evaluation: territory, population preserved, exhaustion, treaty terms (WAR_TERMINATION_MINIMAL_SPEC §8). Operation Storm: conditional late-war precondition check when Washington active, RS threat, exhaustion, IVP thresholds met; sets state flags/narrative only (no auto control flip).
+Terminal conditions: (1) Negotiated settlement (treaty accepted per Rulebook §13), (2) Faction collapse (exhaustion + fragmented authority + below viability threshold), (3) Timeout/stalemate (scenario max duration, e.g. 208 weeks). No total victory. Evaluation: territory, population preserved, exhaustion, treaty terms (WAR_TERMINATION_MINIMAL_SPEC §8). Operation Storm: conditional late-war precondition check when Washington active, RS threat, exhaustion, IVP thresholds met; records `state.meta.operation_storm_preconditions_met` / `operation_storm_precondition_turn` only. Actual western-theater rupture is event truth: `state.meta.operation_storm_triggered` / `operation_storm_turn` are set only after the `operation_storm_1995` event fires. No Operation Storm path auto-flips control.
 
 ---
 

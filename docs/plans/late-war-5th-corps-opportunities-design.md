@@ -69,7 +69,7 @@ A future implementation should track a small set of family-specific state, not h
 | `fifth_corps_pocket_quality` | Local hardening: staff confidence, recon-sabotage effectiveness, cohesion under siege. | Force-quality / commander system |
 | `captured_support_pool` | Captured arms, artillery, armor, and ammunition available to support later ops. | Equipment / operation consequence |
 | `enemy_pressure_memory` | Recent Una/Breza/Pauk pressure, casualties, fatigue, morale shock. | Operation AAR / crisis consequence |
-| `storm_oluja_theater_open` | Wider Croatia/Krajina rupture has opened an outward exploitation path. | Strategic event / HV-HVO theater |
+| `storm_oluja_theater_open` | Wider Croatia/Krajina rupture has opened an outward exploitation path. This is derived from Operation Storm event truth, not from abstract precondition readiness. | Strategic event / HV-HVO theater |
 | `sana_exploitation_window` | The pocket is alive and the theater is open enough for a rapid outward offensive. | Opportunity prereq helper |
 
 These should be deterministic derived or persisted fields, never ad hoc date checks buried inside combat resolution.
@@ -303,7 +303,7 @@ Bot posture should not force history. A cautious ARBiH bot might preserve the po
 3. **P2 - Tigar-Sloboda and Pecigrad chain.** Implement support/deception and APWB reduction as the first live opportunity chain.
 4. **P3 - Breza and Pauk defensive crises.** Implement pressure without guaranteed VRS success. This is the first major failed-operation test.
 5. **P4 - Grmec and overextension.** Implement breakout plus counterpressure memory.
-6. **P5 - Storm/Oluja theater flag and Sana gate.** Do not launch Sana until the wider theater opens and 5th Corps survived in usable form.
+6. **P5 - Storm/Oluja theater flag and Sana gate.** Split abstract Storm precondition readiness from actual theater rupture. Do not launch Sana until the `operation_storm_1995` event opens the wider theater and 5th Corps survived in usable form.
 7. **P6 - AAR / diagnostics.** Persist family resolution rows so 104w/156w/183w reviews can see why each opportunity appeared, failed, or never became available.
 
 Each implementation packet must include deterministic ordering proof, replay-safe proposal records, and tests that show date alone is insufficient.

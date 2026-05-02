@@ -8,8 +8,8 @@
  * AWWV window w135-w145 (10-turn sustained siege phase).
  *
  * Pauk-specific historian gate: "Pauk impossible after Oluja". The
- * `alliance_context` REQUIRED predicate hard-blocks the proposal once
- * `state.meta.operation_storm_triggered === true`. This is the MOST important
+ * `alliance_context` REQUIRED predicate hard-blocks the proposal once the
+ * Operation Storm event opens the western theater. This is the MOST important
  * gate of the three T3 entries.
  *
  * Contract under test (T3 specific — mirrors the Una 94 / Breza 94 shape):
@@ -18,7 +18,7 @@
  *   - pocket_survival missing → no proposal.
  *   - corps_readiness < 0.30 → no proposal.
  *   - logistics pressure ≥ 95 → no proposal.
- *   - operation_storm_triggered === true → no proposal (PRIMARY GATE).
+ *   - Operation Storm event fired → no proposal (PRIMARY GATE).
  *   - All required axes aligned → proposal surfaces at mid-window turn.
  *   - **T3 substrate consumption**: Approve does NOT push a CorpsOperation;
  *     resolution row gets executed_op_aar_id=undefined +
@@ -85,6 +85,7 @@ const PAUK_BRIGADE_IDS = [
 ];
 
 function buildState(opts: FixtureOpts): GameState {
+    const stormTurn = opts.operationStormTriggered ? Math.min(opts.turn, 174) : undefined;
     const cmd: CorpsCommandState = {
         command_span: 9,
         subordinate_count: 9,
@@ -161,6 +162,8 @@ function buildState(opts: FixtureOpts): GameState {
         ],
         military: {
             formations,
+            fired_event_ids: opts.operationStormTriggered ? ['operation_storm_1995'] : [],
+            event_last_fired_turn: stormTurn === undefined ? {} : { operation_storm_1995: stormTurn },
             front_segments: {},
             front_posture: {},
             front_posture_regions: {},
@@ -241,11 +244,11 @@ describe('Pauk/Spider 94-95 opportunity (LANE C Phase 4 — T3 defensive-crisis 
         expect(proposals.find(p => p.opportunity_id === 'pauk_94_95')).toBeUndefined();
     });
 
-    // ── 6. PRIMARY GATE: operation_storm_triggered === true → no proposal ──
+    // ── 6. PRIMARY GATE: Operation Storm event fired → no proposal ──────────
     //   "Pauk impossible after Oluja" — historian. The hardest constraint of
     //   the three T3 entries. Even within the date window with all other axes
     //   green, post-Storm state must block the proposal entirely.
-    it('does NOT surface after Operation Storm has triggered ("Pauk impossible after Oluja")', () => {
+    it('does NOT surface after the Operation Storm event fires ("Pauk impossible after Oluja")', () => {
         const state = buildState({
             turn: 140,
             operationStormTriggered: true,

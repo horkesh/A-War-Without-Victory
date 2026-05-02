@@ -15,6 +15,7 @@ import type { AARSnapshot, TurnReport } from './turn_pipeline_types.js';
 import type { NarrativeArc } from './war_stories.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { getOsidAreas } from './osid_areas.js';
+import { getOperationStormEventTurn, isWesternTheaterRuptured } from './combat/operation_storm_theater.js';
 
 // ---------------------------------------------------------------------------
 // Snapshot capture (turn start)
@@ -431,13 +432,14 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
         });
     }
 
-    // Operation Storm triggered this turn
-    if (state.meta?.operation_storm_triggered) {
+    // Operation Storm opened the western theater this turn
+    if (isWesternTheaterRuptured(state)) {
         // Detect first occurrence: no prior summary has reported it
         const alreadyReported = (state.turn_summaries ?? []).some((s) =>
             s.notable_events.some((e) => e.kind === 'operation_storm')
         );
-        if (!alreadyReported) {
+        const eventTurn = getOperationStormEventTurn(state) ?? state.meta.operation_storm_turn;
+        if (!alreadyReported && (eventTurn == null || eventTurn === turn)) {
             events.push({
                 kind: 'operation_storm',
                 description: 'Operation Storm (Oluja) triggered.',

@@ -78,6 +78,22 @@
 
 **Report:** `docs/40_reports/implemented/20260501_LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE.md`.
 
+## [2026-05-01] fix(operations): split Operation Storm readiness from theater rupture
+
+**Type:** Operation-event semantics / opportunity gating / save-shape clarification. No combat math, OOB, painted targets, scenario data, or sensitive-history content changed.
+
+**Why:** LANE E proved the 5th Corps T3 defensive-crisis opportunities were blocked because `state.meta.operation_storm_triggered` became true when abstract Storm preconditions aligned, while the actual `operation_storm_1995` event fired much later. This conflated pressure-readiness with the real western-theater rupture and made pre-Storm content vanish too early.
+
+**Change:** Added `src/sim/combat/operation_storm_theater.ts` helper API (`getOperationStormEventTurn`, `hasOperationStormEventFired`, `isWesternTheaterRuptured`, `isPreStormWesternTheater`). `operation-storm-check` now records `operation_storm_preconditions_met` / `operation_storm_precondition_turn` when Washington + RS threat + exhaustion + IVP align, and sets `operation_storm_triggered` / `operation_storm_turn` only after the `operation_storm_1995` event fires. Sana uses the post-Storm helper; Una/Breza/Pauk use the pre-Storm helper. Turn-summary notable events now key from event/theater truth.
+
+**Scenario proof:** Rebased onto current main (`8b5a2902`) and rerun. Fresh 40w `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` hash `c6677e7ea3c7d3a4` records no readiness and no rupture; Jan1993 compare 91.3% / 93.3% area. Fresh 104w `runs/apr1992_definitive_104w__13abfd609800bba2__w104_n3` hash `9dc1a087c86a99e1` records readiness at w85 but no rupture; Apr1994 compare 82.6% / 79.6% area. Fresh 188w `runs/apr1992_definitive_188w__210e69404d054959__w188_n4` hash `164ea509d7168b24` records readiness at w85 and actual rupture at w174. All seven 5th Corps opportunities surface/resolve: APWB 5/5, Tigar 4/4, Una/Breza/Pauk as T3 sentinels, Grmec failed 0/6, Sana failed 0/31. Opportunity health audit is clean (0 unlinked, 0 broken AAR, 0 duplicates). Diagnose 188w: 0 errors / 35 warnings; validate consistency still has 18 known sector-layer failures.
+
+**Determinism:** Preserved. No randomness, timestamps, locale ordering, or unstable iteration introduced. Hash drift is expected: the save now persists Storm precondition meta and the long run now records the previously blocked T3 opportunity decisions.
+
+**Verification:** Red-first `tests/operation_storm_theater_gate.test.ts`; focused opportunity pack 66/66 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; 40w/104w/188w scenario runs and painted-target comparisons completed.
+
+**Docs/knowledge:** Canon updated in War Specification and Systems Manual; 5th Corps design doc updated; durable rule added to PROJECT_LEDGER_KNOWLEDGE.md. Report: `docs/40_reports/implemented/20260501_OPERATION_STORM_THEATER_GATE_SPLIT.md`.
+
 ---
 
 ## [2026-05-01] feat(operations): LANE E 5th Corps opportunity predicate topology + 188w validation

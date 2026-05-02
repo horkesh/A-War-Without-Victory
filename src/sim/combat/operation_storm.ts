@@ -2,8 +2,9 @@
  * War phase §11.3: Operation Storm (Oluja) precondition check.
  *
  * When Washington Agreement is active and RS threat, exhaustion, and IVP meet thresholds,
- * sets state.meta.operation_storm_triggered. Same pattern as phase-ii-washington-check.
- * Design: docs/30_planning/OPERATION_STORM_DESIGN.md.
+ * records Storm precondition readiness. The actual western-theater rupture is
+ * set only after the Operation Storm event fires. Same pattern as phase-ii-washington-check.
+ * Baseline design/report: docs/40_reports/implemented/20260225_PIPELINE_2_3_2_4_2_5_EDGE_CASES_OPERATION_STORM_SCORING.md.
  *
  * Thresholds are Architect-decided; flag for user review.
  * Deterministic: pure function of state; no RNG.
@@ -11,6 +12,11 @@
 
 import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import {
+    getOperationStormEventTurn,
+    hasOperationStormEventFired,
+    isWesternTheaterRuptured,
+} from './operation_storm_theater.js';
 
 // ── Storm precondition thresholds (Architect-decided; flag for review) ──
 
@@ -31,8 +37,11 @@ export interface OperationStormPreconditionResult {
 
 export interface OperationStormCheckReport {
     preconditions: OperationStormPreconditionResult;
+    event_fired: boolean;
+    event_turn?: number;
     fired: boolean;
     already_triggered: boolean;
+    preconditions_recorded: boolean;
 }
 
 function computeRsTerritorialShare(state: GameState): number {
@@ -77,7 +86,11 @@ export function evaluateOperationStormPreconditions(state: GameState): Operation
 }
 
 /**
- * Check and apply Operation Storm: set meta.operation_storm_triggered when all preconditions met.
+ * Check and apply Operation Storm.
+ *
+ * Precondition truth and theater truth are deliberately separate:
+ * - preconditions aligned: record readiness in meta, but do not open the theater.
+ * - Operation Storm event fired: set meta.operation_storm_triggered/operation_storm_turn.
  * Must run after phase-ii-washington-check (Washington must be possible first).
  */
 export function checkAndApplyOperationStorm(state: GameState): OperationStormCheckReport {
@@ -90,26 +103,63 @@ export function checkAndApplyOperationStorm(state: GameState): OperationStormChe
                 ivp_momentum: false,
                 all_met: false
             },
+            event_fired: false,
             fired: false,
-            already_triggered: false
-        };
-    }
-
-    const alreadyTriggered = state.meta.operation_storm_triggered === true;
-    if (alreadyTriggered) {
-        return {
-            preconditions: evaluateOperationStormPreconditions(state),
-            fired: false,
-            already_triggered: true
+            already_triggered: false,
+            preconditions_recorded: false
         };
     }
 
     const preconditions = evaluateOperationStormPreconditions(state);
-    if (!preconditions.all_met) {
-        return { preconditions, fired: false, already_triggered: false };
+    const eventFired = hasOperationStormEventFired(state);
+    const eventTurn = getOperationStormEventTurn(state);
+    const alreadyTriggered = isWesternTheaterRuptured(state)
+        && state.meta.operation_storm_triggered === true;
+
+    if (alreadyTriggered) {
+        return {
+            preconditions,
+            event_fired: eventFired,
+            event_turn: eventTurn,
+            fired: false,
+            already_triggered: true,
+            preconditions_recorded: state.meta.operation_storm_preconditions_met === true
+        };
     }
 
-    state.meta = { ...state.meta, operation_storm_triggered: true };
-    return { preconditions, fired: true, already_triggered: false };
+    let preconditionsRecorded = state.meta.operation_storm_preconditions_met === true;
+    if (preconditions.all_met) {
+        state.meta = {
+            ...state.meta,
+            operation_storm_preconditions_met: true,
+            operation_storm_precondition_turn: state.meta.operation_storm_precondition_turn ?? state.meta.turn,
+        };
+        preconditionsRecorded = true;
+    }
+
+    if (!eventFired) {
+        return {
+            preconditions,
+            event_fired: false,
+            fired: false,
+            already_triggered: false,
+            preconditions_recorded: preconditionsRecorded
+        };
+    }
+
+    const ruptureTurn = eventTurn ?? state.meta.turn;
+    state.meta = {
+        ...state.meta,
+        operation_storm_triggered: true,
+        operation_storm_turn: ruptureTurn,
+    };
+    return {
+        preconditions,
+        event_fired: true,
+        event_turn: ruptureTurn,
+        fired: true,
+        already_triggered: false,
+        preconditions_recorded: preconditionsRecorded
+    };
 }
 

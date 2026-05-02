@@ -12,7 +12,7 @@
  *   - pocket_survival missing → no proposal.
  *   - corps_readiness < 0.30 (higher than Una's 0.25 — three-axis fight).
  *   - logistics pressure ≥ 95 → no proposal.
- *   - operation_storm_triggered === true → no proposal (pre-Storm gate).
+ *   - Operation Storm event fired → no proposal (pre-Storm gate).
  *   - All required axes aligned → proposal surfaces at mid-window turn.
  *   - **T3 substrate consumption**: Approve does NOT push a CorpsOperation;
  *     resolution row gets executed_op_aar_id=undefined +
@@ -79,6 +79,7 @@ const BREZA_BRIGADE_IDS = [
 ];
 
 function buildState(opts: FixtureOpts): GameState {
+    const stormTurn = opts.operationStormTriggered ? Math.min(opts.turn, 174) : undefined;
     const cmd: CorpsCommandState = {
         command_span: 9,
         subordinate_count: 9,
@@ -155,6 +156,8 @@ function buildState(opts: FixtureOpts): GameState {
         ],
         military: {
             formations,
+            fired_event_ids: opts.operationStormTriggered ? ['operation_storm_1995'] : [],
+            event_last_fired_turn: stormTurn === undefined ? {} : { operation_storm_1995: stormTurn },
             front_segments: {},
             front_posture: {},
             front_posture_regions: {},
@@ -235,8 +238,8 @@ describe('Breza 94 opportunity (LANE C Phase 4 — T3 defensive-crisis triad)', 
         expect(proposals.find(p => p.opportunity_id === 'breza_94')).toBeUndefined();
     });
 
-    // ── 6. operation_storm_triggered === true → no proposal ─────────────────
-    it('does not surface after Operation Storm has triggered (pre-Storm gate)', () => {
+    // ── 6. Operation Storm event fired → no proposal ────────────────────────
+    it('does not surface after the Operation Storm event fires (pre-Storm gate)', () => {
         const state = buildState({
             turn: 127,
             operationStormTriggered: true,
