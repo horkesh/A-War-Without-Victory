@@ -3,6 +3,7 @@
 **Date:** 2026-05-02
 **Status:** PARTIAL with named remaining blocker — predicate-fix demonstrably lands (Stupčanica-95 0→1 attack, ratio 0.209→0.831 crosses launch threshold); Krivaja-95 still 0 attacks because `computeAttackerPower` reads in-transit intermediate-OSID terrain/supply context (Phase 4d / `combat_math.ts` territory, predecessor Successor Lane #7).
 **Predecessor:** `98446604` Krivaja-95 catalog ICTY-citation correction + pre-stage helper overwrite contract — successor handoff #7 (Predictor in-transit-numerator-exclusion fix).
+**Verification commit:** `87062cc4`.
 
 ## Lane Summary
 
