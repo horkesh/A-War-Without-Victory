@@ -4,6 +4,7 @@ import {
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
   type PresidentialDecisionRoomCommandQuestion,
+  type PresidentialDecisionRoomDossier,
   type PresidentialDecisionRoomLens,
   type PresidentialDecisionRoomSeverity,
   type PresidentialDecisionRoomSourceHandoff,
@@ -112,11 +113,22 @@ function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomC
   );
 }
 
-function PriorityCard({ card }: { card: PresidentialDecisionRoomCard }) {
+function PriorityCard({
+  card,
+  active,
+  onSelectCard,
+}: {
+  card: PresidentialDecisionRoomCard;
+  active: boolean;
+  onSelectCard: (cardId: string) => void;
+}) {
   const disabled = card.navigationTarget.kind === 'none';
 
   return (
-    <article className="min-h-[7.25rem] rounded border border-panel-border/55 bg-panel-card/55 px-3 py-2">
+    <article className={`min-h-[7.25rem] rounded border px-3 py-2 transition ${active
+      ? 'border-amber-400/45 bg-amber-400/10 shadow-[inset_3px_0_0_rgba(251,191,36,0.55)]'
+      : 'border-panel-border/55 bg-panel-card/55'}`}
+    >
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -126,6 +138,15 @@ function PriorityCard({ card }: { card: PresidentialDecisionRoomCard }) {
             <span className="rounded border border-panel-border/70 bg-panel-bg/70 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary">
               {categoryLabel(card.category)}
             </span>
+            <button
+              type="button"
+              onClick={() => onSelectCard(card.id)}
+              className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] transition ${active
+                ? 'border-amber-400/35 bg-amber-400/15 text-amber-200'
+                : 'border-panel-border/60 bg-panel-bg/60 text-text-muted hover:border-amber-400/30 hover:text-amber-300'}`}
+            >
+              Dossier
+            </button>
           </div>
           <div className="mt-1 truncate text-[12px] font-bold text-text-primary">{card.title}</div>
           <div className="mt-0.5 max-h-8 overflow-hidden text-[10px] leading-snug text-text-secondary">{card.explanation}</div>
@@ -152,6 +173,105 @@ function PriorityCard({ card }: { card: PresidentialDecisionRoomCard }) {
         {card.sourceOwner} / {card.sourceLabel}
       </div>
     </article>
+  );
+}
+
+function PriorityDossier({
+  dossier,
+  cardsById,
+  onSelectCard,
+}: {
+  dossier: PresidentialDecisionRoomDossier | null;
+  cardsById: Map<string, PresidentialDecisionRoomCard>;
+  onSelectCard: (cardId: string) => void;
+}) {
+  if (!dossier) {
+    return (
+      <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
+        No priority dossier selected.
+      </div>
+    );
+  }
+
+  const disabled = dossier.navigationTarget.kind === 'none';
+  const relatedCards = dossier.relatedCardIds
+    .map((cardId) => cardsById.get(cardId) ?? null)
+    .filter((card): card is PresidentialDecisionRoomCard => card != null);
+
+  return (
+    <section className="rounded border border-amber-400/25 bg-panel-card/65 px-3 py-2 shadow-[inset_3px_0_0_rgba(251,191,36,0.45)]">
+      <div className="mb-1 flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">Priority Dossier</div>
+          <div className="mt-1 text-[12px] font-bold leading-snug text-text-primary">{dossier.title}</div>
+        </div>
+        <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase ${severityClass(dossier.severity)}`}>
+          {categoryLabel(dossier.category)}
+        </span>
+      </div>
+
+      <div className="text-[10px] leading-snug text-text-secondary">{dossier.explanation}</div>
+
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="rounded border border-panel-border/55 bg-panel-bg/60 px-2 py-1">
+          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">Source</div>
+          <div className="mt-0.5 truncate text-[10px] font-semibold text-text-primary">{dossier.sourceOwner}</div>
+          <div className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{dossier.sourceLabel}</div>
+        </div>
+        <div className="rounded border border-panel-border/55 bg-panel-bg/60 px-2 py-1">
+          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">Advance</div>
+          <div className={`mt-0.5 truncate text-[10px] font-semibold ${dossier.advanceSensitive ? 'text-amber-300' : 'text-text-primary'}`}>
+            {dossier.advanceLabel}
+          </div>
+          <div className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">
+            {dossier.sourceHandoff?.summary ?? 'No handoff'}
+          </div>
+        </div>
+      </div>
+
+      {dossier.evidence.length > 0 && (
+        <div className="mt-2">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Evidence</div>
+          <div className="flex flex-wrap gap-1.5">
+            {dossier.evidence.map((entry) => (
+              <span key={entry} className="min-w-0 max-w-full truncate rounded border border-panel-border/55 bg-panel-bg/60 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.08em] text-text-secondary">
+                {entry}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {relatedCards.length > 0 && (
+        <div className="mt-2">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Same Surface</div>
+          <div className="space-y-1">
+            {relatedCards.map((card) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => onSelectCard(card.id)}
+                className="flex w-full min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-bg/55 px-2 py-1 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04]"
+              >
+                <span className="min-w-0 truncate text-[9px] font-semibold text-text-primary">{card.title}</span>
+                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase ${severityClass(card.severity)}`}>
+                  {categoryLabel(card.category)}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => openPresidentialDecisionRoomNavigationTarget(dossier.navigationTarget)}
+        className="mt-2 h-8 w-full truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+      >
+        {dossier.actionLabel}
+      </button>
+    </section>
   );
 }
 
@@ -204,10 +324,15 @@ export function PresidentialDecisionRoomPanel() {
   const state = useGameStore((s) => s.loadedGameState);
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
 
   const view = useMemo(
-    () => buildPresidentialDecisionRoomView({ state, osidNameMap }),
-    [state, osidNameMap],
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId: activeCardId }),
+    [state, osidNameMap, activeCardId],
+  );
+  const cardsById = useMemo(
+    () => new Map(view.cards.map((card) => [card.id, card])),
+    [view.cards],
   );
 
   if (!view.hasPlayerFaction) {
@@ -229,6 +354,12 @@ export function PresidentialDecisionRoomPanel() {
   const inspectNext = (effectiveLens === 'all'
     ? view.inspectNext
     : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
+  const selectedDossierCardId = view.activeDossier?.cardId ?? null;
+  const handleSelectLens = (id: ActiveDecisionRoomLens) => {
+    setActiveLens(id);
+    const lens = view.lenses.find((entry) => entry.id === id);
+    setActiveCardId(lens?.topCardId ?? null);
+  };
 
   return (
     <section className="mb-2" data-testid="presidential-decision-room">
@@ -268,7 +399,7 @@ export function PresidentialDecisionRoomPanel() {
               key={lens.id}
               lens={lens}
               active={effectiveLens === lens.id}
-              onSelect={setActiveLens}
+              onSelect={handleSelectLens}
             />
           ))}
         </div>
@@ -281,11 +412,24 @@ export function PresidentialDecisionRoomPanel() {
               {view.emptyState}
             </div>
           ) : mainCards.map((card) => (
-            <PriorityCard key={card.id} card={card} />
+            <PriorityCard
+              key={card.id}
+              card={card}
+              active={selectedDossierCardId === card.id}
+              onSelectCard={setActiveCardId}
+            />
           ))}
         </div>
 
         <aside className="space-y-2">
+          <div>
+            <PriorityDossier
+              dossier={view.activeDossier}
+              cardsById={cardsById}
+              onSelectCard={setActiveCardId}
+            />
+          </div>
+
           <div>
             <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Inspect Next</div>
             <div className="space-y-1.5">

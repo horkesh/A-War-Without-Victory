@@ -461,6 +461,90 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
   });
 
+  it('builds a deterministic priority dossier for the top card by default', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [
+        makeOpportunity({ proposal_id: 'opp_beta', display_name: 'Beta Window', expires_turn: 30 }),
+        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
+      ],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        displacement_total: 1400,
+      }),
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+
+    expect(first.activeDossier).toMatchObject({
+      cardId: 'review:pending',
+      title: 'Presidential reviews pending',
+      sourceOwner: 'Presidential review queue',
+      sourceHandoff: {
+        id: 'army-hq-briefing',
+        cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
+      },
+      relatedCardIds: ['opportunity:opp_alpha', 'opportunity:opp_beta'],
+      advanceSensitive: true,
+      advanceLabel: 'Review before advance',
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(second.activeDossier).toEqual(first.activeDossier);
+  });
+
+  it('honors an explicit priority dossier card id without changing the card archive', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [makeOpportunity()],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: -1 },
+        displacement_total: 1800,
+      }),
+    });
+
+    const defaultView = buildPresidentialDecisionRoomView({ state });
+    const selectedView = buildPresidentialDecisionRoomView({
+      state,
+      selectedCardId: 'turn:24:hard-turn',
+    });
+    const fallbackView = buildPresidentialDecisionRoomView({
+      state,
+      selectedCardId: 'missing-card',
+    });
+
+    expect(selectedView.cards.map((card) => card.id)).toEqual(defaultView.cards.map((card) => card.id));
+    expect(selectedView.activeDossier).toMatchObject({
+      cardId: 'turn:24:hard-turn',
+      sourceOwner: 'Turn Aftermath records',
+      sourceHandoff: {
+        id: 'turn-aftermath-records',
+        cardIds: ['turn:24:hard-turn'],
+      },
+      relatedCardIds: [],
+      advanceSensitive: true,
+      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+    });
+    expect(fallbackView.activeDossier?.cardId).toBe(defaultView.cards[0]?.id);
+  });
+
   it('returns a safe empty state when no player faction is loaded', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
@@ -481,6 +565,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.lenses).toEqual([]);
     expect(view.commandQuestions).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
+    expect(view.activeDossier).toBeNull();
     expect(view.emptyState).toBe('No player faction loaded.');
   });
 });

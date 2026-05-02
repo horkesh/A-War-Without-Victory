@@ -1,3 +1,30 @@
+## [2026-05-02] feat(ui): add Decision Room priority dossier
+
+**Type:** UI/product read-model and Army HQ presentation change. No simulation, combat, scenario, OOB, sensitive-history, or calibration logic changed.
+
+**Change:** `buildPresidentialDecisionRoomView(...)` now derives an `activeDossier` from the same sorted Strategic Priorities card archive, existing grouped `sourceHandoffs`, and the current `advanceReadiness` packet. The dossier defaults deterministically to the top sorted card, accepts an optional `selectedCardId`, carries full explanation/evidence/source owner/action target, lists related card ids from the same existing source handoff, and marks whether the card is in `Review Before Advance`.
+
+**UI:** `PresidentialDecisionRoomPanel` now keeps local `activeCardId` selection and renders a compact `Priority Dossier` pane in Army HQ BRIEFING. Priority cards expose a `Dossier` selector while keeping their direct source action. The pane shows source, advance status, evidence, same-surface related cards, and the selected card's canonical action through `openPresidentialDecisionRoomNavigationTarget(...)`.
+
+**Ownership guardrails:** The dossier is an inspection affordance only. It does not create a second inbox, priority queue, opportunity ledger, cost ledger, Chronicle, event log, records owner, combat planner, or turn blocker. Related items are projected from `sourceHandoffs`; source truth remains with the review queue, opportunity dossiers, operational SITREP, command briefing, Turn Aftermath records, active cost, and Chronicle.
+
+**Verification:** Red-first Decision Room model and wiring tests failed on missing `activeDossier` / panel wiring; green focused runs passed 9/9 model tests, 8/8 wiring tests, then 15/15 adjacent read-model tests and 14/14 adjacent wiring tests before docs. Final TypeScript/build verification is recorded in `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`.
+
+**Files:**
+- `src/ui/map/data/presidentialDecisionRoom.ts`
+- `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`
+- `tests/ui/presidential_decision_room.test.ts`
+- `tests/ui_presidential_decision_room_wiring.test.ts`
+- `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+---
+
 ## [2026-05-02] docs(combat): retire queued-order predicate hypothesis; pipeline order disproves predecessor closeout
 
 **Type:** Documentation correction + read-only diagnostic + structural test. No engine code, scenario data, painted targets, OOB, combat math, or rupture/enclave logic changed.

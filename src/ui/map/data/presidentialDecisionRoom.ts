@@ -96,6 +96,24 @@ export interface PresidentialDecisionRoomSourceHandoff {
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
 }
 
+export interface PresidentialDecisionRoomDossier {
+  id: string;
+  cardId: string;
+  category: PresidentialDecisionRoomCategory;
+  severity: PresidentialDecisionRoomSeverity;
+  title: string;
+  explanation: string;
+  sourceOwner: string;
+  sourceLabel: string;
+  actionLabel: string;
+  evidence: string[];
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  sourceHandoff: PresidentialDecisionRoomSourceHandoff | null;
+  relatedCardIds: string[];
+  advanceSensitive: boolean;
+  advanceLabel: string;
+}
+
 export interface PresidentialDecisionRoomView {
   hasPlayerFaction: boolean;
   emptyState: string | null;
@@ -103,6 +121,7 @@ export interface PresidentialDecisionRoomView {
   lenses: PresidentialDecisionRoomLens[];
   commandQuestions: PresidentialDecisionRoomCommandQuestion[];
   sourceHandoffs: PresidentialDecisionRoomSourceHandoff[];
+  activeDossier: PresidentialDecisionRoomDossier | null;
   inspectNext: PresidentialDecisionRoomCard[];
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness;
   metrics: PresidentialDecisionRoomMetrics;
@@ -111,6 +130,7 @@ export interface PresidentialDecisionRoomView {
 export interface PresidentialDecisionRoomInput {
   state: LoadedGameState | null;
   osidNameMap?: Record<string, string> | null;
+  selectedCardId?: string | null;
 }
 
 type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey'> & {
@@ -748,6 +768,43 @@ function buildCommandQuestions(
   ];
 }
 
+function buildActiveDossier(
+  cards: PresidentialDecisionRoomCard[],
+  sourceHandoffs: PresidentialDecisionRoomSourceHandoff[],
+  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
+  selectedCardId: string | null | undefined,
+): PresidentialDecisionRoomDossier | null {
+  const selectedCard = selectedCardId
+    ? cards.find((card) => card.id === selectedCardId) ?? null
+    : null;
+  const card = selectedCard ?? cards[0] ?? null;
+  if (!card) return null;
+
+  const sourceHandoff = sourceHandoffs.find((handoff) => handoff.cardIds.includes(card.id)) ?? null;
+  const relatedCardIds = sourceHandoff?.cardIds
+    .filter((cardId) => cardId !== card.id)
+    .slice(0, 4) ?? [];
+  const advanceSensitive = advanceReadiness.items.some((item) => item.id === card.id);
+
+  return {
+    id: `dossier:${card.id}`,
+    cardId: card.id,
+    category: card.category,
+    severity: card.severity,
+    title: card.title,
+    explanation: card.explanation,
+    sourceOwner: card.sourceOwner,
+    sourceLabel: card.sourceLabel,
+    actionLabel: card.actionLabel,
+    evidence: card.evidence,
+    navigationTarget: card.navigationTarget,
+    sourceHandoff,
+    relatedCardIds,
+    advanceSensitive,
+    advanceLabel: advanceSensitive ? 'Review before advance' : 'Not in advance review',
+  };
+}
+
 export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoomInput): PresidentialDecisionRoomView {
   const state = input.state;
   const playerFaction = state?.player_faction ?? null;
@@ -759,6 +816,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       lenses: [],
       commandQuestions: [],
       sourceHandoffs: [],
+      activeDossier: null,
       inspectNext: [],
       advanceReadiness: {
         headline: 'No state loaded',
@@ -782,6 +840,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       lenses: [],
       commandQuestions: [],
       sourceHandoffs: [],
+      activeDossier: null,
       inspectNext: [],
       advanceReadiness: {
         headline: 'No player faction loaded',
@@ -814,6 +873,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const inspectNext = cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
   const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
+  const activeDossier = buildActiveDossier(cards, sourceHandoffs, advanceReadiness, input.selectedCardId);
 
   return {
     hasPlayerFaction: true,
@@ -822,6 +882,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     lenses,
     commandQuestions,
     sourceHandoffs,
+    activeDossier,
     inspectNext,
     advanceReadiness,
     metrics: {

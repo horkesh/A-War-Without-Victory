@@ -86,6 +86,23 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('sourceHandoffLedger');
   });
 
+  it('renders a selected priority dossier over the existing card archive', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
+
+    expect(model).toContain('activeDossier');
+    expect(model).toContain('buildActiveDossier');
+    expect(model).toContain('selectedCardId');
+    expect(panel).toContain('activeCardId');
+    expect(panel).toContain('setActiveCardId');
+    expect(panel).toContain('PriorityDossier');
+    expect(panel).toContain('view.activeDossier');
+    expect(panel).toContain('onSelectCard');
+    expect(panel).toContain('Priority Dossier');
+    expect(panel).not.toContain('priorityDossierQueue');
+    expect(panel).not.toContain('priorityDossierLedger');
+  });
+
   it('does not import or expose sensitive-history/combat-lane internals', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
