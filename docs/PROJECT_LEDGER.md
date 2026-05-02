@@ -1,3 +1,17 @@
+## [2026-05-02] evidence(operations): verify Sana follow-on reachability split after current-main rebase
+
+**Type:** Scenario verification + documentation propagation for the 5th Corps Sana catalog split. No additional engine behavior changed in this evidence addendum beyond the already-implemented `sana_95` / `sana_95_follow_on` split.
+
+**Why:** The original Sana follow-on branch was authored before the combat-math mega-lane, Storm theater gate split, and campaign proof platform were integrated on `main`. Because parallel lanes can be locally green but still need current-main proof, Codex rebased `codex/fifth-corps-reachability` onto `main` and reran the relevant tests plus 40w/188w scenario evidence.
+
+**Verification:** Focused proof pack 70/70 PASS (`operation_opportunities_5th_corps_sana`, Una/Breza/Pauk opportunity suites, campaign proof diagnostic); `npx.cmd tsc --noEmit` clean. 40w smoke `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0c2fc264112dec1f` matches the current main integration baseline, Jan1993 91.3% count / 93.3% area, `diagnose_run` 0 ERR / 30 WARN, `validate_run_consistency` PASS. 188w proof `runs/apr1992_definitive_188w__210e69404d054959__w188_n1` hash `b2426eb412f4422e`, Oct1995 70.8% count / 63.2% area, `diagnose_run` 0 ERR / 35 WARN, `validate_run_consistency` 18 known sector-layer failures, `opportunity_health_audit` 7 decisions / 7 completed / 2 successes / 3 T3 sentinels / 0 broken links.
+
+**Sana proof:** `opportunity_campaign_proof` now observes 8 5th Corps opportunities: 4 surfaced-executed, 3 T3-authorized, 1 blocked in-window, and 0 reachability warnings. `sana_95` fires at t175 as a reachable 2-axis / 18-objective operation (`sana_bihac_petrovac`, `sana_krupa`) and fails by normal combat underdelivery (4 attacks, 0/18 captures, `UNDERDELIV:2`). `sana_95_follow_on` does not surface; it is blocked turns 175-188 by live `staging_access x14` and `logistics x14`, which is the intended non-railroad behavior when the corridor never opens.
+
+**Artifacts:** Updated `docs/40_reports/implemented/20260501_FIFTH_CORPS_SANA_FOLLOW_ON_REACHABILITY.md`; added `docs/40_reports/diagnostics/20260502_sana_follow_on_n1_evidence.md`; updated knowledge/napkin with the staged-operation live-corridor rule.
+
+---
+
 ## [2026-05-02] merge(architecture): integrate Codex proof platform + Storm gate split after combat-math mega-lane
 
 **Type:** Architecture integration / review close-out. Codex reviewed Claude's Combat-Math `estimateForceRatio` mega-lane, accepted it, and shipped one wording-only correction clarifying that `OperationAAR.force_ratio_estimate` is a decision-time / launch-tick carryover (assessment or anti-paralysis forced decision), not a post-mortem recompute. Then merged two Codex parallel branches onto current `main`: `codex/opportunity-proof-platform` (read-only campaign proof matrix) and `codex/storm-theater-gate` (split abstract Operation Storm readiness from actual western-theater rupture).
