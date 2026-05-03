@@ -224,6 +224,16 @@ export interface OpportunityCostLedger {
     entries: OpportunityCostLedgerEntry[];
 }
 
+/** Audit-only annotations attached by divergence events.
+ *  Reflection of state.military.cost_ledger_annotations — not a writer. */
+export interface CostLedgerAnnotation {
+    event_id: string;
+    tag: string;
+    text?: string;
+    turn: number;
+    faction?: string;
+}
+
 export interface CostLedger {
     war_duration_weeks: number;
     entries: CostLedgerEntry[];
@@ -231,6 +241,8 @@ export interface CostLedger {
     operation_opportunities?: OpportunityCostLedger;
     total_military_killed: number;
     total_civilian_killed: number;
+    /** Audit-only divergence-event annotations. Sorted (turn, tag) for determinism. */
+    annotations?: CostLedgerAnnotation[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -302,6 +314,23 @@ export function buildCostLedger(state: GameState): CostLedger {
             description: r.description,
         }));
 
+    // Reflect divergence-event annotations (audit-only). Sorted by (turn, tag) for determinism.
+    const rawAnnotations = state.military?.cost_ledger_annotations ?? [];
+    const annotations: CostLedgerAnnotation[] = rawAnnotations.length === 0 ? [] : [...rawAnnotations]
+        .map((a) => ({
+            event_id: a.event_id,
+            tag: a.tag,
+            text: a.text,
+            turn: a.turn,
+            faction: a.faction,
+        }))
+        .sort((a, b) => {
+            if (a.turn !== b.turn) return a.turn - b.turn;
+            const t = strictCompare(a.tag, b.tag);
+            if (t !== 0) return t;
+            return strictCompare(a.event_id, b.event_id);
+        });
+
     return {
         war_duration_weeks: turn,
         entries,
@@ -309,5 +338,6 @@ export function buildCostLedger(state: GameState): CostLedger {
         operation_opportunities: buildOpportunityCostLedger(state),
         total_military_killed: totalMilitaryKilled,
         total_civilian_killed: totalCivilianKilled,
+        annotations: annotations.length > 0 ? annotations : undefined,
     };
 }

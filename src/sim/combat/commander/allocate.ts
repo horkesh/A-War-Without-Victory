@@ -69,8 +69,45 @@ const AGGRESSIVE_THRESHOLD = 0.7;
 /** Garrison budget reduction for aggressive commanders (fraction). */
 const AGGRESSIVE_BUDGET_REDUCTION = 0.1;
 
-/** Garrison budget multiplier for must-hold zones (structural chokepoints). */
-const MUST_HOLD_BUDGET_MULTIPLIER = 1.5;
+/**
+ * Variable garrison budget multiplier for must-hold zones (structural chokepoints).
+ *
+ * LANE-NIGHTSHIFT-ROUND2-MUST-HOLD-VARIABLE-MULTIPLIER:
+ * Replaces the prior flat 1.5× with `clamp(0.75 × observed_pressure, 2.0, 5.0)`.
+ * Light pressure → 2.0× floor (still doubles the budget so chokepoints aren't
+ * stripped). Heavy pressure → up to 5.0× cap so the corps CO is forced to
+ * commit reserves when an attacker is massing on a corridor entrance.
+ *
+ * `observed_pressure` is read from `zone.commitment_ratio`, which is the
+ * zone's existing front_edges / assigned_brigades signal — the same proxy
+ * the threat assessor already uses to map zones to threat levels (see
+ * assess.ts MEDIUM_THREAT_COMMITMENT=6, LOW_THREAT_COMMITMENT=4). No new
+ * plumbing required; faction-agnostic; deterministic (pure arithmetic).
+ *
+ * Math: floor breakpoint at 2.0/0.75 ≈ 2.667 commitment, cap breakpoint at
+ * 5.0/0.75 ≈ 6.667 commitment. Between those, the multiplier scales linearly.
+ */
+const MUST_HOLD_MULT_FLOOR = 2.0;
+const MUST_HOLD_MULT_CAP = 5.0;
+const MUST_HOLD_PRESSURE_COEFFICIENT = 0.75;
+
+/**
+ * Compute the variable must-hold garrison budget multiplier from observed
+ * attacker pressure at the zone. See MUST_HOLD_MULT_* constants.
+ *
+ * Faction-agnostic. Deterministic — pure arithmetic, no state, no I/O.
+ *
+ * @param observedPressure - Attacker pressure at the zone. Read from
+ *   `zone.commitment_ratio`. Non-negative; non-finite values clamp to floor.
+ */
+export function computeMustHoldMultiplier(observedPressure: number): number {
+    // Defensive: NaN/Infinity collapse to the floor.
+    if (!Number.isFinite(observedPressure) || observedPressure <= 0) {
+        return MUST_HOLD_MULT_FLOOR;
+    }
+    const scaled = MUST_HOLD_PRESSURE_COEFFICIENT * observedPressure;
+    return Math.max(MUST_HOLD_MULT_FLOOR, Math.min(MUST_HOLD_MULT_CAP, scaled));
+}
 
 /** Besieged zone surplus is locked to local ops within this many hops. */
 export const BESIEGED_SURPLUS_HOP_LIMIT = 2;
@@ -117,8 +154,14 @@ export function computeGarrisonBudget(
     // Must-hold zones (structural chokepoints) get a garrison floor bump
     // applied BEFORE personality modifiers so aggressive commanders cannot
     // strip corridor-entrance zones below the structural minimum.
+    //
+    // The multiplier scales with observed attacker pressure
+    // (zone.commitment_ratio) so chokepoints under heavy pressure draw
+    // more reserves, while quiet must-hold zones still get a structural
+    // 2.0× floor. See computeMustHoldMultiplier() for the formula.
     if (isMustHold) {
-        budget = Math.ceil(budget * MUST_HOLD_BUDGET_MULTIPLIER);
+        const multiplier = computeMustHoldMultiplier(zone.commitment_ratio);
+        budget = Math.ceil(budget * multiplier);
     }
 
     // Personality modifiers

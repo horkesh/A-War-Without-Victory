@@ -2931,6 +2931,54 @@ app.whenReady().then(() => {
     return { ok: true };
   });
 
+  // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
+  //
+  // Single-owner: these handlers are the only writers of `meta.tutorial_state`.
+  // Both go through readCanonicalCurrentState / writeCanonicalCurrentState so
+  // the tutorial state round-trips through the canonical serializer (matches
+  // desktop_persistence_contract).
+  //
+  // Determinism: completed_steps is appended-in-call-order; no clock, no
+  // sorting. Idempotent — a duplicate advance-step request is a no-op.
+  ipcMain.handle('tutorial:dismiss', async (event) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    if (!state.meta) return { ok: false, error: 'no_meta' };
+    const prior = state.meta.tutorial_state ?? { dismissed: false, completed_steps: [] };
+    state.meta.tutorial_state = {
+      dismissed: true,
+      current_step: prior.current_step,
+      completed_steps: Array.isArray(prior.completed_steps) ? prior.completed_steps.slice() : [],
+    };
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
+  ipcMain.handle('tutorial:advance-step', async (event, payload) => {
+    const stepId = payload?.stepId;
+    if (typeof stepId !== 'string' || stepId.length === 0) {
+      return { ok: false, error: 'invalid_step_id' };
+    }
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    if (!state.meta) return { ok: false, error: 'no_meta' };
+    const prior = state.meta.tutorial_state ?? { dismissed: false, completed_steps: [] };
+    const completed = Array.isArray(prior.completed_steps) ? prior.completed_steps.slice() : [];
+    // Idempotent append: skip if already present (deterministic, no duplicates).
+    if (!completed.includes(stepId)) {
+      completed.push(stepId);
+    }
+    state.meta.tutorial_state = {
+      dismissed: prior.dismissed === true,
+      current_step: stepId,
+      completed_steps: completed,
+    };
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
   // Start the tactical map HTTP server (required because MapLibre's Web Workers
   // don't function under Electron custom protocol schemes), then create the window.
   startMapServer().then(() => {

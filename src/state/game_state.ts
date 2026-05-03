@@ -1297,6 +1297,20 @@ export interface StateMeta {
      * Older saves without this field fall back to the existing recompute path.
      */
     endgame_snapshot?: EndgameSnapshot;
+    /**
+     * v0.9.2 tutorial/onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
+     *
+     * Tracks first-session tutorial overlay state. Additive, optional — absent on
+     * older saves and treated as "not yet dismissed" so the overlay shows on a
+     * fresh campaign. Faction-agnostic, UI-only; the simulation does not read
+     * this field. `dismissed=true` hides the overlay permanently for the save;
+     * `current_step` and `completed_steps` track the step walkthrough deterministically.
+     */
+    tutorial_state?: {
+        dismissed: boolean;
+        current_step?: string;
+        completed_steps: string[];
+    };
 }
 
 /**
@@ -2041,6 +2055,17 @@ enclave_state?: Record<string, { fallen?: boolean; status?: string; [key: string
 /** Presidential command authority resource. Spent on Level 3 (Direct Intervention) actions; recovers +2/turn.
  *  See docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md §Level 3. */
 command_authority?: CommandAuthority;
+/** Audit-only annotations attached to the cost ledger by divergence events.
+ *  Read-only surface — `buildCostLedger` reflects these without applying mechanical
+ *  effects. Each entry records the annotating event id, narrative tag, and turn. */
+cost_ledger_annotations?: Array<{
+    event_id: string;
+    tag: string;
+    text?: string;
+    turn: number;
+    /** Optional faction subject when the annotation is faction-scoped. */
+    faction?: FactionId;
+}>;
 }
 
 /** Presidential command authority — the player's resource for overriding the command chain.

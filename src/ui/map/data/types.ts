@@ -758,6 +758,18 @@ export interface LoadedGameState {
     player_faction?: string | null;
     rbih_hrhb_war_earliest_turn?: number | null;
     war_alliance_rbih_hrhb?: number | null;
+    /**
+     * v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
+     *
+     * Mirrors `state.meta.tutorial_state`. Optional / absent on older saves;
+     * the OnboardingOverlay treats absent as "not yet dismissed". UI-only:
+     * sim engine does not read this.
+     */
+    tutorial_state?: {
+        dismissed: boolean;
+        current_step?: string;
+        completed_steps: string[];
+    };
     displacementByMun?: Record<string, {
         originalPopulation: number;
         displacedOut: number;

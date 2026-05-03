@@ -99,4 +99,7 @@ contextBridge.exposeInMainWorld('awwv', {
   acceptProposal: (proposalId) => ipcRenderer.invoke('accept-proposal', proposalId),
   rejectProposal: (proposalId) => ipcRenderer.invoke('reject-proposal', proposalId),
   resolveOperationOpportunityDecision: (payload) => ipcRenderer.invoke('resolve-operation-opportunity-decision', payload),
+  // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON)
+  dismissTutorial: () => ipcRenderer.invoke('tutorial:dismiss'),
+  advanceTutorialStep: (stepId) => ipcRenderer.invoke('tutorial:advance-step', { stepId }),
 });

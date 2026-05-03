@@ -1234,5 +1234,193 @@
       "ahmici_1993": true
     },
     "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T) on the Ahmici massacre of 16 April 1993 and the Lasva Valley operations. ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9."
+  },
+  {
+    "id": "csq_alliance_holds_past_w35",
+    "title": "An Alliance That Did Not Break",
+    "narrative": "The Mostar guns never opened up. The Ahmici road never burned. Past week thirty-five — the date the historians had circled — the RBiH-HRHB alliance is still functioning. The Washington table the Americans imagined is now a different table: not a cease-fire forced on belligerents, but a coordination of two fronts that never split. Cohesion in the joint sectors holds.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 35,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_above", "value": 0.20 },
+          { "type": "flag_not_set", "flag": "rbih_hrhb_war_active" },
+          { "type": "flag_not_set", "flag": "hvo_arbih_war_active" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "RBiH-HRHB alliance survives past w35; Washington alt-path opens." },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": 4 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 4 },
+      { "kind": "alliance_lock", "mode": "floor", "value": 0.10, "duration_turns": 12 }
+    ],
+    "sets_flags": {
+      "washington_agreement_alt_path": true,
+      "alliance_held_past_w35": true
+    },
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Counter-historical: an unbroken RBiH-HRHB alliance past the historical April-1993 rupture window, anchored to alliance > 0.20 and absence of war flags. /narrative-designer + /historian sign-off."
+  },
+  {
+    "id": "csq_paramilitary_authorization_refused",
+    "title": "The Sweep That Was Never Ordered",
+    "narrative": "Twenty turns and counting. The political files do not contain the order. The paramilitary detachments that, on other timelines, would have been turned loose on the rear-area municipalities are still confined to peripheral roles. The international monitors cite a clean record. It is the rarest commodity in this war: a ledger without massacres.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 21,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "paramilitary_mode_equals", "value": "rear_pocket" },
+          { "type": "flag_not_set", "flag": "paramilitary_offensive_authorized" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "No paramilitary authorization for 20+ turns; clean-record divergence." },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": 12 }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "international_standing", "delta": 12 }
+    ],
+    "sets_flags": {
+      "clean_record": true,
+      "paramilitary_authorization_refused": true
+    },
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Models the counter-historical case where rear-area paramilitary authorization is withheld for 20+ turns. /narrative-designer + /historian sign-off."
+  },
+  {
+    "id": "csq_enclave_held_alt_intervention",
+    "title": "Safe Areas Still Standing",
+    "narrative": "By turn 145 the enclaves are not the museum exhibits the world expected to inspect after the fact. Resilience indices are running well above the floor. The columns have not marched out. The lists have not been compiled. The UN Safe Areas designation, which on the historical path became a euphemism for unfinished obligation, is still — for now — an enforced reality.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 145,
+      "turn_max": 145,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_not_set", "flag": "srebrenica_fallen" },
+          { "type": "flag_not_set", "flag": "zepa_fallen" },
+          { "type": "flag_not_set", "flag": "gorazde_fallen" },
+          { "type": "enclave_resilience_aggregate", "aggregate": "mean", "comparator": "above", "threshold": 0.30 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "Enclaves intact past t145; alt-intervention path annotated." },
+    "effects": [
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "un_safe_areas_intact",
+        "text": "UN Safe Areas designation enforced past t145 — counter-historical alt-intervention path."
+      }
+    ],
+    "sets_flags": {
+      "un_safe_areas_intact": true
+    },
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Audit-only: does NOT flip genocide_condemnation. Counter-historical preservation of the eastern enclaves through t145. /narrative-designer + /historian sign-off."
+  },
+  {
+    "id": "csq_patron_pressure_resisted_streak",
+    "title": "Three Times No",
+    "narrative": "The patron's envoy returned three times with three different demands and left three times empty-handed. The cables back to the capital described a client increasingly difficult to steer. The cost will not be free: arms shipments are reviewed, training rotations slip, and the recruitment networks that depended on the patron's good will begin to thin. But the principle has been established.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 12,
+      "phase": "war",
+      "condition": {
+        "type": "flag_at_least",
+        "flag": "patron_resist_streak",
+        "min": 3
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "Three or more patron resist responses; patron confidence and recruitment penalty applied." },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": -15 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.85, "duration_turns": 12 }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "patron_confidence", "delta": -15 }
+    ],
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Streak counter `patron_resist_streak` is incremented by patron-event response options. Faction-agnostic predicate; effects target the resisting faction (authored RS by default; alt-faction variants can be added downstream)."
+  },
+  {
+    "id": "csq_early_peace_acceptance_w120",
+    "title": "Pen Before the Last Offensive",
+    "narrative": "The plan is signed before the last offensive runs its course. The ink is dry and the cease-fire boundary is drawn while several axes still have momentum and several enclaves are still intact. The leverage that the late-war battles would have purchased never materializes; what is on the table now is what will be on the table at the final accord. The negotiators understand the trade.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "turn_max": 119,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "peace_plan_accepted", "value": true },
+          { "type": "territory_percentage", "faction": "RS", "comparator": "below", "threshold": 0.62 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "Peace accepted before t120 with non-baseline territory; leverage floor locked, ledger annotated." },
+    "effects": [
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "early_peace_acceptance_w120",
+        "text": "Peace plan accepted before t120 with territorial position outside late-war baseline. Leverage trade recorded."
+      },
+      { "kind": "alliance_lock", "mode": "floor", "value": 0.0, "duration_turns": 16 }
+    ],
+    "sets_flags": {
+      "early_peace_w120": true
+    },
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Late-war baseline territorial position approximated by RS area share <0.62 (Dayton-era anchor). Audit-only ledger annotation; no rupture wiring."
+  },
+  {
+    "id": "csq_force_quality_inversion",
+    "title": "The Inverted Roster",
+    "narrative": "The officer rolls tell the story the front line had begun to suspect. The veteran cadre on the historically dominant side has thinned past the inflection point — not from any single battle, but from accumulation: postings refused, replacements thinned, the senior class retiring into silence. On the other side, new commanders cycle through hard schools and come out the other end. The predictor's confidence in the old assumptions takes a small but real haircut.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 30,
+      "phase": "war",
+      "condition": {
+        "type": "metric_compare_factions",
+        "metric": "officer_quality_avg",
+        "faction_a": "RS",
+        "faction_b": "RBiH",
+        "comparator": "less_than",
+        "baseline": 0.55,
+        "baseline_drop": 0.15
+      }
+    },
+    "once": true,
+    "priority": 80,
+    "effect": { "kind": "narrative", "text": "RS officer-quality average has fallen below ARBiH and dropped >0.15 from baseline." },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "military_credibility", "delta": -6 }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -6 }
+    ],
+    "sets_flags": {
+      "force_quality_inversion": true,
+      "predictor_confidence_haircut": -0.05
+    },
+    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Static baseline 0.55 reflects scenario-init RS officer_quality (CALIBRATION_MASTER, Memory 'officer quality faction defaults'). Faction-agnostic predicate authored with RS<-RBiH for the historical dominant-side; alt orientations can be added downstream. Predictor-confidence haircut consumed via the `predictor_confidence_haircut` flag."
   }
 ]

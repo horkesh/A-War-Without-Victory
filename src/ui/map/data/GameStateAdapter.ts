@@ -1732,6 +1732,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
+        // v0.9.2 tutorial onboarding skeleton: pass through unchanged.
+        // Absent on older saves — OnboardingOverlay treats undefined as "not dismissed".
+        tutorial_state: meta?.tutorial_state ?? undefined,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
         frontPressureByEdge,

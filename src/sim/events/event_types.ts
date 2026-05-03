@@ -34,7 +34,28 @@ export type EventCondition =
     | { type: 'week_since_event'; event_id: string; min_weeks?: number; max_weeks?: number }
     | { type: 'event_fire_count'; event_id: string; min_count?: number; max_count?: number }
     | { type: 'enclave_supply_status'; municipality: string; status: 'adequate' | 'strained' | 'critical' }
-    | { type: 'corridor_severed'; from_osid: string; to_osid: string; faction: FactionId };
+    | { type: 'corridor_severed'; from_osid: string; to_osid: string; faction: FactionId }
+    // ─── Ring-1 divergence-event predicates (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS) ──
+    /** True when state.political.paramilitary_mode equals the given value (defaults to 'rear_pocket' when undefined). Faction-agnostic. */
+    | { type: 'paramilitary_mode_equals'; value: 'rear_pocket' | 'offensive' }
+    /** Aggregates state.political.enclave_resilience entries via 'max' | 'min' | 'mean' and compares to threshold.
+     *  Both bare-number and EnclaveResilienceEntry shapes are read; EnclaveResilienceEntry uses .resilience. */
+    | { type: 'enclave_resilience_aggregate'; aggregate: 'max' | 'min' | 'mean'; comparator: 'above' | 'below'; threshold: number }
+    /** True when the named numeric event_flag is at least `min` (missing flag treated as 0). Faction-agnostic. */
+    | { type: 'flag_at_least'; flag: string; min: number }
+    /** Compares an aggregate metric across two factions and (optionally) a static baseline.
+     *  metric='officer_quality_avg' aggregates active brigade.officer_quality.
+     *  comparator='less_than': require factionA < factionB.
+     *  When baseline_drop is set, additionally require (baseline - factionA) >= baseline_drop. */
+    | {
+        type: 'metric_compare_factions';
+        metric: 'officer_quality_avg';
+        faction_a: FactionId;
+        faction_b: FactionId;
+        comparator: 'less_than';
+        baseline?: number;
+        baseline_drop?: number;
+    };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -193,6 +214,19 @@ export interface EventEffectBotPriorityShift {
     duration_turns: number;
 }
 
+/** Effect: append an audit-only annotation to state.military.cost_ledger_annotations.
+ *  Read by `buildCostLedger` for narrative surfaces; never drives mechanical effects.
+ *  Faction-scoped when `faction` is provided. */
+export interface EventEffectCostLedgerAnnotation {
+    kind: 'cost_ledger_annotation';
+    /** Short stable tag (e.g. 'un_safe_areas_intact'). Used as a key for downstream consumers. */
+    tag: string;
+    /** Optional human-readable narrative line. */
+    text?: string;
+    /** Optional subject faction. */
+    faction?: FactionId;
+}
+
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
@@ -210,7 +244,8 @@ export type EventEffect =
     | EventEffectRecruitmentModifier
     | EventEffectDoctrineConstraint
     | EventEffectAllianceLock
-    | EventEffectBotPriorityShift;
+    | EventEffectBotPriorityShift
+    | EventEffectCostLedgerAnnotation;
 
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {
@@ -507,6 +542,68 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
                 if (osidSeverity >= targetSeverity) return true;
             }
             return false;
+        }
+        case 'paramilitary_mode_equals': {
+            // Per-brigade `paramilitary_mode` lives on BrigadeFormation. The aggregate
+            // "current authorized mode" is: 'offensive' if any active formation has
+            // paramilitary_mode='offensive', else 'rear_pocket'. Faction-agnostic.
+            const formations = state.military?.formations ?? {};
+            let anyOffensive = false;
+            for (const fid of Object.keys(formations).sort()) {
+                const f = formations[fid];
+                if (!f || f.status !== 'active') continue;
+                if (f.paramilitary_mode === 'offensive') { anyOffensive = true; break; }
+            }
+            const mode: 'rear_pocket' | 'offensive' = anyOffensive ? 'offensive' : 'rear_pocket';
+            return mode === condition.value;
+        }
+        case 'enclave_resilience_aggregate': {
+            const er = state.political?.enclave_resilience;
+            if (!er) return false;
+            const ids = Object.keys(er).sort();
+            if (ids.length === 0) return false;
+            const values: number[] = [];
+            for (const id of ids) {
+                const entry = er[id];
+                if (entry == null) continue;
+                const v = typeof entry === 'number' ? entry : entry.resilience;
+                if (typeof v === 'number' && !Number.isNaN(v)) values.push(v);
+            }
+            if (values.length === 0) return false;
+            let agg: number;
+            if (condition.aggregate === 'max') agg = values.reduce((a, b) => a > b ? a : b, values[0]);
+            else if (condition.aggregate === 'min') agg = values.reduce((a, b) => a < b ? a : b, values[0]);
+            else agg = values.reduce((s, v) => s + v, 0) / values.length;
+            return condition.comparator === 'above' ? agg > condition.threshold : agg < condition.threshold;
+        }
+        case 'flag_at_least': {
+            const flags = state.military.event_flags ?? {};
+            const raw = flags[condition.flag];
+            const num = typeof raw === 'number' ? raw : (typeof raw === 'boolean' ? (raw ? 1 : 0) : 0);
+            return num >= condition.min;
+        }
+        case 'metric_compare_factions': {
+            const formations = state.military?.formations ?? {};
+            const sortedIds = Object.keys(formations).sort();
+            const collect = (faction: FactionId): number => {
+                const vals: number[] = [];
+                for (const fid of sortedIds) {
+                    const f = formations[fid];
+                    if (!f || f.faction !== faction || f.status !== 'active' || f.kind !== 'brigade') continue;
+                    if (typeof f.officer_quality === 'number') vals.push(f.officer_quality);
+                }
+                if (vals.length === 0) return Number.NaN;
+                return vals.reduce((s, v) => s + v, 0) / vals.length;
+            };
+            const a = collect(condition.faction_a);
+            const b = collect(condition.faction_b);
+            if (Number.isNaN(a) || Number.isNaN(b)) return false;
+            if (condition.comparator !== 'less_than') return false;
+            if (!(a < b)) return false;
+            if (condition.baseline != null && condition.baseline_drop != null) {
+                if (!((condition.baseline - a) >= condition.baseline_drop)) return false;
+            }
+            return true;
         }
         case 'corridor_severed': {
             // BFS from from_osid to to_osid through faction-controlled territory

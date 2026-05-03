@@ -16,16 +16,17 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     bot_priority_shift: 3,
     cohesion_change: 4,
     control_change: 5,
-    doctrine_constraint: 6,
-    equipment_grant: 7,
-    guerrilla_threat: 8,
-    humanitarian_impact: 9,
-    morale_change: 10,
-    narrative: 11,
-    negotiation_capital: 12,
-    patron_pressure: 13,
-    recruitment_modifier: 14,
-    supply_delta: 15,
+    cost_ledger_annotation: 6,
+    doctrine_constraint: 7,
+    equipment_grant: 8,
+    guerrilla_threat: 9,
+    humanitarian_impact: 10,
+    morale_change: 11,
+    narrative: 12,
+    negotiation_capital: 13,
+    patron_pressure: 14,
+    recruitment_modifier: 15,
+    supply_delta: 16,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -97,6 +98,9 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             break;
         case 'bot_priority_shift':
             applyBotPriorityShift(state, effect.faction, effect.add_objectives, effect.remove_objectives, effect.duration_turns);
+            break;
+        case 'cost_ledger_annotation':
+            applyCostLedgerAnnotation(state, effect.tag, effect.text, effect.faction);
             break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
@@ -363,6 +367,29 @@ function applyAllianceLock(
         mode,
         value: clamp(value, -1, 1),
         expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** Append an audit-only cost-ledger annotation. Read by `buildCostLedger`;
+ *  never drives mechanical effects. The annotation is keyed by `tag` (a stable
+ *  identifier) and tagged with the current turn for deterministic ordering.
+ *  Single-writer: `applyEventEffects` only. Single-reader: `buildCostLedger`. */
+function applyCostLedgerAnnotation(
+    state: GameState,
+    tag: string,
+    text: string | undefined,
+    faction: FactionId | undefined
+): void {
+    if (!state.military.cost_ledger_annotations) {
+        state.military.cost_ledger_annotations = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.cost_ledger_annotations.push({
+        event_id: tag, // tag doubles as the stable identifier for the source event family
+        tag,
+        text,
+        turn: currentTurn,
+        faction,
     });
 }
 

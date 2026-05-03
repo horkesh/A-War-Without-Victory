@@ -49,6 +49,7 @@ import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
 import { FirstTurnOrientationCard, FIRST_TURN_INTRO_STORAGE_KEY } from './components/FirstTurnOrientationCard';
 import { buildFirstTurnOrientation } from './data/firstTurnOrientation';
+import { OnboardingOverlay } from './components/onboarding';
 import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
@@ -174,6 +175,28 @@ function FirstTurnOrientationWrapper() {
   const view = buildFirstTurnOrientation(state, hasSeenIntro);
   if (!view) return null;
   return <FirstTurnOrientationCard view={view} onDismiss={() => setHasSeenIntro(true)} />;
+}
+
+function OnboardingOverlayWrapper() {
+  // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
+  //
+  // Single-owner mount of the OnboardingOverlay. Reads `tutorial_state` from
+  // the loaded UI state shape (mirrored from `meta.tutorial_state`); writes
+  // through the canonical IPC bridge so persistence flows through the same
+  // serializer as autonomy/proposal writes.
+  //
+  // Faction-agnostic: no `player_faction` gate. Visibility is owned by
+  // `shouldShowOnboarding` inside OnboardingOverlay (treats absent state as
+  // "not yet dismissed").
+  const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
+  const ipc = useIPC();
+  const bridge = ipc.isAvailable
+    ? {
+        dismissTutorial: () => ipc.dismissTutorial(),
+        advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
+      }
+    : null;
+  return <OnboardingOverlay tutorialState={tutorialState} ipc={bridge} />;
 }
 
 function PeaceWarTransitionOverlay() {
@@ -953,6 +976,11 @@ function App() {
       )}
       {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
       {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
+      {/* v0.9.2 tutorial onboarding skeleton — mounted at app root.
+          Only visible on the in-game screen with a loaded save; hidden during
+          main menu / side picker. The overlay's own predicate handles the
+          dismissed-state branch. */}
+      {appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />}
     </div>
   );
 }
