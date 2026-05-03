@@ -77,13 +77,16 @@ describe('Army HQ / presidential review coherence', () => {
   });
 
   it('keys Warroom review signaling from the canonical presidential review queue', () => {
-    const source = readFileSync(
-      new URL('../src/ui/map/components/warroom/WarroomStatusBar.tsx', import.meta.url),
+    // Post-Warroom-React-migration ownership boundary: WarroomStatusBar takes
+    // `pendingReviews` as a prop; the canonical wiring lives at the caller
+    // (App.tsx) which reads `loadedGameState.presidentialReviewQueue.pendingCount`.
+    // The previous direct-read pattern was retired in the React migration.
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
     );
-
-    expect(source).toContain('loadedGameState.presidentialReviewQueue?.pendingCount');
-    expect(source).not.toContain('loadedGameState.pendingEventDecisions?.length');
+    expect(appSource).toContain('loadedGameState?.presidentialReviewQueue?.pendingCount');
+    expect(appSource).not.toContain('loadedGameState.pendingEventDecisions?.length');
   });
 
   /**

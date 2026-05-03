@@ -203,11 +203,13 @@ describe('Adapter — endgame field population contract', () => {
     );
 
     it('adapter populates costLedger when game_over is true', () => {
-        expect(adapterSource).toMatch(/costLedger.*game_over/);
+        // Adapter pattern: `let costLedger ...; if (Boolean(meta.game_over)) { costLedger = ... }`
+        // Multi-line via [\s\S]* to span the let-declaration → game_over guard.
+        expect(adapterSource).toMatch(/costLedger[\s\S]*?game_over/);
     });
 
     it('adapter populates historicalComparison when game_over is true', () => {
-        expect(adapterSource).toMatch(/historicalComparison.*game_over/);
+        expect(adapterSource).toMatch(/historicalComparison[\s\S]*?game_over/);
     });
 
     it('adapter calls buildCostLedger from endgame module', () => {
