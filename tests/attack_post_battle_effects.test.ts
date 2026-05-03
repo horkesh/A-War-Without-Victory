@@ -20,9 +20,12 @@ import {
     FACTION_LEARNING_RATE,
     DEFAULT_LEARNING_RATE,
 } from '../src/sim/combat/attack_post_battle_effects.js';
+import { recordBattleHistory } from '../src/sim/combat/attack_history_recording.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from '../src/sim/combat/officer_quality_update.js';
-import type { FactionId, FormationState, BrigadeComposition } from '../src/state/game_state.js';
+import type { FactionId, FormationId, FormationState, BrigadeComposition, GameState } from '../src/state/game_state.js';
 import type { CombatOutcome } from '../src/sim/combat/combat_math.js';
+
+// Cluster 8 — attack_history_recording.test.ts (9 it) absorbed below.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
@@ -507,5 +510,239 @@ describe('applyPostBattleMorale', () => {
                 moraleAbsorbed: false,
             });
         }).not.toThrow();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Absorbed: attack_history_recording.test.ts (Cluster 8)
+//
+// Covers: recordBattleHistory — attacker recording, no-defender,
+//         single defender, multi-defender with weights, multi-defender sorting,
+//         isConcentrated derivation, defFaction derivation.
+// ═══════════════════════════════════════════════════════════════════════════
+
+function makeHistoryFormation(overrides: Partial<FormationState> = {}): FormationState {
+    return {
+        id: 'test_brigade',
+        faction: 'RS' as FactionId,
+        name: 'Test Brigade',
+        created_turn: 1,
+        status: 'active',
+        assignment: null,
+        kind: 'brigade',
+        personnel: 1000,
+        morale: 60,
+        cohesion: 60,
+        experience: 0.3,
+        tags: [],
+        ...overrides,
+    } as FormationState;
+}
+
+function makeMinimalState(): GameState {
+    return {
+        military: { formations: {} },
+    } as unknown as GameState;
+}
+
+function baseHistoryParams(overrides: Partial<Parameters<typeof recordBattleHistory>[0]> = {}) {
+    return {
+        attackerFormations: [makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId })],
+        defenderFormation: null as FormationState | null,
+        sectorDefenseBrigades: null as FormationState[] | null,
+        sectorBrigadeWeights: null as Map<FormationId, number> | null,
+        currentTurn: 5,
+        targetOsid: 'op:test:test_1',
+        outcome: 'victory' as CombatOutcome,
+        attackerFaction: 'RBiH' as FactionId,
+        controller: 'RS' as FactionId | null,
+        flip: true,
+        finalAttackerCas: 50,
+        finalDefenderCas: 100,
+        state: makeMinimalState(),
+        battleId: 'battle_001',
+        battleEquipDefenderTanksLost: 2,
+        battleEquipDefenderArtLost: 1,
+        battleEquipAttackerTanksLost: 0,
+        battleEquipAttackerArtLost: 0,
+        battleEquipCapturedBy: 'RBiH',
+        battleEquipCapturedTanks: 1,
+        battleEquipCapturedArt: 0,
+        ...overrides,
+    };
+}
+
+describe('recordBattleHistory', () => {
+    it('records attacker engagement for a single attacker', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const params = baseHistoryParams({ attackerFormations: [atk] });
+
+        recordBattleHistory(params);
+
+        expect(atk.brigade_history).toBeDefined();
+        expect(atk.brigade_history!.battles_fought).toBe(1);
+        expect(atk.brigade_history!.battles_as_attacker).toBe(1);
+        expect(atk.brigade_history!.engagements).toHaveLength(1);
+        expect(atk.brigade_history!.engagements[0]!.role).toBe('attacker');
+        expect(atk.brigade_history!.engagements[0]!.osid).toBe('op:test:test_1');
+        expect(atk.brigade_history!.engagements[0]!.battle_id).toBe('battle_001');
+    });
+
+    it('does not crash when defenderFormation is null', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: null,
+        });
+
+        recordBattleHistory(params);
+
+        expect(atk.brigade_history).toBeDefined();
+        expect(atk.brigade_history!.battles_fought).toBe(1);
+    });
+
+    it('records single defender with correct equipment data', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const def = makeHistoryFormation({ id: 'def_1', faction: 'RS' as FactionId });
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: def,
+            battleEquipAttackerTanksLost: 3,
+            battleEquipAttackerArtLost: 2,
+            battleEquipCapturedBy: 'RS',
+            battleEquipCapturedTanks: 1,
+            battleEquipCapturedArt: 1,
+        });
+
+        recordBattleHistory(params);
+
+        expect(def.brigade_history).toBeDefined();
+        expect(def.brigade_history!.battles_fought).toBe(1);
+        expect(def.brigade_history!.battles_as_defender).toBe(1);
+        const eng = def.brigade_history!.engagements[0]!;
+        expect(eng.role).toBe('defender');
+        expect(eng.casualties_taken).toBe(100);
+        expect(eng.casualties_inflicted).toBe(50);
+        expect(eng.equipment_destroyed).toEqual({ tanks: 3, artillery: 2 });
+        expect(eng.equipment_captured).toEqual({ tanks: 1, artillery: 1 });
+    });
+
+    it('distributes casualties by weights for multi-defender', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const def1 = makeHistoryFormation({ id: 'def_a', faction: 'RS' as FactionId });
+        const def2 = makeHistoryFormation({ id: 'def_b', faction: 'RS' as FactionId });
+        const weights = new Map<FormationId, number>([
+            ['def_a' as FormationId, 0.6],
+            ['def_b' as FormationId, 0.4],
+        ]);
+
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: def1,
+            sectorDefenseBrigades: [def1, def2],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 100,
+            finalAttackerCas: 50,
+        });
+
+        recordBattleHistory(params);
+
+        expect(def1.brigade_history).toBeDefined();
+        expect(def2.brigade_history).toBeDefined();
+        expect(def1.brigade_history!.battles_fought).toBe(1);
+        expect(def2.brigade_history!.battles_fought).toBe(1);
+
+        const cas1 = def1.brigade_history!.engagements[0]!.casualties_taken;
+        const cas2 = def2.brigade_history!.engagements[0]!.casualties_taken;
+        expect(cas1 + cas2).toBe(100);
+        expect(cas1).toBe(60);
+        expect(cas2).toBe(40);
+
+        expect(def1.brigade_history!.engagements[0]!.equipment_destroyed).toEqual({ tanks: 0, artillery: 0 });
+        expect(def1.brigade_history!.engagements[0]!.equipment_captured).toEqual({ tanks: 0, artillery: 0 });
+    });
+
+    it('sorts multi-defender group by strictCompare on id', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const defZ = makeHistoryFormation({ id: 'def_z', faction: 'RS' as FactionId });
+        const defA = makeHistoryFormation({ id: 'def_a', faction: 'RS' as FactionId });
+        const weights = new Map<FormationId, number>([
+            ['def_z' as FormationId, 0.5],
+            ['def_a' as FormationId, 0.5],
+        ]);
+
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: defZ,
+            sectorDefenseBrigades: [defZ, defA],
+            sectorBrigadeWeights: weights,
+            finalDefenderCas: 10,
+            finalAttackerCas: 10,
+        });
+
+        recordBattleHistory(params);
+
+        expect(defA.brigade_history).toBeDefined();
+        expect(defZ.brigade_history).toBeDefined();
+        expect(defA.brigade_history!.battles_fought).toBe(1);
+        expect(defZ.brigade_history!.battles_fought).toBe(1);
+    });
+
+    it('isConcentrated is true when multiple attackers', () => {
+        const atk1 = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const atk2 = makeHistoryFormation({ id: 'atk_2', faction: 'RBiH' as FactionId });
+        const def = makeHistoryFormation({ id: 'def_1', faction: 'RS' as FactionId });
+
+        const params = baseHistoryParams({
+            attackerFormations: [atk1, atk2],
+            defenderFormation: def,
+        });
+
+        recordBattleHistory(params);
+
+        expect(atk1.brigade_history!.engagements[0]!.was_concentrated).toBe(true);
+        expect(atk2.brigade_history!.engagements[0]!.was_concentrated).toBe(true);
+        expect(def.brigade_history!.engagements[0]!.was_concentrated).toBe(true);
+    });
+
+    it('isConcentrated is false when single attacker', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const def = makeHistoryFormation({ id: 'def_1', faction: 'RS' as FactionId });
+
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            defenderFormation: def,
+        });
+
+        recordBattleHistory(params);
+
+        expect(atk.brigade_history!.engagements[0]!.was_concentrated).toBe(false);
+        expect(def.brigade_history!.engagements[0]!.was_concentrated).toBe(false);
+    });
+
+    it('defFaction uses controller when present', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            controller: 'RS' as FactionId,
+            attackerFaction: 'RBiH' as FactionId,
+        });
+
+        recordBattleHistory(params);
+
+        expect(atk.brigade_history!.engagements[0]!.enemy_faction).toBe('RS');
+    });
+
+    it('defFaction falls back to attackerFaction when controller is null', () => {
+        const atk = makeHistoryFormation({ id: 'atk_1', faction: 'RBiH' as FactionId });
+        const params = baseHistoryParams({
+            attackerFormations: [atk],
+            controller: null,
+            attackerFaction: 'RBiH' as FactionId,
+        });
+
+        recordBattleHistory(params);
+
+        expect(atk.brigade_history!.engagements[0]!.enemy_faction).toBe('RBiH');
     });
 });

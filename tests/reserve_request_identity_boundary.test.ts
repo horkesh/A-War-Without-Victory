@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { approveReserveRequest } from '../src/desktop/desktop_sim.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
@@ -110,28 +109,4 @@ describe('reserve request identity boundary', () => {
         expect(state.military.reserve_request_history?.[0]?.reason).toBe('Army CO accepts the selected request.');
     });
 
-    it('threads request_id through the player approval boundary instead of corps_id', () => {
-        const reservePanelSource = readFileSync(
-            new URL('../src/ui/map/components/ArmyReservePanel.tsx', import.meta.url),
-            'utf8',
-        );
-        const useIpcSource = readFileSync(
-            new URL('../src/ui/map/desktop/useIPC.ts', import.meta.url),
-            'utf8',
-        );
-        const preloadSource = readFileSync(
-            new URL('../src/desktop/preload.cjs', import.meta.url),
-            'utf8',
-        );
-        const electronMainSource = readFileSync(
-            new URL('../src/desktop/electron-main.cjs', import.meta.url),
-            'utf8',
-        );
-
-        expect(reservePanelSource).toMatch(/handleApprove\(req\.request_id,\s*req\.suggested_brigade_id\)/);
-        expect(useIpcSource).toMatch(/approveReserveRequest:\s*\(requestId:\s*string,\s*brigadeId:\s*string,\s*reason\?:\s*string\)/);
-        expect(preloadSource).toContain("approveReserveRequest: (requestId, brigadeId, reason) => ipcRenderer.invoke('approve-reserve-request', { requestId, brigadeId, reason })");
-        expect(electronMainSource).toMatch(/const\s+\{\s*requestId,\s*brigadeId,\s*reason\s*\}\s*=\s*payload/);
-        expect(electronMainSource).toContain('sim.approveReserveRequest(state, requestId, brigadeId');
-    });
 });

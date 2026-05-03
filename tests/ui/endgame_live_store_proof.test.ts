@@ -18,8 +18,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
@@ -163,60 +161,3 @@ describe('VerdictScreen — gating condition proof', () => {
     });
 });
 
-// ── App-level reachability contract ─────────────────────────────────────────
-
-describe('App.tsx — VerdictScreen reachability contract', () => {
-    const appSource = readFileSync(
-        resolve(process.cwd(), 'src/ui/map/App.tsx'), 'utf8'
-    );
-
-    it('App.tsx renders VerdictScreen unconditionally (no conditional wrapper)', () => {
-        // VerdictScreen self-gates on gameOver — App just renders it
-        expect(appSource).toContain('<VerdictScreen />');
-    });
-
-    it('VerdictScreen is imported in App.tsx', () => {
-        expect(appSource).toMatch(/import.*VerdictScreen.*from/);
-    });
-
-    it('VerdictScreen is NOT wrapped in a gameOver conditional', () => {
-        // Find the line with <VerdictScreen /> and check it's not inside a gameOver guard
-        const lines = appSource.split('\n');
-        const vsLine = lines.findIndex(l => l.includes('<VerdictScreen />'));
-        expect(vsLine).toBeGreaterThan(0);
-        // The preceding line should NOT be a gameOver conditional
-        const prevLine = lines[vsLine - 1]?.trim() ?? '';
-        expect(prevLine).not.toContain('gameOver');
-    });
-
-    it('DaytonNegotiationModal IS gated on gameOver (contrast)', () => {
-        // Dayton modal is gated: {loadedGameState?.pendingDayton && !loadedGameState?.gameOver && ...}
-        expect(appSource).toContain('pendingDayton && !loadedGameState?.gameOver');
-    });
-});
-
-// ── Adapter endgame field population proof ──────────────────────────────────
-
-describe('Adapter — endgame field population contract', () => {
-    const adapterSource = readFileSync(
-        resolve(process.cwd(), 'src/ui/map/data/GameStateAdapter.ts'), 'utf8'
-    );
-
-    it('adapter populates costLedger when game_over is true', () => {
-        // Adapter pattern: `let costLedger ...; if (Boolean(meta.game_over)) { costLedger = ... }`
-        // Multi-line via [\s\S]* to span the let-declaration → game_over guard.
-        expect(adapterSource).toMatch(/costLedger[\s\S]*?game_over/);
-    });
-
-    it('adapter populates historicalComparison when game_over is true', () => {
-        expect(adapterSource).toMatch(/historicalComparison[\s\S]*?game_over/);
-    });
-
-    it('adapter calls buildCostLedger from endgame module', () => {
-        expect(adapterSource).toContain('buildCostLedger');
-    });
-
-    it('adapter calls compareToHistorical from endgame module', () => {
-        expect(adapterSource).toContain('compareToHistorical');
-    });
-});

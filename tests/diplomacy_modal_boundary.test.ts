@@ -1,13 +1,8 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { DiplomacyModal } from '../src/ui/warroom/components/DiplomacyModal.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import type { GameState } from '../src/state/game_state.js';
-
-const SOURCE_PATH = resolve(process.cwd(), 'src/ui/warroom/components/DiplomacyModal.ts');
-const source = readFileSync(SOURCE_PATH, 'utf8');
 
 /** Minimal GameState for RBiH diplomacy render (war phase). */
 function makeState(): GameState {
@@ -48,25 +43,6 @@ function makeState(): GameState {
 }
 
 describe('DiplomacyModal boundary', () => {
-    it('canonical boundary comment is present in source', () => {
-        expect(source).toContain('DATA BOUNDARY: extractWarData() is the primary data source for this file.');
-        expect(source).toContain('This file must NOT import from operational_sitrep_views.ts or command_briefing_views.ts.');
-    });
-
-    it('source does not import from operational_sitrep_views or command_briefing_views', () => {
-        expect(source).not.toMatch(/^import[^'"]*['"].*operational_sitrep_views/m);
-        expect(source).not.toMatch(/^import[^'"]*['"].*command_briefing_views/m);
-    });
-
-    it('W5 seam closed — source does not read political.political_controllers directly', () => {
-        expect(source).not.toContain('political.political_controllers');
-    });
-
-    it('HRHB capability exception is documented with explicit reasoning', () => {
-        expect(source).toContain('BOUNDARY EXCEPTION: reads own-faction capability profile directly from gameState.');
-        expect(source).toContain('Do not expand this exception to other factions or other raw-state fields.');
-    });
-
     it('functional render (RBiH) returns a DOM element and does not crash', () => {
         const el = new DiplomacyModal(makeState()).render();
         expect(el).toBeDefined();

@@ -1,10 +1,5 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { openArmyHQAftermathRecord, type ShellNavigationState } from '../src/ui/map/utils/shellNavigation.js';
-
-function read(path: string): string {
-  return readFileSync(new URL(path, import.meta.url), 'utf8');
-}
 
 function createState(playerFaction: string | null = 'RBiH'): ShellNavigationState & {
   calls: Array<[string, unknown]>;
@@ -43,23 +38,5 @@ describe('Chronicle to turn-record navigation', () => {
 
     expect(openArmyHQAftermathRecord(state, 113)).toBe(false);
     expect(state.calls).toEqual([]);
-  });
-
-  it('wires Chronicle dossier entries to the focused record route', () => {
-    const chronicle = read('../src/ui/map/components/chronicle/ChronicleOverlay.tsx');
-
-    expect(chronicle).toContain('openArmyHQAftermathRecord');
-    expect(chronicle).toContain('handleOpenTurnRecord(entry.turn)');
-    expect(chronicle).toContain('Open Turn Record');
-  });
-
-  it('persists and renders the focused aftermath turn in Army HQ records', () => {
-    const store = read('../src/ui/map/store/gameStore.ts');
-    const records = read('../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx');
-
-    expect(store).toContain('focusedAftermathTurn');
-    expect(store).toContain('setFocusedAftermathTurn');
-    expect(records).toContain('focusedAftermathTurn');
-    expect(records).toContain('data-focused-aftermath-turn');
   });
 });

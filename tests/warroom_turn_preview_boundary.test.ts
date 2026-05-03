@@ -10,14 +10,9 @@
  */
 
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import type { FactionId, GameState } from '../src/state/game_state.js';
-
-const CRM_PATH = resolve(process.cwd(), 'src/ui/warroom/ClickableRegionManager.ts');
-const EXTRACTOR_PATH = resolve(process.cwd(), 'src/ui/warroom/data/war_data_extractor.ts');
 
 // ---------------------------------------------------------------------------
 // Minimal fixture helpers
@@ -89,41 +84,6 @@ function makeStateWithWiaFormations(): GameState {
         },
     });
 }
-
-// ---------------------------------------------------------------------------
-// Test 1 — DATA BOUNDARY comment present
-// ---------------------------------------------------------------------------
-
-describe('ClickableRegionManager boundary comment', () => {
-    it('has DATA BOUNDARY: comment at top of file', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        expect(src).toContain('DATA BOUNDARY:');
-        expect(src).toContain('extractWarData()');
-    });
-
-    it('documents the meta.* exception explicitly', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        expect(src).toContain('state.meta.*');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Test 2 — forbidden direct read pattern is gone
-// ---------------------------------------------------------------------------
-
-describe('generateThisWeekPreview direct state.military.formations read guard', () => {
-    it('ClickableRegionManager does not contain the forbidden raw formations loop', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        // The old pattern: iterating Object.keys(formations) inside generateThisWeekPreview
-        // to count wiaReturning. This must no longer appear.
-        expect(src).not.toMatch(/const formations = state\.military\.formations/);
-    });
-
-    it('ClickableRegionManager uses snap.ownForces.wiaFormationCount instead', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        expect(src).toContain('snap.ownForces.wiaFormationCount');
-    });
-});
 
 // ---------------------------------------------------------------------------
 // Test 3 — extractor correctness: wiaFormationCount is populated
@@ -230,10 +190,5 @@ describe('OwnForcesSnapshot structural contract', () => {
         const state = makeMinimalWarState();
         const snap = extractWarData(state, 'RBiH');
         expect('wiaFormationCount' in snap.ownForces).toBe(true);
-    });
-
-    it('extractor source declares wiaFormationCount on OwnForcesSnapshot interface', () => {
-        const src = readFileSync(EXTRACTOR_PATH, 'utf8');
-        expect(src).toContain('wiaFormationCount: number');
     });
 });

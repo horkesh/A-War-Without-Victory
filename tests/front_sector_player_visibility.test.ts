@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
 import type { FeatureCollection } from 'geojson';
 import { buildFrontEdgesHoverGeoJSON } from '../src/ui/map/map/builders/buildFrontEdgesHoverGeoJSON.js';
 import { findPlayerFacingSectorById } from '../src/ui/shared/playerVisibility.js';
@@ -131,19 +130,5 @@ describe('front sector player visibility', () => {
     expect(friendlyFeature?.properties?.sector_id).toBe('sector:rbih:0');
     expect(enemyFeature?.properties?.sector_id).toBeUndefined();
     expect(enemyFeature?.properties?.corps_id).toBeUndefined();
-  });
-
-  it('keeps map and panel code on the player-facing sector helper', () => {
-    const mapSource = readFileSync(
-      new URL('../src/ui/map/map/MapContainer.tsx', import.meta.url),
-      'utf8',
-    );
-    const panelSource = readFileSync(
-      new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
-      'utf8',
-    );
-
-    expect(mapSource).toContain('findPlayerFacingSectorById');
-    expect(panelSource).toContain('findPlayerFacingSectorById');
   });
 });

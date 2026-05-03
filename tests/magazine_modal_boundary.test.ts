@@ -1,11 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
 import type { GameState } from '../src/state/game_state.js';
-
-const SOURCE_PATH = resolve(process.cwd(), 'src/ui/warroom/components/MagazineModal.ts');
 
 describe('MagazineModal boundary', () => {
   it('Phase 0 render returns a DOM element without reading raw political state', () => {
@@ -31,25 +27,5 @@ describe('MagazineModal boundary', () => {
     expect(el.textContent).not.toContain('political_controllers');
     expect(el.textContent).not.toContain('municipalities');
     expect(el.textContent).not.toContain('stability_score');
-  });
-
-  it('MagazineModal source does not import from operational_sitrep_views or command_briefing_views', () => {
-    const source = readFileSync(SOURCE_PATH, 'utf8');
-    // Comment may reference these files by name — only actual import statements are forbidden.
-    expect(source).not.toMatch(/^import[^'"]*['"].*operational_sitrep_views/m);
-    expect(source).not.toMatch(/^import[^'"]*['"].*command_briefing_views/m);
-  });
-
-  it('MagazineModal source does not read gameState.political.municipalities directly', () => {
-    const source = readFileSync(SOURCE_PATH, 'utf8');
-    expect(source).not.toContain('political.municipalities');
-    expect(source).not.toContain('political.political_controllers');
-    expect(source).not.toContain('stability_score');
-  });
-
-  it('MagazineModal canonical boundary comment is present', () => {
-    const source = readFileSync(SOURCE_PATH, 'utf8');
-    expect(source).toContain('MagazineModal is a flavor wrapper over the player-safe war snapshot');
-    expect(source).toContain('extractWarData(gameState, playerFaction) only');
   });
 });

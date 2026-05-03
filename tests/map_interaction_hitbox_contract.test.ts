@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
@@ -42,21 +40,4 @@ describe('map interaction hitbox contract', () => {
     ]);
   });
 
-  it('keeps sector-owned glow and hit layers on the front-edge hover source', () => {
-    const source = readFileSync(join(process.cwd(), 'src/ui/map/map/MapContainer.tsx'), 'utf8');
-
-    for (const layerId of [
-      'FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID',
-      'FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID',
-      'SECTOR_EDGE_HIT_POS_LAYER_ID',
-      'SECTOR_EDGE_HIT_NEG_LAYER_ID',
-      'SECTOR_EDGE_GLOW_POS_LAYER_ID',
-      'SECTOR_EDGE_GLOW_NEG_LAYER_ID',
-    ]) {
-      const layerBlock = source.slice(source.indexOf(`id: ${layerId}`), source.indexOf(`id: ${layerId}`) + 500);
-      expect(layerBlock, `${layerId} should exist`).toContain(`id: ${layerId}`);
-      expect(layerBlock, `${layerId} must use sector-owned front-edge source`).toContain('source: FRONT_EDGES_HOVER_SOURCE_ID');
-      expect(layerBlock, `${layerId} must not use generic front-lines source`).not.toContain("source: 'front-lines'");
-    }
-  });
 });

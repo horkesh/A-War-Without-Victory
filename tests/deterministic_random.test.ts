@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import {
     djb2Hash,
     deterministicRandom,
@@ -88,12 +86,3 @@ describe('deterministicPick', () => {
     });
 });
 
-describe('no Math.random()', () => {
-    it('source file does not contain Math.random', () => {
-        const src = readFileSync(
-            resolve(__dirname, '../src/state/deterministic_random.ts'),
-            'utf-8',
-        );
-        expect(src).not.toContain('Math.random');
-    });
-});

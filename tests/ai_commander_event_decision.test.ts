@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { buildEventDecisionPrompt, generateEventDecision } from '../src/sim/ai_commander/event_decision_ai.js';
+import { getAdvisorRecommendation } from '../src/sim/ai_commander/player_advisor.js';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 import type { EventDefinition, EventResponseOption } from '../src/sim/events/event_types.js';
 import type { AiClient } from '../src/sim/ai_commander/ai_client.js';
 import type { AiPrompt, AiResponse } from '../src/sim/ai_commander/ai_types.js';
+
+// Cluster 6 — ai_commander_advisor.test.ts (2 it) absorbed at end of file.
 
 /** Minimal GameState stub for testing. */
 function stubState(turn = 10): GameState {
@@ -199,5 +202,28 @@ describe('generateEventDecision', () => {
         };
         const result = await generateEventDecision(stubState(), 'RS', stubEvent(), noChoiceClient);
         expect(result).toBeNull();
+    });
+});
+
+// ── Absorbed: ai_commander_advisor.test.ts (Cluster 6) ───────────────────────
+
+describe('player advisor', () => {
+    it('returns unavailable message when no client', async () => {
+        const state = { meta: { turn: 5 }, military: {} } as unknown as GameState;
+        const result = await getAdvisorRecommendation(state, 'RBiH', 'situation_analysis', null);
+        expect(result).not.toBeNull();
+        expect(result!.assessment).toContain('not available');
+    });
+
+    it('returns error message when client fails', async () => {
+        const state = { meta: { turn: 5 }, military: {} } as unknown as GameState;
+        const mockClient = {
+            provider: 'test',
+            isAvailable: () => true,
+            generateDecision: async () => { throw new Error('network error'); },
+        };
+        const result = await getAdvisorRecommendation(state, 'RBiH', 'situation_analysis', mockClient);
+        expect(result).not.toBeNull();
+        expect(result!.assessment).toContain('error');
     });
 });

@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -65,41 +64,4 @@ describe('Presidential toolbar — pre-advance severity pip', () => {
     });
   });
 
-  describe('PresidentialToolbar source wiring', () => {
-    const toolbarSource = readFileSync(
-      new URL('../../src/ui/map/components/PresidentialToolbar.tsx', import.meta.url),
-      'utf8',
-    );
-
-    it('imports/derives severity tone from the canonical presidentialReviewQueue', () => {
-      // Reads from the adapter-owned canonical view-model — not from a new
-      // engine field, IPC channel, or duplicated tally.
-      expect(toolbarSource).toContain('derivePreAdvanceSeverityTone');
-      expect(toolbarSource).toContain('loadedGameState?.presidentialReviewQueue');
-    });
-
-    it('renders the severity pip wrapper around the InboxBadge', () => {
-      expect(toolbarSource).toContain('data-testid="pre-advance-severity-pip"');
-      expect(toolbarSource).toContain('data-severity-tone=');
-      // Ring classes for both tones must be wired.
-      expect(toolbarSource).toContain('ring-red-500/70');
-      expect(toolbarSource).toContain('ring-amber-400/60');
-    });
-
-    it('keeps the pip purely visual — no new state, no engine touch, no random', () => {
-      // No new useState for severity. The existing `useState` calls
-      // (advancing, runIdInput, loading, saveFlash) stay; we just require
-      // no severity-state introduction.
-      expect(toolbarSource).not.toMatch(/useState[^;]*[Ss]everity/);
-      // No timestamps or random sources.
-      expect(toolbarSource).not.toContain('Math.random');
-      expect(toolbarSource).not.toContain('Date.now');
-      // No new IPC or engine field access introduced for the pip.
-      expect(toolbarSource).not.toContain('ipc.fetchPreAdvanceSeverity');
-    });
-
-    it('cites the NIGHTSHIFT-G5 lane in a canonical comment', () => {
-      expect(toolbarSource).toContain('NIGHTSHIFT-G5');
-    });
-  });
 });

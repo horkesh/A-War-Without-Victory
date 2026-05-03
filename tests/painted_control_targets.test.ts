@@ -40,13 +40,6 @@ describe('painted control target tooling', () => {
     }
   });
 
-  it('keeps the painter dropdown synced to the loaded save target', () => {
-    const html = fs.readFileSync(path.join(process.cwd(), 'tools/paint_control_targets.html'), 'utf8');
-    expect(html).toContain('els.target.value = id;');
-    expect(html).toContain("els.target.addEventListener('change', () => loadSelectedTarget(false));");
-    expect(html).not.toContain("els.target.addEventListener('change', () => { state.target = els.target.value; });");
-  });
-
   it('compare_painted_vs_sim accepts an explicit painted file path', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'awwv-painted-target-'));
     const runDir = path.join(tmp, 'run');

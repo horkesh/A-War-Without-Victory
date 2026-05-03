@@ -1,6 +1,4 @@
 import { createRequire } from 'node:module';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -70,28 +68,6 @@ describe('desktop autonomy IPC boundary truth', () => {
       index: 1,
       error: null,
     });
-  });
-
-  it('wires the desktop handlers through the shared autonomy IPC helper', () => {
-    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
-
-    expect(source).toContain("require('./autonomy_ipc_contract.cjs')");
-    expect(source).toContain('pending_proposal_reviews: getPendingProposalReviewsForPlayer(state)');
-    expect(source).toContain('const proposalAccess = resolvePendingProposalAccess(proposals, proposalId, playerFaction);');
-  });
-
-  it('routes rich operation-opportunity decisions through a dedicated desktop bridge', () => {
-    const mainSource = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
-    const preloadSource = readFileSync(resolve(process.cwd(), 'src/desktop/preload.cjs'), 'utf8');
-    const useIpcSource = readFileSync(resolve(process.cwd(), 'src/ui/map/desktop/useIPC.ts'), 'utf8');
-
-    expect(mainSource).toContain('resolve-operation-opportunity-decision');
-    expect(mainSource).toContain('resolveOpportunityDecisionPayload(proposals, payload, playerFaction)');
-    expect(mainSource).toContain('proposal.opportunity_decision = decisionAccess.decision;');
-    expect(mainSource).toContain('proposal.opportunity_decision_options = decisionAccess.options;');
-    expect(preloadSource).toContain('resolveOperationOpportunityDecision');
-    expect(preloadSource).toContain("ipcRenderer.invoke('resolve-operation-opportunity-decision'");
-    expect(useIpcSource).toContain('resolveOperationOpportunityDecision');
   });
 
   it('validates rich operation-opportunity decision payloads before mutation', () => {

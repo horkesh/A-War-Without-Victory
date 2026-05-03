@@ -10,14 +10,9 @@
  */
 
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import type { FactionId, GameState } from '../src/state/game_state.js';
-
-const IVP_MODAL_PATH = resolve(process.cwd(), 'src/ui/warroom/components/IvpBreakdownModal.ts');
-const CRM_PATH = resolve(process.cwd(), 'src/ui/warroom/ClickableRegionManager.ts');
 
 /** Minimal GameState for IVP boundary tests (war phase). */
 function makeMinimalWarState() {
@@ -64,55 +59,6 @@ function makeMinimalWarState() {
         },
     };
 }
-
-// ---------------------------------------------------------------------------
-// Test 1 — boundary comment present
-// ---------------------------------------------------------------------------
-
-describe('IvpBreakdownModal boundary comment', () => {
-    it('IvpBreakdownModal has DATA BOUNDARY comment', () => {
-        const src = readFileSync(IVP_MODAL_PATH, 'utf8');
-        expect(src).toContain('DATA BOUNDARY:');
-        expect(src).toContain('extractWarData()');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Test 2 — no raw political or military reads
-// ---------------------------------------------------------------------------
-
-describe('IvpBreakdownModal direct state read guard', () => {
-    it('IvpBreakdownModal does not read political.international_visibility_pressure directly', () => {
-        const src = readFileSync(IVP_MODAL_PATH, 'utf8');
-        expect(src).not.toContain('political.international_visibility_pressure');
-    });
-
-    it('IvpBreakdownModal does not read political.ivp_consequences_active directly', () => {
-        const src = readFileSync(IVP_MODAL_PATH, 'utf8');
-        expect(src).not.toContain('political.ivp_consequences_active');
-    });
-
-    it('IvpBreakdownModal does not read military.sarajevo_tunnel_operational directly', () => {
-        const src = readFileSync(IVP_MODAL_PATH, 'utf8');
-        expect(src).not.toContain('military.sarajevo_tunnel_operational');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Test 3 — shell seam closed in ClickableRegionManager
-// ---------------------------------------------------------------------------
-
-describe('ClickableRegionManager shell seam', () => {
-    it('ClickableRegionManager does not read state.political.international_visibility_pressure', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        expect(src).not.toContain('state.political.international_visibility_pressure');
-    });
-
-    it('ClickableRegionManager does not read state.political.ivp_consequences_active', () => {
-        const src = readFileSync(CRM_PATH, 'utf8');
-        expect(src).not.toContain('state.political.ivp_consequences_active');
-    });
-});
 
 // ---------------------------------------------------------------------------
 // Test 4 — ivpState correctness

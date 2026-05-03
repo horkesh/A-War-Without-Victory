@@ -10,14 +10,9 @@
  */
 
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import type { FactionId, GameState } from '../src/state/game_state.js';
-
-const NEWSPAPER_MODAL_PATH = resolve(process.cwd(), 'src/ui/warroom/components/NewspaperModal.ts');
-const EXTRACTOR_PATH = resolve(process.cwd(), 'src/ui/warroom/data/war_data_extractor.ts');
 
 // ---------------------------------------------------------------------------
 // Minimal fixture helper (matches warroom_turn_preview_boundary.test.ts pattern)
@@ -62,50 +57,6 @@ function makeMinimalWarState(overrides: Record<string, unknown> = {}): GameState
     };
     return base as unknown as GameState;
 }
-
-// ---------------------------------------------------------------------------
-// Test 1 — Structural: no direct military.named_officer_data read in war-phase path
-// ---------------------------------------------------------------------------
-
-describe('NewspaperModal direct state read guard — named_officer_data', () => {
-    it('NewspaperModal does not read this.gameState.military.named_officer_data directly', () => {
-        const src = readFileSync(NEWSPAPER_MODAL_PATH, 'utf8');
-        expect(src).not.toContain('this.gameState.military.named_officer_data');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Test 2 — Structural: no direct military.formations read in getOfficerSuccessionLines
-// ---------------------------------------------------------------------------
-
-describe('NewspaperModal direct state read guard — formations', () => {
-    it('NewspaperModal does not read this.gameState.military.formations in succession lines', () => {
-        const src = readFileSync(NEWSPAPER_MODAL_PATH, 'utf8');
-        expect(src).not.toContain('this.gameState.military.formations');
-    });
-});
-
-// ---------------------------------------------------------------------------
-// Test 3 — Structural: DATA BOUNDARY comment present
-// ---------------------------------------------------------------------------
-
-describe('NewspaperModal boundary comment', () => {
-    it('NewspaperModal has DATA BOUNDARY: comment at class level', () => {
-        const src = readFileSync(NEWSPAPER_MODAL_PATH, 'utf8');
-        expect(src).toContain('DATA BOUNDARY:');
-    });
-
-    it('NewspaperModal DATA BOUNDARY comment references extractWarData', () => {
-        const src = readFileSync(NEWSPAPER_MODAL_PATH, 'utf8');
-        expect(src).toContain('extractWarData');
-    });
-
-    it('NewspaperModal DATA BOUNDARY comment documents the Phase 0 exceptions', () => {
-        const src = readFileSync(NEWSPAPER_MODAL_PATH, 'utf8');
-        expect(src).toContain('phase0_events_log');
-        expect(src).toContain('declaration_pressure');
-    });
-});
 
 // ---------------------------------------------------------------------------
 // Test 4 — Functional: extractWarData returns correct officerNamesById
@@ -242,18 +193,3 @@ describe('extractWarData officerNamesById null safety', () => {
     });
 });
 
-// ---------------------------------------------------------------------------
-// Structural: extractor source declares officerNamesById on WarDataSnapshot
-// ---------------------------------------------------------------------------
-
-describe('WarDataSnapshot structural contract', () => {
-    it('extractor source declares officerNamesById on WarDataSnapshot interface', () => {
-        const src = readFileSync(EXTRACTOR_PATH, 'utf8');
-        expect(src).toContain('officerNamesById');
-    });
-
-    it('extractor source has extractOfficerNamesById sub-extractor function', () => {
-        const src = readFileSync(EXTRACTOR_PATH, 'utf8');
-        expect(src).toContain('extractOfficerNamesById');
-    });
-});

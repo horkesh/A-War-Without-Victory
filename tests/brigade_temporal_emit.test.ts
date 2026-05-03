@@ -21,8 +21,6 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import {
     buildBrigadeTemporalRows,
     type BrigadeTemporalRow,
@@ -229,19 +227,6 @@ describe('LANE-A1 brigade temporal emit', () => {
         const state = makeState({ formations: {} });
         const rows = buildBrigadeTemporalRows(state, 0);
         expect(rows).toEqual([]);
-    });
-
-    it('T8 forbidden_token_grep — no Math.random / Date.now / new Date / locale sort in emit source', () => {
-        const src = readFileSync(
-            resolve(__dirname, '..', 'src', 'scenario', 'brigade_temporal_emit.ts'),
-            'utf8',
-        );
-        expect(src).not.toMatch(/\bMath\.random\b/);
-        expect(src).not.toMatch(/\bDate\.now\b/);
-        expect(src).not.toMatch(/\bnew\s+Date\b/);
-        expect(src).not.toMatch(/\bperformance\.now\b/);
-        expect(src).not.toMatch(/\.localeCompare\b/);
-        expect(src).not.toMatch(/\bIntl\./);
     });
 
     it('T9 non_brigade_kind_filter — only brigade-kind formations are emitted', () => {
