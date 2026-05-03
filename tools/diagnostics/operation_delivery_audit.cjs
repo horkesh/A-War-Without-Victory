@@ -102,7 +102,31 @@ function loadAdjacency(repoRoot) {
 //   'no_contact_other'            : total_attacks == 0 but first_obj IS
 //                                   front-adjacent (e.g. participants never
 //                                   reached staging, op never opened fire
-//                                   for non-pathing reasons).
+//                                   for non-pathing reasons). Preserved as
+//                                   a fallback when recovery_reason does not
+//                                   discriminate one of the three sub-classes
+//                                   below.
+//
+// LANE-NIGHTSHIFT-N6 (2026-05-03): the historical 'no_contact_other' bucket
+// collapsed three distinct binding mechanisms. Sub-predicates now split by
+// op-level `recovery_reason` when total_attacks == 0 and the first objective
+// is front-adjacent:
+//   'no_launch_readiness'         : recovery_reason == 'planning_invalidated'.
+//                                   Commander invalidated the plan during
+//                                   planning (e.g. participants never reached
+//                                   staging before plan abandoned, intel
+//                                   shifted, force_ratio dropped below gate).
+//                                   This is the family that the LANE-B1
+//                                   cooldown bounds (the 6x repeat loop).
+//   'no_opening_attack'           : recovery_reason in {'max_failures',
+//                                   'no_logged_attempt'}. Op entered
+//                                   execution but `hasExecutableOpeningAttack`
+//                                   never returned an actionable axis-relevant
+//                                   attack — staging reached but no attack fired.
+//   'no_staging_march'            : recovery_reason in {'brigade_attrition',
+//                                   'orphaned_sector'}. Participants destroyed
+//                                   in transit, or sector dissolved during the
+//                                   op so staging concept evaporated.
 //   'unknown'                     : insufficient data.
 //
 // Note: predicates use the *final-save* political control snapshot, which
@@ -124,7 +148,7 @@ function frontAdjacentApproachOsids(adjacency, controllers, firstObjective, fact
     return out;
 }
 
-function classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, axesPresent) {
+function classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, axesPresent, recoveryReason) {
     const targets = asArray(axis.objectives_targeted);
     const captured = asArray(axis.objectives_captured);
     const attacks = Number.isFinite(+axis.total_attacks) ? +axis.total_attacks : 0;
@@ -158,7 +182,20 @@ function classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, axe
         } else if (friendlyApproach.length === 0) {
             predicate = 'no_contact_pathing';
         } else {
-            predicate = 'no_contact_other';
+            // LANE-NIGHTSHIFT-N6: split the historical 'no_contact_other'
+            // bucket into three sub-classes by op-level recovery_reason.
+            // /operations-expert Tier 1 evidence: n1621 had 23 ops collapsed
+            // under no_contact_other masking distinct binding mechanisms.
+            const reason = typeof recoveryReason === 'string' ? recoveryReason : '';
+            if (reason === 'planning_invalidated') {
+                predicate = 'no_launch_readiness';
+            } else if (reason === 'max_failures' || reason === 'no_logged_attempt') {
+                predicate = 'no_opening_attack';
+            } else if (reason === 'brigade_attrition' || reason === 'orphaned_sector') {
+                predicate = 'no_staging_march';
+            } else {
+                predicate = 'no_contact_other';
+            }
         }
     } else {
         predicate = 'unknown';
@@ -182,8 +219,8 @@ function classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, axe
     };
 }
 
-function buildAxisRow(axis, opTotalAttacks, controllers, adjacency, faction) {
-    const cls = classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, true);
+function buildAxisRow(axis, opTotalAttacks, controllers, adjacency, faction, recoveryReason) {
+    const cls = classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, true, recoveryReason);
     return {
         axis_id: String(axis.axis_id || ''),
         axis_name: String(axis.axis_name || ''),
@@ -194,7 +231,7 @@ function buildAxisRow(axis, opTotalAttacks, controllers, adjacency, faction) {
     };
 }
 
-function buildLegacyAxisRow(aar, controllers, adjacency, faction) {
+function buildLegacyAxisRow(aar, controllers, adjacency, faction, recoveryReason) {
     // Legacy flat op (no axes); synthesize a single axis row.
     const fakeAxis = {
         axis_id: '(flat)',
@@ -204,7 +241,7 @@ function buildLegacyAxisRow(aar, controllers, adjacency, faction) {
         objectives_captured: asArray(aar.objectives_captured),
         total_attacks: aar.total_attacks,
     };
-    const cls = classifyAxis(fakeAxis, aar.total_attacks, controllers, adjacency, faction, false);
+    const cls = classifyAxis(fakeAxis, aar.total_attacks, controllers, adjacency, faction, false, recoveryReason);
     return {
         axis_id: '(flat)',
         axis_name: '(flat)',
@@ -276,12 +313,13 @@ function buildOpRows({ runDir, includeActive }) {
 
         const faction = String(aar.faction || '');
         const axes = asArray(aar.axis_summaries);
+        const axisRecoveryReason = typeof aar.recovery_reason === 'string' ? aar.recovery_reason : '';
         const axisRows = axes.length > 0
             ? axes
                 .slice()
                 .sort((a, b) => strictCompare(String(a.axis_id || ''), String(b.axis_id || '')))
-                .map((axis) => buildAxisRow(axis, aar.total_attacks, controllers, adjacency, faction))
-            : [buildLegacyAxisRow(aar, controllers, adjacency, faction)];
+                .map((axis) => buildAxisRow(axis, aar.total_attacks, controllers, adjacency, faction, axisRecoveryReason))
+            : [buildLegacyAxisRow(aar, controllers, adjacency, faction, axisRecoveryReason)];
 
         const totalAttacks = Number.isFinite(+aar.total_attacks) ? +aar.total_attacks : 0;
         const totalCaptured = asArray(aar.objectives_captured).length;
@@ -406,6 +444,9 @@ function predicateEmoji(predicate) {
         case 'target_already_friendly': return 'PRE-FRIENDLY';
         case 'contacted_but_underdelivered': return 'UNDERDELIV';
         case 'no_contact_pathing': return 'NO-CONTACT-PATH';
+        case 'no_launch_readiness': return 'NO-LAUNCH-READINESS';
+        case 'no_opening_attack': return 'NO-OPENING-ATTACK';
+        case 'no_staging_march': return 'NO-STAGING-MARCH';
         case 'no_contact_other': return 'NO-CONTACT-OTHER';
         case 'partial_delivery': return 'PARTIAL';
         case 'contacted_no_capture': return 'STALEMATE';
