@@ -20,6 +20,7 @@ import { getAllTerritorialPackages, getTerritorialPackageById } from './territor
 import { getAllInstitutionalPackages } from './institutional_packages.js';
 import { evaluateBotResponse, getCompositeCapital, computeProposalCostToFaction } from './bot_negotiation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -272,6 +273,11 @@ export function resolveDaytonNegotiation(
     // Mark game as over
     state.meta.game_over = true;
     state.meta.outcome = 'dayton';
+
+    // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
+    // verdict / cost ledger / historical comparison are preserved across
+    // save/load round-trip even if post-Dayton bot drift mutates state.
+    freezeEndgameSnapshot(state);
 
     return result;
 }

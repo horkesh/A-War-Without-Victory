@@ -15,6 +15,7 @@ import { PEACE_PLAN_REJECTION_SUPPORT_COST } from './patron_pressure.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
+import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -248,6 +249,11 @@ export function resolvePeacePlan(
         if (!state.military.event_flags) state.military.event_flags = {};
         state.military.event_flags['war_ended_early'] = true;
         state.military.event_flags['early_peace_implemented'] = planId;
+        // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
+        // verdict / cost ledger / historical comparison are preserved across
+        // save/load round-trip even if subsequent engine activity perturbs
+        // the state. Idempotent.
+        freezeEndgameSnapshot(state);
     } else {
         // Apply rejection consequences
         applyRejectionConsequences(state, plan, rejectionFactions);

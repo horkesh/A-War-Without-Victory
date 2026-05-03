@@ -1272,6 +1272,41 @@ export interface StateMeta {
     autonomy_overrides?: AutonomyOverride[];
     /** v0.8.4 Phase B: Pending AI proposal reviews at Level 1 (Assisted). Player must accept or reject before they take effect. */
     pending_proposal_reviews?: PendingProposalReview[];
+    /**
+     * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame snapshot.
+     *
+     * Set ONCE at game-over from `freezeEndgameSnapshot(state)` (3 termination
+     * writers: resolvePeacePlan-allAccepted, resolveDaytonNegotiation, and
+     * checkWarTermination collapse/turn-limit branches). The adapter prefers
+     * this snapshot over recomputing `gameVerdict` / `costLedger` /
+     * `historicalComparison` from live state, so post-Dayton bot drift can't
+     * perturb the verdict on save/load round-trip.
+     *
+     * Older saves without this field fall back to the existing recompute path.
+     */
+    endgame_snapshot?: EndgameSnapshot;
+}
+
+/**
+ * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame outcome.
+ *
+ * Three derived shapes captured at termination so save/load round-trips
+ * preserve verdict identical regardless of post-termination engine drift.
+ * Fields are typed as opaque `unknown` to avoid cross-package type imports
+ * in `game_state.ts`; the adapter narrows them back to their original
+ * shapes when reading.
+ */
+export interface EndgameSnapshot {
+    /** Turn at which the snapshot was frozen. */
+    frozen_turn: number;
+    /** Outcome string at freeze time (`meta.outcome`). Stored for cross-check. */
+    outcome: string;
+    /** GameVerdict from `computeFullVerdict` at freeze time. */
+    verdict?: unknown;
+    /** Cost ledger from `buildCostLedger` at freeze time. */
+    cost_ledger?: unknown;
+    /** Historical comparison from `compareToHistorical` at freeze time. */
+    historical_comparison?: unknown;
 }
 
 export interface NegotiationLedgerEntry {

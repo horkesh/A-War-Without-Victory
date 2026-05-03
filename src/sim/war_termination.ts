@@ -7,6 +7,7 @@
 
 import type { GameState } from '../state/game_state.js';
 import { evaluateVictoryConditions } from '../scenario/victory_conditions.js';
+import { freezeEndgameSnapshot } from './endgame/endgame_snapshot.js';
 
 /** Default max turns (4 years at 1 turn/week). */
 const DEFAULT_MAX_TURNS = 208;
@@ -162,9 +163,16 @@ function checkFactionCollapse(state: GameState): WarTerminationResult | null {
 /**
  * Apply war termination result to game state.
  * Sets meta.game_over and meta.outcome when triggered.
+ *
+ * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): also freezes the endgame snapshot
+ * once game_over is set. The frozen snapshot preserves verdict / cost
+ * ledger / historical comparison across save/load round-trip so post-
+ * termination engine drift cannot perturb the verdict. Idempotent —
+ * subsequent calls are no-ops.
  */
 export function applyWarTermination(state: GameState, result: WarTerminationResult): void {
     if (!result.game_over) return;
     state.meta.game_over = true;
     state.meta.outcome = result.outcome ?? 'unknown';
+    freezeEndgameSnapshot(state);
 }

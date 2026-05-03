@@ -1780,12 +1780,30 @@ export function parseGameState(json: unknown): LoadedGameState {
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
-        // Game over
+        // Game over.
+        // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): when state.meta.endgame_snapshot
+        // is present (set by freezeEndgameSnapshot at termination), prefer the
+        // frozen values over recomputing from live state. This keeps verdict
+        // byte-stable across save/load round-trip even if post-termination
+        // bot drift mutates the state. Older saves without the snapshot fall
+        // back to the existing recompute path.
         gameOver: Boolean(meta.game_over),
         gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
-        gameVerdict: Boolean(meta.game_over) ? deriveGameVerdict(state) : undefined,
-        costLedger: Boolean(meta.game_over) ? deriveCostLedger(state) : undefined,
-        historicalComparison: Boolean(meta.game_over) ? deriveHistoricalComparison(state) : undefined,
+        gameVerdict: Boolean(meta.game_over)
+            ? (meta.endgame_snapshot?.verdict !== undefined
+                ? (meta.endgame_snapshot.verdict as ReturnType<typeof deriveGameVerdict>)
+                : deriveGameVerdict(state))
+            : undefined,
+        costLedger: Boolean(meta.game_over)
+            ? (meta.endgame_snapshot?.cost_ledger !== undefined
+                ? (meta.endgame_snapshot.cost_ledger as ReturnType<typeof deriveCostLedger>)
+                : deriveCostLedger(state))
+            : undefined,
+        historicalComparison: Boolean(meta.game_over)
+            ? (meta.endgame_snapshot?.historical_comparison !== undefined
+                ? (meta.endgame_snapshot.historical_comparison as ReturnType<typeof deriveHistoricalComparison>)
+                : deriveHistoricalComparison(state))
+            : undefined,
     };
 }
 
@@ -2538,10 +2556,21 @@ function derivePendingProposalReviews(
     return pending.length > 0 ? pending : undefined;
 }
 
+// LANE-NIGHTSHIFT-N7 (Mission D#5, 2026-05-03): wrap the silent catch with
+// console.warn so when verdict/ledger/comparison computation throws and we
+// fall back to undefined (which routes UI to FallbackGameOver), next-session
+// triage has the error message + outcome context. No behavior change; pure
+// observability. /technical-architect Mission D #5.
 function deriveGameVerdict(state: any): GameVerdict | undefined {
     try {
         return computeFullVerdict(state);
-    } catch {
+    } catch (err) {
+        console.warn(
+            '[adapter] deriveGameVerdict threw:',
+            err instanceof Error ? err.message : String(err),
+            'outcome:',
+            state?.meta?.outcome,
+        );
         return undefined;
     }
 }
@@ -2549,7 +2578,13 @@ function deriveGameVerdict(state: any): GameVerdict | undefined {
 function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
     try {
         return buildCostLedger(state as GameState);
-    } catch {
+    } catch (err) {
+        console.warn(
+            '[adapter] deriveCostLedger threw:',
+            err instanceof Error ? err.message : String(err),
+            'outcome:',
+            state?.meta?.outcome,
+        );
         return undefined;
     }
 }
@@ -2558,7 +2593,13 @@ function deriveHistoricalComparison(state: any): LoadedGameState['historicalComp
     try {
         const ledger = buildCostLedger(state as GameState);
         return compareToHistorical(ledger, historicalBaseline as any);
-    } catch {
+    } catch (err) {
+        console.warn(
+            '[adapter] deriveHistoricalComparison threw:',
+            err instanceof Error ? err.message : String(err),
+            'outcome:',
+            state?.meta?.outcome,
+        );
         return undefined;
     }
 }
