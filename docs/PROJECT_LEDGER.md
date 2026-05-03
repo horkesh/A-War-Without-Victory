@@ -1,3 +1,62 @@
+## [2026-05-03] feat(round2): six-lane parallel ship (LANE-NIGHTSHIFT-ROUND2 commit `e4c661d5`)
+
+**Type:** Multi-lane behavioral + content + observability + audit. Engine narrow-scope; faction-agnostic; Ring 1; no §6 sign-off.
+
+**Why:** User directive ("push to 0.9.5 in one round"). Six lanes shipped in parallel autonomous dispatch. Single 40w smoke covers items 1+2 engine surfaces.
+
+**Lanes:**
+- **R2-1 must_hold variable multiplier** — flat 1.5× → `max(2.0, min(5.0, 0.75 × commitment_ratio))` at `src/sim/combat/commander/allocate.ts`. /game-designer verdict-D. Pressure-responsive, faction-agnostic. 22/22 lane tests + 255/255 commander regression. Plumbing: zero new fields (reads existing `zone.commitment_ratio`).
+- **R2-2 divergence event seeds** — 6/7 Ring 1 / no-§6 events: `csq_alliance_holds_past_w35`, `csq_paramilitary_authorization_refused`, `csq_enclave_held_alt_intervention` (audit-only on rupture), `csq_patron_pressure_resisted_streak`, `csq_early_peace_acceptance_w120`, `csq_force_quality_inversion`. 7th (`csq_corps_redeployed_off_axis`) HELD per STOP rule (per-corps `historical_axis_munis` config not yet on `CorpsCommandState`). Engine extensions: 4 new condition kinds + 1 new `cost_ledger_annotation` effect family + `MilitaryState.cost_ledger_annotations` additive optional field. 7/7 lane tests; 225/225 focused regression.
+- **R2-3 tutorial onboarding skeleton** — opens v0.9.2. `StateMeta.tutorial_state` field + `OnboardingOverlay/Step/steps` components + `tutorial:dismiss`/`tutorial:advance-step` IPC. 3/3 lane tests. UI-only; no engine sim mutations.
+- **R2-4 perf baseline audit** — opens v0.9.3. 40w n1626 hash `876597582e7ae8f7`: per-turn mean 3,094ms (30.9× over <100ms target); supply-osid 18.2%; bot orders 562ms combined; 5.6MB/turn growth. P0 flagged: every turn exceeds 1s. Architectural change required; named hot phases. Audit + raw data only — instrumentation reverted.
+- **R2-5 OSID damage seed** — opens v0.9.4. `tools/build_osid_damage_seed.cjs` builder + `data/derived/osid_damage_seed.json` (445 OSIDs scored from n1624). Score: `1.0×battles + 0.01×casualties + 2.0×flips + 1.5×spikes`. Top-10 dominated by sustained displacement spikes in urban OSIDs (Sarajevo cluster, Banja Luka, Brčko, Prijedor, Bijeljina) + Maglaj `cobe_2` battle node. 2/2 lane tests.
+- **R2-6 Srebrenica rupture diagnostic** — §6-BLOCKED for fix; audit-only. `tools/diagnostics/srebrenica_rupture_trace.cjs` + audit report with 5 binding §6 sign-off questions. Top hypothesis: VRS Drina under-commits at trigger window (bot AI gap; Krivaja-95 launched t180 with 0.092 force_ratio; 9,434 perimeter pers available but corps commander does not concentrate). Top question Q-CANON-RUPT-4: Ring-2 emergent vs heuristic. NO modification of `enclave_resilience.ts`, OOB JSON, rupture conditions, FORAWWV, paint anchors, or `political_controllers`. 3/3 diagnostic tests.
+
+**Verification:**
+- Pre-merge `tsc --noEmit` clean.
+- Lane tests in batch: 45/45 GREEN (must_hold 22, divergence 7, tutorial 3, srebrenica diag 3, morale override 10).
+- 40w smoke n1627 hash `a2a51d4a9994a7f5` vs N4 baseline n1624 `3b0426b1ca73a547`. /scenario-creator-runner-tester verdict: NARROW BEHAVIORAL DRIFT (calibration-flat). orders 134→131 (RS −2 / RBiH −1 / HRHB 0 — faction-symmetric); flips_applied 43=43; control_alignment BYTE-IDENTICAL; anchors 26/27 (same brka_2 carryover); benchmarks 6/6. Drift shape consistent with item-1 must_hold tightening; item-2 events inert in 40w (later-turn triggers).
+- /war-or-game verdict: SHIP. P0 none. P1 monitor early-peace + force-quality thresholds at 52w/188w. Variable multiplier matches historical reinforcement scaling (Ozren, Bihać, Kupres, Mostar).
+
+**Hash drift class:** Lane 1 BEHAVIORAL global narrow-scope; Lane 2 STATE-SHAPE additive + BEHAVIORAL inert in 40w; Lanes 3-6 NONE.
+
+**Sensitive-history compliance:** All Ring 1, faction-agnostic, no rupture/enclave/OOB/FORAWWV touch. R2-6 explicitly preserves §6 boundary by being audit-only and naming binding canon questions for future sign-off work.
+
+**Successor handoffs:**
+- R2-2: `csq_corps_redeployed_off_axis` needs per-corps `historical_axis_munis` config + off-axis duration counter.
+- R2-4: top-3 supply-osid + bot-orders + sector-reconciliation hot phases for next perf lane.
+- R2-5: visual rendering layer that consumes `osid_damage_seed.json` (v0.9.4 Map That Scars implementation).
+- R2-6: §6 sign-off process for Q-CANON-RUPT-4 (Ring-2 emergent vs heuristic) before any fix can ship.
+
+---
+
+## [2026-05-03] feat(combat): morale-collapse dissolution override — shadow-flag default-off (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT commit `58624617`)
+
+**Type:** Canon amendment + state-shape additive + gated engine path. Faction-agnostic; Ring 1; user "B" sign-off + /game-designer + /historian pre-merge gates.
+
+**Why:** Mission B-4 morale-zombie dissolution from /technical-architect endgame audit. A 2000-personnel brigade at zero morale for 32+ days is the historical absurdity (cf. 9th Grahovo LIB BB1 p.455, post-Srebrenica 28th Division reconstitution BB1 p.443) — the personnel cap (>=800) blocks dissolution despite combat ineffectiveness. Shadow-flag pattern lets the counter accumulate evidence in saves so a future ON-run can be A/B'd against an OFF-baseline at the same seed before flag promotion.
+
+**Changes:**
+- `docs/10_canon/Engine_Invariants_v0_7_0.md` §6.2.4 + `docs/10_canon/Systems_Manual_v0_7_0.md` §6.4: morale-collapse override clause with constants block.
+- `src/state/game_state.ts`: new `morale_low_streak?: number` field on `FormationState` (additive optional).
+- `src/sim/combat/morale_drift.ts`: counter increment loop after main drift loop. Constants `MORALE_OVERRIDE_THRESHOLD=15`, `MORALE_OVERRIDE_RESET=20`. Increments at `morale ≤ 15`; resets at `morale > 20`; preserved unchanged in 16-20 hysteresis band.
+- `src/sim/combat/brigade_dissolution.ts`: new `MORALE_OVERRIDE_TURNS=8` export + gated dissolution path. Gate: `process.env.MORALE_OVERRIDE_ENABLED === 'true'`. With flag ON and `morale_low_streak >= 8`, the 800-personnel cap AND the 2-of-3 criteria are bypassed. Default OFF.
+- `tests/morale_collapse_override.test.ts` (NEW): 10/10 GREEN. T1-T5 streak counter contract; T6-T10 dissolution gate contract with both flag-OFF and flag-ON branches.
+
+**Verification:**
+- 10/10 lane tests GREEN; 49/49 focused regression across 7 suites; tsc clean.
+- 40w smoke n1624 `3b0426b1ca73a547` vs A2-only baseline n1625 `8c33da5b1f2ba80b`. /scenario-creator-runner-tester verdict: STATE-SHAPE-ONLY DRIFT. 313/313 formations match; 4 records differ — each delta is exclusively the new `morale_low_streak` field (values 0, 9, 10, 11). Headline metrics IDENTICAL: orders 134=134, anchors 26/27, benchmarks 6/6, casualties identical, controllers identical, attribution identical. Behavioral-zero with flag OFF — foundational claim honored.
+- /war-or-game verdict: SHIP. Realism-positive when flag enabled.
+
+**Hash drift class:** STATE-SHAPE additive (one new optional field). Behavioral drift class: zero with flag OFF; gated narrow-scope when flag ON (future calibration regression required before flag promotion).
+
+**Successor handoff (when flag promoted to default-ON):**
+- 188w sensitive-history regression run (mandatory before flip).
+- Validate dissolution count ≤ 3-5 per faction per 40w (P1 from /war-or-game gate).
+- Save schema documentation update so legacy loaders preserve `morale_low_streak` field (P2).
+
+---
+
 ## [2026-05-03] docs(roadmap): roadmap truth cadence sync for trip session 1 (2026-05-02/03)
 
 **Type:** Pure docs sync. No engine code, scenario data, OOB, painted targets, FORAWWV, or sensitive-history surface touched.

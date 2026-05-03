@@ -1,7 +1,18 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-05-03 (trip-session run trail: n1621 188w + n1622 40w on top of B-1 cooldown lane)
+**Updated:** 2026-05-03 (trip session 2: n1624 N4 baseline + n1625 A2-only baseline + n1626 perf workload + n1627 R2 six-lane combined smoke)
+
+## Trip Session 2 Run Trail (2026-05-03, on top of `e4c661d5`)
+
+| Run | Hash | Lane | Verdict | Notes |
+|---|---|---|---|---|
+| **n1627** | `a2a51d4a9994a7f5` | R2 six-lane (R2-1+R2-2 engine) | NARROW BEHAVIORAL DRIFT (calibration-flat) | orders 134→131 (RS −2 / RBiH −1 / HRHB 0); flips_applied 43=43; control_alignment BYTE-IDENTICAL; anchors 26/27 (same brka_2 carryover); benchmarks 6/6; defender casualties −2,979; defender_present_battles 84→73. Drift shape consistent with R2-1 must_hold tightening; R2-2 events inert in 40w. /war-or-game: SHIP. |
+| **n1626** | `876597582e7ae8f7` | R2-4 perf baseline | Audit-only (instrumentation reverted) | Per-turn mean 3,094 ms (30.9× over <100ms target); supply-osid 18.2%; bot orders 562ms combined; 5.6MB/turn RSS growth from 286MB cold to 510MB peak. P0 flagged: every turn >1s. Audit: `docs/40_reports/audits/20260503_PERF_BASELINE_ROUND2.md`. |
+| **n1625** | `8c33da5b1f2ba80b` | A2-only baseline (N4 engine stashed) | Reference baseline | Used to isolate N4 contribution from A2 contribution. Confirms N4 with flag OFF is byte-identical at behavior layer (only 4/313 formations differ — `morale_low_streak` field additive). |
+| **n1624** | `3b0426b1ca73a547` | N4 morale-collapse override (flag OFF) | STATE-SHAPE-ONLY DRIFT | 313/313 formations match; only `morale_low_streak` field present on 4 records (values 0, 9, 10, 11). Headline behavior IDENTICAL to predecessor. Foundational claim of "B" approval honored. |
+
+## Trip Session 1 Run Trail (2026-05-02, on top of `45d39ad7`)
 
 ## Review Methodology
 
