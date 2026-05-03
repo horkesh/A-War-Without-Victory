@@ -175,6 +175,83 @@ function scanWeekly(weeklyPath, watchSet) {
     return { opAppearances, dissolutions, lastWeekIndex };
 }
 
+/**
+ * LANE-NIGHTSHIFT-N11 (2026-05-03): consume brigade_temporal_log.jsonl
+ * (emitted by harness per LANE-A1) when present. Builds per-watched-brigade
+ * timeline of per-turn snapshots so `unknown_inactive` cases (where terminal
+ * artifacts cannot disambiguate the lifecycle path) get per-turn evidence.
+ *
+ * Backwards-compat: when the log file is absent (older runs pre-A1), returns
+ * an empty Map and the diagnostic falls back to op-aggregate classification
+ * with a notice that temporal log is unavailable.
+ */
+function loadBrigadeTemporalLog(runDir, watchSet) {
+    const p = path.join(runDir, 'brigade_temporal_log.jsonl');
+    const timeline = new Map(); // id -> Array<row>
+    if (!fs.existsSync(p)) return { timeline, present: false };
+    const text = fs.readFileSync(p, 'utf8');
+    const lines = text.split(/\r?\n/);
+    for (const ln of lines) {
+        if (!ln) continue;
+        let row;
+        try {
+            row = JSON.parse(ln);
+        } catch (e) {
+            // Skip malformed line — partial-write tolerance per harness contract.
+            continue;
+        }
+        const bid = row.brigade_id;
+        if (typeof bid !== 'string') continue;
+        if (!watchSet.has(bid)) continue;
+        let arr = timeline.get(bid);
+        if (!arr) {
+            arr = [];
+            timeline.set(bid, arr);
+        }
+        arr.push(row);
+    }
+    // Sort each brigade's timeline by turn ascending — strictCompare safe for
+    // numeric turn field via numeric comparator.
+    for (const arr of timeline.values()) {
+        arr.sort((a, b) => (Number(a.turn) || 0) - (Number(b.turn) || 0));
+    }
+    return { timeline, present: true };
+}
+
+/**
+ * Build temporal evidence summary from a brigade's per-turn timeline.
+ * Returns null when timeline is empty.
+ */
+function buildTemporalEvidence(brigadeId, timeline) {
+    if (!timeline || timeline.length === 0) return null;
+    let opTurns = 0;
+    let transitTurns = 0;
+    let lastActiveTurn = null;
+    let lastOpTurn = null;
+    let lastLocation = null;
+    let homeOsid = null;
+    for (const row of timeline) {
+        if (row.active_op_id) {
+            opTurns += 1;
+            lastOpTurn = row.turn;
+        }
+        if (row.mv_state === 'in_transit') transitTurns += 1;
+        if (row.status === 'active') lastActiveTurn = row.turn;
+        if (row.location_osid) lastLocation = row.location_osid;
+        if (row.home_osid) homeOsid = row.home_osid;
+    }
+    return {
+        timeline_turn_count: timeline.length,
+        op_participation_turns: opTurns,
+        in_transit_turns: transitTurns,
+        last_active_turn: lastActiveTurn,
+        last_op_active_turn: lastOpTurn,
+        last_location_osid: lastLocation,
+        home_osid: homeOsid,
+        location_drift_from_home: !!(homeOsid && lastLocation && lastLocation !== homeOsid),
+    };
+}
+
 function classify({ opEntry, dissolutionTurns, destroyedRecord, lastWeekIndex }) {
     if (destroyedRecord) {
         // LANE-A-Tier1 mis-tag fix: distinguish combat destruction from pure
@@ -196,11 +273,11 @@ function classify({ opEntry, dissolutionTurns, destroyedRecord, lastWeekIndex })
     return 'silent_inactive';
 }
 
-function buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex) {
+function buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex, temporalLog) {
     const opEntry = opAppearances.get(id) || null;
     const dissArr = dissolutions.get(id) || [];
     const destroyedRecord = destroyedMap.get(id) || null;
-    const path = classify({
+    const lifecyclePath = classify({
         opEntry,
         dissolutionTurns: dissArr,
         destroyedRecord,
@@ -212,6 +289,12 @@ function buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex) 
     } else if (dissArr.length > 0) {
         inactiveTurn = dissArr[0].turn;
     }
+    // LANE-NIGHTSHIFT-N11: enrich with temporal evidence when the
+    // brigade_temporal_log.jsonl from A1 is available. Particularly valuable
+    // for `unknown_inactive` and `active_throughout` rows which terminal
+    // artifacts cannot fully disambiguate.
+    const timeline = temporalLog ? temporalLog.get(id) : null;
+    const temporalEvidence = buildTemporalEvidence(id, timeline);
     return {
         brigade_id: id,
         first_op_appearance_turn: opEntry ? opEntry.first : null,
@@ -221,7 +304,8 @@ function buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex) 
         dissolution_records: dissArr,
         destroyed_record: destroyedRecord,
         inactive_turn: inactiveTurn,
-        lifecycle_path: path,
+        lifecycle_path: lifecyclePath,
+        temporal_evidence: temporalEvidence,
     };
 }
 
@@ -243,9 +327,10 @@ function main() {
 
     const destroyedMap = loadDestroyed(runDir);
     const { opAppearances, dissolutions, lastWeekIndex } = scanWeekly(weeklyPath, watchSet);
+    const { timeline: temporalLog, present: temporalLogPresent } = loadBrigadeTemporalLog(runDir, watchSet);
 
     const rows = watchListSorted.map((id) =>
-        buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex),
+        buildRow(id, opAppearances, dissolutions, destroyedMap, lastWeekIndex, temporalLog),
     );
 
     const out = {
@@ -253,6 +338,10 @@ function main() {
         run_dir: runDir,
         last_week_index: lastWeekIndex,
         watch_list: watchListSorted,
+        // LANE-NIGHTSHIFT-N11: signal whether per-turn temporal evidence is
+        // available. Older runs pre-A1 will see `false` and `temporal_evidence`
+        // null on every row.
+        temporal_log_available: temporalLogPresent,
         rows,
     };
     process.stdout.write(JSON.stringify(out, null, 2) + '\n');

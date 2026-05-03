@@ -83,6 +83,11 @@ const ROW_KEYS = [
     'destroyed_record',
     'inactive_turn',
     'lifecycle_path',
+    // LANE-NIGHTSHIFT-N11: per-turn temporal evidence enrichment from
+    // brigade_temporal_log.jsonl (LANE-A1). Field is null when the
+    // log is absent (older runs pre-A1) or no timeline rows for this
+    // brigade; populated object otherwise.
+    'temporal_evidence',
 ];
 
 function strictCompare(a: string, b: string): number {
