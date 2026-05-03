@@ -347,7 +347,12 @@ describe('deployment health (40w)', () => {
                 // { osid: 'op:zvornik:sapna', expected: 'RBiH' },
                 { osid: 'op:ugljevik:teocak_krstac_2', expected: 'RBiH' },
                 { osid: 'op:orasje:orasje', expected: 'HRHB' },
-                { osid: 'op:brcko:brka_2', expected: 'RBiH' },
+                // brka_2: codified RS post-LANE-2026-05-02-B1 (planning_invalidated cooldown).
+                // /game-designer pre-merge gate explicitly approved the RBiH→RS flip
+                // as a registered behavioral consequence of feeding planning_invalidated
+                // recoveries into failed_offensive_objectives cooldown. Golden baseline
+                // manifest was refreshed in 018cacd3; this anchor list now reflects parity.
+                { osid: 'op:brcko:brka_2', expected: 'RS' },
                 { osid: 'op:gorazde:gorazde_2', expected: 'RBiH' },
                 { osid: 'op:srebrenica:srebrenica_2', expected: 'RBiH' },
                 { osid: 'op:zavidovici:vozuca_2', expected: 'RS' },
