@@ -41,6 +41,20 @@ const EXHAUSTION_MORALE_PENALTY = -0.5;
 const CRITICAL_EXHAUSTION_THRESHOLD = 0.95;
 const CRITICAL_EXHAUSTION_PENALTY = -1.5;
 
+/**
+ * LANE-NIGHTSHIFT-N4-CANON-AMENDMENT (Engine Invariants v0.7.0 §6.2.4 +
+ * Systems Manual v0.7.0 §6.4, 2026-05-03): morale-collapse override
+ * thresholds. The streak counter is incremented every turn the brigade's
+ * final morale is ≤ MORALE_OVERRIDE_THRESHOLD (15); reset to 0 when morale
+ * rises above MORALE_OVERRIDE_RESET (20). When the streak reaches
+ * MORALE_OVERRIDE_TURNS (8), brigade_dissolution.ts dissolves regardless
+ * of personnel count — but only when env flag MORALE_OVERRIDE_ENABLED is
+ * true (shadow-flag default-off). The counter increments either way for
+ * diagnostic visibility.
+ */
+const MORALE_OVERRIDE_THRESHOLD = 15;
+const MORALE_OVERRIDE_RESET = 20;
+
 /** Morale drift from recent battle outcomes. Victory boosts morale, defeat drains it.
  * Historical: VRS morale was high in 1992 because they were winning everywhere.
  * ARBiH morale plummeted initially, recovered as they organized and won small victories.
@@ -254,5 +268,30 @@ export function runMoraleDrift(
             report.by_faction[f.faction] = (report.by_faction[f.faction] ?? 0) + 1;
         }
     }
+
+    // LANE-NIGHTSHIFT-N4-CANON-AMENDMENT: update morale_low_streak counter
+    // for ALL active brigade-kind formations regardless of engaged status.
+    // Final morale at end of drift is the canonical "this turn's morale"
+    // for streak purposes. Engaged brigades had their morale set during
+    // battle resolution earlier in the pipeline; the streak counter respects
+    // whatever value lives on f.morale at this point. Increment when
+    // morale ≤ 15; reset when morale > 20; preserve unchanged in the 16-20
+    // hysteresis band. Counter increments unconditionally — the env-flag
+    // gate lives in brigade_dissolution.ts so the streak data is available
+    // for diagnostics even when the dissolution path is suppressed.
+    for (const fId of formationIds) {
+        const f = formations[fId] as FormationState | undefined;
+        if (!f || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'operational_group') continue;
+        const morale = typeof f.morale === 'number' ? f.morale : 60;
+        const streak = typeof f.morale_low_streak === 'number' ? f.morale_low_streak : 0;
+        if (morale <= MORALE_OVERRIDE_THRESHOLD) {
+            f.morale_low_streak = streak + 1;
+        } else if (morale > MORALE_OVERRIDE_RESET) {
+            if (streak !== 0) f.morale_low_streak = 0;
+        }
+        // 16-20 hysteresis band: leave streak unchanged.
+    }
+
     return report;
 }

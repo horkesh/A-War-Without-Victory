@@ -60,6 +60,17 @@ export const DISSOLUTION_PERSONNEL_CAP = 800;
 export const DISSOLUTION_PERSONNEL_TO_RESERVE_RATE = 0.5;
 export const DISSOLUTION_EQUIPMENT_TRANSFER_RATE = 0.7;
 
+/**
+ * LANE-NIGHTSHIFT-N4-CANON-AMENDMENT (Engine Invariants v0.7.0 §6.2.4 +
+ * Systems Manual v0.7.0 §6.4, 2026-05-03): turns of sustained morale
+ * collapse (morale ≤ 15 with hysteresis reset > 20, tracked in
+ * morale_drift.ts) before the morale-collapse override path bypasses
+ * the personnel cap and 2-of-3 criteria. Gated behind env flag
+ * MORALE_OVERRIDE_ENABLED (default false) — counter still increments
+ * for diagnostic visibility when the gate is off.
+ */
+export const MORALE_OVERRIDE_TURNS = 8;
+
 export interface DissolutionReport {
     dissolved_count: number;
     dissolved_brigades: Array<{
@@ -93,10 +104,24 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         const absFloor = isEnclave ? ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR : DISSOLUTION_ABSOLUTE_FLOOR;
         const requiredCriteria = isEnclave ? 3 : 2;
 
+        // LANE-NIGHTSHIFT-N4-CANON-AMENDMENT (Engine Invariants v0.7.0 §6.2.4 +
+        // Systems Manual v0.7.0 §6.4, 2026-05-03): morale-collapse override.
+        // A brigade with morale_low_streak ≥ MORALE_OVERRIDE_TURNS (8) dissolves
+        // regardless of personnel cap. The streak counter is incremented in
+        // morale_drift.ts whenever morale ≤ 15; reset when morale > 20.
+        // Override is gated behind env flag MORALE_OVERRIDE_ENABLED (default
+        // false) — when off, the personnel cap exit fires as before. The
+        // streak counter still increments for diagnostic visibility.
+        const moraleOverrideEnabled = process.env.MORALE_OVERRIDE_ENABLED === 'true';
+        const streak = typeof f.morale_low_streak === 'number' ? f.morale_low_streak : 0;
+        const moraleCollapseTrigger =
+            moraleOverrideEnabled && streak >= MORALE_OVERRIDE_TURNS;
+
         // Personnel cap: brigades above DISSOLUTION_PERSONNEL_CAP can't dissolve from
         // morale+cohesion alone. A 1400-man brigade with low morale is demoralized, not
         // destroyed — combat multipliers already penalize it at 30% effectiveness.
-        if (personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
+        // Morale-collapse override (above) bypasses this cap.
+        if (!moraleCollapseTrigger && personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
 
         // Dissolution criteria: always require at least requiredCriteria to be met.
         // The absolute floor counts as the "low personnel" criterion automatically.
@@ -106,7 +131,9 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         const lowCohesion = cohesion <= DISSOLUTION_COHESION_THRESHOLD;
         const lowMorale = morale <= DISSOLUTION_MORALE_THRESHOLD;
         const criteriaCount = (lowPersonnel ? 1 : 0) + (lowCohesion ? 1 : 0) + (lowMorale ? 1 : 0);
-        if (criteriaCount < requiredCriteria) continue;
+        // LANE-NIGHTSHIFT-N4: morale-collapse override is the fourth, independent
+        // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.
+        if (!moraleCollapseTrigger && criteriaCount < requiredCriteria) continue;
 
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);

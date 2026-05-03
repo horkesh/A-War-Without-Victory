@@ -645,6 +645,18 @@ export interface FormationState {
     disrupted_turns?: number;
     /** Consecutive turns at morale 0; after 3+, 5% personnel attrition per turn. */
     zero_morale_turns?: number;
+    /**
+     * LANE-NIGHTSHIFT-N4-CANON-AMENDMENT (Engine Invariants v0.7.0 §6.2.4 +
+     * Systems Manual v0.7.0 §6.4, 2026-05-03): consecutive turns at
+     * morale <= MORALE_OVERRIDE_THRESHOLD (15). Increments each turn when
+     * morale <= 15; resets to 0 when morale > 20 (5-point hysteresis band).
+     * When this counter reaches MORALE_OVERRIDE_TURNS (8), the brigade
+     * dissolves on the next dissolution check regardless of personnel cap —
+     * BUT ONLY when the env flag MORALE_OVERRIDE_ENABLED is true (shadow-flag
+     * default-off; counter increments either way for diagnostic visibility).
+     * Save/load: persisted; absent on legacy saves deserializes to 0.
+     */
+    morale_low_streak?: number;
     /** How many battle outcomes this formation has processed through morale drift. Used for habituation — diminishing morale effect of combat over time. */
     battle_outcome_count?: number;
     /** Per-brigade personnel cap. When set, overrides MAX_BRIGADE_PERSONNEL for reinforcement. Derived from OOB max_personnel field. Varies by formation type and faction — historical brigades ranged from 1500 (enclave) to 3500 (mechanized). */

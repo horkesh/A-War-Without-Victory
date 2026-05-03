@@ -67,6 +67,14 @@ Unoccupied OSIDs adjacent to friendly brigades have militia-only defense. Fronta
 
 **Dissolution** is the only removal mechanism: requires 2-of-3 criteria (personnel < 400, cohesion <= 20, morale <= 15). Enclave brigades require 3-of-3. Absolute floors (150 personnel, enclave 50) count as "low personnel" but do NOT bypass the criteria check. On dissolution: equipment transferred to nearest same-corps brigade (70% salvaged); personnel to strategic reserve (50%).
 
+**§6.2.4 Morale-collapse override (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT, 2026-05-03):** A brigade with `morale_low_streak >= MORALE_OVERRIDE_TURNS` (canonical: 8 turns at `morale <= 15`) dissolves regardless of personnel count. The `morale_low_streak` counter increments each turn `morale <= 15` and resets to 0 when `morale > 20` (5-point hysteresis prevents flutter at the threshold). This override exists because a unit cannot be simultaneously combat-incapable in spirit and indestructible in substance — the 2-of-3 criteria above continue to apply for combat-attrition cases; this override adds a fourth, independent dissolution path keyed on sustained morale collapse alone. Faction-agnostic; the predicate has zero faction/corps/OSID condition. **Implementation gate:** the override is gated behind environment flag `MORALE_OVERRIDE_ENABLED` (default `false`). When the flag is off, the streak counter still increments (diagnostic-only); only the dissolution path is suppressed. Hash drift with the flag off is null. Constants:
+
+```
+MORALE_OVERRIDE_TURNS     = 8
+MORALE_OVERRIDE_THRESHOLD = 15   // brigade is "in collapse" at or below this morale
+MORALE_OVERRIDE_RESET     = 20   // streak resets when morale exceeds this (hysteresis)
+```
+
 ### 6.3 Ops-Only Attack Invariant
 
 **No brigade attacks independently.** All offensive combat flows through `CorpsOperation`. Brigades do not evaluate independent attack targets.
