@@ -39,6 +39,19 @@ import { compareToHistorical } from './endgame_comparison.js';
 import historicalBaseline from '../../../data/reference/historical_baseline.json';
 
 /**
+ * Best-effort derive helper: returns the result of `fn()`, or `undefined` if
+ * it throws. The freeze is intentionally permissive — partial computation is
+ * acceptable since the adapter falls back to recompute when a field is absent.
+ */
+function tryDerive<T>(fn: () => T): T | undefined {
+    try {
+        return fn();
+    } catch {
+        return undefined;
+    }
+}
+
+/**
  * Freeze the endgame snapshot onto `state.meta.endgame_snapshot` if not
  * already present. Idempotent. Safe to call multiple times.
  */
@@ -46,41 +59,20 @@ export function freezeEndgameSnapshot(state: GameState): void {
     const meta = state.meta as { endgame_snapshot?: EndgameSnapshot; turn?: number; outcome?: string; game_over?: boolean };
     if (meta.endgame_snapshot) return; // idempotency guard
 
-    let verdict: unknown;
-    let costLedger: unknown;
-    let historicalComparison: unknown;
+    const verdict = tryDerive(() => computeFullVerdict(state));
+    const costLedger = tryDerive(() => buildCostLedger(state));
+    const historicalComparison = costLedger
+        ? tryDerive(() => compareToHistorical(
+            costLedger as Parameters<typeof compareToHistorical>[0],
+            historicalBaseline as Parameters<typeof compareToHistorical>[1],
+        ))
+        : undefined;
 
-    try {
-        verdict = computeFullVerdict(state);
-    } catch {
-        verdict = undefined;
-    }
-
-    try {
-        costLedger = buildCostLedger(state);
-    } catch {
-        costLedger = undefined;
-    }
-
-    try {
-        if (costLedger) {
-            historicalComparison = compareToHistorical(
-                costLedger as Parameters<typeof compareToHistorical>[0],
-                historicalBaseline as Parameters<typeof compareToHistorical>[1],
-            );
-        } else {
-            historicalComparison = undefined;
-        }
-    } catch {
-        historicalComparison = undefined;
-    }
-
-    const snapshot: EndgameSnapshot = {
+    meta.endgame_snapshot = {
         frozen_turn: typeof meta.turn === 'number' ? meta.turn : 0,
         outcome: typeof meta.outcome === 'string' ? meta.outcome : '',
         verdict,
         cost_ledger: costLedger,
         historical_comparison: historicalComparison,
     };
-    meta.endgame_snapshot = snapshot;
 }

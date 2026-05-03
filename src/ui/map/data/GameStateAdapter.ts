@@ -1696,6 +1696,28 @@ export function parseGameState(json: unknown): LoadedGameState {
     const operationOpportunityRecords = deriveOperationOpportunityRecords(state, playerFaction);
     const operationOpportunitySummary = deriveOperationOpportunitySummary(operationOpportunityRecords);
 
+    // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): when state.meta.endgame_snapshot
+    // is present (set by freezeEndgameSnapshot at termination), prefer the
+    // frozen values over recomputing from live state. This keeps verdict
+    // byte-stable across save/load round-trip even if post-termination
+    // bot drift mutates the state. Older saves without the snapshot fall
+    // back to the existing recompute path.
+    let gameVerdict: LoadedGameState['gameVerdict'];
+    let costLedger: LoadedGameState['costLedger'];
+    let historicalComparison: LoadedGameState['historicalComparison'];
+    if (Boolean(meta.game_over)) {
+        const snapshot = meta.endgame_snapshot;
+        gameVerdict = snapshot?.verdict !== undefined
+            ? (snapshot.verdict as ReturnType<typeof deriveGameVerdict>)
+            : deriveGameVerdict(state);
+        costLedger = snapshot?.cost_ledger !== undefined
+            ? (snapshot.cost_ledger as ReturnType<typeof deriveCostLedger>)
+            : deriveCostLedger(state);
+        historicalComparison = snapshot?.historical_comparison !== undefined
+            ? (snapshot.historical_comparison as ReturnType<typeof deriveHistoricalComparison>)
+            : deriveHistoricalComparison(state);
+    }
+
     return {
         label, turn, phase,
         metadata: {
@@ -1780,30 +1802,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
-        // Game over.
-        // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): when state.meta.endgame_snapshot
-        // is present (set by freezeEndgameSnapshot at termination), prefer the
-        // frozen values over recomputing from live state. This keeps verdict
-        // byte-stable across save/load round-trip even if post-termination
-        // bot drift mutates the state. Older saves without the snapshot fall
-        // back to the existing recompute path.
+        // Game over (LANE-NIGHTSHIFT-N3 — see snapshot-prefer block above).
         gameOver: Boolean(meta.game_over),
         gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
-        gameVerdict: Boolean(meta.game_over)
-            ? (meta.endgame_snapshot?.verdict !== undefined
-                ? (meta.endgame_snapshot.verdict as ReturnType<typeof deriveGameVerdict>)
-                : deriveGameVerdict(state))
-            : undefined,
-        costLedger: Boolean(meta.game_over)
-            ? (meta.endgame_snapshot?.cost_ledger !== undefined
-                ? (meta.endgame_snapshot.cost_ledger as ReturnType<typeof deriveCostLedger>)
-                : deriveCostLedger(state))
-            : undefined,
-        historicalComparison: Boolean(meta.game_over)
-            ? (meta.endgame_snapshot?.historical_comparison !== undefined
-                ? (meta.endgame_snapshot.historical_comparison as ReturnType<typeof deriveHistoricalComparison>)
-                : deriveHistoricalComparison(state))
-            : undefined,
+        gameVerdict,
+        costLedger,
+        historicalComparison,
     };
 }
 
@@ -2561,47 +2565,33 @@ function derivePendingProposalReviews(
 // fall back to undefined (which routes UI to FallbackGameOver), next-session
 // triage has the error message + outcome context. No behavior change; pure
 // observability. /technical-architect Mission D #5.
-function deriveGameVerdict(state: any): GameVerdict | undefined {
+function safeDerive<T>(label: string, state: any, fn: () => T): T | undefined {
     try {
-        return computeFullVerdict(state);
+        return fn();
     } catch (err) {
         console.warn(
-            '[adapter] deriveGameVerdict threw:',
+            `[adapter] ${label} threw:`,
             err instanceof Error ? err.message : String(err),
             'outcome:',
             state?.meta?.outcome,
         );
         return undefined;
     }
+}
+
+function deriveGameVerdict(state: any): GameVerdict | undefined {
+    return safeDerive('deriveGameVerdict', state, () => computeFullVerdict(state));
 }
 
 function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
-    try {
-        return buildCostLedger(state as GameState);
-    } catch (err) {
-        console.warn(
-            '[adapter] deriveCostLedger threw:',
-            err instanceof Error ? err.message : String(err),
-            'outcome:',
-            state?.meta?.outcome,
-        );
-        return undefined;
-    }
+    return safeDerive('deriveCostLedger', state, () => buildCostLedger(state as GameState));
 }
 
 function deriveHistoricalComparison(state: any): LoadedGameState['historicalComparison'] {
-    try {
+    return safeDerive('deriveHistoricalComparison', state, () => {
         const ledger = buildCostLedger(state as GameState);
         return compareToHistorical(ledger, historicalBaseline as any);
-    } catch (err) {
-        console.warn(
-            '[adapter] deriveHistoricalComparison threw:',
-            err instanceof Error ? err.message : String(err),
-            'outcome:',
-            state?.meta?.outcome,
-        );
-        return undefined;
-    }
+    });
 }
 
 function derivePressureWarning(state: any): boolean {
