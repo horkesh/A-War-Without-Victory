@@ -176,6 +176,29 @@ const OBJECTIVE_FAILURE_THRESHOLD = 2;
  */
 const OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8;
 
+/**
+ * LANE-NIGHTSHIFT-A2 (2026-05-03): minimum predictor force-ratio for launch.
+ *
+ * Per /operations-expert Tier 1 + n1623 panel verdict: ops with
+ * predictor force_ratio_estimate < 0.3 are obviously-doomed mismatches
+ * (attacker <33% of defender power). Krivaja-95 in n1623 launched at
+ * force_ratio 0.09 / 0 attacks; Stupčanica-95 at 0.83 / 1 attack /
+ * max_failures. The 0.3 floor is conservatively set well below the
+ * historical 1.5 launch standard, so this only catches catastrophic
+ * mismatches without lane-tuning toward Srebrenica/Žepa outcomes.
+ *
+ * /war-or-game APPROVED-WITH-CAVEAT class: faction-agnostic, OSID-
+ * agnostic, scenario-agnostic predictor honesty correction. Same shape
+ * as IN-TRANSIT-PREDICTOR / IN-TRANSIT-COMBAT-POWER-CONTEXT predecessor
+ * lanes. § 8.3 (a) honest mechanic correction.
+ *
+ * Forced-launch (player override `op.force_launch === true`) bypasses
+ * the floor — the player retains the lever to launch a doomed op anyway.
+ * Probes / feints / forced launches that skip preparation have undefined
+ * force_ratio_estimate and bypass the gate by predicate construction.
+ */
+const MIN_LAUNCH_FORCE_RATIO_FLOOR = 0.3;
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 
@@ -802,6 +825,19 @@ export function advanceSectorOffensives(
                     continue;
                 }
                 if (!forcedLaunch && !hasExecutableOpeningAttack(state, faction, op)) {
+                    beginRecovery(op, turn, 'planning_invalidated', state);
+                    continue;
+                }
+                // LANE-NIGHTSHIFT-A2 (2026-05-03): predictor force-ratio launch
+                // floor. Aborts launches at obviously-doomed force ratios
+                // (<0.3 = attacker <33% of defender power). Faction-agnostic,
+                // forced-launch override preserved. See MIN_LAUNCH_FORCE_RATIO_FLOOR
+                // docstring above for full design rationale.
+                if (
+                    !forcedLaunch
+                    && typeof op.force_ratio_estimate === 'number'
+                    && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                ) {
                     beginRecovery(op, turn, 'planning_invalidated', state);
                     continue;
                 }
