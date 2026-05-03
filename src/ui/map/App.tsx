@@ -47,6 +47,8 @@ import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
+import { FirstTurnOrientationCard, FIRST_TURN_INTRO_STORAGE_KEY } from './components/FirstTurnOrientationCard';
+import { buildFirstTurnOrientation } from './data/firstTurnOrientation';
 import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
@@ -149,6 +151,29 @@ function StrategicDashboardWrapper() {
   const open = useGameStore((s) => s.strategicDashboardOpen);
   if (!open) return null;
   return <StrategicDashboard />;
+}
+
+function FirstTurnOrientationWrapper() {
+  // NIGHTSHIFT-G2: One-time orientation card shown after the side picker on a
+  // fresh save. Reads localStorage at mount; persistence is handled inside
+  // FirstTurnOrientationCard on dismiss / item click.
+  const state = useGameStore((s) => s.loadedGameState);
+  // Read localStorage inside an effect, not in pure render — keeps render deterministic.
+  const [hasSeenIntro, setHasSeenIntro] = useState<boolean>(true);
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        setHasSeenIntro(window.localStorage.getItem(FIRST_TURN_INTRO_STORAGE_KEY) === '1');
+      } else {
+        setHasSeenIntro(false);
+      }
+    } catch {
+      setHasSeenIntro(false);
+    }
+  }, []);
+  const view = buildFirstTurnOrientation(state, hasSeenIntro);
+  if (!view) return null;
+  return <FirstTurnOrientationCard view={view} onDismiss={() => setHasSeenIntro(true)} />;
 }
 
 function PeaceWarTransitionOverlay() {
@@ -862,6 +887,7 @@ function App() {
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
+      <FirstTurnOrientationWrapper />
       <VerdictScreen />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal

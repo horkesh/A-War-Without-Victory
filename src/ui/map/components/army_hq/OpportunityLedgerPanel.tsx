@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore';
 import type { OperationOpportunityRecordView } from '../../data/types';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
+import { buildOpportunityLedgerPulse, type OpportunityLedgerPulse } from '../../data/opportunityLedgerPulse';
 
 const STATUS_LABEL: Record<OperationOpportunityRecordView['status'], string> = {
     eligible_pending_review: 'Pending Review',
@@ -125,22 +126,96 @@ function OpportunityRecordCard({ record }: { record: OperationOpportunityRecordV
     );
 }
 
+function PulseMetric({ label, value, detail }: { label: string; value: string | number; detail: string }) {
+    return (
+        <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
+            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{label}</div>
+            <div className="text-[13px] font-bold tabular-nums text-text-primary">{value}</div>
+            <div className="truncate text-[9px] text-text-secondary">{detail}</div>
+        </div>
+    );
+}
+
+function OpportunityLedgerPulseBand({ pulse }: { pulse: OpportunityLedgerPulse }) {
+    const axes = pulse.lifetime_axes;
+    const axisDetail = axes.required_total > 0 || axes.optional_total > 0
+        ? `${axes.required_green}/${axes.required_total} req | ${axes.optional_green}/${axes.optional_total} opt`
+        : 'No axis data';
+    return (
+        <section
+            data-testid="opportunity-ledger-pulse"
+            className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2"
+        >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Opportunity pulse</div>
+                    <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{pulse.headline}</div>
+                    <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">
+                        {pulse.total_decisions === 0
+                            ? 'No opportunity records yet — pulse will populate as decisions resolve.'
+                            : `${pulse.resolved_decisions} resolved of ${pulse.total_decisions} tracked. ${pulse.in_progress} operation${pulse.in_progress === 1 ? '' : 's'} underway.`}
+                    </div>
+                </div>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+                <PulseMetric
+                    label="Decisions Taken"
+                    value={pulse.taken}
+                    detail={`${pulse.in_progress} in progress`}
+                />
+                <PulseMetric
+                    label="Decisions Missed"
+                    value={pulse.missed}
+                    detail="Declined / expired"
+                />
+                <PulseMetric
+                    label="Outcomes"
+                    value={`${pulse.completed_success}/${pulse.completed_success + pulse.completed_failure}`}
+                    detail={`${pulse.completed_failure} failure${pulse.completed_failure === 1 ? '' : 's'}`}
+                />
+                <PulseMetric
+                    label="On Desk"
+                    value={pulse.pending}
+                    detail="Awaiting review"
+                />
+                <PulseMetric
+                    label="T3 Authorized"
+                    value={pulse.t3_authorized}
+                    detail="Reserves committed"
+                />
+                <PulseMetric
+                    label="Lifetime Axes"
+                    value={`${axes.required_green}/${axes.required_total}`}
+                    detail={axisDetail}
+                />
+            </div>
+        </section>
+    );
+}
+
 export function OpportunityLedgerPanel() {
-    const records = useGameStore((s) => s.loadedGameState?.operationOpportunityRecords);
-    const summary = useGameStore((s) => s.loadedGameState?.operationOpportunitySummary);
+    const state = useGameStore((s) => s.loadedGameState);
+    const records = state?.operationOpportunityRecords;
+    const summary = state?.operationOpportunitySummary;
 
     const rows = useMemo(() => records ?? [], [records]);
+    const pulse = useMemo(() => buildOpportunityLedgerPulse(state), [state]);
 
     if (rows.length === 0) {
         return (
-            <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
-                No operation opportunities recorded for this headquarters.
+            <div className="space-y-3">
+                <OpportunityLedgerPulseBand pulse={pulse} />
+                <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
+                    No operation opportunities recorded for this headquarters.
+                </div>
             </div>
         );
     }
 
     return (
         <div className="space-y-3">
+            <OpportunityLedgerPulseBand pulse={pulse} />
+
             {summary && (
                 <div className="grid grid-cols-3 gap-2">
                     <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2">

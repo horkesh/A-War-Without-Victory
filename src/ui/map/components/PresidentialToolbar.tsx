@@ -27,6 +27,39 @@ import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
 
+/**
+ * Pre-Advance review-queue severity tone derived directly from the canonical
+ * adapter-owned `presidentialReviewQueue` view-model.
+ *
+ * NIGHTSHIFT-G5 — On-Map Pre-Advance Severity Pip.
+ *
+ * The map toolbar `INBOX` badge surfaces actionable count from `inboxItems`,
+ * but that is a different aggregation than the canonical presidential review
+ * queue used by AdvanceTurnModal / WarroomStatusBar. If the player dismisses
+ * AdvanceTurnModal back to the map without resolving review work, there is
+ * no persistent on-map severity cue. This helper derives the ring tone from
+ * the queue's existing fields (no new state, no engine touch) so the toolbar
+ * can render a thin severity ring around the inbox badge.
+ *
+ * Tone derivation (deterministic, count-threshold based — no random, no time):
+ *  - 'blocking' (red)   when `criticalCount > 0`
+ *  - 'urgent'   (amber) when `pendingCount  > 5`
+ *  - null               otherwise (no ring)
+ *
+ * Pure visual augment — kept inside the toolbar file so Decision Room /
+ * Pre-Advance / Warroom-owned files are untouched.
+ */
+export type PreAdvanceSeverityTone = 'blocking' | 'urgent';
+
+export function derivePreAdvanceSeverityTone(
+    queue: { pendingCount: number; criticalCount: number } | null | undefined,
+): PreAdvanceSeverityTone | null {
+    if (!queue) return null;
+    if (queue.criticalCount > 0) return 'blocking';
+    if (queue.pendingCount > 5) return 'urgent';
+    return null;
+}
+
 /** Command Authority gauge — shows the president's override resource. Level 3 actions deplete this. */
 function CommandAuthorityGauge({ current, max }: { current: number; max: number }) {
     const pct = max > 0 ? Math.round((current / max) * 100) : 0;
@@ -106,6 +139,10 @@ export function PresidentialToolbar({
     const embedded = typeof window !== 'undefined' && isEmbeddedTacticalMap(window.location.search);
     const showWarroomReturn = typeof window !== 'undefined' && shouldShowWarroomReturn(window.location.search, ipc.isAvailable);
     const reserveSignal = reserveAttention ? getArmyReserveToolbarSignal(reserveAttention) : null;
+    // NIGHTSHIFT-G5: severity tone for on-map pre-advance pip ring around INBOX.
+    // Reads canonical adapter-owned presidentialReviewQueue (criticalCount / pendingCount).
+    // Visual-only; no new state; deterministic count-threshold derivation.
+    const preAdvanceSeverityTone = derivePreAdvanceSeverityTone(loadedGameState?.presidentialReviewQueue);
 
     const handleAdvanceTurn = useCallback(async () => {
         if (!ipc.isAvailable || advancing) return;
@@ -270,19 +307,47 @@ export function PresidentialToolbar({
 
                 {/* CENTER: Alert badges (crest is separate floating element below) */}
                 <div className="flex items-center gap-4">
-                    {/* Inbox badge — unified presidential decision queue */}
-                    <InboxBadge onClick={() => {
-                        const gs = useGameStore.getState();
-                        // Deselect everything to return to inbox home state
-                        gs.setSelectedOsid(null);
-                        gs.setSelectedFormationId(null);
-                        gs.setSelectedCorpsId(null);
-                        gs.setSelectedCorpsFrontSectorId(null);
-                        gs.setSelectedArmyId(null);
-                        gs.setSelectedArmyHqId(null);
-                        gs.setSelectedOperationKey(null);
-                        gs.setSelectedOrbatCorpsId(null);
-                    }} />
+                    {/*
+                      NIGHTSHIFT-G5: Pre-Advance Severity Pip.
+                      The InboxBadge surfaces inboxItems count/severity. The ring
+                      wrapper below adds a complementary thin ring derived from
+                      the canonical presidentialReviewQueue so AdvanceTurnModal
+                      dismiss → back-to-map persistently signals unresolved
+                      pre-advance review work. Visual-only; pointer events stay
+                      with the wrapped badge button.
+                    */}
+                    <div
+                        data-testid="pre-advance-severity-pip"
+                        data-severity-tone={preAdvanceSeverityTone ?? 'none'}
+                        className={`relative inline-flex items-center rounded-md ${
+                            preAdvanceSeverityTone === 'blocking'
+                                ? 'ring-1 ring-red-500/70 ring-offset-1 ring-offset-[#0a0a14]'
+                                : preAdvanceSeverityTone === 'urgent'
+                                    ? 'ring-1 ring-amber-400/60 ring-offset-1 ring-offset-[#0a0a14]'
+                                    : ''
+                        }`}
+                        title={
+                            preAdvanceSeverityTone === 'blocking'
+                                ? 'Pre-Advance review queue: blocking items unresolved'
+                                : preAdvanceSeverityTone === 'urgent'
+                                    ? 'Pre-Advance review queue: pending items above urgent threshold'
+                                    : undefined
+                        }
+                    >
+                        {/* Inbox badge — unified presidential decision queue */}
+                        <InboxBadge onClick={() => {
+                            const gs = useGameStore.getState();
+                            // Deselect everything to return to inbox home state
+                            gs.setSelectedOsid(null);
+                            gs.setSelectedFormationId(null);
+                            gs.setSelectedCorpsId(null);
+                            gs.setSelectedCorpsFrontSectorId(null);
+                            gs.setSelectedArmyId(null);
+                            gs.setSelectedArmyHqId(null);
+                            gs.setSelectedOperationKey(null);
+                            gs.setSelectedOrbatCorpsId(null);
+                        }} />
+                    </div>
 
                     {/* Left alert: Pending decisions */}
                     {pendingReviews > 0 && (
