@@ -240,8 +240,8 @@ Three options:
 
 ## Appendix: References
 
-- Engine Invariants §6.2 (current text, line ~68): `docs/10_canon/ENGINE_INVARIANTS.md`
-- Systems Manual §6 (current text, line ~238): `docs/10_canon/SYSTEMS_MANUAL.md`
+- Engine Invariants v0.7.0 §6.2 (current text, line ~68): `docs/10_canon/Engine_Invariants_v0_7_0.md`
+- Systems Manual v0.7.0 §6 (current text, line ~238): `docs/10_canon/Systems_Manual_v0_7_0.md`
 - Sensitive-History Design Gate §6, §8.3: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
 - LANE-NIGHTSHIFT-N4 block report: (canon-compliance-reviewer output, this session)
 - n1621 zombie-brigade evidence: latest 188w simulation, VRS Drina Corps formations
