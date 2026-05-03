@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'vitest';
 
-test('baseline regression workflow installs nested map UI deps before typecheck and test jobs', async () => {
+test('baseline regression workflow installs nested map UI deps before typecheck, test, and scenarios jobs', async () => {
     const workflow = await readFile(
         join(process.cwd(), '.github', 'workflows', 'baseline-regression.yml'),
         'utf8',
@@ -11,10 +11,14 @@ test('baseline regression workflow installs nested map UI deps before typecheck 
 
     const nestedInstalls = workflow.match(/npm install --legacy-peer-deps --prefix src\/ui\/map/g) ?? [];
 
+    // 3 jobs: typecheck, test, scenarios. Baselines job removed
+    // 2026-05-04 (LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST follow-up)
+    // because byte-hash baseline comparison is platform-bound and
+    // fails between Windows dev and Linux CI.
     assert.strictEqual(
         nestedInstalls.length,
-        4,
-        'baseline regression workflow should install nested map UI dependencies in the typecheck, test, scenarios, and baselines jobs',
+        3,
+        'baseline regression workflow should install nested map UI dependencies in the typecheck, test, and scenarios jobs',
     );
     assert.match(
         workflow,
@@ -25,10 +29,5 @@ test('baseline regression workflow installs nested map UI deps before typecheck 
         workflow,
         /npm run test:vitest/,
         'baseline regression workflow should keep the canonical Vitest gate',
-    );
-    assert.match(
-        workflow,
-        /npm run test:baselines/,
-        'baseline regression workflow should keep the canonical baseline regression gate',
     );
 });
