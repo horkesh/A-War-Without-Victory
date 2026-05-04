@@ -1007,6 +1007,15 @@ export interface LoadedGameState {
     /** Historical comparison (computed at game end — divergence from historical baseline). */
     historicalComparison?: import('../../../sim/endgame/endgame_comparison.js').ComparisonResult;
 
+    /**
+     * LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER — read-only sequence of saved
+     * GameState snapshots powering the VerdictScreen Replay tab. Optional and
+     * additive; absent on live sessions and on save adapters that have not
+     * been hardened to carry the sequence yet. Consumed by ReplayScrubber
+     * via the replayPlayer() read-only player. Never mutated by UI.
+     */
+    replaySaveSequence?: ReadonlyArray<import('../../../state/game_state.js').GameState>;
+
     /** Active (in-progress) operations. */
     activeOperations?: Array<{
         corps_id: string;

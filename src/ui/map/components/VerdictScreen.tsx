@@ -21,6 +21,11 @@ import { WarCostSummary } from './WarCostSummary';
 // path-not-taken records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
 import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dynamic_section_builder.js';
+// LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER: read-only turn scrubber for the
+// Replay tab. Renders only when gameOver === true AND a save sequence has
+// been plumbed into the loaded adapter. Consumes byte-identical save
+// round-trip; does NOT advance turns or mutate engine state.
+import { ReplayScrubber } from './replay/index.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -334,6 +339,19 @@ export function VerdictScreen() {
                                 </li>
                             ))}
                         </ul>
+                    </div>
+                )}
+
+                {/* Replay — turn-by-turn scrub (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER).
+                    Stacked AFTER Codex tab (Mission E). Visible only when
+                    gameOver === true (already gated above) AND a save sequence
+                    has been plumbed into the loaded adapter. Read-only; does
+                    NOT advance turns or mutate engine state. */}
+                {loadedGameState.replaySaveSequence
+                    && loadedGameState.replaySaveSequence.length > 0 && (
+                    <div className="border-t border-panel-border"
+                         data-awwv-endgame-section="replay">
+                        <ReplayScrubber saveSequence={loadedGameState.replaySaveSequence} />
                     </div>
                 )}
 
