@@ -47,6 +47,14 @@ import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
+import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
+
+/**
+ * Feature flag: Map That Scars per-OSID damage overlay.
+ * Default false → byte-stable (no fetch, no layer in deck.gl pipeline).
+ * Flip to true to enable.
+ */
+const MAP_SCARS_FEATURE_FLAG = false;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
@@ -203,6 +211,8 @@ function composeDeckLayersForCurrentSelection(args: {
   centroidLookup: Map<string, [number, number]>;
   ghostMapVisible: boolean;
   ghostMapData?: GhostMapDatum[];
+  /** Map That Scars: gated by MAP_SCARS_FEATURE_FLAG; data only present when flag enabled. */
+  mapScarsData?: OsidDamageDatum[];
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
@@ -216,8 +226,13 @@ function composeDeckLayersForCurrentSelection(args: {
     zoom: args.zoom,
     loadedGameState: args.loadedGameState,
     centroidLookup: args.centroidLookup,
-    capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: args.ghostMapVisible },
+    capabilities: {
+      ...DEFAULT_DECK_LAYER_CAPABILITIES,
+      ghostMapVisible: args.ghostMapVisible,
+      mapScarsVisible: MAP_SCARS_FEATURE_FLAG && Boolean(args.mapScarsData && args.mapScarsData.length > 0),
+    },
     ghostMapData: args.ghostMapData,
+    mapScarsData: args.mapScarsData,
     highlightedFormationIds: collectHighlightedFormationIds({
       formationsGeoJson: args.formationsGeoJson,
       loadedGameState: args.loadedGameState,
@@ -238,6 +253,8 @@ export function MapContainer() {
   const lastFormationsGeoJsonRef = useRef<FeatureCollection | null>(null);
   const lastDeckLayerInputsRef = useRef<DeckLayerRenderInputs | null>(null);
   const ghostMapDataRef = useRef<GhostMapDatum[] | null>(null);
+  // Map That Scars: pre-computed per-OSID damage data; only populated when MAP_SCARS_FEATURE_FLAG is true.
+  const osidDamageDataRef = useRef<OsidDamageDatum[] | null>(null);
   const lastPanTargetRef = useRef<string | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
   /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
@@ -363,6 +380,9 @@ export function MapContainer() {
         centroidLookup: nextInputs.centroidLookup,
         ghostMapVisible: nextInputs.ghostMapVisible,
         ghostMapData: nextInputs.ghostMapData,
+        // Map That Scars: ref is null unless MAP_SCARS_FEATURE_FLAG was true at init.
+        // Off by default → undefined → byte-stable (capabilities gate also blocks layer creation).
+        mapScarsData: osidDamageDataRef.current ?? undefined,
         selectedFormationId: nextInputs.selectedFormationId,
         selectedCorpsId: nextInputs.selectedCorpsId,
         selectedCorpsFrontSectorId: nextInputs.selectedCorpsFrontSectorId,
@@ -468,6 +488,20 @@ export function MapContainer() {
         // Pre-compute ghost map data from census (never changes)
         if (censusGeoJson) {
           ghostMapDataRef.current = buildGhostMapData(censusGeoJson);
+        }
+
+        // Map That Scars: load damage seed once when feature flag is enabled.
+        // Faction-agnostic, deterministic. When flag is false (default) this branch is dead → byte-stable.
+        if (MAP_SCARS_FEATURE_FLAG) {
+          try {
+            const dmgRes = await fetch('/data/derived/osid_damage_seed.json');
+            if (dmgRes.ok) {
+              const dmgSeed = (await dmgRes.json()) as OsidDamageSeed;
+              osidDamageDataRef.current = buildOsidDamageData(dmgSeed, geojson);
+            }
+          } catch (err) {
+            console.warn('[MapContainer] Failed to load osid_damage_seed.json:', err);
+          }
         }
 
         osidBaseRef.current = geojson;

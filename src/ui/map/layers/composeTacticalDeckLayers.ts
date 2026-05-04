@@ -5,6 +5,7 @@ import type { OsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { buildExperimentalDeckLayers } from './buildExperimentalDeckLayers';
 import { buildTacticalDeckLayers } from './buildTacticalDeckLayers';
 import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
+import { buildOsidDamageOverlay, type OsidDamageDatum } from './buildOsidDamageOverlay';
 import {
   DEFAULT_DECK_LAYER_CAPABILITIES,
   type DeckLayerCapabilities,
@@ -29,12 +30,20 @@ export function composeTacticalDeckLayers(args: {
   capabilities?: DeckLayerCapabilities;
   /** Pre-computed ghost map census data (pass when ghostMapVisible is true). */
   ghostMapData?: GhostMapDatum[];
+  /** Pre-computed Map That Scars per-OSID damage data (pass when mapScarsVisible is true). */
+  mapScarsData?: OsidDamageDatum[];
 }): Layer[] {
   const caps = args.capabilities ?? DEFAULT_DECK_LAYER_CAPABILITIES;
 
   // Ghost map renders UNDER everything else
   const ghost: Layer[] = (caps.ghostMapVisible && args.ghostMapData)
     ? [buildGhostMapLayer(args.ghostMapData)]
+    : [];
+
+  // Map That Scars: render below front edges and counters, above territory fill.
+  // Faction-agnostic dark scar tint.
+  const scars: Layer[] = (caps.mapScarsVisible && args.mapScarsData && args.mapScarsData.length > 0)
+    ? [buildOsidDamageOverlay(args.mapScarsData)]
     : [];
 
   const under = buildExperimentalDeckLayers(
@@ -52,5 +61,6 @@ export function composeTacticalDeckLayers(args: {
         args.highlightedFormationIds,
       )
     : [];
-  return [...ghost, ...under, ...counters];
+  // Layer order (bottom → top): ghost → scars → experimental (front lines, ops arcs, unit dots) → counters.
+  return [...ghost, ...scars, ...under, ...counters];
 }

@@ -32,6 +32,14 @@ export interface DeckLayerCapabilities {
 
   /** Ghost Map: pre-war census demographics as ScatterplotLayer dots. */
   readonly ghostMapVisible: boolean;
+
+  /**
+   * Map That Scars: per-OSID damage overlay (PolygonLayer tinting OSIDs by
+   * `data/derived/osid_damage_seed.json` damage_score). Faction-agnostic.
+   * Default false → byte-stable (no layer added to overlay).
+   * Renders below front-edge layers and above territory fill.
+   */
+  readonly mapScarsVisible: boolean;
 }
 
 /** Default: Deck.gl formation counters ON (enriched); other experiments off. */
@@ -41,4 +49,5 @@ export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
   deckFrontLines: false,
   unitScatterDots: false,
   ghostMapVisible: false,
+  mapScarsVisible: false,
 };
