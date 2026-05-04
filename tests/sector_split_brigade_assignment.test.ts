@@ -12,14 +12,21 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ensureMinimumSectorCoverage } from '../src/sim/combat/brigade_assignment.js';
-import type {
-    CorpsFrontSector,
-    CorpsFrontSubSegment,
-    FactionId,
-    FormationId,
-    FormationState,
+import {
+    classifyBrigadesByTerritory,
+    ensureMinimumSectorCoverage,
+} from '../src/sim/combat/brigade_assignment.js';
+import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import {
+    CURRENT_SCHEMA_VERSION,
+    type CorpsFrontSector,
+    type CorpsFrontSubSegment,
+    type FactionId,
+    type FormationId,
+    type FormationState,
+    type GameState,
 } from '../src/state/game_state.js';
+import type { EdgeRecord } from '../src/map/settlements.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 // ── Fixture helpers ──────────────────────────────────────────────────────────
@@ -741,5 +748,286 @@ describe('ensureMinimumSectorCoverage — Lane B pre-pass (territory membership)
         // donor retains all its brigades.
         expect(donor.assigned_brigade_ids).toContain('bde_a');
         expect(donor.assigned_brigade_ids).toContain('bde_b');
+    });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// Absorbed from sector_shared_front_assignment.test.ts (Phase 3 §2 leftover)
+// ────────────────────────────────────────────────────────────────────────────
+
+type SharedFrontFormationOverrides = Partial<FormationState> & {
+  id: string;
+  faction: FormationState['faction'];
+  location_osid: string;
+  corps_id?: string;
+  equipment?: Record<string, number>;
+};
+
+type SharedFrontSectorOverrides = Partial<CorpsFrontSector> & {
+  sector_id: string;
+  corps_id: string;
+  front_osids?: string[];
+  enemy_osids?: string[];
+  pressure_level?: string;
+  threat_score?: number;
+  neighbor_sector_ids?: string[];
+  centroid?: { x: number; y: number };
+  contiguous_components?: number;
+  needs_brigade?: boolean;
+  sub_segments?: CorpsFrontSubSegment[];
+};
+
+function makeSharedFrontFormation(overrides: SharedFrontFormationOverrides): FormationState {
+  const {
+    id,
+    faction,
+    location_osid,
+    corps_id = 'test_corps',
+    equipment = {},
+    ...rest
+  } = overrides;
+
+  return {
+    id,
+    kind: 'brigade',
+    faction,
+    name: id,
+    status: 'active',
+    corps_id,
+    location_osid,
+    personnel: overrides.personnel ?? 1000,
+    equipment,
+    readiness: overrides.readiness ?? 1,
+    assignment: overrides.assignment,
+    posture: overrides.posture,
+    home_osid: overrides.home_osid,
+    ...rest,
+  } as unknown as FormationState;
+}
+
+function makeSharedFrontSector(overrides: SharedFrontSectorOverrides): CorpsFrontSector {
+  const frontOsids = overrides.front_osids ? [...overrides.front_osids] : [];
+  const enemyOsids = overrides.enemy_osids ? [...overrides.enemy_osids] : [];
+  const edgeIds = frontOsids.map((osid, idx) => `${overrides.sector_id}:edge:${idx}:${osid}`);
+
+  return {
+    sector_id: overrides.sector_id,
+    corps_id: overrides.corps_id,
+    faction: 'RS',
+    opposing_factions: ['RBiH'],
+    edge_ids: edgeIds,
+    length_edges: overrides.length_edges ?? 1,
+    front_osids: frontOsids,
+    enemy_osids: enemyOsids,
+    territory_osids: overrides.territory_osids ? [...overrides.territory_osids] : [],
+    assigned_brigade_ids: overrides.assigned_brigade_ids ? [...overrides.assigned_brigade_ids] : [],
+    reserve_brigade_ids: overrides.reserve_brigade_ids ? [...overrides.reserve_brigade_ids] : [],
+    pressure_level: overrides.pressure_level ?? 'balanced',
+    threat_score: overrides.threat_score ?? 0,
+    neighbor_sector_ids: overrides.neighbor_sector_ids ? [...overrides.neighbor_sector_ids] : [],
+    centroid: overrides.centroid ?? { x: 0, y: 0 },
+    contiguous_components: overrides.contiguous_components ?? 1,
+    needs_brigade: overrides.needs_brigade ?? false,
+    sub_segments: overrides.sub_segments ?? [{
+      sub_segment_id: `${overrides.sector_id}:segment`,
+      friendly_osids: frontOsids,
+      enemy_osids: enemyOsids,
+      edge_ids: edgeIds,
+      length_edges: overrides.length_edges ?? (frontOsids.length || 1),
+      primary_brigade_ids: [],
+    }],
+    density: 0,
+    threat_ratio: 0,
+    defensive_power: 0,
+    sector_stance: 'defend',
+    stance_source: 'bot',
+  } as unknown as CorpsFrontSector;
+}
+
+describe('classifyBrigadesByTerritory shared-front assignment', () => {
+  it('assigns a brigade at a shared front OSID to the neediest sibling sector instead of the highest-threat one', () => {
+    const sectors: CorpsFrontSector[] = [
+      makeSharedFrontSector({
+        sector_id: 'sector:test:0',
+        corps_id: 'test_corps',
+        length_edges: 4,
+        front_osids: ['shared_front'],
+        enemy_osids: ['enemy_heavy'],
+        territory_osids: ['rear_a'],
+      }),
+      makeSharedFrontSector({
+        sector_id: 'sector:test:1',
+        corps_id: 'test_corps',
+        length_edges: 9,
+        front_osids: ['shared_front', 'needy_front'],
+        enemy_osids: ['enemy_light'],
+        territory_osids: ['rear_b'],
+      }),
+    ];
+
+    const formations: Record<string, FormationState> = {
+      brig_shared: makeSharedFrontFormation({
+        id: 'brig_shared',
+        faction: 'vrs',
+        corps_id: 'test_corps',
+        location_osid: 'shared_front',
+        personnel: 1800,
+      }),
+      enemy_heavy: makeSharedFrontFormation({
+        id: 'enemy_heavy',
+        faction: 'arbih',
+        corps_id: 'enemy_corps',
+        location_osid: 'enemy_heavy',
+        personnel: 5000,
+      }),
+      enemy_light: makeSharedFrontFormation({
+        id: 'enemy_light',
+        faction: 'arbih',
+        corps_id: 'enemy_corps',
+        location_osid: 'enemy_light',
+        personnel: 500,
+      }),
+    };
+
+    const state = {
+      political: {
+        control: {},
+      },
+      map: {
+        osid_owner: {},
+      },
+      military: {
+        elite_loan_assignments: {},
+      },
+    } as unknown as GameState;
+
+    const componentOf = new Map<string, number>([
+      ['shared_front', 0],
+      ['needy_front', 0],
+      ['rear_a', 0],
+      ['rear_b', 0],
+      ['enemy_heavy', 1],
+      ['enemy_light', 1],
+    ]);
+    const friendlyOsids = new Set(['shared_front', 'needy_front', 'rear_a', 'rear_b']);
+
+    classifyBrigadesByTerritory(
+      sectors,
+      'vrs',
+      formations,
+      new Map(),
+      friendlyOsids,
+      componentOf,
+      new Map(),
+      undefined,
+      state,
+    );
+
+    expect(sectors[0]!.assigned_brigade_ids).toEqual([]);
+    expect(sectors[1]!.assigned_brigade_ids).toEqual(['brig_shared']);
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// Absorbed from sector_misassignment_relocation.test.ts (Phase 3 §2 leftover)
+// ────────────────────────────────────────────────────────────────────────────
+
+function makeMisassignFormation(id: string, overrides: Partial<FormationState>): FormationState {
+    return {
+        id,
+        name: id,
+        faction: 'RS' as FactionId,
+        kind: 'brigade',
+        status: 'active',
+        created_turn: 1,
+        assignment: null,
+        personnel: 1200,
+        cohesion: 65,
+        morale: 70,
+        ...overrides,
+    } as FormationState;
+}
+
+describe('post-merge misassignment relocation', () => {
+    it('keeps a brigade with the same-corps sector that truthfully owns its current location', () => {
+        const state: GameState = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: {
+                turn: 10,
+                seed: 'sector-misassignment-relocation',
+                phase: 'war',
+                scenario_start_date: { year: 1992, month: 4, day: 6 },
+                referendum_held: true,
+                referendum_turn: 1,
+                war_start_turn: 1,
+            } as GameState['meta'],
+            factions: [
+                { id: 'RS' as FactionId, profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+                { id: 'RBiH' as FactionId, profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], declared: true },
+            ] as unknown as GameState['factions'],
+            military: {
+                formations: {
+                    corps_a: makeMisassignFormation('corps_a', {
+                        kind: 'corps',
+                        location_osid: 'op:hq',
+                        personnel: 50,
+                    }),
+                    brig_home: makeMisassignFormation('brig_home', {
+                        corps_id: 'corps_a',
+                        location_osid: 'op:home:rear',
+                        home_osid: 'op:home:rear',
+                    }),
+                    brig_front: makeMisassignFormation('brig_front', {
+                        corps_id: 'corps_a',
+                        location_osid: 'op:front:a',
+                        home_osid: 'op:front:a',
+                    }),
+                },
+                war_front_edges_osid: [
+                    { edge_id: 'op:front:a__op:enemy:a', a: 'op:front:a', b: 'op:enemy:a', side_a: 'RS', side_b: 'RBiH' },
+                    { edge_id: 'op:front:b__op:enemy:b', a: 'op:front:b', b: 'op:enemy:b', side_a: 'RS', side_b: 'RBiH' },
+                ],
+                front_segments: {},
+                front_posture: {},
+                front_posture_regions: {},
+                front_pressure: {},
+                militia_pools: {},
+            } as GameState['military'],
+            political: {
+                political_controllers: {
+                    'op:hq': 'RS',
+                    'op:front:a': 'RS',
+                    'op:front:b': 'RS',
+                    'op:home:rear': 'RS',
+                    'op:enemy:a': 'RBiH',
+                    'op:enemy:b': 'RBiH',
+                },
+            } as GameState['political'],
+            displacement: {} as GameState['displacement'],
+        } as GameState;
+
+        const edges: EdgeRecord[] = [
+            { a: 'op:hq', b: 'op:front:a' } as EdgeRecord,
+            { a: 'op:hq', b: 'op:front:b' } as EdgeRecord,
+            { a: 'op:hq', b: 'op:home:rear' } as EdgeRecord,
+            { a: 'op:front:a', b: 'op:enemy:a' } as EdgeRecord,
+            { a: 'op:front:b', b: 'op:enemy:b' } as EdgeRecord,
+        ];
+
+        const sectors = buildCorpsFrontSectors(state, edges, null);
+        const assignedOwner = Object.values(sectors).find((sector) => sector.assigned_brigade_ids.includes('brig_home'));
+        expect(assignedOwner).toBeDefined();
+        expect(state.military.formations.brig_home.location_osid).toMatch(/^op:front:/);
+        expect(state.military.formations.brig_home.assignment).toEqual({
+            kind: 'sector',
+            sector_id: assignedOwner?.sector_id,
+            role: 'front',
+        });
+        for (const sector of Object.values(sectors)) {
+            if (sector.sector_id === assignedOwner?.sector_id) continue;
+            expect(sector.assigned_brigade_ids).not.toContain('brig_home');
+            expect(sector.reserve_brigade_ids).not.toContain('brig_home');
+            expect(sector.rear_brigade_ids ?? []).not.toContain('brig_home');
+        }
     });
 });

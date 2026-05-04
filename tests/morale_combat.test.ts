@@ -93,19 +93,20 @@ function makeState(formations: Record<string, FormationState>, overrides?: Parti
 }
 
 describe('Population Affinity', () => {
-    it('RBiH has high affinity in Srebrenica (73% Bosniak)', () => {
-        const aff = getFactionAlignedPopulationShare('srebrenica', 'RBiH', TEST_CENSUS, 0.5);
-        expect(aff).toBeGreaterThan(0.70);
-    });
-
-    it('RS has high affinity in Banja Luka (54% Serb)', () => {
-        const aff = getFactionAlignedPopulationShare('banja_luka', 'RS', TEST_CENSUS, 0.5);
-        expect(aff).toBeGreaterThan(0.50);
-    });
-
-    it('HRHB has high affinity in Livno (70% Croat)', () => {
-        const aff = getFactionAlignedPopulationShare('livno', 'HRHB', TEST_CENSUS, 0.5);
-        expect(aff).toBeGreaterThanOrEqual(0.70);
+    // Phase 3 it.each consolidation: 3 faction-symmetric high-affinity contracts
+    // (RBiH/RS/HRHB) with parametric per-faction municipality, floor, and
+    // strictness preserved as overrides.
+    it.each([
+        { faction: 'RBiH' as const, mun: 'srebrenica', label: 'Srebrenica (73% Bosniak)', floor: 0.70, strict: true },
+        { faction: 'RS' as const, mun: 'banja_luka', label: 'Banja Luka (54% Serb)', floor: 0.50, strict: true },
+        { faction: 'HRHB' as const, mun: 'livno', label: 'Livno (70% Croat)', floor: 0.70, strict: false },
+    ])('$faction has high affinity in $label', ({ faction, mun, floor, strict }) => {
+        const aff = getFactionAlignedPopulationShare(mun, faction, TEST_CENSUS, 0.5);
+        if (strict) {
+            expect(aff).toBeGreaterThan(floor);
+        } else {
+            expect(aff).toBeGreaterThanOrEqual(floor);
+        }
     });
 
     it('RS has low affinity in Tuzla', () => {

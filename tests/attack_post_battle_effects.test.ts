@@ -67,28 +67,38 @@ function makeFormation(overrides: Partial<FormationState> = {}): FormationState 
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('applyExperienceGain', () => {
-    it('RBiH winning: rate 1.5, gain = (0.03 + 0.02) * 1.5 = 0.075 base', () => {
-        const f = makeFormation({ faction: 'RBiH', experience: 0.0 });
-        applyExperienceGain(f, true);
-        // gain = (BASE + BONUS) * rate = 0.05 * 1.5 = 0.075
-        // diminishing = 0.075 * (1.0 - 0.0 * 0.5) = 0.075
-        expect(f.experience).toBeCloseTo(0.075, 6);
-    });
-
-    it('RS losing: rate 0.7, gain = max(0.03*0.7, 0.01*0.7) = 0.021', () => {
-        const f = makeFormation({ faction: 'RS', experience: 0.0 });
-        applyExperienceGain(f, false);
-        // gain = BASE * rate = 0.03 * 0.7 = 0.021
-        // max(0.021, DEFEAT * rate = 0.01 * 0.7 = 0.007) = 0.021
-        // diminishing = 0.021 * (1.0 - 0.0 * 0.5) = 0.021
-        expect(f.experience).toBeCloseTo(0.021, 6);
-    });
-
-    it('HRHB winning: rate 1.0', () => {
-        const f = makeFormation({ faction: 'HRHB', experience: 0.0 });
-        applyExperienceGain(f, true);
-        // gain = (0.03 + 0.02) * 1.0 = 0.05
-        expect(f.experience).toBeCloseTo(0.05, 6);
+    // Phase 3 it.each consolidation: 3 faction-symmetric experience-rate
+    // contracts (RBiH/RS/HRHB) with parametric overrides for won/expected.
+    // Per-faction rate semantics preserved verbatim in the description.
+    it.each([
+        {
+            faction: 'RBiH' as const,
+            won: true,
+            expected: 0.075,
+            label: 'RBiH winning: rate 1.5, gain = (0.03 + 0.02) * 1.5 = 0.075 base',
+            // gain = (BASE + BONUS) * rate = 0.05 * 1.5 = 0.075
+            // diminishing = 0.075 * (1.0 - 0.0 * 0.5) = 0.075
+        },
+        {
+            faction: 'RS' as const,
+            won: false,
+            expected: 0.021,
+            label: 'RS losing: rate 0.7, gain = max(0.03*0.7, 0.01*0.7) = 0.021',
+            // gain = BASE * rate = 0.03 * 0.7 = 0.021
+            // max(0.021, DEFEAT * rate = 0.01 * 0.7 = 0.007) = 0.021
+            // diminishing = 0.021 * (1.0 - 0.0 * 0.5) = 0.021
+        },
+        {
+            faction: 'HRHB' as const,
+            won: true,
+            expected: 0.05,
+            label: 'HRHB winning: rate 1.0',
+            // gain = (0.03 + 0.02) * 1.0 = 0.05
+        },
+    ])('$label', ({ faction, won, expected }) => {
+        const f = makeFormation({ faction, experience: 0.0 });
+        applyExperienceGain(f, won);
+        expect(f.experience).toBeCloseTo(expected, 6);
     });
 
     it('diminishing returns: formation with experience 0.8 gains less than one with 0.0', () => {

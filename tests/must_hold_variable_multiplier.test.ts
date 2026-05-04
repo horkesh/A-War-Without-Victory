@@ -215,58 +215,61 @@ describe('computeMustHoldMultiplier — T3: cap at 5.0×', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('computeMustHoldMultiplier — T4: faction-symmetric', () => {
-    it('produces identical multipliers for RBiH, RS, and HRHB at low pressure', () => {
-        const pressure = 1.5;
-        // The multiplier function is faction-agnostic by design — it takes a number.
-        const m = computeMustHoldMultiplier(pressure);
-        expect(m).toBe(2.0);
-        // Reinforce by exercising the call site with three faction-tagged zones.
-        const zoneRbih = makeZone({
-            faction: 'RBiH' as FactionId,
-            commitment_ratio: pressure,
-        });
-        const zoneRs = makeZone({
-            faction: 'RS' as FactionId,
-            commitment_ratio: pressure,
-        });
-        const zoneHrhb = makeZone({
-            faction: 'HRHB' as FactionId,
-            commitment_ratio: pressure,
-        });
-        const a = computeGarrisonBudget(zoneRbih, neutralPersonality, true);
-        const b = computeGarrisonBudget(zoneRs, neutralPersonality, true);
-        const c = computeGarrisonBudget(zoneHrhb, neutralPersonality, true);
-        expect(a).toBe(b);
-        expect(b).toBe(c);
-    });
-
-    it('produces identical multipliers for RBiH, RS, and HRHB at mid-range pressure', () => {
-        const pressure = 4.0;
-        expect(computeMustHoldMultiplier(pressure)).toBeCloseTo(3.0, 10);
-        const zones: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-        const budgets = zones.map(faction =>
-            computeGarrisonBudget(
-                makeZone({ faction, commitment_ratio: pressure, front_edge_count: 24 }),
-                neutralPersonality,
-                true,
-            ),
-        );
-        expect(new Set(budgets).size).toBe(1);
-    });
-
-    it('produces identical multipliers for RBiH, RS, and HRHB at high pressure (cap)', () => {
-        const pressure = 9.0;
-        expect(computeMustHoldMultiplier(pressure)).toBe(5.0);
-        const zones: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-        const budgets = zones.map(faction =>
-            computeGarrisonBudget(
-                makeZone({ faction, commitment_ratio: pressure, front_edge_count: 24 }),
-                neutralPersonality,
-                true,
-            ),
-        );
-        expect(new Set(budgets).size).toBe(1);
-        // And the multiplier cap drives the budget: base 2 × 5 = 10.
-        expect(budgets[0]).toBe(10);
-    });
+    // Phase 3 it.each consolidation: 3 pressure regimes × identical RBiH/RS/HRHB
+    // assertion structure. Per-regime expected multiplier preserved as parametric
+    // override; all three regimes assert identical budgets across factions.
+    it.each([
+        {
+            label: 'low pressure',
+            pressure: 1.5,
+            expectedMultiplier: 2.0,
+            useToBe: true,
+            front_edge_count: undefined as number | undefined,
+            expectedBudget: undefined as number | undefined,
+        },
+        {
+            label: 'mid-range pressure',
+            pressure: 4.0,
+            expectedMultiplier: 3.0,
+            useToBe: false,
+            front_edge_count: 24,
+            expectedBudget: undefined,
+        },
+        {
+            label: 'high pressure (cap)',
+            pressure: 9.0,
+            expectedMultiplier: 5.0,
+            useToBe: true,
+            front_edge_count: 24,
+            // base 2 × 5 = 10
+            expectedBudget: 10,
+        },
+    ])(
+        'produces identical multipliers for RBiH, RS, and HRHB at $label',
+        ({ pressure, expectedMultiplier, useToBe, front_edge_count, expectedBudget }) => {
+            // The multiplier function is faction-agnostic by design — it takes a number.
+            if (useToBe) {
+                expect(computeMustHoldMultiplier(pressure)).toBe(expectedMultiplier);
+            } else {
+                expect(computeMustHoldMultiplier(pressure)).toBeCloseTo(expectedMultiplier, 10);
+            }
+            // Reinforce by exercising the call site with three faction-tagged zones.
+            const zones: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+            const budgets = zones.map(faction =>
+                computeGarrisonBudget(
+                    makeZone({
+                        faction,
+                        commitment_ratio: pressure,
+                        ...(front_edge_count !== undefined ? { front_edge_count } : {}),
+                    }),
+                    neutralPersonality,
+                    true,
+                ),
+            );
+            expect(new Set(budgets).size).toBe(1);
+            if (expectedBudget !== undefined) {
+                expect(budgets[0]).toBe(expectedBudget);
+            }
+        },
+    );
 });

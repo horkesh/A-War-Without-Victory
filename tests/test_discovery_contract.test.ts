@@ -39,7 +39,7 @@ describe('test discovery contracts', () => {
             'tests/scenario_harness_contracts.test.ts',
             'tests/scenario_control_change_attribution_contract.test.ts',
             'tests/scenario_continue_from_save_equivalence.test.ts',
-            'tests/scenario_init_control_apr1992.test.ts',
+            'tests/scenario_init_control.test.ts',
             'tests/scenario_init_formations.test.ts',
             'tests/scenario_vrs_operation_proof.test.ts',
             'tests/sim_scenario.test.ts',
