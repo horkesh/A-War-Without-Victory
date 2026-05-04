@@ -167,6 +167,20 @@ export function VerdictScreen() {
     const ipc = useIPC();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
 
+    // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: build ghost entries via useMemo.
+    // CRITICAL: useMemo MUST be called before any early return to satisfy
+    // the React Rules of Hooks — otherwise renders with/without verdict
+    // call different numbers of hooks and React throws.
+    const turnForCodex = loadedGameState?.turn ?? 0;
+    const codexGhosts: BuiltGhostEntry[] = useMemo(() => {
+        if (!loadedGameState) return [];
+        try {
+            return buildGhostEntries(loadedGameState as unknown as Parameters<typeof buildGhostEntries>[0], turnForCodex);
+        } catch {
+            return [];
+        }
+    }, [loadedGameState, turnForCodex]);
+
     if (!loadedGameState?.gameOver) return null;
 
     const verdict = loadedGameState.gameVerdict;
@@ -215,23 +229,6 @@ export function VerdictScreen() {
     }
 
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
-
-    // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only ghost entries built from
-    // frozen end-of-game state for the Codex tab. The builder is pure and
-    // refuses §6 refused-list flags; we wrap in a try/catch so a bad upstream
-    // flag cannot crash the Verdict screen — the tab simply hides.
-    const codexGhosts: BuiltGhostEntry[] = useMemo(() => {
-        try {
-            // The adapter exposes a partial GameState shape; the builder reads only
-            // event_flags, event_fire_counts, paramilitary_policy, player_faction,
-            // and political.negotiation, all of which are present on the loaded
-            // adapter when termination occurred. Cast through unknown to keep this
-            // an additive read-only consumption surface.
-            return buildGhostEntries(loadedGameState as unknown as Parameters<typeof buildGhostEntries>[0], turn);
-        } catch {
-            return [];
-        }
-    }, [loadedGameState, turn]);
 
     return (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
