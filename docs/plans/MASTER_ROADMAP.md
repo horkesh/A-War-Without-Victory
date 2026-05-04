@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-04 (post-trip Wave 6 — 188w Reconstitution verification shipped on `3f1a3372`; **Wave 4 Gap 2 hypothesis DISPROVED by trajectory evidence** — reinforcement-mult lever does NOT bend VRS/HRHB late-war officer-quality arc; RBiH (control) tracks doctrinal arc; casualty-side path `OFFICER_CASUALTY_MULT` named as next investigation surface)
+**Last Updated:** 2026-05-05 (post-trip Wave 7 — `analyzeFactionGraph` per-turn memo (4 of 5 sites, partial) `72a040fc` + replay-buffer streaming `107fe60b`; bot-orders pipeline ~35% cost reduction (562 → 364 ms/turn); 188w hash gates UNBLOCKED via streaming finalizer; deferred `OFFICER_CASUALTY_MULT` calibration lane now technically dispatchable)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."

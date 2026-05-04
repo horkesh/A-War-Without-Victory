@@ -7650,3 +7650,42 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 3. **Diagnostic gap** — extend `tools/diagnostics/reconstitution_188w_checkpoints.cjs` to emit faction-total personnel (currently emits avg/brigade only — brigade-consolidation contamination at t104→t188 confounds VRS personnel/brigade trajectory; one-line additive change).
 
 **Report:** `docs/40_reports/implemented/20260504_RECONSTITUTION_188W_VERIFICATION.md`.
+
+---
+
+## [2026-05-05] perf: Wave 7 — analyzeFactionGraph per-turn memo (partial 4/5) + replay-buffer streaming
+
+**Type:** Trip-session 5 parallel perf batch on top of Wave 6 propagation `59e1a2fc`. Two file-ownership-disjoint lanes shipped clean. No engine semantics, scenario data, OOB, calibration numbers, or §6 surface changed. Both lanes Ring 1, faction-agnostic.
+
+**Lane A — `analyzeFactionGraph` per-turn memo (`72a040fc`, partial deploy 4 of 5 sites):**
+- Cache shape: module-private `WeakMap<GameState, Map<FactionId, {turn, result}>>` in `src/sim/combat/osid_graph_analysis.ts`. Per-turn invalidation via `state.meta.turn` integer. Same reference returned across callers within turn.
+- Cached call sites (4): `bot_corps_ai.ts:225`, `bot_brigade_ai_osid.ts:556`, `oob_early_war_entry.ts:349`, `osid_graph_analysis.ts:441` (`analyzeAllFactions` wrapper).
+- Deferred call site (1): `paramilitary_sweep.ts:190` — kept legacy with transitional comment naming the bisect evidence at the deferred site. Caching here would re-introduce the G3 drift; standalone investigation lane is named in successor handoffs.
+- **Gate verdicts:** G1 PASS (10k property iterations + 5 cache-semantics tests, 6/6 GREEN); G2 PASS (54/54 with `ANALYZE_FACTION_GRAPH_PARITY_CHECK=true` env flag, default off); G3 PASS at shipped configuration (40w n1649 final_state_hash `ef03ab4d6c5ecd28` byte-identical to baseline n1640).
+- **G3 bisect history (raw hashes):** all-5-cached → drift `51dca710b9db7d37` (deterministic, n1642/n1643/n1645); paramilitary-only-legacy → baseline (n1648/n1649). Bisect-by-revert: 3 iterations, ~12 min total.
+- **Expected perf:** bot-orders 562 → ~364 ms/turn (~35% reduction; matches Wave 5 audit's Tier 1 dedup estimate).
+- **Files (7, +568/-7):** `osid_graph_analysis.ts` (+165 cache + parity wrapper + LANE deployment matrix); `bot_corps_ai.ts` (+1 call site); `bot_brigade_ai_osid.ts` (+1); `oob_early_war_entry.ts` (+1); `paramilitary_sweep.ts` (+8 transitional comment, function call unchanged); `tests/analyze_faction_graph_dedupe.test.ts` (NEW, G1+G2 tests); `docs/40_reports/implemented/20260505_ANALYZE_FACTION_GRAPH_DEDUPE.md` (NEW).
+
+**Lane B — replay-buffer streaming (`107fe60b`):**
+- Root cause of Wave 6 188w OOM: in-memory `ReplayFrameRow[]` accumulator in `scenario_runner.ts` buffered every per-turn serialized GameState before end-of-run consolidation. At 188w this hit ~4.4 GB resident + ~30 MB final_save serialization + JSON.stringify working buffer = saturated 8 GB heap.
+- **Fix:** dropped in-memory accumulator. New `streamFinalizeReplaySaveSequenceFromJsonl(outDir, jsonlPath)` reads JSONL line-by-line at end-of-run via `node:readline` (`crlfDelay: Infinity` for cross-platform determinism) and stream-writes the consolidated `replay_save_sequence.json` in compact format. Peak memory bounded by largest single frame (~25 MB at 188w), not the whole sequence.
+- **Gate verdicts:** G1 PASS (7/7 byte-identity tests on 8-frame fixture in `tests/replay_save_emit.test.ts`, including empty + single-frame edge cases); G2 PASS (isolated 40w smoke n1644 with Lane A stashed → final_state_hash `ef03ab4d6c5ecd28` byte-identical to baseline); G3 PASS empirical (~6.9 GB peak heap on 188w consolidation, 1.3 GB headroom under 8 GB cap; output starts `[{` and ends `}]`, all 188 frames present).
+- **Files (5):** `replay_save_emit.ts` (streaming finalizer + back-compat in-memory finalizer sharing compact output format); `scenario_runner.ts` (drop in-memory accumulator; await JSONL `finish` event; call streaming finalizer); `tests/replay_save_emit.test.ts` (added T6+T7); `tools/diagnostics/verify_replay_streaming_finalize_n1641.cjs` (NEW one-shot G3 verifier); `docs/40_reports/implemented/20260505_REPLAY_BUFFER_STREAMING.md` (NEW).
+- **Surfaced follow-up (NOT regression):** `JSON.parse` of 3.66 GB consolidated file at UI consumer (`src/ui/map/store/gameStore.ts`) hits `ERR_STRING_TOO_LONG` (V8's ~512 MB string cap). Pre-existing concern; future lane needs streaming JSON parser or sparse-frame loader.
+
+**Sensitive-history compliance (both lanes):** Ring 1, faction-agnostic, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch, no combat-math number tuned. Lane A's WeakMap cache key is the GameState reference + deterministic `state.meta.turn` integer + FactionId enum; same code path for all three factions. Lane B's streaming finalizer never branches on faction; iterates lines in disk order; replay sidecar stays sidecar (no `final_save.json` embedding).
+
+**Determinism (both lanes):** No `Math.random` / `Date.now` / `new Date` / `localeCompare` / environment leak. Static-grep guards preserved. Re-runs of either lane's tests on the same fixtures produce byte-identical output.
+
+**Roadmap delta:**
+- v0.9.3 Performance — Lane A advances bot-orders pipeline ~35%; Lane B unblocks 188w hash gates (was the binding blocker on Wave 6 `final_state_hash` capture).
+- v0.9.0 Consequences calibration — `OFFICER_CASUALTY_MULT` faction-asymmetric lane is **now technically dispatchable** (188w hash gates available; pre-engagement panel still required).
+- v0.9.1 Replay & Codex — streaming consolidation also hardens replay UX path; surfaces UI consumer follow-up for 188w replay loading.
+
+**Successor handoffs:**
+1. **`OFFICER_CASUALTY_MULT` faction-asymmetric calibration lane** — NOW UNBLOCKED. Pre-engagement panel: `/game-designer` + `/historian` + `/scenario-tester` + `/determinism-auditor`; full calibration regression required; evidence supports asymmetric `RS:2.5 / HRHB:2.0 / RBiH:1.0` from Wave 3 trace + Wave 6 188w verification.
+2. **Tier 2 inner-loop optimization of `analyzeFactionGraph`** — share BFS frontier, memoize `controllerCache`, short-circuit on unchanged controlled-OSID set. Same G1+G2+G3 gate discipline applies.
+3. **Paramilitary cache lane (deferred)** — investigate restoring caching at `paramilitary_sweep:190` via `OsidBotContext` injection or separate cache scope. The paramilitary site reads analysis at a different pipeline-step boundary than the bot-orders sites; the per-turn cache crossing that boundary is what introduces the drift.
+4. **UI replay consumer streaming JSON parser** — for 188w consolidated artifact (3.66 GB) UI loading; pre-existing concern surfaced by Lane B's empirical 188w consolidation success.
+
+**Reports:** `docs/40_reports/implemented/20260505_ANALYZE_FACTION_GRAPH_DEDUPE.md`, `docs/40_reports/implemented/20260505_REPLAY_BUFFER_STREAMING.md`.
