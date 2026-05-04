@@ -7689,3 +7689,42 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 4. **UI replay consumer streaming JSON parser** — for 188w consolidated artifact (3.66 GB) UI loading; pre-existing concern surfaced by Lane B's empirical 188w consolidation success.
 
 **Reports:** `docs/40_reports/implemented/20260505_ANALYZE_FACTION_GRAPH_DEDUPE.md`, `docs/40_reports/implemented/20260505_REPLAY_BUFFER_STREAMING.md`.
+
+---
+
+## [2026-05-05] feat: Wave 8 — 4-lane parallel batch (Phase 0 panel + Tier 2 perf + Events Wave 8 + force-quality glow)
+
+**Type:** Trip-session 5 4-lane parallel batch on top of Wave 7 propagation `e030f4e8`. All 4 lanes shipped clean (chain `7c3792d7..2d14feec`). Sensitive-history Ring 1 across all lanes; faction-agnostic mechanism; no §6 surface touched.
+
+**Lane A — `OFFICER_CASUALTY_MULT` Phase 0 panel (`7c3792d7`):** Read-only synthesis lane. 4 expert verdicts (game-designer, historian, scenario-tester, determinism-auditor) + GO/NO-GO/CONDITIONS verdict. **Verdict: CONDITIONS** — Phase 1 GO with 10 binding acceptance criteria. Recommended numerics unanimous: `RS:2.5 / HRHB:2.0 / RBiH:1.0` with `DEFAULT_OFFICER_CASUALTY_MULT = 1.5` fallback. Code shape: `Record<string, number>` + accessor + `?? 1.5` default; mirrors `FACTION_LEARNING_RATE` precedent. Ring classification: Ring 1; §6 NOT triggered. Phase 1 acceptance criteria: code shape (no `if (faction === 'X')` branches); 40w smoke (anchors ≥26/27, benchmarks 6/6, area-weighted ≥92.5%); 188w smoke (`final_state_hash` emits cleanly via Wave 7 Lane B streaming finalizer; VRS+HRHB whole-run officer_quality Δ/turn ≤0; RBiH Δ/turn ≥+0.001; RS active brigade count at t188 ≥35); trajectory verification via Wave 6 diagnostic re-run; ≥5 new lane tests + focused regression GREEN; out-of-scope guards (no MORALE_OVERRIDE_ENABLED / OFFICER_QUALITY_FLOOR / FACTION_LEARNING_RATE / war_crimes_record coupling / UNPROFOR/comms/ammo touch). Stop trigger: if 188w VRS officer_quality Δ/turn does NOT bend nonpositive, STOP and produce Wave-6-style verdict report; do NOT retune in-lane.
+
+**Lane B — Tier 2 inner-loop optimization of `analyzeFactionGraph` (`1e0557d9`):** Successor to Wave 7 Lane A `72a040fc` (per-turn memo wrapper). Pattern: rename pre-optimization body to `analyzeFactionGraphLegacy`, dispatch public name to optimized version. Optimized body builds formations-by-OSID index ONCE per call instead of repeated linear scans. **No cross-call shared state** — index lives within one function invocation, then GC'd. **G1 PASS** (10k property trials extending `tests/analyze_faction_graph_dedupe.test.ts`). **G2 PASS** (`ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK` env flag, default off, 54/54 GREEN under flag). **G3 PASS at first attempt:** 40w smoke n1651 final_state_hash `ef03ab4d6c5ecd28` byte-identical to baseline n1640. No bisect needed. Wave 7 Lane A's wrapper preserved unchanged; the 4 cached call sites + the deferred paramilitary site all unchanged. Tier 2 perf measurement deferred to a follow-up instrumentation lane (mirroring Wave 5 audit pattern).
+
+**Lane C — Divergence Events Wave 8 (`940e92b3`):** 6 new Ring 1 / no-§6 / faction-agnostic events appended to `data/scenarios/events/consequences.json`. Wave-lineage 35 → 41; absolute catalog 59 → 65. Events: `csq_war_exhaustion_high_streak`, `csq_patron_arms_pipeline_attenuated`, `csq_supply_corridor_chronic_strain`, `csq_mobilization_demographics_strained`, `csq_political_split_temporary`, `csq_winter_supply_attrition`. All condition-gated; default-OFF on baseline. STOP rule preserved: no new condition kinds, no new effect kinds (audit tests enforce). 11/11 lane tests + 155/155 focused regression GREEN. 40w smoke n1650 final_state_hash `ef03ab4d6c5ecd28` byte-identical to baseline.
+
+**Lane D — Force-quality glow overlay (`2d14feec`):** Closes second v0.9.4 (Visual Layer) feature, mirroring the Map That Scars validation pattern. New `src/ui/map/layers/buildForceQualityOverlay.ts` (per-(osid, faction) mean officer_quality aggregator + deck.gl PolygonLayer factory; faction-symmetric palette via pure lookup over frozen `FACTION_GLOW_RGB`; 3-tier alpha gradient 0.05/0.15/0.30). New `forceQualityVisible` capability + `DEFAULT_DECK_LAYER_CAPABILITIES` default false; double-defended capability gate (`FORCE_QUALITY_FEATURE_FLAG && data.length > 0`). 8 new tests T1..T8 all GREEN: builder shape, empty-input safe, zero-quality skip, per-(osid, faction) aggregation, faction-symmetric palette via pure lookup, per-tier alpha, capability gate, deterministic byte-equality. Flag flipped: `FORCE_QUALITY_FEATURE_FLAG = true`. UI-only flag — does not enter sim path; determinism untouched.
+
+**Index-race incident (logged for durable lessons):** Wave 8's parallel commit phase produced a git index race between Lanes B/C/D when 3 agents wrote-then-committed concurrently. Three intermediate hijacked commits appeared in reflog (`555b5b2d`, `a8257b30`, `6d335826`) — all soft-reset cleanly. Lane B and Lane D ultimately exited without their own clean commits; manual remediation via parent agent (sequential `git add` + `git commit` per lane after the agents had reported). The git index itself is shared mutable state across concurrent agents even when implementation files are file-ownership disjoint. Final commit chain clean: A → C → B → D.
+
+**Verification (aggregate):** `npx tsc --noEmit` clean across all touched files; lane tests + focused regression GREEN; 40w hash byte-identical for B + C; T1-T8 GREEN for D; G1+G2+G3 PASS for B; CONDITIONS verdict for A.
+
+**Sensitive-history compliance (all 4 lanes):** Ring 1, faction-agnostic, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch, no combat-math number tuned. Lane A read-only (audit only); B/C/D mechanism-faction-symmetric.
+
+**Roadmap delta:**
+- v0.9.0 catalog 35 → 41 events (wave-lineage); absolute 59 → 65.
+- v0.9.3 Performance — Tier 2 inner-loop optimization shipped without hash drift; further perf via instrumentation lane.
+- v0.9.4 Visual Layer — second feature CLOSED (force-quality glow live).
+- v0.9 Calibration — `OFFICER_CASUALTY_MULT` Phase 0 panel returned CONDITIONS; Phase 1 implementation user-authorizable.
+
+**Successor handoffs:**
+1. **`OFFICER_CASUALTY_MULT` Phase 1 implementation** — Phase 0 panel approved with 10 binding acceptance criteria; user authorization required. Implementation is ~30-50 LOC + smoke regression battery; binding work is 188w trajectory verification, not the code change.
+2. **Tier 3 perf optimization of `analyzeFactionGraph`** — sharing BFS frontier across factions OR short-circuiting on unchanged controlled-OSID set. Both cross-call optimizations — the cache-boundary risk that bit Wave 7 Lane A. Would need new gate strategy beyond G1+G2+G3; deferred.
+3. **Tier 2 perf measurement** — instrumentation lane mirroring Wave 5 audit pattern; capture per-call ms/turn delta empirically.
+4. **Wave 9 divergence events** — faction-mirror inversions of Wave 8 events (RS variant of war_exhaustion, RBiH variant of winter_supply, etc.); recovery / positive-side mobilization events.
+5. **Third v0.9.4 visual feature** — refugee column animated overlay (PathLayer along OSID-to-OSID escape routes) or corridor heartbeat pulse animation.
+
+**Reports:**
+- `docs/40_reports/audits/20260505_OFFICER_CASUALTY_MULT_PHASE_0_PANEL.md`
+- `docs/40_reports/implemented/20260505_ANALYZE_FACTION_GRAPH_TIER_2.md`
+- `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_8.md`
+- `docs/40_reports/implemented/20260505_FORCE_QUALITY_GLOW_VALIDATION.md`

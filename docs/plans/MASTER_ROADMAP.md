@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip Wave 7 — `analyzeFactionGraph` per-turn memo (4 of 5 sites, partial) `72a040fc` + replay-buffer streaming `107fe60b`; bot-orders pipeline ~35% cost reduction (562 → 364 ms/turn); 188w hash gates UNBLOCKED via streaming finalizer; deferred `OFFICER_CASUALTY_MULT` calibration lane now technically dispatchable)
+**Last Updated:** 2026-05-05 (post-trip Wave 8 — 4 parallel lanes shipped `7c3792d7..2d14feec`: OFFICER_CASUALTY_MULT Phase 0 panel returned **CONDITIONS** verdict with unanimous numerics `RS:2.5 / HRHB:2.0 / RBiH:1.0`; Tier 2 inner-loop optimization of analyzeFactionGraph G1+G2+G3 PASS byte-identical; Divergence Events Wave 8 +6 events (catalog 35→41 wave-lineage / 59→65 absolute); force-quality glow visual feature CLOSED with T1-T8 GREEN — second v0.9.4 feature live)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
