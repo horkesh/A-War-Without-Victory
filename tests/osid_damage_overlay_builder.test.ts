@@ -17,13 +17,34 @@
  *                             strictCompare-sorted seed keys regardless of
  *                             insertion order in the input record.
  *
- * Part of LANE-NIGHTSHIFT-MAP-THAT-SCARS-RENDERER.
+ * LANE-NIGHTSHIFT-MAP-THAT-SCARS-VALIDATION extension (4 additional tests):
+ *   T5 (layer-descriptor):    `buildOsidDamageOverlay` produces a deck.gl
+ *                             PolygonLayer with the expected layer id, data
+ *                             reference, and getFillColor accessor that emits
+ *                             a faction-neutral RGB triple plus per-tier alpha.
+ *   T6 (no-faction-mutation): The PolygonLayer's fill color is invariant to
+ *                             faction metadata on the polygon Feature — i.e.
+ *                             the scar layer never reads or mutates faction
+ *                             colors; it is a pure dark-grey overlay.
+ *   T7 (empty-graceful):      Empty seed (`{}`) produces an empty data array,
+ *                             and the resulting PolygonLayer carries `data:[]`
+ *                             without throwing — i.e. the renderer is safe to
+ *                             enable on a fresh save before any combat.
+ *   T8 (zero-score-skip):     OSIDs whose `damage_score` is 0 (or negative,
+ *                             or NaN) are NOT emitted into the layer data —
+ *                             they receive zero opacity and territory fill
+ *                             beneath them is preserved.
+ *
+ * Part of LANE-NIGHTSHIFT-MAP-THAT-SCARS-RENDERER (T1–T4) and
+ * LANE-NIGHTSHIFT-MAP-THAT-SCARS-VALIDATION (T5–T8).
  */
 import { describe, it, expect } from 'vitest';
 import type { FeatureCollection, Polygon } from 'geojson';
 import {
   buildOsidDamageData,
+  buildOsidDamageOverlay,
   damageScoreToAlpha,
+  type OsidDamageDatum,
   type OsidDamageSeed,
 } from '../src/ui/map/layers/buildOsidDamageOverlay';
 
@@ -196,5 +217,149 @@ describe('buildOsidDamageOverlay', () => {
 
     // Byte-equivalent across two builds (same content, same order).
     expect(JSON.stringify(dataA)).toBe(JSON.stringify(dataB));
+  });
+
+  // -------------------------------------------------------------------------
+  // LANE-NIGHTSHIFT-MAP-THAT-SCARS-VALIDATION (T5..T8)
+  //
+  // Path A: deterministic deck.gl layer-descriptor validation. The layer
+  // descriptor is a deterministic function of input data — we can assert
+  // visual semantics (color, alpha, data reference, layer id) without
+  // running a headless renderer.
+  // -------------------------------------------------------------------------
+
+  it('T5 layer-descriptor: PolygonLayer carries the expected id, data ref, and faction-neutral RGB + tier alpha', () => {
+    const polygons = makeFC(['op:foo:a', 'op:foo:b', 'op:foo:c']);
+    const seed = makeSeed([
+      ['op:foo:a', 5],   // faint  → alpha 0.05 → round(0.05*255) = 13
+      ['op:foo:b', 25],  // mid    → alpha 0.15 → round(0.15*255) = 38
+      ['op:foo:c', 75],  // wound  → alpha 0.30 → round(0.30*255) = 77
+    ]);
+    const data = buildOsidDamageData(seed, polygons);
+    const layer = buildOsidDamageOverlay(data);
+
+    // Identity / data reference: the layer's data MUST be the exact array we
+    // passed in (no defensive clone — clones would defeat byte-stability and
+    // re-render gating in deck.gl).
+    expect(layer.id).toBe('osid-damage-overlay');
+    expect(layer.props.data).toBe(data);
+
+    // The accessor MUST return faction-neutral dark grey RGB [20,20,24] and
+    // an alpha that matches the per-OSID damage tier. We invoke the accessor
+    // directly on each datum — this is the same call deck.gl performs when
+    // rasterizing a feature.
+    type FillColor = [number, number, number, number];
+    const getFill = layer.props.getFillColor as (d: OsidDamageDatum) => FillColor;
+
+    const expectations: Array<{ osid: string; alpha: number }> = [
+      { osid: 'op:foo:a', alpha: Math.round(0.05 * 255) },
+      { osid: 'op:foo:b', alpha: Math.round(0.15 * 255) },
+      { osid: 'op:foo:c', alpha: Math.round(0.30 * 255) },
+    ];
+    for (const { osid, alpha } of expectations) {
+      const datum = data.find((d) => d.osid === osid);
+      expect(datum).toBeDefined();
+      const rgba = getFill(datum!);
+      // RGB is the faction-neutral dark grey; alpha is the tier value.
+      expect(rgba[0]).toBe(20);
+      expect(rgba[1]).toBe(20);
+      expect(rgba[2]).toBe(24);
+      expect(rgba[3]).toBe(alpha);
+    }
+
+    // Stroke off, fill on, not pickable, not extruded — the renderer is a
+    // pure overlay and must not intercept clicks or contribute z-fighting.
+    expect(layer.props.stroked).toBe(false);
+    expect(layer.props.filled).toBe(true);
+    expect(layer.props.extruded).toBe(false);
+    expect(layer.props.pickable).toBe(false);
+  });
+
+  it('T6 no-faction-mutation: layer fill is invariant to faction props on the polygon feature', () => {
+    const polygonsRBiH = makeFC(['op:foo:x']);
+    polygonsRBiH.features[0].properties = {
+      ...(polygonsRBiH.features[0].properties ?? {}),
+      osid: 'op:foo:x',
+      faction: 'RBiH',
+      // A faction stroke color the scar layer must NEVER read.
+      stroke_color_rgb: [0, 200, 0],
+    };
+
+    const polygonsRS: FeatureCollection = {
+      type: 'FeatureCollection',
+      features: polygonsRBiH.features.map((f) => ({
+        ...f,
+        properties: {
+          ...(f.properties ?? {}),
+          faction: 'RS',
+          stroke_color_rgb: [200, 0, 0],
+        },
+      })),
+    };
+
+    const seed = makeSeed([['op:foo:x', 60]]);
+
+    const dataR = buildOsidDamageData(seed, polygonsRBiH);
+    const dataS = buildOsidDamageData(seed, polygonsRS);
+    const layerR = buildOsidDamageOverlay(dataR);
+    const layerS = buildOsidDamageOverlay(dataS);
+
+    type FillColor = [number, number, number, number];
+    const fillR = (layerR.props.getFillColor as (d: OsidDamageDatum) => FillColor)(dataR[0]);
+    const fillS = (layerS.props.getFillColor as (d: OsidDamageDatum) => FillColor)(dataS[0]);
+
+    // Faction-neutral RGB regardless of faction prop on input feature.
+    expect(fillR).toEqual([20, 20, 24, Math.round(0.30 * 255)]);
+    expect(fillS).toEqual([20, 20, 24, Math.round(0.30 * 255)]);
+    // Cross-faction equality: the fill is byte-identical between RBiH and RS.
+    expect(fillR).toEqual(fillS);
+
+    // The emitted datum exposes no faction-coupled fields.
+    for (const d of dataR) {
+      expect(Object.prototype.hasOwnProperty.call(d, 'faction')).toBe(false);
+      expect(Object.prototype.hasOwnProperty.call(d, 'stroke_color_rgb')).toBe(false);
+    }
+  });
+
+  it('T7 empty-graceful: empty seed yields empty data and a no-op layer (no throw)', () => {
+    const polygons = makeFC(['op:foo:a', 'op:foo:b']);
+    const emptySeed: OsidDamageSeed = {};
+
+    const data = buildOsidDamageData(emptySeed, polygons);
+    expect(data).toEqual([]);
+
+    // Construction must not throw; the resulting layer carries data:[].
+    const layer = buildOsidDamageOverlay(data);
+    expect(layer.id).toBe('osid-damage-overlay');
+    expect(layer.props.data).toEqual([]);
+    expect(Array.isArray(layer.props.data)).toBe(true);
+    expect((layer.props.data as readonly unknown[]).length).toBe(0);
+  });
+
+  it('T8 zero-score-skip: damage_score 0 / negative / NaN OSIDs do NOT enter the layer (territory fill preserved)', () => {
+    const polygons = makeFC([
+      'op:foo:zero',
+      'op:foo:neg',
+      'op:foo:nan',
+      'op:foo:positive',
+    ]);
+    const seed: OsidDamageSeed = {
+      'op:foo:zero': { damage_score: 0, battles: 0, casualties_total: 0, flips: 0, displacement_spike_turns: [] },
+      'op:foo:neg': { damage_score: -5, battles: 0, casualties_total: 0, flips: 0, displacement_spike_turns: [] },
+      'op:foo:nan': { damage_score: Number.NaN, battles: 0, casualties_total: 0, flips: 0, displacement_spike_turns: [] },
+      'op:foo:positive': { damage_score: 12, battles: 0, casualties_total: 0, flips: 0, displacement_spike_turns: [] },
+    };
+
+    const data = buildOsidDamageData(seed, polygons);
+
+    // Only the positive-score OSID survives the filter; the other three are
+    // skipped so the territory fill underneath them is fully preserved.
+    expect(data.map((d) => d.osid)).toEqual(['op:foo:positive']);
+
+    // Sanity: damageScoreToAlpha agrees that all three skipped scores map to
+    // alpha 0 — confirming the renderer's contract that "no signal == no paint".
+    expect(damageScoreToAlpha(0)).toBe(0);
+    expect(damageScoreToAlpha(-5)).toBe(0);
+    expect(damageScoreToAlpha(Number.NaN)).toBe(0);
   });
 });

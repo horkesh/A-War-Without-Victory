@@ -51,10 +51,23 @@ import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
- * Default false → byte-stable (no fetch, no layer in deck.gl pipeline).
- * Flip to true to enable.
+ *
+ * Default ON as of LANE-NIGHTSHIFT-MAP-THAT-SCARS-VALIDATION
+ * (docs/40_reports/implemented/20260504_MAP_THAT_SCARS_VALIDATION.md).
+ *
+ * Validation evidence:
+ *   - tests/osid_damage_overlay_builder.test.ts T5..T8 (8/8 GREEN) confirm
+ *     the deck.gl PolygonLayer descriptor is well-formed: faction-neutral
+ *     RGB [20,20,24], per-tier alpha (0.05 / 0.15 / 0.30), no faction
+ *     coupling, empty-seed safe, and zero-score OSIDs skipped so territory
+ *     fill is preserved.
+ *   - Capability gate in composeTacticalDeckLayers still requires
+ *     `mapScarsData.length > 0`; the layer is not added when the seed
+ *     fetch fails.
+ *
+ * Flip back to false only if a regression is detected on the live map.
  */
-const MAP_SCARS_FEATURE_FLAG = false;
+const MAP_SCARS_FEATURE_FLAG = true;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
