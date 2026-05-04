@@ -6,6 +6,7 @@ import { buildExperimentalDeckLayers } from './buildExperimentalDeckLayers';
 import { buildTacticalDeckLayers } from './buildTacticalDeckLayers';
 import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
 import { buildOsidDamageOverlay, type OsidDamageDatum } from './buildOsidDamageOverlay';
+import { buildForceQualityOverlay, type ForceQualityDatum } from './buildForceQualityOverlay';
 import {
   DEFAULT_DECK_LAYER_CAPABILITIES,
   type DeckLayerCapabilities,
@@ -32,6 +33,8 @@ export function composeTacticalDeckLayers(args: {
   ghostMapData?: GhostMapDatum[];
   /** Pre-computed Map That Scars per-OSID damage data (pass when mapScarsVisible is true). */
   mapScarsData?: OsidDamageDatum[];
+  /** Pre-computed Force-Quality glow per-(OSID,faction) data (pass when forceQualityVisible is true). */
+  forceQualityData?: ForceQualityDatum[];
 }): Layer[] {
   const caps = args.capabilities ?? DEFAULT_DECK_LAYER_CAPABILITIES;
 
@@ -44,6 +47,17 @@ export function composeTacticalDeckLayers(args: {
   // Faction-agnostic dark scar tint.
   const scars: Layer[] = (caps.mapScarsVisible && args.mapScarsData && args.mapScarsData.length > 0)
     ? [buildOsidDamageOverlay(args.mapScarsData)]
+    : [];
+
+  // Force-Quality glow: render above scars (so glow reads on darkened ground)
+  // and below experimental tactical layers. Faction-symmetric tint via palette
+  // lookup; capability gate matches Map That Scars (`length > 0`).
+  const forceQuality: Layer[] = (
+    caps.forceQualityVisible
+    && args.forceQualityData
+    && args.forceQualityData.length > 0
+  )
+    ? [buildForceQualityOverlay(args.forceQualityData)]
     : [];
 
   const under = buildExperimentalDeckLayers(
@@ -61,6 +75,6 @@ export function composeTacticalDeckLayers(args: {
         args.highlightedFormationIds,
       )
     : [];
-  // Layer order (bottom → top): ghost → scars → experimental (front lines, ops arcs, unit dots) → counters.
-  return [...ghost, ...scars, ...under, ...counters];
+  // Layer order (bottom → top): ghost → scars → forceQuality → experimental (front lines, ops arcs, unit dots) → counters.
+  return [...ghost, ...scars, ...forceQuality, ...under, ...counters];
 }

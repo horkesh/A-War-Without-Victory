@@ -40,6 +40,16 @@ export interface DeckLayerCapabilities {
    * Renders below front-edge layers and above territory fill.
    */
   readonly mapScarsVisible: boolean;
+
+  /**
+   * Force-Quality Glow: per-OSID per-faction officer_quality intensity
+   * overlay (PolygonLayer tinting OSIDs by mean officer_quality of active
+   * brigades present). Faction-symmetric (palette lookup, no asymmetric
+   * branching). Default false → byte-stable (no layer added to overlay).
+   * Renders below front-edge layers and above territory fill, layered above
+   * the Map That Scars scar overlay so the glow reads on darkened ground.
+   */
+  readonly forceQualityVisible: boolean;
 }
 
 /** Default: Deck.gl formation counters ON (enriched); other experiments off. */
@@ -50,4 +60,5 @@ export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
   unitScatterDots: false,
   ghostMapVisible: false,
   mapScarsVisible: false,
+  forceQualityVisible: false,
 };

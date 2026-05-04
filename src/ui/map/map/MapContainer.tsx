@@ -48,6 +48,7 @@ import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../l
 import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
+import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
@@ -68,6 +69,31 @@ import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '
  * Flip back to false only if a regression is detected on the live map.
  */
 const MAP_SCARS_FEATURE_FLAG = true;
+
+/**
+ * Feature flag: Force-Quality Glow per-OSID per-faction officer-quality overlay.
+ *
+ * Default ON as of LANE-NIGHTSHIFT-FORCE-QUALITY-GLOW
+ * (docs/40_reports/implemented/20260505_FORCE_QUALITY_GLOW_VALIDATION.md).
+ * Closes the second v0.9.4 (Visual Layer) feature.
+ *
+ * Validation evidence:
+ *   - tests/force_quality_overlay_builder.test.ts T1..T8 (8/8 GREEN) confirm
+ *     the deck.gl PolygonLayer descriptor is well-formed: faction-symmetric
+ *     palette lookup (RBiH/RS/HRHB → existing per-faction RGB tints), per-tier
+ *     alpha (0.05 / 0.15 / 0.30), zero-quality skip, capability-gated by
+ *     forceQualityData.length > 0, deterministic builder output.
+ *   - Capability gate in composeTacticalDeckLayers requires
+ *     `forceQualityData.length > 0`; the layer is not added when no active
+ *     brigade has officer_quality data.
+ *
+ * Sensitive-history: Ring 1, UI-only, faction-symmetric mechanism (palette
+ * lookup is data, not branching logic). Builder reads existing
+ * `LoadedGameState.formations[*].officer_quality`; no engine plumbing.
+ *
+ * Flip back to false only if a regression is detected on the live map.
+ */
+const FORCE_QUALITY_FEATURE_FLAG = true;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
@@ -226,6 +252,8 @@ function composeDeckLayersForCurrentSelection(args: {
   ghostMapData?: GhostMapDatum[];
   /** Map That Scars: gated by MAP_SCARS_FEATURE_FLAG; data only present when flag enabled. */
   mapScarsData?: OsidDamageDatum[];
+  /** Force-Quality Glow: gated by FORCE_QUALITY_FEATURE_FLAG; data recomputed each render from formations. */
+  forceQualityData?: ForceQualityDatum[];
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
@@ -243,9 +271,11 @@ function composeDeckLayersForCurrentSelection(args: {
       ...DEFAULT_DECK_LAYER_CAPABILITIES,
       ghostMapVisible: args.ghostMapVisible,
       mapScarsVisible: MAP_SCARS_FEATURE_FLAG && Boolean(args.mapScarsData && args.mapScarsData.length > 0),
+      forceQualityVisible: FORCE_QUALITY_FEATURE_FLAG && Boolean(args.forceQualityData && args.forceQualityData.length > 0),
     },
     ghostMapData: args.ghostMapData,
     mapScarsData: args.mapScarsData,
+    forceQualityData: args.forceQualityData,
     highlightedFormationIds: collectHighlightedFormationIds({
       formationsGeoJson: args.formationsGeoJson,
       loadedGameState: args.loadedGameState,
@@ -396,6 +426,12 @@ export function MapContainer() {
         // Map That Scars: ref is null unless MAP_SCARS_FEATURE_FLAG was true at init.
         // Off by default → undefined → byte-stable (capabilities gate also blocks layer creation).
         mapScarsData: osidDamageDataRef.current ?? undefined,
+        // Force-Quality Glow: rebuilt each render from loadedGameState.formations
+        // (cheap O(N) sort + aggregation; ~213 brigades typical). Capability gate
+        // in composeDeckLayersForCurrentSelection requires data.length > 0.
+        forceQualityData: (FORCE_QUALITY_FEATURE_FLAG && nextInputs.loadedGameState && osidBaseRef.current)
+          ? buildForceQualityData(nextInputs.loadedGameState.formations, osidBaseRef.current)
+          : undefined,
         selectedFormationId: nextInputs.selectedFormationId,
         selectedCorpsId: nextInputs.selectedCorpsId,
         selectedCorpsFrontSectorId: nextInputs.selectedCorpsFrontSectorId,
