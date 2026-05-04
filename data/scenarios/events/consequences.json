@@ -2624,5 +2624,232 @@
       "corps_reorganization_active_HRHB": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (doctrine/operational chain). Predicate: extended high-exhaustion + low morale, non-recurring (mutex via corps_reorganization_active flag). Faction-agnostic; authored HRHB by default to mirror the documented HVO 1994 reorganization following the Washington Agreement (BB II Ch.42; Burg & Shoup, 2000). Short-term cohesion drain reflects subordination-chain disruption; longer-term recruitment uplift reflects post-reform absorption."
+  },
+  {
+    "id": "csq_war_exhaustion_high_streak",
+    "title": "The Year That Would Not End",
+    "narrative": "The exhaustion column has been pinned at the upper end of its scale for two consecutive quarters. Recruitment offices report an attenuated stream — the cohort that volunteered in the first wave is gone, the cohort that was conscripted in the second has rotated through the casualty lists, and the third cohort understands what it is being asked to do. Quotas are cut. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 70 },
+          { "type": "morale_average_below", "faction": "RBiH", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "war_exhaustion_high_streak_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained high war_exhaustion + low avg morale; recruitment quota attenuates, cohesion erodes."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.88, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -3 },
+      { "kind": "cost_ledger_annotation", "tag": "war_exhaustion_high_streak", "text": "Sustained war_exhaustion>70 and morale_avg<50. Recruitment -12% for 25 turns; cohesion -3 to reflect institutional fatigue. AUDIT-ONLY ledger annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -4 }
+    ],
+    "sets_flags": {
+      "war_exhaustion_high_streak_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (mobilization/exhaustion chain). Predicate: sustained war_exhaustion (≥70) + low average morale (<50) + non-recurring mutex. Faction-agnostic mechanism; authored RBiH by default to mirror documented late-1994 / 1995 ARBiH manpower-pool attenuation (Hoare, 'How Bosnia Armed', 2004; BB II Ch.49)."
+  },
+  {
+    "id": "csq_patron_arms_pipeline_attenuated",
+    "title": "The Pipeline Trickles",
+    "narrative": "The patron's confidence has been below water for three quarters. The arms pipeline did not formally close — it simply became less reliable. Manifests run light. The high-end calibres are reserved for capital-city ceremonial use. The combat units that depended on the pipeline learn to substitute. The substitutes work, until they don't. The combat-power column registers the attrition; the recruitment offices, watching the equipment problem feed back into morale, register a smaller but parallel decline.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_below", "faction": "RS", "dimension": "patron_confidence", "threshold": 35 },
+          { "type": "patron_pressure_above", "faction": "RS", "threshold": 25 },
+          { "type": "flag_not_set", "flag": "arms_pipeline_attenuated_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Patron arms pipeline attenuated under low confidence + high pressure; equipment quality and recruitment both register the shift."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RS", "multiplier": 0.94, "duration_turns": 25 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.93, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_arms_pipeline_attenuated", "text": "Patron arms pipeline attenuated under patron_confidence<35 and patron_pressure>25. Equipment quality -6% and recruitment -7% for 25 turns; reflects compounded patron-distance regime distinct from the formal arms-review writer." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -4 },
+      { "faction": "RS", "dimension": "patron_confidence", "delta": -3 }
+    ],
+    "sets_flags": {
+      "arms_pipeline_attenuated_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (equipment-flow chain, patron-pressure variant). Predicate uses dimension_below(patron_confidence,35) AND patron_pressure_above(25) — a distinct trigger surface from csq_arms_pipeline_disrupted (which gates on supply_below + patron_arms_review_active flag). Reuses equipment_quality_modifier substrate from event 658241df. Faction-agnostic mechanism; authored RS by default to mirror documented late-1994 Belgrade-Pale tension affecting VRS munitions reliability (BB II Ch.34, Vrabec arms-flow research)."
+  },
+  {
+    "id": "csq_supply_corridor_chronic_strain",
+    "title": "The Corridor That Bled Slow",
+    "narrative": "The corridor never closed. It also never quite worked. Trucks moved, but in fits. Ammunition arrived, but in the wrong calibres. Spare parts arrived, but late. The chronic strain on the corridor manifested in cohesion: each unit's logistics officer learned to hoard, to substitute, to improvise. The improvisation worked, mostly. But the institutional confidence that the supply system would function decayed turn over turn, and the recruitment narrative — which had emphasized adequate equipment — quietly stopped emphasizing it.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "HRHB", "threshold": 30 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "supply_corridor_chronic_strain_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Chronic low supply + sub-baseline morale; cohesion erodes, recruitment narrative weakens."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -4 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.92, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "supply_corridor_chronic_strain", "text": "Chronic supply corridor strain under supply<30 and morale_avg<50. Cohesion -4 reflecting accumulated logistics improvisation costs; recruitment -8% for 20 turns reflecting weakened equipment narrative." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -3 }
+    ],
+    "sets_flags": {
+      "supply_corridor_chronic_strain_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (economic/logistic chain). Predicate uses supply_below + morale_average_below — distinct from csq_black_market_supply_route (positive uplift) and csq_grain_corridor_reopened (corridor-open variant). Faction-agnostic mechanism; authored HRHB by default to mirror documented 1994-1995 HVO logistics strain on the Posušje-Tomislavgrad corridor under Croatia-side reorganization (BB II Ch.41-42)."
+  },
+  {
+    "id": "csq_mobilization_demographics_strained",
+    "title": "The Lists Run Thin",
+    "narrative": "The conscription officers no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_RBiH", "min": 60 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 60 },
+          { "type": "flag_not_set", "flag": "mobilization_demographics_strained_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cumulative casualties + sustained exhaustion strain the mobilization pool past standard age-class boundaries."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.85, "duration_turns": 30 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": -2 },
+      { "kind": "cost_ledger_annotation", "tag": "mobilization_demographics_strained", "text": "Mobilization demographics strained under cumulative_casualties>60 and war_exhaustion>60. Recruitment -15% for 30 turns to reflect age-class exhaustion; morale -2 to reflect the political register of the demographic constraint." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -3 },
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "mobilization_demographics_strained_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (mobilization chain, late-war variant). Predicate uses cumulative casualty + sustained exhaustion flags — distinct from csq_reservist_exhaustion_callup (mid-war reservist surge) and csq_late_war_volunteer_surge (territory-loss-induced volunteer push). Faction-agnostic mechanism; authored RBiH by default to mirror documented 1995 ARBiH age-class strain (Hoare 2004; Burg & Shoup 2000). Mutex flag prevents recurrence."
+  },
+  {
+    "id": "csq_political_split_temporary",
+    "title": "Cabinet Crisis",
+    "narrative": "The political class fractures over a question that — taken in isolation — should have been routine. The casualty totals; the patron's latest demand; the alliance's latest concession. The argument is held in private, then in committees, then in the press. A working consensus is restored within the quarter, but the institutional cohesion records the dispute. The international observers note the fracture and revise their estimates of the political class's room to maneuver.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_below", "value": 0.30 },
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_HRHB", "min": 35 },
+          { "type": "dimension_below", "faction": "HRHB", "dimension": "international_standing", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "political_split_temporary_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cabinet split under low alliance + casualty pressure + sub-baseline international standing; cohesion drains, leverage attenuates."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -4 },
+      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "international_credibility", "delta": -5 },
+      { "kind": "cost_ledger_annotation", "tag": "political_split_temporary", "text": "Cabinet crisis under alliance<0.30 and cumulative_casualties>35 and international_standing<45. Cohesion -4 short-term to reflect institutional dispute; negotiation capital -5 to reflect the international perception of fracture." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -4 },
+      { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": -3 }
+    ],
+    "sets_flags": {
+      "political_split_temporary_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (faction-internal political chain). Predicate combines alliance pressure (alliance_below) with cumulative casualty flag and sub-baseline international standing — distinct from existing alliance-drift events which read alliance value alone. Faction-agnostic mechanism; authored HRHB by default to mirror documented 1993-1994 Croat Defence Council political fractures over Washington Agreement direction (BB II Ch.41; Burg & Shoup 2000). Mutex flag prevents recurrence."
+  },
+  {
+    "id": "csq_winter_supply_attrition",
+    "title": "The Winter Bill",
+    "narrative": "The first hard freeze finds the supply system already stretched. Generators run; fuel runs out. The roads that worked for trucks in the autumn now require four-wheel-drive. The depots that had been adequate for summer-rate operations are not adequate for winter-rate. The combat units in the high country burn through fuel faster than the supply column can deliver it. The bill comes in cohesion. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RS", "threshold": 40 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 50 },
+          { "type": "morale_average_below", "faction": "RS", "threshold": 55 },
+          { "type": "flag_not_set", "flag": "winter_supply_attrition_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Winter logistics gap intersects with high exhaustion and sub-baseline morale; cohesion drains across the active force."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": -3 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "winter_supply_attrition", "text": "Winter supply attrition under supply<40 and war_exhaustion>50 and morale_avg<55. Cohesion -3 to reflect distributed logistics improvisation under cold-weather load; supply -8 to reflect the additional draw on the depot." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "winter_supply_attrition_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (logistic/operational chain, seasonal variant). Predicate compounds supply_below + war_exhaustion flag + morale_average_below — three independent conditions modeling a winter logistics squeeze. Faction-agnostic mechanism; authored RS by default to mirror documented 1992-93 / 1993-94 winter VRS supply strain at altitude (BB II Ch.31, Sarajevo siege rotation logistics). Mutex flag prevents recurrence."
   }
 ]
