@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-04 (post-trip Wave 5 — Bot-orders profile retry + Divergence Events Wave 5 + Map That Scars validation + Phase 5 test review shipped on `94e1666e`; v0.9.0 at **35 events**; first v0.9.4 Visual Layer feature CLOSED; bot-orders single-target optimization (`analyzeFactionGraph` 63.3%) named for next perf lane)
+**Last Updated:** 2026-05-04 (post-trip Wave 6 — 188w Reconstitution verification shipped on `3f1a3372`; **Wave 4 Gap 2 hypothesis DISPROVED by trajectory evidence** — reinforcement-mult lever does NOT bend VRS/HRHB late-war officer-quality arc; RBiH (control) tracks doctrinal arc; casualty-side path `OFFICER_CASUALTY_MULT` named as next investigation surface)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."

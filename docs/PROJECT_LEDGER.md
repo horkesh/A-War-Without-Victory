@@ -7617,3 +7617,36 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Successor handoffs:** (1) `analyzeFactionGraph` cache/dedupe optimization — single function, 63.3% of bot-orders cost, two-call-site duplication (G1+G2+G3 gate discipline applies, Mission C precedent). (2) 188w Reconstitution verification re-dispatch (Wave 5 attempt did not produce output). (3) Future divergence-event waves can keep using existing condition kinds + the equipment-quality substrate.
 
 **Reports:** `docs/40_reports/audits/20260504_BOT_ORDERS_HOT_PATH_PROFILE.md`, `docs/40_reports/implemented/20260504_DIVERGENCE_EVENTS_WAVE_5.md`, `docs/40_reports/implemented/20260504_MAP_THAT_SCARS_VALIDATION.md`.
+
+---
+
+## [2026-05-04] feat(audit): Wave 6 — 188w Reconstitution verification — Wave 4 Gap 2 hypothesis disproved
+
+**Type:** Trip-session 4 audit-only verification commits `cc829ebb` + backfill `3f1a3372` on top of Wave 5 propagation `f500570f`. Successor verification of Wave 4 reconstitution-policy commit `e9584dd3` (VRS+HRHB reinforcement step-curve restoration). No engine, scenario, or test files changed.
+
+**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1641` — wallclock ~12.4 min, OOM during post-sim summary write at 4.4 GB replay buffer; **brigade_temporal_log captured complete trajectory through t188** before OOM. `final_state_hash` unavailable (run_summary.json never written; not blocking the structural verdict). The OOM is a separate perf concern from sim OOM — sim itself completed all 188 turns.
+
+**Verdict (audit-only, structural):**
+- **VRS officer_quality NOT bent** — climbs through deepest 0.45× decay band (t78→t104 +0.000194/turn slowest segment, dampening as expected; but t104→t188 RESUMES climbing at +0.001218/turn exactly when the step-curve hits its deepest band). Whole-run mean +0.000775/turn (inverse to doctrinal canon-sign -1).
+- **VRS active brigade count drops 78→51** (-34.6%) — the lever IS shrinking the force; but surviving cadre grows stronger per-brigade (+37.7% personnel, +21.6% officer_quality). Per-brigade growth term overwhelms per-faction reinforcement budget.
+- **HRHB officer_quality grows monotonically** (0.227 → 0.643), every checkpoint segment positive, NOT bent.
+- **RBiH (lever NOT applied, control)** tracks doctrinal arc cleanly (+0.003865/turn matches canon).
+
+**Implication:** The Wave 4 Gap 2 hypothesis "starve the personnel-fill side so the officer-quality decay term dominates" is **not vindicated**. The reinforcement-mult lever shrinks the force but cannot starve per-brigade growth. The casualty-side path (`applyOfficerCasualtyLoss` / `OFFICER_CASUALTY_MULT`) is the indicated next investigation surface — directly affects the destabilising growth term rather than the reinforcement budget.
+
+**Files (audit-only):**
+- `tools/diagnostics/reconstitution_188w_checkpoints.cjs` (NEW; lane-specific post-processor at t0/t52/t78/t104/t188; canonical sorted faction iteration via `strictCompare`; no engine touch)
+- `docs/40_reports/implemented/20260504_RECONSTITUTION_188W_VERIFICATION.md` (NEW; full trajectory tables + structural verdict + sensitive-history compliance + successor handoff)
+
+**Sensitive-history compliance:** Audit-only. Ring 1, faction-agnostic, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No combat-math number tuned, no step-curve numbers changed (those are the lever under test, not retuned).
+
+**Determinism:** New diagnostic uses pure aggregation, sorted faction iteration via `strictCompare`, numeric-ascending turn iteration, no `Math.random` / `Date.now` / locale-sort / `new Date`. Re-runs on the same `brigade_temporal_log.jsonl` produce byte-identical output.
+
+**Roadmap delta:** Wave 4 Gap 2 mechanism hypothesis disproved by trajectory evidence. The named successor lane shifts from "verify Wave 4 step-curve at 188w" to "investigate `OFFICER_CASUALTY_MULT` faction-asymmetric path." The 4.4 GB replay-buffer OOM is captured as a separate perf-concern handoff (streaming/chunked replay serialization).
+
+**Successor handoffs:**
+1. **`OFFICER_CASUALTY_MULT` faction-asymmetric lane** — pre-engagement panel: /game-designer + /historian + /scenario-tester + /determinism-auditor (full calibration regression required); evidence supports asymmetric `RS:2.5 / HRHB:2.0 / RBiH:1.0` from Wave 3 trace. The casualty-side weight directly affects the destabilising growth term.
+2. **Replay-buffer streaming** — 4.4 GB replay buffer needs streaming/chunked serialization to allow 188w runs to write `run_summary.json` reliably (perf concern, not blocking calibration).
+3. **Diagnostic gap** — extend `tools/diagnostics/reconstitution_188w_checkpoints.cjs` to emit faction-total personnel (currently emits avg/brigade only — brigade-consolidation contamination at t104→t188 confounds VRS personnel/brigade trajectory; one-line additive change).
+
+**Report:** `docs/40_reports/implemented/20260504_RECONSTITUTION_188W_VERIFICATION.md`.
