@@ -88,6 +88,10 @@
     "desktop:release:check": "npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build",
     "desktop:package:dir": "npm run desktop:release:check && electron-builder --dir --publish never",
     "desktop:package:probe": "npm run desktop:package:dir && node tools/desktop_packaged_runtime_probe.mjs",
+    "desktop:package:linux:appimage": "npm run desktop:release:check && electron-builder --linux AppImage --publish never",
+    "desktop:package:linux:appimage:smoke": "node tools/build/linux_appimage_smoke.cjs",
+    "desktop:package:win:nsis": "npm run desktop:release:check && electron-builder --win nsis --publish never",
+    "desktop:package:win:nsis:smoke": "node tools/build/win_nsis_smoke.cjs",
     "desktop": "npm run desktop:release:check && electron .",
     "dev:warroom": "vite --config src/ui/warroom/vite.config.ts",
     "warroom:build": "vite build --config src/ui/warroom/vite.config.ts && tsx tools/ui/warroom_stage_assets.ts",
@@ -358,9 +362,22 @@
     ],
     "win": {
       "signAndEditExecutable": false,
+      "sign": null,
       "target": [
-        "dir"
+        "dir",
+        "nsis"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Game"
     }
   },
   "ts-node": {

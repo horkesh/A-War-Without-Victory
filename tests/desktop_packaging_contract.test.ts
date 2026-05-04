@@ -50,7 +50,10 @@ test('electron-builder config matches the packaged runtime resource contract', a
         false,
         'bounded dir-target packaging should stay explicitly unsigned instead of depending on Windows sign/edit helper downloads',
     );
-    assert.deepStrictEqual(build?.win?.target, ['dir']);
+    // Per LANE-NIGHTSHIFT-PLATFORM-PACKAGING-GROUNDWORK (v0.9.5 prep):
+    // 'nsis' added to Win build targets for unsigned NSIS installer
+    // groundwork. signAndEditExecutable: false above remains binding.
+    assert.deepStrictEqual(build?.win?.target, ['dir', 'nsis']);
     assert.deepStrictEqual(
         packagedFiles,
         [

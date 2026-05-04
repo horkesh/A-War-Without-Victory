@@ -23,6 +23,10 @@ dist/
 build/
 coverage/
 
+# Allow tooling under tools/build/ (build-related scripts, not build outputs)
+!tools/build/
+!tools/build/**
+
 # Generated audit/debug artifacts (do not track)
 data/derived/_debug/
 data/derived/_test/
