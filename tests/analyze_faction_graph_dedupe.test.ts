@@ -21,6 +21,7 @@ import { describe, it, expect } from 'vitest';
 import {
     analyzeFactionGraphCached,
     __test_analyzeFactionGraphLegacy as analyzeFactionGraph,
+    __test_analyzeFactionGraphOptimized as analyzeFactionGraphOptimized,
     type FactionGraphAnalysis,
 } from '../src/sim/combat/osid_graph_analysis.js';
 import type { FactionId, GameState } from '../src/state/game_state.js';
@@ -267,6 +268,48 @@ describe('analyzeFactionGraphCached — G1 property test', () => {
         } finally {
             if (prev === undefined) delete process.env.ANALYZE_FACTION_GRAPH_PARITY_CHECK;
             else process.env.ANALYZE_FACTION_GRAPH_PARITY_CHECK = prev;
+        }
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-TIER-2 — direct optimized-vs-legacy
+// G1 property test. Bypasses the per-turn cache so any drift between the
+// optimized body and the frozen legacy reference body is detectable
+// independently of cache-correctness. Cached-vs-legacy continues to be
+// covered by the original 10k-trial test above.
+// ─────────────────────────────────────────────────────────────────────────
+describe('analyzeFactionGraphOptimized — Tier 2 G1 property test (direct optimized vs legacy)', () => {
+    it('optimized === legacy structurally over 10,000 random trials (deterministic LCG)', () => {
+        const rng = makeRng(0xC0FFEE);
+        const TRIAL_COUNT = 10_000;
+        let firstFailure: string | null = null;
+        for (let i = 0; i < TRIAL_COUNT; i++) {
+            const trial = buildTrial(rng, i);
+            const optimized = analyzeFactionGraphOptimized(trial.state, trial.faction, trial.adjacency, trial.reverseMap);
+            const legacy = analyzeFactionGraph(trial.state, trial.faction, trial.adjacency, trial.reverseMap);
+            const eq = structurallyEqual(optimized, legacy);
+            if (!eq.ok) {
+                firstFailure = `trial ${i}: ${eq.reason}`;
+                break;
+            }
+        }
+        expect(firstFailure).toBeNull();
+    }, 60_000);
+
+    it('Tier 2 parity flag opt-in — passes without throwing on healthy trials', () => {
+        const prev = process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK;
+        process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK = 'true';
+        try {
+            const rng = makeRng(0x7152C001);
+            for (let i = 0; i < 50; i++) {
+                const trial = buildTrial(rng, i);
+                analyzeFactionGraphCached(trial.state, trial.faction, trial.adjacency, trial.reverseMap);
+                analyzeFactionGraphCached(trial.state, trial.faction, trial.adjacency, trial.reverseMap);
+            }
+        } finally {
+            if (prev === undefined) delete process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK;
+            else process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK = prev;
         }
     });
 });

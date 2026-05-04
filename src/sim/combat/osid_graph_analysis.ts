@@ -200,8 +200,118 @@ function getCoethnicPop(
 /**
  * Compute strategic graph analysis for a single faction.
  * Call once per turn per faction.
+ *
+ * LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-TIER-2 (2026-05-05): public entry point
+ * dispatches to the optimized body. The legacy body (`analyzeFactionGraphLegacy`)
+ * is retained below for the G1 property test (`__test_analyzeFactionGraphLegacy`)
+ * and for the G2 parity wrapper. Optimized + legacy MUST return structurally-
+ * identical output by construction; G1 enforces this over 10,000 LCG-seeded
+ * trials and the existing `ANALYZE_FACTION_GRAPH_PARITY_CHECK=true` env flag
+ * also exercises optimized vs legacy on every cache hit.
  */
 export function analyzeFactionGraph(
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): FactionGraphAnalysis {
+    return analyzeFactionGraphOptimized(state, faction, adjacency, reverseMap);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-TIER-2 — formations-by-OSID index
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// The Wave 5 audit named `analyzeFactionGraph` as 63.3% of bot-orders cost
+// (≈398 ms/turn over 40w). Wave 7 Lane A (`72a040fc`) deduplicated the per-
+// turn calls (4 of 5 call sites cached) for a ~35% bot-orders drop. Tier 2
+// optimizes the body itself.
+//
+// Hidden hotspot: `getBrigadePowerAtOsid` iterated `Object.entries(formations)`
+// (O(F) ≈ 700 formations late-war) on EVERY call, and was called O(V·avg_deg)
+// times per analysis. For 712 OSIDs that's ~500k Object.entries iterations
+// per faction per turn — the dominating sub-cost.
+//
+// Tier 2 builds a formations-by-OSID index ONCE per call (single O(F) pass)
+// and converts every `getBrigadePowerAtOsid`-shaped lookup to O(1) Map reads.
+// All tie-break orderings preserved (bestId selection, neighbor iteration
+// order, sorted output arrays) — outputs structurally byte-identical to legacy.
+//
+// Determinism: no Math.random / Date.now / new Date / locale-sort /
+// environment leak. Faction-agnostic — same code path for all factions.
+// Sorted iteration unchanged. Single-pass — no cross-call shared state.
+// No new timing surface (Wave 7 Lane A's G3 drift was a cross-step timing
+// issue from the WeakMap cache crossing pipeline boundaries; Tier 2 is
+// inner-loop only and creates no such surface).
+
+interface FormationPowerEntry {
+    id: string;
+    formation: FormationState;
+    power: number;
+}
+
+interface FormationsIndex {
+    /** Per-(osid, faction) total power. Key: `${osid}\x00${faction}`. */
+    factionTotalByOsid: Map<string, number>;
+    /** Per-(osid, faction) strongest single brigade (for legacy bestId tie-break). */
+    factionBestByOsid: Map<string, FormationPowerEntry>;
+    /** Per-osid total power across all factions (for unfiltered enemy threat reads). */
+    anyTotalByOsid: Map<Osid, number>;
+    /** Per-osid strongest single brigade across all factions (for weak-enemy `formation` field). */
+    anyBestByOsid: Map<Osid, FormationPowerEntry>;
+}
+
+/**
+ * Build a formations-by-OSID index in a single O(F) pass.
+ * Tie-break for `bestId` mirrors legacy: stronger power wins; on equal power,
+ * lexicographically-smaller id wins (via `strictCompare`).
+ *
+ * Iterates `Object.entries(formations)` ONCE; the legacy body did this O(V·avg_deg)
+ * times via `getBrigadePowerAtOsid`.
+ */
+function buildFormationsIndex(state: GameState): FormationsIndex {
+    const factionTotalByOsid = new Map<string, number>();
+    const factionBestByOsid = new Map<string, FormationPowerEntry>();
+    const anyTotalByOsid = new Map<Osid, number>();
+    const anyBestByOsid = new Map<Osid, FormationPowerEntry>();
+
+    const formations = state.military.formations ?? {};
+    for (const [id, f] of Object.entries(formations)) {
+        if (f.status !== 'active') continue;
+        if (f.location_osid == null) continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+
+        const osid = f.location_osid as Osid;
+        const personnel = f.personnel ?? 0;
+        const eq = Math.max(0.1, f.experience ?? 0.3);
+        const coh = Math.max(0.1, (f.cohesion ?? 60) / 100);
+        const power = personnel * eq * coh;
+
+        // Any-faction total + best
+        anyTotalByOsid.set(osid, (anyTotalByOsid.get(osid) ?? 0) + power);
+        const anyBest = anyBestByOsid.get(osid);
+        if (anyBest === undefined || power > anyBest.power || (power === anyBest.power && strictCompare(id, anyBest.id) < 0)) {
+            anyBestByOsid.set(osid, { id, formation: f, power });
+        }
+
+        // Per-faction total + best (keyed by `${osid}\x00${faction}` to avoid Map<Map> indirection)
+        const fkey = `${osid}\x00${f.faction}`;
+        factionTotalByOsid.set(fkey, (factionTotalByOsid.get(fkey) ?? 0) + power);
+        const factionBest = factionBestByOsid.get(fkey);
+        if (factionBest === undefined || power > factionBest.power || (power === factionBest.power && strictCompare(id, factionBest.id) < 0)) {
+            factionBestByOsid.set(fkey, { id, formation: f, power });
+        }
+    }
+
+    return { factionTotalByOsid, factionBestByOsid, anyTotalByOsid, anyBestByOsid };
+}
+
+/**
+ * Tier 2 optimized body of `analyzeFactionGraph`. See block comment above for
+ * the optimization summary. Output is structurally identical to the legacy
+ * body (`analyzeFactionGraphLegacy`); G1 property test enforces equivalence.
+ */
+function analyzeFactionGraphOptimized(
     state: GameState,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
@@ -218,7 +328,13 @@ export function analyzeFactionGraph(
         enemy_pockets: []
     };
 
-    // 1. Identify all faction-controlled OSIDs
+    // O1: pre-index formations by OSID — single O(F) pass replaces O(V·avg_deg) repeated scans.
+    const idx = buildFormationsIndex(state);
+    const factionKey = (osid: Osid, fac: FactionId): string => `${osid}\x00${fac}`;
+
+    // 1. Identify all faction-controlled OSIDs. Loop 1 already populates the controller
+    //    cache for every key in adjacency; subsequent reads skip the `?? getPoliticalControllerOSID(...)`
+    //    fallback (O3 — vestigial defensive read).
     const allOsids = Array.from(adjacency.keys()).sort(strictCompare);
     const controlledSet = new Set<Osid>();
     const controllerCache = new Map<Osid, FactionId | null>();
@@ -229,7 +345,8 @@ export function analyzeFactionGraph(
         if (controller === faction) controlledSet.add(osid);
     }
 
-    // 2. Analyze each controlled OSID
+    // 2. Analyze each controlled OSID. Single-pass neighbor classification (O2 —
+    //    advance_enemy_adjacency = enemyNeighbors.length, no second loop needed).
     for (const osid of allOsids) {
         if (!controlledSet.has(osid)) continue;
 
@@ -238,22 +355,26 @@ export function analyzeFactionGraph(
         const friendlyNeighbors: Osid[] = [];
 
         for (const n of neighbors) {
-            const c = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
-            if (c === faction) friendlyNeighbors.push(n);
-            else if (c !== null) enemyNeighbors.push(n);
+            const c = controllerCache.get(n);
+            // controllerCache covers every adjacency key; defensive fallback retained
+            // only for the rare case `n` is not a key in adjacency (mirrors legacy semantics).
+            const ctrl = c !== undefined ? c : getPoliticalControllerOSID(state, n, reverseMap);
+            if (ctrl === faction) friendlyNeighbors.push(n);
+            else if (ctrl !== null) enemyNeighbors.push(n);
         }
 
-        // Brigade at this OSID — use totalPower for classification and OsidAnalysis
-        const { totalPower: brigadePower, brigadeId } = getBrigadePowerAtOsid(state, osid, faction);
+        // Brigade at this OSID — index lookup replaces O(F) scan.
+        const ownKey = factionKey(osid, faction);
+        const brigadePower = idx.factionTotalByOsid.get(ownKey) ?? 0;
+        const brigadeId = idx.factionBestByOsid.get(ownKey)?.id ?? null;
 
-        // Enemy threat: sum of ALL enemy brigade powers on adjacent enemy OSIDs
+        // Enemy threat — index lookup per enemy neighbor.
         let enemyThreat = 0;
         for (const en of enemyNeighbors) {
-            const { totalPower } = getBrigadePowerAtOsid(state, en);
-            enemyThreat += totalPower;
+            enemyThreat += idx.anyTotalByOsid.get(en) ?? 0;
         }
 
-        // Front classification
+        // Front classification (semantics preserved verbatim from legacy).
         let classification: FrontClassification;
         if (enemyNeighbors.length === 0) {
             classification = 'interior';
@@ -276,11 +397,235 @@ export function analyzeFactionGraph(
         // Chokepoint analysis: does removing this OSID disconnect territory?
         const choke = isChokepoint(osid, adjacency, controlledSet);
         if (choke) {
-            // Chokepoint bonus: add population of OSIDs that would be disconnected
-            civilianWeight += 10000; // Flat chokepoint premium
+            civilianWeight += 10000;
         }
 
-        // Advance enemy adjacency (for attack planning)
+        // O2: advance_enemy_adjacency = enemyNeighbors.length (counts neighbors with
+        //     non-null controller != faction). Identical to legacy's second-pass count.
+        const advanceEnemyAdj = enemyNeighbors.length;
+
+        const analysis: OsidAnalysis = {
+            osid,
+            controller: faction,
+            enemy_neighbors: enemyNeighbors,
+            friendly_neighbors: friendlyNeighbors,
+            brigade_id: brigadeId,
+            brigade_power: brigadePower,
+            enemy_threat: enemyThreat,
+            classification,
+            civilian_weight: civilianWeight,
+            is_chokepoint: choke,
+            advance_enemy_adjacency: advanceEnemyAdj
+        };
+
+        result.osid_analysis.set(osid, analysis);
+
+        if (enemyNeighbors.length > 0) {
+            result.front_osids.push(osid);
+            if (classification === 'undefended') result.undefended_front.push(osid);
+            if (advanceEnemyAdj >= 3) result.salients.push(osid);
+        }
+        if (choke) result.chokepoints.push(osid);
+    }
+
+    // 3. Detect weak enemy OSIDs (attack opportunities) — index lookups.
+    const enemyChecked = new Set<Osid>();
+    for (const frontOsid of result.front_osids) {
+        const analysis = result.osid_analysis.get(frontOsid)!;
+        for (const enemyOsid of analysis.enemy_neighbors) {
+            if (enemyChecked.has(enemyOsid)) continue;
+            enemyChecked.add(enemyOsid);
+
+            const totalPower = idx.anyTotalByOsid.get(enemyOsid) ?? 0;
+            const best = idx.anyBestByOsid.get(enemyOsid);
+            const formation = best ? best.formation : null;
+
+            if (totalPower === 0) {
+                result.weak_enemy_osids.push({ osid: enemyOsid, reason: 'undefended' });
+            } else if (formation) {
+                const entrenchment = (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
+                const disrupted = (formation as { disrupted_turns?: number }).disrupted_turns ?? 0;
+                const cohesion = formation.cohesion ?? 60;
+
+                if (entrenchment === 0) {
+                    result.weak_enemy_osids.push({ osid: enemyOsid, reason: 'no_entrenchment' });
+                } else if (disrupted > 0) {
+                    result.weak_enemy_osids.push({ osid: enemyOsid, reason: 'disrupted' });
+                } else if (cohesion < 25) {
+                    result.weak_enemy_osids.push({ osid: enemyOsid, reason: 'low_cohesion' });
+                }
+            }
+        }
+    }
+
+    // 4. Detect enemy pockets (semantics preserved verbatim).
+    const MAX_POCKET_CLUSTER = 6;
+    const pocketChecked = new Set<Osid>();
+    for (const osid2 of allOsids) {
+        if (!osid2.startsWith('op:')) continue;
+        if (!controlledSet.has(osid2)) continue;
+        const neighbors2 = adjacency.get(osid2) ?? [];
+        for (const enemyOsid of neighbors2) {
+            if (!enemyOsid.startsWith('op:')) continue;
+            if (controlledSet.has(enemyOsid)) continue;
+            if (pocketChecked.has(enemyOsid)) continue;
+
+            const enemyControllerCached = controllerCache.get(enemyOsid);
+            const enemyController = enemyControllerCached !== undefined
+                ? enemyControllerCached
+                : getPoliticalControllerOSID(state, enemyOsid, reverseMap);
+            if (!enemyController || enemyController === faction) { pocketChecked.add(enemyOsid); continue; }
+
+            const cluster: Osid[] = [];
+            const clusterSet = new Set<Osid>();
+            const bfsQueue: Osid[] = [enemyOsid];
+            clusterSet.add(enemyOsid);
+            let tooLarge = false;
+
+            while (bfsQueue.length > 0) {
+                const curr = bfsQueue.shift()!;
+                cluster.push(curr);
+                if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
+                for (const n of (adjacency.get(curr) ?? [])) {
+                    if (!n.startsWith('op:')) continue;
+                    if (clusterSet.has(n)) continue;
+                    const nCachedCtrl = controllerCache.get(n);
+                    const nCtrl = nCachedCtrl !== undefined
+                        ? nCachedCtrl
+                        : getPoliticalControllerOSID(state, n, reverseMap);
+                    if (nCtrl === enemyController) {
+                        clusterSet.add(n);
+                        bfsQueue.push(n);
+                    }
+                }
+            }
+
+            for (const c of clusterSet) pocketChecked.add(c);
+            if (tooLarge) continue;
+
+            // Pocket-defense check via index lookup (was O(F) per cluster member).
+            let hasOrganizedDefense = false;
+            for (const c of cluster) {
+                const total = idx.factionTotalByOsid.get(factionKey(c, enemyController)) ?? 0;
+                if (total > 0) {
+                    hasOrganizedDefense = true;
+                    break;
+                }
+            }
+            if (hasOrganizedDefense) continue;
+
+            let allSurrounded = true;
+            for (const c of cluster) {
+                for (const n of (adjacency.get(c) ?? [])) {
+                    if (!n.startsWith('op:')) continue;
+                    if (clusterSet.has(n)) continue;
+                    const nCachedCtrl = controllerCache.get(n);
+                    const nCtrl = nCachedCtrl !== undefined
+                        ? nCachedCtrl
+                        : getPoliticalControllerOSID(state, n, reverseMap);
+                    if (nCtrl !== faction) { allSurrounded = false; break; }
+                }
+                if (!allSurrounded) break;
+            }
+
+            if (allSurrounded) {
+                for (const c of cluster) result.enemy_pockets.push(c);
+            }
+        }
+    }
+
+    // Sort all output arrays for determinism (semantics identical to legacy).
+    result.front_osids.sort(strictCompare);
+    result.chokepoints.sort(strictCompare);
+    result.salients.sort(strictCompare);
+    result.undefended_front.sort(strictCompare);
+    result.weak_enemy_osids.sort((a, b) => strictCompare(a.osid, b.osid));
+    result.enemy_pockets.sort(strictCompare);
+
+    return result;
+}
+
+/**
+ * LEGACY body — retained for the G1 property test (compares optimized vs this
+ * over 10,000 LCG-seeded trials) and for the G2 parity wrapper. Behavior MUST
+ * remain frozen at the pre-Tier-2 implementation; do not edit unless the
+ * intent is to modify the property-test reference.
+ *
+ * Pre-Tier-2 history: this body was the public `analyzeFactionGraph` entry
+ * through Wave 7 Lane A (`72a040fc`). Tier 2 (this lane) introduces
+ * `analyzeFactionGraphOptimized` and dispatches the public entry to it.
+ */
+function analyzeFactionGraphLegacy(
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): FactionGraphAnalysis {
+    const result: FactionGraphAnalysis = {
+        faction,
+        osid_analysis: new Map(),
+        front_osids: [],
+        chokepoints: [],
+        salients: [],
+        undefended_front: [],
+        weak_enemy_osids: [],
+        enemy_pockets: []
+    };
+
+    const allOsids = Array.from(adjacency.keys()).sort(strictCompare);
+    const controlledSet = new Set<Osid>();
+    const controllerCache = new Map<Osid, FactionId | null>();
+
+    for (const osid of allOsids) {
+        const controller = getPoliticalControllerOSID(state, osid, reverseMap);
+        controllerCache.set(osid, controller);
+        if (controller === faction) controlledSet.add(osid);
+    }
+
+    for (const osid of allOsids) {
+        if (!controlledSet.has(osid)) continue;
+
+        const neighbors = adjacency.get(osid) ?? [];
+        const enemyNeighbors: Osid[] = [];
+        const friendlyNeighbors: Osid[] = [];
+
+        for (const n of neighbors) {
+            const c = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
+            if (c === faction) friendlyNeighbors.push(n);
+            else if (c !== null) enemyNeighbors.push(n);
+        }
+
+        const { totalPower: brigadePower, brigadeId } = getBrigadePowerAtOsid(state, osid, faction);
+
+        let enemyThreat = 0;
+        for (const en of enemyNeighbors) {
+            const { totalPower } = getBrigadePowerAtOsid(state, en);
+            enemyThreat += totalPower;
+        }
+
+        let classification: FrontClassification;
+        if (enemyNeighbors.length === 0) {
+            classification = 'interior';
+        } else if (brigadePower === 0) {
+            classification = 'undefended';
+        } else if (enemyThreat > 0 && enemyThreat / brigadePower > 2.0) {
+            classification = 'critical';
+        } else if (enemyThreat > 0 && enemyThreat / brigadePower > 1.0) {
+            classification = 'threatened';
+        } else if (enemyThreat > 0) {
+            classification = 'active';
+        } else {
+            classification = 'quiet';
+        }
+
+        const coethnicPop = getCoethnicPop(state, osid, faction, reverseMap);
+        let civilianWeight = coethnicPop;
+
+        const choke = isChokepoint(osid, adjacency, controlledSet);
+        if (choke) {
+            civilianWeight += 10000;
+        }
+
         let advanceEnemyAdj = 0;
         for (const n of neighbors) {
             const c = controllerCache.get(n);
@@ -311,7 +656,6 @@ export function analyzeFactionGraph(
         if (choke) result.chokepoints.push(osid);
     }
 
-    // 3. Detect weak enemy OSIDs (attack opportunities)
     const enemyChecked = new Set<Osid>();
     for (const frontOsid of result.front_osids) {
         const analysis = result.osid_analysis.get(frontOsid)!;
@@ -338,12 +682,6 @@ export function analyzeFactionGraph(
         }
     }
 
-    // 4. Detect enemy pockets: enemy OSID clusters (1-3 connected same-controller OSIDs)
-    //    where ALL external neighbors are faction-controlled.
-    //    A cluster of 2 HRHB OSIDs inside RS territory won't be caught by single-OSID
-    //    detection because they neighbor each other. BFS finds the connected component first.
-    //    Scan ALL controlled OSIDs (not just front) because pockets are typically deep
-    //    in the interior, surrounded by friendly territory on all sides.
     const MAX_POCKET_CLUSTER = 6;
     const pocketChecked = new Set<Osid>();
     for (const osid2 of allOsids) {
@@ -352,10 +690,9 @@ export function analyzeFactionGraph(
         const neighbors2 = adjacency.get(osid2) ?? [];
         for (const enemyOsid of neighbors2) {
             if (!enemyOsid.startsWith('op:')) continue;
-            if (controlledSet.has(enemyOsid)) continue; // skip friendly
+            if (controlledSet.has(enemyOsid)) continue;
             if (pocketChecked.has(enemyOsid)) continue;
 
-            // BFS: find connected component of same-controller enemy OSIDs
             const enemyController = controllerCache.get(enemyOsid) ?? getPoliticalControllerOSID(state, enemyOsid, reverseMap);
             if (!enemyController || enemyController === faction) { pocketChecked.add(enemyOsid); continue; }
 
@@ -370,7 +707,7 @@ export function analyzeFactionGraph(
                 cluster.push(curr);
                 if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
                 for (const n of (adjacency.get(curr) ?? [])) {
-                    if (!n.startsWith('op:')) continue; // skip canonical SID nodes
+                    if (!n.startsWith('op:')) continue;
                     if (clusterSet.has(n)) continue;
                     const nCtrl = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
                     if (nCtrl === enemyController) {
@@ -380,12 +717,9 @@ export function analyzeFactionGraph(
                 }
             }
 
-            // Mark all cluster members as checked
             for (const c of clusterSet) pocketChecked.add(c);
             if (tooLarge) continue;
 
-            // A defended enclave is not a rear pocket. Rear-pocket cleanup is only for
-            // abandoned clusters with no organized military present anywhere inside.
             let hasOrganizedDefense = false;
             for (const c of cluster) {
                 const { totalPower } = getBrigadePowerAtOsid(state, c, enemyController);
@@ -396,13 +730,11 @@ export function analyzeFactionGraph(
             }
             if (hasOrganizedDefense) continue;
 
-            // Check: ALL external op: neighbors of the cluster must be faction-controlled
-            // Skip canonical SID nodes (S:-prefixed) — they have no political_controllers entry
             let allSurrounded = true;
             for (const c of cluster) {
                 for (const n of (adjacency.get(c) ?? [])) {
-                    if (!n.startsWith('op:')) continue; // skip canonical SID nodes
-                    if (clusterSet.has(n)) continue; // skip intra-cluster edges
+                    if (!n.startsWith('op:')) continue;
+                    if (clusterSet.has(n)) continue;
                     const nCtrl = controllerCache.get(n) ?? getPoliticalControllerOSID(state, n, reverseMap);
                     if (nCtrl !== faction) { allSurrounded = false; break; }
                 }
@@ -415,7 +747,6 @@ export function analyzeFactionGraph(
         }
     }
 
-    // Sort all output arrays for determinism
     result.front_osids.sort(strictCompare);
     result.chokepoints.sort(strictCompare);
     result.salients.sort(strictCompare);
@@ -519,9 +850,18 @@ export function analyzeFactionGraphCached(
         const entry = perFaction.get(faction);
         if (entry !== undefined && entry.turn === currentTurn) {
             // G2 parity wrapper — opt-in via env flag, default off.
+            // Wave 7 Lane A: cached vs fresh recompute (cache-correctness).
             if (process.env.ANALYZE_FACTION_GRAPH_PARITY_CHECK === 'true') {
                 const fresh = analyzeFactionGraph(state, faction, adjacency, reverseMap);
                 assertFactionGraphAnalysisEqual(entry.result, fresh, state, faction, adjacency);
+            }
+            // LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-TIER-2 G2 parity wrapper:
+            // cached vs LEGACY body (body-correctness). Catches drift between
+            // the optimized body and the frozen legacy reference. Default off,
+            // zero production cost.
+            if (process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK === 'true') {
+                const legacy = analyzeFactionGraphLegacy(state, faction, adjacency, reverseMap);
+                assertFactionGraphAnalysisEqual(entry.result, legacy, state, faction, adjacency);
             }
             return entry.result;
         }
@@ -530,6 +870,11 @@ export function analyzeFactionGraphCached(
         factionGraphCache.set(state, perFaction);
     }
     const result = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+    // Tier 2 G2 parity wrapper also fires on cache miss (fresh recompute).
+    if (process.env.ANALYZE_FACTION_GRAPH_TIER_2_PARITY_CHECK === 'true') {
+        const legacy = analyzeFactionGraphLegacy(state, faction, adjacency, reverseMap);
+        assertFactionGraphAnalysisEqual(result, legacy, state, faction, adjacency);
+    }
     perFaction.set(faction, { turn: currentTurn, result });
     return result;
 }
@@ -603,5 +948,14 @@ function assertFactionGraphAnalysisEqual(
     }
 }
 
-// Test-only re-export so the G1 property test can compare cached vs fresh.
-export { analyzeFactionGraph as __test_analyzeFactionGraphLegacy };
+// Test-only re-export so the G1 property test can compare cached vs the LEGACY body.
+// LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-TIER-2 (2026-05-05): now points at
+// `analyzeFactionGraphLegacy` (the pre-Tier-2 frozen reference body) instead
+// of the public `analyzeFactionGraph` dispatcher (which now calls the
+// optimized body). Property test invariant preserved: cached === legacy
+// structurally over 10k LCG-seeded trials.
+export { analyzeFactionGraphLegacy as __test_analyzeFactionGraphLegacy };
+
+// Test-only re-export of the Tier 2 optimized body so a direct optimized-vs-legacy
+// property test can compare without going through the per-turn cache.
+export { analyzeFactionGraphOptimized as __test_analyzeFactionGraphOptimized };
