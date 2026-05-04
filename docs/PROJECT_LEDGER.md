@@ -1,3 +1,74 @@
+## [2026-05-04] Wave 4: Reconstitution policy review + Events Wave 4 + Test Phase 4 + Bot-orders instrumentation STOP-AND-ASK
+
+**Four parallel lanes dispatched** in user-authorized "do more in parallel" cascade after Wave 3 closure. All Ring 1 / faction-agnostic / no §6 sign-off required. Three shipped clean; one STOP-AND-ASK (revert).
+
+**Lane A — Reconstitution policy review (`e9584dd3`):** THE Gap 2 named upstream fix.
+
+Per `docs/40_reports/audits/20260504_FORCE_QUALITY_GAP_2_VERIFICATION.md` (commit `20c3aa05`). The Gap 2 trace identified VRS reconstitution outpacing battle attrition as the upstream growth term overriding the casualty-driven officer_quality decay path. This lane fixes the upstream lever directly.
+
+- **Lever identified:** `getFactionReinforcementMult()` in `src/state/formation_constants.ts` and parallel data in `data/scenarios/timelines/apr1992.json`. VRS `reinforcement_mult` was hardcoded flat 1.0× from turn 0 to 9999. The brigade-fill path drained mobilization surplus + strategic-reserve overflow into existing brigades faster than battle attrition could erode them.
+- **Parameters changed (faction-symmetric mechanism, asymmetric data):** RS flat 1.0× → 4-band step curve (1.0× <w52, 0.85× <w78, 0.65× <w104, 0.45× thereafter); HRHB 2-band → 4-band (added 0.65× w52-77, 0.50× w78+); RBiH unchanged (audit shows ARBiH on-doctrine).
+- **Mechanism is faction-agnostic in CODE** — `lookupStepCurve(...)` is the same predicate RBiH and HRHB already used; only data parameters drive faction asymmetry.
+- 16/16 new lane tests + 130/130 targeted regression GREEN
+- 40w smoke n1638 hash `ef03ab4d6c5ecd28`: anchors 26/27 PASS (only failure brka_2 pre-existing P0); benchmarks 6/6 PASS; area 93.3% (vs n1289 baseline 93.2%; +0.1pp drift in expected direction); per-region all within bounds; combat 95 attack targets 73 contested + 22 uncontested att:def 0.67
+- /war-or-game: NO new absurdity introduced at 40w. /scenario-creator-runner-tester: PASS, all 4 lane gates clear.
+- 188w verification (the late-war arc bend) deferred to next packet; lever does not bite at 40w (RS in unchanged 1.0× band)
+
+**Lane B — Events Wave 4 (`013bd633`):** 10 more divergence events.
+
+Per `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md`. v0.9.0 breadth: 18 → **28 events**, approaching closure target ~30.
+
+10 events authored (additive, faction-agnostic, all reuse existing condition + effect kinds; no new substrate):
+- 3 alliance/diplomacy: csq_separate_track_recovery, csq_alliance_reset_after_rupture, csq_tripartite_federation_overture
+- 2 patron pressure: csq_patron_equipment_delivery_confirmed (consumes equipment_quality_modifier from Wave 3 `658241df` — clean substrate-then-content sequencing precedent), csq_international_tribunal_observation (AUDIT-ONLY)
+- 2 economic/logistic: csq_black_market_supply_route, csq_refugee_labor_mobilization
+- 2 mobilization: csq_late_war_volunteer_surge, csq_reservist_exhaustion_callup
+- 1 ahistorical "what-if": csq_partition_referendum_proposal (AUDIT-ONLY DECISION)
+
+Tests: 12/12 lane + 172/172 focused regression GREEN. tsc clean. 40w hash-drift class NONE (chained-flag predicates can't fire in 40w window).
+
+Engine-truth bug surfaced: `dimension_above` uses `>=` despite its name (`event_types.ts:536`). Captured inline in test #3 + closeout report so future authors don't hit the same gotcha.
+
+**Lane C — Test usefulness Phase 4 (`717c4817`):** Fixture/helper extraction.
+
+Per morning-report OPP-3. Extracted 2 shared helpers + refactored 11 test files (5 attack cluster + 6 commander cluster). Zero test count change (helpers consolidate scaffolds, not assertions). +2 NEW helper files; 0 deletions; 11 modified.
+
+- New `tests/_helpers/combat.ts` (makeAttackComposition, makeAttackFormation)
+- New `tests/_helpers/commander.ts` (makeCommanderBrigade/Zone/Eval/Forces, MinimalSpatial, MinimalBriefing, MinimalState, DEFAULT_COMMANDER_PERSONALITY)
+- 350/350 tests GREEN across refactored files; ~1100 lines of inline-helper duplication removed
+- Out-of-scope deferred: `makeAdjacency` (4 distinct signatures), `makeOp` (6 distinct shapes), `makeState` (81 files heterogeneous), briefing_campaign_intent (unique signature)
+
+**Lane D — Bot-orders instrumentation STOP-AND-ASK (no commit; reverted):**
+
+Per Wave 3 STOP-AND-ASK recommendation, dispatched per-call-site `hrtime.bigint()` profiler lane to identify the dominating function. Agent's profiler env var failed in Bash shell (`AWWV_BOT_ORDERS_PROFILE=1` PowerShell-style assignment didn't set in Bash); scenario ran without instrumentation. Agent reported needing re-run with env var actually set.
+
+- Working tree had 5 source-file modifications (bot_brigade_ai_osid + bot_corps_ai + combat_predictor + commander/commander_loop [out-of-scope per spec] + war_phases) + 1 new profiler module
+- **All reverted per spec** (instrumentation is one-shot measurement; only audit artifacts ship; agent didn't capture audit data so nothing to ship)
+- No audit report committed
+- Lane closes deferred for follow-up: future bot-orders profiler lane needs proper Bash-syntax env var setup (`AWWV_BOT_ORDERS_PROFILE=1 npm run sim:scenario:run:40w`); also needs to either expand file ownership to include `commander/` (agent went there anyway) OR limit instrumentation to bot_corps + bot_brigade entry points only
+
+**Roadmap delta:**
+- v0.9.0 Consequences: 18 → **28 events** (Lane B)
+- v0.9 calibration trajectory: Gap 2 upstream fix shipped (Lane A); 188w verification of late-war arc bending is the next packet
+- v0.9.3 Performance: bot-orders instrumentation deferred (Lane D); supply-osid CLOSED (Mission C A0)
+- Test hygiene: Phase 4 fixture extraction shipped (Lane C); deeper passes (makeAdjacency, makeOp, makeState) deferred per opportunity-versus-cost analysis
+
+**Sensitive-history compliance:** All 3 shipped lanes Ring 1 / faction-agnostic. No FORAWWV / paint anchor / political_controllers / OOB / rupture wiring touch.
+
+**Successor handoffs:**
+- 188w smoke for Reconstitution lane verification (heap-bumped re-run + Gap 2 diagnostic re-run)
+- Bot-orders instrumentation retry with proper env var setup
+- Equipment substrate consumer events beyond #11 (Croatia pipeline, Iran flights, post-Dayton)
+- More divergence events to close ~30 v0.9.0 target (Lane B brought count to 28)
+- Phase 5 test review: makeAdjacency / makeOp consolidation if signature variants can be unified
+
+**Lessons durable (added to PROJECT_LEDGER_KNOWLEDGE):**
+1. When fixing a metric arc, the upstream lever often produces correct asymmetric data via symmetric mechanism — `getFactionReinforcementMult` step-curve precedent
+2. Substrate-then-content sequencing pattern: ship effect-kind substrate first, then events that consume it (Equipment substrate → event #11 → Wave 4 event #4 chain)
+3. Bash-syntax env var assignment differs from PowerShell — agents running cross-shell commands need explicit syntax annotation
+
+---
+
 ## [2026-05-04] Wave 3: Equipment substrate Option A + Force-Quality Gap 2 verification + Bot-orders STOP-AND-ASK
 
 **Three parallel lanes dispatched** in user-authorized "1 then 2" cascade after Wave 1+2 closure. Mix of engine-extension (Equipment), audit-only investigation (Gap 2), and Phase 0 STOP (Bot-orders). All Ring 1 / faction-agnostic / no §6 sign-off required.

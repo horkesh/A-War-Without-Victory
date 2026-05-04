@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-04 (post-trip Wave 3 — Equipment substrate + event #11 + Force-Quality Gap 2 verification shipped on `20c3aa05`; bot-orders deferred to instrumentation lane)
+**Last Updated:** 2026-05-04 (post-trip Wave 4 — Reconstitution policy + Events Wave 4 + Test Phase 4 shipped on `717c4817`; v0.9.0 at 28 events; v0.9 calibration Gap 2 upstream fix in tree pending 188w verification)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
