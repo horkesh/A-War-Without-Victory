@@ -1,3 +1,69 @@
+## [2026-05-04] Wave 3: Equipment substrate Option A + Force-Quality Gap 2 verification + Bot-orders STOP-AND-ASK
+
+**Three parallel lanes dispatched** in user-authorized "1 then 2" cascade after Wave 1+2 closure. Mix of engine-extension (Equipment), audit-only investigation (Gap 2), and Phase 0 STOP (Bot-orders). All Ring 1 / faction-agnostic / no §6 sign-off required.
+
+**Lane A — Equipment substrate Option A + event #11 (`658241df`):**
+
+Per `docs/40_reports/audits/20260504_EQUIPMENT_QUALITY_MODIFIER_SUBSTRATE.md` Option A (substrate-first lane, then re-enable event #11). Mirrors `recruitment_modifier` precedent. Single thread point in combat predictor with no-op early return for byte-stability.
+
+- New effect kind `EventEffectEquipmentQualityModifier` (multiplicative, faction-scoped, time-bounded)
+- New state field `MilitaryState.equipment_quality_modifiers?: Array<{faction, multiplier, expires_turn}>`
+- Apply handler in `apply_effects.ts` (EFFECT_KIND_ORDER index 9, alphabetic shift)
+- Reader `getActiveEquipmentQualityMultiplier(state, faction, currentTurn)` in `active_modifiers.ts`
+- GC scope extended in `cleanupExpiredEventModifiers`
+- Combat predictor thread point: gated `if (eqMult !== 1.0) power *= eqMult` in both `computeAttackerPower` + `computeDefenderPower`. Preserves byte-stable arithmetic on no-event historical path.
+- Event #11 `csq_weapons_embargo_partial_lift` re-enabled (turn>=60 + international_standing>=60 + patron_pressure>=15 → recruitment_modifier 1.10/30 + equipment_quality_modifier 1.05/30 + patron_confidence +10). Faction-agnostic predicate.
+- Tests: 14/14 GREEN (7 substrate + 7 event #11)
+- Regression: 86/86 consequence + 131/131 combat GREEN
+- 40w smoke hash `45530f5fba46905a` byte-identical to predecessor (event predicate cannot fire in 40w window — confirms no-op substrate hypothesis)
+
+**Lane B — Bot-orders pipeline optimization: Phase 0 STOP-AND-ASK (no commit):**
+
+Spec authorized Wave 3 dispatch of bot-orders perf optimization with G1+G2+G3 gates (mirroring Mission C A0 success pattern). Phase 0 investigation (read R2-4 baseline, `bot_corps_ai.ts`, `bot_corps_directives.ts`, `bot_brigade_ai_osid.ts`, `bot_corps_helpers.ts`, `commander/briefing.ts`) found:
+
+- 562ms cost is **diffused** across commander loop + briefing builder + predictor (`predictAllAdjacentTargets`) + per-brigade evaluators
+- Heaviest per-corps work lives under `src/sim/combat/commander/` which spec explicitly excluded from file ownership
+- Candidates within scope (`getFactionCorps()`/`getCorpsSubordinates()` sort+filter cleanup; `analyzeFactionGraph` cross-call cache) collectively look like 20-100ms/turn — real-but-modest, no clear "lift one stone" target
+- Mission C A0 had a clearly-named single function (O(E²) → O(V+E)); bot-orders has no equivalent
+
+Agent invoked spec STOP trigger: *"Phase 0 finds no obvious hotspot → STOP and report (don't optimize blindly)"*. **Recommends instrumentation lane FIRST** (per-call-site `hrtime.bigint()` wrappers around `runCommanderForCorps`, `buildBriefing`, `analyzeFactionGraph`, `executeFactionDirectives`, `predictAllAdjacentTargets`, per-brigade `evaluate*` chain). Then re-scope a lane to whichever single function actually dominates — likely under `commander/`, requiring expanded file ownership.
+
+No code changes. Lane closes deferred.
+
+**Lane C — Force-Quality Gap 2 verification trace (`20c3aa05`):**
+
+Per `docs/40_reports/audits/20260504_FORCE_QUALITY_PRIORITIZATION.md` Priority 2. Audit-only investigation; no engine code changes; no tuning parameter adjustments.
+
+- Extended `tools/diagnostics/force_quality_trajectory.cjs` to consume per-turn `officer_quality` from `brigade_temporal_log.jsonl` (Gap 1 observability commit `0bd5a938`)
+- 188w smoke n1634 OOM-crashed at t84 (V8 4GB heap-limit; 19,420 brigade rows). Retry n1636 with `NODE_OPTIONS=--max-old-space-size=8192` in flight as background task
+- Partial trace at t84 sufficient for directional findings (rate-of-change formula explains persistence)
+- Trace findings (t1→t84): HRHB officer_quality `INVERSE` Δ+0.1716; RS officer_quality `INVERSE` Δ+0.0204; HRHB cohesion `INVERSE` Δ+2.99
+- 5/5 diagnostic tests GREEN (3 existing + 2 new for officer_quality schema + determinism)
+
+**CRITICAL FINDING — do NOT tune `OFFICER_CASUALTY_MULT` in isolation:**
+
+The casualty path mechanism is wired correctly. VRS rate-of-change `+0.000246/turn` shows the casualty path is *just barely failing* to overcome the `+0.0067/turn` growth term. Root cause is upstream: VRS reconstitution outpaces battle attrition (Mission G row 1: VRS personnel +753 over 188w). **Fix reconstitution policy first** — single upstream lever; faction-agnostic; restores doctrinal arc for both personnel AND officer_quality without faction-asymmetric multiplier tuning. If a future lane decides to tune anyway, trace evidence supports asymmetric `RS:2.5 / HRHB:2.0 / RBiH:1.0` (vs uniform 1.5). Math in audit.
+
+**Roadmap delta:**
+
+- v0.9.0 Consequences: 17 events shipped + event #11 = **18 events**; Equipment substrate now in tree (reusable for future arms-flow events)
+- v0.9.3 Performance: bot-orders deferred to instrumentation lane; supply-osid CLOSED (Mission C A0 Tarjan)
+- v0.9 calibration trajectory: Gap 2 root cause identified (reconstitution policy, upstream from officer_quality_update.ts) — successor lane scope is reconstitution review, NOT OFFICER_CASUALTY_MULT tuning
+
+**Successor handoffs:**
+
+- Reconstitution policy review lane: examine VRS reconstitution rate vs battle attrition; identify the +753-personnel-over-188w upstream lever; faction-agnostic fix
+- Bot-orders instrumentation lane: per-call-site `hrtime.bigint()` profiler in pipeline steps `generate-bot-corps-orders` + `generate-bot-brigade-orders`; identify the single dominating function; then optimize with G1+G2+G3 gates (reuse Mission C A0 pattern)
+- Future arms-flow events (Croatia pipeline, Iran flights, post-Dayton lifting) can consume the new Equipment substrate
+
+**Sensitive-history compliance:** All 3 lanes Ring 1 / faction-agnostic. No FORAWWV / paint anchor / political_controllers / OOB / rupture wiring touch.
+
+**Lessons durable (added to PROJECT_LEDGER_KNOWLEDGE):**
+1. When a hot-path optimization spec says "no obvious hotspot found", that IS a valid Phase 0 outcome — instrumentation lane first, optimization lane second
+2. When trace evidence implicates an upstream system, fix the upstream lever rather than tuning the downstream multiplier (Gap 2 reconstitution-vs-casualty insight)
+
+---
+
 ## [2026-05-04] Wave 2: Mission C A0 Tarjan retry shipped clean (the 4th supply-osid attempt)
 
 **Commit:** `a60d39c9` perf(supply): replace per-edge BFS-removal with single-pass Tarjan in deriveCorridorsOsid (LANE-NIGHTSHIFT-SUPPLY-OSID-A0-TARJAN-WITH-GATES).
