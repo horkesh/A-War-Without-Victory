@@ -71,6 +71,35 @@ The binding plan's "Acceptance Shape" requires:
 
 Net: doctrinal arc is **partially delivered**. Cohesion + morale arc-direction matches doctrine. Personnel arc and fatigue arc invert the doctrine.
 
+## Per-Faction Snapshot at t40 / t100 / t180
+
+Computed by re-driving `aggregateByTurn` over the same temporal log and applying `classifyDirection` against `t1` as the early reference. Each cell shows `divergence_class` for that (faction, metric, turn) versus the doctrinal sign.
+
+| Faction | Turn | cohesion | morale | fatigue | personnel |
+|---|---|---|---|---|---|
+| HRHB | 40 | matches | inverse | drifting_away | inverse |
+| HRHB | 100 | matches | inverse | drifting_away | inverse |
+| HRHB | 180 | matches | inverse | drifting_away | inverse |
+| RBiH | 40 | matches | matches | drifting_away | matches |
+| RBiH | 100 | matches | matches | drifting_away | matches |
+| RBiH | 180 | matches | drifting_away | drifting_away | matches |
+| RS | 40 | matches | matches | drifting_away | inverse |
+| RS | 100 | matches | inverse | drifting_away | inverse |
+| RS | 180 | matches | matches | drifting_away | inverse |
+
+The cohesion column is `matches` for all three factions across all three checkpoints — that part of the doctrinal arc is delivered consistently throughout the war, not just end-of-run. The personnel column inverts for both VRS and HRHB at every checkpoint (manpower averages rise instead of fall) and matches for RBiH. The fatigue column is `drifting_away` for every faction at every checkpoint — fatigue trends below early-war values rather than accumulating, which is the same signal flagged in the Top 10. HRHB morale is `inverse` at every checkpoint; RS morale flips back to `matches` only at t40 and t180 (the late-war collapse to 11.16 finally pulls the delta below the early-war baseline).
+
+## Mechanism Gaps Identified
+
+Naming gaps only — no fix attribution. References point to the architecture-contract column that would own the future repair.
+
+1. **No officer brain-drain → average-quality coupling visible in artifacts.** `formation.officer_quality` exists per brigade in `final_save.json` but is not emitted to `brigade_temporal_log.jsonl`, so the diagnostic cannot prove an officer-quality arc per turn at all. Architecture contract row `formation.officer_quality` lists the consumer as "operation planning, staging, recovery"; the missing link is observability, not the field itself.
+2. **Personnel reconstitution outruns attrition for VRS / HRHB.** Average brigade personnel rises by +753 (RS) and +572 (HRHB) over the war. The architecture contract's `equipment + maintenance + supply` row points at `support thresholds` as the intended consumer; the diagnostic surfaces that manpower is the upstream signal currently masking degradation.
+3. **Fatigue does not stratify by veterancy or accumulate across the war.** All three factions end with fatigue at-or-below early-war values. Architecture contract row `cohesion floor/ceiling` names "organizational staying power" as the role; fatigue currently behaves as a per-turn transient, not a long-run brittleness driver.
+4. **Morale does not stratify by faction trajectory.** ARBiH morale rises (good per doctrine) but HRHB morale also rises (bad per doctrine). Architecture contract row `morale drift` names "will to continue under success/failure" — the per-faction shape is not asymmetric in the way the doctrinal arc requires.
+
+Each gap is a separate owner candidate; per binding plan §"Required Evidence Before Any Fix", the next packet must dispatch the owner specialists rather than apply a global multiplier.
+
 ## Counterfactual Safety Note
 
 The binding plan §"Counterfactual safety" requires that fixes not force outcomes by date. This audit observes existing engine behavior on a stock 188w; no calendar-forced operations were added; the diagnostic is run-only and does not loop into the engine.

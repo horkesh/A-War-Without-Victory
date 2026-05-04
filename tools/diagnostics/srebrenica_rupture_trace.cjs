@@ -25,6 +25,16 @@
  *   - any rupture_consequences already recorded
  *   - per-turn weekly report deltas if multi-turn weekly_report.jsonl is available
  *
+ * V2 EXTENSIONS (LANE-NIGHTSHIFT-SREBRENICA-DIAGNOSTIC-V2 — additive, R2-6 schema preserved):
+ *   - per-formation Drina-perimeter brigade roster (location_osid, personnel,
+ *     morale, cohesion) — full record, deterministic order
+ *   - per-enclave force concentration ratio (defender personnel /
+ *     attacker personnel within DRINA perimeter ring at the enclave's
+ *     hostile-prefix neighbours) — Srebrenica + Žepa
+ *   - predictor force_ratio_estimate harvested from operation_aars.json for
+ *     every active triggered op whose objective_osids overlap an enclave
+ *     OSID (Srebrenica pocket OR Žepa capital)
+ *
  * Determinism: sorted iteration on every map output, no Math.random(),
  * no Date.now(), no timestamps. Reads only.
  *
@@ -104,13 +114,43 @@ function isDrinaPerimeter(osid) {
     return false;
 }
 
+// V2: optional AAR sidecar for predictor force_ratio_estimate harvest.
+function readAARs(p) {
+    if (!fs.existsSync(p)) return [];
+    try {
+        const arr = JSON.parse(fs.readFileSync(p, 'utf8'));
+        return Array.isArray(arr) ? arr : [];
+    } catch (_e) {
+        return [];
+    }
+}
+
+// V2: classify whether a given AAR record targets an enclave (Srebrenica OR Žepa).
+// Read-only against engine; uses the OSID lists local to this tool.
+function aarTargetsEnclave(aar) {
+    const objs = (aar && (aar.objectives_targeted || [])) || [];
+    if (!Array.isArray(objs) || objs.length === 0) return null;
+    let hitsSreb = false;
+    let hitsZepa = false;
+    for (const o of objs) {
+        if (SREBRENICA_OSID_LIST.indexOf(o) >= 0) hitsSreb = true;
+        if (o === ZEPA_CAPITAL_OSID) hitsZepa = true;
+    }
+    if (hitsSreb && hitsZepa) return 'both';
+    if (hitsSreb) return 'srebrenica';
+    if (hitsZepa) return 'zepa';
+    return null;
+}
+
 // ── Snapshot extractor ──────────────────────────────────────────────────────
 
 /**
  * Build one diagnostic snapshot from a final_save-shaped state object.
  * Returns a deterministic, plain-object record.
  */
-function buildSnapshot(state) {
+function buildSnapshot(state, opts) {
+    const aarRecords = (opts && Array.isArray(opts.aars)) ? opts.aars : [];
+
     const turn = (state && state.meta && state.meta.turn) || 0;
     const flags = (state && state.military && state.military.event_flags) || {};
     const controllers = (state && state.political && state.political.political_controllers) || {};
@@ -133,9 +173,13 @@ function buildSnapshot(state) {
     const formationIds = Object.keys(formations).sort(strictCompare);
     let rbih_pocket_personnel = 0;
     let rbih_capital_personnel = 0;
+    let rbih_zepa_capital_personnel = 0;
     let vrs_perimeter_personnel = 0;
     let vrs_perimeter_count = 0;
     const capital_garrison_brigades = [];
+    // V2: full Drina-perimeter roster — every VRS brigade located on the
+    // Drina perimeter (not only the aggregate count). Read-only.
+    const vrs_drina_perimeter_roster = [];
 
     for (const fid of formationIds) {
         const f = formations[fid];
@@ -154,16 +198,92 @@ function buildSnapshot(state) {
                 });
             }
         }
+        if (fac === 'RBiH' && loc === ZEPA_CAPITAL_OSID) {
+            rbih_zepa_capital_personnel += pers;
+        }
         if (fac === 'RS' && isDrinaPerimeter(loc)) {
             vrs_perimeter_personnel += pers;
             vrs_perimeter_count++;
+            vrs_drina_perimeter_roster.push({
+                id: fid,
+                location_osid: loc,
+                personnel: pers,
+                morale: (f.morale === undefined || f.morale === null) ? null : Number(f.morale),
+                cohesion: (f.cohesion === undefined || f.cohesion === null) ? null : Number(f.cohesion),
+                corps_id: f.corps_id || null,
+            });
         }
     }
     capital_garrison_brigades.sort((a, b) => strictCompare(a.id, b.id));
+    vrs_drina_perimeter_roster.sort((a, b) => strictCompare(a.id, b.id));
 
     const force_ratio_vrs_to_rbih = rbih_pocket_personnel > 0
         ? Number((vrs_perimeter_personnel / rbih_pocket_personnel).toFixed(4))
         : null;
+
+    // V2: per-enclave force concentration ratio.
+    // Defender = RBiH personnel inside the enclave OSID set (capital for Žepa,
+    // full pocket for Srebrenica). Attacker = VRS Drina perimeter personnel
+    // (the historical siege ring). Concentration_ratio = attacker/defender.
+    // This is the SAME numerator as force_ratio_vrs_to_rbih for Srebrenica;
+    // we publish per-enclave so Žepa parity is visible without re-derivation.
+    function concRatio(attackerPers, defenderPers) {
+        if (!defenderPers || defenderPers <= 0) return null;
+        return Number((attackerPers / defenderPers).toFixed(4));
+    }
+    const concentration_ratios = {
+        srebrenica_pocket: {
+            attacker_pers_vrs_drina_perimeter: vrs_perimeter_personnel,
+            defender_pers_rbih_pocket: rbih_pocket_personnel,
+            ratio_attacker_over_defender: concRatio(vrs_perimeter_personnel, rbih_pocket_personnel),
+        },
+        srebrenica_capital_only: {
+            attacker_pers_vrs_drina_perimeter: vrs_perimeter_personnel,
+            defender_pers_rbih_capital: rbih_capital_personnel,
+            ratio_attacker_over_defender: concRatio(vrs_perimeter_personnel, rbih_capital_personnel),
+        },
+        zepa: {
+            attacker_pers_vrs_drina_perimeter: vrs_perimeter_personnel,
+            defender_pers_rbih_zepa_capital: rbih_zepa_capital_personnel,
+            ratio_attacker_over_defender: concRatio(vrs_perimeter_personnel, rbih_zepa_capital_personnel),
+        },
+    };
+
+    // V2: predictor force_ratio_estimate harvest from AARs whose objective set
+    // overlaps an enclave OSID. We surface the predictor's view, not a recomputation.
+    const enclave_op_predictor_ratios = [];
+    for (const aar of aarRecords) {
+        const cls = aarTargetsEnclave(aar);
+        if (!cls) continue;
+        enclave_op_predictor_ratios.push({
+            operation_name: aar.operation_name || null,
+            operation_id: aar.operation_id || null,
+            corps_id: aar.corps_id || null,
+            faction: aar.faction || null,
+            started_turn: (aar.started_turn === undefined || aar.started_turn === null) ? null : Number(aar.started_turn),
+            ended_turn: (aar.ended_turn === undefined || aar.ended_turn === null) ? null : Number(aar.ended_turn),
+            duration_turns: (aar.duration_turns === undefined || aar.duration_turns === null) ? null : Number(aar.duration_turns),
+            force_ratio_estimate: (aar.force_ratio_estimate === undefined || aar.force_ratio_estimate === null)
+                ? null : Number(aar.force_ratio_estimate),
+            initial_strength: (aar.initial_strength === undefined || aar.initial_strength === null) ? null : Number(aar.initial_strength),
+            final_strength: (aar.final_strength === undefined || aar.final_strength === null) ? null : Number(aar.final_strength),
+            outcome: aar.outcome || null,
+            recovery_reason: aar.recovery_reason || null,
+            participating_brigades: Array.isArray(aar.participating_brigades)
+                ? aar.participating_brigades.slice().sort(strictCompare)
+                : [],
+            objectives_targeted: Array.isArray(aar.objectives_targeted)
+                ? aar.objectives_targeted.slice().sort(strictCompare)
+                : [],
+            enclave_class: cls,
+        });
+    }
+    enclave_op_predictor_ratios.sort((a, b) => {
+        const sa = a.started_turn === null ? -1 : a.started_turn;
+        const sb = b.started_turn === null ? -1 : b.started_turn;
+        if (sa !== sb) return sa - sb;
+        return strictCompare(a.operation_id || '', b.operation_id || '');
+    });
 
     const resilienceEntry = resilienceMap['srebrenica'] || null;
     const zepaResilienceEntry = resilienceMap['zepa'] || null;
@@ -199,11 +319,18 @@ function buildSnapshot(state) {
         forces: {
             rbih_pocket_personnel,
             rbih_capital_personnel,
+            rbih_zepa_capital_personnel,
             vrs_perimeter_count,
             vrs_perimeter_personnel,
             force_ratio_vrs_to_rbih,
             capital_garrison_brigades,
+            // V2 additive — full perimeter roster for the §6 reviewer.
+            vrs_drina_perimeter_roster,
         },
+        // V2 additive — concentration ratios per enclave (read-only summary).
+        concentration_ratios,
+        // V2 additive — predictor force-ratio for enclave-targeting ops.
+        enclave_op_predictor_ratios,
         resilience: {
             srebrenica: resilienceEntry,
             zepa: zepaResilienceEntry,
@@ -250,6 +377,47 @@ function renderStdout(snapshot, label) {
     lines.push('Resilience:');
     lines.push('  srebrenica = ' + JSON.stringify(s.resilience.srebrenica));
     lines.push('  zepa       = ' + JSON.stringify(s.resilience.zepa));
+    // V2: per-enclave concentration ratios.
+    if (s.concentration_ratios) {
+        lines.push('Concentration ratios (attacker / defender pers):');
+        const cKeys = Object.keys(s.concentration_ratios).sort(strictCompare);
+        for (const k of cKeys) {
+            const c = s.concentration_ratios[k];
+            lines.push('  ' + k.padEnd(28) + ' '
+                + 'attacker=' + (c.attacker_pers_vrs_drina_perimeter ?? '-')
+                + '  defender=' + (
+                    c.defender_pers_rbih_pocket
+                    ?? c.defender_pers_rbih_capital
+                    ?? c.defender_pers_rbih_zepa_capital
+                    ?? '-')
+                + '  ratio=' + (c.ratio_attacker_over_defender ?? '-'));
+        }
+    }
+    // V2: full Drina-perimeter roster (sorted by id).
+    if (s.forces && Array.isArray(s.forces.vrs_drina_perimeter_roster)
+        && s.forces.vrs_drina_perimeter_roster.length > 0) {
+        lines.push('VRS Drina-perimeter brigade roster (' + s.forces.vrs_drina_perimeter_roster.length + '):');
+        for (const b of s.forces.vrs_drina_perimeter_roster) {
+            lines.push('  ' + b.id.padEnd(34)
+                + ' loc=' + (b.location_osid || '?').padEnd(28)
+                + ' pers=' + String(b.personnel).padStart(5)
+                + ' morale=' + String(b.morale ?? '-')
+                + ' cohesion=' + String(b.cohesion ?? '-'));
+        }
+    }
+    // V2: predictor ratio harvest for enclave-targeting ops.
+    if (Array.isArray(s.enclave_op_predictor_ratios) && s.enclave_op_predictor_ratios.length > 0) {
+        lines.push('Predictor force_ratio_estimate for enclave ops:');
+        for (const op of s.enclave_op_predictor_ratios) {
+            lines.push('  ' + (op.operation_name || op.operation_id || '?')
+                + ' [' + op.enclave_class + ']'
+                + ' t=' + op.started_turn + '..' + op.ended_turn
+                + ' force_ratio=' + (op.force_ratio_estimate ?? '-')
+                + ' initial=' + (op.initial_strength ?? '-')
+                + ' outcome=' + (op.outcome || '-')
+                + ' recovery=' + (op.recovery_reason || '-'));
+        }
+    }
     if (s.rupture_recorded) {
         lines.push('Rupture entries:');
         for (const r of s.rupture_entries) {
@@ -288,7 +456,9 @@ function main() {
     }
 
     const finalState = readJSON(finalSavePath);
-    const finalSnapshot = buildSnapshot(finalState);
+    // V2: harvest AARs once and pass into snapshot (additive; absent AARs → empty list, R2-6 behaviour preserved).
+    const aars = readAARs(path.join(args.run_dir, 'operation_aars.json'));
+    const finalSnapshot = buildSnapshot(finalState, { aars });
 
     // Per-turn snapshots from weekly_report.jsonl when present. The weekly
     // report is event-stream-shaped, not full state, so we only synthesize
@@ -385,6 +555,8 @@ if (require.main === module) {
 
 module.exports = {
     buildSnapshot,
+    readAARs,
+    aarTargetsEnclave,
     SREBRENICA_OSID_LIST,
     SREBRENICA_CAPITAL_OSID,
     SREBRENICA_MIN_TURN,
