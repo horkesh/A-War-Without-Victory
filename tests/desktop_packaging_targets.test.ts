@@ -61,9 +61,11 @@ test('T2: package.json build section declares Win NSIS target with sign: false',
         winTargets.includes('nsis'),
         `Win nsis target must be declared in build.win.target. Got: ${JSON.stringify(winTargets)}`,
     );
-    // The lane requires unsigned NSIS. electron-builder uses two complementary fields:
-    //   - win.signAndEditExecutable: false  (skip signtool/edit dance)
-    //   - win.sign: null                    (no custom signer hook)
+    // The lane requires unsigned NSIS. electron-builder uses
+    //   win.signAndEditExecutable: false  (skip signtool/edit dance)
+    // win.sign: null was tried but caused electron-builder to attempt
+    // default signing in CI; redundant with signAndEditExecutable: false.
+    // Removed 2026-05-04 (LANE-NIGHTSHIFT-DRG-REGRESSION-FIX).
     assert.strictEqual(
         pkg.build?.win?.signAndEditExecutable,
         false,
@@ -71,8 +73,8 @@ test('T2: package.json build section declares Win NSIS target with sign: false',
     );
     assert.strictEqual(
         pkg.build?.win?.sign,
-        null,
-        'win.sign must be null (no signing) for the unsigned groundwork target',
+        undefined,
+        'win.sign must be undefined; signAndEditExecutable: false is the canonical unsigned switch',
     );
     assert.strictEqual(
         pkg.scripts?.['desktop:package:win:nsis'],

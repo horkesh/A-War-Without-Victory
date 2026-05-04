@@ -362,7 +362,6 @@
     ],
     "win": {
       "signAndEditExecutable": false,
-      "sign": null,
       "target": [
         "dir",
         "nsis"
