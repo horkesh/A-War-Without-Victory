@@ -58,6 +58,7 @@ The game will not model, represent, or expose these. This list is exhaustive and
 8. **No granular attribution of individual victims.** Named civilian victims do not appear as simulated entities with agency. Essays may cite named historical persons in their roles as victims of documented historical events; the simulation does not.
 9. **No "justified atrocity" framing.** Retaliatory killings (Kravica, Grabovica/Uždol) are depicted as war crimes in their own right, not as moral equivalence or karmic balancing. All perpetrators are named.
 10. **No gamified "prevent genocide" mechanic.** The player cannot earn points for preventing Srebrenica; they can only keep the enclave intact through ordinary military means. The reward is the absence of a `genocide_condemnation` flag, not a badge.
+11. **No calendar-driven atrocity recording.** Rupture events fire only on mechanical c2 satisfaction (the §2 criterion-3 game-state condition). Ahistorical campaigns where the c2 condition is not mechanically satisfied carry **no rupture flag** in the verdict packet — historical findings remain in Ring 2 (essays + codex) regardless. The historical calendar alone is not a trigger; the modeled war must produce the trigger condition. (Resolution of Q-CANON-RUPT-4, recommendation §4 Path (d), 2026-05-04.)
 
 ---
 
@@ -69,7 +70,7 @@ A historical event becomes eligible for rupture status **only if it meets all fo
 
 1. **Mass scale** — >1,000 civilian deaths in a bounded event, or systematic over a bounded timeframe.
 2. **International legal finding** — ICTY conviction (any of genocide, crimes against humanity, grave breaches) or an ICJ/UN finding of equivalent weight.
-3. **Specific trigger condition** — the rupture fires on a discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), not a cumulative threshold.
+3. **Specific trigger condition** — the rupture fires on a discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), not a cumulative threshold. **This is the BINDING criterion: ruptures fire only on emergent satisfaction of the discrete game-state condition. No calendar-window heuristic substitution is permitted — the historical calendar alone cannot stand in for the OSID/flag/turn predicate.** Counterfactual silence (the rupture not firing because the modeled war produced no fall) is canonically correct and is the responsibility of the §3 ghost-entry register, not the rupture evaluator. (Q-CANON-RUPT-4 resolution, recommendation §5, 2026-05-04.)
 4. **Non-reversible** — once recorded, the event is a fact of the world for the remainder of the run.
 
 ### Current rupture roster
@@ -171,6 +172,16 @@ All historical essays are available from scenario start. There is no "unlock the
 ### Dynamic / ghost sections
 
 When a player's war diverges from history (e.g., Srebrenica enclave held), the essay may gain a `dynamic_sections` block that notes the divergence in historical voice: *"In this campaign, the Srebrenica enclave did not fall; the pocket was relieved by ARBiH 2nd Corps on week X."* This is neither celebratory nor minimizing — it is historical recording of the counterfactual.
+
+### Counterfactual register (canonical pattern)
+
+The Mission E `enclave_defended` ghost entry is the §3-compliant counterfactual recorder for sensitive-history divergence. It is the canonical pattern for any future "what the modeled war produced instead of the historical atrocity" annotation:
+
+- **Predicate location:** `src/sim/codex/dynamic_section_builder.ts` — `predEnclaveDefended()` gates emission on the `enclave_held_through_turn` flag (set when ARBiH retains `op:srebrenica:srebrenica_2`, `op:zepa:zepa_2`, `op:gorazde:gorazde_2` at the recorded turn).
+- **Narrative location:** `data/codex/ghost_entries/enclave_defended.md` — historical-voice text register, no celebration, no minimization, no "less deadly than history" framing.
+- **Canonical role:** This is the §3 register for ahistorical paths where the §1.5 #11 / §2 criterion-3 mechanical condition for a rupture is not satisfied. The Ring 2 historical record (essays + ICTY citations) remains canonical and accessible regardless; the ghost entry observes the divergence without overwriting either layer.
+
+Any future canon-permitted counterfactual recorder (for other Ring-1 sensitive events) must follow this shape: a deterministic predicate on a flag set by the simulation's own observation system, plus a narrative file in the §4-compliant register. (Q-CANON-RUPT-4 resolution, recommendation §5, 2026-05-04.)
 
 ---
 
