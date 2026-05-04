@@ -438,7 +438,170 @@ export function analyzeAllFactions(
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
     const result = new Map<FactionId, FactionGraphAnalysis>();
     for (const faction of factions) {
-        result.set(faction, analyzeFactionGraph(state, faction, adjacency, reverseMap));
+        result.set(faction, analyzeFactionGraphCached(state, faction, adjacency, reverseMap));
     }
     return result;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-DEDUPE — PARTIAL FIX (2026-05-05)
+//
+// Per-turn memoization for analyzeFactionGraph. Wave 5 audit
+// (`docs/40_reports/audits/20260504_BOT_ORDERS_HOT_PATH_PROFILE.md`) measured
+// this function at 63.3% of bot-orders cost (≈398 ms/turn over 40w), called
+// twice per faction per turn from `bot_corps_ai.ts:225` and
+// `bot_brigade_ai_osid.ts:556` with identical inputs. Deduping these two
+// is the audit's primary win.
+//
+// CALL-SITE DEPLOYMENT (post-G3-bisect):
+//   - bot_corps_ai.ts:225            → analyzeFactionGraphCached  ✓ (hash-clean)
+//   - bot_brigade_ai_osid.ts:556     → analyzeFactionGraphCached  ✓ (hash-clean)
+//   - oob_early_war_entry.ts:349     → analyzeFactionGraphCached  ✓ (hash-clean)
+//   - osid_graph_analysis.ts:441     → analyzeFactionGraphCached  ✓ (hash-clean)
+//   - paramilitary_sweep.ts:190      → analyzeFactionGraph (legacy) — DELIBERATELY UNCACHED
+//
+// Bisect evidence: routing paramilitary_sweep through the cache produced
+// reproducible drift `51dca710b9db7d37` vs baseline `ef03ab4d6c5ecd28` (n1642,
+// n1643 deterministic). Reverting ONLY paramilitary_sweep restored byte-
+// identity (n1648). The corps_ai + brigade_ai dedup is hash-safe by itself
+// — paramilitary's structural position (war_phases:809, BEFORE bot-orders at
+// :1148) means a paramilitary-seeded cache entry serves the bot-orders
+// pipeline pre-mutation; re-fresh at paramilitary keeps the bot-orders
+// cache-fill clean.
+//
+// Cache shape: WeakMap<GameState, Map<FactionId, {turn, result}>>. The
+// WeakMap is keyed on the state object reference so cached entries are
+// garbage-collected with the state. The inner Map carries a turn
+// fingerprint to defensively evict if the same state reference is reused
+// across turns (unusual, but cheap to guard against).
+//
+// Determinism: no Math.random / Date.now / new Date / environment leak.
+// Faction-agnostic — same code path for all factions. Sorted iteration
+// inside `analyzeFactionGraph` unchanged.
+//
+// Mission C precedent (`a60d39c9`, 2026-05-04): hot-path optimizations that
+// previously failed hash-identity ship only with G1+G2+G3 gates. G2 parity
+// wrapper is `ANALYZE_FACTION_GRAPH_PARITY_CHECK=true` (default off,
+// zero production cost).
+//
+// G3 verdict: PASS at the SHIPPED CONFIGURATION (n1648 = baseline ef03ab4d6c5ecd28).
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface CachedFactionGraph {
+    turn: number;
+    result: FactionGraphAnalysis;
+}
+
+const factionGraphCache: WeakMap<GameState, Map<FactionId, CachedFactionGraph>> = new WeakMap();
+
+/**
+ * Per-turn memoized variant of `analyzeFactionGraph`.
+ * Returns the cached result on hit (same reference); recomputes on miss.
+ *
+ * Hit predicate: same state reference AND same faction AND same `state.meta.turn`.
+ *
+ * The cache invalidates per turn: a cached entry whose turn fingerprint
+ * does not match the current turn is evicted and recomputed. This guards
+ * against the unusual case of the same state reference being reused
+ * across turns (e.g. test harnesses).
+ *
+ * Faction-agnostic, deterministic, no environment leak.
+ */
+export function analyzeFactionGraphCached(
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): FactionGraphAnalysis {
+    const currentTurn = state.meta?.turn ?? 0;
+    let perFaction = factionGraphCache.get(state);
+    if (perFaction !== undefined) {
+        const entry = perFaction.get(faction);
+        if (entry !== undefined && entry.turn === currentTurn) {
+            // G2 parity wrapper — opt-in via env flag, default off.
+            if (process.env.ANALYZE_FACTION_GRAPH_PARITY_CHECK === 'true') {
+                const fresh = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+                assertFactionGraphAnalysisEqual(entry.result, fresh, state, faction, adjacency);
+            }
+            return entry.result;
+        }
+    } else {
+        perFaction = new Map<FactionId, CachedFactionGraph>();
+        factionGraphCache.set(state, perFaction);
+    }
+    const result = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+    perFaction.set(faction, { turn: currentTurn, result });
+    return result;
+}
+
+/**
+ * G2 parity-wrapper assertion. Throws on any structural mismatch between
+ * the cached and freshly-recomputed `FactionGraphAnalysis`. Default off
+ * (zero production cost). Run a 40w smoke with the env flag set to catch
+ * real-scenario divergence before merge.
+ */
+function assertFactionGraphAnalysisEqual(
+    cached: FactionGraphAnalysis,
+    fresh: FactionGraphAnalysis,
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+): void {
+    const errs: string[] = [];
+    if (cached.faction !== fresh.faction) errs.push(`faction:${cached.faction}!=${fresh.faction}`);
+    if (cached.osid_analysis.size !== fresh.osid_analysis.size) {
+        errs.push(`osid_analysis.size:${cached.osid_analysis.size}!=${fresh.osid_analysis.size}`);
+    }
+    const arrayKeys: Array<keyof FactionGraphAnalysis> = [
+        'front_osids', 'chokepoints', 'salients', 'undefended_front', 'enemy_pockets'
+    ];
+    for (const k of arrayKeys) {
+        const a = cached[k] as Osid[];
+        const b = fresh[k] as Osid[];
+        if (a.length !== b.length) { errs.push(`${k}.length:${a.length}!=${b.length}`); continue; }
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) { errs.push(`${k}[${i}]:${a[i]}!=${b[i]}`); break; }
+        }
+    }
+    if (cached.weak_enemy_osids.length !== fresh.weak_enemy_osids.length) {
+        errs.push(`weak_enemy_osids.length:${cached.weak_enemy_osids.length}!=${fresh.weak_enemy_osids.length}`);
+    } else {
+        for (let i = 0; i < cached.weak_enemy_osids.length; i++) {
+            const a = cached.weak_enemy_osids[i]!;
+            const b = fresh.weak_enemy_osids[i]!;
+            if (a.osid !== b.osid || a.reason !== b.reason) {
+                errs.push(`weak_enemy_osids[${i}]:${a.osid}/${a.reason}!=${b.osid}/${b.reason}`);
+                break;
+            }
+        }
+    }
+    // Deep compare osid_analysis values for any keys that exist in both
+    for (const [osid, freshAnalysis] of fresh.osid_analysis) {
+        const cachedAnalysis = cached.osid_analysis.get(osid);
+        if (!cachedAnalysis) { errs.push(`osid_analysis missing osid:${osid}`); break; }
+        if (cachedAnalysis.classification !== freshAnalysis.classification) {
+            errs.push(`osid_analysis[${osid}].classification:${cachedAnalysis.classification}!=${freshAnalysis.classification}`);
+            break;
+        }
+        if (cachedAnalysis.brigade_power !== freshAnalysis.brigade_power
+            || cachedAnalysis.enemy_threat !== freshAnalysis.enemy_threat
+            || cachedAnalysis.civilian_weight !== freshAnalysis.civilian_weight
+            || cachedAnalysis.is_chokepoint !== freshAnalysis.is_chokepoint
+            || cachedAnalysis.advance_enemy_adjacency !== freshAnalysis.advance_enemy_adjacency) {
+            errs.push(`osid_analysis[${osid}] scalar fields diverge`);
+            break;
+        }
+    }
+    if (errs.length > 0) {
+        const detail = JSON.stringify({
+            faction,
+            turn: state.meta?.turn ?? null,
+            adjacency_size: adjacency.size,
+            errors: errs.slice(0, 10),
+        });
+        throw new Error(`ANALYZE_FACTION_GRAPH_PARITY_CHECK mismatch: ${detail}`);
+    }
+}
+
+// Test-only re-export so the G1 property test can compare cached vs fresh.
+export { analyzeFactionGraph as __test_analyzeFactionGraphLegacy };

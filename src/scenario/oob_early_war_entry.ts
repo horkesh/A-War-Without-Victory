@@ -9,7 +9,7 @@ import type { EdgeRecord } from '../map/settlements.js';
 import type { MunicipalityPopulation1991Map } from '../sim/early_war/pool_population.js';
 import { getEligiblePopulationCount } from '../sim/early_war/pool_population.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
-import { analyzeFactionGraph, type FrontClassification } from '../sim/combat/osid_graph_analysis.js';
+import { analyzeFactionGraphCached, analyzeFactionGraph, type FrontClassification } from '../sim/combat/osid_graph_analysis.js';
 import { buildOsidAdjacency, type Osid } from '../sim/combat/osid_adjacency.js';
 import { FACTION_INITIAL_COHESION, FACTION_INITIAL_PERSONNEL, MIN_BRIGADE_SPAWN, MIN_ELIGIBLE_POPULATION_FOR_BRIGADE } from '../state/formation_constants.js';
 import { isEnclaveBrigade } from '../sim/combat/enclave_resilience.js';
@@ -346,7 +346,7 @@ export function spreadBrigadesToFrontOsids(
         report.front_osids_covered[faction] = 0;
 
         // Analyze graph to get front classifications
-        const analysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+        const analysis = analyzeFactionGraphCached(state, faction, adjacency, reverseMap);
 
         // Collect brigades by current OSID
         const brigadesByOsid = new Map<Osid, FormationId[]>();

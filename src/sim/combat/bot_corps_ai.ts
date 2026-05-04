@@ -27,7 +27,7 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { SpatialContext } from '../spatial_context.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
-import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
+import { analyzeFactionGraphCached, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
 import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders } from './bot_corps_stance.js';
@@ -222,7 +222,7 @@ export function generateAllCorpsOrders(
     const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(effectiveOsidEdges);
     let graphAnalysis: FactionGraphAnalysis | null = null;
     if (reverseMap) {
-        graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
+        graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, reverseMap);
     }
     // 6b. Evaluate sector stances (Layer B: independent sector stances)
     evaluateSectorStances(state, faction);

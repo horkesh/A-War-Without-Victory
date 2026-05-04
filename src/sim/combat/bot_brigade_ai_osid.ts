@@ -42,7 +42,7 @@ import {
     type PredictedOutcome
 } from './combat_predictor.js';
 import {
-    analyzeFactionGraph,
+    analyzeFactionGraphCached,
     type FactionGraphAnalysis,
 } from './osid_graph_analysis.js';
 import { getEffectiveAttackShare } from './bot_strategy.js';
@@ -553,7 +553,7 @@ export function generateAllBotOrdersOsid(
 
         if (brigades.length === 0) continue;
 
-        const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, ctx.reverseMap);
+        const graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, ctx.reverseMap);
 
         const result = executeFactionDirectives(
             state, faction, brigades, adjacency, ctx.reverseMap,

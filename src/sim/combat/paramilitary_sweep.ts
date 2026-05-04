@@ -187,6 +187,14 @@ export function detectParamilitaryTargets(
     }
 
     for (const faction of factions) {
+        // LANE-NIGHTSHIFT-ANALYZE-FACTION-GRAPH-DEDUPE bisect (2026-05-05): this call site
+        // MUST stay on legacy `analyzeFactionGraph`. Routing it through `analyzeFactionGraphCached`
+        // produced reproducible 40w hash drift (`51dca710b9db7d37` cached vs baseline
+        // `ef03ab4d6c5ecd28`); reverting only this site to legacy restored byte-identity (n1648).
+        // Cause is structural (paramilitary runs at war_phases:809 BEFORE bot-orders at 1148; if
+        // it seeds the per-(state, faction) cache, the bot-orders pipeline reads pre-paramilitary-
+        // mutation graph state) — keep this site fresh-recompute. The G3-safe dedup ships at
+        // bot_corps_ai.ts + bot_brigade_ai_osid.ts (the audit's primary 198 ms/turn target).
         const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
         const pockets = graphAnalysis.enemy_pockets;
         if (pockets.length === 0) continue;
