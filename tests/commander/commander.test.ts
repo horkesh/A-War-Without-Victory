@@ -52,114 +52,17 @@ import { BotCorpsCommander } from '../../src/sim/combat/commander/commander_loop
 import type { CorpsOperation } from '../../src/state/game_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Test helpers — minimal mock factories
+// Test helpers — extracted to tests/_helpers/commander.ts (canonical home).
+// Aliased here for local readability.
 // ═══════════════════════════════════════════════════════════════════════════
 
-function makeBrigade(overrides: Partial<FormationState> = {}): FormationState {
-    return {
-        id: 'test_brigade_1' as FormationId,
-        faction: 'RBiH' as FactionId,
-        name: 'Test Brigade',
-        created_turn: 0,
-        status: 'active',
-        assignment: null,
-        kind: 'brigade',
-        personnel: 2000,
-        cohesion: 70,
-        morale: 60,
-        entrenchment_turns: 0,
-        disrupted_turns: 0,
-        location_osid: 'op:test:test_1',
-        ...overrides,
-    } as FormationState;
-}
-
-function makeZone(overrides: Partial<ZoneAssessment> = {}): ZoneAssessment {
-    return {
-        zone_id: 'zone:test_corps:0' as ZoneId,
-        corps_id: 'test_corps' as FormationId,
-        faction: 'RBiH' as FactionId,
-        osids: ['op:test:test_1', 'op:test:test_2'],
-        front_edge_count: 10,
-        depth: 3,
-        corridor_width: 5,
-        population_value: 10000,
-        strategic_value: 5,
-        posture: 'balanced' as ZonePosture,
-        commitment_ratio: 2.5,
-        garrison_budget: 1,
-        assigned_brigades: [],
-        surplus_brigades: [],
-        deficit: 0,
-        is_main_body: true,
-        enemy_adjacent_osids: [],
-        ...overrides,
-    } as ZoneAssessment;
-}
-
-function makeEval(overrides: Partial<BrigadeEvaluation> = {}): BrigadeEvaluation {
-    return {
-        brigade_id: 'test_brigade_1' as FormationId,
-        fitness_offense: 0.6,
-        fitness_defense: 0.4,
-        fitness_garrison: 0.4,
-        equipment_class: undefined,
-        equipment_priority: 0,
-        tier: 'active_defense' as const,
-        is_combat_effective: true,
-        is_disrupted: false,
-        is_on_loan: false,
-        is_home_defense: false,
-        morale: 80,
-        current_zone: 'zone:test_corps:0' as ZoneId,
-        ...overrides,
-    };
-}
-
-function makeForces(
-    evaluations: BrigadeEvaluation[],
-    zones: ZoneAssessment[] = [],
-): ForceAssessment {
-    let mainEffort = 0;
-    let activeDefense = 0;
-    let garrison = 0;
-    let combatEffective = 0;
-
-    const byZone: Record<string, BrigadeEvaluation[]> = {};
-
-    for (const ev of evaluations) {
-        if (ev.is_combat_effective) combatEffective++;
-        switch (ev.tier) {
-            case 'main_effort': mainEffort++; break;
-            case 'active_defense': activeDefense++; break;
-            case 'garrison': garrison++; break;
-        }
-        const key = ev.current_zone ?? '__unassigned__';
-        if (!byZone[key]) byZone[key] = [];
-        byZone[key]!.push(ev);
-    }
-
-    let totalSurplus = 0;
-    for (const zone of zones) {
-        totalSurplus += Math.max(0, zone.assigned_brigades.length - zone.garrison_budget);
-    }
-
-    return {
-        total_brigades: evaluations.length,
-        combat_effective: combatEffective,
-        evaluations,
-        by_zone: byZone,
-        tier_counts: { main_effort: mainEffort, active_defense: activeDefense, garrison },
-        total_surplus: totalSurplus,
-    };
-}
-
-const defaultPersonality: OfficerPersonality = {
-    aggression: 0.5,
-    caution: 0.3,
-    initiative: 0.3,
-    competence: 0.5,
-};
+import {
+    makeCommanderBrigade as makeBrigade,
+    makeCommanderZone as makeZone,
+    makeCommanderEval as makeEval,
+    makeCommanderForces as makeForces,
+    DEFAULT_COMMANDER_PERSONALITY as defaultPersonality,
+} from '../_helpers/commander.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. Zone Detection Tests

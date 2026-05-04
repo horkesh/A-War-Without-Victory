@@ -17,41 +17,14 @@ import type { FactionId, FormationState, BrigadeComposition } from '../src/state
 import type { CombatOutcome } from '../src/sim/combat/combat_math.js';
 import type { AttackResolutionOsidReport, AttackResolutionOsidSnapEvent } from '../src/sim/combat/attack_resolution_types.js';
 import type { OsidEthnicComposition } from '../src/sim/combat/ethnic_defense.js';
+import {
+    makeAttackComposition as makeComposition,
+    makeAttackFormation as makeFormation,
+} from './_helpers/combat.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Helpers
+// Helpers (extracted to tests/_helpers/combat.ts; aliased for local readability)
 // ═══════════════════════════════════════════════════════════════════════════
-
-function makeComposition(overrides: Partial<BrigadeComposition> = {}): BrigadeComposition {
-    return {
-        infantry: 800,
-        tanks: 20,
-        artillery: 10,
-        aa_systems: 5,
-        tank_condition: { operational: 0.8, degraded: 0.1, non_operational: 0.1 },
-        artillery_condition: { operational: 0.8, degraded: 0.1, non_operational: 0.1 },
-        ...overrides,
-    };
-}
-
-function makeFormation(overrides: Partial<FormationState> = {}): FormationState {
-    return {
-        id: 'test_brigade',
-        faction: 'RS' as FactionId,
-        name: 'Test Brigade',
-        created_turn: 1,
-        status: 'active',
-        assignment: null,
-        kind: 'brigade',
-        personnel: 1000,
-        morale: 60,
-        cohesion: 60,
-        experience: 0.3,
-        tags: [],
-        composition: makeComposition(),
-        ...overrides,
-    } as FormationState;
-}
 
 function makeReport(): AttackResolutionOsidReport {
     return {
