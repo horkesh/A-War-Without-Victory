@@ -7593,3 +7593,27 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 **Ownership guardrails:** This is still a reminder/handoff surface only. It does not create a second inbox, cost ledger, Chronicle, event log, or turn blocker, and it imports no sim/combat/catalog code.
 
 **Verification:** `npx.cmd vitest run tests/ui/pre_advance_command_review.test.ts tests/ui_pre_advance_command_review_wiring.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui_shell_navigation.test.ts tests/ui_warroom_priority_pulse_wiring.test.ts tests/army_hq_presidential_review_coherence.test.ts` passed 43/43 before docs. Full type/build verification recorded in the implementation report.
+
+---
+
+## [2026-05-04] feat(audit): Wave 5 — Bot-orders profile retry + Divergence Events Wave 5 + Map That Scars validation + Test Phase 5
+
+**Type:** Trip-session 4 parallel-lane batch on top of Wave 4 propagation `d90367a2`. 4 lanes shipped clean (5th — 188w Reconstitution verification — did not produce output; not blocking).
+
+**Lane 1 — Bot-orders instrumentation retry (`8b4f06ec`):** Wave 4 STOP-AND-ASK retry. Agent's prior attempt failed because the profiler env var was set with PowerShell-style `:VAR=value` prefix in Bash and never took effect. This retry used the proper Bash `VAR=value command` syntax. Run: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1640`, hash `ef03ab4d6c5ecd28`. **Top finding:** `analyzeFactionGraph` accounts for 15,908ms over 40w = 63.3% of bot-orders cost; same function is invoked twice per turn from two call sites with identical input. Single-cache memo or call deduplication is the obvious next perf lane. Source files reverted; only audit (`docs/40_reports/audits/20260504_BOT_ORDERS_HOT_PATH_PROFILE.md`) + per-callsite profile JSON (`data/derived/bot_orders_profile.json`) shipped. Determinism: byte-identical to baseline. Faction-agnostic, Ring 1, no §6 surface touched.
+
+**Lane 2 — Divergence events Wave 5 (`1f7b6282`):** 7 more Ring 1 / no-§6 divergence events appended to `data/scenarios/events/consequences.json`, against the `equipment_quality_modifier` substrate (`658241df`) + broader divergence substrate. v0.9.0 catalog 28 → **35 events**. Tests: `tests/divergence_events_wave_5.test.ts` 10/10 GREEN; focused regression on adjacent areas 250/250 GREEN. Determinism: byte-identical hash on 40w smoke (events condition-gated, default-OFF on baseline campaign). All 7 events: faction-agnostic mechanism, no §6 surface, additive-only.
+
+**Lane 3 — Map That Scars feature flag default-ON (`7e5397d2`):** Validation gate for the per-OSID damage overlay (R2-5 builder + `composeTacticalDeckLayers` integration shipped earlier). Flip: `src/ui/map/map/MapContainer.tsx:57` `MAP_SCARS_FEATURE_FLAG = true`. T5..T8 (8/8 GREEN in `tests/osid_damage_overlay_builder.test.ts`) confirm the deck.gl PolygonLayer descriptor: faction-neutral RGB [20,20,24], per-tier alpha 0.05 / 0.15 / 0.30, no faction coupling, empty-seed safe (`composeTacticalDeckLayers mapScarsData.length>0` gate retained — layer not added when seed fetch fails), zero-score OSIDs skipped (territory fill preserved). UI-only flag — does not enter sim path; determinism untouched. **Closes first v0.9.4 (Visual Layer) feature.** Report: `docs/40_reports/implemented/20260504_MAP_THAT_SCARS_VALIDATION.md`.
+
+**Lane 4 — Test usefulness Phase 5 (`94e1666e`):** Continuation of Phase 4 fixture extraction. New helper `tests/_helpers/adjacency.ts` exports `makeAdjacency<T extends string>(pairs?, options?)` with dedupe + sort flags. 12 fixture-heavy tests refactored to use `makeAdjacency` in place of hand-rolled adjacency map literals. 174/174 GREEN. No behavioral or assertion changes. Deferred clusters with explicit rationale: `makeOp` / `makeState` declined as premature abstraction (each test cares about a different subset of fields; helper would have to be excessively flexible or excessively narrow).
+
+**Verification (aggregate):** `npx tsc --noEmit` clean; targeted vitest 18/18 + 174/174 = **192/192 GREEN**. Working tree clean except `.claude/scheduled_tasks.lock` (transient runtime) and `data/derived/_op_audit_n1621.json` (stray Wave 3/4 byproduct, not for commit).
+
+**Sensitive-history compliance:** Lane 1 audit-only; Lane 2 condition-gated additive on existing kinds (no §6 surface); Lane 3 UI-only flag flip; Lane 4 test refactor only. All faction-agnostic. No FORAWWV / paint anchor / political_controllers / OOB / rupture wiring touch.
+
+**Roadmap delta:** v0.9.0 catalog 28 → 35 events; v0.9.4 first feature CLOSED (Map That Scars overlay live in tactical map); v0.9.3 next perf lane named (`analyzeFactionGraph` single-target memo/dedupe). Tests-as-spec hygiene continues to compound.
+
+**Successor handoffs:** (1) `analyzeFactionGraph` cache/dedupe optimization — single function, 63.3% of bot-orders cost, two-call-site duplication (G1+G2+G3 gate discipline applies, Mission C precedent). (2) 188w Reconstitution verification re-dispatch (Wave 5 attempt did not produce output). (3) Future divergence-event waves can keep using existing condition kinds + the equipment-quality substrate.
+
+**Reports:** `docs/40_reports/audits/20260504_BOT_ORDERS_HOT_PATH_PROFILE.md`, `docs/40_reports/implemented/20260504_DIVERGENCE_EVENTS_WAVE_5.md`, `docs/40_reports/implemented/20260504_MAP_THAT_SCARS_VALIDATION.md`.
