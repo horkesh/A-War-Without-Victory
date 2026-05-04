@@ -77,6 +77,29 @@ export interface BrigadeTemporalRow {
     morale: number;
     cohesion: number;
     fatigue: number;
+    /**
+     * LANE-NIGHTSHIFT-FORCE-QUALITY-GAP-1-OBSERVABILITY — Brigade-level officer
+     * quality [0,1] read directly from FormationState.officer_quality. Optional
+     * on the row to preserve byte-identity on legacy fixtures that lack the
+     * field; populated whenever the formation carries the field.
+     *
+     * Maintained by `updateBrigadeOfficerQuality` and casualty-driven
+     * `applyOfficerCasualtyLoss` (post-2026-05-01 Phase 3 of the FORCE
+     * QUALITY FOUNDATION). This row makes the per-turn trajectory visible so
+     * Gap 2 (officer brain-drain verification) is measurable on the same
+     * harness `tools/diagnostics/force_quality_trajectory.cjs` already runs.
+     */
+    officer_quality?: number;
+    /**
+     * LANE-NIGHTSHIFT-FORCE-QUALITY-GAP-1-OBSERVABILITY — Per-brigade active
+     * officer count when the formation carries one; else null. The current
+     * schema does not yet track an officer headcount on FormationState, so
+     * this field is reserved for forward compatibility with a future officer
+     * roster representation. Emitting it as part of the row schema lets the
+     * harness consume the trajectory the moment such data lands without
+     * requiring another schema bump.
+     */
+    officer_count_active?: number | null;
 }
 
 /** Find the first active op for a given brigade. Stable iteration order. */
@@ -169,6 +192,21 @@ export function buildBrigadeTemporalRows(
             cohesion: typeof f.cohesion === 'number' ? f.cohesion : 0,
             fatigue: f.ops && typeof f.ops.fatigue === 'number' ? f.ops.fatigue : 0,
         };
+        // LANE-NIGHTSHIFT-FORCE-QUALITY-GAP-1-OBSERVABILITY — only attach the
+        // officer fields when the formation actually carries them, so legacy
+        // fixtures without officer_quality continue to serialize byte-identical.
+        if (typeof f.officer_quality === 'number') {
+            row.officer_quality = f.officer_quality;
+        }
+        // officer_count_active is reserved for a future roster representation;
+        // surface as `null` whenever the underlying source carries an explicit
+        // numeric count (currently never; the optional read keeps the door open).
+        const fAny = f as unknown as { officer_count_active?: unknown };
+        if (typeof fAny.officer_count_active === 'number') {
+            row.officer_count_active = fAny.officer_count_active;
+        } else if (fAny.officer_count_active === null) {
+            row.officer_count_active = null;
+        }
         out.push(row);
     }
 

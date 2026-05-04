@@ -229,6 +229,58 @@ describe('LANE-A1 brigade temporal emit', () => {
         expect(rows).toEqual([]);
     });
 
+    it('T10 officer_quality_passthrough — officer_quality field present when formation has it', () => {
+        // LANE-NIGHTSHIFT-FORCE-QUALITY-GAP-1-OBSERVABILITY: per-brigade officer
+        // quality must surface on the temporal row when the formation carries it
+        // so Gap 2 (officer brain-drain verification) is measurable per-turn.
+        const state = makeState({
+            formations: {
+                vrs_with_oq: baseFormation('vrs_with_oq', 'RS', { officer_quality: 0.55 }) as unknown as never,
+                arbih_with_oq: baseFormation('arbih_with_oq', 'RBiH', { officer_quality: 0.05 }) as unknown as never,
+                no_oq: baseFormation('no_oq', 'HRHB') as unknown as never,
+            },
+        });
+        const rows = buildBrigadeTemporalRows(state, 12);
+        const byId = new Map(rows.map((r) => [r.brigade_id, r]));
+        // When the formation carries officer_quality, it must surface on the row.
+        expect(byId.get('vrs_with_oq')?.officer_quality).toBe(0.55);
+        expect(byId.get('arbih_with_oq')?.officer_quality).toBe(0.05);
+        // When the formation does NOT carry officer_quality, the field is absent
+        // (preserves byte-identity for legacy fixtures and rows without OQ).
+        const noOqRow = byId.get('no_oq')!;
+        expect('officer_quality' in noOqRow).toBe(false);
+    });
+
+    it('T11 officer_count_active_passthrough — officer_count_active field present when formation has it', () => {
+        // LANE-NIGHTSHIFT-FORCE-QUALITY-GAP-1-OBSERVABILITY: officer_count_active
+        // is reserved for a future roster representation. The schema accepts both
+        // a numeric count and explicit null; absence on the formation means
+        // absence on the row (no fake flexibility).
+        const state = makeState({
+            formations: {
+                with_count: baseFormation('with_count', 'RBiH', {
+                    officer_count_active: 23,
+                }) as unknown as never,
+                with_null: baseFormation('with_null', 'RS', {
+                    officer_count_active: null,
+                }) as unknown as never,
+                without_field: baseFormation('without_field', 'HRHB') as unknown as never,
+            },
+        });
+        const rows = buildBrigadeTemporalRows(state, 18);
+        const byId = new Map(rows.map((r) => [r.brigade_id, r]));
+        // Numeric count surfaces verbatim.
+        expect(byId.get('with_count')?.officer_count_active).toBe(23);
+        // Explicit null is preserved (distinct from "absent").
+        const nullRow = byId.get('with_null')!;
+        expect('officer_count_active' in nullRow).toBe(true);
+        expect(nullRow.officer_count_active).toBeNull();
+        // Absence on the formation → absence on the row (byte-identity for
+        // pre-extension fixtures).
+        const absentRow = byId.get('without_field')!;
+        expect('officer_count_active' in absentRow).toBe(false);
+    });
+
     it('T9 non_brigade_kind_filter — only brigade-kind formations are emitted', () => {
         // Corps / militia / paramilitary should NOT pollute brigade temporal log.
         const state = makeState({
