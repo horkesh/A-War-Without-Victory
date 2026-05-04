@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-04 (post trip session 3 nightshift — 8 lanes shipped on `5a94199b`)
+**Last Updated:** 2026-05-04 (post-trip Wave 1 — Q-CANON-RUPT-4 Path d + Force-Quality Gap 1 shipped on `0bd5a938`)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."

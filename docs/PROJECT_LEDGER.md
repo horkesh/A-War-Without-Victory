@@ -1,3 +1,50 @@
+## [2026-05-04] Trip session 3 closeout follow-ups + Wave 1 post-trip lanes
+
+**Type:** Multi-commit closeout chain after the trip session 3 nightshift. Mix of bug fixes, research deliverables, and follow-up implementations. All Ring 1 / no §6 sign-off required (Q-CANON-RUPT-4 lane resolved a §6 question via canon clarification, NOT engine relaxation).
+
+**Commits (in push order, on top of `4b3722f9`):**
+
+- **`e09978a6` fix(ui): VerdictScreen useMemo hooks order.** React Rules of Hooks violation — Mission E's `codexGhosts` useMemo was placed AFTER the `if (!verdict) return <FallbackGameOver />` early return (line 217), causing renders with vs without verdict to call different numbers of hooks. The packaged endgame probe timed out at the VerdictScreen DOM surface marker. Fix: hoist useMemo to before all early returns; cleanly handle `loadedGameState === undefined` case via `?? 0` fallback for turn. tsc clean, codex+replay tests 24/24 GREEN. **Lesson: when adding a hook to a component with early returns, ALWAYS verify the hook is above ALL early returns. The packaged probe is the only test that exercises React render with the verdict gate active — unit tests with mocked stores don't catch this.**
+
+- **`2ef5ffcf` fix(packaging): remove redundant win.sign: null.** DRG regression root cause confirmed. Mission I's `package.json` build config added `"sign": null` alongside `"signAndEditExecutable": false` for redundancy. Hypothesis confirmed by CI verdict: electron-builder treats `null` differently than `undefined` for the sign hook, attempting default Windows SignTool resolution that interfered with asar integrity rewriting. Result: packaged Electron started but Warroom main window never fired `did-finish-load`. Fix: remove `win.sign: null` (signAndEditExecutable is canonical unsigned switch). 5/5 packaging tests GREEN. **Desktop Release Guard CI green at `2ef5ffcf` first time since `6d10e725`.** **Lesson: electron-builder treats `sign: null` differently than omission — always use `signAndEditExecutable: false` alone for unsigned Win builds.**
+
+- **`b349dbea` feat(replay): replay save-sequence producer.** Closes the consumer-without-producer gap from earlier Mission J commit `5a94199b`. 3-layer wiring: harness emit (`src/scenario/replay_save_emit.ts` NEW; mirrors `brigade_temporal_emit.ts` precedent) → save format extension (separate `replay_save_sequence.json` sidecar; NOT embedded in final_save) → adapter + IPC wiring through `electron-main.cjs` + `preload.cjs` + `useDesktopSession.ts` + `gameStore.ts`. 5/5 lane tests GREEN. **Hash byte-identical to predecessor `45530f5fba46905a` — emit is read-only.** **Non-blocking observation:** 40w artifact size 320 MB (50× the spec's 6 MB estimate); future lane may want gzip / selective frames / delta-encoding if sequence files become operationally unwieldy.
+
+- **`dbdf7d72` docs(audits): 4 decision-research recommendations.** Read-only research for the 4 deferred-decision items at trip session 3 closeout:
+  - `20260504_SUPPLY_OSID_RETRY_RECOMMENDATION.md` — primary A1 region-keyed cache (NONE drift, S effort, 3-5× speedup); secondary A0 Tarjan retry with G1/G2/G3 gates
+  - `20260504_Q_CANON_RUPT_4_RECOMMENDATION.md` — recommends Path (d) explicit acceptance of canonical silence; cites §0/§1.5/§2/§3/§4
+  - `20260504_FORCE_QUALITY_PRIORITIZATION.md` — Priority 1 Gap 1 (observability), Priority 2 Gap 2 (officer brain-drain — but mechanism EXISTS, calendar railroad already removed in Phase 3 FORCE QUALITY FOUNDATION 2026-05-01; work is verification + tuning, not reintroduction), Priority 3 Gap 4 (equipment attrition), defer Gap 3 (morale veterancy)
+  - `20260504_EQUIPMENT_QUALITY_MODIFIER_SUBSTRATE.md` — Option A substrate-first lane, then re-enable event #11; mirror `recruitment_modifier` shape
+
+- **`ce95c162` feat(canon): Q-CANON-RUPT-4 Path (d) — explicit acceptance of canonical silence.** Resolves §6 sign-off question raised in Mission H's Srebrenica diagnostic v2. Engine ALREADY implements Path (d) at `rupture_consequences.ts` — this lane is canon-doc-only. Canon amendments to `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`: §1.5 Ring 3 #11 NEW (no calendar-driven atrocity recording); §2 criterion 3 amended (BINDING-criterion clause forbidding heuristic substitution); §5 Counterfactual register NEW (cites Mission E `enclave_defended` ghost as §3-compliant pattern). Regression test `tests/rupture_silence_when_defended.test.ts` (NEW) 4/4 GREEN; `tests/rupture_consequences.test.ts` 18/18 still GREEN. **Q-CANON-RUPT-3 (Žepa parity) FORECLOSED by Path (d) per recommendation §6. Q-CANON-RUPT-1 (corps-AI commit floor) and Q-CANON-RUPT-2 (capital-OSID combat-math) become next §6-gated lanes.**
+
+- **`0bd5a938` feat(observability): force-quality Gap 1 — officer_quality + officer_count_active per-turn emit.** XS effort, zero anchor risk, unblocks Gap 2 measurement. Schema extension to `BrigadeTemporalRow` (2 optional fields with conditional attach for byte-identity preservation on legacy fixtures). 10/10 tests GREEN (8 existing + 2 new). Critical correction from research: Gap 2 mechanism EXISTS in `applyOfficerCasualtyLoss` — calendar-driven railroad already removed in Phase 3 of FORCE QUALITY FOUNDATION (2026-05-01). The work for Gap 2 is verification + tuning, NOT reintroduction.
+
+**STOP-AND-ASK (no commit, lane closed cleanly):**
+
+- **Mission C A1 region-keyed cache.** Spec assumption refuted by direct probe: BiH static OSID adjacency graph has **1 connected component containing all 712 OSIDs** (verified via `data/derived/operational/operational_contact_graph.json`). Connected-component partitioning yields a degenerate single-region partition equivalent to the existing whole-faction WeakMap cache. The recommendation's "polygon-adjacency-only static-topology connected-component" interpretation is degenerate on BiH topology. Agent recommends pivoting to A0 (Tarjan retry with G1+G2+G3 gates from same recommendation §3) OR a different hot phase. **Lesson for future supply-osid optimization: BiH-specific topology constrains naive graph-partition strategies; either invent a deterministic non-trivial partition (e.g., METIS-style recursive bisection with frozen partition table as generated artifact) or pivot to inner-loop optimization with property-test gates.**
+
+**Cumulative state at HEAD `0bd5a938`:**
+
+- v0.9.0 Consequences: ADVANCED (broader divergence-event matrix open; Q-CANON-RUPT-4 §6 sign-off CLOSED via Path d)
+- v0.9.1 Dynamic Codex: ADVANCED (Replay producer closed consumer-without-producer gap; endgame comparison polish open)
+- v0.9.2 Tutorial: ADVANCED (8 real first-session steps + restart IPC shipped earlier; external playtesting still open)
+- v0.9.3 Performance: OPENED-WITH-AUDIT + GAP-1-OBSERVABILITY (force-quality trajectory diagnostic + officer_quality per-turn emit; Mission C supply-osid retry deferred pending strategy pivot)
+- v0.9.4 Map That Scars: OPENED-WITH-RENDERER (feature flag default off)
+- v0.9.5 Platform Packaging: OPENED-WITH-LINUX-WIN (Linux AppImage + Win unsigned NSIS targets; Mac notarized + Win signed + Steam still cert/account-blocked)
+
+**Sensitive-history compliance throughout:** All commits Ring 1 / faction-agnostic. Q-CANON-RUPT-4 lane resolves a §6 question via canon clarification (binding clauses added to `SENSITIVE_HISTORY_DESIGN_GATE.md`); zero engine relaxation. Mission E `enclave_defended` ghost remains the §3-compliant counterfactual recorder. ICTY/ICJ findings preserved in Ring 2 regardless of campaign path.
+
+**Successor handoffs:**
+- Mission C retry — pivot to A0 (Tarjan with G1/G2/G3 gates) OR bot-orders pipeline (562ms second-largest hot phase per R2-4)
+- Mission D event #11 + Equipment substrate Option A (substrate-first lane, then re-enable event #11)
+- Force-Quality Gap 2 verification trace using new officer_quality emit, then tune OFFICER_CASUALTY_MULT
+- Force-Quality Gap 4 equipment attrition (closes personnel-rebound illusion)
+- Q-CANON-RUPT-1 (corps-AI commit floor for Krivaja-95 / Stupčanica-95) — §6-gated
+- Q-CANON-RUPT-2 (capital-OSID combat-math envelope) — §6-gated
+
+---
+
 ## [2026-05-04] Trip session 3 — Nightshift autonomous parallel execution (8 lanes shipped + 1 STOP-AND-ASK)
 
 **Type:** Multi-mission Ring 1 / no §6 / faction-agnostic. All plans pre-anchored per nightshift-handoff.md to docs/plans/. 8 lanes shipped + Mission C (supply-osid perf) STOP-AND-ASK rolled back on hash drift.
