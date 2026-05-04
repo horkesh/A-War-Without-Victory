@@ -143,6 +143,8 @@ Per lane CONSTRAINTS: "If the 188w run OOMs again or fails for any reason, repor
 
 No engine, scenario, or test files changed. No node_modules state changed.
 
+**Commit:** `cc829ebb` (signature SHA backfill not required; report self-references the verification commit).
+
 ## Successor Handoff
 
 The Wave 4 reconstitution-decay lever does NOT bend the late-war VRS officer-quality arc. The Gap 2 audit's recommended **deferred** lane (faction-asymmetric `OFFICER_CASUALTY_MULT`) named in `20260504_RECONSTITUTION_POLICY_REVIEW.md` §"Successor Lanes" item 2 is now the indicated next investigation — the casualty-side weight is the candidate that directly affects the destabilising growth term, rather than the personnel-fill side this lane tested. Recommend dispatching a follow-up lane to:
