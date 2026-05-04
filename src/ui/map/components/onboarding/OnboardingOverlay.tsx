@@ -1,20 +1,23 @@
 /**
- * v0.9.2 tutorial onboarding skeleton — root overlay.
- *
- * LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON.
+ * v0.9.2 tutorial onboarding — root overlay (LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1).
  *
  * Single-owner: this component is the only renderer of the onboarding overlay.
  * Reads `meta.tutorial_state` from the supplied state-shape; writes via the
- * IPC bridge (`tutorial:dismiss`, `tutorial:advance-step`).
+ * IPC bridge (`tutorial:dismiss`, `tutorial:advance-step`, `tutorial:restart`).
  *
  * Visibility predicate: render only when `tutorial_state?.dismissed !== true`.
  * Absent/undefined `tutorial_state` is treated as "not yet dismissed" so the
  * overlay shows on a fresh campaign.
  *
- * Faction-agnostic. Not gated by `meta.player_faction`.
+ * **Faction-agnostic.** Not gated by `meta.player_faction`.
  *
- * Determinism: step order from `onboardingSteps.ts` (array index). No clock,
- * no Math.random.
+ * **Determinism:** step order from `onboardingSteps.ts` (lexicographic sort
+ * by id). No clock, no Math.random.
+ *
+ * **Restart affordance:** when the tutorial is `dismissed` OR all steps are
+ * complete, callers may render a small "Restart Tutorial" button via the
+ * exported `OnboardingRestartButton`. The overlay itself does not re-show
+ * automatically after dismissal — restart is an explicit player action.
  */
 
 import { useState } from 'react';
@@ -30,12 +33,14 @@ export interface TutorialStateShape {
 
 /**
  * IPC bridge surface used by the overlay. The desktop bridge wires these to
- * `tutorial:dismiss` and `tutorial:advance-step` ipcMain handlers. Provided as
- * a prop so unit tests and storybook can inject stubs without an Electron host.
+ * `tutorial:dismiss`, `tutorial:advance-step`, and `tutorial:restart`
+ * ipcMain handlers. Provided as a prop so unit tests and storybook can inject
+ * stubs without an Electron host.
  */
 export interface OnboardingIpcBridge {
     dismissTutorial: () => Promise<{ ok: boolean; error?: string }>;
     advanceStep: (stepId: string) => Promise<{ ok: boolean; error?: string }>;
+    restartTutorial: () => Promise<{ ok: boolean; error?: string }>;
 }
 
 export interface OnboardingOverlayProps {
@@ -52,6 +57,32 @@ export interface OnboardingOverlayProps {
 export function shouldShowOnboarding(state: TutorialStateShape | null | undefined): boolean {
     if (!state) return true;
     return state.dismissed !== true;
+}
+
+/**
+ * Pure helper used by tests and any restart-affordance UI. Builds the next
+ * tutorial state for a "restart" action: `dismissed=false`, `current_step`
+ * cleared, `completed_steps=[]`. Mirrors the `tutorial:restart` IPC handler.
+ */
+export function applyRestart(_prior: TutorialStateShape | null | undefined): TutorialStateShape {
+    return {
+        dismissed: false,
+        current_step: undefined,
+        completed_steps: [],
+    };
+}
+
+/**
+ * Pure helper used by tests. Mirrors the `tutorial:dismiss` IPC handler:
+ * sets `dismissed=true` and preserves prior fields (current_step, completed_steps).
+ */
+export function applyDismissPure(prior: TutorialStateShape | null | undefined): TutorialStateShape {
+    const safe = prior ?? { dismissed: false, completed_steps: [] };
+    return {
+        dismissed: true,
+        current_step: safe.current_step,
+        completed_steps: Array.isArray(safe.completed_steps) ? safe.completed_steps.slice() : [],
+    };
 }
 
 export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | null {
@@ -94,6 +125,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     return (
         <div
             data-testid="onboarding-overlay"
+            data-tutorial-step={next.target_ui_element === null ? next.id : undefined}
             style={{
                 position: 'fixed',
                 inset: 0,
@@ -114,5 +146,55 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                 onSkip={onSkip}
             />
         </div>
+    );
+}
+
+/**
+ * Standalone "Restart Tutorial" button. Renders a small affordance the App
+ * shell can mount in (e.g.) the Help menu. Click invokes the
+ * `tutorial:restart` IPC handler which clears completed_steps and
+ * dismissed flags — the overlay then re-mounts at step 1 on the next render.
+ *
+ * Faction-agnostic. Single-owner: this is the only canonical restart button.
+ */
+export interface OnboardingRestartButtonProps {
+    ipc: OnboardingIpcBridge | null;
+    /** Optional callback fired after restart succeeds (for telemetry / focus). */
+    onRestart?: () => void;
+}
+
+export function OnboardingRestartButton(props: OnboardingRestartButtonProps): JSX.Element {
+    const { ipc, onRestart } = props;
+    const [pending, setPending] = useState(false);
+
+    const handleClick = async () => {
+        if (pending || !ipc) return;
+        setPending(true);
+        try {
+            const result = await ipc.restartTutorial();
+            if (result?.ok && onRestart) onRestart();
+        } finally {
+            setPending(false);
+        }
+    };
+
+    return (
+        <button
+            type="button"
+            data-testid="onboarding-restart"
+            onClick={handleClick}
+            disabled={pending || !ipc}
+            style={{
+                background: 'transparent',
+                color: '#cdb98c',
+                border: '1px solid rgba(205, 185, 140, 0.5)',
+                borderRadius: 3,
+                padding: '4px 10px',
+                fontSize: 11,
+                cursor: pending || !ipc ? 'wait' : 'pointer',
+            }}
+        >
+            Restart Tutorial
+        </button>
     );
 }

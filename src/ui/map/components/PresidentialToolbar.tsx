@@ -217,8 +217,11 @@ export function PresidentialToolbar({
 
     return (
         <>
-            {/* Toolbar bar */}
-            <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8">
+            {/* Toolbar bar — LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1 spotlight target for step 03_brief. */}
+            <div
+                data-tutorial-step="presidential-toolbar"
+                className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
+            >
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
@@ -400,6 +403,7 @@ export function PresidentialToolbar({
                         />
                     )}
                     <button
+                        data-tutorial-step="advance-turn-button"
                         onClick={handleAdvanceTurn}
                         disabled={advancing || !loadedGameState || !ipc.isAvailable}
                         className="px-5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-[0.15em] bg-amber-400/10 text-amber-400 border border-amber-400/30 rounded hover:bg-amber-400/20 hover:border-amber-400/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"

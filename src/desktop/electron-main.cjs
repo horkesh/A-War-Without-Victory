@@ -2979,6 +2979,23 @@ app.whenReady().then(() => {
     return { ok: true };
   });
 
+  // LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1: explicit restart action. Resets
+  // dismissed=false and clears completed_steps so the overlay re-mounts at
+  // step 1. Single-owner: this is the only canonical restart writer.
+  ipcMain.handle('tutorial:restart', async (event) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    if (!state.meta) return { ok: false, error: 'no_meta' };
+    state.meta.tutorial_state = {
+      dismissed: false,
+      current_step: undefined,
+      completed_steps: [],
+    };
+    writeCanonicalCurrentState(sim, state, event.sender);
+    return { ok: true };
+  });
+
   // Start the tactical map HTTP server (required because MapLibre's Web Workers
   // don't function under Electron custom protocol schemes), then create the window.
   startMapServer().then(() => {

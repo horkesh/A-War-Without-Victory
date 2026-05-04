@@ -362,7 +362,7 @@ export function PresidentialDecisionRoomPanel() {
   };
 
   return (
-    <section className="mb-2" data-testid="presidential-decision-room">
+    <section className="mb-2" data-testid="presidential-decision-room" data-tutorial-step="decision-room">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 border-b border-panel-border pb-1">
         <div>
           <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">Presidential Decision Room</div>

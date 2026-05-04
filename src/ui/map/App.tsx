@@ -190,10 +190,12 @@ function OnboardingOverlayWrapper() {
   // "not yet dismissed").
   const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
   const ipc = useIPC();
+  // LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1: bridge now exposes restart action.
   const bridge = ipc.isAvailable
     ? {
         dismissTutorial: () => ipc.dismissTutorial(),
         advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
+        restartTutorial: () => ipc.restartTutorial(),
       }
     : null;
   return <OnboardingOverlay tutorialState={tutorialState} ipc={bridge} />;

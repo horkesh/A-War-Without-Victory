@@ -113,9 +113,11 @@ interface WindowAwwv {
     acceptProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     resolveOperationOpportunityDecision: (payload: OperationOpportunityDecisionPayload) => Promise<{ ok: boolean; error?: string }>;
-    // v0.9.2 tutorial onboarding skeleton
+    // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON
+    // + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
     dismissTutorial: () => Promise<{ ok: boolean; error?: string }>;
     advanceTutorialStep: (stepId: string) => Promise<{ ok: boolean; error?: string }>;
+    restartTutorial: () => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -407,13 +409,16 @@ export function useIPC() {
                 ? (payload: OperationOpportunityDecisionPayload) => awwv.resolveOperationOpportunityDecision(payload)
                 : (_payload: OperationOpportunityDecisionPayload) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
-            // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON)
+            // v0.9.2 tutorial onboarding (LANE-NIGHTSHIFT-ROUND2 + LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1)
             dismissTutorial: awwv
                 ? () => awwv.dismissTutorial()
                 : makeNoop<{ ok: boolean; error?: string }>(),
             advanceTutorialStep: awwv
                 ? (stepId: string) => awwv.advanceTutorialStep(stepId)
                 : (_stepId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
+            restartTutorial: awwv
+                ? () => awwv.restartTutorial()
+                : makeNoop<{ ok: boolean; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

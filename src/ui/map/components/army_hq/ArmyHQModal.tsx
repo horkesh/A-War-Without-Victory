@@ -278,11 +278,15 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0">
+                <div
+                    data-tutorial-step="army-hq-tabs"
+                    className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0"
+                >
                     {HQ_TABS.map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
+                            data-tutorial-step={`army-hq-tab-${id}`}
                             onClick={() => setActiveTab(id)}
                             className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
                                 activeTab === id

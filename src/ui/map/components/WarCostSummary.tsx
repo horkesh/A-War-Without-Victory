@@ -62,7 +62,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
     const opportunityLedger = costLedger.operation_opportunities;
 
     return (
-        <div className="p-6 space-y-4 border-t border-panel-border">
+        <div data-tutorial-step="cost-ledger" className="p-6 space-y-4 border-t border-panel-border">
             <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
                 War Cost &amp; Historical Comparison
             </div>
