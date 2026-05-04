@@ -12,11 +12,15 @@
  *
  * "The least bad version of a tragedy."
  */
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
+// LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only consumption of ghost-entry
+// path-not-taken records for the Codex tab. Builder is pure/deterministic
+// and refuses §6 sensitive-history flags via its own Ring guard.
+import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dynamic_section_builder.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -207,6 +211,23 @@ export function VerdictScreen() {
 
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
 
+    // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only ghost entries built from
+    // frozen end-of-game state for the Codex tab. The builder is pure and
+    // refuses §6 refused-list flags; we wrap in a try/catch so a bad upstream
+    // flag cannot crash the Verdict screen — the tab simply hides.
+    const codexGhosts: BuiltGhostEntry[] = useMemo(() => {
+        try {
+            // The adapter exposes a partial GameState shape; the builder reads only
+            // event_flags, event_fire_counts, paramilitary_policy, player_faction,
+            // and political.negotiation, all of which are present on the loaded
+            // adapter when termination occurred. Cast through unknown to keep this
+            // an additive read-only consumption surface.
+            return buildGhostEntries(loadedGameState as unknown as Parameters<typeof buildGhostEntries>[0], turn);
+        } catch {
+            return [];
+        }
+    }, [loadedGameState, turn]);
+
     return (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
              data-awwv-endgame-surface="verdict"
@@ -291,6 +312,28 @@ export function VerdictScreen() {
                             costLedger={loadedGameState.costLedger}
                             comparison={loadedGameState.historicalComparison}
                         />
+                    </div>
+                )}
+
+                {/* Codex — paths not taken (LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE).
+                    Ring 2 narrative observations only. Hidden when no ghosts emit. */}
+                {codexGhosts.length > 0 && (
+                    <div className="border-t border-panel-border px-6 py-4 bg-panel-card/20"
+                         data-awwv-codex-ghosts={codexGhosts.length}>
+                        <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
+                            Codex &mdash; Paths Not Taken
+                        </div>
+                        <ul className="space-y-1">
+                            {codexGhosts.map((g) => (
+                                <li key={g.ghost_id} className="text-[10px] text-text-secondary"
+                                    data-awwv-ghost-id={g.ghost_id}
+                                    data-awwv-ghost-variant={g.variant}
+                                    data-awwv-ghost-ring={g.ring_classification}>
+                                    <span className="text-text-primary font-mono">{g.ghost_id}</span>
+                                    <span className="text-text-secondary/70"> &mdash; {g.path}</span>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 )}
 
