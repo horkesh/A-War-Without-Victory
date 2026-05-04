@@ -3,6 +3,10 @@ import type { CorpsFrontSector, CorpsFrontSubSegment, FactionId, FormationId, Fo
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 import { assignTerritoryVoronoi, repairDisconnectedTerritory } from '../src/sim/combat/sector_territory.js';
 import { canonicalizeSiblingFrontOwnership } from '../src/sim/combat/corps_front_sectors.js';
+import { makeAdjacency as makeAdjacencyShared } from './_helpers/adjacency.js';
+
+const makeAdjacency = (connections: [string, string][]): Map<Osid, Osid[]> =>
+    makeAdjacencyShared(connections) as unknown as Map<Osid, Osid[]>;
 
 function makeSubSeg(
     id: string,
@@ -42,19 +46,6 @@ function makeSector(
         sector_stance: 'defend',
         stance_source: 'bot',
     } as CorpsFrontSector;
-}
-
-function makeAdjacency(connections: [string, string][]): Map<Osid, Osid[]> {
-    const adj = new Map<Osid, Osid[]>();
-    for (const [a, b] of connections) {
-        const la = adj.get(a as Osid) ?? [];
-        if (!la.includes(b as Osid)) la.push(b as Osid);
-        adj.set(a as Osid, la);
-        const lb = adj.get(b as Osid) ?? [];
-        if (!lb.includes(a as Osid)) lb.push(a as Osid);
-        adj.set(b as Osid, lb);
-    }
-    return adj;
 }
 
 describe('sector territory packet contract', () => {

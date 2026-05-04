@@ -10,6 +10,7 @@ import { assignBrigadesToSubSegments, findSubSegmentForOsid, REASSIGNMENT_ENTREN
 import { findWeakestSubSegment, getWeakSubSegmentBonus, WEAK_SUBSEGMENT_SCORE_BONUS } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from '../src/sim/combat/bot_brigade_eval_front.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment, GameState, FormationState } from '../src/state/game_state.js';
+import { makeAdjacency } from './_helpers/adjacency.js';
 
 function makeFormation(overrides: Partial<FormationState> & { location_osid?: string }): FormationState {
     return {
@@ -58,19 +59,6 @@ function makeSector(
         sector_stance: 'defend',
         stance_source: 'bot',
     } as CorpsFrontSector;
-}
-
-function makeAdjacency(connections: [string, string][]): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const [a, b] of connections) {
-        const la = adj.get(a) ?? [];
-        if (!la.includes(b)) la.push(b);
-        adj.set(a, la);
-        const lb = adj.get(b) ?? [];
-        if (!lb.includes(a)) lb.push(a);
-        adj.set(b, lb);
-    }
-    return adj;
 }
 
 describe('brigade AoR sub-segment assignment', () => {

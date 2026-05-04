@@ -22,6 +22,7 @@ import {
 } from '../src/state/formation_constants.js';
 import { CURRENT_SCHEMA_VERSION, type FormationState, type GameState } from '../src/state/game_state.js';
 import type { SettlementRecord } from '../src/map/settlements.js';
+import { makeAdjacency } from './_helpers/adjacency.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -75,18 +76,6 @@ function baseState(overrides: Partial<GameState> = {}): GameState {
         displacement: {} as any,
         ...overrides
     } as unknown as GameState;
-}
-
-// Build a minimal adjacency map for OSIDs
-function makeAdjacency(edges: Array<[string, string]>): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const [a, b] of edges) {
-        if (!adj.has(a)) adj.set(a, []);
-        if (!adj.has(b)) adj.set(b, []);
-        adj.get(a)!.push(b);
-        adj.get(b)!.push(a);
-    }
-    return adj;
 }
 
 // Build osidToMun map

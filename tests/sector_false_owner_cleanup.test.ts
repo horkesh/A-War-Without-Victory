@@ -3,19 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { relocateMisassignedBrigadesToTruthfulOwners } from '../src/sim/combat/corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment, FormationId, FormationState, GameState } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+import { makeAdjacency as makeAdjacencyShared } from './_helpers/adjacency.js';
 
-function makeAdjacency(pairs: Array<[string, string]>): Map<Osid, Osid[]> {
-    const map = new Map<Osid, Osid[]>();
-    for (const [a, b] of pairs) {
-        const left = map.get(a as Osid) ?? [];
-        if (!left.includes(b as Osid)) left.push(b as Osid);
-        map.set(a as Osid, left);
-        const right = map.get(b as Osid) ?? [];
-        if (!right.includes(a as Osid)) right.push(a as Osid);
-        map.set(b as Osid, right);
-    }
-    return map;
-}
+const makeAdjacency = (pairs: Array<[string, string]>): Map<Osid, Osid[]> =>
+    makeAdjacencyShared(pairs) as unknown as Map<Osid, Osid[]>;
 
 function makeFormation(id: string, location_osid: string): FormationState {
     return {

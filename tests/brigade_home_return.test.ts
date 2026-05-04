@@ -12,6 +12,7 @@ import {
     RETURN_MAX_PER_CORPS,
     RETURN_MAX_MARCH_HOPS,
 } from '../src/sim/combat/brigade_home_return.js';
+import { makeAdjacency } from './_helpers/adjacency.js';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
 
@@ -44,22 +45,6 @@ function makeFormation(overrides: Partial<any> = {}): any {
         disrupted_turns: 0,
         ...overrides,
     };
-}
-
-/**
- * Build adjacency map from pairs. Bidirectional.
- */
-function makeAdjacency(pairs: [string, string][]): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const [a, b] of pairs) {
-        if (!adj.has(a)) adj.set(a, []);
-        if (!adj.has(b)) adj.set(b, []);
-        adj.get(a)!.push(b);
-        adj.get(b)!.push(a);
-    }
-    // Sort for determinism
-    for (const [, v] of adj) v.sort();
-    return adj;
 }
 
 /**

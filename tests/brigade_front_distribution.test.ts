@@ -5,6 +5,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { distributeBrigadesToFront } from '../src/sim/combat/brigade_front_distribution.js';
+import { makeAdjacency } from './_helpers/adjacency.js';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
 
@@ -44,19 +45,6 @@ function makeFormation(overrides: Partial<any> = {}): any {
         assigned_sub_segment_id: undefined,
         ...overrides,
     };
-}
-
-function makeAdjacency(pairs: [string, string][]): Map<string, string[]> {
-    const adj = new Map<string, string[]>();
-    for (const [a, b] of pairs) {
-        if (!adj.has(a)) adj.set(a, []);
-        if (!adj.has(b)) adj.set(b, []);
-        adj.get(a)!.push(b);
-        adj.get(b)!.push(a);
-    }
-    // Sort for determinism
-    for (const [, v] of adj) v.sort();
-    return adj;
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

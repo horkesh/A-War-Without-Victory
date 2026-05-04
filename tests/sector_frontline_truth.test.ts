@@ -46,6 +46,7 @@ import type { CorpsCommanderProfile } from '../src/sim/combat/commander_override
 import type { WeeklyActivityCounts } from '../src/scenario/scenario_reporting.js';
 import type { TurnReport } from '../src/sim/turn_pipeline_types.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
+import { makeAdjacency as makeAdjacencyShared } from './_helpers/adjacency.js';
 
 // ── Fixture helpers (shared across all waves) ────────────────────────────────
 
@@ -107,18 +108,8 @@ function makeSector(
     } as CorpsFrontSector;
 }
 
-function makeAdjacency(connections: [string, string][]): Map<Osid, Osid[]> {
-    const adj = new Map<Osid, Osid[]>();
-    for (const [a, b] of connections) {
-        const la = adj.get(a as Osid) ?? [];
-        if (!la.includes(b)) la.push(b);
-        adj.set(a as Osid, la);
-        const lb = adj.get(b as Osid) ?? [];
-        if (!lb.includes(a)) lb.push(a);
-        adj.set(b as Osid, lb);
-    }
-    return adj;
-}
+const makeAdjacency = (connections: [string, string][]): Map<Osid, Osid[]> =>
+    makeAdjacencyShared(connections) as unknown as Map<Osid, Osid[]>;
 
 function makeComponentOf(osidToComponent: Record<string, number>): Map<string, number> {
     return new Map(Object.entries(osidToComponent));

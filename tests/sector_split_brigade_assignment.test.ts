@@ -28,6 +28,7 @@ import {
 } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+import { makeAdjacency as makeAdjacencyShared } from './_helpers/adjacency.js';
 
 // ── Fixture helpers ──────────────────────────────────────────────────────────
 
@@ -98,19 +99,11 @@ function makeSector(opts: {
 
 /**
  * Build a bidirectional adjacency map from a list of [a, b] OSID pairs.
+ * Wraps the shared `makeAdjacency` helper while preserving the local
+ * `Map<Osid, Osid[]>` return shape.
  */
-function makeAdjacency(connections: [string, string][]): Map<Osid, Osid[]> {
-    const adj = new Map<Osid, Osid[]>();
-    for (const [a, b] of connections) {
-        const la = adj.get(a as Osid) ?? [];
-        if (!la.includes(b)) la.push(b);
-        adj.set(a as Osid, la);
-        const lb = adj.get(b as Osid) ?? [];
-        if (!lb.includes(a)) lb.push(a);
-        adj.set(b as Osid, lb);
-    }
-    return adj;
-}
+const makeAdjacency = (connections: [string, string][]): Map<Osid, Osid[]> =>
+    makeAdjacencyShared(connections) as unknown as Map<Osid, Osid[]>;
 
 function makeComponentOf(mapping: Record<string, number>): Map<string, number> {
     return new Map(Object.entries(mapping));

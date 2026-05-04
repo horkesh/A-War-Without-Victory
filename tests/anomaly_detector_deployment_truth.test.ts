@@ -6,18 +6,7 @@ import {
     detectUnassignedFrontlineBrigades,
     runAnomalyDetection,
 } from '../src/scenario/anomaly_detector.js';
-
-function makeAdjacency(pairs: Array<[string, string]>): Map<string, string[]> {
-    const adjacency = new Map<string, string[]>();
-    for (const [a, b] of pairs) {
-        if (!adjacency.has(a)) adjacency.set(a, []);
-        if (!adjacency.has(b)) adjacency.set(b, []);
-        adjacency.get(a)!.push(b);
-        adjacency.get(b)!.push(a);
-    }
-    for (const neighbors of adjacency.values()) neighbors.sort();
-    return adjacency;
-}
+import { makeAdjacency } from './_helpers/adjacency.js';
 
 describe('anomaly detector deployment truth', () => {
     it('does not let placement:fixed_home_osid suppress canonically unresolved sector brigades', () => {
