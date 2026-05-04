@@ -12,6 +12,7 @@ import { getSettlementControlStatus } from './settlement_control.js';
 import type { SupplyReachabilityReport } from './supply_reachability.js';
 import type { SupplyReachabilityOsidReport, FactionSupplyReachabilityOsid } from './supply_reachability_osid.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
+import { strictCompare } from './validateGameState.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // v0.9.3 C2a — per-faction OSID-supply derivation caches.
@@ -362,7 +363,17 @@ export function deriveLocalProductionCapacity(
 // ═══════════════════════════════════════════════════════════════════════════
 
 
-function isBridgeInSubgraphOsid(
+/**
+ * LEGACY per-edge BFS-removal bridge predicate.
+ *
+ * Retained for the G2 parity wrapper (`SUPPLY_BRIDGE_PARITY_CHECK=true`)
+ * and exported under `__test_*` names for the G1 property test.
+ *
+ * Production callsite (`computeFactionCorridors`) uses Tarjan
+ * (`findBridgesInSubgraphOsid`) below. Do NOT call this function in any
+ * non-test, non-parity-check path — it is O(E²) on the subgraph.
+ */
+function isBridgeInSubgraphOsidLegacy(
     edgeId: string,
     edgesUsed: Set<string>,
     reachableNodes: Set<string>,
@@ -390,6 +401,168 @@ function isBridgeInSubgraphOsid(
     }
     return !visited.has(b);
 }
+
+/**
+ * LANE-NIGHTSHIFT-SUPPLY-OSID-A0-TARJAN: single-pass O(V+E) bridge-finding.
+ *
+ * Tarjan's bridge algorithm (1974). Iterative DFS to avoid recursion stack
+ * overflow on BiH-scale graphs. Multi-component-safe: outer loop restarts
+ * DFS at every unvisited reachable node, so subgraphs split into enclaves
+ * (Goražde / Žepa / Sarajevo / Bihać per spec §5) are handled correctly.
+ *
+ * Determinism plumbing (binding):
+ *   - Root vertex iteration via `[...reachableNodes].sort(strictCompare)`.
+ *   - Neighbor iteration via the C1-memoized adjacency lists, which
+ *     `buildOsidAdjacency` already sorts via strictCompare.
+ *   - Output is a Set<string>; downstream `computeFactionCorridors` only
+ *     calls `.has()` on it (set is order-insensitive at consumer side),
+ *     and emits sorted DerivedCorridor[] downstream.
+ *
+ * The `reachableNodes` filter mirrors the legacy predicate's early-exit:
+ * an edge whose endpoint is not in `reachableNodes` is never a bridge in
+ * the reachable subgraph (it isn't even part of it). The `edges` filter
+ * mirrors the legacy's `edgesUsed.has(eid)` neighbor-edge gate.
+ *
+ * Returns the SET of bridge edge IDs (canonical-orientation: a__b with a<b).
+ */
+function findBridgesInSubgraphOsid(
+    edges: Set<string>,
+    reachableNodes: Set<string>,
+    adjacency: Map<string, string[]>
+): Set<string> {
+    const bridges = new Set<string>();
+    if (reachableNodes.size === 0 || edges.size === 0) return bridges;
+
+    // Index reachable nodes deterministically (root iteration must be
+    // strictCompare-sorted to avoid Map-iteration-order divergence).
+    const reachableSorted: string[] = [...reachableNodes].sort(strictCompare);
+    const indexOf = new Map<string, number>();
+    for (let i = 0; i < reachableSorted.length; i++) indexOf.set(reachableSorted[i], i);
+
+    const N = reachableSorted.length;
+    const disc: number[] = new Array(N).fill(-1);
+    const low: number[] = new Array(N).fill(-1);
+    let timer = 0;
+
+    /**
+     * Iterative DFS with explicit stack of (nodeIdx, parentIdx, neighborCursor).
+     * Each frame remembers which neighbor index it last advanced to.
+     */
+    type Frame = { v: number; parent: number; cursor: number; neighbors: string[] };
+    const stack: Frame[] = [];
+
+    const buildNeighbors = (v: number): string[] => {
+        const node = reachableSorted[v];
+        const raw = adjacency.get(node) ?? [];
+        // Filter to neighbors that are (a) reachable and (b) connected by an
+        // edge in the subgraph `edges` set. Adjacency is already strictCompare-
+        // sorted by buildOsidAdjacency, so the filtered list inherits that order.
+        const out: string[] = [];
+        for (const n of raw) {
+            if (!reachableNodes.has(n)) continue;
+            const eid = node < n ? `${node}__${n}` : `${n}__${node}`;
+            if (!edges.has(eid)) continue;
+            out.push(n);
+        }
+        return out;
+    };
+
+    for (let r = 0; r < N; r++) {
+        if (disc[r] !== -1) continue; // already visited (other component)
+        // Start DFS at r
+        const rootNeighbors = buildNeighbors(r);
+        disc[r] = timer;
+        low[r] = timer;
+        timer++;
+        stack.push({ v: r, parent: -1, cursor: 0, neighbors: rootNeighbors });
+
+        while (stack.length > 0) {
+            const top = stack[stack.length - 1];
+            if (top.cursor < top.neighbors.length) {
+                const nName = top.neighbors[top.cursor];
+                top.cursor++;
+                const nIdx = indexOf.get(nName);
+                if (nIdx === undefined) continue; // not in reachable set (defensive)
+                if (nIdx === top.parent) continue; // skip immediate parent
+                if (disc[nIdx] !== -1) {
+                    // Back-edge: update low[top.v] with disc[nIdx]
+                    if (disc[nIdx] < low[top.v]) low[top.v] = disc[nIdx];
+                } else {
+                    // Tree-edge: descend
+                    disc[nIdx] = timer;
+                    low[nIdx] = timer;
+                    timer++;
+                    const nNeighbors = buildNeighbors(nIdx);
+                    stack.push({ v: nIdx, parent: top.v, cursor: 0, neighbors: nNeighbors });
+                }
+            } else {
+                // Pop: propagate low[top.v] to parent
+                const popped = stack.pop()!;
+                if (popped.parent !== -1) {
+                    const p = popped.parent;
+                    if (low[popped.v] < low[p]) low[p] = low[popped.v];
+                    // Bridge condition: low[child] > disc[parent]
+                    if (low[popped.v] > disc[p]) {
+                        const childName = reachableSorted[popped.v];
+                        const parentName = reachableSorted[p];
+                        const eid = parentName < childName
+                            ? `${parentName}__${childName}`
+                            : `${childName}__${parentName}`;
+                        bridges.add(eid);
+                    }
+                }
+            }
+        }
+    }
+
+    return bridges;
+}
+
+/**
+ * G2 parity wrapper. Default: returns Tarjan output unchanged.
+ * Opt-in via `SUPPLY_BRIDGE_PARITY_CHECK=true`: also runs the legacy per-edge
+ * predicate over every edge in `edges` and asserts identical bridge classification.
+ * On mismatch, throws with a graph dump containing the first divergent edge.
+ *
+ * The parity wrapper is the production-path safety net for cases the G1 property
+ * test cannot catch (real BiH topology with caches, faction interactions, multi-turn
+ * state). Default OFF — zero production cost. Run 40w with the env flag set to
+ * catch drift in real scenarios before merge.
+ */
+function findBridgesInSubgraphOsidWithParity(
+    edges: Set<string>,
+    reachableNodes: Set<string>,
+    adjacency: Map<string, string[]>
+): Set<string> {
+    const tarjan = findBridgesInSubgraphOsid(edges, reachableNodes, adjacency);
+    if (process.env.SUPPLY_BRIDGE_PARITY_CHECK !== 'true') return tarjan;
+
+    // Parity check: re-classify every edge with the legacy predicate.
+    for (const e of edges) {
+        const legacyIsBridge = isBridgeInSubgraphOsidLegacy(e, edges, reachableNodes, adjacency);
+        const tarjanIsBridge = tarjan.has(e);
+        if (legacyIsBridge !== tarjanIsBridge) {
+            const dumpNodes: string[] = [...reachableNodes].sort(strictCompare).slice(0, 50);
+            const dumpEdges: string[] = [...edges].sort(strictCompare).slice(0, 50);
+            const detail = JSON.stringify({
+                first_divergent_edge: e,
+                legacy_is_bridge: legacyIsBridge,
+                tarjan_is_bridge: tarjanIsBridge,
+                reachable_node_count: reachableNodes.size,
+                edge_count: edges.size,
+                node_sample: dumpNodes,
+                edge_sample: dumpEdges,
+            });
+            throw new Error(`SUPPLY_BRIDGE_PARITY_CHECK mismatch: ${detail}`);
+        }
+    }
+    return tarjan;
+}
+
+// Test-only re-exports for G1 property test + small-graph correctness test.
+// Names prefixed `__test_` to discourage non-test consumers.
+export { findBridgesInSubgraphOsid as __test_findBridgesInSubgraphOsid };
+export { isBridgeInSubgraphOsidLegacy as __test_isBridgeInSubgraphOsidLegacy };
 
 /**
  * Compute the corridor list for a single faction over the OSID graph.
@@ -420,9 +593,15 @@ function computeFactionCorridors(
         }
     }
 
+    // LANE-NIGHTSHIFT-SUPPLY-OSID-A0-TARJAN: single Tarjan pass replaces the
+    // legacy O(E²) per-edge BFS-removal call (was: ~360k ops/faction at BiH
+    // scale; now: O(V+E) ≈ ~3k ops/faction). G1 property test (10k trials)
+    // proves set-equality with legacy. G2 parity wrapper guards production.
+    const bridgeSet = findBridgesInSubgraphOsidWithParity(reachableEdges, reachableSet, adjacency);
+
     const out: DerivedCorridor[] = [];
     for (const edgeId of reachableEdges) {
-        const isBridge = isBridgeInSubgraphOsid(edgeId, reachableEdges, reachableSet, adjacency);
+        const isBridge = bridgeSet.has(edgeId);
         out.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
     }
     for (const edgeId of potentialEdges) {
