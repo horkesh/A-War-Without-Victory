@@ -201,9 +201,23 @@ export const ENCLAVE_MUNICIPALITY_IDS = new Set<string>(['srebrenica', 'gorazde'
 
 /**
  * Faction-specific reinforcement rate multiplier by war phase.
- * Historically: RS inherited JNA logistics (full rate from day 1).
- * RBiH was disorganized militia; reinforcement capacity grew over time as corps formed.
- * HRHB had Croatian cadre support but limited logistics.
+ *
+ * Historically:
+ * - RS: inherited JNA logistics (full rate early); from mid-1993 onward officer cadre
+ *   attrition, sanctions-driven equipment decay, and pool exhaustion erode replacement
+ *   tempo. By 1995 VRS replacement quality and rate are well below 1992 baseline even
+ *   when nominal pool manpower exists.
+ * - RBiH: disorganized militia; reinforcement capacity grew over time as corps formed.
+ * - HRHB: Croatian cadre support but limited logistics; two-front stress after Lašva
+ *   Valley + Washington Agreement constraints reduce late-war replacement throughput.
+ *
+ * The MECHANISM is faction-symmetric (step curve over turn). Only data parameters
+ * drive faction asymmetry. This is the canonical lever identified in
+ * `docs/40_reports/audits/20260504_FORCE_QUALITY_GAP_2_VERIFICATION.md` for the
+ * "+753 VRS personnel over 188w" inversion: VRS late-war reinforcement was flat
+ * 1.0× indefinitely, so the brigade-fill path drained mobilization surplus and
+ * strategic-reserve overflow into existing brigades faster than battle attrition
+ * could erode them — overpowering the casualty-driven officer_quality decay term.
  */
 export function getFactionReinforcementMult(faction: string, turn: number, timeline?: WarTimeline): number {
     // Timeline-driven when available
@@ -220,9 +234,18 @@ export function getFactionReinforcementMult(faction: string, turn: number, timel
     }
     if (faction === 'HRHB') {
         if (turn < 12) return 0.50;   // HVO had Croatian cadre but limited logistics
-        return 0.75;                   // Never matched VRS logistics capacity
+        if (turn < 52) return 0.75;   // Mid-92 → mid-93: capable
+        if (turn < 78) return 0.65;   // Mid-93 → mid-94: Lašva Valley + Washington stress
+        return 0.50;                   // Late 94 → end-war: two-front exhaustion
     }
-    // RS: full rate from day 1 (JNA inheritance)
+    // RS: JNA inheritance early, then officer/sanctions-driven late-war decay
+    if (faction === 'RS') {
+        if (turn < 52) return 1.0;    // 1992 → mid-1993: JNA inheritance, full rate
+        if (turn < 78) return 0.85;   // Mid-93 → mid-94: officer attrition, sanctions bite
+        if (turn < 104) return 0.65;  // Mid-94 → mid-95: deepening exhaustion
+        return 0.45;                   // Late 1995: brittle, replacement quality crumbles
+    }
+    // Default fallback for any other faction
     return 1.0;
 }
 
