@@ -144,10 +144,14 @@ import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
 // stream + end-of-run consolidated `replay_save_sequence.json` artifact powering
 // the VerdictScreen Replay tab via Mission J's `replayPlayer()` consumer.
+// LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING (2026-05-05): per-turn JSONL append
+// is the single source of truth; consolidated artifact is finalized by
+// stream-reading the JSONL on disk so peak heap is bounded by one frame, not
+// the whole sequence. This unblocks 188w hash-identity gates that previously
+// OOM'd at the post-sim summary write (~4.4 GB replay buffer).
 import {
     buildReplayFrameRow,
-    finalizeReplaySaveSequence,
-    type ReplayFrameRow,
+    streamFinalizeReplaySaveSequenceFromJsonl,
 } from './replay_save_emit.js';
 import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
@@ -1626,7 +1630,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const brigadeTemporalStream = createWriteStream(brigadeTemporalLogPath, { flags: 'w' });
         const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
         const replaySequenceStream = createWriteStream(replaySequencePath, { flags: 'w' });
-        const replaySequenceFrames: ReplayFrameRow[] = [];
+        // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING: NO in-memory frame accumulator.
+        // The per-turn JSONL stream is the single source of truth; the consolidated
+        // `replay_save_sequence.json` is finalized at end-of-run by stream-reading
+        // the JSONL line-by-line. Peak memory is bounded by one frame's serialized
+        // state (~25 MB at 188w), not the whole sequence (~4.4 GB at 188w).
 
         let final_state_hash = '';
         let firstReportRow: WeeklyReportRow | null = null;
@@ -2158,12 +2166,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
 
             // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn replay frame.
-            // Pure read-only — `serializeState(state)` is the canonical writer (also
-            // produces final_save.json). State is NOT mutated. Frames accumulate in
-            // turn order for the end-of-run consolidated artifact, and are also
-            // emitted line-by-line to the JSONL stream for streaming consumers.
+            // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING (2026-05-05): JSONL append-only
+            // path; no in-memory accumulator. The consolidated artifact is
+            // stream-finalized from this JSONL at end-of-run. Pure read-only —
+            // `serializeState(state)` is the canonical writer (also produces
+            // final_save.json). State is NOT mutated.
             const replayFrameRow = buildReplayFrameRow(state, week_index);
-            replaySequenceFrames.push(replayFrameRow);
             replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
 
             if (week_index === weeks - 1) {
@@ -2212,6 +2220,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             reportStream.on('error', reject);
         });
+        // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING: the consolidated finalize step
+        // stream-reads `replay_sequence.jsonl` from disk, so we MUST wait for the
+        // JSONL `finish` event before invoking the finalizer. Without this, the
+        // finalizer can race against still-buffered writes on slow disks.
+        await new Promise<void>((resolve, reject) => {
+            replaySequenceStream.on('finish', resolve).on('error', reject);
+        });
 
         const finalSavePath = join(outDir, 'final_save.json');
         if (state.meta.phase === 'war' && operationalData) {
@@ -2238,7 +2253,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // save hash invariance holds and existing loaders continue working
         // unchanged. UI adapter / desktop IPC pick this up when present and
         // populate `LoadedGameState.replaySaveSequence` for the VerdictScreen.
-        const replaySaveSequencePath = await finalizeReplaySaveSequence(outDir, replaySequenceFrames);
+        // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING (2026-05-05): finalized by
+        // stream-reading `replay_sequence.jsonl` line-by-line — peak heap is
+        // bounded by one frame's serialized state, never the whole sequence.
+        // This unblocks 188w hash-identity gates that previously OOM'd here.
+        const replaySaveSequencePath = await streamFinalizeReplaySaveSequenceFromJsonl(
+            outDir,
+            replaySequencePath,
+        );
 
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
 

@@ -1,5 +1,6 @@
 /**
  * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER — Replay save sequence emit.
+ * LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING — Streaming finalize (2026-05-05).
  *
  * Pure read-only projection over `GameState` per turn. Produces the stream
  * artifact `replay_sequence.jsonl` (one line per turn, each line is a serialized
@@ -10,8 +11,26 @@
  *
  * Engine ownership boundary: this module is harness-side only; the engine
  * pipeline never imports it. The scenario harness calls `serializeReplayFrame`
- * once per turn after `runTurn` returns, then calls `finalizeReplaySaveSequence`
- * once at end-of-run.
+ * once per turn after `runTurn` returns, then calls
+ * `streamFinalizeReplaySaveSequenceFromJsonl` once at end-of-run to materialize
+ * the consolidated JSON from the on-disk JSONL stream WITHOUT keeping all frames
+ * resident in memory.
+ *
+ * --------------------------------------------------------------------------
+ * Why streaming finalize? (LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING)
+ * --------------------------------------------------------------------------
+ * The original implementation accumulated every per-turn frame into a
+ * `ReplayFrameRow[]` array, then re-parsed each frame and emitted a single
+ * `JSON.stringify(states, null, 2)` payload. At 188w, this collapsed the V8
+ * heap (4.4 GB replay buffer + final-save serialization saturated the 8 GB
+ * cap) and prevented `run_summary.json` emission, blocking the
+ * `final_state_hash` gate that future calibration lanes depend on.
+ *
+ * The fix: keep the JSONL stream as the single source of truth (it already
+ * mirrors the proven Wave 5 `brigade_temporal_log.jsonl` chunked-write
+ * pattern). At end-of-run, stream-read the JSONL line-by-line and stream-write
+ * the consolidated JSON array. Peak memory is now bounded by the largest
+ * single frame (~25 MB at 188w) instead of the cumulative sequence (~4.4 GB).
  *
  * --------------------------------------------------------------------------
  * Design call: SEPARATE ARTIFACT (not embedded in `final_save.json`)
@@ -22,7 +41,7 @@
  *
  * Choice: (b) — separate artifact. Justification:
  *   1. **File size.** A 40w run × ~150KB serialized state ≈ 6 MB; a 188w
- *      campaign run ≈ 28 MB. Embedding in `final_save.json` would balloon
+ *      campaign run ≈ 28 MB+. Embedding in `final_save.json` would balloon
  *      the canonical save by 50× and break the "small, loadable, validatable"
  *      contract every existing save consumer assumes.
  *   2. **Loader compatibility.** `parseGameState()` (UI), `deserializeState()`
@@ -42,16 +61,23 @@
  * --------------------------------------------------------------------------
  *  - Each frame is produced via `serializeState(state)` (canonical writer
  *    with deep sort already enforced by `serializeGameState`).
- *  - `finalizeReplaySaveSequence` accumulates frames in turn order (ascending
- *    week_index) — the harness is the sole producer and emits in lockstep with
- *    the per-turn loop, so no resort is needed.
+ *  - The harness emits frames in lockstep with the per-turn loop, so JSONL
+ *    line order is the canonical replay order. The streaming finalizer
+ *    preserves that order line-by-line.
+ *  - Consolidated output format is COMPACT JSON: `[<state1>,<state2>,...]`
+ *    where each `<stateN>` is the canonical serialized GameState string from
+ *    the JSONL. No re-formatting, no pretty-printing — bytes are a function
+ *    of the JSONL bytes plus fixed delimiters. This is what guarantees the
+ *    G1 byte-identity gate.
  *  - No nondeterministic primitives (no RNG, no wall-clock timestamps,
  *    no locale-aware sort).
  *  - No engine state mutation. Pure read.
  */
 
 import type { WriteStream } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { mkdir } from 'node:fs/promises';
+import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import type { GameState } from '../state/game_state.js';
 import { serializeState } from '../state/serialize.js';
@@ -114,19 +140,115 @@ export function writeReplayFrame(
 }
 
 /**
- * At end-of-run, materialize the consolidated `replay_save_sequence.json`
- * artifact from the in-memory frame array. Frames must already be in turn
- * order (the harness produces them in lockstep with the per-turn loop).
+ * Compose one frame's contribution to the consolidated array. Given a JSONL
+ * row's parsed object (or a `ReplayFrameRow`), returns the inner canonical
+ * state string. Pure helper — no I/O, no allocation beyond the return value.
+ */
+function extractStateString(row: { state?: unknown }): string {
+    const s = row?.state;
+    if (typeof s !== 'string') {
+        throw new Error(
+            'replay_save_emit: malformed JSONL row — `state` field is not a string',
+        );
+    }
+    return s;
+}
+
+/**
+ * Stream-finalize the consolidated `replay_save_sequence.json` from the
+ * per-turn `replay_sequence.jsonl` stream on disk. Bounded peak memory:
+ * one frame's serialized state at a time, never the whole sequence.
  *
- * Output shape: a JSON array of GameState objects, one per turn, in turn
- * order. This is the exact shape Mission J's `replayPlayer()` consumes via
- * `LoadedGameState.replaySaveSequence`.
+ * Output format (COMPACT, byte-deterministic):
+ *   `[` `<state1>` `,` `<state2>` `,` ... `,` `<stateN>` `]`
  *
- * Determinism: each frame's `state` string was produced by `serializeState()`,
- * which is the canonical writer. Re-parsing via `JSON.parse` and emitting
- * the array via `JSON.stringify` is deterministic because object key order
- * is preserved by V8 for re-parsed objects (and the canonical writer already
- * emitted keys in deep-sorted order).
+ * Each `<stateK>` is the canonical-serialized GameState from JSONL line K
+ * (the inner `state` field of each row), passed through verbatim — no
+ * re-format, no re-parse, no re-stringify. The consumer (`replayPlayer`)
+ * calls `JSON.parse` on the file, which yields a `GameState[]` byte-stable
+ * to the engine's canonical writer.
+ *
+ * Determinism:
+ *  - Reads JSONL line-by-line in disk order (harness emits in turn order).
+ *  - Output is a deterministic function of the JSONL contents plus three
+ *    fixed delimiter strings (`[`, `,`, `]`).
+ *  - No re-sort, no re-parse, no platform-dependent newline handling
+ *    (`readline` strips trailing `\r` / `\n` uniformly).
+ *
+ * Sensitive-history compliance: faction-agnostic; iterates lines in the
+ * order produced by the harness; no field-by-field inspection of GameState.
+ *
+ * Returns the path of the consolidated artifact.
+ */
+export async function streamFinalizeReplaySaveSequenceFromJsonl(
+    outDir: string,
+    jsonlPath: string,
+): Promise<string> {
+    await mkdir(outDir, { recursive: true });
+    const sequencePath = join(outDir, 'replay_save_sequence.json');
+    const out = createWriteStream(sequencePath, { flags: 'w', encoding: 'utf8' });
+
+    // Helper: await a write stream `write` call so backpressure is honored.
+    // Without this, very large frames (~25 MB at 188w) can blow the internal
+    // buffer cap on slow disks. The pattern is the same one used by
+    // `brigade_temporal_log.jsonl` (which writes per-line through a single
+    // shared stream and is proven stable at 188w / 23.4 MB).
+    const writeChunk = (chunk: string): Promise<void> =>
+        new Promise<void>((resolve, reject) => {
+            const ok = out.write(chunk, (err) => {
+                if (err) reject(err);
+            });
+            if (ok) resolve();
+            else out.once('drain', () => resolve());
+        });
+
+    const closeStream = (): Promise<void> =>
+        new Promise<void>((resolve, reject) => {
+            out.on('finish', () => resolve());
+            out.on('error', (err) => reject(err));
+            out.end();
+        });
+
+    // Open JSONL for line-by-line read. `readline` handles arbitrary line
+    // length and strips trailing CR/LF uniformly — important for
+    // cross-platform byte-identity.
+    const inputStream = createReadStream(jsonlPath, { encoding: 'utf8' });
+    const rl = createInterface({ input: inputStream, crlfDelay: Infinity });
+
+    await writeChunk('[');
+    let firstFrame = true;
+    try {
+        for await (const line of rl) {
+            if (line.length === 0) continue; // tolerate trailing newline
+            const row = JSON.parse(line) as { state?: unknown };
+            const stateStr = extractStateString(row);
+            if (!firstFrame) {
+                await writeChunk(',');
+            }
+            await writeChunk(stateStr);
+            firstFrame = false;
+        }
+    } finally {
+        rl.close();
+        inputStream.close();
+    }
+    await writeChunk(']');
+    await closeStream();
+    return sequencePath;
+}
+
+/**
+ * Stream-finalize from an in-memory `ReplayFrameRow[]`. Used by the existing
+ * test surface and by callers that already hold the frame array in memory
+ * (small scenarios where buffering is acceptable).
+ *
+ * Output format is identical to `streamFinalizeReplaySaveSequenceFromJsonl`
+ * — `[<state1>,<state2>,...]` compact — so the G1 byte-identity gate holds:
+ * for a given input frame sequence, both finalizers produce byte-identical
+ * `replay_save_sequence.json`.
+ *
+ * Backwards-compatible signature: the existing call site (test T4) and the
+ * existing return-path semantics are preserved.
  */
 export async function finalizeReplaySaveSequence(
     outDir: string,
@@ -134,15 +256,32 @@ export async function finalizeReplaySaveSequence(
 ): Promise<string> {
     await mkdir(outDir, { recursive: true });
     const sequencePath = join(outDir, 'replay_save_sequence.json');
-    // Re-parse each canonical-serialized state into an object so the consolidated
-    // artifact is a JSON array of GameStates (not an array of strings).
-    const states: unknown[] = new Array(frames.length);
+    const out = createWriteStream(sequencePath, { flags: 'w', encoding: 'utf8' });
+
+    const writeChunk = (chunk: string): Promise<void> =>
+        new Promise<void>((resolve, reject) => {
+            const ok = out.write(chunk, (err) => {
+                if (err) reject(err);
+            });
+            if (ok) resolve();
+            else out.once('drain', () => resolve());
+        });
+
+    const closeStream = (): Promise<void> =>
+        new Promise<void>((resolve, reject) => {
+            out.on('finish', () => resolve());
+            out.on('error', (err) => reject(err));
+            out.end();
+        });
+
+    await writeChunk('[');
     for (let i = 0; i < frames.length; i++) {
-        states[i] = JSON.parse(frames[i].state);
+        if (i > 0) {
+            await writeChunk(',');
+        }
+        await writeChunk(extractStateString(frames[i]));
     }
-    // Emit pretty-printed for human inspection / diff. Deterministic because
-    // input state strings were produced by canonical writer (deep-sorted keys)
-    // and JSON.parse + JSON.stringify preserves that order in V8.
-    await writeFile(sequencePath, JSON.stringify(states, null, 2), 'utf8');
+    await writeChunk(']');
+    await closeStream();
     return sequencePath;
 }

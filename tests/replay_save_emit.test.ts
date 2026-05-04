@@ -18,12 +18,14 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { createWriteStream } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
     buildReplayFrameRow,
     finalizeReplaySaveSequence,
+    streamFinalizeReplaySaveSequenceFromJsonl,
     type ReplayFrameRow,
 } from '../src/scenario/replay_save_emit.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
@@ -155,5 +157,124 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
         expect(source).not.toMatch(/localeCompare/);
         // Inline sentinel: the design call is documented in the source.
         expect(source).toMatch(/SEPARATE ARTIFACT/);
+    });
+
+    /**
+     * LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING — G1 byte-identity gate.
+     *
+     * Asserts that for a fresh small-scenario sequence, the streaming finalizer
+     * (`streamFinalizeReplaySaveSequenceFromJsonl`, which reads the per-turn
+     * JSONL on disk line-by-line) produces byte-identical output to the
+     * buffer-then-write reference (`finalizeReplaySaveSequence`, which iterates
+     * an in-memory frame array).
+     *
+     * This is the binding regression gate for the streaming refactor: any
+     * future change to the finalizer must preserve byte-identity between the
+     * two surfaces. If they diverge, the consolidated artifact's hash drifts
+     * silently, breaking downstream verification.
+     */
+    it('T6 streaming_byte_identity — JSONL-streamed finalize == in-memory finalize byte-for-byte', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'replay-stream-test-'));
+        try {
+            const frames: ReplayFrameRow[] = [
+                buildReplayFrameRow(makeState(1), 0),
+                buildReplayFrameRow(makeState(2), 1),
+                buildReplayFrameRow(makeState(3), 2),
+                buildReplayFrameRow(makeState(4), 3),
+                buildReplayFrameRow(makeState(5), 4),
+                buildReplayFrameRow(makeState(6), 5),
+                buildReplayFrameRow(makeState(7), 6),
+                buildReplayFrameRow(makeState(8), 7),
+            ];
+
+            // Reference: in-memory buffer-then-write finalize.
+            const refDir = join(dir, 'reference');
+            const referencePath = await finalizeReplaySaveSequence(refDir, frames);
+            const referenceBytes = await readFile(referencePath, 'utf8');
+
+            // Streamed: write JSONL to disk first (mirroring scenario_runner harness),
+            // then stream-finalize from disk.
+            const streamedDir = join(dir, 'streamed');
+            // mkdir is invoked by the finalizer; pre-create only the JSONL parent.
+            const { mkdir } = await import('node:fs/promises');
+            await mkdir(streamedDir, { recursive: true });
+            const jsonlPath = join(streamedDir, 'replay_sequence.jsonl');
+            const jsonlStream = createWriteStream(jsonlPath, { flags: 'w' });
+            for (const row of frames) {
+                jsonlStream.write(JSON.stringify(row) + '\n');
+            }
+            jsonlStream.end();
+            await new Promise<void>((resolve, reject) => {
+                jsonlStream.on('finish', resolve).on('error', reject);
+            });
+
+            const streamedPath = await streamFinalizeReplaySaveSequenceFromJsonl(streamedDir, jsonlPath);
+            const streamedBytes = await readFile(streamedPath, 'utf8');
+
+            // G1 binding assertion: byte-for-byte identity.
+            expect(streamedBytes).toBe(referenceBytes);
+
+            // Sanity: parses to the same array of states.
+            const refParsed = JSON.parse(referenceBytes) as Array<{ meta: { turn: number } }>;
+            const streamedParsed = JSON.parse(streamedBytes) as Array<{ meta: { turn: number } }>;
+            expect(streamedParsed).toEqual(refParsed);
+            expect(streamedParsed.map((f) => f.meta.turn)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
+
+    /**
+     * LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING — empty / single-frame edge cases.
+     *
+     * The streaming finalizer must produce well-formed JSON for both edge
+     * cases. Empty input → `[]`; single-frame input → `[<state>]` with no
+     * trailing comma. The reference and streamed paths must agree on these.
+     */
+    it('T7 streaming_edge_cases — empty + single-frame inputs are well-formed and stream-stable', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'replay-stream-edge-'));
+        try {
+            const { mkdir } = await import('node:fs/promises');
+
+            // Empty case.
+            const emptyDir = join(dir, 'empty');
+            await mkdir(emptyDir, { recursive: true });
+            const emptyJsonl = join(emptyDir, 'replay_sequence.jsonl');
+            const emptyJsonlStream = createWriteStream(emptyJsonl, { flags: 'w' });
+            emptyJsonlStream.end();
+            await new Promise<void>((resolve, reject) => {
+                emptyJsonlStream.on('finish', resolve).on('error', reject);
+            });
+            const emptyStreamedPath = await streamFinalizeReplaySaveSequenceFromJsonl(emptyDir, emptyJsonl);
+            const emptyStreamedBytes = await readFile(emptyStreamedPath, 'utf8');
+            const emptyRefDir = join(dir, 'empty-ref');
+            const emptyRefPath = await finalizeReplaySaveSequence(emptyRefDir, []);
+            const emptyRefBytes = await readFile(emptyRefPath, 'utf8');
+            expect(emptyStreamedBytes).toBe(emptyRefBytes);
+            expect(JSON.parse(emptyStreamedBytes)).toEqual([]);
+
+            // Single-frame case.
+            const singleDir = join(dir, 'single');
+            await mkdir(singleDir, { recursive: true });
+            const singleJsonl = join(singleDir, 'replay_sequence.jsonl');
+            const singleRow = buildReplayFrameRow(makeState(42), 41);
+            const singleJsonlStream = createWriteStream(singleJsonl, { flags: 'w' });
+            singleJsonlStream.write(JSON.stringify(singleRow) + '\n');
+            singleJsonlStream.end();
+            await new Promise<void>((resolve, reject) => {
+                singleJsonlStream.on('finish', resolve).on('error', reject);
+            });
+            const singleStreamedPath = await streamFinalizeReplaySaveSequenceFromJsonl(singleDir, singleJsonl);
+            const singleStreamedBytes = await readFile(singleStreamedPath, 'utf8');
+            const singleRefDir = join(dir, 'single-ref');
+            const singleRefPath = await finalizeReplaySaveSequence(singleRefDir, [singleRow]);
+            const singleRefBytes = await readFile(singleRefPath, 'utf8');
+            expect(singleStreamedBytes).toBe(singleRefBytes);
+            const parsed = JSON.parse(singleStreamedBytes) as Array<{ meta: { turn: number } }>;
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0].meta.turn).toBe(42);
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
     });
 });
