@@ -2337,5 +2337,292 @@
       }
     ],
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4 (stretch ahistorical what-if). Decision event; bot uses strategic_weighted. Faction-agnostic predicate; responding_faction defaults to RBiH because the question presupposes the multi-ethnic civic state. AUDIT-ONLY framing per spec — annotation is the reckoning surface; no rupture wiring, no OOB, no political_controllers touch. Stretch counterfactual: a partition referendum was proposed but never put in any historical Bosnian war negotiation (Holbrooke, 'To End a War', 1998); this event represents a non-historical branch."
+  },
+  {
+    "id": "csq_arms_pipeline_disrupted",
+    "title": "The Pipeline Goes Quiet",
+    "narrative": "The route that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. Combat units rotating through the depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RS", "threshold": 35 },
+          { "type": "flag_at_least", "flag": "patron_arms_review_active", "min": 1 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Arms pipeline disrupted; equipment quality and recruitment both register the shortfall."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RS", "multiplier": 0.92, "duration_turns": 30 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.95, "duration_turns": 30 },
+      { "kind": "cost_ledger_annotation", "tag": "arms_pipeline_disrupted", "text": "Arms pipeline disrupted under supply<35 and patron_arms_review_active. Equipment quality -8% and recruitment -5% for 30 turns; reflects compounded patron-distance + supply-shortfall regime." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -5 }
+    ],
+    "sets_flags": {
+      "arms_pipeline_disrupted_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (equipment-flow chain). Predicate chains on the existing patron_arms_review writer (csq_patron_arms_review_imposed). Mirror inversion of csq_patron_equipment_delivery_confirmed: same substrate (equipment_quality_modifier reuse from event 658241df), opposite sign. Faction-agnostic predicate; authored RS by default because the equipment-pipeline asymmetry was historically most acute for VRS munitions reliance on Belgrade. Mirrors documented embargo-tightening patterns 1993-1994 (BB II Ch.30, Vrabec arms-flow research)."
+  },
+  {
+    "id": "csq_captured_equipment_windfall",
+    "title": "The Captured Stockpile",
+    "narrative": "A successful operation closes around a depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign cyrillic, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "major_operation_success", "min": 1 },
+          { "type": "territory_loss_window", "faction": "RS", "min_loss_pct": 0.02, "window_turns": 6 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Captured equipment from a successful operation provides a short-window combat-power uplift."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 1.06, "duration_turns": 20 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "captured_equipment_windfall", "text": "Captured equipment windfall under major_operation_success and territory_loss_window(RS,2%). Equipment quality +6% for 20 turns; small morale uplift to reflect operational momentum." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": 4 }
+    ],
+    "sets_flags": {
+      "captured_equipment_windfall_active": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (equipment-flow chain). Predicate chains on a major-op-success flag (writer in operation_completion paths). Faction-agnostic; authored RBiH by default — the historical asymmetry of capture-from-VRS dominated, but the predicate fires for any responding faction in principle. Mirrors documented ARBiH capture patterns from late-1994 / 1995 corps offensives (Hoare, 'How Bosnia Armed', 2004; BB II Ch.49)."
+  },
+  {
+    "id": "csq_post_dayton_arms_normalization",
+    "title": "The Manifests Run Clean",
+    "narrative": "After the agreement the arms paperwork that had been laundered through humanitarian cover or quietly looked-past begins running through proper customs. The headline numbers do not change much; the reliability does. Spare parts arrive on schedule. Calibres that had been rationed appear in adequate quantities. The change is bureaucratic, not heroic, but the depots register it and the front follows by the second quarter.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 140,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "post_dayton_phase", "min": 1 },
+          { "type": "dimension_above", "faction": "RBiH", "dimension": "international_standing", "threshold": 50 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Post-Dayton arms normalization; equipment quality and patron confidence both stabilize."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 1.04, "duration_turns": 30 },
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 10 },
+      { "kind": "cost_ledger_annotation", "tag": "post_dayton_arms_normalization", "text": "Post-Dayton arms normalization under post_dayton_phase and dimension_above(international_standing,50). Equipment quality +4% for 30 turns; supply +10. Reflects the documented late-1995 / 1996 train-and-equip pipeline normalization." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "international_standing", "delta": 4 },
+      { "faction": "RBiH", "dimension": "patron_confidence", "delta": 4 }
+    ],
+    "sets_flags": {
+      "post_dayton_arms_normalization_active": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (equipment-flow chain, late-war). Predicate chains on post_dayton_phase writer (set in scenario late-game phase machinery). Reuses equipment_quality_modifier substrate from event 658241df. Faction-agnostic; authored RBiH by default to mirror the documented post-Dayton US train-and-equip program (Holbrooke, 'To End a War', 1998; BB II Ch.61)."
+  },
+  {
+    "id": "csq_back_channel_communication",
+    "title": "The Quiet Line",
+    "narrative": "A regular channel opens between two capitals — not formal, not announced, not even acknowledged when journalists ask. Liaisons travel under other titles. Drafts circulate. The substance is mundane: scheduling, deconfliction, an exchange of intent. The mediators register the channel without comment. It is not yet a track; it is the precondition for one.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "patron_pressure_above", "faction": "RBiH", "threshold": 15 },
+          { "type": "dimension_above", "faction": "RBiH", "dimension": "patron_confidence", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "back_channel_active" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "A back-channel communication line opens with the patron capital; leverage accrues quietly."
+    },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 },
+      { "kind": "alliance_lock", "mode": "floor", "value": 0.15, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "back_channel_communication", "text": "Back-channel communication established under patron_pressure>15 and patron_confidence>50. Negotiating leverage +5 and soft alliance floor 0.15 for 25 turns; reflects deconflicting cooperation rather than partnership revival." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 },
+      { "faction": "RBiH", "dimension": "patron_confidence", "delta": 3 }
+    ],
+    "sets_flags": {
+      "back_channel_active": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (negotiation/diplomatic chain). Faction-agnostic predicate; authored RBiH by default to mirror the documented Bosnian-American back-channel patterns 1993-1995 (Holbrooke, 'To End a War', 1998; Burg & Shoup, 2000). The soft alliance floor reflects deconflicting cooperation rather than full partnership revival."
+  },
+  {
+    "id": "csq_third_party_mediation_offered",
+    "title": "The Third-Party Mediator",
+    "narrative": "A nation with no direct stake in the war — distant, well-resourced, signalling its diplomatic ambition — offers itself as a third-party mediator. The standing mediators are tired; the major capitals are distracted. The offer is genuine but the price is the framing it would impose. The decision is whether to engage or hold to the existing tracks.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 130,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_below", "value": 0.40 },
+          { "type": "dimension_below", "faction": "RBiH", "dimension": "international_standing", "threshold": 45 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 45,
+    "responding_faction": "RBiH",
+    "requires_player_response": true,
+    "bot_response_logic": "strategic_weighted",
+    "effect": {
+      "kind": "narrative",
+      "text": "A third-party mediator offers to enter the negotiations; a binding response is required."
+    },
+    "effects": [
+      { "kind": "cost_ledger_annotation", "tag": "third_party_mediation_offered", "text": "Third-party mediation offered under alliance_below(0.40) and dimension_below(international_standing,45). AUDIT-ONLY: this annotation is the reckoning surface only; engagement / refusal does not flip rupture wiring or unlock §6 paths." }
+    ],
+    "response_options": [
+      {
+        "id": "engage_mediator",
+        "label": "Engage the third-party mediator",
+        "description": "Trade internal cohesion for international credibility and a fresh diplomatic track.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 7 },
+          { "kind": "cohesion_change", "faction": "RBiH", "delta": -3 },
+          { "kind": "cost_ledger_annotation", "tag": "third_party_mediation_engaged", "text": "Third-party mediator engaged; cohesion traded for international credibility." }
+        ],
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "international_standing", "delta": 5 },
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -3 }
+        ],
+        "sets_flags": { "third_party_mediation_engaged": true },
+        "aggression_affinity": -0.3,
+        "risk_level": 0.5
+      },
+      {
+        "id": "decline_mediator",
+        "label": "Decline; hold to existing tracks",
+        "description": "Refuse the third-party frame; preserve internal cohesion.",
+        "effects": [
+          { "kind": "cost_ledger_annotation", "tag": "third_party_mediation_declined", "text": "Third-party mediation declined; existing negotiating tracks preserved." }
+        ],
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 },
+          { "faction": "RBiH", "dimension": "international_standing", "delta": -2 }
+        ],
+        "sets_flags": { "third_party_mediation_declined": true },
+        "aggression_affinity": 0.2,
+        "risk_level": 0.3
+      }
+    ],
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (negotiation/diplomatic chain). Decision event; bot uses strategic_weighted. Faction-agnostic predicate; responding_faction defaults to RBiH because the historical mediation initiatives were primarily RBiH-facing. AUDIT-ONLY framing per spec — annotation is the reckoning surface; no rupture wiring, no political_controllers touch. Mirrors the documented third-party mediation overtures of Iran, Turkey, and the OIC during 1993-1994 (Burg & Shoup, 2000; Bougarel, 'Survivre aux empires', 2015)."
+  },
+  {
+    "id": "csq_doctrine_reform_initiated",
+    "title": "The Doctrine Reform",
+    "narrative": "The corps that had been improvising for two years initiates a formal doctrine review. Manuals are translated, training cycles formalized, NCO certification standards drafted. The reform is partial — the war has not stopped — but the institution upgrades visibly. Recruitment offices report an uplift in volunteer quality; the existing ranks register the improvement in cohesion within a quarter.",
+    "category": "command",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_above", "faction": "RBiH", "dimension": "internal_cohesion", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_RBiH", "min": 30 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Doctrine reform initiated under high-cohesion / cumulative-casualty conditions; recruitment quality and cohesion both uplift."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 1.08, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "doctrine_reform_initiated", "text": "Doctrine reform initiated under cohesion>55 and cumulative_casualties>30. Recruitment +8% for 25 turns; cohesion +3 to reflect institutional consolidation under sustained casualty pressure." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": 4 },
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 3 }
+    ],
+    "sets_flags": {
+      "doctrine_reform_initiated_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (doctrine/operational chain). Faction-agnostic predicate; authored RBiH by default to mirror the documented 1994-1995 ARBiH professionalization (corps reorganization, NCO program, train-and-equip preparation). Hoare, 'How Bosnia Armed' (2004); BB II Ch.48-50."
+  },
+  {
+    "id": "csq_corps_reorganization_attempted",
+    "title": "The Corps Is Re-Drawn",
+    "narrative": "Corps boundaries that had been improvised in 1992 are formally re-drawn. Brigades are renumbered; subordination chains shifted; sectors re-allocated. The reorganization is doctrinally correct and operationally disruptive. For one quarter the cohesion column thins as units adjust to new commanders. For the quarter after, the recruitment column ticks up as the new structure absorbs replacements more cleanly.",
+    "category": "command",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 55 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "corps_reorganization_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Corps reorganization attempted under sustained exhaustion; short-term cohesion drain, longer-term recruitment uplift."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -5 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 1.05, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "corps_reorganization_attempted", "text": "Corps reorganization attempted under war_exhaustion>55 and morale_avg<45. Cohesion -5 short-term to reflect chain-of-command disruption; recruitment +5% for 25 turns to reflect institutional clean-up." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -5 },
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": 2 }
+    ],
+    "sets_flags": {
+      "corps_reorganization_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5 (doctrine/operational chain). Predicate: extended high-exhaustion + low morale, non-recurring (mutex via corps_reorganization_active flag). Faction-agnostic; authored HRHB by default to mirror the documented HVO 1994 reorganization following the Washington Agreement (BB II Ch.42; Burg & Shoup, 2000). Short-term cohesion drain reflects subordination-chain disruption; longer-term recruitment uplift reflects post-reform absorption."
   }
 ]
