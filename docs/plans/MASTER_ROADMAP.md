@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-04 (post-trip Wave 1 — Q-CANON-RUPT-4 Path d + Force-Quality Gap 1 shipped on `0bd5a938`)
+**Last Updated:** 2026-05-04 (post-trip Wave 2 — Mission C A0 Tarjan with G1+G2+G3 gates shipped on `a60d39c9`; v0.9.3 supply-osid CLOSED)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."

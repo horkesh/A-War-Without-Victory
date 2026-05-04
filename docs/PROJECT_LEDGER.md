@@ -1,3 +1,49 @@
+## [2026-05-04] Wave 2: Mission C A0 Tarjan retry shipped clean (the 4th supply-osid attempt)
+
+**Commit:** `a60d39c9` perf(supply): replace per-edge BFS-removal with single-pass Tarjan in deriveCorridorsOsid (LANE-NIGHTSHIFT-SUPPLY-OSID-A0-TARJAN-WITH-GATES).
+
+**Type:** Engine perf optimization. Replaces O(E²) per-edge BFS-removal with O(V+E) iterative-DFS Tarjan biconnected-components/bridge-finding in `src/state/supply_state_derivation.ts:findBridgesInSubgraphOsid`. Target: largest single hot phase per R2-4 baseline (supply-osid 562ms/turn, 18.2% of total). Faction-agnostic. Hash-identity binding gate.
+
+**This is the 4th supply-osid optimization attempt:**
+1. Mission C original Tarjan (trip session 3): rolled back on hash drift; no property test, no parity wrapper, no gates.
+2. A1 region-keyed cache (Wave 1, this session): STOP-AND-ASK; BiH static graph 1-SCC topology refuted partition assumption.
+3. (no third standalone attempt — A1 STOP closed cleanly)
+4. **A0 Tarjan retry with G1+G2+G3 gates** (this commit): the structural difference is the gate set.
+
+**3 binding pre-merge gates (all GREEN before commit):**
+- **G1 — Property test:** `tests/supply_bridge_finding_property.test.ts` runs 10,000 randomized BiH-shape graph trials (deterministic LCG seed; planar ~700 vertices, ~2000 edges; varies connected-component count; includes enclave-like multi-component subgraphs Goražde/Žepa/Sarajevo/Bihać). Each trial asserts `bridgeSet(legacy) === bridgeSet(Tarjan)` (set equality + per-edge classification identity). 10,000/10,000 GREEN at 197s.
+- **G2 — Production parity wrapper:** `findBridgesInSubgraphOsidWithParity` wraps Tarjan output behind `SUPPLY_BRIDGE_PARITY_CHECK=true` env flag. When set, every call also runs the legacy implementation and asserts output identity; throws with full graph dump on mismatch. Default off (no production cost). Verified opt-in on `supply_state_derivation_cache.test.ts` 4/4 GREEN under flag.
+- **G3 — Hash-identity smoke:** 40w smoke n1632 (pre-Tarjan baseline at HEAD `bb4dd7ae`) hash `45530f5fba46905a`; n1633 (post-Tarjan) hash `45530f5fba46905a`. **Byte-identical.**
+
+**Determinism plumbing:** root iteration via `[...reachableNodes].sort(strictCompare)`; neighbor iteration via C1-memoized adjacency (already strictCompare-sorted); iterative DFS (no recursion stack risk); multi-component-safe outer loop.
+
+**Files changed (3):**
+- `src/state/supply_state_derivation.ts` — added `findBridgesInSubgraphOsid` (Tarjan, iterative DFS), `findBridgesInSubgraphOsidWithParity` (G2 wrapper); legacy retained as `isBridgeInSubgraphOsidLegacy` for parity comparator; `__test_*` re-exports for G1
+- `tests/supply_bridge_finding_tarjan.test.ts` (NEW): 9 small-graph correctness cases (triangle, path, square, square+tail, two-triangles-bridge, disjoint components, isolated reachable, edges-with-unreachable-side filter, enclave-shape parity)
+- `tests/supply_bridge_finding_property.test.ts` (NEW): G1 10,000-trial property test with deterministic LCG-seeded BiH-shape generator + 700-vertex stress trial
+
+**Verification:**
+- 9/9 small-graph correctness GREEN
+- G1: 10,000/10,000 property trials GREEN (197s)
+- G2: parity wrapper opt-in 4/4 GREEN
+- G3: hash byte-identical (`45530f5fba46905a` pre/post)
+- 80/80 supply regression GREEN (10 suites)
+- 226/226 sector regression GREEN (26 suites)
+- npx tsc --noEmit clean
+
+**Roadmap delta:**
+- v0.9.3 Performance: OPENED-WITH-AUDIT + GAP-1-OBSERVABILITY → **v0.9.3 SUPPLY-OSID-CLOSED**. Largest hot phase from R2-4 baseline now optimized with byte-identical hash. Bot-orders pipeline (562ms second-largest hot phase) and sector-reconciliation cluster remain as future perf lanes.
+
+**Sensitive-history compliance:** No engine logic changes that affect bots/calibration; pure algorithmic substitution. Faction-agnostic. No FORAWWV / sensitive-history surface touch.
+
+**Successor handoffs:**
+- v0.9.3 Performance: bot-orders pipeline optimization (562ms combined corps + brigade orders); sector-reconciliation cluster (22.6s aggregate)
+- G2 parity wrapper provides ongoing safety net for future supply-osid changes — every supply-graph mutation can opt in via env flag during dev/CI
+
+**Lesson durable:** When optimizing a hot phase that previously failed at hash-identity, the structural fix is **gate discipline**, not algorithm choice. G1 (10k property trials) catches edge-case divergence the original Mission C Tarjan attempt never tested. G2 (parity wrapper) provides production safety net for future regression detection. G3 (hash-identity smoke) is the binding ship gate. Algorithm choice (Tarjan vs region cache vs worker thread) is secondary to this gate set.
+
+---
+
 ## [2026-05-04] Trip session 3 closeout follow-ups + Wave 1 post-trip lanes
 
 **Type:** Multi-commit closeout chain after the trip session 3 nightshift. Mix of bug fixes, research deliverables, and follow-up implementations. All Ring 1 / no §6 sign-off required (Q-CANON-RUPT-4 lane resolved a §6 question via canon clarification, NOT engine relaxation).
