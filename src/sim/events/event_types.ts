@@ -55,7 +55,30 @@ export type EventCondition =
         comparator: 'less_than';
         baseline?: number;
         baseline_drop?: number;
-    };
+    }
+    // ─── LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (additive Ring 1, faction-agnostic) ──
+    /**
+     * Alliance-drift predicate. True when current RBiH-HRHB alliance ≤ `value`.
+     * Optional `min_recent_drop` additionally requires (canonical_initial − current) ≥ min_recent_drop,
+     * where canonical_initial is the implicit alliance baseline of 1.0. Stateless / deterministic.
+     * Faction-agnostic in the sense that the alliance is between the two non-RS factions and is
+     * the only first-class alliance modeled by the engine.
+     */
+    | { type: 'alliance_drift'; value: number; min_recent_drop?: number }
+    /**
+     * Territory-loss window predicate. True when `faction`'s area-weighted share dropped by
+     * at least `min_loss_pct` (fractional, e.g. 0.05 = 5%) over the last `window_turns`.
+     * Reads `state.turn_summaries[]` (most-recent-first; engine retains last 3 by canon).
+     * Returns false when history is shallower than the window (conservative deterministic miss).
+     */
+    | { type: 'territory_loss_window'; faction: FactionId; min_loss_pct: number; window_turns: number }
+    /**
+     * Cumulative displaced-in aggregate predicate. True when the faction-aligned cumulative
+     * displaced-in count across all municipalities is ≥ `threshold`. Reads
+     * `state.displacement.displacement_state[*].displaced_in_by_faction[faction]`.
+     * Faction-agnostic predicate; integer comparison; deterministic.
+     */
+    | { type: 'displaced_in_aggregate'; faction: FactionId; threshold: number };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -604,6 +627,45 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
                 if (!((condition.baseline - a) >= condition.baseline_drop)) return false;
             }
             return true;
+        }
+        case 'alliance_drift': {
+            const current = state.political?.war_alliance_rbih_hrhb ?? 1.0;
+            if (!(current <= condition.value)) return false;
+            if (condition.min_recent_drop != null) {
+                // Canonical initial alliance value is 1.0; treat as the implicit baseline.
+                const drop = 1.0 - current;
+                if (!(drop >= condition.min_recent_drop)) return false;
+            }
+            return true;
+        }
+        case 'territory_loss_window': {
+            const summaries = state.turn_summaries ?? [];
+            if (summaries.length === 0) return false;
+            // turn_summaries are stored most-recent-first; index 0 = latest.
+            const latest = summaries[0];
+            const latestSnap = latest.territory_snapshot?.[condition.faction];
+            if (latestSnap == null) return false;
+            // Pick the oldest entry inside the window, falling back to oldest available.
+            const windowIdx = Math.min(condition.window_turns, summaries.length - 1);
+            if (windowIdx <= 0) return false;
+            const past = summaries[windowIdx];
+            const pastSnap = past.territory_snapshot?.[condition.faction];
+            if (pastSnap == null) return false;
+            const loss = pastSnap - latestSnap;
+            return loss >= condition.min_loss_pct;
+        }
+        case 'displaced_in_aggregate': {
+            const dispMap = state.displacement?.displacement_state;
+            if (!dispMap) return false;
+            let total = 0;
+            for (const munId of Object.keys(dispMap).sort()) {
+                const ds = dispMap[munId];
+                const byFaction = ds?.displaced_in_by_faction;
+                if (!byFaction) continue;
+                const v = byFaction[condition.faction];
+                if (typeof v === 'number' && Number.isFinite(v)) total += v;
+            }
+            return total >= condition.threshold;
         }
         case 'corridor_severed': {
             // BFS from from_osid to to_osid through faction-controlled territory

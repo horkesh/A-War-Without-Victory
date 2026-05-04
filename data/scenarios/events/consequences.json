@@ -1422,5 +1422,449 @@
       "predictor_confidence_haircut": -0.05
     },
     "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Static baseline 0.55 reflects scenario-init RS officer_quality (CALIBRATION_MASTER, Memory 'officer quality faction defaults'). Faction-agnostic predicate authored with RS<-RBiH for the historical dominant-side; alt orientations can be added downstream. Predictor-confidence haircut consumed via the `predictor_confidence_haircut` flag."
+  },
+  {
+    "id": "csq_alliance_drift_silent_w20",
+    "title": "The Silent Drift",
+    "narrative": "No declaration, no incident — the alliance simply thins. Joint patrols stop coordinating. Liaison officers are reassigned without replacements. The press communiqués grow shorter. By any measurable count the partnership still exists; in the practice of it the trust has gone elsewhere. Capitals on both sides note the change and adjust their expectations downward.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 20,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_drift", "value": 0.40, "min_recent_drop": 0.20 },
+          { "type": "flag_not_set", "flag": "rbih_hrhb_war_active" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH-HRHB cooperation thins without an open break."
+    },
+    "effects": [
+      { "kind": "alliance_lock", "mode": "ceiling", "value": 0.45, "duration_turns": 30 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -2 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -2 },
+      { "kind": "cost_ledger_annotation", "tag": "silent_alliance_decay", "text": "RBiH-HRHB cooperation drifted below 0.40 with measurable recent erosion; ceiling-locked for 30 turns." }
+    ],
+    "sets_flags": {
+      "alliance_silent_drift": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (alliance/diplomacy A1). Predicate uses additive `alliance_drift` condition kind. Faction-agnostic; alliance is intrinsically RBiH-HRHB. Mirrors pre-Croat-Bosniak-war 1992-1993 erosion documented in Burg & Shoup (2000) and CIA 'Balkan Battlegrounds' I p.157-160."
+  },
+  {
+    "id": "csq_joint_command_collapse",
+    "title": "The Joint Command Comes Apart",
+    "narrative": "What had been signed on paper at Sarajevo and reaffirmed in Mostar is now, at the working level, a fiction. Shared objectives are dropped from operational orders. Liaison teams pack their files. The supply ledgers — once cross-credited between corps — are returned to single accounts. The collapse is administrative before it is military, but the military follows.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 25,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "joint_operations_agreement_active", "value": true },
+          { "type": "alliance_below", "value": 0.30 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Joint RBiH-HRHB command structure is unwound."
+    },
+    "effects": [
+      { "kind": "alliance_lock", "mode": "floor", "value": -1.0, "duration_turns": 20 },
+      { "kind": "bot_priority_shift", "faction": "RBiH", "remove_objectives": ["joint_operations", "shared_corridor_defense"], "duration_turns": 20 },
+      { "kind": "bot_priority_shift", "faction": "HRHB", "remove_objectives": ["joint_operations", "shared_corridor_defense"], "duration_turns": 20 },
+      { "kind": "supply_delta", "faction": "RBiH", "delta": -15 },
+      { "kind": "supply_delta", "faction": "HRHB", "delta": -15 },
+      { "kind": "cost_ledger_annotation", "tag": "joint_command_collapse", "text": "Joint RBiH-HRHB operations agreement collapsed; shared objectives stripped for 20 turns." }
+    ],
+    "sets_flags": {
+      "joint_command_collapsed": true,
+      "joint_operations_agreement_active": false
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (alliance/diplomacy A2). Floor lock at -1.0 effectively clears any prior alliance_lock floor (overriding instead of mutating). Mirrors the operational collapse of HVO-ARBiH cooperation winter 1992-1993."
+  },
+  {
+    "id": "csq_separate_peace_overture",
+    "title": "Separate Peace Overture",
+    "narrative": "A back-channel draft circulates from one capital to the other, and to the mediators. The terms are bilateral. The other partner is not in the room. Negotiating leverage shifts to the faction that holds the initiative; the partner left outside notes the precedent.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 50,
+      "turn_max": 110,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "peace_plan_offered", "value": true },
+          { "type": "flag_at_least", "flag": "peace_plan_acceptance_gap", "min": 25 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 40,
+    "responding_faction": "RBiH",
+    "requires_player_response": true,
+    "bot_response_logic": "strategic_weighted",
+    "effect": {
+      "kind": "narrative",
+      "text": "One faction quietly offers a separate peace; the other is not in the room."
+    },
+    "effects": [
+      { "kind": "cost_ledger_annotation", "tag": "separate_peace_overture", "text": "Bilateral peace overture circulated under flag_equals(peace_plan_offered) with acceptance-gap >=25." }
+    ],
+    "response_options": [
+      {
+        "id": "press_bilateral",
+        "label": "Press the bilateral track",
+        "description": "Trade alliance for negotiating leverage.",
+        "effects": [
+          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 8 },
+          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+        ],
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 8 },
+          { "faction": "RBiH", "dimension": "patron_confidence", "delta": -5 }
+        ],
+        "sets_flags": { "separate_peace_pursued": true },
+        "aggression_affinity": 0.2,
+        "risk_level": 0.6
+      },
+      {
+        "id": "decline_overture",
+        "label": "Decline; keep the partnership intact",
+        "description": "Hold the alliance line; refuse the bilateral track.",
+        "effects": [
+          { "kind": "cost_ledger_annotation", "tag": "separate_peace_declined", "text": "Bilateral overture declined; alliance partnership preserved." }
+        ],
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 }
+        ],
+        "sets_flags": { "separate_peace_declined": true },
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2
+      }
+    ],
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (alliance/diplomacy A3). Decision event; bot uses strategic_weighted. Mirrors back-channel patterns around Vance-Owen and Owen-Stoltenberg negotiations 1993."
+  },
+  {
+    "id": "csq_alliance_revival_after_hostility",
+    "title": "Cooperation Returns",
+    "narrative": "After the hostility recedes the practical reasons for working together return faster than the trust does. Joint patrols are scheduled tentatively, then routinely. Mediators note quiet visits between capitals. Neither side calls it a revival; both sides act as if the partnership had never quite been retired.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_above", "value": 0.30 },
+          { "type": "flag_at_least", "flag": "alliance_low_water_mark_below_0_10", "min": 1 },
+          { "type": "flag_not_set", "flag": "rbih_hrhb_war_active" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH-HRHB cooperation reasserts itself after a hostile interlude."
+    },
+    "effects": [
+      { "kind": "alliance_lock", "mode": "floor", "value": 0.20, "duration_turns": 20 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": 3 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "alliance_revival_after_hostility", "text": "Alliance recovered above 0.30 after a prior low-water mark <0.10; floor-locked at 0.20 for 20 turns." }
+    ],
+    "sets_flags": {
+      "alliance_revived_after_hostility": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (alliance/diplomacy A4). Mirrors the Washington Agreement / Federation rebuild pattern of 1994. The `alliance_low_water_mark_below_0_10` flag is the existing watermark counter set by alliance_update.ts."
+  },
+  {
+    "id": "csq_patron_arms_review_imposed",
+    "title": "The Arms Review Comes Down",
+    "narrative": "The patron has run out of patient briefings. A formal arms review is announced — not a cutoff, but a procedural slowdown that reaches every depot and every transit lane. Mobilization officers will spend the next quarter explaining missing inventories. The message is clear: comply or be cut.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 15,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "patron_resist_streak", "min": 2 },
+          { "type": "dimension_below", "faction": "RS", "dimension": "patron_confidence", "threshold": 40 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Patron imposes a formal arms review; supply throughput slows."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.90, "duration_turns": 15 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -20 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_arms_review_imposed", "text": "Patron arms review imposed after sustained resistance and patron_confidence <40." }
+    ],
+    "sets_flags": {
+      "patron_arms_review_active": true,
+      "patron_arms_review_imposed_turn": 1
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B1). Threshold values follow plan §3 (patron_resist_streak >=2, patron_confidence <40, turn >=15). Faction-agnostic predicate applied to RS for canonical Belgrade arms-review pattern August 1994."
+  },
+  {
+    "id": "csq_patron_disavowal_partial",
+    "title": "Partial Disavowal",
+    "narrative": "The patron stops short of a public break — but the formal language hardens. Diplomatic representatives in capitals abroad are pulled back; sanctions cooperation widens; the public statements draw a careful distance. International standing improves on one side, declines on the other. The flow of arms and recruits both feel the chill.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 25,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "patron_arms_review_active", "value": true },
+          { "type": "flag_at_least", "flag": "patron_resist_streak", "min": 4 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Patron issues partial disavowal; arms review tightens."
+    },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RS", "delta": -20 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.80, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_partial_disavowal", "text": "Patron issued partial disavowal after sustained arms-review resistance." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "international_standing", "delta": -5 },
+      { "faction": "RS", "dimension": "patron_confidence", "delta": -20 },
+      { "faction": "RBiH", "dimension": "international_standing", "delta": 5 }
+    ],
+    "sets_flags": {
+      "patron_partial_disavowal": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B2). Mirrors Belgrade-Pale partial break August 1994 (FRY closure of Drina border for non-humanitarian goods)."
+  },
+  {
+    "id": "csq_patron_recovery_offer",
+    "title": "Patron Recovery Offer",
+    "narrative": "The patron's emissary returns with terms: structural concessions in exchange for a managed recovery of the relationship. Acceptance buys back arms, briefings, and the soft cover of recognized backing. Refusal locks in the disavowal. Either way the choice is binding for the rest of the war.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 45,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "patron_partial_disavowal",
+        "value": true
+      }
+    },
+    "once": true,
+    "priority": 40,
+    "responding_faction": "RS",
+    "requires_player_response": true,
+    "bot_response_logic": "historical",
+    "effect": {
+      "kind": "narrative",
+      "text": "Patron offers terms for recovery of the relationship."
+    },
+    "effects": [
+      { "kind": "cost_ledger_annotation", "tag": "patron_recovery_offer", "text": "Patron recovery offer extended after partial disavowal; binding choice." }
+    ],
+    "response_options": [
+      {
+        "id": "accept_recovery",
+        "label": "Accept the terms",
+        "description": "Recover patron confidence; lock cohesion ceiling.",
+        "effects": [
+          { "kind": "patron_pressure", "faction": "RS", "delta": 12 }
+        ],
+        "dimension_shifts": [
+          { "faction": "RS", "dimension": "patron_confidence", "delta": 12 },
+          { "faction": "RS", "dimension": "internal_cohesion", "delta": -3 }
+        ],
+        "sets_flags": { "patron_recovery_accepted": true, "patron_cohesion_ceiling_locked": true },
+        "aggression_affinity": -0.1,
+        "risk_level": 0.3
+      },
+      {
+        "id": "refuse_recovery",
+        "label": "Refuse; carry the disavowal",
+        "description": "Lock in the partial disavowal; preserve internal autonomy.",
+        "effects": [
+          { "kind": "cost_ledger_annotation", "tag": "patron_recovery_refused", "text": "Patron recovery offer refused; partial disavowal locked in." }
+        ],
+        "dimension_shifts": [
+          { "faction": "RS", "dimension": "patron_confidence", "delta": -8 },
+          { "faction": "RS", "dimension": "internal_cohesion", "delta": 2 }
+        ],
+        "sets_flags": { "patron_recovery_refused": true, "patron_confidence_floor_locked": true },
+        "aggression_affinity": 0.4,
+        "risk_level": 0.7
+      }
+    ],
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to historical (which here is acceptance under Milosevic 1995 pressure)."
+  },
+  {
+    "id": "csq_industrial_conscription_wave",
+    "title": "Industrial Conscription Wave",
+    "narrative": "The exhaustion of the front pushes the rear into emergency mobilization. Factories release their reserved categories. Universities suspend exemptions. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 40,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 35 },
+          { "type": "territory_loss_window", "faction": "RBiH", "min_loss_pct": 0.05, "window_turns": 30 },
+          { "type": "flag_not_set", "flag": "industrial_wave_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Industrial conscription wave imposed under exhaustion and territorial loss."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 1.20, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "industrial_conscription_wave", "text": "RBiH industrial conscription wave imposed: war_exhaustion >35, territory_loss_30day >=5%." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -8 }
+    ],
+    "sets_flags": {
+      "industrial_wave_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (mobilization C1). Predicate uses additive `territory_loss_window` condition reading turn_summaries[*].territory_snapshot. Mirrors ARBiH 1993-1994 industrial mobilization expansion under territorial pressure."
+  },
+  {
+    "id": "csq_demobilization_pressure_wave",
+    "title": "Demobilization Pressure Wave",
+    "narrative": "After a quiet quarter the families return to the streets and the patron capitals add their voice. The mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding. The war does not end; it slows.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 55 },
+          { "type": "patron_pressure_above", "faction": "RS", "threshold": 10 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RS", "min": 30 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Demobilization pressure wave: recruitment slows, aggression dampens."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.70, "duration_turns": 30 },
+      { "kind": "aggression_modifier", "faction": "RS", "delta": -0.10, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "demobilization_pressure_wave", "text": "Demobilization pressure wave imposed under exhaustion >0.55, patron pressure >=10, no major offensive 30 turns." }
+    ],
+    "sets_flags": {
+      "demobilization_wave_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (mobilization C2). Predicate uses existing `patron_pressure_above` and `flag_at_least` for window/exhaustion fields. Mirrors VRS 1995 manpower walk-back patterns documented in CIA Balkan Battlegrounds II Ch.55."
+  },
+  {
+    "id": "csq_grain_corridor_reopened",
+    "title": "Grain Corridor Reopened",
+    "narrative": "A long-disused supply lane reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 30,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "supply_route_open_grain_corridor", "value": true },
+          { "type": "flag_at_least", "flag": "turns_since_corridor_hostility", "min": 8 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Grain corridor reopened; supply flows resume."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_reopened", "text": "Grain corridor reopened with no hostility 8 turns; AUDIT-ONLY framing applies if corridor passes within 20 km of any enclave OSID (corridor route is canon-tracked elsewhere)." },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_enclave_proximity_audit", "text": "AUDIT-ONLY: corridor proximity to enclaves is recorded for downstream narrative reckoning. No mechanical effect; rupture wiring untouched.", "faction": "RBiH" }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "international_standing", "delta": 3 }
+    ],
+    "sets_flags": {
+      "grain_corridor_active": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (economic D1). AUDIT-ONLY framing per spec for any enclave-adjacent corridor; rupture/genocide wiring deliberately untouched. Mirrors UNHCR-coordinated humanitarian corridor reopens 1993-1994."
+  },
+  {
+    "id": "csq_refugee_absorption_strain",
+    "title": "Refugee Absorption Strain",
+    "narrative": "The numbers cross a threshold that the receiving faction's institutions have been warning about for months. Camps overspill into rented housing; municipal budgets divert from war administration to bread and shelter. The international press reports sympathetically. The internal politics splits between solidarity and exhaustion, and the cohesion of the absorbing side erodes by the same measure.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 25,
+      "phase": "war",
+      "condition": {
+        "type": "displaced_in_aggregate",
+        "faction": "RBiH",
+        "threshold": 100000
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Refugee absorption crosses 100,000 cumulative; institutional strain registers."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": -20 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -5 },
+      { "kind": "cost_ledger_annotation", "tag": "refugee_absorption_strain", "text": "RBiH cumulative displaced-in crossed 100,000; supply and cohesion strain registered." },
+      { "kind": "cost_ledger_annotation", "tag": "refugee_absorption_enclave_origin_audit", "text": "AUDIT-ONLY: when displaced-in origin OSID set intersects an enclave municipality, this annotation is the canonical reckoning surface; no rupture wiring touched.", "faction": "RBiH" }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -5 },
+      { "faction": "RBiH", "dimension": "international_standing", "delta": 5 }
+    ],
+    "sets_flags": {
+      "refugee_absorption_strain_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (economic D3). Predicate uses additive `displaced_in_aggregate` reading state.displacement.displacement_state[*].displaced_in_by_faction[faction]. AUDIT-ONLY enclave-origin framing per spec; rupture wiring untouched."
   }
 ]
