@@ -1,0 +1,2923 @@
+{
+  "schema_version": 1,
+  "run_id": "runs\\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1640",
+  "final_state_hash": "ef03ab4d6c5ecd28",
+  "captured_at_turn": 40,
+  "per_call_site": [
+    {
+      "site": "generateAllCorpsOrders",
+      "calls": 120,
+      "total_ms": 12379,
+      "total_us": 12379806,
+      "mean_us": 103165.05,
+      "max_ms": 226,
+      "min_us": 32308
+    },
+    {
+      "site": "generateAllBotOrdersOsid",
+      "calls": 40,
+      "total_ms": 9651,
+      "total_us": 9651409,
+      "mean_us": 241285.225,
+      "max_ms": 399,
+      "min_us": 174454
+    },
+    {
+      "site": "analyzeFactionGraph",
+      "calls": 120,
+      "total_ms": 7997,
+      "total_us": 7997253,
+      "mean_us": 66643.775,
+      "max_ms": 183,
+      "min_us": 10872
+    },
+    {
+      "site": "brigadeAI.analyzeFactionGraph",
+      "calls": 120,
+      "total_ms": 7910,
+      "total_us": 7910780,
+      "mean_us": 65923.16666666667,
+      "max_ms": 178,
+      "min_us": 11553
+    },
+    {
+      "site": "runCommanderForCorps",
+      "calls": 666,
+      "total_ms": 2179,
+      "total_us": 2179750,
+      "mean_us": 3272.897897897898,
+      "max_ms": 35,
+      "min_us": 209
+    },
+    {
+      "site": "executeFactionDirectives",
+      "calls": 120,
+      "total_ms": 1705,
+      "total_us": 1705003,
+      "mean_us": 14208.358333333334,
+      "max_ms": 40,
+      "min_us": 4673
+    },
+    {
+      "site": "buildBriefing",
+      "calls": 666,
+      "total_ms": 1118,
+      "total_us": 1118808,
+      "mean_us": 1679.8918918918919,
+      "max_ms": 22,
+      "min_us": 123
+    },
+    {
+      "site": "commander.decide",
+      "calls": 666,
+      "total_ms": 1052,
+      "total_us": 1052835,
+      "mean_us": 1580.8333333333333,
+      "max_ms": 12,
+      "min_us": 62
+    },
+    {
+      "site": "commander.emitCommanderOutput",
+      "calls": 666,
+      "total_ms": 389,
+      "total_us": 389361,
+      "mean_us": 584.6261261261261,
+      "max_ms": 7,
+      "min_us": 10
+    },
+    {
+      "site": "commander.assessSituation",
+      "calls": 666,
+      "total_ms": 387,
+      "total_us": 387611,
+      "mean_us": 581.9984984984985,
+      "max_ms": 4,
+      "min_us": 21
+    },
+    {
+      "site": "commander.makeDecisions",
+      "calls": 666,
+      "total_ms": 118,
+      "total_us": 118843,
+      "mean_us": 178.44294294294295,
+      "max_ms": 1,
+      "min_us": 4
+    },
+    {
+      "site": "commander.assembleBeliefState",
+      "calls": 666,
+      "total_ms": 65,
+      "total_us": 65549,
+      "mean_us": 98.42192192192192,
+      "max_ms": 1,
+      "min_us": 5
+    },
+    {
+      "site": "commander.managePlan",
+      "calls": 666,
+      "total_ms": 54,
+      "total_us": 54775,
+      "mean_us": 82.24474474474475,
+      "max_ms": 5,
+      "min_us": 1
+    },
+    {
+      "site": "commander.allocateBrigades",
+      "calls": 666,
+      "total_ms": 21,
+      "total_us": 21288,
+      "mean_us": 31.963963963963963,
+      "max_ms": 0,
+      "min_us": 3
+    },
+    {
+      "site": "applyCommanderOutput",
+      "calls": 666,
+      "total_ms": 5,
+      "total_us": 5020,
+      "mean_us": 7.5375375375375375,
+      "max_ms": 0,
+      "min_us": 1
+    }
+  ],
+  "per_faction": [
+    {
+      "site": "analyzeFactionGraph",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 4612,
+      "total_us": 4612180
+    },
+    {
+      "site": "analyzeFactionGraph",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 2472,
+      "total_us": 2472469
+    },
+    {
+      "site": "analyzeFactionGraph",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 912,
+      "total_us": 912602
+    },
+    {
+      "site": "applyCommanderOutput",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 1,
+      "total_us": 1976
+    },
+    {
+      "site": "applyCommanderOutput",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 1,
+      "total_us": 1660
+    },
+    {
+      "site": "applyCommanderOutput",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 1,
+      "total_us": 1382
+    },
+    {
+      "site": "brigadeAI.analyzeFactionGraph",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 4554,
+      "total_us": 4554840
+    },
+    {
+      "site": "brigadeAI.analyzeFactionGraph",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 2464,
+      "total_us": 2464588
+    },
+    {
+      "site": "brigadeAI.analyzeFactionGraph",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 891,
+      "total_us": 891350
+    },
+    {
+      "site": "buildBriefing",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 492,
+      "total_us": 492309
+    },
+    {
+      "site": "buildBriefing",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 401,
+      "total_us": 401726
+    },
+    {
+      "site": "buildBriefing",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 224,
+      "total_us": 224771
+    },
+    {
+      "site": "commander.allocateBrigades",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 8,
+      "total_us": 8755
+    },
+    {
+      "site": "commander.allocateBrigades",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 7,
+      "total_us": 7596
+    },
+    {
+      "site": "commander.allocateBrigades",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 4,
+      "total_us": 4936
+    },
+    {
+      "site": "commander.assembleBeliefState",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 29,
+      "total_us": 29370
+    },
+    {
+      "site": "commander.assembleBeliefState",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 25,
+      "total_us": 25251
+    },
+    {
+      "site": "commander.assembleBeliefState",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 10,
+      "total_us": 10926
+    },
+    {
+      "site": "commander.assessSituation",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 203,
+      "total_us": 203341
+    },
+    {
+      "site": "commander.assessSituation",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 135,
+      "total_us": 135239
+    },
+    {
+      "site": "commander.assessSituation",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 49,
+      "total_us": 49031
+    },
+    {
+      "site": "commander.decide",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 438,
+      "total_us": 438962
+    },
+    {
+      "site": "commander.decide",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 413,
+      "total_us": 413102
+    },
+    {
+      "site": "commander.decide",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 200,
+      "total_us": 200770
+    },
+    {
+      "site": "commander.emitCommanderOutput",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 180,
+      "total_us": 180398
+    },
+    {
+      "site": "commander.emitCommanderOutput",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 113,
+      "total_us": 113465
+    },
+    {
+      "site": "commander.emitCommanderOutput",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 95,
+      "total_us": 95498
+    },
+    {
+      "site": "commander.makeDecisions",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 56,
+      "total_us": 56631
+    },
+    {
+      "site": "commander.makeDecisions",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 45,
+      "total_us": 45046
+    },
+    {
+      "site": "commander.makeDecisions",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 17,
+      "total_us": 17165
+    },
+    {
+      "site": "commander.managePlan",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 40,
+      "total_us": 40406
+    },
+    {
+      "site": "commander.managePlan",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 12,
+      "total_us": 12881
+    },
+    {
+      "site": "commander.managePlan",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 1,
+      "total_us": 1487
+    },
+    {
+      "site": "executeFactionDirectives",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 753,
+      "total_us": 753700
+    },
+    {
+      "site": "executeFactionDirectives",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 688,
+      "total_us": 688772
+    },
+    {
+      "site": "executeFactionDirectives",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 262,
+      "total_us": 262530
+    },
+    {
+      "site": "generateAllBotOrdersOsid",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 9651,
+      "total_us": 9651409
+    },
+    {
+      "site": "generateAllCorpsOrders",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 6269,
+      "total_us": 6269583
+    },
+    {
+      "site": "generateAllCorpsOrders",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 4002,
+      "total_us": 4002303
+    },
+    {
+      "site": "generateAllCorpsOrders",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 2107,
+      "total_us": 2107919
+    },
+    {
+      "site": "runCommanderForCorps",
+      "faction": "RS",
+      "calls": 280,
+      "total_ms": 934,
+      "total_us": 934518
+    },
+    {
+      "site": "runCommanderForCorps",
+      "faction": "RBiH",
+      "calls": 228,
+      "total_ms": 817,
+      "total_us": 817726
+    },
+    {
+      "site": "runCommanderForCorps",
+      "faction": "HRHB",
+      "calls": 158,
+      "total_ms": 427,
+      "total_us": 427505
+    }
+  ],
+  "per_turn_series": [
+    {
+      "site": "analyzeFactionGraph",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 313
+        },
+        {
+          "turn": 2,
+          "ms": 306
+        },
+        {
+          "turn": 3,
+          "ms": 334
+        },
+        {
+          "turn": 4,
+          "ms": 318
+        },
+        {
+          "turn": 5,
+          "ms": 344
+        },
+        {
+          "turn": 6,
+          "ms": 314
+        },
+        {
+          "turn": 7,
+          "ms": 338
+        },
+        {
+          "turn": 8,
+          "ms": 338
+        },
+        {
+          "turn": 9,
+          "ms": 140
+        },
+        {
+          "turn": 10,
+          "ms": 334
+        },
+        {
+          "turn": 11,
+          "ms": 142
+        },
+        {
+          "turn": 12,
+          "ms": 149
+        },
+        {
+          "turn": 13,
+          "ms": 156
+        },
+        {
+          "turn": 14,
+          "ms": 349
+        },
+        {
+          "turn": 15,
+          "ms": 153
+        },
+        {
+          "turn": 16,
+          "ms": 149
+        },
+        {
+          "turn": 17,
+          "ms": 147
+        },
+        {
+          "turn": 18,
+          "ms": 148
+        },
+        {
+          "turn": 19,
+          "ms": 153
+        },
+        {
+          "turn": 20,
+          "ms": 157
+        },
+        {
+          "turn": 21,
+          "ms": 161
+        },
+        {
+          "turn": 22,
+          "ms": 158
+        },
+        {
+          "turn": 23,
+          "ms": 161
+        },
+        {
+          "turn": 24,
+          "ms": 152
+        },
+        {
+          "turn": 25,
+          "ms": 161
+        },
+        {
+          "turn": 26,
+          "ms": 164
+        },
+        {
+          "turn": 27,
+          "ms": 167
+        },
+        {
+          "turn": 28,
+          "ms": 165
+        },
+        {
+          "turn": 29,
+          "ms": 153
+        },
+        {
+          "turn": 30,
+          "ms": 156
+        },
+        {
+          "turn": 31,
+          "ms": 164
+        },
+        {
+          "turn": 32,
+          "ms": 165
+        },
+        {
+          "turn": 33,
+          "ms": 161
+        },
+        {
+          "turn": 34,
+          "ms": 162
+        },
+        {
+          "turn": 35,
+          "ms": 155
+        },
+        {
+          "turn": 36,
+          "ms": 153
+        },
+        {
+          "turn": 37,
+          "ms": 141
+        },
+        {
+          "turn": 38,
+          "ms": 158
+        },
+        {
+          "turn": 39,
+          "ms": 169
+        },
+        {
+          "turn": 40,
+          "ms": 170
+        }
+      ]
+    },
+    {
+      "site": "applyCommanderOutput",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 0
+        },
+        {
+          "turn": 2,
+          "ms": 0
+        },
+        {
+          "turn": 3,
+          "ms": 0
+        },
+        {
+          "turn": 4,
+          "ms": 0
+        },
+        {
+          "turn": 5,
+          "ms": 0
+        },
+        {
+          "turn": 6,
+          "ms": 0
+        },
+        {
+          "turn": 7,
+          "ms": 0
+        },
+        {
+          "turn": 8,
+          "ms": 0
+        },
+        {
+          "turn": 9,
+          "ms": 0
+        },
+        {
+          "turn": 10,
+          "ms": 0
+        },
+        {
+          "turn": 11,
+          "ms": 0
+        },
+        {
+          "turn": 12,
+          "ms": 0
+        },
+        {
+          "turn": 13,
+          "ms": 0
+        },
+        {
+          "turn": 14,
+          "ms": 0
+        },
+        {
+          "turn": 15,
+          "ms": 0
+        },
+        {
+          "turn": 16,
+          "ms": 0
+        },
+        {
+          "turn": 17,
+          "ms": 0
+        },
+        {
+          "turn": 18,
+          "ms": 0
+        },
+        {
+          "turn": 19,
+          "ms": 0
+        },
+        {
+          "turn": 20,
+          "ms": 0
+        },
+        {
+          "turn": 21,
+          "ms": 0
+        },
+        {
+          "turn": 22,
+          "ms": 0
+        },
+        {
+          "turn": 23,
+          "ms": 0
+        },
+        {
+          "turn": 24,
+          "ms": 0
+        },
+        {
+          "turn": 25,
+          "ms": 0
+        },
+        {
+          "turn": 26,
+          "ms": 0
+        },
+        {
+          "turn": 27,
+          "ms": 0
+        },
+        {
+          "turn": 28,
+          "ms": 0
+        },
+        {
+          "turn": 29,
+          "ms": 0
+        },
+        {
+          "turn": 30,
+          "ms": 0
+        },
+        {
+          "turn": 31,
+          "ms": 0
+        },
+        {
+          "turn": 32,
+          "ms": 0
+        },
+        {
+          "turn": 33,
+          "ms": 0
+        },
+        {
+          "turn": 34,
+          "ms": 0
+        },
+        {
+          "turn": 35,
+          "ms": 0
+        },
+        {
+          "turn": 36,
+          "ms": 0
+        },
+        {
+          "turn": 37,
+          "ms": 0
+        },
+        {
+          "turn": 38,
+          "ms": 0
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "brigadeAI.analyzeFactionGraph",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 313
+        },
+        {
+          "turn": 2,
+          "ms": 311
+        },
+        {
+          "turn": 3,
+          "ms": 320
+        },
+        {
+          "turn": 4,
+          "ms": 321
+        },
+        {
+          "turn": 5,
+          "ms": 332
+        },
+        {
+          "turn": 6,
+          "ms": 314
+        },
+        {
+          "turn": 7,
+          "ms": 342
+        },
+        {
+          "turn": 8,
+          "ms": 336
+        },
+        {
+          "turn": 9,
+          "ms": 138
+        },
+        {
+          "turn": 10,
+          "ms": 333
+        },
+        {
+          "turn": 11,
+          "ms": 142
+        },
+        {
+          "turn": 12,
+          "ms": 148
+        },
+        {
+          "turn": 13,
+          "ms": 149
+        },
+        {
+          "turn": 14,
+          "ms": 338
+        },
+        {
+          "turn": 15,
+          "ms": 157
+        },
+        {
+          "turn": 16,
+          "ms": 150
+        },
+        {
+          "turn": 17,
+          "ms": 147
+        },
+        {
+          "turn": 18,
+          "ms": 150
+        },
+        {
+          "turn": 19,
+          "ms": 153
+        },
+        {
+          "turn": 20,
+          "ms": 157
+        },
+        {
+          "turn": 21,
+          "ms": 160
+        },
+        {
+          "turn": 22,
+          "ms": 159
+        },
+        {
+          "turn": 23,
+          "ms": 151
+        },
+        {
+          "turn": 24,
+          "ms": 150
+        },
+        {
+          "turn": 25,
+          "ms": 154
+        },
+        {
+          "turn": 26,
+          "ms": 159
+        },
+        {
+          "turn": 27,
+          "ms": 151
+        },
+        {
+          "turn": 28,
+          "ms": 158
+        },
+        {
+          "turn": 29,
+          "ms": 155
+        },
+        {
+          "turn": 30,
+          "ms": 152
+        },
+        {
+          "turn": 31,
+          "ms": 166
+        },
+        {
+          "turn": 32,
+          "ms": 160
+        },
+        {
+          "turn": 33,
+          "ms": 158
+        },
+        {
+          "turn": 34,
+          "ms": 157
+        },
+        {
+          "turn": 35,
+          "ms": 159
+        },
+        {
+          "turn": 36,
+          "ms": 156
+        },
+        {
+          "turn": 37,
+          "ms": 153
+        },
+        {
+          "turn": 38,
+          "ms": 151
+        },
+        {
+          "turn": 39,
+          "ms": 168
+        },
+        {
+          "turn": 40,
+          "ms": 164
+        }
+      ]
+    },
+    {
+      "site": "buildBriefing",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 70
+        },
+        {
+          "turn": 2,
+          "ms": 36
+        },
+        {
+          "turn": 3,
+          "ms": 32
+        },
+        {
+          "turn": 4,
+          "ms": 30
+        },
+        {
+          "turn": 5,
+          "ms": 29
+        },
+        {
+          "turn": 6,
+          "ms": 25
+        },
+        {
+          "turn": 7,
+          "ms": 23
+        },
+        {
+          "turn": 8,
+          "ms": 22
+        },
+        {
+          "turn": 9,
+          "ms": 20
+        },
+        {
+          "turn": 10,
+          "ms": 21
+        },
+        {
+          "turn": 11,
+          "ms": 25
+        },
+        {
+          "turn": 12,
+          "ms": 28
+        },
+        {
+          "turn": 13,
+          "ms": 27
+        },
+        {
+          "turn": 14,
+          "ms": 28
+        },
+        {
+          "turn": 15,
+          "ms": 26
+        },
+        {
+          "turn": 16,
+          "ms": 26
+        },
+        {
+          "turn": 17,
+          "ms": 25
+        },
+        {
+          "turn": 18,
+          "ms": 26
+        },
+        {
+          "turn": 19,
+          "ms": 28
+        },
+        {
+          "turn": 20,
+          "ms": 29
+        },
+        {
+          "turn": 21,
+          "ms": 28
+        },
+        {
+          "turn": 22,
+          "ms": 28
+        },
+        {
+          "turn": 23,
+          "ms": 28
+        },
+        {
+          "turn": 24,
+          "ms": 26
+        },
+        {
+          "turn": 25,
+          "ms": 27
+        },
+        {
+          "turn": 26,
+          "ms": 27
+        },
+        {
+          "turn": 27,
+          "ms": 25
+        },
+        {
+          "turn": 28,
+          "ms": 26
+        },
+        {
+          "turn": 29,
+          "ms": 25
+        },
+        {
+          "turn": 30,
+          "ms": 25
+        },
+        {
+          "turn": 31,
+          "ms": 28
+        },
+        {
+          "turn": 32,
+          "ms": 25
+        },
+        {
+          "turn": 33,
+          "ms": 25
+        },
+        {
+          "turn": 34,
+          "ms": 25
+        },
+        {
+          "turn": 35,
+          "ms": 27
+        },
+        {
+          "turn": 36,
+          "ms": 25
+        },
+        {
+          "turn": 37,
+          "ms": 23
+        },
+        {
+          "turn": 38,
+          "ms": 24
+        },
+        {
+          "turn": 39,
+          "ms": 29
+        },
+        {
+          "turn": 40,
+          "ms": 27
+        }
+      ]
+    },
+    {
+      "site": "commander.allocateBrigades",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 1
+        },
+        {
+          "turn": 2,
+          "ms": 0
+        },
+        {
+          "turn": 3,
+          "ms": 0
+        },
+        {
+          "turn": 4,
+          "ms": 0
+        },
+        {
+          "turn": 5,
+          "ms": 0
+        },
+        {
+          "turn": 6,
+          "ms": 0
+        },
+        {
+          "turn": 7,
+          "ms": 0
+        },
+        {
+          "turn": 8,
+          "ms": 0
+        },
+        {
+          "turn": 9,
+          "ms": 0
+        },
+        {
+          "turn": 10,
+          "ms": 0
+        },
+        {
+          "turn": 11,
+          "ms": 0
+        },
+        {
+          "turn": 12,
+          "ms": 0
+        },
+        {
+          "turn": 13,
+          "ms": 0
+        },
+        {
+          "turn": 14,
+          "ms": 0
+        },
+        {
+          "turn": 15,
+          "ms": 0
+        },
+        {
+          "turn": 16,
+          "ms": 0
+        },
+        {
+          "turn": 17,
+          "ms": 0
+        },
+        {
+          "turn": 18,
+          "ms": 0
+        },
+        {
+          "turn": 19,
+          "ms": 0
+        },
+        {
+          "turn": 20,
+          "ms": 0
+        },
+        {
+          "turn": 21,
+          "ms": 0
+        },
+        {
+          "turn": 22,
+          "ms": 0
+        },
+        {
+          "turn": 23,
+          "ms": 0
+        },
+        {
+          "turn": 24,
+          "ms": 0
+        },
+        {
+          "turn": 25,
+          "ms": 0
+        },
+        {
+          "turn": 26,
+          "ms": 0
+        },
+        {
+          "turn": 27,
+          "ms": 0
+        },
+        {
+          "turn": 28,
+          "ms": 0
+        },
+        {
+          "turn": 29,
+          "ms": 0
+        },
+        {
+          "turn": 30,
+          "ms": 0
+        },
+        {
+          "turn": 31,
+          "ms": 0
+        },
+        {
+          "turn": 32,
+          "ms": 0
+        },
+        {
+          "turn": 33,
+          "ms": 0
+        },
+        {
+          "turn": 34,
+          "ms": 0
+        },
+        {
+          "turn": 35,
+          "ms": 0
+        },
+        {
+          "turn": 36,
+          "ms": 0
+        },
+        {
+          "turn": 37,
+          "ms": 0
+        },
+        {
+          "turn": 38,
+          "ms": 0
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "commander.assembleBeliefState",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 3
+        },
+        {
+          "turn": 2,
+          "ms": 2
+        },
+        {
+          "turn": 3,
+          "ms": 2
+        },
+        {
+          "turn": 4,
+          "ms": 2
+        },
+        {
+          "turn": 5,
+          "ms": 1
+        },
+        {
+          "turn": 6,
+          "ms": 1
+        },
+        {
+          "turn": 7,
+          "ms": 1
+        },
+        {
+          "turn": 8,
+          "ms": 1
+        },
+        {
+          "turn": 9,
+          "ms": 1
+        },
+        {
+          "turn": 10,
+          "ms": 1
+        },
+        {
+          "turn": 11,
+          "ms": 1
+        },
+        {
+          "turn": 12,
+          "ms": 1
+        },
+        {
+          "turn": 13,
+          "ms": 1
+        },
+        {
+          "turn": 14,
+          "ms": 1
+        },
+        {
+          "turn": 15,
+          "ms": 1
+        },
+        {
+          "turn": 16,
+          "ms": 1
+        },
+        {
+          "turn": 17,
+          "ms": 1
+        },
+        {
+          "turn": 18,
+          "ms": 1
+        },
+        {
+          "turn": 19,
+          "ms": 1
+        },
+        {
+          "turn": 20,
+          "ms": 1
+        },
+        {
+          "turn": 21,
+          "ms": 1
+        },
+        {
+          "turn": 22,
+          "ms": 1
+        },
+        {
+          "turn": 23,
+          "ms": 1
+        },
+        {
+          "turn": 24,
+          "ms": 1
+        },
+        {
+          "turn": 25,
+          "ms": 1
+        },
+        {
+          "turn": 26,
+          "ms": 1
+        },
+        {
+          "turn": 27,
+          "ms": 1
+        },
+        {
+          "turn": 28,
+          "ms": 1
+        },
+        {
+          "turn": 29,
+          "ms": 1
+        },
+        {
+          "turn": 30,
+          "ms": 1
+        },
+        {
+          "turn": 31,
+          "ms": 1
+        },
+        {
+          "turn": 32,
+          "ms": 1
+        },
+        {
+          "turn": 33,
+          "ms": 1
+        },
+        {
+          "turn": 34,
+          "ms": 1
+        },
+        {
+          "turn": 35,
+          "ms": 1
+        },
+        {
+          "turn": 36,
+          "ms": 1
+        },
+        {
+          "turn": 37,
+          "ms": 1
+        },
+        {
+          "turn": 38,
+          "ms": 1
+        },
+        {
+          "turn": 39,
+          "ms": 1
+        },
+        {
+          "turn": 40,
+          "ms": 1
+        }
+      ]
+    },
+    {
+      "site": "commander.assessSituation",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 18
+        },
+        {
+          "turn": 2,
+          "ms": 12
+        },
+        {
+          "turn": 3,
+          "ms": 9
+        },
+        {
+          "turn": 4,
+          "ms": 8
+        },
+        {
+          "turn": 5,
+          "ms": 9
+        },
+        {
+          "turn": 6,
+          "ms": 8
+        },
+        {
+          "turn": 7,
+          "ms": 11
+        },
+        {
+          "turn": 8,
+          "ms": 10
+        },
+        {
+          "turn": 9,
+          "ms": 10
+        },
+        {
+          "turn": 10,
+          "ms": 10
+        },
+        {
+          "turn": 11,
+          "ms": 10
+        },
+        {
+          "turn": 12,
+          "ms": 10
+        },
+        {
+          "turn": 13,
+          "ms": 9
+        },
+        {
+          "turn": 14,
+          "ms": 9
+        },
+        {
+          "turn": 15,
+          "ms": 9
+        },
+        {
+          "turn": 16,
+          "ms": 9
+        },
+        {
+          "turn": 17,
+          "ms": 9
+        },
+        {
+          "turn": 18,
+          "ms": 9
+        },
+        {
+          "turn": 19,
+          "ms": 10
+        },
+        {
+          "turn": 20,
+          "ms": 9
+        },
+        {
+          "turn": 21,
+          "ms": 9
+        },
+        {
+          "turn": 22,
+          "ms": 9
+        },
+        {
+          "turn": 23,
+          "ms": 9
+        },
+        {
+          "turn": 24,
+          "ms": 8
+        },
+        {
+          "turn": 25,
+          "ms": 9
+        },
+        {
+          "turn": 26,
+          "ms": 9
+        },
+        {
+          "turn": 27,
+          "ms": 8
+        },
+        {
+          "turn": 28,
+          "ms": 8
+        },
+        {
+          "turn": 29,
+          "ms": 8
+        },
+        {
+          "turn": 30,
+          "ms": 8
+        },
+        {
+          "turn": 31,
+          "ms": 9
+        },
+        {
+          "turn": 32,
+          "ms": 8
+        },
+        {
+          "turn": 33,
+          "ms": 8
+        },
+        {
+          "turn": 34,
+          "ms": 9
+        },
+        {
+          "turn": 35,
+          "ms": 9
+        },
+        {
+          "turn": 36,
+          "ms": 8
+        },
+        {
+          "turn": 37,
+          "ms": 8
+        },
+        {
+          "turn": 38,
+          "ms": 8
+        },
+        {
+          "turn": 39,
+          "ms": 10
+        },
+        {
+          "turn": 40,
+          "ms": 9
+        }
+      ]
+    },
+    {
+      "site": "commander.decide",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 50
+        },
+        {
+          "turn": 2,
+          "ms": 29
+        },
+        {
+          "turn": 3,
+          "ms": 23
+        },
+        {
+          "turn": 4,
+          "ms": 25
+        },
+        {
+          "turn": 5,
+          "ms": 25
+        },
+        {
+          "turn": 6,
+          "ms": 24
+        },
+        {
+          "turn": 7,
+          "ms": 22
+        },
+        {
+          "turn": 8,
+          "ms": 25
+        },
+        {
+          "turn": 9,
+          "ms": 25
+        },
+        {
+          "turn": 10,
+          "ms": 30
+        },
+        {
+          "turn": 11,
+          "ms": 22
+        },
+        {
+          "turn": 12,
+          "ms": 25
+        },
+        {
+          "turn": 13,
+          "ms": 25
+        },
+        {
+          "turn": 14,
+          "ms": 28
+        },
+        {
+          "turn": 15,
+          "ms": 28
+        },
+        {
+          "turn": 16,
+          "ms": 24
+        },
+        {
+          "turn": 17,
+          "ms": 25
+        },
+        {
+          "turn": 18,
+          "ms": 25
+        },
+        {
+          "turn": 19,
+          "ms": 32
+        },
+        {
+          "turn": 20,
+          "ms": 28
+        },
+        {
+          "turn": 21,
+          "ms": 33
+        },
+        {
+          "turn": 22,
+          "ms": 28
+        },
+        {
+          "turn": 23,
+          "ms": 30
+        },
+        {
+          "turn": 24,
+          "ms": 22
+        },
+        {
+          "turn": 25,
+          "ms": 26
+        },
+        {
+          "turn": 26,
+          "ms": 24
+        },
+        {
+          "turn": 27,
+          "ms": 24
+        },
+        {
+          "turn": 28,
+          "ms": 26
+        },
+        {
+          "turn": 29,
+          "ms": 20
+        },
+        {
+          "turn": 30,
+          "ms": 24
+        },
+        {
+          "turn": 31,
+          "ms": 29
+        },
+        {
+          "turn": 32,
+          "ms": 22
+        },
+        {
+          "turn": 33,
+          "ms": 20
+        },
+        {
+          "turn": 34,
+          "ms": 28
+        },
+        {
+          "turn": 35,
+          "ms": 25
+        },
+        {
+          "turn": 36,
+          "ms": 23
+        },
+        {
+          "turn": 37,
+          "ms": 21
+        },
+        {
+          "turn": 38,
+          "ms": 21
+        },
+        {
+          "turn": 39,
+          "ms": 24
+        },
+        {
+          "turn": 40,
+          "ms": 25
+        }
+      ]
+    },
+    {
+      "site": "commander.emitCommanderOutput",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 16
+        },
+        {
+          "turn": 2,
+          "ms": 6
+        },
+        {
+          "turn": 3,
+          "ms": 6
+        },
+        {
+          "turn": 4,
+          "ms": 9
+        },
+        {
+          "turn": 5,
+          "ms": 9
+        },
+        {
+          "turn": 6,
+          "ms": 7
+        },
+        {
+          "turn": 7,
+          "ms": 6
+        },
+        {
+          "turn": 8,
+          "ms": 8
+        },
+        {
+          "turn": 9,
+          "ms": 9
+        },
+        {
+          "turn": 10,
+          "ms": 13
+        },
+        {
+          "turn": 11,
+          "ms": 7
+        },
+        {
+          "turn": 12,
+          "ms": 9
+        },
+        {
+          "turn": 13,
+          "ms": 9
+        },
+        {
+          "turn": 14,
+          "ms": 13
+        },
+        {
+          "turn": 15,
+          "ms": 10
+        },
+        {
+          "turn": 16,
+          "ms": 9
+        },
+        {
+          "turn": 17,
+          "ms": 9
+        },
+        {
+          "turn": 18,
+          "ms": 10
+        },
+        {
+          "turn": 19,
+          "ms": 13
+        },
+        {
+          "turn": 20,
+          "ms": 13
+        },
+        {
+          "turn": 21,
+          "ms": 11
+        },
+        {
+          "turn": 22,
+          "ms": 9
+        },
+        {
+          "turn": 23,
+          "ms": 12
+        },
+        {
+          "turn": 24,
+          "ms": 8
+        },
+        {
+          "turn": 25,
+          "ms": 11
+        },
+        {
+          "turn": 26,
+          "ms": 8
+        },
+        {
+          "turn": 27,
+          "ms": 7
+        },
+        {
+          "turn": 28,
+          "ms": 7
+        },
+        {
+          "turn": 29,
+          "ms": 7
+        },
+        {
+          "turn": 30,
+          "ms": 9
+        },
+        {
+          "turn": 31,
+          "ms": 10
+        },
+        {
+          "turn": 32,
+          "ms": 8
+        },
+        {
+          "turn": 33,
+          "ms": 7
+        },
+        {
+          "turn": 34,
+          "ms": 12
+        },
+        {
+          "turn": 35,
+          "ms": 9
+        },
+        {
+          "turn": 36,
+          "ms": 9
+        },
+        {
+          "turn": 37,
+          "ms": 7
+        },
+        {
+          "turn": 38,
+          "ms": 8
+        },
+        {
+          "turn": 39,
+          "ms": 9
+        },
+        {
+          "turn": 40,
+          "ms": 12
+        }
+      ]
+    },
+    {
+      "site": "commander.makeDecisions",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 3
+        },
+        {
+          "turn": 2,
+          "ms": 5
+        },
+        {
+          "turn": 3,
+          "ms": 3
+        },
+        {
+          "turn": 4,
+          "ms": 3
+        },
+        {
+          "turn": 5,
+          "ms": 3
+        },
+        {
+          "turn": 6,
+          "ms": 3
+        },
+        {
+          "turn": 7,
+          "ms": 2
+        },
+        {
+          "turn": 8,
+          "ms": 2
+        },
+        {
+          "turn": 9,
+          "ms": 2
+        },
+        {
+          "turn": 10,
+          "ms": 2
+        },
+        {
+          "turn": 11,
+          "ms": 2
+        },
+        {
+          "turn": 12,
+          "ms": 3
+        },
+        {
+          "turn": 13,
+          "ms": 3
+        },
+        {
+          "turn": 14,
+          "ms": 2
+        },
+        {
+          "turn": 15,
+          "ms": 2
+        },
+        {
+          "turn": 16,
+          "ms": 2
+        },
+        {
+          "turn": 17,
+          "ms": 3
+        },
+        {
+          "turn": 18,
+          "ms": 2
+        },
+        {
+          "turn": 19,
+          "ms": 3
+        },
+        {
+          "turn": 20,
+          "ms": 3
+        },
+        {
+          "turn": 21,
+          "ms": 3
+        },
+        {
+          "turn": 22,
+          "ms": 3
+        },
+        {
+          "turn": 23,
+          "ms": 3
+        },
+        {
+          "turn": 24,
+          "ms": 3
+        },
+        {
+          "turn": 25,
+          "ms": 3
+        },
+        {
+          "turn": 26,
+          "ms": 3
+        },
+        {
+          "turn": 27,
+          "ms": 3
+        },
+        {
+          "turn": 28,
+          "ms": 2
+        },
+        {
+          "turn": 29,
+          "ms": 2
+        },
+        {
+          "turn": 30,
+          "ms": 2
+        },
+        {
+          "turn": 31,
+          "ms": 2
+        },
+        {
+          "turn": 32,
+          "ms": 2
+        },
+        {
+          "turn": 33,
+          "ms": 2
+        },
+        {
+          "turn": 34,
+          "ms": 2
+        },
+        {
+          "turn": 35,
+          "ms": 2
+        },
+        {
+          "turn": 36,
+          "ms": 2
+        },
+        {
+          "turn": 37,
+          "ms": 2
+        },
+        {
+          "turn": 38,
+          "ms": 2
+        },
+        {
+          "turn": 39,
+          "ms": 2
+        },
+        {
+          "turn": 40,
+          "ms": 2
+        }
+      ]
+    },
+    {
+      "site": "commander.managePlan",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 6
+        },
+        {
+          "turn": 2,
+          "ms": 0
+        },
+        {
+          "turn": 3,
+          "ms": 0
+        },
+        {
+          "turn": 4,
+          "ms": 1
+        },
+        {
+          "turn": 5,
+          "ms": 0
+        },
+        {
+          "turn": 6,
+          "ms": 1
+        },
+        {
+          "turn": 7,
+          "ms": 0
+        },
+        {
+          "turn": 8,
+          "ms": 1
+        },
+        {
+          "turn": 9,
+          "ms": 0
+        },
+        {
+          "turn": 10,
+          "ms": 1
+        },
+        {
+          "turn": 11,
+          "ms": 0
+        },
+        {
+          "turn": 12,
+          "ms": 0
+        },
+        {
+          "turn": 13,
+          "ms": 0
+        },
+        {
+          "turn": 14,
+          "ms": 0
+        },
+        {
+          "turn": 15,
+          "ms": 3
+        },
+        {
+          "turn": 16,
+          "ms": 0
+        },
+        {
+          "turn": 17,
+          "ms": 1
+        },
+        {
+          "turn": 18,
+          "ms": 0
+        },
+        {
+          "turn": 19,
+          "ms": 2
+        },
+        {
+          "turn": 20,
+          "ms": 0
+        },
+        {
+          "turn": 21,
+          "ms": 5
+        },
+        {
+          "turn": 22,
+          "ms": 3
+        },
+        {
+          "turn": 23,
+          "ms": 1
+        },
+        {
+          "turn": 24,
+          "ms": 0
+        },
+        {
+          "turn": 25,
+          "ms": 0
+        },
+        {
+          "turn": 26,
+          "ms": 1
+        },
+        {
+          "turn": 27,
+          "ms": 1
+        },
+        {
+          "turn": 28,
+          "ms": 4
+        },
+        {
+          "turn": 29,
+          "ms": 0
+        },
+        {
+          "turn": 30,
+          "ms": 1
+        },
+        {
+          "turn": 31,
+          "ms": 4
+        },
+        {
+          "turn": 32,
+          "ms": 0
+        },
+        {
+          "turn": 33,
+          "ms": 0
+        },
+        {
+          "turn": 34,
+          "ms": 1
+        },
+        {
+          "turn": 35,
+          "ms": 2
+        },
+        {
+          "turn": 36,
+          "ms": 0
+        },
+        {
+          "turn": 37,
+          "ms": 2
+        },
+        {
+          "turn": 38,
+          "ms": 0
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "executeFactionDirectives",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 62
+        },
+        {
+          "turn": 2,
+          "ms": 41
+        },
+        {
+          "turn": 3,
+          "ms": 47
+        },
+        {
+          "turn": 4,
+          "ms": 59
+        },
+        {
+          "turn": 5,
+          "ms": 66
+        },
+        {
+          "turn": 6,
+          "ms": 51
+        },
+        {
+          "turn": 7,
+          "ms": 45
+        },
+        {
+          "turn": 8,
+          "ms": 37
+        },
+        {
+          "turn": 9,
+          "ms": 35
+        },
+        {
+          "turn": 10,
+          "ms": 37
+        },
+        {
+          "turn": 11,
+          "ms": 36
+        },
+        {
+          "turn": 12,
+          "ms": 35
+        },
+        {
+          "turn": 13,
+          "ms": 44
+        },
+        {
+          "turn": 14,
+          "ms": 38
+        },
+        {
+          "turn": 15,
+          "ms": 39
+        },
+        {
+          "turn": 16,
+          "ms": 37
+        },
+        {
+          "turn": 17,
+          "ms": 36
+        },
+        {
+          "turn": 18,
+          "ms": 37
+        },
+        {
+          "turn": 19,
+          "ms": 35
+        },
+        {
+          "turn": 20,
+          "ms": 38
+        },
+        {
+          "turn": 21,
+          "ms": 34
+        },
+        {
+          "turn": 22,
+          "ms": 48
+        },
+        {
+          "turn": 23,
+          "ms": 42
+        },
+        {
+          "turn": 24,
+          "ms": 41
+        },
+        {
+          "turn": 25,
+          "ms": 34
+        },
+        {
+          "turn": 26,
+          "ms": 35
+        },
+        {
+          "turn": 27,
+          "ms": 43
+        },
+        {
+          "turn": 28,
+          "ms": 49
+        },
+        {
+          "turn": 29,
+          "ms": 48
+        },
+        {
+          "turn": 30,
+          "ms": 43
+        },
+        {
+          "turn": 31,
+          "ms": 41
+        },
+        {
+          "turn": 32,
+          "ms": 38
+        },
+        {
+          "turn": 33,
+          "ms": 37
+        },
+        {
+          "turn": 34,
+          "ms": 42
+        },
+        {
+          "turn": 35,
+          "ms": 44
+        },
+        {
+          "turn": 36,
+          "ms": 48
+        },
+        {
+          "turn": 37,
+          "ms": 48
+        },
+        {
+          "turn": 38,
+          "ms": 35
+        },
+        {
+          "turn": 39,
+          "ms": 40
+        },
+        {
+          "turn": 40,
+          "ms": 39
+        }
+      ]
+    },
+    {
+      "site": "generateAllBotOrdersOsid",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 377
+        },
+        {
+          "turn": 2,
+          "ms": 353
+        },
+        {
+          "turn": 3,
+          "ms": 369
+        },
+        {
+          "turn": 4,
+          "ms": 382
+        },
+        {
+          "turn": 5,
+          "ms": 399
+        },
+        {
+          "turn": 6,
+          "ms": 366
+        },
+        {
+          "turn": 7,
+          "ms": 388
+        },
+        {
+          "turn": 8,
+          "ms": 375
+        },
+        {
+          "turn": 9,
+          "ms": 174
+        },
+        {
+          "turn": 10,
+          "ms": 371
+        },
+        {
+          "turn": 11,
+          "ms": 180
+        },
+        {
+          "turn": 12,
+          "ms": 184
+        },
+        {
+          "turn": 13,
+          "ms": 194
+        },
+        {
+          "turn": 14,
+          "ms": 377
+        },
+        {
+          "turn": 15,
+          "ms": 197
+        },
+        {
+          "turn": 16,
+          "ms": 188
+        },
+        {
+          "turn": 17,
+          "ms": 183
+        },
+        {
+          "turn": 18,
+          "ms": 188
+        },
+        {
+          "turn": 19,
+          "ms": 189
+        },
+        {
+          "turn": 20,
+          "ms": 197
+        },
+        {
+          "turn": 21,
+          "ms": 195
+        },
+        {
+          "turn": 22,
+          "ms": 209
+        },
+        {
+          "turn": 23,
+          "ms": 194
+        },
+        {
+          "turn": 24,
+          "ms": 193
+        },
+        {
+          "turn": 25,
+          "ms": 189
+        },
+        {
+          "turn": 26,
+          "ms": 195
+        },
+        {
+          "turn": 27,
+          "ms": 195
+        },
+        {
+          "turn": 28,
+          "ms": 209
+        },
+        {
+          "turn": 29,
+          "ms": 205
+        },
+        {
+          "turn": 30,
+          "ms": 196
+        },
+        {
+          "turn": 31,
+          "ms": 209
+        },
+        {
+          "turn": 32,
+          "ms": 200
+        },
+        {
+          "turn": 33,
+          "ms": 197
+        },
+        {
+          "turn": 34,
+          "ms": 200
+        },
+        {
+          "turn": 35,
+          "ms": 204
+        },
+        {
+          "turn": 36,
+          "ms": 206
+        },
+        {
+          "turn": 37,
+          "ms": 202
+        },
+        {
+          "turn": 38,
+          "ms": 188
+        },
+        {
+          "turn": 39,
+          "ms": 210
+        },
+        {
+          "turn": 40,
+          "ms": 205
+        }
+      ]
+    },
+    {
+      "site": "generateAllCorpsOrders",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 504
+        },
+        {
+          "turn": 2,
+          "ms": 422
+        },
+        {
+          "turn": 3,
+          "ms": 441
+        },
+        {
+          "turn": 4,
+          "ms": 424
+        },
+        {
+          "turn": 5,
+          "ms": 458
+        },
+        {
+          "turn": 6,
+          "ms": 416
+        },
+        {
+          "turn": 7,
+          "ms": 437
+        },
+        {
+          "turn": 8,
+          "ms": 435
+        },
+        {
+          "turn": 9,
+          "ms": 234
+        },
+        {
+          "turn": 10,
+          "ms": 439
+        },
+        {
+          "turn": 11,
+          "ms": 242
+        },
+        {
+          "turn": 12,
+          "ms": 254
+        },
+        {
+          "turn": 13,
+          "ms": 263
+        },
+        {
+          "turn": 14,
+          "ms": 460
+        },
+        {
+          "turn": 15,
+          "ms": 264
+        },
+        {
+          "turn": 16,
+          "ms": 255
+        },
+        {
+          "turn": 17,
+          "ms": 252
+        },
+        {
+          "turn": 18,
+          "ms": 255
+        },
+        {
+          "turn": 19,
+          "ms": 268
+        },
+        {
+          "turn": 20,
+          "ms": 274
+        },
+        {
+          "turn": 21,
+          "ms": 279
+        },
+        {
+          "turn": 22,
+          "ms": 269
+        },
+        {
+          "turn": 23,
+          "ms": 277
+        },
+        {
+          "turn": 24,
+          "ms": 258
+        },
+        {
+          "turn": 25,
+          "ms": 270
+        },
+        {
+          "turn": 26,
+          "ms": 273
+        },
+        {
+          "turn": 27,
+          "ms": 271
+        },
+        {
+          "turn": 28,
+          "ms": 274
+        },
+        {
+          "turn": 29,
+          "ms": 252
+        },
+        {
+          "turn": 30,
+          "ms": 260
+        },
+        {
+          "turn": 31,
+          "ms": 284
+        },
+        {
+          "turn": 32,
+          "ms": 273
+        },
+        {
+          "turn": 33,
+          "ms": 261
+        },
+        {
+          "turn": 34,
+          "ms": 273
+        },
+        {
+          "turn": 35,
+          "ms": 265
+        },
+        {
+          "turn": 36,
+          "ms": 257
+        },
+        {
+          "turn": 37,
+          "ms": 239
+        },
+        {
+          "turn": 38,
+          "ms": 260
+        },
+        {
+          "turn": 39,
+          "ms": 283
+        },
+        {
+          "turn": 40,
+          "ms": 283
+        }
+      ]
+    },
+    {
+      "site": "runCommanderForCorps",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 121
+        },
+        {
+          "turn": 2,
+          "ms": 65
+        },
+        {
+          "turn": 3,
+          "ms": 56
+        },
+        {
+          "turn": 4,
+          "ms": 56
+        },
+        {
+          "turn": 5,
+          "ms": 55
+        },
+        {
+          "turn": 6,
+          "ms": 49
+        },
+        {
+          "turn": 7,
+          "ms": 45
+        },
+        {
+          "turn": 8,
+          "ms": 47
+        },
+        {
+          "turn": 9,
+          "ms": 45
+        },
+        {
+          "turn": 10,
+          "ms": 52
+        },
+        {
+          "turn": 11,
+          "ms": 48
+        },
+        {
+          "turn": 12,
+          "ms": 55
+        },
+        {
+          "turn": 13,
+          "ms": 53
+        },
+        {
+          "turn": 14,
+          "ms": 56
+        },
+        {
+          "turn": 15,
+          "ms": 55
+        },
+        {
+          "turn": 16,
+          "ms": 51
+        },
+        {
+          "turn": 17,
+          "ms": 51
+        },
+        {
+          "turn": 18,
+          "ms": 52
+        },
+        {
+          "turn": 19,
+          "ms": 60
+        },
+        {
+          "turn": 20,
+          "ms": 58
+        },
+        {
+          "turn": 21,
+          "ms": 62
+        },
+        {
+          "turn": 22,
+          "ms": 57
+        },
+        {
+          "turn": 23,
+          "ms": 59
+        },
+        {
+          "turn": 24,
+          "ms": 50
+        },
+        {
+          "turn": 25,
+          "ms": 53
+        },
+        {
+          "turn": 26,
+          "ms": 51
+        },
+        {
+          "turn": 27,
+          "ms": 49
+        },
+        {
+          "turn": 28,
+          "ms": 52
+        },
+        {
+          "turn": 29,
+          "ms": 46
+        },
+        {
+          "turn": 30,
+          "ms": 50
+        },
+        {
+          "turn": 31,
+          "ms": 58
+        },
+        {
+          "turn": 32,
+          "ms": 48
+        },
+        {
+          "turn": 33,
+          "ms": 45
+        },
+        {
+          "turn": 34,
+          "ms": 54
+        },
+        {
+          "turn": 35,
+          "ms": 53
+        },
+        {
+          "turn": 36,
+          "ms": 48
+        },
+        {
+          "turn": 37,
+          "ms": 45
+        },
+        {
+          "turn": 38,
+          "ms": 45
+        },
+        {
+          "turn": 39,
+          "ms": 53
+        },
+        {
+          "turn": 40,
+          "ms": 53
+        }
+      ]
+    }
+  ]
+}
