@@ -1,3 +1,40 @@
+## [2026-05-04] Trip session 3 — Nightshift autonomous parallel execution (8 lanes shipped + 1 STOP-AND-ASK)
+
+**Type:** Multi-mission Ring 1 / no §6 / faction-agnostic. All plans pre-anchored per nightshift-handoff.md to docs/plans/. 8 lanes shipped + Mission C (supply-osid perf) STOP-AND-ASK rolled back on hash drift.
+
+**Commits (in push order):**
+- `8674ac76` chore(tests): test usefulness Phase 3 — §2 leftover absorptions + faction-symmetric it.each (LANE-NIGHTSHIFT-TEST-USEFULNESS-PHASE3)
+- `11457f85` feat(ui): Map That Scars per-OSID damage overlay (LANE-NIGHTSHIFT-MAP-THAT-SCARS-RENDERER, opens v0.9.4)
+- `d6da6ad4` feat(ui): tutorial content v1 — 8 first-session steps + restart IPC (LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1, advances v0.9.2)
+- `e48a7f67` feat(tools): force-quality trajectory diagnostic + Srebrenica diagnostic v2 (LANE-NIGHTSHIFT-FORCE-QUALITY-DIAGNOSTIC + LANE-NIGHTSHIFT-SREBRENICA-DIAGNOSTIC-V2, audit-only)
+- `6d10e725` feat(events): consequence breadth v2 — 11 divergence events + 8 Cost Ledger templates (LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH, advances v0.9.0)
+- `6d10e725...` feat(packaging): Linux AppImage + Win unsigned NSIS installer targets (LANE-NIGHTSHIFT-PLATFORM-PACKAGING-GROUNDWORK, opens v0.9.5)
+- `6d10e725...` feat(codex): dynamic section builder + 6 ghost entries + VerdictScreen wire-in (LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE, advances v0.9.1)
+- `5a94199b` feat(replay): replay playback consumer + ReplayScrubber UI (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER, closes v0.8-to-v0.9 carryover, advances v0.9.1)
+- Mission K Codex review carryover: CLOSED-RESOLVED (no code; 36/36 Codex tests verified GREEN)
+
+**STOP-AND-ASK (rolled back):**
+- Mission C LANE-NIGHTSHIFT-SUPPLY-OSID-PERF: Tarjan biconnected-components/bridge-finding optimization rolled back on hash drift — 40w smoke n1629 hash `45530f5fba46905a` differed from predecessor `a2a51d4a9994a7f5`. Mathematical equivalence theoretically held (single-pass O(V+E) vs per-edge BFS-removal) but small-graph tests didn't catch BiH-scale divergence. Needs /determinism-auditor + /scenario-creator-runner-tester before retry. **No source files committed; reverted cleanly.**
+
+**Roadmap progression delta:**
+- v0.9.0 Consequences: PARTIAL → ADVANCED (11 divergence events + 8 Cost Ledger templates ship; broader matrix open)
+- v0.9.1 Dynamic Codex: PARTIAL → ADVANCED (6 ghost entries + builder + VerdictScreen Codex tab + Replay tab; endgame comparison polish open)
+- v0.9.2 Tutorial: OPENED → ADVANCED (8 real steps + spotlight wiring + restart IPC; external playtesting still open)
+- v0.9.3 Performance: OPENED-WITH-AUDIT (force-quality trajectory diagnostic + supply-osid attempt deferred)
+- v0.9.4 Map That Scars: OPENED → OPENED-WITH-RENDERER (consumer ready, feature flag default off)
+- v0.9.5 Platform Packaging: NOT-STARTED → OPENED-WITH-LINUX-WIN (Linux AppImage + Win unsigned NSIS targets ready; Mac notarized + Win signed + Steam still cert-blocked)
+
+**Sensitive-history compliance:** All 8 shipped lanes Ring 1 / faction-agnostic. Mission H (Srebrenica diagnostic v2) §6-BLOCKED for fix; ships quantitative evidence + binding §6 sign-off questions only. Mission E ghost #3 (enclave_defended) AUDIT-ONLY observation register; no rupture-flip; no claim about genocide non-occurrence; preserves canonical findings. Faction-agnostic event predicates throughout. No FORAWWV / paint anchor / political_controllers / OOB / rupture wiring touch.
+
+**Successor handoffs:**
+- Mission C retry: needs /determinism-auditor + /scenario-creator-runner-tester before any optimization to bridge-finding survives at BiH scale
+- Mission D event #11 csq_weapons_embargo_partial_lift: requires new equipment_quality_modifier effect kind, deferred to substrate audit
+- Mission I: Mac notarized (Apple cert), Win signed (cert), Steamworks integration
+- Replay: save-sequence accumulator producer that populates LoadedGameState.replaySaveSequence
+- Mission H §6 sign-off chain: Q-CANON-RUPT-4 evidence forecloses single-fix paths; binary §6 choice between heuristic recording vs explicit acceptance
+
+---
+
 ## [2026-05-03] feat(round2): six-lane parallel ship (LANE-NIGHTSHIFT-ROUND2 commit `e4c661d5`)
 
 **Type:** Multi-lane behavioral + content + observability + audit. Engine narrow-scope; faction-agnostic; Ring 1; no §6 sign-off.
