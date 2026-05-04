@@ -215,11 +215,29 @@ function deriveEnclaveSupplyState(
 }
 
 /**
+ * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar attached when
+ * the desktop IPC layer (or scenario runner consumer) found a sibling
+ * `replay_save_sequence.json` next to `final_save.json`. Absent on live sessions
+ * and on older saves; the VerdictScreen Replay tab is gated on
+ * `LoadedGameState.replaySaveSequence?.length > 0` so absence is the back-compat
+ * default. Mission J's `replayPlayer()` consumes the resulting field directly.
+ */
+export interface ParseGameStateOptions {
+    /** Per-turn GameState snapshots in turn order. Optional and additive. */
+    replaySaveSequence?: ReadonlyArray<unknown>;
+}
+
+/**
  * Parse a final_save.json file content into a LoadedGameState.
  * Validates required fields and extracts formations, militia pools, and control data.
  * Accepts raw GameState or a single-level wrapper (e.g. { state: GameState }) for IPC/legacy.
+ *
+ * Optional second arg attaches a replay save sequence (Mission J consumer)
+ * when the desktop loader found a sibling `replay_save_sequence.json`. The
+ * sequence is read-only and faction-agnostic; it is passed straight through
+ * to `LoadedGameState.replaySaveSequence` without further parsing.
  */
-export function parseGameState(json: unknown): LoadedGameState {
+export function parseGameState(json: unknown, options?: ParseGameStateOptions): LoadedGameState {
     // Normalize: unwrap common wrappers so we always work with the flat GameState object.
     let state = json as any;
     if (state != null && typeof state === 'object' && !Array.isArray(state)) {
@@ -1811,6 +1829,13 @@ export function parseGameState(json: unknown): LoadedGameState {
         gameVerdict,
         costLedger,
         historicalComparison,
+        // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: pass-through. Type cast
+        // is intentional — UI consumes via Mission J's `replayPlayer(saveSequence)`,
+        // which structurally narrows to {turn, metadata.date} and never reads
+        // anything that requires deeper validation.
+        replaySaveSequence: options?.replaySaveSequence && options.replaySaveSequence.length > 0
+            ? options.replaySaveSequence as ReadonlyArray<import('../../../state/game_state.js').GameState>
+            : undefined,
     };
 }
 

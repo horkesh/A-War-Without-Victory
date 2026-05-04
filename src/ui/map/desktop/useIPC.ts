@@ -49,6 +49,13 @@ interface WindowAwwv {
     getCurrentGameState: () => Promise<string | null>;
     subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
     subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
+    /**
+     * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: subscribe to optional
+     * sidecar broadcasts from `readReplaySaveSequenceSidecar` (raw JSON
+     * string of `GameState[]`). Renderer is expected to JSON.parse and stage
+     * via `setPendingReplaySaveSequence` BEFORE the next `loadSave` call.
+     */
+    subscribeReplaySequenceUpdated: (cb: (sequenceJson: string) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
@@ -162,6 +169,11 @@ export function useIPC() {
             subscribeTurnReportUpdated: awwv
                 ? (cb: (report: unknown) => void) => awwv.subscribeTurnReportUpdated(cb)
                 : (_cb: (report: unknown) => void) => () => { /* noop */ },
+
+            // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER
+            subscribeReplaySequenceUpdated: awwv
+                ? (cb: (sequenceJson: string) => void) => awwv.subscribeReplaySequenceUpdated(cb)
+                : (_cb: (sequenceJson: string) => void) => () => { /* noop */ },
 
             getRecruitmentCatalog: awwv
                 ? () => awwv.getRecruitmentCatalog()

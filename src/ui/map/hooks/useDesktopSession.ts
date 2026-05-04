@@ -36,6 +36,8 @@ export function useDesktopSession(): void {
     const loadSave = useGameStore((s) => s.loadSave);
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setLastTurnReport = useGameStore((s) => s.setLastTurnReport);
+    // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: stage sidecar before next loadSave().
+    const setPendingReplaySaveSequence = useGameStore((s) => s.setPendingReplaySaveSequence);
 
     useEffect(() => {
         if (typeof document !== 'undefined') {
@@ -64,6 +66,25 @@ export function useDesktopSession(): void {
                 setLoadError(message);
             }
         };
+
+        // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: subscribe to sidecar
+        // BEFORE game-state. The desktop main process emits the sequence
+        // BEFORE the game-state on load, so by the time loadSave() runs the
+        // pending sequence is already staged and gets merged via parseGameState.
+        const unsubscribeReplaySequence = ipc.subscribeReplaySequenceUpdated((sequenceJson: string) => {
+            if (!active || !sequenceJson) return;
+            try {
+                const parsed = JSON.parse(sequenceJson);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setPendingReplaySaveSequence(parsed as ReadonlyArray<unknown>);
+                } else {
+                    setPendingReplaySaveSequence(null);
+                }
+            } catch (_err) {
+                // Bad sidecar JSON — fail closed (no replay tab) rather than crashing the load.
+                setPendingReplaySaveSequence(null);
+            }
+        });
 
         const unsubscribeGameState = ipc.subscribeGameStateUpdated((stateJson: string) => {
             void applyStateJson(stateJson);
@@ -99,6 +120,7 @@ export function useDesktopSession(): void {
             active = false;
             unsubscribeGameState();
             unsubscribeTurnReport();
+            unsubscribeReplaySequence();
             if (typeof document !== 'undefined') {
                 delete document.documentElement.dataset.awwvDesktopSessionReady;
             }

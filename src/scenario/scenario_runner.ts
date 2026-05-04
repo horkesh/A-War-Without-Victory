@@ -141,6 +141,14 @@ import type {
 } from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
 import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
+// LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
+// stream + end-of-run consolidated `replay_save_sequence.json` artifact powering
+// the VerdictScreen Replay tab via Mission J's `replayPlayer()` consumer.
+import {
+    buildReplayFrameRow,
+    finalizeReplaySaveSequence,
+    type ReplayFrameRow,
+} from './replay_save_emit.js';
 import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
@@ -330,6 +338,10 @@ export interface RunScenarioResult {
         operation_aars: string;
         /** LANE-2026-05-02-A1: Per-turn brigade-keyed snapshot (read-only observability). */
         brigade_temporal_log: string;
+        /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state JSONL stream. */
+        replay_sequence_log: string;
+        /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: end-of-run consolidated GameState[] artifact. */
+        replay_save_sequence: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
         weekly_saves?: string[];
         /** Optional replay timeline bundle for tactical-map animation playback/export. */
@@ -1571,6 +1583,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     final_save: initialSavePath,
                     weekly_report: join(outDir, 'weekly_report.jsonl'),
                     brigade_temporal_log: join(outDir, 'brigade_temporal_log.jsonl'),
+                    // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: not produced
+                    // in initialStateOnly mode (no week loop runs), so paths are
+                    // empty strings — consumers should treat empty as "absent".
+                    replay_sequence_log: '',
+                    replay_save_sequence: '',
                     replay: '',
                     run_summary: join(outDir, 'run_summary.json'),
                     control_delta: join(outDir, 'control_delta.json'),
@@ -1597,12 +1614,19 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const weeklyReportPath = join(outDir, 'weekly_report.jsonl');
         const brigadeTemporalLogPath = join(outDir, 'brigade_temporal_log.jsonl');
         const replayPath = emitWeeklySavesForVideo ? join(outDir, 'replay.jsonl') : null;
+        // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
+        // stream. Always emitted (not gated on emitWeeklySavesForVideo) so the
+        // VerdictScreen Replay tab works for every run. Consolidated end-of-run
+        // artifact (replay_save_sequence.json) is what the UI loader picks up.
+        const replaySequencePath = join(outDir, 'replay_sequence.jsonl');
         await ensureRunOutputDir(outDir);
         const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
         // LANE-2026-05-02-A1: per-turn brigade-keyed snapshot stream. Pure observability,
         // mirrors weekly_report.jsonl pattern; no engine state mutation, no save scope.
         const brigadeTemporalStream = createWriteStream(brigadeTemporalLogPath, { flags: 'w' });
         const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
+        const replaySequenceStream = createWriteStream(replaySequencePath, { flags: 'w' });
+        const replaySequenceFrames: ReplayFrameRow[] = [];
 
         let final_state_hash = '';
         let firstReportRow: WeeklyReportRow | null = null;
@@ -2133,6 +2157,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 brigadeTemporalStream.write(stableStringify(row) + '\n');
             }
 
+            // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn replay frame.
+            // Pure read-only — `serializeState(state)` is the canonical writer (also
+            // produces final_save.json). State is NOT mutated. Frames accumulate in
+            // turn order for the end-of-run consolidated artifact, and are also
+            // emitted line-by-line to the JSONL stream for streaming consumers.
+            const replayFrameRow = buildReplayFrameRow(state, week_index);
+            replaySequenceFrames.push(replayFrameRow);
+            replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
+
             if (week_index === weeks - 1) {
                 const serialized = serializeState(state);
                 final_state_hash = createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16);
@@ -2170,6 +2203,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         reportStream.end();
         brigadeTemporalStream.end();
         if (replayStream) replayStream.end();
+        replaySequenceStream.end();
         await new Promise<void>((resolve, reject) => {
             if (replayStream) {
                 reportStream.on('finish', () => replayStream.on('finish', resolve).on('error', reject));
@@ -2198,6 +2232,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         final_state_hash = createHash('sha256').update(finalSerialized, 'utf8').digest('hex').slice(0, 16);
         await ensureRunOutputDir(outDir);
         await writeFile(finalSavePath, finalSerialized, 'utf8');
+
+        // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: consolidated end-of-run
+        // artifact. Separate file (NOT embedded in final_save.json) so canonical
+        // save hash invariance holds and existing loaders continue working
+        // unchanged. UI adapter / desktop IPC pick this up when present and
+        // populate `LoadedGameState.replaySaveSequence` for the VerdictScreen.
+        const replaySaveSequencePath = await finalizeReplaySaveSequence(outDir, replaySequenceFrames);
 
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
 
@@ -2536,6 +2577,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 final_save: finalSavePath,
                 weekly_report: weeklyReportPath,
                 brigade_temporal_log: brigadeTemporalLogPath,
+                replay_sequence_log: replaySequencePath,
+                replay_save_sequence: replaySaveSequencePath,
                 replay: replayPath ?? '',
                 run_summary: runSummaryPath,
                 control_delta: controlDeltaPath,

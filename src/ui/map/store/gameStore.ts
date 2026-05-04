@@ -231,6 +231,17 @@ export interface GameStore {
   setOperationTargetOsids: (osids: string[]) => void;
 
   loadedGameState: LoadedGameState | null;
+  /**
+   * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar carrying
+   * the per-turn GameState snapshots produced by the scenario harness's
+   * `finalizeReplaySaveSequence()` (file: `replay_save_sequence.json`).
+   * Set by the desktop IPC channel `replay-sequence-updated` BEFORE
+   * `loadSave` runs, then merged into `LoadedGameState.replaySaveSequence`
+   * by `parseGameState` so the VerdictScreen Replay tab sees a single
+   * coherent loaded state. Null when absent (live sessions, older saves).
+   */
+  pendingReplaySaveSequence: ReadonlyArray<unknown> | null;
+  setPendingReplaySaveSequence: (sequence: ReadonlyArray<unknown> | null) => void;
   /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
   lastTurnReport: LastTurnReport | null;
   setLastTurnReport: (report: LastTurnReport | null) => void;
@@ -286,7 +297,7 @@ export interface GameStore {
   setStrategicDashboardOpen: (open: boolean) => void;
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
 
   selectedOsid: null,
@@ -490,6 +501,12 @@ export const useGameStore = create<GameStore>((set) => ({
 
   loadedGameState: null,
 
+  // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: sidecar staging slot. The
+  // desktop IPC layer pushes this before/with `loadSave`; `loadSave` merges
+  // it into the resulting LoadedGameState via `parseGameState(json, opts)`.
+  pendingReplaySaveSequence: null,
+  setPendingReplaySaveSequence: (sequence) => set({ pendingReplaySaveSequence: sequence }),
+
   lastTurnReport: null,
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
   turnAftermath: null,
@@ -548,7 +565,12 @@ export const useGameStore = create<GameStore>((set) => ({
           if (!candidate.meta || typeof candidate.meta !== 'object') {
             throw new Error('Save file is missing required game data (no meta block). Ensure this is a valid AWWV save.');
           }
-          state = parseGameState(json);
+          // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: read sidecar from
+          // store (set by IPC `replay-sequence-updated` channel) and merge.
+          // Validated minimally — must be an array; deeper shape is checked by
+          // the read-only `replayPlayer()` consumer downstream.
+          const pendingSequence = (get().pendingReplaySaveSequence ?? null) as ReadonlyArray<unknown> | null;
+          state = parseGameState(json, pendingSequence ? { replaySaveSequence: pendingSequence } : undefined);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           set({ loadError: message });

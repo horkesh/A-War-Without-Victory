@@ -54,6 +54,41 @@ function sendGameStateToRenderer(stateJson, excludeSender) {
   }
 }
 
+/**
+ * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: read a sibling
+ * `replay_save_sequence.json` next to a final_save.json (or any
+ * GameState JSON loaded via the file dialog). The sequence is the
+ * end-of-run consolidated artifact written by the scenario harness
+ * (`finalizeReplaySaveSequence`). Returns null on absent / unreadable
+ * file — the VerdictScreen Replay tab gates on length > 0, so absent
+ * is the back-compat default.
+ *
+ * Read-only. No state mutation.
+ */
+function readReplaySaveSequenceSidecar(statePath) {
+  try {
+    const dir = path.dirname(statePath);
+    const sidecarPath = path.join(dir, 'replay_save_sequence.json');
+    if (!fs.existsSync(sidecarPath)) return null;
+    const raw = fs.readFileSync(sidecarPath, 'utf-8');
+    return raw;
+  } catch (_e) {
+    return null;
+  }
+}
+
+/** Forward a replay save sequence (raw JSON string of GameState[]) to renderers. */
+function sendReplaySequenceToRenderer(sequenceJson, excludeSender) {
+  if (!sequenceJson) return;
+  const targets = [mainWindow, tacticalMapWindow];
+  for (const win of targets) {
+    if (win && !win.isDestroyed()) {
+      if (excludeSender && win.webContents === excludeSender) continue;
+      win.webContents.send('replay-sequence-updated', sequenceJson);
+    }
+  }
+}
+
 function sendTurnReportToRenderer(report) {
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
@@ -643,6 +678,9 @@ function createMainWindow(options = {}) {
               const { state } = await sim.loadStateFromPath(result.filePaths[0]);
               currentGameStateJson = sim.serializeState(state);
               sendGameStateToRenderer(currentGameStateJson);
+              // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
+              const sequenceJson = readReplaySaveSequenceSidecar(result.filePaths[0]);
+              if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
             } catch (e) { console.error('Load state failed:', e); }
           }
         },
@@ -1468,7 +1506,13 @@ app.whenReady().then(() => {
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
-      return { ok: true, stateJson: currentGameStateJson };
+      // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
+      // Carried alongside the state so the VerdictScreen Replay tab works
+      // when the user loads a final_save.json that has a sibling
+      // replay_save_sequence.json (produced by the scenario harness).
+      const sequenceJson = readReplaySaveSequenceSidecar(result.filePaths[0]);
+      if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson, _event.sender);
+      return { ok: true, stateJson: currentGameStateJson, replaySequenceJson: sequenceJson ?? null };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
