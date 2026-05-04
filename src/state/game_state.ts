@@ -2010,6 +2010,16 @@ recruitment_modifiers?: Array<{
     pool_multiplier: number;
     expires_turn: number;
 }>;
+/** Active equipment-quality modifiers. Stack multiplicatively with combat power
+ *  in `computeAttackerPower` / `computeDefenderPower`. Reader returns 1.0
+ *  (no-op, byte-stable) when this array is empty/undefined. Writer:
+ *  `applyEquipmentQualityModifier` in apply_effects.ts. GC by
+ *  `cleanupExpiredEventModifiers`. Single canonical owner; no parallel tensor. */
+equipment_quality_modifiers?: Array<{
+    faction: FactionId;
+    multiplier: number;
+    expires_turn: number;
+}>;
 /** Active alliance floor/ceiling locks on the RBiH-HRHB alliance value. */
 alliance_locks?: Array<{
     mode: 'floor' | 'ceiling';

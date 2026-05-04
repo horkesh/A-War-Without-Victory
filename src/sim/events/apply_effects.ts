@@ -8,7 +8,12 @@ import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
 import { getActiveAllianceBounds } from './active_modifiers.js';
 
-/** Deterministic kind ordering for effect application (alphabetical). */
+/** Deterministic kind ordering for effect application (alphabetical).
+ *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
+ *  new entry. Hash-stability on the historical 40w path is preserved because
+ *  the new kind only fires on csq_weapons_embargo_partial_lift (turn>=60),
+ *  which is outside the 40w window. The sort is stable, so prior kinds keep
+ *  their relative order; only the absolute index numbers shift. */
 const EFFECT_KIND_ORDER: Record<string, number> = {
     aggression_modifier: 0,
     alliance_change: 1,
@@ -19,14 +24,15 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     cost_ledger_annotation: 6,
     doctrine_constraint: 7,
     equipment_grant: 8,
-    guerrilla_threat: 9,
-    humanitarian_impact: 10,
-    morale_change: 11,
-    narrative: 12,
-    negotiation_capital: 13,
-    patron_pressure: 14,
-    recruitment_modifier: 15,
-    supply_delta: 16,
+    equipment_quality_modifier: 9,
+    guerrilla_threat: 10,
+    humanitarian_impact: 11,
+    morale_change: 12,
+    narrative: 13,
+    negotiation_capital: 14,
+    patron_pressure: 15,
+    recruitment_modifier: 16,
+    supply_delta: 17,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -89,6 +95,9 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             break;
         case 'recruitment_modifier':
             applyRecruitmentModifier(state, effect.faction, effect.pool_multiplier, effect.duration_turns);
+            break;
+        case 'equipment_quality_modifier':
+            applyEquipmentQualityModifier(state, effect.faction, effect.multiplier, effect.duration_turns);
             break;
         case 'doctrine_constraint':
             applyDoctrineConstraint(state, effect.constraint, effect.duration_turns);
@@ -311,6 +320,28 @@ function applyRecruitmentModifier(
     state.military.recruitment_modifiers.push({
         faction,
         pool_multiplier: poolMultiplier,
+        expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** Push an equipment-quality modifier onto state.military.equipment_quality_modifiers.
+ *  Multiplier is passed through unclamped — consumer
+ *  (`getActiveEquipmentQualityMultiplier` in active_modifiers.ts) stacks
+ *  multiplicatively. Combat-math consumer gates `if (eqMult !== 1.0)` so the
+ *  no-event historical path is byte-stable. */
+function applyEquipmentQualityModifier(
+    state: GameState,
+    faction: FactionId,
+    multiplier: number,
+    durationTurns: number
+): void {
+    if (!state.military.equipment_quality_modifiers) {
+        state.military.equipment_quality_modifiers = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.equipment_quality_modifiers.push({
+        faction,
+        multiplier,
         expires_turn: currentTurn + durationTurns,
     });
 }

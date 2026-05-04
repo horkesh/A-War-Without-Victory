@@ -30,6 +30,32 @@ export function getActiveRecruitmentMultiplier(
     return product;
 }
 
+/** Product of all active equipment-quality modifiers for the given faction.
+ *  Stacks multiplicatively. Returns 1.0 (no-op, byte-stable) when no
+ *  modifiers are active for the faction. The 1.0 fast-path is the contract
+ *  the combat-math consumer relies on to gate `if (eqMult !== 1.0)` and
+ *  preserve historical byte-stability when no embargo-lift / arms-flow
+ *  events have fired.
+ *
+ *  Mirrors `getActiveRecruitmentMultiplier` exactly (faction-scoped,
+ *  multiplicative, time-bounded). Audit:
+ *  `docs/40_reports/audits/20260504_EQUIPMENT_QUALITY_MODIFIER_SUBSTRATE.md`. */
+export function getActiveEquipmentQualityMultiplier(
+    state: GameState,
+    faction: FactionId,
+    currentTurn: number
+): number {
+    const mods = state.military.equipment_quality_modifiers;
+    if (!mods || mods.length === 0) return 1.0;
+    let product = 1.0;
+    for (const m of mods) {
+        if (m.expires_turn <= currentTurn) continue;
+        if (m.faction !== faction) continue;
+        product *= m.multiplier;
+    }
+    return product;
+}
+
 /** Tightest floor and loosest ceiling across active alliance locks. Undefined
  *  when no lock of that mode is active. Multiple locks of the same mode take
  *  the most restrictive value (highest floor, lowest ceiling). */
@@ -100,6 +126,7 @@ export function getActiveGuerrillaThreatIntensity(
  *  Scoped to the v0.9.0 Consequence System's own arrays:
  *    - `state.military.guerrilla_threats`
  *    - `state.military.recruitment_modifiers`
+ *    - `state.military.equipment_quality_modifiers`
  *    - `state.military.alliance_locks`
  *    - `state.military.bot_priority_shifts`
  *
@@ -124,6 +151,9 @@ export function cleanupExpiredEventModifiers(
     }
     if (mil.recruitment_modifiers) {
         mil.recruitment_modifiers = mil.recruitment_modifiers.filter(m => m.expires_turn > currentTurn);
+    }
+    if (mil.equipment_quality_modifiers) {
+        mil.equipment_quality_modifiers = mil.equipment_quality_modifiers.filter(m => m.expires_turn > currentTurn);
     }
     if (mil.alliance_locks) {
         mil.alliance_locks = mil.alliance_locks.filter(l => l.expires_turn > currentTurn);

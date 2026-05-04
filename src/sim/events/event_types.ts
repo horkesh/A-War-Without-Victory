@@ -203,6 +203,30 @@ export interface EventEffectRecruitmentModifier {
     duration_turns: number;
 }
 
+/** Effect: faction-scoped multiplicative modifier on combat power.
+ *  Mirrors `recruitment_modifier` shape: faction-scoped, multiplicative, time-bounded.
+ *  Stacks multiplicatively across simultaneously-active modifiers via the
+ *  `getActiveEquipmentQualityMultiplier` reader. Returns 1.0 (no-op) when no
+ *  modifier is active for the faction.
+ *
+ *  Consumed at exactly one site: `computeAttackerPower` and `computeDefenderPower`
+ *  in `src/sim/combat/combat_math.ts`, gated `if (eqMult !== 1.0)` so the
+ *  arithmetic on the historical (no-event) path is byte-identical.
+ *
+ *  Models the combat-effectiveness uplift from arms-flow / embargo-lift events
+ *  (Iran flights, Croatia weapons pipeline, post-Dayton transition, partial
+ *  embargo lift). The "+5 quality" embargo-lift framing in the spec is
+ *  interpreted as +5% multiplicative power, since no 0-100 quality score
+ *  exists in the engine — see audit
+ *  `docs/40_reports/audits/20260504_EQUIPMENT_QUALITY_MODIFIER_SUBSTRATE.md`. */
+export interface EventEffectEquipmentQualityModifier {
+    kind: 'equipment_quality_modifier';
+    faction: FactionId;
+    /** Multiplicative on combat power. 1.05 = "+5%". Must be > 0. */
+    multiplier: number;
+    duration_turns: number;
+}
+
 /** Effect: pushes operation/doctrine/scope restrictions onto the existing
  *  `state.military.event_constraints` bus (see `event_constraints.ts`).
  *  Consumer path already live — `isOperationBlocked`, `getActiveDoctrineOverride`,
@@ -265,6 +289,7 @@ export type EventEffect =
     // v0.9.0 Consequence System
     | EventEffectGuerrillaThreat
     | EventEffectRecruitmentModifier
+    | EventEffectEquipmentQualityModifier
     | EventEffectDoctrineConstraint
     | EventEffectAllianceLock
     | EventEffectBotPriorityShift

@@ -29,6 +29,7 @@ import { getLocalFrontDensityModifier } from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
+import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome type
@@ -1011,7 +1012,14 @@ export function computeAttackerPower(
     const fatigueMult = getFatigueMult(formation, 'attack');
     const homeMult = getHomeDistanceMultFromCache(state, formation);
     const moralePenalty = getCriticalMoralePenalty(formation);
-    return base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    let power = base * postureMult * supplyMult * corpsMult * opMult * ogMult * disruptionMult * heavyMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    // LANE-NIGHTSHIFT-EQUIPMENT-QUALITY-MODIFIER-SUBSTRATE: faction-scoped power
+    // multiplier from arms-flow / embargo-lift events. Gated `!== 1.0` so the
+    // historical (no-event) path is byte-stable — same pattern used to keep
+    // recruitment_modifier hash-neutral on 40w.
+    const eqMult = getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0);
+    if (eqMult !== 1.0) power *= eqMult;
+    return power;
 }
 
 export function computeDefenderPower(
@@ -1075,7 +1083,13 @@ export function computeDefenderPower(
     const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
     const finalEnvMult = Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP);
 
-    return base * postureMult * supplyMult * finalEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    let power = base * postureMult * supplyMult * finalEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    // LANE-NIGHTSHIFT-EQUIPMENT-QUALITY-MODIFIER-SUBSTRATE: faction-scoped power
+    // multiplier from arms-flow / embargo-lift events. Gated `!== 1.0` so the
+    // historical (no-event) path is byte-stable.
+    const eqMult = getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0);
+    if (eqMult !== 1.0) power *= eqMult;
+    return power;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1866,5 +1866,60 @@
       "refugee_absorption_strain_RBiH": true
     },
     "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (economic D3). Predicate uses additive `displaced_in_aggregate` reading state.displacement.displacement_state[*].displaced_in_by_faction[faction]. AUDIT-ONLY enclave-origin framing per spec; rupture wiring untouched."
+  },
+  {
+    "id": "csq_weapons_embargo_partial_lift",
+    "title": "Weapons Embargo Partially Lifted",
+    "narrative": "Pressure from Washington and the Contact Group cracks the UN arms embargo. Channels that had been informal — Iranian flights through Croatia, Saudi cash, the Pakistani pipeline — are tacitly normalized. Trainers arrive. Equipment that was previously smuggled now arrives by manifest. The embargo on paper survives; the embargo in fact does not.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "dimension_above",
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "threshold": 60
+          },
+          {
+            "type": "patron_pressure_above",
+            "faction": "RBiH",
+            "threshold": 15
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "International pressure forces a partial lift of the UN arms embargo on RBiH."
+    },
+    "effects": [
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.10,
+        "duration_turns": 30
+      },
+      {
+        "kind": "equipment_quality_modifier",
+        "faction": "RBiH",
+        "multiplier": 1.05,
+        "duration_turns": 30
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": 10
+      }
+    ],
+    "historical_source": "LANE-NIGHTSHIFT-EQUIPMENT-QUALITY-MODIFIER-SUBSTRATE (Mission D event #11, deferred from LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH pending substrate audit). Spec per docs/40_reports/audits/20260504_EQUIPMENT_QUALITY_MODIFIER_SUBSTRATE.md (Option A). Reflects the de-facto US/Contact-Group acquiescence to the Iran-Croatia weapons pipeline and post-Washington-Agreement training flows that materially upgraded ARBiH combat-effectiveness in 1994-1995. The +5% quality is interpreted as multiplicative power, not a quality score, since no 0-100 quality field exists in the engine."
   }
 ]
