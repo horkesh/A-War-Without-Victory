@@ -1,7 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip 4-commit autonomous batch `51cb4b66..8d1bfee4` — **v0.9.4 PHASE 1+2 P1 BACKLOG FULLY CLOSED**: Z-INDEX-TOKENS canonicalization (41 files migrated; canonical 28-tier `Z` table; 359/359 wider UI regression GREEN); MODAL-WRAPPER foundation (`5fec69a6`: reusable `<Modal>` with full feature set; 10/10 lane tests); MODAL-MIGRATION (`8d1bfee4`: 4 modals migrated — RecruitmentModal, WarSummaryModal, TurnAftermathModal, AdvanceTurnModal; 218/218 regression GREEN; tutorial anchors preserved). All 5 audit-identified P1 items shipped with foundations + first migration batch.)
-**Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
+**Last Updated:** 2026-05-05 (post-trip 9-commit autonomous batch `c2e11c72..c2d209e3` — **v0.9.5 PLATFORM PACKAGING PARTIAL CLOSURE**: audit + 5 parallel lanes + version bump (P1-G1 icon, G2 wiring, G5+G6 CI matrix, G7 version, G8 release workflow; P2-G1 AppUserModelId, G3 release-notes generator, G4+G5 test matrix doc) + 2 backfills. 6/8 P1 + 4/8 P2 gaps closed. Open: P1-G3+G4 (first real builds — manual host execution only). package.json semver now `0.9.5-alpha.1`.)
+**Current Version:** v0.9.5-alpha.1 (formally bumped 2026-05-05 in commit `c2d209e3`; v0.9.5 closure PARTIAL pending manual host G3+G4 build runs)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -503,12 +503,23 @@ Loading screens, transitions, shell polish, warroom art finalization, icon polis
 Plan: `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md`
 Supporting inputs: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`, `docs/plans/2026-03-25-ghost-map-exhaustion-clock-spec.md`
 
-### v0.9.5 â€” Platform Packaging + Store
+### v0.9.5 â€” Platform Packaging + Store **(PARTIAL — Linux AppImage + Win unsigned NSIS pipeline + CI + release workflow shipped; first-real-build pending manual host execution)**
 
 Windows installer (Electron-builder, auto-update). Mac build (notarized, universal binary). Linux build (AppImage or Flatpak). Steam integration (Steamworks SDK, achievements, cloud saves). Store page, press kit, community setup.
 
 Plan: `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md`
 Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
+
+**v0.9.5 audit + closure (2026-05-05, 9-commit batch `c2e11c72..c2d209e3`):** Audit `docs/40_reports/audits/20260505_V095_PLATFORM_PACKAGING_AUDIT.md` named 8 P1 + 8 P2 gaps with 10 prioritized lanes. **6 of 8 P1 closed** (G1 icon source, G2 BrowserWindow icon wiring, G5 CI Linux package, G6 CI Win package, G7 version bump 0.8.1→0.9.5-alpha.1, G8 release workflow); **4 of 8 P2 closed** (G1 AppUserModelId, G3 release-notes generator, G4 platform test matrix doc, G5 Linux distro coverage). package.json semver now reflects v0.9.x band reality.
+
+**Open from audit (cannot be agent-dispatched — require manual host execution):**
+- P1-G3: first real Linux AppImage build via `desktop:package:linux:appimage` end-to-end on a Linux host (or WSL2). Smoke verifier ready; CI pipeline ready; manual install/launch/save/load/uninstall checklist ready in `docs/40_reports/PLATFORM_TEST_MATRIX.md`.
+- P1-G4: first real Win unsigned NSIS build via `desktop:package:win:nsis` end-to-end on Win10/11 host. Same readiness state as G3.
+- P2-G2: reproducible build harness (gated on G3+G4 landing first).
+
+**Out of v0.9.5 scope (audit §6 R7):** macOS notarized DMG, Steam integration, signed Win cert, electron-updater auto-update — all flagged for v0.9.6+ / v1.0 prep.
+
+**Closure threshold:** v0.9.5 is closure-floor PARTIAL — all infrastructure (icon, version, CI matrix, release workflow, test matrix, release-notes generator, RELEASE_PROCESS.md) is shipped + ready to support manual G3/G4 runs. The release pipeline can produce a downloadable artifact pair the moment G3+G4 are exercised on host.
 
 ---
 

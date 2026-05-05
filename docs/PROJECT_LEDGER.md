@@ -1,3 +1,20 @@
+## [2026-05-05] v0.9.5 Platform Packaging closure batch — 9 commits, 8/8 P1 gaps closed (except G3+G4 which require manual host)
+
+**Audit-driven 5-lane parallel dispatch** on top of `c2e11c72` (`docs(audits): v0.9.5 Platform Packaging closure audit + backlog`). Each agent owned exclusive files; one git index race surfaced and was recovered cleanly. All Ring N/A (sim-orthogonal infrastructure); zero §6 surface; 40w hash drift = NONE by construction (zero deterministic-state-path reads of `package.json` version).
+
+**Commits (in push order):**
+- `c2e11c72` — v0.9.5 Platform Packaging closure audit + backlog (8 P1 + 8 P2 gaps named, 10 lanes prioritized).
+- `55b4653a` + `f9f9c351` — `LANE-V095-CI-PACKAGE-MATRIX`: extends `desktop-release-guard.yml` with electron-builder caching, AppImage + NSIS package builds, `--report-only` smokes, 14-day artifact retention. Closes P1-G5 + P1-G6 + QW-4.
+- `9c9f4a3c` — `LANE-V095-PLATFORM-TEST-MATRIX-DOC`: `docs/40_reports/PLATFORM_TEST_MATRIX.md` (289 lines, 8 sections, manual clean-VM checklist) + lane report. Closes P2-G4 + P2-G5. **Self-corrected from a sibling-sweep:** initial commit `db974e19` swept 3 sibling-lane staged files due to concurrent index activity; agent recovered via `git reset --soft HEAD^` + `git restore --staged` + explicit pathspec re-commit.
+- `9d38f09b` + `32a752a0` — `LANE-V095-RELEASE-WORKFLOW`: `.github/workflows/release.yml` (4 jobs, `v*` tag + `workflow_dispatch` dry-run, `softprops/action-gh-release@v2`, default `GITHUB_TOKEN` only) + `docs/RELEASE_PROCESS.md` (semver convention, manual fallback, SmartScreen + FUSE2 player-facing notes). Closes P1-G8 + QW-5.
+- `5799a6d1` — `LANE-V095-PLATFORM-ICON-APPID` (combined L1+L6 since both touch `electron-main.cjs`): `build/icon.png` 512×512 + `build/icon.ico` multi-res, `getAppIconPath()` helper + BrowserWindow icon wiring on both constructors, `setAppUserModelId('com.awwv.desktop')` win32-gated, faction-agnostic icon (mountain silhouette + faded star + AWWV wordmark). 5/5 contract tests + 5/5 packaging regression GREEN. Closes P1-G1 + P1-G2 + P2-G1. Justified `.gitignore` edit: replaced broad `build/` ignore with explicit re-ignores of electron-builder staging subdirs so source icons land but staging output stays out.
+- `953ab752` — `LANE-V095-RELEASE-NOTES-GENERATOR`: `tools/release/generate_release_notes.cjs` (deterministic; conventional-commit-grouped output; pathspec CLI) + 4 lane tests. Closes P2-G3. **Recovered by parent agent** after sub-agent's report cut off mid-"Now committing:"; parent verified files clean (4/4 tests GREEN, no `Math.random`/`Date.now`/`new Date(`/`performance.now`) and committed via explicit pathspec.
+- `c2d209e3` — `LANE-V095-VERSION-BUMP`: `package.json` `0.8.1` → `0.9.5-alpha.1`. Closes P1-G7 + QW-1. Audit R4 verification passed cleanly (zero version reads in any code path).
+
+**Audit closure scoreboard:** P1 = 6/8 closed (G1, G2, G5, G6, G7, G8); P2 = 4/8 closed (G1, G3, G4, G5). **Open:** P1-G3 + P1-G4 (first real Linux AppImage + Win NSIS build — requires manual host execution per audit §3). P2-G2 (reproducible build harness; gated on G3+G4). P2-G6/G7/G8 (macOS, Steam, auto-update — out of v0.9.5 scope per audit §6 R7).
+
+**v0.9.5 closure threshold floor reached:** all 5 P1 audit-recommended lanes shipped + version bump + 4 P2 quick wins. Remaining P1-G3/G4 are bench-execution lanes (run electron-builder on a Linux + Win host; manually validate install/launch/save/load/uninstall per `PLATFORM_TEST_MATRIX.md`); they cannot be agent-dispatched. The release pipeline + CI matrix + icon + version + test plan + release-notes generator + release process doc are all ready to support those manual runs.
+
 ## [2026-05-04] Wave 4: Reconstitution policy review + Events Wave 4 + Test Phase 4 + Bot-orders instrumentation STOP-AND-ASK
 
 **Four parallel lanes dispatched** in user-authorized "do more in parallel" cascade after Wave 3 closure. All Ring 1 / faction-agnostic / no §6 sign-off required. Three shipped clean; one STOP-AND-ASK (revert).

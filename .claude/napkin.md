@@ -16,7 +16,28 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
-## Current State (2026-05-05, v0.9.4 P1 BACKLOG CLOSED — Z-index + Modal wrapper + Modal migration on top of `a6f277fa`)
+## Current State (2026-05-05, v0.9.5 PLATFORM PACKAGING — 6 of 8 P1 + 4 of 8 P2 gaps CLOSED, all pushed)
+**9-commit batch shipped + pushed (`c2e11c72..c2d209e3`):** v0.9.5 Platform Packaging audit + 5 parallel lanes + 2 backfills + version bump. All Ring N/A (sim-orthogonal); 40w hash drift = NONE by construction (zero `npm_package_version` reads in any code path).
+
+- `c2e11c72` audit + backlog (8+8 gaps, 10 lanes prioritized)
+- `55b4653a`+`f9f9c351` `LANE-V095-CI-PACKAGE-MATRIX` (P1-G5+G6+QW-4) — desktop-release-guard.yml extended w/ caching + AppImage/NSIS package + smoke + artifact upload
+- `9c9f4a3c` `LANE-V095-PLATFORM-TEST-MATRIX-DOC` (P2-G4+G5) — `docs/40_reports/PLATFORM_TEST_MATRIX.md` 289-line manual clean-VM checklist; self-recovered from sibling-sweep at `db974e19` via reset-soft + pathspec
+- `9d38f09b`+`32a752a0` `LANE-V095-RELEASE-WORKFLOW` (P1-G8+QW-5) — `.github/workflows/release.yml` 4-job matrix + `docs/RELEASE_PROCESS.md`
+- `5799a6d1` `LANE-V095-PLATFORM-ICON-APPID` (P1-G1+G2+P2-G1) — combined L1+L6 since both touch electron-main.cjs; `build/icon.png` 512×512 + `build/icon.ico` multi-res; `getAppIconPath()` helper; `setAppUserModelId('com.awwv.desktop')` win32-gated; faction-agnostic icon (mountain silhouette + faded star + AWWV wordmark)
+- `953ab752` `LANE-V095-RELEASE-NOTES-GENERATOR` (P2-G3) — recovered by parent after sub-agent's report cut off mid-"Now committing:"; pathspec-form commit
+- `c2d209e3` `LANE-V095-VERSION-BUMP` (P1-G7+QW-1) — package.json 0.8.1 → 0.9.5-alpha.1; tsc clean + 14/14 packaging tests GREEN
+
+**Open from audit (CANNOT be agent-dispatched):**
+- P1-G3 + P1-G4: first-real-build on Linux + Windows hosts (electron-builder + smoke verification + manual install/launch/save/load/uninstall per `PLATFORM_TEST_MATRIX.md`).
+- P2-G2: reproducible-build harness (gated on G3+G4).
+
+**Out of v0.9.5 scope (audit §6 R7):** macOS, Steam, signed-Win, auto-update — flagged for v0.9.6+ / v1.0 prep.
+
+**Two new durable lessons in KNOWLEDGE:** (1) parallel-lane git index race recovery via `git reset --soft HEAD^` + `git commit -o <files> -m "..."` pathspec form (use `-o` not `git add && git commit` in any parallel-lane batch); (2) sub-agent commit-step cut-off recovered by parent via verify-files + pathspec-form commit on agent's behalf.
+
+**LANE-2026-05-02-TRIGGERED-OP-TEMPORAL-TRACE re-verified clean:** already shipped at `1e68d8dc` before this session; 67/67 focused regression GREEN, tsc clean against current main `c2e11c72`. No new commits required. Lane retired the queued-order predicate hypothesis as structurally impossible per Codex P2. Real Krivaja blocker = brigade-roster lifecycle (3/5 INACTIVE pre-t179); Stupčanica blocker = defender combat-math stack (Phase 4d). Both named successor handoffs.
+
+## Previous State (2026-05-05, v0.9.4 P1 BACKLOG CLOSED — Z-index + Modal wrapper + Modal migration on top of `a6f277fa`)
 **4 commits shipped: `51cb4b66`+`f282f9c1` (Z-INDEX two-commit) + `5fec69a6` (MODAL-WRAPPER foundation) + `8d1bfee4` (MODAL-MIGRATION 4 modals).**
 
 **`51cb4b66`+`f282f9c1` Z-INDEX-TOKENS canonicalization:** Two-commit pattern. `src/ui/shared/zIndex.ts` canonical 28-tier frozen `Z` table. 41 React-shell source files migrated; 49 z-index literal occurrences eliminated. `tests/z_index_canonical.test.ts` 7 tests covering frozen Z, byte-stable values, monotonic ordering, no residual literals. Migration policy: Tailwind `z-[N]` arbitrary classes replaced with inline `style={{ zIndex: Z.X }}` (Tailwind JIT detection guarantee for canonical tokens). 359/359 wider UI regression GREEN; Phase-3 visual layer T1-T8 32/32 GREEN; tsc clean. Stacking order preserved byte-for-byte. **Deferred (out-of-scope):** ~28 CSS/debug-viewer literals in `warroom/styles/*.css`, `warroom/index.html`, `map_viewer_*` debug viewer, `globals.css`, `painter.html` — separate cleanup lane.
