@@ -2,12 +2,20 @@
  * Event Decision Modal.
  * Displays a pending event decision with response options for the player.
  * Matches EventModal's parchment/dispatch aesthetic.
+ *
+ * Migrated to the shared `<Modal>` wrapper in
+ * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-respond modal:
+ * `dismissible={false}` (no ESC, no click-outside) — the only valid close
+ * path is `onRespond(eventId, responseId)` (parent stops rendering this
+ * modal once the event is resolved). The bespoke `onRespond` callback
+ * stays on inner panel content (`<ResponseButton>`), NOT on Modal props.
  */
 
 import type { PendingEventDecision, EventResponseOption, EventEffect } from '../../../sim/events/event_types';
 import { FACTION_COLORS } from '../utils/theme';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 export interface EventDecisionModalProps {
     decision: PendingEventDecision;
@@ -67,9 +75,15 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
     const factionColor = FACTION_COLORS[decision.faction] ?? 'text-accent-gold';
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center" style={{ zIndex: Z.CRITICAL_MODAL }}>
-            <div className="bg-panel-bg border border-panel-border rounded-lg p-6 max-w-[560px] w-[90%]
-                            shadow-xl backdrop-blur-sm">
+        <Modal
+            isOpen={true}
+            dismissible={false}
+            zIndex={Z.CRITICAL_MODAL}
+            ariaLabelledBy="event-decision-title"
+            backdropClassName="bg-black/70"
+            panelClassName="bg-panel-bg border border-panel-border rounded-lg p-6 max-w-[560px] w-[90%] shadow-xl backdrop-blur-sm"
+        >
+            <>
                 {/* Category stamp */}
                 <div className="flex items-center gap-3 mb-4">
                     <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-panel-bg bg-accent-gold px-2 py-0.5 rounded"
@@ -82,7 +96,7 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
                 </div>
 
                 {/* Title */}
-                <h3 className="font-sans text-base text-text-primary font-semibold mb-4">
+                <h3 id="event-decision-title" className="font-sans text-base text-text-primary font-semibold mb-4">
                     {decision.event_title}
                 </h3>
 
@@ -99,7 +113,7 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
                         />
                     ))}
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }

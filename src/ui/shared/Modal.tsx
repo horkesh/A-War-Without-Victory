@@ -14,6 +14,17 @@
  * This wrapper centralizes those concerns so callers get correct behavior
  * by default, and migrating modals can shed their bespoke handlers.
  *
+ * ─── Dismissibility (LANE-V094-MODAL-DISMISSIBLE-EXTENSION) ───────────────
+ * `onClose` is OPTIONAL and `dismissible` (default `true`) is the master
+ * switch for user-initiated dismissal. Callers that omit both inherit the
+ * Wave 1 contract (ESC + click-outside fire `onClose` if provided; no-op
+ * if not). Callers that pass `dismissible={false}` opt out of both ESC
+ * and click-outside handlers entirely — the modal can ONLY be closed by
+ * the parent flipping `isOpen={false}` after a response action. Used by
+ * terminal modals (Game Over) and must-respond modals (Peace Plan, Dayton
+ * negotiation, Event decision). See the `dismissible` prop JSDoc for the
+ * full behavior matrix.
+ *
  * ─── Faction-symmetric mechanism ──────────────────────────────────────────
  * Modal styling is data — no faction-specific branching. Backdrop / panel
  * colors are derived from the existing palette tokens (`bg-panel-bg`,
@@ -53,9 +64,39 @@ export interface ModalProps {
     /**
      * Called when the user dismisses the modal (ESC key, click-outside, or
      * close button via the panel). Migrating modals pass their existing
-     * `onClose` / `onDismiss` here.
+     * `onClose` / `onDismiss` here. Optional — terminal / must-respond
+     * modals may omit it together with `dismissible={false}`.
+     *
+     * Behavior:
+     *   - `dismissible !== false` and `onClose` provided: existing behavior
+     *     identical to the original (Wave 1) contract.
+     *   - `dismissible !== false` and `onClose` undefined: ESC + click-outside
+     *     fire no-op; consumer can omit `onClose` without crashing.
+     *   - `dismissible === false`: handlers not installed at all; `onClose`
+     *     may be undefined. Modal is closed only by the parent flipping
+     *     `isOpen={false}` (e.g., after a response action).
      */
-    onClose: () => void;
+    onClose?: () => void;
+    /**
+     * Master switch for user-initiated dismissal. Defaults to `true`.
+     *
+     *   - `true` (default): existing semantics — `closeOnEscape` and
+     *     `closeOnBackdropClick` apply.
+     *   - `false`: ESC + click-outside are both disabled regardless of
+     *     `closeOnEscape` / `closeOnBackdropClick`. Use for terminal
+     *     modals (Game Over) and must-respond modals (Peace Plan, Dayton
+     *     negotiation, Event decision) where the only valid close path
+     *     is the parent flipping `isOpen={false}` after a response.
+     *
+     * Examples:
+     *   `<Modal isOpen={open} onClose={close} />`              // dismissible
+     *   `<Modal isOpen={open} dismissible={false}>...</Modal>` // must-respond
+     *   `<Modal isOpen={open} dismissible={false}>...</Modal>` // terminal
+     *
+     * Backward-compatibility: callers that omit `dismissible` get
+     * `dismissible=true` and identical behavior to the pre-extension wrapper.
+     */
+    dismissible?: boolean;
     /**
      * Children rendered inside the panel. Migrating modals lift their
      * panel-content subtree directly into here.
@@ -143,6 +184,7 @@ export function Modal({
     onClose,
     children,
     zIndex = Z.MODAL,
+    dismissible = true,
     closeOnEscape = true,
     closeOnBackdropClick = true,
     trapFocus = true,
@@ -159,18 +201,21 @@ export function Modal({
 
     // ESC dismissal — installed at window level so a focused interactive
     // element inside the panel still receives the dismiss.
+    // `dismissible === false` is a master switch that force-skips this
+    // effect regardless of `closeOnEscape`. When `onClose` is undefined the
+    // dismiss is a no-op (no crash) — consistent with the optional contract.
     useEffect(() => {
-        if (!isOpen || !closeOnEscape) return;
+        if (!isOpen || !dismissible || !closeOnEscape) return;
         const handler = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
-                onClose();
+                onClose?.();
             }
         };
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [isOpen, closeOnEscape, onClose]);
+    }, [isOpen, dismissible, closeOnEscape, onClose]);
 
     // Focus management — focus first focusable on open; restore prior
     // focus on close.
@@ -228,8 +273,13 @@ export function Modal({
 
     if (!isOpen) return null;
 
+    // Backdrop click — disabled when `dismissible === false` (master switch),
+    // even if `closeOnBackdropClick` is true. When `onClose` is undefined the
+    // dismiss is a no-op so consumers can omit it on terminal / must-respond
+    // modals without crashing.
     const handleBackdropClick = () => {
-        if (closeOnBackdropClick) onClose();
+        if (!dismissible || !closeOnBackdropClick) return;
+        onClose?.();
     };
 
     return (

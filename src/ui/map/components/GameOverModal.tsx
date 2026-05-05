@@ -1,11 +1,19 @@
 /**
  * Game Over Modal — shown when state.meta.game_over is true.
  * Displays outcome, faction standings, and options (New Game / Load).
+ *
+ * Migrated to the shared `<Modal>` wrapper in
+ * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Terminal modal: `dismissible={false}`
+ * (no ESC, no click-outside) — the only valid close path is starting a new
+ * game (`window.location.reload()`) or loading a save (which replaces the
+ * game state and clears `gameOver`). No `onClose` callback exists or is
+ * needed.
  */
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
     victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures — but at what cost?' },
@@ -26,6 +34,7 @@ export function GameOverModal() {
     const ipc = useIPC();
 
     if (!loadedGameState?.gameOver) return null;
+    const isOpen = true;
 
     const { title, subtitle } = getOutcomeDisplay(loadedGameState.gameOutcome);
     const turn = loadedGameState.turn ?? 0;
@@ -53,14 +62,21 @@ export function GameOverModal() {
     const factionIds = ['RBiH', 'RS', 'HRHB'];
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm" style={{ zIndex: Z.GAME_OVER }}>
-            <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+        <Modal
+            isOpen={isOpen}
+            dismissible={false}
+            zIndex={Z.GAME_OVER}
+            ariaLabelledBy="game-over-title"
+            backdropClassName="bg-black/80 backdrop-blur-sm"
+            panelClassName="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+        >
+            <>
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
                         {date} — A War Without Victory
                     </div>
-                    <div className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
+                    <div id="game-over-title" className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
                         {title}
                     </div>
                     <div className="text-[11px] text-text-secondary italic leading-relaxed max-w-sm mx-auto">
@@ -118,7 +134,7 @@ export function GameOverModal() {
                         </button>
                     )}
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }

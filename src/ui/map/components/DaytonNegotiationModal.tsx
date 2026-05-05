@@ -6,6 +6,14 @@
  * On resolution, game ends and VerdictScreen appears.
  *
  * v0.5.0: Single round (submit → resolve). v0.6.3 extends to 3 rounds with AI dialogue.
+ *
+ * Migrated to the shared `<Modal>` wrapper in
+ * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-submit modal:
+ * `dismissible={false}` (no ESC, no click-outside) — the only valid close
+ * path is `handleSubmit` -> IPC `resolveDayton` -> game state push that
+ * clears `pendingDayton` (parent stops rendering this modal). No `onClose`
+ * prop exists; the bespoke `Submit Proposal` button stays on the inner
+ * panel content, NOT on Modal props.
  */
 import { useState } from 'react';
 import type { LoadedGameState } from '../data/types';
@@ -13,6 +21,7 @@ import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
@@ -88,13 +97,19 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm" style={{ zIndex: Z.CRITICAL_MODAL }}>
-            <div className="w-[95%] max-w-[800px] max-h-[92vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
-                 style={{
-                     background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
-                     fontFamily: 'Georgia, "Times New Roman", serif',
-                 }}>
-
+        <Modal
+            isOpen={true}
+            dismissible={false}
+            zIndex={Z.CRITICAL_MODAL}
+            ariaLabelledBy="dayton-negotiation-title"
+            backdropClassName="bg-black/80 backdrop-blur-sm"
+            panelClassName="w-[95%] max-w-[800px] max-h-[92vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
+            panelStyle={{
+                background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
+                fontFamily: 'Georgia, "Times New Roman", serif',
+            }}
+        >
+            <>
                 {/* Header */}
                 <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
                     <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
@@ -103,7 +118,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                     <div className="text-[10px] uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
                         General Framework Agreement for Peace
                     </div>
-                    <h2 className="text-[22px] font-bold text-[#2a2016] leading-tight">
+                    <h2 id="dayton-negotiation-title" className="text-[22px] font-bold text-[#2a2016] leading-tight">
                         Dayton Peace Accords
                     </h2>
                     <div className="text-[11px] text-[#6a5a40] mt-1" style={{ fontFamily: 'Courier New, monospace' }}>
@@ -230,7 +245,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }

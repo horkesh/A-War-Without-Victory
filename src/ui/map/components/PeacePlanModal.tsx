@@ -4,12 +4,21 @@
  * Renders when a pending peace plan exists in LoadedGameState.
  * Player must accept or reject before proceeding. Bot responses displayed alongside.
  * Paper document aesthetic matching EventModal.
+ *
+ * Migrated to the shared `<Modal>` wrapper in
+ * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-respond modal:
+ * `dismissible={false}` (no ESC, no click-outside) — the only valid close
+ * path is the player choosing Accept or Reject, which calls `onDismiss`
+ * (parent flips render guard) and resolves the plan via IPC. The
+ * `onDismiss` prop is preserved on the panel content (NOT passed to Modal
+ * as `onClose`) since Modal's master switch is `dismissible={false}`.
  */
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -50,13 +59,19 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const splitTotal = plan.proposedSplit.RBiH + plan.proposedSplit.RS + plan.proposedSplit.HRHB;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ zIndex: Z.CRITICAL_MODAL }}>
-            <div className="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
-                 style={{
-                     background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
-                     fontFamily: 'Georgia, "Times New Roman", serif',
-                 }}>
-
+        <Modal
+            isOpen={true}
+            dismissible={false}
+            zIndex={Z.CRITICAL_MODAL}
+            ariaLabelledBy="peace-plan-title"
+            backdropClassName="bg-black/70 backdrop-blur-sm"
+            panelClassName="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
+            panelStyle={{
+                background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
+                fontFamily: 'Georgia, "Times New Roman", serif',
+            }}
+        >
+            <>
                 {/* Header — document stamp */}
                 <div className="relative px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30">
                     <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
@@ -65,7 +80,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     <div className="text-[10px] uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
                         International Peace Proposal
                     </div>
-                    <h2 className="text-[20px] font-bold text-[#2a2016] leading-tight">
+                    <h2 id="peace-plan-title" className="text-[20px] font-bold text-[#2a2016] leading-tight">
                         {plan.planName}
                     </h2>
                     <div className="text-[11px] text-[#6a5a40] mt-1"
@@ -149,7 +164,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }
