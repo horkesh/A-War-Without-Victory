@@ -2851,5 +2851,226 @@
       "winter_supply_attrition_active_RS": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8 (logistic/operational chain, seasonal variant). Predicate compounds supply_below + war_exhaustion flag + morale_average_below — three independent conditions modeling a winter logistics squeeze. Faction-agnostic mechanism; authored RS by default to mirror documented 1992-93 / 1993-94 winter VRS supply strain at altitude (BB II Ch.31, Sarajevo siege rotation logistics). Mutex flag prevents recurrence."
+  },
+  {
+    "id": "csq_war_exhaustion_high_streak_RS",
+    "title": "The Pale Quotas",
+    "narrative": "The recruitment officers in the eastern theatre stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave volunteered in 1992 with the parishes intact; the second was conscripted with the parishes already attriting; the third looks at the casualty lists and at the front lines and at the political class's communiqués and registers what the political class will not say in public. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 70 },
+          { "type": "morale_average_below", "faction": "RS", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "war_exhaustion_high_streak_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained high war_exhaustion + low avg morale; recruitment quota attenuates, cohesion erodes."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.88, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "RS", "delta": -3 },
+      { "kind": "cost_ledger_annotation", "tag": "war_exhaustion_high_streak_RS", "text": "Sustained war_exhaustion>70 and morale_avg<50 (RS variant). Recruitment -12% for 25 turns; cohesion -3 to reflect institutional fatigue. AUDIT-ONLY ledger annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": -4 }
+    ],
+    "sets_flags": {
+      "war_exhaustion_high_streak_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (mobilization/exhaustion chain, RS mirror of csq_war_exhaustion_high_streak). Predicate is structurally identical; only the faction parameter differs. Mirrors documented late-1994 / 1995 VRS manpower-pool attenuation as Croatian and joint-federation operations expanded the casualty list (BB II Ch.49; Hoare on cross-faction late-war demographic strain). Faction-symmetric mechanism — same condition kinds, same effect kinds; the predicate fires for any faction the event is parameterized against."
+  },
+  {
+    "id": "csq_supply_corridor_chronic_strain_RS",
+    "title": "The Brčko Bottleneck",
+    "narrative": "The corridor that connected the eastern enclave-belt to the western salients never closed. It also never quite worked. Trucks moved, but in fits. Ammunition arrived, but in the wrong calibres. Spare parts arrived, but late. The chronic strain on the corridor manifested in cohesion: each unit's logistics officer learned to hoard, to substitute, to improvise. The improvisation worked, mostly. But the institutional confidence that the supply system would function decayed turn over turn.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RS", "threshold": 30 },
+          { "type": "morale_average_below", "faction": "RS", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "supply_corridor_chronic_strain_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Chronic low supply + sub-baseline morale (RS variant); cohesion erodes, recruitment narrative weakens."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": -4 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.92, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "supply_corridor_chronic_strain_RS", "text": "Chronic supply corridor strain under supply<30 and morale_avg<50 (RS variant). Cohesion -4 reflecting accumulated logistics improvisation costs; recruitment -8% for 20 turns reflecting weakened equipment narrative." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": -3 }
+    ],
+    "sets_flags": {
+      "supply_corridor_chronic_strain_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (economic/logistic chain, RS mirror of csq_supply_corridor_chronic_strain). Predicate is structurally identical to the HRHB authoring; only the faction parameter differs. Mirrors documented 1994-1995 VRS Posavina corridor strain (Brčko bottleneck) under sustained ARBiH/HVO pressure on the corridor's flanks (BB II Ch.34). Faction-symmetric mechanism."
+  },
+  {
+    "id": "csq_winter_supply_attrition_RBiH",
+    "title": "The Siege Winter",
+    "narrative": "The first hard freeze finds the supply system already stretched. Generators run; fuel runs out. The relief routes that worked for hand-trucks in the autumn now require sleds. The depots that had been adequate for summer-rate operations are not adequate for winter-rate. The combat units in the siege ring and in the central enclaves burn through fuel faster than the relief column can deliver it. The bill comes in cohesion. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RBiH", "threshold": 40 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 50 },
+          { "type": "morale_average_below", "faction": "RBiH", "threshold": 55 },
+          { "type": "flag_not_set", "flag": "winter_supply_attrition_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Winter logistics gap intersects with high exhaustion and sub-baseline morale (RBiH variant); cohesion drains across the active force."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -3 },
+      { "kind": "supply_delta", "faction": "RBiH", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "winter_supply_attrition_RBiH", "text": "Winter supply attrition under supply<40 and war_exhaustion>50 and morale_avg<55 (RBiH variant). Cohesion -3 to reflect distributed logistics improvisation under cold-weather load; supply -8 to reflect the additional draw on the depot." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "winter_supply_attrition_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (logistic/operational chain, seasonal variant — RBiH mirror of csq_winter_supply_attrition). Predicate structurally identical; only the faction parameter differs. Mirrors documented 1992-93 / 1993-94 winter ARBiH supply strain in the Sarajevo siege ring and central Bosnia enclaves (BB II Ch.31). Faction-symmetric mechanism."
+  },
+  {
+    "id": "csq_post_cease_fire_recruitment_decline",
+    "title": "The Demobilization Drift",
+    "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_above", "value": 0.55 },
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_RBiH", "min": 40 },
+          { "type": "flag_not_set", "flag": "post_cease_fire_recruitment_decline_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cease-fire holds long enough that political mobilization rhetoric attenuates; recruitment droops while front lines remain active."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.90, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "post_cease_fire_recruitment_decline", "text": "Post-cease-fire recruitment decline under alliance>0.55 and cumulative_casualties>40. Recruitment -10% for 25 turns to reflect demobilization-of-rhetoric while the front lines remain active. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -2 }
+    ],
+    "sets_flags": {
+      "post_cease_fire_recruitment_decline_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (recovery / post-cease-fire chain). Predicate gates on sustained high alliance (alliance_above) — the engine's only first-class alliance is RBiH-HRHB, so the cease-fire framing references the post-Washington Agreement period — and cumulative casualty flag. Mirrors documented 1994 Washington Agreement period and intermittent local cease-fires producing recruitment droop as the political class demobilized rhetoric while the front lines remained active (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism."
+  },
+  {
+    "id": "csq_third_party_arms_channel",
+    "title": "The Other Pipeline",
+    "narrative": "The principal patron's pipeline has been registering pressure for two quarters. A third-party channel — never quite acknowledged, never quite formalized — begins running parallel. The aircraft land at night; the manifests describe humanitarian cargo; the depots register a different inventory the next morning. The combat units that had been substituting around the principal-pipeline gaps find the substitutes more reliable. The combat-power column registers the shift. The mediator capitals know about the channel and pretend not to.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_below", "faction": "RBiH", "dimension": "patron_confidence", "threshold": 40 },
+          { "type": "patron_pressure_above", "faction": "RBiH", "threshold": 20 },
+          { "type": "flag_not_set", "flag": "third_party_arms_channel_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Third-party arms channel opens to substitute around principal-patron attenuation; equipment quality uplifts."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 1.05, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "third_party_arms_channel", "text": "Third-party arms channel established under patron_confidence<40 and patron_pressure>20. Equipment quality +5% for 25 turns to reflect alternate-pipeline substitution around principal-patron attenuation. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": 3 }
+    ],
+    "sets_flags": {
+      "third_party_arms_channel_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (recovery / equipment-flow chain). Predicate gates on principal-patron attenuation (dimension_below(patron_confidence) AND patron_pressure_above) — the same compound trigger surface as csq_patron_arms_pipeline_attenuated, but inverted-effect: equipment quality uplift rather than attenuation. Reuses equipment_quality_modifier substrate from event 658241df. Mirrors documented Iran flights (1994-1995), Croatia-pipeline arrangements, and mujahideen / volunteer arms channels emerging as primary patron pipelines registered pressure (BB II Ch.30, 49; Wiebes 'Intelligence and the War in Bosnia 1992-1995', 2002). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against."
+  },
+  {
+    "id": "csq_arbih_resistance_revival",
+    "title": "The Enclave Holds",
+    "narrative": "The enclave has been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the enclave register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "territory_loss_window", "faction": "RBiH", "min_loss_pct": 0.03, "window_turns": 10 },
+          { "type": "morale_average_below", "faction": "RBiH", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "resistance_revival_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained territory loss + sub-baseline morale produces an existential-pressure morale and recruitment surge."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 1.08, "duration_turns": 20 },
+      { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "resistance_revival", "text": "Resistance revival under territory_loss>=3% over 10-turn window and morale_avg<45. Recruitment +8% for 20 turns; morale +3 to reflect existential-pressure surge. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 3 }
+    ],
+    "sets_flags": {
+      "resistance_revival_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO (recovery / morale-revival chain). Predicate gates on territory_loss_window AND morale_average_below — captures the existential-pressure surge that emerges from sustained territorial regression rather than from political mobilization. Mirrors documented enclave-defender morale surges under sustained territory loss (Bihać 1994-95, Goražde defense doctrine; BB II Ch.43-46). Faction-symmetric mechanism — the predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface (no enclave_resilience_aggregate, no rupture wiring, no political_controllers writes)."
   }
 ]
