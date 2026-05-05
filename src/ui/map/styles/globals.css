@@ -59,6 +59,42 @@ body {
   animation: panelSlideInRight 200ms ease-out;
 }
 
+/*
+ * Shared Modal entry animations — owned by the canonical `<Modal>` wrapper
+ * at `src/ui/shared/Modal.tsx` (LANE-V094-MODAL-WRAPPER, audit P1-B).
+ * Backdrop fades in; panel scales/translates from a slight offset. Held to
+ * the audit's 3-tier animation vocabulary: 150ms fast.
+ */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-fade-in {
+  animation: modalFadeIn 150ms ease-out;
+}
+
+.modal-panel-in {
+  animation: modalPanelIn 150ms ease-out;
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
