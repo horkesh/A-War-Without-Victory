@@ -38747,7 +38747,28 @@
           "combat_death_replacement_delay": 1,
           "faction": "HRHB",
           "generic_replacement_competence": 2,
-          "learning_rate_per_turn": 0.01,
+          "learning_rate_per_turn_step_curve": [
+            {
+              "end_turn": 52,
+              "start_turn": 0,
+              "value": 0.01
+            },
+            {
+              "end_turn": 78,
+              "start_turn": 52,
+              "value": 0.0057
+            },
+            {
+              "end_turn": 104,
+              "start_turn": 78,
+              "value": 0
+            },
+            {
+              "end_turn": 9999,
+              "start_turn": 104,
+              "value": -0.004
+            }
+          ],
           "political_replacement_delay": 4,
           "roso_restructuring_week": 52,
           "zagreb_cadre_interval": 15
@@ -38766,7 +38787,28 @@
           "brain_drain_start_week": 40,
           "faction": "RS",
           "generic_replacement_competence": 2,
-          "learning_rate_per_turn": 0.007
+          "learning_rate_per_turn_step_curve": [
+            {
+              "end_turn": 52,
+              "start_turn": 0,
+              "value": 0.007
+            },
+            {
+              "end_turn": 78,
+              "start_turn": 52,
+              "value": 0.004
+            },
+            {
+              "end_turn": 104,
+              "start_turn": 78,
+              "value": 0
+            },
+            {
+              "end_turn": 9999,
+              "start_turn": 104,
+              "value": -0.0028
+            }
+          ]
         }
       },
       "patron_directives": {
@@ -38833,9 +38875,19 @@
             "value": 0.5
           },
           {
-            "end_turn": 9999,
+            "end_turn": 52,
             "start_turn": 12,
             "value": 0.75
+          },
+          {
+            "end_turn": 78,
+            "start_turn": 52,
+            "value": 0.65
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 78,
+            "value": 0.5
           }
         ],
         "RBiH": [
@@ -38862,9 +38914,24 @@
         ],
         "RS": [
           {
-            "end_turn": 9999,
+            "end_turn": 52,
             "start_turn": 0,
             "value": 1
+          },
+          {
+            "end_turn": 78,
+            "start_turn": 52,
+            "value": 0.85
+          },
+          {
+            "end_turn": 104,
+            "start_turn": 78,
+            "value": 0.65
+          },
+          {
+            "end_turn": 9999,
+            "start_turn": 104,
+            "value": 0.45
           }
         ]
       },
