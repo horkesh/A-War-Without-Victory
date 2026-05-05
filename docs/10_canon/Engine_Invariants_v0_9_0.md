@@ -1,4 +1,6 @@
-# A War Without Victory -- Engine Invariants v0.7.0
+# A War Without Victory -- Engine Invariants v0.9.0
+
+**Last Updated:** 2026-05-05
 
 One game turn equals one week.
 
@@ -418,6 +420,7 @@ The following systems have been fully removed from the codebase and must not be 
 
 ## Appendix B: Version History
 
+- **v0.9.0** (2026-05-05): Filename + body version-bump pass. §6.2.4 morale-collapse override (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT, commit `58624617`, 2026-05-03; gated behind `MORALE_OVERRIDE_ENABLED`, default false; counter increments diagnostically with flag off). v0.8 Command Chain integration: §15 Officer System covers named-officer succession, AI commander intelligence, Phase 0 panel pattern, replay-buffer streaming, Tier 2 perf integration. References to `equipment_quality_modifier` substrate (Wave 3, commit `658241df`) and the `must_hold` variable multiplier substrate (R2-1, commit `e4c661d5`) become normative wherever they were already implementation-noted in supporting docs. No invariant relaxed; no new invariant added beyond the morale-collapse override clause.
 - **v0.7.0** (2026-03-15): Brigade no-destruction, ops-only attack, officer succession, cold front, elite loan invariants. Removed Systems appendix. Enclave/Sarajevo detail. Morale retreat resistance floors.
 - **v0.7.3**: Single-phase (War only) model. Peace phase and Phase 0 removed.
 - **v0.6.0**: Two-phase (Peace/War) model. Purged Phase I/II terminology.
@@ -425,4 +428,4 @@ The following systems have been fully removed from the codebase and must not be 
 
 ---
 
-*Engine Invariants v0.7.0 -- Single-phase (War only) model, corps-driven operations.*
+*Engine Invariants v0.9.0 -- Single-phase (War only) model, corps-driven operations, v0.8 Command Chain + v0.9 product-spine substrate amendments folded in.*
