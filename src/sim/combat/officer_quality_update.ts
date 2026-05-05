@@ -14,6 +14,7 @@
 
 import type { FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { lookupStepCurve } from '../../state/war_timeline.js';
 import { getFactionDefaultOfficerQuality } from './combat_math.js';
 import {
     buildFrontlineAssignedFormationSet,
@@ -124,9 +125,15 @@ export function updateBrigadeOfficerQuality(
         if (f.kind !== 'brigade' && f.kind !== 'militia' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
 
         const faction = f.faction as string;
-        // Shape C precedence (Phase 2 of FORCE QUALITY FOUNDATION; see audit §4):
+        // Shape C + B'.2 precedence (Phase 1 LANE-NIGHTSHIFT-OFFICER-LEARNING-RATE-
+        // TIMELINE-DATA-PHASE-1, 2026-05-05; see Phase 0 panel `be6b95ff`):
+        //   0. timeline `learning_rate_per_turn_step_curve` — absolute per-turn
+        //      combat growth as a step-curve, evaluated against the current turn.
+        //      WINS over the scalar field below (faction-symmetric mechanism;
+        //      faction-asymmetric data only). Mirrors Wave 4 `reinforcement_mult`
+        //      precedent. Negative bands are accepted (modeled at OFFICER_QUALITY_FLOOR clamp).
         //   1. timeline `learning_rate_per_turn` — absolute per-turn combat growth
-        //      (preferred field; consumed before the quality-dampening factor).
+        //      (preferred scalar field; consumed before the quality-dampening factor).
         //   2. timeline `learning_rate_multiplier` — multiplier on COMBAT_GROWTH_BASE.
         //   3. timeline `learning_rate` — DEPRECATED, treated as multiplier for
         //      backward compatibility (matches legacy code path).
@@ -135,7 +142,20 @@ export function updateBrigadeOfficerQuality(
         // combat growth (= 0.5×) regardless of which input shape is used.
         const timelineConfig = state.military.war_timeline?.officer_config?.[faction];
         let combatGrowthPerTurn: number;
-        if (typeof timelineConfig?.learning_rate_per_turn === 'number') {
+        const stepCurve = timelineConfig?.learning_rate_per_turn_step_curve;
+        if (Array.isArray(stepCurve) && stepCurve.length > 0) {
+            // Path #0 — step-curve. Default to scalar (path #1) when out of band, else
+            // fall through the rest of the precedence chain.
+            const fallback =
+                typeof timelineConfig?.learning_rate_per_turn === 'number'
+                    ? timelineConfig.learning_rate_per_turn
+                    : typeof timelineConfig?.learning_rate_multiplier === 'number'
+                        ? COMBAT_GROWTH_BASE * timelineConfig.learning_rate_multiplier
+                        : typeof timelineConfig?.learning_rate === 'number'
+                            ? COMBAT_GROWTH_BASE * timelineConfig.learning_rate
+                            : COMBAT_GROWTH_BASE * (FACTION_LEARNING_RATE[faction] ?? 1.0);
+            combatGrowthPerTurn = lookupStepCurve(stepCurve, turn, fallback);
+        } else if (typeof timelineConfig?.learning_rate_per_turn === 'number') {
             combatGrowthPerTurn = timelineConfig.learning_rate_per_turn;
         } else if (typeof timelineConfig?.learning_rate_multiplier === 'number') {
             combatGrowthPerTurn = COMBAT_GROWTH_BASE * timelineConfig.learning_rate_multiplier;

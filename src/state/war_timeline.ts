@@ -283,18 +283,43 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                 throw new Error(`WarTimeline: officer_config["${faction}"] must be an object`);
             }
             const c = config as Record<string, unknown>;
-            // Shape C precedence: at least one of the three learning-rate fields must be present
-            // and a number. `learning_rate_per_turn` (absolute) is the preferred new field;
-            // `learning_rate_multiplier` is the explicit multiplier; `learning_rate` is the
-            // deprecated legacy field treated as a multiplier for backward compat.
+            // Shape C + B'.2 precedence: at least one of {step-curve, scalar-per-turn,
+            // multiplier, legacy} learning-rate fields must be present.
+            // `learning_rate_per_turn_step_curve` (path #0) is the new B'.2 field;
+            // `learning_rate_per_turn` (absolute) is the preferred scalar field;
+            // `learning_rate_multiplier` is the explicit multiplier; `learning_rate`
+            // is the deprecated legacy field treated as a multiplier for backward compat.
+            const hasStepCurve = Array.isArray(c.learning_rate_per_turn_step_curve);
             const hasPerTurn = typeof c.learning_rate_per_turn === 'number';
             const hasMultiplier = typeof c.learning_rate_multiplier === 'number';
             const hasLegacy = typeof c.learning_rate === 'number';
-            if (!hasPerTurn && !hasMultiplier && !hasLegacy) {
+            if (!hasStepCurve && !hasPerTurn && !hasMultiplier && !hasLegacy) {
                 throw new Error(
                     `WarTimeline: officer_config["${faction}"] must define one of ` +
+                    `learning_rate_per_turn_step_curve (B'.2 step-curve, path #0), ` +
                     `learning_rate_per_turn (absolute), learning_rate_multiplier (multiplier on COMBAT_GROWTH_BASE), ` +
                     `or learning_rate (DEPRECATED legacy multiplier).`
+                );
+            }
+            // B'.2 mutually-exclusive check: scalar `learning_rate_per_turn` and
+            // step-curve `learning_rate_per_turn_step_curve` cannot both be defined
+            // for the same faction at the SAME path-precedence layer. The step-curve
+            // wins when present; emit a DEV-mode warning so scenario authors know
+            // the scalar is shadowed in production for this faction.
+            if (hasStepCurve && hasPerTurn) {
+                // Non-fatal: log a warning and let the step-curve win at runtime.
+                // Tests assert this warning fires; production runs continue.
+                // eslint-disable-next-line no-console
+                console.warn(
+                    `WarTimeline: officer_config["${faction}"] defines BOTH learning_rate_per_turn_step_curve ` +
+                    `and learning_rate_per_turn (scalar). The step-curve wins (path #0); the scalar is shadowed ` +
+                    `at production runtime — keep it only as a documented fallback for non-canonical readers.`
+                );
+            }
+            if (hasStepCurve) {
+                validateStepCurveEntries(
+                    c.learning_rate_per_turn_step_curve as unknown[],
+                    `officer_config["${faction}"].learning_rate_per_turn_step_curve`
                 );
             }
             if (typeof c.faction !== 'string') {

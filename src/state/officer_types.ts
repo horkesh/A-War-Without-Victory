@@ -8,6 +8,7 @@
  */
 
 import type { FactionId } from './game_state.js';
+import type { StepCurveEntry } from './war_timeline.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Static officer data (loaded from JSON, immutable during simulation)
@@ -180,9 +181,31 @@ export interface PendingOfficerEvent {
 export interface FactionOfficerConfig {
     faction: FactionId;
     /**
+     * Step-curve override for `learning_rate_per_turn`. When present, takes
+     * precedence over the scalar `learning_rate_per_turn` field below (and over
+     * `learning_rate_multiplier` / `learning_rate`). Each entry's `value` is the
+     * absolute per-turn combat-growth rate for that band; bands may include
+     * negative values to model late-war cadre erosion (panel B'.2 precedent —
+     * 2026-05-05 Phase 0 panel for OQ-Growth timeline-data variant).
+     *
+     * MUTUALLY EXCLUSIVE with the scalar `learning_rate_per_turn`: the validator
+     * will reject configurations defining both for the same faction.
+     *
+     * Defaults to the scalar `learning_rate_per_turn` when no band matches the
+     * current turn (or to the path #4 hardcoded fallback when neither scalar nor
+     * step-curve is present).
+     *
+     * Faction-symmetric mechanism; faction-asymmetric data only.
+     */
+    learning_rate_per_turn_step_curve?: StepCurveEntry[];
+    /**
      * Absolute per-turn combat-growth rate for brigade officer quality (before
      * quality dampening `(1 - quality * 0.5)`). Preferred field for new scenarios.
      * Frontline growth scales by `FRONTLINE_GROWTH_BASE / COMBAT_GROWTH_BASE` (= 0.5).
+     *
+     * SHADOWED by `learning_rate_per_turn_step_curve` when both are present (the
+     * step-curve wins; the scalar is preserved as fallback for non-canonical
+     * faction codes / out-of-band turns).
      */
     learning_rate_per_turn?: number;
     /**
