@@ -1,8 +1,9 @@
-# War Specification v0.6.0 — War Phase
+# War Specification v0.9.0 — War Phase
 
-**Status:** Canon (v0.7.3; single-phase War-only model)
-**Canon Version:** v0.6.0
-**Date:** 2026-02-28
+**Status:** Canon (v0.9.0; single-phase War-only model)
+**Canon Version:** v0.9.0
+**Last Updated:** 2026-05-05
+**Original Date:** 2026-02-28
 
 ---
 
@@ -87,4 +88,61 @@ This document is the War phase specification. As of v0.7.3, the simulation is si
 
 ---
 
-*War Specification v0.6.0 — Single war phase; part of canon v0.6 set.*
+## 12. v0.9.0 Substrate Amendments
+
+The War-phase pipeline at v0.9.x has accreted substrate without altering the single-phase model or the §5 pipeline-step ordering invariant. Each amendment integrates into existing pipeline steps already documented above; this section makes the substrate explicit so canon readers can map current source files to canonical authority.
+
+### 12.1 must_hold variable multiplier (R2-1, commit `e4c661d5`, 2026-05-03)
+
+The corps commander's must-hold zone weight (`commander/allocate.ts`) was a flat 1.5× multiplier in the v0.7.x window. v0.9.0 replaces it with `max(2.0, min(5.0, 0.75 × commitment_ratio))` — must-hold weight scales with the corps's commitment ratio so that an under-pressed corps does not over-weight defensive zones, and an over-stretched corps cannot dilute must-hold attention. Pressure-responsive, faction-agnostic, integrates into the same Step 5 pipeline phase that already runs commander allocation. No new state shape; reads existing `zone.commitment_ratio`.
+
+### 12.2 Divergence event substrate (R2-2 + Wave 4 + Wave 4 Lane B)
+
+Divergence events fire within the existing event pipeline (`update-event-readiness` → `evaluate-events`) but consume new substrate added at v0.9.0:
+
+- **`cost_ledger_annotation` effect family:** new effect kind that records prosecutorial-voice annotations for endgame Cost Ledger consumption. Faction-agnostic effect application; emit-only at event resolution.
+- **`MilitaryState.cost_ledger_annotations` field:** additive optional array on `MilitaryState`; deserializes to empty on legacy saves.
+- **New condition kinds** layered on existing `EventCondition` union: `alliance_holds_past_w35`, `paramilitary_authorization_refused`, `enclave_held_alt_intervention`, `patron_pressure_resisted_streak`, `early_peace_acceptance_w120`, `force_quality_inversion`, plus Wave 4 additions consuming `equipment_quality_modifier` substrate. All faction-agnostic predicates.
+- **Cumulative count:** 28+ divergence events authored at `data/scenarios/events/consequences.json` as of Wave 4. Closure target ~30; the matrix is open and additive.
+
+### 12.3 `equipment_quality_modifier` substrate (Wave 3, commit `658241df`, 2026-05-04)
+
+New effect kind `EventEffectEquipmentQualityModifier` (multiplicative, faction-scoped, time-bounded) + `MilitaryState.equipment_quality_modifiers?: Array<{faction, multiplier, expires_turn}>` field + reader `getActiveEquipmentQualityMultiplier(state, faction, currentTurn)`. Threaded into combat predictor power computation behind a no-op early return: `if (eqMult !== 1.0) power *= eqMult`. Preserves byte-stable arithmetic on no-event historical paths. Mirrors the established `recruitment_modifier` precedent.
+
+The substrate is consumed by event #11 `csq_weapons_embargo_partial_lift` (Wave 3) and Wave 4 `csq_patron_equipment_delivery_confirmed` (substrate-then-content sequencing precedent). Future arms-flow events (Croatia pipeline, Iran flights, post-Dayton lifting) can consume this substrate without further engine extension.
+
+### 12.4 Reconstitution policy step curve (Wave 4 Lane A, commit `e9584dd3`, 2026-05-04)
+
+`getFactionReinforcementMult` in `formation_constants.ts` (parallel data in `data/scenarios/timelines/apr1992.json`):
+
+- VRS: flat 1.0× → 4-band step curve (1.0× <w52, 0.85× <w78, 0.65× <w104, 0.45× thereafter)
+- HRHB: 2-band → 4-band (added 0.65× w52-77, 0.50× w78+)
+- RBiH: unchanged (audit confirms ARBiH on-doctrine)
+
+Mechanism is faction-agnostic in code (`lookupStepCurve(...)` is the same predicate RBiH and HRHB already used); only data parameters drive faction asymmetry. Closes the Force-Quality Gap 2 upstream lever identified in `20260504_FORCE_QUALITY_GAP_2_VERIFICATION.md` (VRS reconstitution outpacing battle attrition was overriding the casualty-driven officer_quality decay path).
+
+### 12.5 Sensitive-history Ring 1 substrate
+
+The canonical pattern for counterfactual recording (Q-CANON-RUPT-4 Path (d), commit `ce95c162`, 2026-05-04) is:
+
+- Deterministic predicate on a flag set by the simulation's own observation system (e.g., `predEnclaveDefended` reading `enclave_held_through_turn` flag in `dynamic_section_builder.ts`).
+- Narrative file in the §4-compliant register at `data/codex/ghost_entries/<key>.md`.
+
+Rupture consequences (`evaluateRuptureConsequences()`) fire ONLY on emergent satisfaction of a discrete game-state condition (control of a specific OSID + flag + turn predicate). Calendar-window heuristic substitution is forbidden. Counterfactual silence (no rupture in an ahistorical campaign that did not produce the trigger condition) is canonically correct. The historical record (Ring 2: essays + ICTY citations) remains accessible regardless of campaign path.
+
+The single live rupture is `srebrenica_genocide_1995` (RS controls `op:srebrenica:srebrenica_2` + `enclave_formed` flag + turn ≥140). See `SENSITIVE_HISTORY_DESIGN_GATE.md` §1.5 #11, §2 criterion 3, §5.
+
+### 12.6 Officer-quality observability (Force-Quality Gap 1, commit `0bd5a938`, 2026-05-04)
+
+`BrigadeTemporalRow` schema extended with optional `officer_quality` + `officer_count_active` fields (conditional attach for byte-identity preservation on legacy fixtures). Per-turn officer-quality trajectory now traceable in `brigade_temporal_log.jsonl`. Pure observability; no engine state shape change. Harness emit; not engine.
+
+### 12.7 Deferred substrate
+
+Items recorded in lane handoffs but not yet integrated into normative pipeline:
+- 188w sensitive-history regression run before promoting `MORALE_OVERRIDE_ENABLED` flag from default-off to default-on.
+- Per-corps `historical_axis_munis` config + off-axis duration counter on `CorpsCommandState` (R2-2 7th event `csq_corps_redeployed_off_axis` is HELD pending this).
+- Stupčanica-95 defender combat-math stack honesty (Phase 4d successor to LANE-NIGHTSHIFT-SREBRENICA-DIAGNOSTIC-V2).
+
+---
+
+*War Specification v0.9.0 — Single war phase; v0.6 lifecycle baseline + v0.9 substrate amendments (must_hold variable multiplier, divergence event substrate, equipment_quality_modifier, reconstitution policy step curve, sensitive-history Ring 1 substrate, officer-quality observability) integrated.*
