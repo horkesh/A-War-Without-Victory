@@ -12,6 +12,7 @@ import {
     getPlayerSafeBrigadeName,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
+import { EmptyState } from './EmptyState';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -459,9 +460,10 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                              summary.notable_events.length === 0 &&
                              summary.decoration_awards.length === 0 &&
                              summary.arc_transitions.length === 0 && (
-                                <div className="text-text-muted text-center py-4">
-                                    Quiet turn — no significant events recorded.
-                                </div>
+                                <EmptyState
+                                    message="Quiet turn"
+                                    helpText="No significant events recorded this turn."
+                                />
                             )}
                         </>
                     )}

@@ -20,6 +20,7 @@ import {
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { EmptyState } from './EmptyState';
 
 const REASON_LABELS: Record<string, string> = {
     offensive_support: 'Offensive Support',
@@ -138,7 +139,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         Reserve Pool ({elites.length})
                     </div>
                     {elites.length === 0 ? (
-                        <div className="text-text-secondary italic">No elite brigades in reserve pool.</div>
+                        <EmptyState
+                            message="No elite formations"
+                            helpText="Reserve pool currently empty."
+                            density="compact"
+                        />
                     ) : (
                         <div className="space-y-1.5">
                             {elites.map(brigade => {
@@ -212,7 +217,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         Active Loans ({activeLoans.length})
                     </div>
                     {activeLoans.length === 0 ? (
-                        <div className="text-text-secondary italic">No active deployments this turn.</div>
+                        <EmptyState
+                            message="No active deployments"
+                            helpText="No elite formations are presently committed to corps."
+                            density="compact"
+                        />
                     ) : (
                         <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                             {activeLoans.map((brigade) => {

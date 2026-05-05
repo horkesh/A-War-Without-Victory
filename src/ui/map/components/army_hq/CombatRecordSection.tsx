@@ -4,6 +4,7 @@
  */
 import type { FormationView } from '../../data/types';
 import { CollapsibleSection } from './CollapsibleSection';
+import { EmptyState } from '../EmptyState';
 
 interface CombatRecordSectionProps {
     corpsId: string;
@@ -16,7 +17,11 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
     return (
         <CollapsibleSection sectionKey={`combat-${corpsId}`} title="Combat Record">
             {!cs || cs.battles_fought === 0 ? (
-                <div className="text-[11px] text-text-secondary italic py-1">No combat record</div>
+                <EmptyState
+                    message="No combat record"
+                    helpText="Corps has not fought a battle yet."
+                    density="compact"
+                />
             ) : (
                 <div className="space-y-1 text-[11px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
                     <div className="flex justify-between">

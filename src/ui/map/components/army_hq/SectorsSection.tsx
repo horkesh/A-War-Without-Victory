@@ -12,6 +12,7 @@ import { OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel } from '../../utils/formatters';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { CollapsibleSection } from './CollapsibleSection';
+import { EmptyState } from '../EmptyState';
 
 interface SectorsSectionProps {
     corpsId: string;
@@ -210,7 +211,11 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
     return (
         <CollapsibleSection sectionKey={`sec-${corpsId}`} title="Sectors" count={sectors.length}>
             {sectors.length === 0 ? (
-                <div className="text-[11px] text-text-secondary/60 italic py-2 font-mono uppercase">NO SECTOR ASSIGNMENTS DETECTED</div>
+                <EmptyState
+                    message="No sector assignments"
+                    helpText="No front sectors are currently held by this corps."
+                    density="compact"
+                />
             ) : (
                 <div className="space-y-2">
                     {sectors.map((sector) => {

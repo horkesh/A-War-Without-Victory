@@ -8,6 +8,7 @@ import { turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord } from '../../utils/shellNavigation.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
+import { EmptyState } from '../EmptyState.js';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -375,9 +376,10 @@ export function ChronicleOverlay() {
                 >
                     {allEntries.length === 0 ? (
                         <div className="flex items-center justify-center h-full">
-                            <p className="text-stone-600 text-xs font-mono">
-                                No events recorded yet. Advance turns to build your chronicle.
-                            </p>
+                            <EmptyState
+                                message="No chronicle entries"
+                                helpText="Advance turns to record the campaign chronicle."
+                            />
                         </div>
                     ) : (
                         <div style={{ width: `${totalWidth}px`, minHeight: '100%' }}>

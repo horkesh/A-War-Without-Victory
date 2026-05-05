@@ -4,6 +4,7 @@
  */
 
 import { GlassPanel } from './GlassPanel';
+import { EmptyState } from './EmptyState';
 
 /** A single entry in the event log history. */
 export interface EventLogEntry {
@@ -32,9 +33,10 @@ export function EventLogPanel({ events, onClose }: EventLogPanelProps) {
     return (
         <GlassPanel position="right" title="Event Log" width="340px" onClose={onClose} zIndex={42}>
             {events.length === 0 ? (
-                <div className="text-sm text-center py-8" style={{ color: '#6a6258' }}>
-                    No events recorded yet.
-                </div>
+                <EmptyState
+                    message="No events recorded"
+                    helpText="Awaiting first event."
+                />
             ) : (
                 <div className="space-y-2">
                     {events.map((entry, i) => {

@@ -13,6 +13,7 @@ import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
+import { EmptyState } from '../EmptyState';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -525,7 +526,11 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     return (
         <CollapsibleSection sectionKey={`ops-${corpsId}`} title="Operations" count={operations.length}>
             {operations.length === 0 ? (
-                <div className="text-[11px] text-text-secondary/60 italic py-2 font-mono uppercase">NO ACTIVE OPERATIONS DETECTED</div>
+                <EmptyState
+                    message="No active operations"
+                    helpText="Awaiting orders from corps command."
+                    density="compact"
+                />
             ) : (
                 <div className="space-y-3">
                     {/* Command-risk inline reminder — demoted in Wave 10 (Standing section owns detail).

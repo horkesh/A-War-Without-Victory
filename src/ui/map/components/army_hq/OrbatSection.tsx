@@ -9,6 +9,7 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
+import { EmptyState } from '../EmptyState';
 
 interface OrbatSectionProps {
     corpsId: string;
@@ -218,6 +219,13 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
 
     return (
         <CollapsibleSection sectionKey={`orbat-${corpsId}`} title="ORBAT" count={brigades.length}>
+            {sorted.length === 0 ? (
+                <EmptyState
+                    message="No formations to show"
+                    helpText="No brigades currently report under this corps."
+                    density="compact"
+                />
+            ) : (
             <div className="max-h-[500px] overflow-y-auto space-y-1 pr-2 custom-scrollbar font-mono">
                 <div className="flex items-center px-4 py-1 text-[9px] text-text-secondary/60 uppercase tracking-widest font-bold">
                     <span className="w-6 shrink-0" />
@@ -288,6 +296,7 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
                     );
                 })}
             </div>
+            )}
         </CollapsibleSection>
     );
 }
