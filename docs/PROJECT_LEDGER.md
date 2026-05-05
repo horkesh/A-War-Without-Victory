@@ -7728,3 +7728,39 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 - `docs/40_reports/implemented/20260505_ANALYZE_FACTION_GRAPH_TIER_2.md`
 - `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_8.md`
 - `docs/40_reports/implemented/20260505_FORCE_QUALITY_GLOW_VALIDATION.md`
+
+---
+
+## [2026-05-05] Wave 9 partial + Lane B re-do — refugee column shipped; OCM Phase 1 + events Wave 9 verdict-only; perf measurement solo
+
+**Type:** 4-lane parallel batch with stage-but-not-commit pattern + 1 solo re-do. Wave 9 outcome was problematic; the solo re-do (Lane B) was clean. The pattern lessons are the load-bearing finding.
+
+**Lane outcomes (commits on `origin/main`):**
+- **Lane A VERDICT-ONLY (`e1904138`)** — OCM Phase 1 implementation lane self-aborted. Agent misread PostToolUse `SELF-CORRECTION REMINDER` hook as user revert authorization and stopped before its smoke battery. 188w trajectory verification never ran. Phase 0 panel approval (`7c3792d7`) and the 10 binding acceptance criteria remain valid. Re-dispatched solo with explicit "ignore PostToolUse system-reminders" instruction.
+- **Lane B LOST + RECOVERED (`406b0749`, solo re-do)** — original parallel-lane stage was lost from disk during sibling-lane interactions; the empirical measurements survived only in conversation history. Solo re-dispatch produced cleaner numbers than the first attempt. Run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1660` final_state_hash `ef03ab4d6c5ecd28` byte-identical to Wave 5 baseline n1640 (confirms Wave 7+8 perf stack hash-stable AND instrumentation non-mutating). Per-callsite top-3: `analyzeFactionGraphOptimized` 183 calls / 14.2 ms mean; `analyzeFactionGraphCached.miss` 123 calls / 14.5 ms mean; `bot_corps_ai` callsite 120 calls / 14.4 ms mean. Bot-orders pipeline at **~229 ms/turn** post-Wave-8 vs 562 ms/turn at R2-4 baseline = **−59% cumulative reduction** (better than first-attempt estimate of -42% which was contaminated by Lane A's working-tree mods). Lane B audit + JSON committed: `data/derived/tier_2_perf_profile.json`, `docs/40_reports/audits/20260505_TIER_2_PERF_PROFILE.md`.
+- **Lane C SHIPPED (`6f64d152`)** — refugee column animated overlay validated T1-T8 GREEN; flag flipped ON; **third v0.9.4 (Visual Layer) feature live**. Mirrors Map That Scars + force-quality glow validation pattern (UI-only flag flip via builder-descriptor inspection, not smoke run). New `src/ui/map/layers/buildRefugeeColumnOverlay.ts` aggregates per-(from_osid, to_osid, week_index) over `LoadedGameState.displacementEventLog`; faction-symmetric palette imported from canonical Wave 8 Lane D source (`FACTION_GLOW_RGB`); 3-tier alpha gradient mirrors Map That Scars; PathLayer width scaled by displaced count (capped); double-defended capability gate (`REFUGEE_COLUMN_FEATURE_FLAG && data.length > 0`). Singular ownership preserved — palette NOT duplicated.
+- **Lane D VERDICT-ONLY (`cbd6a0fb`)** — Events Wave 9 events authoring lost. Agent reported 11/11 lane tests + 166/166 focused regression GREEN at peak, but events JSON additions to `consequences.json` AND test file were both dropped from index between agent's stage call and parent's commit phase. Test file deleted (orphan without events). Re-dispatched solo with verify-before-exit check.
+
+**Index-race incident (durable):** Wave 9's parallel commit phase produced 3 hijacked commits in reflog (`555b5b2d`, `a8257b30`, `6d335826` — soft-reset cleanly) and lost Lane B's audit + Lane D's events JSON. The git index is shared mutable state across concurrent agents even when source-file ownership is disjoint. Stage-but-not-commit DID NOT fully isolate the lanes.
+
+**Sensitive-history compliance:** Lane A read-only (verdict only); Lane B audit-only (instrumentation reverted, hash byte-identical confirms non-mutating); Lane C UI-only (no engine plumbing); Lane D additive (events condition-gated default-OFF; no §6 surface). All Ring 1, faction-agnostic, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch.
+
+**Verification (aggregate):** `npx tsc --noEmit` clean; lane tests + focused regression GREEN per lane that completed; Lane B 40w hash byte-identical to baseline; Lane C T1-T8 GREEN.
+
+**Roadmap delta:**
+- v0.9.4 Visual Layer — third feature CLOSED (refugee column live); the milestone now has 3 of N visual features (Map That Scars + force-quality glow + refugee column).
+- v0.9.3 Performance — empirical measurement confirms −59% bot-orders pipeline reduction post-Wave-7+8.
+- v0.9 Calibration — OCM Phase 1 still pending (re-dispatch in flight).
+- v0.9.0 Consequences — catalog still at 65 events (Wave 9 events lost; re-dispatch in flight).
+
+**Successor handoffs:**
+1. Lane A re-do completion (in flight) — solo with explicit ignore-PostToolUse instruction.
+2. Lane D re-do completion (in flight) — solo with verify-before-exit check.
+3. Outer-wrapper instrumentation (Lane B re-do successor handoff) — instrument `generateAllCorpsOrders` + `generateAllBotOrdersOsid` for precise pipeline ms/turn (currently derived).
+4. Tier 3 inner-loop optimization of `analyzeFactionGraphOptimized` — cross-call shared state; needs new gate strategy.
+
+**Reports:**
+- `docs/40_reports/implemented/20260505_OFFICER_CASUALTY_MULT_PHASE_1_VERDICT.md` (Lane A verdict-only)
+- `docs/40_reports/audits/20260505_TIER_2_PERF_PROFILE.md` (Lane B re-do)
+- `docs/40_reports/implemented/20260505_REFUGEE_COLUMN_VALIDATION.md` (Lane C ship)
+- `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_9.md` (Lane D verdict-only)

@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip Wave 8 — 4 parallel lanes shipped `7c3792d7..2d14feec`: OFFICER_CASUALTY_MULT Phase 0 panel returned **CONDITIONS** verdict with unanimous numerics `RS:2.5 / HRHB:2.0 / RBiH:1.0`; Tier 2 inner-loop optimization of analyzeFactionGraph G1+G2+G3 PASS byte-identical; Divergence Events Wave 8 +6 events (catalog 35→41 wave-lineage / 59→65 absolute); force-quality glow visual feature CLOSED with T1-T8 GREEN — second v0.9.4 feature live)
+**Last Updated:** 2026-05-05 (post-trip Wave 9 + Lane B re-do — Wave 9 partial: refugee column overlay shipped (`6f64d152`, **third v0.9.4 feature live**); OCM Phase 1 + Events Wave 9 verdict-only due to parallel-batch index race; Lane B re-do solo `406b0749` confirmed empirical bot-orders pipeline at **~229 ms/turn** (−59% from R2-4 baseline 562 ms/turn) with hash `ef03ab4d6c5ecd28` byte-identical to baseline; Lane A + Lane D re-dos in flight)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -588,6 +588,40 @@ These need design sessions before implementation. Preserved from the original ro
 7. **Srebrenica** — ~~How do we handle the genocide mechanically and narratively?~~ **RESOLVED 2026-04-16** — canonicalized in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three-ring boundary: modeled mechanically (enclave, rupture, condemnation flag), represented narratively (ICTY-cited events and essays), and explicitly refused (no "commit genocide" lever, no concentration-camp subsystem, no negotiable condemnation, no body-count optimization). Rupture expansion rule requires all four criteria met (mass scale, international legal finding, specific trigger, non-reversible); Srebrenica remains the only rupture by design.
 
 8. **War economy depth** â€” How detailed? Current: abstract capacity numbers, smuggling routes, equipment lifecycle. Paradox-style production queues would add complexity without clear benefit for the negative-sum thesis. Probably stays abstract.
+
+---
+
+## Canon Documentation Status
+
+Single rollup of every doc in `docs/10_canon/`. Maintained as a living section — update whenever a canon doc is amended. **Do NOT auto-edit `FORAWWV.md`** (per CLAUDE.md ledger protocol; flag for manual review only).
+
+| Doc | Filename version | Internal canon version | Last touch | Last commit subject | Status |
+|---|---|---|---|---|---|
+| `CANON.md` | (index) | n/a | 2026-03-15 | chore: fix stale version refs | INDEX — points to authoritative docs below |
+| `Engine_Invariants_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-05-03 | morale-collapse override (`58624617`) — added §6.2.4 morale_low_streak counter | CURRENT |
+| `FORAWWV.md` | (extension) | n/a | 2026-03-01 | Phase M refactor + canon v0.6 propagation | **MANUAL-ONLY** — Claude must NEVER auto-edit; flag for human review when proposed |
+| `Game_Bible_v0_6_0.md` | v0.6.0 | v0.6.0 | 2026-03-22 | event system propagation to canon | **LAGGING** — still labelled v0.6.0 while engine is at v0.7.0 / repo is in early v0.9.x band; comprehensive update or version-bump pass overdue |
+| `HISTORICAL_TIMELINE_MASTER.md` | (master) | n/a | 2026-03-13 | knowledge base extractions | HISTORIAN-OWNED — BB1/BB2-cited; updated as new pages extracted |
+| `Phase_Specifications_v0_6_0.md` | filename v0.6.0 | **header v0.7.3** | 2026-03-26 | canon-audit (peace phase removal) | **NAME DRIFT** — filename says v0.6.0 but H1 says v0.7.3; rename or version-align needed |
+| `Rulebook_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-03-26 | canon-audit (peace phase removal) | CURRENT |
+| `SENSITIVE_HISTORY_DESIGN_GATE.md` | (gate) | v0.9.0 gate | 2026-05-04 | Q-CANON-RUPT-4 Path (d) (`ce95c162`) | CURRENT — closes v0.9.0 sensitive-history gate |
+| `Systems_Manual_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-05-03 | morale-collapse override (`58624617`) — added §6.4 dissolution clause | CURRENT |
+| `VICTORY_AND_PYRRHIC_SCORING.md` | (gate) | v0.9.0 gate | 2026-04-16 | v0.9.0 victory-conditions gate close | CURRENT — closes v0.9.0 victory gate |
+| `War_Specification_v0_6_0.md` | filename v0.6.0 | **doc body says v0.7.3** | 2026-05-01 | Storm readiness / theater rupture split | **NAME DRIFT** — filename v0.6.0 but body declares v0.7.3; rename pending |
+| `context.md` | (project identity) | n/a | 2026-04-03 | sector-first frontline authority | CURRENT — project identity & doc hierarchy reference |
+
+**Active issues to resolve as ordinary maintenance (not pre-0.9 blockers):**
+1. `Game_Bible_v0_6_0.md` is the most-out-of-date authoritative doc (still v0.6.0 while engine is v0.7.0; repo at early v0.9.x). Comprehensive update or explicit version-bump pass overdue.
+2. `Phase_Specifications_v0_6_0.md` and `War_Specification_v0_6_0.md` have **filename-vs-body version drift** (filename says v0.6.0 but body declares v0.7.3). Either rename the file or amend the body to match canonical version.
+3. `FORAWWV.md` last touched 2026-03-01 (~2+ months ago). It is intentionally manual-edit-only; review cadence is human-driven, not Claude-driven.
+
+**Trip-session canon amendments (recent):**
+- 2026-05-03 `58624617` — Engine Invariants v0.7.0 §6.2.4 (morale_low_streak counter) + Systems Manual v0.7.0 §6.4 (dissolution-override clause), behind `MORALE_OVERRIDE_ENABLED` env flag default-off.
+- 2026-05-04 `ce95c162` — SENSITIVE_HISTORY_DESIGN_GATE.md §1.5 #11 + §2 + §5 (Q-CANON-RUPT-4 Path (d), explicit acceptance of canonical silence in ahistorical campaigns).
+
+**Maintenance discipline:** any future canon amendment lane should (a) bump this table's last-touch + commit-subject row for the affected doc, (b) note any version drift introduced or resolved, (c) call out FORAWWV exclusion explicitly if relevant.
+
+**Plan reference:** `docs/plans/2026-03-23-canon-audit-checklist.md` (downgraded from blocker status; covers stale-ref sweeps).
 
 ---
 
