@@ -433,10 +433,10 @@
     "HRHB": {
       "faction": "HRHB",
       "learning_rate_per_turn_step_curve": [
-        { "start_turn": 0,   "end_turn": 52,   "value":  0.010 },
-        { "start_turn": 52,  "end_turn": 78,   "value":  0.007 },
-        { "start_turn": 78,  "end_turn": 104,  "value":  0.003 },
-        { "start_turn": 104, "end_turn": 9999, "value": -0.002 }
+        { "start_turn": 0,   "end_turn": 52,   "value":  0.010   },
+        { "start_turn": 52,  "end_turn": 78,   "value":  0.0057  },
+        { "start_turn": 78,  "end_turn": 104,  "value":  0.000   },
+        { "start_turn": 104, "end_turn": 9999, "value": -0.004   }
       ],
       "zagreb_cadre_interval": 15,
       "roso_restructuring_week": 52,
