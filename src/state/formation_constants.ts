@@ -84,6 +84,79 @@ export const MIN_ATTACK_PERSONNEL = 500;
 /** Maximum fatigue a formation can accumulate. Shared across combat resolution, fatigue recovery, and combat power calculation. */
 export const FATIGUE_MAX = 30;
 
+/**
+ * LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-POINT-5-IMPLEMENTATION (2026-05-06):
+ * Per-turn cap on the absolute magnitude of negative morale drift applied
+ * inside `runMoraleDrift`. This is a faction-symmetric mechanism: the
+ * SAME numeric clamp runs for every faction. Worst-case in-source drift
+ * stack (per Phase 1.5 mini-panel §2.2): −12.7 (catastrophic battle ×
+ * RS defeat sensitivity 1.3 = −5.2; ENCIRCLEMENT_ENEMY_POP_DRIFT −3;
+ * AFFINITY_DRIFT_DOWN −2; CRITICAL_EXHAUSTION_PENALTY −1.5;
+ * CRITICAL_SUPPLY_DRAIN −1). At 8 points/turn the metastable-edge case
+ * (Skelani sat at m=20 for 6 turns then a single −12 burst → m=8 ≤
+ * dissolution threshold) becomes a graduated descent (m=20 → 12 → 4),
+ * preserving the hysteresis-reset zone (>20) for one extra turn and
+ * giving reinforcement / battle-victory windows a chance to fire.
+ *
+ * The cap ONLY bounds NEGATIVE drift (positive drift is already bounded
+ * by the +5 victory ceiling × 1.3 RBiH sensitivity ≈ +6.5; capping
+ * positive drift at 8 has no effect on observed in-engine maxima).
+ *
+ * Optional timeline override path: when present in
+ * `WarTimeline.morale_drift_max_per_turn[faction]`, that step-curve wins;
+ * otherwise the faction-keyed fallback below is used; otherwise the
+ * scalar default.
+ *
+ * Mini-panel report:
+ *   docs/40_reports/audits/20260506_KRIVAJA_PHASE_1_5_MINI_PANEL.md
+ */
+export const MORALE_DRIFT_MAX_PER_TURN = 8;
+
+/**
+ * Faction-keyed fallback for the per-turn morale-drift cap. Same numeric
+ * value across factions in the default profile (faction-symmetric). Kept as
+ * a separate map to allow scenarios that supply faction-asymmetric DATA
+ * via the timeline path to do so consistently with the Phase 1
+ * step-curve substrate, while the SOURCE-SIDE constants here remain
+ * faction-symmetric.
+ */
+export const FACTION_MORALE_DRIFT_MAX_FALLBACK: Record<string, number> = {
+    RS: MORALE_DRIFT_MAX_PER_TURN,
+    RBiH: MORALE_DRIFT_MAX_PER_TURN,
+    HRHB: MORALE_DRIFT_MAX_PER_TURN,
+};
+
+/**
+ * Resolve the per-faction, per-turn morale-drift cap. Faction-symmetric
+ * MECHANISM (same lookup, same comparison). Faction-asymmetric DATA via
+ * the optional timeline `morale_drift_max_per_turn` field, or the
+ * faction-keyed fallback map.
+ *
+ * Precedence:
+ *   1. timeline.morale_drift_max_per_turn[faction] (step-curve)
+ *   2. FACTION_MORALE_DRIFT_MAX_FALLBACK[faction]
+ *   3. MORALE_DRIFT_MAX_PER_TURN (scalar default)
+ *
+ * Pure / deterministic / no I/O / no random.
+ */
+export function resolveMoraleDriftMaxPerTurn(
+    faction: string | undefined,
+    turn: number,
+    timeline?: WarTimeline,
+): number {
+    if (faction && timeline?.morale_drift_max_per_turn?.[faction]) {
+        return lookupStepCurve(
+            timeline.morale_drift_max_per_turn[faction],
+            turn,
+            FACTION_MORALE_DRIFT_MAX_FALLBACK[faction] ?? MORALE_DRIFT_MAX_PER_TURN,
+        );
+    }
+    if (faction && faction in FACTION_MORALE_DRIFT_MAX_FALLBACK) {
+        return FACTION_MORALE_DRIFT_MAX_FALLBACK[faction]!;
+    }
+    return MORALE_DRIFT_MAX_PER_TURN;
+}
+
 /** Minimum 1991 population (faction-eligible) in a municipality to assign historical brigade name or allow emergent spawn (demographic gating). Below this: OOB brigades get generic name; emergent spawn is skipped. */
 export const MIN_ELIGIBLE_POPULATION_FOR_BRIGADE = 500;
 

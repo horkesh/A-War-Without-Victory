@@ -12,6 +12,7 @@ import { getFactionAlignedPopulationShare } from '../../state/population_share.j
 import { strictCompare } from '../../state/validateGameState.js';
 import { CRITICAL_MORALE_THRESHOLD } from './combat_math.js';
 import { munFromOsid } from './osid_adjacency.js';
+import { resolveMoraleDriftMaxPerTurn } from '../../state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -223,6 +224,24 @@ export function runMoraleDrift(
         }
 
         if (drift === 0) continue;
+
+        // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-POINT-5-IMPLEMENTATION (SHAPE δ,
+        // 2026-05-06): per-turn cap on the absolute magnitude of NEGATIVE
+        // drift. Faction-symmetric mechanism — same min(|drift|, cap) clamp
+        // runs for every faction. Optional faction-keyed timeline override
+        // and faction-keyed fallback live in formation_constants.ts.
+        // Positive drift is intentionally NOT clamped (existing engine
+        // bounds limit positive stack to ~+6.5; any positive cap would be
+        // a no-op). Targets the metastable-edge dissolution case where a
+        // single-turn worst-case stack (-12.7) ate the hysteresis-reset
+        // safety margin between m=20 (reset) and the dissolution
+        // threshold. Mini-panel:
+        //   docs/40_reports/audits/20260506_KRIVAJA_PHASE_1_5_MINI_PANEL.md
+        if (drift < 0) {
+            const turnNow = state.meta?.turn ?? 0;
+            const cap = resolveMoraleDriftMaxPerTurn(f.faction, turnNow, state.military.war_timeline);
+            if (-drift > cap) drift = -cap;
+        }
 
         const prev = f.morale;
         f.morale = Math.max(0, Math.min(100, f.morale + drift));

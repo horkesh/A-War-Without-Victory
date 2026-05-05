@@ -119,6 +119,24 @@ export interface WarTimeline {
     dissolution_personnel_threshold?: Record<string, StepCurveEntry[]>;
     dissolution_cohesion_threshold?: Record<string, StepCurveEntry[]>;
     dissolution_morale_threshold?: Record<string, StepCurveEntry[]>;
+    /**
+     * LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-POINT-5-IMPLEMENTATION (2026-05-06,
+     * SHAPE δ): per-faction step-curve override for the absolute per-turn
+     * cap on negative morale drift inside `runMoraleDrift`. Optional;
+     * falls back to `FACTION_MORALE_DRIFT_MAX_FALLBACK` then the scalar
+     * `MORALE_DRIFT_MAX_PER_TURN` constant in `formation_constants.ts`.
+     *
+     * Mechanism is faction-symmetric (same lookup, same min(|drift|, cap)
+     * comparison runs for every faction). Data here drives any
+     * faction-asymmetric calibration. Values are absolute caps in
+     * morale-points-per-turn (e.g. 8 means a single turn cannot drive
+     * morale down by more than 8 points before the floor/ceiling clamp
+     * applies).
+     *
+     * Mini-panel report:
+     *   docs/40_reports/audits/20260506_KRIVAJA_PHASE_1_5_MINI_PANEL.md
+     */
+    morale_drift_max_per_turn?: Record<string, StepCurveEntry[]>;
 }
 
 // ── Generic lookup functions ─────────────────────────────────────────────────
@@ -275,6 +293,24 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                 throw new Error(`WarTimeline: ${field}["${faction}"] must be an array`);
             }
             validateStepCurveEntries(entries, `${field}["${faction}"]`);
+        }
+    }
+
+    // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-POINT-5-IMPLEMENTATION (SHAPE δ):
+    // Validate optional `morale_drift_max_per_turn` step-curve. Same
+    // shape/contiguity invariants as cohesion_drift / dissolution_*.
+    {
+        const fieldVal = obj.morale_drift_max_per_turn;
+        if (fieldVal !== undefined) {
+            if (typeof fieldVal !== 'object' || fieldVal === null) {
+                throw new Error('WarTimeline: "morale_drift_max_per_turn" must be an object when present');
+            }
+            for (const [faction, entries] of Object.entries(fieldVal as Record<string, unknown>)) {
+                if (!Array.isArray(entries)) {
+                    throw new Error(`WarTimeline: morale_drift_max_per_turn["${faction}"] must be an array`);
+                }
+                validateStepCurveEntries(entries, `morale_drift_max_per_turn["${faction}"]`);
+            }
         }
     }
 

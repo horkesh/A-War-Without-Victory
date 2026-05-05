@@ -410,13 +410,14 @@
   },
   "dissolution_cohesion_threshold": {
     "RS": [
-      { "start_turn": 0,    "end_turn": 52,   "value": 20 },
-      { "start_turn": 52,   "end_turn": 9999, "value": 15 }
+      { "start_turn": 0,    "end_turn": 39,   "value": 20 },
+      { "start_turn": 39,   "end_turn": 9999, "value": 15 }
     ]
   },
   "dissolution_morale_threshold": {
     "RS": [
-      { "start_turn": 0,    "end_turn": 104,  "value": 15 },
+      { "start_turn": 0,    "end_turn": 39,   "value": 15 },
+      { "start_turn": 39,   "end_turn": 104,  "value": 12 },
       { "start_turn": 104,  "end_turn": 9999, "value": 9 }
     ]
   },
