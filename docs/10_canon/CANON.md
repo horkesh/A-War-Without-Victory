@@ -4,25 +4,35 @@
 
 The following documents are **CANON** (authoritative). Canon docs live in `docs/10_canon/`. At docs root: `docs/PROJECT_LEDGER.md` (append-only changelog) and `docs/PROJECT_LEDGER_KNOWLEDGE.md` (thematic knowledge base � decisions, patterns, rationale by topic).
 
-- `docs/10_canon/Engine_Invariants_v0_7_0.md`
-- `docs/10_canon/Phase_Specifications_v0_6_0.md`
-- `docs/10_canon/Peace_Specification_v0_6_0.md`
-- `docs/10_canon/War_Specification_v0_6_0.md`
-- `docs/10_canon/Systems_Manual_v0_7_0.md`
-- `docs/10_canon/Rulebook_v0_7_0.md`
-- `docs/10_canon/Game_Bible_v0_6_0.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
+- `docs/10_canon/Phase_Specifications_v0_9_0.md`
+- `docs/10_canon/War_Specification_v0_9_0.md`
+- `docs/10_canon/Systems_Manual_v0_9_0.md`
+- `docs/10_canon/Rulebook_v0_9_0.md`
+- `docs/10_canon/Game_Bible_v0_9_0.md`
+- `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (canon, v0.9.0 gate)
+- `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` (canon, v0.9.0 gate)
 - `docs/10_canon/context.md` (process canon)
+- `docs/10_canon/HISTORICAL_TIMELINE_MASTER.md` (historian-owned)
+- `docs/10_canon/FORAWWV.md` (manual-edit-only)
+
+*Note:* `Peace_Specification_v0_6_0.md` was decommissioned in v0.7.3 when the simulation moved to a single-phase (War only) model. Filename-vs-body version drift on Phase Specifications, War Specification, and Game Bible was resolved in the LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 pass on 2026-05-05.
 
 ## Canon Precedence Order
 
 When conflicts arise, resolve in this order:
 
-1. **Engine Invariants v0.7.0** - Defines what MUST be true (correctness constraints)
-2. **Phase Specifications v0.6.0** - Defines lifecycle contracts (Peace/War)
-3. **Systems & Mechanics Manual v0.7.0** - Defines complete system behavior (implementation spec)
-4. **Rulebook v0.7.0** - Defines player-facing experience
-5. **Game Bible v0.6.0** - Defines design philosophy and constraints
+1. **Engine Invariants v0.9.0** - Defines what MUST be true (correctness constraints)
+2. **Phase Specifications v0.9.0** - Defines lifecycle contracts (single-phase War-only model)
+3. **Systems & Mechanics Manual v0.9.0** - Defines complete system behavior (implementation spec)
+4. **Rulebook v0.9.0** - Defines player-facing experience
+5. **Game Bible v0.9.0** - Defines design philosophy and constraints
 6. **context.md** - Defines process canon (workflow, ledger, session runbook)
+
+**v0.9.0 gate docs (Tier 2; above Rulebook, below Engine Invariants):**
+
+- **SENSITIVE_HISTORY_DESIGN_GATE.md** - moral/design boundary for sensitive history (three-ring rule, rupture expansion, Cost Ledger wording)
+- **VICTORY_AND_PYRRHIC_SCORING.md** - victory conditions, outcome taxonomy, faction grade anchors, scoring non-goals
 
 ## Industry mapping
 
@@ -61,7 +71,7 @@ Do NOT edit FORAWWV automatically.
 
 ## Canon Versioning
 
-Canon v0.7 is the active canon (Engine Invariants, Systems Manual, Rulebook). Phase Specifications, Peace/War Specifications, and Game Bible remain at v0.6 (no changes needed). Deprecated v0.5 and older canon files have been removed.
+Canon v0.9 is the active canon. As of 2026-05-05 (LANE-NIGHTSHIFT-CANON-DOCS-TO-V09), Engine Invariants, Phase Specifications, War Specification, Systems Manual, Rulebook, and Game Bible all carry v0.9.0 filename and body version markers. The v0.9.0 gate docs (SENSITIVE_HISTORY_DESIGN_GATE.md, VICTORY_AND_PYRRHIC_SCORING.md) closed on 2026-04-16. Deprecated v0.5 / v0.6 / v0.7 canon files have been removed (or archived under `docs/_old/10_canon/` for lineage).
 
 **Canon doc versions are independent of game version.** Canon tracks documentation state; game version tracks software milestones. See `docs/20_engineering/VERSIONING.md`.
 

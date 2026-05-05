@@ -597,27 +597,28 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 
 | Doc | Filename version | Internal canon version | Last touch | Last commit subject | Status |
 |---|---|---|---|---|---|
-| `CANON.md` | (index) | n/a | 2026-03-15 | chore: fix stale version refs | INDEX — points to authoritative docs below |
-| `Engine_Invariants_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-05-03 | morale-collapse override (`58624617`) — added §6.2.4 morale_low_streak counter | CURRENT |
+| `CANON.md` | (index) | n/a | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — index updated for renamed docs + v0.9.0 gate refs | CURRENT — points to authoritative v0.9.0 docs below |
+| `Engine_Invariants_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.7.0 with morale_low_streak + equipment substrate amendments | CURRENT |
 | `FORAWWV.md` | (extension) | n/a | 2026-03-01 | Phase M refactor + canon v0.6 propagation | **MANUAL-ONLY** — Claude must NEVER auto-edit; flag for human review when proposed |
-| `Game_Bible_v0_6_0.md` | v0.6.0 | v0.6.0 | 2026-03-22 | event system propagation to canon | **LAGGING** — still labelled v0.6.0 while engine is at v0.7.0 / repo is in early v0.9.x band; comprehensive update or version-bump pass overdue |
+| `Game_Bible_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.6.0 with §§22-25 sensitive-history gate + scoring + Command Chain + product spine | CURRENT |
 | `HISTORICAL_TIMELINE_MASTER.md` | (master) | n/a | 2026-03-13 | knowledge base extractions | HISTORIAN-OWNED — BB1/BB2-cited; updated as new pages extracted |
-| `Phase_Specifications_v0_6_0.md` | filename v0.6.0 | **header v0.7.3** | 2026-03-26 | canon-audit (peace phase removal) | **NAME DRIFT** — filename says v0.6.0 but H1 says v0.7.3; rename or version-align needed |
-| `Rulebook_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-03-26 | canon-audit (peace phase removal) | CURRENT |
+| `Phase_Specifications_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.6.0/v0.7.3 (resolved name drift) | CURRENT |
+| `Rulebook_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.7.0 with §21 v0.8/v0.9 systems summary | CURRENT |
 | `SENSITIVE_HISTORY_DESIGN_GATE.md` | (gate) | v0.9.0 gate | 2026-05-04 | Q-CANON-RUPT-4 Path (d) (`ce95c162`) | CURRENT — closes v0.9.0 sensitive-history gate |
-| `Systems_Manual_v0_7_0.md` | v0.7.0 | v0.7.0 | 2026-05-03 | morale-collapse override (`58624617`) — added §6.4 dissolution clause | CURRENT |
+| `Systems_Manual_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.7.0 with v0.8/v0.9 additions section | CURRENT |
 | `VICTORY_AND_PYRRHIC_SCORING.md` | (gate) | v0.9.0 gate | 2026-04-16 | v0.9.0 victory-conditions gate close | CURRENT — closes v0.9.0 victory gate |
-| `War_Specification_v0_6_0.md` | filename v0.6.0 | **doc body says v0.7.3** | 2026-05-01 | Storm readiness / theater rupture split | **NAME DRIFT** — filename v0.6.0 but body declares v0.7.3; rename pending |
+| `War_Specification_v0_9_0.md` | v0.9.0 | v0.9.0 | 2026-05-05 | LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — bumped from v0.6.0/v0.7.3 with §12 substrate amendments (resolved name drift) | CURRENT |
 | `context.md` | (project identity) | n/a | 2026-04-03 | sector-first frontline authority | CURRENT — project identity & doc hierarchy reference |
 
 **Active issues to resolve as ordinary maintenance (not pre-0.9 blockers):**
-1. `Game_Bible_v0_6_0.md` is the most-out-of-date authoritative doc (still v0.6.0 while engine is v0.7.0; repo at early v0.9.x). Comprehensive update or explicit version-bump pass overdue.
-2. `Phase_Specifications_v0_6_0.md` and `War_Specification_v0_6_0.md` have **filename-vs-body version drift** (filename says v0.6.0 but body declares v0.7.3). Either rename the file or amend the body to match canonical version.
-3. `FORAWWV.md` last touched 2026-03-01 (~2+ months ago). It is intentionally manual-edit-only; review cadence is human-driven, not Claude-driven.
+1. `FORAWWV.md` last touched 2026-03-01 (~2+ months ago). It is intentionally manual-edit-only; review cadence is human-driven, not Claude-driven.
+2. Source/test references to old v0.7.0 / v0.6.0 filenames remain in supporting docs (`docs/20_engineering/`, `docs/40_reports/`, `.claude/skills/`, plan docs). These are downstream-consumer pointers and were left in place by LANE-NIGHTSHIFT-CANON-DOCS-TO-V09; updating them is a follow-up doc-sweep lane that does not block v0.9 canon authority.
+3. Pre-v0.9 backup snapshot at `docs/10_canon/_backups_pre_v09_20260505/` may be removed once the v0.9.0 canon-doc state is verified and merged.
 
 **Trip-session canon amendments (recent):**
-- 2026-05-03 `58624617` — Engine Invariants v0.7.0 §6.2.4 (morale_low_streak counter) + Systems Manual v0.7.0 §6.4 (dissolution-override clause), behind `MORALE_OVERRIDE_ENABLED` env flag default-off.
+- 2026-05-03 `58624617` — Engine Invariants v0.7.0 §6.2.4 (morale_low_streak counter) + Systems Manual v0.7.0 §6.4 (dissolution-override clause), behind `MORALE_OVERRIDE_ENABLED` env flag default-off. (Folded into v0.9.0 docs by LANE-NIGHTSHIFT-CANON-DOCS-TO-V09.)
 - 2026-05-04 `ce95c162` — SENSITIVE_HISTORY_DESIGN_GATE.md §1.5 #11 + §2 + §5 (Q-CANON-RUPT-4 Path (d), explicit acceptance of canonical silence in ahistorical campaigns).
+- 2026-05-05 LANE-NIGHTSHIFT-CANON-DOCS-TO-V09 — Engine Invariants, Rulebook, Systems Manual, Phase Specifications, War Specification, Game Bible all bumped from v0.7.0 / v0.6.0 / v0.7.3 → v0.9.0 (filename + body); name-drift resolved on Phase Specifications + War Specification; comprehensive content update on Game Bible (largest content gap closed).
 
 **Maintenance discipline:** any future canon amendment lane should (a) bump this table's last-touch + commit-subject row for the affected doc, (b) note any version drift introduced or resolved, (c) call out FORAWWV exclusion explicitly if relevant.
 
