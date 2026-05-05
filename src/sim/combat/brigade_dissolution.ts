@@ -22,6 +22,7 @@
 import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { lookupStepCurve, type WarTimeline } from '../../state/war_timeline.js';
 
 /**
  * Remove a brigade from its corps' active operation (participating_brigades + axes).
@@ -84,10 +85,39 @@ export interface DissolutionReport {
     }>;
 }
 
+/**
+ * LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-IMPLEMENTATION (2026-05-05):
+ * Resolve a per-faction, per-turn dissolution threshold from the war_timeline
+ * step-curve. Falls back to the hardcoded default constant when the timeline
+ * is absent, the faction has no entry, or no step matches the current turn.
+ *
+ * MECHANISM is faction-symmetric — the same lookup runs for every faction.
+ * DATA in `data/scenarios/timelines/apr1992.json` drives the asymmetry.
+ *
+ * Phase 0 audit: `docs/40_reports/audits/20260505_KRIVAJA_ROSTER_LIFECYCLE_PHASE_0_PANEL.md`.
+ */
+export function resolveDissolutionThreshold(
+    timeline: WarTimeline | undefined,
+    field: 'dissolution_personnel_threshold' | 'dissolution_cohesion_threshold' | 'dissolution_morale_threshold',
+    faction: string | undefined,
+    turn: number,
+    defaultValue: number,
+): number {
+    if (!timeline || !faction) return defaultValue;
+    const entries = timeline[field]?.[faction];
+    return lookupStepCurve(entries, turn, defaultValue);
+}
+
 export function dissolveCombatIneffectiveBrigades(state: GameState): DissolutionReport {
     const report: DissolutionReport = { dissolved_count: 0, dissolved_brigades: [] };
     const formations = state.military.formations ?? {};
     const formationIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
+
+    // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-IMPLEMENTATION: timeline + turn captured
+    // once per call. Per-faction step-curve overrides (faction-symmetric MECHANISM,
+    // faction-asymmetric DATA) drive Krivaja-95 calibration drift correction.
+    const timeline = state.military.war_timeline;
+    const currentTurn = state.meta?.turn ?? 0;
 
     for (const fid of formationIds) {
         const f = formations[fid];
@@ -127,9 +157,25 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // The absolute floor counts as the "low personnel" criterion automatically.
         // A brigade at 140 pers but 60 morale and 56 cohesion is a company-strength
         // unit still willing to fight — it shouldn't auto-dissolve just from being small.
-        const lowPersonnel = personnel < DISSOLUTION_PERSONNEL_THRESHOLD || personnel < absFloor;
-        const lowCohesion = cohesion <= DISSOLUTION_COHESION_THRESHOLD;
-        const lowMorale = morale <= DISSOLUTION_MORALE_THRESHOLD;
+        //
+        // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-IMPLEMENTATION (2026-05-05): each
+        // threshold is now resolved through the war_timeline step-curve. Mechanism
+        // is faction-symmetric (same lookup, same comparison, same gate); DATA in
+        // apr1992.json drives faction-asymmetric calibration. The absolute floor
+        // remains a hard kind-floor (a 50-100 person brigade is a company remnant
+        // regardless of faction-specific calibration) and is NOT timeline-driven.
+        const personnelThreshold = resolveDissolutionThreshold(
+            timeline, 'dissolution_personnel_threshold', f.faction, currentTurn, DISSOLUTION_PERSONNEL_THRESHOLD,
+        );
+        const cohesionThreshold = resolveDissolutionThreshold(
+            timeline, 'dissolution_cohesion_threshold', f.faction, currentTurn, DISSOLUTION_COHESION_THRESHOLD,
+        );
+        const moraleThreshold = resolveDissolutionThreshold(
+            timeline, 'dissolution_morale_threshold', f.faction, currentTurn, DISSOLUTION_MORALE_THRESHOLD,
+        );
+        const lowPersonnel = personnel < personnelThreshold || personnel < absFloor;
+        const lowCohesion = cohesion <= cohesionThreshold;
+        const lowMorale = morale <= moraleThreshold;
         const criteriaCount = (lowPersonnel ? 1 : 0) + (lowCohesion ? 1 : 0) + (lowMorale ? 1 : 0);
         // LANE-NIGHTSHIFT-N4: morale-collapse override is the fourth, independent
         // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.

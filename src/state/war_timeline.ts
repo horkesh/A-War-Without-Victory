@@ -95,6 +95,30 @@ export interface WarTimeline {
     maintenance_decay: MaintenanceDecayConfig[];
     /** Per-faction officer configuration. Keys: faction IDs (RS, RBiH, HRHB). Optional; hardcoded defaults used when absent. */
     officer_config?: Record<string, import('./officer_types.js').FactionOfficerConfig>;
+    /**
+     * LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-IMPLEMENTATION (2026-05-05):
+     * Per-faction step-curve overrides for the dissolveCombatIneffectiveBrigades
+     * 2-of-3 thresholds. The CODE mechanism (dissolution criteria, criteria-count
+     * gate, personnel-cap exit) is faction-symmetric. The DATA below drives
+     * faction-asymmetric calibration via the existing step-curve substrate.
+     *
+     * Optional per faction. When absent for a faction (or no entry matches the
+     * current turn), the engine falls back to the hardcoded constants in
+     * formation_constants / brigade_dissolution.ts. Values are absolute
+     * thresholds (NOT multipliers), in the same units as the constants:
+     *   - dissolution_personnel_threshold: personnel < value → lowPersonnel
+     *   - dissolution_cohesion_threshold: cohesion <= value → lowCohesion
+     *   - dissolution_morale_threshold: morale <= value → lowMorale
+     *
+     * Lowering these thresholds for a faction in a turn window makes the
+     * 2-of-3 dissolution criteria FIRE LATER for that faction, extending the
+     * canon-cited operational window of historically-attested formations.
+     * Phase 0 audit (`docs/40_reports/audits/20260505_KRIVAJA_ROSTER_LIFECYCLE_PHASE_0_PANEL.md`)
+     * verdicted CONDITIONS for VRS Drina Corps Krivaja-95 participants.
+     */
+    dissolution_personnel_threshold?: Record<string, StepCurveEntry[]>;
+    dissolution_cohesion_threshold?: Record<string, StepCurveEntry[]>;
+    dissolution_morale_threshold?: Record<string, StepCurveEntry[]>;
 }
 
 // ── Generic lookup functions ─────────────────────────────────────────────────
@@ -231,6 +255,22 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
     // Validate step curve entries (contiguity + ordering)
     for (const field of ['cohesion_drift', 'reinforcement_mult'] as const) {
         for (const [faction, entries] of Object.entries(obj[field] as Record<string, unknown>)) {
+            if (!Array.isArray(entries)) {
+                throw new Error(`WarTimeline: ${field}["${faction}"] must be an array`);
+            }
+            validateStepCurveEntries(entries, `${field}["${faction}"]`);
+        }
+    }
+
+    // LANE-NIGHTSHIFT-KRIVAJA-PHASE-1-IMPLEMENTATION: Validate optional dissolution
+    // threshold step-curves. Same shape/contiguity invariants as cohesion_drift.
+    for (const field of ['dissolution_personnel_threshold', 'dissolution_cohesion_threshold', 'dissolution_morale_threshold'] as const) {
+        const fieldVal = obj[field];
+        if (fieldVal === undefined) continue;
+        if (typeof fieldVal !== 'object' || fieldVal === null) {
+            throw new Error(`WarTimeline: "${field}" must be an object when present`);
+        }
+        for (const [faction, entries] of Object.entries(fieldVal as Record<string, unknown>)) {
             if (!Array.isArray(entries)) {
                 throw new Error(`WarTimeline: ${field}["${faction}"] must be an array`);
             }
