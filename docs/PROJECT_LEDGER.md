@@ -7835,3 +7835,47 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 - `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_9_REDO.md`
 - `docs/40_reports/implemented/20260505_OFFICER_CASUALTY_MULT_PHASE_1.md` (verdict-report-only)
 - 6 canon-to-v0.9 closeout reports embedded in commit messages
+
+---
+
+## [2026-05-05] OQ-Growth investigation + Phase 0 panel + Phase 1 verdict + Corridor Heartbeat
+
+**Type:** Trip session 5 second batch. Commits `9ad7a854..a42ebae0` (5 commits): 3 audit/research + 1 v0.9.4 visual ship + 1 Phase 1 verdict-report-only.
+
+**`9ad7a854` Canon cross-ref sweep:** 9 LIVE pointers updated across docs/engineering/plans/skills; 23 HISTORICAL refs preserved; 0 source-code refs found. Closes Canon-to-v0.9 follow-up; entire repo's LIVE references now point at v0.9.0 canon filenames.
+
+**`a4b71ac5` OQ-Growth investigation audit:** Audit-only; reuses Wave 6 n1641 + Lane A n1665 trajectory data. Named the defect candidate at `src/sim/combat/officer_quality_update.ts:164-170`: unconditional positive growth scaled by `FACTION_LEARNING_RATE` constants. Survivorship-vs-growth attribution via new `tools/diagnostics/officer_quality_growth_trace.cjs`: ~3:1 growth-dominant (HRHB 77.6% / RBiH 63.2% / RS 74.4%) — defect is in growth code, not metric artifact. Three candidate fix shapes proposed (A: per-faction CAP, B: cadre-replacement-optimism tax, C: cohort-experience formula replacement). Cross-lane lesson "when two proximate levers fail, escalate upstream" applied: A is OUT OF SCOPE (proximate per-faction multiplier — same failure class as Wave 4 + Lane A); B is recommended; C is alternative.
+
+**`af080eac` OQ-Growth Phase 0 panel:** Read-only synthesis. 4-expert reads (`/game-designer`, `/historian`, `/scenario-creator-runner-tester`, `/determinism-auditor`) — unanimous CONDITIONS verdict. Fix Shape B GO with 10 binding acceptance criteria + 5 stop triggers + Ring 1 + §6 NOT triggered. Recommended numerics: RBiH `const 1.5`, RS `0.7/0.4/0.0/-0.4`, HRHB `1.0/0.7/0.3/-0.2` at brackets `<w52/w52-77/w78-103/w104+`. Bracket boundaries match Wave 4 reinforcement_mult precedent. Fix Shape C DEFERRED. Mirrors OCM Phase 0 panel pattern. Includes the NEW stayer-Δ trajectory gate (criterion 4) — the per-formation gate that Wave 6 + Lane A could not test.
+
+**`13052958` Corridor Heartbeat — v0.9.4 Phase 3 FULLY CLOSED:** Fourth and final v0.9.4 Visual Layer feature. Mirrors Map That Scars + Force-Quality Glow + Refugee Column validation pattern. Substrate: derived corridor segments from `LoadedGameState.frontEdgesOsid` (every contested edge is a corridor segment); intensity from optional `LoadedGameState.frontPressureByEdge`. Static deck.gl `PathLayer` (animated TripsLayer follow-on noted with `period_ms` data preserved per-datum). Faction-symmetric palette imported from canonical `FACTION_GLOW_RGB` (Wave 8 Lane D); no duplication anywhere in repo. T1-T8 all GREEN; flag flipped default-ON. Adjacent regression: 32/32 GREEN across all four v0.9.4 visual lanes (Map That Scars + Force-Quality Glow + Refugee Column + Corridor Heartbeat). **All 4 features now live.**
+
+**`a42ebae0` OQ-Growth Phase 1 implementation VERDICT-REPORT-ONLY:** Implementation was structurally correct: `FACTION_LEARNING_RATE` promoted to `Record<string, StepCurveEntry[]>`, `getFactionLearningRate(faction, turn)` accessor with `?? 1.0` default, mirrors Wave 4 step-curve precedent. Verification at peak: 14/14 lane + caller tests GREEN (8 new + 6 extended); `npx tsc --noEmit` clean; 40w smoke n1666 hash `ef03ab4d6c5ecd28` byte-identical to baseline (expected — at w40 all factions still in first step-curve band) + anchors 26/27 PASS. 188w smoke n1667 hash `781e4009ba528833` ran cleanly with full artifact emission (Wave 7 Lane B streaming finalizer worked at scale, second consecutive 188w with full emit). Trajectory data: HRHB whole-run Δ/turn = +0.00219 (canon -1, FAIL); RBiH = +0.00386 (PASS); RS = +0.00078 (FAIL); HRHB stayer Δ/turn = +0.002249 (FAIL); RBiH stayer Δ/turn = +0.003875 (PASS); RS stayer Δ/turn = +0.000650 (FAIL); RS active brigades at t188 = 51 (PASS).
+
+Per panel criterion 8 stop-triggers #1 (faction-mean Δ/turn doesn't bend nonpositive) AND #2 (stayer Δ/turn doesn't bend nonpositive) BOTH TRIGGERED. Implementation reverted; verdict-report retained.
+
+**LOAD-BEARING META-FINDING:** Phase 1 was DORMANT in production due to **timeline precedence shadowing**. The 4-level precedence chain in `updateBrigadeOfficerQuality` has timeline `learning_rate_per_turn` at path #1 (highest); the new step-curve fallback at path #4. `data/scenarios/timelines/apr1992.json` defines `learning_rate_per_turn` for all three factions, so path #1 always wins. The new step-curve NEVER ACTIVATES. n1667's trajectory is nearly-identical to Lane A n1665 (which made no change to this code path). The Phase 0 panel approved Phase 1 without verifying production reachability.
+
+**THREE proximate levers now ruled out** (Wave 4 reinforcement_mult `e9584dd3`, Lane A OFFICER_CASUALTY_MULT `411f6843`, Phase 1 FACTION_LEARNING_RATE step-curve `a42ebae0`). **Real upstream lever named:** `data/scenarios/timelines/apr1992.json` `officer_config.<faction>.learning_rate_per_turn` (RS=0.007, HRHB≈0.010, RBiH≈0.015 currently scalar). Future calibration must target the timeline data directly OR use Fix Shape C (cohort-experience formula replacement, structurally independent of `learning_rate_per_turn` precedence).
+
+**Sensitive-history compliance (all 5 commits):** Ring 1, faction-agnostic mechanism, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No combat-math number tuned in production (Phase 1 reverted).
+
+**Roadmap delta:**
+- v0.9.4 Phase 3 (Legendary Map Features) FULLY CLOSED — all 4 features live; v0.9.4 Phase 1 (Shell + Transition Polish) and Phase 2 (Visual Consistency) remain for future lanes.
+- v0.9 Calibration — third proximate-lever ruled out + real upstream lever (timeline data) named.
+- Wave 7 Lane B streaming finalizer twice-validated at 188w scale (n1665 + n1667 both full-emit).
+
+**Successor handoffs:**
+1. **Timeline-data step-curve lane** (LOAD-BEARING): target `data/scenarios/timelines/apr1992.json` `officer_config.<faction>.learning_rate_per_turn` directly — replace scalar with step-curve OR add new `learning_rate_per_turn_step_curve` field at path #1 precedence. Phase 0 panel REQUIRED with NEW "production reachability" criterion (verify the lever's code path actually fires at runtime with current scenario data).
+2. **Fix Shape C re-elevation** (DEFERRED → parallel candidate): cohort-experience formula replacement is structurally independent of `learning_rate_per_turn` precedence chain.
+3. **Phase 0 panel discipline upgrade**: add "production reachability" criterion to all future Phase 0 panels.
+4. **MORALE_OVERRIDE_ENABLED flag promotion** to default-on (188w gate now feasible after streaming finalizer twice-validated).
+5. **Wave 10 events**: faction-mirror inversions; doctrine-reform / arms-channel variants.
+6. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized` (cross-call shared state — needs new gate strategy beyond G1+G2+G3).
+
+**Reports:**
+- `docs/40_reports/audits/20260505_OFFICER_QUALITY_GROWTH_PATH_AUDIT.md`
+- `docs/40_reports/audits/20260505_OFFICER_QUALITY_GROWTH_PATH_PHASE_0_PANEL.md`
+- `docs/40_reports/implemented/20260505_CORRIDOR_HEARTBEAT_VALIDATION.md`
+- `docs/40_reports/implemented/20260505_OFFICER_QUALITY_GROWTH_PHASE_1.md` (verdict-report-only)
+- New diagnostic: `tools/diagnostics/officer_quality_growth_trace.cjs`
