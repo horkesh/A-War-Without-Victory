@@ -256,8 +256,8 @@ Three rules derived from settling this gate. These belong in `docs/life_lessons.
 ### Canon and design
 - `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` — scoring model
 - `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md` — original design discussion
-- `docs/10_canon/Rulebook_v0_7_0.md:195` — officer war_crimes_record informational-only rule
-- `docs/10_canon/Engine_Invariants_v0_7_0.md:353` — same
+- `docs/10_canon/Rulebook_v0_9_0.md` §5.8 (war_crimes_record) — officer war_crimes_record informational-only rule
+- `docs/10_canon/Engine_Invariants_v0_9_0.md` §15.2 (War Crimes Records) — same
 
 ### Historical sources
 - ICTY completed cases: https://www.icty.org/en/cases
