@@ -16,6 +16,18 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
+## Current State (2026-05-05, Wave 10 events SHIP on top of `4b199332`)
+**Single-commit additive content lane.** Wave 10 events SHIPPED clean (`d59abaa4`). Catalog 71→77; Wave-10 lineage 47→53. 6 new Ring 1 / no-§6 / faction-agnostic events: HRHB supply-strain mirror, post-Dayton train-and-equip, ARBiH doctrine modernization, Iran-arms-channel attenuation, RBiH political-split mirror, doctrine-drift. 11/11 lane tests + 177/177 focused regression GREEN; 40w smoke n1674 hash `987cfe1dcdb272f8` byte-identical to predecessor n1672 (events condition-gated default-OFF as designed). Verify-before-exit confirmed.
+
+**Sensitive-history compliance:** Ring 1, faction-agnostic predicates, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No `event_types.ts` modification (STOP rule met). AUDIT-ONLY framing on every event via `cost_ledger_annotation`.
+
+**Successor handoffs (none load-bearing now):**
+1. **MORALE_OVERRIDE_ENABLED flag promotion** to default-on (188w gate four-times-validated; needs Phase 0 panel for §6-adjacent dissolution-override mechanism + 188w sensitive-history regression run + dissolution count validation per `58624617` handoff).
+2. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized` (cross-call shared state — needs new gate strategy beyond G1+G2+G3).
+3. **Fix Shape C cleanup** (DEFERRED → optional polish; not load-bearing now that late-war arc is closed).
+4. **40w hash drift investigation** (HRHB retune produced 40w hash drift; band-2 starts at w52 > 40w boundary so technically should have NO effect at 40w; expected to be iteration-order side effect but worth confirming).
+5. **Wave 11 events** (faction-mirror inversions of Wave 9-10 not yet covered; further doctrine / negotiation / patron variants).
+
 ## Current State (2026-05-05, HRHB retune SHIP — LATE-WAR DOCTRINAL ARC CLOSED on 5th attempt on top of `d038da73`)
 **Commits `3f8951e1..f9c40043` (2 commits).** Trip session 5 fourth batch.
 

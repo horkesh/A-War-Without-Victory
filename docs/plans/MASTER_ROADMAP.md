@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip HRHB numerics retune `f9c40043` — **LATE-WAR DOCTRINAL ARC CLOSED for both VRS and HRHB** on 5th attempt; mini-panel ALTERNATIVE-PROPOSED RS-proportional numerics on HRHB baseline (`0.010 / 0.0057 / 0.000 / -0.004`); 188w n1673 results: RS whole-run Δ/turn = -0.000677 BYTE-IDENTICAL to prior (no regression — criterion 6 PASS), HRHB post-w52 segment Δ/turn = -0.000768 (refined criterion 3 PASS), HRHB whole-run +0.000105 (-79% attenuation; pre-w52 canonical professionalization dominates), RBiH control held. **Trip session central calibration question ANSWERED.**)
+**Last Updated:** 2026-05-05 (post-trip Wave 10 events `d59abaa4` — catalog 71→77 (Wave-10 lineage 47→53); 6 new Ring 1 / no-§6 events: HRHB supply-strain mirror, post-Dayton train-and-equip, ARBiH doctrine modernization, Iran-arms-channel attenuation, RBiH political-split mirror, doctrine-drift; 11/11 + 177/177 GREEN; 40w hash byte-identical. Predecessor: HRHB numerics retune `f9c40043` closed late-war doctrinal arc on 5th attempt (RS strict + HRHB refined). **v0.9.0 events at 77 catalog. Trip session central calibration question ANSWERED.**)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
