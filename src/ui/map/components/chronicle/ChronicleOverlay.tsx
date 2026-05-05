@@ -9,6 +9,7 @@ import { openArmyHQAftermathRecord } from '../../utils/shellNavigation.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import { EmptyState } from '../EmptyState.js';
+import { Z } from '../../../shared/zIndex.js';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -321,7 +322,7 @@ export function ChronicleOverlay() {
     }
 
     return (
-        <div className="fixed inset-0 z-[1000] bg-black/92 backdrop-blur-sm flex flex-col">
+        <div className="fixed inset-0 bg-black/92 backdrop-blur-sm flex flex-col" style={{ zIndex: Z.MODAL }}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-2.5 border-b border-white/8">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">

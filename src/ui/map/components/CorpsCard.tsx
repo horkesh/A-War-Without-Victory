@@ -4,6 +4,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
 import { FlipCard } from './army_hq/FlipCard';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 const STANCE_ICON: Record<string, IconName> = {
   offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
@@ -231,7 +232,7 @@ export function CorpsCard({
       {toastMsg && (
         <div
           className={`absolute left-0 right-0 flex justify-center pointer-events-none ${toastExiting ? 'stance-toast-exit' : 'stance-toast-enter'}`}
-          style={{ bottom: '-24px', zIndex: 30 }}
+          style={{ bottom: '-24px', zIndex: Z.CORPS_CARD_LABEL }}
         >
           <span className="px-2 py-0.5 bg-accent-gold/20 border border-accent-gold/40 rounded text-[9px] font-mono text-accent-gold tracking-wider uppercase shadow-lg">
             {toastMsg}

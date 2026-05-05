@@ -19,6 +19,7 @@ import {
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
+import { Z } from '../../../shared/zIndex';
 
 export interface WarroomStatusBarProps {
   onReviewPriorities?: () => void;
@@ -188,8 +189,8 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   return (
     <div
       data-tutorial-step="warroom-status-bar"
-      className="fixed bottom-4 right-4 z-[60] flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded bg-black/70 px-3 py-1.5 font-mono text-[10px] text-amber-400 pointer-events-auto select-none"
-      style={{ backdropFilter: 'blur(4px)' }}
+      className="fixed bottom-4 right-4 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-2 rounded bg-black/70 px-3 py-1.5 font-mono text-[10px] text-amber-400 pointer-events-auto select-none"
+      style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}
     >
       {priorityDocketOpen && (
         <PriorityDocketPanel

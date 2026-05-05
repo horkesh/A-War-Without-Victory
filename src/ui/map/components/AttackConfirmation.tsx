@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 /** Attacker formation summary for the confirmation modal. */
 export interface AttackConfirmationAttacker {
@@ -82,7 +83,8 @@ export function AttackConfirmation({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+      className="fixed inset-0 flex items-center justify-center bg-black/50"
+      style={{ zIndex: Z.ATTACK_CONFIRMATION }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="attack-confirmation-title"

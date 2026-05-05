@@ -22,6 +22,7 @@
  * no §6 surface. UI-only — does NOT enter sim path.
  */
 import React from 'react';
+import { Z } from '../../shared/zIndex';
 
 export interface LoadingSkeletonProps {
   /** Optional override for the loading caption. Default: "LOADING SCENARIO". */
@@ -37,7 +38,8 @@ export interface LoadingSkeletonProps {
 export function LoadingSkeleton({ caption = 'LOADING SCENARIO' }: LoadingSkeletonProps): React.ReactElement {
   return (
     <div
-      className="fixed inset-0 bg-panel-bg z-[50] flex flex-col"
+      className="fixed inset-0 bg-panel-bg flex flex-col"
+      style={{ zIndex: Z.LOADING_SKELETON }}
       role="status"
       aria-live="polite"
       aria-busy="true"

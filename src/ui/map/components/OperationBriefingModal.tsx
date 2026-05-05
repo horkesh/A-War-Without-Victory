@@ -10,6 +10,7 @@ import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playe
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
+import { Z } from '../../shared/zIndex';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 
@@ -455,7 +456,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     }, [intelConf, supplyReady, forceRatio, assessment, postponements, commander]);
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60" style={{ zIndex: Z.CRITICAL_MODAL }}>
             <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-lg w-full">
                 {/* Header — operation name + stamp */}
                 <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100 relative">

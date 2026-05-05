@@ -1,4 +1,5 @@
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
+import { Z } from '../../shared/zIndex';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ export function TurnAftermathModal({
   const signalPreview = view.signals.slice(0, 4);
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/70 px-4" style={{ zIndex: Z.TURN_AFTERMATH }}>
       <div className="w-full max-w-4xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
           <div className="min-w-0">

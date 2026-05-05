@@ -9,6 +9,7 @@ import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -49,7 +50,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const splitTotal = plan.proposedSplit.RBiH + plan.proposedSplit.RS + plan.proposedSplit.HRHB;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ zIndex: Z.CRITICAL_MODAL }}>
             <div className="w-[95%] max-w-[640px] max-h-[90vh] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
                  style={{
                      background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',

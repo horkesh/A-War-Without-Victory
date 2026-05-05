@@ -4,6 +4,7 @@
  */
 import { GlassPanel } from './GlassPanel';
 import type { LoadedGameState } from '../data/types';
+import { Z } from '../../shared/zIndex';
 
 interface PeaceWarTransitionProps {
     onDismiss: () => void;
@@ -59,7 +60,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
     const factionOrder = ['RBiH', 'RS', 'HRHB'];
 
     return (
-        <GlassPanel position="overlay" title="WAR BEGINS" width="560px" onClose={onDismiss} zIndex={60}>
+        <GlassPanel position="overlay" title="WAR BEGINS" width="560px" onClose={onDismiss} zIndex={Z.GLASS_PANEL_PEACE_WAR}>
             {/* Date */}
             <div className="text-center mb-4">
                 <div className="text-[10px] uppercase tracking-[0.3em] text-[#8a8578] mb-1">Date</div>

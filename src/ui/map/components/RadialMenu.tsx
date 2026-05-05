@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Z } from '../../shared/zIndex';
 
 export interface RadialMenuItem {
   id: string;
@@ -45,8 +46,8 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
   return (
     <div
       ref={ref}
-      className="fixed z-[200]"
-      style={{ left: x, top: y }}
+      className="fixed"
+      style={{ left: x, top: y, zIndex: Z.SHELL_FLOATING }}
     >
       {/* Center label */}
       <div className="absolute -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-panel/90 backdrop-blur-md border border-white/15 flex items-center justify-center">

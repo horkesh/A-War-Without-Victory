@@ -11,6 +11,7 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_HEX_COLORS } from '../utils/theme';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -139,7 +140,8 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
 
   return (
     <div
-      className="fixed inset-0 z-[500] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      style={{ zIndex: Z.PANEL }}
       onClick={(e) => { if (e.target === e.currentTarget) setStrategicDashboardOpen(false); }}
     >
       <div className="bg-panel-bg border border-panel-border rounded-lg shadow-2xl w-[640px] max-h-[80vh] overflow-auto">

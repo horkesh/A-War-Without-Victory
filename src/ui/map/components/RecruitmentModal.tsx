@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { RecruitmentCatalogBrigade } from '../desktop/types';
+import { Z } from '../../shared/zIndex';
 
 interface RecruitmentModalProps {
   isOpen: boolean;
@@ -41,7 +42,8 @@ export function RecruitmentModal({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 flex items-center justify-center bg-black/60"
+      style={{ zIndex: Z.OVERLAY_LIGHT }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="recruitment-title"

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useGameStore, type StagedOrder } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 function formationName(formationId: string, formationNamesById: Map<string, string>): string {
   return getPlayerSafeBrigadeName(formationNamesById.get(formationId));
@@ -41,7 +42,7 @@ export function OrderQueue() {
           left: 0,
           bottom: '2.25rem',
           width: '18rem',
-          zIndex: 15,
+          zIndex: Z.ORDER_QUEUE,
           direction: 'ltr',
         }}
       >
@@ -63,7 +64,7 @@ export function OrderQueue() {
           left: 0,
           bottom: '2.25rem',
           width: '18rem',
-          zIndex: 15,
+          zIndex: Z.ORDER_QUEUE,
           direction: 'ltr',
         }}
       >
@@ -83,7 +84,7 @@ export function OrderQueue() {
         left: 0,
         bottom: '2rem',
         width: '18rem',
-        zIndex: 15,
+        zIndex: Z.ORDER_QUEUE,
         direction: 'ltr',
       }}
     >

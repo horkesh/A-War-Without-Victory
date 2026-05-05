@@ -1,6 +1,8 @@
 /**
  * In-game pause menu — triggered by Escape when no other modal is open.
  */
+import { Z } from '../../shared/zIndex';
+
 interface PauseMenuProps {
     onResume: () => void;
     onSave: () => void;
@@ -11,7 +13,8 @@ interface PauseMenuProps {
 
 export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: PauseMenuProps) {
     return (
-        <div className="fixed inset-0 z-[8000] flex items-center justify-center bg-black/45"
+        <div className="fixed inset-0 flex items-center justify-center bg-black/45"
+             style={{ zIndex: Z.PAUSE_MENU }}
              onClick={onResume}>
             <div className="w-[320px] rounded-lg border border-[#8a7a60]/35 shadow-2xl p-4 flex flex-col gap-2"
                  style={{

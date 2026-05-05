@@ -28,6 +28,7 @@ import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
+import { Z } from '../../../shared/zIndex';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -179,7 +180,7 @@ export function ArmyHQModal() {
     const crestSrc = getArmyCrest(faction);
 
     return (
-        <div className="fixed inset-0 z-[1000] flex overflow-hidden font-mono" onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
+        <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
             <div className="absolute inset-0 bg-black/85" />
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">

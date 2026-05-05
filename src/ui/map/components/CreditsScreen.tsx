@@ -1,13 +1,16 @@
 /**
  * Credits screen — studio, sources, acknowledgments, dedication.
  */
+import { Z } from '../../shared/zIndex';
+
 interface CreditsScreenProps {
     onClose: () => void;
 }
 
 export function CreditsScreen({ onClose }: CreditsScreenProps) {
     return (
-        <div className="fixed inset-0 z-[8500] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+             style={{ zIndex: Z.MODAL_HARD }}
              onClick={onClose}>
             <div className="w-[90%] max-w-[480px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{

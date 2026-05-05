@@ -7,6 +7,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
 import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
+import { Z } from '../../shared/zIndex.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
@@ -94,7 +95,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[900] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ zIndex: Z.CODEX }}>
             <div className="w-[760px] max-w-[95vw] h-[80vh] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-700/50 bg-[#10131a]">
                     <div className="flex items-center gap-2.5">

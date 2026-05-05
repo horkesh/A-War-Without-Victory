@@ -10,6 +10,7 @@ import maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection, Feature, Polygon } from 'geojson';
 import { useGameStore } from '../store/gameStore';
+import { Z } from '../../shared/zIndex';
 
 const MINIMAP_WIDTH = 250;
 const MINIMAP_HEIGHT = 180;
@@ -232,7 +233,7 @@ export const Minimap = React.memo(function Minimap() {
         bottom: 76,
         width: MINIMAP_WIDTH,
         height: MINIMAP_HEIGHT,
-        zIndex: 10,
+        zIndex: Z.MAP_OVERLAY,
         borderRadius: 8,
         overflow: 'hidden',
         border: '1px solid rgba(180, 160, 130, 0.25)',

@@ -9,6 +9,7 @@ import { AuthorizePhase } from './AuthorizePhase';
 import { OpsMap } from './OpsMap';
 import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
+import { Z } from '../../../shared/zIndex';
 
 let nextAxisCounter = 0;
 function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
@@ -258,7 +259,7 @@ export function OpsPlanningModal() {
     const currentIdx = PHASE_ORDER.indexOf(phase);
 
     return (
-        <div className="fixed inset-0 z-[1000] bg-black/60">
+        <div className="fixed inset-0 bg-black/60" style={{ zIndex: Z.MODAL }}>
             {/* Full-bleed map background */}
             <OpsMap
                 corpsId={corpsId}

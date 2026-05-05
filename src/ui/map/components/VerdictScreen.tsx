@@ -26,6 +26,7 @@ import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dyna
 // been plumbed into the loaded adapter. Consumes byte-identical save
 // round-trip; does NOT advance turns or mutate engine state.
 import { ReplayScrubber } from './replay/index.js';
+import { Z } from '../../shared/zIndex.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -231,7 +232,8 @@ export function VerdictScreen() {
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+        <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+             style={{ zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
              data-awwv-endgame-outcome={verdict.outcome_label}>
             <div className="w-[780px] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
@@ -623,7 +625,8 @@ function FallbackGameOver({
         : { title: 'Game Over', subtitle: '' };
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+             style={{ zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="fallback"
              data-awwv-endgame-outcome={display.title}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">

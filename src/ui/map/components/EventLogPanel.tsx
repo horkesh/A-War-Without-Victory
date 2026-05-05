@@ -5,6 +5,7 @@
 
 import { GlassPanel } from './GlassPanel';
 import { EmptyState } from './EmptyState';
+import { Z } from '../../shared/zIndex';
 
 /** A single entry in the event log history. */
 export interface EventLogEntry {
@@ -31,7 +32,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function EventLogPanel({ events, onClose }: EventLogPanelProps) {
     return (
-        <GlassPanel position="right" title="Event Log" width="340px" onClose={onClose} zIndex={42}>
+        <GlassPanel position="right" title="Event Log" width="340px" onClose={onClose} zIndex={Z.GLASS_PANEL_EVENT_LOG}>
             {events.length === 0 ? (
                 <EmptyState
                     message="No events recorded"

@@ -3,6 +3,7 @@ import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
+import { Z } from '../../shared/zIndex';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -77,9 +78,9 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-auto"
+            className="fixed inset-0 flex items-center justify-center pointer-events-auto"
             onClick={handleBackdropClick}
-            style={{ perspective: '1000px' }}
+            style={{ perspective: '1000px', zIndex: Z.MODAL }}
         >
             {/* Backdrop with blur & darken */}
             <div

@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { WarCrimesBadge } from './WarCrimesBadge';
+import { Z } from '../../shared/zIndex';
 
 function StatBar({ label, value }: { label: string; value: number }) {
   const pct = (value / 5) * 100;
@@ -126,7 +127,7 @@ function OfficerEventModal({ events, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm" style={{ zIndex: Z.CRITICAL_MODAL }}>
       <div className="w-[480px] max-h-[80vh] bg-panel-bg/95 border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-5 py-3 border-b border-panel-border bg-panel-card/50 flex items-center justify-between shrink-0">

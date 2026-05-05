@@ -17,6 +17,7 @@ import {
 } from '../utils/officerCharacter';
 import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
+import { Z } from '../../shared/zIndex';
 
 interface CommanderSelectionModalProps {
     isOpen: boolean;
@@ -100,7 +101,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
     if (!isOpen || !context) return null;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60" style={{ zIndex: Z.CRITICAL_MODAL }}>
             <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col">
                 <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100">
                     <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Assign Operations Commander</div>

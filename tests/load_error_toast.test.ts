@@ -137,7 +137,7 @@ describe('LoadErrorToast — save-load error toast', () => {
     expect(html).not.toMatch(/#c04040|#4a9a55|#4080b8/);
   });
 
-  it('T8 — fixed positioning applies z-[8500] above the modal stack but below GameOver/Verdict', () => {
+  it('T8 — fixed positioning applies z-index 8500 (Z.MODAL_HARD) above the modal stack but below GameOver/Verdict', () => {
     const onDismiss = vi.fn();
     const html = renderToStaticMarkup(
       createElement(LoadErrorToast, {
@@ -146,7 +146,9 @@ describe('LoadErrorToast — save-load error toast', () => {
         // default positioning='fixed'
       }),
     );
-    expect(html).toContain('z-[8500]');
+    // Post LANE-V094-Z-INDEX-TOKENS: Tailwind `z-[8500]` arbitrary class
+    // replaced with inline `style="z-index:8500"` from canonical Z.MODAL_HARD.
+    expect(html).toMatch(/z-index\s*:\s*8500/);
     expect(html).toContain('fixed');
   });
 });

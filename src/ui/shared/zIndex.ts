@@ -24,10 +24,17 @@
  * state. The frozen `Z` object is safe to read from any code path.
  *
  * ─── Migration policy ──────────────────────────────────────────────────────
- * For Tailwind arbitrary-value classes, prefer template literal usage:
- *   `fixed inset-0 z-[${Z.MODAL}] flex ...`
- * For inline `style.zIndex`, use the constant directly:
- *   style={{ zIndex: Z.TOOLTIP }}
+ * Use inline `style={{ zIndex: Z.X }}` (or for vanilla DOM:
+ * `el.style.zIndex = String(Z.X)`) when migrating an existing literal.
+ * This avoids Tailwind JIT class-detection edge cases that can occur with
+ * template-literal `z-[${Z.MODAL}]` arbitrary-value classes (Tailwind's JIT
+ * scans for static class strings; template substitutions are not always
+ * resolved at scan time).
+ *
+ * Pre-existing Tailwind `z-[N]` arbitrary-value classes are removed from
+ * a `className` and replaced with `style={{ zIndex: Z.X }}` on the same
+ * element — the resulting browser z-index is identical to the prior
+ * literal class.
  *
  * NEVER hard-code a numeric literal for z-index in any UI shell file going
  * forward; import a tier from this module instead. Tests in

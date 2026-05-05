@@ -7,6 +7,7 @@
 import type { PendingEventDecision, EventResponseOption, EventEffect } from '../../../sim/events/event_types';
 import { FACTION_COLORS } from '../utils/theme';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { Z } from '../../shared/zIndex';
 
 export interface EventDecisionModalProps {
     decision: PendingEventDecision;
@@ -66,7 +67,7 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
     const factionColor = FACTION_COLORS[decision.faction] ?? 'text-accent-gold';
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999]">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center" style={{ zIndex: Z.CRITICAL_MODAL }}>
             <div className="bg-panel-bg border border-panel-border rounded-lg p-6 max-w-[560px] w-[90%]
                             shadow-xl backdrop-blur-sm">
                 {/* Category stamp */}

@@ -7,6 +7,7 @@
  * Visual spec: dark NATO ops center aesthetic matching CommandTopBar.
  */
 import { useEffect, useRef, type ReactNode } from 'react';
+import { Z } from '../../shared/zIndex';
 
 export interface GlassPanelProps {
     position: 'left' | 'right' | 'overlay' | 'bottom-tray';
@@ -32,7 +33,7 @@ export function GlassPanel({
     onClose,
     children,
     className = '',
-    zIndex = 40,
+    zIndex = Z.GLASS_PANEL_DEFAULT,
 }: GlassPanelProps) {
     const panelRef = useRef<HTMLDivElement>(null);
 

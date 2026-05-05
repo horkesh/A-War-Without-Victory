@@ -3,6 +3,7 @@
  * Two-tier layout: primary actions (New Game, Continue, Tutorial)
  * and secondary actions (Load, Settings, Credits).
  */
+import { Z } from '../../shared/zIndex';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -16,8 +17,9 @@ interface MainMenuProps {
 
 export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSettings, onCredits, onQuit }: MainMenuProps) {
     return (
-        <div className="fixed inset-0 z-[9000] flex flex-col items-center justify-center"
+        <div className="fixed inset-0 flex flex-col items-center justify-center"
              style={{
+                 zIndex: Z.HARD_MODAL,
                  background: 'radial-gradient(ellipse at center, #1a1816 0%, #0d0c0a 100%)',
                  fontFamily: 'Georgia, "Times New Roman", serif',
              }}>

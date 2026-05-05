@@ -1,5 +1,6 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getFactionFlag, getArmyName } from '../utils/factionAssets';
+import { Z } from '../../shared/zIndex';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -22,7 +23,8 @@ export function SidePickerOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 flex items-center justify-center bg-black/60"
+      style={{ zIndex: Z.OVERLAY_LIGHT }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="side-picker-title"

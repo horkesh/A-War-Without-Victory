@@ -23,6 +23,7 @@
  * no §6 surface. UI-only — does NOT enter sim path.
  */
 import React, { useEffect, useRef } from 'react';
+import { Z } from '../../shared/zIndex';
 
 export interface LoadErrorToastProps {
   /** The error message to display. If null/empty, the toast does not render. */
@@ -52,8 +53,9 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
   if (!message) return null;
 
   const positionClass = positioning === 'fixed'
-    ? 'fixed top-16 left-1/2 -translate-x-1/2 z-[8500]'
+    ? 'fixed top-16 left-1/2 -translate-x-1/2'
     : '';
+  const positionStyle = positioning === 'fixed' ? { zIndex: Z.MODAL_HARD } : undefined;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Escape') {
@@ -66,6 +68,7 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
   return (
     <div
       className={`${positionClass} max-w-md min-w-[20rem] bg-panel-bg border border-red-500 shadow-lg rounded`}
+      style={positionStyle}
       role="alert"
       aria-live="assertive"
       onKeyDown={handleKeyDown}

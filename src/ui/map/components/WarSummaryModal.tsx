@@ -7,6 +7,7 @@
  */
 import type { SummaryFocusSection } from '../data/types';
 import { WarSummaryContent } from './army_hq/WarSummaryContent';
+import { Z } from '../../shared/zIndex';
 
 interface WarSummaryModalProps {
     isOpen: boolean;
@@ -22,7 +23,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
             style={{
                 position: 'fixed',
                 inset: 0,
-                zIndex: 1200,
+                zIndex: Z.MODAL_RAISED_2,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

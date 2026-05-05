@@ -23,6 +23,7 @@ import {
   type PreAdvanceCommandReviewStatus,
 } from '../../data/preAdvanceCommandReview';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
+import { Z } from '../../../shared/zIndex';
 
 export interface AdvanceTurnModalProps {
   onReviewPriorities?: () => void;
@@ -157,7 +158,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/65 px-4" style={{ zIndex: Z.CRITICAL_MODAL }}>
       <div className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border-2 border-neutral-400 bg-neutral-50 shadow-xl">
         <div className="border-b-2 border-neutral-300 bg-neutral-100 px-4 py-3">
           <div className="flex flex-wrap items-start justify-between gap-2">

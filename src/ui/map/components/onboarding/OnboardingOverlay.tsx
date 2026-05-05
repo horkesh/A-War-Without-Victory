@@ -23,6 +23,7 @@
 import { useState } from 'react';
 import { OnboardingStep } from './OnboardingStep';
 import { ONBOARDING_STEPS, resolveNextStep } from './onboardingSteps';
+import { Z } from '../../../shared/zIndex';
 
 /** Minimal tutorial-state shape mirrored from `StateMeta.tutorial_state`. */
 export interface TutorialStateShape {
@@ -133,7 +134,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 9000,
+                zIndex: Z.HARD_MODAL,
                 pointerEvents: 'auto',
             }}
         >

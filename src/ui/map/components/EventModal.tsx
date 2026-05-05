@@ -13,6 +13,7 @@
 
 import { GlassPanel } from './GlassPanel';
 import { Icon, type IconName } from './icons/Icon';
+import { Z } from '../../shared/zIndex';
 import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
@@ -99,7 +100,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
 
     return (
-        <GlassPanel position="overlay" title="Event" width="520px" zIndex={55}>
+        <GlassPanel position="overlay" title="Event" width="520px" zIndex={Z.GLASS_PANEL_EVENT_MODAL}>
             {/* Queue indicator */}
             {queueTotal != null && queueTotal > 1 && (
                 <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>

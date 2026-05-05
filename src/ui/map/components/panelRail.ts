@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { Z } from '../../shared/zIndex';
 
 export type PanelRailPanel =
   | 'inbox'
@@ -37,7 +38,7 @@ export const DETAIL_PANEL_STYLE: CSSProperties = {
   // Toolbar-safe clearance is injected by App via CSS variable.
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
-  zIndex: 100,
+  zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
 
@@ -50,7 +51,7 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   left: '18rem', // Width of OOBSidebar (w-72 = 18rem)
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
-  zIndex: 100,
+  zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
 
@@ -62,7 +63,7 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
   right: '25.5rem', // Offset by primary panel width (24rem + 1rem padding + 0.5rem gap)
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
-  zIndex: 90, // Slightly behind primary
+  zIndex: Z.PANEL_RAIL_SECONDARY, // Slightly behind primary
   overflow: 'hidden',
 };
 
@@ -75,7 +76,7 @@ export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
   left: '42.5rem', // 18rem (sidebar) + 24rem (primary) + 0.5rem (gap)
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
-  zIndex: 90,
+  zIndex: Z.PANEL_RAIL_SECONDARY,
   overflow: 'hidden',
 };
 
@@ -87,7 +88,7 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
   right: 0,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
-  zIndex: 50,
+  zIndex: Z.PANEL_RAIL_TERTIARY,
   overflow: 'hidden',
 };
 

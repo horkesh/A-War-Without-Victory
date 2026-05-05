@@ -13,6 +13,7 @@
  */
 
 import { useGameStore } from '../store/gameStore';
+import { Z } from '../../shared/zIndex';
 import {
     openChronicle,
     openCodex,
@@ -88,7 +89,8 @@ export function FirstTurnOrientationCard({ view, onDismiss }: FirstTurnOrientati
 
     return (
         <div
-            className="fixed inset-0 z-[8500] flex items-center justify-center bg-black/55"
+            className="fixed inset-0 flex items-center justify-center bg-black/55"
+            style={{ zIndex: Z.MODAL_HARD }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="first-turn-intro-headline"

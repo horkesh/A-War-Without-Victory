@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/gameStore.js';
 import { generateWrappedSlides } from './generateWrappedSlides.js';
 import { WrappedSlideComponent } from './WrappedSlide.js';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels.js';
+import { Z } from '../../../shared/zIndex.js';
 
 export function WrappedOverlay() {
     const open = useGameStore(s => s.wrappedOpen);
@@ -78,7 +79,8 @@ export function WrappedOverlay() {
 
     return (
         <div
-            className="fixed inset-0 z-[1100] cursor-pointer"
+            className="fixed inset-0 cursor-pointer"
+            style={{ zIndex: Z.MODAL_RAISED }}
             onClick={handleClick}
         >
             <WrappedSlideComponent

@@ -7,6 +7,7 @@ import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { stripFactionSuffix } from '../utils/sectorUtils';
 import { FACTION_COLORS } from '../utils/theme';
+import { Z } from '../../shared/zIndex';
 import { SettlementDetailContent } from './SettlementDetailContent';
 import type { CorpsFrontSectorView, FormationView } from '../data/types';
 import type { TurnBattle } from '../../../state/turn_summary.js';
@@ -363,7 +364,7 @@ export const Tooltip = React.memo(function Tooltip() {
     position: 'fixed',
     left: position.x + TOOLTIP_OFFSET,
     top: position.y + TOOLTIP_OFFSET,
-    zIndex: 9999,
+    zIndex: Z.TOOLTIP,
     pointerEvents: 'none',
   };
 

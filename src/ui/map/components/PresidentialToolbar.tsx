@@ -26,6 +26,7 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import { Z } from '../../shared/zIndex';
 
 /**
  * Pre-Advance review-queue severity tone derived directly from the canonical
@@ -220,7 +221,8 @@ export function PresidentialToolbar({
             {/* Toolbar bar — LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1 spotlight target for step 03_brief. */}
             <div
                 data-tutorial-step="presidential-toolbar"
-                className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
+                className="fixed top-0 left-0 right-0 flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
+                style={{ zIndex: Z.TOOLBAR }}
             >
 
                 {/* LEFT: Date */}
@@ -416,7 +418,8 @@ export function PresidentialToolbar({
             {/* Army Crest — floating on top of toolbar, extends below */}
             <button
                 onClick={handleOpenHQ}
-                className="fixed top-0.5 left-1/2 -translate-x-1/2 z-[200] group flex flex-col items-center pointer-events-auto"
+                className="fixed top-0.5 left-1/2 -translate-x-1/2 group flex flex-col items-center pointer-events-auto"
+                style={{ zIndex: Z.SHELL_FLOATING }}
                 aria-label={`${armyName ?? 'Army'} HQ [H]`}
                 title="Visit Army HQ [H]"
             >

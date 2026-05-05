@@ -5,6 +5,7 @@
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
+import { Z } from '../../shared/zIndex';
 
 const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
     victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures — but at what cost?' },
@@ -52,7 +53,7 @@ export function GameOverModal() {
     const factionIds = ['RBiH', 'RS', 'HRHB'];
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm" style={{ zIndex: Z.GAME_OVER }}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
