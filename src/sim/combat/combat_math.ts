@@ -1069,12 +1069,33 @@ export function computeDefenderPower(
     const homeMult = getHomeDistanceMultFromCache(state, formation);
     const moralePenalty = getCriticalMoralePenalty(formation);
 
+    // ── LANE-NIGHTSHIFT-STUPCANICA-DEFENDER-STACK-PHASE-1-IMPLEMENTATION ──
+    // SHAPE B mutual-exclusivity collapse on the terrain-class triplet
+    // {urban, forest, enclave}. An OSID is one terrain class — historically,
+    // the Žepa enclave-interior is highland forest, NOT a stack of three
+    // independent terrain advantages. Pre-collapse: urbanMult * forestMult *
+    // enclaveMult was triple-multiplicative. Post-collapse: a single MAX-of-set
+    // dominant-class multiplier participates in envProduct. All other defender
+    // modifiers (entrench, posture, home, per-brigade-terrain, officer, etc.)
+    // remain orthogonal and multiplicative as before. The existing soft-cap
+    // (DEFENSE_ENV_CAP_THRESHOLD / DEFENSE_ENV_COMPRESSION / DEFENSE_ENV_HARD_CAP=2.5)
+    // remains UNTOUCHED as the second-line backstop (panel SHAPE A fallback).
+    // §6 sign-off chain (b03333af):
+    //   - docs/40_reports/audits/20260505_STUPCANICA_S6_HISTORIAN_SIGN_OFF.md (APPROVED-WITH-CAVEAT)
+    //   - docs/40_reports/audits/20260505_STUPCANICA_S6_GAME_DESIGNER_SIGN_OFF.md (APPROVED + AC-14)
+    //   - docs/40_reports/audits/20260505_STUPCANICA_S6_WAR_OR_GAME_SIGN_OFF.md (APPROVED-WITH-CAVEAT + AC-15 + ST-6 Goražde extension)
+    // Faction-symmetric mechanism: applies to every defender at every OSID
+    // where two or more of {urban, forest, enclave} are >1.0, irrespective of
+    // faction or operation. ICTY Krstić IT-98-33-T §§120-150 + Popović IT-05-88-T
+    // §§240-250 ground the historical record (an OSID is one terrain class).
+    const terrainClassMult = Math.max(urbanMult, forestMult, enclaveMult);
+
     // ── Mechanic B: Defense environmental soft cap ─────────────────────
     // The product of environmental defense multipliers uses diminishing returns
     // above DEFENSE_ENV_CAP_THRESHOLD to prevent 17 small multipliers from
     // compounding to absurd levels.
     const envProduct = terrainMult * entrenchmentMult * corpsDefMult * resilienceMult
-        * urbanMult * forestMult * enclaveMult * toTerrainMult * perBrigadeTerrainBonus
+        * terrainClassMult * toTerrainMult * perBrigadeTerrainBonus
         * frontDensityMult * ethnicMult;
     const envBonus = envProduct - 1.0;
     const cappedBonus = envBonus <= DEFENSE_ENV_CAP_THRESHOLD
