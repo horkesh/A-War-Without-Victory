@@ -2,7 +2,7 @@
 
 **Lane:** `LANE-V095-RELEASE-WORKFLOW`
 **Date:** 2026-05-05
-**Status:** IN-PROGRESS (skeleton created; will be finalized at commit time)
+**Status:** SHIPPED (commit `9d38f09b`)
 **Audit ref:** `docs/40_reports/audits/20260505_V095_PLATFORM_PACKAGING_AUDIT.md` LANE 5 (gap P1-G8) + QW-5
 **Predecessor:** `docs/40_reports/implemented/20260504_V0_9_5_PLATFORM_PACKAGING_GROUNDWORK.md`
 
