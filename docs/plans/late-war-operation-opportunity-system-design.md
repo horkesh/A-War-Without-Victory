@@ -28,7 +28,7 @@ This doc does **not**:
 - Authorize implementation. A separate plan packet must call out the owners (`/operations-expert` + `/sector-expert` + `/historian` + `/game-designer`), the test contract, and the calibration gate before any code lands.
 - Settle the sensitive-history question. That is already settled in `SENSITIVE_HISTORY_DESIGN_GATE.md`. This doc only reaffirms how the opportunity layer must respect that gate.
 
-**Player-role anchor.** Per `Rulebook_v0_7_0.md` §16.3, the player is the political/strategic leader, not a brigade driver. They shape intent, commitment, and risk through Army HQ / corps / event surfaces. Operation opportunities surface at exactly the level where the player is already canonically deciding things.
+**Player-role anchor.** Per `Rulebook_v0_9_0.md` §16.3, the player is the political/strategic leader, not a brigade driver. They shape intent, commitment, and risk through Army HQ / corps / event surfaces. Operation opportunities surface at exactly the level where the player is already canonically deciding things.
 
 ---
 

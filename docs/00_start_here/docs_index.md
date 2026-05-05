@@ -5,7 +5,7 @@
 ## Where to start
 
 - **Process and workflow:** [docs/10_canon/context.md](../10_canon/context.md) — mandatory first read for agents and contributors (ledger, mistake guard, determinism).
-- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_7_0.md § System 11](../10_canon/Systems_Manual_v0_7_0.md).
+- **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_9_0.md § System 11](../10_canon/Systems_Manual_v0_9_0.md).
 - **Pyrrhic roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Pyrrhic Games (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
@@ -17,13 +17,13 @@
 | [CANON.md](../10_canon/CANON.md) | Index and precedence |
 | [context.md](../10_canon/context.md) | Process canon |
 | [FORAWWV.md](../10_canon/FORAWWV.md) | Validated design insights (addenda) |
-| [Engine_Invariants_v0_7_0.md](../10_canon/Engine_Invariants_v0_7_0.md) | Correctness constraints |
-| [Systems_Manual_v0_7_0.md](../10_canon/Systems_Manual_v0_7_0.md) | System behavior spec |
-| [Rulebook_v0_7_0.md](../10_canon/Rulebook_v0_7_0.md) | Player-facing rules |
-| [Game_Bible_v0_6_0.md](../10_canon/Game_Bible_v0_6_0.md) | Design philosophy |
-| [Phase_Specifications_v0_6_0.md](../10_canon/Phase_Specifications_v0_6_0.md) | Frozen phase specs |
+| [Engine_Invariants_v0_9_0.md](../10_canon/Engine_Invariants_v0_9_0.md) | Correctness constraints |
+| [Systems_Manual_v0_9_0.md](../10_canon/Systems_Manual_v0_9_0.md) | System behavior spec |
+| [Rulebook_v0_9_0.md](../10_canon/Rulebook_v0_9_0.md) | Player-facing rules |
+| [Game_Bible_v0_9_0.md](../10_canon/Game_Bible_v0_9_0.md) | Design philosophy |
+| [Phase_Specifications_v0_9_0.md](../10_canon/Phase_Specifications_v0_9_0.md) | Frozen phase specs |
 | [Peace_Specification_v0_6_0.md](../10_canon/Peace_Specification_v0_6_0.md) | Peace spec |
-| [War_Specification_v0_6_0.md](../10_canon/War_Specification_v0_6_0.md) | War spec |
+| [War_Specification_v0_9_0.md](../10_canon/War_Specification_v0_9_0.md) | War spec |
 
 ## Engineering (docs/20_engineering/)
 

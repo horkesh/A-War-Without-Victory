@@ -38,7 +38,7 @@ You are the person in the room who says: "Wait — the spec says corps should ab
 Priority order (canon hierarchy):
 1. Engine Invariants (`docs/10_canon/Engine_Invariants.md`)
 2. Phase Specs (`docs/10_canon/Phase_*`)
-3. Systems Manual (`docs/10_canon/Systems_Manual_v0_7_0.md`)
+3. Systems Manual (`docs/10_canon/Systems_Manual_v0_9_0.md`)
 4. Rulebook (`docs/10_canon/Rulebook_*.md`)
 5. Game Bible (`docs/10_canon/Game_Bible_*.md`)
 6. Design specs in `docs/30_planning/`

@@ -47,8 +47,8 @@ description: Owns militia spawning, brigade formation, militia pools, and format
 
 **Canon (authoritative):**
 - **Formation creation agency:** `docs/10_canon/FORAWWV.md` — H2.4: formation creation requires explicit orders or harness directives.
-- **War:** `docs/10_canon/War_Specification_v0_6_0.md` — war-phase constraints and formation behavior context.
-- **Systems Manual:** `docs/10_canon/Systems_Manual_v0_6_0.md` — formation state, equipment_state, doctrines, eligibility.
+- **War:** `docs/10_canon/War_Specification_v0_9_0.md` — war-phase constraints and formation behavior context.
+- **Systems Manual:** `docs/10_canon/Systems_Manual_v0_9_0.md` — formation state, equipment_state, doctrines, eligibility.
 - **Peace (organizational penetration → War handoff):** `docs/10_canon/Peace_Specification_v0_6_0.md` — stability and organizational penetration; Peace investment feeds op used by militia emergence.
 
 **Engineering / design (implementation authority):**
@@ -88,7 +88,7 @@ When explaining behavior or tracing bugs, cite both the canon/design doc and the
 
 ## Required reading (when relevant)
 
-- **Canon:** `docs/10_canon/FORAWWV.md` (H2.4), `docs/10_canon/War_Specification_v0_6_0.md`, `docs/10_canon/Peace_Specification_v0_6_0.md`, `docs/10_canon/Systems_Manual_v0_6_0.md`
+- **Canon:** `docs/10_canon/FORAWWV.md` (H2.4), `docs/10_canon/War_Specification_v0_9_0.md`, `docs/10_canon/Peace_Specification_v0_6_0.md`, `docs/10_canon/Systems_Manual_v0_9_0.md`
 - **Design:** `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`
 - **Code:** `src/sim/early_war/militia_emergence.ts`, `src/sim/early_war/pool_population.ts`, `src/sim/formation_spawn.ts`, `src/sim/turn_phases/war_phases.ts` (Phase I steps), `src/sim/turn_pipeline.ts` (orchestrator), `src/state/game_state.ts`, `src/state/formation_constants.ts`, `src/state/militia_pool_key.ts`, `src/phase0/investment.ts`, `src/scenario/scenario_runner.ts` (directive at init)
 - **Historical OOB (for comparison):** `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md`, `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`, `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md`

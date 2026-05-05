@@ -200,8 +200,8 @@ Role and objective:
 You are implementing the next large operation-opportunity family lane. Extend the opportunity system beyond 5th Corps by designing and implementing prerequisite-driven opportunity families for Central Bosnia / Vlasic and Federation-Western Bosnia, without railroading historical outcomes.
 
 Canon references:
-- docs/10_canon/Engine_Invariants_v0_7_0.md
-- docs/10_canon/Rulebook_v0_7_0.md
+- docs/10_canon/Engine_Invariants_v0_9_0.md
+- docs/10_canon/Rulebook_v0_9_0.md
 - docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md
 - docs/plans/late-war-operation-opportunity-system-design.md
 - docs/plans/2026-05-01-v09-product-spine-megalane-plan.md

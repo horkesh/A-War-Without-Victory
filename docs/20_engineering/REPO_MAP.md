@@ -20,7 +20,7 @@ Populate this section from the discovery checklist.
 
 ## Key Pipelines and Their Code Locations
 ### Turn/Phase Pipeline
-- Canon references: `docs/10_canon/Systems_Manual_v0_7_0.md`, `docs/10_canon/Engine_Invariants_v0_7_0.md`
+- Canon references: `docs/10_canon/Systems_Manual_v0_9_0.md`, `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - Code entrypoints (one canonical owner per phase; nothing else is co-equal):
   - **Canonical war-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`.
   - **Canonical peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Weekly state progression (directives, deployments, military_interaction, fragmentation_resolution, supply_resolution, political_effects, exhaustion_update, persistence).
@@ -41,7 +41,7 @@ Populate this section from the discovery checklist.
   - `turn_incidents.ts` — per-turn incident collection (battles, flips, dissolutions)
 
 ### Scenario Loading/Execution
-- Canon references: `docs/10_canon/Rulebook_v0_7_0.md`
+- Canon references: `docs/10_canon/Rulebook_v0_9_0.md`
 - Code entrypoints:
   - Scenario harness: `src/scenario/scenario_runner.ts`
   - Harness combat causality diagnostics: `src/scenario/combat_causality.ts`

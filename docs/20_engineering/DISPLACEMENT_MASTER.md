@@ -50,7 +50,7 @@ By January 1993 (week 40), approximately 1 million people had been displaced in 
 
 ## 2. Pipeline Integration
 
-Displacement runs at three points in the **War turn pipeline** (canon: War_Specification_v0_6_0.md §5). The order matters because each step can create state that subsequent steps read.
+Displacement runs at three points in the **War turn pipeline** (canon: War_Specification_v0_9_0.md §5). The order matters because each step can create state that subsequent steps read.
 
 ### 2.1 `war-hostile-takeover-displacement` (step 14) — **PRIMARY DRIVER**
 
@@ -174,7 +174,7 @@ Pressure state tracking uses a module-level cache (`pressureStateCache`) that tr
 
 **File:** `src/state/displacement_routing_data.ts`
 
-Routing is organized by **8 geographic regions** × **3 ethnicities** (Bosniak/Croat/Serb), with sub-regional routing for finer granularity. Canon: Systems_Manual_v0_7_0.md §12.1.
+Routing is organized by **8 geographic regions** × **3 ethnicities** (Bosniak/Croat/Serb), with sub-regional routing for finer granularity. Canon: Systems_Manual_v0_9_0.md §12.1.
 
 **Lookup:** `getDisplacementRouteForMun(originMun, ethnicity)` → ordered list of destination municipalities
 
@@ -671,7 +671,7 @@ The `osid` field carries the OSID identity from attack resolution into the displ
 
 ### Canon References
 
-- `docs/10_canon/Phase_Specifications_v0_6_0.md` — two-phase model (Peace / War)
-- `docs/10_canon/War_Specification_v0_6_0.md` §5 — War pipeline step order (step 14: `war-hostile-takeover-displacement`)
-- `docs/10_canon/Systems_Manual_v0_7_0.md` §12.1 (per-municipality routing), §12.2 (OSID-level tracking)
+- `docs/10_canon/Phase_Specifications_v0_9_0.md` — two-phase model (Peace / War)
+- `docs/10_canon/War_Specification_v0_9_0.md` §5 — War pipeline step order (step 14: `war-hostile-takeover-displacement`)
+- `docs/10_canon/Systems_Manual_v0_9_0.md` §12.1 (per-municipality routing), §12.2 (OSID-level tracking)
 - `docs/30_planning/20260228_phase_ii_mechanics_design.md` §Mechanic 8 (routing table design)
