@@ -3519,5 +3519,228 @@
       "resistance_revival_active_HRHB": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-9-redo mirror — HRHB variant of csq_arbih_resistance_revival). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO Lasva Valley defensive consolidation under sustained ARBiH pressure — Vitez, Busovača, and the Kiseljak pocket holdouts where existential-pressure recruitment surges emerged from sustained territorial regression rather than from political mobilization (BB II Ch.41-42; Burg & Shoup 2000 on HVO Lasva Valley defense doctrine). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface (no enclave_resilience_aggregate, no rupture wiring, no political_controllers writes)."
+  },
+  {
+    "id": "csq_war_exhaustion_high_streak_HRHB",
+    "title": "The West Mostar Quotas",
+    "narrative": "The recruitment offices in West Mostar and the Lasva Valley stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave that volunteered through the Croat Defence Council in 1992 has aged through the casualty lists. The second cohort, conscripted under emergency mobilization in 1993, has rotated through the same lists. The third cohort looks at the front-line casualty registers and at the political class's communiqués and registers what the political class will not say. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 70 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "war_exhaustion_high_streak_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained high war_exhaustion + low avg morale (HRHB variant); recruitment quota attenuates, cohesion erodes."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.88, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -3 },
+      { "kind": "cost_ledger_annotation", "tag": "war_exhaustion_high_streak_HRHB", "text": "Sustained war_exhaustion>70 and morale_avg<50 (HRHB variant). Recruitment -12% for 25 turns; cohesion -3 to reflect institutional fatigue. AUDIT-ONLY ledger annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -4 }
+    ],
+    "sets_flags": {
+      "war_exhaustion_high_streak_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_war_exhaustion_high_streak; the RS variant ships as csq_war_exhaustion_high_streak_RS). Predicate structurally identical to the Wave-8 RBiH progenitor; only the faction parameter and mutex flag differ. Mirrors documented 1994-1995 HVO manpower-pool attenuation in the Croat-majority municipalities of Herzegovina and central Bosnia under sustained Lasva Valley combat losses (Hoare 'How Bosnia Armed' 2004; BB II Ch.41-42, 49). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_supply_corridor_chronic_strain_RBiH",
+    "title": "The Sarajevo Tunnel Gradient",
+    "narrative": "The corridor never closed. It also never quite worked. Deliveries moved, but in fits. Ammunition arrived, but in the wrong calibres. Spare parts arrived, but late. The chronic strain on the corridor manifested in cohesion: each unit's logistics officer learned to hoard, to substitute, to improvise. The improvisation worked, mostly. But the institutional confidence that the supply system would function decayed turn over turn, and the recruitment narrative — which had emphasized adequate equipment — quietly stopped emphasizing it.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RBiH", "threshold": 30 },
+          { "type": "morale_average_below", "faction": "RBiH", "threshold": 50 },
+          { "type": "flag_not_set", "flag": "supply_corridor_chronic_strain_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Chronic low supply + sub-baseline morale (RBiH variant); cohesion erodes, recruitment narrative weakens."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": -4 },
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.92, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "supply_corridor_chronic_strain_RBiH", "text": "Chronic supply corridor strain (RBiH variant) under supply<30 and morale_avg<50. Cohesion -4 reflecting accumulated logistics improvisation costs in the Sarajevo siege ring and central enclave corridors; recruitment -8% for 20 turns reflecting weakened equipment narrative. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -3 }
+    ],
+    "sets_flags": {
+      "supply_corridor_chronic_strain_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — RBiH variant of csq_supply_corridor_chronic_strain; the RS variant ships as csq_supply_corridor_chronic_strain_RS, the HRHB progenitor as csq_supply_corridor_chronic_strain). Predicate structurally identical; only the faction parameter and mutex flag differ. Mirrors documented 1992-1995 ARBiH chronic supply strain in the Sarajevo siege ring, the Sarajevo-Tuzla corridor, and the central Bosnia enclave routes (BB II Ch.31, 43-46; Hoare 2004 on ARBiH logistics). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_mobilization_demographics_strained_HRHB",
+    "title": "The Croat Lists Run Thin",
+    "narrative": "The conscription officers in the Croat-majority municipalities no longer ask the question they had been asking for two years — when can the cohort be mobilized? They ask which cohort is left. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Croatia and to the Federation territories thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class, watching the demographic data, registers what every army watching its own pool eventually registers.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_HRHB", "min": 60 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 60 },
+          { "type": "flag_not_set", "flag": "mobilization_demographics_strained_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cumulative casualties + sustained exhaustion strain the HRHB mobilization pool past standard age-class boundaries."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.85, "duration_turns": 30 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": -2 },
+      { "kind": "cost_ledger_annotation", "tag": "mobilization_demographics_strained_HRHB", "text": "Mobilization demographics strained (HRHB variant) under cumulative_casualties>60 and war_exhaustion>60. Recruitment -15% for 30 turns to reflect age-class exhaustion in the Croat-majority municipalities; morale -2 to reflect the political register of the demographic constraint. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -3 },
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "mobilization_demographics_strained_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_mobilization_demographics_strained). Predicate structurally identical to the Wave-8 RBiH progenitor; only the faction parameter and mutex flag differ. Mirrors documented 1994-1995 HVO age-class strain in the Croat-majority municipalities — recruitment-pool attrition compounded by departure rolls to Croatia proper and to the Federation territories (Hoare 2004; Burg & Shoup 2000; BB II Ch.41-42, 49). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_arbih_doctrine_modernization_HRHB",
+    "title": "The Lasva Manual Ages Up",
+    "narrative": "The HVO officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the Lasva Valley combat — not through the pre-war JNA academies or the HV cadre exchange — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers in West Mostar do not understand it; the front-line officers do not explain it.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_above", "faction": "HRHB", "dimension": "internal_cohesion", "threshold": 60 },
+          { "type": "flag_at_least", "flag": "corps_reorganization_active_HRHB", "min": 1 },
+          { "type": "flag_not_set", "flag": "doctrine_modernization_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Doctrine modernization (HRHB variant) following officer-class generational turnover; equipment quality uplifts as the new cadre adopts the new manual."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 1.05, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "doctrine_modernization_HRHB", "text": "Doctrine modernization (HRHB variant) under cohesion>60 and prior corps_reorganization_active_HRHB. Equipment quality +5% for 25 turns and cohesion +2 to reflect officer-class generational turnover and adoption of the new manual. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": 3 }
+    ],
+    "sets_flags": {
+      "doctrine_modernization_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-10 mirror — HRHB variant of csq_arbih_doctrine_modernization). Predicate gates on dimension_above(internal_cohesion) AND a prior corps_reorganization flag — chains off the Wave-5 lineage HVO reorganization event without inventing new substrate. The HRHB chain references corps_reorganization_active_HRHB (the existing HVO reform inflection) rather than doctrine_reform_initiated_RBiH (the RBiH-side analogue) so faction-internal causality is preserved. Reuses equipment_quality_modifier substrate. Mirrors documented late-war HVO informal doctrine evolution as the Lasva-cadre cohort adopted post-Washington Agreement training norms (Hoare 'How Bosnia Armed' 2004; Burg & Shoup 2000 on HVO command turnover; BB II Ch.42-49). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_post_cease_fire_recruitment_decline_HRHB",
+    "title": "The Federation Demobilization Drift",
+    "narrative": "A general cease-fire — formal or de facto — holds for long enough that the political class in West Mostar begins to demobilize the rhetoric. The newspapers shift their lead. The recruitment offices, which had been running on Croat-Defence-Council patriotic urgency, find the urgency no longer compounds. Volunteers slow; conscription quotas are quietly relaxed. The front lines remain active; the manpower behind them does not refill at the same rate. The cease-fire is not peace, but the recruitment narrative does not know how to call the war by both names at once.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "alliance_above", "value": 0.55 },
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_HRHB", "min": 40 },
+          { "type": "flag_not_set", "flag": "post_cease_fire_recruitment_decline_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cease-fire holds long enough that political mobilization rhetoric attenuates (HRHB variant); recruitment droops while front lines remain active."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.90, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "post_cease_fire_recruitment_decline_HRHB", "text": "Post-cease-fire recruitment decline (HRHB variant) under alliance>0.55 and cumulative_casualties>40. Recruitment -10% for 25 turns to reflect demobilization-of-rhetoric while the front lines remain active. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -2 }
+    ],
+    "sets_flags": {
+      "post_cease_fire_recruitment_decline_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-9-redo mirror — HRHB variant of csq_post_cease_fire_recruitment_decline). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB, so the cease-fire framing references the post-Washington Agreement period for both factions; the HRHB-side recruitment droop tracks the same alliance-above threshold but drains the HVO mobilization narrative rather than the ARBiH one. Mirrors documented 1994 Washington Agreement period and intermittent local cease-fires producing recruitment droop on the HVO side as the political class in West Mostar demobilized rhetoric while the Lasva Valley front lines remained active (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_patron_arms_pipeline_attenuated_HRHB",
+    "title": "The Croatia Pipeline Trickles",
+    "narrative": "The patron's confidence has been below water for three quarters. The arms pipeline did not formally close — it simply became less reliable. Manifests run light. The high-end calibres are reserved for the HV's own ceremonial use. The combat units that depended on the pipeline learn to substitute. The substitutes work, until they don't. The combat-power column registers the attrition; the recruitment offices, watching the equipment problem feed back into morale, register a smaller but parallel decline.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_below", "faction": "HRHB", "dimension": "patron_confidence", "threshold": 35 },
+          { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 25 },
+          { "type": "flag_not_set", "flag": "arms_pipeline_attenuated_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Patron arms pipeline attenuated (HRHB variant) under low confidence + high pressure; equipment quality and recruitment both register the shift."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 0.94, "duration_turns": 25 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.93, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_arms_pipeline_attenuated_HRHB", "text": "Patron arms pipeline attenuated (HRHB variant) under patron_confidence<35 and patron_pressure>25. Equipment quality -6% and recruitment -7% for 25 turns; reflects compounded patron-distance regime distinct from the formal arms-review writer. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": -4 },
+      { "faction": "HRHB", "dimension": "patron_confidence", "delta": -3 }
+    ],
+    "sets_flags": {
+      "arms_pipeline_attenuated_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_patron_arms_pipeline_attenuated; the RS progenitor uses dimension_below(patron_confidence) AND patron_pressure_above against the Belgrade-Pale axis). Predicate structurally identical to the Wave-8 RS authoring; only the faction parameter and mutex flag differ. Distinct trigger surface from csq_arms_pipeline_disrupted (which gates on supply_below + patron_arms_review_active flag). Reuses equipment_quality_modifier substrate from event 658241df. Mirrors documented 1994-1995 Croatia-side patron tension affecting HV-cadre arms reliability to the HVO formations (BB II Ch.41-42; Wiebes 'Intelligence and the War in Bosnia 1992-1995' 2002 on Croatia-pipeline arms-flow). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
   }
 ]
