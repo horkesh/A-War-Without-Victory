@@ -1,0 +1,11 @@
+# Doctrine Reform Without Drift: The Reform That Took Hold
+
+**Ring 2 — narrative observation. Path-not-taken. Ghost entry.**
+
+The military forces that fought the Bosnian War were institutions in motion. The Army of the Republic of Bosnia and Herzegovina formed from a Territorial Defence base, a fragmented police-and-volunteer first wave, and a rolling absorption of regional formations into a corps structure that did not exist at the war's outset. The Croatian Defence Council, the Army of Republika Srpska, and their respective patron-supported reform attempts ran on parallel tracks. *Balkan Battlegrounds* II Chapter 51 documents the late-war reform-and-modernisation arc on the ARBiH side; the canonical Codex covers the corresponding pulses on the other faction trajectories.
+
+The historical pattern of reform was uneven. Documented late-war forces show reform initiation followed, in many cases, by drift — the institutional erosion that occurs when cadre rotation outpaces consolidation, when manuals are written faster than they are read, and when war exhaustion above the audit threshold combines with morale below the audit threshold to dissolve the conditions reform required. The corresponding cost-ledger annotations in the canonical Codex describe the documented mechanism.
+
+In this campaign, on the player faction's track, the reform pattern fired, the modernisation pulse that depends on prior reform fired, and the drift predicate did not fire. The cohesion floor required for reform consolidation held; the war-exhaustion-and-morale joint threshold that triggers drift was not crossed. By the audit turn, the player faction's order-of-battle reflected the consolidated outcome the reform pulse describes, not the eroded outcome the drift annotation documents.
+
+The mechanism is recorded in the cohesion, exhaustion, and morale ledgers. The institutional outcome is visible in the late-run order of battle. This entry does not assert that reform delivered any particular operational outcome, prevented any specific atrocity, or altered the war's broad strategic shape. It records that the reform-without-drift sequence — uncommon historically — fired in this run on the player faction's specific track.

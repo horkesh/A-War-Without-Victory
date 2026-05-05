@@ -240,6 +240,118 @@ function predForceQualityInversion(state: GameState): boolean {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Wave 2 ghost-entry predicates
+// (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION, 2026-05-05)
+//
+// All Wave 2 predicates are Ring 2 narrative observations, faction-agnostic
+// where possible (faction is read from `state.meta.player_faction` for
+// per-faction flag substitution), and AUDIT-ONLY in framing. None of them
+// cross into §6 surface (rupture-flip, genocide-recording, atrocity-
+// attribution). They observe upstream Wave 4-11 consequences-event flags
+// and timeline events; they do not write any state.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// — Ghost 7: paramilitary_streak_refused —
+//   The sustained-refusal pattern. clean_record flag set AND
+//   paramilitary_authorization_refused flag set AND turn ≥ 80. Both flags
+//   come from csq_paramilitary_authorization_refused. Distinct from
+//   cleansing_refused, which is gated on policy + war_crimes counter
+//   rather than the upstream divergence-event flag.
+function predParamilitaryStreakRefused(state: GameState, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'paramilitary_authorization_refused')) return false;
+    return flag(state, 'clean_record');
+}
+
+// — Ghost 8: winter_held —
+//   Counterfactual: the seasonal supply-attrition predicate did NOT fire on
+//   the player faction's track by the audit turn. Requires an upstream
+//   observer to set `winter_held_through_turn` as a positive audit signal
+//   (analogous to enclave_held_through_turn) AND the per-faction
+//   winter_supply_attrition_active_<faction> flag remains unset.
+//   Faction-agnostic via player_faction.
+function predWinterHeld(state: GameState, currentTurn: number): boolean {
+    if (currentTurn < 80) return false;
+    if (!flag(state, 'winter_held_through_turn')) return false;
+    const faction = playerFaction(state);
+    return !flag(state, `winter_supply_attrition_active_${faction}`);
+}
+
+// — Ghost 9: corridor_blocked —
+//   Counterfactual: the Posavina corridor breakthrough did not occur.
+//   Requires upstream observer to set `corridor_blocked_through_turn` as a
+//   positive audit signal AND NOT corridor_secured AND NOT
+//   eventFiredById('operation_corridor_1992'). Turn ≥ 30 is a margin past
+//   the historical operational window (w12-w22) so we are observing the
+//   post-window state, not racing it.
+function predCorridorBlocked(state: GameState, currentTurn: number): boolean {
+    if (currentTurn < 30) return false;
+    if (!flag(state, 'corridor_blocked_through_turn')) return false;
+    if (flag(state, 'corridor_secured')) return false;
+    return !eventFiredById(state, 'operation_corridor_1992');
+}
+
+// — Ghost 10: doctrine_reform_completed —
+//   The reform-without-drift sequence. Both reform-initiation AND
+//   modernisation pulse fired AND drift did NOT fire on player faction's track.
+//   Faction-agnostic via player_faction. Modernisation chains on prior reform
+//   (csq_doctrine_modernization_<faction> requires doctrine_reform_initiated).
+function predDoctrineReformCompleted(state: GameState): boolean {
+    const faction = playerFaction(state);
+    if (!flag(state, `doctrine_reform_initiated_${faction}`)) return false;
+    if (!flag(state, `doctrine_modernization_active_${faction}`)) return false;
+    return !flag(state, `doctrine_drift_active_${faction}`);
+}
+
+// — Ghost 11: arms_embargo_full_compliance —
+//   Counterfactual: no third-party channel activated and no attenuation event
+//   fired on player faction's track by the audit turn. Requires upstream
+//   observer to set `arms_embargo_compliant_through_turn` as a positive
+//   audit signal AND no third-party-channel or attenuation flags are set
+//   for the player faction. Faction-agnostic via player_faction.
+function predArmsEmbargoFullCompliance(state: GameState, currentTurn: number): boolean {
+    if (currentTurn < 100) return false;
+    if (!flag(state, 'arms_embargo_compliant_through_turn')) return false;
+    const faction = playerFaction(state);
+    if (flag(state, `third_party_arms_channel_active_${faction}`)) return false;
+    return !flag(state, `iran_arms_channel_attenuation_active_${faction}`);
+}
+
+// — Ghost 12: political_unity_held —
+//   Counterfactual: the temporary-political-split predicate did NOT fire on
+//   player faction's track by the audit turn. Requires upstream observer to
+//   set `political_unity_held_through_turn` as a positive audit signal AND
+//   the per-faction political_split_temporary_active_<faction> flag remains
+//   unset. Faction-agnostic via player_faction.
+function predPoliticalUnityHeld(state: GameState, currentTurn: number): boolean {
+    if (currentTurn < 100) return false;
+    if (!flag(state, 'political_unity_held_through_turn')) return false;
+    const faction = playerFaction(state);
+    return !flag(state, `political_split_temporary_active_${faction}`);
+}
+
+// — Ghost 13: equipment_quality_collapse —
+//   Divergence note: a catastrophic late-war equipment-quality collapse fired
+//   on player faction's track. Reads equipment_quality_collapsed flag (set by
+//   an upstream auditor when per-brigade equipment-quality readings cross the
+//   collapse audit threshold).
+function predEquipmentQualityCollapse(state: GameState): boolean {
+    return flag(state, 'equipment_quality_collapsed');
+}
+
+// — Ghost 14: negotiation_capital_exhausted —
+//   Divergence note: diplomatic capital ran out without any canonical peace
+//   plan being signed. Reads negotiation_capital_exhausted flag AND
+//   no peace-plan acceptance flag is set.
+function predNegotiationCapitalExhausted(state: GameState): boolean {
+    if (!flag(state, 'negotiation_capital_exhausted')) return false;
+    if (flag(state, 'vance_owen_accepted')) return false;
+    if (flag(state, 'owen_stoltenberg_accepted')) return false;
+    if (eventFiredById(state, 'dayton_signed_1995')) return false;
+    return true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Ghost-entry registry — fixed declaration order, deterministic
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -297,6 +409,90 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
         variant: 'context',
         conditional_on: ['vrs_quality_inverted'],
         predicate: predForceQualityInversion,
+    },
+    // ─── Wave 2 entries (LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION) ────────
+    {
+        ghost_id: 'paramilitary_streak_refused',
+        path: 'data/codex/ghost_entries/paramilitary_streak_refused.md',
+        variant: 'context',
+        conditional_on: ['paramilitary_authorization_refused', 'clean_record', 'turn>=80'],
+        predicate: predParamilitaryStreakRefused,
+    },
+    {
+        ghost_id: 'winter_held',
+        path: 'data/codex/ghost_entries/winter_held.md',
+        variant: 'context',
+        conditional_on: [
+            'winter_held_through_turn',
+            'NOT winter_supply_attrition_active_<player>',
+            'turn>=80',
+        ],
+        predicate: predWinterHeld,
+    },
+    {
+        ghost_id: 'corridor_blocked',
+        path: 'data/codex/ghost_entries/corridor_blocked.md',
+        variant: 'context',
+        conditional_on: [
+            'corridor_blocked_through_turn',
+            'NOT corridor_secured',
+            'NOT operation_corridor_1992',
+            'turn>=30',
+        ],
+        predicate: predCorridorBlocked,
+    },
+    {
+        ghost_id: 'doctrine_reform_completed',
+        path: 'data/codex/ghost_entries/doctrine_reform_completed.md',
+        variant: 'context',
+        conditional_on: [
+            'doctrine_reform_initiated_<player>',
+            'doctrine_modernization_active_<player>',
+            'NOT doctrine_drift_active_<player>',
+        ],
+        predicate: predDoctrineReformCompleted,
+    },
+    {
+        ghost_id: 'arms_embargo_full_compliance',
+        path: 'data/codex/ghost_entries/arms_embargo_full_compliance.md',
+        variant: 'context',
+        conditional_on: [
+            'arms_embargo_compliant_through_turn',
+            'NOT third_party_arms_channel_active_<player>',
+            'NOT iran_arms_channel_attenuation_active_<player>',
+            'turn>=100',
+        ],
+        predicate: predArmsEmbargoFullCompliance,
+    },
+    {
+        ghost_id: 'political_unity_held',
+        path: 'data/codex/ghost_entries/political_unity_held.md',
+        variant: 'context',
+        conditional_on: [
+            'political_unity_held_through_turn',
+            'NOT political_split_temporary_active_<player>',
+            'turn>=100',
+        ],
+        predicate: predPoliticalUnityHeld,
+    },
+    {
+        ghost_id: 'equipment_quality_collapse',
+        path: 'data/codex/ghost_entries/equipment_quality_collapse.md',
+        variant: 'context',
+        conditional_on: ['equipment_quality_collapsed'],
+        predicate: predEquipmentQualityCollapse,
+    },
+    {
+        ghost_id: 'negotiation_capital_exhausted',
+        path: 'data/codex/ghost_entries/negotiation_capital_exhausted.md',
+        variant: 'context',
+        conditional_on: [
+            'negotiation_capital_exhausted',
+            'NOT vance_owen_accepted',
+            'NOT owen_stoltenberg_accepted',
+            'NOT dayton_signed_1995',
+        ],
+        predicate: predNegotiationCapitalExhausted,
     },
 ];
 
