@@ -1,4 +1,6 @@
-# A War Without Victory -- Systems and Mechanics Manual v0.7.0
+# A War Without Victory -- Systems and Mechanics Manual v0.9.0
+
+**Last Updated:** 2026-05-05
 
 One game turn equals one week.
 
@@ -962,7 +964,38 @@ v0.7.0 adds the following normative sections:
 
 Supersedes Systems_Manual_v0_6_0.md. Deprecated docs in docs/_old/10_canon/.
 
+## v0.8 / v0.9 Additions
+
+v0.9.0 (filename + body version-bump pass, 2026-05-05) folds in already-landed v0.7.x → v0.9.x amendments and the v0.8 Command Chain integration. The Manual remains the authoritative implementation spec for all the systems below; mechanics already documented in §6 / §7 / §14 / Appendix A continue to govern. Highlights:
+
+**Combat / dissolution amendments:**
+- **§6.4 Morale-collapse override** (LANE-NIGHTSHIFT-N4-CANON-AMENDMENT, commit `58624617`, 2026-05-03): fourth dissolution path keyed on `morale_low_streak ≥ 8`. Gated behind `MORALE_OVERRIDE_ENABLED` env flag (default off); counter increments diagnostically with flag off. Engine Invariants §6.2.4 mirrors this.
+- **must_hold variable multiplier** (R2-1, commit `e4c661d5`, 2026-05-03): `commander/allocate.ts` replaces the flat 1.5× must_hold weight with `max(2.0, min(5.0, 0.75 × commitment_ratio))` — the must_hold weight scales with the corps's commitment ratio rather than being a static lever. Pressure-responsive, faction-agnostic. The `must_hold` substrate is now normative; the static fallback is retired.
+- **`equipment_quality_modifier` substrate** (Wave 3, commit `658241df`, 2026-05-04): new effect kind `EventEffectEquipmentQualityModifier` (multiplicative, faction-scoped, time-bounded) + `MilitaryState.equipment_quality_modifiers` field + reader `getActiveEquipmentQualityMultiplier(state, faction, currentTurn)`. Threaded through combat predictor power computation behind a no-op early return; preserves byte-stable arithmetic on no-event historical paths. Mirrors `recruitment_modifier` precedent. Consumed by event #11 `csq_weapons_embargo_partial_lift` (Wave 3) and Wave 4 `csq_patron_equipment_delivery_confirmed` (substrate-then-content sequencing precedent).
+- **Reconstitution policy step curve** (Wave 4 Lane A, commit `e9584dd3`, 2026-05-04): VRS `getFactionReinforcementMult` flat 1.0× → 4-band step curve (1.0× <w52, 0.85× <w78, 0.65× <w104, 0.45× thereafter); HRHB extended 2-band → 4-band; RBiH unchanged. Mechanism is faction-agnostic in code (`lookupStepCurve`); only data parameters drive faction asymmetry. Closes the Force-Quality Gap 2 upstream lever identified in `20260504_FORCE_QUALITY_GAP_2_VERIFICATION.md`.
+- **`planning_invalidated` cooldown** (LANE-2026-05-02-B1-PLANNING-INVALIDATED-COOLDOWN, 2026-05-02): planning-invalidated ops now feed `failed_offensive_objectives` cooldown like other failure modes (max_failures, brigade_attrition); after `OBJECTIVE_FAILURE_THRESHOLD=2` failures on the same objective the existing 8-turn cooldown bounds re-emission. `probe_complete` (recon-by-force) and `political_blocked` (truce-induced) remain genuinely skipped. Already documented inline at §6.4.
+
+**v0.8 Command Chain (closed):**
+- **Corps Commander Intelligence** (v0.8.0): named officers exercise interpretation authority over corps directives via the `commander/` cluster (`commander_loop.ts`, `briefing.ts`, `allocate.ts`, etc.). Officer competence/aggressiveness/defensiveness shape directive translation. See §7.5 (officer system) + §6.4 (corps command and army stance).
+- **Commander Maturity** (v0.8.1): persistent belief state, motive stack, and per-turn decision trace serialized on `CorpsCommandState`. Inspectable in player command-review surfaces.
+- **Political Leader Bot** (v0.8.2): bot factions have a political layer (foundational decisions, patron management, faction identity) that drives the army-level commander's strategic-priorities packet. See `political/` cluster.
+- **Order Interpretation** (v0.8.3): explicit semantic gap between player order and named-officer interpretation. Subordinates may delay, partial-execute, refuse, or escalate-to-context. Surfaced in the Pre-Advance Review surface.
+- **Autonomy Depth + Claude API** (v0.8.4): named-officer autonomy operates within a deterministic envelope; the optional Claude-API integration (§7.9) may add narrative texture but cannot change the autonomous decision once recorded. Replay determinism preserved via `decision_log.ts`.
+- **Phase 0 panel pattern** (durable lesson, codified in PROJECT_LEDGER_KNOWLEDGE): when modifying a system that crosses combat / commander / political / events surfaces, dispatch a Phase 0 panel of the affected experts before writing code. Lane reports cite this pattern explicitly.
+- **Replay-buffer streaming** (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER + producer, 2026-05-04): `replay_save_sequence.json` sidecar captures per-turn save deltas; harness emit (`replay_save_emit.ts`) mirrors `brigade_temporal_emit.ts` precedent. Replay playback consumer + ReplayScrubber UI live on tactical map.
+- **Tier 2 perf** (R2-4 baseline + Mission C A0 Tarjan, 2026-05-04): supply-osid corridor derivation moved from O(E²) per-edge BFS-removal to O(V+E) iterative-DFS Tarjan in `findBridgesInSubgraphOsid`. G1 (10k property trials) + G2 (parity wrapper) + G3 (40w hash-identity) gates established the deterministic-equivalence ship contract for future hot-path optimizations.
+
+**v0.9 product spine (in progress):**
+- **Decision Room and command loop**: see Rulebook §17.2 / §17.5; mechanically the Decision Room is a derived read-model over Strategic Priorities, opportunity dossiers, source handoffs (operational SITREP, command briefing, Turn Aftermath, active cost summary, Chronicle). No new state shape; no parallel action queue.
+- **Sensitive-history Ring 1 substrate** (Mission E ghost #3 `enclave_defended`, LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE, 2026-05-04 + Q-CANON-RUPT-4 Path (d), commit `ce95c162`): the canonical pattern for counterfactual-recording ahistorical paths is a deterministic predicate (e.g., `predEnclaveDefended` reading `enclave_held_through_turn` flag) plus a §4-compliant ghost narrative entry. Rupture consequences fire ONLY on emergent satisfaction of a discrete game-state condition; calendar-window heuristics are forbidden. Counterfactual silence in ahistorical campaigns is canonically correct. See `SENSITIVE_HISTORY_DESIGN_GATE.md` §1.5 #11, §2 criterion 3, §5.
+- **Divergence event substrate** (R2-2 + Wave 4 + Wave 4 Lane B): 28+ divergence events authored at `data/scenarios/events/consequences.json`. `cost_ledger_annotation` effect family + `MilitaryState.cost_ledger_annotations` additive optional field. New condition kinds (`alliance_holds_past_w35`, `paramilitary_authorization_refused`, `enclave_held_alt_intervention`, etc.) layered on existing `EventCondition` union without breaking backward compatibility.
+- **Officer-quality observability** (Force-Quality Gap 1, commit `0bd5a938`, 2026-05-04): `BrigadeTemporalRow` schema extended with optional `officer_quality` + `officer_count_active` fields (conditional attach for byte-identity preservation on legacy fixtures). Per-turn trajectory now traceable in `brigade_temporal_log.jsonl`.
+- **Sector subtype anomaly classification** (LANE-2026-05-02-B3, 2026-05-02): `AnomalyReport.subtype` field disambiguates `pool_exhausted` (corps has 0 unassigned brigades) vs `misallocated` (corps has surplus in another sector) for empty-contested-sector and undefended-front-subsegment anomalies. Routes signals to /operations-expert + /formation-expert vs /corps-army-commander.
+- **Per-turn brigade-keyed snapshot emission** (LANE-2026-05-02-A1, 2026-05-02): `brigade_temporal_log.jsonl` per-turn 20-field row schema written by harness (`scenario_runner.ts`), not engine. Pure observability; no engine state shape change; no save/load impact; no run-hash impact. Mirrors `weekly_report.jsonl` precedent.
+
+Supersedes Systems_Manual_v0_7_0.md.
+
 ---
 
-*Systems and Mechanics Manual v0.7.0*
-*Two-phase (Peace/War) model; v0.4 Systems 1–11, v0.7 combat/defense/intel/AI commander systems integrated*
+*Systems and Mechanics Manual v0.9.0*
+*Single-phase (War only) model; v0.4 Systems 1–11, v0.7 combat/defense/intel/AI commander systems, v0.8 Command Chain, v0.9 product-spine substrate amendments integrated*
