@@ -1,0 +1,263 @@
+name: Release
+
+# LANE-V095-RELEASE-WORKFLOW (audit gap P1-G8 + QW-5)
+#
+# Triggers:
+#   - push of any `v*` tag → real GitHub Release created with attached
+#     AppImage (Linux) + NSIS .exe (Windows) installer artifacts.
+#   - workflow_dispatch → DRY RUN. Same build matrix runs, but no GitHub
+#     Release is created. Artifacts are uploaded as workflow artifacts only,
+#     so the workflow can be exercised before the first real tag is pushed.
+#
+# Required secrets: GITHUB_TOKEN only (default; no extra secrets needed for
+# unsigned-build v0.9.5 closure). Code-signing cert + auto-update wiring is
+# explicitly out of v0.9.5 scope per
+# docs/40_reports/audits/20260505_V095_PLATFORM_PACKAGING_AUDIT.md §2.3.
+#
+# Companion docs:
+#   - docs/RELEASE_PROCESS.md — versioning + tagging convention + manual
+#     fallback steps.
+#   - docs/40_reports/PLATFORM_TEST_MATRIX.md — install / launch / uninstall
+#     verification matrix (sibling lane LANE-V095-PLATFORM-TEST-MATRIX-DOC
+#     will create this).
+#
+# Sibling lanes that own files this workflow does NOT touch:
+#   - LANE-V095-CI-PACKAGE-MATRIX → .github/workflows/desktop-release-guard.yml
+#   - LANE-V095-RELEASE-NOTES-GENERATOR → tools/release/generate_release_notes.cjs
+#   - LANE-V095-VERSION-BUMP → package.json semver
+#   - LANE-V095-PLATFORM-ICON → build/icon.png + electron-main.cjs icon wiring
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run_note:
+        description: 'Dry-run note (optional, free-form)'
+        required: false
+        default: 'manual dry-run; no GitHub Release will be created'
+
+# `contents: write` is required by softprops/action-gh-release@v2 to create
+# / update a Release on tag push. The default GITHUB_TOKEN is used.
+permissions:
+  contents: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # build-linux: Ubuntu runner produces the AppImage. Mirrors the conventions
+  # of .github/workflows/desktop-release-guard.yml so packaging reproduces
+  # bit-for-bit (modulo electron-builder timestamp embedding) on a hosted
+  # runner of the same SHA.
+  # ---------------------------------------------------------------------------
+  build-linux:
+    name: Build Linux AppImage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history so tag-derived release notes (future LANE 8) can
+          # diff against the prior `v*` tag.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      # Cache electron-builder + Electron downloads to avoid re-fetching
+      # ~150-300 MiB on every release run. Key matches DRG to share cache.
+      - name: Cache electron-builder and Electron downloads (Linux)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron-builder
+            ~/.electron
+          key: electron-builder-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: |
+            electron-builder-${{ runner.os }}-
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Verify baked startup snapshot and desktop build artifacts
+        run: npm run desktop:release:check
+
+      - name: Package Linux AppImage
+        run: npm run desktop:package:linux:appimage
+
+      - name: Smoke-verify Linux AppImage artifact
+        run: npm run desktop:package:linux:appimage:smoke -- --report-only
+
+      - name: Upload Linux AppImage workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux-appimage
+          path: dist-packaged/*.AppImage
+          if-no-files-found: error
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # build-windows: windows-latest runner produces the unsigned NSIS installer.
+  # SmartScreen warning is intentional and documented in
+  # docs/RELEASE_PROCESS.md; signing is out of v0.9.5 scope per audit §2.3.
+  # ---------------------------------------------------------------------------
+  build-windows:
+    name: Build Windows NSIS Installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: Cache electron-builder and Electron downloads (Windows)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron-builder
+            ~/.electron
+          key: electron-builder-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: |
+            electron-builder-${{ runner.os }}-
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Verify baked startup snapshot and desktop build artifacts
+        run: npm run desktop:release:check
+
+      - name: Package Windows NSIS installer
+        run: npm run desktop:package:win:nsis
+
+      - name: Smoke-verify Windows NSIS installer artifact
+        run: npm run desktop:package:win:nsis:smoke -- --report-only
+
+      - name: Upload Windows NSIS workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-win-nsis
+          path: dist-packaged/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # release: aggregates the build matrix outputs and creates / updates the
+  # GitHub Release. SKIPPED under workflow_dispatch (dry run) — only runs
+  # when the workflow was triggered by a `v*` tag push.
+  # ---------------------------------------------------------------------------
+  release:
+    name: Create GitHub Release
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Download Linux AppImage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-linux-appimage
+          path: dist-packaged
+
+      - name: Download Windows NSIS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: desktop-win-nsis
+          path: dist-packaged
+
+      - name: Inventory artifacts before release upload
+        run: |
+          echo "Artifacts staged for release upload:"
+          ls -lah dist-packaged
+          echo "Tag: ${GITHUB_REF_NAME}"
+
+      # Release-body placeholder. The future LANE-V095-RELEASE-NOTES-GENERATOR
+      # (sibling lane LANE 8) will replace this with auto-generated content
+      # extracted from docs/PROJECT_LEDGER.md since the prior `v*` tag.
+      # Until that lands, the body is a literal placeholder + ledger pointer.
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          # Pre-release marker auto-derived: any tag containing a hyphen
+          # (e.g. v0.9.5-alpha.1, v0.9.5-rc.2) is a pre-release.
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          fail_on_unmatched_files: true
+          files: |
+            dist-packaged/*.AppImage
+            dist-packaged/*.exe
+          body: |
+            # A War Without Victory — ${{ github.ref_name }}
+
+            > **Placeholder release notes.** A future automation lane
+            > (`LANE-V095-RELEASE-NOTES-GENERATOR`) will populate this body
+            > automatically from `docs/PROJECT_LEDGER.md` since the prior
+            > `v*` tag. Until that lands, refer to the ledger directly:
+            >
+            > - `docs/PROJECT_LEDGER.md` — behavioral / output changes
+            > - `docs/PROJECT_LEDGER_KNOWLEDGE.md` — thematic knowledge
+            > - `docs/40_reports/` — implementation reports
+
+            ## Downloads
+
+            | Platform | Artifact | Notes |
+            |---|---|---|
+            | Linux x64 | `*.AppImage` | `chmod +x` then run; FUSE2 required (`sudo apt install libfuse2` on Ubuntu 22.04+) |
+            | Windows x64 | `*Setup*.exe` | Unsigned NSIS installer; SmartScreen warning is expected on first run — see `docs/RELEASE_PROCESS.md` |
+
+            ## First-time install
+
+            See `docs/RELEASE_PROCESS.md` for platform-specific install
+            walkthroughs, including the Windows SmartScreen click-through
+            sequence and the Linux AppImage FUSE2 requirement.
+
+            ## Verification
+
+            See `docs/40_reports/PLATFORM_TEST_MATRIX.md` (lands separately
+            via sibling lane `LANE-V095-PLATFORM-TEST-MATRIX-DOC`) for the
+            install / launch / save-load / uninstall checklist used to
+            qualify each release.
+
+            ---
+
+            *Determinism note: this release is built from tag
+            `${{ github.ref_name }}` on commit `${{ github.sha }}`. The
+            packaged simulation core is byte-identical between platforms;
+            only the platform-specific Electron shell differs.*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # dry-run-summary: workflow_dispatch-only job that prints a summary so a
+  # manually-triggered run produces a clear "no release was created" signal
+  # in the Actions UI. Skipped on tag push.
+  # ---------------------------------------------------------------------------
+  dry-run-summary:
+    name: Dry-run summary (no release created)
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Print dry-run summary
+        run: |
+          echo "::notice::Dry run complete. No GitHub Release created."
+          echo "Inputs.dry_run_note: ${{ github.event.inputs.dry_run_note }}"
+          echo "Artifacts (AppImage + NSIS .exe) are available under the"
+          echo "workflow run's Artifacts panel for download + inspection."
