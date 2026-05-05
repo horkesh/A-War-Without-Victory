@@ -4,29 +4,35 @@
 
 **A War Without Victory (AWWV)** is a strategic-level historical simulation of the 1992-1995 Bosnian War. This is a deterministic, negative-sum war game focused on exhaustion, political collapse, and constrained agency rather than conquest.
 
-**Current Lifecycle Model:** Two-phase canonical lifecycle (`peace`, `war`). Peace retains pre-war investment/preparation mechanics; War covers all active conflict behavior and April 1992 war-start scenarios.
+**Current Lifecycle Model:** Single-phase canonical lifecycle (`war`). Peace phase retired in v0.7.3; all canonical scenarios start in April 1992 directly in War phase. Early-war mechanics (militia emergence, JNA dissolution, pool population, alliance updates) run as War-phase pipeline steps during the first ~12 weeks.
 
 ## Authoritative Documentation Hierarchy
 
 When conflicts arise between documents, this is the resolution order. See **`docs/10_canon/CANON.md`** for the canonical list and paths.
 
-1. **Engine Invariants v0.7.0** - Defines what MUST be true (correctness constraints)
-2. **Phase Specifications v0.6.0** - Defines lifecycle contracts (Peace/War)
-3. **Systems Manual v0.7.0** - Defines complete system behavior (implementation spec)
-4. **Rulebook v0.7.0** - Defines player-facing experience
-5. **Game Bible v0.6.0** - Defines design philosophy and constraints
+1. **Engine Invariants v0.9.0** - Defines what MUST be true (correctness constraints)
+2. **Phase Specifications v0.9.0** - Defines lifecycle contracts (single-phase War-only model)
+3. **Systems Manual v0.9.0** - Defines complete system behavior (implementation spec)
+4. **Rulebook v0.9.0** - Defines player-facing experience
+5. **Game Bible v0.9.0** - Defines design philosophy and constraints
 6. **context.md** - Defines process canon (workflow, ledger, session runbook)
+
+**v0.9.0 gate docs (Tier 2; above Rulebook, below Engine Invariants):**
+- **SENSITIVE_HISTORY_DESIGN_GATE.md** - moral/design boundary for sensitive history
+- **VICTORY_AND_PYRRHIC_SCORING.md** - victory conditions, outcome taxonomy, scoring non-goals
 
 ### Document Purposes
 
 | Document | Audience | Purpose | Status |
 |----------|----------|---------|--------|
-| **Rulebook** | Players, new designers | Teach how to play | v0.7.0 |
-| **Engine Invariants** | Developers, QA | Assert correctness constraints | v0.7.0 |
-| **Game Bible** | Designers | Establish design principles | v0.6.0 |
-| **Systems Manual** | Developers | Complete mechanical specification | v0.7.0 |
-| **Phase Specifications** | Developers | Two-phase lifecycle contracts | v0.6.0 |
-| **War Specification** | Developers | War-phase behavior (fronts, supply, exhaustion, operations) | v0.6.0 |
+| **Rulebook** | Players, new designers | Teach how to play | v0.9.0 |
+| **Engine Invariants** | Developers, QA | Assert correctness constraints | v0.9.0 |
+| **Game Bible** | Designers | Establish design principles | v0.9.0 |
+| **Systems Manual** | Developers | Complete mechanical specification | v0.9.0 |
+| **Phase Specifications** | Developers | Single-phase (War only) lifecycle contract | v0.9.0 |
+| **War Specification** | Developers | War-phase behavior (fronts, supply, exhaustion, operations) | v0.9.0 |
+| **SENSITIVE_HISTORY_DESIGN_GATE** | All roles | Three-ring sensitive-history boundary; rupture expansion rule | v0.9.0 gate |
+| **VICTORY_AND_PYRRHIC_SCORING** | All roles | Outcome taxonomy, faction grade anchors, scoring non-goals | v0.9.0 gate |
 
 **Current Location:** Canon docs in `docs/10_canon/`. Engineering (code canon, pipelines, determinism) in `docs/20_engineering/`.
 
