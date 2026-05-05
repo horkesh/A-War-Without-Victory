@@ -1,0 +1,1331 @@
+{
+  "schema_version": 1,
+  "run_id": "apr1992_definitive_40w__3649b3861a87e6ea__w40",
+  "final_state_hash": "ef03ab4d6c5ecd28",
+  "captured_at_turn": 40,
+  "per_call_site": [
+    {
+      "site": "analyzeFactionGraphOptimized",
+      "calls": 183,
+      "total_ms": 2605,
+      "total_us": 2605274,
+      "mean_us": 14236.469945355191,
+      "max_ms": 37,
+      "min_us": 1997
+    },
+    {
+      "site": "analyzeFactionGraphCached.miss",
+      "calls": 123,
+      "total_ms": 1786,
+      "total_us": 1786241,
+      "mean_us": 14522.28455284553,
+      "max_ms": 37,
+      "min_us": 2088
+    },
+    {
+      "site": "callsite.bot_corps_ai",
+      "calls": 120,
+      "total_ms": 1726,
+      "total_us": 1726975,
+      "mean_us": 14391.458333333334,
+      "max_ms": 37,
+      "min_us": 2095
+    },
+    {
+      "site": "callsite.paramilitary_sweep",
+      "calls": 60,
+      "total_ms": 823,
+      "total_us": 823874,
+      "mean_us": 13731.233333333334,
+      "max_ms": 36,
+      "min_us": 2003
+    },
+    {
+      "site": "buildFormationsIndex",
+      "calls": 183,
+      "total_ms": 74,
+      "total_us": 74223,
+      "mean_us": 405.59016393442624,
+      "max_ms": 0,
+      "min_us": 283
+    },
+    {
+      "site": "callsite.oob_early_war_entry",
+      "calls": 6,
+      "total_ms": 60,
+      "total_us": 60441,
+      "mean_us": 10073.5,
+      "max_ms": 36,
+      "min_us": 21
+    },
+    {
+      "site": "callsite.bot_brigade_ai_osid",
+      "calls": 120,
+      "total_ms": 3,
+      "total_us": 3231,
+      "mean_us": 26.925,
+      "max_ms": 0,
+      "min_us": 11
+    },
+    {
+      "site": "analyzeFactionGraphCached.hit",
+      "calls": 123,
+      "total_ms": 1,
+      "total_us": 1948,
+      "mean_us": 15.83739837398374,
+      "max_ms": 0,
+      "min_us": 6
+    }
+  ],
+  "per_faction": [
+    {
+      "site": "analyzeFactionGraphCached.hit",
+      "faction": "HRHB",
+      "calls": 41,
+      "total_ms": 0,
+      "total_us": 801
+    },
+    {
+      "site": "analyzeFactionGraphCached.hit",
+      "faction": "RS",
+      "calls": 41,
+      "total_ms": 0,
+      "total_us": 627
+    },
+    {
+      "site": "analyzeFactionGraphCached.hit",
+      "faction": "RBiH",
+      "calls": 41,
+      "total_ms": 0,
+      "total_us": 520
+    },
+    {
+      "site": "analyzeFactionGraphCached.miss",
+      "faction": "RS",
+      "calls": 41,
+      "total_ms": 1289,
+      "total_us": 1289842
+    },
+    {
+      "site": "analyzeFactionGraphCached.miss",
+      "faction": "RBiH",
+      "calls": 41,
+      "total_ms": 393,
+      "total_us": 393206
+    },
+    {
+      "site": "analyzeFactionGraphCached.miss",
+      "faction": "HRHB",
+      "calls": 41,
+      "total_ms": 103,
+      "total_us": 103193
+    },
+    {
+      "site": "analyzeFactionGraphOptimized",
+      "faction": "RS",
+      "calls": 61,
+      "total_ms": 1855,
+      "total_us": 1855690
+    },
+    {
+      "site": "analyzeFactionGraphOptimized",
+      "faction": "RBiH",
+      "calls": 61,
+      "total_ms": 599,
+      "total_us": 599857
+    },
+    {
+      "site": "analyzeFactionGraphOptimized",
+      "faction": "HRHB",
+      "calls": 61,
+      "total_ms": 149,
+      "total_us": 149727
+    },
+    {
+      "site": "callsite.bot_brigade_ai_osid",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 1,
+      "total_us": 1256
+    },
+    {
+      "site": "callsite.bot_brigade_ai_osid",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 1,
+      "total_us": 1044
+    },
+    {
+      "site": "callsite.bot_brigade_ai_osid",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 0,
+      "total_us": 931
+    },
+    {
+      "site": "callsite.bot_corps_ai",
+      "faction": "RS",
+      "calls": 40,
+      "total_ms": 1274,
+      "total_us": 1274068
+    },
+    {
+      "site": "callsite.bot_corps_ai",
+      "faction": "RBiH",
+      "calls": 40,
+      "total_ms": 357,
+      "total_us": 357133
+    },
+    {
+      "site": "callsite.bot_corps_ai",
+      "faction": "HRHB",
+      "calls": 40,
+      "total_ms": 95,
+      "total_us": 95774
+    },
+    {
+      "site": "callsite.oob_early_war_entry",
+      "faction": "RBiH",
+      "calls": 2,
+      "total_ms": 36,
+      "total_us": 36413
+    },
+    {
+      "site": "callsite.oob_early_war_entry",
+      "faction": "RS",
+      "calls": 2,
+      "total_ms": 16,
+      "total_us": 16180
+    },
+    {
+      "site": "callsite.oob_early_war_entry",
+      "faction": "HRHB",
+      "calls": 2,
+      "total_ms": 7,
+      "total_us": 7848
+    },
+    {
+      "site": "callsite.paramilitary_sweep",
+      "faction": "RS",
+      "calls": 20,
+      "total_ms": 567,
+      "total_us": 567510
+    },
+    {
+      "site": "callsite.paramilitary_sweep",
+      "faction": "RBiH",
+      "calls": 20,
+      "total_ms": 207,
+      "total_us": 207950
+    },
+    {
+      "site": "callsite.paramilitary_sweep",
+      "faction": "HRHB",
+      "calls": 20,
+      "total_ms": 48,
+      "total_us": 48414
+    }
+  ],
+  "per_turn_series": [
+    {
+      "site": "analyzeFactionGraphCached.hit",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 0
+        },
+        {
+          "turn": 2,
+          "ms": 0
+        },
+        {
+          "turn": 3,
+          "ms": 0
+        },
+        {
+          "turn": 4,
+          "ms": 0
+        },
+        {
+          "turn": 5,
+          "ms": 0
+        },
+        {
+          "turn": 6,
+          "ms": 0
+        },
+        {
+          "turn": 7,
+          "ms": 0
+        },
+        {
+          "turn": 8,
+          "ms": 0
+        },
+        {
+          "turn": 9,
+          "ms": 0
+        },
+        {
+          "turn": 10,
+          "ms": 0
+        },
+        {
+          "turn": 11,
+          "ms": 0
+        },
+        {
+          "turn": 12,
+          "ms": 0
+        },
+        {
+          "turn": 13,
+          "ms": 0
+        },
+        {
+          "turn": 14,
+          "ms": 0
+        },
+        {
+          "turn": 15,
+          "ms": 0
+        },
+        {
+          "turn": 16,
+          "ms": 0
+        },
+        {
+          "turn": 17,
+          "ms": 0
+        },
+        {
+          "turn": 18,
+          "ms": 0
+        },
+        {
+          "turn": 19,
+          "ms": 0
+        },
+        {
+          "turn": 20,
+          "ms": 0
+        },
+        {
+          "turn": 21,
+          "ms": 0
+        },
+        {
+          "turn": 22,
+          "ms": 0
+        },
+        {
+          "turn": 23,
+          "ms": 0
+        },
+        {
+          "turn": 24,
+          "ms": 0
+        },
+        {
+          "turn": 25,
+          "ms": 0
+        },
+        {
+          "turn": 26,
+          "ms": 0
+        },
+        {
+          "turn": 27,
+          "ms": 0
+        },
+        {
+          "turn": 28,
+          "ms": 0
+        },
+        {
+          "turn": 29,
+          "ms": 0
+        },
+        {
+          "turn": 30,
+          "ms": 0
+        },
+        {
+          "turn": 31,
+          "ms": 0
+        },
+        {
+          "turn": 32,
+          "ms": 0
+        },
+        {
+          "turn": 33,
+          "ms": 0
+        },
+        {
+          "turn": 34,
+          "ms": 0
+        },
+        {
+          "turn": 35,
+          "ms": 0
+        },
+        {
+          "turn": 36,
+          "ms": 0
+        },
+        {
+          "turn": 37,
+          "ms": 0
+        },
+        {
+          "turn": 38,
+          "ms": 0
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "analyzeFactionGraphCached.miss",
+      "series": [
+        {
+          "turn": 0,
+          "ms": 60
+        },
+        {
+          "turn": 1,
+          "ms": 30
+        },
+        {
+          "turn": 2,
+          "ms": 29
+        },
+        {
+          "turn": 3,
+          "ms": 33
+        },
+        {
+          "turn": 4,
+          "ms": 34
+        },
+        {
+          "turn": 5,
+          "ms": 33
+        },
+        {
+          "turn": 6,
+          "ms": 32
+        },
+        {
+          "turn": 7,
+          "ms": 42
+        },
+        {
+          "turn": 8,
+          "ms": 44
+        },
+        {
+          "turn": 9,
+          "ms": 43
+        },
+        {
+          "turn": 10,
+          "ms": 42
+        },
+        {
+          "turn": 11,
+          "ms": 43
+        },
+        {
+          "turn": 12,
+          "ms": 43
+        },
+        {
+          "turn": 13,
+          "ms": 44
+        },
+        {
+          "turn": 14,
+          "ms": 46
+        },
+        {
+          "turn": 15,
+          "ms": 45
+        },
+        {
+          "turn": 16,
+          "ms": 47
+        },
+        {
+          "turn": 17,
+          "ms": 47
+        },
+        {
+          "turn": 18,
+          "ms": 46
+        },
+        {
+          "turn": 19,
+          "ms": 44
+        },
+        {
+          "turn": 20,
+          "ms": 45
+        },
+        {
+          "turn": 21,
+          "ms": 46
+        },
+        {
+          "turn": 22,
+          "ms": 46
+        },
+        {
+          "turn": 23,
+          "ms": 46
+        },
+        {
+          "turn": 24,
+          "ms": 45
+        },
+        {
+          "turn": 25,
+          "ms": 43
+        },
+        {
+          "turn": 26,
+          "ms": 46
+        },
+        {
+          "turn": 27,
+          "ms": 47
+        },
+        {
+          "turn": 28,
+          "ms": 44
+        },
+        {
+          "turn": 29,
+          "ms": 45
+        },
+        {
+          "turn": 30,
+          "ms": 44
+        },
+        {
+          "turn": 31,
+          "ms": 45
+        },
+        {
+          "turn": 32,
+          "ms": 44
+        },
+        {
+          "turn": 33,
+          "ms": 45
+        },
+        {
+          "turn": 34,
+          "ms": 44
+        },
+        {
+          "turn": 35,
+          "ms": 43
+        },
+        {
+          "turn": 36,
+          "ms": 44
+        },
+        {
+          "turn": 37,
+          "ms": 46
+        },
+        {
+          "turn": 38,
+          "ms": 44
+        },
+        {
+          "turn": 39,
+          "ms": 43
+        },
+        {
+          "turn": 40,
+          "ms": 44
+        }
+      ]
+    },
+    {
+      "site": "analyzeFactionGraphOptimized",
+      "series": [
+        {
+          "turn": 0,
+          "ms": 59
+        },
+        {
+          "turn": 1,
+          "ms": 66
+        },
+        {
+          "turn": 2,
+          "ms": 60
+        },
+        {
+          "turn": 3,
+          "ms": 63
+        },
+        {
+          "turn": 4,
+          "ms": 67
+        },
+        {
+          "turn": 5,
+          "ms": 66
+        },
+        {
+          "turn": 6,
+          "ms": 65
+        },
+        {
+          "turn": 7,
+          "ms": 84
+        },
+        {
+          "turn": 8,
+          "ms": 87
+        },
+        {
+          "turn": 9,
+          "ms": 85
+        },
+        {
+          "turn": 10,
+          "ms": 85
+        },
+        {
+          "turn": 11,
+          "ms": 89
+        },
+        {
+          "turn": 12,
+          "ms": 87
+        },
+        {
+          "turn": 13,
+          "ms": 87
+        },
+        {
+          "turn": 14,
+          "ms": 92
+        },
+        {
+          "turn": 15,
+          "ms": 90
+        },
+        {
+          "turn": 16,
+          "ms": 93
+        },
+        {
+          "turn": 17,
+          "ms": 96
+        },
+        {
+          "turn": 18,
+          "ms": 91
+        },
+        {
+          "turn": 19,
+          "ms": 90
+        },
+        {
+          "turn": 20,
+          "ms": 91
+        },
+        {
+          "turn": 21,
+          "ms": 46
+        },
+        {
+          "turn": 22,
+          "ms": 46
+        },
+        {
+          "turn": 23,
+          "ms": 46
+        },
+        {
+          "turn": 24,
+          "ms": 45
+        },
+        {
+          "turn": 25,
+          "ms": 43
+        },
+        {
+          "turn": 26,
+          "ms": 46
+        },
+        {
+          "turn": 27,
+          "ms": 46
+        },
+        {
+          "turn": 28,
+          "ms": 44
+        },
+        {
+          "turn": 29,
+          "ms": 45
+        },
+        {
+          "turn": 30,
+          "ms": 44
+        },
+        {
+          "turn": 31,
+          "ms": 44
+        },
+        {
+          "turn": 32,
+          "ms": 43
+        },
+        {
+          "turn": 33,
+          "ms": 45
+        },
+        {
+          "turn": 34,
+          "ms": 44
+        },
+        {
+          "turn": 35,
+          "ms": 43
+        },
+        {
+          "turn": 36,
+          "ms": 44
+        },
+        {
+          "turn": 37,
+          "ms": 45
+        },
+        {
+          "turn": 38,
+          "ms": 44
+        },
+        {
+          "turn": 39,
+          "ms": 43
+        },
+        {
+          "turn": 40,
+          "ms": 44
+        }
+      ]
+    },
+    {
+      "site": "buildFormationsIndex",
+      "series": [
+        {
+          "turn": 0,
+          "ms": 1
+        },
+        {
+          "turn": 1,
+          "ms": 2
+        },
+        {
+          "turn": 2,
+          "ms": 2
+        },
+        {
+          "turn": 3,
+          "ms": 2
+        },
+        {
+          "turn": 4,
+          "ms": 2
+        },
+        {
+          "turn": 5,
+          "ms": 3
+        },
+        {
+          "turn": 6,
+          "ms": 2
+        },
+        {
+          "turn": 7,
+          "ms": 2
+        },
+        {
+          "turn": 8,
+          "ms": 2
+        },
+        {
+          "turn": 9,
+          "ms": 2
+        },
+        {
+          "turn": 10,
+          "ms": 2
+        },
+        {
+          "turn": 11,
+          "ms": 2
+        },
+        {
+          "turn": 12,
+          "ms": 2
+        },
+        {
+          "turn": 13,
+          "ms": 2
+        },
+        {
+          "turn": 14,
+          "ms": 2
+        },
+        {
+          "turn": 15,
+          "ms": 2
+        },
+        {
+          "turn": 16,
+          "ms": 1
+        },
+        {
+          "turn": 17,
+          "ms": 2
+        },
+        {
+          "turn": 18,
+          "ms": 2
+        },
+        {
+          "turn": 19,
+          "ms": 2
+        },
+        {
+          "turn": 20,
+          "ms": 2
+        },
+        {
+          "turn": 21,
+          "ms": 1
+        },
+        {
+          "turn": 22,
+          "ms": 1
+        },
+        {
+          "turn": 23,
+          "ms": 1
+        },
+        {
+          "turn": 24,
+          "ms": 1
+        },
+        {
+          "turn": 25,
+          "ms": 1
+        },
+        {
+          "turn": 26,
+          "ms": 1
+        },
+        {
+          "turn": 27,
+          "ms": 1
+        },
+        {
+          "turn": 28,
+          "ms": 1
+        },
+        {
+          "turn": 29,
+          "ms": 1
+        },
+        {
+          "turn": 30,
+          "ms": 1
+        },
+        {
+          "turn": 31,
+          "ms": 1
+        },
+        {
+          "turn": 32,
+          "ms": 1
+        },
+        {
+          "turn": 33,
+          "ms": 1
+        },
+        {
+          "turn": 34,
+          "ms": 1
+        },
+        {
+          "turn": 35,
+          "ms": 1
+        },
+        {
+          "turn": 36,
+          "ms": 1
+        },
+        {
+          "turn": 37,
+          "ms": 1
+        },
+        {
+          "turn": 38,
+          "ms": 1
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 1
+        }
+      ]
+    },
+    {
+      "site": "callsite.bot_brigade_ai_osid",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 0
+        },
+        {
+          "turn": 2,
+          "ms": 0
+        },
+        {
+          "turn": 3,
+          "ms": 0
+        },
+        {
+          "turn": 4,
+          "ms": 0
+        },
+        {
+          "turn": 5,
+          "ms": 0
+        },
+        {
+          "turn": 6,
+          "ms": 0
+        },
+        {
+          "turn": 7,
+          "ms": 0
+        },
+        {
+          "turn": 8,
+          "ms": 0
+        },
+        {
+          "turn": 9,
+          "ms": 0
+        },
+        {
+          "turn": 10,
+          "ms": 0
+        },
+        {
+          "turn": 11,
+          "ms": 0
+        },
+        {
+          "turn": 12,
+          "ms": 0
+        },
+        {
+          "turn": 13,
+          "ms": 0
+        },
+        {
+          "turn": 14,
+          "ms": 0
+        },
+        {
+          "turn": 15,
+          "ms": 0
+        },
+        {
+          "turn": 16,
+          "ms": 0
+        },
+        {
+          "turn": 17,
+          "ms": 0
+        },
+        {
+          "turn": 18,
+          "ms": 0
+        },
+        {
+          "turn": 19,
+          "ms": 0
+        },
+        {
+          "turn": 20,
+          "ms": 0
+        },
+        {
+          "turn": 21,
+          "ms": 0
+        },
+        {
+          "turn": 22,
+          "ms": 0
+        },
+        {
+          "turn": 23,
+          "ms": 0
+        },
+        {
+          "turn": 24,
+          "ms": 0
+        },
+        {
+          "turn": 25,
+          "ms": 0
+        },
+        {
+          "turn": 26,
+          "ms": 0
+        },
+        {
+          "turn": 27,
+          "ms": 0
+        },
+        {
+          "turn": 28,
+          "ms": 0
+        },
+        {
+          "turn": 29,
+          "ms": 0
+        },
+        {
+          "turn": 30,
+          "ms": 0
+        },
+        {
+          "turn": 31,
+          "ms": 0
+        },
+        {
+          "turn": 32,
+          "ms": 0
+        },
+        {
+          "turn": 33,
+          "ms": 0
+        },
+        {
+          "turn": 34,
+          "ms": 0
+        },
+        {
+          "turn": 35,
+          "ms": 0
+        },
+        {
+          "turn": 36,
+          "ms": 0
+        },
+        {
+          "turn": 37,
+          "ms": 0
+        },
+        {
+          "turn": 38,
+          "ms": 0
+        },
+        {
+          "turn": 39,
+          "ms": 0
+        },
+        {
+          "turn": 40,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "callsite.bot_corps_ai",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 30
+        },
+        {
+          "turn": 2,
+          "ms": 29
+        },
+        {
+          "turn": 3,
+          "ms": 33
+        },
+        {
+          "turn": 4,
+          "ms": 34
+        },
+        {
+          "turn": 5,
+          "ms": 33
+        },
+        {
+          "turn": 6,
+          "ms": 32
+        },
+        {
+          "turn": 7,
+          "ms": 42
+        },
+        {
+          "turn": 8,
+          "ms": 44
+        },
+        {
+          "turn": 9,
+          "ms": 43
+        },
+        {
+          "turn": 10,
+          "ms": 42
+        },
+        {
+          "turn": 11,
+          "ms": 43
+        },
+        {
+          "turn": 12,
+          "ms": 43
+        },
+        {
+          "turn": 13,
+          "ms": 44
+        },
+        {
+          "turn": 14,
+          "ms": 46
+        },
+        {
+          "turn": 15,
+          "ms": 45
+        },
+        {
+          "turn": 16,
+          "ms": 47
+        },
+        {
+          "turn": 17,
+          "ms": 47
+        },
+        {
+          "turn": 18,
+          "ms": 46
+        },
+        {
+          "turn": 19,
+          "ms": 44
+        },
+        {
+          "turn": 20,
+          "ms": 45
+        },
+        {
+          "turn": 21,
+          "ms": 46
+        },
+        {
+          "turn": 22,
+          "ms": 46
+        },
+        {
+          "turn": 23,
+          "ms": 46
+        },
+        {
+          "turn": 24,
+          "ms": 45
+        },
+        {
+          "turn": 25,
+          "ms": 43
+        },
+        {
+          "turn": 26,
+          "ms": 46
+        },
+        {
+          "turn": 27,
+          "ms": 47
+        },
+        {
+          "turn": 28,
+          "ms": 44
+        },
+        {
+          "turn": 29,
+          "ms": 45
+        },
+        {
+          "turn": 30,
+          "ms": 44
+        },
+        {
+          "turn": 31,
+          "ms": 45
+        },
+        {
+          "turn": 32,
+          "ms": 44
+        },
+        {
+          "turn": 33,
+          "ms": 45
+        },
+        {
+          "turn": 34,
+          "ms": 44
+        },
+        {
+          "turn": 35,
+          "ms": 43
+        },
+        {
+          "turn": 36,
+          "ms": 44
+        },
+        {
+          "turn": 37,
+          "ms": 46
+        },
+        {
+          "turn": 38,
+          "ms": 44
+        },
+        {
+          "turn": 39,
+          "ms": 43
+        },
+        {
+          "turn": 40,
+          "ms": 44
+        }
+      ]
+    },
+    {
+      "site": "callsite.oob_early_war_entry",
+      "series": [
+        {
+          "turn": 0,
+          "ms": 60
+        },
+        {
+          "turn": 1,
+          "ms": 0
+        }
+      ]
+    },
+    {
+      "site": "callsite.paramilitary_sweep",
+      "series": [
+        {
+          "turn": 1,
+          "ms": 36
+        },
+        {
+          "turn": 2,
+          "ms": 30
+        },
+        {
+          "turn": 3,
+          "ms": 29
+        },
+        {
+          "turn": 4,
+          "ms": 33
+        },
+        {
+          "turn": 5,
+          "ms": 33
+        },
+        {
+          "turn": 6,
+          "ms": 33
+        },
+        {
+          "turn": 7,
+          "ms": 41
+        },
+        {
+          "turn": 8,
+          "ms": 42
+        },
+        {
+          "turn": 9,
+          "ms": 42
+        },
+        {
+          "turn": 10,
+          "ms": 42
+        },
+        {
+          "turn": 11,
+          "ms": 45
+        },
+        {
+          "turn": 12,
+          "ms": 43
+        },
+        {
+          "turn": 13,
+          "ms": 44
+        },
+        {
+          "turn": 14,
+          "ms": 46
+        },
+        {
+          "turn": 15,
+          "ms": 45
+        },
+        {
+          "turn": 16,
+          "ms": 46
+        },
+        {
+          "turn": 17,
+          "ms": 49
+        },
+        {
+          "turn": 18,
+          "ms": 45
+        },
+        {
+          "turn": 19,
+          "ms": 45
+        },
+        {
+          "turn": 20,
+          "ms": 46
+        }
+      ]
+    }
+  ]
+}
