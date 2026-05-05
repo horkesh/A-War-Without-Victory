@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 /** Attacker formation summary for the confirmation modal. */
 export interface AttackConfirmationAttacker {
@@ -47,18 +48,18 @@ export function AttackConfirmation({
   const containerRef = useRef<HTMLDivElement>(null);
   const confirmRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap: focus Confirm on mount; keep focus inside modal
+  // Focus Confirm on mount — preserves original UX (affirmative action gets
+  // focus rather than Cancel). The shared <Modal> wrapper's `trapFocus` is
+  // disabled below so its first-focusable auto-focus does not override this;
+  // bespoke Tab cycling preserved via the keydown effect below.
   useEffect(() => {
     confirmRef.current?.focus();
   }, []);
 
+  // Tab cycling — bespoke trap preserved (wrapper-level trapFocus disabled to
+  // keep Confirm-on-mount focus). ESC dismiss is owned by the wrapper.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onCancel();
-        return;
-      }
       if (e.key !== 'Tab' || !containerRef.current) return;
       const focusable = containerRef.current.querySelectorAll<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -79,22 +80,19 @@ export function AttackConfirmation({
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onCancel]);
+  }, []);
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/50"
-      style={{ zIndex: Z.ATTACK_CONFIRMATION }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="attack-confirmation-title"
-      onClick={(e) => e.target === e.currentTarget && onCancel()}
+    <Modal
+      isOpen={true}
+      onClose={onCancel}
+      zIndex={Z.ATTACK_CONFIRMATION}
+      ariaLabelledBy="attack-confirmation-title"
+      trapFocus={false}
+      backdropClassName="bg-black/50"
+      panelClassName="bg-panel-card border border-panel-border rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
     >
-      <div
-        ref={containerRef}
-        className="bg-panel-card border border-panel-border rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div ref={containerRef}>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg">
           <h2
             id="attack-confirmation-title"
@@ -165,6 +163,6 @@ export function AttackConfirmation({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }

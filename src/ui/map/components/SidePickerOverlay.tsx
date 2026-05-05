@@ -1,6 +1,7 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getFactionFlag, getArmyName } from '../utils/factionAssets';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -19,18 +20,16 @@ export function SidePickerOverlay({
   onClose,
   onSelectFaction,
 }: SidePickerOverlayProps) {
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/60"
-      style={{ zIndex: Z.OVERLAY_LIGHT }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="side-picker-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndex={Z.OVERLAY_LIGHT}
+      ariaLabelledBy="side-picker-title"
+      backdropClassName="bg-black/60"
+      panelClassName="w-full max-w-md mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden"
     >
-      <div className="w-full max-w-md mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden">
+      <>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg">
           <h2 id="side-picker-title" className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             Choose your faction
@@ -114,7 +113,7 @@ export function SidePickerOverlay({
             Close
           </button>
         </div>
-      </div>
-    </div>
+      </>
+    </Modal>
   );
 }

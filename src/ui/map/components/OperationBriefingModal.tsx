@@ -11,6 +11,7 @@ import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../uti
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 
@@ -402,7 +403,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         return { operation: op, commander: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
     }, [loadedGameState, context]);
 
-    if (!isOpen || !context || !operation) return null;
+    if (!context || !operation) return null;
 
     const intelConf = operation.intel_confidence_at_assessment ?? operation.readiness?.intel ?? 0;
     const supplyReady = operation.supply_readiness_at_assessment ?? operation.readiness?.supply ?? 0;
@@ -456,14 +457,21 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     }, [intelConf, supplyReady, forceRatio, assessment, postponements, commander]);
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60" style={{ zIndex: Z.CRITICAL_MODAL }}>
-            <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-lg w-full">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            zIndex={Z.CRITICAL_MODAL}
+            ariaLabelledBy="operation-briefing-title"
+            backdropClassName="bg-black/60"
+            panelClassName="bg-white border-2 border-neutral-400 shadow-xl max-w-lg w-full"
+        >
+            <>
                 {/* Header — operation name + stamp */}
                 <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100 relative">
                     <div className={`absolute top-1 right-3 opacity-15 font-black text-2xl -rotate-12 select-none uppercase ${assessment === 'launch' ? 'text-green-700' : assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
                         BRIEFING
                     </div>
-                    <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operations Briefing</div>
+                    <div id="operation-briefing-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operations Briefing</div>
                     <div className="text-sm font-bold mt-0.5">{operation.name}</div>
                     <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
@@ -616,7 +624,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         Close
                     </button>
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }

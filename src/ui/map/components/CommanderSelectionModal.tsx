@@ -18,6 +18,7 @@ import {
 import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 interface CommanderSelectionModalProps {
     isOpen: boolean;
@@ -98,13 +99,20 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
         };
     }, [loadedGameState, context]);
 
-    if (!isOpen || !context) return null;
+    if (!context) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60" style={{ zIndex: Z.CRITICAL_MODAL }}>
-            <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col">
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            zIndex={Z.CRITICAL_MODAL}
+            ariaLabelledBy="commander-selection-title"
+            backdropClassName="bg-black/60"
+            panelClassName="bg-white border-2 border-neutral-400 shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col"
+        >
+            <>
                 <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100">
-                    <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Assign Operations Commander</div>
+                    <div id="commander-selection-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Assign Operations Commander</div>
                     <div className="text-sm font-bold mt-0.5">
                         {operation?.name ?? context.operationName} - {corpsName}
                     </div>
@@ -183,7 +191,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                         Back to Draft
                     </button>
                 </div>
-            </div>
-        </div>
+            </>
+        </Modal>
     );
 }
