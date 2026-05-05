@@ -3742,5 +3742,386 @@
       "arms_pipeline_attenuated_active_HRHB": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_patron_arms_pipeline_attenuated; the RS progenitor uses dimension_below(patron_confidence) AND patron_pressure_above against the Belgrade-Pale axis). Predicate structurally identical to the Wave-8 RS authoring; only the faction parameter and mutex flag differ. Distinct trigger surface from csq_arms_pipeline_disrupted (which gates on supply_below + patron_arms_review_active flag). Reuses equipment_quality_modifier substrate from event 658241df. Mirrors documented 1994-1995 Croatia-side patron tension affecting HV-cadre arms reliability to the HVO formations (BB II Ch.41-42; Wiebes 'Intelligence and the War in Bosnia 1992-1995' 2002 on Croatia-pipeline arms-flow). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_post_cease_fire_recruitment_decline_RS",
+    "title": "The Pale Quiet",
+    "narrative": "A long stretch of cease-fire — formal in the Sarajevo TEZ, de facto along most of the Posavina line — runs longer than the political class in Pale expected. The recruitment offices still open. The volunteers slow. The conscription officers, who had been operating on Republika Srpska existential urgency, find the urgency no longer compounds. The front lines remain active; the cohorts behind them no longer surge in. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "alliance_above",
+            "value": 0.55
+          },
+          {
+            "type": "flag_at_least",
+            "flag": "cumulative_casualties_x100_RS",
+            "min": 40
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "post_cease_fire_recruitment_decline_active_RS"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cease-fire holds long enough that political mobilization rhetoric attenuates (RS variant); recruitment droops while front lines remain active."
+    },
+    "effects": [
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RS",
+        "pool_multiplier": 0.9,
+        "duration_turns": 25
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "post_cease_fire_recruitment_decline_RS",
+        "text": "Post-cease-fire recruitment decline (RS variant) under alliance>0.55 (used as faction-agnostic ceasefire proxy per Wave-9-redo + Wave-12 precedent) and cumulative_casualties>40. Recruitment -10% for 25 turns to reflect demobilization-of-rhetoric while the front lines remain active. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": -2
+      }
+    ],
+    "sets_flags": {
+      "post_cease_fire_recruitment_decline_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-9-redo mirror — RS variant of csq_post_cease_fire_recruitment_decline; the RBiH variant ships as the Wave-9-redo progenitor and the HRHB variant ships as Wave-12 csq_post_cease_fire_recruitment_decline_HRHB). Predicate structurally identical; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB so the alliance_above predicate is reused as a faction-agnostic 'war activity ebbs' proxy per the Wave-9-redo and Wave-12 precedents. Mirrors documented 1994-1995 VRS recruitment-droop episodes during local cease-fire periods around the Sarajevo and Bihac axes when the political class in Pale demobilized rhetoric while front-line activity continued (BB II Ch.43-46; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_arbih_resistance_revival_RS",
+    "title": "The Krajina Volunteer Surge",
+    "narrative": "Territory has slipped — slowly at first, then in the August window. Morale across the active brigades is sub-baseline, and the press has stopped leading with weekly maps. Then the volunteer offices, which had been quiet for two quarters, begin to fill again. Some of the volunteers are first-time, drawn by the existential framing of refugee columns from the Krajina. Some are returning, drawn back by the sense that this time the war is at the door. The recruitment column registers the inflection. The morale column registers it a turn later.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "territory_loss_window",
+            "faction": "RS",
+            "min_loss_pct": 0.03,
+            "window_turns": 10
+          },
+          {
+            "type": "morale_average_below",
+            "faction": "RS",
+            "threshold": 45
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "resistance_revival_active_RS"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained territory loss + sub-baseline morale (RS variant) produces an existential-pressure morale and recruitment surge."
+    },
+    "effects": [
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RS",
+        "pool_multiplier": 1.08,
+        "duration_turns": 20
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 3
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "resistance_revival_RS",
+        "text": "Resistance revival (RS variant) under territory_loss>=3% over 10-turn window and morale_avg<45. Recruitment +8% for 20 turns; morale +3 to reflect existential-pressure surge in the Krajina-Posavina axis under Operation Storm spillover and Operation Deliberate Force pressure. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": 3
+      }
+    ],
+    "sets_flags": {
+      "resistance_revival_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-11 mirror — RS variant of csq_arbih_resistance_revival; the RBiH variant ships as the Wave-11 progenitor and the HRHB variant ships as Wave-11 csq_arbih_resistance_revival_HRHB). Predicate structurally identical to the Wave-11 RBiH and HRHB authoring; only the faction parameter and mutex flag differ. Mirrors documented 1995 VRS rear-area morale surges during Croatian Operation Storm spillover and the August 1995 NATO Operation Deliberate Force as the RS faced existential pressure on the Krajina-Posavina axis (BB II Ch.46-48). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_mobilization_demographics_strained_RS",
+    "title": "The Krajina Lists Run Thin",
+    "narrative": "The conscription offices in Banja Luka, Pale, and the rear-area Posavina towns no longer post the rolls outside the door. The age-class registers are running thin past the standard pool: too young, too old, too sick, already mobilized, already lost. The departure rolls to Belgrade and to Krajina Serbia thin the pool further. The recruitment offices push the boundaries; the volunteers slow; the press does not lead with the numbers. The political class in Pale, watching the demographic data, registers what every army watching its own pool eventually registers.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_at_least",
+            "flag": "cumulative_casualties_x100_RS",
+            "min": 60
+          },
+          {
+            "type": "flag_at_least",
+            "flag": "war_exhaustion_x100_RS",
+            "min": 60
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "mobilization_demographics_strained_RS"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cumulative casualties + sustained exhaustion strain the RS mobilization pool past standard age-class boundaries."
+    },
+    "effects": [
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RS",
+        "pool_multiplier": 0.85,
+        "duration_turns": 30
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -2
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "mobilization_demographics_strained_RS",
+        "text": "Mobilization demographics strained (RS variant) under cumulative_casualties>60 and war_exhaustion>60. Recruitment -15% for 30 turns to reflect age-class exhaustion in the Krajina and Posavina; morale -2 to reflect the political register of the demographic constraint. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": -3
+      },
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -2
+      }
+    ],
+    "sets_flags": {
+      "mobilization_demographics_strained_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-8 mirror — RS variant of csq_mobilization_demographics_strained; the RBiH variant ships as the Wave-8 progenitor and the HRHB variant ships as Wave-12 csq_mobilization_demographics_strained_HRHB). Predicate structurally identical; only the faction parameter and mutex flag differ. The Wave-12 successor handoffs section explicitly flagged this as still missing. Mirrors documented 1994-1995 VRS age-class strain in the Krajina and Posavina under cumulative casualties and sustained exhaustion (BB II Ch.43-49; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_back_channel_communication_HRHB",
+    "title": "The Mostar Side-Door",
+    "narrative": "A quiet line opens between the patron capital and the West Mostar offices. It is not a partnership revival. It is deconfliction: a channel for messages that cannot be sent through the formal Croatian state apparatus and cannot be sent through the international mediators. The leverage accrues quietly — not in declarations, but in the small concessions the patron stops pressing for. The political officer in West Mostar registers the shift; the Croatian Defence Council does not announce it.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "patron_pressure_above",
+            "faction": "HRHB",
+            "threshold": 15
+          },
+          {
+            "type": "dimension_above",
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "threshold": 50
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "back_channel_active_HRHB"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "A back-channel communication line opens with the patron capital (HRHB variant); leverage accrues quietly."
+    },
+    "effects": [
+      {
+        "kind": "negotiation_capital",
+        "faction": "HRHB",
+        "dimension": "negotiating_leverage",
+        "delta": 5
+      },
+      {
+        "kind": "alliance_lock",
+        "mode": "floor",
+        "value": 0.15,
+        "duration_turns": 25
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "back_channel_communication_HRHB",
+        "text": "Back-channel communication established (HRHB variant) under patron_pressure>15 and patron_confidence>50. Negotiating leverage +5 and soft alliance floor 0.15 for 25 turns; reflects deconflicting cooperation rather than partnership revival. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "negotiating_leverage",
+        "delta": 5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": 3
+      }
+    ],
+    "sets_flags": {
+      "back_channel_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-4 mirror — HRHB variant of csq_back_channel_communication; the RBiH variant ships as the Wave-4 progenitor). Predicate structurally identical to the Wave-4 RBiH authoring; only the faction parameter and mutex flag differ. Faction-internal causality preserved — chains off HRHB patron_pressure and patron_confidence values rather than the RBiH-side analogue. Mirrors documented HVO/Croatia back-channel deconfliction with Western mediators during 1993-1994 Lasva Valley fighting (BB II Ch.41-42; Burg & Shoup 2000 on HRHB / mediator deconfliction). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_extended_truce_streak_RBiH",
+    "title": "The Federation Quarter Holds",
+    "narrative": "The alliance holds across a full quarter without major casualties. The recruitment offices in Sarajevo and Tuzla report stabilization rather than droop. The training cycles, which had been compressed under combat-replacement pressure, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "alliance_above",
+            "value": 0.6
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "extended_truce_streak_active_RBiH"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained alliance-above threshold yields an institutional cohesion uplift on the responding faction (RBiH variant); the recovery counterpart to the post-cease-fire recruitment droop."
+    },
+    "effects": [
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "extended_truce_streak_RBiH",
+        "text": "Extended truce streak (RBiH variant) under alliance>0.6. Cohesion +3 to reflect institutional recovery during sustained Federation-period activity; recovery counterpart to Wave-9-redo csq_post_cease_fire_recruitment_decline. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 2
+      }
+    ],
+    "sets_flags": {
+      "extended_truce_streak_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (NEW faction-symmetric streak event). Recovery-side counterpart to Wave-9-redo csq_post_cease_fire_recruitment_decline: rather than penalizing recruitment droop, models the cohesion uplift that accrues when an alliance threshold holds with sustained Federation-period activity on the responding-faction side. Mirrors documented 1994-1995 Federation-side cohesion recovery during sustained Washington-Agreement-period activity (BB II Ch.41-42; Burg & Shoup 2000). Anchor authored as RBiH because the alliance is the only first-class engine alliance; HRHB and RS variants are valid future Wave-14+ candidates with same faction-symmetric mechanism. Distinct from csq_back_channel_communication (which gates on patron_pressure + patron_confidence, not on alliance threshold). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_mediator_engagement_streak_RBiH",
+    "title": "The Geneva Channel Stays Open",
+    "narrative": "The mediator engagement holds across the quarter. Patron confidence stays above the threshold the foreign-ministry analysts call \"engaged\" rather than \"performative\". War-exhaustion is moderate — not so high that the population pushes for any peace, not so low that the political class feels diplomatically weightless. The negotiating-leverage column accrues by a small but measurable amount. The diplomats register the inflection; the front-line officers do not.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "dimension_above",
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "threshold": 55
+          },
+          {
+            "type": "flag_at_least",
+            "flag": "war_exhaustion_x100_RBiH",
+            "min": 40
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "mediator_engagement_streak_active_RBiH"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained mediator engagement (RBiH variant) accrues negotiating leverage; recovery-adjacent counterpart to back-channel diplomatic openings."
+    },
+    "effects": [
+      {
+        "kind": "negotiation_capital",
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 4
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "mediator_engagement_streak_RBiH",
+        "text": "Mediator engagement streak (RBiH variant) under patron_confidence>=55 and war_exhaustion>=40. Negotiating leverage +4 to reflect accrual during sustained mediator-channel engagement; distinct from csq_back_channel_communication which gates on patron_pressure rather than war_exhaustion. AUDIT-ONLY annotation; no rupture wiring."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 2
+      }
+    ],
+    "sets_flags": {
+      "mediator_engagement_streak_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (NEW faction-symmetric streak event). Recovery-adjacent counterpart to Wave-4 csq_back_channel_communication: models the negotiating-leverage accrual when patron-confidence holds above a threshold and war-exhaustion is moderate (not high enough to trigger the demobilization-pressure or fatigue events). The patron_confidence / flag_at_least(war_exhaustion) axes used here are the same surfaces already exercised by Wave-4 back_channel and Wave-8/12 patron_arms_pipeline events. Distinct trigger surface from csq_back_channel_communication (which gates on patron_pressure + patron_confidence, not on war_exhaustion). Mirrors documented 1994-1995 ARBiH negotiating-leverage accrual during sustained patron engagement (BB II Ch.43-47; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
   }
 ]
