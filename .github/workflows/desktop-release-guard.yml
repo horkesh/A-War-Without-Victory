@@ -26,6 +26,35 @@ jobs:
       - name: Verify baked startup snapshot and desktop build artifacts
         run: npm run desktop:release:check
 
+      # ---- LANE-V095-CI-PACKAGE-MATRIX (P1-G5, partial QW-4) ----
+      # Cache electron-builder + Electron downloads so packaging does not
+      # re-fetch ~150-300 MiB on every PR. Key derived from runner OS and the
+      # locked package.json (which pins electron-builder).
+      - name: Cache electron-builder and Electron downloads (Linux)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron-builder
+            ~/.electron
+          key: electron-builder-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: |
+            electron-builder-${{ runner.os }}-
+
+      - name: Package Linux AppImage
+        run: npm run desktop:package:linux:appimage
+
+      - name: Smoke-verify Linux AppImage artifact
+        run: npm run desktop:package:linux:appimage:smoke -- --report-only
+
+      - name: Upload Linux AppImage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-linux-appimage
+          path: dist-packaged/*.AppImage
+          if-no-files-found: warn
+          retention-days: 14
+
   desktop-packaged-runtime-probe:
     needs: desktop-release-check
     runs-on: windows-latest
@@ -45,3 +74,32 @@ jobs:
 
       - name: Probe packaged desktop runtime contract
         run: npm run desktop:package:probe
+
+      # ---- LANE-V095-CI-PACKAGE-MATRIX (P1-G6) ----
+      # Windows path resolution for ~ on hosted runners maps to the user
+      # profile, so actions/cache@v4 expands these correctly under
+      # %USERPROFILE%\.cache\electron-builder and %USERPROFILE%\.electron.
+      - name: Cache electron-builder and Electron downloads (Windows)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron-builder
+            ~/.electron
+          key: electron-builder-${{ runner.os }}-${{ hashFiles('package-lock.json', 'package.json') }}
+          restore-keys: |
+            electron-builder-${{ runner.os }}-
+
+      - name: Package Windows NSIS installer
+        run: npm run desktop:package:win:nsis
+
+      - name: Smoke-verify Windows NSIS installer artifact
+        run: npm run desktop:package:win:nsis:smoke -- --report-only
+
+      - name: Upload Windows NSIS installer artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-win-nsis
+          path: dist-packaged/*.exe
+          if-no-files-found: warn
+          retention-days: 14
