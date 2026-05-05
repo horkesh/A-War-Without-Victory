@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { RecruitmentCatalogBrigade } from '../desktop/types';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 interface RecruitmentModalProps {
   isOpen: boolean;
@@ -38,18 +39,16 @@ export function RecruitmentModal({
     setEquipmentClass(first?.default_equipment_class ?? 'light');
   }, [isOpen, available]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center bg-black/60"
-      style={{ zIndex: Z.OVERLAY_LIGHT }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="recruitment-title"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndex={Z.OVERLAY_LIGHT}
+      ariaLabelledBy="recruitment-title"
+      backdropClassName="bg-black/60"
+      panelClassName="w-full max-w-xl mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden"
     >
-      <div className="w-full max-w-xl mx-4 bg-panel-card border border-panel-border rounded-lg shadow-xl overflow-hidden">
+      <>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg flex items-center justify-between">
           <h2 id="recruitment-title" className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             Recruitment
@@ -120,7 +119,7 @@ export function RecruitmentModal({
             {applying ? 'Recruiting...' : 'Recruit'}
           </button>
         </div>
-      </div>
-    </div>
+      </>
+    </Modal>
   );
 }

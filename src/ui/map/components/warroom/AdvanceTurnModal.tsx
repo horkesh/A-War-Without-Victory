@@ -12,6 +12,14 @@
  * Canonical owner: src/ui/map/components/warroom/AdvanceTurnModal.tsx
  */
 
+/**
+ * LANE-V094-MODAL-MIGRATION: migrated to shared `<Modal>` wrapper for
+ * canonical ESC dismissal, focus management, aria contracts, and z-index.
+ * Original markup had no click-outside dismiss; preserved via
+ * `closeOnBackdropClick={false}`. ESC is gated by `advancing` so the
+ * confirmation flow cannot be ducked mid-advance. No tutorial
+ * `data-tutorial-step` anchors inside this modal.
+ */
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
@@ -24,6 +32,7 @@ import {
 } from '../../data/preAdvanceCommandReview';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { Z } from '../../../shared/zIndex';
+import { Modal } from '../../../shared/Modal';
 
 export interface AdvanceTurnModalProps {
   onReviewPriorities?: () => void;
@@ -117,8 +126,6 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
     [loadedGameState, osidDisplayNames],
   );
 
-  if (!pending) return null;
-
   const handleConfirm = async () => {
     if (advancing) return;
     setAdvancing(true);
@@ -158,12 +165,20 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/65 px-4" style={{ zIndex: Z.CRITICAL_MODAL }}>
-      <div className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border-2 border-neutral-400 bg-neutral-50 shadow-xl">
+    <Modal
+      isOpen={pending}
+      onClose={handleCancel}
+      zIndex={Z.CRITICAL_MODAL}
+      closeOnBackdropClick={false}
+      ariaLabelledBy="advance-turn-title"
+      backdropClassName="bg-black/65 px-4"
+      panelClassName="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border-2 border-neutral-400 bg-neutral-50 shadow-xl"
+    >
+      <>
         <div className="border-b-2 border-neutral-300 bg-neutral-100 px-4 py-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              <div id="advance-turn-title" className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 End of Turn
               </div>
               <div className="mt-0.5 text-sm font-bold text-neutral-950">Advance to next turn?</div>
@@ -235,7 +250,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
             Cancel
           </button>
         </div>
-      </div>
-    </div>
+      </>
+    </Modal>
   );
 }

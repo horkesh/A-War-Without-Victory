@@ -1,5 +1,13 @@
+/**
+ * LANE-V094-MODAL-MIGRATION: migrated to shared `<Modal>` wrapper for
+ * canonical ESC dismissal, focus management, aria contracts, and z-index.
+ * Original markup had no click-outside dismiss; preserved via
+ * `closeOnBackdropClick={false}`. No tutorial `data-tutorial-step`
+ * anchors inside this modal.
+ */
 import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAftermath';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -49,17 +57,25 @@ export function TurnAftermathModal({
   onOpenSummary,
   onOpenRecords,
 }: TurnAftermathModalProps) {
-  if (!isOpen || !view) return null;
+  if (!view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
   const signalPreview = view.signals.slice(0, 4);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/70 px-4" style={{ zIndex: Z.TURN_AFTERMATH }}>
-      <div className="w-full max-w-4xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      zIndex={Z.TURN_AFTERMATH}
+      closeOnBackdropClick={false}
+      ariaLabelledBy="turn-aftermath-title"
+      backdropClassName="bg-black/70 px-4"
+      panelClassName="w-full max-w-4xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
+    >
+      <>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
           <div className="min-w-0">
-            <div className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-400/70">
+            <div id="turn-aftermath-title" className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-400/70">
               Turn Aftermath
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -187,8 +203,8 @@ export function TurnAftermathModal({
             Review Inbox
           </button>
         </div>
-      </div>
-    </div>
+      </>
+    </Modal>
   );
 }
 
