@@ -35,6 +35,10 @@
 
 **Two new durable lessons in KNOWLEDGE:** (1) parallel-lane git index race recovery via `git reset --soft HEAD^` + `git commit -o <files> -m "..."` pathspec form (use `-o` not `git add && git commit` in any parallel-lane batch); (2) sub-agent commit-step cut-off recovered by parent via verify-files + pathspec-form commit on agent's behalf.
 
+**Two more lanes pushed on top of v0.9.5 batch (`d221b831..47ef3788`):**
+- `94744b89` `LANE-V094-CSS-ZINDEX-CLEANUP`: 31 z-index literals across 8 deferred CSS/HTML/debug-viewer files; 15 annotated with canonical `Z` token comments; 16 bare values allowlisted in `tests/css_z_index_canonical.test.ts` (no matching `Z` tier — predecessor gap flagged for future tier-expansion lane). Strategy B (annotation-only) chosen over CSS-variable refactor. 11/11 GREEN; tsc + map-build clean.
+- `47ef3788` `LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13`: catalog 89 → 95 (+6 events) — 3 mirrors closing prior-wave faction-asymmetry gaps (post-cease-fire RS, ARBiH revival RS, mobilization-strain RS) + 1 HRHB mirror (back-channel) + 2 NEW faction-symmetric streak events (extended_truce, mediator_engagement; RBiH-anchored). 11/11 lane + 217/217 focused regression GREEN. 40w hash byte-stable by construction (all turn_min ≥ 50).
+
 **LANE-2026-05-02-TRIGGERED-OP-TEMPORAL-TRACE re-verified clean:** already shipped at `1e68d8dc` before this session; 67/67 focused regression GREEN, tsc clean against current main `c2e11c72`. No new commits required. Lane retired the queued-order predicate hypothesis as structurally impossible per Codex P2. Real Krivaja blocker = brigade-roster lifecycle (3/5 INACTIVE pre-t179); Stupčanica blocker = defender combat-math stack (Phase 4d). Both named successor handoffs.
 
 ## Previous State (2026-05-05, v0.9.4 P1 BACKLOG CLOSED — Z-index + Modal wrapper + Modal migration on top of `a6f277fa`)
