@@ -7764,3 +7764,74 @@ Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors firs
 - `docs/40_reports/audits/20260505_TIER_2_PERF_PROFILE.md` (Lane B re-do)
 - `docs/40_reports/implemented/20260505_REFUGEE_COLUMN_VALIDATION.md` (Lane C ship)
 - `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_9.md` (Lane D verdict-only)
+
+---
+
+## [2026-05-05] Lane A+D re-dos + Canon-to-v0.9 batch — events catalog 65→71; canon at v0.9.0; OFFICER_CASUALTY_MULT VERDICT-REPORT-ONLY (cross-lane finding)
+
+**Type:** Three concurrent successor lanes on top of Wave 9 propagation `8561de0f`. Commits `6c39b6a8..411f6843` (12 commits in chain).
+
+**Lane D events Wave 9 redo SHIPPED (`6c39b6a8`):**
+- 6 new Ring 1 / no-§6 / faction-agnostic events appended to `consequences.json`. Wave-9 lineage 41→47; absolute catalog 65→71.
+- Events: `csq_war_exhaustion_high_streak_RS`, `csq_supply_corridor_chronic_strain_RS`, `csq_winter_supply_attrition_RBiH` (Wave-8 mirror inversions); `csq_post_cease_fire_recruitment_decline`, `csq_third_party_arms_channel`, `csq_arbih_resistance_revival` (recovery/positive-side variants).
+- 11/11 lane tests + 166/166 focused regression GREEN.
+- Isolation 40w smoke n1664 final_state_hash `ef03ab4d6c5ecd28` byte-identical to baseline.
+- **Verify-before-exit pattern applied:** `git show --stat HEAD` confirmed 3 files in commit before agent reported back; this caught the prior Wave 9 staging-loss failure mode.
+
+**Canon docs to v0.9.0 batch SHIPPED (10 commits `6dab35c5..284ecc23`):**
+- Phase 0 backup snapshot at `docs/10_canon/_backups_pre_v09_20260505/` (user directive: "create backups before editing canon docs. I don't want anything lost") with README citing parent commit SHA `6c39b6a8`.
+- Renames + version bumps:
+  - `Engine_Invariants_v0_7_0.md` → `Engine_Invariants_v0_9_0.md` (`96c852ce`)
+  - `Rulebook_v0_7_0.md` → `Rulebook_v0_9_0.md` (`9abb9a1f`)
+  - `Systems_Manual_v0_7_0.md` → `Systems_Manual_v0_9_0.md` (`34091ccf`)
+  - `Phase_Specifications_v0_6_0.md` → `Phase_Specifications_v0_9_0.md` (`ae982bbe`, name-drift resolved)
+  - `War_Specification_v0_6_0.md` → `War_Specification_v0_9_0.md` (`5fce82c5`, name-drift resolved)
+  - `Game_Bible_v0_6_0.md` → `Game_Bible_v0_9_0.md` (`823e7495`) — LARGEST content gap closure: §§22-26 added (Sensitive History gate, Pyrrhic scoring, v0.8 Command Chain, v0.9 product spine, v0.9 canon consolidation).
+- `CANON.md` index update (`32f27109`); `context.md` hierarchy sync to v0.9.0 (`24a7360c`); stale v0.7.0/v0.6.0 cross-references inside canon docs fixed (`284ecc23`).
+- MASTER_ROADMAP.md "Canon Documentation Status" table refreshed; all 6 main docs marked CURRENT at v0.9.0/2026-05-05.
+- FORAWWV.md preserved (manual-only per CLAUDE.md ledger protocol; not auto-edited).
+- 33 downstream consumers (`docs/`, `tests/`, `.claude/skills/`, etc.) still reference old v0.7.0/v0.6.0 filenames — flagged as follow-up sweep lane.
+
+**Lane A OCM Phase 1 redo VERDICT-REPORT-ONLY (`411f6843`):**
+- Implementation surface was structurally correct: `OFFICER_CASUALTY_MULT` promoted to `Record<string, number>` with `getOfficerCasualtyMult(faction)` accessor + `?? DEFAULT_OFFICER_CASUALTY_MULT (=1.5)` fallback. Numerics per Phase 0 panel: `RBiH:1.0 / HRHB:2.0 / RS:2.5`. Faction-symmetric mechanism (no `if (faction === 'X')` branches); mirrors `FACTION_LEARNING_RATE` precedent shape on the loss side.
+- Verification at peak: 79/79 lane + caller tests GREEN (26 lane + 53 caller); `npx tsc --noEmit` clean; 40w smoke anchors 26/27 + benchmarks 6/6 PASS (only `op:brcko:brka_2` fails — pre-existing P0).
+- 188w smoke n1665 final_state_hash `6d3ff5b4669ccb80` ran cleanly with full artifact emission (`final_save.json` + `replay_save_sequence.json` + `run_summary.json`). **First full-emit 188w since Wave 6 OOM** — Wave 7 Lane B's streaming finalizer validated at scale.
+- Trajectory data (per-faction whole-run officer_quality Δ/turn, t1→t188):
+  - HRHB: +0.00218 (canon -1, INVERSE)
+  - RBiH: +0.00396 (canon +1, matches)
+  - RS: +0.00059 (canon -1, INVERSE)
+  - RS active brigade count at t188: 51 (criterion ≥35 PASS)
+- Per Phase 0 panel criterion 3 (VRS+HRHB Δ/turn ≤0): both FAIL.
+- Per criterion 4 (monotonic VRS+HRHB decline from t52): HRHB climbs every segment; RS has one nonpositive sub-segment (t52→t78 = −0.000098/turn) but resumes climbing — FAIL.
+- Per criterion 8 stop-trigger ("STOP and produce Wave-6-style verdict report; do NOT retune in-lane"): implementation reverted; verdict report retained as audit evidence.
+
+**Cross-lane finding (load-bearing for late-war calibration):**
+
+| Lever | Lane | 188w VRS Δ/turn | Verdict |
+|---|---|---|---|
+| Wave 4 reinforcement_mult step-curve (`e9584dd3`) | LANE-NIGHTSHIFT-RECONSTITUTION-POLICY-REVIEW | +0.000591 (Wave 6 verification `cc829ebb`) | inverse to canon |
+| Lane A OFFICER_CASUALTY_MULT faction-asymmetric | LANE-NIGHTSHIFT-OFFICER-CASUALTY-MULT-PHASE-1-IMPLEMENTATION | +0.000591 | inverse to canon |
+
+**BOTH proximate levers — the per-faction reinforcement budget AND the casualty-side decay term — fail to bend the late-war doctrinal arc.** The defect is UPSTREAM of both: per-brigade officer-quality GROWTH term (`applyOfficerExperienceGain` and the cohort-experience formula), not the per-faction budget or the per-faction casualty-side multiplier. Future calibration needs to investigate growth-side, not multiplier-side.
+
+**Sensitive-history compliance (all 3 lanes):** Ring 1, faction-agnostic mechanism, no §6 surface. No FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` body-edit (canon agent only updated cross-references in SENSITIVE_HISTORY_DESIGN_GATE.md to point at v0.9.0 section anchors). No combat-math number tuned (Lane A reverted).
+
+**Verification (aggregate):** All commits hash-pass per lane criteria; tsc clean; lane tests + focused regression GREEN per lane. Canon agent's stale-ref grep returned zero true stale references inside `docs/10_canon/`.
+
+**Roadmap delta:**
+- v0.9.0 Consequences — events catalog 65→71 (wave-lineage 41→47).
+- v0.9 Calibration — OFFICER_CASUALTY_MULT VERDICT-REPORT-ONLY; cross-lane finding redirects investigation to officer-quality GROWTH path.
+- v0.7-v0.9 Canon — all 6 main docs at v0.9.0; name drifts resolved; Game Bible content gap closed; backup snapshot in tree.
+- Wave 7 Lane B streaming finalizer VALIDATED at 188w scale (production-proven).
+
+**Successor handoffs:**
+1. **Officer-quality GROWTH path investigation** (load-bearing): trace `applyOfficerExperienceGain`, cohort-experience formula, FACTION_LEARNING_RATE interaction. Both proximate levers ruled out.
+2. **Canon cross-reference sweep follow-up:** update 33 downstream consumers (`docs/PROJECT_LEDGER.md`, `docs/20_engineering/*`, `docs/40_reports/*`, `.claude/skills/*`, `docs/plans/*`) to reference v0.9.0 filenames.
+3. **MORALE_OVERRIDE_ENABLED flag promotion** (default-off → default-on): per `58624617` handoff, requires 188w sensitive-history regression run; now technically dispatchable since streaming finalizer validated at scale.
+4. **Wave 10 divergence event waves**: faction-mirror inversions of remaining Wave 8 events; doctrine reform / arms-channel variants.
+5. **v0.9.4 fourth visual feature** (Corridor Heartbeat per Lane C's successor handoff).
+
+**Reports:**
+- `docs/40_reports/implemented/20260505_DIVERGENCE_EVENTS_WAVE_9_REDO.md`
+- `docs/40_reports/implemented/20260505_OFFICER_CASUALTY_MULT_PHASE_1.md` (verdict-report-only)
+- 6 canon-to-v0.9 closeout reports embedded in commit messages

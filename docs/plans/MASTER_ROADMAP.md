@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip Wave 9 + Lane B re-do — Wave 9 partial: refugee column overlay shipped (`6f64d152`, **third v0.9.4 feature live**); OCM Phase 1 + Events Wave 9 verdict-only due to parallel-batch index race; Lane B re-do solo `406b0749` confirmed empirical bot-orders pipeline at **~229 ms/turn** (−59% from R2-4 baseline 562 ms/turn) with hash `ef03ab4d6c5ecd28` byte-identical to baseline; Lane A + Lane D re-dos in flight)
+**Last Updated:** 2026-05-05 (post-trip Lane A+D re-dos + Canon-to-v0.9 batch: Lane D events Wave 9 redo `6c39b6a8` shipped (catalog 65→71); **Canon docs all bumped to v0.9.0 across 10 commits `6dab35c5..284ecc23`** including pre-v0.9 backup snapshot per user directive; Lane A OCM Phase 1 hit panel criterion 8 stop-trigger via 188w n1665 trajectory data — VERDICT-REPORT-ONLY at `411f6843`; **cross-lane finding**: BOTH proximate levers (Wave 4 reinforcement_mult AND Lane A OFFICER_CASUALTY_MULT) fail to bend late-war doctrinal arc — defect upstream of both, in OFFICER-QUALITY-GROWTH path; Wave 7 Lane B streaming finalizer validated at 188w scale)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
