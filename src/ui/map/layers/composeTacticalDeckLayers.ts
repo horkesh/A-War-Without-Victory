@@ -7,6 +7,7 @@ import { buildTacticalDeckLayers } from './buildTacticalDeckLayers';
 import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
 import { buildOsidDamageOverlay, type OsidDamageDatum } from './buildOsidDamageOverlay';
 import { buildForceQualityOverlay, type ForceQualityDatum } from './buildForceQualityOverlay';
+import { buildRefugeeColumnOverlay, type RefugeeColumnDatum } from './buildRefugeeColumnOverlay';
 import {
   DEFAULT_DECK_LAYER_CAPABILITIES,
   type DeckLayerCapabilities,
@@ -35,6 +36,8 @@ export function composeTacticalDeckLayers(args: {
   mapScarsData?: OsidDamageDatum[];
   /** Pre-computed Force-Quality glow per-(OSID,faction) data (pass when forceQualityVisible is true). */
   forceQualityData?: ForceQualityDatum[];
+  /** Pre-computed Refugee Column per-(from,to,turn,faction) data (pass when refugeeColumnVisible is true). */
+  refugeeColumnData?: RefugeeColumnDatum[];
 }): Layer[] {
   const caps = args.capabilities ?? DEFAULT_DECK_LAYER_CAPABILITIES;
 
@@ -60,6 +63,20 @@ export function composeTacticalDeckLayers(args: {
     ? [buildForceQualityOverlay(args.forceQualityData)]
     : [];
 
+  // Refugee Column: render above the force-quality glow (paths read better on
+  // a partly-tinted ground) and below experimental tactical layers (front
+  // lines, ops arcs, unit dots) so symbols and front edges are not occluded.
+  // Faction-symmetric color via the same `FACTION_GLOW_RGB` palette lookup
+  // shared with Force-Quality Glow. Capability gate matches the sibling
+  // overlays (`length > 0`).
+  const refugeeColumn: Layer[] = (
+    caps.refugeeColumnVisible
+    && args.refugeeColumnData
+    && args.refugeeColumnData.length > 0
+  )
+    ? [buildRefugeeColumnOverlay(args.refugeeColumnData)]
+    : [];
+
   const under = buildExperimentalDeckLayers(
     args.loadedGameState,
     args.centroidLookup,
@@ -75,6 +92,6 @@ export function composeTacticalDeckLayers(args: {
         args.highlightedFormationIds,
       )
     : [];
-  // Layer order (bottom → top): ghost → scars → forceQuality → experimental (front lines, ops arcs, unit dots) → counters.
-  return [...ghost, ...scars, ...forceQuality, ...under, ...counters];
+  // Layer order (bottom → top): ghost → scars → forceQuality → refugeeColumn → experimental (front lines, ops arcs, unit dots) → counters.
+  return [...ghost, ...scars, ...forceQuality, ...refugeeColumn, ...under, ...counters];
 }

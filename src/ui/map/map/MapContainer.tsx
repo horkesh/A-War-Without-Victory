@@ -49,6 +49,7 @@ import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
+import { buildRefugeeColumnData, type RefugeeColumnDatum } from '../layers/buildRefugeeColumnOverlay';
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
@@ -94,6 +95,35 @@ const MAP_SCARS_FEATURE_FLAG = true;
  * Flip back to false only if a regression is detected on the live map.
  */
 const FORCE_QUALITY_FEATURE_FLAG = true;
+
+/**
+ * Feature flag: Refugee Column per-displacement-event PathLayer overlay.
+ *
+ * Default ON as of LANE-NIGHTSHIFT-V094-THIRD-VISUAL-FEATURE
+ * (docs/40_reports/implemented/20260505_REFUGEE_COLUMN_VALIDATION.md).
+ * Closes the third v0.9.4 (Visual Layer) feature.
+ *
+ * Validation evidence:
+ *   - tests/refugee_column_overlay_builder.test.ts T1..T8 (8/8 GREEN) confirm
+ *     the deck.gl PathLayer descriptor is well-formed: faction-symmetric
+ *     palette lookup (`FACTION_GLOW_RGB` shared with Force-Quality Glow), per-
+ *     tier width scaling (300 / 600 / 1200 / 2000m capped), zero-displacement
+ *     skip, missing-origin-or-dest skip, self-loop skip, per-route aggregation
+ *     by (origin, dest, turn, faction), deterministic output sorted by
+ *     (from_osid, to_osid, week_index, faction_origin) strictCompare.
+ *   - Capability gate in composeTacticalDeckLayers requires
+ *     `refugeeColumnData.length > 0`; the layer is not added when no
+ *     displacement event in the log has both an origin and a destination.
+ *
+ * Sensitive-history: Ring 1, UI-only, faction-symmetric mechanism (palette
+ * lookup is data, not branching logic). Builder reads existing
+ * `LoadedGameState.displacementEventLog`; no engine plumbing, no save embed.
+ * Width cap (2000m at ≥10k displaced) prevents a single mass-displacement
+ * event from visually dominating the map.
+ *
+ * Flip back to false only if a regression is detected on the live map.
+ */
+const REFUGEE_COLUMN_FEATURE_FLAG = true;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
@@ -254,6 +284,8 @@ function composeDeckLayersForCurrentSelection(args: {
   mapScarsData?: OsidDamageDatum[];
   /** Force-Quality Glow: gated by FORCE_QUALITY_FEATURE_FLAG; data recomputed each render from formations. */
   forceQualityData?: ForceQualityDatum[];
+  /** Refugee Column: gated by REFUGEE_COLUMN_FEATURE_FLAG; data recomputed each render from displacementEventLog. */
+  refugeeColumnData?: RefugeeColumnDatum[];
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
@@ -272,10 +304,12 @@ function composeDeckLayersForCurrentSelection(args: {
       ghostMapVisible: args.ghostMapVisible,
       mapScarsVisible: MAP_SCARS_FEATURE_FLAG && Boolean(args.mapScarsData && args.mapScarsData.length > 0),
       forceQualityVisible: FORCE_QUALITY_FEATURE_FLAG && Boolean(args.forceQualityData && args.forceQualityData.length > 0),
+      refugeeColumnVisible: REFUGEE_COLUMN_FEATURE_FLAG && Boolean(args.refugeeColumnData && args.refugeeColumnData.length > 0),
     },
     ghostMapData: args.ghostMapData,
     mapScarsData: args.mapScarsData,
     forceQualityData: args.forceQualityData,
+    refugeeColumnData: args.refugeeColumnData,
     highlightedFormationIds: collectHighlightedFormationIds({
       formationsGeoJson: args.formationsGeoJson,
       loadedGameState: args.loadedGameState,
@@ -431,6 +465,16 @@ export function MapContainer() {
         // in composeDeckLayersForCurrentSelection requires data.length > 0.
         forceQualityData: (FORCE_QUALITY_FEATURE_FLAG && nextInputs.loadedGameState && osidBaseRef.current)
           ? buildForceQualityData(nextInputs.loadedGameState.formations, osidBaseRef.current)
+          : undefined,
+        // Refugee Column: rebuilt each render from
+        // loadedGameState.displacementEventLog (cheap O(N) aggregation; ~100s
+        // of events typical, capped routes after de-duplication). Capability
+        // gate in composeDeckLayersForCurrentSelection requires data.length > 0.
+        refugeeColumnData: (REFUGEE_COLUMN_FEATURE_FLAG && nextInputs.loadedGameState)
+          ? buildRefugeeColumnData(
+              nextInputs.loadedGameState.displacementEventLog ?? [],
+              nextInputs.centroidLookup,
+            )
           : undefined,
         selectedFormationId: nextInputs.selectedFormationId,
         selectedCorpsId: nextInputs.selectedCorpsId,

@@ -50,6 +50,18 @@ export interface DeckLayerCapabilities {
    * the Map That Scars scar overlay so the glow reads on darkened ground.
    */
   readonly forceQualityVisible: boolean;
+
+  /**
+   * Refugee Column: per-displacement-event PathLayer drawing OSID-centroid
+   * → OSID-centroid escape routes whose width scales with displaced count
+   * (capped to prevent a single mass-displacement event from dominating).
+   * Faction-symmetric — color comes from the same `FACTION_GLOW_RGB`
+   * palette used by Force-Quality Glow (lookup over `ethnicity` field of
+   * the displacement event log, which carries canonical faction id).
+   * Default false → byte-stable (no layer added to overlay). Renders above
+   * Force-Quality Glow and below experimental tactical layers.
+   */
+  readonly refugeeColumnVisible: boolean;
 }
 
 /** Default: Deck.gl formation counters ON (enriched); other experiments off. */
@@ -61,4 +73,5 @@ export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
   ghostMapVisible: false,
   mapScarsVisible: false,
   forceQualityVisible: false,
+  refugeeColumnVisible: false,
 };
