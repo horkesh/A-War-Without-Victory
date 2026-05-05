@@ -7995,3 +7995,56 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Reports:**
 - `docs/40_reports/audits/20260505_HRHB_NUMERICS_RETUNE_MINI_PANEL.md`
 - `docs/40_reports/implemented/20260505_HRHB_NUMERICS_RETUNE_PHASE_1.md`
+
+---
+
+## [2026-05-05] Wave 11 events + UI shell audit + Codex Wave 2 + faction palette canonicalization (5-commit autonomous batch)
+
+**Type:** 5 commits per "finish game fully" autonomous directive. Commits `c406fd9c..ce0474e7` (Wave 10 propagation `f47c0091` was the predecessor checkpoint; MORALE_OVERRIDE Phase 0 panel `9b9650e4` followed; this batch covers the next 5).
+
+**`c406fd9c` Wave 11 divergence events:** 6 new Ring 1 / no-§6 / faction-agnostic events. Wave-11-lineage 53→59; absolute catalog 77→83. Events: `csq_winter_supply_attrition_HRHB`, `csq_political_split_temporary_RS` (Pale-Banja Luka 1994-95), `csq_doctrine_drift_HRHB`, `csq_post_dayton_train_and_equip_HRHB`, `csq_iran_arms_channel_attenuation_HRHB`, `csq_arbih_resistance_revival_HRHB`. 11/11 lane tests + 195/195 focused regression GREEN. 40w smoke n1675 hash byte-identical to baseline.
+
+**`cdb2d30f` v0.9.4 Phase 1+2 UI shell audit:** Read-only audit. Phase 1 (Shell + Transition Polish): 10 gaps (P0=0, P1=5, P2=3, P3=2). Phase 2 (Visual Consistency): 10 gaps (P0=0, P1=2, P2=6, P3=2). Prioritized backlog top 5: faction palette canonicalization (P1 M); z-index tokens (P1 M); modal wrapper (P1 M); loading + error states (P1 S); empty-state pass (P1 S). 6 quick wins (<2 hours each). Cross-cutting risks: faction palette spans React + vanilla-TS; z-index migration wide-touch; tutorial `data-tutorial-step` anchors must be preserved across modal-wrapper migration.
+
+**`0ec2c28a` Codex content expansion Wave 2:** 8 new Ring 2 / AUDIT-ONLY ghost entries authored. Total Codex ghost entries: 14 (6 Mission E + 8 here). Builder extended at `src/sim/codex/dynamic_section_builder.ts` with 8 new Wave-2 predicates (faction-agnostic via `state.meta.player_faction`). 40/40 lane tests + 94/94 broader Codex regression GREEN. Sub-agent died before authoring lane report; parent agent verified implementation + tests and authored closeout report. Sibling re-derivation by deferred agent produced byte-identical content (good integrity signal).
+
+**`14d4d0f8` + `ce0474e7` Faction palette canonicalization (two-commit pattern):**
+- `14d4d0f8` source-first: ADD-ONLY new canonical accessor module `src/ui/shared/factionPalette.ts` (+103 LOC; no fork migrations yet; `FACTION_GLOW_RGB` byte-stable per Phase-3 visual layer constraint).
+- `ce0474e7` sweep: migrate 5 audit-named forks + 1 audit-missed fork (`opsConstants.ts`); fix `SettingsModal.ts` RS=blue/HRHB=red color INVERSION (post-fix: RS=red, HRHB=blue per canonical symbology); add canonicalization test; add lane report.
+- **6 forks migrated:** `theme.ts`, `warroom_utils.ts`, `InvestmentPanel.ts`, `SettingsModal.ts`, `opsConstants.ts`. (5 audit-named + 1 audit-missed.)
+- 39/39 GREEN across focused 5-file regression + new `tests/faction_palette_canonical.test.ts` (7 tests covering byte-stability, single-source, derivations, inversion-fixed, no-fork-literals).
+- Phase-3 visual layer regression: PASS (Map That Scars + Force-Quality Glow + Refugee Column + Corridor Heartbeat all continue passing T1-T8 gates; `FACTION_GLOW_RGB` Object.freeze({...}) byte-identical).
+- Out-of-scope discoveries flagged for future cleanup: `SettlementInfoPanel.ts`, `WarPlanningMap.ts`, `map_viewer_*`, `modals.css`, `tailwind.config.ts`.
+
+**Sensitive-history compliance (all 5 commits):**
+- Wave 11 events: Ring 1, faction-agnostic mechanism, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch.
+- UI shell audit: read-only; no source/test/scenario/canon/political_controllers/OOB/rupture/§6 touch.
+- Codex Wave 2: Ring 2 narrative observations only; AUDIT-ONLY framing; no §6 surface.
+- Faction palette canonicalization: Ring 1, faction-symmetric mechanism (palette = data, lookup = mechanism), no `if (faction === 'X')` branches introduced (existing `SettingsModal` ternary deleted), no engine plumbing.
+
+**Verification (aggregate):** `npx tsc --noEmit` clean across all 5 commits; 195/195 (Wave 11) + 94/94 (Codex) + 39/39 (palette) = 328/328 GREEN focused regressions. 40w hash byte-identical for events + palette (post-source-stable).
+
+**Roadmap delta:**
+- v0.9.0 Consequences: events catalog 77→83.
+- v0.9.1 Replay & Codex: ghost entries 6→14 (Codex Wave 2).
+- v0.9.4 Phase 1+2: full audit done with prioritized backlog; first P1 backlog item (palette canonicalization) shipped.
+- v0.9.4 Phase 3: still FULLY CLOSED (4 features live; palette canonicalization preserved their byte-stability).
+
+**MORALE_OVERRIDE Phase 1 in flight (not yet committed in this batch):**
+- One-line predicate sense flip in `brigade_dissolution.ts` (working tree)
+- 7/7 lane tests in `tests/morale_override_flag_promotion_phase_1.test.ts`
+- 188w A/B dual smoke chain `bmwcenlqt` running (default-ON + MORALE_OVERRIDE_ENABLED=false A/B per panel criterion 11)
+- Lane report + save schema doc update + commit pending smoke completion
+
+**Successor handoffs:**
+1. MORALE_OVERRIDE Phase 1 closure (smoke completion → A/B evidence packet → commit)
+2. v0.9.4 backlog continuation: 4 more lanes (z-index tokens, modal wrapper, loading + error states, empty-state pass) + 6 quick wins
+3. Codex observer flag wiring (`winter_held_through_turn` etc. currently DORMANT)
+4. CSS/debug/Tailwind palette literals cleanup
+5. Wave 12 events
+6. Tier 3 perf optimization
+
+**Reports:**
+- `docs/40_reports/audits/20260505_V094_PHASE_1_2_UI_SHELL_AUDIT.md`
+- `docs/40_reports/implemented/20260505_CODEX_CONTENT_EXPANSION.md`
+- `docs/40_reports/implemented/20260505_V094_FACTION_PALETTE_CANONICALIZATION.md`

@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip Wave 10 events `d59abaa4` — catalog 71→77 (Wave-10 lineage 47→53); 6 new Ring 1 / no-§6 events: HRHB supply-strain mirror, post-Dayton train-and-equip, ARBiH doctrine modernization, Iran-arms-channel attenuation, RBiH political-split mirror, doctrine-drift; 11/11 + 177/177 GREEN; 40w hash byte-identical. Predecessor: HRHB numerics retune `f9c40043` closed late-war doctrinal arc on 5th attempt (RS strict + HRHB refined). **v0.9.0 events at 77 catalog. Trip session central calibration question ANSWERED.**)
+**Last Updated:** 2026-05-05 (post-trip 5-commit autonomous batch `c406fd9c..ce0474e7` — Wave 11 events (catalog 77→83); v0.9.4 Phase 1+2 UI shell audit + prioritized backlog; Codex content expansion Wave 2 (8 ghost entries; total 14); **faction palette canonicalization** with new canonical source `src/ui/shared/factionPalette.ts` + 6 forks migrated + SettingsModal RS=red/HRHB=blue inversion FIXED (Phase-3 visual layers byte-stable). MORALE_OVERRIDE Phase 1 in flight (188w A/B dual smoke `bmwcenlqt`).)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
