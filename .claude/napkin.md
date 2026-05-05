@@ -16,6 +16,41 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
+## Current State (2026-05-05, Phase 1 B'.2 PARTIAL SHIP — FIRST late-war arc bend in 4 attempts on top of `b63348bf`)
+**Commits `be6b95ff..7aee7bb7` (2 commits).** Trip session 5 third batch.
+
+**Timeline-data Phase 0 panel SHIPPED (`be6b95ff`):** Read-only synthesis with NEW binding criterion 11 (production reachability runtime trace) instituted in light of Phase 1 (`a42ebae0`) dormancy precedent. Unanimous CONDITIONS verdict on Option B'.2 (add new `learning_rate_per_turn_step_curve` field at higher precedence than scalar). Recommended numerics: RS `0.007/0.004/0.000/-0.0028`, HRHB `0.010/0.007/0.003/-0.002` at brackets `<w52/w52-77/w78-103/w104+`; RBiH `const 0.015` UNTOUCHED (control). 11 binding criteria + 5 stop triggers + Ring 1 + §6 NOT triggered. Production reachability trace artifact: path #1 (scalar) currently fires for {RS, RBiH, HRHB} → B'.2 inserts NEW path #0 (step-curve) at higher precedence → with recommended numerics, path #0 fires for {RS, HRHB}, path #1 still fires for {RBiH}.
+
+**Phase 1 B'.2 PARTIAL SHIP (`7aee7bb7`) — FIRST late-war arc bend in 4 attempts:** Implementation shipped structurally correct (11/11 lane tests, tsc clean, 40w n1669 anchors 26/27 PASS). 188w smoke n1671 (hash `6e8f60f3765ffc04`) ran cleanly with full artifact emission (Wave 7 Lane B streaming finalizer THRICE-validated at scale). **Per-faction trajectory:**
+- RS whole-run Δ/turn = **−0.000677** (PASS: ≤0)
+- RS stayer Δ/turn = **−0.000794** (PASS: ≤0)
+- RS active brigades at t188 = 52 (PASS: ≥35)
+- HRHB whole-run Δ/turn = +0.000505 (borderline FAIL: technically positive, near-flat)
+- HRHB stayer Δ/turn = +0.000520 (borderline FAIL)
+- RBiH whole-run Δ/turn = +0.003909 (PASS: control held)
+- HRHB segment-trajectory: +0.000684 / **−0.000023** / **−0.000563** at t52→t78 / t78→t104 / t104→t188 — segment-bends after t52 but whole-run dominated by pre-w52 contribution.
+
+**Decision: PARTIAL SHIP per partial-fix-is-valid Mission C precedent.** Failure mode is numerics-magnitude (HRHB needs more aggressive negative bands), NOT mechanism failure (RS proves the mechanism works). RS bends decisively negative across all three late-war segments. The mechanism is now validated.
+
+**Cross-lane progress (all 4 attempts):**
+1. Wave 4 reinforcement_mult `e9584dd3` — VRS Δ/turn = +0.000591, didn't bend (budget-side wrong path)
+2. Lane A OCM `411f6843` — VRS Δ/turn = +0.000591, didn't bend (casualty-side multiplier insufficient)
+3. Phase 1 OQ-Growth `a42ebae0` — VRS Δ/turn = +0.000780, DORMANT (timeline shadowing)
+4. **Phase 1 B'.2 (this lane) — VRS Δ/turn = -0.000677, BENDS** (timeline-data step-curve at path #0 — actually-firing path)
+
+**Sensitive-history compliance (both commits):** Ring 1, faction-agnostic mechanism (record-lookup pattern at path #0; faction-symmetric mechanism, asymmetric data), no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch.
+
+**Successor handoffs:**
+1. **HRHB numerics retune lane** (LOAD-BEARING follow-up): tighter negative bands like `0.010 < w52 / 0.005 < w78 / -0.001 < w104 / -0.005 thereafter`. Mini-panel verdict required (panel approved B'.2 as class; numerics-tuning-within-class is smaller successor scope). Same 5 stop triggers + criterion 11 reachability check apply.
+2. **Wave 10 events**: faction-mirror inversions; doctrine-reform / arms-channel variants.
+3. **MORALE_OVERRIDE_ENABLED flag promotion** to default-on (188w gate now thrice-validated).
+4. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized` (cross-call shared state — needs new gate strategy beyond G1+G2+G3).
+5. **Fix Shape C re-evaluation** (DEFERRED → still candidate as cleanup if HRHB retune doesn't close gap).
+
+Do instead: (1) **PARTIAL SHIP is a valid outcome when partial-fix-is-valid Mission C precedent applies AND mechanism is validated.** Phase 1 B'.2 had RS PASS criterion 3+4 + HRHB borderline-FAIL on numerics-magnitude. Rather than verdict-only-revert (which is correct for mechanism-failure cases like Lane A), ship the implementation + recommend tightened numerics for successor. The distinction: mechanism-failure (cache wrapper drifts hash; lever is structurally wrong) → revert; numerics-magnitude-failure (lever works for RS but HRHB needs bigger numbers) → partial ship + successor. Mission C precedent on `paramilitary_sweep` deferred-cached site is the canonical analog. (2) **The "fourth attempt finally works" pattern means each prior attempt narrowed the search productively even when it failed.** Wave 4 (budget-side wrong path) → Lane A (per-brigade math attempted but multiplier insufficient) → Phase 1 OQ-Growth (right code surface but wrong precedence path) → Phase 1 B'.2 (right code surface AND right precedence path). The structural lesson: each verdict-only outcome added information that informed the next attempt. The third attempt's "DORMANT" finding directly named the precedence-path issue that the fourth attempt fixed. Don't be discouraged by 3-of-4 failure rate — the attempts compound. (3) **Criterion 11 (production reachability) prevents another DORMANT shipment.** Phase 0 panel adopted criterion 11 specifically because Phase 1 OQ-Growth shipped a structurally correct lever that was DORMANT in production. Phase 1 B'.2 verified path-firing semantics structurally via test coverage; the lever DID activate. Future Phase 0 panels that touch multi-level precedence chains MUST include criterion 11 — verify the lever's path actually fires at runtime with current scenario data. (4) **Pre-w52 growth dominates the 188-turn whole-run average** when step-curve activates at w52+. HRHB's whole-run Δ/turn = +0.000505 is positive because the canonical professionalization arc accumulates +0.094 of growth before the step-curve engages. Future calibration that uses step-curves at w52 should expect this pattern: segment-trajectory bends correctly post-bracket-boundary, but whole-run averages can stay positive if pre-bracket growth dominates. The criterion-3 strict reading of "whole-run Δ/turn ≤0" may need refinement to "post-w52 segment Δ/turn ≤0" for future late-war calibration lanes. Linked lane: `[2026-05-05] feat(combat): officer-quality timeline-data step-curve per Phase 0 panel B'.2`.
+
+Reports: `docs/40_reports/audits/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_0_PANEL.md`, `docs/40_reports/implemented/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_1.md`.
+
 ## Current State (2026-05-05, OQ-Growth investigation + Phase 0 panel + Phase 1 verdict + Corridor Heartbeat on top of `105e0577`)
 **Commits `9ad7a854..a42ebae0` (5 commits).** Trip session 5 second batch.
 

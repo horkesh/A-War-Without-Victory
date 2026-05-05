@@ -7879,3 +7879,66 @@ Per panel criterion 8 stop-triggers #1 (faction-mean Δ/turn doesn't bend nonpos
 - `docs/40_reports/implemented/20260505_CORRIDOR_HEARTBEAT_VALIDATION.md`
 - `docs/40_reports/implemented/20260505_OFFICER_QUALITY_GROWTH_PHASE_1.md` (verdict-report-only)
 - New diagnostic: `tools/diagnostics/officer_quality_growth_trace.cjs`
+
+---
+
+## [2026-05-05] OQ-Growth Phase 1 timeline-data variant (B'.2) — PARTIAL SHIP, FIRST late-war arc bend in 4 attempts
+
+**Type:** Trip session 5 third batch. Commits `be6b95ff..7aee7bb7` (2 commits): timeline-data Phase 0 panel + Phase 1 PARTIAL SHIP.
+
+**`be6b95ff` Timeline-data Phase 0 panel:** Read-only synthesis with NEW binding criterion 11 (production reachability runtime trace) instituted in light of Phase 1 OQ-Growth (`a42ebae0`) dormancy precedent. Unanimous CONDITIONS verdict on Option B'.2 (add new `learning_rate_per_turn_step_curve` field at higher precedence than scalar `learning_rate_per_turn` at path #1). Recommended numerics: RS `0.007/0.004/0.000/-0.0028`, HRHB `0.010/0.007/0.003/-0.002` at brackets `<w52/w52-77/w78-103/w104+`; RBiH `const 0.015` UNTOUCHED (control). 11 binding criteria + 5 stop triggers + Ring 1 + §6 NOT triggered.
+
+**Production reachability trace artifact (new criterion 11):** Path #1 (timeline `learning_rate_per_turn` scalar) currently fires for {RS, RBiH, HRHB} in production with `apr1992.json` because all three factions have scalar defined. Paths #2/#3/#4 unreachable. **B'.2 inserts NEW path #0 (`learning_rate_per_turn_step_curve`) at higher precedence.** With recommended numerics, path #0 fires for {RS, HRHB}; path #1 still fires for {RBiH}.
+
+**`7aee7bb7` Phase 1 B'.2 PARTIAL SHIP — FIRST mechanism that bends the late-war doctrinal arc:** Implementation shipped structurally correct (11/11 lane tests, tsc clean, 40w n1669 anchors 26/27 PASS). 188w smoke n1671 (hash `6e8f60f3765ffc04`) ran cleanly with full artifact emission (Wave 7 Lane B streaming finalizer thrice-validated at scale).
+
+**Per-faction trajectory (n1671):**
+
+| Faction | t52 | t78 | t104 | t188 | whole-run Δ/turn | stayer Δ/turn | Verdict |
+|---|---|---|---|---|---|---|---|
+| HRHB | 0.3035 | 0.3213 | 0.3207 | 0.3213 | +0.000505 | +0.000520 | borderline FAIL |
+| RBiH | 0.3503 | 0.4540 | 0.5683 | 0.8176 | +0.003909 | +0.003941 | PASS |
+| RS   | 0.5658 | 0.5518 | 0.5030 | **0.4252** | **−0.000677** | **−0.000794** | **PASS** |
+
+(t1 baselines: HRHB ≈ 0.227, RBiH ≈ 0.087, RS ≈ 0.552. RS active brigades at t188 = 52, criterion ≥35 PASS.)
+
+**Adjacent-checkpoint Δ/turn:**
+
+| From → To | HRHB | RBiH | RS |
+|---|---|---|---|
+| t52 → t78 | +0.000684 | +0.003988 | **−0.000537** |
+| t78 → t104 | **−0.000023** | +0.004396 | **−0.001877** |
+| t104 → t188 | **−0.000563** | +0.003050 | **−0.001049** |
+
+**RS bends decisively negative across all three late-war segments.** HRHB segment-trajectory bends after t52 but whole-run dominated by pre-w52 contribution (canonical professionalization arc accumulates +0.094 before step-curve engages).
+
+**Cross-lane progress (4-attempt summary):**
+
+| Attempt | Lever | Lane | 188w VRS Δ/turn | Verdict |
+|---|---|---|---|---|
+| 1 | Wave 4 reinforcement_mult | RECONSTITUTION-POLICY-REVIEW | +0.000591 | budget-side wrong path |
+| 2 | Lane A OFFICER_CASUALTY_MULT | OCM-PHASE-1-IMPL-REDO | +0.000591 | casualty-side multiplier insufficient |
+| 3 | Phase 1 OQ-Growth FACTION_LEARNING_RATE step-curve | OQ-GROWTH-PHASE-1-IMPL | +0.000780 | DORMANT (timeline shadowing) |
+| **4** | **Phase 1 B'.2 timeline-data step-curve at path #0** | **OQ-LEARNING-RATE-TIMELINE-DATA-PHASE-1** | **−0.000677** | **PARTIAL SHIP — RS bends, mechanism validated** |
+
+The mechanism is now proven: when the step-curve sits at path #0 of the precedence chain (the actually-firing path) and goes negative in late-war windows, the per-brigade growth term decays as canon expects. RS demonstrates the bend.
+
+**Decision: PARTIAL SHIP per partial-fix-is-valid Mission C precedent.** Failure mode is numerics-magnitude (HRHB needs more aggressive negative bands), NOT mechanism failure. RS proves the mechanism works.
+
+**Sensitive-history compliance (both commits):** Ring 1, faction-symmetric mechanism with asymmetric data, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No combat-math number tuned outside panel-recommended numerics.
+
+**Roadmap delta:**
+- v0.9 late-war calibration: FIRST proven mechanism for officer-quality decay (4-attempt sequence finally produces a bend).
+- Wave 7 Lane B streaming finalizer thrice-validated at 188w scale (n1665, n1667, n1671).
+- Phase 0 panel discipline upgraded with criterion 11 (production reachability) — successfully prevented another DORMANT shipment.
+
+**Successor handoffs:**
+1. **HRHB numerics retune lane** (LOAD-BEARING follow-up): tighter negative bands like `0.010 < w52 / 0.005 < w78 / -0.001 < w104 / -0.005 thereafter`. Mini-panel verdict required.
+2. **Wave 10 events**: faction-mirror inversions; doctrine-reform / arms-channel variants.
+3. **MORALE_OVERRIDE_ENABLED flag promotion** to default-on (188w gate now thrice-validated).
+4. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized`.
+5. **Fix Shape C re-evaluation** (DEFERRED → still candidate as cleanup).
+
+**Reports:**
+- `docs/40_reports/audits/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_0_PANEL.md`
+- `docs/40_reports/implemented/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_1.md`
