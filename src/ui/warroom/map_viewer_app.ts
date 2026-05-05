@@ -466,6 +466,7 @@ async function main(): Promise<void> {
                 fontSize: '12px',
                 fontFamily: 'Arial',
                 pointerEvents: 'none',
+                // canonical: Z.TOOLTIP = 9999 (src/ui/shared/zIndex.ts)
                 zIndex: '9999',
                 borderRadius: '4px',
                 maxWidth: '280px',

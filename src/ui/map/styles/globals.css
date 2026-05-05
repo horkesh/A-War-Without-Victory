@@ -126,7 +126,7 @@ body {
   bottom: 0;
   right: 0;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-  z-index: 100;
+  z-index: 100; /* canonical: Z.TOOLBAR = 100 (src/ui/shared/zIndex.ts) — frame-level chrome tier */
   background-size: 100% 3px, 3px 100%;
   pointer-events: none;
   opacity: 0.15;

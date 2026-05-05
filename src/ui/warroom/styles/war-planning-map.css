@@ -3,7 +3,7 @@
 .war-planning-map-overlay {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 1000; /* canonical: Z.MODAL = 1000 (src/ui/shared/zIndex.ts) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,7 +98,7 @@
     color: #333;
     background: rgba(232, 222, 194, 0.9);
     border: 1px solid #4a4238;
-    z-index: 10;
+    z-index: 10; /* canonical: Z.MAP_OVERLAY = 10 (src/ui/shared/zIndex.ts) */
 }
 
 .war-planning-map-zoom-pill {
@@ -142,7 +142,7 @@
     position: absolute;
     top: 8px;
     right: 90px;
-    z-index: 10;
+    z-index: 10; /* canonical: Z.MAP_OVERLAY = 10 (src/ui/shared/zIndex.ts) */
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -193,7 +193,7 @@
     position: absolute;
     bottom: 16px;
     right: 16px;
-    z-index: 10;
+    z-index: 10; /* canonical: Z.MAP_OVERLAY = 10 (src/ui/shared/zIndex.ts) */
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -369,7 +369,7 @@
     left: 16px;
     width: 150px;
     height: 100px;
-    z-index: 10;
+    z-index: 10; /* canonical: Z.MAP_OVERLAY = 10 (src/ui/shared/zIndex.ts) */
     border: 1px solid #555;
     cursor: pointer;
 }
@@ -380,7 +380,7 @@
     position: absolute;
     bottom: 60px;
     right: 16px;
-    z-index: 10;
+    z-index: 10; /* canonical: Z.MAP_OVERLAY = 10 (src/ui/shared/zIndex.ts) */
 }
 
 .war-planning-map-legend-toggle {
@@ -1062,7 +1062,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    z-index: 30;
+    z-index: 30; /* canonical: Z.CORPS_CARD_LABEL = 30 (src/ui/shared/zIndex.ts) — intra-component label tier */
     max-width: 260px;
     pointer-events: none;
     background: rgba(47, 40, 33, 0.95);
