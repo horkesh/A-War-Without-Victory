@@ -4481,5 +4481,221 @@
       "paramilitary_refusal_streak_active_RBiH": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-14 (NEW faction-symmetric streak event — Wave-13 successor handoff #5: 'paramilitary_streak_refused' ghost entry made first-class). Models the cohesion accrual when the aggregate paramilitary mode (per BrigadeFormation.paramilitary_mode read at event_types.ts:594) holds at 'rear_pocket' and war-exhaustion is moderate. Distinct trigger surface from csq_extended_truce_streak (alliance_above) and csq_mediator_engagement_streak (patron_confidence). Anchor authored as RBiH because the recovery-side cohesion register is most documented on the Federation side; HRHB and RS variants are valid future Wave-15+ candidates with the same faction-symmetric mechanism. Mirrors documented 1994-1995 ARBiH integration of volunteer battalions back into the rear-area pool during the Washington-Agreement period (BB II Ch.41-43; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. NO atrocity-as-tactic content; the rear_pocket mode is the recovery / refusal stance, not the offensive one. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_demobilization_pressure_wave_RBiH",
+    "title": "Demobilization Pressure Wave (RBiH)",
+    "narrative": "After a quiet quarter the Federation families return to the streets and Washington adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices in Sarajevo and Tuzla reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 55 },
+          { "type": "patron_pressure_above", "faction": "RBiH", "threshold": 10 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RBiH", "min": 30 },
+          { "type": "flag_not_set", "flag": "demobilization_wave_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Demobilization pressure wave (RBiH variant): recruitment slows, aggression dampens."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.70, "duration_turns": 30 },
+      { "kind": "aggression_modifier", "faction": "RBiH", "delta": -0.10, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "demobilization_pressure_wave_RBiH", "text": "RBiH demobilization pressure wave imposed under exhaustion >0.55, patron pressure >=10, no major offensive 30 turns. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "sets_flags": {
+      "demobilization_wave_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — RBiH variant of csq_demobilization_pressure_wave; the RS variant ships as the Wave-3 progenitor; the HRHB variant ships in this same Wave-15). Predicate structurally identical to the Wave-3 RS authoring; only the faction parameter and mutex flag differ. Wave-14 successor handoffs section explicitly flagged this as still missing. Mirrors documented 1995 ARBiH manpower walk-back patterns under sustained Washington pressure during the post-Dayton period (BB II Ch.49-55; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_demobilization_pressure_wave_HRHB",
+    "title": "Demobilization Pressure Wave (HRHB)",
+    "narrative": "After a quiet quarter the West Mostar and Posusje families return to the streets and Zagreb adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 55 },
+          { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 10 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_HRHB", "min": 30 },
+          { "type": "flag_not_set", "flag": "demobilization_wave_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Demobilization pressure wave (HRHB variant): recruitment slows, aggression dampens."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.70, "duration_turns": 30 },
+      { "kind": "aggression_modifier", "faction": "HRHB", "delta": -0.10, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "demobilization_pressure_wave_HRHB", "text": "HRHB demobilization pressure wave imposed under exhaustion >0.55, patron pressure >=10, no major offensive 30 turns. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "sets_flags": {
+      "demobilization_wave_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — HRHB variant of csq_demobilization_pressure_wave; closes demobilization-wave triad alongside Wave-15 RBiH variant). Predicate structurally identical to the Wave-3 RS authoring; only the faction parameter and mutex flag differ. Wave-14 successor handoffs section explicitly flagged this as still missing. Mirrors documented 1995 HVO manpower walk-back patterns under sustained Zagreb pressure during the post-Washington-Agreement period (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_paramilitary_refusal_streak_HRHB",
+    "title": "The Volunteer Battalions Recede (HRHB)",
+    "narrative": "The Croat-majority paramilitary detachments — the volunteer companies that had drifted forward toward the Lasva and Mostar contact lines during the worst months — pull back to the rear. Not all at once, and not by any single order: the political register of the population shifts, the volunteer offices stop pushing, and the irregulars who had attached themselves to HVO brigades return to their towns. The brigade staffs note the absence; the political officers note the relief. A small recovery of cohesion accrues to the regular formations.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "paramilitary_mode_equals", "value": "rear_pocket" },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 50 },
+          { "type": "flag_not_set", "flag": "paramilitary_refusal_streak_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained rear-pocket paramilitary mode + moderate war-exhaustion (HRHB variant) registers as a paramilitary refusal streak; cohesion accrues to the regular formations."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "paramilitary_refusal_streak_HRHB", "text": "Paramilitary refusal streak (HRHB variant) under aggregate paramilitary_mode=rear_pocket and war_exhaustion>=50. Cohesion +2 to reflect the regular HVO formations no longer sharing sectors with volunteer companies. AUDIT-ONLY annotation; no rupture wiring; no atrocity-as-tactic content." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "paramilitary_refusal_streak_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-14 mirror — HRHB variant of csq_paramilitary_refusal_streak; the RBiH variant ships as the Wave-14 progenitor). Predicate structurally identical to the Wave-14 RBiH authoring; only the faction parameter and mutex flag differ. Wave-14 successor handoffs section explicitly flagged this as a future candidate. Mirrors documented 1994-1995 HVO integration of volunteer battalions back into the rear-area pool during the Washington-Agreement period (BB II Ch.41-42; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. NO atrocity-as-tactic content; the rear_pocket mode is the recovery / refusal stance, not the offensive one. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_paramilitary_refusal_streak_RS",
+    "title": "The Volunteer Battalions Recede (RS)",
+    "narrative": "The Serb paramilitary detachments — the volunteer companies that had drifted forward toward the contact lines during the worst months — pull back to the rear. Not all at once, and not by any single order: the political register of the population shifts, the volunteer offices in Banja Luka and Pale stop pushing, and the irregulars who had attached themselves to VRS brigades return to their towns or to their militias-of-record. The brigade staffs note the absence; the political officers note the relief. A small recovery of cohesion accrues to the regular formations.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "paramilitary_mode_equals", "value": "rear_pocket" },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 50 },
+          { "type": "flag_not_set", "flag": "paramilitary_refusal_streak_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained rear-pocket paramilitary mode + moderate war-exhaustion (RS variant) registers as a paramilitary refusal streak; cohesion accrues to the regular formations."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "paramilitary_refusal_streak_RS", "text": "Paramilitary refusal streak (RS variant) under aggregate paramilitary_mode=rear_pocket and war_exhaustion>=50. Cohesion +2 to reflect the regular VRS formations no longer sharing sectors with volunteer companies. AUDIT-ONLY annotation; no rupture wiring; no atrocity-as-tactic content." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "paramilitary_refusal_streak_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-14 mirror — RS variant of csq_paramilitary_refusal_streak; closes refusal-streak triad alongside Wave-15 HRHB variant). Predicate structurally identical to the Wave-14 RBiH authoring; only the faction parameter and mutex flag differ. Wave-14 successor handoffs section explicitly flagged this as a future candidate. Mirrors documented 1994-1995 VRS integration of volunteer battalions back into the rear-area pool during the Contact Group plan period (BB II Ch.43-47; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. NO atrocity-as-tactic content; the rear_pocket mode is the recovery / refusal stance, not the offensive one. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_industrial_conscription_wave_RS",
+    "title": "Industrial Conscription Wave (RS)",
+    "narrative": "The exhaustion of the Posavina and Drina fronts pushes the Republika Srpska rear into emergency mobilization. Banja Luka and Doboj factories release their reserved categories. Universities suspend exemptions. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 35 },
+          { "type": "territory_loss_window", "faction": "RS", "min_loss_pct": 0.05, "window_turns": 30 },
+          { "type": "flag_not_set", "flag": "industrial_wave_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Industrial conscription wave (RS variant) imposed under exhaustion and territorial loss."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 1.20, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "RS", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "industrial_conscription_wave_RS", "text": "RS industrial conscription wave imposed: war_exhaustion >35, territory_loss_30day >=5%. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": -8 }
+    ],
+    "sets_flags": {
+      "industrial_wave_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — RS variant of csq_industrial_conscription_wave; the RBiH variant ships as the Wave-3 progenitor). Predicate structurally identical to the Wave-3 RBiH authoring; only the faction parameter and mutex flag differ. Mirrors documented 1995 VRS industrial mobilization expansion under territorial pressure during Operation Storm and the post-Krajina collapse period (BB II Ch.49-55). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_industrial_conscription_wave_HRHB",
+    "title": "Industrial Conscription Wave (HRHB)",
+    "narrative": "The exhaustion of the Lasva and Neretva fronts pushes the HZ-HB rear into emergency mobilization. The West Mostar and Grude workshops release their reserved categories. The municipal exemptions are suspended. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 35 },
+          { "type": "territory_loss_window", "faction": "HRHB", "min_loss_pct": 0.05, "window_turns": 30 },
+          { "type": "flag_not_set", "flag": "industrial_wave_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Industrial conscription wave (HRHB variant) imposed under exhaustion and territorial loss."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 1.20, "duration_turns": 25 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "industrial_conscription_wave_HRHB", "text": "HRHB industrial conscription wave imposed: war_exhaustion >35, territory_loss_30day >=5%. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -8 }
+    ],
+    "sets_flags": {
+      "industrial_wave_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — HRHB variant of csq_industrial_conscription_wave; closes industrial-conscription triad alongside Wave-15 RS variant). Predicate structurally identical to the Wave-3 RBiH authoring; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO industrial mobilization expansion under territorial pressure during the Lasva-Vitez and Mostar campaigns (BB II Ch.41-42). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
   }
 ]
