@@ -30,6 +30,22 @@ function getBaseDir() {
   return path.join(__dirname, '..', '..');
 }
 
+/**
+ * Resolve the application icon path for BrowserWindow `icon:` wiring.
+ *
+ * Dev: <repo>/build/icon.png (sibling of src/desktop/).
+ * Packaged: electron-builder copies build/icon.png into the app via the
+ * top-level `build.icon` field; the .exe / AppImage launcher icon is set at
+ * the OS level. The window-runtime icon below mainly affects Linux WMs
+ * (Windows reuses the .exe icon for taskbar). Both paths point at the same
+ * file relative to the resolved base dir.
+ *
+ * Determinism: pure path resolution; no Date / no Math.random.
+ */
+function getAppIconPath() {
+  return path.join(getBaseDir(), 'build', 'icon.png');
+}
+
 /** In-memory game state for "play myself". Set by load-scenario or load-state; updated by advance-turn. */
 let currentGameStateJson = null;
 let mainWindow = null;
@@ -634,6 +650,7 @@ function createMainWindow(options = {}) {
     width: 1400,
     height: 900,
     show,
+    icon: getAppIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -710,6 +727,7 @@ function createTacticalMapWindow(options = {}) {
     width: 1400,
     height: 900,
     show,
+    icon: getAppIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -1445,6 +1463,14 @@ function registerProtocol() {
 
     return new Response('Not Found', { status: 404 });
   });
+}
+
+// Pin a stable Windows AppUserModelID before any window is created so taskbar
+// grouping, jump-list identity, and toast notifications match the appId
+// declared in package.json `build.appId`. No-op on non-Windows platforms.
+// (LANE-V095-PLATFORM-ICON-APPID — closes audit P2-G1.)
+if (process.platform === 'win32' && typeof app.setAppUserModelId === 'function') {
+  app.setAppUserModelId('com.awwv.desktop');
 }
 
 app.whenReady().then(() => {

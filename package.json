@@ -298,6 +298,7 @@
     "appId": "com.awwv.desktop",
     "productName": "A War Without Victory",
     "npmRebuild": false,
+    "icon": "build/icon.png",
     "directories": {
       "output": "dist-packaged"
     },

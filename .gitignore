@@ -20,8 +20,18 @@ dist-packaged/
 
 # Build outputs
 dist/
-build/
 coverage/
+
+# build/ holds electron-builder source assets (committed) AND staged
+# packager output (ignored). Re-ignore the staged subdirs explicitly so the
+# committed source icons can land while build outputs stay ignored.
+# (LANE-V095-PLATFORM-ICON-APPID.)
+build/*-unpacked/
+build/*-arm64-unpacked/
+build/win-ia32-unpacked/
+build/linux-unpacked/
+build/mac/
+build/__icon_gen_temp.cjs
 
 # Allow tooling under tools/build/ (build-related scripts, not build outputs)
 !tools/build/
