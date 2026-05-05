@@ -50,6 +50,8 @@ import { CodexPanel } from './components/CodexPanel';
 import { FirstTurnOrientationCard, FIRST_TURN_INTRO_STORAGE_KEY } from './components/FirstTurnOrientationCard';
 import { buildFirstTurnOrientation } from './data/firstTurnOrientation';
 import { OnboardingOverlay } from './components/onboarding';
+import { LoadingSkeleton } from './components/LoadingSkeleton';
+import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
@@ -983,6 +985,27 @@ function App() {
           main menu / side picker. The overlay's own predicate handles the
           dismissed-state branch. */}
       {appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />}
+      {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
+          Shown when the in-game shell has been requested but no save has
+          loaded yet. Auto-dismisses when `loadedGameState` resolves. We
+          deliberately exclude the `mainMenu` / `warroom` screens (those have
+          their own UI) and the side-picker overlay (the overlay itself is
+          the entry surface). */}
+      {appScreen === 'game' && !loadedGameState && !sidePickerOpen && (
+        <LoadingSkeleton />
+      )}
+      {/* LANE-V094-LOADING-AND-ERROR — save-load error toast.
+          Mounted at App root reading the canonical `loadError` slice of
+          the game store. Dismiss clears the slice so the next failure
+          surfaces a fresh toast. Suppressed while the SidePickerOverlay
+          is open — that overlay already renders `errorMessage={loadError}`
+          inline, so we avoid a duplicate consumer. */}
+      {!sidePickerOpen && (
+        <LoadErrorToast
+          message={loadError}
+          onDismiss={() => setLoadError(null)}
+        />
+      )}
     </div>
   );
 }
