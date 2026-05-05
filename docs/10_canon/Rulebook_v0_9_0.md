@@ -1,4 +1,6 @@
-# A War Without Victory -- Rulebook v0.7.0
+# A War Without Victory -- Rulebook v0.9.0
+
+**Last Updated:** 2026-05-05
 
 One game turn equals one week.
 
@@ -607,4 +609,29 @@ This document (v0.7.0) adds the following systems implemented since v0.6:
 - **Brigade Survivability** (§5.6): Brigades are never destroyed — emergency retreat with penalties (60% personnel retained, -20 cohesion, 3 turns disrupted) to home_osid, fallback_osid, corps HQ, or any friendly OSID.
 - **Ops-Only Attack Doctrine** (§6.4): All attacks flow through corps operations. Counter-attacks (retake lost position) are the sole brigade-level exception.
 
-This version supersedes Rulebook_v0_6_0.md.
+## 21. v0.8 / v0.9 Systems Summary
+
+This document (v0.9.0) adds the following systems and player-facing surfaces implemented since v0.7. Mechanical detail lives in the Systems Manual; this section is the player-facing index.
+
+**v0.8 Command Chain (closed):**
+- **Corps Commander Intelligence** (v0.8.0): named officers exercise interpretation authority over corps directives — they may delay, escalate, or dissent rather than execute orders mechanically. The player issues *intent*; the named officer translates intent into a corps plan filtered by competence, aggressiveness, and the corps situation.
+- **Commander Maturity** (v0.8.1): commanders carry persistent belief state, motive stack, and a per-turn decision trace. Their reasoning becomes inspectable in the player command-review surfaces.
+- **Political Leader Bot** (v0.8.2): bot factions have a political layer (foundational decisions, patron management, faction identity) that drives the army-level commander's strategic-priorities packet — rather than the army layer fabricating its own goals.
+- **Order Interpretation** (v0.8.3): explicit semantic gap between the player's order and the named officer's interpretation. Subordinates may *delay*, *partial-execute*, *refuse*, or *escalate-to-context* — and the player sees that interpretation in the Pre-Advance Review surface before the turn commits.
+- **Autonomy Depth** (v0.8.4): named-officer autonomy operates within a deterministic envelope; the optional Claude-API integration may add narrative texture but cannot change the autonomous decision once recorded.
+
+**v0.9 product spine:**
+- **Decision Room and Command Loop**: Army HQ Decision Room collects the cards the player must address before advancing — Strategic Priorities, opportunity dossiers, source handoffs to operational SITREP, command briefing, Turn Aftermath records, active cost summary, and Chronicle entries. Each card carries a canonical action target rather than spawning a parallel action queue.
+- **Pre-Advance Review and Turn Aftermath**: the player reviews staged orders against named-officer interpretation before advancing the turn; after the turn, the Turn Aftermath surface captures what happened, whose orders survived, and which interpretations were recorded.
+- **Chronicle**: a persistent narrative record of the war emergent from gameplay — major battles, atrocities, displacement waves, officer succession, treaty offers — surfaced in Army HQ and folded into the Verdict / Wrapped at endgame.
+- **Cost Ledger** (`v0.9.0`): ICTY-style prosecutorial endgame narrative, drawing on the war-crimes counter, displacement records, casualty ledger, and rupture consequences. Wording constrained by `SENSITIVE_HISTORY_DESIGN_GATE.md` §4.
+- **Endgame Comparison and Dynamic Codex** (`v0.9.1`): your war vs the historical war, side-by-side; ghost essay sections that note where your campaign diverged from history.
+- **Tutorial / Onboarding** (`v0.9.2`): first-session guided steps; restart IPC for tutorial-aware new-game.
+- **Map That Scars / Refugee Column / Corridor Heartbeat** (`v0.9.4`): visual layers that make the war's accumulated cost visible on the tactical map.
+
+**Sensitive-history gate (canonical, see `SENSITIVE_HISTORY_DESIGN_GATE.md`):**
+- Atrocity is a **consequence**, never a **lever**. The Pyrrhic score does not invert under any input.
+- Sensitive-history features live in exactly one of three rings: modeled mechanically (Ring 1), represented narratively (Ring 2), or refused (Ring 3). The boundaries are explicit and binding.
+- Rupture consequences (currently only `srebrenica_genocide_1995`) fire only on emergent satisfaction of a discrete game-state condition — never on calendar-window heuristics. Counterfactual silence (no rupture in an ahistorical campaign that did not produce the trigger condition) is canonically correct; the historical record remains in Ring 2 (essays + codex) regardless.
+
+This version supersedes Rulebook_v0_7_0.md.
