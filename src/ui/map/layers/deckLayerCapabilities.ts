@@ -62,6 +62,19 @@ export interface DeckLayerCapabilities {
    * Force-Quality Glow and below experimental tactical layers.
    */
   readonly refugeeColumnVisible: boolean;
+
+  /**
+   * Corridor Heartbeat: per-strategic-corridor PathLayer drawing
+   * friendly→hostile pulses along contested OSID-pair segments derived
+   * from `frontEdgesOsid`. Width scales with normalized intensity 0..1
+   * (front pressure if available, otherwise a small fallback so the
+   * corridor structure remains visible). Faction-symmetric — color comes
+   * from the same `FACTION_GLOW_RGB` palette used by Force-Quality Glow
+   * + Refugee Column (lookup keyed on the friendly side of the contested
+   * edge). Default false → byte-stable (no layer added to overlay).
+   * Renders above Refugee Column and below experimental tactical layers.
+   */
+  readonly corridorHeartbeatVisible: boolean;
 }
 
 /** Default: Deck.gl formation counters ON (enriched); other experiments off. */
@@ -74,4 +87,5 @@ export const DEFAULT_DECK_LAYER_CAPABILITIES: DeckLayerCapabilities = {
   mapScarsVisible: false,
   forceQualityVisible: false,
   refugeeColumnVisible: false,
+  corridorHeartbeatVisible: false,
 };

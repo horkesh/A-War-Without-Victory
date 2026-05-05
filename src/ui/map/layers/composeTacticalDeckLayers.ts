@@ -8,6 +8,7 @@ import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
 import { buildOsidDamageOverlay, type OsidDamageDatum } from './buildOsidDamageOverlay';
 import { buildForceQualityOverlay, type ForceQualityDatum } from './buildForceQualityOverlay';
 import { buildRefugeeColumnOverlay, type RefugeeColumnDatum } from './buildRefugeeColumnOverlay';
+import { buildCorridorHeartbeatOverlay, type CorridorHeartbeatDatum } from './buildCorridorHeartbeatOverlay';
 import {
   DEFAULT_DECK_LAYER_CAPABILITIES,
   type DeckLayerCapabilities,
@@ -38,6 +39,8 @@ export function composeTacticalDeckLayers(args: {
   forceQualityData?: ForceQualityDatum[];
   /** Pre-computed Refugee Column per-(from,to,turn,faction) data (pass when refugeeColumnVisible is true). */
   refugeeColumnData?: RefugeeColumnDatum[];
+  /** Pre-computed Corridor Heartbeat per-(from,to,faction) data (pass when corridorHeartbeatVisible is true). */
+  corridorHeartbeatData?: CorridorHeartbeatDatum[];
 }): Layer[] {
   const caps = args.capabilities ?? DEFAULT_DECK_LAYER_CAPABILITIES;
 
@@ -77,6 +80,22 @@ export function composeTacticalDeckLayers(args: {
     ? [buildRefugeeColumnOverlay(args.refugeeColumnData)]
     : [];
 
+  // Corridor Heartbeat: render above the refugee-column paths and below
+  // experimental tactical layers (front lines, ops arcs, unit dots).
+  // Corridor segments are derived from `frontEdgesOsid` (contested OSID-pair
+  // edges) — every contested front edge IS a corridor segment, and the
+  // pulse intensity reflects how loaded that segment is. Faction-symmetric
+  // color via the same `FACTION_GLOW_RGB` palette lookup shared with Force-
+  // Quality Glow + Refugee Column. Capability gate matches the sibling
+  // overlays (`length > 0`).
+  const corridorHeartbeat: Layer[] = (
+    caps.corridorHeartbeatVisible
+    && args.corridorHeartbeatData
+    && args.corridorHeartbeatData.length > 0
+  )
+    ? [buildCorridorHeartbeatOverlay(args.corridorHeartbeatData)]
+    : [];
+
   const under = buildExperimentalDeckLayers(
     args.loadedGameState,
     args.centroidLookup,
@@ -92,6 +111,6 @@ export function composeTacticalDeckLayers(args: {
         args.highlightedFormationIds,
       )
     : [];
-  // Layer order (bottom → top): ghost → scars → forceQuality → refugeeColumn → experimental (front lines, ops arcs, unit dots) → counters.
-  return [...ghost, ...scars, ...forceQuality, ...refugeeColumn, ...under, ...counters];
+  // Layer order (bottom → top): ghost → scars → forceQuality → refugeeColumn → corridorHeartbeat → experimental (front lines, ops arcs, unit dots) → counters.
+  return [...ghost, ...scars, ...forceQuality, ...refugeeColumn, ...corridorHeartbeat, ...under, ...counters];
 }

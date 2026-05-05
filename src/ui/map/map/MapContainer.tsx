@@ -50,6 +50,12 @@ import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLa
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
 import { buildRefugeeColumnData, type RefugeeColumnDatum } from '../layers/buildRefugeeColumnOverlay';
+import {
+  buildCorridorHeartbeatData,
+  type CorridorHeartbeatDatum,
+  type FrontEdgeRecord as CorridorFrontEdgeRecord,
+  type FrontPressureRecord as CorridorFrontPressureRecord,
+} from '../layers/buildCorridorHeartbeatOverlay';
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
@@ -124,6 +130,42 @@ const FORCE_QUALITY_FEATURE_FLAG = true;
  * Flip back to false only if a regression is detected on the live map.
  */
 const REFUGEE_COLUMN_FEATURE_FLAG = true;
+
+/**
+ * Feature flag: Corridor Heartbeat per-strategic-corridor PathLayer overlay.
+ *
+ * Default ON as of LANE-NIGHTSHIFT-V094-CORRIDOR-HEARTBEAT
+ * (docs/40_reports/implemented/20260505_CORRIDOR_HEARTBEAT_VALIDATION.md).
+ * Closes the fourth v0.9.4 (Visual Layer) feature.
+ *
+ * Validation evidence:
+ *   - tests/corridor_heartbeat_overlay_builder.test.ts T1..T8 (8/8 GREEN)
+ *     confirm the deck.gl PathLayer descriptor is well-formed: faction-
+ *     symmetric palette lookup (`FACTION_GLOW_RGB` shared with Force-
+ *     Quality Glow + Refugee Column), per-tier width scaling
+ *     (240/480/900/1500m capped), zero-intensity skip, missing-side /
+ *     same-side edge skip, self-loop skip, missing-centroid skip, MAX-
+ *     intensity per-corridor aggregation by (friendly, hostile, faction),
+ *     deterministic output sorted by (from_osid, to_osid, faction)
+ *     strictCompare.
+ *   - Capability gate in composeTacticalDeckLayers requires
+ *     `corridorHeartbeatData.length > 0`; the layer is not added when no
+ *     contested front edge is present (early-war pre-front-formation).
+ *
+ * Sensitive-history: Ring 1, UI-only, faction-symmetric mechanism (palette
+ * lookup is data, not branching logic). Builder reads existing
+ * `LoadedGameState.frontEdgesOsid` + optional
+ * `LoadedGameState.frontPressureByEdge`; no engine plumbing, no save embed.
+ * Width cap (1500m at intensity ≥0.9) prevents a single critical lifeline
+ * from visually dominating the map.
+ *
+ * Animation status: STATIC. deck.gl `PathLayer` does not natively support
+ * time-keyed pulses; `period_ms` is retained on each datum for a future
+ * TripsLayer / shader follow-on.
+ *
+ * Flip back to false only if a regression is detected on the live map.
+ */
+const CORRIDOR_HEARTBEAT_FEATURE_FLAG = true;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
@@ -286,6 +328,8 @@ function composeDeckLayersForCurrentSelection(args: {
   forceQualityData?: ForceQualityDatum[];
   /** Refugee Column: gated by REFUGEE_COLUMN_FEATURE_FLAG; data recomputed each render from displacementEventLog. */
   refugeeColumnData?: RefugeeColumnDatum[];
+  /** Corridor Heartbeat: gated by CORRIDOR_HEARTBEAT_FEATURE_FLAG; data recomputed each render from frontEdgesOsid. */
+  corridorHeartbeatData?: CorridorHeartbeatDatum[];
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
@@ -305,11 +349,13 @@ function composeDeckLayersForCurrentSelection(args: {
       mapScarsVisible: MAP_SCARS_FEATURE_FLAG && Boolean(args.mapScarsData && args.mapScarsData.length > 0),
       forceQualityVisible: FORCE_QUALITY_FEATURE_FLAG && Boolean(args.forceQualityData && args.forceQualityData.length > 0),
       refugeeColumnVisible: REFUGEE_COLUMN_FEATURE_FLAG && Boolean(args.refugeeColumnData && args.refugeeColumnData.length > 0),
+      corridorHeartbeatVisible: CORRIDOR_HEARTBEAT_FEATURE_FLAG && Boolean(args.corridorHeartbeatData && args.corridorHeartbeatData.length > 0),
     },
     ghostMapData: args.ghostMapData,
     mapScarsData: args.mapScarsData,
     forceQualityData: args.forceQualityData,
     refugeeColumnData: args.refugeeColumnData,
+    corridorHeartbeatData: args.corridorHeartbeatData,
     highlightedFormationIds: collectHighlightedFormationIds({
       formationsGeoJson: args.formationsGeoJson,
       loadedGameState: args.loadedGameState,
@@ -475,6 +521,33 @@ export function MapContainer() {
               nextInputs.loadedGameState.displacementEventLog ?? [],
               nextInputs.centroidLookup,
             )
+          : undefined,
+        // Corridor Heartbeat: rebuilt each render from
+        // loadedGameState.frontEdgesOsid + optional frontPressureByEdge
+        // (cheap O(E) aggregation; ~hundreds of front edges typical).
+        // Capability gate in composeDeckLayersForCurrentSelection requires
+        // data.length > 0; pre-front-formation early-war saves degrade
+        // gracefully (no contested edges → no layer).
+        corridorHeartbeatData: (CORRIDOR_HEARTBEAT_FEATURE_FLAG && nextInputs.loadedGameState)
+          ? (() => {
+              const edgesRaw = nextInputs.loadedGameState!.frontEdgesOsid ?? [];
+              const edges: CorridorFrontEdgeRecord[] = edgesRaw.map((e) => ({
+                edge_id: e.edge_id,
+                a: e.a,
+                b: e.b,
+                side_a: e.side_a,
+                side_b: e.side_b,
+              }));
+              const pressureMap = nextInputs.loadedGameState!.frontPressureByEdge;
+              let pressureLookup: Map<string, CorridorFrontPressureRecord> | null = null;
+              if (pressureMap) {
+                pressureLookup = new Map<string, CorridorFrontPressureRecord>();
+                for (const [edgeId, pr] of Object.entries(pressureMap)) {
+                  pressureLookup.set(edgeId, { value: pr.value, max_abs: pr.max_abs });
+                }
+              }
+              return buildCorridorHeartbeatData(edges, pressureLookup, nextInputs.centroidLookup);
+            })()
           : undefined,
         selectedFormationId: nextInputs.selectedFormationId,
         selectedCorpsId: nextInputs.selectedCorpsId,
