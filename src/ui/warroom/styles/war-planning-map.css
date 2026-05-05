@@ -54,7 +54,7 @@
 
 .war-planning-map-frame {
     position: relative;
-    z-index: 2;
+    z-index: 2; /* canonical: Z.MAP_HUD_LOW = 2 (src/ui/shared/zIndex.ts) */
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -422,7 +422,7 @@
     top: 48px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 20;
+    z-index: 20; /* canonical: Z.HOVER_LABEL = 20 (src/ui/shared/zIndex.ts) */
     display: flex;
     flex-direction: column;
     min-width: 240px;
@@ -953,7 +953,7 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    z-index: 5;
+    z-index: 5; /* canonical: Z.MAP_HUD_BUTTON = 5 (src/ui/shared/zIndex.ts) */
     width: 30px;
     height: 30px;
     border: 1px solid rgba(68, 56, 43, 0.7);
@@ -973,7 +973,7 @@
     position: absolute;
     top: 10px;
     right: 50px;
-    z-index: 5;
+    z-index: 5; /* canonical: Z.MAP_HUD_BUTTON = 5 (src/ui/shared/zIndex.ts) */
     height: 30px;
     border: 1px solid rgba(68, 56, 43, 0.7);
     border-radius: 2px;

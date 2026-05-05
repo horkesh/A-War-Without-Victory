@@ -21,10 +21,15 @@
  * This lane (LANE-V094-CSS-ZINDEX-CLEANUP) annotates every literal whose
  * numeric value matches a canonical `Z.X` tier with an inline comment of
  * shape `canonical: Z.<TIER> = <N>` on (or immediately before) the line
- * containing the numeric literal. Non-shell-tier values
- * (0, 1, 2, 5, 20, 999, 1001, 1500, 2000) have no canonical token in `Z`
- * and are left bare — task instructions explicitly forbid inventing a new
- * canonical tier in this lane.
+ * containing the numeric literal.
+ *
+ * Successor lane LANE-V094-Z-TIER-EXPANSION extended `Z` with eight new
+ * tiers (BACKDROP_GRAIN=1, MAP_HUD_LOW=2, MAP_HUD_BUTTON=5, HOVER_LABEL=20,
+ * WARROOM_TICKER=999, MODAL_CLOSE=1001, MODAL_RAISED_3=1500,
+ * WARROOM_OVERLAY=2000) so the previously-bare literals at those values
+ * are now annotated against canonical tokens. Only `z-index: 0` remains
+ * documented as a non-shell-tier intra-component value (implicit-default
+ * baseline; no canonical name fits).
  *
  * Test contract:
  *
@@ -100,12 +105,17 @@ const RE_TS_Z_INDEX = /zIndex\s*:\s*['"]?(-?\d+)['"]?/g;
  * numeric MUST be annotated; new literals outside the shell tier MAY be
  * left bare (the test only flags shell-tier regressions).
  *
+ * After LANE-V094-Z-TIER-EXPANSION the values 1, 2, 5, 20, 999, 1001,
+ * 1500, 2000 became canonical shell tiers (BACKDROP_GRAIN, MAP_HUD_LOW,
+ * MAP_HUD_BUTTON, HOVER_LABEL, WARROOM_TICKER, MODAL_CLOSE,
+ * MODAL_RAISED_3, WARROOM_OVERLAY) and were removed from this allowlist.
+ * Only `z-index: 0` remains — it represents the implicit document-flow
+ * baseline and has no semantic shell-tier meaning.
+ *
  * Current intra-component values found in the touched files:
- *   0, 1, 2, 5, 20, 999, 1001, 1500, 2000
+ *   0
  */
-const KNOWN_NON_SHELL_TIER_VALUES = new Set<number>([
-  0, 1, 2, 5, 20, 999, 1001, 1500, 2000,
-]);
+const KNOWN_NON_SHELL_TIER_VALUES = new Set<number>([0]);
 
 /**
  * Extract a `canonical: Z.<TIER> = <N>` reference from a window of source

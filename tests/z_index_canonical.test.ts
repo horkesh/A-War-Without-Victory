@@ -95,8 +95,13 @@ const MIGRATED_FILES = [
 describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
   it('T1 — Z is exported, frozen, and contains every expected tier', () => {
     const expectedKeys: ReadonlyArray<keyof typeof Z> = [
+      // LANE-V094-Z-TIER-EXPANSION additions (low end)
+      'BACKDROP_GRAIN',
+      'MAP_HUD_LOW',
+      'MAP_HUD_BUTTON',
       'MAP_OVERLAY',
       'ORDER_QUEUE',
+      'HOVER_LABEL',
       'CORPS_CARD_LABEL',
       'GLASS_PANEL_DEFAULT',
       'GLASS_PANEL_EVENT_LOG',
@@ -113,9 +118,14 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
       'SHELL_FLOATING',
       'PANEL',
       'CODEX',
+      // LANE-V094-Z-TIER-EXPANSION additions (modal band)
+      'WARROOM_TICKER',
       'MODAL',
+      'MODAL_CLOSE',
       'MODAL_RAISED',
       'MODAL_RAISED_2',
+      'MODAL_RAISED_3',
+      'WARROOM_OVERLAY',
       'PAUSE_MENU',
       'MODAL_HARD',
       'HARD_MODAL',
@@ -138,8 +148,13 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
   });
 
   it('T2 — every tier preserves the audit-inventory numeric value byte-for-byte', () => {
+    // LANE-V094-Z-TIER-EXPANSION additions (low end)
+    expect(Z.BACKDROP_GRAIN).toBe(1);
+    expect(Z.MAP_HUD_LOW).toBe(2);
+    expect(Z.MAP_HUD_BUTTON).toBe(5);
     expect(Z.MAP_OVERLAY).toBe(10);
     expect(Z.ORDER_QUEUE).toBe(15);
+    expect(Z.HOVER_LABEL).toBe(20);
     expect(Z.CORPS_CARD_LABEL).toBe(30);
     expect(Z.GLASS_PANEL_DEFAULT).toBe(40);
     expect(Z.GLASS_PANEL_EVENT_LOG).toBe(42);
@@ -156,9 +171,14 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
     expect(Z.SHELL_FLOATING).toBe(200);
     expect(Z.PANEL).toBe(500);
     expect(Z.CODEX).toBe(900);
+    // LANE-V094-Z-TIER-EXPANSION additions (modal band)
+    expect(Z.WARROOM_TICKER).toBe(999);
     expect(Z.MODAL).toBe(1000);
+    expect(Z.MODAL_CLOSE).toBe(1001);
     expect(Z.MODAL_RAISED).toBe(1100);
     expect(Z.MODAL_RAISED_2).toBe(1200);
+    expect(Z.MODAL_RAISED_3).toBe(1500);
+    expect(Z.WARROOM_OVERLAY).toBe(2000);
     expect(Z.PAUSE_MENU).toBe(8000);
     expect(Z.MODAL_HARD).toBe(8500);
     expect(Z.HARD_MODAL).toBe(9000);
@@ -171,8 +191,14 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
   it('T3 — relative ordering preserves audit stacking taxonomy', () => {
     // Strict-monotonic ordering of the canonical taxonomy chain. Ties are
     // explicit (e.g. CRITICAL_MODAL === TOOLTIP); preserved as-is.
+    // LANE-V094-Z-TIER-EXPANSION additions interleave with existing tiers
+    // without disturbing the original chain — only new < relations added.
+    expect(Z.BACKDROP_GRAIN).toBeLessThan(Z.MAP_HUD_LOW);
+    expect(Z.MAP_HUD_LOW).toBeLessThan(Z.MAP_HUD_BUTTON);
+    expect(Z.MAP_HUD_BUTTON).toBeLessThan(Z.MAP_OVERLAY);
     expect(Z.MAP_OVERLAY).toBeLessThan(Z.ORDER_QUEUE);
-    expect(Z.ORDER_QUEUE).toBeLessThan(Z.CORPS_CARD_LABEL);
+    expect(Z.ORDER_QUEUE).toBeLessThan(Z.HOVER_LABEL);
+    expect(Z.HOVER_LABEL).toBeLessThan(Z.CORPS_CARD_LABEL);
     expect(Z.CORPS_CARD_LABEL).toBeLessThan(Z.GLASS_PANEL_DEFAULT);
     expect(Z.GLASS_PANEL_DEFAULT).toBeLessThan(Z.LOADING_SKELETON);
     expect(Z.LOADING_SKELETON).toBeLessThan(Z.PANEL_RAIL_SECONDARY);
@@ -181,10 +207,14 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
     expect(Z.OVERLAY_LIGHT).toBeLessThan(Z.SHELL_FLOATING);
     expect(Z.SHELL_FLOATING).toBeLessThan(Z.PANEL);
     expect(Z.PANEL).toBeLessThan(Z.CODEX);
-    expect(Z.CODEX).toBeLessThan(Z.MODAL);
-    expect(Z.MODAL).toBeLessThan(Z.MODAL_RAISED);
+    expect(Z.CODEX).toBeLessThan(Z.WARROOM_TICKER);
+    expect(Z.WARROOM_TICKER).toBeLessThan(Z.MODAL);
+    expect(Z.MODAL).toBeLessThan(Z.MODAL_CLOSE);
+    expect(Z.MODAL_CLOSE).toBeLessThan(Z.MODAL_RAISED);
     expect(Z.MODAL_RAISED).toBeLessThan(Z.MODAL_RAISED_2);
-    expect(Z.MODAL_RAISED_2).toBeLessThan(Z.PAUSE_MENU);
+    expect(Z.MODAL_RAISED_2).toBeLessThan(Z.MODAL_RAISED_3);
+    expect(Z.MODAL_RAISED_3).toBeLessThan(Z.WARROOM_OVERLAY);
+    expect(Z.WARROOM_OVERLAY).toBeLessThan(Z.PAUSE_MENU);
     expect(Z.PAUSE_MENU).toBeLessThan(Z.MODAL_HARD);
     expect(Z.MODAL_HARD).toBeLessThan(Z.HARD_MODAL);
     expect(Z.HARD_MODAL).toBeLessThan(Z.CRITICAL_MODAL);
@@ -218,8 +248,16 @@ describe('z-index canonical token file — LANE-V094-Z-INDEX-TOKENS', () => {
     // file that still hard-codes one of these numbers via `zIndex: N` is a
     // regression.
     const SHELL_TIER_NUMBERS = new Set<number>([
+      // LANE-V094-Z-INDEX-TOKENS original shell tiers
       40, 42, 50, 55, 60, 90, 100, 120, 200, 500, 900, 1000, 1100, 1200,
       8000, 8500, 9000, 9999, 10000, 99999,
+      // LANE-V094-Z-TIER-EXPANSION additions — these are NOT yet expected
+      // to appear in React-shell components (no React-shell consumer was
+      // migrated as part of this lane); the React-source migration is
+      // future work. They are listed here so that if a React-shell file
+      // later uses one of these values inline it must route through the
+      // canonical Z.<TIER> token rather than a bare numeric literal.
+      1, 2, 5, 20, 999, 1001, 1500, 2000,
     ]);
     for (const path of MIGRATED_FILES) {
       const src = read(path);

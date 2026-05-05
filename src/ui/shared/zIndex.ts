@@ -55,8 +55,12 @@
  *
  * Tier groupings:
  *
+ *   BACKDROP_GRAIN (1)            — Decorative noise / stripe overlay backdrops
+ *   MAP_HUD_LOW (2)               — Map HUD chrome over canvas (legend, zoom)
+ *   MAP_HUD_BUTTON (5)            — Map HUD interactive buttons (close, return)
  *   MAP_OVERLAY (10)              — Intra-component map overlays (Minimap)
  *   ORDER_QUEUE (15)              — Intra-component queue badges
+ *   HOVER_LABEL (20)              — Hover-state corps / unit title labels
  *   CORPS_CARD_LABEL (30)         — Intra-component badge labels
  *   GLASS_PANEL_DEFAULT (40)      — GlassPanel default (left/right tray)
  *   GLASS_PANEL_EVENT_LOG (42)    — Right-side Event Log panel
@@ -73,9 +77,13 @@
  *   SHELL_FLOATING (200)          — Toolbar crest, radial menu
  *   PANEL (500)                   — Strategic dashboard
  *   CODEX (900)                   — Codex panel
+ *   WARROOM_TICKER (999)          — Warroom news ticker (just below MODAL)
  *   MODAL (1000)                  — ArmyHQ / Chronicle / Ops / StackExpansion
+ *   MODAL_CLOSE (1001)            — Modal close button (just above MODAL)
  *   MODAL_RAISED (1100)           — Wrapped overlay (above MODAL siblings)
  *   MODAL_RAISED_2 (1200)         — War Summary modal
+ *   MODAL_RAISED_3 (1500)         — Warroom settlement info side panel
+ *   WARROOM_OVERLAY (2000)        — Warroom legacy loading overlay / tooltip
  *   PAUSE_MENU (8000)             — Pause menu
  *   MODAL_HARD (8500)             — Settings, Credits, FirstTurn, Toast
  *   HARD_MODAL (9000)             — Main menu, Onboarding overlay
@@ -85,11 +93,41 @@
  *   GAME_OVER (99999)             — GameOver / Verdict screens
  */
 export const Z = Object.freeze({
+  /**
+   * Decorative grain / stripe overlay backdrops — sits one above the
+   * implicit document flow (e.g., noise SVG over the frame, stripe
+   * pattern over loading-screen chrome). Used as a low lift to keep a
+   * non-interactive decorative element above its parent's static content
+   * but below any chrome.
+   */
+  BACKDROP_GRAIN: 1,
+
+  /**
+   * Map HUD chrome that sits over the canvas — Warroom legacy map frame,
+   * legend pill, zoom-button cluster. Lifts the chrome above the map
+   * canvas (z=0) without competing with intra-component overlays.
+   */
+  MAP_HUD_LOW: 2,
+
+  /**
+   * Map HUD interactive buttons (close / return) on the Warroom phase-0
+   * preparation map. Sits above MAP_HUD_LOW chrome so the close button
+   * remains clickable above adjacent panels.
+   */
+  MAP_HUD_BUTTON: 5,
+
   /** Intra-component minimap overlay marker (e.g., viewport rectangle). */
   MAP_OVERLAY: 10,
 
   /** Intra-component order-queue badge stacking. */
   ORDER_QUEUE: 15,
+
+  /**
+   * Hover-state corps / unit title label — appears above standard map
+   * overlays and order-queue badges when a unit is hovered, but sits
+   * below CorpsCard badge labels (which are persistently rendered).
+   */
+  HOVER_LABEL: 20,
 
   /** Intra-component CorpsCard badge label. */
   CORPS_CARD_LABEL: 30,
@@ -139,14 +177,44 @@ export const Z = Object.freeze({
   /** Codex knowledge panel. */
   CODEX: 900,
 
+  /**
+   * Warroom news ticker — fixed bar at the bottom edge of the legacy
+   * Warroom shell. Sits just below MODAL so any opened modal covers
+   * the ticker; above CODEX/PANEL chrome so the ticker remains visible
+   * over routine panel content.
+   */
+  WARROOM_TICKER: 999,
+
   /** ArmyHQ / Chronicle / OpsPlanning / StackExpansion — sibling modal tier. */
   MODAL: 1000,
+
+  /**
+   * Modal close button — sits one above MODAL so the close affordance
+   * is reliably clickable above any modal-internal chrome rendered at
+   * the MODAL tier. Used by Warroom legacy modal close buttons.
+   */
+  MODAL_CLOSE: 1001,
 
   /** Wrapped overlay — above MODAL siblings. */
   MODAL_RAISED: 1100,
 
   /** War Summary modal — above MODAL_RAISED. */
   MODAL_RAISED_2: 1200,
+
+  /**
+   * Warroom settlement info side panel — above MODAL_RAISED_2 to ensure
+   * the right-edge slide-out clears the War Summary modal stack while
+   * remaining below the legacy loading/tooltip overlay tier.
+   */
+  MODAL_RAISED_3: 1500,
+
+  /**
+   * Warroom legacy loading overlay / tooltip — sits above the modal
+   * stack (1000–1500) but below PAUSE_MENU (8000). Used by the Warroom
+   * loading-screen full-bleed cover and pointer-events-none tooltip
+   * popovers that must paint above any open modal.
+   */
+  WARROOM_OVERLAY: 2000,
 
   /** Pause menu — above all panels and modals, below MODAL_HARD. */
   PAUSE_MENU: 8000,

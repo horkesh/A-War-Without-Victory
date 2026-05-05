@@ -86,7 +86,7 @@
     font-size: 18px;
     line-height: 24px;
     text-align: center;
-    z-index: 1001;
+    z-index: 1001; /* canonical: Z.MODAL_CLOSE = 1001 (src/ui/shared/zIndex.ts) */
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     transition: all 120ms ease;
 }
@@ -113,7 +113,7 @@
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     font-size: 11px;
     pointer-events: none;
-    z-index: 2000;
+    z-index: 2000; /* canonical: Z.WARROOM_OVERLAY = 2000 (src/ui/shared/zIndex.ts) */
     white-space: nowrap;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
@@ -1310,7 +1310,7 @@
     border-left: 2px solid #252540;
     display: flex;
     flex-direction: column;
-    z-index: 1500;
+    z-index: 1500; /* canonical: Z.MODAL_RAISED_3 = 1500 (src/ui/shared/zIndex.ts) */
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
 }
 

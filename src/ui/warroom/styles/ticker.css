@@ -9,7 +9,7 @@
     height: 36px;
     background: #111122;
     border-top: 1px solid #252540;
-    z-index: 999;
+    z-index: 999; /* canonical: Z.WARROOM_TICKER = 999 (src/ui/shared/zIndex.ts) */
     overflow: hidden;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
 }
@@ -68,7 +68,7 @@
     font-size: 16px;
     line-height: 22px;
     text-align: center;
-    z-index: 1001;
+    z-index: 1001; /* canonical: Z.MODAL_CLOSE = 1001 (src/ui/shared/zIndex.ts) */
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     transition: all 120ms ease;
 }
