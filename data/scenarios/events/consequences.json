@@ -3295,5 +3295,229 @@
       "doctrine_drift_active_RBiH": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10 (counterpart to csq_doctrine_reform_initiated). Predicate gates on the prior doctrine_reform flag AND late-war exhaustion thresholds — chains off the Wave-8 lineage event with an inverted-effect drift. Mirrors documented late-war institutional erosion in forces where cadre rotation outpaces reform consolidation (Hoare 2004; Burg & Shoup 2000). Faction-symmetric mechanism — same predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_winter_supply_attrition_HRHB",
+    "title": "The Lasva Valley Cold",
+    "narrative": "The Lasva Valley brigades enter the second war winter with depots that registered adequate on the autumn manifest and are not adequate by December. The supply road from the Croatia border worked at summer rate; at winter rate the same trucks deliver two-thirds of the same load. Diesel rations tighten. The forward depots run on improvisation. Cohesion thins not in headline incidents but in the smaller decisions — patrols shortened, training cycles deferred, ammunition expenditures rationed. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "HRHB", "threshold": 40 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 50 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 55 },
+          { "type": "flag_not_set", "flag": "winter_supply_attrition_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Winter logistics gap intersects with high exhaustion and sub-baseline morale (HRHB variant); cohesion drains across the active force."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -3 },
+      { "kind": "supply_delta", "faction": "HRHB", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "winter_supply_attrition_HRHB", "text": "Winter supply attrition under supply<40 and war_exhaustion>50 and morale_avg<55 (HRHB variant). Cohesion -3 to reflect distributed logistics improvisation under cold-weather load; supply -8 to reflect the additional draw on the depot. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "winter_supply_attrition_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-8/9 mirror — HRHB variant of csq_winter_supply_attrition). Predicate structurally identical to the Wave-8 progenitor and Wave-9-redo RBiH variant; only the faction parameter differs. Mirrors documented 1993-94 / 1994-95 HVO Lasva Valley and Posušje-Tomislavgrad winter supply strain under Croatia-side reorganization (BB II Ch.41-42; Hoare 2004 on HVO logistics). Faction-symmetric mechanism — same predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_political_split_temporary_RS",
+    "title": "The Pale–Banja Luka Rift",
+    "narrative": "Late in the campaign, the political leadership in Pale registers a fracture along old lines. The Banja Luka civilian caucus and the Pale war-party caucus both publish positions. The negotiating team is given two sets of instructions, neither of which can be reconciled. The military command wires that the political-fracture noise has begun to interfere with operational priorities. The negotiation column registers the discount. The cohesion column registers the spillover. Internal mediators close the rift in days, but the cost is on the books.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 55 },
+          { "type": "dimension_below", "faction": "RS", "dimension": "internal_cohesion", "threshold": 45 },
+          { "type": "flag_at_least", "flag": "cumulative_casualties_x100_RS", "min": 35 },
+          { "type": "flag_not_set", "flag": "political_split_temporary_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Pale-Banja Luka caucus rift produces short-term cohesion drag and a negotiation-leverage discount."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": -3 },
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -3 },
+      { "kind": "cost_ledger_annotation", "tag": "political_split_temporary_RS", "text": "Political split (temporary, RS variant) under war_exhaustion>55 AND internal_cohesion<45 AND cumulative_casualties>35. Cohesion -3 and international_credibility -3 to reflect short-term Pale-Banja Luka caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": -2 }
+    ],
+    "sets_flags": {
+      "political_split_temporary_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-8/10 mirror — RS variant of csq_political_split_temporary). Predicate uses war_exhaustion + internal_cohesion + cumulative_casualties — distinct from the HRHB progenitor's alliance_below-anchored compound and the RBiH variant's alliance + exhaustion + cohesion compound, since RS is not party to the RBiH-HRHB alliance and the Pale-Banja Luka fracture historically tracked exhaustion and casualty pressure rather than alliance dynamics. Mirrors documented 1994-1995 RS leadership fracture between Pale war-party (Karadžić, Mladić) and Banja Luka civilian caucus over Vance-Owen and Contact Group plan acceptance (BB II Ch.34, 49; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_doctrine_drift_HRHB",
+    "title": "The Manual on the Lasva Shelf",
+    "narrative": "The corps reorganization that was attempted two years earlier has drifted off the agenda. The new chain-of-command tables sit on the shelf in the corps headquarters; the cadre that knew the new structure has rotated; the cadre that replaced them never adopted it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
+    "category": "military",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "corps_reorganization_active_HRHB", "min": 1 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 70 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "doctrine_drift_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Doctrine drift after corps-reorganization inflection (HRHB variant); the new structure ages on the shelf as the cadre that knew it rotates out."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": -3 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.94, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "doctrine_drift_HRHB", "text": "Doctrine drift (HRHB variant) under prior corps_reorganization AND war_exhaustion>70 AND morale_avg<45. Cohesion -3 and recruitment -6% for 25 turns to reflect the institutional erosion documented in late-war forces where cadre rotation outpaces reform consolidation. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "doctrine_drift_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-10 mirror — HRHB variant of csq_doctrine_drift). Predicate gates on the prior corps_reorganization_active_HRHB flag (Wave-5 lineage) AND late-war exhaustion thresholds — chains off the existing HRHB doctrine inflection event without inventing new substrate. Mirrors documented late-war HVO institutional erosion as the post-Washington Agreement reorganization cadre rotated out under sustained Lasva Valley combat (BB II Ch.42, 49; Burg & Shoup 2000; Hoare 2004 on HVO command turnover). Faction-symmetric mechanism — same predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_post_dayton_train_and_equip_HRHB",
+    "title": "Train and Equip — Federation Side",
+    "narrative": "The Federation framework brings a parallel train-and-equip pipeline to the HVO formations that opted into the joint structure. The crates that show up at the Croatia-border depots are stamped, manifested, and matched to schedules — a different rhythm from the embargo-era catch-as-catch-can. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in. The political class in West Mostar treats the pipeline as evidence of the framework's seriousness.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 140,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "post_dayton_phase", "min": 1 },
+          { "type": "alliance_above", "value": 0.5 },
+          { "type": "flag_not_set", "flag": "post_dayton_train_and_equip_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Post-Dayton train-and-equip pipeline opens (HRHB / Federation side); equipment quality uplifts and recruitment quality stabilizes."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 1.06, "duration_turns": 30 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 1.04, "duration_turns": 30 },
+      { "kind": "cost_ledger_annotation", "tag": "post_dayton_train_and_equip_HRHB", "text": "Post-Dayton train-and-equip pipeline opens under post_dayton_phase and Federation alliance>0.5 (HRHB variant). Equipment quality +6% and recruitment +4% for 30 turns to reflect the documented late-1995/1996 train-and-equip pipeline normalization within the Federation framework, HVO side. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": 4 }
+    ],
+    "sets_flags": {
+      "post_dayton_train_and_equip_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-10 mirror — HRHB variant of csq_post_dayton_train_and_equip_RBiH). Predicate structurally identical to the Wave-10 RBiH variant; only the faction parameter and mutex flag differ. Distinct from csq_post_dayton_arms_normalization which gates on dimension_above(international_standing). Reuses equipment_quality_modifier substrate. Mirrors documented late-1995/1996 Federation-framework train-and-equip pipeline applied to HVO formations within the joint structure (Wiebes 'Intelligence and the War in Bosnia 1992-1995', 2002; Burg & Shoup 2000 on Federation military integration). Faction-symmetric mechanism — predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_iran_arms_channel_attenuation_HRHB",
+    "title": "The Croatia Pipeline Cools",
+    "narrative": "The Croatia-side pipeline that had substituted around the principal-patron gaps for two quarters begins to register pressure. The mediator capitals that have known about the channel and pretended not to begin to make calls. The crates do not stop arriving immediately. The manifests, however, change. The quantities decline; the quality declines faster. The combat units that had been substituting around the principal-pipeline gaps begin substituting around the substitute. The brigades on the line do not see a sudden cliff; they see a gradient.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 90,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "third_party_arms_channel_active_HRHB", "min": 1 },
+          { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 35 },
+          { "type": "flag_not_set", "flag": "iran_arms_channel_attenuation_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Third-party arms channel attenuates (HRHB variant) under sustained mediator pressure; equipment quality reduction registers two quarters in."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 0.96, "duration_turns": 20 },
+      { "kind": "cost_ledger_annotation", "tag": "iran_arms_channel_attenuation_HRHB", "text": "Third-party arms channel attenuation (HRHB variant) under prior third_party_arms_channel_HRHB firing AND patron_pressure>35. Equipment quality -4% for 20 turns to reflect mediator-pressure attenuation of the alternate pipeline. AUDIT-ONLY annotation; no rupture wiring; no patron_arms_review trigger." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "patron_confidence", "delta": -3 }
+    ],
+    "sets_flags": {
+      "iran_arms_channel_attenuation_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-10 mirror — HRHB variant of csq_iran_arms_channel_attenuation). Predicate structurally identical to the Wave-10 RBiH variant; only the faction parameter and prior-flag suffix differ (third_party_arms_channel_active_HRHB rather than _RBiH). Note: the prior-flag chain is honored — the HRHB attenuation is gated on the HRHB-side third_party_arms_channel flag rather than collapsing to the RBiH flag, so faction-internal causality is preserved. Reuses equipment_quality_modifier substrate. Mirrors documented 1995-1996 mediator-capital pressure on the Croatia / HV-cadre arms channels following Dayton's signature, parallel to the Iran-channel pressure on the RBiH side (Wiebes 2002; BB II Ch.41-42, 49). Faction-symmetric mechanism — same predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_arbih_resistance_revival_HRHB",
+    "title": "The Lasva Valley Holds",
+    "narrative": "The HVO formations in the Lasva Valley have been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the surviving Croat-majority municipalities register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "territory_loss_window", "faction": "HRHB", "min_loss_pct": 0.03, "window_turns": 10 },
+          { "type": "morale_average_below", "faction": "HRHB", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "resistance_revival_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Sustained territory loss + sub-baseline morale (HRHB variant) produces an existential-pressure morale and recruitment surge."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 1.08, "duration_turns": 20 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "resistance_revival_HRHB", "text": "Resistance revival (HRHB variant) under territory_loss>=3% over 10-turn window and morale_avg<45. Recruitment +8% for 20 turns; morale +3 to reflect existential-pressure surge. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 3 }
+    ],
+    "sets_flags": {
+      "resistance_revival_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-9-redo mirror — HRHB variant of csq_arbih_resistance_revival). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO Lasva Valley defensive consolidation under sustained ARBiH pressure — Vitez, Busovača, and the Kiseljak pocket holdouts where existential-pressure recruitment surges emerged from sustained territorial regression rather than from political mobilization (BB II Ch.41-42; Burg & Shoup 2000 on HVO Lasva Valley defense doctrine). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface (no enclave_resilience_aggregate, no rupture wiring, no political_controllers writes)."
   }
 ]
