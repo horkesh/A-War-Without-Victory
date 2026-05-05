@@ -63,6 +63,13 @@
 2. Validate Stupčanica SHAPE B against AC-14 prediction table (zepa_2 0.95-1.05 band; srebrenica_2 ±0.005; sarajevo/bihac/gorazde ≤5%/10%/10%). Lane report finalize + status update.
 3. Sequentially dispatch Krivaja Phase 1.5 (touches MORALE_OVERRIDE-staged files; must serialize after MORALE_OVERRIDE settles).
 
+**RESOLUTIONS (2026-05-06):**
+- `dc46406b` MORALE_OVERRIDE Phase 1 retune **VERDICT-REPORT-ONLY (REVERTED)**: 188w A/B (n1690 default-ON `df7a8cd836eacbc8` vs n1691 override-disable `b4be38bed12816fb`) STOP-TRIGGER-FIRED on all 3 reconciled criterion-3 thresholds — RS dissolutions 67 vs ≤35 binding (+32); RS absorption 84.1% vs ≤55% (+29.1pp); per-40w 14.26 vs ≤7.5 (+6.76). Direction correct (retune IS bending RS late-war arc steeper) but magnitude ~2× overshoot. Same shape as predecessor `8919c3ed`. Implementation source + lane tests reverted to HEAD; expert audit + lane report committed as VERDICT-REPORT-ONLY.
+- `31952d44` Krivaja Phase 1.5 mini-panel — CONDITIONS verdict; recommended **SHAPE δε** (combined per-turn morale_drift cap + apr1992.json step-curve start_turn shift 52→39). 12 ACs + 7 STs binding; Ring 1 / no §6. Predicted AC5: 4/5 ACTIVE at t179 (vs Phase 1's 3/5). SHAPE ζ (upstream desertion-rate at morale_drift.ts:258-263) deferred — too-large blast radius + crosses §6 morale-streak boundary.
+- Stupčanica SHAPE B AC-14 PARTIAL FAIL flagged for §6 follow-up: prediction table calibrated under implicit retune-layered-on assumption; with retune REVERTED, SHAPE B alone misses zepa_2 0.95-1.05 band (n1691 actual 0.6694). Capital-controller integrity (AC-3/ST-2/ST-6) PASS; do NOT revert SHAPE B itself.
+
+**Active background:** Krivaja Phase 1.5 SHAPE δε implementation lane dispatched (`af59f44caff8f6ef1`).
+
 **4 lanes shipped on top of `dd2528c6` (`b03333af..bc44ddec`):**
 - `b03333af` `LANE-NIGHTSHIFT-STUPCANICA-DEFENDER-STACK-S6-SIGN-OFF-CHAIN`: 3 sign-offs (`/historian` APPROVED-WITH-CAVEAT; `/game-designer` APPROVED + AC-14 prediction-table requirement; `/war-or-game` APPROVED-WITH-CAVEAT + AC-15 time-series regression-table requirement + ST-6 extended to Goražde 10%). 15 ACs + 6 STs total. **Phase 1 SHAPE B `MAX(urban,forest,enclave)` collapse UNBLOCKED on §6 gate.**
 - `4069f8c3` `LANE-V094-INSTALLER-BLOAT-TRIM`: STRATEGY A (negative-pattern filters in package.json `extraResources`); trimmed ~355MB (1338→983MB). Stopped short of full ~650MB target — `data/derived/_debug/**` (~313MB) + `municipalities_mun1990_viewer_v1.geojson` duplicate (~322MB) blocked by predecessor `desktop_packaging_contract.test.ts` pin requiring `data/derived` filter `['**/*']` exact. Phase 2 successor flagged. 17/17 GREEN.
