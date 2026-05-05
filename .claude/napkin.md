@@ -16,6 +16,37 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
+## Current State (2026-05-05, v0.9.4 P1 BACKLOG CLOSED — Z-index + Modal wrapper + Modal migration on top of `a6f277fa`)
+**4 commits shipped: `51cb4b66`+`f282f9c1` (Z-INDEX two-commit) + `5fec69a6` (MODAL-WRAPPER foundation) + `8d1bfee4` (MODAL-MIGRATION 4 modals).**
+
+**`51cb4b66`+`f282f9c1` Z-INDEX-TOKENS canonicalization:** Two-commit pattern. `src/ui/shared/zIndex.ts` canonical 28-tier frozen `Z` table. 41 React-shell source files migrated; 49 z-index literal occurrences eliminated. `tests/z_index_canonical.test.ts` 7 tests covering frozen Z, byte-stable values, monotonic ordering, no residual literals. Migration policy: Tailwind `z-[N]` arbitrary classes replaced with inline `style={{ zIndex: Z.X }}` (Tailwind JIT detection guarantee for canonical tokens). 359/359 wider UI regression GREEN; Phase-3 visual layer T1-T8 32/32 GREEN; tsc clean. Stacking order preserved byte-for-byte. **Deferred (out-of-scope):** ~28 CSS/debug-viewer literals in `warroom/styles/*.css`, `warroom/index.html`, `map_viewer_*` debug viewer, `globals.css`, `painter.html` — separate cleanup lane.
+
+**`5fec69a6` MODAL-WRAPPER foundation:** Reusable `<Modal>` at `src/ui/shared/Modal.tsx` with full feature set: backdrop + panel composition; ESC dismiss (configurable); click-outside dismiss (configurable; default ON); focus trap; aria-modal/role-dialog/aria-labelledby; z-index from canonical `Z.MODAL_BACKDROP`/`Z.MODAL_PANEL`; standard entry/exit transition. 10/10 lane tests GREEN. Sub-agent died after authoring wrapper but before migrating modals; deferred 5-8 modals to follow-up. Parent agent renamed test file (.tsx → .ts to match codebase convention) + verified compilation.
+
+**`8d1bfee4` MODAL-MIGRATION (4 modals):** Migrated **RecruitmentModal**, **WarSummaryModal**, **TurnAftermathModal**, **AdvanceTurnModal** to use `<Modal>` wrapper. Preserved per-modal: visible behavior (backdrop opacity, panel class, aria contracts); tutorial `data-tutorial-step` anchors (zero matches in any migrated file); z-index numerical values via canonical Z tiers (OVERLAY_LIGHT=120, MODAL_RAISED_2=1200, TURN_AFTERMATH=10000, CRITICAL_MODAL=9999); click-outside dismiss preserved per-modal (TurnAftermath + AdvanceTurn = OFF, RecruitmentModal + WarSummary = ON). Audit-named modals (SettingsModal, MagazineModal, CommandBriefingModal, IvpBreakdownModal, DiplomacyModal) **don't exist in the codebase** — only `SettingsScreen.tsx` and `DiplomacyOverview.tsx` exist as related shells; agent substituted 4 real modals at similar/lower risk. **218/218 focused regression GREEN** including tests/modal_migration.test.ts 21/21 + tutorial 15/15 + warroom_shell_layer 32/32 + ui_army_hq 4/4. tsc clean; `desktop:map:build` clean.
+
+**v0.9.4 PHASE 1+2 P1 BACKLOG FULLY CLOSED:** All 5 P1 items shipped:
+1. ✅ FACTION-PALETTE-CANONICALIZATION (`14d4d0f8`+`ce0474e7`) — 6 forks migrated + SettingsModal RS/HRHB color-inversion fix
+2. ✅ LOADING-AND-ERROR (`a3433670`) — LoadingSkeleton + LoadErrorToast
+3. ✅ EMPTY-STATE-PASS (`f96f7866`) — `<EmptyState>` across 9 surfaces
+4. ✅ Z-INDEX-TOKENS (`51cb4b66`+`f282f9c1`) — canonical 28-tier `Z` + 41 file sweep
+5. ✅ MODAL-WRAPPER + MODAL-MIGRATION (`5fec69a6`+`8d1bfee4`) — `<Modal>` wrapper + 4 modals migrated
+
+**Sensitive-history compliance (all 4 commits):** Ring 1, faction-symmetric mechanism, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. UI-only — does NOT enter sim path.
+
+**Successor handoffs (after natural pause):**
+1. **MORALE_OVERRIDE retune** — needs user re-authorization (§6-adjacent). Mini-panel: faction-asymmetric `MORALE_OVERRIDE_TURNS` (e.g., RS=12, HRHB=8, RBiH=8) per BB1/BB2 record. Stop-trigger threshold reconciliation also needed.
+2. **MODAL-MIGRATION-2:** further modal migrations (5-8 more candidates if they exist; agent's note that audit-named modals don't exist suggests inventory step is binding for any further migration lane).
+3. **CSS/debug-viewer z-index cleanup:** ~28 literals deferred from Z-INDEX-TOKENS.
+4. **Wave 12 events:** cheap additive content; Wave-12 lineage 59→65-ish; absolute catalog 83→89.
+5. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized` (cross-call shared state — needs new gate strategy).
+6. **Codex observer flag wiring** — `winter_held_through_turn`, `corridor_blocked_through_turn`, etc. currently DORMANT.
+7. **v0.9.5 platform packaging audit.**
+
+Do instead: (1) **Audit-named target lists may include items that don't exist in the codebase.** MODAL-MIGRATION's 5 audit-named modals: 4 didn't exist (SettingsModal, MagazineModal, CommandBriefingModal, IvpBreakdownModal); only DiplomacyModal partial (DiplomacyOverview shell). Agent substituted 4 real modals at similar risk. **Rule:** for "migrate N items per audit list" lanes, agent must do `grep + inventory` step first to verify each named target exists; substitute with similar-risk targets when names don't match codebase. (2) **Test file extension matters for vitest discovery.** Codebase convention is `.test.ts` for component tests (not `.test.tsx`). Sub-agent died on this discovery; parent agent renamed file. **Rule:** lane specs that create test files should explicitly state the file extension convention (`.test.ts` not `.test.tsx`) to prevent sub-agent confusion. (3) **Foundation-then-migration is canonical for shared-component lanes.** MODAL-WRAPPER shipped foundation alone first (10 tests, no migrations); MODAL-MIGRATION shipped migrations against the foundation. Two-step pattern is safer than single-step "wrapper + migrations" because foundation can be tested in isolation before any existing-modal regression risk is introduced. Mirror palette canonicalization + Z-INDEX two-commit patterns. (4) **Tailwind `z-[N]` arbitrary classes can fail JIT detection.** Migration to inline `style={{ zIndex: Z.X }}` is the safer form — same browser output, but Tailwind doesn't need to detect template-substituted class strings.
+
+Reports: `docs/40_reports/implemented/20260505_V094_Z_INDEX_TOKENS.md`, `docs/40_reports/implemented/20260505_V094_MODAL_WRAPPER.md`, `docs/40_reports/implemented/20260505_V094_MODAL_MIGRATION.md`.
+
 ## Current State (2026-05-05, 3-commit batch `a3433670..8919c3ed` — UI quick wins + MORALE_OVERRIDE verdict-only)
 **Three commits shipped autonomously per "finish game fully" directive.**
 

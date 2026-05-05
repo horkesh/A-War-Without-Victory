@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip 3-commit autonomous batch `a3433670..8919c3ed` — v0.9.4 LOADING-AND-ERROR shipped (`a3433670`: LoadingSkeleton + LoadErrorToast, 14/14 GREEN); v0.9.4 EMPTY-STATE-PASS shipped (`f96f7866`: reusable `<EmptyState>` across 9 surfaces, 9/9 + 43/43 regression GREEN); **MORALE_OVERRIDE Phase 1 VERDICT-REPORT-ONLY** (`8919c3ed`: stop-trigger #2 fired — RS absorbs 90% of incremental dissolutions; mechanism validated via A/B hash delta + RS Δ/turn at t104→t188 doubles -0.001049→-0.002015, but criterion 3 dissolution balance failed; user §6 authorization received but panel stop-triggers binding). Wave 7 Lane B streaming finalizer FIVE-TIMES-validated at 188w scale.)
+**Last Updated:** 2026-05-05 (post-trip 4-commit autonomous batch `51cb4b66..8d1bfee4` — **v0.9.4 PHASE 1+2 P1 BACKLOG FULLY CLOSED**: Z-INDEX-TOKENS canonicalization (41 files migrated; canonical 28-tier `Z` table; 359/359 wider UI regression GREEN); MODAL-WRAPPER foundation (`5fec69a6`: reusable `<Modal>` with full feature set; 10/10 lane tests); MODAL-MIGRATION (`8d1bfee4`: 4 modals migrated — RecruitmentModal, WarSummaryModal, TurnAftermathModal, AdvanceTurnModal; 218/218 regression GREEN; tutorial anchors preserved). All 5 audit-identified P1 items shipped with foundations + first migration batch.)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
