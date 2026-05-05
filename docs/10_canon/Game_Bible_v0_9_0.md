@@ -1,4 +1,6 @@
-# A War Without Victory -- Game Bible v0.6.0
+# A War Without Victory -- Game Bible v0.9.0
+
+**Last Updated:** 2026-05-05
 
 One game turn equals one week.
 
@@ -230,7 +232,7 @@ These boundaries are non-negotiable and define what this game is and what it is 
 
 ## 20. v0.6 Canon consolidation
 
-This document (v0.6.0) is the Game Bible for the two-phase (Peace/War) model. It supersedes Game_Bible_v0_5_0.md; deprecated canon versions are archived in docs/_old/10_canon/.
+This document (v0.6.0) was the Game Bible for the two-phase (Peace/War) model. As of v0.9.0 the simulation is single-phase (War only); the peace phase has been removed (v0.7.3). The v0.6.0 design philosophy and abstraction layers in §§1-19 remain authoritative; the consolidation note here is preserved for lineage. Game_Bible_v0_9_0.md supersedes Game_Bible_v0_6_0.md; deprecated canon versions are archived in docs/_old/10_canon/.
 
 ## 21. The Metagame — Political Leadership and the Event System
 
@@ -272,3 +274,174 @@ These are ahistorical branching points. The bot always picks the historical opti
 ### 21.4 Event Flags
 
 Player decisions set named flags on game state (e.g., `rs_strategic_goals: 'selective'`). Downstream events read these flags to modify their conditions, options, and consequences. Flags create explicit causal chains across the entire game.
+
+## 22. Sensitive History Design Gate (canon, v0.9.0)
+
+AWWV depicts the 1992-1995 Bosnian War — a war that included genocide, systematic ethnic cleansing, siege-starvation, and mass atrocity convicted by the International Criminal Tribunal for the former Yugoslavia. A negative-sum wargame that takes its subject seriously must settle the moral question before implementation continues, not after.
+
+**Core position:** AWWV depicts atrocity without letting the player optimize against it. The game refuses to turn genocide into a manipulable cost-benefit system. **Atrocity is a consequence, not a lever.**
+
+The full canonical statement is `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. The Bible-level summary:
+
+### 22.1 Three Rings (binding boundary)
+
+Every depiction of sensitive history lives in exactly one of three rings:
+
+- **Ring 1 — Modeled mechanically:** enclaves, displacement, paramilitary sweeps, war crimes counter, and rupture consequences (currently only `srebrenica_genocide_1995`).
+- **Ring 2 — Represented narratively:** historical events, ICTY-cited essays, Chronicle entries, Cost Ledger prose. The game depicts every major atrocity from BB and ICTY in this ring.
+- **Ring 3 — Refused:** no "commit genocide" decision tree, no concentration camp system, no negotiable condemnation, no body-count optimization surface, no "atrocity efficiency" metric, no calendar-driven atrocity recording, and seven other refused surfaces. This list is exhaustive and binding.
+
+A feature that fits in none of the three rings does not exist yet. If you cannot place it in a ring, do not build it.
+
+### 22.2 Rupture Expansion Rule
+
+A historical event becomes eligible for rupture status only if it meets all four criteria:
+
+1. **Mass scale:** >1,000 civilian deaths in a bounded event, or systematic over a bounded timeframe.
+2. **International legal finding:** ICTY conviction (genocide, crimes against humanity, grave breaches) or ICJ/UN finding of equivalent weight.
+3. **Specific trigger condition:** discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), NOT a cumulative threshold and NOT a calendar-window heuristic.
+4. **Non-reversible:** once recorded, the event is a fact of the world for the run.
+
+Adding a rupture is a capital-R Decision requiring `/historian` + `/war-or-game` + `/game-designer` + user approval. The default is: do not add one.
+
+### 22.3 Counterfactual silence is canon
+
+When a player's modeled war does not satisfy the rupture trigger condition, the rupture is correctly silent. The historical record (Ring 2: essays + ICTY citations) remains canonical and accessible regardless of campaign path. The §3 ghost-entry register (e.g., Mission E `enclave_defended` ghost at `data/codex/ghost_entries/enclave_defended.md`) records the divergence in historical voice without celebration, minimization, or "less deadly than history" framing. (Q-CANON-RUPT-4 resolution, 2026-05-04.)
+
+### 22.4 Cost Ledger wording
+
+The Cost Ledger is the closing prosecutorial voice. Required: historical voice, ICTY case citations, specific atrocity names, integer civilian counts. Forbidden: euphemisms, trivializing comparisons, minimization, second-person framing, achievement-style language, humor or ironic distance. Tone draws from ICTY summary judgments and UN investigative reports — not sports commentary, not Paradox endgame summaries. Full constraints in `SENSITIVE_HISTORY_DESIGN_GATE.md` §4.
+
+## 23. Victory Conditions and Pyrrhic Scoring (canon, v0.9.0)
+
+**Thesis:** AWWV is a negative-sum political wargame. There is no winning. There are only graded failures. The player is judged on how much worse they made it versus what was possible — not on who prevailed.
+
+The full canonical statement is `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. The Bible-level summary:
+
+### 23.1 No victory; only verdicts
+
+- There is no victory screen. There is a **verdict screen**.
+- There is no single winner. The verdict is per-faction.
+- There is no scoreboard. Pyrrhic score is *supporting context*, not sovereign truth.
+- Outcome class + grade are the primary verdict drivers. Condemnation flags can cap or taint any result.
+
+### 23.2 Termination vs Judgment
+
+Two distinct systems:
+
+- **Termination** (`war_termination.ts`): *when* the war ends. Priority order: scenario victory conditions → faction collapse → turn limit stalemate.
+- **Judgment** (`scoring.ts`): *how* the war is assessed. Produces `GameVerdict` with per-faction `FactionVerdict` packets.
+
+Judgment runs regardless of which termination trigger fired. A victory-condition match does not give that faction automatic A+ — it still gets judged against its grade anchors.
+
+### 23.3 Outcome Taxonomy
+
+Seven `OutcomeClass` values: `strategic_success`, `survival`, `negotiated_escape`, `pyrrhic_success`, `hollow_victory`, `failure`, `collapse`. Classification order: condemnation flags FIRST (Srebrenica genocide forces `failure` regardless of territory), then territorial grades.
+
+### 23.4 Faction grade anchors (canon)
+
+Faction grades are gated by faction-specific anchors that encode historical reality. RBiH grades on territory + enclaves + Sarajevo + war crimes; RS grades on territory + cohesion + war crimes; HRHB grades on territory + cohesion. Grade anchors are canon — changing them changes what the game means by "roughly historical." Full table in `VICTORY_AND_PYRRHIC_SCORING.md` §3.2.
+
+### 23.5 Non-Goals (binding)
+
+The scoring system **does not and will not**: reward body count; treat atrocity as tradeable capital; invert under any input; expose a difficulty multiplier; produce a "winner" label; rank factions against each other; drift toward arcade endings.
+
+## 24. v0.8 Command Chain (closed)
+
+v0.8 closed the gap between *the player issues an order* and *the army does what the player intended*. Five milestones:
+
+### 24.1 Corps Commander Intelligence (v0.8.0)
+
+Named officers exercise interpretation authority over corps directives. The corps commander does not execute the player's order mechanically — they translate intent into a corps plan filtered by competence, aggressiveness, defensiveness, and the corps situation. A timid corps commander may downgrade an aggressive directive; a competent one may identify a better axis than the player chose.
+
+This converts the army from a vending-machine ("insert order, receive movement") into a chain of subordinates with their own judgment. Player intent is real but never executes cleanly through bad commanders or bad situations — which is the historically correct model of the Bosnian War's institutionally fragile chains of command.
+
+### 24.2 Commander Maturity (v0.8.1)
+
+Commanders carry persistent belief state, motive stack, and a per-turn decision trace. The commander is not a function-of-state pure formula; they accumulate experience and conviction. Decisions become inspectable (the player can see *why* the commander did what they did) and replayable (deterministic envelope; same state + same belief state + same motive stack produces identical decision).
+
+### 24.3 Political Leader Bot (v0.8.2)
+
+Bot factions have a political layer — foundational decisions (RS Six Strategic Goals, RBiH state identity, HRHB political goal), patron management, faction identity. The army-level commander does not fabricate strategic priorities; they receive a strategic-priorities packet from the political layer and translate that into corps directives.
+
+This separates *politics* from *military command*. The player's army-level commander is a subordinate to the player-as-political-leader, not a co-equal goal-setter.
+
+### 24.4 Order Interpretation (v0.8.3)
+
+The semantic gap between *what the player ordered* and *what the named officer interprets* becomes explicit. Subordinates may:
+
+- **Delay:** wait for better intel, supply, or weather.
+- **Partial-execute:** commit a smaller force than ordered.
+- **Refuse:** decline an order that contradicts their judgment.
+- **Escalate-to-context:** ask for clarification (surfaced as Decision Room cards).
+
+The player sees the interpretation in the Pre-Advance Review surface before the turn commits. The player can override (force the order through) at the cost of cohesion, morale, or commander confidence.
+
+### 24.5 Autonomy Depth + Claude API (v0.8.4)
+
+Named-officer autonomy operates within a deterministic envelope; the optional Claude-API integration may add narrative texture (corps dialogue, battle narratives, war dispatches) but cannot change the autonomous decision once recorded. Replay determinism is preserved via `decision_log.ts`.
+
+The Claude integration has four modes (cadet → recruit → officer → commander) at increasing API cost. Cadet is formula-only and the default; the deterministic envelope is canonical.
+
+### 24.6 Phase 0 panel pattern (durable lesson)
+
+When modifying a system that crosses combat / commander / political / events surfaces, dispatch a Phase 0 panel of the affected experts BEFORE writing code. Lane reports cite this pattern explicitly. The pattern is a durable rule recorded in `PROJECT_LEDGER_KNOWLEDGE.md`.
+
+## 25. v0.9 Product Spine
+
+v0.9 closes the loop between the simulation and the player's experience of the simulation. The pieces existed at v0.8.x; v0.9 makes them feel like one coherent presidential campaign loop.
+
+### 25.1 Decision Room and Command Loop
+
+Army HQ Decision Room collects the cards the player must address before advancing the turn — Strategic Priorities, opportunity dossiers, source handoffs to operational SITREP, command briefing, Turn Aftermath records, active cost summary, Chronicle entries. Each card carries a **canonical action target** rather than spawning a parallel action queue.
+
+The Decision Room is an inspection affordance, not a second inbox. Source truth remains with the review queue, opportunity dossiers, operational SITREP, command briefing, Turn Aftermath records, active cost surface, and Chronicle. (See `PROJECT_LEDGER_KNOWLEDGE.md` "singular ownership" lesson.)
+
+### 25.2 Pre-Advance Review and Turn Aftermath
+
+The player reviews staged orders against named-officer interpretation BEFORE advancing the turn. Subordinate dissent (delay, partial-execute, refuse) surfaces here. The player may override at cost.
+
+After the turn, the Turn Aftermath surface captures what happened, whose orders survived, which interpretations were recorded, what the named officers actually did, and what the consequences will be over the coming weeks.
+
+### 25.3 Chronicle
+
+A persistent narrative record of the war emergent from gameplay — major battles, atrocities, displacement waves, officer succession, treaty offers — surfaced in Army HQ and folded into the Verdict / Wrapped at endgame. The Chronicle is read by the player, not authored by the player. It records what the simulation produced; it does not simulate what was recorded.
+
+### 25.4 Cost Ledger (v0.9.0)
+
+ICTY-style prosecutorial endgame narrative, drawing on the war-crimes counter, displacement records, casualty ledger, and rupture consequences. Wording constrained by `SENSITIVE_HISTORY_DESIGN_GATE.md` §4. The Cost Ledger is the closing voice the war speaks back to the player about what they made of it.
+
+### 25.5 Endgame Comparison and Dynamic Codex (v0.9.1)
+
+Your war vs the historical war, side-by-side. Ghost essay sections in the Codex note where your campaign diverged from history. The §3 register (`SENSITIVE_HISTORY_DESIGN_GATE.md` §5) governs counterfactual narrative voice — historical recording, not celebration or minimization.
+
+### 25.6 Tutorial / Onboarding (v0.9.2)
+
+First-session guided steps; restart IPC for tutorial-aware new-game. The tutorial teaches the campaign loop, not the simulation's mechanical depth — depth is encountered through play.
+
+### 25.7 Map That Scars / Refugee Column / Corridor Heartbeat (v0.9.4)
+
+Visual layers that make the war's accumulated cost visible on the tactical map:
+
+- **Map That Scars:** OSID-keyed damage seed (battles, casualties, flips, displacement spikes) drives a per-OSID damage overlay. The map records what the war did to the land.
+- **Refugee Column:** displacement as visible map entity. Refugee columns move along the supply graph from origin OSIDs toward destination receivers, with carrying capacity caps, route blocking, and abroad-flight fractions visible.
+- **Corridor Heartbeat:** supply corridor pulse visualization. Open corridors pulse green; brittle pulse amber; cut go dark. The corridor's state visually breathes with the war's logistics.
+
+### 25.8 Force-quality and observability (v0.9.x)
+
+The simulation's force-quality arc (officer_quality decay under casualty, growth under combat experience and frontline presence) bends toward historical reality through deterministic mechanism without faction-asymmetric multiplier railroad. The substrate fixes (reconstitution policy step curve, equipment_quality_modifier, officer-quality observability) are documented in `War_Specification_v0_9_0.md` §12. The observability surfaces (per-turn `brigade_temporal_log.jsonl`, force-quality trajectory diagnostic) are harness emissions, not engine state.
+
+## 26. v0.9 Canon consolidation
+
+This document (v0.9.0) supersedes Game_Bible_v0_6_0.md. The substantive design philosophy in §§1-21 is the v0.6.0 baseline and remains authoritative. §§22-25 fold in the v0.7-v0.9 design surface that landed since the v0.6.0 consolidation:
+
+- §22 Sensitive History Design Gate (canon, 2026-04-16; Q-CANON-RUPT-4 amendment 2026-05-04)
+- §23 Victory Conditions and Pyrrhic Scoring (canon, 2026-04-16)
+- §24 v0.8 Command Chain (closed; v0.8.0 → v0.8.4 → v0.8.x-final)
+- §25 v0.9 Product Spine (in progress; consequence-substrate live, broader matrix open)
+
+Deprecated canon versions are archived in `docs/_old/10_canon/`.
+
+---
+
+*Game Bible v0.9.0 — design philosophy preserved from v0.6.0; v0.7-v0.9 sensitive-history gate, victory scoring, Command Chain, and product spine integrated as canon §§22-25.*
