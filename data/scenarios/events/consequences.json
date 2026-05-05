@@ -4697,5 +4697,229 @@
       "industrial_wave_active_HRHB": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — HRHB variant of csq_industrial_conscription_wave; closes industrial-conscription triad alongside Wave-15 RS variant). Predicate structurally identical to the Wave-3 RBiH authoring; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO industrial mobilization expansion under territorial pressure during the Lasva-Vitez and Mostar campaigns (BB II Ch.41-42). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_negotiating_capital_recovery_RBiH",
+    "title": "The Geneva Column Steadies (RBiH)",
+    "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. The patron capital's signals stabilize on the constructive register. The Federation foreign-ministry analysts, who had been forecasting a slow decay, instead register a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "patron_pressure_above", "faction": "RBiH", "threshold": 12 },
+          { "type": "dimension_above", "faction": "RBiH", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RBiH", "min": 25 },
+          { "type": "flag_not_set", "flag": "negotiating_capital_recovery_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Negotiating-capital recovery (RBiH variant): leverage column drifts upward."
+    },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 },
+      { "kind": "cost_ledger_annotation", "tag": "negotiating_capital_recovery_RBiH", "text": "RBiH negotiating-capital recovery under patron_pressure>=12, patron_confidence>55, no major offensive 25 turns. Negotiating leverage +5; AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 }
+    ],
+    "sets_flags": {
+      "negotiating_capital_recovery_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event — Wave-15 successor handoff #1: 'csq_negotiation_capital_recovery'). Recovery counterpart to negotiation-capital drain events; reads the same engine surface (negotiating_leverage strategic dimension via negotiation_capital effect kind) but in the positive direction, gated on sustained patron-confidence + paused offensive operations. Mirrors documented 1995 ARBiH leverage recovery during sustained Washington-Agreement period (BB II Ch.49-55; Holbrooke 'To End a War' 1998; Burg & Shoup 2000). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_negotiating_capital_recovery_RS",
+    "title": "The Geneva Column Steadies (RS)",
+    "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. Belgrade's signals stabilize on the constructive register. The Pale foreign-ministry section, which had been forecasting a slow decay, instead registers a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "patron_pressure_above", "faction": "RS", "threshold": 12 },
+          { "type": "dimension_above", "faction": "RS", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RS", "min": 25 },
+          { "type": "flag_not_set", "flag": "negotiating_capital_recovery_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Negotiating-capital recovery (RS variant): leverage column drifts upward."
+    },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "RS", "dimension": "negotiating_leverage", "delta": 5 },
+      { "kind": "cost_ledger_annotation", "tag": "negotiating_capital_recovery_RS", "text": "RS negotiating-capital recovery under patron_pressure>=12, patron_confidence>55, no major offensive 25 turns. Negotiating leverage +5; AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "negotiating_leverage", "delta": 5 }
+    ],
+    "sets_flags": {
+      "negotiating_capital_recovery_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event, RS variant — Wave-15 successor handoff #1). Recovery counterpart to negotiation-capital drain events; predicate structurally identical to RBiH variant; only faction parameter and mutex flag differ. Mirrors documented 1995 RS leverage recovery during the Contact-Group / pre-Dayton period under sustained Belgrade pressure (BB II Ch.49-55). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_negotiating_capital_recovery_HRHB",
+    "title": "The Geneva Column Steadies (HRHB)",
+    "narrative": "The negotiating-leverage column, which had been drifting downward through three quarters of unfavorable communiques, steadies. Zagreb's signals stabilize on the constructive register. The HZ-HB foreign-ministry section, which had been forecasting a slow decay, instead registers a small recovery. The mediators read the inflection. The front-line officers do not; the diplomats do.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 80,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 12 },
+          { "type": "dimension_above", "faction": "HRHB", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_HRHB", "min": 25 },
+          { "type": "flag_not_set", "flag": "negotiating_capital_recovery_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Negotiating-capital recovery (HRHB variant): leverage column drifts upward."
+    },
+    "effects": [
+      { "kind": "negotiation_capital", "faction": "HRHB", "dimension": "negotiating_leverage", "delta": 5 },
+      { "kind": "cost_ledger_annotation", "tag": "negotiating_capital_recovery_HRHB", "text": "HRHB negotiating-capital recovery under patron_pressure>=12, patron_confidence>55, no major offensive 25 turns. Negotiating leverage +5; AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": 5 }
+    ],
+    "sets_flags": {
+      "negotiating_capital_recovery_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event, HRHB variant; closes triad — Wave-15 successor handoff #1). Recovery counterpart to negotiation-capital drain events; predicate structurally identical to RBiH variant; only faction parameter and mutex flag differ. Mirrors documented 1994-1995 HVO leverage recovery during Washington-Agreement / Federation-period sustained Zagreb pressure (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_spring_thaw_supply_recovery_RBiH",
+    "title": "The Spring Thaw (RBiH)",
+    "narrative": "The roads dry. The hand-trucks come out of storage. The relief routes that had required sleds in the worst weeks of the winter now move at hand-truck speed, and the depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RBiH", "threshold": 50 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RBiH", "min": 30 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RBiH", "min": 20 },
+          { "type": "flag_not_set", "flag": "spring_thaw_supply_recovery_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Spring thaw supply recovery (RBiH variant): supply column refills at marginal route pace."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RBiH", "delta": 10 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "spring_thaw_supply_recovery_RBiH", "text": "RBiH spring thaw supply recovery under supply<50, war_exhaustion>=30, no major offensive 20 turns. Supply +10, cohesion +2; recovery counterpart to csq_winter_supply_attrition_RBiH. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "spring_thaw_supply_recovery_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event — Wave-15 successor handoff #1: 'spring-thaw recovery variant counterpart to csq_winter_supply_attrition'). Recovery counterpart to Wave-8/Wave-9-redo winter supply attrition triad; reads the same engine surface (supply_delta + cohesion_change effect kinds) but in the positive direction, gated on the same supply<threshold + exhaustion >= bound + paused offensive. Mirrors documented 1993 / 1994 ARBiH spring-thaw quartermaster relief into central enclaves once mountain routes reopened (BB II Ch.31, Sarajevo siege rotation logistics; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_spring_thaw_supply_recovery_RS",
+    "title": "The Spring Thaw (RS)",
+    "narrative": "The roads dry. The trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the high country note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RS", "threshold": 50 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 30 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RS", "min": 20 },
+          { "type": "flag_not_set", "flag": "spring_thaw_supply_recovery_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Spring thaw supply recovery (RS variant): supply column refills at marginal route pace."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RS", "delta": 10 },
+      { "kind": "cohesion_change", "faction": "RS", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "spring_thaw_supply_recovery_RS", "text": "RS spring thaw supply recovery under supply<50, war_exhaustion>=30, no major offensive 20 turns. Supply +10, cohesion +2; recovery counterpart to csq_winter_supply_attrition. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "spring_thaw_supply_recovery_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event, RS variant — Wave-15 successor handoff #1). Recovery counterpart to Wave-8 winter supply attrition; predicate structurally identical to RBiH variant; only faction parameter and mutex flag differ. Mirrors documented 1993 / 1994 VRS spring-thaw quartermaster relief into the high country once mountain routes reopened (BB II Ch.31, eastern theatre logistics). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_equipment_quality_recovery_streak_RBiH",
+    "title": "The Cadre Catches Up (RBiH)",
+    "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. The patron's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 90,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_above", "faction": "RBiH", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RBiH", "min": 25 },
+          { "type": "flag_not_set", "flag": "equipment_quality_recovery_streak_active_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Equipment-quality recovery streak (RBiH variant): combat-power readout drifts upward."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 1.04, "duration_turns": 30 },
+      { "kind": "cohesion_change", "faction": "RBiH", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "equipment_quality_recovery_streak_RBiH", "text": "RBiH equipment-quality recovery streak under patron_confidence>55, no major offensive 25 turns. Equipment +4% for 30 turns, cohesion +2; recovery counterpart to csq_iran_arms_channel_attenuation / csq_arms_pipeline_disrupted. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "equipment_quality_recovery_streak_active_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event — Wave-15 successor handoff #4: 'equipment-quality recovery half — substrate exists from Wave 3 but content side recovery half is sparse'). Recovery counterpart to the equipment-quality drain events (csq_iran_arms_channel_attenuation, csq_arms_pipeline_disrupted, csq_patron_arms_pipeline_attenuated); reads the existing equipment_quality_modifier substrate from Wave-3 in the positive direction. Distinct from csq_arbih_doctrine_modernization (which gates on doctrine_reform_initiated flag) and csq_post_dayton_train_and_equip_RBiH (which gates on post-Dayton normalization). This event gates only on patron-confidence + paused offensive — the ordinary recovery half rather than a structural inflection. Mirrors documented 1994-1995 ARBiH cadre rotation onto new manuals during sustained Federation-period training-cycle expansion (BB II Ch.41-43; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
   }
 ]
