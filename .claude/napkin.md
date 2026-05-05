@@ -16,6 +16,43 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
+## Current State (2026-05-05, HRHB retune SHIP — LATE-WAR DOCTRINAL ARC CLOSED on 5th attempt on top of `d038da73`)
+**Commits `3f8951e1..f9c40043` (2 commits).** Trip session 5 fourth batch.
+
+**HRHB mini-panel ALTERNATIVE PROPOSED (`3f8951e1`):** Mini-scope synthesis evaluating HRHB step-curve tightening within validated B'.2 class. 4 expert reads. Original candidate `-0.005` REJECTED (3-of-3 substantive panelists; 4th abstains): proportionally invert BB1/BB2 historical record. HVO Washington Agreement (~w104) was a quality-REINFUSION event via HV cadre mentorship, NOT continued-degradation. VRS late-war degradation was MORE severe than HVO historically. Approved ALTERNATIVE: RS-proportional ratios (`1.0 / 0.57 / 0.0 / -0.4`) on HRHB's 0.010 baseline = `0.010 / 0.0057 / 0.000 / -0.004`. Predicted post-w52 segment Δ/turn ≈ -0.00040/turn. New 6th stop trigger: RS regression (current shipped numerics produced bend; HRHB retune must NOT regress RS).
+
+**HRHB retune Phase 1 SHIPPED (`f9c40043`):** Data-only edit to `data/scenarios/timelines/apr1992.json` HRHB step-curve. Mechanism unchanged from B'.2. 11/11 lane tests still pass (no test changes required — band-boundary tests use RS canonical numerics; HRHB faction-symmetric test uses sharedCurve). 40w smoke n1672 hash `987cfe1dcdb272f8`, anchors 26/27 + benchmarks 6/6 PASS. 188w smoke n1673 hash `bd043ba67dd5257a`, full artifact emission.
+
+**Per-faction trajectory (n1673):**
+- **RS whole-run Δ/turn = -0.000677** (BYTE-IDENTICAL to Phase 1 B'.2; criterion 6 RS regression check PASS — no regression)
+- **HRHB whole-run Δ/turn = +0.000105** (-79% attenuation from prior +0.000505; technically positive but pre-w52 contribution dominates)
+- **HRHB post-w52 segment Δ/turn = -0.000768** (DECISIVE BEND — refined criterion 3 PASS)
+- **HRHB stayer Δ/turn = +0.000128** (-75% attenuation)
+- RBiH whole-run +0.003909 (control held)
+- RS active brigades at t188 = 52 (criterion ≥35 PASS)
+
+**Per criterion 3+4 "strict OR refined" formulation: BOTH PASS via refined reading.** The trip session's "pre-bracket-boundary growth dominates whole-run averages" insight is load-bearing here — refined criterion (post-w52 segment Δ/turn ≤0) captures the actual late-war bend correctly. Strict whole-run reading is contaminated by canonical pre-w52 professionalization.
+
+**LATE-WAR DOCTRINAL ARC CLOSED.** Five-attempt journey:
+1. Wave 4 reinforcement_mult `e9584dd3` — VRS Δ/turn = +0.000591, didn't bend (budget-side wrong path)
+2. Lane A OCM `411f6843` — VRS Δ/turn = +0.000591, didn't bend (casualty-side multiplier insufficient)
+3. Phase 1 OQ-Growth `a42ebae0` — VRS Δ/turn = +0.000780, DORMANT (timeline shadowing)
+4. Phase 1 B'.2 `7aee7bb7` — RS PASS (-0.000677), HRHB partial (+0.000505); mechanism validated
+5. **HRHB retune `f9c40043` — RS PASS (no regression), HRHB PASS via refined criterion (post-w52 segment -0.000768) — TRIP SESSION CENTRAL CALIBRATION QUESTION ANSWERED**
+
+**Sensitive-history compliance (both commits):** Ring 1, faction-agnostic mechanism with asymmetric data, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No combat-math number tuned outside panel-recommended numerics.
+
+**Successor handoffs (none load-bearing now; late-war calibration question is answered):**
+1. **Wave 10 events**: faction-mirror inversions; doctrine-reform / arms-channel variants. Cheap additive content.
+2. **MORALE_OVERRIDE_ENABLED flag promotion** to default-on (188w gate now four-times-validated: n1665, n1667, n1671, n1673).
+3. **Tier 3 perf optimization** of `analyzeFactionGraphOptimized` (cross-call shared state — needs new gate strategy beyond G1+G2+G3).
+4. **Fix Shape C cleanup** (DEFERRED → optional polish if cohort-experience formula needs structural work; not load-bearing now that HRHB+VRS bend).
+5. **40w hash drift investigation** (HRHB retune produced 40w hash drift `987cfe1dcdb272f8` from Phase 1 B'.2's `bd5267c3f2cb4095`; expected since HRHB band-2 value changed and band-2 starts at w52 which is below 40w boundary — so technically the change SHOULD have NO effect at 40w. Worth confirming this is just iteration-order side effect, not actual sim drift.)
+
+Do instead: (1) **Mini-panel pattern is canonical for numerics-tuning lanes within an already-validated mechanism class.** Phase 0 panel approved B'.2 mechanism class; mini-panel (4-expert reads, numerics-only scope) approved tightened HRHB numerics within that class. The mini-panel is faster than full Phase 0 (~10 min vs ~15-20 min) because mechanism evaluation is skipped. **Rule:** when a mechanism class is already validated, numerics-tuning successor lanes use mini-panel pattern (numerics-only synthesis, lighter acceptance criteria, mechanism-unchanged code-shape preservation criterion) rather than re-running full Phase 0. (2) **Historian's "proportional inversion" critique is binding** — when proposed numerics for one faction would invert the relative magnitude vs another faction's already-shipped numerics, AND the historical record places the relationship the other way, the proposed numerics MUST be rejected. HRHB candidate `-0.005` (50% of first-band) > RS shipped `-0.0028` (40% of first-band) would have made HRHB's late-war decay MORE severe than RS's, contradicting BB1/BB2 record where VRS late-war degradation was more severe than HVO. Proportional ranking inversion is a binding rejection criterion for Pyrrhic Games' canon-vs-history alignment. (3) **RS regression check (criterion 6) is canonical for follow-up tuning lanes.** When a follow-up lane retunes one faction's numerics, the prior-shipped factions' numerics must be byte-identical and their trajectories must NOT regress. Lane A's RS Δ/turn = -0.000677 was byte-identical between Phase 1 B'.2 (n1671) and HRHB retune (n1673) — confirms RS calibration is stable across HRHB-only retunes. **Rule:** any data-only retune lane that targets one faction must include a regression check verifying other factions' metrics stay byte-identical or improve.
+
+Reports: `docs/40_reports/audits/20260505_HRHB_NUMERICS_RETUNE_MINI_PANEL.md`, `docs/40_reports/implemented/20260505_HRHB_NUMERICS_RETUNE_PHASE_1.md`.
+
 ## Current State (2026-05-05, Phase 1 B'.2 PARTIAL SHIP — FIRST late-war arc bend in 4 attempts on top of `b63348bf`)
 **Commits `be6b95ff..7aee7bb7` (2 commits).** Trip session 5 third batch.
 

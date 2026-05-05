@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip OQ-Growth Phase 1 B'.2 PARTIAL SHIP `7aee7bb7` — **FIRST mechanism in 4 attempts that bends the late-war doctrinal arc**: timeline-data step-curve at path #0 (the actually-firing path) for RS+HRHB; RS bends decisively negative (whole-run Δ/turn = -0.000677, stayer Δ/turn = -0.000794), HRHB segment-bends after t52 but borderline whole-run (+0.000505) due to pre-w52 contribution dominating average. Mechanism validated by RS; HRHB needs tighter negative bands as numerics-magnitude follow-up. Phase 0 panel `be6b95ff` approved B'.2 unanimous CONDITIONS with NEW criterion 11 (production reachability) preventing the dormant-implementation pattern.)
+**Last Updated:** 2026-05-05 (post-trip HRHB numerics retune `f9c40043` — **LATE-WAR DOCTRINAL ARC CLOSED for both VRS and HRHB** on 5th attempt; mini-panel ALTERNATIVE-PROPOSED RS-proportional numerics on HRHB baseline (`0.010 / 0.0057 / 0.000 / -0.004`); 188w n1673 results: RS whole-run Δ/turn = -0.000677 BYTE-IDENTICAL to prior (no regression — criterion 6 PASS), HRHB post-w52 segment Δ/turn = -0.000768 (refined criterion 3 PASS), HRHB whole-run +0.000105 (-79% attenuation; pre-w52 canonical professionalization dominates), RBiH control held. **Trip session central calibration question ANSWERED.**)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."

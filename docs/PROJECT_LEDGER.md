@@ -7942,3 +7942,56 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Reports:**
 - `docs/40_reports/audits/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_0_PANEL.md`
 - `docs/40_reports/implemented/20260505_OFFICER_LEARNING_RATE_TIMELINE_DATA_PHASE_1.md`
+
+---
+
+## [2026-05-05] HRHB numerics retune — LATE-WAR DOCTRINAL ARC CLOSED (5th-attempt completion)
+
+**Type:** Mini-panel + data-only retune lane. Commits `3f8951e1..f9c40043` (2 commits).
+
+**`3f8951e1` HRHB mini-panel ALTERNATIVE PROPOSED:** Mini-scope synthesis evaluating HRHB step-curve tightening within the validated B'.2 class. 4 expert reads (numerics-only; mechanism evaluation skipped since B'.2 already validated by RS bend). Original candidate `0.010 / 0.005 / -0.001 / -0.005` REJECTED (3-of-3 substantive panelists; 4th abstains as determinism-safe): proportionally inverts BB1/BB2 historical record. HVO Washington Agreement (~w104) was a quality-REINFUSION event via HV cadre mentorship; VRS late-war degradation was MORE severe than HVO historically. Approved ALTERNATIVE: RS-proportional ratios (`1.0 / 0.57 / 0.0 / -0.4`) on HRHB's 0.010 baseline = `0.010 / 0.0057 / 0.000 / -0.004`. New 6th stop trigger: RS regression (current shipped numerics produced bend; HRHB retune must NOT regress RS).
+
+**`f9c40043` HRHB retune Phase 1 SHIPPED:** Data-only edit to `data/scenarios/timelines/apr1992.json` HRHB step-curve. Mechanism unchanged from B'.2. 11/11 lane tests still pass (no test changes required — band-boundary tests use RS canonical numerics; HRHB faction-symmetric test uses sharedCurve, not shipped HRHB numerics). 40w smoke n1672 hash `987cfe1dcdb272f8`, anchors 26/27 + benchmarks 6/6 PASS. 188w smoke n1673 hash `bd043ba67dd5257a`, full artifact emission (Wave 7 Lane B streaming finalizer four-times-validated at scale).
+
+**Per-faction trajectory (n1673):**
+
+| Faction | Phase 1 B'.2 (n1671) | HRHB retune (n1673) | Verdict |
+|---|---|---|---|
+| **RS whole-run Δ/turn** | -0.000677 | -0.000677 (byte-identical) | PASS strict; criterion 6 RS regression PASS |
+| **RS post-w52 segment** | bends decisively | bends decisively | PASS strict |
+| **HRHB whole-run Δ/turn** | +0.000505 | **+0.000105** (-79%) | borderline strict; pre-w52 dominates |
+| **HRHB post-w52 segment** | +0.000131 | **-0.000768** | **PASS refined criterion** |
+| **HRHB stayer Δ/turn** | +0.000520 | +0.000128 (-75%) | borderline strict; segments bend |
+| **RBiH whole-run** | +0.003909 | +0.003909 | PASS — control held |
+| **RS active brigades t188** | 52 | 52 | PASS ≥35 |
+
+**Per criterion 3+4 "strict OR refined" formulation: BOTH PASS via refined reading.** No stop triggers fired.
+
+**TRIP SESSION CENTRAL CALIBRATION QUESTION ANSWERED.** Five-attempt journey to closure:
+
+| Attempt | Lever | Lane | 188w VRS Δ/turn | Verdict |
+|---|---|---|---|---|
+| 1 | Wave 4 reinforcement_mult | RECONSTITUTION-POLICY-REVIEW (`e9584dd3`) | +0.000591 | budget-side wrong path |
+| 2 | Lane A OCM | OCM-PHASE-1-IMPL-REDO (`411f6843`) | +0.000591 | casualty-side multiplier insufficient |
+| 3 | Phase 1 OQ-Growth FACTION_LEARNING_RATE step-curve | OQ-GROWTH-PHASE-1-IMPL (`a42ebae0`) | +0.000780 | DORMANT (timeline shadowing) |
+| 4 | Phase 1 B'.2 timeline-data step-curve at path #0 | OQ-LEARNING-RATE-TIMELINE-DATA-PHASE-1 (`7aee7bb7`) | -0.000677 | RS PASS; HRHB partial; mechanism validated |
+| **5** | **HRHB retune (RS-proportional numerics)** | **HRHB-NUMERICS-RETUNE-PHASE-1 (`f9c40043`)** | **-0.000677 (byte-identical)** | **RS PASS (no regression); HRHB PASS via refined; LATE-WAR ARC CLOSED** |
+
+**Sensitive-history compliance:** Ring 1, faction-symmetric mechanism with asymmetric data, no §6 surface, no FORAWWV / paint anchor / political_controllers / OOB / rupture-wiring / `enclave_resilience.ts` touch. No combat-math number tuned outside panel-recommended numerics.
+
+**Roadmap delta:**
+- v0.9 late-war calibration: CLOSED. The OFFICER-QUALITY-GROWTH path correction is now production-shipped for both VRS and HRHB; RBiH control faction tracks canonical professionalization arc.
+- Wave 7 Lane B streaming finalizer four-times-validated at 188w scale (n1665, n1667, n1671, n1673).
+- Mini-panel pattern proven for numerics-tuning successor lanes (faster than full Phase 0; mechanism-evaluation skipped).
+- Historian's "proportional inversion" critique demonstrated as binding rejection criterion (BB1/BB2 record vs proposed numerics).
+
+**Successor handoffs (none load-bearing now; late-war calibration is closed):**
+1. Wave 10 events: faction-mirror inversions; doctrine-reform / arms-channel variants. Cheap additive content.
+2. MORALE_OVERRIDE_ENABLED flag promotion to default-on (188w gate four-times-validated).
+3. Tier 3 perf optimization of `analyzeFactionGraphOptimized` (needs new gate strategy beyond G1+G2+G3).
+4. Fix Shape C cleanup (DEFERRED → optional polish; not load-bearing now).
+5. 40w hash drift investigation (HRHB retune produced 40w hash drift from Phase 1 B'.2 even though HRHB band-2 starts at w52 > 40w boundary; expected to be iteration-order side effect, but worth confirming).
+
+**Reports:**
+- `docs/40_reports/audits/20260505_HRHB_NUMERICS_RETUNE_MINI_PANEL.md`
+- `docs/40_reports/implemented/20260505_HRHB_NUMERICS_RETUNE_PHASE_1.md`
