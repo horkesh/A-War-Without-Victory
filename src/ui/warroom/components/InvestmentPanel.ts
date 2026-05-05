@@ -15,6 +15,7 @@ function getInvestmentCostWithCoordination(_t: unknown, _s?: unknown, _c?: unkno
 function getInvestmentTypesForFaction(_f: unknown): InvestmentType[] { return []; }
 function isCoordinationEligibleFaction(_f: unknown): boolean { return false; }
 import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
+import { factionRgbString } from '../../shared/factionPalette.js';
 export type StagedInvestment = { id: string; investmentType: string; munId: string; cost: number; coordinated?: boolean; targetMunIds: string[] };
 export type Phase0DirectiveState = {
     getStagedForMunicipality(munId: string): StagedInvestment[];
@@ -48,11 +49,10 @@ export interface InvestmentPanelProps {
     onClose: () => void;
 }
 
-const FACTION_COLORS: Record<string, string> = {
-    RBiH: 'rgb(27, 94, 32)',
-    RS: 'rgb(226, 74, 74)',
-    HRHB: 'rgb(74, 144, 226)',
-};
+// Faction colors removed — use canonical `factionRgbString(faction)` from
+// `src/ui/shared/factionPalette.ts` (re-exports `FACTION_GLOW_RGB` from
+// the Wave 8 Lane D Force-Quality Glow source). Single source of truth
+// across all UI shells.
 
 const INVESTMENT_LABELS: Record<InvestmentType, { icon: string; name: string; desc: string }> = {
     police: { icon: '🛡', name: 'Police Loyalty', desc: 'Secure police cooperation' },
@@ -152,7 +152,7 @@ export class InvestmentPanel {
         header.appendChild(headerRow);
 
         // Controller + stability
-        const controllerColor = FACTION_COLORS[mun.controller ?? ''] ?? 'rgb(100,100,100)';
+        const controllerColor = mun.controller ? factionRgbString(mun.controller) : 'rgb(100,100,100)';
         const metaRow = document.createElement('div');
         metaRow.className = 'investment-panel-meta';
         metaRow.innerHTML = `

@@ -1,7 +1,12 @@
 import type { TempoType } from './TempoSelector';
+import { factionHex } from '../../../shared/factionPalette';
 
-/** Axis colors: warm military tones matching faction palette */
-export const AXIS_COLORS = ['#c24040', '#4a9a55', '#4080b8', '#c4a35a', '#9a6fbf'];
+/**
+ * Axis colors: warm military tones. The first three slots derive from the
+ * canonical faction palette (`FACTION_GLOW_RGB`); slots 4–5 are neutral
+ * accents reserved for non-faction axes.
+ */
+export const AXIS_COLORS = [factionHex('RS'), factionHex('RBiH'), factionHex('HRHB'), '#c4a35a', '#9a6fbf'];
 
 /** Maps internal tempo values to IPC payload tempo values */
 export const TEMPO_IPC_MAP: Record<TempoType, 'all_out' | 'standard' | 'methodical'> = {
@@ -10,9 +15,15 @@ export const TEMPO_IPC_MAP: Record<TempoType, 'all_out' | 'standard' | 'methodic
     slow: 'methodical',
 };
 
-/** Faction hex colors for inline styles */
+/**
+ * Faction hex colors for inline styles. Derived projection of the canonical
+ * `FACTION_GLOW_RGB` table — single source of truth across all UI shells.
+ * See `src/ui/shared/factionPalette.ts`.
+ */
 export const FACTION_HEX_COLORS: Record<string, string> = {
-    RS: '#c24040', RBiH: '#4a9a55', HRHB: '#4080b8',
+    RS: factionHex('RS'),
+    RBiH: factionHex('RBiH'),
+    HRHB: factionHex('HRHB'),
 };
 
 // ─── G-2 Briefing Thresholds ──────────────────────────────────────────────

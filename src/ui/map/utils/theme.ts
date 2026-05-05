@@ -1,10 +1,16 @@
 /**
  * Shared faction color class names for text and background.
- * Keep in sync with tailwind.config.ts theme colors.
+ * Keep Tailwind class strings in sync with tailwind.config.ts theme colors.
  * All faction variants (RS/VRS/vrs, RBiH/ARBiH/rbih, HRHB/HVO/hrhb) are
  * expanded from canonical entries via normalizeFactionId().
+ *
+ * `FACTION_HEX_COLORS` derives from the project-wide canonical palette source
+ * `src/ui/shared/factionPalette.ts` (re-exports `FACTION_GLOW_RGB` from
+ * `src/ui/map/layers/buildForceQualityOverlay.ts`, Wave 8 Lane D). DO NOT
+ * declare a separate hex literal map here — derived projections only.
  */
 import { normalizeFactionId } from '../../../state/identity.js';
+import { factionHex } from '../../shared/factionPalette';
 
 /** Expand a canonical 3-key map to cover all known faction variants. */
 function expandFactionMap(canonical: Record<string, string>): Record<string, string> {
@@ -35,9 +41,18 @@ export const FACTION_BG_SUBTLE: Record<string, string> = expandFactionMap({
   HRHB: 'bg-faction-hrhb-subtle',
 });
 
-/** Faction hex colors for inline styles (not Tailwind classes). */
+/**
+ * Faction hex colors for inline styles (not Tailwind classes).
+ *
+ * Derived projection of the canonical `FACTION_GLOW_RGB` table — never a
+ * separately-maintained literal palette. Adding a new faction requires
+ * extending `FACTION_GLOW_RGB` in `buildForceQualityOverlay.ts`; this map
+ * is then automatically derived.
+ */
 export const FACTION_HEX_COLORS: Record<string, string> = {
-    RS: '#c04040', RBiH: '#4a9a55', HRHB: '#4080b8',
+    RS: factionHex('RS'),
+    RBiH: factionHex('RBiH'),
+    HRHB: factionHex('HRHB'),
 };
 
 /** Short faction labels for compact display. */

@@ -1,4 +1,5 @@
 import { getPlayerFaction } from './warroom_utils.js';
+import { factionHex } from '../../shared/factionPalette.js';
 
 export class SettingsModal {
     private gameState: any;
@@ -12,8 +13,15 @@ export class SettingsModal {
         container.className = 'wr-dialog';
         container.style.maxWidth = '600px';
 
+        // Pre-2026-05-04: a hand-rolled inline conditional inverted the
+        // canonical faction symbology — RS rendered as blue (#14316d) and
+        // HRHB as red (#922026), opposite of every other surface in the
+        // codebase. Replaced with the canonical `factionHex(faction)`
+        // lookup from `src/ui/shared/factionPalette.ts` (single source of
+        // truth, re-exports Wave 8 Lane D `FACTION_GLOW_RGB`).
+        // This restores RS=red / HRHB=blue / RBiH=green.
         const factionId = getPlayerFaction(this.gameState) || 'RBiH';
-        const accentColor = factionId === 'RS' ? '#14316d' : factionId === 'HRHB' ? '#922026' : '#2b5042';
+        const accentColor = factionHex(factionId);
 
         container.innerHTML = `
             <h2><span class="wr-text-primary">SYSTEM SETTINGS</span></h2>

@@ -8,6 +8,7 @@
  */
 
 import type { FactionId, GameState, OrganizationalPenetration } from '../../../state/game_state.js';
+import { factionAccentTriple } from '../../shared/factionPalette.js';
 
 /** Months in title case (January, February, …). */
 const MONTHS = [
@@ -190,11 +191,19 @@ export function strengthCategoryLabel(personnel: number): string {
     return 'FORTRESS';
 }
 
-/** Faction accent colors for UI — matches tactical map faction palette. */
+/**
+ * Faction accent colors for the Warroom shell — derived from the
+ * canonical `FACTION_GLOW_RGB` palette (single source of truth across all
+ * UI shells; see `src/ui/shared/factionPalette.ts`).
+ *
+ * DO NOT declare separate literal RGB values here. Adding a new faction
+ * requires extending `FACTION_GLOW_RGB` in `buildForceQualityOverlay.ts`;
+ * this map is then automatically derived.
+ */
 export const FACTION_COLORS: Record<string, { primary: string; dim: string; bg: string }> = {
-    RBiH: { primary: 'rgb(55, 140, 75)', dim: 'rgba(55, 140, 75, 0.3)', bg: 'rgba(55, 140, 75, 0.08)' },
-    RS: { primary: 'rgb(180, 50, 50)', dim: 'rgba(180, 50, 50, 0.3)', bg: 'rgba(180, 50, 50, 0.08)' },
-    HRHB: { primary: 'rgb(50, 110, 170)', dim: 'rgba(50, 110, 170, 0.3)', bg: 'rgba(50, 110, 170, 0.08)' },
+    RBiH: factionAccentTriple('RBiH'),
+    RS: factionAccentTriple('RS'),
+    HRHB: factionAccentTriple('HRHB'),
 };
 
 /** Get the CSS class suffix for a faction: 'rbih', 'rs', 'hrhb'. */
