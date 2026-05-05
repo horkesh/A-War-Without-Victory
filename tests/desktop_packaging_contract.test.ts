@@ -88,9 +88,24 @@ test('electron-builder config matches the packaged runtime resource contract', a
 
     const startupSnapshotEntry = extraResources.find((entry) => entry.from === 'data/derived');
     assert.ok(startupSnapshotEntry, 'packaged resources should include derived data, including the baked startup snapshot');
-    assert.deepStrictEqual(
-        startupSnapshotEntry?.filter,
-        ['**/*'],
-        'derived data should be copied deterministically without a second packaging-specific filter contract',
+    // LANE-V094-INSTALLER-BLOAT-TRIM-PHASE-2 widened this filter from
+    // ['**/*'] to include two negative patterns trimming runtime-orphan
+    // bloat from the NSIS installer (see
+    // docs/40_reports/implemented/20260505_V094_INSTALLER_BLOAT_TRIM_PHASE_2.md):
+    //   !**/_debug/** — phaseD0-F4 / phase3a_ab_harness build-time outputs (~398MB)
+    //   !**/municipalities_mun1990_viewer_v1.geojson — build-only viewer geojson (~322MB)
+    // Both paths verified zero src/ runtime references.
+    const derivedFilter = startupSnapshotEntry?.filter ?? [];
+    assert.ok(
+        derivedFilter.includes('**/*'),
+        'derived data filter must include "**/*" as the base inclusion to ship runtime tiles, operational geojson, and startup snapshot',
+    );
+    assert.ok(
+        derivedFilter.includes('!**/_debug/**'),
+        'derived data filter must exclude "**/_debug/**" — phaseD0-F4 / phase3a_ab_harness build-only outputs are runtime-orphan',
+    );
+    assert.ok(
+        derivedFilter.includes('!**/municipalities_mun1990_viewer_v1.geojson'),
+        'derived data filter must exclude "**/municipalities_mun1990_viewer_v1.geojson" — build-only viewer geojson with .gz companion is runtime-orphan',
     );
 });

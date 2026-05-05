@@ -336,7 +336,9 @@
         "from": "data/derived",
         "to": "data/derived",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/_debug/**",
+          "!**/municipalities_mun1990_viewer_v1.geojson"
         ]
       },
       {

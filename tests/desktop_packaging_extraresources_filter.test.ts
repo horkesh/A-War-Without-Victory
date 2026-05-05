@@ -7,8 +7,9 @@ import { test } from 'vitest';
  * LANE-V094-INSTALLER-BLOAT-TRIM contract tests.
  *
  * These pin the v0.9.5 installer-bloat-trim deliverables. NSIS first-real-build
- * shipped at 1338MB; ~650MB was clear-cut waste in extraResources. This lane
- * tightens per-entry filter arrays to drop:
+ * shipped at 1338MB; ~650MB was clear-cut waste in extraResources.
+ *
+ * Phase 1 (commit 4069f8c3) tightened per-entry filter arrays to drop:
  *   - data/source/osm/*.osm.pbf (149MB) — raw OSM extract, build-only
  *   - data/source/historical data/*.pdf (21MB) — research source PDFs
  *   - data/source/*.zip (~10MB) — source archives with unzipped JSON companions
@@ -16,12 +17,18 @@ import { test } from 'vitest';
  *   - data/source/_inputs/, dem/, geo/ subtrees — derivation inputs
  *   - assets/raw_sora/ + **\/*.psd (30MB) — Photoshop source files
  *
- * Out-of-scope (deferred follow-up): data/derived/_debug/** (~313MB) and
- * data/derived/municipalities_mun1990_viewer_v1.geojson (322MB duplicate of
- * .gz). The predecessor desktop_packaging_contract.test.ts pins
- * data/derived's filter to ['**\/*'] exactly, blocking direct exclusion in
- * this lane. Documented in
- * docs/40_reports/implemented/20260505_V094_INSTALLER_BLOAT_TRIM.md.
+ * Phase 2 (LANE-V094-INSTALLER-BLOAT-TRIM-PHASE-2, this revision; spec
+ * widened 2026-05-06 in autonomous-trip mode after first-attempt
+ * STOP-AND-ASK ac7211ad6a1907cd9) widens the data/derived filter to drop
+ * two runtime-orphan paths verified to have zero src/ references:
+ *   - data/derived/_debug/** (~398MB) — phaseD0-F4 / phase3a_ab_harness
+ *     build-time outputs consumed only by src/cli/phaseD0…F4 tooling
+ *   - data/derived/municipalities_mun1990_viewer_v1.geojson (~322MB
+ *     duplicate of .gz) — only consumed by build-time
+ *     scripts/map/validate_map_contracts.ts
+ * The predecessor desktop_packaging_contract.test.ts pin was widened in
+ * lockstep. Estimated post-trim ~263MB. Documented in
+ * docs/40_reports/implemented/20260505_V094_INSTALLER_BLOAT_TRIM_PHASE_2.md.
  *
  * Verification is static config inspection only (matches sibling lanes —
  * actually invoking electron-builder is slow and host-dependent).
@@ -141,7 +148,7 @@ test('T6: required runtime resources remain included (not blanket-excluded)', ()
     const pkg = readPackageJson();
     const extras = pkg.build?.extraResources ?? [];
 
-    // data/derived must remain ['**/*'] so the runtime can fetch:
+    // data/derived must still ship the following runtime fetches:
     //   - tiles/osm.pmtiles (438MB, served by PMTilesProtocol)
     //   - operational/operational_settlements.geojson (DataLoader.ts)
     //   - operational/operational_political_control.json
@@ -150,11 +157,25 @@ test('T6: required runtime resources remain included (not blanket-excluded)', ()
     //   - terrain/settlements_terrain_scalars.json
     //   - startup/apr_1992_initial_save.json (electron-main.cjs:782)
     //   - latest_run_final_save.json
+    //
+    // LANE-V094-INSTALLER-BLOAT-TRIM-PHASE-2 widened the filter beyond ['**/*']
+    // to drop two runtime-orphan paths verified to have zero src/ references:
+    //   !**/_debug/** (~398MB phaseD0-F4 / phase3a_ab_harness build outputs)
+    //   !**/municipalities_mun1990_viewer_v1.geojson (~322MB build-only viewer geojson)
+    // The base '**/*' include must remain so that all listed runtime files are still copied.
     const derivedEntry = findEntry(extras, 'data/derived');
-    assert.deepStrictEqual(
-        derivedEntry.filter,
-        ['**/*'],
-        'data/derived filter must remain ["**/*"] (predecessor contract pin); _debug/ exclusion is deferred follow-up.',
+    const derivedFilter = derivedEntry.filter ?? [];
+    assert.ok(
+        derivedFilter.includes('**/*'),
+        `data/derived filter must include "**/*" base inclusion to ship runtime tiles, operational geojson, and startup snapshot. Got: ${JSON.stringify(derivedFilter)}`,
+    );
+    assert.ok(
+        derivedFilter.includes('!**/_debug/**'),
+        `data/derived filter must exclude "!**/_debug/**" (phaseD0-F4 build-only outputs, runtime-orphan, ~398MB). Got: ${JSON.stringify(derivedFilter)}`,
+    );
+    assert.ok(
+        derivedFilter.includes('!**/municipalities_mun1990_viewer_v1.geojson'),
+        `data/derived filter must exclude "!**/municipalities_mun1990_viewer_v1.geojson" (build-only viewer geojson, runtime-orphan, ~322MB). Got: ${JSON.stringify(derivedFilter)}`,
     );
 
     // data/source must still include political-controller, OOB, and census files
@@ -178,10 +199,15 @@ test('T6: required runtime resources remain included (not blanket-excluded)', ()
 
 test('T7: predecessor desktop_packaging_contract.test.ts invariants remain green', () => {
     // This test mirrors the load-bearing pinned shape in
-    // desktop_packaging_contract.test.ts (lines 75-95). If this passes, the
-    // predecessor's full extraResources contract (from/to pair list and the
-    // strict ['**/*'] filter on data/derived) is still honored by the
-    // package.json this lane modifies.
+    // desktop_packaging_contract.test.ts. If this passes, the predecessor's
+    // full extraResources contract (from/to pair list, plus the data/derived
+    // filter shape) is still honored by the package.json this lane modifies.
+    //
+    // LANE-V094-INSTALLER-BLOAT-TRIM-PHASE-2 (autonomous-trip-mode 2026-05-06)
+    // widened the data/derived filter beyond ['**/*']. The predecessor
+    // contract test was revised in lockstep to assert the new 3-element
+    // filter shape (base include + two runtime-orphan exclusions). T7
+    // mirrors that revision exactly.
     const pkg = readPackageJson();
     const extras = pkg.build?.extraResources ?? [];
 
@@ -200,9 +226,17 @@ test('T7: predecessor desktop_packaging_contract.test.ts invariants remain green
     );
 
     const derivedEntry = findEntry(extras, 'data/derived');
-    assert.deepStrictEqual(
-        derivedEntry.filter,
-        ['**/*'],
-        "data/derived filter must remain ['**/*'] — predecessor pin in desktop_packaging_contract.test.ts.",
+    const derivedFilter = derivedEntry.filter ?? [];
+    assert.ok(
+        derivedFilter.includes('**/*'),
+        `data/derived filter must include "**/*" — predecessor pin in desktop_packaging_contract.test.ts (Phase-2 widened). Got: ${JSON.stringify(derivedFilter)}`,
+    );
+    assert.ok(
+        derivedFilter.includes('!**/_debug/**'),
+        `data/derived filter must include "!**/_debug/**" — Phase-2 widened predecessor pin. Got: ${JSON.stringify(derivedFilter)}`,
+    );
+    assert.ok(
+        derivedFilter.includes('!**/municipalities_mun1990_viewer_v1.geojson'),
+        `data/derived filter must include "!**/municipalities_mun1990_viewer_v1.geojson" — Phase-2 widened predecessor pin. Got: ${JSON.stringify(derivedFilter)}`,
     );
 });
