@@ -90,3 +90,6 @@ The audit prescribes `-- --report-only` even though the package step builds the 
 ## Commit
 
 `feat(ci): v0.9.5 package matrix in desktop-release-guard (LANE-V095-CI-PACKAGE-MATRIX)` — single commit, conventional, no `--no-verify`. Parent batches push.
+
+**SHA:** `55b4653a`
+**`git show --stat` summary:** 2 files changed, 150 insertions (workflow +58, new report +92).
