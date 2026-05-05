@@ -27,6 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # tests/release_notes_generator.test.ts uses HEAD~5..HEAD git ranges
+          # which require full history. Default fetch-depth=1 (shallow clone)
+          # makes the generator's git log fail with "ambiguous argument 'HEAD~5..HEAD'".
+          fetch-depth: 0
 
       - uses: actions/setup-node@v5
         with:

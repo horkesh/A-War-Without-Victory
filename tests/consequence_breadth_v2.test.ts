@@ -170,6 +170,11 @@ describe('LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH — event predicates', () => {
                 war_exhaustion_x100_RS: 60,
                 turns_since_major_offensive_RS: 35,
             },
+            // Suppress Wave-13 csq_extended_truce_streak_* triad which fires
+            // on alliance_above 0.6 + turn>=70 default-alliance=1.0 setup,
+            // crowding the MAX_EVENTS_PER_TURN=4 cap and pushing
+            // csq_demobilization_pressure_wave out of the firing slot.
+            alliance: 0.50,
         });
         // patron_pressure_above reads override_authority on patron_relationships
         state.military.negotiation = {
