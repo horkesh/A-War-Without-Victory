@@ -343,7 +343,16 @@
         "from": "data/source",
         "to": "data/source",
         "filter": [
-          "**/*"
+          "**/*",
+          "!**/*.pbf",
+          "!**/*.pdf",
+          "!**/*.zip",
+          "!**/*.ts",
+          "!osm/**",
+          "!historical data/**",
+          "!_inputs/**",
+          "!dem/**",
+          "!geo/**"
         ]
       },
       {
@@ -357,7 +366,9 @@
         "from": "assets",
         "to": "assets",
         "filter": [
-          "**/*"
+          "**/*",
+          "!raw_sora/**",
+          "!**/*.psd"
         ]
       }
     ],
