@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip 5-commit autonomous batch `c406fd9c..ce0474e7` — Wave 11 events (catalog 77→83); v0.9.4 Phase 1+2 UI shell audit + prioritized backlog; Codex content expansion Wave 2 (8 ghost entries; total 14); **faction palette canonicalization** with new canonical source `src/ui/shared/factionPalette.ts` + 6 forks migrated + SettingsModal RS=red/HRHB=blue inversion FIXED (Phase-3 visual layers byte-stable). MORALE_OVERRIDE Phase 1 in flight (188w A/B dual smoke `bmwcenlqt`).)
+**Last Updated:** 2026-05-05 (post-trip 3-commit autonomous batch `a3433670..8919c3ed` — v0.9.4 LOADING-AND-ERROR shipped (`a3433670`: LoadingSkeleton + LoadErrorToast, 14/14 GREEN); v0.9.4 EMPTY-STATE-PASS shipped (`f96f7866`: reusable `<EmptyState>` across 9 surfaces, 9/9 + 43/43 regression GREEN); **MORALE_OVERRIDE Phase 1 VERDICT-REPORT-ONLY** (`8919c3ed`: stop-trigger #2 fired — RS absorbs 90% of incremental dissolutions; mechanism validated via A/B hash delta + RS Δ/turn at t104→t188 doubles -0.001049→-0.002015, but criterion 3 dissolution balance failed; user §6 authorization received but panel stop-triggers binding). Wave 7 Lane B streaming finalizer FIVE-TIMES-validated at 188w scale.)
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
