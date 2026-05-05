@@ -1,0 +1,11 @@
+# Equipment Quality: The Recovery Recorded in This Run
+
+**Ring 2 — narrative observation. Divergence note. Ghost entry. CoS analytical assessment.**
+
+In the canonical record, the equipment-quality trajectory across the war's three faction tracks bent in characteristic ways. The Army of Republika Srpska, inheriting the Yugoslav People's Army arsenal at scale in May 1992 and sustained through the Personnel Centre mechanism documented in *Prosecutor v. Perišić* (IT-04-81-T), declined gradually under attrition and rotation pressure. The Croatian Defence Council, after the Washington Agreement of 1 March 1994, received reinfusion through the Croatian Army cadre-mentorship and equipment channels documented in *Balkan Battlegrounds* II Chapter 51. The Army of the Republic of Bosnia and Herzegovina rebuilt its baseline through the embargo-and-pipeline period and into the late-war reform pulse described in the canonical Codex. None of the three trajectories produced a sharp upward bend within the war window; the recovery profiles were gradual at best, partial at most.
+
+In this campaign, on the player faction's track, the equipment-quality reading at the audit turn diverged upward from the canonical baseline. The combined drivers — replacement-cycle throughput on the run's per-brigade ledger, reduced cumulative attrition across the operational tempo of the recorded window, and the cohort-rotation discipline on technical specialists — produced an upward bend sharper than the canonical baseline projects, and the run's order-of-battle ledger reflects the recovered trajectory rather than the gradual-decline historical profile.
+
+The mechanism is recorded in the run's per-brigade attrition, replacement, equipment-quality-modifier, and cohort tables. The downstream effect is visible in the late-run combat-power readings against opposing forces, and in the negotiation-table posture the recovered force represents at the audit turn.
+
+This entry does not claim that the recovery altered the war's outcome, prevented atrocity, or produced any specific operational consequence beyond what the run's own ledgers record. The historical baseline against which this run diverges remains in the canonical Codex. The Tribunal record on the patron-supply mechanism — the Personnel Centre findings, the Croatian-cadre findings — is not displaced by this entry.

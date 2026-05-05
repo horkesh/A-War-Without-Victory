@@ -1,0 +1,11 @@
+# Civilian Displacement: The Wave That Did Not Crest
+
+**Ring 2 — narrative observation. Path-not-taken. Ghost entry.**
+
+The Bosnian War produced the largest civilian displacement in Europe since the Second World War. The UNHCR registered over 2.2 million displaced persons by 1995, divided between internally displaced persons within Bosnia and Herzegovina and refugees abroad. *Balkan Battlegrounds* I Chapters 16–18 and II Chapters 31–41 document the displacement waves: the spring–summer 1992 displacement out of the Republika Srpska–claimed municipalities, the central-Bosnia displacement of 1992–1993 between Bosniak and Croat populations, the Drina-valley enclave displacements that culminated in the events of July 1995, and the Operation Storm displacement out of the Krajina in August 1995. The Trial Chambers in *Prosecutor v. Krajišnik* (IT-00-39-T) and the related Prijedor-municipality cases addressed forced displacement as an underlying offence within the broader campaign of persecution.
+
+In this campaign, on the player faction's track, the civilian-displacement audit counter recorded a trajectory below the canonical-baseline reading by the audit turn. The combined predicate — population-loss flag set on a covered municipality, displacement-event fired against the player faction's controllers, refugee-flow consequence-event registered — did not satisfy across the recorded turn window. The displacement ledger registered movement, but the wave that the canonical baseline records did not crest by the audit turn.
+
+The historical record on the displacement waves remains in the canonical Codex. The UNHCR registration totals, the Trial Chamber findings on forced-displacement campaigns in the Karadžić-indictment municipalities and the Prlić-indictment municipalities, and the post-Dayton Annex 7 right-of-return framework remain authoritative.
+
+What is recorded here is narrow: in this run, on the player faction's specific controllers and within the audit window, the displacement-counter trajectory diverged from the canonical baseline below the audit threshold. The mechanism is recorded in the run's population, controller, and event ledgers; this entry asserts the divergence and nothing further.
