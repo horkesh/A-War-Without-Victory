@@ -110,6 +110,15 @@
 
 **Out-of-mandate (need user design direction):** v1.0 master-roadmap items — AI Commander intelligence (PERCEIVE-DECIDE-EXECUTE), Order Interpretation system, Political Leader Bot, Consequence-system ahistorical branching, Tutorial Lane A content tone.
 
+## A-lane sequence (AI Officers + Army COs) DISPATCHED 2026-05-06
+
+User trip-mode authorization: "Panel recommendations are confirmed. As for questions, research and implement best solutions for them. Aim for balance between fun and historicity. After that, dispatch all A lanes in succession."
+
+- `eee308e0` **DDR** — 5 design questions LOCKED (`docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md`). Q1 player issues political directives default + corps-level override at 2 political_capital cost; Q2 ADVISORY shape; Q3 Mladić-class insubordination (stubbornness ≥4 + opportunity-catalog + 1-turn advance + 12-turn cooldown); Q4 cross-army coordination via political-bot tolerance (Karadžić=4/Izetbegović=3/Boban=2; 3-overrides-in-12-turns auto-relief); Q5 hybrid hand-authored historical roster + emergent variation. Plus AI-officers panel defaults locked: MAX_BONUS_OBJECTIVES=2, CAUTIOUS_EXTRA_PREP_TURNS=[0,3,2,0,0,0], AGGRESSIVE_HALT_DELAY=2.
+- `18136710` **A1** wire CampaignPlan→briefing — **audit P0 ARMY-GAP-1 found STALE**: wiring already in place (`army_hq_gathering.ts:1004-1007` produces; `briefing.ts:376` consumes via `collectCampaignIntent()`; pipeline ordering correct; 6 campaign fields surfaced). Lane shipped 7-test regression net (366/366 regression GREEN). No engine code touched.
+- `ba6955bf` **A2** Army CO loop substrate — additive schema-only (`stubbornness` + `override_tolerance` traits; `last_autonomous_launch_turn` + `recent_overrides` state; `army_co_decision_traces` per-faction state). 16/16 + 101/101 regression GREEN. Default-undefined → behavior fires only after A4 populates canonical historical values.
+- A3 dispatched (`a17b92742621979dd`) — army-level Order Interpretation + Mladić-class autonomous launch path. Will be ~400-600 LOC. Pre-A4-data: 40w hash should remain byte-stable.
+
 **Two new durable KNOWLEDGE entries (2026-05-06; cited above):**
 1. Multi-agent git-index sweep risk: `git commit -o <files>` pathspec form is MANDATORY in any parallel-batch context; long-running subprocesses belong to parent (Bash background) not agent.
 2. Sibling-file-ownership collision: parent must build per-file ownership table BEFORE dispatch; if two lanes need the same file, bundle/serialize/split.
