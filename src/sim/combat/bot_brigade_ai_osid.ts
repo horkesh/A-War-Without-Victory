@@ -69,11 +69,6 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 
-// Env-flag-gated hrtime instrumentation (default-OFF; zero overhead when disabled).
-// See docs/40_reports/implemented/20260506_BOT_ORDERS_INTERNALS_INSTRUMENTATION.md
-// and predecessor commit 406b0749.
-import { withPerf } from './_perf_profile_bot_orders.js';
-
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Canonical
@@ -362,24 +357,6 @@ function executeFactionDirectives(
     ethnicMap?: OsidEthnicComposition,
     osidPopulationMap?: OsidPopulationMap
 ): OsidBotOrdersResult {
-    return withPerf('bot_orders.executeFactionDirectives.total', () => executeFactionDirectivesImpl(
-        state, faction, brigades, adjacency, reverseMap, terrainCache, graphAnalysis,
-        supplyStateByOsid, ethnicMap, osidPopulationMap,
-    ));
-}
-
-function executeFactionDirectivesImpl(
-    state: GameState,
-    faction: FactionId,
-    brigades: FormationState[],
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    terrainCache: Record<string, number>,
-    graphAnalysis: FactionGraphAnalysis,
-    supplyStateByOsid?: SupplyStateByOsidReport | null,
-    ethnicMap?: OsidEthnicComposition,
-    osidPopulationMap?: OsidPopulationMap
-): OsidBotOrdersResult {
     const result: OsidBotOrdersResult = {
         posture_orders: [],
         attack_orders: {},
@@ -460,10 +437,7 @@ function executeFactionDirectivesImpl(
             
         const directive = cmd?.directive ?? null;
         const corpsStance = cmd?.stance ?? 'balanced';
-        const adjEnemy = withPerf(
-            'bot_orders.executeFactionDirectives.adjacentEnemyScan',
-            () => getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap),
-        );
+        const adjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
 
         const retreatInfo = (brigade as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
         const currentTurn = state.meta?.turn ?? 0;
@@ -516,28 +490,21 @@ function executeFactionDirectivesImpl(
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }
-        // Evaluator chain: order matters; first matching evaluator wins.
-        // Wrapped in withPerf to capture per-brigade evaluator-chain cost.
-        // Returns whether an evaluator fired so `continue` semantics survive.
-        const fired = withPerf('bot_orders.executeFactionDirectives.evaluators', () => {
-            if (evaluateGarrisonAndDetachments(ctx)) return true;
-            if (evaluateSectorMarch(ctx)) return true;
-            if (evaluateReturnToCorps(ctx)) return true; // Before hold/defense — orphans march home first
-            if (evaluatePocketEvacuation(ctx)) return true; // Evacuate tiny non-enclave pockets
-            if (evaluateHomeDefense(ctx)) return true;
-            if (evaluateReserve(ctx)) return true;
-            if (evaluateSupplyGate(ctx)) return true;
-            if (evaluateSectorAttack(ctx)) return true;
-            if (evaluateUncontestedOccupation(ctx)) return true;
-            if (evaluateHold(ctx)) return true;
-            if (evaluateReorganize(ctx)) return true;
-            if (evaluateDefensive(ctx)) return true;
-            if (evaluateOffensive(ctx)) return true;
-            if (evaluateFrontCoverage(ctx)) return true;
-            evaluateInteriorMovement(ctx);
-            return false;
-        });
-        if (fired) continue;
+        if (evaluateGarrisonAndDetachments(ctx)) continue;
+        if (evaluateSectorMarch(ctx)) continue;
+        if (evaluateReturnToCorps(ctx)) continue; // Before hold/defense — orphans march home first
+        if (evaluatePocketEvacuation(ctx)) continue; // Evacuate tiny non-enclave pockets
+        if (evaluateHomeDefense(ctx)) continue;
+        if (evaluateReserve(ctx)) continue;
+        if (evaluateSupplyGate(ctx)) continue;
+        if (evaluateSectorAttack(ctx)) continue;
+        if (evaluateUncontestedOccupation(ctx)) continue;
+        if (evaluateHold(ctx)) continue;
+        if (evaluateReorganize(ctx)) continue;
+        if (evaluateDefensive(ctx)) continue;
+        if (evaluateOffensive(ctx)) continue;
+        if (evaluateFrontCoverage(ctx)) continue;
+        evaluateInteriorMovement(ctx);
     }
 
     return result;
