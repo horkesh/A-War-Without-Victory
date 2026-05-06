@@ -727,31 +727,51 @@ function App() {
       className="h-screen w-screen relative"
       style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '6.5rem' : '5.5rem' }}
     >
+      {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
+          - <main>: MapContainer (the primary tactical-map view; landmark
+            authored inside MapContainer.tsx, also tutorial spotlight target).
+          - <header>: PresidentialToolbar (top-of-screen command bar).
+          - <aside>: OOBSidebar (order-of-battle accordion).
+          - <nav>: BottomStatusStrip (map-mode pills + layer controls; below).
+          Each wrapper uses display:contents so the wrapped components retain
+          their existing absolute/fixed positioning unaffected by the new tag.
+          Faction-agnostic; UI-only; no sim path touched. */}
       <MapContainer />
-      <PresidentialToolbar
-        pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
-        reserveAttention={loadedGameState?.armyReserveQueue
-          ? {
-            pendingCount: loadedGameState.armyReserveQueue.pendingCount,
-            criticalCount: loadedGameState.armyReserveQueue.criticalCount,
-            leadCriticalReason: loadedGameState.armyReserveQueue.leadCriticalReason,
-            leadCriticalPurpose: loadedGameState.armyReserveQueue.leadCriticalPurpose,
-            leadCriticalWhyNeeded: loadedGameState.armyReserveQueue.leadCriticalWhyNeeded,
-            leadCriticalDescription: loadedGameState.armyReserveQueue.leadCriticalDescription,
-          }
-          : null}
-        pressureWarning={loadedGameState?.pressureWarning ?? false}
-        onOpenSummary={openSummary}
-        onOpenRecords={() => openArmyHQRecords('aar')}
-        onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
-        onOpenCodex={() => openCodex(useGameStore.getState())}
-        onOpenEventLog={() => setEventLogOpen(true)}
-      />
+      <header
+        role="banner"
+        aria-label="Presidential command toolbar"
+        style={{ display: 'contents' }}
+      >
+        <PresidentialToolbar
+          pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
+          reserveAttention={loadedGameState?.armyReserveQueue
+            ? {
+              pendingCount: loadedGameState.armyReserveQueue.pendingCount,
+              criticalCount: loadedGameState.armyReserveQueue.criticalCount,
+              leadCriticalReason: loadedGameState.armyReserveQueue.leadCriticalReason,
+              leadCriticalPurpose: loadedGameState.armyReserveQueue.leadCriticalPurpose,
+              leadCriticalWhyNeeded: loadedGameState.armyReserveQueue.leadCriticalWhyNeeded,
+              leadCriticalDescription: loadedGameState.armyReserveQueue.leadCriticalDescription,
+            }
+            : null}
+          pressureWarning={loadedGameState?.pressureWarning ?? false}
+          onOpenSummary={openSummary}
+          onOpenRecords={() => openArmyHQRecords('aar')}
+          onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
+          onOpenCodex={() => openCodex(useGameStore.getState())}
+          onOpenEventLog={() => setEventLogOpen(true)}
+        />
+      </header>
       <CommandBriefingLayer
         onOpenSummary={openSummary}
         onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
       />
-      <OOBSidebar />
+      <aside
+        aria-label="Order of Battle"
+        style={{ display: 'contents' }}
+      >
+        <OOBSidebar />
+      </aside>
       <OperationsPanel />
       <OrderQueue />
       {/* Tactical Detail Panels (Nested Rail Architecture) */}
@@ -923,7 +943,12 @@ function App() {
       />
       <MapModeLegend />
       <Minimap />
-      <BottomStatusStrip />
+      <nav
+        aria-label="Map controls and status"
+        style={{ display: 'contents' }}
+      >
+        <BottomStatusStrip />
+      </nav>
 
       {/* Warroom React shell — foundation layer, activated by ?view=warroom */}
       {appScreen === 'warroom' && (

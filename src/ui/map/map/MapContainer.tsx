@@ -3154,8 +3154,72 @@ export function MapContainer() {
     return () => cancelAnimationFrame(frameId);
   }, [shouldAnimateMapPulse]);
 
+  // LANE-NIGHTSHIFT-V093-A11Y-LANE-B: keyboard pan/zoom handler for the
+  // tactical map canvas. Arrow keys pan, +/- zoom, Home/End reset to the
+  // canonical Bosnia view. Pure DOM event → MapLibre method dispatch; no
+  // store touch, no sim path. Faction-agnostic.
+  //
+  // Pan amount is a fixed-pixel offset (deterministic; no per-frame timing).
+  // MapLibre's panBy / zoomIn / zoomOut / jumpTo are deterministic for given
+  // inputs. Keyboard events only fire when the <main> wrapper has focus
+  // (tabIndex={0}), so they do not collide with global shortcuts when
+  // focus is elsewhere (Army HQ tabs, modals, sidebar).
+  const handleMapKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const PAN_PX = 100;
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        map.panBy([0, -PAN_PX]);
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        map.panBy([0, PAN_PX]);
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        map.panBy([-PAN_PX, 0]);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        map.panBy([PAN_PX, 0]);
+        break;
+      case '+':
+      case '=':
+        e.preventDefault();
+        map.zoomIn();
+        break;
+      case '-':
+      case '_':
+        e.preventDefault();
+        map.zoomOut();
+        break;
+      case 'Home':
+      case 'End':
+        e.preventDefault();
+        map.jumpTo({ center: BOSNIA_CENTER, zoom: DEFAULT_ZOOM });
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
-    <>
+    // LANE-NIGHTSHIFT-V093-A11Y-LANE-B: <main> landmark + tutorial spotlight
+    // anchor on the same outer wrapper. The element receives keyboard focus
+    // (tabIndex={0}) and routes pan/zoom keys to the MapLibre instance via
+    // handleMapKeyDown above. id="main-content" reserves the skip-link target
+    // for the sibling A11y skip-link lane. Faction-agnostic; UI-only.
+    <main
+      role="main"
+      id="main-content"
+      data-tutorial-step="map-container"
+      aria-label="Tactical map of Bosnia and Herzegovina; pan with arrow keys, zoom with plus and minus, press Home to reset view"
+      tabIndex={0}
+      onKeyDown={handleMapKeyDown}
+      className="absolute inset-0 outline-none"
+    >
       <div ref={containerRef} className="absolute inset-0" style={{ filter: 'sepia(0.08) saturate(0.95)' }} />
 
       {expandedStackOsid && overlayAnchor && loadedGameState && (
@@ -3191,6 +3255,6 @@ export function MapContainer() {
           onClose={() => setContextMenu(null)}
         />
       )}
-    </>
+    </main>
   );
 }
