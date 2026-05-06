@@ -658,10 +658,22 @@ export function runBotRecruitment(
     const maxElectivePerFaction = options?.maxElectivePerFaction;
 
     // Step 0: Create corps formations (always free, same as legacy)
+    // LANE-NIGHTSHIFT-Q1-HVO-NORTHWEST-BOSNIA-EMPTY-CORPS (2026-05-07):
+    // Honor `available_from` for corps creation. Previously this loop created
+    // every OOB corps unconditionally at scenario init, which produced "empty
+    // shell" corps formations for OZs whose brigades were OOB-gated to spawn
+    // at later weeks (e.g. hvo_northwest_bosnia: available_from=10, brigades
+    // available_from=2/8). The briefing reducer correctly returned 0 brigades
+    // for those shells because the brigades genuinely did not exist yet. The
+    // honest fix is to keep the corps formation absent until its
+    // `available_from` turn — the same gate the brigade-creation paths below
+    // (lines ~700 and ~822) already enforce. Faction-symmetric: applies
+    // uniformly to all OOB corps regardless of faction.
     if (!state.military.formations) state.military.formations = {};
     if (includeCorps) {
         for (const c of oobCorps) {
             if (state.military.formations[c.id]) continue;
+            if (c.available_from > currentTurn) continue;
             if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
             const location_osid =
