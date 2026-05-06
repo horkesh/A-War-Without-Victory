@@ -12,6 +12,10 @@ import {
     A4_PIPELINE_STEP_NAME,
 } from '../combat/army_co_roster_loader.js';
 import {
+    applyPoliticalDirectiveProducer,
+    B1_PIPELINE_STEP_NAME,
+} from '../political/political_directive_producer.js';
+import {
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
     generateOpportunityProposalReviews,
@@ -1150,6 +1154,34 @@ export const warPhases: NamedPhase[] = [
                 if (faction === context.state.meta.player_faction) continue;
                 evaluateArmyHQGathering(context.state, faction, context.state.meta.turn);
             }
+        },
+    },
+    {
+        // B1 (LANE-NIGHTSHIFT-B1-POLITICAL-DIRECTIVE-PRODUCER-INFRA):
+        // Bot-side producer for the soft-state political directive that A3
+        // (`apply-army-directive-interpretation`) reads from
+        // `state.military.political_directives_by_faction[faction]`. Without
+        // a producer, A3's `readPoliticalDirective` short-circuits every turn
+        // and `interpretArmyDirective` is never invoked. B1 wires the
+        // infrastructure; B2 will populate `political_leader_data` so the
+        // producer transitions from always-null to actively emitting verbs.
+        //
+        // Position: AFTER `evaluate-army-hq-gathering` (the producer reads
+        // CampaignPlan to derive `target_corps_id`) and BEFORE
+        // `evaluate-army-co-transitions` (A4) / `apply-army-directive-interpretation`
+        // (A3, the consumer of what we write).
+        //
+        // SUBSTRATE-DRIVEN: short-circuits when
+        // B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED env flag is set OR
+        // `state.military.political_leader_data` / `political_leaders` are
+        // unpopulated. 40w byte-stable until B2 ships scenario data.
+        //
+        // DDR: docs/40_reports/audits/20260506_B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DDR.md
+        // (941bd68e + 168d65c2). A3: c8ff93d8. A4: 93c75b1d.
+        name: B1_PIPELINE_STEP_NAME,
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyPoliticalDirectiveProducer(context.state);
         },
     },
     {
