@@ -78,6 +78,35 @@ export interface NamedOfficer {
         /** Turn when enclave breaks out / officer evacuated. Undefined = permanent lock. */
         locked_until_turn?: number;
     };
+
+    // ── A2 substrate (LANE-NIGHTSHIFT-A2-ARMY-CO-LOOP-SUBSTRATE) ──────────────
+    // DDR-cited fields per audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+    // (eee308e0). All optional + defaulted; A3 consumes them.
+
+    /**
+     * A2 substrate (DDR Q3): willingness to launch operations the political
+     * leader did NOT explicitly order. 1-5 scale (higher = more autonomous).
+     * ≥4 unlocks autonomous-launch path in A3. Canonical defaults from DDR:
+     * Mladić=5, Halilović=4, Praljak=3, Delić=2, Petković=2, Roso=2. Defaults
+     * applied at population time (A4); undefined here means "use canonical
+     * fallback" in A3.
+     *
+     * Faction-symmetric mechanism: every army CO has a stubbornness value;
+     * faction-asymmetric data only.
+     */
+    stubbornness?: number;
+
+    /**
+     * A2 substrate (DDR Q4): tolerance of subordinate insubordination /
+     * autonomous launches before relief. 1-5 scale (higher = more permissive).
+     * Only meaningful on POLITICAL leaders; storing on the general officer
+     * schema is fine (a different consumer reads it). Canonical defaults from
+     * DDR: Karadžić=4, Izetbegović=3, Boban=2.
+     *
+     * Faction-symmetric mechanism: every political-leader entry has a tolerance
+     * value; faction-asymmetric data only.
+     */
+    override_tolerance?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -117,6 +146,29 @@ export interface NamedOfficerState {
     last_override_turn?: number;
     /** If set, officer is "cowed" — complies fully without deviation until this turn. */
     cowed_until_turn?: number;
+
+    // ── A2 substrate (LANE-NIGHTSHIFT-A2-ARMY-CO-LOOP-SUBSTRATE) ──────────────
+    // DDR-cited fields per audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+    // (eee308e0). All optional + defaulted at consumption (A3); writers populate
+    // when the autonomous-launch path or override-tracking path fires. No
+    // breaking changes to existing saves.
+
+    /**
+     * A2 substrate (DDR Q3): turn of last autonomous launch by this army CO.
+     * Used by A3 to enforce the 12-turn rolling-window cooldown
+     * (max 1 autonomous launch per army CO per 12 turns).
+     * Undefined = never autonomously launched.
+     */
+    last_autonomous_launch_turn?: number;
+
+    /**
+     * A2 substrate (DDR Q4): rolling 12-turn override history for political bot
+     * auto-relief threshold (≥3 overrides in 12 turns triggers relief).
+     * Append-only ring (consumer prunes entries with turn < currentTurn - 12).
+     * Each entry carries the resolution so A3 can distinguish patient overrides
+     * from full reliefs. Sorted by turn ascending for determinism.
+     */
+    recent_overrides?: { turn: number; resolution: 'accept' | 'override' | 'relieve' }[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

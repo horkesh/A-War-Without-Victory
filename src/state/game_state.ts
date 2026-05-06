@@ -1978,6 +1978,29 @@ army_hq_overrides?: ArmyHQOverride[];
 campaign_plans?: Record<string, import('../sim/combat/army_hq_gathering_types.js').CampaignPlan | null>;
 /** Turn of last gathering per faction. */
 last_gathering_turn?: Record<string, number>;
+/**
+ * A2 substrate (LANE-NIGHTSHIFT-A2-ARMY-CO-LOOP-SUBSTRATE):
+ * Per-faction army-level decision traces — append-only "why" log for
+ * army-CO-loop decisions so UI (A5 Army HQ pushback) can surface them.
+ *
+ * DDR-cited per `docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md`
+ * (eee308e0). Single canonical owner; no parallel state.
+ *
+ * Writer: A3 (army-level order-interpretation lane). Reader: A5 UI.
+ * Faction-symmetric mechanism; faction-asymmetric data populated per faction.
+ * Each entry: turn (integer ≥0), campaign_role (mirrors FrontPriority['role']
+ * vocabulary), human-readable rationale, optional raw_directive_id linking back
+ * to the originating ArmyHQOverride / sync-op for cross-reference.
+ *
+ * Bounded by trim policy (A3 owns trim/GC). Entries sorted by turn ascending
+ * for deterministic serialization.
+ */
+army_co_decision_traces?: Record<string, Array<{
+    turn: number;
+    campaign_role: string;
+    rationale: string;
+    raw_directive_id?: string;
+}>>;
 /** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;
 /** Pending officer personnel events for player notification (new arrivals, suggested replacements). */

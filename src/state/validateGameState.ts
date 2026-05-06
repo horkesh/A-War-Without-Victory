@@ -444,6 +444,100 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                 }
             }
         }
+
+        // ── A2 substrate (LANE-NIGHTSHIFT-A2-ARMY-CO-LOOP-SUBSTRATE) ──────────
+        // DDR-cited per audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+        // (eee308e0). All-optional fields; backward-compatible with pre-A2 saves.
+
+        // army_co_decision_traces: per-faction append-only "why" log.
+        if ('army_co_decision_traces' in mil && mil.army_co_decision_traces !== undefined) {
+            const traces = mil.army_co_decision_traces;
+            if (traces === null || typeof traces !== 'object' || Array.isArray(traces)) {
+                errors.push('military.army_co_decision_traces must be an object (Record<FactionId, DecisionTraceEntry[]>) when present');
+            } else {
+                for (const [fid, list] of Object.entries(traces)) {
+                    if (!Array.isArray(list)) {
+                        errors.push(`military.army_co_decision_traces.${fid} must be an array`);
+                        continue;
+                    }
+                    for (let i = 0; i < (list as unknown[]).length; i++) {
+                        const entry = (list as unknown[])[i] as any;
+                        if (entry == null || typeof entry !== 'object' || Array.isArray(entry)) {
+                            errors.push(`military.army_co_decision_traces.${fid}[${i}] must be an object`);
+                            continue;
+                        }
+                        if (typeof entry.turn !== 'number' || !Number.isInteger(entry.turn) || entry.turn < 0) {
+                            errors.push(`military.army_co_decision_traces.${fid}[${i}].turn must be a non-negative integer`);
+                        }
+                        if (typeof entry.campaign_role !== 'string' || entry.campaign_role.length === 0) {
+                            errors.push(`military.army_co_decision_traces.${fid}[${i}].campaign_role must be a non-empty string`);
+                        }
+                        if (typeof entry.rationale !== 'string') {
+                            errors.push(`military.army_co_decision_traces.${fid}[${i}].rationale must be a string`);
+                        }
+                        if (entry.raw_directive_id !== undefined && typeof entry.raw_directive_id !== 'string') {
+                            errors.push(`military.army_co_decision_traces.${fid}[${i}].raw_directive_id must be a string when present`);
+                        }
+                    }
+                }
+            }
+        }
+
+        // named_officer_data: stubbornness + override_tolerance bounds (1-5 inclusive).
+        if ('named_officer_data' in mil && mil.named_officer_data !== undefined) {
+            const data = mil.named_officer_data;
+            if (Array.isArray(data)) {
+                for (let i = 0; i < data.length; i++) {
+                    const o = data[i] as any;
+                    if (o == null || typeof o !== 'object') continue; // existing officer-shape validator owns this
+                    if (o.stubbornness !== undefined) {
+                        if (typeof o.stubbornness !== 'number' || !Number.isInteger(o.stubbornness) || o.stubbornness < 1 || o.stubbornness > 5) {
+                            errors.push(`military.named_officer_data[${i}].stubbornness must be an integer in [1,5] when present`);
+                        }
+                    }
+                    if (o.override_tolerance !== undefined) {
+                        if (typeof o.override_tolerance !== 'number' || !Number.isInteger(o.override_tolerance) || o.override_tolerance < 1 || o.override_tolerance > 5) {
+                            errors.push(`military.named_officer_data[${i}].override_tolerance must be an integer in [1,5] when present`);
+                        }
+                    }
+                }
+            }
+        }
+
+        // named_officers: last_autonomous_launch_turn + recent_overrides.
+        if ('named_officers' in mil && mil.named_officers !== undefined) {
+            const officers = mil.named_officers;
+            if (officers !== null && typeof officers === 'object' && !Array.isArray(officers)) {
+                for (const [oid, st] of Object.entries(officers)) {
+                    const s2 = st as any;
+                    if (s2 == null || typeof s2 !== 'object') continue;
+                    if (s2.last_autonomous_launch_turn !== undefined) {
+                        if (typeof s2.last_autonomous_launch_turn !== 'number' || !Number.isInteger(s2.last_autonomous_launch_turn) || s2.last_autonomous_launch_turn < 0) {
+                            errors.push(`military.named_officers.${oid}.last_autonomous_launch_turn must be a non-negative integer when present`);
+                        }
+                    }
+                    if (s2.recent_overrides !== undefined) {
+                        if (!Array.isArray(s2.recent_overrides)) {
+                            errors.push(`military.named_officers.${oid}.recent_overrides must be an array when present`);
+                        } else {
+                            for (let i = 0; i < s2.recent_overrides.length; i++) {
+                                const ro = s2.recent_overrides[i];
+                                if (ro == null || typeof ro !== 'object' || Array.isArray(ro)) {
+                                    errors.push(`military.named_officers.${oid}.recent_overrides[${i}] must be an object`);
+                                    continue;
+                                }
+                                if (typeof ro.turn !== 'number' || !Number.isInteger(ro.turn) || ro.turn < 0) {
+                                    errors.push(`military.named_officers.${oid}.recent_overrides[${i}].turn must be a non-negative integer`);
+                                }
+                                if (ro.resolution !== 'accept' && ro.resolution !== 'override' && ro.resolution !== 'relieve') {
+                                    errors.push(`military.named_officers.${oid}.recent_overrides[${i}].resolution must be 'accept'|'override'|'relieve'`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // political_controllers: every entry must have value defined (can be null)
