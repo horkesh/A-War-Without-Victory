@@ -292,12 +292,22 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     // Source: docs/40_reports/implemented/20260501_TARGET_AWARE_SCENARIO_HEALTH_BASELINE.md
     // identified four missing scripted ops as the dominant Family-1 (missing
     // scenario content) gap at oct1995. These four operations close those gaps
-    // by adding turn-gated triggered ops at week >= 168 (Krivaja-95) through
+    // by adding turn-gated triggered ops at week >= 170 (Krivaja-95) through
     // week >= 175 (Sana). They do not affect early-war runs (104w n1588, 156w
-    // n1589 hashes preserved by gate ≥ 168).
+    // n1589 hashes preserved by gate ≥ 170).
+    //
+    // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (2026-05-06): Krivaja-95 +
+    // Stupčanica-95 trigger floors enforce the §6 sensitive-history canonical
+    // floor of t≥170 (Engine_Invariants_v0_9_0.md §6 + SENSITIVE_HISTORY_
+    // DESIGN_GATE.md). Prior threshold of t≥168 was a pre-existing canon
+    // violation surfaced by 188w A/B (n1705 + n1707). Sign-off precedent:
+    // Stupčanica SHAPE B b03333af; Krivaja Phase 1 bc44ddec. Mechanism is
+    // faction-symmetric (a generic numeric-turn-gate predicate); only the
+    // canon Krivaja-95 data row threshold is bumped. 40w window (t≤40)
+    // unaffected; 188w first-fire shifts t168→t170 by design.
     //
     // Date math (Apr 1 1992 = w0):
-    //   w168 ≈ June 24 1995  → Krivaja-95 (Srebrenica fall, July 6–11 1995)
+    //   w170 ≈ July 8 1995   → Krivaja-95 (Srebrenica fall, July 6–11 1995)
     //   w172 ≈ July 22 1995  → Stupčanica-95 (Žepa fall, July 14–25 1995)
     //   w175 ≈ Aug 12 1995   → Mistral 2 (Drvar/Šipovo/Mrkonjić push, Sep 8–15)
     //   w175 ≈ Aug 12 1995   → Operation Sana (5th Corps liberation, Sep–Oct 1995)
@@ -393,7 +403,10 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         staging_osid: 'op:bratunac:bratunac_2',
         planning_duration: 3,
         min_attack_outcome: 'repulsed',
-        trigger: (_state, turn) => turn >= 168,
+        // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (2026-05-06): bumped 168→170
+        // to enforce §6 canonical floor (Engine_Invariants_v0_9_0.md §6 +
+        // SENSITIVE_HISTORY_DESIGN_GATE.md). Sign-off precedent: b03333af / bc44ddec.
+        trigger: (_state, turn) => turn >= 170,
         axes: [
             {
                 axis_id: 'srebrenica_enclave',

@@ -73,9 +73,11 @@ describe('late-1995 triggered operations — catalog', () => {
         assert.equal(def!.axes[0]!.axis_id, 'srebrenica_enclave');
         assert.equal(def!.axes[0]!.corps, 'vrs_drina');
         assert.equal(def!.staging_osid, 'op:bratunac:bratunac_2');
-        // Trigger gate: w >= 168
-        assert.equal(def!.trigger(trivialState(167), 167), false);
-        assert.equal(def!.trigger(trivialState(168), 168), true);
+        // Trigger gate: w >= 170 (LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX
+        // 2026-05-06: bumped 168→170 to enforce §6 canonical floor; sign-off
+        // precedent b03333af / bc44ddec).
+        assert.equal(def!.trigger(trivialState(169), 169), false);
+        assert.equal(def!.trigger(trivialState(170), 170), true);
     });
 
     it('Operation Stupčanica-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
