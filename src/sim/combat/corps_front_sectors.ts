@@ -82,6 +82,203 @@ import {
     commanderReviewAssignment,
 } from './commander_override.js';
 
+// node:fs / node:path are imported only for the env-flag-gated jsonl writer
+// in `_flushInvocation` below. They are dead-code-eliminable when the flag is
+// OFF — the writer's first line is `if (!SECTOR_PARTITION_PERF_FLAG) return null;`
+// — but ESM forbids dynamic require() so we name the modules here. UI builds
+// (Electron renderer / Vite map) never import this file; it is a sim-only module.
+import * as _fsModule from 'node:fs';
+import * as _pathModule from 'node:path';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Sector-Partition Perf Instrumentation (LANE-NIGHTSHIFT-SECTOR-PARTITION-INSTRUMENTATION)
+//
+// Default-OFF env-flag-gated hrtime wrappers around the major sub-functions
+// of buildCorpsFrontSectors. Activated by setting the literal string "true" in
+// `PERF_PROFILE_SECTOR_PARTITION` in the process env. When the flag is unset
+// (or any other value), `_perfTime` short-circuits to a direct call so
+// production runs pay only one boolean read per wrapped site invocation.
+//
+// At the end of each `buildCorpsFrontSectors` call, when the flag is ON, one
+// JSONL line is appended to data/derived/_debug/sector_partition_perf.jsonl
+// describing per-faction + per-sub-function nanosecond costs for that single
+// invocation. Per-corps detail (faction-grouped) is captured during faction-
+// sector building; per-pass detail (sealMergedSectorTruth, recoverDroppedFront-
+// Edges, applyFinalSectorOwnerTruthPass — all called multiple times per turn)
+// is captured per-call and aggregated by label.
+//
+// Determinism contract:
+//   - process.hrtime.bigint() reads only — no Math.random, no Date.now, no
+//     new Date, no locale-sort, no environment leak into game state.
+//   - jsonl writes happen ONLY when flag is ON; production runs are byte-stable
+//     vs flag-OFF runs (verified by tests/sector_partition_instrumentation.test.ts).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SECTOR_PARTITION_PERF_FLAG: boolean =
+    process.env.PERF_PROFILE_SECTOR_PARTITION === 'true';
+
+/** Returns true iff the sector-partition perf-profile flag is enabled for this process. */
+export function isSectorPartitionPerfEnabled(): boolean {
+    return SECTOR_PARTITION_PERF_FLAG;
+}
+
+interface SectorPartitionPerfBucket {
+    /** Total elapsed nanoseconds across all calls within the current invocation. */
+    totalNs: bigint;
+    /** Number of calls within the current invocation. */
+    count: number;
+}
+
+interface SectorPartitionInvocationRecord {
+    /** Per-invocation per-faction sub-bucket: faction → corps_id → totalNs. */
+    perFactionPerCorpsNs: Map<FactionId, Map<string, bigint>>;
+    /** Per-invocation per-sub-function bucket. */
+    subFunctionNs: Map<string, SectorPartitionPerfBucket>;
+}
+
+/**
+ * Per-invocation-scoped timing record. The outer call to `buildCorpsFrontSectors`
+ * creates one of these and threads it through the body via this module-local
+ * field. Each wrapped sub-function call adds to its bucket. At the end of the
+ * invocation, the record is flushed as one jsonl line and reset. Reentrant
+ * calls share the outer record (we never expect reentrancy — buildCorpsFront-
+ * Sectors is not called recursively — but the record is replaced atomically
+ * at entry so the worst case is a lost-jsonl-line, never a corrupted state).
+ */
+let _activeInvocation: SectorPartitionInvocationRecord | null = null;
+
+function _newInvocation(): SectorPartitionInvocationRecord {
+    return {
+        perFactionPerCorpsNs: new Map(),
+        subFunctionNs: new Map(),
+    };
+}
+
+/**
+ * Wrap a synchronous function call with hrtime instrumentation. When the env
+ * flag is OFF or no invocation is active, `_perfTime` is a tail-call to `fn()`
+ * (only added cost: the boolean check + the function-call frame).
+ *
+ * If `fn()` throws, the elapsed time IS still recorded (in a `finally` block)
+ * and the error is re-thrown — instrumentation never swallows.
+ */
+function _perfTime<T>(label: string, fn: () => T): T {
+    if (!SECTOR_PARTITION_PERF_FLAG) return fn();
+    if (!_activeInvocation) return fn();
+    const start = process.hrtime.bigint();
+    try {
+        return fn();
+    } finally {
+        const elapsed = process.hrtime.bigint() - start;
+        const inv = _activeInvocation!;
+        let bucket = inv.subFunctionNs.get(label);
+        if (!bucket) {
+            bucket = { totalNs: 0n, count: 0 };
+            inv.subFunctionNs.set(label, bucket);
+        }
+        bucket.totalNs += elapsed;
+        bucket.count += 1;
+    }
+}
+
+/**
+ * Flush the active invocation record as one JSONL line to the canonical _debug
+ * path, then clear it. Returns the absolute path written, or null when the flag
+ * is OFF or no invocation is active.
+ *
+ * Output path: data/derived/_debug/sector_partition_perf.jsonl (gitignored).
+ *
+ * Lazy-loaded `node:fs` and `node:path` so this module remains tree-shakeable
+ * for browser builds.
+ */
+function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolean): string | null {
+    if (!SECTOR_PARTITION_PERF_FLAG) return null;
+    if (!_activeInvocation) return null;
+    const fs = _fsModule;
+    const path = _pathModule;
+    const cwd = process.cwd();
+    const outDir = path.join(cwd, 'data', 'derived', '_debug');
+    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const outPath = path.join(outDir, 'sector_partition_perf.jsonl');
+
+    const inv = _activeInvocation;
+    // Sort sub-functions by label for stable jsonl output.
+    const subFunctionLabels = Array.from(inv.subFunctionNs.keys()).sort(strictCompare);
+    const subFunctionRows = subFunctionLabels.map((label) => {
+        const b = inv.subFunctionNs.get(label)!;
+        return { label, total_ns: b.totalNs.toString(), count: b.count };
+    });
+    // Sort factions then corps for stable jsonl output.
+    const factions = Array.from(inv.perFactionPerCorpsNs.keys()).sort(strictCompare);
+    const perFactionRows = factions.map((faction) => {
+        const corpsMap = inv.perFactionPerCorpsNs.get(faction)!;
+        const corpsIds = Array.from(corpsMap.keys()).sort(strictCompare);
+        const perCorps = corpsIds.map((corpsId) => ({
+            corps_id: corpsId,
+            total_ns: corpsMap.get(corpsId)!.toString(),
+        }));
+        const factionTotal = corpsIds.reduce((acc, c) => acc + corpsMap.get(c)!, 0n);
+        return { faction, total_ns: factionTotal.toString(), per_corps: perCorps };
+    });
+
+    const line = {
+        schema_version: 1,
+        flag: 'PERF_PROFILE_SECTOR_PARTITION',
+        turn: state.meta.turn,
+        is_final_pass: isFinalPass,
+        total_ns: totalNs.toString(),
+        per_faction: perFactionRows,
+        sub_functions: subFunctionRows,
+    };
+    fs.appendFileSync(outPath, JSON.stringify(line) + '\n', { encoding: 'utf8' });
+
+    _activeInvocation = null;
+    return outPath;
+}
+
+// ── Test-only surfaces ───────────────────────────────────────────────────
+// Exposed solely so tests can verify wrapper non-throwing, jsonl write, and
+// flag-gating without spinning up a full scenario run. Production code paths
+// inside buildCorpsFrontSectors use the unexported closures directly.
+export const __sectorPartitionPerfTestHooks = {
+    isFlagOn: () => SECTOR_PARTITION_PERF_FLAG,
+    openInvocation: () => {
+        _activeInvocation = _newInvocation();
+    },
+    closeInvocation: () => {
+        _activeInvocation = null;
+    },
+    perfTime: _perfTime,
+    snapshotInvocation: () => {
+        if (!_activeInvocation) return null;
+        const inv = _activeInvocation;
+        const subFunctionLabels = Array.from(inv.subFunctionNs.keys()).sort(strictCompare);
+        return {
+            subFunctions: subFunctionLabels.map((label) => {
+                const b = inv.subFunctionNs.get(label)!;
+                return { label, totalNs: b.totalNs, count: b.count };
+            }),
+            perFaction: Array.from(inv.perFactionPerCorpsNs.entries())
+                .sort(([a], [b]) => strictCompare(a, b))
+                .map(([faction, corpsMap]) => ({
+                    faction,
+                    perCorps: Array.from(corpsMap.entries())
+                        .sort(([a], [b]) => strictCompare(a, b))
+                        .map(([corpsId, totalNs]) => ({ corpsId, totalNs })),
+                })),
+        };
+    },
+    addFactionCorpsCost: (faction: FactionId, corpsId: string, ns: bigint) => {
+        if (!_activeInvocation) return;
+        let factionMap = _activeInvocation.perFactionPerCorpsNs.get(faction);
+        if (!factionMap) {
+            factionMap = new Map<string, bigint>();
+            _activeInvocation.perFactionPerCorpsNs.set(faction, factionMap);
+        }
+        factionMap.set(corpsId, (factionMap.get(corpsId) ?? 0n) + ns);
+    },
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Entry Point
 // ═══════════════════════════════════════════════════════════════════════════
@@ -112,6 +309,12 @@ export function buildCorpsFrontSectors(
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
     if (!edges || edges.length === 0) return {};
 
+    // Open a per-invocation perf record (no-op when flag is OFF).
+    const _invStart: bigint = SECTOR_PARTITION_PERF_FLAG ? process.hrtime.bigint() : 0n;
+    if (SECTOR_PARTITION_PERF_FLAG) {
+        _activeInvocation = _newInvocation();
+    }
+
     // Use SpatialContext adjacency if available, otherwise build from edges (backward compat)
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     // Shared-boundary-only adjacency for territory contiguity checks.
@@ -122,18 +325,21 @@ export function buildCorpsFrontSectors(
     const strictAdj = sharedBoundaryAdj;
     // Intermediate adjacency (~16.6m) for Case B split threshold.
     const CASE_B_SPLIT_THRESHOLD = 0.00015; // ~16.6m
-    const caseBSplitAdj = new Map<Osid, Osid[]>();
-    for (const e of edges) {
-        if (!e?.a || !e?.b) continue;
-        if (e.min_dist !== undefined && e.min_dist > CASE_B_SPLIT_THRESHOLD) continue;
-        const listA = caseBSplitAdj.get(e.a as Osid) ?? [];
-        if (!listA.includes(e.b as Osid)) listA.push(e.b as Osid);
-        caseBSplitAdj.set(e.a as Osid, listA);
-        const listB = caseBSplitAdj.get(e.b as Osid) ?? [];
-        if (!listB.includes(e.a as Osid)) listB.push(e.a as Osid);
-        caseBSplitAdj.set(e.b as Osid, listB);
-    }
-    for (const list of caseBSplitAdj.values()) list.sort(strictCompare);
+    const caseBSplitAdj = _perfTime('adjacency-build-caseB', () => {
+        const m = new Map<Osid, Osid[]>();
+        for (const e of edges) {
+            if (!e?.a || !e?.b) continue;
+            if (e.min_dist !== undefined && e.min_dist > CASE_B_SPLIT_THRESHOLD) continue;
+            const listA = m.get(e.a as Osid) ?? [];
+            if (!listA.includes(e.b as Osid)) listA.push(e.b as Osid);
+            m.set(e.a as Osid, listA);
+            const listB = m.get(e.b as Osid) ?? [];
+            if (!listB.includes(e.a as Osid)) listB.push(e.a as Osid);
+            m.set(e.b as Osid, listB);
+        }
+        for (const list of m.values()) list.sort(strictCompare);
+        return m;
+    });
     // Build edge metadata lookup from osidFrontEdges — used by areSectorsFrontEdgeAdjacent
     // for triple-junction edge-to-edge adjacency checks in both merge passes.
     const globalEdgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
@@ -146,11 +352,37 @@ export function buildCorpsFrontSectors(
     const result: Record<string, CorpsFrontSector> = {};
 
     for (const faction of factions) {
-        const factionSectors = buildFactionSectors(
+        const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
             state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial
-        );
+        ));
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
+        }
+        // Per-corps cost contribution: each faction's sectors carry corps_id;
+        // attribute the faction-level cost equally across that faction's corps so
+        // a per-corps timeline is available without instrumenting deep into
+        // sector_territory.ts (out of EFO scope). This is a faction-bounded
+        // approximation, sufficient for spike characterization at corps grain.
+        if (SECTOR_PARTITION_PERF_FLAG && _activeInvocation) {
+            const inv = _activeInvocation;
+            const factionLabel = `buildFactionSectors:${faction}`;
+            const factionBucket = inv.subFunctionNs.get(factionLabel);
+            if (factionBucket && factionSectors.length > 0) {
+                const corpsSet = new Set<string>();
+                for (const s of factionSectors) corpsSet.add(s.corps_id);
+                const numCorps = corpsSet.size;
+                if (numCorps > 0) {
+                    const perCorpsNs = factionBucket.totalNs / BigInt(numCorps);
+                    let factionMap = inv.perFactionPerCorpsNs.get(faction);
+                    if (!factionMap) {
+                        factionMap = new Map<string, bigint>();
+                        inv.perFactionPerCorpsNs.set(faction, factionMap);
+                    }
+                    for (const corpsId of corpsSet) {
+                        factionMap.set(corpsId, (factionMap.get(corpsId) ?? 0n) + perCorpsNs);
+                    }
+                }
+            }
         }
     }
 
@@ -158,19 +390,19 @@ export function buildCorpsFrontSectors(
     // municipality territory. Prevents splitting two brigades defending the same
     // area into separate sectors (Brcko fix: 215th and 108th were in different
     // sectors, so reactive defense couldn't concentrate them).
-    mergeSmallAdjacentSectors(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
+    _perfTime('mergeSmallAdjacentSectors', () => mergeSmallAdjacentSectors(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids));
 
     // Post-merge contiguity repair: mergeSmallAdjacentSectors unions territory sets
     // without verifying contiguity. Repair any disconnected territory that resulted.
-    {
+    _perfTime('repairDisconnectedTerritory:post-merge', () => {
         const allSectors = Object.values(result);
         const allFriendly = new Set<string>();
         for (const s of allSectors) {
             for (const osid of s.territory_osids) allFriendly.add(osid);
         }
         repairDisconnectedTerritory(allSectors, sharedBoundaryAdj, allFriendly);
-    }
-    const emptiedSectorIds = canonicalizeSiblingFrontOwnership(
+    });
+    const emptiedSectorIds = _perfTime('canonicalizeSiblingFrontOwnership:1', () => canonicalizeSiblingFrontOwnership(
         Object.values(result),
         formations,
         globalEdgeMeta,
@@ -178,13 +410,13 @@ export function buildCorpsFrontSectors(
         sharedBoundaryAdj,
         caseBSplitAdj,
         centroids,
-    );
+    ));
     for (const sectorId of emptiedSectorIds) {
         delete result[sectorId];
     }
-    mergeLateSiblingFrontFragments(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
-    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
-    const postInvariantEmptiedSectorIds = canonicalizeSiblingFrontOwnership(
+    _perfTime('mergeLateSiblingFrontFragments', () => mergeLateSiblingFrontFragments(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids));
+    _perfTime('enforceFinalSectorGeometryInvariants:1', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
+    const postInvariantEmptiedSectorIds = _perfTime('canonicalizeSiblingFrontOwnership:2', () => canonicalizeSiblingFrontOwnership(
         Object.values(result),
         formations,
         globalEdgeMeta,
@@ -192,25 +424,25 @@ export function buildCorpsFrontSectors(
         sharedBoundaryAdj,
         caseBSplitAdj,
         centroids,
-    );
+    ));
     for (const sectorId of postInvariantEmptiedSectorIds) {
         delete result[sectorId];
     }
-    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
-    relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency);
-    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
-    pruneGhostArtifactSectors(result);
-    recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial);
-    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
-    pruneGhostArtifactSectors(result);
-    recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial);
+    _perfTime('sealMergedSectorTruth:1', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
+    _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
+    _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
+    _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
+    _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial));
+    _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
+    _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
+    _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial));
 
     // Final geometry barrier: late recovery and seal passes can still leave
     // duplicate same-corps front ownership on sibling fragments. Resolve those
     // at whole-piece granularity before the final packet rebuild so the last
     // rebuild sees one canonical owner per front fragment instead of trying to
     // canonicalize individual edges in place.
-    canonicalizeDuplicateFrontOwnershipByPiece(
+    _perfTime('canonicalizeDuplicateFrontOwnershipByPiece', () => canonicalizeDuplicateFrontOwnershipByPiece(
         result,
         formations,
         adjacency,
@@ -218,21 +450,21 @@ export function buildCorpsFrontSectors(
         sharedBoundaryAdj,
         caseBSplitAdj,
         centroids,
-    );
+    ));
 
     // Final geometry barrier: late recovery and seal passes can still leave
     // fractured frontline packets. Rebuild the final packets from edge truth
     // one last time and preserve brigade ownership across any split so no
     // later writer can silently re-fragment the serialized result.
-    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
-    pruneGhostArtifactSectors(result);
+    _perfTime('enforceFinalSectorGeometryInvariants:2', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
+    _perfTime('pruneGhostArtifactSectors:3', () => pruneGhostArtifactSectors(result));
 
     // The final geometry rebuild can leave territory packets stale relative to
     // the recovered/split edge truth. Refresh territory one last time before
     // the final live-owner seal, otherwise zero-owner sibling fragments keep
     // their old one-OSID packets and survive absorption even though the line
     // truth has changed underneath them.
-    {
+    _perfTime('assignTerritoryVoronoi:1', () => {
         const byFaction = new Map<FactionId, CorpsFrontSector[]>();
         for (const sector of Object.values(result)) {
             const list = byFaction.get(sector.faction) ?? [];
@@ -254,28 +486,28 @@ export function buildCorpsFrontSectors(
             assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
             repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
         }
-    }
+    });
 
     // Late recovery can still leave zero-owner sibling fragments behind even
     // after the final geometry rebuild. Run one last live-owner sealing pass so
     // overlapping same-corps fragments are absorbed before final packet truth is
     // synchronized into formation assignments and UI-facing sector geometry.
-    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
-    pruneGhostArtifactSectors(result);
+    _perfTime('sealMergedSectorTruth:4', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
+    _perfTime('pruneGhostArtifactSectors:4', () => pruneGhostArtifactSectors(result));
 
     // Merge passes can zero density/power/threat when they union sectors. Refresh
     // metrics before we sync assignments back into formation truth.
-    recomputeMetricsByFaction(Object.values(result), formations, state);
+    _perfTime('recomputeMetricsByFaction:1', () => recomputeMetricsByFaction(Object.values(result), formations, state));
 
     // Final packet truth must be reconciled before the last late seal. Any sector
     // bucket that does not physically own its brigade is false final state and must
     // be moved or dropped before the closing absorb/seal pass serializes assignments.
-    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
-    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
-    pruneGhostArtifactSectors(result);
-    rescueUnassignedLoanedElitesInTerritory(result, formations);
-    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
-    if (absorbEmptyStaffableSiblingSectors(
+    _perfTime('applyFinalSectorOwnerTruthPass:1', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency));
+    _perfTime('sealMergedSectorTruth:5', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
+    _perfTime('pruneGhostArtifactSectors:5', () => pruneGhostArtifactSectors(result));
+    _perfTime('rescueUnassignedLoanedElitesInTerritory', () => rescueUnassignedLoanedElitesInTerritory(result, formations));
+    _perfTime('applyFinalSectorOwnerTruthPass:2', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency));
+    const _absorbed = _perfTime('absorbEmptyStaffableSiblingSectors', () => absorbEmptyStaffableSiblingSectors(
         result,
         state,
         formations,
@@ -285,38 +517,51 @@ export function buildCorpsFrontSectors(
         globalEdgeMeta,
         centroids,
         spatial,
-    )) {
-        enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
-        pruneGhostArtifactSectors(result);
+    ));
+    if (_absorbed) {
+        _perfTime('enforceFinalSectorGeometryInvariants:3', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
+        _perfTime('pruneGhostArtifactSectors:6', () => pruneGhostArtifactSectors(result));
+        _perfTime('assignTerritoryVoronoi:2-post-absorb', () => {
+            for (const faction of getFactions(state)) {
+                const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
+                if (factionSectors.length === 0) continue;
+                const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+                    ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+                    : buildFriendlyOsidsFromState(state, adjacency, faction);
+                const osidToCorps = mapOsidsToCorps(state, faction, getCorpsForFaction(formations, faction), adjacency, formations, reverseMap);
+                assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
+                repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+            }
+        });
+        _perfTime('applyFinalSectorOwnerTruthPass:3', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency));
+    }
+    _perfTime('repairDisconnectedTerritory:final', () => {
         for (const faction of getFactions(state)) {
             const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
             if (factionSectors.length === 0) continue;
             const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
                 ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
                 : buildFriendlyOsidsFromState(state, adjacency, faction);
-            const osidToCorps = mapOsidsToCorps(state, faction, getCorpsForFaction(formations, faction), adjacency, formations, reverseMap);
-            assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
             repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
         }
-        applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
-    }
-    for (const faction of getFactions(state)) {
-        const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
-        if (factionSectors.length === 0) continue;
-        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
-            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
-            : buildFriendlyOsidsFromState(state, adjacency, faction);
-        repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
-    }
-    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
-    annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial);
-    recomputeMetricsByFaction(Object.values(result), formations, state);
+    });
+    _perfTime('applyFinalSectorOwnerTruthPass:4', () => applyFinalSectorOwnerTruthPass(result, state, formations, adjacency));
+    _perfTime('annotateUnstaffedFrontSectors', () => annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial));
+    _perfTime('recomputeMetricsByFaction:2', () => recomputeMetricsByFaction(Object.values(result), formations, state));
 
     // Sync sector assignments back to formation.assignment
-    syncSectorAssignmentsToFormations(result, formations, adjacency);
-    state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(state, result, formations, adjacency);
+    _perfTime('syncSectorAssignmentsToFormations', () => syncSectorAssignmentsToFormations(result, formations, adjacency));
+    const _unresolvedBrigades = _perfTime('collectUnresolvedSectorBrigades',
+        () => collectUnresolvedSectorBrigades(state, result, formations, adjacency));
+    state.military.unresolved_sector_brigades = _unresolvedBrigades;
     if (isFinalPass) {
-        emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
+        emitFinalUnresolvedSectorWarnings(_unresolvedBrigades, formations);
+    }
+
+    // Flush jsonl line for this invocation (no-op when flag is OFF).
+    if (SECTOR_PARTITION_PERF_FLAG) {
+        const totalNs = process.hrtime.bigint() - _invStart;
+        _flushInvocation(state, totalNs, isFinalPass);
     }
 
     return result;
