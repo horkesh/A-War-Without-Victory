@@ -361,40 +361,6 @@ function collectAdjacentCorpsSummaries(
     return [...summaries.values()].sort((a, b) => strictCompare(a.corps_id, b.corps_id));
 }
 
-/**
- * C1 (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE) — read the
- * A3-translated per-corps directive from
- * `state.military.army_corps_directives_by_faction[faction][corpsId]`.
- *
- * Returns null when the env flag is set OR the slot is absent (pre-C1
- * saves, A3 short-circuit, no political directive emitted this turn). When
- * a directive is present, the OVERLAY in `collectCampaignIntent` REPLACES
- * the CampaignPlan-derived role with the A3-translated role — this is the
- * single chokepoint that makes the political → army → corps chain
- * observable. Mirrors A3's persist short-circuit for byte-stable A/B.
- *
- * DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
- * (57cec91c).
- */
-function readArmyCorpsDirectiveOverlay(
-    state: GameState,
-    faction: FactionId,
-    corpsId: FormationId,
-): { role: 'primary' | 'secondary' | 'economy' | 'contain' } | null {
-    if (process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED === 'true') return null;
-    type LooseMilitary = GameState['military'] & {
-        army_corps_directives_by_faction?: Record<string, Record<string, {
-            corps_id: string;
-            role: 'primary' | 'secondary' | 'economy' | 'contain';
-            deviated: boolean;
-        }>>;
-    };
-    const mil = state.military as LooseMilitary;
-    const slot = mil.army_corps_directives_by_faction?.[faction]?.[corpsId];
-    if (!slot) return null;
-    return { role: slot.role };
-}
-
 function collectCampaignIntent(
     state: GameState,
     faction: FactionId,
@@ -409,16 +375,9 @@ function collectCampaignIntent(
 } {
     const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
     const turn = state.meta?.turn ?? 0;
-
-    // C1 overlay precedence: A3-translated role wins over CampaignPlan role
-    // when present. When the slot is absent (env-flag short-circuit, no
-    // directive emitted, pre-C1 save), fall back to A1's CampaignPlan path.
-    const overlay = readArmyCorpsDirectiveOverlay(state, faction, corpsId);
-
     if (!plan || plan.valid_until_turn < turn) {
-        // No CampaignPlan — overlay still wins for `role` if present.
         return {
-            role: overlay?.role ?? null,
+            role: null,
             offensiveTargets: [],
             holdTargets: [],
             stanceCeiling: null,
@@ -434,13 +393,8 @@ function collectCampaignIntent(
         if (syncParticipant) break;
     }
 
-    // C1 OVERLAY: if A3 persisted a directive for this corps, it REPLACES
-    // the CampaignPlan-derived role; else fall back to frontPriority.role.
-    const role: CommanderBriefing['campaign_role'] =
-        overlay?.role ?? frontPriority?.role ?? null;
-
     return {
-        role,
+        role: frontPriority?.role ?? null,
         offensiveTargets: [...(frontPriority?.offensive_targets ?? [])].sort(strictCompare),
         holdTargets: [...(frontPriority?.hold_targets ?? [])].sort(strictCompare),
         stanceCeiling: plan.doctrine_override?.corps_stance_ceilings?.[corpsId] ?? null,

@@ -483,41 +483,6 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
             }
         }
 
-        // ── C1 substrate (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE) ───
-        // DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
-        // (57cec91c). Optional field; backward-compatible with pre-C1 saves.
-        // Per-faction × per-corps directive map written by A3, read by briefing.
-        if ('army_corps_directives_by_faction' in mil && mil.army_corps_directives_by_faction !== undefined) {
-            const slot = mil.army_corps_directives_by_faction;
-            if (slot === null || typeof slot !== 'object' || Array.isArray(slot)) {
-                errors.push('military.army_corps_directives_by_faction must be an object (Record<FactionId, Record<corpsId, ArmyCorpsDirective>>) when present');
-            } else {
-                const validRoles = new Set(['primary', 'secondary', 'economy', 'contain']);
-                for (const [fid, factionMap] of Object.entries(slot)) {
-                    if (factionMap === null || typeof factionMap !== 'object' || Array.isArray(factionMap)) {
-                        errors.push(`military.army_corps_directives_by_faction.${fid} must be an object`);
-                        continue;
-                    }
-                    for (const [corpsId, cd] of Object.entries(factionMap as Record<string, unknown>)) {
-                        if (cd == null || typeof cd !== 'object' || Array.isArray(cd)) {
-                            errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId} must be an object`);
-                            continue;
-                        }
-                        const entry = cd as { corps_id?: unknown; role?: unknown; deviated?: unknown };
-                        if (typeof entry.corps_id !== 'string' || entry.corps_id.length === 0) {
-                            errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.corps_id must be a non-empty string`);
-                        }
-                        if (typeof entry.role !== 'string' || !validRoles.has(entry.role)) {
-                            errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.role must be one of 'primary'|'secondary'|'economy'|'contain'`);
-                        }
-                        if (typeof entry.deviated !== 'boolean') {
-                            errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.deviated must be a boolean`);
-                        }
-                    }
-                }
-            }
-        }
-
         // named_officer_data: stubbornness + override_tolerance bounds (1-5 inclusive).
         if ('named_officer_data' in mil && mil.named_officer_data !== undefined) {
             const data = mil.named_officer_data;
