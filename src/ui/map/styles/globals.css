@@ -2,6 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * ─── A11y: prefers-reduced-motion (LANE-NIGHTSHIFT-V093-A11Y-LANE-D) ──────
+ * Vestibular-sensitive and seizure-prone users need motion suppressed. The
+ * media query catches OS-level preference (Windows / macOS / Linux DEs);
+ * the parallel `.user-reduce-motion` class on <html> mirrors the same effect
+ * for an in-game toggle (SettingsScreen). Both gates apply globally to all
+ * descendants and pseudo-elements, so the 9 named keyframe-driven classes
+ * below (panel-slide-in-right, modal-fade-in, modal-panel-in, panel-shimmer,
+ * crt-flicker, panel-power-on, stance-flash, stance-toast-enter,
+ * stance-toast-exit) all collapse to ≈instant.
+ *
+ * Sensitive-history / determinism: pure CSS, no script, no faction-specific
+ * branching. Ring 1, no §6 surface. UI-only — does NOT enter sim path.
+ *
+ * Per WCAG 2.1 §2.3.3 (AAA) + §2.2.2 (AA pause/stop/hide) + best-practice
+ * pattern from web.dev / MDN (animation-duration: 0.01ms — not 0 — keeps
+ * any JS animation-end events firing so dependent code paths don't stall).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.user-reduce-motion *,
+html.user-reduce-motion *::before,
+html.user-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/*
+ * ─── A11y: colorblind-mode CSS variables (LANE-NIGHTSHIFT-V093-A11Y-LANE-D) ─
+ * Driven by `<html data-cb-preset="...">` set by SettingsScreen. The default
+ * preset re-exports the canonical Wave 8 Lane D faction RGBs byte-identical
+ * (RS=200,70,70 / RBiH=70,165,90 / HRHB=70,130,200) — no Phase-3 deck.gl
+ * regression. The three colorblind-safe presets (Okabe-Ito-derived) provide
+ * pairwise-distinguishable hues for deuteranopia/protanopia/tritanopia.
+ *
+ * Consumers reference `var(--cb-faction-rs)` etc.; if a consumer doesn't
+ * read the variable, the canonical palette path applies (unchanged behavior).
+ * This is additive — no current consumer is migrated by this lane.
+ */
+html[data-cb-preset="default"],
+html:not([data-cb-preset]) {
+  --cb-faction-rs: rgb(200, 70, 70);
+  --cb-faction-rbih: rgb(70, 165, 90);
+  --cb-faction-hrhb: rgb(70, 130, 200);
+}
+
+html[data-cb-preset="deuteranopia"] {
+  /* Okabe-Ito vermillion / blue / yellow — distinguishable under green-blind */
+  --cb-faction-rs: rgb(213, 94, 0);
+  --cb-faction-rbih: rgb(0, 114, 178);
+  --cb-faction-hrhb: rgb(240, 228, 66);
+}
+
+html[data-cb-preset="protanopia"] {
+  /* Okabe-Ito orange / sky-blue / bluish-green — distinguishable under red-blind */
+  --cb-faction-rs: rgb(230, 159, 0);
+  --cb-faction-rbih: rgb(86, 180, 233);
+  --cb-faction-hrhb: rgb(0, 158, 115);
+}
+
+html[data-cb-preset="tritanopia"] {
+  /* Reddish-purple / light-cyan / dark-navy — distinguishable under blue-blind;
+     wide luminance spread so factions are tellable apart even on monochrome */
+  --cb-faction-rs: rgb(204, 121, 167);
+  --cb-faction-rbih: rgb(129, 212, 229);
+  --cb-faction-hrhb: rgb(39, 38, 93);
+}
+
 html,
 body,
 #root {

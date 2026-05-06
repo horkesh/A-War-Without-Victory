@@ -101,3 +101,100 @@ export function factionAccentTriple(faction: string): FactionAccentTriple {
     bg: factionRgbaString(faction, 0.08),
   };
 }
+
+/**
+ * ─── A11y: Colorblind palette presets (LANE-NIGHTSHIFT-V093-A11Y-LANE-D) ──
+ *
+ * Additive — preserves the canonical Wave 8 Lane D RGB tuples byte-identical
+ * for the `'default'` preset. The three colorblind-safe presets use
+ * Okabe-Ito-derived hues chosen for pairwise distinguishability under the
+ * three common color-vision deficiencies. Selection is a UI-preference-only
+ * setting (persisted in localStorage by SettingsScreen), not in the
+ * save-game schema; deck.gl/Force-Quality/Map-That-Scars tactical layers
+ * continue to read from the canonical FACTION_GLOW_RGB table directly,
+ * so the four shipped Phase-3 visual gates do NOT regress regardless of
+ * preset choice.
+ *
+ * Faction-symmetric mechanism: every preset is a flat record keyed by the
+ * three canonical faction IDs. There is no `if (faction === 'X')` branching
+ * — the lookup is identical to the canonical path.
+ *
+ * Determinism: pure data; no Math.random, no Date.now, no closures.
+ */
+export type ColorblindPreset =
+  | 'default'
+  | 'deuteranopia'
+  | 'protanopia'
+  | 'tritanopia';
+
+export const COLORBLIND_PRESETS: ReadonlyArray<ColorblindPreset> = [
+  'default',
+  'deuteranopia',
+  'protanopia',
+  'tritanopia',
+];
+
+/**
+ * Frozen map of preset → faction → RGB tuple. The `'default'` row is the
+ * canonical Wave 8 Lane D table re-stated locally (not re-imported, to keep
+ * this projection self-contained for the byte-stability test). Test
+ * `tests/v093_a11y_lane_d_contrast_reduced_motion.test.ts` pins both the
+ * default-row byte-stability AND the parity with `FACTION_GLOW_RGB`.
+ */
+export const FACTION_COLORBLIND_PALETTES: Readonly<
+  Record<ColorblindPreset, Readonly<Record<string, readonly [number, number, number]>>>
+> = Object.freeze({
+  default: Object.freeze({
+    RS: Object.freeze([200, 70, 70]) as readonly [number, number, number],
+    RBiH: Object.freeze([70, 165, 90]) as readonly [number, number, number],
+    HRHB: Object.freeze([70, 130, 200]) as readonly [number, number, number],
+  }),
+  // Okabe-Ito vermillion / blue / yellow — green-blind safe.
+  deuteranopia: Object.freeze({
+    RS: Object.freeze([213, 94, 0]) as readonly [number, number, number],
+    RBiH: Object.freeze([0, 114, 178]) as readonly [number, number, number],
+    HRHB: Object.freeze([240, 228, 66]) as readonly [number, number, number],
+  }),
+  // Okabe-Ito orange / sky-blue / bluish-green — red-blind safe.
+  protanopia: Object.freeze({
+    RS: Object.freeze([230, 159, 0]) as readonly [number, number, number],
+    RBiH: Object.freeze([86, 180, 233]) as readonly [number, number, number],
+    HRHB: Object.freeze([0, 158, 115]) as readonly [number, number, number],
+  }),
+  // Reddish-purple / light-cyan / dark-navy — blue-blind safe; chosen for
+  // wide luminance spread (≥8:1 brightest:darkest) so the three factions
+  // remain distinguishable on a monochrome readout under tritanopia.
+  tritanopia: Object.freeze({
+    RS: Object.freeze([204, 121, 167]) as readonly [number, number, number],
+    RBiH: Object.freeze([129, 212, 229]) as readonly [number, number, number],
+    HRHB: Object.freeze([39, 38, 93]) as readonly [number, number, number],
+  }),
+});
+
+/**
+ * Lookup the preset RGB for a faction. Returns the canonical
+ * `FACTION_GLOW_RGB` value when preset is `'default'` (or unknown), so any
+ * call site that opts in via this function continues to render the canonical
+ * palette by default. UI-preference-only; not consumed by sim/visual-layer
+ * paths.
+ */
+export function colorblindFactionRgb(
+  preset: ColorblindPreset,
+  faction: string,
+): readonly [number, number, number] {
+  const row = FACTION_COLORBLIND_PALETTES[preset] ?? FACTION_COLORBLIND_PALETTES.default;
+  return row[faction] ?? FACTION_GLOW_RGB[faction] ?? DEFAULT_RGB;
+}
+
+/**
+ * localStorage key for the colorblind preset (UI preference only — not in
+ * save schema). Read by SettingsScreen on mount, written on toggle.
+ */
+export const COLORBLIND_PRESET_STORAGE_KEY = 'awwv.a11y.colorblindPreset';
+
+/**
+ * localStorage key for the in-game reduce-motion toggle (UI preference only).
+ * Co-located here so all Lane D persistence keys are discoverable from one
+ * file; consumed by SettingsScreen + globals.css `.user-reduce-motion` class.
+ */
+export const REDUCE_MOTION_STORAGE_KEY = 'awwv.a11y.reduceMotion';
