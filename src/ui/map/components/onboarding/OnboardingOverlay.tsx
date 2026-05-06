@@ -18,9 +18,25 @@
  * complete, callers may render a small "Restart Tutorial" button via the
  * exported `OnboardingRestartButton`. The overlay itself does not re-show
  * automatically after dismissal — restart is an explicit player action.
+ *
+ * **Accessibility (LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E):** the overlay is
+ * a modal dialog by semantics. Lane E layers the same a11y contract A11y
+ * Lane A canonicalized for `<Modal>` (`src/ui/shared/Modal.tsx`, frozen)
+ * directly into this full-overlay component:
+ *   - `role="dialog"` + `aria-modal="true"` on the overlay root.
+ *   - `aria-labelledby` referencing a deterministic id rendered inside the
+ *     overlay subtree (`onboarding-title-<step.id>`).
+ *   - Focus capture/restore: on open, the previously-focused element is
+ *     captured and the first focusable descendant gains focus; on close,
+ *     focus is restored to the originator.
+ *   - Tab / Shift+Tab cycle within the overlay's focusable descendants.
+ *   - ESC dismisses the tutorial via `ipc.dismissTutorial()`.
+ *
+ * Tutorial Lane B-subset's auto-dismiss-on-step-8 path (committed at
+ * `c2dcec62`) is preserved byte-identical inside `onAdvance`.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { OnboardingStep } from './OnboardingStep';
 import { ONBOARDING_STEPS, resolveNextStep } from './onboardingSteps';
 import { Z } from '../../../shared/zIndex';
@@ -127,22 +143,101 @@ export function isFinalStep(stepId: string): boolean {
     return !!last && last.id === stepId;
 }
 
+/**
+ * Selector for focusable descendants. Mirrors the canonical
+ * FOCUSABLE_SELECTOR in `src/ui/shared/Modal.tsx` (A11y Lane A, frozen).
+ * Replicated here rather than imported to keep Lane E's exclusive file
+ * ownership intact (Modal.tsx must not be touched).
+ */
+const ONBOARDING_FOCUSABLE_SELECTOR: string = [
+    'a[href]',
+    'button:not([disabled])',
+    'textarea:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+].join(',');
+
+function getOverlayFocusables(root: HTMLElement | null): HTMLElement[] {
+    if (!root) return [];
+    return Array.from(root.querySelectorAll<HTMLElement>(ONBOARDING_FOCUSABLE_SELECTOR));
+}
+
 export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | null {
     const { tutorialState, ipc } = props;
     const [pending, setPending] = useState(false);
 
-    if (!shouldShowOnboarding(tutorialState)) return null;
+    // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E refs.
+    // overlayRef: the overlay root, used by the focus trap and Tab cycle.
+    // previousActiveRef: the element focused when the overlay opens, restored
+    //   on unmount. Mirrors A11y Lane A `Modal.tsx` focus-restoration pattern.
+    const overlayRef = useRef<HTMLDivElement | null>(null);
+    const previousActiveRef = useRef<HTMLElement | null>(null);
 
+    const visible = shouldShowOnboarding(tutorialState);
     const completed = tutorialState?.completed_steps ?? [];
-    const next = resolveNextStep(completed);
+    const next = visible ? resolveNextStep(completed) : null;
+    const active = visible && next !== null;
 
-    // All steps done but not yet dismissed — auto-dismiss path is owned by the
-    // App shell / IPC handler; here we just render nothing rather than show a
-    // stale step. The shell may then call dismissTutorial().
-    if (!next) return null;
+    // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — focus capture + restore + first-
+    // focusable focus on open. Effect runs while the overlay is `active`; the
+    // cleanup restores prior focus when the overlay closes (either via
+    // dismissTutorial flipping `tutorial_state.dismissed` or via running out
+    // of steps). Determinism: pure DOM ops, no clock, no Math.random.
+    useEffect(() => {
+        if (!active) return;
+        previousActiveRef.current = (typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null);
+        const focusables = getOverlayFocusables(overlayRef.current);
+        const target = focusables[0] ?? overlayRef.current;
+        if (target && typeof target.focus === 'function') {
+            target.focus();
+        }
+        return () => {
+            const prior = previousActiveRef.current;
+            if (prior && typeof prior.focus === 'function') {
+                try {
+                    prior.focus();
+                } catch {
+                    // Originator may have been unmounted — no-op.
+                }
+            }
+            previousActiveRef.current = null;
+        };
+    }, [active]);
+
+    // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — ESC dismisses the tutorial via
+    // `ipc.dismissTutorial()`. Installed at window level so a focused
+    // descendant still receives the dismiss. Guarded on `pending` (no
+    // double-fire mid-IPC) and on `ipc !== null` (headless preview no-op).
+    useEffect(() => {
+        if (!active) return;
+        const handler = (e: KeyboardEvent) => {
+            if (e.key !== 'Escape') return;
+            if (pending || !ipc) return;
+            e.preventDefault();
+            e.stopPropagation();
+            setPending(true);
+            // Fire-and-forget: ipc.dismissTutorial() is a pure synchronous
+            // transform of meta.tutorial_state in the ipcMain handler, so
+            // we do not block on the promise. `setPending(false)` resets
+            // when the promise settles.
+            ipc.dismissTutorial().finally(() => setPending(false));
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [active, pending, ipc]);
+
+    if (!active || !next) return null;
 
     const indexOneBased = ONBOARDING_STEPS.findIndex(s => s.id === next.id) + 1;
     const total = ONBOARDING_STEPS.length;
+
+    // Deterministic id used by `aria-labelledby` to resolve to the
+    // visually-hidden step-title mirror rendered below. Stable across
+    // renders for the same step id.
+    const titleId = `onboarding-title-${next.id}`;
 
     const onAdvance = async () => {
         if (pending || !ipc) return;
@@ -175,10 +270,41 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         }
     };
 
+    // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — Tab / Shift+Tab cycle inside
+    // the overlay's focusable descendants. Mirrors A11y Lane A
+    // `Modal.tsx`'s `handlePanelKeyDown`. Attached to the overlay root so
+    // any keypress while focus is anywhere inside the overlay is handled.
+    const onOverlayKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+        if (e.key !== 'Tab') return;
+        const focusables = getOverlayFocusables(overlayRef.current);
+        if (focusables.length === 0) {
+            e.preventDefault();
+            return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const current = (typeof document !== 'undefined'
+            ? (document.activeElement as HTMLElement | null)
+            : null);
+        if (e.shiftKey && current === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && current === last) {
+            e.preventDefault();
+            first.focus();
+        }
+    };
+
     return (
         <div
+            ref={overlayRef}
             data-testid="onboarding-overlay"
             data-tutorial-step={next.target_ui_element === null ? next.id : undefined}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
+            onKeyDown={onOverlayKeyDown}
             style={{
                 position: 'fixed',
                 inset: 0,
@@ -190,6 +316,32 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                 pointerEvents: 'auto',
             }}
         >
+            {/*
+              * LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — visually-hidden title
+              * mirror so `aria-labelledby` resolves inside the overlay's own
+              * subtree. The visible title rendered by `OnboardingStep` is
+              * untouched (Lane E does not modify the sibling component); a
+              * second a11y-only mirror keeps the wiring deterministic and
+              * does not require coupling between the two files. Screen
+              * readers announce the dialog name from this element.
+              */}
+            <h2
+                id={titleId}
+                data-testid="onboarding-title-mirror"
+                style={{
+                    position: 'absolute',
+                    width: 1,
+                    height: 1,
+                    padding: 0,
+                    margin: -1,
+                    overflow: 'hidden',
+                    clip: 'rect(0, 0, 0, 0)',
+                    whiteSpace: 'nowrap',
+                    border: 0,
+                }}
+            >
+                {next.title}
+            </h2>
             <OnboardingStep
                 step={next}
                 indexOneBased={indexOneBased}
