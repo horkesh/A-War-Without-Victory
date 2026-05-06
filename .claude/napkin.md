@@ -72,6 +72,17 @@
 - `6f378afd` Perf Phase 0 panel — **STOP-AND-RECOMMEND across all 5 candidate optimization lanes** (Wave 7+8 already harvested single dominator; post-W8 cost diffuse). 3 immediately-dispatchable instrumentation lanes named: bot-orders internals hrtime, 188w heap profile, sector-partition spike characterization. Tier 2 perf: analyzeFactionGraph 66.3→14.2ms/call (~78% reduction); 40w hash `ef03ab4d6c5ecd28` byte-stable across n1640/n1649/n1651/n1660.
 - Codex Wave 4 first attempt (`affe03f6f7c8921b3`) STOP-AND-ASKed on path mismatch (canonical 1992-essay corpus is `data/scenarios/essays/*.json` not `data/codex/**/*.md`); 13-event inventory preserved; re-dispatched with corrected scope (`a76b343e4cb33db4a`).
 - Active in flight: a11y Phase 0 panel (`a690bcc408b72973c`) + Tutorial Phase 0 panel (`ad0eeab69a6ca8e47`) + Codex Wave 4 retry + 3 perf instrumentation lanes (bot-orders + heap-profile + sector-partition).
+- A11y Phase 0 panel landed clean (`49375b5a`): 35 gaps across 8 categories; **4 P0 v1.0-ship blockers** (clickable-div anti-pattern in 4 files; WCAG-AA contrast borderline tokens; zero `prefers-reduced-motion`; zero form-label `htmlFor=`); 5-lane implementation plan (file-disjoint, parallel-safe; Wave 1=A+B+D recommended); 50 ACs + 5 STs.
+- Tutorial Phase 0 panel landed clean (`6a0ad4c2`): 8-step `OnboardingOverlay` system shipped at `d6da6ad4`; legacy `TUTORIAL_OBJECTIVES` is dead code (zero importers); `data-tutorial-step="map-container"` MISSING in src/; 5-lane plan with autonomous-friendly vs needs-user-direction split; 12 ACs + 5 STs.
+- 188w heap profile lane (`a12c0d39952b6b942`) cut off at 31s; retried as `a1dc7a60d0a457e21` with explicit drive-to-completion directive.
+
+**4 v1.0 implementation lanes dispatched 2026-05-06:**
+- `a4523756b6460cae3` A11y Lane A — Modal stack a11y baseline (Modal.tsx + 12 migrated modals + clickable-div fix)
+- `a4b6587cde3331863` A11y Lane B + Tutorial map-container anchor bundled (Map landmarks + canvas keyboard pan + tutorial anchor wire)
+- `a381039d8ea82ddc2` A11y Lane D — color-contrast + reduced-motion + colorblind support (closes 3 P0s; HIGHEST priority)
+- `a3966c5244ee15979` Tutorial Lane B subset — auto-dismiss on final step + mount RestartButton (autonomous-friendly per panel)
+
+**8 lanes in flight total** (4 perf instrumentation + Codex Wave 4 retry + heap profile retry + 3 a11y/tutorial implementation). All file-disjoint via pathspec-form ownership.
 
 **v0.9.5-alpha.1 TAGGED 2026-05-06** — first formal pre-release tag pushed at `58309a19`. `.github/workflows/release.yml` (committed at `9d38f09b`, never run live) executing now (run `25407343785`) — exercises Linux AppImage + Win unsigned NSIS build matrix, smoke verifiers, and `softprops/action-gh-release@v2` upload to GitHub Release. Manual install/launch/save/load/uninstall validation per `docs/40_reports/PLATFORM_TEST_MATRIX.md` required before promoting to v0.9.5 non-prerelease.
 
