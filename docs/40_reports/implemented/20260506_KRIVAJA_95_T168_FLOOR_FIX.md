@@ -1,7 +1,7 @@
 # Krivaja-95 t168 Floor Fix — LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX
 
 **Date:** 2026-05-06
-**Status:** IN PROGRESS
+**Status:** SHIPPED `d622b762` (parent-recovered after agent stalled at watchdog mid-test-authoring; 10/10 tests GREEN; tsc clean)
 **Class:** Ring 1 / canon-data tweak / §6 compliance fix (ENFORCING canonical floor)
 **Sign-off precedent:** Stupčanica SHAPE B `b03333af`; Krivaja Phase 1 `bc44ddec`
 
