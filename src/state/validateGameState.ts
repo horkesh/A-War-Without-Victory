@@ -498,12 +498,23 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                         errors.push(`military.army_corps_directives_by_faction.${fid} must be an object`);
                         continue;
                     }
+                    // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON):
+                    // optional `deviation_reason` field when `deviated=true`.
+                    // Closed enum; field is omitted when `deviated=false`.
+                    // Validator is permissive: allows `deviation_reason` even
+                    // when `deviated=false` (back-compat) but if the field is
+                    // present it MUST be one of the canonical codes.
+                    const validDeviationReasons = new Set([
+                        'aggressive_preference',
+                        'cautious_preference',
+                        'compliance_score_low',
+                    ]);
                     for (const [corpsId, cd] of Object.entries(factionMap as Record<string, unknown>)) {
                         if (cd == null || typeof cd !== 'object' || Array.isArray(cd)) {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId} must be an object`);
                             continue;
                         }
-                        const entry = cd as { corps_id?: unknown; role?: unknown; deviated?: unknown };
+                        const entry = cd as { corps_id?: unknown; role?: unknown; deviated?: unknown; deviation_reason?: unknown };
                         if (typeof entry.corps_id !== 'string' || entry.corps_id.length === 0) {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.corps_id must be a non-empty string`);
                         }
@@ -512,6 +523,11 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                         }
                         if (typeof entry.deviated !== 'boolean') {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.deviated must be a boolean`);
+                        }
+                        if (entry.deviation_reason !== undefined) {
+                            if (typeof entry.deviation_reason !== 'string' || !validDeviationReasons.has(entry.deviation_reason)) {
+                                errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.deviation_reason must be one of 'aggressive_preference'|'cautious_preference'|'compliance_score_low' when present`);
+                            }
                         }
                     }
                 }

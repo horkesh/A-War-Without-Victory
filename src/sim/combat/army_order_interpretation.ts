@@ -421,11 +421,51 @@ export type ArmyComplianceCategory = 'full' | 'modified' | 'partial' | 'refused'
  */
 export type ArmyCorpsDirectiveRole = 'primary' | 'secondary' | 'economy' | 'contain';
 
+/**
+ * Canonical reason-code enum for `deviation_reason` (Q2 surface).
+ *
+ * Lane: LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON.
+ * Surfaced by API smoke run as DG-CLUSTER-3 ("compliance: deviated" universal
+ * default with no reason field — commanders cannot act on it).
+ *
+ * Mapping is purely deterministic over the existing scoring logic in this
+ * file (DDR Q2 thresholds — see `categoryForScore` and `deviationStepsForCategory`):
+ *   • `compliance_score_low` — category is 'partial' or 'refused'
+ *     (score < MODIFIED_COMPLIANCE_THRESHOLD = 0.50). Officer's overall trust
+ *     in the directive is low; per-corps deviation is the explicit pushback.
+ *   • `aggressive_preference` — category is 'modified' AND officer's preferred
+ *     role rank is HIGHER than the raw role rank (officer wants more aggressive
+ *     posture: e.g. `primary` when directive said `secondary`).
+ *   • `cautious_preference` — category is 'modified' AND officer's preferred
+ *     role rank is LOWER than the raw role rank (officer wants less aggressive
+ *     posture: e.g. `contain` when directive said `primary`).
+ *
+ * Faction-symmetric: derived purely from numeric data (officer competence /
+ * stubbornness / aggressiveness + score). No `if (faction === 'X')` branches.
+ *
+ * Set membership is closed: every `deviated=true` outcome maps to exactly one
+ * of these three codes. (`undefined` when `deviated=false`.)
+ */
+export type ArmyCorpsDirectiveDeviationReason =
+    | 'aggressive_preference'
+    | 'cautious_preference'
+    | 'compliance_score_low';
+
 export interface ArmyCorpsDirective {
     corps_id: string;
     role: ArmyCorpsDirectiveRole;
     /** True when this directive deviated from the raw political-verb baseline. */
     deviated: boolean;
+    /**
+     * Reason code explaining WHY this corps deviated from the raw role
+     * (Q2 surface). Defined iff `deviated === true`. See
+     * `ArmyCorpsDirectiveDeviationReason` for code semantics.
+     *
+     * DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+     * Q2 ("ADVISORY shape — compliance-score thresholds"). Lane:
+     * LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON.
+     */
+    deviation_reason?: ArmyCorpsDirectiveDeviationReason;
 }
 
 export interface ArmyDirectiveInterpretation {
@@ -585,6 +625,40 @@ function preferredRoleForOfficer(data: NamedOfficer): ArmyCorpsDirectiveRole {
 }
 
 /**
+ * Deterministic mapping from (category, rawRoleRank, preferredRoleRank) to
+ * a canonical deviation-reason code. Faction-symmetric — depends only on the
+ * scoring/category outputs already computed by A3.
+ *
+ * Returns `undefined` when no deviation occurred OR when the category is
+ * 'full' (which never deviates anyway). The caller (interpretArmyDirective)
+ * must only attach the reason to corps directives whose `deviated === true`.
+ *
+ * Lane: LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON.
+ * DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+ * (Q2 advisory thresholds + Q3 stubbornness mechanic).
+ */
+function deviationReasonForCorps(
+    category: ArmyComplianceCategory,
+    rawRoleRank: number,
+    preferredRoleRank: number,
+): ArmyCorpsDirectiveDeviationReason | undefined {
+    if (category === 'full') return undefined;
+    // Below MODIFIED_COMPLIANCE_THRESHOLD: officer's overall trust in the
+    // directive is low. Score-driven, not direction-driven.
+    if (category === 'partial' || category === 'refused') {
+        return 'compliance_score_low';
+    }
+    // 'modified' — direction-driven mapping.
+    if (preferredRoleRank > rawRoleRank) return 'aggressive_preference';
+    if (preferredRoleRank < rawRoleRank) return 'cautious_preference';
+    // Equal ranks within 'modified' produce no deviation (deviationStepsForCategory
+    // returns 0). Defensive: still classify so callers checking deviated=true
+    // get a stable code; 'aggressive_preference' is the safe default since
+    // modified compliance is bounded above 'full' by ALIGNMENT.
+    return 'aggressive_preference';
+}
+
+/**
  * Build a player-safe reason string for the interpretation event.
  */
 function buildArmyReason(
@@ -720,11 +794,21 @@ export function interpretArmyDirective(
         const steps = deviationStepsForCategory(category, rawRank, preferredRank);
         const newRank = Math.max(0, Math.min(ROLE_LADDER.length - 1, rawRank + steps));
         const finalRole = ROLE_LADDER[newRank]!;
-        return {
+        const deviated = finalRole !== rawRole;
+        // Q2 deviation_reason: only emit when this corps actually deviated.
+        // Reason is a deterministic function of (category, rawRank, preferredRank);
+        // see `deviationReasonForCorps` doc-comment for the mapping table.
+        // Lane: LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON.
+        const reasonCode = deviated
+            ? deviationReasonForCorps(category, rawRank, preferredRank)
+            : undefined;
+        const out: ArmyCorpsDirective = {
             corps_id: corpsId,
             role: finalRole,
-            deviated: finalRole !== rawRole,
+            deviated,
         };
+        if (reasonCode !== undefined) out.deviation_reason = reasonCode;
+        return out;
     });
 
     const reason = buildArmyReason(data.name, directive.verb, category);
@@ -951,11 +1035,20 @@ function persistCorpsDirectives(
         a.corps_id < b.corps_id ? -1 : (a.corps_id > b.corps_id ? 1 : 0),
     );
     for (const cd of sorted) {
-        factionMap[cd.corps_id] = {
+        // Q2: forward `deviation_reason` to the persisted slot iff the source
+        // directive carries one (only present when deviated=true). Backward-
+        // compatible: pre-Q2 saves load with `deviation_reason` undefined and
+        // the validator accepts the field as optional.
+        // Lane: LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON.
+        const persisted: ArmyCorpsDirective = {
             corps_id: cd.corps_id,
             role: cd.role,
             deviated: cd.deviated,
         };
+        if (cd.deviation_reason !== undefined) {
+            persisted.deviation_reason = cd.deviation_reason;
+        }
+        factionMap[cd.corps_id] = persisted;
     }
     mil.army_corps_directives_by_faction[faction] = factionMap;
 }

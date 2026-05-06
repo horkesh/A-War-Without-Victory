@@ -380,19 +380,32 @@ function readArmyCorpsDirectiveOverlay(
     state: GameState,
     faction: FactionId,
     corpsId: FormationId,
-): { role: 'primary' | 'secondary' | 'economy' | 'contain' } | null {
+): {
+    role: 'primary' | 'secondary' | 'economy' | 'contain';
+    deviated: boolean;
+    deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
+} | null {
     if (process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED === 'true') return null;
     type LooseMilitary = GameState['military'] & {
         army_corps_directives_by_faction?: Record<string, Record<string, {
             corps_id: string;
             role: 'primary' | 'secondary' | 'economy' | 'contain';
             deviated: boolean;
+            deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
         }>>;
     };
     const mil = state.military as LooseMilitary;
     const slot = mil.army_corps_directives_by_faction?.[faction]?.[corpsId];
     if (!slot) return null;
-    return { role: slot.role };
+    // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): forward
+    // `deviation_reason` to the briefing overlay so the commander loop
+    // (and downstream API prompt construction) can act on the reason
+    // instead of seeing an opaque `compliance: deviated` flag.
+    return {
+        role: slot.role,
+        deviated: slot.deviated === true,
+        ...(slot.deviation_reason !== undefined ? { deviation_reason: slot.deviation_reason } : {}),
+    };
 }
 
 function collectCampaignIntent(
@@ -406,6 +419,14 @@ function collectCampaignIntent(
     stanceCeiling: CommanderBriefing['campaign_stance_ceiling'];
     syncRole: CommanderBriefing['campaign_sync_role'];
     syncTargets: readonly string[];
+    /**
+     * Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): canonical reason
+     * code surfaced from the C1 overlay slot when present and the corps
+     * directive deviated. Null when no overlay, no deviation, or the field
+     * is absent in the persisted slot. Threaded into `CommanderBriefing.
+     * campaign_role_deviation_reason` for downstream visibility.
+     */
+    deviationReason: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low' | null;
 } {
     const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
     const turn = state.meta?.turn ?? 0;
@@ -414,6 +435,13 @@ function collectCampaignIntent(
     // when present. When the slot is absent (env-flag short-circuit, no
     // directive emitted, pre-C1 save), fall back to A1's CampaignPlan path.
     const overlay = readArmyCorpsDirectiveOverlay(state, faction, corpsId);
+
+    // Q2 reason surfaces only when the overlay records a deviation. (If the
+    // overlay is null, fall back returns null reason; the deterministic
+    // briefing path is unchanged for non-overlay states.)
+    const deviationReason = overlay?.deviated === true && overlay.deviation_reason
+        ? overlay.deviation_reason
+        : null;
 
     if (!plan || plan.valid_until_turn < turn) {
         // No CampaignPlan — overlay still wins for `role` if present.
@@ -424,6 +452,7 @@ function collectCampaignIntent(
             stanceCeiling: null,
             syncRole: null,
             syncTargets: [],
+            deviationReason,
         };
     }
 
@@ -446,6 +475,7 @@ function collectCampaignIntent(
         stanceCeiling: plan.doctrine_override?.corps_stance_ceilings?.[corpsId] ?? null,
         syncRole: syncParticipant?.role ?? null,
         syncTargets: [...(syncParticipant?.target_osids ?? [])].sort(strictCompare),
+        deviationReason,
     };
 }
 
@@ -534,7 +564,15 @@ export function buildBriefing(
         ...campaignIntent.holdTargets,
     ].sort(strictCompare);
 
-    return {
+    // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): attach the
+    // deviation reason as a structural extension to the briefing. Field is
+    // omitted when no deviation/no overlay/no reason. Downstream readers
+    // (api_commander prompt, commander loop diagnostics) read defensively
+    // by property access — the canonical type lives at the writer site
+    // (`ArmyCorpsDirectiveDeviationReason` in army_order_interpretation.ts).
+    // We avoid extending CommanderBriefing in commander_state.ts to keep
+    // singular ownership of the briefing surface here at the assembly site.
+    const briefing: CommanderBriefing = {
         corps_id: corpsId,
         faction,
         turn,
@@ -569,4 +607,11 @@ export function buildBriefing(
         campaign_sync_role: campaignIntent.syncRole,
         campaign_sync_targets: campaignIntent.syncTargets,
     };
+    if (campaignIntent.deviationReason !== null) {
+        // Structural addition; tests read via property access, downstream
+        // consumers read via the same path (commander loop / api_commander).
+        (briefing as unknown as { campaign_role_deviation_reason?: string })
+            .campaign_role_deviation_reason = campaignIntent.deviationReason;
+    }
+    return briefing;
 }

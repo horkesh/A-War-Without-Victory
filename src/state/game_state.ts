@@ -2028,6 +2028,15 @@ army_corps_directives_by_faction?: Record<string, Record<string, {
     corps_id: string;
     role: 'primary' | 'secondary' | 'economy' | 'contain';
     deviated: boolean;
+    /**
+     * Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): canonical reason
+     * code explaining WHY this corps deviated from the raw role. Defined iff
+     * `deviated === true`; omitted when `deviated === false`. See
+     * `ArmyCorpsDirectiveDeviationReason` in
+     * `src/sim/combat/army_order_interpretation.ts` for the closed enum and
+     * mapping rules.
+     */
+    deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
 }>>;
 /** Per-brigade elite deployment tracker. Keyed by brigade FormationId. */
 elite_brigade_tracker?: Record<string, EliteBrigadeTracker>;

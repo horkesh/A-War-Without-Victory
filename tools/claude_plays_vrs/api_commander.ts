@@ -45,6 +45,13 @@ type LooseMilitaryWithDirectives = GameState['military'] & {
         corps_id: string;
         role: 'primary' | 'secondary' | 'economy' | 'contain';
         deviated: boolean;
+        // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): canonical
+        // reason code emitted by A3 when `deviated=true`. Surfaced into the
+        // API prompt's chain-context section so the API commander can
+        // reason about WHY the army CO deviated, not just THAT it did.
+        // Closed enum mirrored from
+        // `src/sim/combat/army_order_interpretation.ts:ArmyCorpsDirectiveDeviationReason`.
+        deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
     }>>;
 };
 
@@ -98,7 +105,14 @@ export function buildChainContextSection(state: GameState, faction: FactionId): 
         for (const cid of corpsIds) {
             const cd = corpsMap![cid];
             const compliance = cd.deviated ? 'deviated' : 'full';
-            lines.push(`  - ${cid}: role=${cd.role} (compliance: ${compliance})`);
+            // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): emit the
+            // canonical reason code when deviated=true and the field is
+            // present. Format mirrors the existing `(compliance: <cat>)`
+            // shape so the prompt remains parseable / diff-stable.
+            const reasonSuffix = cd.deviated && cd.deviation_reason
+                ? `, reason: ${cd.deviation_reason}`
+                : '';
+            lines.push(`  - ${cid}: role=${cd.role} (compliance: ${compliance}${reasonSuffix})`);
         }
     } else {
         lines.push('Army CO translation: (no corps directives persisted)');

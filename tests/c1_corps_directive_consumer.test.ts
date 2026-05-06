@@ -363,12 +363,23 @@ describe('C1 — reuses existing rawRoleForVerb mapping', () => {
         const slot = readSlot(state2)!;
         // For each corps in interp, the persisted role MUST equal
         // interp.corps_directives[].role (no remapping in C1).
+        // NOTE (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): Q2 added
+        // an optional `deviation_reason` field that is forwarded by C1's
+        // persistCorpsDirectives. The C1 contract is unchanged — the role
+        // mirror still holds — but an exact-equal match on the persisted
+        // record would now also need to match `deviation_reason`. Use
+        // toMatchObject so C1's role-mirror invariant remains the assertion.
         for (const cd of interp.corps_directives) {
-            expect(slot['RS']![cd.corps_id]).toEqual({
+            expect(slot['RS']![cd.corps_id]).toMatchObject({
                 corps_id: cd.corps_id,
                 role: cd.role,
                 deviated: cd.deviated,
             });
+            // If Q2 emitted a reason on the in-memory directive, it MUST
+            // mirror into the persisted slot (forwards the field 1:1).
+            const persisted = slot['RS']![cd.corps_id] as { deviation_reason?: string };
+            const inMemory = cd as unknown as { deviation_reason?: string };
+            expect(persisted.deviation_reason).toBe(inMemory.deviation_reason);
         }
     });
 });
