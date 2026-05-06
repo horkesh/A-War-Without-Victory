@@ -474,14 +474,20 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-end pointer-events-none">
-            <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={onClose} />
+            {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
+            <button
+                type="button"
+                aria-label="Close After-Action Report"
+                className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
+                onClick={onClose}
+            />
             <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
                     <div>
                         <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">After-Action Report</span>
                         {summary && <span className="text-[10px] text-text-secondary ml-2 font-mono">{formatTurnLabel(loadedGameState.label)}</span>}
                     </div>
-                    <button onClick={onClose} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
+                    <button type="button" onClick={onClose} aria-label="Close After-Action Report" className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
                 </div>
                 <div className="p-3 overflow-auto text-[11px] flex-1">
                     {body}

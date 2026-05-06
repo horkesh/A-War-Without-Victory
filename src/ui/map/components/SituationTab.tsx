@@ -1,3 +1,12 @@
+/**
+ * Situation tab — strategic / casualty / IVP / convoy / OPSEC overview.
+ *
+ * A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C — verified clean of clickable-div
+ * anti-pattern: every interactive element here is a real <button>. The lane
+ * keeps SituationTab in scope for static-grep guards that prevent the
+ * anti-pattern from regressing during future feature work. See
+ * `tests/v093_a11y_lane_c_warroom_decision_room.test.ts`.
+ */
 import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';

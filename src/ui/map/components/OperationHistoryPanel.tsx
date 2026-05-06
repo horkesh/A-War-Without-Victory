@@ -506,11 +506,17 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
 
     return (
         <div className="fixed inset-0 z-50 flex items-start justify-end pointer-events-none">
-            <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={onClose} />
+            {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
+            <button
+                type="button"
+                aria-label="Close Operations panel"
+                className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
+                onClick={onClose}
+            />
             <div className="relative panel-slide-in-right pointer-events-auto w-[24rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
                     <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">Operations</span>
-                    <button onClick={onClose} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
+                    <button type="button" onClick={onClose} aria-label="Close Operations panel" className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
                 </div>
                 <div className="p-3 overflow-auto flex-1">{body}</div>
             </div>

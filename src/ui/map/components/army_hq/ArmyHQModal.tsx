@@ -8,7 +8,7 @@
  *
  * See: docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md
  */
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warroomReturn';
@@ -175,13 +175,38 @@ export function ArmyHQModal() {
         setOpen(false);
     }, [data, faction, setOpen, setSelectedArmyHqId]);
 
+    /**
+     * A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C — tablist arrow-key navigation.
+     * ArrowLeft / ArrowRight cycle (with wrap-around). Home / End jump to first / last tab.
+     */
+    const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+    const handleTabKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
+        const len = HQ_TABS.length;
+        let nextIdx: number | null = null;
+        if (e.key === 'ArrowRight') nextIdx = (currentIdx + 1) % len;
+        else if (e.key === 'ArrowLeft') nextIdx = (currentIdx - 1 + len) % len;
+        else if (e.key === 'Home') nextIdx = 0;
+        else if (e.key === 'End') nextIdx = len - 1;
+        if (nextIdx == null) return;
+        e.preventDefault();
+        const nextTab = HQ_TABS[nextIdx];
+        setActiveTab(nextTab.id);
+        tabRefs.current[nextTab.id]?.focus();
+    }, [setActiveTab]);
+
     if (!open || !faction || !state || !data) return null;
 
     const crestSrc = getArmyCrest(faction);
 
     return (
-        <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>
-            <div className="absolute inset-0 bg-black/85" />
+        <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label="Army Headquarters">
+            {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
+            <button
+                type="button"
+                aria-label="Close Army Headquarters"
+                className="absolute inset-0 bg-black/85 cursor-default"
+                onClick={() => setOpen(false)}
+            />
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
@@ -279,28 +304,46 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
+                {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: tablist semantics + arrow-key navigation. */}
                 <div
                     data-tutorial-step="army-hq-tabs"
+                    role="tablist"
+                    aria-label="Army HQ sections"
                     className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0"
                 >
-                    {HQ_TABS.map(({ id, label }) => (
-                        <button
-                            key={id}
-                            type="button"
-                            data-tutorial-step={`army-hq-tab-${id}`}
-                            onClick={() => setActiveTab(id)}
-                            className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
-                                activeTab === id
-                                    ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
-                                    : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
-                            }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
+                    {HQ_TABS.map(({ id, label }, idx) => {
+                        const isActive = activeTab === id;
+                        return (
+                            <button
+                                key={id}
+                                id={`army-hq-tab-${id}`}
+                                ref={(el) => { tabRefs.current[id] = el; }}
+                                type="button"
+                                role="tab"
+                                aria-selected={isActive}
+                                aria-controls={`army-hq-tabpanel-${id}`}
+                                tabIndex={isActive ? 0 : -1}
+                                data-tutorial-step={`army-hq-tab-${id}`}
+                                onClick={() => setActiveTab(id)}
+                                onKeyDown={(e) => handleTabKeyDown(e, idx)}
+                                className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
+                                    isActive
+                                        ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
+                                        : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
+                                }`}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
                 </div>
 
-                <div className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3">
+                <div
+                    className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3"
+                    role="tabpanel"
+                    id={`army-hq-tabpanel-${activeTab}`}
+                    aria-labelledby={`army-hq-tab-${activeTab}`}
+                >
 
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
