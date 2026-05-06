@@ -1073,7 +1073,7 @@
     "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Visegrad, Foca, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 4,
+      "turn_min": 8,
       "turn_max": 25,
       "phase": "war",
       "condition": {

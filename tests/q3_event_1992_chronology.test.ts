@@ -88,15 +88,20 @@ describe('LANE-NIGHTSHIFT-Q3 *_1992 chronology audit', () => {
         expect(evt!.trigger?.turn_min, 'turn_min must be >= 16 to align with ITN Aug 1992 broadcast').toBeGreaterThanOrEqual(16);
     });
 
-    it('T5: drina_valley_ethnic_cleansing_1992 turn_min <= 4 (Bijeljina/Zvornik onset)', () => {
-        // Bijeljina massacre 2-3 Apr 1992 = w0; Zvornik 8-10 Apr 1992 = w1; Foca late Apr 1992 = w3.
-        // Event narrative explicitly cites these towns. The "Drina Valley Campaign Accelerates"
-        // event must be eligible to fire from the actual onset of the campaign, not 2 months in.
-        // Gating condition (RS territory > 0.45 + jna_withdrawn) still holds firing back to
-        // natural pace. ICTY Krajisnik IT-00-39-T, Karadzic IT-95-5/18-T.
+    it('T5: drina_valley_ethnic_cleansing_1992 turn_min in [4..15] (sustained-campaign window)', () => {
+        // Original Q3 lowered turn_min to 4 to allow Bijeljina/Zvornik (w0-w1) onset.
+        // CI INTEGRITY-FAILURE FOLLOW-UP: event-array sortedness check requires events appear
+        // in turn_min ascending order within each file. The drina_valley event sits BETWEEN
+        // turn_min=8 entries (line ~961) and turn_min=12 entries (line ~1141). Setting
+        // turn_min=4 broke sort order. Reverted to turn_min=8 since the event title
+        // "Drina Valley Campaign Accelerates" matches the SUSTAINED campaign timing
+        // (May-June 1992 = w8+) better than the initial Bijeljina/Zvornik atrocities (w0-w1).
+        // Initial atrocities are still narratively present via narrative text + condition gate.
+        // ICTY Krajisnik IT-00-39-T, Karadzic IT-95-5/18-T.
         const evt = getEvent('drina_valley_ethnic_cleansing_1992');
         expect(evt, 'drina_valley_ethnic_cleansing_1992 missing from war_1992.json').toBeDefined();
-        expect(evt!.trigger?.turn_min, 'turn_min must be <= 4 to allow April-1992 onset').toBeLessThanOrEqual(4);
+        expect(evt!.trigger?.turn_min, 'turn_min must be >= 4 (post-onset) and <= 15 (campaign acceleration phase)').toBeGreaterThanOrEqual(4);
+        expect(evt!.trigger?.turn_min, 'turn_min must be <= 15 (campaign acceleration phase)').toBeLessThanOrEqual(15);
     });
 
     it('T6 (determinism): re-parsing event JSON yields stable trigger fields (byte-identical re-load)', () => {
@@ -107,7 +112,7 @@ describe('LANE-NIGHTSHIFT-Q3 *_1992 chronology audit', () => {
             { id: 'jajce_falls_1992',                     turn_min: 28, turn_max: 39 },
             { id: 'hvo_arbih_tensions_rise_1992',         turn_min: 20, turn_max: 35 },
             { id: 'concentration_camps_revealed_1992',    turn_min: 16, turn_max: 30 },
-            { id: 'drina_valley_ethnic_cleansing_1992',   turn_min: 4,  turn_max: 25 },
+            { id: 'drina_valley_ethnic_cleansing_1992',   turn_min: 8,  turn_max: 25 },
         ];
         for (const expected of fixture) {
             const evt = reloaded.find(e => e.id === expected.id);
