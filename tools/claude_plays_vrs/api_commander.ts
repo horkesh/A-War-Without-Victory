@@ -2,11 +2,110 @@
  * API-powered commander decisions using Claude.
  * Each faction's army commander gets a Claude API call per turn.
  * Produces structured decisions + natural language briefing + diagnostic observations.
+ *
+ * LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE (2026-05-06): The deterministic C1
+ * substrate persists per-corps role overlays at
+ * `state.military.army_corps_directives_by_faction[faction][corpsId]`, and the
+ * B1 producer writes the originating political verb at
+ * `state.military.political_directives_by_faction[faction]`. This file bridges
+ * those persisted slots into the Claude API commander's user prompt so the API
+ * path sees the same political→army chain context the deterministic corps
+ * commander gets via `briefing.campaign_role`.
+ *
+ * Refs:
+ *   • C1 (persistence): commit 5084071d — re-applied as c084dd86. See
+ *     `src/sim/combat/army_order_interpretation.ts:persistCorpsDirectives`.
+ *   • C-lane DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
+ *   • B-lane DDR: docs/40_reports/audits/20260506_B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DDR.md
+ *
+ * Env flag `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` short-circuits the
+ * chain-context section to the no-directive fallback (mirrors C1 persist
+ * short-circuit — when set, the slots will be empty anyway, but explicit).
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { FactionId, GameState, CorpsStance } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Political → Army chain context (LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Loose-typed accessor for the persisted C1 slot. The slot is optional on
+ * `state.military` (post-C1, opt-in via env flag); we read defensively.
+ */
+type LooseMilitaryWithDirectives = GameState['military'] & {
+    political_directives_by_faction?: Record<string, {
+        verb: string;
+        target_corps_id?: string;
+        directive_id?: string;
+    } | undefined>;
+    army_corps_directives_by_faction?: Record<string, Record<string, {
+        corps_id: string;
+        role: 'primary' | 'secondary' | 'economy' | 'contain';
+        deviated: boolean;
+    }>>;
+};
+
+/**
+ * Build the "Political-Army Chain Context" prompt section. Surfaces:
+ *   • the political directive verb issued to this faction (B1 producer slot)
+ *   • the army CO's per-corps translation: role + deviation flag (C1 slot)
+ *
+ * Backward-compat: when neither slot is populated (pre-substrate state, env
+ * flag disabled, or factions B1 hasn't reached) emits a single fallback line
+ * "(no political directive issued this turn)".
+ *
+ * Determinism: corps_id iteration sorted via `strictCompare`. Plain text only.
+ *
+ * Env flag: when `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` we emit the
+ * fallback section regardless of slot contents (the persist path is already
+ * short-circuited upstream so the slot would be empty anyway, but we are
+ * explicit here for clarity in tests).
+ */
+export function buildChainContextSection(state: GameState, faction: FactionId): string {
+    const HEADER = '=== Political-Army Chain Context ===';
+    const FALLBACK_BODY = '(no political directive issued this turn)';
+
+    if (process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED === 'true') {
+        return `${HEADER}\n${FALLBACK_BODY}`;
+    }
+
+    const mil = state.military as LooseMilitaryWithDirectives;
+    const directive = mil.political_directives_by_faction?.[faction];
+    const corpsMap = mil.army_corps_directives_by_faction?.[faction];
+
+    const hasDirective = !!directive && typeof directive.verb === 'string' && directive.verb.length > 0;
+    const hasCorpsMap = !!corpsMap && Object.keys(corpsMap).length > 0;
+
+    if (!hasDirective && !hasCorpsMap) {
+        return `${HEADER}\n${FALLBACK_BODY}`;
+    }
+
+    const lines: string[] = [HEADER];
+
+    if (hasDirective) {
+        const target = directive!.target_corps_id ? ` -> target corps_id=${directive!.target_corps_id}` : '';
+        lines.push(`Political directive (from president): ${directive!.verb}${target}`);
+    } else {
+        lines.push('Political directive (from president): (none this turn)');
+    }
+
+    if (hasCorpsMap) {
+        lines.push('Army CO translation (per-corps role overlays):');
+        const corpsIds = Object.keys(corpsMap!).sort(strictCompare);
+        for (const cid of corpsIds) {
+            const cd = corpsMap![cid];
+            const compliance = cd.deviated ? 'deviated' : 'full';
+            lines.push(`  - ${cid}: role=${cd.role} (compliance: ${compliance})`);
+        }
+    } else {
+        lines.push('Army CO translation: (no corps directives persisted)');
+    }
+
+    return lines.join('\n');
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -105,7 +204,11 @@ function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: R
     for (const [osid, f] of Object.entries(pc)) {
         const area = osidAreas[osid] ?? 0;
         totalArea += area;
-        if (areaByFaction[f] !== undefined) areaByFaction[f] += area;
+        // Defensive: `political_controllers` value is `FactionId | null`. Null
+        // means uncontrolled and is excluded from per-faction tallies. (Drive-by
+        // fix for pre-existing TS2538 surfaced when this file was reformatted
+        // by LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE.)
+        if (f !== null && areaByFaction[f] !== undefined) areaByFaction[f] += area;
     }
 
     lines.push('');
@@ -178,6 +281,15 @@ function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: R
         lines.push('');
         lines.push(`RECENT EVENTS: ${firedEvents.slice(-5).join(', ')}`);
     }
+
+    // Political → Army chain context (LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE)
+    // Bridges the deterministic C1 substrate
+    // (`state.military.army_corps_directives_by_faction[faction]`) and B1
+    // producer slot (`state.military.political_directives_by_faction[faction]`)
+    // into the API commander's prompt so it sees the same context the
+    // deterministic corps commander gets via briefing.campaign_role.
+    lines.push('');
+    lines.push(buildChainContextSection(state, faction));
 
     // Alliance state (for HRHB/RBiH)
     if (faction === 'HRHB' || faction === 'RBiH') {
