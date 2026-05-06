@@ -186,14 +186,27 @@ export type OfficerEventType =
     | 'order_modified'    // officer silently modified order parameters
     | 'order_refused'     // officer refuses order entirely, reverts to preferred
     | 'order_exceeded'    // officer expanded beyond order scope (aggressive officers)
-    | 'officer_relieved'; // player relieved (fired) the officer
+    | 'officer_relieved'  // player relieved (fired) the officer
+    // ── A3 substrate (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION) ──
+    // DDR-cited per audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+    // (eee308e0). Both event types are fired by the army-level interpretation
+    // path; the corps-level path (order_interpretation.ts) is unchanged.
+    | 'army_directive_pushback'  // army CO objects to political directive (compliance < FULL)
+    | 'army_co_proposes_op';     // Mladić-class autonomous launch proposal (1-turn warning)
 
 /**
  * Snapshot of an order for before/after interpretation comparison.
  * Used in PendingOfficerEvent to show player what changed.
  */
 export interface OrderSnapshot {
-    order_type: 'stance_change' | 'operation_launch' | 'operation_halt' | 'brigade_reassign';
+    order_type:
+        | 'stance_change'
+        | 'operation_launch'
+        | 'operation_halt'
+        | 'brigade_reassign'
+        // ── A3 (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION) ──
+        | 'political_directive'   // army-level: political → corps directive translation
+        | 'army_co_proposed_op';  // army-level: autonomous-launch proposal payload
     corps_id: string;
     /** For stance changes */
     stance?: string;
@@ -202,6 +215,10 @@ export interface OrderSnapshot {
     objectives?: string[];
     /** For halts */
     delay_turns?: number;
+    /** For political_directive (A3): canonical directive verb. */
+    directive_verb?: string;
+    /** For army_co_proposed_op (A3): catalog opportunity_id of the proposed op. */
+    opportunity_id?: string;
 }
 
 export interface PendingOfficerEvent {

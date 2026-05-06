@@ -4,6 +4,10 @@
 
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
 import {
+    applyArmyDirectiveInterpretation,
+    A3_PIPELINE_STEP_NAME,
+} from '../combat/army_order_interpretation.js';
+import {
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
     generateOpportunityProposalReviews,
@@ -1142,6 +1146,30 @@ export const warPhases: NamedPhase[] = [
                 if (faction === context.state.meta.player_faction) continue;
                 evaluateArmyHQGathering(context.state, faction, context.state.meta.turn);
             }
+        },
+    },
+    {
+        // A3 (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION):
+        // Translate POLITICAL directives → per-corps directives via the army CO's
+        // advisory interpretation; emit `army_directive_pushback` PendingOfficerEvent
+        // on non-FULL compliance, plus `army_co_proposes_op` for Mladić-class
+        // autonomous launches (stubbornness ≥ 4 + 12-turn cooldown).
+        //
+        // Position: AFTER `evaluate-army-hq-gathering` (consumes CampaignPlan
+        // context implicitly — same turn) and BEFORE `generate-bot-corps-orders`
+        // (downstream consumer of corps directives).
+        //
+        // SUBSTRATE-DRIVEN: pre-A4-roster-data this step short-circuits when no
+        // political directive is present in state.military.political_directives_by_faction
+        // and when stubbornness fields are unpopulated. 40w byte-stable until A4
+        // populates the canonical roster.
+        //
+        // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+        // (eee308e0). A1: 18136710. A2: ba6955bf.
+        name: A3_PIPELINE_STEP_NAME,
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyArmyDirectiveInterpretation(context.state);
         },
     },
     {
