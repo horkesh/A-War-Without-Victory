@@ -33,6 +33,16 @@ import {
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { Z } from '../../../shared/zIndex';
 import { Modal } from '../../../shared/Modal';
+// LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of Army HQ
+// pushback (CO objections + Mladić-class autonomous-launch warnings).
+// DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+// (eee308e0). Predecessors A1 (18136710) + A2 (ba6955bf) + A3 (c8ff93d8) + A4 (93c75b1d).
+import {
+  ArmyCoPushbackPanel,
+  type ArmyCoOfficerInput,
+  type ArmyCoPendingEventInput,
+  type ArmyCoDecisionTraceInput,
+} from '../../../components/ArmyCoPushbackPanel';
 
 export interface AdvanceTurnModalProps {
   onReviewPriorities?: () => void;
@@ -125,6 +135,95 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
     () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
     [loadedGameState, osidDisplayNames],
   );
+
+  // LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: extract substrate fields from
+  // loadedGameState. A2 fields (stubbornness / override_tolerance /
+  // last_autonomous_launch_turn / recent_overrides) and A3 traces are not yet
+  // typed in LoadedGameState — read via permissive cast and degrade gracefully
+  // when undefined. The panel itself returns null when no data surfaces.
+  const armyCoPushbackData = useMemo(() => {
+    const lgs = loadedGameState as unknown as
+      | (Record<string, unknown> & {
+          turn?: number;
+          player_faction?: string | null;
+          namedOfficerData?: Array<Record<string, unknown>>;
+          namedOfficerStateById?: Record<string, Record<string, unknown>>;
+          pendingOfficerEvents?: Array<Record<string, unknown>>;
+          armyCoDecisionTraces?: Record<string, Array<Record<string, unknown>>>;
+          military?: { army_co_decision_traces?: Record<string, Array<Record<string, unknown>>> };
+        })
+      | null
+      | undefined;
+    if (!lgs) {
+      return {
+        currentTurn: 0,
+        officers: [] as ArmyCoOfficerInput[],
+        pendingOfficerEvents: [] as ArmyCoPendingEventInput[],
+        decisionTraces: {} as Record<string, ArmyCoDecisionTraceInput[]>,
+        playerFaction: null as string | null,
+      };
+    }
+    const officers: ArmyCoOfficerInput[] = (lgs.namedOfficerData ?? []).map((d) => {
+      const id = String(d.id ?? '');
+      const stateById = lgs.namedOfficerStateById?.[id];
+      const dAny = d as Record<string, unknown>;
+      const sAny = (stateById ?? {}) as Record<string, unknown>;
+      return {
+        id,
+        name: String(d.name ?? ''),
+        faction: String(d.faction ?? ''),
+        rank: String(d.rank ?? ''),
+        stubbornness: typeof dAny.stubbornness === 'number' ? dAny.stubbornness : undefined,
+        override_tolerance:
+          typeof dAny.override_tolerance === 'number' ? dAny.override_tolerance : undefined,
+        last_autonomous_launch_turn:
+          typeof sAny.last_autonomous_launch_turn === 'number'
+            ? sAny.last_autonomous_launch_turn
+            : undefined,
+        recent_overrides: Array.isArray(sAny.recent_overrides)
+          ? (sAny.recent_overrides as Array<{
+              turn: number;
+              resolution: 'accept' | 'override' | 'relieve';
+            }>)
+          : undefined,
+      };
+    });
+    const pending: ArmyCoPendingEventInput[] = (lgs.pendingOfficerEvents ?? []).map((e) => ({
+      event_id: String(e.event_id ?? ''),
+      type: String(e.type ?? ''),
+      faction: String(e.faction ?? ''),
+      turn: Number(e.turn ?? 0),
+      officer_id: String(e.officer_id ?? ''),
+      officer_name: typeof e.officer_name === 'string' ? e.officer_name : undefined,
+      reason: typeof e.reason === 'string' ? e.reason : undefined,
+      overridable: Boolean(e.overridable),
+    }));
+    // Trace source order:
+    //  1. Top-level `armyCoDecisionTraces` if the adapter ever surfaces it.
+    //  2. `military.army_co_decision_traces` from raw state pass-through.
+    //  3. {} fallback (panel renders nothing for that section).
+    const tracesRaw =
+      lgs.armyCoDecisionTraces ?? lgs.military?.army_co_decision_traces ?? {};
+    const decisionTraces: Record<string, ArmyCoDecisionTraceInput[]> = {};
+    for (const faction of Object.keys(tracesRaw).sort()) {
+      const arr = tracesRaw[faction];
+      if (!Array.isArray(arr)) continue;
+      decisionTraces[faction] = arr.map((entry) => ({
+        turn: Number(entry.turn ?? 0),
+        campaign_role: String(entry.campaign_role ?? ''),
+        rationale: String(entry.rationale ?? ''),
+        raw_directive_id:
+          typeof entry.raw_directive_id === 'string' ? entry.raw_directive_id : undefined,
+      }));
+    }
+    return {
+      currentTurn: typeof lgs.turn === 'number' ? lgs.turn : 0,
+      officers,
+      pendingOfficerEvents: pending,
+      decisionTraces,
+      playerFaction: typeof lgs.player_faction === 'string' ? lgs.player_faction : null,
+    };
+  }, [loadedGameState]);
 
   const handleConfirm = async () => {
     if (advancing) return;
@@ -220,6 +319,17 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
               />
             ))}
           </section>
+
+          {/* LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of CO
+              objections + Mladić-class autonomous-launch warnings. Panel
+              returns null when no data surfaces — keeps shell clean. */}
+          <ArmyCoPushbackPanel
+            currentTurn={armyCoPushbackData.currentTurn}
+            officers={armyCoPushbackData.officers}
+            pendingOfficerEvents={armyCoPushbackData.pendingOfficerEvents}
+            decisionTraces={armyCoPushbackData.decisionTraces}
+            playerFaction={armyCoPushbackData.playerFaction}
+          />
         </div>
 
         <div className="flex flex-wrap gap-2 border-t-2 border-neutral-300 bg-neutral-100 px-4 py-3">
