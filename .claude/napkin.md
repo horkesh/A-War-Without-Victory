@@ -98,7 +98,17 @@
 - ✓ A11y Lane C (`e81c7e3e`) — Warroom/Decision Room/tablist + 4 div-onClick fixes; **closes 4th P0 (clickable-div)**; ArmyHQ tablist upgraded to full WAI-ARIA. **All 4 P0 v1.0-ship a11y blockers now CLOSED.**
 - ✓ Tutorial Lane E (`5e422ed8`) — OnboardingOverlay role="dialog" + focus trap + ESC dismissal; layered on Tutorial Lane B-subset's auto-dismiss.
 - ✓ Tutorial Lane C (`542cef3b`) — anchor-coverage regression test; all 7 non-null step anchors verified emitted; dynamic `army-hq-tab-${id}` template-literal covered.
-- A11y Lane E (forms + SrAnnouncer) — in flight; sibling agents flagged TS errors in its test file (lines 112, 168 — `<SrAnnouncerProvider />` missing children prop); agent should self-correct since the test file is its own.
+- ✓ A11y Lane E (`926e4256`) — 8 form fixes (htmlFor pairings, aria-label on hidden inputs); `src/ui/shared/SrAnnouncer.tsx` primitive added (App.tsx mount deferred to Lane B follow-up; file-disjoint mandate honored). Agent resolved its own TS errors before committing.
+
+**Wave 2 100% COMPLETE (4/4 lanes shipped). Total v1.0 ship-readiness sprint: 12 commits across 12 lanes (10 SHIPPED + 2 REVERTED-but-documented).**
+
+**Available successor lanes (small, autonomous-friendly):**
+- SrAnnouncer App.tsx mount (Lane B successor; ~20 LOC)
+- Heading hierarchy a11y pass (A11y deferred AC C-C4; per-component small fix)
+- Warroom DOM-injected accessible names (A11y deferred AC C-C5; needs Playwright e2e)
+- Re-dispatch bot-orders + heap-profile per fixed pattern (parent-owned subprocess)
+
+**Out-of-mandate (need user design direction):** v1.0 master-roadmap items — AI Commander intelligence (PERCEIVE-DECIDE-EXECUTE), Order Interpretation system, Political Leader Bot, Consequence-system ahistorical branching, Tutorial Lane A content tone.
 
 **Two new durable KNOWLEDGE entries (2026-05-06; cited above):**
 1. Multi-agent git-index sweep risk: `git commit -o <files>` pathspec form is MANDATORY in any parallel-batch context; long-running subprocesses belong to parent (Bash background) not agent.
