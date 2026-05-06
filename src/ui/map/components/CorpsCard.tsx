@@ -209,6 +209,7 @@ export function CorpsCard({
               value={stance ?? 'balanced'}
               onChange={(event) => handleStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
+              aria-label="Corps stance"
               className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
             >
               <option value="defensive" title="Digs in. No offensive operations. Maximum entrenchment rate.">Defensive</option>

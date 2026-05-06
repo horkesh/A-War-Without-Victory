@@ -448,11 +448,12 @@ export function PresidentialToolbar({
                     <input
                         type="text" value={runIdInput} onChange={(e) => setRunIdInput(e.target.value)}
                         placeholder="RUN_ID" onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
+                        aria-label="Dev: load run by ID"
                         className="w-20 px-1 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-amber-400/40 focus:outline-none"
                     />
                     <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">SYNC</button>
                     <button onClick={handleSave} disabled={!loadedGameState || !ipc.isAvailable} className={`px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 border border-white/10 rounded transition-colors disabled:opacity-30 ${saveFlash ? 'text-green-400 border-green-500/30' : 'text-text-secondary hover:text-text-primary hover:border-white/20'}`}>{saveFlash ? 'SAVED!' : 'SAVE'}</button>
-                    <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoadFile} className="hidden" />
+                    <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoadFile} aria-label="Dev: load save file" className="hidden" />
                 </div>
             )}
 

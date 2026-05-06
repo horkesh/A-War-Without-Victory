@@ -50,8 +50,9 @@ export function CommandTopBar({
 
                 <div className="flex items-center gap-6">
                     <div className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Directive Name</label>
+                        <label htmlFor="command-topbar-directive-name" className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Directive Name</label>
                         <input
+                            id="command-topbar-directive-name"
                             type="text"
                             value={opName}
                             onChange={(e) => onNameChange(e.target.value)}

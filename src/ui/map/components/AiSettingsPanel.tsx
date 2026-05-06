@@ -40,10 +40,14 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
             <div className="space-y-5">
                 {/* API Key */}
                 <div className="space-y-1.5">
-                    <label className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
+                    <label
+                        htmlFor="ai-settings-api-key"
+                        className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]"
+                    >
                         Anthropic API Key
                     </label>
                     <input
+                        id="ai-settings-api-key"
                         type="password"
                         value={apiKey}
                         onChange={(e) => setApiKey(e.target.value)}

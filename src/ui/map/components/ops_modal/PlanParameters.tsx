@@ -101,10 +101,14 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
             {/* Operation name */}
             <div className="flex flex-col gap-1.5 rounded-md border border-[rgba(180,160,130,0.12)]
                             bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
-                <span className="text-[7px] font-bold uppercase tracking-[0.25em] text-text-secondary/50">
+                <label
+                    htmlFor="plan-params-op-name"
+                    className="text-[7px] font-bold uppercase tracking-[0.25em] text-text-secondary/50"
+                >
                     Name
-                </span>
+                </label>
                 <input
+                    id="plan-params-op-name"
                     type="text"
                     value={plan.opName}
                     onChange={(e) => onUpdate({ opName: e.target.value })}

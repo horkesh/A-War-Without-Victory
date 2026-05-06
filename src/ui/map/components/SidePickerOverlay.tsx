@@ -65,6 +65,7 @@ export function SidePickerOverlay({
               type="file"
               id="map-file-input"
               accept=".json"
+              aria-label="Load save file"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];

@@ -177,8 +177,14 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   </div>
                   {eligibleEnclaveIdSet.has(enclaveId) && (
                     <div className="col-span-2">
-                      <div className="text-text-secondary mb-1">Allocated supply</div>
+                      <label
+                        htmlFor={`enclave-allocation-${enclaveId}`}
+                        className="text-text-secondary mb-1 block"
+                      >
+                        Allocated supply
+                      </label>
                       <input
+                        id={`enclave-allocation-${enclaveId}`}
                         type="number"
                         min={0}
                         max={airdropBudget}

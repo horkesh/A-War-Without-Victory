@@ -253,6 +253,7 @@ export function TopToolbar({
                 value={runIdInput}
                 onChange={(e) => setRunIdInput(e.target.value)}
                 placeholder="RUN_ID"
+                aria-label="Dev: load run by ID"
                 className="w-[4.5rem] px-1 py-0.5 text-[8px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-interactive/40 focus:outline-none transition-colors"
                 onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
               />
@@ -416,6 +417,7 @@ export function TopToolbar({
           type="file"
           accept=".json"
           onChange={handleFileChange}
+          aria-label="Dev: load save file"
           className="hidden"
         />
       )}
