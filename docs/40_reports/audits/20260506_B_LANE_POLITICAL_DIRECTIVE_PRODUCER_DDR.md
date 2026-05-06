@@ -3,6 +3,7 @@
 **Lane:** LANE-NIGHTSHIFT-B-LANE-PHASE-0-PANEL-RETRY
 **Date:** 2026-05-06
 **Predecessors:** A1 (`18136710`), A2 (`ba6955bf`), A3 (`c8ff93d8`), A4 (`93c75b1d`), A-lane DDR (`eee308e0`).
+**Checkpoint:** committed `941bd68e` — DDR-only, no source edits, pre-commit docs/process-only path skipped tsc.
 
 ## Overview
 
