@@ -1,0 +1,109 @@
+{
+  "schema_version": "a4-2026-05-06",
+  "ddr_commit": "eee308e0",
+  "lane": "LANE-NIGHTSHIFT-A4-ARMY-CO-ROSTER-PERSONALITIES",
+  "predecessors": {
+    "a1": "18136710",
+    "a2": "ba6955bf",
+    "a3": "c8ff93d8"
+  },
+  "rosters": {
+    "RS": {
+      "main_staff_formation_id": "vrs_main_staff",
+      "schedule": [
+        {
+          "officer_id": "vrs_mladic",
+          "tenure_start": 0,
+          "tenure_end_default": null,
+          "stubbornness": 5,
+          "replacement_trigger": "combat-death|political-relief",
+          "replaces_with": "vrs_krstic|political_bot_pick"
+        }
+      ]
+    },
+    "RBiH": {
+      "main_staff_formation_id": "arbih_main_staff",
+      "schedule": [
+        {
+          "officer_id": "arbih_halilovic",
+          "tenure_start": 0,
+          "tenure_end_default": null,
+          "stubbornness": 4,
+          "replacement_trigger": "scheduled-neretva-93|political-relief",
+          "replaces_with": "arbih_delic"
+        },
+        {
+          "officer_id": "arbih_delic",
+          "tenure_start": 60,
+          "tenure_end_default": null,
+          "stubbornness": 2,
+          "replacement_trigger": "combat-death|extreme-relief",
+          "replaces_with": null
+        }
+      ]
+    },
+    "HRHB": {
+      "main_staff_formation_id": "hvo_main_staff",
+      "schedule": [
+        {
+          "officer_id": "hvo_petkovic",
+          "tenure_start": 0,
+          "tenure_end_default": null,
+          "stubbornness": 2,
+          "replacement_trigger": "scheduled-1993-reorg|political-relief",
+          "replaces_with": "hvo_praljak"
+        },
+        {
+          "officer_id": "hvo_praljak",
+          "tenure_start": 64,
+          "tenure_end_default": null,
+          "stubbornness": 3,
+          "replacement_trigger": "scheduled-1994-washington|political-relief",
+          "replaces_with": "hvo_roso"
+        },
+        {
+          "officer_id": "hvo_roso",
+          "tenure_start": 80,
+          "tenure_end_default": null,
+          "stubbornness": 2,
+          "replacement_trigger": "scheduled-rotation|political-relief",
+          "replaces_with": "hvo_petkovic_2"
+        },
+        {
+          "officer_id": "hvo_petkovic_2",
+          "tenure_start": 100,
+          "tenure_end_default": null,
+          "stubbornness": 2,
+          "replacement_trigger": "scheduled-rotation|political-relief",
+          "replaces_with": "hvo_blaskic_2"
+        },
+        {
+          "officer_id": "hvo_blaskic_2",
+          "tenure_start": 120,
+          "tenure_end_default": null,
+          "stubbornness": 3,
+          "replacement_trigger": "combat-death",
+          "replaces_with": null
+        }
+      ]
+    }
+  },
+  "political_leader_tolerance": {
+    "RS": 4,
+    "RBiH": 3,
+    "HRHB": 2
+  },
+  "variation_rules": {
+    "keep_past_schedule": {
+      "competence_decay_per_12w": -0.05,
+      "stubbornness_escalation": 1,
+      "stubbornness_cap": 5,
+      "cooldown_halving": true,
+      "cooldown_halved_to_turns": 6
+    },
+    "early_relief": {
+      "political_capital_cost": 4,
+      "predecessor_morale_penalty": -0.5
+    }
+  }
+}

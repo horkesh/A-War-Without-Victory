@@ -8,6 +8,10 @@ import {
     A3_PIPELINE_STEP_NAME,
 } from '../combat/army_order_interpretation.js';
 import {
+    applyArmyCoRosterStep,
+    A4_PIPELINE_STEP_NAME,
+} from '../combat/army_co_roster_loader.js';
+import {
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
     generateOpportunityProposalReviews,
@@ -1149,14 +1153,40 @@ export const warPhases: NamedPhase[] = [
         },
     },
     {
+        // A4 (LANE-NIGHTSHIFT-A4-ARMY-CO-ROSTER-PERSONALITIES):
+        // Populate canonical historical roster onto NamedOfficer.stubbornness
+        // and political-leader-tolerance state; evaluate scheduled transitions
+        // (informational — `processOfficerSuccession` remains canonical owner of
+        // the relief event); apply emergent variation rules (competence decay,
+        // stubbornness escalation, cooldown halving) when an army CO is held
+        // past their tenure_end_default (resolved against OOB
+        // available_until_turn when the roster JSON leaves it null).
+        //
+        // Position: AFTER `evaluate-army-hq-gathering` (consumes the same
+        // CampaignPlan context implicitly — same turn) and BEFORE
+        // `apply-army-directive-interpretation` (A3 reads the populated
+        // stubbornness values).
+        //
+        // SUBSTRATE-DRIVEN: short-circuits when the roster JSON is unavailable
+        // or A4_ARMY_CO_ROSTER_DISABLED env var is set (188w A/B control run).
+        //
+        // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
+        // (eee308e0). A1: 18136710. A2: ba6955bf. A3: c8ff93d8.
+        name: A4_PIPELINE_STEP_NAME,
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            applyArmyCoRosterStep(context.state);
+        },
+    },
+    {
         // A3 (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION):
         // Translate POLITICAL directives → per-corps directives via the army CO's
         // advisory interpretation; emit `army_directive_pushback` PendingOfficerEvent
         // on non-FULL compliance, plus `army_co_proposes_op` for Mladić-class
         // autonomous launches (stubbornness ≥ 4 + 12-turn cooldown).
         //
-        // Position: AFTER `evaluate-army-hq-gathering` (consumes CampaignPlan
-        // context implicitly — same turn) and BEFORE `generate-bot-corps-orders`
+        // Position: AFTER `evaluate-army-co-transitions` (A4 populates stubbornness
+        // / tolerance from the canonical roster) and BEFORE `generate-bot-corps-orders`
         // (downstream consumer of corps directives).
         //
         // SUBSTRATE-DRIVEN: pre-A4-roster-data this step short-circuits when no
