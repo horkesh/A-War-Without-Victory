@@ -1,9 +1,18 @@
 /**
  * Settings screen — gameplay, display, and audio settings.
  * Uses section registry pattern for extensibility (v0.5.3 audio, v0.6.3 AI content).
+ *
+ * LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: hosts the canonical
+ * `OnboardingRestartButton` mount in the Gameplay section. The button is
+ * visible only when `tutorial_state.dismissed === true` (no point restarting
+ * an active tutorial). Singular ownership: SettingsScreen is the only
+ * non-overlay host of the restart affordance.
  */
 import { useState } from 'react';
 import { Z } from '../../shared/zIndex';
+import { OnboardingRestartButton } from './onboarding/OnboardingOverlay';
+import { useGameStore } from '../store/gameStore';
+import { useIPC } from '../desktop/useIPC';
 
 interface SettingsSection {
     id: string;
@@ -29,6 +38,22 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
     const [activeSection, setActiveSection] = useState('gameplay');
+
+    // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: tutorial restart affordance.
+    // Read tutorial_state from the canonical UI store (mirrored from
+    // `meta.tutorial_state`). Show the restart button only when the tutorial
+    // has been dismissed (either via Skip or via the auto-dismiss-on-final-
+    // step path in OnboardingOverlay). Faction-agnostic.
+    const tutorialState = useGameStore((s) => s.loadedGameState?.tutorial_state);
+    const tutorialDismissed = tutorialState?.dismissed === true;
+    const ipc = useIPC();
+    const onboardingBridge = ipc.isAvailable
+        ? {
+              dismissTutorial: () => ipc.dismissTutorial(),
+              advanceStep: (stepId: string) => ipc.advanceTutorialStep(stepId),
+              restartTutorial: () => ipc.restartTutorial(),
+          }
+        : null;
 
     const allSections: Array<{ id: string; title: string }> = [
         { id: 'gameplay', title: 'Gameplay' },
@@ -75,6 +100,22 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             <SettingRow label="Fog of War" description="Enable fog of war by default">
                                 <ToggleSwitch />
                             </SettingRow>
+                            {/*
+                              LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET:
+                              tutorial restart affordance. Only rendered when
+                              the tutorial has been dismissed — there is no
+                              point restarting an already-active tutorial.
+                            */}
+                            {tutorialDismissed && (
+                                <SettingRow
+                                    label="Tutorial"
+                                    description="Restart the first-session onboarding walkthrough"
+                                >
+                                    <div data-testid="settings-tutorial-restart-host">
+                                        <OnboardingRestartButton ipc={onboardingBridge} />
+                                    </div>
+                                </SettingRow>
+                            )}
                         </>
                     )}
                     {activeSection === 'display' && (

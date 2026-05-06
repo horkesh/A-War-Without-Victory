@@ -86,6 +86,47 @@ export function applyDismissPure(prior: TutorialStateShape | null | undefined): 
     };
 }
 
+/**
+ * Pure helper used by tests. Mirrors the `tutorial:advance-step` IPC handler:
+ * idempotent append of `stepId` to `completed_steps`; sets `current_step`
+ * to the most recent stepId. `dismissed` is preserved from prior.
+ *
+ * Determinism: linear scan + slice; no clock, no Math.random.
+ */
+export function applyAdvanceStepPure(
+    prior: TutorialStateShape | null | undefined,
+    stepId: string,
+): TutorialStateShape {
+    const safe = prior ?? { dismissed: false, completed_steps: [] };
+    const completed = Array.isArray(safe.completed_steps) ? safe.completed_steps.slice() : [];
+    if (!completed.includes(stepId)) {
+        completed.push(stepId);
+    }
+    return {
+        dismissed: safe.dismissed === true,
+        current_step: stepId,
+        completed_steps: completed,
+    };
+}
+
+/**
+ * LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET — auto-dismiss on final step.
+ *
+ * Predicate used by `OnboardingOverlay`'s onAdvance handler to decide whether
+ * the player has just completed the *final* authored step. When this returns
+ * `true`, the overlay must (after appending the final step via
+ * `tutorial:advance-step`) also invoke `tutorial:dismiss` so the overlay does
+ * not invisibly re-show on next launch.
+ *
+ * Pure / deterministic: compares the supplied stepId against
+ * `ONBOARDING_STEPS[ONBOARDING_STEPS.length - 1].id` from the canonical
+ * lexicographically-sorted list. No clock, no Math.random.
+ */
+export function isFinalStep(stepId: string): boolean {
+    const last = ONBOARDING_STEPS[ONBOARDING_STEPS.length - 1];
+    return !!last && last.id === stepId;
+}
+
 export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | null {
     const { tutorialState, ipc } = props;
     const [pending, setPending] = useState(false);
@@ -108,6 +149,17 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         setPending(true);
         try {
             await ipc.advanceStep(next.id);
+            // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: auto-dismiss on
+            // final step. After appending the last authored step to
+            // `completed_steps`, also write `dismissed=true` so the overlay
+            // does not invisibly re-show on next launch (resolveNextStep
+            // returns null past step 8 → overlay would render null forever
+            // with `dismissed=false`). Two IPC writes (advance + dismiss)
+            // are deterministic and idempotent: each ipcMain handler is
+            // a pure synchronous transform of the canonical state.
+            if (isFinalStep(next.id)) {
+                await ipc.dismissTutorial();
+            }
         } finally {
             setPending(false);
         }
