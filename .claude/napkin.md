@@ -84,6 +84,8 @@
 
 **8 lanes in flight total** (4 perf instrumentation + Codex Wave 4 retry + heap profile retry + 3 a11y/tutorial implementation). All file-disjoint via pathspec-form ownership.
 
+- `32f72470` Codex Wave 4 SHIPPED — **13 essays authored = total reaches 96 essays, meeting v1.0 deliverable target** ("96+ certified historical essays"). 76/76 lane tests GREEN. ICTY-grounded throughout (avg 4 citations/essay across Karadžić IT-95-5/18-T, Tadić IT-94-1-T, Stakić IT-97-24-T, Kunarac IT-96-23-T, Vasiljević IT-98-32-T, Lukić IT-98-32/1-T, Galić IT-98-29-T, etc.). Engine-referenced essays: gorazde_pocket_consolidation_1992 + milosevic_isolation_warning_aug92 (in war_1992.json). Other 11 are content-only Codex entries.
+
 **v0.9.5-alpha.1 TAGGED 2026-05-06** — first formal pre-release tag pushed at `58309a19`. `.github/workflows/release.yml` (committed at `9d38f09b`, never run live) executing now (run `25407343785`) — exercises Linux AppImage + Win unsigned NSIS build matrix, smoke verifiers, and `softprops/action-gh-release@v2` upload to GitHub Release. Manual install/launch/save/load/uninstall validation per `docs/40_reports/PLATFORM_TEST_MATRIX.md` required before promoting to v0.9.5 non-prerelease.
 
 **Stupčanica AC-14 §6 re-calibration finding committed at `58309a19`** — per /game-designer §3.3 contract; prediction-table updated to reflect SHAPE-B-only baseline (zepa_2 0.65-1.05 widened band; srebrenica_2 0.090 ± 0.075 widened tolerance; sarajevo/bihac/gorazde unchanged ≤5%/10%/10% capital-controller). Capital-controller integrity intact across both n1690+n1691; SHAPE B retained; no revert. Successor lanes deferred to user direction.
