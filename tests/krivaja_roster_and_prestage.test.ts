@@ -318,7 +318,9 @@ describe('LANE-2026-05-02-KRIVAJA T5: prestage helper is deterministic', () => {
 // ---------------------------------------------------------------------------
 describe('LANE-2026-05-02-KRIVAJA T6: checkTriggeredOperations invokes prestage', () => {
     it('emits movement orders for non-staged participants when Krivaja-95 fires', () => {
-        const state = buildSyntheticState(168);
+        // LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX (d622b762, 2026-05-06):
+        // Krivaja-95 trigger floor bumped 168→170 to enforce §6 canonical floor.
+        const state = buildSyntheticState(170);
 
         // Ensure all five Krivaja-95 objectives are RBiH-controlled so the
         // hasEnemyObjective check inside checkTriggeredOperations passes.
@@ -339,7 +341,7 @@ describe('LANE-2026-05-02-KRIVAJA T6: checkTriggeredOperations invokes prestage'
 
         assert.ok(
             injected.includes('Operation Krivaja-95'),
-            `Krivaja-95 must be injected at turn 168; got ${JSON.stringify(injected)}`,
+            `Krivaja-95 must be injected at turn 170; got ${JSON.stringify(injected)}`,
         );
 
         const orders = state.military.brigade_movement_orders ?? {};

@@ -144,6 +144,9 @@ describe('war-phase step ordering', () => {
         // +1 from evaluate-operation-opportunities (LANE B Phase 1 substrate, 2026-05-01)
         // +1 from apply-bot-opportunity-decisions (LANE B Phase 2 deterministic bot decisions, 2026-05-01)
         // +1 from generate-level1-opportunity-proposals (LANE B Phase 2 player review surface, 2026-05-01)
-        expect(stepNames.length).toBe(171);
+        // +1 from evaluate-army-co-transitions (LANE-NIGHTSHIFT-A4-ARMY-CO-ROSTER-PERSONALITIES, 93c75b1d, 2026-05-06)
+        // +1 from apply-army-directive-interpretation (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION, c8ff93d8, 2026-05-06)
+        // +1 from produce-political-directive (LANE-NIGHTSHIFT-B1-POLITICAL-DIRECTIVE-PRODUCER-INFRA, 44053a32, 2026-05-06)
+        expect(stepNames.length).toBe(174);
     });
 });
