@@ -631,19 +631,72 @@ function readPoliticalDirective(state: GameState, faction: FactionId): Political
 }
 
 /**
+ * C1 (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE) — persist
+ * the per-corps directive map produced by `interpretArmyDirective` into
+ * `state.military.army_corps_directives_by_faction[faction]` so the
+ * commander briefing can overlay `frontPriority.role` → `campaign_role`.
+ *
+ * Env flag `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` short-circuits
+ * the persist path (mirrors briefing.ts read-path short-circuit) for
+ * byte-stable A/B verification per DDR (57cec91c).
+ *
+ * Lazy slot init — when no directives are persisted (env flag set, or no
+ * faction produced one) the slot remains undefined, preserving pre-C1
+ * save byte-stability.
+ *
+ * Faction-symmetric: same code path for RBiH / RS / HRHB.
+ */
+function persistCorpsDirectives(
+    state: GameState,
+    faction: FactionId,
+    interpretation: ArmyDirectiveInterpretation,
+): void {
+    if (process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED === 'true') return;
+    if (!interpretation.corps_directives.length) return;
+
+    type LooseMilitary = GameState['military'] & {
+        army_corps_directives_by_faction?: Record<string, Record<string, ArmyCorpsDirective>>;
+    };
+    const mil = state.military as LooseMilitary;
+    if (!mil.army_corps_directives_by_faction) {
+        mil.army_corps_directives_by_faction = {};
+    }
+    const factionMap: Record<string, ArmyCorpsDirective> = {};
+    // Iterate in deterministic order (interpretation already sorts; double-guard).
+    const sorted = [...interpretation.corps_directives].sort((a, b) =>
+        a.corps_id < b.corps_id ? -1 : (a.corps_id > b.corps_id ? 1 : 0),
+    );
+    for (const cd of sorted) {
+        factionMap[cd.corps_id] = {
+            corps_id: cd.corps_id,
+            role: cd.role,
+            deviated: cd.deviated,
+        };
+    }
+    mil.army_corps_directives_by_faction[faction] = factionMap;
+}
+
+/**
  * Single pipeline-step entry: for each (non-player) faction, run the A3
  * predicates and emit traces / events. Faction-symmetric: no per-faction
  * branches.
  *
  * Caller (war_phases.ts) gates by phase==='war' and orders this step AFTER
  * `evaluate-army-hq-gathering` and BEFORE `generate-bot-corps-orders`.
+ *
+ * C1 (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE): when an interpretation
+ * is produced, persist its corps_directives[] into
+ * `state.military.army_corps_directives_by_faction[faction]` so the briefing
+ * overlay path can read it. Persist short-circuits when env flag
+ * `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` is set.
  */
 export function applyArmyDirectiveInterpretation(state: GameState): void {
     const factions: FactionId[] = ['HRHB', 'RBiH', 'RS']; // sorted alphabetically — determinism
     for (const faction of factions) {
         const directive = readPoliticalDirective(state, faction);
         if (directive) {
-            interpretArmyDirective(state, faction, directive);
+            const interpretation = interpretArmyDirective(state, faction, directive);
+            persistCorpsDirectives(state, faction, interpretation);
         }
         // Autonomous-launch evaluation is independent of the political directive
         // (it is the army CO's volitional act). Always evaluate; the function
