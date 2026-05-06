@@ -52,6 +52,17 @@ import { getArmyCommander } from './officer_system.js';
 import { OPERATION_OPPORTUNITY_CATALOG, evaluateAxes, isOpportunityEligible, buildProposalId } from './operation_opportunities.js';
 import type { OperationOpportunityDef } from './operation_opportunities.js';
 
+// node:fs / node:path imported only for the env-flag-gated jsonl writer used
+// by C2 telemetry (`emitC2TelemetryEvent` / `flushC2TurnTelemetry` below).
+// They are dead-code-eliminable when the C2 flag is OFF — the writer's first
+// line is `if (C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED) return;` — but ESM
+// forbids dynamic require() so we name the modules here. UI builds (Electron
+// renderer / Vite map) never import this file; it is a sim-only module.
+// Mirrors the precedent established in src/sim/combat/corps_front_sectors.ts
+// (LANE-NIGHTSHIFT-SECTOR-PARTITION-INSTRUMENTATION).
+import * as _fsModule from 'node:fs';
+import * as _pathModule from 'node:path';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants (DDR-locked per panel defaults table at DDR §"AI-officers
 // P1-P5 — confirmed panel defaults")
@@ -99,6 +110,279 @@ const MISALIGNMENT_PENALTY = 0.20;
 // Reliability-modifier integration is a Phase-3-of-corps concern; A3 leaves
 // it as a 0.0 placeholder slot for forward compatibility.
 const A3_RELIABILITY_PLACEHOLDER = 0.0;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// C2 — Corps Directive Telemetry Surface
+// LANE-NIGHTSHIFT-C2-CORPS-DIRECTIVE-TELEMETRY-SURFACE
+//
+// DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
+// (57cec91c) — Q3 + Q5.
+// Predecessors: A3 c8ff93d8 • B1 44053a32 • B2 d019bef7 • C1 5084071d.
+//
+// Closes the observability gap surfaced by A4's 188w A/B finding: B-lane
+// thresholds PASS but `weekly_report.jsonl` showed zero observable telemetry
+// because (a) A3 didn't persist directives (closed by C1) AND (b) no events
+// were emitted to the post-run telemetry stream (closed here).
+//
+// Three event types per DDR Q3 (emitted at the C-lane consumer site, not at
+// A3's emit site, so the panel observes whether the consumer actually used
+// the persisted directive):
+//   1. `army_directive_application` — per (faction × corps × turn) when A3
+//      persists a corps_directive.
+//      Payload: { turn, faction, corps_id, directive_verb, role_overlay,
+//                 source_political_directive_id }
+//   2. `corps_role_overlay_count` — weekly aggregate (per faction).
+//      Payload: { turn, faction, count, by_role: { primary, secondary,
+//                 contain, economy } }
+//   3. `political_directive_chain_active` — turn-end assertion when both
+//      the B1 producer fired AND A3 persisted ≥1 directive that turn.
+//      Payload: { turn, factions_with_active_chain: ['HRHB','RBiH','RS'] }
+//
+// Channel: side-channel JSONL at `data/derived/_debug/
+// c_lane_corps_directive_telemetry.jsonl` (gitignored — see `.gitignore`
+// `data/derived/_debug/` rule). Mirrors the corps_front_sectors.ts perf-
+// instrumentation precedent. Post-run panel reads this file directly.
+//
+// CRITICAL byte-stability invariants (verified by tests T4 + T9):
+//   • C2 NEVER mutates GameState — all events are written to the side-channel
+//     JSONL file. `final_state_hash` is identical whether C2 is enabled or
+//     disabled. weekly_report.jsonl is byte-identical with C2 enabled vs.
+//     disabled (we never write to weekly_report.jsonl from C2).
+//   • Env flag `C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED=true` short-circuits
+//     ALL three emissions → side-channel JSONL is not written. When the flag
+//     is set, the file is byte-identical to a pre-C2 baseline (i.e. absent
+//     when no other code wrote to it).
+//   • Determinism: no Math.random / Date.now / new Date / setTimeout. All
+//     iteration via sorted keys. Event order is (faction-alphabetical, then
+//     corps_id-alphabetical) — same as the directive iteration order.
+//
+// Faction-symmetric mechanism: same code path for RBiH / RS / HRHB. No
+// per-faction string-equality branches (T10 static-grep guard).
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Side-channel JSONL output path, relative to process.cwd(). Gitignored via
+ * the `data/derived/_debug/` rule in `.gitignore`. The post-run panel reads
+ * this path directly when the C2 flag is enabled.
+ */
+const C2_TELEMETRY_OUTPUT_REL_PATH = 'data/derived/_debug/c_lane_corps_directive_telemetry.jsonl';
+
+/**
+ * Schema version for emitted lines. Bump when payload shape changes so panel
+ * readers can route by version. v1 ships the three types defined in DDR Q3.
+ */
+const C2_TELEMETRY_SCHEMA_VERSION = 1;
+
+/**
+ * Returns true iff the C2 telemetry surface is short-circuited (env flag set).
+ * Exposed so tests can verify flag-gating without touching env globals.
+ */
+export function isC2TelemetryDisabled(): boolean {
+    return process.env.C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED === 'true';
+}
+
+/**
+ * Per-turn aggregation buffer for C2 telemetry. Module-local — never lives
+ * inside GameState (telemetry-only invariance, T9). Reset at the start of
+ * each `applyArmyDirectiveInterpretation` invocation; flushed at the end of
+ * the same call. There is no cross-turn state.
+ */
+interface C2TurnTelemetryBuffer {
+    turn: number;
+    /** One entry per persisted (faction × corps) directive application this turn. */
+    applications: Array<{
+        turn: number;
+        faction: FactionId;
+        corps_id: string;
+        directive_verb: PoliticalDirectiveVerb;
+        role_overlay: ArmyCorpsDirectiveRole;
+        source_political_directive_id: string | null;
+    }>;
+    /** Per-faction set of factions for which BOTH a B1 directive existed AND A3 persisted ≥1 corps_directive this turn. */
+    factionsWithActiveChain: Set<FactionId>;
+    /** Per-faction tally for `corps_role_overlay_count` aggregate event. */
+    perFactionRoleCounts: Map<FactionId, { primary: number; secondary: number; contain: number; economy: number }>;
+}
+
+let _activeTurnBuffer: C2TurnTelemetryBuffer | null = null;
+
+function _newTurnBuffer(turn: number): C2TurnTelemetryBuffer {
+    return {
+        turn,
+        applications: [],
+        factionsWithActiveChain: new Set(),
+        perFactionRoleCounts: new Map(),
+    };
+}
+
+function _bumpRoleCount(
+    buffer: C2TurnTelemetryBuffer,
+    faction: FactionId,
+    role: ArmyCorpsDirectiveRole,
+): void {
+    let counts = buffer.perFactionRoleCounts.get(faction);
+    if (!counts) {
+        counts = { primary: 0, secondary: 0, contain: 0, economy: 0 };
+        buffer.perFactionRoleCounts.set(faction, counts);
+    }
+    counts[role] += 1;
+}
+
+/**
+ * Record a per-corps directive application into the active turn buffer.
+ * Caller (persistCorpsDirectives) invokes this once per persisted corps
+ * directive when both the C2 flag is OFF (i.e. telemetry is ENABLED) and
+ * the C1 consumer flag is OFF (i.e. C1 actually persisted the slot).
+ *
+ * The weekly aggregate (`corps_role_overlay_count`) and chain-active marker
+ * are computed from this buffer at flush time.
+ *
+ * State-free: writes to module-local buffer, NOT to GameState.
+ */
+function recordC2Application(
+    faction: FactionId,
+    corpsId: string,
+    verb: PoliticalDirectiveVerb,
+    role: ArmyCorpsDirectiveRole,
+    sourcePoliticalDirectiveId: string | null,
+    turn: number,
+): void {
+    if (isC2TelemetryDisabled()) return;
+    if (!_activeTurnBuffer || _activeTurnBuffer.turn !== turn) {
+        // Defensive: caller should have opened the buffer at the top of the
+        // turn. If the buffer is missing or stale, open a fresh one so the
+        // event is not silently dropped (test T6 guards determinism).
+        _activeTurnBuffer = _newTurnBuffer(turn);
+    }
+    _activeTurnBuffer.applications.push({
+        turn,
+        faction,
+        corps_id: corpsId,
+        directive_verb: verb,
+        role_overlay: role,
+        source_political_directive_id: sourcePoliticalDirectiveId,
+    });
+    _bumpRoleCount(_activeTurnBuffer, faction, role);
+    _activeTurnBuffer.factionsWithActiveChain.add(faction);
+}
+
+/**
+ * Flush the active turn buffer to the side-channel JSONL file. Emits up to
+ * three event lines per faction × turn:
+ *   • One `army_directive_application` line per persisted corps directive.
+ *   • One `corps_role_overlay_count` line per faction with non-zero counts.
+ *   • One `political_directive_chain_active` line at end-of-turn when at
+ *     least one faction had active chain.
+ *
+ * State-free; only side effect is fs.appendFileSync to the gitignored
+ * `data/derived/_debug/` path. No-op when the C2 flag is set or when the
+ * buffer is empty.
+ */
+function flushC2TurnTelemetry(): void {
+    if (isC2TelemetryDisabled()) {
+        // Drop the buffer regardless so a re-enabled future turn starts clean.
+        _activeTurnBuffer = null;
+        return;
+    }
+    const buffer = _activeTurnBuffer;
+    _activeTurnBuffer = null;
+    if (!buffer) return;
+    if (buffer.applications.length === 0 && buffer.factionsWithActiveChain.size === 0) return;
+
+    const fs = _fsModule;
+    const path = _pathModule;
+    const cwd = process.cwd();
+    const outDir = path.join(cwd, 'data', 'derived', '_debug');
+    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const outPath = path.join(outDir, 'c_lane_corps_directive_telemetry.jsonl');
+
+    const lines: string[] = [];
+
+    // 1. army_directive_application — per (faction × corps × turn).
+    //    Iterate in deterministic order: faction-alphabetical, then corps-id
+    //    alphabetical. The applications array was filled in the same order
+    //    by applyArmyDirectiveInterpretation (factions: ['HRHB','RBiH','RS'])
+    //    + persistCorpsDirectives (sorted by corps_id).
+    for (const app of buffer.applications) {
+        lines.push(JSON.stringify({
+            schema_version: C2_TELEMETRY_SCHEMA_VERSION,
+            event_type: 'army_directive_application',
+            turn: app.turn,
+            faction: app.faction,
+            corps_id: app.corps_id,
+            directive_verb: app.directive_verb,
+            role_overlay: app.role_overlay,
+            source_political_directive_id: app.source_political_directive_id,
+        }));
+    }
+
+    // 2. corps_role_overlay_count — weekly aggregate per faction. Iterate
+    //    factions in alphabetical order for deterministic output.
+    const orderedFactions: FactionId[] = (Array.from(buffer.perFactionRoleCounts.keys()) as FactionId[])
+        .sort();
+    for (const faction of orderedFactions) {
+        const counts = buffer.perFactionRoleCounts.get(faction)!;
+        const total = counts.primary + counts.secondary + counts.contain + counts.economy;
+        if (total === 0) continue;
+        lines.push(JSON.stringify({
+            schema_version: C2_TELEMETRY_SCHEMA_VERSION,
+            event_type: 'corps_role_overlay_count',
+            turn: buffer.turn,
+            faction,
+            count: total,
+            by_role: {
+                primary: counts.primary,
+                secondary: counts.secondary,
+                contain: counts.contain,
+                economy: counts.economy,
+            },
+        }));
+    }
+
+    // 3. political_directive_chain_active — turn-end assertion. Single line
+    //    when at least one faction had both producer fired AND ≥1 persisted
+    //    directive.
+    if (buffer.factionsWithActiveChain.size > 0) {
+        const factionsArr: FactionId[] = (Array.from(buffer.factionsWithActiveChain) as FactionId[])
+            .sort();
+        lines.push(JSON.stringify({
+            schema_version: C2_TELEMETRY_SCHEMA_VERSION,
+            event_type: 'political_directive_chain_active',
+            turn: buffer.turn,
+            factions_with_active_chain: factionsArr,
+        }));
+    }
+
+    if (lines.length === 0) return;
+    fs.appendFileSync(outPath, lines.join('\n') + '\n', { encoding: 'utf8' });
+}
+
+// ── Test-only surfaces ───────────────────────────────────────────────────
+// Exposed solely so tests can verify flag-gating, deterministic ordering,
+// and chain-observability without spinning up a full scenario run.
+export const __c2TelemetryTestHooks = {
+    isFlagDisabled: () => isC2TelemetryDisabled(),
+    openTurn: (turn: number): void => {
+        _activeTurnBuffer = _newTurnBuffer(turn);
+    },
+    snapshotTurn: () => {
+        if (!_activeTurnBuffer) return null;
+        const b = _activeTurnBuffer;
+        return {
+            turn: b.turn,
+            applications: b.applications.slice(),
+            factions_with_active_chain: Array.from(b.factionsWithActiveChain).sort(),
+            per_faction_role_counts: Array.from(b.perFactionRoleCounts.entries())
+                .sort((a, b2) => a[0].localeCompare(b2[0]))
+                .map(([faction, counts]) => ({ faction, ...counts })),
+        };
+    },
+    closeTurn: (): void => {
+        _activeTurnBuffer = null;
+    },
+    flush: (): void => flushC2TurnTelemetry(),
+    outputRelPath: () => C2_TELEMETRY_OUTPUT_REL_PATH,
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -677,6 +961,54 @@ function persistCorpsDirectives(
 }
 
 /**
+ * C2 (LANE-NIGHTSHIFT-C2-CORPS-DIRECTIVE-TELEMETRY-SURFACE) — record each
+ * persisted directive application into the side-channel telemetry buffer.
+ *
+ * Caller invokes this AFTER `persistCorpsDirectives` returns — only when
+ * the C1 consumer flag is OFF AND the persist slot for this faction was
+ * actually written. (We detect persistence by inspecting the slot post-call:
+ * when the C1 flag is set, persist short-circuits and the slot is absent for
+ * this faction → no telemetry recorded → T5 transitive silence holds.)
+ *
+ * Explicit T4 contract: `recordC2Application` is itself a no-op when the C2
+ * flag is set, so the side-channel JSONL is not written.
+ *
+ * State-free: only mutates the module-local `_activeTurnBuffer`. C1's
+ * `persistCorpsDirectives` signature is preserved (frozen at C1 5084071d
+ * per DDR Q5 split — see closeout report).
+ */
+function recordC2ApplicationsForFaction(
+    state: GameState,
+    faction: FactionId,
+    interpretation: ArmyDirectiveInterpretation,
+    directive: PoliticalDirective,
+): void {
+    if (isC2TelemetryDisabled()) return;
+    // Detect actual persist (C1 flag may have suppressed it).
+    type LooseMilitary = GameState['military'] & {
+        army_corps_directives_by_faction?: Record<string, Record<string, ArmyCorpsDirective>>;
+    };
+    const factionSlot = (state.military as LooseMilitary).army_corps_directives_by_faction?.[faction];
+    if (!factionSlot) return;
+    // Iterate in the same deterministic order as persistCorpsDirectives.
+    const sorted = [...interpretation.corps_directives].sort((a, b) =>
+        a.corps_id < b.corps_id ? -1 : (a.corps_id > b.corps_id ? 1 : 0),
+    );
+    for (const cd of sorted) {
+        // Defensive: only record applications that were actually persisted.
+        if (!factionSlot[cd.corps_id]) continue;
+        recordC2Application(
+            faction,
+            cd.corps_id,
+            directive.verb,
+            cd.role,
+            directive.directive_id ?? null,
+            state.meta.turn,
+        );
+    }
+}
+
+/**
  * Single pipeline-step entry: for each (non-player) faction, run the A3
  * predicates and emit traces / events. Faction-symmetric: no per-faction
  * branches.
@@ -689,14 +1021,39 @@ function persistCorpsDirectives(
  * `state.military.army_corps_directives_by_faction[faction]` so the briefing
  * overlay path can read it. Persist short-circuits when env flag
  * `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` is set.
+ *
+ * C2 (LANE-NIGHTSHIFT-C2-CORPS-DIRECTIVE-TELEMETRY-SURFACE): opens a per-turn
+ * telemetry buffer at top, persistCorpsDirectives records per-corps
+ * applications into it, then flushes the buffer at end of turn to the
+ * side-channel JSONL `data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+ * Both buffer-open and flush short-circuit when env flag
+ * `C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED=true` is set, leaving the JSONL
+ * file byte-identical (and weekly_report.jsonl + final_state_hash also
+ * byte-identical, since C2 never mutates state and never touches
+ * weekly_report.jsonl).
  */
 export function applyArmyDirectiveInterpretation(state: GameState): void {
     const factions: FactionId[] = ['HRHB', 'RBiH', 'RS']; // sorted alphabetically — determinism
+
+    // C2 — open the per-turn telemetry buffer. No-op when the C2 flag is set
+    // (recordC2Application & flushC2TurnTelemetry both early-return). When
+    // the C1 flag is set, persistCorpsDirectives early-returns BEFORE
+    // recording anything, so the buffer stays empty and flush is a no-op.
+    if (!isC2TelemetryDisabled()) {
+        _activeTurnBuffer = _newTurnBuffer(state.meta.turn);
+    }
+
     for (const faction of factions) {
         const directive = readPoliticalDirective(state, faction);
         if (directive) {
             const interpretation = interpretArmyDirective(state, faction, directive);
             persistCorpsDirectives(state, faction, interpretation);
+            // C2 — record telemetry AFTER persist. Helper short-circuits when
+            // either the C2 flag is set OR C1's persist short-circuited (i.e.
+            // the C1 flag was set, leaving the slot absent for this faction).
+            // Singular ownership: C1's persistCorpsDirectives is unchanged
+            // (frozen at 5084071d); C2 owns recordC2ApplicationsForFaction.
+            recordC2ApplicationsForFaction(state, faction, interpretation, directive);
         }
         // Autonomous-launch evaluation is independent of the political directive
         // (it is the army CO's volitional act). Always evaluate; the function
@@ -704,6 +1061,13 @@ export function applyArmyDirectiveInterpretation(state: GameState): void {
         // populated rosters yield zero behavior change.
         proposeAutonomousArmyLaunch(state, faction);
     }
+
+    // C2 — flush the per-turn telemetry buffer to the side-channel JSONL.
+    // Determinism: emission order is (faction-alphabetical, then corps-id
+    // alphabetical) for `army_directive_application` events; `corps_role_
+    // overlay_count` events follow in faction-alphabetical order; the
+    // single `political_directive_chain_active` event closes the turn.
+    flushC2TurnTelemetry();
 }
 
 // Validator-friendly named export for the A3 pipeline step name. The pipeline
