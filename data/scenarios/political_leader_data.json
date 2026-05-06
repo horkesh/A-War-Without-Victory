@@ -1,0 +1,67 @@
+{
+  "schema_version": "b2-2026-05-06",
+  "ddr_commit": "941bd68e",
+  "lane": "LANE-NIGHTSHIFT-B2-POLITICAL-LEADER-DATA-INTEGRATION",
+  "predecessors": {
+    "a1": "18136710",
+    "a2": "ba6955bf",
+    "a3": "c8ff93d8",
+    "a4": "93c75b1d",
+    "b1": "44053a32"
+  },
+  "scale": "1-5 (matches officer-system convention; 1 = low, 5 = high). B1 thresholds: B1_HAWKISH_THRESHOLD=4, B1_HIGH_SENSITIVITY_THRESHOLD=4.",
+  "leaders": [
+    {
+      "leader_id": "rbih_izetbegovic",
+      "faction": "RBiH",
+      "name": "Alija Izetbegović",
+      "hawkishness": 3.0,
+      "flexibility": 3.4,
+      "international_sensitivity": 4.2,
+      "patron_deference": 2.4,
+      "impunity_tolerance": 2.5,
+      "_sources": [
+        "Balkan Battlegrounds Vol I ch.4-5 — pragmatic survival posture; reluctant escalation",
+        "Balkan Battlegrounds Vol II ch.10-11 — arms-embargo politics + IC observation primary lever",
+        "ICTY case record (Krajisnik TJ §§) — multiple negotiation rounds (Vance-Owen, Owen-Stoltenberg)",
+        "BiH-first orientation; rejected mujahideen integration; Saudi/Iranian arms accepted but doctrine independent"
+      ]
+    },
+    {
+      "leader_id": "rs_karadzic",
+      "faction": "RS",
+      "name": "Radovan Karadžić",
+      "hawkishness": 4.2,
+      "flexibility": 2.0,
+      "international_sensitivity": 2.4,
+      "patron_deference": 3.4,
+      "impunity_tolerance": 4.5,
+      "_sources": [
+        "ICTY Karadžić Trial Judgement §§3447-3464 — Six Strategic Goals 12 May 1992, explicit territorial maximalism",
+        "Karadžić mountain rhetoric quotes (ICTY transcripts 2010-2016)",
+        "Vance-Owen rejection Aug 1993 RS Assembly referendum",
+        "Owen-Stoltenberg rejection 1993; only signed Dayton under Milošević coercion via Belgrade",
+        "BB Vol II — sanctions defied, NATO no-fly defied April 1993, Srebrenica execution despite UN observation",
+        "Frequent friction with Milošević post-1993 (Vance-Owen split, August 1994 sanctions)"
+      ]
+    },
+    {
+      "leader_id": "hrhb_boban",
+      "faction": "HRHB",
+      "name": "Mate Boban",
+      "hawkishness": 3.6,
+      "flexibility": 3.2,
+      "international_sensitivity": 3.0,
+      "patron_deference": 4.2,
+      "impunity_tolerance": 3.5,
+      "_sources": [
+        "Graz Accord with Karadžić Apr 1992 — Greater Croatia ambitions",
+        "BB Vol I — Mostar campaign May 1993; central Bosnia push 1993",
+        "Petković/Praljak/Roso commander rotations 1993-1994",
+        "Washington Agreement Mar 1994 — signed under direct Tudjman directive",
+        "Boban replaced Mar 1994 when Tudjman pivoted to Washington — strongest patron deference of three leaders",
+        "ICTY Prlić et al. — Tudjman-Zagreb directive primary; Boban as Tudjman proxy"
+      ]
+    }
+  ]
+}

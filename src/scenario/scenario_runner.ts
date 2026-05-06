@@ -73,6 +73,7 @@ import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrai
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { reconcileFinalSectorTruth } from '../sim/combat/final_sector_truth_reconciliation.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
+import { applyPoliticalLeaderDataInit } from '../sim/political/political_leader_data_loader.js';
 import {
     loadMunicipalityHqSettlement,
     loadOobBrigades,
@@ -1234,6 +1235,19 @@ export async function buildScenarioStartupState(
         }
         const officerData = validateOfficerData(officerRaw);
         initializeNamedOfficers(state, officerData);
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // LANE-NIGHTSHIFT-B2-POLITICAL-LEADER-DATA-INTEGRATION
+    // Populate canonical political_leader_data + political_leaders substrate
+    // for B1's producePoliticalDirective. Faction-symmetric loader; faction-
+    // asymmetric DATA. Short-circuits when B2_POLITICAL_LEADER_DATA_DISABLED
+    // env flag is set or when the JSON is unavailable (pre-B2 saves pass).
+    // DDR: 941bd68e + 168d65c2. B1: 44053a32.
+    // ───────────────────────────────────────────────────────────────────────
+    {
+        const leaderDataPath = join(baseDir, 'data/scenarios/political_leader_data.json');
+        applyPoliticalLeaderDataInit(state, leaderDataPath);
     }
 
     if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
