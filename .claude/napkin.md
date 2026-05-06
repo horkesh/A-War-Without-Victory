@@ -84,6 +84,26 @@
 
 **8 lanes in flight total** (4 perf instrumentation + Codex Wave 4 retry + heap profile retry + 3 a11y/tutorial implementation). All file-disjoint via pathspec-form ownership.
 
+**v1.0 ship-readiness sprint Wave 1 final scoreboard (2026-05-06):**
+- ✓ Codex Wave 4 (`32f72470`) — 13 1992-event essays; **96 essays = v1.0 deliverable target MET**.
+- ✓ A11y Lane A (`9dd9eb42`) — Modal stack baseline; 12/12 modals PASS a11y verdict.
+- ✓ A11y Lane B (`f496de43`) — Map landmarks + tutorial `map-container` anchor; keyboard pan/zoom on canvas.
+- ✓ A11y Lane D (`52667ef1`+`7a8a750d`) — contrast + reduced-motion + colorblind support; **closes 3 of 4 P0 v1.0-ship a11y blockers**.
+- ✓ Tutorial Lane B-subset (`c2dcec62`) — auto-dismiss on step 8 + RestartButton mount.
+- ✓ Sector-partition instrumentation (`ce72fc40`+`e33c2a09`) — cold-start spike pattern (turns 0-7) characterized; 3 successor optimization-lane targets named.
+- ✗ Bot-orders instrumentation REVERTED (`34fb8edb` audit) — multi-agent git-index sweep race casualty.
+- ✗ 188w heap-profile retry REVERTED (`34fb8edb` audit) — agent-runtime cutoff during 188w validation subprocess.
+
+**v1.0 ship-readiness sprint Wave 2 (2026-05-06):**
+- ✓ A11y Lane C (`e81c7e3e`) — Warroom/Decision Room/tablist + 4 div-onClick fixes; **closes 4th P0 (clickable-div)**; ArmyHQ tablist upgraded to full WAI-ARIA. **All 4 P0 v1.0-ship a11y blockers now CLOSED.**
+- ✓ Tutorial Lane E (`5e422ed8`) — OnboardingOverlay role="dialog" + focus trap + ESC dismissal; layered on Tutorial Lane B-subset's auto-dismiss.
+- ✓ Tutorial Lane C (`542cef3b`) — anchor-coverage regression test; all 7 non-null step anchors verified emitted; dynamic `army-hq-tab-${id}` template-literal covered.
+- A11y Lane E (forms + SrAnnouncer) — in flight; sibling agents flagged TS errors in its test file (lines 112, 168 — `<SrAnnouncerProvider />` missing children prop); agent should self-correct since the test file is its own.
+
+**Two new durable KNOWLEDGE entries (2026-05-06; cited above):**
+1. Multi-agent git-index sweep risk: `git commit -o <files>` pathspec form is MANDATORY in any parallel-batch context; long-running subprocesses belong to parent (Bash background) not agent.
+2. Sibling-file-ownership collision: parent must build per-file ownership table BEFORE dispatch; if two lanes need the same file, bundle/serialize/split.
+
 - `32f72470` Codex Wave 4 SHIPPED — **13 essays authored = total reaches 96 essays, meeting v1.0 deliverable target** ("96+ certified historical essays"). 76/76 lane tests GREEN. ICTY-grounded throughout (avg 4 citations/essay across Karadžić IT-95-5/18-T, Tadić IT-94-1-T, Stakić IT-97-24-T, Kunarac IT-96-23-T, Vasiljević IT-98-32-T, Lukić IT-98-32/1-T, Galić IT-98-29-T, etc.). Engine-referenced essays: gorazde_pocket_consolidation_1992 + milosevic_isolation_warning_aug92 (in war_1992.json). Other 11 are content-only Codex entries.
 
 **v0.9.5-alpha.1 TAGGED 2026-05-06** — first formal pre-release tag pushed at `58309a19`. `.github/workflows/release.yml` (committed at `9d38f09b`, never run live) executing now (run `25407343785`) — exercises Linux AppImage + Win unsigned NSIS build matrix, smoke verifiers, and `softprops/action-gh-release@v2` upload to GitHub Release. Manual install/launch/save/load/uninstall validation per `docs/40_reports/PLATFORM_TEST_MATRIX.md` required before promoting to v0.9.5 non-prerelease.
