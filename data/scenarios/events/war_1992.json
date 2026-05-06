@@ -1073,7 +1073,7 @@
     "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Visegrad, Foca, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 8,
+      "turn_min": 4,
       "turn_max": 25,
       "phase": "war",
       "condition": {
@@ -1197,7 +1197,7 @@
     "narrative": "International journalists have reached Prijedor. Television cameras are broadcasting images from Omarska and Trnopolje to a horrified world. The emaciated faces behind barbed wire have become the defining image of this war. The international community demands an explanation. Your patrons in Belgrade are alarmed. How you respond will shape whether the world sees you as a legitimate state or a criminal enterprise.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 14,
+      "turn_min": 16,
       "turn_max": 30,
       "phase": "war",
       "condition": {
@@ -1594,7 +1594,7 @@
     "category": "political",
     "trigger": {
       "turn_min": 20,
-      "turn_max": 40,
+      "turn_max": 35,
       "phase": "war",
       "condition": {
         "type": "alliance_below",
@@ -1658,7 +1658,7 @@
     "category": "territorial",
     "trigger": {
       "turn_min": 28,
-      "turn_max": 52,
+      "turn_max": 39,
       "phase": "war",
       "condition": {
         "type": "faction_controls_municipality",
