@@ -36,6 +36,11 @@ import { emitCommanderOutput } from './emit.js';
 import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 
+// Env-flag-gated hrtime instrumentation (default-OFF; zero overhead when disabled).
+// See docs/40_reports/implemented/20260506_BOT_ORDERS_INTERNALS_INSTRUMENTATION.md
+// and predecessor commit 406b0749.
+import { withPerf } from '../_perf_profile_bot_orders.js';
+
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
     right: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -149,14 +154,22 @@ export function runCommanderForCorps(
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
 ): CommanderOutput {
-    const briefing = buildBriefing(
-        state, corpsId, faction, spatial, edges,
-        reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
-    );
-    const previousState: CommanderState | null =
-        state.military.corps_command?.[corpsId]?.commander_state ?? null;
-    const commander = new BotCorpsCommander();
-    return commander.decide(briefing, previousState);
+    return withPerf('commander.runCommanderForCorps.total', () => {
+        const briefing = withPerf(
+            'commander.runCommanderForCorps.buildBriefing',
+            () => buildBriefing(
+                state, corpsId, faction, spatial, edges,
+                reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
+            ),
+        );
+        const previousState: CommanderState | null =
+            state.military.corps_command?.[corpsId]?.commander_state ?? null;
+        const commander = new BotCorpsCommander();
+        return withPerf(
+            'commander.runCommanderForCorps.commanderDecide',
+            () => commander.decide(briefing, previousState),
+        );
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
