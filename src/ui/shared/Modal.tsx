@@ -135,6 +135,14 @@ export interface ModalProps {
      */
     ariaLabel?: string;
     /**
+     * Optional `aria-describedby` referencing an `id` on a description
+     * element inside the panel. Per LANE-NIGHTSHIFT-V093-A11Y-LANE-A
+     * (Phase 1 ACs from
+     * `docs/40_reports/audits/20260506_V093_A11Y_PHASE_0_PANEL.md`):
+     * additive, defaults `undefined`. Existing callers unaffected.
+     */
+    ariaDescribedBy?: string;
+    /**
      * Optional className applied to the backdrop element. Migrating
      * modals can pass their existing backdrop styling here (e.g.
      * `bg-black/60`, `bg-black/70 backdrop-blur-sm`).
@@ -190,6 +198,7 @@ export function Modal({
     trapFocus = true,
     ariaLabelledBy,
     ariaLabel,
+    ariaDescribedBy,
     backdropClassName,
     panelClassName,
     panelStyle,
@@ -295,6 +304,7 @@ export function Modal({
                 aria-modal="true"
                 aria-labelledby={ariaLabelledBy}
                 aria-label={ariaLabel}
+                aria-describedby={ariaDescribedBy}
                 tabIndex={-1}
                 className={`modal-panel-in ${panelClassName ?? ''}`}
                 style={{ ...(panelStyle ?? {}), zIndex: zIndex + 1 }}
