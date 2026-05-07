@@ -3,6 +3,7 @@
 **Lane:** `LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-PHASE-1-RESEARCH`
 **Date:** 2026-05-07
 **Type:** Research / sign-off package. No code, no canon-doc edits.
+**Status:** SHIPPED + PUSHED at `8e974004` (main).
 **Predecessor DDR:** `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`, unmodified through HEAD `5659c28b`).
 **Audit predecessor:** `docs/40_reports/implemented/20260507_SRK_SIEGE_MORALE_AUDIT.md` (commit `aa115a99`, sub-issue #1 STOP-AND-ASK).
 **Calibration baseline:** n1728 (40w hash `79fa407377b40083`, 26/27 anchors) + n1729 (188w hash `e85303890ff4b601`, 26/27 anchors, 6/6 benchmarks).
