@@ -2,6 +2,7 @@
 
 **Last Updated:** 2026-05-07 (post-trip-session-6 — **v0.9.6 "AI OFFICERS (real)" OPENED**: ~30+ commits across A1-A5 substrate (`18136710..3f17733f`), B-lane producer (`941bd68e`/`44053a32`/`d019bef7`), C-lane consumer + telemetry (`57cec91c`/`5084071d`/`c084dd86`/`f24ad5d7`/`5589c6fe`), API-Directive bridge (`a2d564e6`), D-lane personas (`85f43f5a`/`e25c18c3`/`59805cd6`), Q1 revert + drina-fix (`8ccdbff8`/`03ef9cd4`), 5-lane batch (NW Bosnia OOB `be7e0715` closes BUG-01; Persona prompt restructure `cb13e605`; SRK siege `aa115a99`; JNA withdrawal consequences `ecae99da`; Jajce cascade morale `ec837dca`), 3-lane backlog closure (RBiH t40 reanchor `d377e07b`; SRK siege Phase 0 DDR `bb0e449e`; Stupčanica name-collision fix `759a35cd`), Krivaja-95 t168 floor compliance (`d622b762`/`39e6b7b6` backfill), and documentation propagation (6 KNOWLEDGE entries + FORAWWV §X-§XVI substrate canon `bca414ba` + master-doc updates `ebac4fdf`). Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS).
 **Current Version:** v0.9.5-alpha.1 (package.json formally bumped 2026-05-05 in commit `c2d209e3`). **package.json bump for v0.9.6 is PENDING** — roadmap state is now ahead of semver; bump is the parent's call after roadmap reflects intent.
+**v0.9.5 corrected 2026-05-07:** P1-G3 (Linux) + P1-G4 (Win) first-real-builds DONE on disk (`78e32c73`, `5799a6d1`+`4069f8c3`). Earlier roadmap framing of these gates as "open" was stale; remaining work is operator-driven test matrix execution per `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md`.
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -512,14 +513,18 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 **v0.9.5 audit + closure (2026-05-05, 9-commit batch `c2e11c72..c2d209e3`):** Audit `docs/40_reports/audits/20260505_V095_PLATFORM_PACKAGING_AUDIT.md` named 8 P1 + 8 P2 gaps with 10 prioritized lanes. **6 of 8 P1 closed** (G1 icon source, G2 BrowserWindow icon wiring, G5 CI Linux package, G6 CI Win package, G7 version bump 0.8.1→0.9.5-alpha.1, G8 release workflow); **4 of 8 P2 closed** (G1 AppUserModelId, G3 release-notes generator, G4 platform test matrix doc, G5 Linux distro coverage). package.json semver now reflects v0.9.x band reality.
 
-**Open from audit (cannot be agent-dispatched — require manual host execution):**
-- P1-G3: first real Linux AppImage build via `desktop:package:linux:appimage` end-to-end on a Linux host (or WSL2). Smoke verifier ready; CI pipeline ready; manual install/launch/save/load/uninstall checklist ready in `docs/40_reports/PLATFORM_TEST_MATRIX.md`.
-- P1-G4: first real Win unsigned NSIS build via `desktop:package:win:nsis` end-to-end on Win10/11 host. Same readiness state as G3.
-- P2-G2: reproducible build harness (gated on G3+G4 landing first).
+**Build artifacts COMPLETE on disk (per `20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` §0 critical-finding pass — corrected 2026-05-07):**
+- P1-G3 (Linux AppImage): BUILT at `78e32c73` 2026-05-05 (1.20 GB at `dist-packaged-fresh-linux/`). Closure report: `docs/40_reports/implemented/20260505_V095_LINUX_APPIMAGE_FIRST_BUILD.md`.
+- P1-G4 (Windows unsigned NSIS): BUILT at `5799a6d1`+`4069f8c3` 2026-05-05 (1.40 GB at `dist-packaged-fresh/`; pre-trim — post-trim target ~983 MB).
+- **Lane-prompt mismatch corrected:** earlier roadmap framed P1-G3 as Windows + P1-G4 as macOS; repo truth (per audit `20260505_V095_PLATFORM_PACKAGING_AUDIT.md` §6 R7) is P1-G3=Linux + P1-G4=Win unsigned. macOS is OUT of v0.9.5 scope.
+
+**Remaining for v0.9.5 closure (require manual host execution on clean target VMs):**
+- Platform test matrix execution per `docs/40_reports/PLATFORM_TEST_MATRIX.md` on Win10/11 + Ubuntu/Fedora/Debian clean VMs. Runbook ready at `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (632 lines, every step pre-flighted on this Windows host: PE/MZ headers GREEN, smoke `--report-only` exits 0, package.json build block well-formed, Node v24.13.0 / npm v11.6.2 above engines floor).
+- P2-G2: reproducible build harness (gated on test matrix completion).
 
 **Out of v0.9.5 scope (audit §6 R7):** macOS notarized DMG, Steam integration, signed Win cert, electron-updater auto-update — all flagged for v0.9.6+ / v1.0 prep.
 
-**Closure threshold:** v0.9.5 is closure-floor PARTIAL — all infrastructure (icon, version, CI matrix, release workflow, test matrix, release-notes generator, RELEASE_PROCESS.md) is shipped + ready to support manual G3/G4 runs. The release pipeline can produce a downloadable artifact pair the moment G3+G4 are exercised on host.
+**Closure threshold:** v0.9.5 is closure-floor PARTIAL — all infrastructure (icon, version, CI matrix, release workflow, test matrix, release-notes generator, RELEASE_PROCESS.md) shipped + first-real-builds COMPLETE on disk + test matrix runbook ready. Closure to FULL pending operator-executed test matrix on clean VMs (template + commit instructions in runbook §5).
 
 ### v0.9.6 â€” AI Officers (real) **(OPENED 2026-05-06/07; ~30+ commit trip session 6)**
 
@@ -611,9 +616,9 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 **Cross-milestone view of what remains between v0.9.x and v1.0.0 Gold.** This section is a rolling synthesis; individual milestones above remain authoritative for sub-task scope. Updated 2026-05-07.
 
 **Hard blockers (must close before v1.0):**
-1. **v0.9.5 P1-G3 + P1-G4** — first real Linux AppImage + Win unsigned NSIS builds via manual host execution. Smoke verifier ready; CI pipeline ready; manual install/launch/save/load/uninstall checklist ready in `docs/40_reports/PLATFORM_TEST_MATRIX.md`. **NOT agent-dispatchable.**
-2. **v0.9.6 SRK siege defender morale Phase 1** — DDR drafted at `bb0e449e`; needs user sign-off on coefficient + floor + flag default before Phase 1 implementation can ship.
-3. **v0.9.6 persona suppressor validation run** — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts the genuine-signal rate above the ~11.5% baseline.
+1. **v0.9.5 platform test matrix execution** — first-real-builds DONE on disk (P1-G3 Linux AppImage at `78e32c73`; P1-G4 Win NSIS at `5799a6d1`+`4069f8c3`). Remaining: operator-driven test matrix on Win10/11 + Ubuntu/Fedora/Debian clean VMs per `docs/40_reports/PLATFORM_TEST_MATRIX.md`. Runbook ready at `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (632 lines, all pre-flight checks GREEN on Windows host). **NOT agent-dispatchable** (clean-VM execution required).
+2. **v0.9.6 SRK siege defender morale Phase 1** — DDR drafted at `bb0e449e`; evidence-backed Phase 1 recommendation shipped at `8e974004` (`docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md`): ACCEPT DDR coefficient schedule + ACCEPT floor=25 + OFF default per FORAWWV §XIV.1 + corrected canon §6.10 numbering. Pending user sign-off on §8 + §9.
+3. **v0.9.6 persona suppressor validation run** — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts genuine-signal rate above the ~11.5% baseline. Methodology resolution lane in flight (V3, transcript-capture path TBD per V2 finding).
 4. **package.json bump to v0.9.6** — pending parent decision after roadmap reflects intent. Currently `0.9.5-alpha.1`; roadmap state is now ahead of semver.
 
 **Open milestone work carried forward (not blockers, but unfinished):**
@@ -636,7 +641,7 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 - Source/test references to old v0.7.0 / v0.6.0 canon filenames remain in supporting docs (`docs/20_engineering/`, `docs/40_reports/`, `.claude/skills/`, plan docs) — downstream-consumer pointers; doc-sweep lane.
 - Pre-v0.9 backup snapshot at `docs/10_canon/_backups_pre_v09_20260505/` removable once v0.9.0 canon-doc state is verified.
 
-**Bottom line:** v1.0 ship-readiness is gated by P1-G3+G4 manual host builds + v0.9.6 SRK siege Phase 1 sign-off + persona suppressor validation. Everything else is maintenance, polish, or graceful-degradation backlog.
+**Bottom line:** v1.0 ship-readiness is gated by v0.9.5 platform test matrix execution (builds done; matrix pending) + v0.9.6 SRK siege Phase 1 sign-off (recommendation shipped; awaiting user sign-off) + persona suppressor validation (V3 in flight). Everything else is maintenance, polish, or graceful-degradation backlog.
 
 ---
 

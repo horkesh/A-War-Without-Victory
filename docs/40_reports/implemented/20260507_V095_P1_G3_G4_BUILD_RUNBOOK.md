@@ -2,7 +2,7 @@
 
 **Lane:** `LANE-NIGHTSHIFT-V095-P1-G3-G4-BUILD-RUNBOOK`
 **Date:** 2026-05-07
-**Status:** AUTHORED — runbook ready for user execution. **Findings section contains lane-prompt mismatch flag (read first).**
+**Status:** SHIPPED + PUSHED at `5963b12b` (main). Runbook ready for user execution. **Findings section contains lane-prompt mismatch flag (read first).**
 **Roadmap slot:** v0.9.5 (Platform Packaging + Store)
 **Owner files (this lane):** `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (THIS FILE only)
 **Audit reference:** `docs/40_reports/audits/20260505_V095_PLATFORM_PACKAGING_AUDIT.md`
