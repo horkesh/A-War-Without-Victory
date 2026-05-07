@@ -23,7 +23,7 @@
     { "id": "hvo_main_staff", "faction": "HRHB", "name": "Main Staff HVO", "hq_mun": "mostar", "hq_osid": "op:mostar:kruzanj_2", "kind": "army_hq", "available_from": 10, "initial_officer_quality": 0.50, "initial_cohesion": 65 },
     { "id": "hvo_southeast_herzegovina", "faction": "HRHB", "name": "Southeast Herzegovina OZ", "hq_mun": "citluk", "hq_osid": "op:citluk:citluk_2", "available_from": 10 },
     { "id": "hvo_central_bosnia", "faction": "HRHB", "name": "Central Bosnia OZ", "hq_mun": "vitez", "hq_osid": "op:vitez:vitez_2", "available_from": 10 },
-    { "id": "hvo_northwest_bosnia", "faction": "HRHB", "name": "Northwest Bosnia OZ", "hq_mun": "orasje", "hq_osid": "op:orasje:orasje", "available_from": 10 },
+    { "id": "hvo_northwest_bosnia", "faction": "HRHB", "name": "Northwest Bosnia OZ", "hq_mun": "orasje", "hq_osid": "op:orasje:orasje", "available_from": 0 },
     { "id": "hvo_tomislavgrad", "faction": "HRHB", "name": "Tomislavgrad OZ", "hq_mun": "duvno", "hq_osid": "op:duvno:tomislavgrad_2", "available_from": 10 }
   ]
 }
