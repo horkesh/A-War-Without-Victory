@@ -56,7 +56,7 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         consolidation_priority_weight: 0.5,
         benchmarks: [
             { turn: 20, objective: 'hold_core_centers', expected_control_share: 0.35, tolerance: 0.08 },
-            { turn: 40, objective: 'preserve_survival_corridors', expected_control_share: 0.329, tolerance: 0.05 }
+            { turn: 40, objective: 'preserve_survival_corridors', expected_control_share: 0.388, tolerance: 0.05 }
         ]
     },
     RS: {
