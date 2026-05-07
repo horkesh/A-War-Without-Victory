@@ -165,6 +165,27 @@ export function generateCorpsStanceOrders(
             if (corpsHomeMun && SARAJEVO_SIEGE_MUNS.has(corpsHomeMun)) {
                 if (stance === 'reorganize') stance = 'balanced'; // Maintain siege pressure
             }
+            // LANE-NIGHTSHIFT-SRK-SIEGE-MORALE-AUDIT (2026-05-06): SRK
+            // (vrs_sarajevo_romanija) doctrine is positional containment of
+            // ARBiH 1st Corps inside the city perimeter, NOT offensive
+            // maneuver. ICTY Galić IT-98-29-T canonically establishes the
+            // SRK's operational mode as siege bombardment + counterattack
+            // against sallies — Galić explicitly did not initiate large
+            // offensive operations except by Main Staff direction. The
+            // upstream RS early-war aggression bias (lines 160-162) and
+            // SARAJEVO_SIEGE_MUNS guard (which keys on hq_mun and misses
+            // SRK's actual hq_mun 'novo_sarajevo') were leaving SRK in
+            // 'offensive' stance through w0–w26. AI commander personas
+            // (Mladić, SRK Galić-persona) flagged this as ahistorical.
+            // Canon citation: Engine Invariants v0.9.0 §6.4, Systems Manual
+            // v0.9.0 §6.4 (corps command — siege doctrine). Mechanism is
+            // faction-symmetric: a corps_id-keyed siege-doctrine constraint
+            // could be expanded to any besieger if needed; data lives here.
+            // This does NOT alter Sarajevo siege turn boundaries (those live
+            // in triggered_operations.ts and are untouched).
+            if (corps.id === 'vrs_sarajevo_romanija' && stance === 'offensive') {
+                stance = 'balanced';
+            }
         } else if (faction === 'RBiH') {
             // E2: RBiH Sarajevo corps: strong defensive bias, but can go balanced
             // when army HQ issues probe override (historically ARBiH probed SRK lines).
