@@ -32,6 +32,11 @@ import { strictCompare } from '../../src/state/validateGameState.js';
 // system_prompt_template into the prompt construction. Default-off path
 // unchanged.
 import { loadPersonaByTenure, type PersonaFaction } from './persona_loader.js';
+// LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit one
+// PersonaDecisionRecord per API call so the side-channel JSONL at
+// `data/derived/_debug/d_lane_persona_decisions.jsonl` becomes observable.
+// `emitDecision` is a no-op when CLAUDE_PERSONA_TELEMETRY_DISABLED=true.
+import { emitDecision } from './persona_telemetry.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Political → Army chain context (LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE)
@@ -402,10 +407,30 @@ export async function generateApiDecision(
         .map(block => block.text)
         .join('');
 
+    // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): resolve the active
+    // army-CO persona id via A4 roster tenure for the officer_id field. Falls
+    // back to the deterministic profile commander name when no persona is
+    // registered (faction-symmetric; no per-faction branches).
+    const activePersona = loadPersonaByTenure(profile.faction as PersonaFaction, 'army_co', turn);
+    const officerId = activePersona ? activePersona.id : commanderName;
+
     // Parse response
     const parsed = safeParseJson(text);
     if (!parsed) {
         console.warn(`[API] Failed to parse response for ${profile.faction}. Falling back.`);
+        // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX: emit telemetry on parse-failure
+        // path too, so cost / latency / failure rate is observable in JSONL.
+        emitDecision({
+            turn,
+            faction: profile.faction as PersonaFaction,
+            role: 'army_co',
+            officer_id: officerId,
+            prompt_tokens: response.usage.input_tokens,
+            completion_tokens: response.usage.output_tokens,
+            latency_ms: latencyMs,
+            decision_summary: 'parse_failure',
+            chain_context_section_present: true,
+        });
         return {
             faction: profile.faction as FactionId,
             commander_name: commanderName,
@@ -451,12 +476,32 @@ export async function generateApiDecision(
         }
     }
 
+    // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit per-decision
+    // record to the D2 side-channel JSONL. Determinism: append-only, no
+    // GameState mutation. Faction-symmetric (no per-faction branches).
+    const stancesSummary = Object.entries(corpsStances)
+        .sort(([a], [b]) => strictCompare(a, b))
+        .map(([cid, st]) => `${cid}:${st}`)
+        .join(',');
+    const briefingStr = String(parsed.briefing ?? '');
+    emitDecision({
+        turn,
+        faction: profile.faction as PersonaFaction,
+        role: 'army_co',
+        officer_id: officerId,
+        prompt_tokens: response.usage.input_tokens,
+        completion_tokens: response.usage.output_tokens,
+        latency_ms: latencyMs,
+        decision_summary: `briefing_len=${briefingStr.length};stances=${stancesSummary}`,
+        chain_context_section_present: true,
+    });
+
     return {
         faction: profile.faction as FactionId,
         commander_name: commanderName,
         turn,
         corps_stances: corpsStances,
-        briefing: String(parsed.briefing ?? ''),
+        briefing: briefingStr,
         strategic_reasoning: String(parsed.strategic_reasoning ?? ''),
         observations,
         model_used: response.model,

@@ -32,6 +32,11 @@ import type Anthropic from '@anthropic-ai/sdk';
 import type { GameState } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { loadPersona, type Persona, type PersonaFaction } from './persona_loader.js';
+// LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit one
+// PersonaDecisionRecord per API call so the side-channel JSONL at
+// `data/derived/_debug/d_lane_persona_decisions.jsonl` becomes observable.
+// `emitDecision` is a no-op when CLAUDE_PERSONA_TELEMETRY_DISABLED=true.
+import { emitDecision } from './persona_telemetry.js';
 
 // Local widening of Anthropic ContentBlock to support narrowed text-block
 // extraction. The SDK's ContentBlock is a union (text | thinking | tool_use
@@ -245,6 +250,21 @@ export async function producePresidentDirective(
     const scratchpad = parsed && typeof parsed.scratchpad_reasoning === 'string'
         ? parsed.scratchpad_reasoning
         : '';
+
+    // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit per-decision
+    // record to the D2 side-channel JSONL. No-op when env flag disables.
+    // Faction-symmetric (no per-faction branches). Determinism: append-only.
+    emitDecision({
+        turn: state.meta.turn,
+        faction,
+        role: 'president',
+        officer_id: persona.id,
+        prompt_tokens: response.usage.input_tokens,
+        completion_tokens: response.usage.output_tokens,
+        latency_ms: latencyMs,
+        decision_summary: `verb=${verb}`,
+        chain_context_section_present: false,
+    });
 
     return {
         faction,

@@ -11,7 +11,12 @@ import { strictCompare } from '../../src/state/validateGameState.js';
 // CLAUDE_AS_CORPS_CO_<faction>_<corps>=true and a persona file exists for
 // the requested corps (named-officer or archetype fallback), splice the
 // persona system_prompt_template. Default-off path unchanged.
-import { loadPersona } from './persona_loader.js';
+import { loadPersona, type PersonaFaction } from './persona_loader.js';
+// LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit one
+// PersonaDecisionRecord per API call so the side-channel JSONL at
+// `data/derived/_debug/d_lane_persona_decisions.jsonl` becomes observable.
+// `emitDecision` is a no-op when CLAUDE_PERSONA_TELEMETRY_DISABLED=true.
+import { emitDecision } from './persona_telemetry.js';
 
 /**
  * Map a corps_id to its persona filename id. Named-officer personas exist
@@ -212,13 +217,37 @@ export async function generateCorpsApiDecision(
         }
     }
 
+    // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): resolve persona id
+    // for the officer_id field. Falls back to the canonical corps-derived
+    // persona id when no persona JSON is registered. Faction-symmetric.
+    const personaId = corpsIdToPersonaId(corpsId);
+    const persona = loadPersona(personaId, { role: 'corps_co' });
+    const officerId = persona ? persona.id : personaId;
+
+    // LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX (2026-05-07): emit per-decision
+    // record to the D2 side-channel JSONL. Determinism: append-only, no
+    // GameState mutation.
+    const assessmentStr = String(parsed?.assessment ?? '');
+    const sectorCount = Object.keys(sectorStances).length;
+    emitDecision({
+        turn: state.meta.turn,
+        faction: faction as PersonaFaction,
+        role: 'corps_co',
+        officer_id: officerId,
+        prompt_tokens: response.usage.input_tokens,
+        completion_tokens: response.usage.output_tokens,
+        latency_ms: latencyMs,
+        decision_summary: `assessment_len=${assessmentStr.length};sectors=${sectorCount}`,
+        chain_context_section_present: false,
+    });
+
     return {
         corps_id: corpsId,
         faction,
         commander_name: commanderName,
         turn: state.meta.turn,
         sector_stances: sectorStances,
-        assessment: String(parsed?.assessment ?? ''),
+        assessment: assessmentStr,
         model_used: response.model,
         prompt_tokens: response.usage.input_tokens,
         completion_tokens: response.usage.output_tokens,
