@@ -16,6 +16,31 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
+## Current State (2026-05-07, post-5-lane batch + 3-lane backlog closure — n1728 40w + n1729 188w baselines)
+
+**Latest baselines:** n1728 40w hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks post RBiH-t40 reanchor); n1729 188w hash `e85303890ff4b601` (26/27 anchors, 6/6 post-reanchor, §6 floors PASS).
+
+**~25+ commits shipped across A1-A5 + Krivaja-95 + B-lane (DDR+B1+B2) + C-lane (DDR+C1+C2) + API-Directive Bridge + Q1 revert + drina-fix + D-lane (DDR+D1+D2) + telemetry wire + 5-lane batch (NW Bosnia OOB `be7e0715` + Persona restructure `cb13e605` + SRK siege `aa115a99` + JNA `ecae99da` + Jajce `ec837dca`) + 3-lane backlog closure (RBiH benchmark reanchor `d377e07b` + SRK siege Phase 0 DDR `bb0e449e` + Stupčanica name-collision `759a35cd`).** All CI green (latest `759a35cd`).
+
+**Claude-roleplay-as-all-3-layers QA infrastructure LIVE:** presidents + army COs + corps COs; per-layer × per-faction env flags (`CLAUDE_AS_PRESIDENT_*`, `CLAUDE_AS_COMMANDER_*`, `CLAUDE_AS_CORPS_*`); auto-swap on A4 roster; side-channel telemetry at `data/derived/_debug/d_lane_persona_decisions.jsonl`. Default OFF — byte-stable. Real-API D3 cost calibration: ~$2.79 total across 3 configs at Haiku 4.5.
+
+**Six new durable KNOWLEDGE entries (2026-05-06 to 2026-05-07; head of `docs/PROJECT_LEDGER_KNOWLEDGE.md`):**
+1. Calibration-overshoot risk: prefer OOB-data audit over engine-gate fixes (Q1 revert + Lane 2 NW Bosnia).
+2. Bot-pool name-collision with canonical sensitive-history names (Stupčanica fix; data-not-comment exclusion).
+3. Persona-grounded LLM commanders don't auto-improve calibration signal quality (~11.5% genuine, indistinguishable from baseline; SHAPE of noise shifts, QUALITY doesn't).
+4. Schema mismatch between agent-designed types and engine-canonical interfaces (D1+D2 16-verb vs engine 6-verb; PRESIDENT_TO_CANONICAL bridge).
+5. Default-off `if (apiClient)` guards depend on apiClient init — gate apiClient init on env flags too (D3 wire-up bug).
+6. Side-effect suppression is NOT a canonical resolution; preserve the original bug for proper fix (Stupčanica appeared absent in n1728 5-lane batch but root cause was untouched).
+
+**Mandatory durable patterns (re-affirmed):**
+- `git commit -o <files>` pathspec form is MANDATORY in any parallel-batch context (no exceptions).
+- Keep agent runtime under 15 minutes; long subprocesses (>5 min) belong to parent (Bash background) not agent.
+
+**Successor handoffs after natural pause:**
+- Bot-orders + heap-profile re-dispatch per fixed pattern (parent-owned subprocess).
+- SrAnnouncer App.tsx mount (Lane B successor).
+- v1.0 master-roadmap items requiring user design direction (AI Commander intelligence, Order Interpretation, Political Leader Bot, Consequence-system ahistorical branching, Tutorial Lane A tone).
+
 ## Current State (2026-05-05, v0.9.5 PLATFORM PACKAGING — 6 of 8 P1 + 4 of 8 P2 gaps CLOSED, all pushed)
 **9-commit batch shipped + pushed (`c2e11c72..c2d209e3`):** v0.9.5 Platform Packaging audit + 5 parallel lanes + 2 backfills + version bump. All Ring N/A (sim-orthogonal); 40w hash drift = NONE by construction (zero `npm_package_version` reads in any code path).
 

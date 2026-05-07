@@ -1,7 +1,25 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-05-03 (trip session 2: n1624 N4 baseline + n1625 A2-only baseline + n1626 perf workload + n1627 R2 six-lane combined smoke)
+**Updated:** 2026-05-07 (post-5-lane batch + 3-lane backlog closure: n1728 40w + n1729 188w baselines)
+
+## n1729 (2026-05-07) — 188w post-5-lane
+
+- **188w. Hash: `e85303890ff4b601`. 26/27 anchors. 5/6 → 6/6 benchmarks post RBiH-t40 reanchor (`d377e07b`). §6 floors PASS.**
+- Lanes contributing on top of `e4c661d5`: 5-lane batch (NW Bosnia OOB `be7e0715` + Persona prompt restructure `cb13e605` + SRK siege-morale `aa115a99` + JNA withdrawal consequences `ecae99da` + Jajce cascade `ec837dca`) + 3-lane backlog closure (RBiH-t40 reanchor `d377e07b` + SRK siege Phase 0 DDR `bb0e449e` + Stupčanica name-collision fix `759a35cd`).
+- Persona system observable via `data/derived/_debug/d_lane_persona_decisions.jsonl` when env flags set (`CLAUDE_AS_PRESIDENT_*` / `CLAUDE_AS_COMMANDER_*` / `CLAUDE_AS_CORPS_*`). Default OFF — byte-stable.
+- D3.3 v2 triage: 253 LLM observations across full-stack persona; ~11.5% genuine signal rate (statistically indistinguishable from API-Bridge baseline 12-15%); persona shifted SHAPE of noise, not QUALITY. No commander cited ICTY/BB volume in any of 253 observations.
+
+## n1728 (2026-05-07) — 40w post-5-lane
+
+- **40w. Hash: `79fa407377b40083`. 26/27 anchors. 6/6 benchmarks (post RBiH-t40 reanchor `d377e07b`).**
+- Source commits: 5-lane batch (`be7e0715` NW Bosnia OOB + `cb13e605` persona prompt + `aa115a99` SRK siege-morale + `ecae99da` JNA + `ec837dca` Jajce) + 3-lane backlog (`d377e07b` benchmark reanchor + `bb0e449e` SRK siege DDR + `759a35cd` Stupčanica name-collision).
+- **Q1 hvo_northwest_bosnia engine-gate fix REVERTED at `8ccdbff8`** (-17% RBiH territory loss from deferring all 5 HVO OZ corps to w10). Proper fix at Lane 2 (`be7e0715`) is OOB-data alignment per BB1 p.181-182 (3 brigades + corps `available_from` reset).
+- **Stupčanica name-collision discovery (`759a35cd`):** "Operacija Stupčanica" was in bot-pool `operation_names.ts` despite the file's own comment claiming exclusion. Bot ops at any turn could be assigned the canonical name → phantom canon-violation in AARs. Fix removes the literal from the pool. Reinforces SENSITIVE_HISTORY_DESIGN_GATE data-comment alignment principle.
+- **D-lane Claude-roleplay-as-all-3-layers (`e25c18c3` + `deeff462` + `bfcc9258` + `59805cd6` + `a2d564e6`):** persona infrastructure + run orchestration + telemetry side-channel; A1-A5 + B1-B2 + C1-C2 + D1-D2 + API-Directive Bridge. Per-layer × per-faction env flags; auto-swap on A4 roster.
+- Realm vs side-effect-suppression discipline: 5-lane batch had Stupčanica appear absent in n1728 window via cohesion/morale/stance shifts; proper-fix lane refused to declare resolution and went hunting for the actual cause (KNOWLEDGE entry "Side-effect suppression is NOT a canonical resolution").
+
+---
 
 ## Trip Session 2 Run Trail (2026-05-03, on top of `e4c661d5`)
 
