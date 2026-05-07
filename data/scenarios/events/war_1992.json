@@ -775,6 +775,28 @@
         "delta": -5
       },
       {
+        "kind": "recruitment_modifier",
+        "faction": "RS",
+        "pool_multiplier": 0.92,
+        "duration_turns": 20
+      },
+      {
+        "kind": "equipment_quality_modifier",
+        "faction": "RS",
+        "multiplier": 0.96,
+        "duration_turns": 15
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": 5
+      },
+      {
         "kind": "narrative",
         "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
       }
@@ -1671,13 +1693,28 @@
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",
-      "delta": -10
+      "delta": -12
     },
     "effects": [
       {
         "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -6
+      },
+      {
+        "kind": "morale_change",
         "faction": "RS",
         "delta": 3
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": -8
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": -6
       },
       {
         "kind": "alliance_change",
@@ -1685,7 +1722,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Jajce falls to the VRS. Mutual blame between HVO and ARBiH accelerates the breakdown of their alliance."
+        "text": "Jajce falls to the VRS. Refugee columns flood central Bosnia; mutual blame between HVO and ARBiH accelerates the breakdown of their alliance."
       }
     ],
     "dimension_shifts": [
