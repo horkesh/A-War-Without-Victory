@@ -577,6 +577,40 @@ async function main(): Promise<void> {
         const prevPc = { ...pc };
         const prevFired = [...(state.military.fired_event_ids ?? [])];
 
+        // PRESIDENT LAYER (D3 wire-up): per-faction api_president invocation when
+        // CLAUDE_AS_PRESIDENT_<faction>=true (or wildcard CLAUDE_AS_ALL/_LAYERS).
+        // Writes state.political.political_directives[faction] BEFORE army-CO
+        // decisions read it via the chain-context section. Internal gate via
+        // isPresidentLayerEnabled() returns null when faction's env flag absent.
+        // To prevent B1's deterministic producer from overwriting on next runTurn,
+        // run with B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED=true.
+        if (apiClient) {
+            try {
+                const { producePresidentDirective } = await import('./api_president.js');
+                for (const profile of profiles) {
+                    const faction = profile.faction as FactionId;
+                    try {
+                        const presidentResult = await producePresidentDirective(apiClient, state, faction as any, { model: apiModel });
+                        if (presidentResult && presidentResult.verb !== 'no_directive') {
+                            // Canonical slot: state.military.political_directives_by_faction (per
+                            // B1 producer + A3 interpreter contract). NOT state.political.*.
+                            const milAny = state.military as any;
+                            if (!milAny.political_directives_by_faction) milAny.political_directives_by_faction = {};
+                            milAny.political_directives_by_faction[faction] = {
+                                verb: presidentResult.verb,
+                                target_corps_id: presidentResult.target_corps_id,
+                                directive_id: `pres_${faction}_w${week}`,
+                            };
+                            totalApiCost += estimateCost(presidentResult.prompt_tokens, presidentResult.completion_tokens, apiModel);
+                            totalApiCalls++;
+                        }
+                    } catch (presErr) {
+                        console.warn(`[API-President] ${faction} w${week} error: ${presErr}`);
+                    }
+                }
+            } catch { /* api_president module not available */ }
+        }
+
         // Generate decisions for all commanders
         const decisions: CommanderDecision[] = [];
         for (const profile of profiles) {
