@@ -587,28 +587,53 @@ async function main(): Promise<void> {
         if (apiClient) {
             try {
                 const { producePresidentDirective } = await import('./api_president.js');
+                // BRIDGE: api_president emits 16 rich verbs (presidential intent vocabulary);
+                // engine's canonical PoliticalDirective interface accepts 6. Map rich → canonical
+                // before writing the slot so A3's interpretArmyDirective recognizes it.
+                const PRESIDENT_TO_CANONICAL: Record<string, string | null> = {
+                    hold_corridor: 'MAINTAIN_CORRIDOR',
+                    consolidate_drina: 'PRESS_OFFENSIVE',
+                    maintain_siege: 'HOLD_AT_ALL_COSTS',
+                    reject_partition_plan: 'PREPARE_RESERVE',
+                    selective_advance: 'PRESS_OFFENSIVE',
+                    defend_enclave: 'HOLD_AT_ALL_COSTS',
+                    negotiate: 'HONOR_TRUCE',
+                    preserve_republic: 'BALANCE_FRONTS',
+                    accept_ceasefire: 'HONOR_TRUCE',
+                    mobilize_general: 'PRESS_OFFENSIVE',
+                    consolidate_herzegovina: 'PRESS_OFFENSIVE',
+                    hold_central_bosnia: 'HOLD_AT_ALL_COSTS',
+                    screen_arbih_axis: 'MAINTAIN_CORRIDOR',
+                    accept_zagreb_directive: 'BALANCE_FRONTS',
+                    accept_washington_framework: 'HONOR_TRUCE',
+                    no_directive: null,
+                };
                 for (const profile of profiles) {
                     const faction = profile.faction as FactionId;
                     try {
                         const presidentResult = await producePresidentDirective(apiClient, state, faction as any, { model: apiModel });
-                        if (presidentResult && presidentResult.verb !== 'no_directive') {
-                            // Canonical slot: state.military.political_directives_by_faction (per
-                            // B1 producer + A3 interpreter contract). NOT state.political.*.
-                            const milAny = state.military as any;
-                            if (!milAny.political_directives_by_faction) milAny.political_directives_by_faction = {};
-                            milAny.political_directives_by_faction[faction] = {
-                                verb: presidentResult.verb,
-                                target_corps_id: presidentResult.target_corps_id,
-                                directive_id: `pres_${faction}_w${week}`,
-                            };
+                        if (presidentResult) {
+                            // Count the API call regardless of verb validity (cost was incurred).
                             totalApiCost += estimateCost(presidentResult.prompt_tokens, presidentResult.completion_tokens, apiModel);
                             totalApiCalls++;
+                            const canonicalVerb = PRESIDENT_TO_CANONICAL[presidentResult.verb];
+                            if (canonicalVerb) {
+                                // Canonical slot: state.military.political_directives_by_faction
+                                // (per B1 producer + A3 interpreter contract).
+                                const milAny = state.military as any;
+                                if (!milAny.political_directives_by_faction) milAny.political_directives_by_faction = {};
+                                milAny.political_directives_by_faction[faction] = {
+                                    verb: canonicalVerb,
+                                    target_corps_id: presidentResult.target_corps_id,
+                                    directive_id: `pres_${faction}_w${week}_${presidentResult.verb}`,
+                                };
+                            }
                         }
                     } catch (presErr) {
                         console.warn(`[API-President] ${faction} w${week} error: ${presErr}`);
                     }
                 }
-            } catch { /* api_president module not available */ }
+            } catch (e) { console.warn(`[API-President] outer block error: ${e}`); }
         }
 
         // Generate decisions for all commanders
