@@ -1,7 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-05-05 (post-trip 9-commit autonomous batch `c2e11c72..c2d209e3` — **v0.9.5 PLATFORM PACKAGING PARTIAL CLOSURE**: audit + 5 parallel lanes + version bump (P1-G1 icon, G2 wiring, G5+G6 CI matrix, G7 version, G8 release workflow; P2-G1 AppUserModelId, G3 release-notes generator, G4+G5 test matrix doc) + 2 backfills. 6/8 P1 + 4/8 P2 gaps closed. Open: P1-G3+G4 (first real builds — manual host execution only). package.json semver now `0.9.5-alpha.1`.)
-**Current Version:** v0.9.5-alpha.1 (formally bumped 2026-05-05 in commit `c2d209e3`; v0.9.5 closure PARTIAL pending manual host G3+G4 build runs)
+**Last Updated:** 2026-05-07 (post-trip-session-6 — **v0.9.6 "AI OFFICERS (real)" OPENED**: ~30+ commits across A1-A5 substrate (`18136710..3f17733f`), B-lane producer (`941bd68e`/`44053a32`/`d019bef7`), C-lane consumer + telemetry (`57cec91c`/`5084071d`/`c084dd86`/`f24ad5d7`/`5589c6fe`), API-Directive bridge (`a2d564e6`), D-lane personas (`85f43f5a`/`e25c18c3`/`59805cd6`), Q1 revert + drina-fix (`8ccdbff8`/`03ef9cd4`), 5-lane batch (NW Bosnia OOB `be7e0715` closes BUG-01; Persona prompt restructure `cb13e605`; SRK siege `aa115a99`; JNA withdrawal consequences `ecae99da`; Jajce cascade morale `ec837dca`), 3-lane backlog closure (RBiH t40 reanchor `d377e07b`; SRK siege Phase 0 DDR `bb0e449e`; Stupčanica name-collision fix `759a35cd`), Krivaja-95 t168 floor compliance (`d622b762`/`39e6b7b6` backfill), and documentation propagation (6 KNOWLEDGE entries + FORAWWV §X-§XVI substrate canon `bca414ba` + master-doc updates `ebac4fdf`). Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS).
+**Current Version:** v0.9.5-alpha.1 (package.json formally bumped 2026-05-05 in commit `c2d209e3`). **package.json bump for v0.9.6 is PENDING** — roadmap state is now ahead of semver; bump is the parent's call after roadmap reflects intent.
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -521,6 +521,123 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 **Closure threshold:** v0.9.5 is closure-floor PARTIAL — all infrastructure (icon, version, CI matrix, release workflow, test matrix, release-notes generator, RELEASE_PROCESS.md) is shipped + ready to support manual G3/G4 runs. The release pipeline can produce a downloadable artifact pair the moment G3+G4 are exercised on host.
 
+### v0.9.6 â€” AI Officers (real) **(OPENED 2026-05-06/07; ~30+ commit trip session 6)**
+
+**Theme:** Make the political → army → corps command chain a real deterministic substrate, not a sophisticated illusion. This milestone is the deeper realization of the concepts that v0.8.3 Order Interpretation (closed 2026-04-06) and v0.8.4 Phase E Claude API at political level (closed 2026-04-06) opened — but those earlier milestones operated on top of a single-actor commander. v0.9.6 makes the multi-layer chain (president → army CO → corps CO) canonical, with real personality scalars on the army CO, real interpretation/persistence at every link, and an opt-in three-layer LLM persona harness for QA only.
+
+**Why this is a separate milestone, not an extension of v0.8.x:** v0.8.3/v0.8.4 closed the *single-actor* command-review and political-level API surfaces. The substrate underneath them (canonical 6-verb `PoliticalDirective`; per-faction army CO with `stubbornness` / `override_tolerance`; Mladić-class autonomous launch path; per-corps `army_corps_directives_by_faction` persistence; briefing-overlay consumer; persona prompt suppressor block; faction-symmetric mechanism with faction-asymmetric data) all landed in trip session 6. The architecture is qualitatively different from v0.8.x because it treats the political → army → corps chain as a typed multi-layer pipeline rather than a single commander loop with political flavor.
+
+**Sequencing principles:**
+1. Mechanism is faction-symmetric. Asymmetry lives entirely in DATA (officer rosters, leader scalars, persona prose). Static-grep guards prevent per-faction string-equality branches.
+2. Default-off byte-stability invariant: any env-flag-gated mechanism MUST produce byte-identical state hash when its flag is off.
+3. Side-channel telemetry (per-feature gitignored JSONL under `data/derived/_debug/`) for observability of opt-in features. Never mutate `weekly_report.jsonl`.
+4. OOB-data correctness over engine-gate fixes for "missing formation / zero-brigade" anomalies (per Q1 revert + Lane 2 NW Bosnia evidence).
+5. Bot/AI generator name-pool exclusion is data, not comments (per Stupčanica name-collision fix).
+
+**A-lane (deterministic political → army → corps substrate):**
+- **DDR** (`eee308e0`) — 5 design questions LOCKED: Q1 player-issues-political-directives default + corps-level override at 2 political_capital cost; Q2 ADVISORY shape; Q3 Mladić-class insubordination (stubbornness ≥4 + opportunity-catalog + 1-turn advance + 12-turn cooldown); Q4 cross-army coordination via political-bot tolerance; Q5 hybrid hand-authored historical roster + emergent variation. AI-officers panel defaults locked: MAX_BONUS_OBJECTIVES=2, CAUTIOUS_EXTRA_PREP_TURNS=[0,3,2,0,0,0], AGGRESSIVE_HALT_DELAY=2.
+- **A1 wire CampaignPlan→briefing** (`18136710`) — closes audit P0 ARMY-GAP-1; 7-test regression net (366/366 GREEN); no engine code touched (audit was STALE — wiring already in place at `army_hq_gathering.ts:1004-1007` producer + `briefing.ts:376` consumer).
+- **A2 Army CO loop substrate** (`ba6955bf`) — additive schema-only: `stubbornness` + `override_tolerance` traits; `last_autonomous_launch_turn` + `recent_overrides` state; `army_co_decision_traces` per-faction. Default-undefined → behavior fires only after A4 populates canonical historical values.
+- **A3 army-level Order Interpretation** (`c8ff93d8`) — political-directive→corps-directive translation per canonical 6 verbs (`HOLD_AT_ALL_COSTS`, `PRESS_OFFENSIVE`, `MAINTAIN_CORRIDOR`, `PREPARE_RESERVE`, `HONOR_TRUCE`, `BALANCE_FRONTS`); Mladić-class autonomous launch path.
+- **A4 Army CO roster + personalities** (`93c75b1d`) — historical succession encoded in `data/scenarios/army_co_roster.json`: VRS Mladić throughout; ARBiH Halilović→Delić w60+ (Burg & Shoup ch.4); HVO Petković→Praljak w64+→Roso w130+ (BB Vol II).
+- **A5 Army HQ pushback panel** (`3f17733f`) — Pre-Advance Review surfaces CO objections + Mladić-class autonomous-launch warnings.
+
+**B-lane (political directive producer):**
+- **DDR** (`941bd68e`) — Q1-Q5 + go/no-go.
+- **B1 producer infrastructure** (`44053a32`) — byte-stable null until B2 wires data.
+- **B2 political_leader_data integration** (`d019bef7`) — canonical population + scenario-init wire-up; reads `state.political.political_leader_data[faction]` from `data/scenarios/political_leader_data.json`.
+
+**C-lane (corps directive consumer + telemetry):**
+- **DDR** (`57cec91c`) — bot_corps_orders consumer Q1-Q5 + go/no-go.
+- **C1 consumer wire** (`5084071d` original / `c084dd86` reapply after `e6afb559` misdiagnosed revert) — A3 persists, briefing reads, byte-stable behind env flag. Persists to `state.military.army_corps_directives_by_faction[faction][corps_id]`; consumed by `commander/briefing.ts` `assembleCampaignIntent` → `briefing.campaign_role`.
+- **C2 telemetry side-channel** (`f24ad5d7` / `5589c6fe` cherry-pick) — 3 weekly_report event emitters byte-stable behind env flag; side-channel JSONL at `data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+
+**API-Directive Bridge** (`a2d564e6`) — wire C1 corps-directive context into Claude API commander prompt; bridge deterministic substrate to API path.
+
+**Q-lanes (correctness audits):**
+- **Q1 hvo_northwest_bosnia 0-brigade corps shell** (`6cbcaa00` initial → `8ccdbff8` REVERT → `be7e0715` proper fix at NW Bosnia OOB audit). Engine-gate fix caused -17% RBiH territory loss (deferred all 5 HVO OZs to w10); proper fix is OOB-data alignment per BB1 p.181-182 evidence.
+- **Q3 _1992 event chronology audit** (`aa30f349`) → drina_valley_ethnic_cleansing_1992 turn_min 4→8 (`03ef9cd4`) to restore event-array sortedness.
+
+**D-lane (Claude-API persona QA harness, opt-in only):**
+- **DDR** (`85f43f5a`) — Q1-Q7 + go/no-go for Claude-as-all-3-layers.
+- **D1+D2 personas** (`e25c18c3`) — Claude persona infrastructure + run orchestration + telemetry side-channel for presidents (Karadžić/Izetbegović/Boban) + army COs + corps COs. Per-layer × per-faction × per-corps env flags.
+- **D2 telemetry wire-fix** (`59805cd6`) — wire `persona_telemetry.emitDecision` into all three layer dispatchers; surfaced dormant-path bug (`if (apiClient)` guard depends on apiClient being initialized).
+- **D3 real-API smoke chain** — ~$2.79 total cost across 3 configs at Haiku 4.5 (Presidents-only 40w ~$0.46; Army CO personas 40w ~$0.45; full stack 40w ~$1.30; full stack 188w extrapolated ~$5-9).
+- **D3.3 v2 triage finding:** persona-grounded LLM commanders shift the SHAPE of LLM noise (commander-flavored complaints in 3 structural clusters) without improving the QUALITY rate. Genuine-signal rate ~10-15% regardless of persona depth.
+
+**5-lane batch + 3-lane backlog closure:**
+- **NW Bosnia OOB audit** (`be7e0715`) — closes BUG-01 via OOB-data alignment; bumped 4 NW Bosnia rows to `available_from=0` per BB1 p.181-182.
+- **Persona prompt restructure** (`cb13e605`) — suppress 4 D3.3 noise clusters; add ICTY citation guidance.
+- **SRK siege-morale calibration** (`aa115a99`) — minimal fix.
+- **JNA withdrawal consequences** (`ecae99da`) — close audit gap on `jna_withdrawal_1992` consequence block.
+- **Jajce cascade morale** (`ec837dca`) — close audit gap on `jajce_falls_1992` cascade-morale consequences.
+- **RBiH t40 benchmark reanchor** (`d377e07b`) — re-anchor `preserve_survival_corridors` to post-5-lane equilibrium per durable rule "calibration % means nothing if mechanics are broken".
+- **SRK siege defender Phase 0 DDR** (`bb0e449e`) — Q1-Q6 design questions for §6-amendment lane (awaiting Phase 1 sign-off on coefficient + floor + flag default).
+- **Stupčanica name-collision fix** (`759a35cd`) — close pre-existing canon-violation root cause (bot operation-name pool contained reserved canonical names; phantom canon-violations masquerading as trigger bugs).
+
+**Krivaja-95 t168 floor compliance:** `d622b762` (Krivaja-95 trigger bumped to t≥170 per §6 ICTY Popović IT-05-88-T) + `39e6b7b6` (backfill SHA in implementation report).
+
+**Documentation propagation:**
+- 6 new durable KNOWLEDGE entries (head of `docs/PROJECT_LEDGER_KNOWLEDGE.md`):
+  1. Calibration-overshoot risk: prefer OOB-data audit over engine-gate fixes (Q1 revert + Lane 2 NW Bosnia).
+  2. Bot-pool name-collision with canonical sensitive-history names (Stupčanica fix; data-not-comment exclusion).
+  3. Persona-grounded LLM commanders don't auto-improve calibration signal quality (~11.5% genuine, indistinguishable from baseline).
+  4. Schema mismatch between agent-designed types and engine-canonical interfaces (D1+D2 16-verb vs engine 6-verb; PRESIDENT_TO_CANONICAL bridge).
+  5. Default-off `if (apiClient)` guards depend on apiClient init — gate apiClient init on env flags too.
+  6. Side-effect suppression is NOT a canonical resolution; preserve the original bug for proper fix.
+- **FORAWWV §X-§XVI substrate canon** (`bca414ba`) — AI officer chain + sensitive-history floors + persona QA mode + OOB-data rules + side-channel telemetry + calibration discipline. Six new canon sections.
+- **Master-doc updates + canon refs** (`ebac4fdf`) — session-end doc propagation for 6 KNOWLEDGE entries.
+- CALIBRATION_MASTER + napkin Current State updated to reflect n1728/n1729 baselines.
+- Canon-doc propagation notes: `docs/40_reports/audits/20260507_CANON_DOC_PROPAGATION_NOTES.md` (manual canon amendments still pending for some downstream docs).
+
+**Latest baselines:**
+- 40w n1728 hash `79fa407377b40083` — 26/27 anchors, 6/6 benchmarks (post RBiH t40 reanchor).
+- 188w n1729 hash `e85303890ff4b601` — 26/27 anchors, 6/6 benchmarks, §6 floors PASS.
+
+**Status (2026-05-07): OPENED, PARTIAL.** Substrate is shipped and CI green at `759a35cd`/`ebac4fdf`/`bca414ba`. Closure threshold pending: SRK siege defender Phase 1 (DDR drafted; needs user sign-off on coefficient + floor + flag default), persona suppressor validation run (~$1.30 D3 re-run), and any further v0.9.6 follow-on work that emerges. v0.9.6 cannot formally CLOSE until the open SRK siege defender Phase 1 is sign-off-resolved and the suppressor validation run lands.
+
+**Open from this session (carried forward — see Path to v1.0 below for cross-milestone tracking):**
+- SRK siege defender morale Phase 1 — DDR drafted at `bb0e449e`; needs user sign-off on coefficient + floor + flag default.
+- Persona suppressor validation run — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts the genuine-signal rate.
+- Aggressive ledger archival — `docs/PROJECT_LEDGER.md` is 8302 lines; ~30-50% reduction potential without losing provenance.
+- Manual canon-doc amendments per `docs/40_reports/audits/20260507_CANON_DOC_PROPAGATION_NOTES.md`.
+
+**Sensitive-history compliance:** All trip-session-6 commits Ring 1 / no-§6 / faction-agnostic (mechanism layer); faction-asymmetric data only (officer rosters, leader scalars, persona prose). No FORAWWV / paint anchor / political_controllers / OOB-rupture / `enclave_resilience.ts` touch outside the canonical NW Bosnia OOB row corrections (BB1-cited).
+
+---
+
+## Path to v1.0
+
+**Cross-milestone view of what remains between v0.9.x and v1.0.0 Gold.** This section is a rolling synthesis; individual milestones above remain authoritative for sub-task scope. Updated 2026-05-07.
+
+**Hard blockers (must close before v1.0):**
+1. **v0.9.5 P1-G3 + P1-G4** — first real Linux AppImage + Win unsigned NSIS builds via manual host execution. Smoke verifier ready; CI pipeline ready; manual install/launch/save/load/uninstall checklist ready in `docs/40_reports/PLATFORM_TEST_MATRIX.md`. **NOT agent-dispatchable.**
+2. **v0.9.6 SRK siege defender morale Phase 1** — DDR drafted at `bb0e449e`; needs user sign-off on coefficient + floor + flag default before Phase 1 implementation can ship.
+3. **v0.9.6 persona suppressor validation run** — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts the genuine-signal rate above the ~11.5% baseline.
+4. **package.json bump to v0.9.6** — pending parent decision after roadmap reflects intent. Currently `0.9.5-alpha.1`; roadmap state is now ahead of semver.
+
+**Open milestone work carried forward (not blockers, but unfinished):**
+- **v0.9.0 Consequence System** — PARTIAL with gold-blocker gates closed; broader divergence-event matrix still has authoring debt. Trip-session-6 added jna_withdrawal + jajce_falls consequence blocks; remaining authoring per `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md` and Cost Ledger full prosecutorial authoring per `docs/plans/2026-03-26-cost-ledger-template-format.md`.
+- **v0.9.1 Dynamic Essay + Endgame Comparison** — PARTIAL via pulled-forward; broader dynamic-essay authoring + richer milestone-week comparison UX still open.
+- **v0.9.2 Tutorial + External Playtesting** — OPENED with onboarding skeleton (R2-3 trip session 2); tutorial Lanes B/C/E shipped in v1.0 ship-readiness sprint Wave 1+2 (anchor coverage, auto-dismiss, role=dialog + focus trap + ESC). External playtesting recruitment + structured feedback collection still untouched.
+- **v0.9.3 Performance + Accessibility** — OPENED with perf baseline audit (R2-4) + a11y Lanes A/B/C/D/E shipped in v1.0 ship-readiness sprint (4 of 4 P0 v1.0-ship a11y blockers CLOSED). Profiling pass on hot paths (target <100ms/turn; current 3,094ms) still open. Bot-orders + heap-profile instrumentation REVERTED 2026-05-06; re-dispatch per fixed pattern (parent-owned subprocess) is queued.
+- **v0.9.4 Visual Polish + Legendary Map Features** — Phase 3 (Legendary Map Features) FULLY CLOSED 2026-05-05 (Map That Scars + Force-Quality Glow + Refugee Column + Corridor Heartbeat all live). Phase 1 (Shell + Transition Polish) + Phase 2 (Visual Consistency) BACKLOG CLOSED 2026-05-05 (palette canonicalization, z-index tokens, modal wrapper, loading + error states, empty-state pass; 4 modal migrations + Wave 2 + dismissible extension + installer bloat trim + z-tier expansion all shipped).
+
+**Deferred to v0.9.6+ / v1.0 prep (per v0.9.5 audit §6 R7):**
+- macOS notarized DMG.
+- Steam integration.
+- Signed Win cert.
+- electron-updater auto-update.
+
+**Maintenance (not v1.0 blockers but durable):**
+- Aggressive ledger archival (~30-50% reduction potential on `docs/PROJECT_LEDGER.md` 8302 lines).
+- Manual canon-doc amendments per `docs/40_reports/audits/20260507_CANON_DOC_PROPAGATION_NOTES.md`.
+- FORAWWV.md last touched 2026-03-01 — manual review cadence is human-driven.
+- Source/test references to old v0.7.0 / v0.6.0 canon filenames remain in supporting docs (`docs/20_engineering/`, `docs/40_reports/`, `.claude/skills/`, plan docs) — downstream-consumer pointers; doc-sweep lane.
+- Pre-v0.9 backup snapshot at `docs/10_canon/_backups_pre_v09_20260505/` removable once v0.9.0 canon-doc state is verified.
+
+**Bottom line:** v1.0 ship-readiness is gated by P1-G3+G4 manual host builds + v0.9.6 SRK siege Phase 1 sign-off + persona suppressor validation. Everything else is maintenance, polish, or graceful-degradation backlog.
+
 ---
 
 ## Planned: v1.0.0 â€” Gold
@@ -652,7 +769,7 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | Equipment pipeline | Complete |
 | OOB (247 brigades, 166 active) | Complete |
 | Scenario runner | Complete |
-| Calibration pipeline | Complete (92.2% area-weighted, n21 on `a91ccc66`, 27/27 anchors, 6/6 benchmarks, 712 OSIDs, 0 critical anomalies — fresh baseline post-Phase-1 + Orasje fix; pre-fix baseline was n1358 @ 93.6%) |
+| Calibration pipeline | Complete (40w n1728 hash `79fa407377b40083` 26/27 anchors, 6/6 benchmarks post RBiH-t40 reanchor; 188w n1729 hash `e85303890ff4b601` 26/27 anchors, 6/6 benchmarks, §6 floors PASS; 712 OSIDs) |
 | Desktop app (Electron v41) | Functional |
 | Tactical map (React + MapLibre + Deck.gl) | Functional |
 | Warroom (React) | Complete â€” React migration landed 2026-04-04. `warroom.ts` retains launch/picker/iframe/bridge. |
@@ -666,8 +783,9 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
-| Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
-| Autonomy Depth + Claude API | Complete (v0.8.4 closed 2026-04-07 â€” all 6 phases closed; DRINA variance accepted with evidence) |
+| Order Interpretation | Complete at single-actor level (v0.8.3 closed 2026-04-06); deeper political → army → corps multi-layer realization OPENED in v0.9.6 trip session 6 (A-lane + B-lane + C-lane substrate) |
+| Autonomy Depth + Claude API | Complete at political level (v0.8.4 closed 2026-04-07 — all 6 phases closed; DRINA variance accepted); three-layer Claude-API persona QA harness (presidents + army COs + corps COs) OPENED in v0.9.6 D-lane (opt-in only; default off byte-stable) |
+| AI Officers (real) — political → army → corps substrate | OPENED v0.9.6 (2026-05-06/07; ~30+ commits): A1-A5 + B1-B2 + C1-C2 + API-Directive bridge + D1-D2 + Q-lanes + 5-lane batch + 3-lane backlog closure + Krivaja-95 floor compliance + FORAWWV §X-§XVI canon |
 | Consequence system | Partial (`v0.9.0` substrate live: consequence owner cleanup, stranded lifecycle, verdict contract, locked rupture path; broader divergence chains still open) |
 | Cost Ledger | Partial (`CostLedger` / historical comparison builders and War Cost surface live; full prosecutorial authoring still open) |
 | Ghost Map | Implemented (live on tactical map; roadmap-owned cleanup/polish only if needed) |
@@ -686,7 +804,7 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 | Roadmap / repo-truth cadence | Active permanent lane - Studio Health owns roadmap sync after major runs, milestone closures, and remote branch integration. The next sync should record the post-2026-04-30 scenario evidence once Claude's current setup/run work settles. |
 
-**Current:** formal package semver is still `v0.8.1`, but roadmap state is now safely inside early `v0.9.x` development rather than the old transition band. Calibration status has two layers: the last recorded roadmap baseline as of 2026-04-28 was `n21` on `main` `a91ccc66` at 92.2% area-weighted, 27/27 anchors, 6/6 benchmarks, 712 OSIDs, 0 critical anomalies; local 2026-04-30 evidence on current `main` (`n1579`, 40w) is stronger at 93.7% area-weighted, 27/27 anchors, 6/6 benchmarks, 0 invalid ops, and consistency validation PASS. Treat `n1579` as fresh evidence pending Claude's current scenario setup/run closeout and the next Studio Health roadmap sync. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, 188w/200w proof is required before those milestones close, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, formation-life believability remains a visible simulation gap, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
+**Current:** formal package semver is `v0.9.5-alpha.1` (bumped 2026-05-05 in `c2d209e3`); roadmap state is now in **early v0.9.x band with v0.9.6 OPENED** (trip-session-6 ~30+ commits 2026-05-06/07). **package.json bump to v0.9.6 is PENDING** — roadmap state is ahead of semver, and the bump is the parent's call once v0.9.6 SRK siege defender Phase 1 sign-off + persona suppressor validation lands. Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS). Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy + Phase E API at political level (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, comparison propagation into Chronicle / Wrapped / Codex, and (via v0.9.6 trip session 6) the deterministic political → army → corps substrate that v0.8.3/v0.8.4 conceptually opened. Honest residuals remain: `v0.9.0` / `v0.9.1` / `v0.9.2` / `v0.9.3` / `v0.9.4` / `v0.9.5` / `v0.9.6` all remain open milestones at varying degrees of partial closure; v0.9.5 P1-G3+G4 manual host builds are not agent-dispatchable; v0.9.6 SRK siege defender Phase 1 is awaiting §6 sign-off; persona suppressor validation run is pending; replay playback/consumer is still absent from the product shell; broader performance work (target <100ms/turn vs current 3,094ms) is still ahead. See "Path to v1.0" above for the cross-milestone synthesis of remaining work.
 
 ---
 
@@ -768,6 +886,11 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md` | v0.9.4 visual polish + legendary map features |
 | `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md` | v0.9.5 platform packaging + store |
 | `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md` | v0.9.2 tutorial and onboarding |
+| `docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md` | v0.9.6 AI Officers DDR — 5 design questions LOCKED (commit `eee308e0`) |
+| `docs/40_reports/implemented/20260507_NW_BOSNIA_OOB_AUDIT.md` | v0.9.6 Lane 2 NW Bosnia OOB BUG-01 fix (commit `be7e0715`) |
+| `docs/40_reports/implemented/20260507_STUPCANICA_W27_TRIGGER_FIX.md` | v0.9.6 Stupčanica name-collision fix (commit `759a35cd`) |
+| `docs/40_reports/audits/20260507_CANON_DOC_PROPAGATION_NOTES.md` | v0.9.6 manual canon-doc amendment notes (carry-forward maintenance) |
+| `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` | v0.9.6 SRK siege defender Phase 0 DDR (commit `bb0e449e`; awaiting Phase 1 sign-off) |
 | `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md` | v1.0 gold readiness integration gate |
 | `docs/plans/2026-04-30-post-1-0-content-execution-plan.md` | post-1.0 content update coverage and child-plan triggers |
 | `docs/plans/2026-04-30-roadmap-open-design-questions-resolution-plan.md` | open roadmap design-question resolution process |
