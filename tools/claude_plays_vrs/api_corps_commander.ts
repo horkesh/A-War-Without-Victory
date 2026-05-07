@@ -7,6 +7,42 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { FactionId, GameState, CorpsFrontSector } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
+// D1 persona splice (LANE-NIGHTSHIFT-D1-D2-CLAUDE-PERSONAS): when
+// CLAUDE_AS_CORPS_CO_<faction>_<corps>=true and a persona file exists for
+// the requested corps (named-officer or archetype fallback), splice the
+// persona system_prompt_template. Default-off path unchanged.
+import { loadPersona } from './persona_loader.js';
+
+/**
+ * Map a corps_id to its persona filename id. Named-officer personas exist
+ * for VRS Drina, SRK, and 1KK (per parent's Q5 priority); all other corps
+ * fall through to the `default_corps_co` archetype via loadPersona's
+ * role-based fallback chain.
+ */
+function corpsIdToPersonaId(corpsId: string): string {
+    if (corpsId === 'vrs_drina') return 'vrs_drina_corps_co';
+    if (corpsId === 'vrs_sarajevo_romanija') return 'vrs_srk_corps_co';
+    if (corpsId === 'vrs_1st_krajina') return 'vrs_1kk_corps_co';
+    return `${corpsId}_co`; // will miss; loadPersona archetype-fallback handles it
+}
+
+/**
+ * D1 corps-CO env-flag gate. Returns true iff
+ * CLAUDE_AS_CORPS_CO_<faction>_<corps>=true OR
+ * CLAUDE_AS_CORPS_CO_<faction>=true OR
+ * CLAUDE_AS_ALL_LAYERS_<faction>=true OR CLAUDE_AS_ALL=true.
+ *
+ * The corps_id in the env-var name uses the canonical corps_id form
+ * (e.g. CLAUDE_AS_CORPS_CO_RS_VRS_DRINA=true). Determinism: pure env-read.
+ */
+export function isCorpsCoPersonaLayerEnabled(faction: FactionId, corpsId: string): boolean {
+    if (process.env.CLAUDE_AS_ALL === 'true') return true;
+    if (process.env[`CLAUDE_AS_ALL_LAYERS_${faction}`] === 'true') return true;
+    if (process.env[`CLAUDE_AS_CORPS_CO_${faction}`] === 'true') return true;
+    const upperCorps = corpsId.toUpperCase();
+    if (process.env[`CLAUDE_AS_CORPS_CO_${faction}_${upperCorps}`] === 'true') return true;
+    return false;
+}
 
 export interface ApiCorpsDecision {
     corps_id: string;
@@ -32,6 +68,25 @@ function getCorpsSystemPrompt(
     const FACTION_NAMES: Record<string, string> = {
         RS: 'VRS', RBiH: 'ARBiH', HRHB: 'HVO',
     };
+
+    // D1 persona splice (LANE-NIGHTSHIFT-D1-D2-CLAUDE-PERSONAS): when the
+    // per-(faction, corps) corps-CO env flag is set AND a persona JSON
+    // exists for the corps (named-officer for Drina/SRK/1KK, archetype
+    // default_corps_co for all others), prefer the persona's
+    // system_prompt_template. Default-off path: unchanged below.
+    if (isCorpsCoPersonaLayerEnabled(faction, corpsId)) {
+        const personaId = corpsIdToPersonaId(corpsId);
+        const persona = loadPersona(personaId, { role: 'corps_co' });
+        if (persona) {
+            return `${persona.system_prompt_template}
+
+ARMY COMMANDER'S BRIEFING:
+${armyBriefing}
+
+Respond with ONLY valid JSON matching the schema in the user prompt. No markdown outside JSON.`;
+        }
+    }
+
     const style = aggressiveness >= 4 ? 'aggressive' : aggressiveness <= 1 ? 'cautious' : 'balanced';
     const skill = competence >= 4 ? 'highly competent' : competence <= 2 ? 'limited' : 'capable';
 

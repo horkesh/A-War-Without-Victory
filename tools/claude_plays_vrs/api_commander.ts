@@ -26,6 +26,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { FactionId, GameState, CorpsStance } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
+// D1 persona splice (LANE-NIGHTSHIFT-D1-D2-CLAUDE-PERSONAS): when
+// CLAUDE_AS_ARMY_CO_<faction>=true and a persona file exists for the
+// currently-active army CO (per A4 roster tenure), splice the persona
+// system_prompt_template into the prompt construction. Default-off path
+// unchanged.
+import { loadPersonaByTenure, type PersonaFaction } from './persona_loader.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Political → Army chain context (LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE)
@@ -160,9 +166,44 @@ interface CommanderProfile {
 // System prompts per faction
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * D1 persona-layer env-flag gate. Returns true iff
+ * CLAUDE_AS_ARMY_CO_<faction>=true OR CLAUDE_AS_ALL_LAYERS_<faction>=true OR
+ * CLAUDE_AS_ALL=true. Mirrors api_president.ts gating idiom.
+ *
+ * Determinism: pure env-read; no IO.
+ */
+export function isArmyCoPersonaLayerEnabled(faction: FactionId): boolean {
+    if (process.env.CLAUDE_AS_ALL === 'true') return true;
+    if (process.env[`CLAUDE_AS_ALL_LAYERS_${faction}`] === 'true') return true;
+    if (process.env[`CLAUDE_AS_ARMY_CO_${faction}`] === 'true') return true;
+    return false;
+}
+
 function getSystemPrompt(profile: CommanderProfile, turn: number): string {
     const name = (profile.successor && turn >= profile.successor.transition_week)
         ? profile.successor.name : profile.commander;
+
+    // D1 persona splice (LANE-NIGHTSHIFT-D1-D2-CLAUDE-PERSONAS): when the
+    // per-faction army-CO env flag is set AND a persona JSON exists for the
+    // currently-active army CO (per A4 roster tenure auto-swap), prefer the
+    // persona's system_prompt_template over the legacy CommanderProfile-derived
+    // system prompt. Default-off path: unchanged below.
+    if (isArmyCoPersonaLayerEnabled(profile.faction)) {
+        const persona = loadPersonaByTenure(profile.faction as PersonaFaction, 'army_co', turn);
+        if (persona) {
+            return `${persona.system_prompt_template}
+
+YOUR JOB EACH TURN:
+1. Analyze the game state provided.
+2. Set corps stances (offensive/balanced/defensive) based on the situation.
+3. Provide a briefing IN CHARACTER (2-3 sentences, your voice).
+4. Provide strategic reasoning (1-2 sentences, analytical).
+5. Flag any OBSERVATIONS where the game doesn't match your expectations.
+
+Your output MUST be valid JSON matching the schema provided. No markdown outside JSON.`;
+        }
+    }
 
     const priorities = profile.strategic_doctrine.priorities.map((p, i) => `${i + 1}. ${p}`).join('\n');
     const redLines = profile.strategic_doctrine.red_lines.map(r => `- ${r}`).join('\n');
