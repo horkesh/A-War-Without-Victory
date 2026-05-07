@@ -146,18 +146,24 @@ Markers checked (all 5 must be present):
 Faction-symmetric. ICTY citation guidance present. cb13e605 implementation
 intent is fully realized.
 
-### Empirical validation — IN FLIGHT (partial signal at 22:30)
+### Empirical validation — RUN TERMINATED at turn 22 (post-mortem 2026-05-07 22:32)
 
-At 26 minutes elapsed (turn 20/40), 442 API calls completed, $0.88 spent.
-The full 40w diagnostic_report.json will only be written at run completion
-(~22:55). Comparison verdict will require the user (or a follow-up agent
-session) to execute:
+The agent-spawned run died when the V3 agent process ended at 28 min runtime.
+`validation_v3_log.txt` reached turn 22 (last log line: `[API] Failed to parse
+response for RS. Falling back.`); no further log writes after 22:32. Tasklist
+shows no node/tsx process. `diagnostic_report.json` remained at the 10:38
+baseline timestamp — confirming the run did NOT complete (the report is only
+written at run completion). Spend at termination: ~$0.88 of projected $1.76.
 
-```bash
-python3 tools/d3_validation_compare.py
-```
+**Root cause:** long-running subprocess spawned inside an agent context dies
+with the agent process per FORAWWV §XVI long-subprocess discipline ("188w runs
+belong to parent, not agent"). The 40w persona run is the same pattern.
 
-against the completed `runs/three_commanders/diagnostic_report.json`.
+**Re-launch:** parent-owned background subprocess (Bash with
+`run_in_background=true`) launched 2026-05-07 post-V3-closeout. Comparison
+script is staged at `tools/d3_validation_compare.py`; runs against the
+completed `runs/three_commanders/diagnostic_report.json` once parent run
+lands.
 
 ### Partial signal from in-flight telemetry — over-suppression risk surfaced
 
