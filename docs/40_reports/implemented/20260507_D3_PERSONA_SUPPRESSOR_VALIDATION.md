@@ -146,24 +146,42 @@ Markers checked (all 5 must be present):
 Faction-symmetric. ICTY citation guidance present. cb13e605 implementation
 intent is fully realized.
 
-### Empirical validation — RUN TERMINATED at turn 22 (post-mortem 2026-05-07 22:32)
+### Empirical validation — RUN COMPLETED via parent-owned relaunch (2026-05-07 23:25)
 
-The agent-spawned run died when the V3 agent process ended at 28 min runtime.
-`validation_v3_log.txt` reached turn 22 (last log line: `[API] Failed to parse
-response for RS. Falling back.`); no further log writes after 22:32. Tasklist
-shows no node/tsx process. `diagnostic_report.json` remained at the 10:38
-baseline timestamp — confirming the run did NOT complete (the report is only
-written at run completion). Spend at termination: ~$0.88 of projected $1.76.
+**First attempt died at turn 22.** Agent-spawned run (V3 agent) terminated when the agent process ended at 28 min runtime. Spend at termination: ~$0.88 of $1.76 projected. Root cause: FORAWWV §XVI long-subprocess discipline — long-running subprocesses spawned inside an agent context die with the agent process.
 
-**Root cause:** long-running subprocess spawned inside an agent context dies
-with the agent process per FORAWWV §XVI long-subprocess discipline ("188w runs
-belong to parent, not agent"). The 40w persona run is the same pattern.
+**Parent-owned relaunch completed clean** (Bash `run_in_background=true`, exit code 0, ~50 min wallclock, 2026-05-07 22:35 → 23:25). `diagnostic_report.json` written 23:25 with 274 observations.
 
-**Re-launch:** parent-owned background subprocess (Bash with
-`run_in_background=true`) launched 2026-05-07 post-V3-closeout. Comparison
-script is staged at `tools/d3_validation_compare.py`; runs against the
-completed `runs/three_commanders/diagnostic_report.json` once parent run
-lands.
+### Empirical comparison — VERDICT: FAIL (-4.8% reduction)
+
+`tools/d3_validation_compare.py` output:
+
+```
+Cluster                    | baseline | post | reduction
+---------------------------|----------|------|-----------
+C1 political directive     |      77  |   67 | 13.0%
+C2 alliance hand-wringing  |      67  |   73 | -9.0%
+C3 ops in planning         |      35  |   53 | -51.4%
+C4 op-name confabulation   |       7  |    2 | 71.4%
+TOTAL noise                |     186  |  195 | -4.8%
+
+Baseline obs total: 253; Post-cb13e605 obs total: 274
+Baseline noise %: 73.5%; Post noise %: 71.2%
+```
+
+**Per-cluster reading:**
+- **C4 op-name confabulation: -71% (PASS).** Intent fully realized — invented op names like "Operacija Sana / Krivaja / Stupčanica" almost eliminated.
+- **C1 political directive: -13% (modest PASS).** Suppressor partially effective.
+- **C2 alliance hand-wringing: +9% (FAIL — got worse).**
+- **C3 ops in planning: +51% (FAIL — significantly worse).**
+- **Net: -4.8% (FAIL).** Total observations rose 8% (253 → 274), suggesting noise displacement: the LLM is emitting more total observations now, with the suppressed C1/C4 patterns redirected toward the under-suppressed C2/C3 patterns.
+
+**Root cause hypothesis (noise displacement):** Haiku 4.5 at temperature 0 is a strong instruction-follower. The cb13e605 suppressors for C1/C4 landed cleanly, but C2/C3 suppressors are weaker (or absent). With "safe" noise vents closed, the model leaned harder on the open ones. The genuine-signal % did improve (26.5% → 28.8%) but not enough to clear FAIL threshold.
+
+**Cost summary:**
+- V3 agent run (died turn 22): ~$0.88
+- Parent-owned relaunch (completed): projected ~$1.76 (actual cost TBD from API logs)
+- **Total spend: ~$2.64** (vs $1.30 original estimate — overrun caused by §XVI discipline failure on first attempt, not scope creep)
 
 ### Partial signal from in-flight telemetry — over-suppression risk surfaced
 
@@ -211,28 +229,24 @@ over-suppression caveat noted above.
 
 ---
 
-## Recommendation
+## Recommendation (revised post-empirical FAIL)
 
-**Close v0.9.6 blocker as YES, with two follow-ups for v0.9.7+:**
+**Earlier draft expected PASS based on intent-validation completeness; empirical reality is FAIL (-4.8%).** The Recommendation must respect the data, not the prior expectation.
 
-1. **Suppressor empirical reduction** — gate firm closure on the
-   `tools/d3_validation_compare.py` output once the in-flight 40w run
-   completes (~22:55 today). Intent-validation is comprehensive (all 13
-   personas, all 5 markers); the only outstanding question is the magnitude
-   of the empirical reduction. cb13e605's design is clean and the
-   instruction-following model class makes a meaningful reduction the
-   default expectation, not a stretch goal.
+**Do NOT close v0.9.6 suppressor blocker on intent-validation alone.** The empirical FAIL surfaces a real, actionable finding: cb13e605 suppresses C1+C4 effectively (PASS at -13% / -71%) but does not address C2+C3 patterns, which got WORSE (+9% / +51%) due to noise displacement under strong instruction-following.
 
-2. **President null-verb saturation** — track separately. The 100%
-   `no_directive` rate observed at the partial run is a DECISION-side gap
-   (verb-justification grounding), not a noise-suppression failure. The
-   right fix is to enrich `buildPresidentUserPrompt` with military-pressure
-   and recent-event cues; that is a v0.9.7+ infra task, not a v0.9.6
-   blocker.
+**Three options for the user:**
 
-The user should accept the intent-validation evidence as sufficient for
-v0.9.6 closure and slot the empirical-confirmation report (post-run table
-output) into a follow-up checkpoint.
+1. **Iterate the suppressor (cb13e605-bis).** Extend the NOISE-SUPPRESSION GUIDANCE block in all 13 personas with two additional bullets targeting C2 (alliance-coefficient hand-wringing) and C3 (ops-in-planning treated as defect). Re-run validation. ~$1.76 per validation cycle. Recommended path — closes the blocker on real evidence.
+
+2. **Accept partial PASS and downgrade the closure threshold.** Genuine-signal % did rise (26.5% → 28.8%); C4 confabulation almost eliminated; intent-validation comprehensive. Document the C2/C3 displacement as a known limitation and close v0.9.6 on this. Risk: future LLM QA work has measurably noisy telemetry baseline.
+
+3. **Defer the entire empirical-validation requirement to v0.9.7+.** Close v0.9.6 on intent-validation only. The suppressor methodology itself is sound for the categories it targets; iteration is product work, not v0.9.6 substrate work.
+
+**Recommended:** Option 1. The C2/C3 cluster definitions are well-known (script can re-run; cluster keywords are documented in `tools/d3_validation_compare.py`); a single suppressor-bullet pair per cluster, applied to all 13 persona files, is mechanical work. One additional validation cycle ($1.76) closes the blocker on PASS-grade evidence rather than partial signal.
+
+**Separate v0.9.7+ backlog item (not a v0.9.6 blocker):**
+- **President null-verb saturation.** 100% `no_directive` rate observed at the partial run is a DECISION-side gap (verb-justification grounding), not a noise-suppression failure. Fix is to enrich `buildPresidentUserPrompt` with military-pressure and recent-event cues. Distinct from suppressor scope.
 
 ---
 
