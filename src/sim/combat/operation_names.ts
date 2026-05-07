@@ -13,6 +13,37 @@
  *
  * Pre-planned and triggered operation names are NOT in these pools
  * (they use explicit names like "Operation Koridor", "Operation Jajce").
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): canonical
+ * sensitive-history op names that COLLIDE with pre-planned/triggered op
+ * canonical names are explicitly EXCLUDED from these pools. Bot ops were
+ * picking up names like "Operacija Stupčanica" / "Operacija Krivaja" /
+ * "Operacija Sana" / "Operacija Maestral" at any turn (e.g. w27 in
+ * pre-5-lane n1705 / n1707 / n1717), masquerading as the canonical
+ * sensitive-history operations and tripping AAR scans + war-or-game
+ * scrutiny. Trigger gates in `triggered_operations.ts` were always
+ * correct (Stupčanica-95 = t≥172 since `d622b762`); the leak was the
+ * BOT POOL containing the same canonical names. The block comment
+ * above ALREADY claimed these names were excluded — this fix makes the
+ * code match the documented intent.
+ *
+ * Excluded RS canonical names: Krivaja, Stupčanica (trigger ops); Vrbas
+ * is preserved (not currently a triggered op, BB1 Vrbas 92 = pre-planned
+ * "Operation Jajce" which uses a DIFFERENT name, so no collision).
+ *
+ * Excluded RBiH canonical names: Sana (opportunity catalog op).
+ *
+ * Excluded HRHB canonical names: Maestral (collides with "Operation
+ * Mistral 2").
+ *
+ * Faction-symmetric mechanism: this is a name-collision filter applied
+ * to all three pools where the canonical name was duplicated. No combat,
+ * §6 territorial, or §6 atrocity surface is touched.
+ *
+ * Sign-off precedent: Krivaja Phase 1 `bc44ddec`; Stupčanica SHAPE B
+ * `b03333af`; Krivaja-95 t168 floor fix `d622b762`.
+ * ─────────────────────────────────────────────────────────────────────────
  */
 
 import type { GameState } from '../../state/game_state.js';
@@ -26,8 +57,13 @@ import type { GameState } from '../../state/game_state.js';
  * then JNA-style placeholders: nature, minerals, fortification terms.
  *
  * Note: "Koridor", "Drina", "Prsten", "Foca", "Prijedor", "Bosanski Novi",
- * "Posavina Corridor", "Kotor Varos", "Jajce", "Cerska-Kamenica" are
- * reserved for pre-planned/triggered ops and excluded here.
+ * "Posavina Corridor", "Kotor Varos", "Jajce", "Cerska-Kamenica",
+ * "Krivaja", "Stupčanica" are reserved for pre-planned/triggered ops
+ * and excluded here. (LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX
+ * 2026-05-07: "Krivaja" + "Stupčanica" added to the exclusion list to
+ * close the bot-pool name-collision that caused canonical sensitive-
+ * history op names to fire at non-canonical turns; the trigger gates in
+ * triggered_operations.ts were already correct via `d622b762`.)
  */
 const RS_NAMES: string[] = [
     // --- Historical (BB1/BB2, ICTY) ---
@@ -41,8 +77,15 @@ const RS_NAMES: string[] = [
     'Operacija Jesen',          // Autumn 94 — Herzegovina, Nov 1994
     'Operacija Pauk',           // Spider — Bihac, joint VRS/SVK, Nov 1994
     'Operacija Plamen',         // Flame 95 — Orasje, May 1995
-    'Operacija Krivaja',        // Krivaja 95 — Srebrenica, Jul 1995
-    'Operacija Stup\u010Danica', // Stupchanica 95 — Zepa, Jul 1995
+    // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
+    // Krivaja" + "Operacija Stup\u010Danica" REMOVED from bot pool — they
+    // collide with canonical "Operation Krivaja-95" / "Operation
+    // Stup\u010Danica-95" in triggered_operations.ts, which caused bot
+    // RS ops at any turn (e.g. w27 in n1707 / n1717) to inherit canonical
+    // sensitive-history op names. The triggered op gates (t≥170 /
+    // t≥172 since `d622b762`) were always correct; only the bot pool
+    // leaked. Faction-symmetric: same exclusion applied to RBiH (Sana) +
+    // HRHB (Maestral) below.
     'Operacija Vaganj',         // Vaganj 95 — defensive umbrella, 1995
     // --- Placeholders: JNA-style nature/fortification ---
     'Operacija Grom',           // Thunder
@@ -92,7 +135,10 @@ const RBiH_NAMES: string[] = [
     'Operacija Crveni Lav',     // Red Lion — Vozuca phase 1, Sep 1995
     'Operacija Farz',           // Farz 95 — 3rd Corps Vozuca, Sep 1995
     'Operacija Uragan',         // Hurricane — 2nd Corps Vozuca, Sep 1995
-    'Operacija Sana',           // Sana 95 — 5th Corps, Sep 1995
+    // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
+    // Sana" REMOVED — collides with canonical "Operation Sana" in the
+    // 5th Corps opportunity catalog (operation_opportunity_catalog_5th_corps.ts).
+    // Same name-collision class as Krivaja / Stup\u010Danica above.
     // --- Placeholders: aspirational + nature + Islamic ---
     'Operacija Sabur',          // Patience (Islamic virtue)
     'Operacija Nada',           // Hope
@@ -135,7 +181,10 @@ const HRHB_NAMES: string[] = [
     'Operacija Zima',            // Winter 94 — SW Bosnia, Dec 1994
     'Operacija Skok',            // Leap — Dinara positions, Apr 1995
     'Operacija Ljeto',           // Summer 95 — Grahovo/Glamoc, Jul 1995
-    'Operacija Maestral',        // Mistral wind — western Bosnia, Sep 1995
+    // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
+    // Maestral" REMOVED — collides with canonical "Operation Mistral 2"
+    // (triggered_operations.ts; September 1995 HV-HVO joint offensive).
+    // Same name-collision class as Krivaja / Stup\u010Danica / Sana above.
     'Operacija Južni Potez',    // Southern Move — final offensive, Oct 1995
     // --- Placeholders: Croatian weather/force/action ---
     'Operacija Jugo',            // Sirocco wind (Adriatic)
