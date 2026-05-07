@@ -261,3 +261,170 @@ Some SVG-derived geometry clusters may be irreducibly misaligned in coordinate s
 - Numeric fitting, similarity transforms, centroid anchoring, or heuristic penalties are insufficient and must not be used.
 - Reconciliation must use a trusted, historically validated legacy substrate as a coordinate-frame anchor.
 - Legacy substrates may anchor transforms only; they must never supply gameplay semantics.
+
+---
+
+## X. AI Officers and the political → army → corps chain (substrate canon)
+
+Validated 2026-05-06/05-07 across A1-A5 + B-lane (DDR + B1 + B2) + C-lane (DDR + C1 + C2) + Krivaja-95 floor work.
+
+### X.1 Canonical PoliticalDirective verbs
+The canonical `PoliticalDirective` interface in `src/sim/combat/army_order_interpretation.ts` accepts EXACTLY six verbs:
+- `HOLD_AT_ALL_COSTS` — DEFENSIVE-WEIGHT
+- `PRESS_OFFENSIVE` — OFFENSIVE-WEIGHT in named theater
+- `MAINTAIN_CORRIDOR` — CONTINGENT-DEFENSE
+- `PREPARE_RESERVE` — RESERVE-WEIGHT
+- `HONOR_TRUCE` — NEGOTIATION-WEIGHT
+- `BALANCE_FRONTS` — default / undirected
+
+Any bot/AI generator that emits a directive verb MUST produce a value from this exact set. Richer agent-side vocabularies (e.g. D-lane's 16-verb president-intent set) require an explicit mapping/translation step before writing to the engine slot. Reference: `tools/claude_plays_vrs/run_three_commanders.ts` `PRESIDENT_TO_CANONICAL` table at commit `bfcc9258`.
+
+### X.2 Canonical chain wiring
+The political → army → corps chain is wired through these state slots:
+- **B1/B2 input:** `state.political.political_leader_data[faction]` (canonical leader scalars per `data/scenarios/political_leader_data.json`); `state.military.political_leaders[faction]` (officer ID per faction).
+- **B1 producer output:** `state.military.political_directives_by_faction[faction]: PoliticalDirective` (verb + optional target_corps_id + directive_id).
+- **A3 interpreter output:** per-corps `ArmyCorpsDirective[]` (corps_id + role + deviated + optional deviation_reason).
+- **C1 persisted slot:** `state.military.army_corps_directives_by_faction[faction][corps_id]: { corps_id, role, deviated, deviation_reason? }` — read by `commander/briefing.ts` `assembleCampaignIntent` to overlay `frontPriority.role` → `briefing.campaign_role`.
+- **Corps decisions:** existing v0.8 corps commander intelligence consumes `briefing.campaign_role` via `plan.ts` chokepoints (`primary`/`secondary`/`economy`/`contain` gates).
+
+### X.3 A4 named-officer roster
+Canonical historical succession is encoded in `data/scenarios/army_co_roster.json` (`93c75b1d`):
+- VRS: Mladić throughout (no historical succession).
+- ARBiH: Halilović (w0) → Delić (w60+) per Burg & Shoup ch.4 sacking.
+- HVO: Petković (w0) → Praljak (w64+) → Roso (w130+) per BB Vol II.
+
+Officer scalar fields (`stubbornness 1-5`, `override_tolerance 1-5`) are populated at scenario init by `army_co_roster_loader.ts`. Mid-run succession is handled by existing `processOfficerSuccession` (combat-death + relief paths) plus A4-introduced scheduled transitions when tenure_until is reached.
+
+### X.4 Faction-symmetric mechanism, faction-asymmetric data
+The mechanism (interpretation, persistence, briefing overlay, corps-role gating) is faction-symmetric: same code paths for RBiH, RS, HRHB. Faction asymmetry lives entirely in DATA: leader scalars (B2), officer rosters (A4), persona prose (D1). Static-grep guards in tests prevent per-faction string-equality branches in the mechanism layer.
+
+---
+
+## XI. Sensitive-history operation trigger floors and name-pool exclusion
+
+Validated 2026-05-06 (Krivaja-95 t168 floor fix `d622b762`) + 2026-05-07 (Stupčanica name-collision fix `759a35cd`).
+
+### XI.1 Canonical floor: Krivaja-95 and Stupčanica-95
+Per ICTY Popović IT-05-88-T + Karadžić IT-95-5/18-T:
+- **Krivaja-95** (Srebrenica fall) is canonically July 6-11, 1995 = w170+. Trigger predicate in `src/sim/combat/triggered_operations.ts` enforces `turn >= 170`.
+- **Stupčanica-95** (Žepa fall) is canonically July 14-25, 1995 = w172+. Trigger predicate enforces `turn >= 172`.
+
+These predicates are §6 sensitive-history floor protections. Sign-off chain: Stupčanica SHAPE B `b03333af`; Krivaja Phase 1 `bc44ddec`; Krivaja-95 floor enforcement `d622b762`.
+
+### XI.2 Bot/AI generator name-pool exclusion (data, not comments)
+Any reserved canonical name (operation, formation, event_id, persona_id) that bot/AI generators could randomly assign MUST be excluded from generator data pools by the data itself. Comment-claims of exclusion that the data doesn't enforce produce phantom canon-violations that masquerade as trigger bugs.
+
+Specifically: `src/sim/combat/operation_names.ts` bot operation-name pools MUST NOT contain `Operacija Krivaja`, `Operacija Stupčanica`, `Operacija Sana`, `Operacija Maestral`, or any other canonical pre-planned/triggered/opportunity op name. Static tests enforcing the exclusion are mandatory.
+
+### XI.3 Investigating phantom canon-violations
+When a canon-violation persists after a trigger-predicate fix:
+1. First hypothesis: name-collision (bot pool contains canonical name).
+2. Second hypothesis: separate trigger code path (multiple op-injection sites).
+3. Third hypothesis: side-effect suppression masking the actual cause.
+
+Side-effect suppression (a recurring bug stops appearing after an unrelated change) is NOT a canonical resolution; preserve the original bug as backlog and trace the suppression mechanism to find the root cause.
+
+---
+
+## XII. AI persona QA mode (Claude-API harness, opt-in only)
+
+Validated 2026-05-06 to 2026-05-07 across D-lane DDR + D1 + D2 + telemetry-wire-fix + D3 real-API smoke chain.
+
+### XII.1 Three-layer roleplay
+The Claude-API QA mode supports persona-grounded roleplay across three layers:
+- **President layer** — `tools/claude_plays_vrs/api_president.ts` (Karadžić / Izetbegović / Boban personas).
+- **Army CO layer** — `tools/claude_plays_vrs/api_commander.ts` (Mladić / Halilović → Delić / Petković → Praljak → Roso personas).
+- **Corps CO layer** — `tools/claude_plays_vrs/api_corps_commander.ts` (named officers per OOB; archetype fallback via `default_corps_co.json`).
+
+### XII.2 Opt-in env-flag schema
+Default-off; opt-in granular per layer × per faction × per corps:
+- `CLAUDE_AS_PRESIDENT_<faction>=true`
+- `CLAUDE_AS_ARMY_CO_<faction>=true`
+- `CLAUDE_AS_CORPS_CO_<faction>_<corps>=true`
+- Wildcards: `CLAUDE_AS_ALL_LAYERS_<faction>=true`, `CLAUDE_AS_ALL=true`.
+- Disable: `CLAUDE_PERSONA_TELEMETRY_DISABLED=true`.
+
+### XII.3 Mid-run persona auto-swap
+Persona auto-swap on A4 roster tenure boundaries. `loadPersonaByTenure(faction, role, turn)` reads `data/scenarios/army_co_roster.json` and returns the persona of the active officer at that turn.
+
+### XII.4 Persona prompt suppressors
+Persona prompts include explicit suppressor clauses for known-acknowledged structural artifacts (no political directive issued = player-driven design; alliance coefficient anchored; ops-in-planning visibility shape; canonical operation-name confabulation). Reference: Lane 1 `cb13e605`. New personas must include the full suppressor block to maintain QA signal-quality discipline.
+
+### XII.5 Persona-grounded LLM signal quality
+Empirically (D3.3 v2 triage of 253 observations vs API-Bridge baseline of 368): persona grounding shifts the SHAPE of LLM noise (BiH-specific vocabulary) without improving the QUALITY rate. Genuine-signal rate ~10-15% regardless of persona depth. Plan triage cost accordingly; do not assume persona depth alone yields cleaner QA.
+
+### XII.6 Cost calibration (Haiku 4.5, with prompt caching)
+- Presidents-only 40w: ~$0.46
+- Army CO personas only 40w: ~$0.45
+- Full stack 40w: ~$1.30
+- Full stack 188w (extrapolated): ~$5-9
+- Full-stack 40w with `--corps-api`: ~$1.30 / 840 calls
+
+---
+
+## XIII. OOB-data correctness rules
+
+Validated 2026-05-07 by Q1 revert + Lane 2 NW Bosnia OOB audit.
+
+### XIII.1 Corps available_from invariant
+A corps's `available_from` MUST NOT be later than its earliest brigade's `available_from`. If a corps activates AFTER its constituent brigades, the run produces "0-brigade corps shells" with role + stance assigned but no combat power — degenerate state observable to AI commanders as a bug.
+
+Engine-side gating (defer corps creation until `available_from <= currentTurn`) is the wrong fix for this invariant violation: it cascades calibration regressions by deferring entire faction OZ structures. Q1 (`6cbcaa00`) reverted at `8ccdbff8` after deferring all 5 HVO OZs to w10 caused -17% RBiH territory loss. The proper fix is OOB-data alignment per documented historical activation: Lane 2 (`be7e0715`) bumped 4 NW Bosnia rows to `available_from=0` per BB1 p.181-182 evidence.
+
+### XIII.2 HVO Posavina OZ uniqueness
+The HVO Northwest Bosnia OZ (`hvo_northwest_bosnia`) is uniquely early among HRHB Operative Zones. Combat in Bosanski Brod began "early March 1992" before any formal HZ-HB or OZ structure — the OZ is canonically active at scenario t0. Other 4 HRHB OZs (`hvo_main_staff`, `hvo_southeast_herzegovina`, `hvo_central_bosnia`, `hvo_tomislavgrad`) correctly activate at `available_from=10` (HVO formed politically 8 April 1992 in Grude; Operative Zones formalized through 1992).
+
+---
+
+## XIV. Default-off byte-stability invariant
+
+Validated across A1-A5 (officer substrate), B1+B2 (political directive producer), C1+C2 (corps directive consumer + telemetry), D1+D2 (persona system), N4 (morale-collapse override).
+
+### XIV.1 Invariant
+Any env-flag-gated mechanism MUST produce byte-identical state hash when its flag is off (default off). Default-off paths must:
+- Skip all Anthropic SDK loads (no API calls).
+- Skip all state-mutating writes downstream of the gate.
+- Leave all canonical state slots untouched (do not initialize empty maps or arrays — leave undefined).
+
+### XIV.2 Verification
+Default-off byte-stability is verified by parent-side 40w smoke against the predecessor baseline. Hash drift between default-off-flag and pre-feature baseline is a contract violation. Flag-state baseline references must be annotated with the env-flag state under which they were measured (durable knowledge entry 2026-05-06).
+
+### XIV.3 Tooling-only vs engine-effecting
+Tooling-only QA features (Ring 0, e.g. D1+D2 personas, `tools/claude_plays_vrs/`) are byte-stable by construction at the engine layer when their flags are off. Engine-effecting features (Ring 1, e.g. C1's `army_corps_directives_by_faction` persistence) require explicit gate-respecting code in their state-write path.
+
+---
+
+## XV. Side-channel telemetry pattern (gitignored debug surface)
+
+Validated 2026-05-06 (C2 telemetry side-channel) + 2026-05-07 (D2 persona telemetry wire-fix).
+
+### XV.1 Pattern
+Observability for env-flag-gated features goes to a per-feature side-channel JSONL file under `data/derived/_debug/` (gitignored). The side-channel is APPEND-ONLY, deterministic-iteration, and does NOT mutate game state.
+
+### XV.2 Canonical paths
+- C2 corps directive telemetry: `data/derived/_debug/c_lane_corps_directive_telemetry.jsonl` (commit `f24ad5d7`).
+- D2 persona decisions: `data/derived/_debug/d_lane_persona_decisions.jsonl` (commits `e25c18c3` + `59805cd6` wire-fix).
+- Sector-partition perf instrumentation: `data/derived/_debug/sector_partition_*.jsonl` (precedent).
+
+### XV.3 Why side-channel, not weekly_report.jsonl
+Adding events to `weekly_report.jsonl` would mutate the canonical run-output stream and change `final_state_hash`, breaking byte-stability invariants. Side-channel JSONL is gitignored, has no consumer in the canonical scenario runner, and can be fully suppressed by env flag.
+
+### XV.4 Side-channel access
+Side-channel files are NOT included in scenario_runner output; they accumulate across runs (or a per-run helper writes a fresh file). Post-run analysis tools (e.g. `tools/compare_painted_vs_sim.cjs`) may read them; canonical run-summary tooling must not.
+
+---
+
+## XVI. Calibration discipline notes
+
+Validated across the v0.7 / v0.8 / v0.9 calibration cycle.
+
+### XVI.1 Calibration % means nothing if mechanics are broken
+A high anchor + benchmark pass-rate against an old expected baseline is meaningless if the mechanism producing the values is broken. When a mechanically-correct fix shifts a benchmark out of its old tolerance band, the proper response is to re-anchor the benchmark to the new equilibrium, not to revert the fix. Reference: Lane A `d377e07b` (RBiH t40 preserve_survival_corridors expected 0.329 → 0.388 after the 5-lane batch produced a more historically accurate trajectory).
+
+### XVI.2 Mini-panel discipline for calibration-active lanes
+Calibration-active lanes (those that change behavior visible at scenario scale) MUST embed a Phase 0 mini-panel before SHIP per durable knowledge 2026-05-04 + 2026-05-06: cross-check DDR-provisional values against historical sources (BB Vol I/II + ICTY judgments per `historical_research_sources.md` hierarchy) + propose binding thresholds for 188w A/B validation + define stop-triggers. Mini-panel verdicts: GO / REFINED / NO-GO.
+
+### XVI.3 Long-subprocess discipline
+188w A/B runs (~25 min each) belong to the parent, not to the agent. Agent runtime cutoffs frequently kill long subprocesses mid-execution. Pattern: agent provides commands; parent runs subprocess as Bash background task; parent commits agent's authored work (code + tests + docs) on agent's behalf via `git commit -o` pathspec form when subprocess output lands.
+
+---
