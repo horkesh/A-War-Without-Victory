@@ -44,13 +44,13 @@ Sister events provide the canonical schema for cascade-morale impacts:
 
 ### D3.3 commander observation
 
-Delic at T28: Jajce fall logged but cascade effects on 2nd Corps cohesion (=51) appear underweighted. Petkovic at T35 flags as alliance-rupture trigger.
+Delic at T28: Jajce fall logged but cascade effects on 3rd Corps cohesion (=51) appear underweighted. Petkovic at T35 flags as alliance-rupture trigger.
 
 The current event has:
 - `morale_change` -10 → immediate hit, but morale recovers each turn from rest/supply.
 - `internal_cohesion` -10 dimension shift → strategic dimension only (Dayton scoring), does NOT propagate to per-brigade `cohesion` field.
 
-The KEY GAP: there is NO `cohesion_change` effect. Per-brigade cohesion (which is what 2nd Corps avg=51 reflects) is unaffected by the event. The Dayton-layer `internal_cohesion` is a separate counter from per-brigade `cohesion`.
+The KEY GAP: there is NO `cohesion_change` effect. Per-brigade cohesion (which is what 3rd Corps avg=51 reflects) is unaffected by the event. The Dayton-layer `internal_cohesion` is a separate counter from per-brigade `cohesion`.
 
 ### Mini-panel verdict
 
@@ -134,7 +134,9 @@ Result: `1 passed (1) | Tests 4 passed (4) | Duration 513ms`.
 
 ## Commit
 
-[pending — sha after commit]
+`ec837dca` — `fix(events): jajce_falls_1992 cascade-morale consequences — close audit gap (LANE-NIGHTSHIFT-JAJCE-CASCADE-MORALE-AUDIT)`
+
+3 files changed, 359 insertions(+), 2 deletions(-).
 
 ## 40w / 188w handoff (PARENT runs)
 
@@ -145,8 +147,8 @@ npm run sim:scenario:run:40w
 ```
 
 Hash WILL drift from baseline (a2a51d4a9994a7f5). Drift visible at w28+ when jajce_falls_1992 fires. Confirm:
-- ARBiH 2nd Corps avg cohesion at w29-w35 drops ≥5 points vs control.
-- ARBiH 7th Corps avg cohesion at w29-w35 drops ≥5 points vs control.
+- ARBiH 3rd Corps avg cohesion at w29-w35 drops ≥5 points vs control.
+- ARBiH 7th Corps avg cohesion at w29-w35 drops ≥5 points vs control (southern flanks; faction-wide effect).
 - HRHB avg cohesion at w29-w35 drops ≥4 points vs control.
 - alliance_rbih_hrhb at w29 drops by 0.05 vs prior turn.
 
@@ -166,5 +168,5 @@ diff <(grep -E "(w2[8-9]|w3[0-5]).*cohesion" /tmp/jajce_control_188w.log) \
      <(grep -E "(w2[8-9]|w3[0-5]).*cohesion" /tmp/jajce_treatment_188w.log)
 ```
 
-Binding threshold: ARBiH 2nd Corps morale and cohesion at w29-w35 should both show ≥5-point drops vs control.
+Binding threshold: ARBiH 3rd Corps morale and cohesion at w29-w35 should both show ≥5-point drops vs control.
 

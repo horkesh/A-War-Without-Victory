@@ -129,3 +129,9 @@ Deltas are *small*, on purpose. The event already drops a +20 supply boost to RS
 - 2026-05-07 T+1: Phase 1 complete. war_1992.json edited — appended 4 new effect entries (RS recruitment_modifier, RS equipment_quality_modifier, RBiH +8 supply_delta, HRHB +5 supply_delta) inside the existing `effects` array of jna_withdrawal_1992. No other event touched. Proceeding to Phase 2 test authoring.
 - 2026-05-07 T+2: Phase 2 complete. tests/jna_withdrawal_consequences.test.ts authored with 4 tests (T1: non-empty consequences; T2: schema-handler match; T3: per-faction inheritance; T4: deterministic re-load). All 4 tests PASS (`npx vitest run tests/jna_withdrawal_consequences.test.ts` → 4 passed in 527ms). `npx tsc --noEmit` clean. Proceeding to broader event-test sweep + commit.
 - 2026-05-07 T+3: Regression sweep clean. event_effects.test.ts (9), event_timeline_integrity.test.ts (17), early_war_jna_transition.test.ts (6), event_conditions.test.ts (13) — 45/45 PASS. No regression to event substrate. Proceeding to commit.
+- 2026-05-07 T+4: Commit attribution split. War_1992.json hunk landed in `ec837dca` (parallel-agent JAJCE_CASCADE_MORALE_AUDIT lane swept it up via concurrent staging — parallel-staging hazard, see life-lessons commit-discipline). Test + report landed cleanly in `ecae99da` (this lane). Both commits are on `main`. Engineering content intact. Net: data fix + tests + report all present, attribution non-ideal but acceptable.
+
+## Commits
+
+- **`ec837dca`** — `data/scenarios/events/war_1992.json` JNA hunk (swept into parallel JAJCE lane).
+- **`ecae99da`** — `tests/jna_withdrawal_consequences.test.ts` + `docs/40_reports/implemented/20260507_JNA_WITHDRAWAL_CONSEQUENCES_AUDIT.md` (this lane).

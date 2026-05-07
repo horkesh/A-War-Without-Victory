@@ -115,7 +115,7 @@ Per-test verdicts (D2 wire-fix file):
 
 `fix(tools): wire persona_telemetry.emitDecision into api_president/api_commander/api_corps_commander (LANE-NIGHTSHIFT-D2-TELEMETRY-WIRE-FIX)`
 
-Commit SHA: (filled in below)
+Commit SHA: `59805cd6`
 
 ## Notes for downstream reviewers
 

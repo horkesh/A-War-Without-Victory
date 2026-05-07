@@ -125,10 +125,10 @@ The lane brief mentioned `csq_alliance_holds_past_w35` — this is in `data/scen
 Single commit, pathspec form (`git commit -o`):
 
 ```
-fix(canon): audit *_1992 event-name year-suffix drift; align trigger windows to canonical 1992 history (LANE-NIGHTSHIFT-Q3-EVENT-1992-CHRONOLOGY-AUDIT)
+aa30f349 fix(canon): audit *_1992 event-name year-suffix drift; align trigger windows to canonical 1992 history (LANE-NIGHTSHIFT-Q3-EVENT-1992-CHRONOLOGY-AUDIT)
 ```
 
-No `--no-verify`. Pre-commit hooks (`tsc --noEmit`) run normally.
+3 files changed, 284 insertions(+), 4 deletions(-). No `--no-verify`. Pre-commit hooks (`tsc --noEmit`) ran normally and passed.
 
 ## Stop-and-ask check
 

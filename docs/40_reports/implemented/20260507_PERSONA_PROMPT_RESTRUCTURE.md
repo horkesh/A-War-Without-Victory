@@ -120,7 +120,7 @@ NOISE-SUPPRESSION GUIDANCE (from D3.3 v2 triage):
 clusters; add ICTY citation guidance
 (LANE-NIGHTSHIFT-PERSONA-PROMPT-RESTRUCTURE)`
 
-Commit SHA: <to be filled in after commit>
+Commit SHA: `cb13e605`
 
 ## Checkpoint log
 
