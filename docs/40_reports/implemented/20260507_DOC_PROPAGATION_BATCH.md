@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-07
 **Lane:** session-end doc propagation across repo master docs, KNOWLEDGE entries, and canon cross-references.
-**Status:** IN PROGRESS
+**Status:** SHIPPED at commit `ebac4fdf`
 
 ## Scope
 
