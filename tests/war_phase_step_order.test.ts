@@ -148,6 +148,7 @@ describe('war-phase step ordering', () => {
         // +1 from apply-army-directive-interpretation (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION, c8ff93d8, 2026-05-06)
         // +1 from produce-political-directive (LANE-NIGHTSHIFT-B1-POLITICAL-DIRECTIVE-PRODUCER-INFRA, 44053a32, 2026-05-06)
         // +1 from clear-displacement-event-log (LANE-NIGHTSHIFT-V093-LANE-D-CONTENT-V2-PATH-A, 834f59f9, 2026-05-08)
-        expect(stepNames.length).toBe(175);
+        // +1 from apply-siege-morale-drain (LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1, 2026-05-08; runs after morale-drift, default-off shadow flag SIEGE_MORALE_DRAIN_ENABLED)
+        expect(stepNames.length).toBe(176);
     });
 });

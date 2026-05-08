@@ -1841,6 +1841,22 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
+    // LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (Engine Invariants
+    // v0.9.0 §6.10 + Systems Manual v0.9.0 §6.10, 2026-05-08): siege defender
+    // morale drain. Runs AFTER morale-drift so the graduated siege drain
+    // layers on top of the existing affinity drift; net direction is what
+    // matters. Faction-symmetric — reads `state.military.siege_turn_counters`
+    // (already faction-keyed). Default-off shadow flag
+    // SIEGE_MORALE_DRAIN_ENABLED; diagnostic counter increments
+    // unconditionally per N4 precedent.
+    {
+        name: 'apply-siege-morale-drain',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { applySiegeMoraleDrain } = await import('../combat/siege_morale_drain.js');
+            context.report.siege_morale_drain = applySiegeMoraleDrain(context.state);
+        }
+    },
     // --- Second dissolution pass: catches brigades whose morale/cohesion dropped
     // below threshold during post-combat drift (morale-drift, cohesion-drift).
     // The first pass (line ~373) runs before combat and cannot catch these.

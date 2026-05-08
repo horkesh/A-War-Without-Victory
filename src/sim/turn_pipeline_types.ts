@@ -64,6 +64,7 @@ import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
 import type { SiegeAttritionReport } from './combat/siege_attrition.js';
+import type { SiegeDrainDiagnostic } from './combat/siege_morale_drain.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
 import type { PoolDecayReport } from './combat/pool_decay.js';
@@ -192,6 +193,11 @@ export interface TurnReport {
     morale_drift_report?: MoraleDriftReport;
     frontline_attrition?: FrontlineAttritionReport;
     siege_bombardment_attrition?: SiegeAttritionReport;
+    /** LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1: per-turn diagnostic
+     * for siege defender morale drain (Engine Invariants v0.9.0 §6.10). The
+     * `drain_pending_count` field increments unconditionally for shadow-flag
+     * visibility per N4 morale-collapse override precedent. */
+    siege_morale_drain?: SiegeDrainDiagnostic;
     takeover_displacement?: TakeoverDisplacementReport;
     ongoing_mobilization?: OngoingMobilizationReport;
     pool_war_weariness_decay?: PoolDecayReport;
