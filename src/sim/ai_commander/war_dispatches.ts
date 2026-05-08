@@ -146,15 +146,33 @@ export async function generateWarDispatch(
     const perspective = getPerspectiveForTurn(turn);
 
     // --- Displacement data ---
-    const displacementLog = state.displacement?.displacement_event_log as Array<{ turn: number; displaced_count: number }> | undefined;
+    // LANE-NIGHTSHIFT-V093-LANE-D-CONTENT-V2-PATH-A (834f59f9) reshaped
+    // state.displacement.displacement_event_log into a per-turn buffer
+    // cleared at end-of-turn. Pre-LANE-D this code referenced
+    // entry.displaced_count (field-name bug: canonical schema is `displaced`,
+    // so both totals were always 0). Post-LANE-D resolution:
+    //   - totalDisplaced: read cumulative from displacement_humanitarian_aggregates
+    //     (sum of refugees_created across all faction × ethnicity keys)
+    //   - recentDisplaced: degrades from "last 4 turns" to "current turn only"
+    //     via per-turn buffer. Acceptable: this is a narrative LLM cue,
+    //     not deterministic sim input; gated by ai_commander_config.mode === 'cadet'
+    //     (unset in calibration). Restoring true 4-turn-window would need a
+    //     sliding-window aggregate substrate (deferred to v0.9.7+).
+    const aggs = state.displacement?.displacement_humanitarian_aggregates;
     let totalDisplaced = 0;
-    let recentDisplaced = 0;
-    if (displacementLog) {
-        for (const entry of displacementLog) {
-            totalDisplaced += entry.displaced_count ?? 0;
-            if (entry.turn >= turn - 4) {
-                recentDisplaced += entry.displaced_count ?? 0;
+    if (aggs) {
+        for (const ethnicities of Object.values(aggs)) {
+            for (const counts of Object.values(ethnicities)) {
+                totalDisplaced += counts.refugees_created ?? 0;
             }
+        }
+    }
+
+    const currentTurnBuffer = state.displacement?.displacement_event_log;
+    let recentDisplaced = 0;
+    if (currentTurnBuffer) {
+        for (const entry of currentTurnBuffer) {
+            recentDisplaced += entry.displaced ?? 0;
         }
     }
 
