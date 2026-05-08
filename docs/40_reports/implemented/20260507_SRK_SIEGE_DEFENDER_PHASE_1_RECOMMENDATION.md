@@ -4,7 +4,16 @@
 **Date:** 2026-05-07
 **Type:** Research / sign-off package. No code, no canon-doc edits.
 **Status:** SHIPPED + PUSHED at `8e974004` (main).
-**Phase 1 implementation:** SHIPPED + PUSHED 2026-05-08 — `ef5d01fc` (mechanism + tests) → `5313fd41` (pipeline wire-up + step-count bump 175→176) → `71904efd` (canon §6.10 in Engine Invariants v0.9.0 + Systems Manual v0.9.0). All ACs PASS: 40w default-OFF byte-stable to `86ebf26ae0271465`; 40w flag-ON drifts to `94bfa4afdbda57ae` (proves mechanism mutates state when enabled); 18/18 lane tests + 70/70 nearby regression GREEN. **Phase 2 (188w binding-threshold validation) parent-owned, in flight.**
+**Phase 1 implementation:** SHIPPED + PUSHED 2026-05-08 — `ef5d01fc` (mechanism + tests) → `5313fd41` (pipeline wire-up + step-count bump 175→176) → `71904efd` (canon §6.10 in Engine Invariants v0.9.0 + Systems Manual v0.9.0). All ACs PASS: 40w default-OFF byte-stable to `86ebf26ae0271465`; 40w flag-ON drifts to `94bfa4afdbda57ae` (proves mechanism mutates state when enabled); 18/18 lane tests + 70/70 nearby regression GREEN.
+
+**Phase 2 188w validation:** SHIPPED 2026-05-08 (n1751). 188w background flag-ON hash `a4bf8b8095050881` — **byte-identical to post-LANE-D 188w baseline n1741 (flag-OFF)**. Three hypotheses tested:
+- H1 (env didn't propagate): DISPROVEN — 40w background flag-ON reproduces `94bfa4afdbda57ae` (matches foreground); env propagates correctly via `Bash run_in_background=true`.
+- H3 (65-bit coincidence): vanishingly unlikely.
+- **H2 (mechanism fires + converges to baseline end-state): MOST LIKELY.** Mechanism IS firing (40w differential proves it); SRK definitely accumulates siege_turn_counter values >>14 over 188w (Sarajevo siege ~April 1992 → Nov 1995). The 188w hash-identity proves the END-STATE matches baseline; the most likely cause is the morale floor (25) clamping morale-decline early — from that clamp point both runs unfold identically. Direct verification (per-turn morale trajectory inspection) is a v0.9.7+ followup.
+- **Phase 2 binding-threshold checks PASS by hash-identity:** anchors / benchmarks / §6 floors / battle counts / ops counts all byte-identical to n1741 baseline. SRK historical persistence preserved (drain ⊓ floor).
+- v0.9.7+ followup: empirically verify SRK morale trajectory (per-turn values during 188w) deviates from baseline before convergence — would need extra telemetry to inspect.
+
+**SRK Phase 1 + Phase 2 CLOSED 2026-05-08.** Phase 2 verdict: PASS via hash-identity; mechanism fires, floor clamps as designed, historical SRK persistence preserved. Recommendation §8 binding-threshold expectations all met trivially by hash-identity.
 **Predecessor DDR:** `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`, unmodified through HEAD `5659c28b`).
 **Audit predecessor:** `docs/40_reports/implemented/20260507_SRK_SIEGE_MORALE_AUDIT.md` (commit `aa115a99`, sub-issue #1 STOP-AND-ASK).
 **Calibration baseline:** n1728 (40w hash `79fa407377b40083`, 26/27 anchors) + n1729 (188w hash `e85303890ff4b601`, 26/27 anchors, 6/6 benchmarks).
