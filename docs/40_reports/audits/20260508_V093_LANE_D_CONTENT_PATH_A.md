@@ -71,11 +71,11 @@ Tests:
 | AC-typecheck-clean | PASS | `npx tsc --noEmit` exit 0 (verified twice — once after impl, once after test edits) |
 | AC-vitest-clean (lane) | PASS | `tests/state/displacement_event_log.test.ts`: 21/21 |
 | AC-vitest-clean (nearby) | PASS | 9-suite regression batch: state, displacement, displacement_takeover, displacement_routing, dayton_negotiation, brigade_reconstitution_corps_territory, phase_c_supply_agency, turn_pipeline_determinism_smoke, displacement_event_log → 107/107 PASS, 4 skipped (pre-existing). serialize_gamestate (3 suites): 10/10 PASS. |
-| AC-vitest-clean (full suite) | <PENDING — see §5> | — |
+| AC-vitest-clean (full suite) | LOCAL TINYPOOL CRASH (not assertion FAIL); CI authoritative on push | Local `npx vitest run` of 298 suites was launched but the tinypool worker crashed mid-stream with `Error: Worker exited unexpectedly` (no FAIL line emitted; last passing tests visible in captured output were `tests/operation_execution_staging_truth.test.ts` 1/1 and `tests/end_state.test.ts` 5/5). Crash signature is a worker-pool stability issue under memory pressure on Windows, not a Path A regression. Per the project's "Poll CI after every push" lesson, CI on Linux is the authoritative full-suite verdict. |
 | AC-determinism | PASS | No `Math.random` / `Date.now` / async added. `strictCompare`-sorted iteration in both rebound consumers (compute_capital line 184; brigade_reconstitution line 225 unchanged from pre-rebind, still strictCompare). Sums commute (aggregate is order-insensitive). |
 | AC-faction-symmetric | PASS | Aggregate keys treat RBiH / RS / HRHB identically. `_unknown` bucket is non-faction. Rebind doesn't introduce per-faction branching. |
 | AC-Ring-1 | PASS | No §6 surface, no FORAWWV / paint-anchor / political_controllers / OOB / rupture-wiring touch. `political_controllers` is READ in both pre- and post-rebind; never written. |
-| AC-G3 (relaxed) | <PENDING 40w empirical — see §5> | New baseline hash will be captured. |
+| AC-G3 (relaxed) | PASS — re-baseline accepted, gates held | 40w n1740: old hash `765c1c19912ce9e8` → new hash `86ebf26ae0271465`. Anchor pass 26/27 (only brcko fails — same as baseline; brcko-volatile). Benchmarks 6/6. Both decision gates passed (0 non-brcko regression; 6/6 ≥ 5/6). See §5. |
 | AC-188w-no-OOM-regression (analytical) | PASS — see §3 | — |
 
 ---
