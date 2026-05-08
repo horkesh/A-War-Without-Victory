@@ -1,7 +1,26 @@
-# D3 Persona Suppressor Validation V3
+# D3 Persona Suppressor Validation V3 (+ cb13e605-bis iteration)
 
-**Date:** 2026-05-07
-**Lane:** LANE-NIGHTSHIFT-D3-PERSONA-VALIDATION-V3
+**Date:** 2026-05-07 (V3); 2026-05-08 (cb13e605-bis iteration appended)
+**Lane:** LANE-NIGHTSHIFT-D3-PERSONA-VALIDATION-V3 + cb13e605-bis iteration
+
+## TL;DR (read first)
+
+Two empirical iterations completed. Both FAIL the validation threshold.
+
+| Iteration | Reduction | Status | Key per-cluster |
+|---|---|---|---|
+| cb13e605 (baseline suppressors) | -4.8% | FAIL | C2 +9%, C3 +51% (noise displacement) |
+| cb13e605-bis (strengthened C2+C3) | -8.1% | FAIL | C2 -23.9% (flipped to PASS), C3 +74.3% (worse) |
+
+**cb13e605-bis is a strict improvement** on cb13e605 (C1/C2/C4 better; C3 still grew) but **diminishing returns** are visible — each iteration gains ~3pp reduction. Reaching the 40% MARGINAL threshold via prompt iteration alone would take 5+ more cycles ($1.76 each).
+
+**C3 (ops-in-planning / op-lifecycle) is structurally hard to suppress via prompt** — the model composes multi-clause observations that touch op status as one of many concerns. Real fix is probably to reduce op-status visibility in the briefing builder, not to keep telling the LLM to ignore visible state.
+
+**Genuine signal % FELL** under cb13e605-bis (75.7% noise post vs 73.5% baseline) — the model became more reticent overall, dropping genuine signal faster than noise. Over-suppression risk realized.
+
+**Recommendation: stop iterating prompt-side suppressors.** Either accept partial (Option 2 from prior) or defer C3 to a v0.9.7+ structural fix (Option 3). Two empirical cycles + one intent-validation pass + one V3 dead-run ≈ $4.40 spent on this question. Continued prompt iteration is no longer cost-effective.
+
+---
 **Predecessors:**
 - `cb13e605` — feat(tools): persona prompt restructure (4 D3.3 noise clusters + ICTY citation guidance)
 - `59805cd6` — fix(tools): wire persona_telemetry.emitDecision (D2 wire-fix)
@@ -295,3 +314,90 @@ over-suppression caveat noted above.
 - 22:34 report drafted, V3 run still in flight (~25 min more to completion)
 - (PENDING) 22:55 ~ run completes; `python3 tools/d3_validation_compare.py`
   delivers final PASS/MARGINAL/FAIL table
+
+---
+
+## cb13e605-bis iteration (2026-05-08)
+
+User chose Option 1 from V3 closeout (iterate the suppressors). Strengthened bullets applied to all 13 personas via `tools/claude_plays_vrs/apply_cb13e605_bis.py` (commit `e5b1090e`):
+
+- **C2 (alliance):** raised threshold 0.20 → 0.30, added decision-trigger conjunction, added 3 explicit no-emit examples copied from V3 baseline observations
+- **C3 (op lifecycle):** broadened from "planning" alone to ALL lifecycle states (planning/recovery/suspended/in-progress/completed/no-trace), added 5 explicit no-emit examples from V3 baseline observations
+
+Cb13e605 result preserved at `runs/three_commanders/diagnostic_report_cb13e605_only.json` (205 KB) for future 3-way reference.
+
+### Empirical run
+
+Parent-owned background relaunch (Bash `run_in_background=true`), exit 0, ~47 min wallclock 2026-05-08 07:51 → 08:38.
+
+### Verdict: FAIL (-8.1% reduction; better than cb13e605's -4.8% but still under MARGINAL threshold)
+
+```
+Cluster                    | baseline | cb13e605-bis | reduction
+---------------------------|----------|--------------|-----------
+C1 political directive     |      77  |          59  | 23.4%  PASS (was 13%)
+C2 alliance hand-wringing  |      67  |          51  | 23.9%  PASS (was -9%, flipped!)
+C3 ops in planning         |      35  |          61  | -74.3% FAIL (was -51%, worse)
+C4 op-name confabulation   |       7  |           0  | 100%   PASS (was 71%)
+TOTAL noise                |     186  |         171  | 8.1%   FAIL (was -4.8%)
+
+Total observations: 226 (down from 274 cb13e605, down from 253 baseline)
+Genuine signal: 55 (down from 79 cb13e605, down from 67 baseline)
+Noise %: 75.7% (UP from 71.2% cb13e605, up from 73.5% baseline)
+```
+
+### Three-way per-cluster trajectory
+
+| Cluster | Baseline → cb13e605 | cb13e605 → cb13e605-bis | Net (Baseline → bis) |
+|---|---|---|---|
+| C1 | -13% | -12% | **-23%** PASS |
+| C2 | +9% (worse) | -30% (flipped!) | **-24%** PASS |
+| C3 | +51% (worse) | +15% (still worse) | **-74%** FAIL |
+| C4 | -71% | -100% | **-100%** PASS |
+| TOTAL | -4.8% | -12% | **-8%** FAIL (over-suppression risk realized) |
+
+### Findings
+
+1. **cb13e605-bis is a strict improvement over cb13e605** on 3/4 clusters. C2 flipped from FAIL (+9%) to PASS (-30% from cb13e605, -24% from baseline) — proves the strengthening worked where it could.
+
+2. **C3 (op-lifecycle) is structurally resistant to prompt-only suppression.** Both iterations made it worse vs baseline. Sample post-bis observation: *"1st Corps has 'probe_arbih_1st_corps_t1' in planning status with no trace provided. At turn 1, this is consistent with a pre-game directive, but the status 'unknown' is unusual for a named operation."* The model technically respects the suppressor (acknowledges normal init) but ALSO flags as "unusual" — half-suppressed; finding new angles each iteration.
+
+3. **Over-suppression realized.** Total observations dropped 253 → 226 (-11%); noise dropped 186 → 171 (-8%); genuine signal dropped 67 → 55 (-18%). The model became more reticent overall, but reticence cost genuine signal faster than it cost noise. Noise % UP from 73.5% to 75.7%.
+
+4. **Diminishing returns visible.** Each prompt-iteration gains ~3pp net reduction. Reaching the 40% MARGINAL threshold via prompt-only iteration would require 5+ more cycles at $1.76 each = $9+ additional spend.
+
+### Why C3 is hard
+
+C3 noise targets observations about op-lifecycle states (planning/recovery/suspended/etc) when the briefing surfaces those states verbatim. The model is shown the data and told to ignore it — but its job is to comment on what's anomalous. State that the briefing surfaces is, by inclusion, salient.
+
+The structural fix is to **reduce op-state visibility in the briefing builder** when those states are routine — not to keep telling the model to ignore what it sees. That's a v0.9.7+ structural change in `tools/claude_plays_vrs/api_*.ts` user-prompt builders, not a persona-prompt change.
+
+### Recommendation (revised again post-bis)
+
+**Stop iterating prompt-side suppressors. Two options:**
+
+1. **Accept partial PASS (Option 2 from V3 closeout).** cb13e605-bis is the best the prompt-only path can deliver. Document C3 as a structural limitation; close v0.9.6 on intent-validation + 3/4 cluster PASS + acknowledged C3 limitation. Track v0.9.7+ structural fix.
+
+2. **Defer empirical-validation entirely (Option 3 from V3 closeout).** Close v0.9.6 on intent-validation only; treat cb13e605-bis as documenting current state without gating on it. Slot the structural fix into v0.9.7+.
+
+**Option 1 NO LONGER recommended** — diminishing returns proven empirically.
+
+**Cost summary (final):**
+- V3 agent dead-run (turn 22 termination): ~$0.88
+- V3 parent-owned relaunch (cb13e605 run): ~$1.76
+- cb13e605-bis run: ~$1.76
+- **Total spend: ~$4.40**
+
+### Followups for v0.9.7+ backlog
+
+- C3 structural fix: prune op-lifecycle states from briefing prompt when states are routine
+- President null-verb saturation: enrich `buildPresidentUserPrompt` with military-pressure cues (separate issue, surfaced V3 partial-signal review)
+- Two-way diagnostic_report.json baseline preservation: keep `_baseline_d3_pre_cb13e605.json` and `_cb13e605_only.json` as durable comparison anchors
+
+### Timeline (cb13e605-bis)
+
+- 07:42 (2026-05-08) cb13e605-bis script written + applied across 13 personas
+- 07:51 commit `e5b1090e` push; parent-owned validation re-run dispatched (Bash `run_in_background=true`)
+- 08:38 run completes (exit 0, 47 min wallclock)
+- 08:39 `python3 tools/d3_validation_compare.py` run; verdict FAIL (-8.1%)
+- 08:40 report TL;DR + cb13e605-bis section appended; commit + push pending
