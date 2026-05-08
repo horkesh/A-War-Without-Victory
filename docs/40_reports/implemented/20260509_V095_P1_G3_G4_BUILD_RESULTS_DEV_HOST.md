@@ -127,3 +127,92 @@ This is **not a regression of the artifact** — it is the expected divergence b
 ---
 
 CHECKPOINT v1: artifact existence + smoke + version observation captured. Committing before proceeding to silent-extract attempt.
+
+### W-4 — Silent install to redirected temp directory
+
+**Result: PASS (with caveats — see W-5/W-6).**
+
+**Pre-install snapshot (clean baseline):**
+```
+HKCU Uninstall entries matching "War Without Victory" / "awwv" / "com.awwv": 0
+%APPDATA%\A War Without Victory: NOT EXISTS
+%LOCALAPPDATA%\Programs\A War Without Victory: NOT EXISTS
+```
+
+**Command run (PowerShell `Start-Process` — `/D=<path>` MUST be last arg, no quotes per NSIS spec):**
+```
+Start-Process -FilePath "F:\A-War-Without-Victory\dist-packaged-fresh\A War Without Victory Setup 0.9.5-alpha.1.exe" `
+  -ArgumentList "/S","/currentuser","/D=C:\Users\User\AppData\Local\Temp\awwv-test-extract-34267595" `
+  -Wait -PassThru -NoNewWindow
+```
+
+**Result:**
+- Exit code: **0**
+- Files extracted to temp dir: **1452**
+- Main exe present: `A War Without Victory.exe` (222,836,736 bytes — Electron 41.0.3 stub, expected per `signAndEditExecutable: false` in `package.json` build block)
+- All Electron runtime files present: `chrome_*.pak`, `d3dcompiler_47.dll`, `dxcompiler.dll`, `dxil.dll`, `ffmpeg.dll`, `icudtl.dat`, `libEGL.dll`, `libGLESv2.dll`, `resources.pak`, `snapshot_blob.bin`, `Uninstall A War Without Victory.exe`, `v8_context_snapshot.bin`, `vk_swiftshader.dll`, `vk_swiftshader_icd.json`, `vulkan-1.dll`
+- Subdirectories: `locales/`, `resources/` (containing `app.asar`)
+
+**Post-install state-pollution audit:**
+
+| Marker | Pre | Post | Status |
+|---|---|---|---|
+| HKCU Uninstall registry entry | 0 | 0 | CLEAN — `/D=` redirect prevented default-install registry write |
+| `%APPDATA%\A War Without Victory` (per-user state) | absent | absent | CLEAN — only created at first launch |
+| `%LOCALAPPDATA%\Programs\A War Without Victory` | absent | absent | CLEAN — `/D=` redirected install away from default |
+| Start Menu shortcut (`%APPDATA%\Microsoft\Windows\Start Menu\Programs\A War Without Victory.lnk`) | absent | **PRESENT** | **POLLUTION — installer created shortcut even with /D= redirect** |
+| Desktop shortcut (`%USERPROFILE%\Desktop\A War Without Victory.lnk`) | absent | **PRESENT** | **POLLUTION — same** |
+
+**Finding W-4-A (POLLUTION):** The electron-builder NSIS `assistedInstaller.nsh` mode writes Start Menu + Desktop shortcuts even when `/D=` redirects the install path away from `%LOCALAPPDATA%\Programs`. The shortcuts point to the installer-redirected install dir. **This is operator-unfriendly for testing**: a strict "no environment modification" path is not achievable with this installer config. Mitigation: shortcuts can be removed manually post-test (this lane will clean up before finishing).
+
+**Finding W-4-B (POSITIVE):** No HKCU Uninstall registry entries created. This means an "Apps & Features" entry was NOT registered — the install behaves more like a portable extract than a registered install when `/D=` is supplied. This is the cleanest dev-host approximation available without resorting to a 7-Zip / native NSIS unpack tool (neither was available on this dev host: no `7z.exe` in standard paths, no PATH entry).
+
+### W-5 — Start Menu entry creation
+
+**Result: PRESENT (unexpected — runbook predicted FALSE for temp install).** See W-4-A above. The dispatching prompt predicted "expected miss for temp-install path" but `/D=` redirect did NOT suppress shortcut creation. This is a behavioral fact about electron-builder's NSIS template, not a build defect.
+
+### W-6 — Desktop shortcut
+
+**Result: PRESENT.** Same root cause as W-5.
+
+### Version coherence at the asar layer
+
+**Result: PASS.**
+
+Read the embedded root `package.json` from `resources/app.asar` by parsing the asar header (16-byte header + JSON file table) and seeking to the entry's offset:
+
+```
+ASAR root package.json:
+  name: awwv
+  version: 0.9.5-alpha.1
+  description: A War Without Victory (AWWV) simulation prototype
+  productName: (empty — productName lives at electron-builder build block, not in package.json root)
+```
+
+**Coherence check:**
+- Artifact filename: `A War Without Victory Setup 0.9.5-alpha.1.exe` → version segment `0.9.5-alpha.1`
+- Embedded asar root `package.json.version`: `0.9.5-alpha.1`
+- **MATCH** — artifact's runtime-visible version field aligns with its filename. **The artifact is genuinely a v0.9.5-alpha.1 build.**
+
+**On the surrounding context:** the working-tree `package.json` at this moment of the repo reads `0.9.6-alpha.1` (the milestone has moved forward since 2026-05-06 build), but the artifact under test is correctly frozen at the older version. This is healthy — frozen artifacts decouple from in-flight working-tree bumps.
+
+### Binary VersionInfo (Windows file properties)
+
+**Observed:**
+```
+ProductName:  Electron
+ProductVersion: 41.0.3
+FileVersion: 41.0.3
+CompanyName: GitHub, Inc.
+OriginalFilename: electron.exe
+InternalName: electron.exe
+FileDescription: Electron
+```
+
+**Expected per audit §2.1:** `signAndEditExecutable: false` is intentional in `package.json` build block — Windows VersionInfo on the binary remains the unmodified Electron stub. The actual game version lives in `app.asar`, not in the PE resource section. This is **the documented v0.9.5 behavior**, not a bug.
+
+For users browsing properties via Explorer, the visible product is "Electron 41.0.3", which is **mildly confusing** but consistent with the v0.9.5 audit's deliberate scope (signing + brand-stamping deferred to v1.0). Recommended for v1.0: enable `signAndEditExecutable: true` after acquiring a signing cert + setting `extraResources` accordingly.
+
+---
+
+CHECKPOINT v2: silent extract via /S /D= verified + version coherence verified. Committing before launch attempt.
