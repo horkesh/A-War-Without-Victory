@@ -4921,5 +4921,302 @@
       "equipment_quality_recovery_streak_active_RBiH": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16 (NEW recovery-side event — Wave-15 successor handoff #4: 'equipment-quality recovery half — substrate exists from Wave 3 but content side recovery half is sparse'). Recovery counterpart to the equipment-quality drain events (csq_iran_arms_channel_attenuation, csq_arms_pipeline_disrupted, csq_patron_arms_pipeline_attenuated); reads the existing equipment_quality_modifier substrate from Wave-3 in the positive direction. Distinct from csq_arbih_doctrine_modernization (which gates on doctrine_reform_initiated flag) and csq_post_dayton_train_and_equip_RBiH (which gates on post-Dayton normalization). This event gates only on patron-confidence + paused offensive — the ordinary recovery half rather than a structural inflection. Mirrors documented 1994-1995 ARBiH cadre rotation onto new manuals during sustained Federation-period training-cycle expansion (BB II Ch.41-43; Hoare 'How Bosnia Armed' 2004). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_spring_thaw_supply_recovery_HRHB",
+    "title": "The Spring Thaw (HRHB)",
+    "narrative": "The Lasva Valley roads dry. The two-axle trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the Lasva and Posušje depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "HRHB", "threshold": 50 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_HRHB", "min": 30 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_HRHB", "min": 20 },
+          { "type": "flag_not_set", "flag": "spring_thaw_supply_recovery_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Spring thaw supply recovery (HRHB variant): supply column refills at marginal route pace."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "HRHB", "delta": 10 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "spring_thaw_supply_recovery_HRHB", "text": "HRHB spring thaw supply recovery under supply<50, war_exhaustion>=30, no major offensive 20 turns. Supply +10, cohesion +2; recovery counterpart to csq_winter_supply_attrition_HRHB. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "spring_thaw_supply_recovery_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-16 successor handoff — closes spring-thaw triad). Recovery counterpart to Wave-11 csq_winter_supply_attrition_HRHB; predicate structurally identical to Wave-16 RBiH and RS variants; only the faction parameter and mutex flag differ. Mirrors documented 1993 / 1994 HVO spring-thaw quartermaster relief on the Lasva Valley and Posušje-Tomislavgrad supply spine once the mountain routes reopened (BB II Ch.41-42; Hoare 'How Bosnia Armed' 2004 on HVO logistics). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_equipment_quality_recovery_streak_RS",
+    "title": "The Cadre Catches Up (RS)",
+    "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Belgrade's confidence stays in the constructive register. The training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new cadre actually rotates onto the new manuals before deploying. The corps staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 90,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_above", "faction": "RS", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_RS", "min": 25 },
+          { "type": "flag_not_set", "flag": "equipment_quality_recovery_streak_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Equipment-quality recovery streak (RS variant): combat-power readout drifts upward."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RS", "multiplier": 1.04, "duration_turns": 30 },
+      { "kind": "cohesion_change", "faction": "RS", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "equipment_quality_recovery_streak_RS", "text": "RS equipment-quality recovery streak under patron_confidence>55, no major offensive 25 turns. Equipment +4% for 30 turns, cohesion +2; recovery counterpart to csq_patron_arms_pipeline_attenuated / csq_arms_pipeline_disrupted. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "equipment_quality_recovery_streak_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-16 successor handoff — closes equipment-quality-recovery triad with RS variant). Predicate structurally identical to Wave-16 RBiH variant; only the faction parameter and mutex flag differ. Distinct from existing csq_doctrine_drift (which inverts effect) and csq_corps_reorganization_attempted (which gates on different surface). Mirrors documented 1994-1995 VRS cadre rotation onto new manuals during sustained Belgrade-side training-cycle expansion (BB II Ch.43-47). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_equipment_quality_recovery_streak_HRHB",
+    "title": "The Cadre Catches Up (HRHB)",
+    "narrative": "The equipment-quality column, which had drifted downward through two quarters of pipeline attenuation, steadies. Zagreb's confidence stays in the constructive register. The HV-cadre training cycles, which had been compressed to combat-replacement pace, lengthen enough that the new HVO instructors actually rotate onto the new manuals before deploying. The brigade staffs note the inflection in the maintenance-availability column, not in the formal communique. The combat-power readout drifts upward by a small but measurable amount.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 90,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_above", "faction": "HRHB", "dimension": "patron_confidence", "threshold": 55 },
+          { "type": "flag_at_least", "flag": "turns_since_major_offensive_HRHB", "min": 25 },
+          { "type": "flag_not_set", "flag": "equipment_quality_recovery_streak_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Equipment-quality recovery streak (HRHB variant): combat-power readout drifts upward."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 1.04, "duration_turns": 30 },
+      { "kind": "cohesion_change", "faction": "HRHB", "delta": 2 },
+      { "kind": "cost_ledger_annotation", "tag": "equipment_quality_recovery_streak_HRHB", "text": "HRHB equipment-quality recovery streak under patron_confidence>55, no major offensive 25 turns. Equipment +4% for 30 turns, cohesion +2; recovery counterpart to csq_patron_arms_pipeline_attenuated_HRHB. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 2 }
+    ],
+    "sets_flags": {
+      "equipment_quality_recovery_streak_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-16 successor handoff — closes equipment-quality-recovery triad with HRHB variant). Predicate structurally identical to Wave-16 RBiH variant; only the faction parameter and mutex flag differ. Distinct from existing csq_doctrine_drift_HRHB (which inverts effect) and csq_post_dayton_train_and_equip_HRHB (which gates on post-Dayton normalization). Mirrors documented 1994-1995 HVO cadre rotation onto Croatian-army-supplied manuals during sustained Federation-period training-cycle expansion (BB II Ch.41-42; Burg & Shoup 2000 on Federation military integration). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_grain_corridor_reopened_RS",
+    "title": "Grain Corridor Reopened (RS)",
+    "narrative": "A long-disused supply lane through Posavina reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain through the agricultural belt, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval; Belgrade does not object.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "supply_route_open_grain_corridor_RS", "value": true },
+          { "type": "flag_at_least", "flag": "turns_since_corridor_hostility_RS", "min": 8 },
+          { "type": "flag_not_set", "flag": "grain_corridor_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Grain corridor reopened (RS variant); supply flows resume."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "RS", "delta": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_reopened_RS", "text": "RS grain corridor reopened with no hostility 8 turns. Supply +25; AUDIT-ONLY framing applies if corridor passes within 20 km of any enclave OSID (corridor route is canon-tracked elsewhere)." },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_enclave_proximity_audit_RS", "text": "AUDIT-ONLY: corridor proximity to enclaves is recorded for downstream narrative reckoning. No mechanical effect; rupture wiring untouched.", "faction": "RS" }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "international_standing", "delta": 3 }
+    ],
+    "sets_flags": {
+      "grain_corridor_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-3 mirror — RS variant of csq_grain_corridor_reopened). Predicate structurally identical to the Wave-3 progenitor; only the faction parameter and mutex flag differ. Mirrors UNHCR-coordinated humanitarian corridor reopens through the Posavina agricultural belt, 1993-1994 (BB II Ch.30-32 on humanitarian logistics through RS-controlled territory). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_grain_corridor_reopened_HRHB",
+    "title": "Grain Corridor Reopened (HRHB)",
+    "narrative": "A long-disused supply lane through the Neretva valley reopens — quietly, through municipal-level arrangements that the formal war has not abolished. Convoys move under flag-of-grain through the Adriatic-coast spine, and the receiving towns count the difference in markets that begin to function again. The international observers note the change with cautious approval; Zagreb does not object.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_equals", "flag": "supply_route_open_grain_corridor_HRHB", "value": true },
+          { "type": "flag_at_least", "flag": "turns_since_corridor_hostility_HRHB", "min": 8 },
+          { "type": "flag_not_set", "flag": "grain_corridor_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Grain corridor reopened (HRHB variant); supply flows resume."
+    },
+    "effects": [
+      { "kind": "supply_delta", "faction": "HRHB", "delta": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_reopened_HRHB", "text": "HRHB grain corridor reopened with no hostility 8 turns. Supply +25; AUDIT-ONLY framing applies if corridor passes within 20 km of any enclave OSID (corridor route is canon-tracked elsewhere)." },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_enclave_proximity_audit_HRHB", "text": "AUDIT-ONLY: corridor proximity to enclaves is recorded for downstream narrative reckoning. No mechanical effect; rupture wiring untouched.", "faction": "HRHB" }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "international_standing", "delta": 3 }
+    ],
+    "sets_flags": {
+      "grain_corridor_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-3 mirror — HRHB variant of csq_grain_corridor_reopened; closes triad). Predicate structurally identical to Wave-3 progenitor; only the faction parameter and mutex flag differ. Mirrors UNHCR-coordinated humanitarian corridor reopens through the Neretva and Adriatic-coast spine, 1993-1994 (BB II Ch.41-42 on Croatian-coast humanitarian logistics). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_arms_pipeline_disrupted_RBiH",
+    "title": "The Pipeline Goes Quiet (RBiH)",
+    "narrative": "The Iran-routed pipeline that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one Adriatic customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. ARBiH combat units rotating through the Travnik depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RBiH", "threshold": 35 },
+          { "type": "flag_at_least", "flag": "patron_arms_review_active_RBiH", "min": 1 },
+          { "type": "flag_not_set", "flag": "arms_pipeline_disrupted_RBiH" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Arms pipeline disrupted (RBiH variant); equipment quality and recruitment both register the shortfall."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RBiH", "multiplier": 0.92, "duration_turns": 30 },
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.95, "duration_turns": 30 },
+      { "kind": "cost_ledger_annotation", "tag": "arms_pipeline_disrupted_RBiH", "text": "RBiH arms pipeline disrupted under supply<35 and patron_arms_review_active_RBiH. Equipment quality -8% and recruitment -5% for 30 turns; reflects compounded patron-distance + supply-shortfall regime. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "military_credibility", "delta": -5 }
+    ],
+    "sets_flags": {
+      "arms_pipeline_disrupted_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-5 mirror — RBiH variant of csq_arms_pipeline_disrupted; the RS progenitor ships at Wave-5). Predicate structurally identical to the Wave-5 progenitor; only the faction parameter and mutex flag differ. Distinct from csq_iran_arms_channel_attenuation (Wave-9-redo) which gates on different surface. Mirrors documented 1993-1994 Iran-pipeline interdiction patterns affecting ARBiH munitions reliability when patron-arms review is active (BB II Ch.30, Vrabec arms-flow research; Wiebes 2002 on Iran arms channel disruption). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_arms_pipeline_disrupted_HRHB",
+    "title": "The Pipeline Goes Quiet (HRHB)",
+    "narrative": "The Croatia-routed pipeline that had supplied a quarter of the heavy munitions stops moving. Embargoes tighten at one Adriatic customs post; a brokered shipment is impounded at another. There is no announcement — the absence is the announcement. HVO combat units rotating through the Mostar depot find the manifests thin. The shortfall registers as a small but durable downgrade in firepower, and the recruitment offices feel the shift before the front does.",
+    "category": "economic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "HRHB", "threshold": 35 },
+          { "type": "flag_at_least", "flag": "patron_arms_review_active_HRHB", "min": 1 },
+          { "type": "flag_not_set", "flag": "arms_pipeline_disrupted_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Arms pipeline disrupted (HRHB variant); equipment quality and recruitment both register the shortfall."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 0.92, "duration_turns": 30 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.95, "duration_turns": 30 },
+      { "kind": "cost_ledger_annotation", "tag": "arms_pipeline_disrupted_HRHB", "text": "HRHB arms pipeline disrupted under supply<35 and patron_arms_review_active_HRHB. Equipment quality -8% and recruitment -5% for 30 turns; reflects compounded patron-distance + supply-shortfall regime. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": -5 }
+    ],
+    "sets_flags": {
+      "arms_pipeline_disrupted_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-5 mirror — HRHB variant of csq_arms_pipeline_disrupted; closes triad). Predicate structurally identical to the Wave-5 progenitor; only the faction parameter and mutex flag differ. Distinct from csq_patron_arms_pipeline_attenuated_HRHB (Wave-12) which gates on dimension_below(patron_confidence) AND patron_pressure_above. Mirrors documented 1994 Croatia-side pipeline interdiction patterns affecting HVO munitions reliability when patron-arms review is active (BB II Ch.41-42; Wiebes 2002 on Croatia-pipeline arms flow). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_captured_equipment_windfall_RS",
+    "title": "The Captured Stockpile (RS)",
+    "narrative": "A successful VRS operation closes around an ARBiH or HVO depot that had been counted in the other faction's order of battle for two years. Crates marked in foreign latin script, vehicles still in factory paint, ammunition in calibers the receiving side had been rationing — all of it inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "major_operation_success_RS", "min": 1 },
+          { "type": "territory_loss_window", "faction": "RBiH", "min_loss_pct": 0.02, "window_turns": 6 },
+          { "type": "flag_not_set", "flag": "captured_equipment_windfall_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Captured equipment from a successful RS operation provides a short-window combat-power uplift."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "RS", "multiplier": 1.06, "duration_turns": 20 },
+      { "kind": "morale_change", "faction": "RS", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "captured_equipment_windfall_RS", "text": "RS captured equipment windfall under major_operation_success_RS and territory_loss_window(RBiH,2%). Equipment quality +6% for 20 turns; small morale uplift to reflect operational momentum. AUDIT-ONLY annotation; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": 4 }
+    ],
+    "sets_flags": {
+      "captured_equipment_windfall_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-5 mirror — RS variant of csq_captured_equipment_windfall; the RBiH progenitor ships at Wave-5). Predicate structurally identical to the Wave-5 progenitor; only the faction parameter, victim parameter, and mutex flag differ. Mirrors documented VRS capture patterns from 1992-1993 Drina and Posavina operations (BB II Ch.20-25; Hoare 'How Bosnia Armed' 2004 on early-war ARBiH equipment loss). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
   }
 ]
