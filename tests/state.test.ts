@@ -62,6 +62,8 @@ const baseState: GameState = {
     } as any,
     displacement: {
         displacement_event_log: [],
+        displacement_humanitarian_aggregates: {},
+        displacement_origin_dest_arrivals: {},
     } as any,
 };
 

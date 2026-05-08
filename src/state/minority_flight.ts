@@ -13,6 +13,7 @@
  */
 
 import type { SettlementRecord } from '../map/settlements.js';
+import { appendDisplacementEvent } from './displacement_event_log.js';
 import { getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import type {
@@ -362,7 +363,7 @@ export function processMinorityFlight(
         ];
         for (const [ethnicity, displaced, killed, fled_abroad, settled] of factionData) {
             if (displaced <= 0) continue;
-            state.displacement.displacement_event_log.push({
+            appendDisplacementEvent(state, {
                 turn: currentTurn, origin_mun: munId, origin_osid: sid, dest_mun: munId,
                 ethnicity, caused_by: controller, displaced, killed, fled_abroad, settled,
             });

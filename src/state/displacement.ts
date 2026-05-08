@@ -13,6 +13,7 @@ import { computeFrontEdges } from '../map/front_edges.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
 import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
+import { appendDisplacementEvent } from './displacement_event_log.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
@@ -438,7 +439,7 @@ function pushDisplacementEventLogFromMun(
                 killedHere = lostHere;
                 fledHere = 0;
             }
-            state.displacement.displacement_event_log.push({
+            appendDisplacementEvent(state, {
                 turn,
                 origin_mun: munId,
                 origin_osid: osid,

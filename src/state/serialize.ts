@@ -616,6 +616,23 @@ function migrateState(raw: unknown): GameState {
                 disp.displacement_event_log = [];
             }
 
+            // LANE D-PRE substrate: humanitarian aggregates + origin-dest arrivals.
+            // Default-empty for old saves so deserialize is byte-stable; new saves
+            // populate via appendDisplacementEvent. D-PRE consumers do NOT read
+            // these yet, so absence in old saves is invisible to scenario output.
+            if (disp && (disp.displacement_humanitarian_aggregates === undefined
+                || disp.displacement_humanitarian_aggregates === null
+                || typeof disp.displacement_humanitarian_aggregates !== 'object'
+                || Array.isArray(disp.displacement_humanitarian_aggregates))) {
+                disp.displacement_humanitarian_aggregates = {};
+            }
+            if (disp && (disp.displacement_origin_dest_arrivals === undefined
+                || disp.displacement_origin_dest_arrivals === null
+                || typeof disp.displacement_origin_dest_arrivals !== 'object'
+                || Array.isArray(disp.displacement_origin_dest_arrivals))) {
+                disp.displacement_origin_dest_arrivals = {};
+            }
+
             // Migrate corps_command active_operation → active_operations
             const corpsCommand = mil?.corps_command;
             if (corpsCommand && typeof corpsCommand === 'object') {

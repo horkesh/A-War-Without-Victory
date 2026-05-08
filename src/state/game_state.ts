@@ -2277,4 +2277,48 @@ settlement_displacement_started_turn?: Record<SettlementId, number>;
 municipality_displacement?: Record<MunicipalityId, number>;
 /** Cumulative civilian displacement casualties (killed, fled_abroad) by ethnicity-aligned faction. */
 civilian_casualties?: CivilianCasualtiesByFaction;
+/**
+ * Per-faction cumulative humanitarian aggregates (LANE D-PRE substrate).
+ * Bounded ~3 factions x 3 ethnicities x 3 numbers = 27 numbers total
+ * (plus an optional '_unknown' caused_by bucket for legacy events without
+ * caused_by attribution).
+ *
+ * Updated at append-time alongside displacement_event_log via
+ * `appendDisplacementEvent` (see src/state/displacement_event_log.ts).
+ *
+ * Read by compute_capital.ts in LANE D-CONTENT (currently unread; D-PRE
+ * writes the substrate, D-CONTENT rebinds the consumer).
+ *
+ * Outer key: caused_by faction ('RBiH' | 'RS' | 'HRHB' | '_unknown')
+ *   For refugees_received the outer key is the faction controlling the
+ *   destination OSID at append time (controllers[evt.dest_osid]).
+ * Inner key: ethnicity ('RBiH' | 'RS' | 'HRHB' as ethnicity-aligned faction).
+ * Value: cumulative counts.
+ */
+displacement_humanitarian_aggregates?: Record<string, Record<string, {
+    /** Sum of (displaced + killed + fled_abroad) for events caused_by this faction with this ethnicity. */
+    refugees_created: number;
+    /** Sum of `settled` for events whose dest_osid was controlled by this faction at append time. */
+    refugees_received: number;
+    /** Sum of `killed` for events caused_by this faction with this ethnicity. */
+    civilian_casualties_caused: number;
+}>>;
+/**
+ * Per-(origin_mun, ethnicity) -> Record<dest_mun, settled_total> aggregate
+ * (LANE D-PRE substrate).
+ *
+ * Bounded by displaced-affected origin municipalities (~111 muns x 3
+ * ethnicities = ~333 outer keys, ~8 inner keys avg) — see analytical bound
+ * in DISPLACEMENT_MASTER.md.
+ *
+ * Used by brigade_reconstitution.ts Path B in LANE D-CONTENT (currently
+ * unread; D-PRE writes the substrate).
+ *
+ * Outer key: `${origin_mun}|${ethnicity}` (composite to avoid nested map).
+ * Inner key: dest_mun.
+ * Value: total settled count from origin_mun (this ethnicity) -> dest_mun
+ *   accumulated across all turns. Only events with dest_mun !== origin_mun
+ *   and settled > 0 contribute (matches consumer's filter at line 193-195).
+ */
+displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
 }

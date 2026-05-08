@@ -10,6 +10,7 @@ import {
     getDisplacementRouteForMun,
     getReceivingCapacityFraction
 } from './displacement_routing_data.js';
+import { appendDisplacementEvent } from './displacement_event_log.js';
 import { factionHasBrigadeInMunicipality, getMunicipalityIdFromRecord, getOrInitDisplacementState, recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import type {
     DisplacementCampState,
@@ -383,7 +384,7 @@ function routeDisplacedCohort(
                 reason: options.eventReason
             });
 
-            state.displacement.displacement_event_log!.push({
+            appendDisplacementEvent(state, {
                 turn: currentTurn,
                 origin_mun: sourceMunId,
                 dest_mun: targetMunId,
@@ -722,7 +723,7 @@ export function processDisplacementTakeover(
 
                 recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
 
-                state.displacement.displacement_event_log.push({
+                appendDisplacementEvent(state, {
                     turn: currentTurn,
                     origin_mun: munId,
                     origin_osid: osid,
@@ -847,7 +848,7 @@ export function processDisplacementTakeover(
 
             recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
 
-            state.displacement.displacement_event_log.push({
+            appendDisplacementEvent(state, {
                 turn: currentTurn,
                 origin_mun: munId,
                 origin_osid: osid,

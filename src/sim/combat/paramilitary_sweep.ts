@@ -26,6 +26,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { defaultArmyLabelForSide, type PoliticalSideId } from '../../state/identity.js';
+import { appendDisplacementEvent } from '../../state/displacement_event_log.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import {
     PARAMILITARY_UNIT_SIZE,
@@ -564,8 +565,7 @@ export function advanceParamilitaries(
             const civFaction = cc![currentController] ??= { killed: 0, fled_abroad: 0 };
             civFaction.killed = (civFaction.killed ?? 0) + civCas;
 
-            if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
-            state.displacement.displacement_event_log.push({
+            appendDisplacementEvent(state, {
                 turn: state.meta.turn ?? 0,
                 origin_mun: targetOsid.split(':')[1] ?? 'unknown',
                 origin_osid: targetOsid,
