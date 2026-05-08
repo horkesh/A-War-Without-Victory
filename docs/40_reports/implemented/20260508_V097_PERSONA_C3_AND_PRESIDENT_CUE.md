@@ -5,6 +5,48 @@
 **Ring:** 0 (tooling-only QA harness; no engine touch; no §6 surface)
 **Faction symmetry:** identical computation for RBiH/RS/HRHB; no per-faction branches.
 
+## Empirical verdict (post-validation 2026-05-08 ~22:30)
+
+Validation 40w persona-on run completed clean (~47 min wallclock; ~$1.76 spend).
+
+**Per-cluster trajectory across all 4 iterations:**
+
+| Cluster | Baseline | cb13e605 | cb13e605-bis | **V097** | V097 Δ vs baseline |
+|---|---:|---:|---:|---:|---:|
+| C1 political directive | 77 | 67 | 59 | **97** | **-26% (WORSE)** |
+| C2 alliance hand-wringing | 67 | 73 | 51 | **59** | **+12% (modest)** |
+| C3 ops in planning | 35 | 53 | 61 | **10** | **+71% (PASS, massive)** |
+| C4 op-name confabulation | 7 | 2 | 0 | **0** | **+100% (perfect held)** |
+| **TOTAL noise** | 186 | 195 | 171 | **166** | **+10.8% (FAIL on ≥40% MARGINAL threshold)** |
+| Total obs | 253 | 274 | 226 | **204** | -19% |
+| Noise % | 73.5% | 71.2% | 75.7% | **81.4%** | +7.9pp WORSE |
+
+### Lane 1 (C3 structural fix): **CLEAR WIN**
+
+C3 went from 35 → 53 → 61 across the previous prompt-only iterations to **10** under V097's structural prune. **+71% reduction vs baseline** (vs cb13e605-bis's +74% worse). This validates the architectural hypothesis: the right intervention surface for op-lifecycle noise is the briefing prompt builder, not persona prompts. The structural prune removed the visible-state surface entirely; the model has nothing to comment on that it shouldn't comment on.
+
+### Lane 2 (president cue enrichment): **MIXED**
+
+The cues did fix the over-suppression — sample post-V097 prose shows presidents emitting concrete verbs (Halilović: "BALANCE_FRONTS issued"; Petković asking "should Zagreb issue standing orders"). But this introduced a NEW C1 surface: now that directives are emitted, personas comment on their interaction with army capacity (Halilović sample: "directive BALANCE_FRONTS... compliance_score_low deviation. This creates a logical contradiction"). Cluster classifier counts this as C1 noise (`political directive` keyword match), driving C1 from 59 → 97 (-26% reduction = +26% increase in absolute count).
+
+**Note:** Some of the "new C1" content is arguably **genuine signal** (real observations about sim mechanic mismatches between presidential intent and army capacity), but the keyword-based classifier can't distinguish substantive from filler. The classifier under-counts genuine signal in V097.
+
+### Net verdict: **PARTIAL WIN — keep Lane 1; refine Lane 2 separately**
+
+- Lane 1 ships clean and is empirically validated (`6cebf13e`)
+- Lane 2 has unintended interaction with classifier; not a regression in the deeper sense (presidents are now functional), but the classifier reads it as C1 noise
+- Total reduction 10.8% < 40% MARGINAL threshold = formal FAIL
+- Genuine-signal-% appears worse (81.4% noise) but is partly classifier artifact
+
+**Recommendation:** Keep Lane 1 (`6cebf13e`) merged — it's a structural win on the most stubborn cluster. Lane 2 (`37b5843a`) needs follow-up: either refine the cues to avoid triggering directive-interpretation commentary, OR update the classifier to distinguish substantive directive observations from filler.
+
+**Cost summary across persona-suppressor work:**
+- V3 dead run + V3 parent run + cb13e605-bis: ~$4.40
+- V097 validation: ~$1.76
+- **Total: ~$6.16** for the empirical refinement of the persona QA harness
+
+---
+
 ## Summary
 
 Two file-disjoint v0.9.7+ followups carried from the cb13e605-bis empirical
