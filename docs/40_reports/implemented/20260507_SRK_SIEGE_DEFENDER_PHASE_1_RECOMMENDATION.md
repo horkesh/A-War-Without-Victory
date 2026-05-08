@@ -4,6 +4,7 @@
 **Date:** 2026-05-07
 **Type:** Research / sign-off package. No code, no canon-doc edits.
 **Status:** SHIPPED + PUSHED at `8e974004` (main).
+**Phase 1 implementation:** SHIPPED + PUSHED 2026-05-08 — `ef5d01fc` (mechanism + tests) → `5313fd41` (pipeline wire-up + step-count bump 175→176) → `71904efd` (canon §6.10 in Engine Invariants v0.9.0 + Systems Manual v0.9.0). All ACs PASS: 40w default-OFF byte-stable to `86ebf26ae0271465`; 40w flag-ON drifts to `94bfa4afdbda57ae` (proves mechanism mutates state when enabled); 18/18 lane tests + 70/70 nearby regression GREEN. **Phase 2 (188w binding-threshold validation) parent-owned, in flight.**
 **Predecessor DDR:** `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`, unmodified through HEAD `5659c28b`).
 **Audit predecessor:** `docs/40_reports/implemented/20260507_SRK_SIEGE_MORALE_AUDIT.md` (commit `aa115a99`, sub-issue #1 STOP-AND-ASK).
 **Calibration baseline:** n1728 (40w hash `79fa407377b40083`, 26/27 anchors) + n1729 (188w hash `e85303890ff4b601`, 26/27 anchors, 6/6 benchmarks).
