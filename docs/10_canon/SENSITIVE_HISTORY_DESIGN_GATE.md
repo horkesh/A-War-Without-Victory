@@ -35,6 +35,8 @@ The game simulates these as structured state:
 - **War crimes counter** — `FactionCapital.war_crimes_events` increments with every paramilitary capture. Feeds into grade anchors (see `VICTORY_AND_PYRRHIC_SCORING.md` §3.2).
 - **Rupture consequence** — exactly one: `srebrenica_genocide_1995`, fired when the Srebrenica OSID falls to RS in the 1995 timeframe with enclave formed flag set. Propagates `genocide_condemnation` flag. Locked, idempotent, permanent.
 
+**Implementation-note (data-not-comment name-pool exclusion, 2026-05-07):** Reserved canonical names — operations, formations, event-IDs, persona-IDs — that bot/AI generators could randomly select MUST be excluded from generator data pools by the data files themselves (e.g., `src/sim/combat/operation_names.ts`), not by source comments. Comment-claims-of-exclusion that the data does not enforce produce phantom canon-violations that masquerade as trigger-predicate bugs. Reference: Stupčanica-95 name-collision incident (`759a35cd`, 2026-05-07) — `Operacija Stupčanica` had appeared at w27 not via the trigger predicate but via the bot operation-name pool. Static tests enforcing the exclusion are mandatory. See `docs/10_canon/FORAWWV.md` §XI.2 for the full canonical statement.
+
 ### Ring 2 — Represented narratively
 
 The game depicts these in player-facing content, drawing on ICTY judgments and primary sources:
