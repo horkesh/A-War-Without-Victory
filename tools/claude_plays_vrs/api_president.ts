@@ -138,11 +138,111 @@ Use plain JSON. No markdown outside JSON.`;
 }
 
 /**
+ * LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL-AND-PRESIDENT-CUE (2026-05-08):
+ * Compute military-pressure cues to ground the president's verb choice.
+ * cb13e605-bis empirical run produced 100% `no_directive` rate (over-
+ * suppression) — root cause hypothesised as the prompt being too coarse
+ * (territory-only snapshot). This block surfaces 5 deterministic cues:
+ *
+ *   1. Corps fronts under threat — count of CorpsFrontSector entries
+ *      with threat_ratio > 1.5 (defender-disadvantaged).
+ *   2. Recent territorial loss — OSIDs flipped against this faction in
+ *      the last 4 turns (from `state.political.control_events`).
+ *   3. Operations in flight — count of corps active_operations with
+ *      phase === 'execution' across this faction's corps.
+ *   4. War exhaustion — current value (canonical monotonic accumulator).
+ *   5. Recent events — count of fired_event_ids in the last 4 turns
+ *      whose name contains 'patron' (pressure proxy; faction-symmetric
+ *      keyword check, no per-faction branches).
+ *
+ * All cues are pure reads on `GameState`. Faction-symmetric: same
+ * computation for RBiH/RS/HRHB. Determinism: no Math.random / Date.now;
+ * sorted iteration where order matters.
+ */
+function computePresidentCues(state: GameState, faction: PersonaFaction): {
+    corps_under_threat: number;
+    recent_territory_loss_osids: number;
+    ops_in_execution: number;
+    war_exhaustion: number;
+    patron_pressure_events_last_4: number;
+} {
+    const turn = state.meta.turn ?? 0;
+    const recentWindowStart = Math.max(0, turn - 4);
+
+    // 1. Corps fronts under threat.
+    let corpsUnderThreat = 0;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const formations = state.military.formations ?? {};
+    const sectorIds = Object.keys(sectors).sort(strictCompare);
+    for (const sid of sectorIds) {
+        const s = sectors[sid];
+        const corpsForm = s.corps_id ? formations[s.corps_id] : undefined;
+        if (corpsForm?.faction === faction && (s.threat_ratio ?? 0) > 1.5) {
+            corpsUnderThreat += 1;
+        }
+    }
+
+    // 2. Recent territorial loss (OSIDs flipped AWAY from this faction in
+    //    the last 4 turns — `from === faction` and turn within window).
+    let recentLossOsids = 0;
+    const controlEvents = (state.political as any)?.control_events as
+        Array<{ turn: number; from: string | null; to: string | null }> | undefined;
+    if (Array.isArray(controlEvents)) {
+        for (const ev of controlEvents) {
+            if (ev.turn >= recentWindowStart && ev.from === faction && ev.to !== faction) {
+                recentLossOsids += 1;
+            }
+        }
+    }
+
+    // 3. Ops in execution across this faction's corps.
+    let opsInExecution = 0;
+    const corpsCommand = state.military.corps_command ?? {};
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    for (const cid of corpsIds) {
+        const cf = formations[cid];
+        if (cf?.faction !== faction) continue;
+        const ops = corpsCommand[cid]?.active_operations ?? [];
+        for (const op of ops) {
+            if (op.phase === 'execution') opsInExecution += 1;
+        }
+    }
+
+    // 4. War exhaustion (canonical monotonic accumulator at
+    //    `state.political.war_exhaustion[faction]`).
+    const we = (state.political as any)?.war_exhaustion as Record<string, number> | undefined;
+    const warExhaustion = we?.[faction] ?? 0;
+
+    // 5. Patron-pressure event proxy. Count events fired in the last 4 turns
+    //    whose id contains 'patron' (substring match — faction-symmetric).
+    //    fired_event_ids is a flat list without per-event turn metadata, so
+    //    we approximate "last 4 turns" by taking the trailing slice.
+    const fired = state.military.fired_event_ids ?? [];
+    const recent = fired.slice(-12); // ~3 events/turn rough cap
+    let patronPressureCount = 0;
+    for (const eid of recent) {
+        if (typeof eid === 'string' && eid.toLowerCase().includes('patron')) {
+            patronPressureCount += 1;
+        }
+    }
+
+    return {
+        corps_under_threat: corpsUnderThreat,
+        recent_territory_loss_osids: recentLossOsids,
+        ops_in_execution: opsInExecution,
+        war_exhaustion: warExhaustion,
+        patron_pressure_events_last_4: patronPressureCount,
+    };
+}
+
+/**
  * Build the user prompt for the president-layer API call. Surfaces:
  *   - Turn, faction, leader name.
  *   - Faction's territory share (placeholder — full state read is delegated
  *     to api_commander.ts; we keep this minimal because the political layer
  *     reasons over a coarser picture than the army-CO layer).
+ *   - LANE-NIGHTSHIFT-V097-PERSONA-CUE: military-pressure cues
+ *     (5 deterministic signals) so the persona can ground its verb choice.
  *   - Recent fired events (last 5).
  *   - Schema reminder.
  *
@@ -173,6 +273,16 @@ export function buildPresidentUserPrompt(
         const pct = total > 0 ? ((counts[f] / total) * 100).toFixed(1) : '0';
         lines.push(`  ${f}: ${counts[f]} OSIDs (${pct}%)`);
     }
+
+    // LANE-NIGHTSHIFT-V097-PERSONA-CUE: military-pressure cues.
+    const cues = computePresidentCues(state, faction);
+    lines.push('');
+    lines.push('MILITARY-PRESSURE CUES (last 4 turns):');
+    lines.push(`  Corps fronts under threat (threat_ratio > 1.5): ${cues.corps_under_threat}`);
+    lines.push(`  OSIDs lost to enemy: ${cues.recent_territory_loss_osids}`);
+    lines.push(`  Operations in execution: ${cues.ops_in_execution}`);
+    lines.push(`  War exhaustion: ${cues.war_exhaustion.toFixed(0)}`);
+    lines.push(`  Patron-pressure events (recent): ${cues.patron_pressure_events_last_4}`);
 
     // Recent fired events.
     const firedEvents = state.military.fired_event_ids ?? [];
