@@ -1,3 +1,29 @@
+## [2026-05-08] v0.9.6 CLOSED — persona suppressor cb13e605-bis iteration + Option 2 partial PASS
+
+**Sequence (today):** cb13e605-bis suppressor iteration → empirical validation FAIL (-8.1%) → CI red triage → stale-assertion fix → Option 2 closure → v0.9.6 CLOSED.
+
+**Persona suppressor cb13e605-bis** (`e5b1090e`): Per V3 closeout's three-option recommendation, user picked Option 1 (iterate). Strengthened C2 + C3 bullets across all 13 personas via `tools/claude_plays_vrs/apply_cb13e605_bis.py` (faction-symmetric edit script). C2 raised threshold 0.20→0.30 + decision-trigger conjunction + 3 explicit no-emit examples. C3 broadened from "planning" alone to ALL lifecycle states (planning/recovery/suspended/in-progress/completed/no-trace) + 5 explicit no-emit examples. cb13e605 baseline preserved at `runs/three_commanders/diagnostic_report_cb13e605_only.json`.
+
+**Empirical validation re-run** (parent-owned background, 47 min wallclock 2026-05-08 07:51 → 08:38, exit 0): Per-cluster trajectory baseline → cb13e605 → cb13e605-bis: C1 -13% → -23% (PASS doubled); C2 +9% → -24% (FLIPPED to PASS); C3 +51% → +74% (still FAIL — structural resistance); C4 -71% → -100% (perfect). TOTAL -4.8% → -8.1% (still FAIL). Genuine signal % FELL 73.5%→75.7% noise (over-suppression realized; total obs 253→226, signal 67→55). Diminishing returns (~3pp/cycle); recommendation revised to STOP iterating prompt-side. v0.9.7+ structural fix path: prune routine op-lifecycle states from briefing user-prompt builder (not persona-side).
+
+**CI red triage:** Last 4 pushes Baseline Regression failing on stale assertions. Diagnosed:
+- `tests/persona_prompt_restructure.test.ts` T2+T5 — substrings asserted old cb13e605 phrasing; cb13e605-bis dropped "RBiH-HRHB" specificity in C2 + broadened C3. Updated substrings to match new phrasing while preserving intent-verification pattern.
+- `tests/docs_desktop_v09_truth.test.ts` — asserted roadmap "Current:" line contains "live replay playback/consumer is still absent from the product shell"; the roadmap audit at `45ada29b` dropped the "live" qualifier. Restored.
+- Local verify 11/11 GREEN. Push: `521fe408`.
+
+**v0.9.6 CLOSED Option 2 (partial PASS)**: User confirmed Option 2 closure pattern. `package.json` 0.9.5-alpha.1 → 0.9.6-alpha.1. Roadmap v0.9.6 status block: OPENED, PARTIAL → CLOSED with explicit C3 structural-fix + over-suppression-mitigation tracked as v0.9.7+. Path to v1.0 hard blockers reduced from 4 to 1 (only v0.9.5 platform test matrix execution remains). Bottom line + Current paragraph + header all updated. Cost summary for the validation question: ~$4.40 across V3 dead-run ($0.88) + V3 parent-owned ($1.76) + cb13e605-bis ($1.76).
+
+**Durable KNOWLEDGE reinforcement (already committed earlier this session):** FORAWWV §XVI "long-subprocess discipline" — agent-spawned long subprocesses die with the agent. The original V3 validation died at turn 22 because of this. Parent-owned `run_in_background=true` is the canonical pattern; verified twice this session (V3 relaunch + cb13e605-bis run).
+
+**v0.9.7+ followups carried forward:**
+1. SRK siege defender Phase 1 implementation (recommendation `8e974004`; awaits §6 sign-off + canon §6.10 amendment).
+2. Persona suppressor C3 structural fix (briefing user-prompt builder change).
+3. Persona over-suppression mitigation (`buildPresidentUserPrompt` enrichment).
+4. Aggressive ledger archival (8302 lines; ~30-50% reduction potential).
+5. Manual canon-doc amendments per `20260507_CANON_DOC_PROPAGATION_NOTES.md`.
+
+---
+
 ## [2026-05-06] A-lane succession checkpoint — A1+A2+A3 SHIPPED + PUSHED; A4 dispatched
 
 **Sequence:** DDR (`eee308e0`) → A1 (`18136710`, ARMY-GAP-1 verification + regression net; audit found wiring already exists) → A2 (`ba6955bf`, officer schema substrate: `stubbornness`, `override_tolerance`, `last_autonomous_launch_turn`, `recent_overrides`, decision-traces) → A3 (`c8ff93d8`, `army_order_interpretation.ts` 659 LOC + pipeline step `apply-army-directive-interpretation`; 14/14 lane + 148/148 regression GREEN; faction-symmetric).

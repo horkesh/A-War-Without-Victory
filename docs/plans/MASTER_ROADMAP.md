@@ -1,8 +1,9 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
 **Last Updated:** 2026-05-07 (post-trip-session-6 — **v0.9.6 "AI OFFICERS (real)" OPENED**: ~30+ commits across A1-A5 substrate (`18136710..3f17733f`), B-lane producer (`941bd68e`/`44053a32`/`d019bef7`), C-lane consumer + telemetry (`57cec91c`/`5084071d`/`c084dd86`/`f24ad5d7`/`5589c6fe`), API-Directive bridge (`a2d564e6`), D-lane personas (`85f43f5a`/`e25c18c3`/`59805cd6`), Q1 revert + drina-fix (`8ccdbff8`/`03ef9cd4`), 5-lane batch (NW Bosnia OOB `be7e0715` closes BUG-01; Persona prompt restructure `cb13e605`; SRK siege `aa115a99`; JNA withdrawal consequences `ecae99da`; Jajce cascade morale `ec837dca`), 3-lane backlog closure (RBiH t40 reanchor `d377e07b`; SRK siege Phase 0 DDR `bb0e449e`; Stupčanica name-collision fix `759a35cd`), Krivaja-95 t168 floor compliance (`d622b762`/`39e6b7b6` backfill), and documentation propagation (6 KNOWLEDGE entries + FORAWWV §X-§XVI substrate canon `bca414ba` + master-doc updates `ebac4fdf`). Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS).
-**Current Version:** v0.9.5-alpha.1 (package.json formally bumped 2026-05-05 in commit `c2d209e3`). **package.json bump for v0.9.6 is PENDING** — roadmap state is now ahead of semver; bump is the parent's call after roadmap reflects intent.
+**Current Version:** v0.9.6-alpha.1 (package.json bumped 2026-05-08 alongside v0.9.6 closure). v0.9.5-alpha.1 was bumped 2026-05-05 in `c2d209e3`.
 **v0.9.5 corrected 2026-05-07:** P1-G3 (Linux) + P1-G4 (Win) first-real-builds DONE on disk (`78e32c73`, `5799a6d1`+`4069f8c3`). Earlier roadmap framing of these gates as "open" was stale; remaining work is operator-driven test matrix execution per `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md`.
+**v0.9.6 CLOSED 2026-05-08 (Option 2 partial PASS):** persona suppressor cb13e605-bis empirical -8.1% reduction (3/4 cluster PASS; C3 structural resistance documented); SRK siege defender Phase 1 recommendation shipped at `8e974004` (implementation deferred to v0.9.7+). Stale-assertion fixes shipped at `521fe408`.
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -599,12 +600,15 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 - 40w n1728 hash `79fa407377b40083` — 26/27 anchors, 6/6 benchmarks (post RBiH t40 reanchor).
 - 188w n1729 hash `e85303890ff4b601` — 26/27 anchors, 6/6 benchmarks, §6 floors PASS.
 
-**Status (2026-05-07): OPENED, PARTIAL.** Substrate is shipped and CI green at `759a35cd`/`ebac4fdf`/`bca414ba`. Closure threshold pending: SRK siege defender Phase 1 (DDR drafted; needs user sign-off on coefficient + floor + flag default), persona suppressor validation run (~$1.30 D3 re-run), and any further v0.9.6 follow-on work that emerges. v0.9.6 cannot formally CLOSE until the open SRK siege defender Phase 1 is sign-off-resolved and the suppressor validation run lands.
+**Status (2026-05-08): CLOSED.** Substrate shipped and CI green; persona suppressor validation completed empirically (cb13e605-bis at `e5b1090e` — 3/4 cluster PASS; C3 structural resistance documented and tracked as v0.9.7+ work); SRK siege defender Phase 1 evidence-backed recommendation shipped at `8e974004` (implementation deferred to v0.9.7+ pending §6 sign-off). package.json bumped to `v0.9.6-alpha.1`.
 
-**Open from this session (carried forward — see Path to v1.0 below for cross-milestone tracking):**
-- SRK siege defender morale Phase 1 — DDR drafted at `bb0e449e`; needs user sign-off on coefficient + floor + flag default.
-- Persona suppressor validation run — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts the genuine-signal rate.
-- Aggressive ledger archival — `docs/PROJECT_LEDGER.md` is 8302 lines; ~30-50% reduction potential without losing provenance.
+**Closure scope:** v0.9.6 closed on substrate shipment + research deliverables. The "AI Officers (real)" milestone delivered the deterministic political → army → corps substrate (its named theme) plus a working LLM persona QA harness with empirically tuned suppressors. Calibration / quality work that emerged during the session (SRK siege Phase 1 implementation, persona suppressor structural fix for C3) is tracked as v0.9.7+ rather than blocking this milestone.
+
+**v0.9.7+ followups carried forward:**
+- SRK siege defender morale Phase 1 implementation — recommendation `8e974004`; awaits §6 sign-off + canon §6.10 numbering correction.
+- Persona suppressor C3 structural fix — prune routine op-lifecycle states from briefing prompt (`tools/claude_plays_vrs/api_*.ts` user-prompt builders); cb13e605-bis is the empirical baseline to beat (-8.1% reduction; C3 +74% vs baseline).
+- Persona over-suppression mitigation — enrich `buildPresidentUserPrompt` with military-pressure cues to recover lost genuine signal (-2pp under cb13e605-bis vs baseline).
+- Aggressive ledger archival — `docs/PROJECT_LEDGER.md` 8302 lines; ~30-50% reduction potential.
 - Manual canon-doc amendments per `docs/40_reports/audits/20260507_CANON_DOC_PROPAGATION_NOTES.md`.
 
 **Sensitive-history compliance:** All trip-session-6 commits Ring 1 / no-§6 / faction-agnostic (mechanism layer); faction-asymmetric data only (officer rosters, leader scalars, persona prose). No FORAWWV / paint anchor / political_controllers / OOB-rupture / `enclave_resilience.ts` touch outside the canonical NW Bosnia OOB row corrections (BB1-cited).
@@ -613,13 +617,16 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 ## Path to v1.0
 
-**Cross-milestone view of what remains between v0.9.x and v1.0.0 Gold.** This section is a rolling synthesis; individual milestones above remain authoritative for sub-task scope. Updated 2026-05-07.
+**Cross-milestone view of what remains between v0.9.x and v1.0.0 Gold.** This section is a rolling synthesis; individual milestones above remain authoritative for sub-task scope. Updated 2026-05-08.
 
 **Hard blockers (must close before v1.0):**
 1. **v0.9.5 platform test matrix execution** — first-real-builds DONE on disk (P1-G3 Linux AppImage at `78e32c73`; P1-G4 Win NSIS at `5799a6d1`+`4069f8c3`). Remaining: operator-driven test matrix on Win10/11 + Ubuntu/Fedora/Debian clean VMs per `docs/40_reports/PLATFORM_TEST_MATRIX.md`. Runbook ready at `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (632 lines, all pre-flight checks GREEN on Windows host). **NOT agent-dispatchable** (clean-VM execution required).
-2. **v0.9.6 SRK siege defender morale Phase 1** — DDR drafted at `bb0e449e`; evidence-backed Phase 1 recommendation shipped at `8e974004` (`docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md`): ACCEPT DDR coefficient schedule + ACCEPT floor=25 + OFF default per FORAWWV §XIV.1 + corrected canon §6.10 numbering. Pending user sign-off on §8 + §9.
-3. **v0.9.6 persona suppressor validation run** — ~$1.30 D3 re-run to confirm `cb13e605` suppressor block lifts genuine-signal rate above the ~11.5% baseline. Methodology resolution lane in flight (V3, transcript-capture path TBD per V2 finding).
-4. **package.json bump to v0.9.6** — pending parent decision after roadmap reflects intent. Currently `0.9.5-alpha.1`; roadmap state is now ahead of semver.
+
+**Closed 2026-05-08 (no longer hard blockers):**
+- ~~v0.9.6 substrate~~ — CLOSED at `e5b1090e` post-suppressor-iteration. package.json bumped 0.9.5-alpha.1 → 0.9.6-alpha.1.
+- ~~v0.9.6 persona suppressor validation~~ — empirical cycle complete (cb13e605-bis: 3/4 cluster PASS; -8.1% net reduction; C3 structural resistance documented). Closed Option 2 (accept partial) per user confirmation 2026-05-08. C3 structural fix tracked as v0.9.7+ work.
+- ~~v0.9.6 SRK siege defender Phase 1~~ — recommendation shipped at `8e974004`; deferred to v0.9.7+ implementation (awaits §6 sign-off + canon §6.10 amendment).
+- ~~package.json bump to v0.9.6~~ — DONE.
 
 **Open milestone work carried forward (not blockers, but unfinished):**
 - **v0.9.0 Consequence System** — PARTIAL with gold-blocker gates closed; broader divergence-event matrix still has authoring debt. Trip-session-6 added jna_withdrawal + jajce_falls consequence blocks; remaining authoring per `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md` and Cost Ledger full prosecutorial authoring per `docs/plans/2026-03-26-cost-ledger-template-format.md`.
@@ -641,7 +648,7 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 - Source/test references to old v0.7.0 / v0.6.0 canon filenames remain in supporting docs (`docs/20_engineering/`, `docs/40_reports/`, `.claude/skills/`, plan docs) — downstream-consumer pointers; doc-sweep lane.
 - Pre-v0.9 backup snapshot at `docs/10_canon/_backups_pre_v09_20260505/` removable once v0.9.0 canon-doc state is verified.
 
-**Bottom line:** v1.0 ship-readiness is gated by v0.9.5 platform test matrix execution (builds done; matrix pending) + v0.9.6 SRK siege Phase 1 sign-off (recommendation shipped; awaiting user sign-off) + persona suppressor validation (V3 in flight). Everything else is maintenance, polish, or graceful-degradation backlog.
+**Bottom line (2026-05-08):** v0.9.6 CLOSED. Only v0.9.5 platform test matrix execution remains as a hard blocker for v1.0 ship-readiness (builds done; matrix pending operator-driven clean-VM run). Everything else is open-milestone work, v0.9.7+ followups, maintenance, or graceful-degradation backlog.
 
 ---
 
@@ -809,7 +816,7 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 | Roadmap / repo-truth cadence | Active permanent lane - Studio Health owns roadmap sync after major runs, milestone closures, and remote branch integration. The next sync should record the post-2026-04-30 scenario evidence once Claude's current setup/run work settles. |
 
-**Current:** formal package semver is `v0.9.5-alpha.1` (bumped 2026-05-05 in `c2d209e3`); roadmap state is now in **early v0.9.x band with v0.9.6 OPENED** (trip-session-6 ~30+ commits 2026-05-06/07). **package.json bump to v0.9.6 is PENDING** — roadmap state is ahead of semver, and the bump is the parent's call once v0.9.6 SRK siege defender Phase 1 sign-off + persona suppressor validation lands. Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS). Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy + Phase E API at political level (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, comparison propagation into Chronicle / Wrapped / Codex, and (via v0.9.6 trip session 6) the deterministic political → army → corps substrate that v0.8.3/v0.8.4 conceptually opened. Honest residuals remain: `v0.9.0` / `v0.9.1` / `v0.9.2` / `v0.9.3` / `v0.9.4` / `v0.9.5` / `v0.9.6` all remain open milestones at varying degrees of partial closure; v0.9.5 P1-G3+G4 manual host builds are not agent-dispatchable; v0.9.6 SRK siege defender Phase 1 is awaiting §6 sign-off; persona suppressor validation run is pending; live replay playback/consumer is still absent from the product shell; broader performance work (target <100ms/turn vs current 3,094ms) is still ahead. See "Path to v1.0" above for the cross-milestone synthesis of remaining work.
+**Current:** formal package semver is `v0.9.6-alpha.1` (bumped 2026-05-08; v0.9.5-alpha.1 was bumped 2026-05-05 in `c2d209e3`); roadmap state is in **early v0.9.x band with v0.9.6 CLOSED** (trip-session-6 ~30+ commits 2026-05-06/07 + persona suppressor cb13e605-bis empirical iteration 2026-05-08). Latest baselines: 40w n1728 hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks); 188w n1729 hash `e85303890ff4b601` (26/27 anchors, 6/6 benchmarks, §6 floors PASS). Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy + Phase E API at political level (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, comparison propagation into Chronicle / Wrapped / Codex, and (via v0.9.6 trip session 6) the deterministic political → army → corps substrate that v0.8.3/v0.8.4 conceptually opened. Honest residuals remain: `v0.9.0` / `v0.9.1` / `v0.9.2` / `v0.9.3` / `v0.9.4` / `v0.9.5` remain open milestones at varying degrees of partial closure (v0.9.6 closed 2026-05-08); v0.9.5 platform test matrix execution is not agent-dispatchable (clean-VM operator-driven); SRK siege defender Phase 1 implementation deferred to v0.9.7+ (recommendation `8e974004` ready); persona suppressor C3 structural fix + president cue enrichment also v0.9.7+; live replay playback/consumer is still absent from the product shell; broader performance work (target <100ms/turn vs current 3,094ms) is still ahead. See "Path to v1.0" above for the cross-milestone synthesis of remaining work.
 
 ---
 
