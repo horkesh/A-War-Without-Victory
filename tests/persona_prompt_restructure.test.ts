@@ -23,9 +23,9 @@ const PERSONAS_DIR = resolve(process.cwd(), 'tools/claude_plays_vrs/personas');
 const SUPPRESSOR_NO_DIRECTIVE =
     'DO NOT flag absence of political directives';
 const SUPPRESSOR_ALLIANCE_COEFF =
-    'DO NOT comment on the RBiH-HRHB alliance coefficient';
+    'DO NOT comment on alliance coefficients';
 const SUPPRESSOR_OPS_PLANNING =
-    'DO NOT flag "ops in planning" as a sim defect';
+    'DO NOT comment on operation lifecycle status';
 const SUPPRESSOR_OP_NAME_CONFAB =
     'DO NOT invent operation names';
 const POSITIVE_ICTY_CITATION =
