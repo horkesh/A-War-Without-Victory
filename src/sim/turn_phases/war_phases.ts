@@ -2868,6 +2868,40 @@ export const warPhases: NamedPhase[] = [
     ...warPhaseReconciliationSteps,
     ...warPhaseNegotiationSteps,
     ...warPhaseBriefingSteps,
+    {
+        // LANE D-CONTENT (Path A): per-turn displacement_event_log retention boundary.
+        //
+        // The legacy log is now a per-turn buffer: appended-to during the turn,
+        // consumed by per-turn-filtered readers (compile_turn_summary,
+        // patron_pressure), and cleared here at end-of-turn AFTER all consumers
+        // have run. The bounded humanitarian / origin-dest aggregates
+        // (state.displacement.displacement_humanitarian_aggregates,
+        // displacement_origin_dest_arrivals) carry the cumulative state forward,
+        // since the two cumulative consumers (compute_capital,
+        // brigade_reconstitution) were rebound to read from those aggregates.
+        //
+        // Heap impact: legacy log heap drops from O(events × turns) to
+        // O(events_this_turn). Aggregates remain ≲21 KB (analytical bound).
+        //
+        // Streaming: if context.input.displacementEventStreamSink is provided
+        // (scenario_runner wires this to displacement_event_log.jsonl), the
+        // sink is invoked with this turn's events BEFORE clearing, mirroring
+        // the brigade_temporal_log.jsonl pattern. Without a sink, the events
+        // are dropped — equivalent to streaming-without-retention semantics.
+        name: 'clear-displacement-event-log',
+        run: (context) => {
+            const log = context.state.displacement?.displacement_event_log;
+            if (!log) return;
+            // Stream out before clearing (only if a sink is registered).
+            const sink = context.input.displacementEventStreamSink;
+            if (sink && log.length > 0) {
+                sink(log.slice());
+            }
+            // Truncate buffer (in-place; preserves array identity for any
+            // intra-turn references already captured).
+            log.length = 0;
+        }
+    },
 ];
 
 /**

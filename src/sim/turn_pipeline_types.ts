@@ -109,6 +109,18 @@ export interface TurnInput {
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */
     eventDefinitions?: import('./events/event_types.js').EventDefinition[];
+    /**
+     * LANE D-CONTENT (Path A): optional sink for per-turn displacement events.
+     * Called once per turn at end-of-pipeline by the `clear-displacement-event-log`
+     * step BEFORE the buffer is cleared. The sink receives a copy of the current
+     * turn's events; the buffer is then truncated to length 0 for next turn.
+     *
+     * scenario_runner.ts wires this to a JSONL stream
+     * (displacement_event_log.jsonl) mirroring brigade_temporal_log.jsonl /
+     * weekly_report.jsonl. Tests/UI that don't supply this sink simply lose
+     * historical detail — equivalent to the legacy behavior pre-D-CONTENT.
+     */
+    displacementEventStreamSink?: (events: import('../state/game_state.js').DisplacementEvent[]) => void;
 }
 
 export interface TurnReport {

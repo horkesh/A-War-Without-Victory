@@ -181,19 +181,28 @@ function findRefugeeMunicipality(
     minPool: number,
     corpsId?: string,
 ): { mun: MunicipalityId; osid: string } | undefined {
-    const eventLog = state.displacement?.displacement_event_log;
-    if (!eventLog || eventLog.length === 0) return undefined;
     const pools = state.military.militia_pools ?? {};
 
-    // Tally displaced arrivals by destination municipality
+    // LANE D-CONTENT (Path A): read from bounded origin-dest arrivals aggregate
+    // instead of full-history scan over displacement_event_log. The aggregate is
+    // written at append-time via appendDisplacementEvent for cross-mun events
+    // with positive settled count, which exactly matches the legacy filter
+    // (origin_mun !== dest_mun, settled > 0). The legacy `evt.settled ?? evt.displaced ?? 0`
+    // defensive fallback is intentionally not replicated here: every production
+    // event has a numeric settled (defaulted to 0 at append sites).
+    const odAgg = state.displacement?.displacement_origin_dest_arrivals;
+    if (!odAgg) return undefined;
+    const compositeKey = `${homeMun}|${faction}`;
+    const destBucket = odAgg[compositeKey];
+    if (!destBucket) return undefined;
+
+    // Convert aggregate into ordered candidate list. O(dest_mun) per call instead
+    // of O(events) full scan.
     const arrivals = new Map<string, number>();
-    for (const evt of eventLog) {
-        if (evt.origin_mun !== homeMun) continue;
-        if (evt.ethnicity !== faction) continue;
-        if (!evt.dest_mun || evt.dest_mun === homeMun) continue;
-        const settled = evt.settled ?? evt.displaced ?? 0;
+    for (const destMun of Object.keys(destBucket)) {
+        const settled = destBucket[destMun] ?? 0;
         if (settled <= 0) continue;
-        arrivals.set(evt.dest_mun, (arrivals.get(evt.dest_mun) ?? 0) + settled);
+        arrivals.set(destMun, settled);
     }
     if (arrivals.size === 0) return undefined;
 

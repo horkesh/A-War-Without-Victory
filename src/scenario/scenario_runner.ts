@@ -347,6 +347,8 @@ export interface RunScenarioResult {
         replay_sequence_log: string;
         /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: end-of-run consolidated GameState[] artifact. */
         replay_save_sequence: string;
+        /** LANE D-CONTENT (Path A): per-turn displacement event JSONL stream (events written before per-turn buffer clear). */
+        displacement_event_log: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
         weekly_saves?: string[];
         /** Optional replay timeline bundle for tactical-map animation playback/export. */
@@ -1613,7 +1615,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     activity_summary: join(outDir, 'activity_summary.json'),
                     formation_delta: join(outDir, 'formation_delta.json'),
                     destroyed_brigades: join(outDir, 'destroyed_brigades.json'),
-                    operation_aars: join(outDir, 'operation_aars.json')
+                    operation_aars: join(outDir, 'operation_aars.json'),
+                    // LANE D-CONTENT (Path A): not produced in initialStateOnly mode.
+                    displacement_event_log: ''
                 }
             };
         }
@@ -1637,6 +1641,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // VerdictScreen Replay tab works for every run. Consolidated end-of-run
         // artifact (replay_save_sequence.json) is what the UI loader picks up.
         const replaySequencePath = join(outDir, 'replay_sequence.jsonl');
+        // LANE D-CONTENT (Path A): per-turn displacement event stream. The
+        // engine's clear-displacement-event-log step calls
+        // displacementEventStreamSink (provided via TurnInput) right before
+        // truncating the per-turn buffer. Mirrors brigade_temporal_log.jsonl /
+        // weekly_report.jsonl. No engine state mutation; pure observability.
+        const displacementEventLogPath = join(outDir, 'displacement_event_log.jsonl');
         await ensureRunOutputDir(outDir);
         const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
         // LANE-2026-05-02-A1: per-turn brigade-keyed snapshot stream. Pure observability,
@@ -1644,6 +1654,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const brigadeTemporalStream = createWriteStream(brigadeTemporalLogPath, { flags: 'w' });
         const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
         const replaySequenceStream = createWriteStream(replaySequencePath, { flags: 'w' });
+        const displacementEventStream = createWriteStream(displacementEventLogPath, { flags: 'w' });
         // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING: NO in-memory frame accumulator.
         // The per-turn JSONL stream is the single source of truth; the consolidated
         // `replay_save_sequence.json` is finalized at end-of-run by stream-reading
@@ -1812,7 +1823,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     settlementDataRaw,
                     municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
                     historicalNameLookup,
-                    eventDefinitions
+                    eventDefinitions,
+                    // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
+                    // Engine clear-displacement-event-log step calls this with the
+                    // turn's events right before truncating the buffer.
+                    displacementEventStreamSink: (events) => {
+                        for (const evt of events) {
+                            displacementEventStream.write(stableStringify(evt) + '\n');
+                        }
+                    }
                 });
                 state = runResult.nextState;
                 turnReport = runResult.report;
@@ -2226,6 +2245,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         brigadeTemporalStream.end();
         if (replayStream) replayStream.end();
         replaySequenceStream.end();
+        displacementEventStream.end();
         await new Promise<void>((resolve, reject) => {
             if (replayStream) {
                 reportStream.on('finish', () => replayStream.on('finish', resolve).on('error', reject));
@@ -2623,6 +2643,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             formation_delta: formationDeltaPath,
                 destroyed_brigades: destroyedBrigadesPath,
                 operation_aars: operationAarsPath,
+                displacement_event_log: displacementEventLogPath,
             ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
             ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
                 ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {})

@@ -27,7 +27,8 @@
 import { describe, it, expect } from 'vitest';
 import { reconstituteBrigades, RECONSTITUTION_DELAY_TURNS, RECONSTITUTION_MIN_POOL } from '../src/sim/combat/brigade_reconstitution.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
-import type { GameState, FormationState } from '../src/state/game_state.js';
+import { appendDisplacementEvent } from '../src/state/displacement_event_log.js';
+import type { GameState, FormationState, DisplacementEvent } from '../src/state/game_state.js';
 
 // ─── Test state builder ─────────────────────────────────────────────────────
 
@@ -115,20 +116,6 @@ function buildState(opts: Opts = {}): GameState {
     const arrivalsBanjaLuka = 5000;
     const arrivalsRefugee = opts.refugeeMuni?.arrivals ?? 0;
 
-    const displacement_event_log = [
-        // The artifact pull: cajnice → banja_luka, large arrivals
-        {
-            turn: 95, origin_mun: 'cajnice', dest_mun: 'banja_luka',
-            ethnicity: 'RS', displaced: arrivalsBanjaLuka, killed: 0, fled_abroad: 0, settled: arrivalsBanjaLuka,
-        },
-    ];
-    if (opts.refugeeMuni) {
-        displacement_event_log.push({
-            turn: 95, origin_mun: 'cajnice', dest_mun: opts.refugeeMuni.mun,
-            ethnicity: 'RS', displaced: arrivalsRefugee, killed: 0, fled_abroad: 0, settled: arrivalsRefugee,
-        });
-    }
-
     const militia_pools: Record<string, any> = {
         [militiaPoolKey('banja_luka' as any, 'RS')]: { mun_id: 'banja_luka', faction: 'RS', available: 5000, committed: 0, exhausted: false, updated_turn: turn - 1 },
     };
@@ -136,7 +123,7 @@ function buildState(opts: Opts = {}): GameState {
         militia_pools[militiaPoolKey(opts.refugeeMuni.mun as any, 'RS')] = { mun_id: opts.refugeeMuni.mun, faction: 'RS', available: opts.refugeeMuni.pool, committed: 0, exhausted: false, updated_turn: turn - 1 };
     }
 
-    return {
+    const state = {
         meta: { turn, phase: 'war', seed: 'recon-test' } as unknown as GameState['meta'],
         military: {
             formations: { rs_test_brigade: destroyed },
@@ -148,10 +135,25 @@ function buildState(opts: Opts = {}): GameState {
         political: {
             political_controllers,
         } as any,
-        displacement: {
-            displacement_event_log,
-        } as any,
+        displacement: {} as any,
     } as unknown as GameState;
+
+    // LANE D-CONTENT (Path A): use appendDisplacementEvent so origin-dest aggregate
+    // is populated for findRefugeeMunicipality. Direct displacement_event_log writes
+    // would not populate displacement_origin_dest_arrivals, leaving the consumer
+    // (rebound to read from the aggregate) blind to test fixtures.
+    appendDisplacementEvent(state, {
+        turn: 95, origin_mun: 'cajnice', dest_mun: 'banja_luka',
+        ethnicity: 'RS', displaced: arrivalsBanjaLuka, killed: 0, fled_abroad: 0, settled: arrivalsBanjaLuka,
+    } as DisplacementEvent);
+    if (opts.refugeeMuni) {
+        appendDisplacementEvent(state, {
+            turn: 95, origin_mun: 'cajnice', dest_mun: opts.refugeeMuni.mun,
+            ethnicity: 'RS', displaced: arrivalsRefugee, killed: 0, fled_abroad: 0, settled: arrivalsRefugee,
+        } as DisplacementEvent);
+    }
+
+    return state;
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -290,15 +292,15 @@ describe('brigade_reconstitution: same-corps territory gate', () => {
                     'op:mostar:zzzz_own_corps_2': 'RS',
                 },
             } as any,
-            displacement: {
-                displacement_event_log: [
-                    {
-                        turn: 95, origin_mun: 'cajnice', dest_mun: 'mostar',
-                        ethnicity: 'RS', displaced: 1000, killed: 0, fled_abroad: 0, settled: 1000,
-                    },
-                ],
-            } as any,
+            displacement: {} as any,
         } as unknown as GameState;
+
+        // LANE D-CONTENT (Path A): populate origin-dest aggregate via the helper
+        // so findRefugeeMunicipality (rebound to aggregate-read) sees the event.
+        appendDisplacementEvent(state, {
+            turn: 95, origin_mun: 'cajnice', dest_mun: 'mostar',
+            ethnicity: 'RS', displaced: 1000, killed: 0, fled_abroad: 0, settled: 1000,
+        } as DisplacementEvent);
 
         // Sanity: confirm the alphabetical ordering of the two friendly OSIDs
         // in this muni puts the foreign-corps OSID first. If this fails, the

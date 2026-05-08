@@ -94,22 +94,13 @@ function assertNoWrapper(state: unknown): asserts state is Record<string, unknow
 }
 
 /**
- * LANE D-PRE substrate keys: omitted from serialization to keep the 40w hash
- * byte-stable to baseline 765c1c19912ce9e8 while D-PRE writes the substrate
- * but D-CONTENT has not yet rebound consumers. Once D-CONTENT ships and
- * legacy `displacement_event_log` is streamed-and-cleared, the consumers
- * read these aggregates and they become legitimate save-state fields; this
- * skip-list will be removed in that lane.
- *
- * Stripping happens at the serialize boundary only: in-memory state still
- * carries the aggregates (they MUST exist for D-CONTENT to consume), and
- * the legacy log continues to serialize unchanged so consumer scans match
- * baseline behavior.
+ * LANE D-CONTENT (Path A) — substrate skip-list REMOVED. The humanitarian /
+ * origin-dest aggregates are now legitimate save-state fields read by
+ * consumers (compute_capital.ts, brigade_reconstitution.ts) and persist
+ * across saves. This is the re-baselined save shape; 40w hash drifts from
+ * legacy 765c1c19912ce9e8 to a new value (capture-time controller
+ * attribution semantics).
  */
-const DPRE_SUBSTRATE_DISPLACEMENT_KEYS: ReadonlySet<string> = new Set([
-    'displacement_humanitarian_aggregates',
-    'displacement_origin_dest_arrivals',
-]);
 
 /**
  * Convert GameState to a plain structure with deterministically ordered keys (no undefined).
@@ -123,14 +114,6 @@ export function toSerializableGameState(state: GameState): unknown {
         throw new Error(`serializeGameState: shape validation failed: ${result.errors.join('; ')}`);
     }
     const out = toDeterministicJsonValue(state) as Record<string, unknown>;
-    // LANE D-PRE: strip substrate-only aggregates from serialized output.
-    // See DPRE_SUBSTRATE_DISPLACEMENT_KEYS docstring above.
-    const disp = out['displacement'] as Record<string, unknown> | undefined;
-    if (disp && typeof disp === 'object') {
-        for (const k of DPRE_SUBSTRATE_DISPLACEMENT_KEYS) {
-            if (k in disp) delete disp[k];
-        }
-    }
     return out;
 }
 

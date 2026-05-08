@@ -168,22 +168,24 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
     let civilians_under_protection = 0;
     let civilian_casualties_caused = 0;
 
-    // Attribution: count refugees from events where THIS faction was the causer.
-    // Fallback: if caused_by is absent (legacy events), attribute to current OSID controller.
-    const eventLog = displacement?.displacement_event_log;
-    if (eventLog) {
-        const controllers = state.political?.political_controllers;
-        for (const evt of eventLog) {
-            const causer = evt.caused_by
-                ?? (evt.origin_osid && controllers ? controllers[evt.origin_osid] : undefined);
-            if (causer === faction) {
-                refugees_created += (evt.displaced ?? 0) + (evt.killed ?? 0) + (evt.fled_abroad ?? 0);
-                civilian_casualties_caused += evt.killed ?? 0;
-            }
-            // refugees_received: events where displaced people settled in faction-controlled territory
-            if (evt.dest_osid && controllers && controllers[evt.dest_osid] === faction) {
-                refugees_received += evt.settled ?? 0;
-            }
+    // LANE D-CONTENT (Path A): read from bounded humanitarian aggregates instead
+    // of full-history scan over displacement_event_log. Aggregates are written at
+    // append-time via appendDisplacementEvent (see src/state/displacement_event_log.ts)
+    // with capture-time controller attribution. Semantically more correct than the
+    // legacy read-time fallback (refugees attributed to the faction controlling
+    // the origin/dest OSID at the moment displacement happened, NOT whoever holds
+    // it later in the run when this consumer scans).
+    //
+    // The faction-keyed outer bucket sums refugees_created + civilian_casualties_caused
+    // (when this faction was the causer) AND refugees_received (when this faction
+    // controlled dest_osid at append time) across all ethnicities.
+    const humAgg = displacement?.displacement_humanitarian_aggregates;
+    if (humAgg && humAgg[faction]) {
+        for (const eth of Object.keys(humAgg[faction]!).sort(strictCompare)) {
+            const slot = humAgg[faction]![eth]!;
+            refugees_created += slot.refugees_created ?? 0;
+            refugees_received += slot.refugees_received ?? 0;
+            civilian_casualties_caused += slot.civilian_casualties_caused ?? 0;
         }
     }
 

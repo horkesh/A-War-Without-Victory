@@ -408,6 +408,110 @@ describe('appendDisplacementEvent — G1 property test (≥1,000 random sequence
     });
 });
 
+// ─── LANE D-CONTENT (Path A) tests ──────────────────────────────────────────
+
+describe('LANE D-CONTENT Path A — per-turn buffer + aggregate-driven consumers', () => {
+    it('end-of-turn clear truncates legacy log; aggregates persist', () => {
+        const state = buildState();
+        for (let i = 0; i < 5; i++) {
+            appendDisplacementEvent(state, {
+                turn: i, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1',
+                dest_mun: 'mun_b', dest_osid: 'op:mun_b:mun_b_1',
+                ethnicity: 'RBiH', caused_by: 'RS',
+                displaced: 100, killed: 5, fled_abroad: 2, settled: 60,
+            });
+        }
+        expect(state.displacement.displacement_event_log).toHaveLength(5);
+        const aggBefore = JSON.parse(JSON.stringify(state.displacement.displacement_humanitarian_aggregates));
+        const odBefore = JSON.parse(JSON.stringify(state.displacement.displacement_origin_dest_arrivals));
+
+        // Simulate the clear-displacement-event-log step's effect
+        state.displacement.displacement_event_log!.length = 0;
+
+        expect(state.displacement.displacement_event_log).toHaveLength(0);
+        // Aggregates UNTOUCHED by clear — they persist across turns
+        expect(state.displacement.displacement_humanitarian_aggregates).toEqual(aggBefore);
+        expect(state.displacement.displacement_origin_dest_arrivals).toEqual(odBefore);
+    });
+
+    it('aggregate-driven origin-dest dest_mun selection is deterministic across permutation', () => {
+        // Same events in different push order must yield same aggregate (sums commute).
+        const evts: DisplacementEvent[] = [
+            { turn: 1, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1', dest_mun: 'mun_b', dest_osid: 'op:mun_b:mun_b_1', ethnicity: 'RBiH', caused_by: 'RS', displaced: 0, killed: 0, fled_abroad: 0, settled: 100 },
+            { turn: 2, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1', dest_mun: 'mun_c', dest_osid: 'op:mun_c:mun_c_1', ethnicity: 'RBiH', caused_by: 'RS', displaced: 0, killed: 0, fled_abroad: 0, settled: 200 },
+            { turn: 3, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1', dest_mun: 'mun_d', dest_osid: 'op:mun_d:mun_d_1', ethnicity: 'RBiH', caused_by: 'RS', displaced: 0, killed: 0, fled_abroad: 0, settled: 200 },
+        ];
+        const orderA = [evts[0]!, evts[1]!, evts[2]!];
+        const orderB = [evts[2]!, evts[0]!, evts[1]!];
+        const orderC = [evts[1]!, evts[2]!, evts[0]!];
+        const stateA = buildState();
+        const stateB = buildState();
+        const stateC = buildState();
+        for (const e of orderA) appendDisplacementEvent(stateA, e);
+        for (const e of orderB) appendDisplacementEvent(stateB, e);
+        for (const e of orderC) appendDisplacementEvent(stateC, e);
+        const aggA = stateA.displacement.displacement_origin_dest_arrivals!['mun_a|RBiH']!;
+        const aggB = stateB.displacement.displacement_origin_dest_arrivals!['mun_a|RBiH']!;
+        const aggC = stateC.displacement.displacement_origin_dest_arrivals!['mun_a|RBiH']!;
+        expect(aggA).toEqual({ mun_b: 100, mun_c: 200, mun_d: 200 });
+        expect(aggB).toEqual(aggA);
+        expect(aggC).toEqual(aggA);
+        // Tied max (mun_c, mun_d at 200): consumer sort uses strictCompare, so the
+        // chosen dest_mun is alphabetically first among tied — 'mun_c'.
+        const sorted = Object.entries(aggA).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+        expect(sorted[0]![0]).toBe('mun_c');
+    });
+
+    it('humanitarian aggregate matches capture-time semantics — controller change between events does NOT retroactively reattribute', () => {
+        // Scenario: same OSID has two events; controller flips between them.
+        // Each event is attributed at append-time using controllers AT THAT MOMENT,
+        // not the final controller after a subsequent flip. This is the canonical
+        // capture-time semantics shift over the legacy read-time scan.
+        const controllers = defaultControllers();
+        const state = buildState(controllers);
+
+        // First event: op:mun_b:mun_b_1 controlled by RS (per defaultControllers)
+        appendDisplacementEvent(state, {
+            turn: 0, origin_mun: 'mun_b', origin_osid: 'op:mun_b:mun_b_1',
+            dest_mun: 'mun_b', /* caused_by omitted, falls back to controllers */
+            ethnicity: 'RBiH',
+            displaced: 100, killed: 0, fled_abroad: 0, settled: 0,
+        });
+
+        // Flip the controller before the second event
+        state.political!.political_controllers!['op:mun_b:mun_b_1'] = 'RBiH';
+
+        // Second event: now attributed to RBiH (capture-time)
+        appendDisplacementEvent(state, {
+            turn: 1, origin_mun: 'mun_b', origin_osid: 'op:mun_b:mun_b_1',
+            dest_mun: 'mun_b', /* caused_by omitted */
+            ethnicity: 'RBiH',
+            displaced: 200, killed: 0, fled_abroad: 0, settled: 0,
+        });
+
+        const agg = state.displacement.displacement_humanitarian_aggregates!;
+        // RS retains 100 from first event (capture-time at append, not retroactive)
+        expect(agg['RS']!['RBiH']!.refugees_created).toBe(100);
+        // RBiH attributed 200 from second event
+        expect(agg['RBiH']!['RBiH']!.refugees_created).toBe(200);
+    });
+
+    it('clear step preserves array identity (in-place truncation)', () => {
+        const state = buildState();
+        appendDisplacementEvent(state, {
+            turn: 0, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1',
+            dest_mun: 'mun_a', ethnicity: 'RBiH', caused_by: 'RS',
+            displaced: 100, killed: 0, fled_abroad: 0, settled: 0,
+        });
+        const logRef = state.displacement.displacement_event_log!;
+        // In-place truncate (matches clear step)
+        logRef.length = 0;
+        // The reference still points at the same array
+        expect(state.displacement.displacement_event_log).toBe(logRef);
+        expect(state.displacement.displacement_event_log).toHaveLength(0);
+    });
+});
+
 describe('appendDisplacementEvent — save/load round-trip', () => {
     it('aggregate fields serialize/deserialize cleanly via JSON round-trip', () => {
         const state = buildState();
