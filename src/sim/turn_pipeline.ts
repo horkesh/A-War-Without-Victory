@@ -11,6 +11,7 @@ import { computeFrontEdges } from '../map/front_edges.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
+import { maybeWriteHeapSnapshot } from './perf/heap_profile.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 
@@ -128,6 +129,13 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
     }
 
     await refreshFrontEdgeSnapshot(context.state, context.input);
+
+    // Heap-profile hook (LANE-NIGHTSHIFT-V093-HEAP-PROFILE-REDISPATCH).
+    // Default-OFF env-flag-gated (HEAP_PROFILE_188W=true). When unset, this
+    // call returns false in O(1) after a single boolean read — hash byte-
+    // identical to predecessor baseline. See src/sim/perf/heap_profile.ts.
+    maybeWriteHeapSnapshot(context.state.meta.turn, '', context.state.meta.seed);
+
     return { nextState: context.state, report };
 }
 
