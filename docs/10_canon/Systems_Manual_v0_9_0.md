@@ -241,6 +241,28 @@ Bot AI evaluates stance per sector based on threat and corps directive. Corps st
 
 **Brigade dissolution** remains as a separate system (§7.4): brigades meeting 2-of-3 criteria (personnel < 400, cohesion ≤ 20, morale ≤ 15) are dissolved. Enclave brigades require 3-of-3. Equipment transferred to nearest same-corps brigade (70% salvaged). Personnel to strategic reserve (50%). Module: `src/sim/combat/brigade_dissolution.ts`.
 
+### 6.10 Siege Defender Morale Drain
+
+**LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (commit `5313fd41`, 2026-05-08).** A new mechanism (`siege_morale_drain.ts`) applies a graduated morale decrement to defenders whose OSID appears in `state.military.siege_turn_counters[<faction>:<osid>]`. Models cumulative siege manning fatigue over the long-siege envelope (1992–1995) documented in ICTY Galić IT-98-29-T and Dragomir Milošević IT-98-29/1, and BB2's chapter on VRS late-war manning. The early "winning period" (turns 0–13) is morale-neutral; erosion deepens through 1993, 1994, and 1995. Faction-symmetric: the predicate has no faction/corps/OSID condition; siege counters are faction-keyed by data and the same coefficient table applies to any besieged faction.
+
+**Schedule (per-turn morale delta, by counter `c` in turns):**
+
+```
+c ∈ [  0,  13]  → 0.0
+c ∈ [ 14,  26]  → -0.5
+c ∈ [ 27,  52]  → -1.0
+c ∈ [ 53, 104]  → -1.5
+c ∈ [105,  ∞]   → -2.0
+```
+
+**Floor:** drain stops at morale `25` (`SIEGE_DRAIN_MORALE_FLOOR`), matching `RBIH_EXISTENTIAL_FLOOR`. Other drains (combat, supply, exhaustion) may push morale lower; this floor pins the siege drain itself, not the composed value.
+
+**Pipeline:** runs in step `apply-siege-morale-drain` immediately after `morale-drift` and before `check-brigade-dissolution-post-combat`. Siege drain layers on top of the existing affinity drift; net per-turn morale direction emerges from composition. Affinity drift (`+2/turn` in own-population areas) is preserved; the siege drain offsets it after the duration threshold.
+
+**Implementation gate:** behind environment flag `SIEGE_MORALE_DRAIN_ENABLED` (default `false`) for shadow-flag rollout per FORAWWV §XIV.1. With the flag off, drain is computed and the diagnostic counter `drain_pending_count` increments unconditionally, but `f.morale` is not mutated. Mirrors the N4 morale-collapse override `morale_low_streak` precedent (commit `58624617`). 40w hash byte-identical with the flag unset (verified: `86ebf26ae0271465`).
+
+Authoritative invariant: Engine Invariants v0.9.0 §6.10. Implementation: `src/sim/combat/siege_morale_drain.ts`. Tests: `tests/siege_morale_drain.test.ts`. Recommendation: `docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md` (`8e974004`). Predecessor DDR: `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (`bb0e449e`).
+
 ## 7. Combat interaction and attack resolution
 
 In War phase, **combat** is resolved by **attack resolution** (see §7.4): discrete attacks per target OSID with combat power formulas, outcome thresholds, casualties, push-back, and control flip. There is no passive pressure flip; control changes only via attack resolution or corps/frontline operations. Pressure-derived metrics (e.g. for exhaustion coupling in Phase 3A/3B/3C) may still be computed from formation state and adjacency but do not cause control change.

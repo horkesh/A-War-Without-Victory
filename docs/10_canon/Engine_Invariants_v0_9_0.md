@@ -97,6 +97,34 @@ RS-HRHB fronts under the Graz Accords are exempt from:
 
 Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-at-OSID vs sector-coverage distinction -- the front is a continuous locked line. Casualty distribution: distance-weighted proportional (decay `0.60^hops`, max 5 hops) with home-municipality motivation bonus (1.3x).
 
+### 6.10 Siege Defender Morale Drain
+
+**LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (commit `5313fd41`, 2026-05-08).** Formations of a faction `F` whose `location_osid` is keyed in `state.military.siege_turn_counters[F:osid]` with counter `c > 0` receive a per-turn morale decrement scaled to siege duration. The mechanism is faction-symmetric by construction: the predicate has zero faction/corps/OSID condition; the siege counters are faction-keyed by data and the same coefficient schedule applies regardless of which faction is besieged. Models cumulative siege manning fatigue documented in ICTY Galić IT-98-29-T (SRK 1992–1994), ICTY Dragomir Milošević IT-98-29/1 (1994–1995), and Balkan Battlegrounds 2 (chapter on VRS late-war manning).
+
+**Schedule (stepped piecewise, keyed on counter `c`):**
+
+```
+c ∈ [  0,  13]  → coefficient  0.0    (early-siege "winning" period)
+c ∈ [ 14,  26]  → coefficient -0.5    (counter-organize phase)
+c ∈ [ 27,  52]  → coefficient -1.0    (sustained positional wear)
+c ∈ [ 53, 104]  → coefficient -1.5    (late-war manning crisis)
+c ∈ [105,  ∞]   → coefficient -2.0    (endgame collapse pressure)
+```
+
+**Floor:** `SIEGE_DRAIN_MORALE_FLOOR = 25`. Matches `RBIH_EXISTENTIAL_FLOOR` and `FACTION_HOME_MORALE_FLOOR.HRHB`. Maintains a 10-point buffer above the §6.2.4 `MORALE_OVERRIDE_THRESHOLD` (15) so siege drain alone cannot push a brigade into the dissolution streak band. Existing combat-attrition drains (combat repulse, supply CRITICAL, exhaustion penalty) continue to apply on top of siege drain and may push morale lower; this floor pins siege drain alone, not the composed morale value.
+
+**Pipeline placement:** runs in `apply-siege-morale-drain` step in `war_phases.ts`, immediately after `morale-drift` and before `check-brigade-dissolution-post-combat`. Siege drain layers on top of the existing affinity drift; the net per-turn direction emerges from composition.
+
+**Implementation gate:** the morale-mutation path is gated behind environment flag `SIEGE_MORALE_DRAIN_ENABLED` (default `false`). When the flag is unset (or any value other than `'true'`), `f.morale` is not mutated; the diagnostic counter `drain_pending_count` still increments unconditionally for shadow-flag visibility (mirrors the N4 morale-collapse override `morale_low_streak` pattern). 40w hash byte-identical with the flag unset (verified: `86ebf26ae0271465` predecessor baseline preserved). Hash drift with the flag off is null per FORAWWV §XIV.1 default-off byte-stability invariant.
+
+```
+SIEGE_DRAIN_MORALE_FLOOR = 25
+SIEGE_DRAIN_SCHEDULE     = piecewise (see above)
+SIEGE_MORALE_DRAIN_ENABLED env flag, default 'false'
+```
+
+**Citations:** Recommendation `docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md` (commit `8e974004`). Predecessor DDR `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`). Implementation: `src/sim/combat/siege_morale_drain.ts`; tests: `tests/siege_morale_drain.test.ts`.
+
 ## 7. Fragmentation Invariants
 
 - Fragmentation requires concurrent authority collapse and connectivity disruption
