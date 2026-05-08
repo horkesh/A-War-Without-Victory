@@ -76,3 +76,54 @@ For a v0.9.5 final closure:
 Honest accounting: this lane delivered ~1 verified item (Linux WSL2 launch) of an intended ~30. Most of the value the lane was supposed to deliver did not land due to agent termination mid-execution. The `dist-packaged-fresh-linux/` AppImage was confirmed launchable in a cleanish Linux environment, which is genuinely informative — but the bulk of the test matrix remains unverified.
 
 The runbook + build artifacts + this partial verification together still constitute MORE evidence than the v0.9.5 surface had at session start (which was: builds-on-disk-but-untested). Net: marginal forward progress.
+
+---
+
+## Windows portion (filed 2026-05-09 follow-up — LANE-NIGHTSHIFT-V095-WINDOWS-ONLY-TEST)
+
+This section is the Windows narrow-scope follow-up to the partial closeout above. Linux is already verified PASS (§"Linux (WSL2)" above) and is NOT re-verified here. Scope intentionally bounded to: artifact integrity, silent-extract install to a temp directory (no system registration), launch-from-temp-dir, and version coherence — explicitly avoiding any modification to user environment (no Start Menu install, no registry write, no system-wide installer run).
+
+### W-1 — Build artifact existence + size
+
+**Result: PASS.**
+
+```
+Path: F:\A-War-Without-Victory\dist-packaged-fresh\A War Without Victory Setup 0.9.5-alpha.1.exe
+Size: 1,403,310,452 bytes (1.40 GB)
+Header: MZ + PE valid (peOffset=216, mzOk=true, peOk=true)
+Smoke verifier: PASS (exit 0)
+Sibling files: .blockmap (1.42 MB), builder-debug.yml (7,739 B), latest.yml (404 B), .icon-ico/ subdir
+Build mtime: 2026-05-06 21:56 (Windows NTFS)
+```
+
+Smoke command run:
+```
+node tools/build/win_nsis_smoke.cjs "dist-packaged-fresh/A War Without Victory Setup 0.9.5-alpha.1.exe"
+```
+
+Output JSON:
+```json
+{"tool":"win_nsis_smoke","target":"dist-packaged-fresh\\A War Without Victory Setup 0.9.5-alpha.1.exe","exists":true,"sizeBytes":1403310452,"sizeFloorBytes":4194304,"header":{"ok":true,"mzOk":true,"peOk":true,"peOffset":216,"reason":"ok"}}
+```
+
+This matches finding F-3 in the `20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (artifact is the pre-trim 1.40 GB build dated 2026-05-06).
+
+### Version coherence — POTENTIAL FINDING (flagging)
+
+**Observation:** `package.json` `version` field on this Windows host at the moment of test reads:
+
+```
+0.9.6-alpha.1
+```
+
+**Artifact filename:** `A War Without Victory Setup 0.9.5-alpha.1.exe`
+
+**Implication:** The artifact on disk (built 2026-05-06) was produced when `package.json` was at `0.9.5-alpha.1`. Since then `package.json` has been bumped to `0.9.6-alpha.1` (commit history shows v0.9.5 was the formal milestone the artifact represents; semver in the working tree has since moved forward).
+
+This is **not a regression of the artifact** — it is the expected divergence between an artifact frozen at build time vs. the current branch. But it does mean: if a user runs this v0.9.5-alpha.1 installer at this moment of the repo, the running app will display 0.9.5 (matches the artifact filename), not 0.9.6. That is correct behavior for this artifact under test.
+
+**No fix attempted** — the lane is read-only on source code per the dispatching prompt's "DO NOT touch source code" guardrail.
+
+---
+
+CHECKPOINT v1: artifact existence + smoke + version observation captured. Committing before proceeding to silent-extract attempt.
