@@ -251,6 +251,31 @@ const FACTION_NAMES: Record<string, string> = {
 // State serialization (enhanced from prompt_builder.ts)
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL-AND-PRESIDENT-CUE (2026-05-08):
+ * Mirror of the corps-CO decision-relevance filter. See
+ * `api_corps_commander.ts:isOpDecisionRelevant` for rationale. The army-CO
+ * prompt enumerates every corps's op verbatim; structural fix is to compress
+ * routine ops to "<name> (<phase>)" without the status/trace spew that drives
+ * the C3 noise cluster.
+ *
+ * Faction-symmetric (no per-faction branches). Deterministic.
+ */
+function isOpDecisionRelevantArmy(op: { phase?: string; last_result?: string } | undefined): boolean {
+    if (!op) return false;
+    if (op.phase === 'execution') return true;
+    if (op.last_result === 'failed') return true;
+    return false;
+}
+
+function isStatusReasonMeaningfulArmy(statusReason: string | undefined): boolean {
+    if (!statusReason) return false;
+    const sr = String(statusReason).trim();
+    if (sr.length === 0) return false;
+    if (sr === 'unknown') return false;
+    return true;
+}
+
 function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: Record<string, number>, osidAreas: Record<string, number>): string {
     const turn = state.meta.turn;
     const lines: string[] = [];
@@ -304,14 +329,32 @@ function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: R
         }
         const avgCoh = brigCount > 0 ? (totalCoh / brigCount).toFixed(0) : '?';
         const avgMor = brigCount > 0 ? (totalMor / brigCount).toFixed(0) : '?';
+        // LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL: only surface op /
+        // status / trace data when something is decision-relevant. Routine
+        // 'planning' / 'recovery' phases with default 'unknown' status_reason
+        // and empty trace are the dominant C3 noise driver — pruned.
         const ops = cc.active_operations ?? [];
         const op = ops[0] ?? null;
-        const opStr = op ? `op: ${op.name} (${op.phase})` : 'no operation';
-        const statusReason = (cc as any).status_reason ?? 'unknown';
-        const trace = ((cc as any).op_launch_trace ?? []).join(', ');
+        const statusReason = (cc as any).status_reason as string | undefined;
+        const traceArr = ((cc as any).op_launch_trace ?? []) as string[];
+        const opIsRelevant = isOpDecisionRelevantArmy(op ?? undefined);
+        const statusIsMeaningful = isStatusReasonMeaningfulArmy(statusReason);
 
         lines.push(`  ${corpsId}: stance=${cc.stance}, ${brigCount} bde, ${totalPers} pers, coh=${avgCoh}, mor=${avgMor}`);
-        lines.push(`    ${opStr} | status: ${statusReason} | trace: ${trace}`);
+        if (op && opIsRelevant) {
+            const lr = (op as any).last_result ? `, last_result=${(op as any).last_result}` : '';
+            const detail = statusIsMeaningful || traceArr.length > 0
+                ? ` | status: ${statusReason ?? 'unknown'} | trace: ${traceArr.join(', ')}`
+                : '';
+            lines.push(`    op: ${op.name} (${op.phase}${lr})${detail}`);
+        } else if (op) {
+            // Routine op — name + phase only, no status/trace spew.
+            lines.push(`    op: ${op.name} (${op.phase}, routine)`);
+        } else if (statusIsMeaningful) {
+            // No op but engine flagged a meaningful status — surface it.
+            lines.push(`    no operation | status: ${statusReason}`);
+        }
+        // else: no op + no meaningful status → emit nothing (silence is signal).
     }
 
     // Supply

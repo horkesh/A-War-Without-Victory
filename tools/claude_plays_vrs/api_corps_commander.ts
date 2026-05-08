@@ -110,6 +110,45 @@ YOUR JOB:
 Respond with ONLY valid JSON. No markdown outside JSON.`;
 }
 
+/**
+ * LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL-AND-PRESIDENT-CUE (2026-05-08):
+ * "Decision-relevant" filter for corps operations. Routine lifecycle states
+ * (planning/recovery with no diagnostic status_reason and no execution
+ * progress) are pruned from the briefing prompt — they are visible-state
+ * noise, not a decision the corps CO must take this turn. The C3 noise
+ * cluster (op-lifecycle commentary) was structurally resistant to
+ * prompt-side suppression because the briefing surfaces these states
+ * verbatim; the structural fix is to surface only what's actionable.
+ *
+ * Rule: a CorpsOperation is decision-relevant iff:
+ *   - phase === 'execution' (active fighting always relevant), OR
+ *   - last_result === 'failed' (recent setback warrants commander attention), OR
+ *   - status_reason is set to something other than 'unknown' / empty
+ *     (engine has flagged a meaningful condition).
+ *
+ * Routine ops (phase='planning' or 'recovery' with no status_reason and no
+ * failed last_result) are summarised as "<name> (<phase>)" without verbose
+ * status/trace fields. When ALL ops are routine, we emit a single
+ * "Operations: routine (no decisions required this turn)" line.
+ *
+ * Faction-symmetric (no per-faction branches). Deterministic
+ * (sorted iteration where order matters).
+ */
+function isOpDecisionRelevant(op: { phase?: string; last_result?: string } | undefined): boolean {
+    if (!op) return false;
+    if (op.phase === 'execution') return true;
+    if (op.last_result === 'failed') return true;
+    return false;
+}
+
+function isStatusReasonMeaningful(statusReason: string | undefined): boolean {
+    if (!statusReason) return false;
+    const sr = String(statusReason).trim();
+    if (sr.length === 0) return false;
+    if (sr === 'unknown') return false;
+    return true;
+}
+
 function buildCorpsStatePrompt(
     state: GameState,
     faction: FactionId,
@@ -125,15 +164,37 @@ function buildCorpsStatePrompt(
     lines.push(`Turn: ${turn}. Corps: ${corpsId}. Faction: ${faction}.`);
     lines.push(`Current stance: ${cc?.stance ?? 'balanced'}`);
 
-    const statusReason = (cc as any)?.status_reason ?? 'unknown';
-    const trace = ((cc as any)?.op_launch_trace ?? []).join(', ');
-    lines.push(`Status: ${statusReason} | Trace: ${trace}`);
+    // LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL: only emit Status/Trace line
+    // when the engine has populated a meaningful status_reason. The default
+    // 'unknown' value with empty trace is the dominant C3 noise driver — we
+    // suppress it here so the LLM has nothing to comment on.
+    const statusReason = (cc as any)?.status_reason as string | undefined;
+    const traceArr = ((cc as any)?.op_launch_trace ?? []) as string[];
+    if (isStatusReasonMeaningful(statusReason) || traceArr.length > 0) {
+        const trace = traceArr.join(', ');
+        lines.push(`Status: ${statusReason ?? 'unknown'} | Trace: ${trace}`);
+    }
 
-    // Active operation
+    // LANE-NIGHTSHIFT-V097-PERSONA-C3-STRUCTURAL: prune routine op-lifecycle
+    // states from the prompt. When ALL ops are routine, emit a single line.
+    // When some are decision-relevant, list those verbosely and summarise
+    // routine ones as "<name> (<phase>)" with no status spew.
     const ops = cc?.active_operations ?? [];
     if (ops.length > 0) {
-        for (const op of ops) {
-            lines.push(`Active operation: ${op.name} (${op.phase})`);
+        const decisionRelevant = ops.filter(isOpDecisionRelevant);
+        const routine = ops.filter(op => !isOpDecisionRelevant(op));
+        if (decisionRelevant.length === 0) {
+            // All routine — single summary line, no per-op enumeration.
+            lines.push(`Operations: ${ops.length} active (all routine planning/recovery — no decisions required this turn)`);
+        } else {
+            for (const op of decisionRelevant) {
+                const lr = (op as any).last_result ? `, last_result=${(op as any).last_result}` : '';
+                lines.push(`Active operation: ${op.name} (${op.phase}${lr})`);
+            }
+            if (routine.length > 0) {
+                const names = routine.map(o => o.name).join(', ');
+                lines.push(`Other operations (routine): ${names}`);
+            }
         }
     }
 
