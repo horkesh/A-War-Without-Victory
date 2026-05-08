@@ -1,3 +1,25 @@
+## [2026-05-08] v0.9.3 perf-memory CLOSED — LANE D streaming (post-v0.9.6 closure work)
+
+**Sequence (afternoon, post-v0.9.6-closure):** Phase 0 panel re-read → heap-profile re-dispatch (`0796ff26`/`d04adc81`, recovered from agent runtime cutoff) → 188w n1736 with snapshots (parent-owned per FORAWWV §XVI) → snapshot analyzer (`d83b3e2c`) named `displacement_event_log` accumulator → D-PRE substrate (`1c5e1323`) added 2 bounded aggregate fields + unified `appendDisplacementEvent` helper, byte-stable to baseline → D-CONTENT V1 (`a4d11fd8` agent) STOPPED-AND-ASKED with 3 structural findings (cap.refugees_received per-turn assignment; 49.7% of real events lack `caused_by`; per-turn buffer + Option α legacy log-scan mutually inconsistent) → parent authorized Path A (re-baseline accepted; capture-time controller attribution = more historically faithful) → D-CONTENT V2 (`834f59f9`/`0c9c44e1`/`45404e43`) shipped clean: anchors 26/27 (brcko volatile only), benchmarks 6/6, new 40w hash `765c1c19912ce9e8` → `86ebf26ae0271465` → 188w n1741 validation (`68273083`): final_save.json **30.11 MB → 6.84 MB (-76.2%)**; heap snapshots **-36/-46/-48% at t60/120/180**; dominant string node **-73/-77/-77%**; **100% reduction on field itself** (per-turn buffer cleared at end-of-turn). Stream `displacement_event_log.jsonl` 87,538 events / 13.21 MB at 188w; aggregates persist (3×3 humanitarian + 226 origin-dest keys at 188w end).
+
+**Architecture:** State `displacement_event_log` is now a per-turn buffer cleared by `clear-displacement-event-log` step at end of `warPhases`. Append-time append helper writes to JSONL stream + bumps 2 aggregates (`displacement_humanitarian_aggregates`, `displacement_origin_dest_arrivals`). Consumers `compute_capital.ts:173` (`computeHumanitarianData`) + `brigade_reconstitution.ts:184` (`findRefugeeMunicipality`) rebound to read aggregates. Other 3 consumers (`patron_pressure.ts`, `compile_turn_summary.ts`, `war_dispatches.ts`) untouched (current-turn-only reads, work with per-turn buffer).
+
+**Latent issue (v0.9.7+ followup, calibration impact zero):** `war_dispatches.ts:149` performs 4-turn rolling window scan; broken by per-turn clear; gated by `ai_commander_config.mode !== 'cadet'` (unset in calibration). Filed in closeout `docs/40_reports/audits/20260508_V093_LANE_D_CONTENT_PATH_A.md` §5.
+
+**Durable KNOWLEDGE reinforcement:** FORAWWV §XVI long-subprocess discipline confirmed AGAIN (heap-profile run at `0796ff26` died with agent; parent-owned re-launch worked clean; same lesson as D3 V3 persona run earlier this session).
+
+**v0.9.3 perf-memory surface CLOSED-FOR-V0.9.3.** Wall-clock perf (target <100 ms/turn vs current 3,094 ms) remains v0.9.4+ work. Sector cold-start data (already shipped at `e33c2a09`) is the next perf-CPU candidate. Closeout reports: `20260508_V093_HEAP_PROFILE_INSTRUMENTATION.md` (instrumentation), `20260508_V093_HEAP_PROFILE_ANALYSIS.md` (snapshot analyzer; named accumulator), `20260508_V093_LANE_D_CONTENT_PATH_A.md` (D-CONTENT closeout), `20260508_V093_LANE_D_188W_VALIDATION.md` (n1741 validation).
+
+**v0.9.7+ followups carried forward:**
+1. SRK siege defender Phase 1 implementation (recommendation `8e974004`).
+2. Persona suppressor C3 structural fix (briefing user-prompt builder).
+3. Persona over-suppression mitigation (`buildPresidentUserPrompt` enrichment).
+4. `war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer.
+5. Aggressive ledger archival.
+6. Manual canon-doc amendments per `20260507_CANON_DOC_PROPAGATION_NOTES.md`.
+
+---
+
 ## [2026-05-08] v0.9.6 CLOSED — persona suppressor cb13e605-bis iteration + Option 2 partial PASS
 
 **Sequence (today):** cb13e605-bis suppressor iteration → empirical validation FAIL (-8.1%) → CI red triage → stale-assertion fix → Option 2 closure → v0.9.6 CLOSED.
