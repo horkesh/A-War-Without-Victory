@@ -17,6 +17,19 @@ This document is the **single source of truth** for AWWV's development roadmap. 
 - `docs/plans/2026-03-22-v06x-master-roadmap.md` â€” v0.6.x detailed roadmap (Track A/B structure, nightshift execution model)
 - `docs/30_planning/_legacy/ROADMAP_TO_1_0.md` â€” original v0.1-v1.0 roadmap with AI commander design and open design questions
 - `docs/20_engineering/VERSIONING.md` â€” retains version scheme and protocol only; roadmap content now here
+- `docs/plans/2026-03-16-v0.7.0-performance.md` â€” superseded by `docs/plans/2026-04-06-v093-performance-accessibility-plan.md` (v0.9.3)
+- `docs/plans/2026-03-16-v0.7.1-accessibility.md` â€” superseded by `docs/plans/2026-04-06-v093-performance-accessibility-plan.md` (v0.9.3)
+- `docs/plans/2026-03-16-v0.7.2-localization.md` â€” deferred to post-1.0 "Mother Tongue" (v1.1.0)
+- `docs/plans/2026-03-16-v0.7.3-visual-polish.md` â€” superseded by `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md` (v0.9.4)
+- `docs/plans/2026-03-16-v0.8.0-external-playtesting.md` â€” superseded by `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md` (v0.9.2)
+- `docs/plans/2026-03-16-v0.8.1-final-balance.md` â€” absorbed into v0.9.2 external playtesting + balance scope
+- `docs/plans/2026-03-16-v0.8.2-platform-packaging.md` â€” superseded by `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md` (v0.9.5)
+- `docs/plans/2026-03-16-v0.9.0-final-qa.md` â€” absorbed into v0.9.5 platform test matrix
+- `docs/plans/2026-03-16-v0.9.1-store-marketing.md` â€” absorbed into v0.9.5 store + post-1.0 plan
+- `docs/plans/2026-03-21-army-hq-nerve-center-v2.md` â€” EXECUTED via absorption (v0.5.x Army HQ 4-tab command center, line 55)
+- `docs/plans/2026-03-22-army-hq-nerve-center-roadmap.md` â€” EXECUTED via absorption (companion to above)
+- `docs/plans/2026-03-24-emergent-phase2-enclave-fix-pool-rerouting.md` â€” EXECUTED via absorption (live at `src/sim/combat/enclave_resilience.ts` + `src/state/enclave_integrity.ts`)
+- `docs/plans/2026-04-03-delegation-override-command-friction-plan.md` â€” EXECUTED as v0.8.0.x command-friction waves 1-5 (line 138, COMPLETE 2026-04-04)
 
 Individual dated roadmap plan files in `docs/plans/` remain active as implementation specs referenced from this roadmap.
 
