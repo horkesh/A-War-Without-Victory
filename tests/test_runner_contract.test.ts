@@ -2,6 +2,8 @@ import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'vitest';
+// @ts-expect-error JS-only repo helper exercised at runtime by the test suite.
+import { buildVitestSliceArgs } from '../tools/test/run_vitest_slice.mjs';
 
 type PackageJson = {
     scripts?: Record<string, string>;
@@ -65,4 +67,22 @@ test('typecheck workflow installs nested map deps before running the root compil
         /npm run typecheck/,
         'typecheck workflow should invoke the canonical root typecheck script',
     );
+});
+
+test('Vitest slice runner uses a project file list instead of expanding every test as argv', () => {
+    const root = process.cwd();
+    const files = [
+        join(root, 'tests', 'alpha.test.ts'),
+        join(root, 'tests', 'bravo.test.ts'),
+        join(root, 'tests', 'charlie.test.ts'),
+    ];
+
+    const args = buildVitestSliceArgs(root, files, ['--reporter=dot']);
+
+    assert.deepStrictEqual(args, [
+        'run',
+        '--config',
+        '.tmp_vitest_slice/vitest.slice.config.mjs',
+        '--reporter=dot',
+    ]);
 });

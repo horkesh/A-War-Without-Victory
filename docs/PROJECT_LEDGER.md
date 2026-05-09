@@ -4,13 +4,25 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Windows fast Vitest runner recovery + startup snapshot rebake
+
+**Scope:** Test/build substrate recovery. The local Windows `npm run test:vitest:fast` gate failed before test execution with `spawnSync ... ENAMETOOLONG` because `tools/test/run_vitest_slice.mjs` expanded 615 absolute test paths directly into the Node child-process argv. After the runner was repaired, the restored gate surfaced a stale baked startup artifact: `data/derived/startup/apr_1992_initial_save.json` no longer matched canonical `buildStartupSnapshotPayload(...)` truth.
+
+**Fix:** Changed the slice runner to generate `.tmp_vitest_slice/vitest.slice.config.mjs` with the selected test list and invoke Vitest through `--config`, preserving the root Vitest environment/alias contract for jsdom and React UI tests. Added a runner contract test proving the slice runner uses the generated config path instead of argv expansion. Rebuilt the April 1992 startup snapshot with `npm run desktop:startup-snapshot:build`.
+
+**Validation:** Initial repro: `npm.cmd run test:vitest:fast` failed with `ENAMETOOLONG`. Red test: `vitest tests/test_runner_contract.test.ts` failed on the missing/import-unsafe slice helper. Targeted green: `vitest tests/test_runner_contract.test.ts tests/warroom_player_visibility.test.ts` passed 19/19. Broad local gate: `node tools/test/run_vitest_slice.mjs fast -- --bail=1 --reporter=dot` passed 614 files, 6494 tests, 14 skipped.
+
+**Behavior:** No simulation logic changed. Product startup artifact bytes changed because the baked `apr_1992` startup save is a one-way derived runtime artifact and was stale relative to the canonical builder.
+
+---
+
 ## [2026-05-09] Baseline Regression recovery + Codex ownership handoff
 
 **Scope:** Test/process-only recovery after Codex handover. `origin/main` Baseline Regression was red on `tests/adapter_field_completeness.test.ts` because the test still asserted `parsed.displacementEventLog.length > 0`. That assertion became stale after v0.9.3 Lane D intentionally converted `state.displacement.displacement_event_log` into a per-turn buffer cleared from final saves, with durable displacement totals carried through `displacement_humanitarian_aggregates`, `displacement_origin_dest_arrivals`, and adapter `displacementByMun`.
 
 **Fix:** Updated the adapter completeness test to assert the per-turn event buffer remains exposed as an array while cumulative displacement still parses through `displacementByMun` with nonzero displaced-out totals. Added a standing napkin directive that Codex now owns repo work end-to-end and treats Claude/subagent/older handoff notes as claim sets requiring local verification.
 
-**Validation:** `vitest tests/adapter_field_completeness.test.ts` 18/18 GREEN; `vitest tests/adapter_field_completeness.test.ts tests/state/displacement_event_log.test.ts` 39/39 GREEN; `npm.cmd run typecheck` clean. Local Windows `npm run test:vitest:fast` remains blocked by existing `ENAMETOOLONG` path expansion in `tools/test/run_vitest_slice.mjs`; GitHub Linux CI is the authoritative fast-slice gate for this fix.
+**Validation:** `vitest tests/adapter_field_completeness.test.ts` 18/18 GREEN; `vitest tests/adapter_field_completeness.test.ts tests/state/displacement_event_log.test.ts` 39/39 GREEN; `npm.cmd run typecheck` clean. At the time, local Windows `npm run test:vitest:fast` was blocked by existing `ENAMETOOLONG` path expansion in `tools/test/run_vitest_slice.mjs`; that runner was repaired on 2026-05-10.
 
 **Behavior:** No simulation, scenario, canon, or player-facing behavior changed. This is a stale-test-contract correction plus process ownership note.
 
