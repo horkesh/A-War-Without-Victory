@@ -75,6 +75,12 @@ export function appendDisplacementEvent(state: GameState, event: DisplacementEve
     const causerKey = causedByEffective ?? UNKNOWN_CAUSER_BUCKET;
     const refugeesCreated = (event.displaced ?? 0) + (event.killed ?? 0) + (event.fled_abroad ?? 0);
     const civCasCaused = event.killed ?? 0;
+
+    if (refugeesCreated > 0) {
+        const recentByTurn = (state.displacement.displacement_recent_by_turn ??= {});
+        recentByTurn[event.turn] = (recentByTurn[event.turn] ?? 0) + refugeesCreated;
+    }
+
     if (refugeesCreated > 0 || civCasCaused > 0) {
         const causerEthBucket = (humAgg[causerKey] ??= {});
         const eth = (causerEthBucket[event.ethnicity] ??= {

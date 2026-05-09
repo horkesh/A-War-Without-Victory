@@ -40,6 +40,8 @@ export interface DispatchPromptInput {
     monthLabel: string;
 }
 
+const DISPATCH_RECENT_TURN_WINDOW = 4;
+
 // --- Constants ---
 
 const PERSPECTIVES: DispatchPerspective[] = ['humanitarian', 'military', 'civilian', 'diplomatic'];
@@ -153,11 +155,8 @@ export async function generateWarDispatch(
     // so both totals were always 0). Post-LANE-D resolution:
     //   - totalDisplaced: read cumulative from displacement_humanitarian_aggregates
     //     (sum of refugees_created across all faction × ethnicity keys)
-    //   - recentDisplaced: degrades from "last 4 turns" to "current turn only"
-    //     via per-turn buffer. Acceptable: this is a narrative LLM cue,
-    //     not deterministic sim input; gated by ai_commander_config.mode === 'cadet'
-    //     (unset in calibration). Restoring true 4-turn-window would need a
-    //     sliding-window aggregate substrate (deferred to v0.9.7+).
+    //   - recentDisplaced: read from displacement_recent_by_turn so the
+    //     monthly/4-turn cue survives end-of-turn event-log clearing.
     const aggs = state.displacement?.displacement_humanitarian_aggregates;
     let totalDisplaced = 0;
     if (aggs) {
@@ -168,13 +167,7 @@ export async function generateWarDispatch(
         }
     }
 
-    const currentTurnBuffer = state.displacement?.displacement_event_log;
-    let recentDisplaced = 0;
-    if (currentTurnBuffer) {
-        for (const entry of currentTurnBuffer) {
-            recentDisplaced += entry.displaced ?? 0;
-        }
-    }
+    const recentDisplaced = computeRecentDisplaced(state, turn);
 
     // --- Territory control ---
     const politicalControllers = state.political?.political_controllers;
@@ -248,4 +241,29 @@ export async function generateWarDispatch(
         console.warn(`[WarDispatches] API error at turn ${turn}:`, error);
         return null;
     }
+}
+
+function computeRecentDisplaced(state: GameState, turn: number): number {
+    const recentByTurn = state.displacement?.displacement_recent_by_turn;
+    if (recentByTurn) {
+        const minTurn = turn - (DISPATCH_RECENT_TURN_WINDOW - 1);
+        let total = 0;
+        for (const [turnKey, value] of Object.entries(recentByTurn)) {
+            const eventTurn = Number(turnKey);
+            if (!Number.isFinite(eventTurn)) continue;
+            if (eventTurn >= minTurn && eventTurn <= turn) {
+                total += value ?? 0;
+            }
+        }
+        return total;
+    }
+
+    const currentTurnBuffer = state.displacement?.displacement_event_log;
+    let total = 0;
+    if (currentTurnBuffer) {
+        for (const entry of currentTurnBuffer) {
+            total += (entry.displaced ?? 0) + (entry.killed ?? 0) + (entry.fled_abroad ?? 0);
+        }
+    }
+    return total;
 }

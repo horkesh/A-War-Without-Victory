@@ -4,6 +4,7 @@ import {
     getPerspectiveForTurn,
     buildDispatchPrompt,
     parseDispatchResponse,
+    generateWarDispatch,
 } from '../src/sim/ai_commander/war_dispatches.js';
 import type { DispatchPromptInput } from '../src/sim/ai_commander/war_dispatches.js';
 
@@ -219,5 +220,54 @@ describe('parseDispatchResponse', () => {
             const result = parseDispatchResponse(raw);
             expect(result?.perspective).toBe(perspective);
         }
+    });
+});
+
+describe('generateWarDispatch displacement window', () => {
+    it('uses the rolling displacement aggregate for the monthly newly-displaced count', async () => {
+        let capturedPrompt = '';
+        const client = {
+            async generateDecision(prompt: { user: string }) {
+                capturedPrompt = prompt.user;
+                return {
+                    content: JSON.stringify({
+                        source: 'UNHCR Field Officer',
+                        headline: 'Displacement Window',
+                        body: 'Monthly displacement continues.',
+                        perspective: 'civilian',
+                    }),
+                };
+            },
+        };
+
+        const state = {
+            meta: { turn: 10, war_start_turn: 0 },
+            displacement: {
+                displacement_event_log: [
+                    { turn: 10, displaced: 3 },
+                ],
+                displacement_recent_by_turn: {
+                    6: 999,
+                    7: 100,
+                    8: 200,
+                    10: 400,
+                },
+                displacement_humanitarian_aggregates: {
+                    RS: {
+                        RBiH: {
+                            refugees_created: 5000,
+                            refugees_received: 0,
+                            civilian_casualties_caused: 0,
+                        },
+                    },
+                },
+            },
+            military: {},
+            political: { political_controllers: {} },
+        } as any;
+
+        await generateWarDispatch(state, client as any);
+
+        expect(capturedPrompt).toMatch(/Newly displaced this month: 700\b/);
     });
 });

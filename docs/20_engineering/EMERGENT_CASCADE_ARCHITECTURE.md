@@ -25,7 +25,7 @@ PLAYER CHOICE
 
 MECHANICAL CONSEQUENCE (v0.6.5 paramilitary_sweep.ts)
   ├─ Territory: op:zvornik:* OSIDs flip RS→captured
-  ├─ Displacement: Bosniak population expelled (displacement_event_log)
+  ├─ Displacement: Bosniak population expelled (per-turn displacement_event_log + cumulative aggregates)
   ├─ Civilian casualties: killed += OSID_pop × 0.05 (civilian_casualties ledger)
   └─ war_crimes_events += 1 per capture (negotiation_capital) ← CURRENTLY MISSING, FIX NEEDED
 
@@ -113,7 +113,7 @@ DAYTON ENDGAME
 | Producer | State Field | Consumers |
 |----------|-------------|-----------|
 | paramilitary_sweep.ts | `political_controllers[osid]` | Front lines, sectors, territory %, Codex, Chronicle |
-| paramilitary_sweep.ts | `displacement_event_log[]` | Displacement tracking, IVP, Chronicle, Wrapped |
+| paramilitary_sweep.ts | `displacement_event_log[]` + displacement aggregates | Displacement tracking, IVP, Chronicle, Wrapped, cosmetic war dispatches |
 | paramilitary_sweep.ts | `civilian_casualties[faction]` | IVP composite, dimension base values, Dayton scoring |
 | paramilitary_sweep.ts | `war_crimes_events` (FIX NEEDED) | `international_standing` dimension, patron pressure, Dayton scoring, event conditions (`war_crimes_above`) |
 | Event system | `event_flags{}` | All condition evaluators, consequence chain, Codex dynamic sections, political bot |
@@ -135,7 +135,7 @@ Player Choice (event decision / paramilitary policy / corps stance / operation l
     │       │
     │       ├─→ war_crimes_events (negotiation_capital)
     │       ├─→ civilian_casualties (IVP composite)
-    │       ├─→ displacement_event_log (Chronicle, displacement tracking)
+    │       ├─→ displacement_event_log + aggregates (Chronicle, displacement tracking)
     │       └─→ political_controllers (territory, front lines, sectors)
     │
     ├─→ Flag Setting (event_flags on GameState)

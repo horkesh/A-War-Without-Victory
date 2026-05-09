@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] War dispatch displacement window restored
+
+**Scope:** Cosmetic AI dispatch substrate. After v0.9.3 Lane D converted `displacement_event_log` into a per-turn buffer cleared at end-of-turn, `war_dispatches.ts` could no longer compute its intended 4-turn/monthly "newly displaced" prompt cue. It fell back to the current-turn buffer only.
+
+**Fix:** Added `displacement_recent_by_turn` to `DisplacementDomainState`, updated `appendDisplacementEvent(...)` to accumulate per-turn refugee-created totals (`displaced + killed + fled_abroad`), normalized the field on save migration, and changed `generateWarDispatch(...)` to sum the current 4-turn window from that aggregate. Updated Systems Manual, DISPLACEMENT_MASTER, and emergent-cascade docs to describe the per-turn buffer plus cumulative/recent aggregate split.
+
+**Validation:** Red tests first: `vitest tests/war_dispatches.test.ts tests/state/displacement_event_log.test.ts` failed on missing `displacement_recent_by_turn` and prompt value `3` instead of `700`. Green targeted regression: `vitest tests/war_dispatches.test.ts tests/state/displacement_event_log.test.ts tests/morale_displacement_schema.test.ts tests/migration_nested_ownership.test.ts` passed 65/65; after startup rebake, `vitest tests/startup_snapshot_contract.test.ts tests/war_dispatches.test.ts tests/state/displacement_event_log.test.ts tests/morale_displacement_schema.test.ts tests/migration_nested_ownership.test.ts` passed 70/70. `npm.cmd run typecheck` clean; `npm.cmd run desktop:startup-snapshot:check` clean.
+
+**Behavior:** Simulation logic and calibration decisions unchanged. This changes serialized displacement state by adding a bounded per-turn recent-total aggregate and restores a cosmetic cadet-mode AI dispatch prompt input.
+
+---
+
 ## [2026-05-10] Windows fast Vitest runner recovery + startup snapshot rebake
 
 **Scope:** Test/build substrate recovery. The local Windows `npm run test:vitest:fast` gate failed before test execution with `spawnSync ... ENAMETOOLONG` because `tools/test/run_vitest_slice.mjs` expanded 615 absolute test paths directly into the Node child-process argv. After the runner was repaired, the restored gate surfaced a stale baked startup artifact: `data/derived/startup/apr_1992_initial_save.json` no longer matched canonical `buildStartupSnapshotPayload(...)` truth.

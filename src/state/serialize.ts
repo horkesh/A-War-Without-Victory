@@ -632,6 +632,12 @@ function migrateState(raw: unknown): GameState {
                 || Array.isArray(disp.displacement_origin_dest_arrivals))) {
                 disp.displacement_origin_dest_arrivals = {};
             }
+            if (disp && (disp.displacement_recent_by_turn === undefined
+                || disp.displacement_recent_by_turn === null
+                || typeof disp.displacement_recent_by_turn !== 'object'
+                || Array.isArray(disp.displacement_recent_by_turn))) {
+                disp.displacement_recent_by_turn = {};
+            }
 
             // Migrate corps_command active_operation → active_operations
             const corpsCommand = mil?.corps_command;

@@ -2321,4 +2321,16 @@ displacement_humanitarian_aggregates?: Record<string, Record<string, {
  *   and settled > 0 contribute (matches consumer's filter at line 193-195).
  */
 displacement_origin_dest_arrivals?: Record<string, Record<string, number>>;
+/**
+ * Per-turn refugee-created totals for recent narrative windows.
+ *
+ * Updated at append-time alongside `displacement_event_log`. Unlike the
+ * per-turn event buffer, this survives end-of-turn log clearing so cosmetic
+ * dispatch prompts can compute a 4-turn/monthly displacement cue without
+ * restoring the unbounded full-history event log.
+ *
+ * Key: turn number serialized as an object key.
+ * Value: sum of displaced + killed + fled_abroad for events on that turn.
+ */
+displacement_recent_by_turn?: Record<number, number>;
 }

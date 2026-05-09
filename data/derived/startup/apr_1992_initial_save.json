@@ -4,6 +4,7 @@
     "displacement_event_log": [],
     "displacement_humanitarian_aggregates": {},
     "displacement_origin_dest_arrivals": {},
+    "displacement_recent_by_turn": {},
     "displacement_state": {
       "banja_luka": {
         "displaced_in": 0,

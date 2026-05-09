@@ -314,6 +314,30 @@ describe('appendDisplacementEvent — substrate basics', () => {
         }
         expect(state.displacement.displacement_event_log).toHaveLength(5);
     });
+
+    it('updates per-turn recent displacement totals for cosmetic dispatch windows', () => {
+        const state = buildState();
+        appendDisplacementEvent(state, {
+            turn: 7, origin_mun: 'mun_a', origin_osid: 'op:mun_a:mun_a_1',
+            dest_mun: 'mun_a', ethnicity: 'RBiH', caused_by: 'RS',
+            displaced: 100, killed: 10, fled_abroad: 5, settled: 0,
+        });
+        appendDisplacementEvent(state, {
+            turn: 7, origin_mun: 'mun_b', origin_osid: 'op:mun_b:mun_b_1',
+            dest_mun: 'mun_b', ethnicity: 'RBiH', caused_by: 'RS',
+            displaced: 40, killed: 0, fled_abroad: 0, settled: 0,
+        });
+        appendDisplacementEvent(state, {
+            turn: 8, origin_mun: 'mun_c', origin_osid: 'op:mun_c:mun_c_1',
+            dest_mun: 'mun_c', ethnicity: 'RBiH', caused_by: 'RS',
+            displaced: 25, killed: 0, fled_abroad: 0, settled: 0,
+        });
+
+        expect(state.displacement.displacement_recent_by_turn).toEqual({
+            7: 155,
+            8: 25,
+        });
+    });
 });
 
 describe('appendDisplacementEvent — bounded-size analytical assertion', () => {

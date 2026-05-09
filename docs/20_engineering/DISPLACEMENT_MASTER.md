@@ -439,7 +439,10 @@ All displacement-related fields on `GameState` (`src/state/game_state.ts`):
 | `displacement_state` | `Record<MunicipalityId, DisplacementState>` | Per-municipality population tracking |
 | `hostile_takeover_timers` | `Record<string, HostileTakeoverTimerState>` | Active takeover timers (keyed by `${osid}\|${fromFaction}`) |
 | `displacement_camp_state` | `Record<MunicipalityId, DisplacementCampState>` | Active camps awaiting reroute |
-| `displacement_event_log` | `DisplacementEvent[]` | Cumulative event log |
+| `displacement_event_log` | `DisplacementEvent[]` | Per-turn event buffer; streamed/aggregated, then cleared at end of turn |
+| `displacement_humanitarian_aggregates` | `Record<string, Record<string, {...}>>` | Cumulative caused-by / receiver humanitarian totals |
+| `displacement_origin_dest_arrivals` | `Record<string, Record<string, number>>` | Cumulative origin-municipality/ethnicity to destination-municipality settled totals |
+| `displacement_recent_by_turn` | `Record<number, number>` | Per-turn refugee-created totals for cosmetic 4-turn war-dispatch windows |
 | `minority_flight_state` | `Record<SettlementId, MinorityFlightStateEntry>` | Per-settlement gradual flight tracking |
 | `civilian_casualties` | `Record<FactionId, { killed, fled_abroad }>` | Aggregate civilian loss counters |
 
