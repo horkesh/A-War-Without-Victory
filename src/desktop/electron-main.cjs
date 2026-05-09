@@ -1250,7 +1250,11 @@ function autoSave() {
 }
 
 function createWindow() {
-  createMainWindow({ show: true, openDevTools: true });
+  // W-11-A (v0.9.5 cosmetic): Gate openDevTools on dev mode only. In packaged
+  // builds, the detached DevTools window steals MainWindow focus and prevents
+  // CloseMainWindow-driven clean exit (operator must force-kill). Dev tools
+  // should not ship enabled-by-default in production anyway.
+  createMainWindow({ show: true, openDevTools: !app.isPackaged });
 }
 
 function openTacticalMapWindow(mode = 'operational') {
