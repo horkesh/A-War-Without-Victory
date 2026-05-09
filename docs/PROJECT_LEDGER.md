@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] President rich-verb bridge metadata defaults
+
+**Scope:** Extra v0.9.7 bridge lane after directive vocabulary metadata. The three-layer Claude QA harness previously mapped president rich verbs to six canonical engine verbs inline inside `run_three_commanders.ts`, and metadata depended on the model returning optional `magnitude` / `permission_flags`.
+
+**Fix:** Extracted a pure `president_directive_bridge.ts` helper with a closed `PRESIDENT_TO_CANONICAL_DIRECTIVE` table. The bridge now returns canonical verb plus deterministic default `magnitude` and `permission_flags`, while preserving valid API-supplied metadata when present. `run_three_commanders.ts` uses the helper before writing `state.military.political_directives_by_faction`.
+
+**Validation:** Red test first: `vitest tests/d3_president_directive_bridge_metadata.test.ts` failed because the pure bridge module did not exist. Green targeted regression: `vitest tests/d3_president_directive_bridge_metadata.test.ts tests/api_commander_directive_context.test.ts tests/d1_persona_infrastructure.test.ts` passed 25/25. `npm.cmd run typecheck` clean; `git diff --check` clean for the lane files.
+
+**Determinism/canon:** No scenario or pipeline behavior changes when the API harness is disabled. The bridge is a pure table lookup with stable arrays; `no_directive` and unknown rich verbs still map to `null`. FORAWWV updated to point at the pure canonical bridge table.
+
+---
+
 ## [2026-05-10] v0.9.7 directive vocabulary metadata lane
 
 **Scope:** Political -> army -> corps command-chain expressiveness. The canonical `PoliticalDirective` verb vocabulary remains the locked six-verb set, but directives now carry optional `magnitude` (`limited`/`standard`/`maximum`) and ordered `permission_flags` (`authorize_offensive`, `authorize_reserve_commitment`, `preserve_reserve`, `avoid_escalation`) alongside existing `target_corps_id` and `directive_id`.

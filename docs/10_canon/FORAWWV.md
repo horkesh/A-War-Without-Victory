@@ -277,7 +277,7 @@ The canonical `PoliticalDirective` interface in `src/sim/combat/army_order_inter
 - `HONOR_TRUCE` — NEGOTIATION-WEIGHT
 - `BALANCE_FRONTS` — default / undirected
 
-Any bot/AI generator that emits a directive verb MUST produce a value from this exact set. Richer agent-side vocabularies (e.g. D-lane's 16-verb president-intent set) require an explicit mapping/translation step before writing to the engine slot. Reference: `tools/claude_plays_vrs/run_three_commanders.ts` `PRESIDENT_TO_CANONICAL` table at commit `bfcc9258`.
+Any bot/AI generator that emits a directive verb MUST produce a value from this exact set. Richer agent-side vocabularies (e.g. D-lane's 16-verb president-intent set) require an explicit mapping/translation step before writing to the engine slot. Reference: `tools/claude_plays_vrs/president_directive_bridge.ts` `PRESIDENT_TO_CANONICAL_DIRECTIVE` table.
 
 The six-verb set is closed, but the directive object may carry optional structural cues around that verb:
 - `target_corps_id` — optional corps focus.
