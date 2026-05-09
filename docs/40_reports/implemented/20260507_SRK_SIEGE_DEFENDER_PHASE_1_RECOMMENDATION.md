@@ -14,6 +14,11 @@
 - v0.9.7+ followup: empirically verify SRK morale trajectory (per-turn values during 188w) deviates from baseline before convergence — would need extra telemetry to inspect.
 
 **SRK Phase 1 + Phase 2 CLOSED 2026-05-08.** Phase 2 verdict: PASS via hash-identity; mechanism fires, floor clamps as designed, historical SRK persistence preserved. Recommendation §8 binding-threshold expectations all met trivially by hash-identity.
+
+**SRK trajectory verification lane attempt 2026-05-09 (agent `accd17f1`):** STOP-AND-ASK; lane did NOT ship. Two issues surfaced:
+1. **Edits-reverted-off-disk incident:** agent reported its `Edit` tool calls succeeded but subsequent `git status` showed zero modifications; system-reminders surfaced pre-edit content snapshots. Likely cause: multi-agent index race with concurrent lanes (persona cue `58c0df30` + cosmetic findings `c4db5bef`/`9c199f41`).
+2. **40w hash drift finding:** agent ran 40w fresh and got `e97fa6e2afbc7b19`, NOT the prior baseline `86ebf26ae0271465`. Independent of issue #1. Most-likely candidates per chronology: Cost Ledger batch commits (`b4512eff`/`2277ab7e`) edited `data/scenarios/events/consequences.json` annotation text — annotations are nominally endgame metadata but may have entered the engine's deterministic load path through a side-channel.
+3. **Verdict:** SRK trajectory verification + 40w-drift triage are BOTH deferred to a fresh session. Tonight's lane is closed STOP-AND-ASK with no commits.
 **Predecessor DDR:** `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`, unmodified through HEAD `5659c28b`).
 **Audit predecessor:** `docs/40_reports/implemented/20260507_SRK_SIEGE_MORALE_AUDIT.md` (commit `aa115a99`, sub-issue #1 STOP-AND-ASK).
 **Calibration baseline:** n1728 (40w hash `79fa407377b40083`, 26/27 anchors) + n1729 (188w hash `e85303890ff4b601`, 26/27 anchors, 6/6 benchmarks).
