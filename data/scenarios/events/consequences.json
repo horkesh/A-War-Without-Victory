@@ -1323,7 +1323,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "un_safe_areas_intact",
-        "text": "UN Safe Areas designation enforced past t145 — counter-historical alt-intervention path."
+        "text": "Counterfactual reckoning surface. UN Security Council Resolution 824 (6 May 1993) and Resolution 836 (4 June 1993) designated Sarajevo, Tuzla, Žepa, Goražde, Bihać and Srebrenica as Safe Areas under UNPROFOR mandate. The historical record finds the Safe Area regime structurally failed: ICTY Trial Chamber, Prosecutor v. Krstić (IT-98-33-T, 2 August 2001, paras. 36-46) documents the July 1995 collapse of the Srebrenica enclave and the genocide that followed, and Prosecutor v. Mladić (IT-09-92-T, 22 November 2017, paras. 2493-2581) finds command responsibility for that collapse. This annotation records a sustained run-state in which the Safe Area mandate is enforced past t145 — the counterfactual that the international protection framework on paper had been honoured in practice. The annotation describes the documented institutional regime; it does not attribute culpability for any specific historical event."
       }
     ],
     "sets_flags": {
@@ -1381,7 +1381,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "early_peace_acceptance_w120",
-        "text": "Peace plan accepted before t120 with territorial position outside late-war baseline. Leverage trade recorded."
+        "text": "Counterfactual reckoning surface. Three internationally-mediated peace frameworks were tabled prior to the November 1995 Dayton settlement: the Vance-Owen Peace Plan (January 1993, ten-canton structure rejected by the Bosnian Serb Assembly at Pale on 5-6 May 1993 per Prosecutor v. Karadžić IT-95-5/18-T, paras. 3422-3431), the Owen-Stoltenberg Plan (August 1993, three-republic union rejected by RBiH), and the Contact Group Plan (July 1994, 51-49 territorial split rejected by the Bosnian Serb Assembly at Pale on 27-29 July 1994 per Prosecutor v. Karadžić paras. 3461-3473). This annotation records a run-state in which a peace framework is accepted before turn 120 with a territorial alignment outside the eventual Dayton baseline. The reckoning question this surfaces: the leverage-territory trade was historically refused, and the war continued to its documented November 1995 endpoint with the documented intervening losses. Descriptive annotation; no attribution of responsibility for the historical refusals."
       },
       { "kind": "alliance_lock", "mode": "floor", "value": 0.0, "duration_turns": 16 }
     ],
@@ -1751,7 +1751,7 @@
     "effects": [
       { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 1.20, "duration_turns": 25 },
       { "kind": "cohesion_change", "faction": "RBiH", "delta": -8 },
-      { "kind": "cost_ledger_annotation", "tag": "industrial_conscription_wave", "text": "RBiH industrial conscription wave imposed: war_exhaustion >35, territory_loss_30day >=5%." }
+      { "kind": "cost_ledger_annotation", "tag": "industrial_conscription_wave", "text": "RBiH war-economy reckoning surface. Triggered under cumulative war-exhaustion above 35 and 30-day territory loss at or above 5 percent: the documented 1992-1993 ARBiH mobilisation regime under the Republic of Bosnia and Herzegovina Presidency Decree on the General Mobilisation (20 June 1992) and the war-economy directives that followed. Balkan Battlegrounds (Vol. I, ch. 5) documents the constraint set on the Sarajevo government: an Arms Embargo regime (UNSC Resolution 713, 25 September 1991) interacting with cumulative territorial loss to force enlargement of the conscription base into industrial workforces, with the documented institutional cost of erosion in skilled-labour pools. This annotation describes the structural pressure that produced the historical mobilisation directives; it does not adjudicate the lawfulness of any specific conscription order, and Article 8 of Additional Protocol II to the Geneva Conventions remains the applicable standard for any individual case." }
     ],
     "dimension_shifts": [
       { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -8 }
@@ -1820,8 +1820,8 @@
     },
     "effects": [
       { "kind": "supply_delta", "faction": "RBiH", "delta": 25 },
-      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_reopened", "text": "Grain corridor reopened with no hostility 8 turns; AUDIT-ONLY framing applies if corridor passes within 20 km of any enclave OSID (corridor route is canon-tracked elsewhere)." },
-      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_enclave_proximity_audit", "text": "AUDIT-ONLY: corridor proximity to enclaves is recorded for downstream narrative reckoning. No mechanical effect; rupture wiring untouched.", "faction": "RBiH" }
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_reopened", "text": "Humanitarian-access reckoning surface. Triggered when the UNHCR-canonical aid corridor remains operationally open across an eight-turn window without obstruction. The corridor regime referenced is documented in Prosecutor v. Galić (IT-98-29-T, 5 December 2003, paras. 192-197) and Prosecutor v. Dragomir Milošević (IT-98-29/1-T, 12 December 2007, paras. 116-122) on the Sarajevo airlift and overland convoys; UN Security Council Resolution 770 (13 August 1992) authorised member states to take all necessary measures to facilitate humanitarian assistance. Common Article 3 to the Geneva Conventions and Article 18 of Additional Protocol II prescribe the legal standard for civilian-population relief. The annotation describes a run-state of corridor functionality consistent with that legal regime; obstruction in other run-states is the exceptional case the regime exists to address." },
+      { "kind": "cost_ledger_annotation", "tag": "grain_corridor_enclave_proximity_audit", "text": "Audit-only proximity ledger. When the corridor route passes within 20 kilometres of an enclave OSID, this annotation registers a documentary observation for the endgame Cost Ledger: corridor functionality and enclave-vicinity passage are jointly recorded as the canonical reckoning surface. No mechanical effect on rupture wiring or enclave_resilience; the proximity field exists so that Dayton-scoring narrative can speak truthfully about whether corridor traffic and enclave isolation co-existed.", "faction": "RBiH" }
     ],
     "dimension_shifts": [
       { "faction": "RBiH", "dimension": "international_standing", "delta": 3 }
