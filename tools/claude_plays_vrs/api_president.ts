@@ -274,15 +274,25 @@ export function buildPresidentUserPrompt(
         lines.push(`  ${f}: ${counts[f]} OSIDs (${pct}%)`);
     }
 
-    // LANE-NIGHTSHIFT-V097-PERSONA-CUE: military-pressure cues.
+    // LANE-NIGHTSHIFT-V097-PERSONA-CUE-REFINEMENT (2026-05-08, Strategy B):
+    // Decision-pressure framing — cues are emitted in parameter-style (key=value)
+    // rather than verbose observational sentences, so the persona reasons about
+    // WHAT TO DO with the numbers rather than ABOUT the numbers themselves.
+    // V097 used neutral observational labels ("Corps fronts under threat: 3")
+    // which invited per-cue elaboration that downstream army COs then
+    // re-elaborated into directive-interpretation commentary the cluster
+    // classifier counted as C1 noise (V097 closeout: C1 59 -> 97).
+    // Parameter-style is harder to use as a launching point for prose
+    // commentary; the persona consumes them as inputs to a verb choice.
     const cues = computePresidentCues(state, faction);
     lines.push('');
-    lines.push('MILITARY-PRESSURE CUES (last 4 turns):');
-    lines.push(`  Corps fronts under threat (threat_ratio > 1.5): ${cues.corps_under_threat}`);
-    lines.push(`  OSIDs lost to enemy: ${cues.recent_territory_loss_osids}`);
-    lines.push(`  Operations in execution: ${cues.ops_in_execution}`);
-    lines.push(`  War exhaustion: ${cues.war_exhaustion.toFixed(0)}`);
-    lines.push(`  Patron-pressure events (recent): ${cues.patron_pressure_events_last_4}`);
+    lines.push('STATE PARAMETERS (decide a verb that addresses the largest pressure):');
+    lines.push(`  fronts_under_threat=${cues.corps_under_threat}`);
+    lines.push(`  osids_lost_last_4_turns=${cues.recent_territory_loss_osids}`);
+    lines.push(`  ops_in_execution=${cues.ops_in_execution}`);
+    lines.push(`  war_exhaustion=${cues.war_exhaustion.toFixed(0)}`);
+    lines.push(`  patron_pressure_events_recent=${cues.patron_pressure_events_last_4}`);
+    lines.push('Choose the verb that most directly addresses the dominant parameter. Brief justification only — do NOT analyze how the army CO will interpret or distribute the directive across corps; that is the army CO surface.');
 
     // Recent fired events.
     const firedEvents = state.military.fired_event_ids ?? [];
