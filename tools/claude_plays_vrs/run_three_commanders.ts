@@ -625,6 +625,8 @@ async function main(): Promise<void> {
                                 milAny.political_directives_by_faction[faction] = {
                                     verb: canonicalVerb,
                                     target_corps_id: presidentResult.target_corps_id,
+                                    magnitude: presidentResult.magnitude,
+                                    permission_flags: presidentResult.permission_flags,
                                     directive_id: `pres_${faction}_w${week}_${presidentResult.verb}`,
                                 };
                             }

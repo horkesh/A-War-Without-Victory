@@ -82,6 +82,8 @@ export interface ApiPresidentDirective {
     turn: number;
     verb: PoliticalDirectiveVerb;
     target_corps_id?: string;
+    magnitude?: 'limited' | 'standard' | 'maximum';
+    permission_flags?: string[];
     scratchpad_reasoning: string;
     model_used: string;
     prompt_tokens: number;
@@ -131,6 +133,8 @@ Your output MUST be valid JSON matching this schema:
 {
   "verb": "<one of the closed verb enum>",
   "target_corps_id": "<optional corps_id from your faction OOB>",
+  "magnitude": "<optional limited|standard|maximum>",
+  "permission_flags": ["<optional permission strings such as authorize_offensive or avoid_escalation>"],
   "scratchpad_reasoning": "<2-3 sentences of your reasoning, in your voice>"
 }
 
@@ -307,6 +311,8 @@ export function buildPresidentUserPrompt(
 {
   "verb": "<one of the closed verb enum>",
   "target_corps_id": "<optional corps_id>",
+  "magnitude": "<optional limited|standard|maximum>",
+  "permission_flags": ["<optional permission strings>"],
   "scratchpad_reasoning": "<2-3 sentences>"
 }`);
 
@@ -367,6 +373,15 @@ export async function producePresidentDirective(
     const targetCorpsId = parsed && typeof parsed.target_corps_id === 'string' && parsed.target_corps_id.length > 0
         ? parsed.target_corps_id
         : undefined;
+    const magnitude = parsed
+        && typeof parsed.magnitude === 'string'
+        && ['limited', 'standard', 'maximum'].includes(parsed.magnitude)
+        ? parsed.magnitude as 'limited' | 'standard' | 'maximum'
+        : undefined;
+    const permissionFlags = parsed
+        && Array.isArray(parsed.permission_flags)
+        ? parsed.permission_flags.filter((flag): flag is string => typeof flag === 'string' && flag.length > 0)
+        : undefined;
     const scratchpad = parsed && typeof parsed.scratchpad_reasoning === 'string'
         ? parsed.scratchpad_reasoning
         : '';
@@ -392,6 +407,8 @@ export async function producePresidentDirective(
         turn: state.meta.turn,
         verb,
         target_corps_id: targetCorpsId,
+        magnitude,
+        permission_flags: permissionFlags,
         scratchpad_reasoning: scratchpad,
         model_used: response.model,
         prompt_tokens: response.usage.input_tokens,
@@ -400,7 +417,13 @@ export async function producePresidentDirective(
     };
 }
 
-function safeParseJson(text: string): { verb?: string; target_corps_id?: string; scratchpad_reasoning?: string } | null {
+function safeParseJson(text: string): {
+    verb?: string;
+    target_corps_id?: string;
+    magnitude?: string;
+    permission_flags?: unknown;
+    scratchpad_reasoning?: string;
+} | null {
     const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
     const cleaned = match ? match[1].trim() : text.trim();
     try {

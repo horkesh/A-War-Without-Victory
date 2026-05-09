@@ -30,6 +30,8 @@ vi.mock('@anthropic-ai/sdk', () => {
             text: JSON.stringify({
                 verb: 'maintain_siege',
                 target_corps_id: 'vrs_sarajevo_romanija',
+                magnitude: 'limited',
+                permission_flags: ['avoid_escalation'],
                 scratchpad_reasoning: 'Holding the siege as negotiation card.',
             }),
         }],
@@ -188,6 +190,8 @@ describe('D1 persona infrastructure', () => {
                 'accept_ceasefire', 'mobilize_general', 'consolidate_herzegovina',
                 'hold_central_bosnia', 'screen_arbih_axis', 'accept_zagreb_directive',
                 'accept_washington_framework', 'no_directive']).toContain(result!.verb);
+            expect(result!.magnitude).toBe('limited');
+            expect(result!.permission_flags).toEqual(['avoid_escalation']);
             expect(typeof result!.scratchpad_reasoning).toBe('string');
             expect(typeof result!.prompt_tokens).toBe('number');
             expect(typeof result!.completion_tokens).toBe('number');

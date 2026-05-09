@@ -50,6 +50,8 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type {
     PoliticalDirective,
+    PoliticalDirectiveMagnitude,
+    PoliticalDirectivePermissionFlag,
     PoliticalDirectiveVerb,
 } from '../combat/army_order_interpretation.js';
 import { strictCompare } from '../../state/turn_phases.js';
@@ -221,6 +223,40 @@ function deriveVerb(
     return 'BALANCE_FRONTS';
 }
 
+function deriveMagnitude(
+    verb: PoliticalDirectiveVerb,
+    profile: LooseLeaderProfile,
+    exhaustion: number,
+): PoliticalDirectiveMagnitude {
+    const hawkishness = typeof profile.hawkishness === 'number' ? profile.hawkishness : 3;
+    if (verb === 'HONOR_TRUCE') return 'limited';
+    if (exhaustion >= B1_HIGH_EXHAUSTION_THRESHOLD) return 'limited';
+    if (verb === 'PRESS_OFFENSIVE' && hawkishness >= B1_HAWKISH_THRESHOLD + 1) return 'maximum';
+    return 'standard';
+}
+
+function derivePermissionFlags(
+    verb: PoliticalDirectiveVerb,
+    magnitude: PoliticalDirectiveMagnitude,
+): PoliticalDirectivePermissionFlag[] {
+    switch (verb) {
+        case 'PRESS_OFFENSIVE':
+            return magnitude === 'maximum'
+                ? ['authorize_offensive', 'authorize_reserve_commitment']
+                : ['authorize_offensive'];
+        case 'MAINTAIN_CORRIDOR':
+            return ['authorize_offensive', 'authorize_reserve_commitment'];
+        case 'HOLD_AT_ALL_COSTS':
+            return ['authorize_reserve_commitment'];
+        case 'PREPARE_RESERVE':
+            return ['preserve_reserve'];
+        case 'HONOR_TRUCE':
+            return ['avoid_escalation'];
+        case 'BALANCE_FRONTS':
+            return ['preserve_reserve'];
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════════════════════
@@ -259,11 +295,15 @@ export function producePoliticalDirective(
         : 1;
 
     const verb = deriveVerb(profile, exhaustion, ivpLevel, alliance, faction);
+    const magnitude = deriveMagnitude(verb, profile, exhaustion);
+    const permission_flags = derivePermissionFlags(verb, magnitude);
     const target_corps_id = pickTargetCorps(mil, faction);
     const turn = state.meta?.turn ?? 0;
 
     const directive: PoliticalDirective = {
         verb,
+        magnitude,
+        permission_flags,
         directive_id: `b1:${faction}:${verb}:${turn}`,
     };
     if (target_corps_id) directive.target_corps_id = target_corps_id;

@@ -50,6 +50,8 @@ type LooseMilitaryWithDirectives = GameState['military'] & {
     political_directives_by_faction?: Record<string, {
         verb: string;
         target_corps_id?: string;
+        magnitude?: string;
+        permission_flags?: string[];
         directive_id?: string;
     } | undefined>;
     army_corps_directives_by_faction?: Record<string, Record<string, {
@@ -105,7 +107,11 @@ export function buildChainContextSection(state: GameState, faction: FactionId): 
 
     if (hasDirective) {
         const target = directive!.target_corps_id ? ` -> target corps_id=${directive!.target_corps_id}` : '';
-        lines.push(`Political directive (from president): ${directive!.verb}${target}`);
+        const magnitude = directive!.magnitude ? ` magnitude=${directive!.magnitude}` : '';
+        const permissions = Array.isArray(directive!.permission_flags) && directive!.permission_flags.length > 0
+            ? ` permissions=${directive!.permission_flags.join(',')}`
+            : '';
+        lines.push(`Political directive (from president): ${directive!.verb}${target}${magnitude}${permissions}`);
     } else {
         lines.push('Political directive (from president): (none this turn)');
     }

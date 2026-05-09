@@ -279,12 +279,19 @@ The canonical `PoliticalDirective` interface in `src/sim/combat/army_order_inter
 
 Any bot/AI generator that emits a directive verb MUST produce a value from this exact set. Richer agent-side vocabularies (e.g. D-lane's 16-verb president-intent set) require an explicit mapping/translation step before writing to the engine slot. Reference: `tools/claude_plays_vrs/run_three_commanders.ts` `PRESIDENT_TO_CANONICAL` table at commit `bfcc9258`.
 
+The six-verb set is closed, but the directive object may carry optional structural cues around that verb:
+- `target_corps_id` — optional corps focus.
+- `magnitude` — `limited`, `standard`, or `maximum`.
+- `permission_flags` — closed authorization flags: `authorize_offensive`, `authorize_reserve_commitment`, `preserve_reserve`, `avoid_escalation`.
+
+These fields clarify intent for the political -> army -> corps chain and API persona prompts. They do not expand the canonical verb vocabulary.
+
 ### X.2 Canonical chain wiring
 The political → army → corps chain is wired through these state slots:
 - **B1/B2 input:** `state.political.political_leader_data[faction]` (canonical leader scalars per `data/scenarios/political_leader_data.json`); `state.military.political_leaders[faction]` (officer ID per faction).
-- **B1 producer output:** `state.military.political_directives_by_faction[faction]: PoliticalDirective` (verb + optional target_corps_id + directive_id).
-- **A3 interpreter output:** per-corps `ArmyCorpsDirective[]` (corps_id + role + deviated + optional deviation_reason).
-- **C1 persisted slot:** `state.military.army_corps_directives_by_faction[faction][corps_id]: { corps_id, role, deviated, deviation_reason? }` — read by `commander/briefing.ts` `assembleCampaignIntent` to overlay `frontPriority.role` → `briefing.campaign_role`.
+- **B1 producer output:** `state.military.political_directives_by_faction[faction]: PoliticalDirective` (verb + optional target_corps_id + optional magnitude + optional permission_flags + directive_id).
+- **A3 interpreter output:** per-corps `ArmyCorpsDirective[]` (corps_id + role + optional directive_magnitude + optional permission_flags + deviated + optional deviation_reason).
+- **C1 persisted slot:** `state.military.army_corps_directives_by_faction[faction][corps_id]: { corps_id, role, directive_magnitude?, permission_flags?, deviated, deviation_reason? }` — read by `commander/briefing.ts` `assembleCampaignIntent` to overlay `frontPriority.role` → `briefing.campaign_role`.
 - **Corps decisions:** existing v0.8 corps commander intelligence consumes `briefing.campaign_role` via `plan.ts` chokepoints (`primary`/`secondary`/`economy`/`contain` gates).
 
 ### X.3 A4 named-officer roster

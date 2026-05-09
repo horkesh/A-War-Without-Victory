@@ -57,6 +57,8 @@ function makeState(opts: {
         verb: string;
         target_corps_id?: string;
         directive_id?: string;
+        magnitude?: string;
+        permission_flags?: string[];
     } | undefined>;
     army_corps_directives_by_faction?: Record<string, Record<string, {
         corps_id: string;
@@ -105,13 +107,21 @@ describe('LANE-NIGHTSHIFT-API-DIRECTIVE-BRIDGE — buildChainContextSection', ()
     it('T1: surfaces political directive verb when slot is populated', () => {
         const state = makeState({
             political_directives_by_faction: {
-                RS: { verb: 'PRESS_OFFENSIVE', target_corps_id: 'vrs_drina', directive_id: 'b1:RS:PRESS_OFFENSIVE:5' },
+                RS: {
+                    verb: 'PRESS_OFFENSIVE',
+                    target_corps_id: 'vrs_drina',
+                    directive_id: 'b1:RS:PRESS_OFFENSIVE:5',
+                    magnitude: 'maximum',
+                    permission_flags: ['authorize_offensive', 'authorize_reserve_commitment'],
+                },
             },
         });
         const out = buildChainContextSection(state, 'RS' as FactionId);
         expect(out).toContain(HEADER);
         expect(out).toContain('Political directive (from president): PRESS_OFFENSIVE');
         expect(out).toContain('target corps_id=vrs_drina');
+        expect(out).toContain('magnitude=maximum');
+        expect(out).toContain('permissions=authorize_offensive,authorize_reserve_commitment');
     });
 
     // T2: prompt includes per-corps role overlays sorted by corps_id alphabetically.

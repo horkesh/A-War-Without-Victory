@@ -2022,11 +2022,21 @@ army_co_decision_traces?: Record<string, Array<{
  *
  * Inner record keyed by corps_id (from formations[corpsId].faction lookup);
  * value mirrors `ArmyCorpsDirective` from army_order_interpretation.ts:
- * `{corps_id, role: 'primary'|'secondary'|'economy'|'contain', deviated: boolean}`.
+ * `{corps_id, role: 'primary'|'secondary'|'economy'|'contain', deviated: boolean}`
+ * plus optional directive vocabulary metadata.
  */
 army_corps_directives_by_faction?: Record<string, Record<string, {
     corps_id: string;
     role: 'primary' | 'secondary' | 'economy' | 'contain';
+    /** Optional political directive intensity copied through from A3. */
+    directive_magnitude?: 'limited' | 'standard' | 'maximum';
+    /** Optional closed political authorization flags copied through from A3. */
+    permission_flags?: Array<
+        'authorize_offensive'
+        | 'authorize_reserve_commitment'
+        | 'preserve_reserve'
+        | 'avoid_escalation'
+    >;
     deviated: boolean;
     /**
      * Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): canonical reason

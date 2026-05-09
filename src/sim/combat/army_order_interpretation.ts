@@ -403,11 +403,23 @@ export type PoliticalDirectiveVerb =
     | 'HONOR_TRUCE'              // NEGOTIATION-WEIGHT
     | 'BALANCE_FRONTS';          // default / undirected
 
+export type PoliticalDirectiveMagnitude = 'limited' | 'standard' | 'maximum';
+
+export type PoliticalDirectivePermissionFlag =
+    | 'authorize_offensive'
+    | 'authorize_reserve_commitment'
+    | 'preserve_reserve'
+    | 'avoid_escalation';
+
 export interface PoliticalDirective {
     /** Directive verb from the canonical vocabulary. */
     verb: PoliticalDirectiveVerb;
     /** Optional corps focus — when present, the army CO weights translation toward this corps. */
     target_corps_id?: string;
+    /** Optional intensity cue attached to the canonical verb. */
+    magnitude?: PoliticalDirectiveMagnitude;
+    /** Optional closed permission flags that clarify what the political layer authorizes. */
+    permission_flags?: PoliticalDirectivePermissionFlag[];
     /** Optional opaque directive id (for cross-reference into army_co_decision_traces). */
     directive_id?: string;
 }
@@ -454,6 +466,10 @@ export type ArmyCorpsDirectiveDeviationReason =
 export interface ArmyCorpsDirective {
     corps_id: string;
     role: ArmyCorpsDirectiveRole;
+    /** Political directive intensity cue copied through for downstream prompts/telemetry. */
+    directive_magnitude?: PoliticalDirectiveMagnitude;
+    /** Political authorization flags copied through in deterministic order. */
+    permission_flags?: PoliticalDirectivePermissionFlag[];
     /** True when this directive deviated from the raw political-verb baseline. */
     deviated: boolean;
     /**
@@ -755,6 +771,8 @@ export function interpretArmyDirective(
         const corpsDirectives: ArmyCorpsDirective[] = corpsIds.map(corpsId => ({
             corps_id: corpsId,
             role: rawRoleForVerb(directive.verb, corpsId === directive.target_corps_id),
+            ...(directive.magnitude !== undefined ? { directive_magnitude: directive.magnitude } : {}),
+            ...(directive.permission_flags !== undefined ? { permission_flags: [...directive.permission_flags] } : {}),
             deviated: false,
         }));
         return {
@@ -772,6 +790,8 @@ export function interpretArmyDirective(
         const corpsDirectives: ArmyCorpsDirective[] = corpsIds.map(corpsId => ({
             corps_id: corpsId,
             role: rawRoleForVerb(directive.verb, corpsId === directive.target_corps_id),
+            ...(directive.magnitude !== undefined ? { directive_magnitude: directive.magnitude } : {}),
+            ...(directive.permission_flags !== undefined ? { permission_flags: [...directive.permission_flags] } : {}),
             deviated: false,
         }));
         return {
@@ -805,6 +825,8 @@ export function interpretArmyDirective(
         const out: ArmyCorpsDirective = {
             corps_id: corpsId,
             role: finalRole,
+            ...(directive.magnitude !== undefined ? { directive_magnitude: directive.magnitude } : {}),
+            ...(directive.permission_flags !== undefined ? { permission_flags: [...directive.permission_flags] } : {}),
             deviated,
         };
         if (reasonCode !== undefined) out.deviation_reason = reasonCode;
@@ -1045,6 +1067,12 @@ function persistCorpsDirectives(
             role: cd.role,
             deviated: cd.deviated,
         };
+        if (cd.directive_magnitude !== undefined) {
+            persisted.directive_magnitude = cd.directive_magnitude;
+        }
+        if (cd.permission_flags !== undefined) {
+            persisted.permission_flags = [...cd.permission_flags];
+        }
         if (cd.deviation_reason !== undefined) {
             persisted.deviation_reason = cd.deviation_reason;
         }

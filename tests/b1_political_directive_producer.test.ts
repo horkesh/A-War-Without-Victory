@@ -93,6 +93,22 @@ function withSubstrate(state: GameState, faction: FactionId, overrides: {
     return state;
 }
 
+function withCampaignPlan(state: GameState, faction: FactionId): GameState {
+    (state.military as unknown as {
+        campaign_plans: Record<string, {
+            front_priorities: Array<{ corps_id: string; priority_weight: number }>;
+        }>;
+    }).campaign_plans = {
+        [faction]: {
+            front_priorities: [
+                { corps_id: `${faction}_secondary_corps`, priority_weight: 10 },
+                { corps_id: `${faction}_primary_corps`, priority_weight: 20 },
+            ],
+        },
+    };
+    return state;
+}
+
 beforeEach(() => {
     delete process.env.B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED;
 });
@@ -319,6 +335,22 @@ describe('B1 — verb derivation', () => {
         const state = withSubstrate(makeBaseState(15), 'RS', { hawkishness: 5 });
         const d = producePoliticalDirective(state, 'RS');
         expect(d!.directive_id).toBe('b1:RS:PRESS_OFFENSIVE:15');
+    });
+
+    it('T8e — directive carries target, magnitude, and ordered permission flags', () => {
+        const state = withCampaignPlan(
+            withSubstrate(makeBaseState(15), 'RS', { hawkishness: 5 }),
+            'RS',
+        );
+        const d = producePoliticalDirective(state, 'RS');
+        expect(d).not.toBeNull();
+        expect(d!.verb).toBe('PRESS_OFFENSIVE');
+        expect(d!.target_corps_id).toBe('RS_primary_corps');
+        expect(d!.magnitude).toBe('maximum');
+        expect(d!.permission_flags).toEqual([
+            'authorize_offensive',
+            'authorize_reserve_commitment',
+        ]);
     });
 });
 

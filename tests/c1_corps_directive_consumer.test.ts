@@ -178,6 +178,26 @@ describe('C1 — A3 persists corps_directives[] into army_corps_directives_by_fa
             deviated: false,
         });
     });
+
+    it('T1b — applyArmyDirectiveInterpretation persists directive magnitude and permission flags', () => {
+        const state = makeStateWithArmyCO('RS', {
+            competence: 5, stubbornness: 1, aggressiveness: 4,
+        });
+        injectDirective(state, 'RS', {
+            verb: 'PRESS_OFFENSIVE',
+            target_corps_id: 'RS_corps_a',
+            magnitude: 'maximum',
+            permission_flags: ['authorize_offensive', 'authorize_reserve_commitment'],
+        });
+
+        applyArmyDirectiveInterpretation(state);
+
+        const slot = readSlot(state);
+        expect(slot!['RS']!['RS_corps_a']).toMatchObject({
+            directive_magnitude: 'maximum',
+            permission_flags: ['authorize_offensive', 'authorize_reserve_commitment'],
+        });
+    });
 });
 
 // ===========================================================================
@@ -414,6 +434,29 @@ describe('C1 — pre-C1 save backward compatibility', () => {
         const errs: string[] = result.ok ? [] : result.errors;
         const c1Errors = errs.filter((e: string) => e.includes('army_corps_directives_by_faction'));
         expect(c1Errors.length).toBeGreaterThan(0);
+    });
+
+    it('T8c — validator accepts directive magnitude and permission flags', async () => {
+        const { validateGameStateShape } = await import('../src/state/validateGameState.js');
+        const state = makeStateWithArmyCO('RS');
+        type LooseMilitary = GameState['military'] & {
+            army_corps_directives_by_faction?: Record<string, Record<string, unknown>>;
+        };
+        (state.military as LooseMilitary).army_corps_directives_by_faction = {
+            RS: {
+                RS_corps_a: {
+                    corps_id: 'RS_corps_a',
+                    role: 'primary',
+                    directive_magnitude: 'maximum',
+                    permission_flags: ['authorize_offensive', 'authorize_reserve_commitment'],
+                    deviated: false,
+                },
+            },
+        };
+        const result = validateGameStateShape(state);
+        const errs: string[] = result.ok ? [] : result.errors;
+        const c1Errors = errs.filter((e: string) => e.includes('army_corps_directives_by_faction'));
+        expect(c1Errors).toHaveLength(0);
     });
 });
 

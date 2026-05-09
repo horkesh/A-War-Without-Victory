@@ -159,6 +159,28 @@ describe('A3 — interpretArmyDirective', () => {
         expect(state.military.pending_officer_events ?? []).toHaveLength(0);
     });
 
+    it('T1b — carries directive magnitude and permission flags into corps directives', () => {
+        const state = makeStateWithArmyCO('RS', {
+            competence: 5,
+            stubbornness: 1,
+            aggressiveness: 4,
+        });
+        const directive: PoliticalDirective = {
+            verb: 'PRESS_OFFENSIVE',
+            target_corps_id: 'RS_corps_a',
+            magnitude: 'maximum',
+            permission_flags: ['authorize_offensive', 'authorize_reserve_commitment'],
+        };
+        const result = interpretArmyDirective(state, 'RS', directive);
+        const target = result.corps_directives.find(cd => cd.corps_id === 'RS_corps_a');
+        expect(target).toBeDefined();
+        expect(target!.directive_magnitude).toBe('maximum');
+        expect(target!.permission_flags).toEqual([
+            'authorize_offensive',
+            'authorize_reserve_commitment',
+        ]);
+    });
+
     // T2 — Modified compliance: mid scores → notification fired with deviation
     //      within MAX_DIRECTIVE_DEVIATION.
     it('T2 — modified compliance fires pushback within max deviation budget', () => {

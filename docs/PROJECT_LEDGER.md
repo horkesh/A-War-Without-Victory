@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] v0.9.7 directive vocabulary metadata lane
+
+**Scope:** Political -> army -> corps command-chain expressiveness. The canonical `PoliticalDirective` verb vocabulary remains the locked six-verb set, but directives now carry optional `magnitude` (`limited`/`standard`/`maximum`) and ordered `permission_flags` (`authorize_offensive`, `authorize_reserve_commitment`, `preserve_reserve`, `avoid_escalation`) alongside existing `target_corps_id` and `directive_id`.
+
+**Fix:** Added closed types to `army_order_interpretation.ts`, made B1 derive magnitude/permission flags deterministically from existing leader profile/exhaustion/verb inputs, carried the fields through A3 return values and C1 persisted `army_corps_directives_by_faction`, validated the saved slot, surfaced metadata in Claude commander chain-context prompts, and let `api_president.ts`/`run_three_commanders.ts` preserve optional president-layer metadata after rich-verb canonicalization.
+
+**Validation:** Red tests first: focused Vitest run failed on missing `magnitude`, `permission_flags`, A3 forwarding, and API prompt/parser fields. Green targeted regression: `vitest tests/c1_corps_directive_consumer.test.ts tests/b1_political_directive_producer.test.ts tests/a3_army_order_interpretation.test.ts tests/api_commander_directive_context.test.ts tests/d1_persona_infrastructure.test.ts` passed 75/75. `npm.cmd run typecheck` clean. `npm.cmd run desktop:startup-snapshot:check` clean.
+
+**Determinism/canon:** No randomness, timestamps, new pipeline step, or new verb values. The metadata is derived from existing deterministic inputs and stored in stable array order. FORAWWV and Systems Manual updated to make clear that metadata clarifies intent but does not expand the six-verb canon.
+
+---
+
 ## [2026-05-10] War dispatch displacement window restored
 
 **Scope:** Cosmetic AI dispatch substrate. After v0.9.3 Lane D converted `displacement_event_log` into a per-turn buffer cleared at end-of-turn, `war_dispatches.ts` could no longer compute its intended 4-turn/monthly "newly displaced" prompt cue. It fell back to the current-turn buffer only.

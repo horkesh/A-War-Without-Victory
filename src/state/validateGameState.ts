@@ -509,12 +509,26 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                         'cautious_preference',
                         'compliance_score_low',
                     ]);
+                    const validMagnitudes = new Set(['limited', 'standard', 'maximum']);
+                    const validPermissionFlags = new Set([
+                        'authorize_offensive',
+                        'authorize_reserve_commitment',
+                        'preserve_reserve',
+                        'avoid_escalation',
+                    ]);
                     for (const [corpsId, cd] of Object.entries(factionMap as Record<string, unknown>)) {
                         if (cd == null || typeof cd !== 'object' || Array.isArray(cd)) {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId} must be an object`);
                             continue;
                         }
-                        const entry = cd as { corps_id?: unknown; role?: unknown; deviated?: unknown; deviation_reason?: unknown };
+                        const entry = cd as {
+                            corps_id?: unknown;
+                            role?: unknown;
+                            directive_magnitude?: unknown;
+                            permission_flags?: unknown;
+                            deviated?: unknown;
+                            deviation_reason?: unknown;
+                        };
                         if (typeof entry.corps_id !== 'string' || entry.corps_id.length === 0) {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.corps_id must be a non-empty string`);
                         }
@@ -523,6 +537,16 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                         }
                         if (typeof entry.deviated !== 'boolean') {
                             errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.deviated must be a boolean`);
+                        }
+                        if (entry.directive_magnitude !== undefined) {
+                            if (typeof entry.directive_magnitude !== 'string' || !validMagnitudes.has(entry.directive_magnitude)) {
+                                errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.directive_magnitude must be one of 'limited'|'standard'|'maximum' when present`);
+                            }
+                        }
+                        if (entry.permission_flags !== undefined) {
+                            if (!Array.isArray(entry.permission_flags) || entry.permission_flags.some(flag => typeof flag !== 'string' || !validPermissionFlags.has(flag))) {
+                                errors.push(`military.army_corps_directives_by_faction.${fid}.${corpsId}.permission_flags must contain only canonical political directive permission flags when present`);
+                            }
                         }
                         if (entry.deviation_reason !== undefined) {
                             if (typeof entry.deviation_reason !== 'string' || !validDeviationReasons.has(entry.deviation_reason)) {
