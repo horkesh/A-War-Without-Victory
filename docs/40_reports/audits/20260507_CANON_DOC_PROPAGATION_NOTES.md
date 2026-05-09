@@ -98,11 +98,15 @@ Sections WHERE this session's work would touch FORAWWV.md if edits were authoriz
 
 ## Recommended Canon Review Sequence (Manual)
 
-1. **HIGH:** SRK siege defender morale §6 sign-off chain — DDR is staged at `bb0e449e`; Engine Invariants §6.x text amendment pending sign-off.
-2. **MEDIUM:** Systems Manual §6.4 + §7.9 advisory text addition for persona-roleplay QA mode (flag-gated; default OFF; byte-stable).
-3. **MEDIUM:** SENSITIVE_HISTORY_DESIGN_GATE §1 Ring 1 implementation-note on data-not-comment name-pool exclusion.
-4. **LOW:** Engine Invariants §11.4 clarification on harness-side telemetry artifacts.
-5. **MANUAL ONLY:** FORAWWV.md — the four section areas listed above; the user / canon authority must decide whether to amend.
+1. ~~**HIGH:** SRK siege defender morale §6 sign-off chain — DDR is staged at `bb0e449e`; Engine Invariants §6.x text amendment pending sign-off.~~ **RESOLVED 2026-05-09:** User signed off the recommendation `8e974004`; Phase 1 shipped at `ef5d01fc`/`5313fd41`/`71904efd`; canon §6.10 (corrected from DDR-proposed §6.6 because Systems Manual §6.6 was already taken by Graz Accords) landed in Engine Invariants v0.9.0 + Systems Manual v0.9.0 in commit `71904efd`. Phase 2 188w validation closed at `32c128f8`. The §6.10 entry covers schedule + floor + pipeline placement + env-flag gate + citations + faction-symmetric framing + ICTY references — full canon coverage of the mechanism.
+2. ~~**MEDIUM:** Systems Manual §6.4 + §7.9 advisory text addition for persona-roleplay QA mode (flag-gated; default OFF; byte-stable).~~ **RESOLVED 2026-05-09:** Shipped at `d530bd75` per LANE-NIGHTSHIFT-CANON-DOC-AMENDMENTS-2026-05-07-PROPAGATION.
+3. ~~**MEDIUM:** SENSITIVE_HISTORY_DESIGN_GATE §1 Ring 1 implementation-note on data-not-comment name-pool exclusion.~~ **RESOLVED 2026-05-09:** Shipped at `d530bd75` per same lane.
+4. **LOW:** Engine Invariants §11.4 clarification on harness-side telemetry artifacts. **STILL OPEN** — low priority; not scheduled.
+5. **MANUAL ONLY:** FORAWWV.md — the four section areas listed above; the user / canon authority must decide whether to amend. **NOTE:** FORAWWV §X-§XVI shipped 2026-05-07 at `bca414ba` (one-turn user-authorized exception to "never auto-edit FORAWWV") covering: AI Officers / political → army → corps chain (§X), Sensitive-history operation trigger floors (§XI), AI persona QA mode (§XII), OOB-data correctness (§XIII), Default-off byte-stability invariant (§XIV), Side-channel telemetry (§XV), Calibration discipline (§XVI). Future FORAWWV amendments remain manual-only per CLAUDE.md standing rule.
+
+## Resolution status (2026-05-09)
+
+3 of 4 listed items RESOLVED across two waves: §6.10 SRK siege defender (Phase 1 closeout `71904efd` + Phase 2 closeout `32c128f8`); Systems Manual §6.4/§7.9 + SENSITIVE_HISTORY_DESIGN_GATE §1 (`d530bd75`). FORAWWV §X-§XVI also covered (`bca414ba`). Remaining LOW item (Engine Invariants §11.4 telemetry clarification) is unscheduled.
 
 ## Determinism Footprint
 
