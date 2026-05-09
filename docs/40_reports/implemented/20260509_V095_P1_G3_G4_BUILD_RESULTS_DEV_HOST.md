@@ -341,3 +341,39 @@ The v0.9.5 closure should now require either:
 Recommendation: parent's call. Either path is defensible. The build does not have a structural blocker.
 
 CHECKPOINT v3: launch + version coherence + cleanup complete. Final commit.
+
+---
+
+## Resolution notes (LANE-NIGHTSHIFT-V096-V095-COSMETIC-FINDINGS, 2026-05-07)
+
+Both cosmetic findings addressed in v0.9.6 follow-up lane:
+
+### W-11-A — RESOLVED (code fix)
+
+**Commit:** `c4db5bef` — `fix(desktop): gate openDevTools on isPackaged===false (W-11-A v0.9.5 cosmetic)`.
+
+**File:** `src/desktop/electron-main.cjs:1252` (`createWindow()`).
+
+**Change:** `openDevTools: true` → `openDevTools: !app.isPackaged`.
+
+**Effect:** In packaged production builds, the detached DevTools window no longer opens by default, so `CloseMainWindow` from the OS targets the warroom window (not DevTools), and the `window-all-closed` → `app.quit()` cascade fires cleanly. Dev-mode (`npm run desktop`, where `app.isPackaged === false`) retains DevTools-on-launch behavior for developer convenience. Standard Electron pattern; this is what most packaged Electron apps ship with.
+
+**Verification:** AC-typecheck-clean PASS (`npx tsc --noEmit`). AC-G3 hash baseline `86ebf26ae0271465` not at risk — Electron main entry is Ring 0 build infrastructure, no engine code touched, no §6 surface.
+
+**Re-test on next packaged build:** Build a fresh installer, install to a temp dir via `/D=`, launch, send `CloseMainWindow` to the process. Expected: process exits cleanly within 5 s without force-kill.
+
+### W-4-A — DOCUMENTED (no code change)
+
+**Why no fix:** A code fix would require introducing a custom `installer.nsh` script (electron-builder's `nsis.include` field) with conditional shortcut-creation logic that detects `/D=` redirect by comparing `$INSTDIR` against the default `%LOCALAPPDATA%\Programs\<productName>` path. Maintaining a custom NSIS template adds a long-tail surface (NSIS macro syntax, electron-builder template-include API drift) for what is fundamentally a dev-tester convenience, not an end-user concern.
+
+**End-user behavior is correct:** Users running the installer normally (default install dir, GUI mode) WANT Start Menu + Desktop shortcuts. The "pollution" only shows up when an operator does silent-install-to-temp-dir for testing — i.e. the runbook's `Start-Process -ArgumentList "/S","/D=<temp>"` pattern. That pattern is itself an approximation of clean-VM testing; testers using it can simply remove the two shortcut files post-test (as this lane's tester did at `Cleanup — state-pollution remediation` above).
+
+**Operator workaround (already documented in this report):**
+```powershell
+Remove-Item -Force "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\A War Without Victory.lnk" -ErrorAction SilentlyContinue
+Remove-Item -Force "$env:USERPROFILE\Desktop\A War Without Victory.lnk" -ErrorAction SilentlyContinue
+```
+
+**Status:** W-4-A is now classified as a **known dev-only quirk of NSIS `/S /D=` testing pattern**, not a defect. End-user installs are unaffected. If a future v1.0 polish pass adds a custom `installer.nsh` for code-signing or other reasons, conditional shortcut creation can be added then.
+
+CHECKPOINT v4 (2026-05-07): W-11-A code fix landed (`!app.isPackaged`), W-4-A documented as dev-only quirk. Both v0.9.5 cosmetic findings closed for v0.9.6.
