@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-09] Baseline Regression recovery + Codex ownership handoff
+
+**Scope:** Test/process-only recovery after Codex handover. `origin/main` Baseline Regression was red on `tests/adapter_field_completeness.test.ts` because the test still asserted `parsed.displacementEventLog.length > 0`. That assertion became stale after v0.9.3 Lane D intentionally converted `state.displacement.displacement_event_log` into a per-turn buffer cleared from final saves, with durable displacement totals carried through `displacement_humanitarian_aggregates`, `displacement_origin_dest_arrivals`, and adapter `displacementByMun`.
+
+**Fix:** Updated the adapter completeness test to assert the per-turn event buffer remains exposed as an array while cumulative displacement still parses through `displacementByMun` with nonzero displaced-out totals. Added a standing napkin directive that Codex now owns repo work end-to-end and treats Claude/subagent/older handoff notes as claim sets requiring local verification.
+
+**Validation:** `vitest tests/adapter_field_completeness.test.ts` 18/18 GREEN; `vitest tests/adapter_field_completeness.test.ts tests/state/displacement_event_log.test.ts` 39/39 GREEN; `npm.cmd run typecheck` clean. Local Windows `npm run test:vitest:fast` remains blocked by existing `ENAMETOOLONG` path expansion in `tools/test/run_vitest_slice.mjs`; GitHub Linux CI is the authoritative fast-slice gate for this fix.
+
+**Behavior:** No simulation, scenario, canon, or player-facing behavior changed. This is a stale-test-contract correction plus process ownership note.
+
+---
+
 ## [2026-05-08] v0.9.3 perf-memory CLOSED — LANE D streaming (post-v0.9.6 closure work)
 
 **Sequence (afternoon, post-v0.9.6-closure):** Phase 0 panel re-read → heap-profile re-dispatch (`0796ff26`/`d04adc81`, recovered from agent runtime cutoff) → 188w n1736 with snapshots (parent-owned per FORAWWV §XVI) → snapshot analyzer (`d83b3e2c`) named `displacement_event_log` accumulator → D-PRE substrate (`1c5e1323`) added 2 bounded aggregate fields + unified `appendDisplacementEvent` helper, byte-stable to baseline → D-CONTENT V1 (`a4d11fd8` agent) STOPPED-AND-ASKED with 3 structural findings (cap.refugees_received per-turn assignment; 49.7% of real events lack `caused_by`; per-turn buffer + Option α legacy log-scan mutually inconsistent) → parent authorized Path A (re-baseline accepted; capture-time controller attribution = more historically faithful) → D-CONTENT V2 (`834f59f9`/`0c9c44e1`/`45404e43`) shipped clean: anchors 26/27 (brcko volatile only), benchmarks 6/6, new 40w hash `765c1c19912ce9e8` → `86ebf26ae0271465` → 188w n1741 validation (`68273083`): final_save.json **30.11 MB → 6.84 MB (-76.2%)**; heap snapshots **-36/-46/-48% at t60/120/180**; dominant string node **-73/-77/-77%**; **100% reduction on field itself** (per-turn buffer cleared at end-of-turn). Stream `displacement_event_log.jsonl` 87,538 events / 13.21 MB at 188w; aggregates persist (3×3 humanitarian + 226 origin-dest keys at 188w end).

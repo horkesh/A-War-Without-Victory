@@ -106,8 +106,12 @@ describe.skipIf(!hasSave)('GameStateAdapter field completeness', () => {
     });
 
     // ── Displacement ─────────────────────────────────────────────────
-    it('extracts displacement event log', () => {
-        expect(parsed.displacementEventLog.length).toBeGreaterThan(0);
+    it('extracts displacement state and exposes the per-turn event buffer', () => {
+        expect(Array.isArray(parsed.displacementEventLog)).toBe(true);
+        expect(Object.keys(parsed.displacementByMun ?? {}).length).toBeGreaterThan(50);
+        const displacedOutTotal = Object.values(parsed.displacementByMun ?? {})
+            .reduce((sum: number, row: any) => sum + row.displacedOut, 0);
+        expect(displacedOutTotal).toBeGreaterThan(0);
     });
 
     // ── Casualty ledger ──────────────────────────────────────────────

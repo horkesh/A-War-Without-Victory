@@ -942,23 +942,25 @@ After EVERY scenario run, the orchestrator:
    Do instead: Read `docs/40_reports/MAP_GEOMETRY_MASTER.md` before any polygon/front-line/geometry work. Covers: polygon topology gaps, shared arc issue, vertex snapping approach, edges_viewer diagnostic.
 
 ## User Directives
-1. **[Standing] working-on.md — task continuity across compaction**
+1. **[2026-05-09] Codex owns future repo work**
+   Do instead: Treat Claude/subagent/older handoff notes as claim sets to verify locally; Codex is the active owner for planning, implementation, verification, docs, and cleanup from here forward.
+2. **[Standing] working-on.md — task continuity across compaction**
    Do instead: When context is visibly high, write `working-on.md` to project root: (1) current task, (2) files being modified, (3) next 3 steps. At session start: read and delete if exists.
-2. **[Standing] Life lessons enforcement system (3 mechanisms)**
+3. **[Standing] Life lessons enforcement system (3 mechanisms)**
    Do instead: (A) Session start: read `docs/life_lessons.md`, flag relevant lessons. (B) Pre-commit: `/awwv_pre_commit_check` includes life-lessons compliance. (C) Daily cron: `3 6 * * *` — re-schedule each session.
-3. **[Standing] Absolute paths**
+4. **[Standing] Absolute paths**
    Do instead: Always use absolute paths for tool calls.
-4. **[Standing] Update napkin during work**
+5. **[Standing] Update napkin during work**
    Do instead: Update napkin after significant changes; don't wait until session end.
-5. **[2026-02-28] Maximize safe parallel execution**
+6. **[2026-02-28] Maximize safe parallel execution**
    Do instead: Run independent tasks in parallel; sequence only on shared-file or dependency gates.
-6. **[2026-02-25] Counterattacks are correct**
+7. **[2026-02-25] Counterattacks are correct**
    Do instead: Captured territory SHOULD be immediately reclaimable.
-7. **[2026-02-22] Replay disabled by default**
+8. **[2026-02-22] Replay disabled by default**
    Do instead: Only generate replay with `--video` flag.
-8. **[2026-02-28] Canonical map is React+MapLibre**
+9. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
-9. **[2026-04-03] Test discovery must be automatic**
+10. **[2026-04-03] Test discovery must be automatic**
    Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
