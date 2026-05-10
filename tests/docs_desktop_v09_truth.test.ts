@@ -111,6 +111,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('`buildBriefing` 1,077.718ms -> 1,041.042ms');
     expect(roadmap).toContain('split `assessSituation` and `emitCommanderOutput` internals');
     expect(roadmap).toContain('probe-target lookup map (316.271ms -> 316.829ms)');
+    expect(roadmap).toContain('`detectZones.mustHold` dropped 126.351ms -> 115.098ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_DETECT_ZONES_MUST_HOLD_PROFILE.md');
     expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
     expect(roadmap).toContain('`assessSituation.detectZones`');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');

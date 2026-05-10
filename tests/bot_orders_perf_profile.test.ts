@@ -106,6 +106,14 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.evaluateForces');
         expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.concentrationZones');
         expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.assessThreats');
+        const zoneDetection = readFileSync(resolve('src/sim/combat/commander/zone_detection.ts'), 'utf8');
+        expect(zoneDetection).toContain('DETECT_ZONES_PROFILE_PREFIX');
+        expect(zoneDetection).toContain('.groupComponents');
+        expect(zoneDetection).toContain('.buildZoneAssessments');
+        expect(zoneDetection).toContain('.frontFacts');
+        expect(zoneDetection).toContain('.depth');
+        expect(zoneDetection).toContain('.corridorWidth');
+        expect(zoneDetection).toContain('.mustHold');
         const commanderEmit = readFileSync(resolve('src/sim/combat/commander/emit.ts'), 'utf8');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildDirective');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations');

@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] perf(commander): detectZones must-hold prefilter
+
+**Scope:** CPU performance profiling lane for `assessSituation.detectZones`, following the retained emit/assess sub-buckets.
+
+**Fix:** Added default-off `detectZones` sub-buckets, then optimized the measured `mustHold` hotspot by precomputing scenario-authored must-hold OSIDs, reusing sorted friendly OSID order inside chokepoint component checks, and skipping the expensive engine-derived chokepoint walk when a zone contains no chokepoint.
+
+**Measured result:** Profiled 40w n1767 -> n1768 kept final hash `ea9f3db7ac59a443`. `detectZones` dropped 238.720ms -> 235.058ms, `detectZones.buildZoneAssessments` dropped 216.538ms -> 203.192ms, and `detectZones.mustHold` dropped 126.351ms -> 115.098ms.
+
+**Validation:** Red profiler guard first failed on missing `detectZones.*` sub-labels. Green focused tests: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts tests/commander/briefing_campaign_intent.test.ts --reporter=dot` passed 19/19. `npm.cmd run typecheck` passed. Profiled 40w n1768 kept final hash `ea9f3db7ac59a443`.
+
+**Canon posture:** Pure performance and default-off diagnostic instrumentation. No scenario data, save schema, canon rule, event trigger, score rule, or player lever changed.
+
+---
+
 ## [2026-05-10] feat(codex): Zepa and Federation Offensive findings-breadth wave
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Continues the same existing-atoms pattern from the Ahmici/Operation Storm wave.

@@ -13,6 +13,7 @@ import type { SpatialContext } from '../../spatial_context.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import { getCoEthnicShare } from '../ethnic_defense.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import type { ZoneAssessment, ZoneId, ZonePosture } from './commander_state.js';
 import { GARRISON_EDGES_PER_BRIGADE } from './allocate.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
@@ -24,6 +25,7 @@ import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
  * Filters minor valley chokepoints; only strategic corridors (Brcko-scale) qualify.
  */
 const MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05;
+const DETECT_ZONES_PROFILE_PREFIX = 'commander.runCommanderForCorps.decide.assessSituation.detectZones';
 
 /**
  * BFS count of reachable OSIDs from `source` through `friendlySet`, excluding
@@ -60,6 +62,7 @@ interface FriendlyComponentFacts {
 
 function collectFriendlyComponentsExcluding(
     friendlySet: ReadonlySet<string>,
+    sortedFriendlyOsids: readonly string[],
     adjacency: ReadonlyMap<string, readonly string[]>,
     excludeOsid: string,
     zoneOsidSet: ReadonlySet<string>,
@@ -68,8 +71,7 @@ function collectFriendlyComponentsExcluding(
     const visited = new Set<string>();
     const components: FriendlyComponentFacts[] = [];
 
-    const sortedFriendly = [...friendlySet].sort(strictCompare);
-    for (const source of sortedFriendly) {
+    for (const source of sortedFriendlyOsids) {
         if (source === excludeOsid || visited.has(source)) continue;
 
         const members = new Set<string>([source]);
@@ -134,185 +136,225 @@ export function detectZones(
     // from scenario start regardless of political status. See issue #9.
     const politicallyConnectedOsids =
         spatial.politicallyConnectedOsidsByFaction?.get(faction) ?? allFriendlyOsids;
+    const adjacency = spatial.adjacency as ReadonlyMap<string, readonly string[]>;
+    const sortedCorpsBrigades = [...corpsBrigades].sort((a, b) => strictCompare(a.id, b.id));
+    const chokepointSet = new Set(graphAnalysis?.chokepoints ?? []);
+    const minIsolated = Math.ceil(allFriendlyOsids.size * MUST_HOLD_MIN_ISOLATED_FRACTION);
+    const sortedAllFriendlyOsids = [...allFriendlyOsids].sort(strictCompare);
+    const sectorMustHoldOsids = new Set<string>();
+    for (const sector of sectors) {
+        if (sector.must_hold !== true) continue;
+        for (const osid of sector.territory_osids) {
+            sectorMustHoldOsids.add(osid);
+        }
+    }
 
     // 2. Group corps OSIDs by component index
-    const componentGroups = new Map<number, string[]>();
-    for (const osid of [...corpsOsids].sort(strictCompare)) {
-        const compIdx = componentMap.get(osid);
-        if (compIdx === undefined) continue;
-        let group = componentGroups.get(compIdx);
-        if (!group) {
-            group = [];
-            componentGroups.set(compIdx, group);
-        }
-        group.push(osid);
-    }
+    const { componentGroups, sortedCompIndices, mainBodyCompIdx } = botOrdersPerfTime(
+        `${DETECT_ZONES_PROFILE_PREFIX}.groupComponents`,
+        () => {
+            const groups = new Map<number, string[]>();
+            for (const osid of [...corpsOsids].sort(strictCompare)) {
+                const compIdx = componentMap.get(osid);
+                if (compIdx === undefined) continue;
+                let group = groups.get(compIdx);
+                if (!group) {
+                    group = [];
+                    groups.set(compIdx, group);
+                }
+                group.push(osid);
+            }
 
-    // 3. Find the main body (largest group by OSID count)
-    let mainBodyCompIdx = -1;
-    let mainBodySize = 0;
-    const sortedCompIndices = [...componentGroups.keys()].sort((a, b) => a - b);
-    for (const compIdx of sortedCompIndices) {
-        const size = componentGroups.get(compIdx)!.length;
-        if (size > mainBodySize) {
-            mainBodySize = size;
-            mainBodyCompIdx = compIdx;
-        }
-    }
+            // 3. Find the main body (largest group by OSID count)
+            let mainBody = -1;
+            let mainBodySize = 0;
+            const compIndices = [...groups.keys()].sort((a, b) => a - b);
+            for (const compIdx of compIndices) {
+                const size = groups.get(compIdx)!.length;
+                if (size > mainBodySize) {
+                    mainBodySize = size;
+                    mainBody = compIdx;
+                }
+            }
+
+            return { componentGroups: groups, sortedCompIndices: compIndices, mainBodyCompIdx: mainBody };
+        },
+    );
 
     // 4. Build zone assessments
-    const zones: ZoneAssessment[] = [];
+    const zones = botOrdersPerfTime(`${DETECT_ZONES_PROFILE_PREFIX}.buildZoneAssessments`, () => {
+        const zoneAssessments: ZoneAssessment[] = [];
 
-    for (const compIdx of sortedCompIndices) {
-        const zoneOsids = componentGroups.get(compIdx)!;
-        const zoneOsidSet = new Set(zoneOsids);
-        const isMainBody = compIdx === mainBodyCompIdx;
-        // Use the lex-first OSID as the zone ID anchor — stable across turns even if
-        // connected-component indices re-number due to sector changes or brigade movement.
-        const zoneId = `zone:${corpsId}:${[...zoneOsids].sort(strictCompare)[0]}` as ZoneId;
+        for (const compIdx of sortedCompIndices) {
+            const zoneOsids = componentGroups.get(compIdx)!;
+            const zoneOsidSet = new Set(zoneOsids);
+            const isMainBody = compIdx === mainBodyCompIdx;
+            // Use the lex-first OSID as the zone ID anchor — stable across turns even if
+            // connected-component indices re-number due to sector changes or brigade movement.
+            const zoneId = `zone:${corpsId}:${zoneOsids[0]}` as ZoneId;
 
-        // Count front edges overlapping this zone and collect enemy adjacent OSIDs
-        let frontEdgeCount = 0;
-        const frontOsidsInZone = new Set<string>();
-        const enemyAdjacentSet = new Set<string>();
-        for (const sector of sectors) {
-            if (sector.corps_id !== corpsId) continue;
-            for (const subSeg of sector.sub_segments) {
-                // Check if sub-segment overlaps this zone
-                let overlapCount = 0;
-                for (const osid of subSeg.friendly_osids) {
-                    if (zoneOsidSet.has(osid)) {
-                        overlapCount++;
-                        frontOsidsInZone.add(osid);
+            // Count front edges overlapping this zone and collect enemy adjacent OSIDs
+            const { frontEdgeCount, frontOsidsInZone, enemyAdjacentOsids } = botOrdersPerfTime(
+                `${DETECT_ZONES_PROFILE_PREFIX}.frontFacts`,
+                () => {
+                    let frontEdgeCount = 0;
+                    const frontOsidsInZone = new Set<string>();
+                    const enemyAdjacentSet = new Set<string>();
+                    for (const sector of sectors) {
+                        if (sector.corps_id !== corpsId) continue;
+                        for (const subSeg of sector.sub_segments) {
+                            // Check if sub-segment overlaps this zone
+                            let overlapCount = 0;
+                            for (const osid of subSeg.friendly_osids) {
+                                if (zoneOsidSet.has(osid)) {
+                                    overlapCount++;
+                                    frontOsidsInZone.add(osid);
+                                }
+                            }
+                            if (overlapCount > 0) {
+                                frontEdgeCount += subSeg.length_edges;
+                                for (const eo of subSeg.enemy_osids) {
+                                    enemyAdjacentSet.add(eo);
+                                }
+                            }
+                        }
                     }
-                }
-                if (overlapCount > 0) {
-                    frontEdgeCount += subSeg.length_edges;
-                    for (const eo of subSeg.enemy_osids) {
-                        enemyAdjacentSet.add(eo);
-                    }
-                }
-            }
-        }
-        const enemyAdjacentOsids = [...enemyAdjacentSet].sort(strictCompare);
-
-        // Compute depth via BFS from front OSIDs inward
-        const depth = computeZoneDepth(frontOsidsInZone, zoneOsidSet, spatial);
-
-        // Compute corridor width. Use politically-connected set (own faction +
-        // allied factions) rather than own-faction-only — an HVO enclave with
-        // an ARBiH-held neighbour is NOT besieged while allied. When the
-        // alliance breaks, politicallyConnectedOsids shrinks back to own-
-        // faction-only and the same enclave becomes besieged organically.
-        const corridorWidth = measureCorridorWidth(
-            zoneOsidSet,
-            politicallyConnectedOsids,
-            spatial.adjacency as ReadonlyMap<string, readonly string[]>,
-            isMainBody,
-        );
-
-        // Compute population value (sum of co-ethnic shares)
-        let populationValue = 0;
-        if (ethnicMap) {
-            for (const osid of zoneOsids) {
-                populationValue += getCoEthnicShare(osid, faction, ethnicMap);
-            }
-        }
-
-        // Compute strategic value (connectivity-based)
-        const strategicValue = computeStrategicValue(zoneOsidSet, spatial);
-
-        // Identify brigades in this zone
-        const assignedBrigadeIds: FormationId[] = [];
-        for (const brig of [...corpsBrigades].sort((a, b) => strictCompare(a.id, b.id))) {
-            if (brig.location_osid && zoneOsidSet.has(brig.location_osid)) {
-                assignedBrigadeIds.push(brig.id);
-            }
-        }
-
-        // Derive posture
-        const posture = derivePosture(corridorWidth, frontEdgeCount, assignedBrigadeIds.length);
-
-        // Compute garrison budget
-        const garrisonBudget = frontEdgeCount > 0
-            ? Math.ceil(frontEdgeCount / GARRISON_EDGES_PER_BRIGADE[posture])
-            : 0;
-
-        // Commitment ratio
-        const commitmentRatio = computeCommitmentRatio(frontEdgeCount, assignedBrigadeIds.length);
-
-        // Surplus and deficit
-        const surplus = Math.max(0, assignedBrigadeIds.length - garrisonBudget);
-        const deficit = Math.max(0, garrisonBudget - assignedBrigadeIds.length);
-
-        // Surplus brigade IDs (last N by sorted order — those beyond garrison budget)
-        const surplusBrigades = surplus > 0 ? assignedBrigadeIds.slice(garrisonBudget) : [];
-
-        // Track 1: scenario-authored must_hold.
-        // Primary: any zone OSID in the scenario-authored mustHoldOsids set (from briefing).
-        // Fallback: sector.must_hold flag (set by external tooling or future player UI).
-        const scenarioMustHold = (mustHoldOsids.size > 0 && zoneOsids.some(o => mustHoldOsids.has(o)))
-            || sectors.some(sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o)));
-
-        // Track 2: engine-derived — zone contains a structural chokepoint whose removal
-        // would isolate at least MUST_HOLD_MIN_CLUSTER_SIZE friendly OSIDs.
-        const chokepointSet = new Set(graphAnalysis?.chokepoints ?? []);
-        const minIsolated = Math.ceil(allFriendlyOsids.size * MUST_HOLD_MIN_ISOLATED_FRACTION);
-        // DISABLED: fraction-of-faction-total can't separate RS Brcko (~9%) from ARBiH Central
-        // Bosnia valley passes (~8%) — both fall in the same range, so any threshold either
-        // over-garrisons ARBiH 4th Corps (cascade → depletion) or misses Brcko.
-        // Fix needed: replace fraction with absolute OSID count OR corps-boundary discriminator
-        // (only fire if isolated cluster spans a different corps jurisdiction).
-        // Track this as a P1 calibration item: run 40w scenario with logging to measure
-        // actual Posavina pocket size vs ARBiH valley cluster sizes.
-        const engineMustHold = chokepointSet.size > 0 && zoneOsids.some(osid => {
-            if (!chokepointSet.has(osid)) return false;
-            const neighbors = (spatial.adjacency.get(osid as string) ?? [])
-                .filter((n: string) => allFriendlyOsids.has(n) && n !== osid);
-            if (neighbors.length < 2) return false;
-
-            const adj = spatial.adjacency as ReadonlyMap<string, readonly string[]>;
-            const components = collectFriendlyComponentsExcluding(
-                allFriendlyOsids,
-                adj,
-                osid,
-                zoneOsidSet,
-                corpsOsidSet,
+                    return {
+                        frontEdgeCount,
+                        frontOsidsInZone,
+                        enemyAdjacentOsids: [...enemyAdjacentSet].sort(strictCompare),
+                    };
+                },
             );
 
-            const zoneComponent = components.find(component => component.hasZoneOsid);
-            if (!zoneComponent) return false;
-
-            return components.some(component =>
-                component !== zoneComponent &&
-                component.hasOutsideCorpsOsid &&
-                component.members.size >= minIsolated
+            // Compute depth via BFS from front OSIDs inward
+            const depth = botOrdersPerfTime(
+                `${DETECT_ZONES_PROFILE_PREFIX}.depth`,
+                () => computeZoneDepth(frontOsidsInZone, zoneOsidSet, spatial),
             );
-        });
 
-        const isMustHold = scenarioMustHold || engineMustHold;
+            // Compute corridor width. Use politically-connected set (own faction +
+            // allied factions) rather than own-faction-only — an HVO enclave with
+            // an ARBiH-held neighbour is NOT besieged while allied. When the
+            // alliance breaks, politicallyConnectedOsids shrinks back to own-
+            // faction-only and the same enclave becomes besieged organically.
+            const corridorWidth = botOrdersPerfTime(
+                `${DETECT_ZONES_PROFILE_PREFIX}.corridorWidth`,
+                () => measureCorridorWidth(
+                    zoneOsidSet,
+                    politicallyConnectedOsids,
+                    adjacency,
+                    isMainBody,
+                ),
+            );
 
-        zones.push({
-            zone_id: zoneId,
-            corps_id: corpsId,
-            faction,
-            osids: zoneOsids,
-            front_edge_count: frontEdgeCount,
-            depth,
-            corridor_width: corridorWidth,
-            population_value: populationValue,
-            strategic_value: strategicValue,
-            posture,
-            commitment_ratio: commitmentRatio,
-            garrison_budget: garrisonBudget,
-            assigned_brigades: assignedBrigadeIds,
-            surplus_brigades: surplusBrigades,
-            deficit,
-            is_main_body: isMainBody,
-            enemy_adjacent_osids: enemyAdjacentOsids,
-            is_must_hold: isMustHold,
-        });
-    }
+            // Compute population value (sum of co-ethnic shares)
+            let populationValue = 0;
+            if (ethnicMap) {
+                for (const osid of zoneOsids) {
+                    populationValue += getCoEthnicShare(osid, faction, ethnicMap);
+                }
+            }
+
+            // Compute strategic value (connectivity-based)
+            const strategicValue = computeStrategicValue(zoneOsidSet, spatial);
+
+            // Identify brigades in this zone
+            const assignedBrigadeIds: FormationId[] = [];
+            for (const brig of sortedCorpsBrigades) {
+                if (brig.location_osid && zoneOsidSet.has(brig.location_osid)) {
+                    assignedBrigadeIds.push(brig.id);
+                }
+            }
+
+            // Derive posture
+            const posture = derivePosture(corridorWidth, frontEdgeCount, assignedBrigadeIds.length);
+
+            // Compute garrison budget
+            const garrisonBudget = frontEdgeCount > 0
+                ? Math.ceil(frontEdgeCount / GARRISON_EDGES_PER_BRIGADE[posture])
+                : 0;
+
+            // Commitment ratio
+            const commitmentRatio = computeCommitmentRatio(frontEdgeCount, assignedBrigadeIds.length);
+
+            // Surplus and deficit
+            const surplus = Math.max(0, assignedBrigadeIds.length - garrisonBudget);
+            const deficit = Math.max(0, garrisonBudget - assignedBrigadeIds.length);
+
+            // Surplus brigade IDs (last N by sorted order — those beyond garrison budget)
+            const surplusBrigades = surplus > 0 ? assignedBrigadeIds.slice(garrisonBudget) : [];
+
+            // Track 1: scenario-authored must_hold.
+            // Primary: any zone OSID in the scenario-authored mustHoldOsids set (from briefing).
+            // Fallback: sector.must_hold flag (set by external tooling or future player UI).
+            const isMustHold = botOrdersPerfTime(`${DETECT_ZONES_PROFILE_PREFIX}.mustHold`, () => {
+                const scenarioMustHold = (mustHoldOsids.size > 0 && zoneOsids.some(o => mustHoldOsids.has(o)))
+                    || (sectorMustHoldOsids.size > 0 && zoneOsids.some(o => sectorMustHoldOsids.has(o)));
+                if (scenarioMustHold) return true;
+                if (chokepointSet.size === 0) return false;
+
+                const zoneChokepoints = zoneOsids.filter(osid => chokepointSet.has(osid));
+                if (zoneChokepoints.length === 0) return false;
+
+                // Track 2: engine-derived — zone contains a structural chokepoint whose removal
+                // would isolate at least MUST_HOLD_MIN_CLUSTER_SIZE friendly OSIDs.
+                // DISABLED: fraction-of-faction-total can't separate RS Brcko (~9%) from ARBiH Central
+                // Bosnia valley passes (~8%) — both fall in the same range, so any threshold either
+                // over-garrisons ARBiH 4th Corps (cascade → depletion) or misses Brcko.
+                // Fix needed: replace fraction with absolute OSID count OR corps-boundary discriminator
+                // (only fire if isolated cluster spans a different corps jurisdiction).
+                // Track this as a P1 calibration item: run 40w scenario with logging to measure
+                // actual Posavina pocket size vs ARBiH valley cluster sizes.
+                return zoneChokepoints.some(osid => {
+                    const neighbors = (adjacency.get(osid as string) ?? [])
+                        .filter((n: string) => allFriendlyOsids.has(n) && n !== osid);
+                    if (neighbors.length < 2) return false;
+
+                    const components = collectFriendlyComponentsExcluding(
+                        allFriendlyOsids,
+                        sortedAllFriendlyOsids,
+                        adjacency,
+                        osid,
+                        zoneOsidSet,
+                        corpsOsidSet,
+                    );
+
+                    const zoneComponent = components.find(component => component.hasZoneOsid);
+                    if (!zoneComponent) return false;
+
+                    return components.some(component =>
+                        component !== zoneComponent &&
+                        component.hasOutsideCorpsOsid &&
+                        component.members.size >= minIsolated
+                    );
+                });
+            });
+
+            zoneAssessments.push({
+                zone_id: zoneId,
+                corps_id: corpsId,
+                faction,
+                osids: zoneOsids,
+                front_edge_count: frontEdgeCount,
+                depth,
+                corridor_width: corridorWidth,
+                population_value: populationValue,
+                strategic_value: strategicValue,
+                posture,
+                commitment_ratio: commitmentRatio,
+                garrison_budget: garrisonBudget,
+                assigned_brigades: assignedBrigadeIds,
+                surplus_brigades: surplusBrigades,
+                deficit,
+                is_main_body: isMainBody,
+                enemy_adjacent_osids: enemyAdjacentOsids,
+                is_must_hold: isMustHold,
+            });
+        }
+
+        return zoneAssessments;
+    });
 
     return zones;
 }
