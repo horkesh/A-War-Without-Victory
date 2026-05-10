@@ -23,6 +23,7 @@
 - 2026-05-10 update: the third authored breadth wave adds Drina, Prijedor camps, HVO camps, Markale shelling, Dayton talks, and Grabovica/Uzdol consumers using existing Cost Ledger and milestone atoms/tokens only.
 - 2026-05-10 update: the fourth authored breadth wave adds Tuzla Gate, Second Markale, and Stupni Do consumers using existing human-cost and HRHB war-crimes Cost Ledger atoms/tokens only.
 - 2026-05-10 update: the early-peace reader bridge adds a Vance-Owen dynamic section that consumes the `early_peace_implementation_record` duration finding emitted by the Cost Ledger, preserving termination as a record rather than moral credit.
+- 2026-05-10 update: the fifth authored breadth wave adds faction-scoped war-crimes finding tokens and four founding-constraint/corridor consumers: RS strategic goals, Herceg-Bosna political project, the arms embargo, and Operation Corridor.
 - 2026-05-10 update: `VerdictScreen` now renders deterministic milestone comparison rows from `historicalComparison.milestone_comparison`, with an older-save `War Duration` fallback derived from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
 - 2026-05-10 update: `historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton; `compareToHistorical(...)` emits them from baseline data and preserved rupture record turns.
 - 2026-05-10 update: the Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms plus milestone interpolation tokens, and the Srebrenica / Dayton essays consume those rows through authored dynamic sections.

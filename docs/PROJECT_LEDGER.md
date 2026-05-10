@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): founding-constraint finding readers
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the early-peace reader bridge.
+
+**Fix:** Added faction-scoped war-crimes Codex tokens (`cost_war_crimes_findings_<faction>`), switched faction-specific war-crimes consumers to those scoped tokens, and added four authored readers for RS strategic goals, Herceg-Bosna political project, the arms embargo, and Operation Corridor.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed 4/69 on missing scoped token/sections. Green after implementation: 69/69 passed.
+
+**Canon posture:** Read-only Ring 2 narrative reflection. No Cost Ledger producer, casualty/displacement math, event trigger, save schema, scenario data, scoring, rupture logic, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, v0.9.1 plan, ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-10] feat(codex): early-peace duration finding reader
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison follow-up to the Packet C3 early-peace Cost Ledger bridge.

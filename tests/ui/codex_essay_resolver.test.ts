@@ -547,6 +547,44 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
         ]);
     });
 
+    it('renders faction-filtered war-crimes Cost Ledger finding tokens', () => {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [{
+                    id: 'hrhb-war-crimes',
+                    insert_after_paragraph: -1,
+                    condition: 'GAME_OVER AND FINDING_FACTION:HRHB',
+                    variant: 'divergence',
+                    content: '{cost_war_crimes_findings_HRHB}',
+                }],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                costLedger: {
+                    ...costLedger,
+                    findings: [
+                        ...costLedger.findings,
+                        {
+                            id: 'war_crimes_record_RS',
+                            category: 'war_crimes',
+                            severity: 'grave',
+                            faction: 'RS',
+                            title: 'RS war-crimes record',
+                            text: 'RS capital records contain 14 war-crime events.',
+                            sources: ['Sensitive History Design Gate §4'],
+                        },
+                    ],
+                },
+            }),
+        );
+
+        const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+        expect(dynamic).toEqual([
+            'HRHB war-crimes record [HRHB]: HRHB capital records contain 4 war-crime events.',
+        ]);
+    });
+
     it('cost-ledger atoms return false when the ledger is absent', () => {
         const ctx = context({ gameOver: true, costLedger: undefined });
         expect(evaluateEssayCondition('FINDING:human_cost_record', ctx)).toBe(false);

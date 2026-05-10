@@ -520,6 +520,87 @@ describe('v0.9.1 vocab - late-war humanitarian memory breadth wave', () => {
     });
 });
 
+describe('v0.9.1 vocab - founding constraint findings breadth wave', () => {
+    const rsGoalsEssay = findEssay('essay_rs_strategic_goals');
+    const hrhbGoalEssay = findEssay('essay_hrhb_political_goal');
+    const embargoEssay = findEssay('essay_arms_embargo_impact_1992');
+    const corridorEssay = findEssay('essay_operation_corridor_1992');
+
+    const sections = {
+        rsGoals: (rsGoalsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_rs_goals_war_crimes_findings'),
+        hrhbGoal: (hrhbGoalEssay.dynamic_sections ?? []).find(s => s.id === 'v091_hrhb_project_war_crimes_findings'),
+        embargo: (embargoEssay.dynamic_sections ?? []).find(s => s.id === 'v091_arms_embargo_human_cost_findings'),
+        corridor: (corridorEssay.dynamic_sections ?? []).find(s => s.id === 'v091_operation_corridor_rs_war_crimes_findings'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 56000,
+        total_civilian_killed: 45000,
+        findings: [
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 15 war-crime events.',
+                sources: ['ICTY Karadzic Trial Judgment'],
+            },
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 7 war-crime events.',
+                sources: ['ICTY Prlic Trial Judgment'],
+            },
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 56,000 military killed and 45,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds founding-constraint sections gated by real Cost Ledger findings', () => {
+        expect(sections.rsGoals?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+        expect(sections.hrhbGoal?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_HRHB');
+        expect(sections.embargo?.condition).toBe('GAME_OVER AND FINDING:human_cost_record');
+        expect(sections.corridor?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+    });
+
+    it('renders faction-scoped findings into founding and corridor essays', () => {
+        const rendered = [
+            resolveCodexEssay(rsGoalsEssay, { firedEventIds: new Set(['rs_strategic_goals']), gameOver: true, costLedger }),
+            resolveCodexEssay(hrhbGoalEssay, { firedEventIds: new Set(['hrhb_political_goal']), gameOver: true, costLedger }),
+            resolveCodexEssay(corridorEssay, { firedEventIds: new Set(['operation_corridor_1992']), gameOver: true, costLedger }),
+        ].flatMap(r => r.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text));
+
+        expect(rendered.filter(text => text.includes('RS war-crimes record [RS]')).length).toBe(2);
+        expect(rendered.filter(text => text.includes('HRHB war-crimes record [HRHB]')).length).toBe(1);
+        expect(rendered.some(text => text.includes('HRHB war-crimes record [HRHB]') && text.includes('RS capital records'))).toBe(false);
+    });
+
+    it('renders human-cost findings into the arms embargo essay', () => {
+        const resolved = resolveCodexEssay(embargoEssay, {
+            firedEventIds: new Set(['arms_embargo_impact_1992']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Human cost record: The ledger records 56,000'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('RDC Sarajevo'))).toBe(true);
+    });
+});
+
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');

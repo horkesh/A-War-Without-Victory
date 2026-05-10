@@ -315,9 +315,11 @@ function costFindingSources(context: CodexRenderContext): string[] {
 function formatCostFindingsByCategory(
     context: CodexRenderContext,
     category: CostLedgerFinding['category'],
+    faction?: string,
 ): string {
     return costFindings(context)
         .filter((finding) => finding.category === category)
+        .filter((finding) => faction === undefined || finding.faction === faction)
         .map(formatCostFinding)
         .join('\n\n');
 }
@@ -369,6 +371,8 @@ function expandToken(token: string, context: CodexRenderContext): string | undef
     if (token === 'cost_displacement_findings') return formatCostFindingsByCategory(context, 'displacement');
     if (token === 'cost_duration_findings') return formatCostFindingsByCategory(context, 'duration');
     if (token === 'cost_war_crimes_findings') return formatCostFindingsByCategory(context, 'war_crimes');
+    const factionWarCrimesMatch = /^cost_war_crimes_findings_([A-Za-z0-9_-]+)$/.exec(token);
+    if (factionWarCrimesMatch?.[1]) return formatCostFindingsByCategory(context, 'war_crimes', factionWarCrimesMatch[1]);
     if (token === 'cost_finding_sources') return costFindingSources(context).join('; ');
 
     if (token === 'duration_delta_weeks') {
