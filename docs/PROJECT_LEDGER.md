@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Cost Ledger prosecutorial findings
+
+**Scope:** Substantial v0.9.0 Cost Ledger closure slice. The existing Cost Ledger had numeric aggregation, opportunity reckoning, and historical comparison, but the roadmap still correctly called out full prosecutorial authoring as open.
+
+**Fix:** Added deterministic `CostLedgerFinding` records to `buildCostLedger(...)` for human cost, displacement, fired rupture consequences, and faction war-crime-event records. `WarCostSummary` now renders these under **Prosecutorial Findings** with source labels. Replaced the old "less costly" / "more costly" casualty comparison wording with a neutral historical-reference index.
+
+**Validation:** Red tests first: focused Cost Ledger/UI tests failed on missing findings, missing rendered findings, and old minimization wording. Green focused pack passed 116/116, and `npm.cmd run typecheck` passed.
+
+**Canon posture:** Ring 2 reflection surface only. No new sim writer, rupture trigger, scoring rule, player lever, scenario behavior, or save producer. Wording follows `SENSITIVE_HISTORY_DESIGN_GATE.md` §4: third-person historical voice, integer counts, source labels, and no second-person or achievement framing.
+
+---
+
 ## [2026-05-10] CPU follow-up profile + roadmap truth cleanup
 
 **Scope:** Follow-up CPU performance profiling lane plus Master Roadmap truth cleanup. The user asked for the next two lanes to be executed, not merely recommended.

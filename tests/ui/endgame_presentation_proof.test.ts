@@ -260,16 +260,18 @@ describe('cost / comparison formatting — full chain', () => {
         expect(text.toLowerCase()).toContain('exactly');
     });
 
-    it('casualty ratio: less costly', () => {
+    it('casualty ratio: lower than reference without minimization language', () => {
         const text = formatCasualtyRatio(0.75);
         expect(text).toContain('75');
-        expect(text.toLowerCase()).toContain('less');
+        expect(text).toContain('historical reference = 100');
+        expect(text).not.toMatch(/less costly|more costly|of historical levels/i);
     });
 
-    it('casualty ratio: more costly', () => {
+    it('casualty ratio: higher than reference without minimization language', () => {
         const text = formatCasualtyRatio(1.2);
         expect(text).toContain('120');
-        expect(text.toLowerCase()).toContain('more');
+        expect(text).toContain('historical reference = 100');
+        expect(text).not.toMatch(/less costly|more costly|of historical levels/i);
     });
 
     it('territory divergence: significant RS delta', () => {

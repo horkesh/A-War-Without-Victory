@@ -3,7 +3,7 @@
  *
  * Covers:
  *  - formatDurationDelta returns correct delta descriptions
- *  - formatCasualtyRatio returns correct percentage descriptions
+ *  - formatCasualtyRatio returns neutral historical-index descriptions
  *  - formatTerritoryDivergence returns correct divergence descriptions
  *
  * Tests pure formatting functions only — no React rendering.
@@ -42,24 +42,26 @@ describe('formatDurationDelta', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('formatCasualtyRatio', () => {
-    it('reports higher casualties correctly', () => {
+    it('reports higher casualties without cost-minimization language', () => {
         const result = formatCasualtyRatio(1.25);
-        expect(result).toBe('125% of historical levels (more costly)');
+        expect(result).toBe('Military casualty index 125 (historical reference = 100)');
+        expect(result).not.toMatch(/more costly|less costly|of historical levels/i);
     });
 
-    it('reports lower casualties correctly', () => {
+    it('reports lower casualties without celebratory language', () => {
         const result = formatCasualtyRatio(0.73);
-        expect(result).toBe('73% of historical levels (less costly)');
+        expect(result).toBe('Military casualty index 73 (historical reference = 100)');
+        expect(result).not.toMatch(/more costly|less costly|of historical levels/i);
     });
 
     it('reports identical casualties', () => {
         const result = formatCasualtyRatio(1.0);
-        expect(result).toBe('100% of historical levels (identical)');
+        expect(result).toBe('Military casualty index 100 (historical reference = 100)');
     });
 
     it('reports zero casualties', () => {
         const result = formatCasualtyRatio(0);
-        expect(result).toBe('0% of historical levels (less costly)');
+        expect(result).toBe('Military casualty index 0 (historical reference = 100)');
     });
 });
 

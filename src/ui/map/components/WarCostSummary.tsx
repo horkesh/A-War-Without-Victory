@@ -23,10 +23,8 @@ export function formatDurationDelta(deltaWeeks: number, historicalWeeks: number)
 
 /** Format a ratio as a percentage string with direction indicator. */
 export function formatCasualtyRatio(ratio: number): string {
-    const pct = Math.round(ratio * 100);
-    if (pct > 100) return `${pct}% of historical levels (more costly)`;
-    if (pct < 100) return `${pct}% of historical levels (less costly)`;
-    return '100% of historical levels (identical)';
+    const index = Math.round(ratio * 100);
+    return `Military casualty index ${index} (historical reference = 100)`;
 }
 
 /** Format territory divergence entry. */
@@ -135,6 +133,38 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                         </span>
                                     )}
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Prosecutorial findings */}
+            {costLedger.findings && costLedger.findings.length > 0 && (
+                <div>
+                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                        Prosecutorial Findings
+                    </div>
+                    <div className="space-y-2">
+                        {costLedger.findings.map((finding) => (
+                            <div
+                                key={finding.id}
+                                className="border-l border-panel-border pl-3 text-[10px] text-text-secondary leading-relaxed"
+                            >
+                                <div className="flex items-baseline justify-between gap-3">
+                                    <span className="text-text-primary font-semibold">
+                                        {finding.title}
+                                    </span>
+                                    <span className="shrink-0 uppercase text-[8px] tracking-wider text-text-secondary/80">
+                                        {finding.faction ? `${finding.faction} / ` : ''}{finding.severity}
+                                    </span>
+                                </div>
+                                <div>{finding.text}</div>
+                                {finding.sources.length > 0 && (
+                                    <div className="mt-1 text-[9px] text-text-secondary/75">
+                                        Sources: {finding.sources.join('; ')}
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

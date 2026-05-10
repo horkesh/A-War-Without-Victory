@@ -110,7 +110,7 @@ function endgame(ov?: Partial<LoadedGameState>): LoadedGameState {
                 HRHB: makeFV('HRHB', { grade: 'B', pyrrhic_score: 55, outcome_class: 'negotiated_escape' as any }),
             },
         } as GameVerdict,
-        costLedger: { war_duration_weeks: 188, total_military_killed: 46500, total_civilian_killed: 38000, entries: [], rupture_consequences: [{ id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of Srebrenica' }] } as CostLedger,
+        costLedger: { war_duration_weeks: 188, total_military_killed: 46500, total_civilian_killed: 38000, entries: [], rupture_consequences: [{ id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of Srebrenica' }], findings: [] } as CostLedger,
         historicalComparison: { duration_delta_weeks: 6, territory_divergence: { RS: 9.0, RBiH_HRHB_Federation: -9.0 }, casualty_ratio: 0.85, displacement_ratio: 0.9, rupture_divergence: [], divergence_notes: ['War lasted 6 weeks longer than the historical 182 weeks', 'Srebrenica genocide occurred as in the historical war'] } as ComparisonResult,
         ...ov,
     } as LoadedGameState;
@@ -323,6 +323,17 @@ function makeCostLedgerMP(): CostLedger {
         ],
         rupture_consequences: [
             { id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of the Srebrenica safe area' },
+        ],
+        findings: [
+            {
+                id: 'rupture_srebrenica_genocide_1995',
+                category: 'rupture',
+                severity: 'rupture',
+                faction: 'RS',
+                title: 'Srebrenica genocide',
+                text: 'The ledger records the Srebrenica genocide after the fall of the Srebrenica safe area; the historical reference is 8,000 killed.',
+                sources: ['ICTY Krstic IT-98-33-T', 'ICJ Bosnia v. Serbia (2007)'],
+            },
         ],
         operation_opportunities: {
             total_decisions: 2,
@@ -608,6 +619,17 @@ describe('WarCostSummary — direct component mount proof', () => {
         expect(html).toContain('Operation Sana');
         expect(html).toContain('Partial Success');
         expect(html).toContain('7 attacks');
+    });
+
+    it('renders prosecutorial findings with sources', () => {
+        const html = renderComponentMP(WarCostSummary, {
+            costLedger: makeCostLedgerMP(),
+            comparison: makeComparisonMP(),
+        });
+        expect(html).toContain('Prosecutorial Findings');
+        expect(html).toContain('Srebrenica genocide');
+        expect(html).toContain('ICTY Krstic IT-98-33-T');
+        expect(html).not.toMatch(/less costly|more costly|of historical levels/i);
     });
 });
 

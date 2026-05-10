@@ -234,6 +234,24 @@ export interface CostLedgerAnnotation {
     faction?: string;
 }
 
+export type CostLedgerFindingCategory =
+    | 'human_cost'
+    | 'displacement'
+    | 'rupture'
+    | 'war_crimes';
+
+export type CostLedgerFindingSeverity = 'record' | 'grave' | 'rupture';
+
+export interface CostLedgerFinding {
+    id: string;
+    category: CostLedgerFindingCategory;
+    severity: CostLedgerFindingSeverity;
+    title: string;
+    text: string;
+    sources: string[];
+    faction?: string;
+}
+
 export interface CostLedger {
     war_duration_weeks: number;
     entries: CostLedgerEntry[];
@@ -241,8 +259,111 @@ export interface CostLedger {
     operation_opportunities?: OpportunityCostLedger;
     total_military_killed: number;
     total_civilian_killed: number;
+    findings: CostLedgerFinding[];
     /** Audit-only divergence-event annotations. Sorted (turn, tag) for determinism. */
     annotations?: CostLedgerAnnotation[];
+}
+
+const COST_LEDGER_SOURCES = Object.freeze({
+    sensitiveHistoryGate: 'Sensitive History Design Gate §4',
+    rdc: 'RDC Sarajevo, Bosnian Book of the Dead (2007)',
+    unhcr: 'UNHCR (1996) displacement estimates',
+    srebrenica: 'ICTY Krstic IT-98-33-T; Karadzic IT-95-5/18-T; Mladic IT-09-92-T; ICJ Bosnia v. Serbia (2007)',
+});
+
+function formatInteger(value: number): string {
+    return Math.trunc(Math.max(0, value)).toLocaleString('en-US');
+}
+
+function plural(value: number, singular: string, pluralForm = `${singular}s`): string {
+    return value === 1 ? singular : pluralForm;
+}
+
+function buildProsecutorialFindings(
+    entries: readonly CostLedgerEntry[],
+    ruptures: readonly { id: string; perpetrator_faction: string; description: string }[],
+    totalMilitaryKilled: number,
+    totalCivilianKilled: number,
+): CostLedgerFinding[] {
+    const findings: CostLedgerFinding[] = [];
+    const totalRefugeesCreated = entries.reduce((sum, entry) => sum + Math.max(0, entry.refugees_created), 0);
+
+    findings.push({
+        id: 'human_cost_record',
+        category: 'human_cost',
+        severity: totalCivilianKilled > 0 || totalMilitaryKilled > 0 ? 'grave' : 'record',
+        title: 'Human cost record',
+        text:
+            `The ledger records ${formatInteger(totalMilitaryKilled)} military killed and ` +
+            `${formatInteger(totalCivilianKilled)} civilian killed across ${entries.length} faction records. ` +
+            'These counts are accounting facts for the verdict surface, not a score.',
+        sources: [COST_LEDGER_SOURCES.rdc, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+    });
+
+    if (totalRefugeesCreated > 0) {
+        findings.push({
+            id: 'civilian_displacement_record',
+            category: 'displacement',
+            severity: 'grave',
+            title: 'Civilian displacement record',
+            text:
+                `The negotiation capital record attributes ${formatInteger(totalRefugeesCreated)} refugees created ` +
+                'to the war path. The figure is reported as an integer civilian record, not as a percentage or efficiency measure.',
+            sources: [COST_LEDGER_SOURCES.unhcr, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+        });
+    }
+
+    for (const rupture of ruptures) {
+        if (rupture.id === 'srebrenica_genocide_1995') {
+            findings.push({
+                id: 'rupture_srebrenica_genocide_1995',
+                category: 'rupture',
+                severity: 'rupture',
+                faction: rupture.perpetrator_faction,
+                title: 'Srebrenica genocide',
+                text:
+                    `The ledger records the Srebrenica genocide after ${rupture.description}. ` +
+                    'The historical reference is 8,000 killed; the finding remains a locked condemnation fact.',
+                sources: [COST_LEDGER_SOURCES.srebrenica, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+            });
+        } else {
+            findings.push({
+                id: `rupture_${rupture.id}`,
+                category: 'rupture',
+                severity: 'rupture',
+                faction: rupture.perpetrator_faction,
+                title: rupture.id.replace(/_/g, ' '),
+                text:
+                    `The ledger records rupture ${rupture.id}: ${rupture.description}. ` +
+                    'The finding remains locked in the verdict packet.',
+                sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+            });
+        }
+    }
+
+    const warCrimeEntries = entries
+        .filter((entry) => entry.war_crimes_events > 0)
+        .sort((a, b) => {
+            if (a.war_crimes_events !== b.war_crimes_events) return b.war_crimes_events - a.war_crimes_events;
+            return strictCompare(a.faction, b.faction);
+        });
+    for (const entry of warCrimeEntries) {
+        findings.push({
+            id: `war_crimes_record_${entry.faction}`,
+            category: 'war_crimes',
+            severity: entry.condemnation_flags.length > 0 || entry.war_crimes_events >= 10 ? 'grave' : 'record',
+            faction: entry.faction,
+            title: `${entry.faction} war-crimes record`,
+            text:
+                `${entry.faction} capital records contain ${formatInteger(entry.war_crimes_events)} ` +
+                `${plural(entry.war_crimes_events, 'war-crime event')}, ${formatInteger(entry.civilian_casualties_caused)} ` +
+                'civilian casualties caused, and ' +
+                `${formatInteger(entry.refugees_created)} refugees created. The ledger records these facts without mitigation or reward language.`,
+            sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+        });
+    }
+
+    return findings;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -338,6 +459,7 @@ export function buildCostLedger(state: GameState): CostLedger {
         operation_opportunities: buildOpportunityCostLedger(state),
         total_military_killed: totalMilitaryKilled,
         total_civilian_killed: totalCivilianKilled,
+        findings: buildProsecutorialFindings(entries, ruptureEntries, totalMilitaryKilled, totalCivilianKilled),
         annotations: annotations.length > 0 ? annotations : undefined,
     };
 }

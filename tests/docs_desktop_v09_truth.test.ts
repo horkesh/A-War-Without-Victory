@@ -59,7 +59,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('bridge metadata defaults shipped at `be66d1cc`');
     expect(roadmap).toContain('Baseline Regression and Desktop Release Guard green at `750e1c14`');
     expect(roadmap).toContain('Persona suppressor C3 structural fix shipped (`6cebf13e`)');
+    expect(roadmap).toContain('Cost Ledger prosecutorial findings shipped 2026-05-10');
+    expect(roadmap).toContain('| Cost Ledger | Advanced');
     expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
+    expect(roadmap).not.toContain('full prosecutorial authoring still open');
     expect(roadmap).not.toContain('Persona suppressor C3 structural fix — prune routine op-lifecycle states');
 
     expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');

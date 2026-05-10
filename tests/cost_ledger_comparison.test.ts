@@ -197,6 +197,56 @@ describe('buildCostLedger', () => {
         expect(JSON.stringify(ledger1)).toBe(JSON.stringify(ledger2));
     });
 
+    it('builds prosecutorial findings with ICTY/ICJ sources and integer counts', () => {
+        const cl = initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+        cl.RBiH!.killed = 31000;
+        cl.RS!.killed = 12000;
+        cl.HRHB!.killed = 3500;
+        const ruptures: RuptureConsequence[] = [
+            {
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 160,
+                perpetrator_faction: 'RS',
+                description: 'Fall of the Srebrenica safe area',
+                condemnation_flag: 'genocide_condemnation',
+            },
+        ];
+        const state = makeState({
+            casualtyLedger: cl,
+            factionBreakdowns: {
+                RBiH: { refugees_created: 1200000, civilian_casualties_caused: 2000, war_crimes_events: 5 },
+                RS: { refugees_created: 600000, civilian_casualties_caused: 35000, war_crimes_events: 35 },
+                HRHB: { refugees_created: 150000, civilian_casualties_caused: 1000, war_crimes_events: 3 },
+            },
+            civilianCasualties: {
+                RBiH: { killed: 2000, fled_abroad: 0 },
+                RS: { killed: 35000, fled_abroad: 0 },
+                HRHB: { killed: 1000, fled_abroad: 0 },
+            },
+            ruptures,
+        });
+
+        const ledger = buildCostLedger(state);
+
+        expect(ledger.findings.map((f) => f.id)).toEqual([
+            'human_cost_record',
+            'civilian_displacement_record',
+            'rupture_srebrenica_genocide_1995',
+            'war_crimes_record_RS',
+            'war_crimes_record_RBiH',
+            'war_crimes_record_HRHB',
+        ]);
+        const rupture = ledger.findings.find((f) => f.id === 'rupture_srebrenica_genocide_1995')!;
+        expect(rupture.text).toContain('Srebrenica genocide');
+        expect(rupture.text).toContain('8,000');
+        expect(rupture.sources.join(' ')).toContain('ICTY');
+        expect(rupture.sources.join(' ')).toContain('ICJ Bosnia v. Serbia');
+        for (const finding of ledger.findings) {
+            expect(finding.text).not.toMatch(/\byou\b/i);
+            expect(finding.text).not.toMatch(/less costly|more costly|achievement|badge/i);
+        }
+    });
+
     it('summarizes opportunity decisions and linked AAR outcomes', () => {
         const state = makeState({
             opportunityResolutions: [

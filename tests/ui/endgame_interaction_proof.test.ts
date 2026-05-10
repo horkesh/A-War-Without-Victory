@@ -124,6 +124,7 @@ function endgame(ov?: Partial<LoadedGameState>): LoadedGameState {
             war_duration_weeks: 188, total_military_killed: 46500, total_civilian_killed: 38000,
             entries: [],
             rupture_consequences: [{ id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of Srebrenica' }],
+            findings: [],
         } as CostLedger,
         historicalComparison: {
             duration_delta_weeks: 6, territory_divergence: { RS: 9.0 },

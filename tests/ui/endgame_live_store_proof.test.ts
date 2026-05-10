@@ -62,6 +62,7 @@ function makeEndgameState(overrides?: Partial<LoadedGameState>): LoadedGameState
     const costLedger: CostLedger = {
         war_duration_weeks: 188, total_military_killed: 46500, total_civilian_killed: 38000,
         entries: [], rupture_consequences: [{ id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of Srebrenica' }],
+        findings: [],
     } as CostLedger;
     const comparison: ComparisonResult = {
         duration_delta_weeks: 6, territory_divergence: { RS: 9.0 },
@@ -160,4 +161,3 @@ describe('VerdictScreen — gating condition proof', () => {
         // VerdictScreen renders FallbackGameOver in this case
     });
 });
-

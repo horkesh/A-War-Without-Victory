@@ -14,9 +14,13 @@ The Cost Ledger is the endgame accounting system that tallies the human, politic
 
 This document defines the template format for Cost Ledger entries, the data sources that feed them, and the rendering contract for the endgame UI.
 
+**Implementation note 2026-05-10:** the placeholder status above is superseded for the core product path. `buildCostLedger(...)` now emits deterministic `findings` in addition to numeric entries, and `WarCostSummary` renders them under **Prosecutorial Findings** with ICTY/ICJ or canon-source labels. The casualty comparison helper no longer prints "less costly" / "more costly" or percent-of-history minimization language; it now uses a neutral historical-reference index.
+
 ---
 
 ## Open Questions — FLAGGED FOR DAYTIME REVIEW
+
+**2026-05-10 resolution for the implemented core:** the live product path answers these as restrained finding records rather than tribunal roleplay. Granularity is aggregate/faction-level; wording is third-person and source-labeled; fired ruptures are rendered as locked findings; counterfactual silence stays with the Ring 2 ghost-entry register.
 
 1. **ICTY case structure as template:** Should Cost Ledger entries mirror ICTY indictment structure (charges, findings, verdicts)? /historian needs to advise on which case structures are appropriate to template without trivializing the proceedings.
 
