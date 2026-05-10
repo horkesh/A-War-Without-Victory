@@ -80,6 +80,7 @@ describe('bot-orders perf profile instrumentation', () => {
     it('static wiring: bot orders and commander hot call sites use the perf wrapper', () => {
         const brigadeAi = readFileSync(resolve('src/sim/combat/bot_brigade_ai_osid.ts'), 'utf8');
         const commanderLoop = readFileSync(resolve('src/sim/combat/commander/commander_loop.ts'), 'utf8');
+        const commanderAssess = readFileSync(resolve('src/sim/combat/commander/assess.ts'), 'utf8');
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -93,6 +94,13 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.assessSituation');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.allocateBrigades');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.managePlan');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.assembleBeliefState');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.makeDecisions');
+        expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput');
+        expect(commanderAssess).toContain('currentZoneOsids');
         expect(runnerCli).toContain('dumpBotOrdersPerfProfile');
     });
 

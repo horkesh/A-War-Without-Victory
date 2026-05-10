@@ -85,48 +85,66 @@ function operationsConflict(
 export class BotCorpsCommander implements ICorpsCommander {
     decide(briefing: CommanderBriefing, previousState: CommanderState | null): CommanderOutput {
         // 1. ASSESS — zones, threats, force eval
-        const { zones, forces, threats } = assessSituation(briefing);
+        const { zones, forces, threats } = botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.assessSituation',
+            () => assessSituation(briefing),
+        );
 
         // 2. ALLOCATE — garrison first, surplus for ops
-        const allocation = allocateBrigades(zones, forces, briefing.officer_personality);
+        const allocation = botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.allocateBrigades',
+            () => allocateBrigades(zones, forces, briefing.officer_personality),
+        );
 
         // 3. PLAN — multi-turn intentions
-        const planDecision = managePlan(
-            briefing,
-            allocation.zones,
-            forces,
-            allocation.surplus_pool,
-            previousState?.current_plan ?? null,
-            briefing.turn,
+        const planDecision = botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.managePlan',
+            () => managePlan(
+                briefing,
+                allocation.zones,
+                forces,
+                allocation.surplus_pool,
+                previousState?.current_plan ?? null,
+                briefing.turn,
+            ),
         );
 
         // 3.5 ASSEMBLE BELIEFS — perception layer
         const previousBeliefs = previousState?.belief_state ?? null;
-        const beliefState = assembleBeliefState(
-            briefing, allocation.zones, forces, previousBeliefs, briefing.turn,
+        const beliefState = botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.assembleBeliefState',
+            () => assembleBeliefState(
+                briefing, allocation.zones, forces, previousBeliefs, briefing.turn,
+            ),
         );
 
         // 4. DECIDE — reactive intel adjustments, now with beliefs
-        const decisions = makeDecisions(
-            briefing,
-            allocation.zones,
-            threats,
-            allocation.surplus_pool,
-            planDecision.plan,
-            previousState,
-            beliefState,
+        const decisions = botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.makeDecisions',
+            () => makeDecisions(
+                briefing,
+                allocation.zones,
+                threats,
+                allocation.surplus_pool,
+                planDecision.plan,
+                previousState,
+                beliefState,
+            ),
         );
 
         // 5. EMIT — produce CorpsDirective + operations
-        return emitCommanderOutput(
-            briefing,
-            allocation.zones,
-            forces,
-            allocation,
-            planDecision,
-            decisions,
-            threats,
-            beliefState,
+        return botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.emitCommanderOutput',
+            () => emitCommanderOutput(
+                briefing,
+                allocation.zones,
+                forces,
+                allocation,
+                planDecision,
+                decisions,
+                threats,
+                beliefState,
+            ),
         );
     }
 }

@@ -3355,3 +3355,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Large replay sidecar loading is no longer a known product-shell blocker; the remaining replay lane is richer replay-map inspection/playback polish.
 
 **Report:** `docs/40_reports/implemented/20260510_REPLAY_SPARSE_MANIFEST_LOADING.md`
+
+---
+
+## [2026-05-10] perf: commander decision buckets and assessThreats cache
+
+**Type:** Default-off profiling instrumentation plus CPU cleanup. No gameplay rule, scenario data, OOB, political controller, rupture, or sensitive-history canon change.
+
+**Change:** Split the existing `commander.runCommanderForCorps.commanderDecide` profiler bucket into named `assessSituation`, `allocateBrigades`, `managePlan`, `assembleBeliefState`, `makeDecisions`, and `emitCommanderOutput` sub-buckets. `assessThreats` now precomputes the set of all current-zone OSIDs once instead of rescanning every current zone for each previous OSID during recent-loss detection.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The assess cleanup preserves deterministic sorted iteration and does not change loss semantics; shifted OSIDs are still not losses, absent OSIDs still are.
+
+**Verification:** Red test first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on the missing commander sub-buckets/current-zone cache guard. Green focused test passed 5/5. Profiled 40w run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1760` kept final hash `ea9f3db7ac59a443` and showed `emitCommanderOutput` and `assessSituation` as the largest named decision sub-buckets.
+
+**Roadmap delta:** CPU profiling has moved from an opaque commander-decision bucket to actionable named commander internals. Next CPU work should target `buildBriefing`, `emitCommanderOutput`, or the remaining `assessSituation` internals based on a fresh profile.

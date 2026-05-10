@@ -44,6 +44,24 @@ Commander-loop profiling remains the larger combined slice after this pass:
 - Passed cached sector/front membership through `BrigadeEvaluationContext`.
 - Reused cached line-front sets in `assignedBrigadeNotOnSectorFrontOsids(...)`, `evaluateSectorMarch(...)`, `evaluateGarrisonAndDetachments(...)`, and attack gates.
 
+## Follow-Up: Commander Decision Split
+
+The next profiled 40w run after sparse-replay closure kept the same final hash, `ea9f3db7ac59a443`, and confirmed the commander-loop bucket still deserves attention:
+
+| Label | Total |
+|---|---:|
+| `commander.runCommanderForCorps.total` | 2,067.218 ms |
+| `commander.runCommanderForCorps.buildBriefing` | 1,056.041 ms |
+| `commander.runCommanderForCorps.commanderDecide` | 1,006.205 ms |
+| `commander.runCommanderForCorps.decide.emitCommanderOutput` | 378.807 ms |
+| `commander.runCommanderForCorps.decide.assessSituation` | 371.642 ms |
+| `commander.runCommanderForCorps.decide.makeDecisions` | 116.744 ms |
+| `commander.runCommanderForCorps.decide.assembleBeliefState` | 60.631 ms |
+| `commander.runCommanderForCorps.decide.managePlan` | 47.007 ms |
+| `commander.runCommanderForCorps.decide.allocateBrigades` | 21.009 ms |
+
+Added default-off sub-buckets for the six commander decision phases and removed a repeated nested `zones.some(...includes(...))` scan in `assessThreats` by precomputing the current-zone OSID set once per assessment. This keeps loss-detection semantics unchanged: OSIDs that merely shift to another current zone are not recent losses, while OSIDs absent from all current zones still count as lost.
+
 ## Determinism And Canon
 
 No gameplay rule changed. The cache preserves the existing sorted sector scan semantics by iterating sector IDs through `strictCompare` and retaining the first matching sector entry.
@@ -52,7 +70,7 @@ The wall-clock probe is debug-only and does not write into game state, save stat
 
 ## Verification
 
-- Red test first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on missing profiler/cache wiring.
+- Red tests first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on missing profiler/cache wiring, then again on missing commander decision phase labels/current-zone OSID cache guard.
 - Green focused tests: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts tests/brigade_aor_subsegment.test.ts --reporter=dot` passed 29/29.
 - Typecheck: `npm.cmd run typecheck` passed.
 - Default-off 40w scenario: final hash `ea9f3db7ac59a443`.
@@ -60,4 +78,4 @@ The wall-clock probe is debug-only and does not write into game state, save stat
 
 ## Next CPU Lane
 
-The next proven wall-clock target is commander-loop internals. Instrumentation already shows `buildBriefing` and `commanderDecide` are now larger than any individual bot-brigade evaluator and should be split into their own named sub-buckets before optimization.
+The next proven wall-clock target remains commander-loop internals, now with better names. `buildBriefing` is the largest single top-level slice, while `emitCommanderOutput` and `assessSituation` are the largest named decision sub-phases. Further optimization should start from one of those three measured buckets.

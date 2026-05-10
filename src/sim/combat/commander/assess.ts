@@ -162,6 +162,12 @@ export function assessThreats(
 
     // Sort zones for deterministic iteration
     const sortedZones = [...zones].sort((a, b) => strictCompare(a.zone_id, b.zone_id));
+    const currentZoneOsids = new Set<string>();
+    for (const zone of sortedZones) {
+        for (const osid of zone.osids) {
+            currentZoneOsids.add(osid);
+        }
+    }
 
     for (const zone of sortedZones) {
         let threatLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
@@ -181,8 +187,7 @@ export function assessThreats(
                 for (const osid of [...prevOsids].sort(strictCompare)) {
                     if (!currentOsids.has(osid)) {
                         // Check if this OSID is in any current zone (it may have shifted)
-                        const inAnyZone = zones.some(z => z.osids.includes(osid));
-                        if (!inAnyZone) {
+                        if (!currentZoneOsids.has(osid)) {
                             lost.push(osid);
                         }
                     }
