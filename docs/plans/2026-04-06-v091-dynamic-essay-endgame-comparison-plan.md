@@ -27,6 +27,7 @@
 - 2026-05-10 update: the sixth authored breadth wave adds seven diplomatic/siege-continuity consumers using existing Cost Ledger and milestone atoms only: JNA withdrawal, Owen-Stoltenberg, Bosnian Assembly rejection of Owen-Stoltenberg, Contact Group plan, Bihac crisis, Carter cessation of hostilities, and ceasefire expiry.
 - 2026-05-10 update: the seventh authored breadth wave adds eight late-intervention/final-offensive consumers using existing Cost Ledger and milestone atoms only: Operation Deliberate Force, UN hostage crisis, Gorazde crisis, Operation Mistral 2, Operation Sana, Operation Summer '95, Washington halts the Federation advance, and Washington Agreement.
 - 2026-05-10 update: the eighth authored breadth wave adds eight UN mandate/sanctions consumers using existing Cost Ledger and milestone atoms only: London Conference, UN Resolution 808, UN Resolution 819, UN Resolution 836, no-fly zone enforcement, Operation Sharp Guard, NATO air-strike threat, and UN Resolution 820 sanctions.
+- 2026-05-10 update: the consequence-reader bridge adds Cost Ledger annotation atoms/tokens (`ANNOTATION:<tag>`, `{cost_annotations}`, `{cost_annotation_<tag>}`) plus six essay consumers for existing consequence facts: accelerated camps discovery, early ICTY mandate expansion, accelerated safe areas, early NATO threshold, Bihac pocket collapse, and Bihac refugee crisis. These consume already-emitted annotations only; no new consequence families or score inputs are added.
 - 2026-05-10 update: `VerdictScreen` now renders deterministic milestone comparison rows from `historicalComparison.milestone_comparison`, with an older-save `War Duration` fallback derived from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
 - 2026-05-10 update: `historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton; `compareToHistorical(...)` emits them from baseline data and preserved rupture record turns.
 - 2026-05-10 update: the Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms plus milestone interpolation tokens, and the Srebrenica / Dayton essays consume those rows through authored dynamic sections.
@@ -73,8 +74,8 @@
 **Assigned to:** Systems Programmer + Documentation Specialist
 
 - [x] define the canonical dynamic essay schema (`dynamic_sections`, `ghost_when`, dynamic variants)
-- [x] add runtime condition evaluation for dynamic sections, including comparison, Cost Ledger finding, and milestone atoms
-- [x] support divergence notes, ghost entries, Cost Ledger findings, and milestone rows in dynamic essay output
+- [x] add runtime condition evaluation for dynamic sections, including comparison, Cost Ledger finding, Cost Ledger annotation, and milestone atoms
+- [x] support divergence notes, ghost entries, Cost Ledger findings, Cost Ledger annotations, and milestone rows in dynamic essay output
 - [ ] ensure canonical historical text remains immutable substrate
 
 **Gate:** A dynamic essay can render canonical text plus deterministic inserted sections without mutating the base essay.
@@ -112,7 +113,7 @@
   - dynamic essay condition evaluation
   - ghost entry visibility
   - divergence note rendering
-  - Cost Ledger finding atom/token rendering
+  - Cost Ledger finding and annotation atom/token rendering
   - historical baseline loading
   - endgame comparison data integrity
 - [ ] full vitest

@@ -593,3 +593,73 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
         expect(evaluateEssayCondition('FINDING_FACTION:RS', ctx)).toBe(false);
     });
 });
+
+describe('codexEssayResolver - cost-ledger annotation atoms and tokens', () => {
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 130,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 0,
+        total_civilian_killed: 0,
+        findings: [],
+        annotations: [
+            {
+                event_id: 'early_nato_threshold_1994',
+                tag: 'early_nato_threshold_1994',
+                text: 'NATO intervention threshold lowered; VRS operational freedom constrained.',
+                turn: 100,
+                faction: 'RS',
+            },
+            {
+                event_id: 'bihac_refugee_crisis_1994',
+                tag: 'bihac_refugee_crisis_1994',
+                text: 'A massive refugee wave floods RBiH-held central Bosnia.',
+                turn: 124,
+                faction: 'RBiH',
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('matches Cost Ledger annotation tags as condition atoms', () => {
+        const ctx = context({ gameOver: true, costLedger });
+
+        expect(evaluateEssayCondition('ANNOTATION:early_nato_threshold_1994', ctx)).toBe(true);
+        expect(evaluateEssayCondition('ANNOTATION:bihac_refugee_crisis_1994', ctx)).toBe(true);
+        expect(evaluateEssayCondition('ANNOTATION:missing_annotation', ctx)).toBe(false);
+    });
+
+    it('renders all annotations and single annotation tokens deterministically', () => {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [
+                    {
+                        id: 'annotation-one',
+                        insert_after_paragraph: -1,
+                        condition: 'GAME_OVER AND ANNOTATION:early_nato_threshold_1994',
+                        variant: 'divergence',
+                        content: '{cost_annotation_early_nato_threshold_1994}',
+                    },
+                    {
+                        id: 'annotation-all',
+                        insert_after_paragraph: -1,
+                        condition: 'GAME_OVER AND ANNOTATION:bihac_refugee_crisis_1994',
+                        variant: 'note',
+                        content: '{cost_annotations}',
+                    },
+                ],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                costLedger,
+            }),
+        );
+
+        const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+        expect(dynamic).toEqual([
+            'early_nato_threshold_1994 [RS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'early_nato_threshold_1994 [RS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'bihac_refugee_crisis_1994 [RBiH, W124]: A massive refugee wave floods RBiH-held central Bosnia.',
+        ]);
+    });
+});

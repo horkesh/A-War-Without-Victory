@@ -1,7 +1,7 @@
 # v0.9.0 -- Consequence System -- Implementation Plan
 
 **Date:** 2026-03-24
-**Status:** DRAFT -- ready for review
+**Status:** DRAFT -- ready for review; scoped reader follow-up advanced 2026-05-10
 **Scope:** When the player makes ahistorical choices, realistic consequences follow
 **Prerequisites:** v0.7.0 (flag wiring), v0.8.x (command chain / political leader bot)
 **Estimated effort:** 8-12 sessions
@@ -52,6 +52,8 @@ Consequences are implemented as **new conditional events**, not as hardcoded eng
 | `bot_priority_shift` | `faction`, `add_objectives[]`, `remove_objectives[]`, `duration_turns` | Modifies bot strategy offensive_objectives and defensive_priorities at runtime. |
 
 These effect types are added to the existing `EventEffect` union in `event_types.ts` and handled in `apply_effects.ts`. The consequence events fire them; engine systems consume the state they write.
+
+**Implementation update (2026-05-10):** `cost_ledger_annotation` is live as an audit-only reader substrate. Consequence Wave 19 attached annotations to six already-authored Chain 4/5 facts (`csq_bihac_pocket_collapses_1994`, `csq_bihac_refugee_crisis_1994`, `csq_accelerated_camps_discovery_1992`, `csq_early_war_crimes_tribunal_1993`, `csq_accelerated_safe_areas_1993`, `csq_early_nato_threshold_1994`). The Dynamic Codex now consumes those annotations through deterministic annotation atoms/tokens. This is a reader closure only; it does not add new triggers, player responses, rupture wiring, or scoring mechanics.
 
 ---
 

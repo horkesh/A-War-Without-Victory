@@ -1,5 +1,5 @@
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
-import type { CostLedger, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
+import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
 import { strictCompare } from '../../../../state/validateGameState.js';
 
 export interface DynamicSection {
@@ -124,6 +124,27 @@ function hasCostFindingField(
     return costFindings(context).some((finding) => finding[field] === value);
 }
 
+function costAnnotations(context: CodexRenderContext): CostLedgerAnnotation[] {
+    const raw = context.costLedger?.annotations;
+    return Array.isArray(raw)
+        ? raw
+            .filter((annotation): annotation is CostLedgerAnnotation => (
+                Boolean(annotation && typeof annotation.tag === 'string' && annotation.tag.trim().length > 0)
+            ))
+            .slice()
+            .sort((a, b) => {
+                if (a.turn !== b.turn) return a.turn - b.turn;
+                const tagDelta = strictCompare(a.tag, b.tag);
+                if (tagDelta !== 0) return tagDelta;
+                return strictCompare(a.event_id, b.event_id);
+            })
+        : [];
+}
+
+function hasCostAnnotation(context: CodexRenderContext, tag: string): boolean {
+    return costAnnotations(context).some((annotation) => annotation.tag === tag);
+}
+
 /** Parse a threshold from a token like "CASUALTY_ABOVE:1.2". Returns NaN on
  *  malformed input, which the caller treats as a non-match. */
 function parseThreshold(rest: string): number {
@@ -213,6 +234,10 @@ function evaluateAtom(token: string, context: CodexRenderContext): boolean {
         return hasCostFindingField(context, 'faction', token.slice('FINDING_FACTION:'.length));
     }
 
+    if (token.startsWith('ANNOTATION:')) {
+        return hasCostAnnotation(context, token.slice('ANNOTATION:'.length));
+    }
+
     if (token.startsWith('EVENT:')) {
         return context.firedEventIds.has(token.slice('EVENT:'.length));
     }
@@ -300,6 +325,16 @@ function formatCostFinding(finding: CostLedgerFinding): string {
     return `${finding.title}${faction}: ${finding.text}`;
 }
 
+function formatCostAnnotation(annotation: CostLedgerAnnotation): string {
+    const details = [
+        annotation.faction,
+        typeof annotation.turn === 'number' ? `W${annotation.turn}` : undefined,
+    ].filter((detail): detail is string => Boolean(detail));
+    const suffix = details.length > 0 ? ` [${details.join(', ')}]` : '';
+    const text = annotation.text && annotation.text.trim().length > 0 ? `: ${annotation.text.trim()}` : '';
+    return `${annotation.tag}${suffix}${text}`;
+}
+
 function costFindingSources(context: CodexRenderContext): string[] {
     const sources = new Set<string>();
     for (const finding of costFindings(context)) {
@@ -366,6 +401,14 @@ function expandToken(token: string, context: CodexRenderContext): string | undef
     const milestoneValue = milestoneTokenValue(token, context);
     if (milestoneValue !== undefined) return milestoneValue;
     if (token === 'cost_findings') return costFindings(context).map(formatCostFinding).join('\n\n');
+    if (token === 'cost_annotations') return costAnnotations(context).map(formatCostAnnotation).join('\n\n');
+    if (token.startsWith('cost_annotation_')) {
+        const tag = token.slice('cost_annotation_'.length);
+        return costAnnotations(context)
+            .filter((annotation) => annotation.tag === tag)
+            .map(formatCostAnnotation)
+            .join('\n\n');
+    }
     if (token === 'cost_rupture_findings') return formatCostFindingsByCategory(context, 'rupture');
     if (token === 'cost_human_findings') return formatCostFindingsByCategory(context, 'human_cost');
     if (token === 'cost_displacement_findings') return formatCostFindingsByCategory(context, 'displacement');

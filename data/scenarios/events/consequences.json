@@ -184,6 +184,12 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": -8
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "bihac_pocket_collapse_1994",
+        "text": "The Bihac pocket collapses; 5th Corps is destroyed or captured.",
+        "faction": "RBiH"
       }
     ],
     "dimension_shifts": [
@@ -201,7 +207,7 @@
     "sets_flags": {
       "bihac_pocket_fell": true
     },
-    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4. Counterfactual to the historical 5th Corps breakout of 1995."
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4. Counterfactual to the historical 5th Corps breakout of 1995. WAVE-19 reader annotation."
   },
   {
     "id": "csq_northwest_rs_consolidation_1995",
@@ -265,6 +271,12 @@
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": -5
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "bihac_refugee_crisis_1994",
+        "text": "A massive refugee wave floods RBiH-held central Bosnia.",
+        "faction": "RBiH"
       }
     ],
     "dimension_shifts": [
@@ -274,7 +286,7 @@
         "delta": 5
       }
     ],
-    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4."
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4. WAVE-19 reader annotation."
   },
   {
     "id": "csq_accelerated_camps_discovery_1992",
@@ -303,6 +315,12 @@
         "kind": "humanitarian_impact",
         "faction": "RS",
         "war_crimes_delta": 2
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "accelerated_camps_discovery_1992",
+        "text": "Detention-camp documentation reaches Western capitals weeks earlier than in the historical record.",
+        "faction": "RS"
       }
     ],
     "dimension_shifts": [
@@ -320,7 +338,7 @@
     "sets_flags": {
       "camps_revealed_early": true
     },
-    "historical_source": "ICTY Stakic Trial Judgment (IT-97-24-T) and Kvocka et al. Trial Judgment (IT-98-30/1-T) on Omarska, Keraterm, and Trnopolje detention facilities; Tadic Trial Judgment (IT-94-1-T) on camp structure. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5."
+    "historical_source": "ICTY Stakic Trial Judgment (IT-97-24-T) and Kvocka et al. Trial Judgment (IT-98-30/1-T) on Omarska, Keraterm, and Trnopolje detention facilities; Tadic Trial Judgment (IT-94-1-T) on camp structure. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation."
   },
   {
     "id": "csq_early_war_crimes_tribunal_1993",
@@ -359,6 +377,12 @@
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": -10
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "early_war_crimes_tribunal_1993",
+        "text": "ICTY mandate expanded; Belgrade distances itself from the VRS earlier than in history.",
+        "faction": "RS"
       }
     ],
     "dimension_shifts": [
@@ -376,7 +400,7 @@
     "sets_flags": {
       "icty_mandate_expanded": true
     },
-    "historical_source": "UNSCR 827 (25 May 1993) established the ICTY. Counterfactual: earlier and more heavily-resourced mandate in response to accumulated aggressive-goals evidence. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5."
+    "historical_source": "UNSCR 827 (25 May 1993) established the ICTY. Counterfactual: earlier and more heavily-resourced mandate in response to accumulated aggressive-goals evidence. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation."
   },
   {
     "id": "csq_accelerated_safe_areas_1993",
@@ -411,6 +435,12 @@
           ]
         },
         "duration_turns": 40
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "accelerated_safe_areas_1993",
+        "text": "UN Safe Areas arrive with a defence mandate; RS operations against Bihac, Srebrenica, Gorazde, and Zepa are constrained.",
+        "faction": "RBiH"
       }
     ],
     "dimension_shifts": [
@@ -423,7 +453,7 @@
     "sets_flags": {
       "safe_areas_have_defence_mandate": true
     },
-    "historical_source": "UNSCR 819 (16 April 1993) — Srebrenica safe area; UNSCR 824 (6 May 1993) — six safe areas; UNSCR 836 (4 June 1993) — defence mandate. ICTY Krstic Trial Judgment (IT-98-33-T) documented that the historical mandate fell short; this counterfactual models the enforced version. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5."
+    "historical_source": "UNSCR 819 (16 April 1993) — Srebrenica safe area; UNSCR 824 (6 May 1993) — six safe areas; UNSCR 836 (4 June 1993) — defence mandate. ICTY Krstic Trial Judgment (IT-98-33-T) documented that the historical mandate fell short; this counterfactual models the enforced version. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation."
   },
   {
     "id": "csq_early_nato_threshold_1994",
@@ -463,6 +493,12 @@
         "faction": "RS",
         "delta": -0.15,
         "duration_turns": 30
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "tag": "early_nato_threshold_1994",
+        "text": "NATO intervention threshold lowered; VRS operational freedom constrained.",
+        "faction": "RS"
       }
     ],
     "dimension_shifts": [
@@ -480,7 +516,7 @@
     "sets_flags": {
       "early_nato_threshold_lowered": true
     },
-    "historical_source": "Operation Deliberate Force (30 August - 20 September 1995) was the historical turning point; counterfactual moves that threshold earlier in response to cumulative aggressive-goals evidence. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5."
+    "historical_source": "Operation Deliberate Force (30 August - 20 September 1995) was the historical turning point; counterfactual moves that threshold earlier in response to cumulative aggressive-goals evidence. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation."
   },
   {
     "id": "csq_drina_partisan_resistance_1992",

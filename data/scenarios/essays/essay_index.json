@@ -310,6 +310,13 @@
           "condition": "GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1",
           "variant": "divergence",
           "content": "{cost_displacement_findings}\n\nSources: {cost_finding_sources}"
+        },
+        {
+          "id": "v091_annotation_accelerated_camps_discovery",
+          "insert_after_paragraph": 4,
+          "condition": "GAME_OVER AND ANNOTATION:accelerated_camps_discovery_1992",
+          "variant": "divergence",
+          "content": "The counterfactual consequence record adds this Cost Ledger annotation: {cost_annotation_accelerated_camps_discovery_1992}"
         }
       ]
     },
@@ -466,6 +473,13 @@
           "condition": "GAME_OVER AND FINDING_CATEGORY:war_crimes",
           "variant": "divergence",
           "content": "The tribunal mandate is paired here with the war-crimes findings recorded by this campaign. {cost_war_crimes_findings}\n\nSources: {cost_finding_sources}"
+        },
+        {
+          "id": "v091_annotation_early_war_crimes_tribunal",
+          "insert_after_paragraph": 3,
+          "condition": "GAME_OVER AND ANNOTATION:early_war_crimes_tribunal_1993",
+          "variant": "divergence",
+          "content": "The tribunal essay is also cross-referenced against this campaign annotation: {cost_annotation_early_war_crimes_tribunal_1993}"
         }
       ]
     },
@@ -695,7 +709,16 @@
         "UN Report on Srebrenica (A/54/549, 1999), mandate vs. means analysis"
       ],
       "generated": true,
-      "content": "The United Nations Safe Areas regime, established across three Security Council resolutions in the spring and summer of 1993, represented one of the most consequential — and most deeply flawed — international interventions of the Bosnian War. Born from the crisis at Srebrenica, the concept was extended to encompass six designated zones across Bosnia-Herzegovina, creating a framework of civilian protection that the international community proved unable and, at critical moments, unwilling to enforce.\n\nThe sequence began with Resolution 819, adopted on 16 April 1993, which declared Srebrenica a safe area in response to the VRS offensive that had brought the enclave to the brink of collapse. Resolution 824, adopted on 6 May, extended the safe area designation to five additional locations: Sarajevo, Tuzla, Žepa, Goražde, and Bihać. Resolution 836, adopted on 4 June, provided the operational framework, authorizing UNPROFOR to use force — including air power — in and around the safe areas to deter attacks, monitor ceasefires, and promote the withdrawal of military units other than those of the Bosnian government.\n\nThe resolutions were ambitious in their language and modest in their means. The UN Secretary-General's own assessment estimated that a credible defense of the six safe areas would require approximately 34,000 additional troops. Member states offered fewer than 8,000, and even that figure was never fully deployed. The result was a protection regime that depended almost entirely on the willingness of the warring parties — above all the VRS — to respect designations that carried little military consequence if violated.\n\nFrom the perspective of the Bosnian government, the safe areas were a bitter compromise. They acknowledged that the international community would not intervene to reverse ethnic cleansing or restore territorial integrity, while offering in return a guarantee of physical protection for populations trapped in besieged enclaves. Bosniak political leaders accepted the framework because they had no alternative, but they harbored deep skepticism about its durability. The demilitarization provisions attached to several of the safe areas were particularly contentious — they required ARBiH forces to surrender heavy weapons while the surrounding VRS formations retained theirs.\n\nThe Bosnian Serb leadership viewed the safe areas with hostility. Karadžić and Mladić regarded them as an impediment to the achievement of the strategic objectives adopted by the Republika Srpska Assembly in May 1992, particularly the consolidation of control over the Drina Valley and the partition of Sarajevo. The VRS repeatedly tested the boundaries of the safe areas through shelling, sniping, and restrictions on humanitarian convoys. The ICTY Karadžić Trial Judgment (IT-95-5/18-T) found that the Bosnian Serb leadership treated the safe area concept as a temporary obstacle to be circumvented or, when conditions permitted, overrun.\n\nThe UN's own retrospective assessment, published as the Report of the Secretary-General on Srebrenica (A/54/549, 1999), was unsparing. It concluded that the safe areas had created an illusion of security without the substance to sustain it, and that the international community had used the concept as a substitute for the more robust military and political action that the situation demanded. The report acknowledged that the gap between mandate and means was known from the outset and never adequately addressed.\n\nThe safe areas would endure for two more years in a state of perpetual fragility — shelled but not overrun, supplied but not adequately, defended but not credibly. They embodied the central tension of international engagement in Bosnia: the desire to be seen protecting civilians without assuming the military risks that genuine protection required."
+      "content": "The United Nations Safe Areas regime, established across three Security Council resolutions in the spring and summer of 1993, represented one of the most consequential — and most deeply flawed — international interventions of the Bosnian War. Born from the crisis at Srebrenica, the concept was extended to encompass six designated zones across Bosnia-Herzegovina, creating a framework of civilian protection that the international community proved unable and, at critical moments, unwilling to enforce.\n\nThe sequence began with Resolution 819, adopted on 16 April 1993, which declared Srebrenica a safe area in response to the VRS offensive that had brought the enclave to the brink of collapse. Resolution 824, adopted on 6 May, extended the safe area designation to five additional locations: Sarajevo, Tuzla, Žepa, Goražde, and Bihać. Resolution 836, adopted on 4 June, provided the operational framework, authorizing UNPROFOR to use force — including air power — in and around the safe areas to deter attacks, monitor ceasefires, and promote the withdrawal of military units other than those of the Bosnian government.\n\nThe resolutions were ambitious in their language and modest in their means. The UN Secretary-General's own assessment estimated that a credible defense of the six safe areas would require approximately 34,000 additional troops. Member states offered fewer than 8,000, and even that figure was never fully deployed. The result was a protection regime that depended almost entirely on the willingness of the warring parties — above all the VRS — to respect designations that carried little military consequence if violated.\n\nFrom the perspective of the Bosnian government, the safe areas were a bitter compromise. They acknowledged that the international community would not intervene to reverse ethnic cleansing or restore territorial integrity, while offering in return a guarantee of physical protection for populations trapped in besieged enclaves. Bosniak political leaders accepted the framework because they had no alternative, but they harbored deep skepticism about its durability. The demilitarization provisions attached to several of the safe areas were particularly contentious — they required ARBiH forces to surrender heavy weapons while the surrounding VRS formations retained theirs.\n\nThe Bosnian Serb leadership viewed the safe areas with hostility. Karadžić and Mladić regarded them as an impediment to the achievement of the strategic objectives adopted by the Republika Srpska Assembly in May 1992, particularly the consolidation of control over the Drina Valley and the partition of Sarajevo. The VRS repeatedly tested the boundaries of the safe areas through shelling, sniping, and restrictions on humanitarian convoys. The ICTY Karadžić Trial Judgment (IT-95-5/18-T) found that the Bosnian Serb leadership treated the safe area concept as a temporary obstacle to be circumvented or, when conditions permitted, overrun.\n\nThe UN's own retrospective assessment, published as the Report of the Secretary-General on Srebrenica (A/54/549, 1999), was unsparing. It concluded that the safe areas had created an illusion of security without the substance to sustain it, and that the international community had used the concept as a substitute for the more robust military and political action that the situation demanded. The report acknowledged that the gap between mandate and means was known from the outset and never adequately addressed.\n\nThe safe areas would endure for two more years in a state of perpetual fragility — shelled but not overrun, supplied but not adequately, defended but not credibly. They embodied the central tension of international engagement in Bosnia: the desire to be seen protecting civilians without assuming the military risks that genuine protection required.",
+      "dynamic_sections": [
+        {
+          "id": "v091_annotation_accelerated_safe_areas",
+          "insert_after_paragraph": 2,
+          "condition": "GAME_OVER AND ANNOTATION:accelerated_safe_areas_1993",
+          "variant": "divergence",
+          "content": "The safe-area record diverges through this consequence annotation: {cost_annotation_accelerated_safe_areas_1993}"
+        }
+      ]
     },
     {
       "id": "essay_srebrenica_demilitarization_1993",
@@ -1093,6 +1116,20 @@
           "condition": "GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1",
           "variant": "divergence",
           "content": "The pocket crisis is also read through the campaign-wide displacement record. {cost_displacement_findings}\n\nSources: {cost_finding_sources}"
+        },
+        {
+          "id": "v091_annotation_bihac_pocket_collapse",
+          "insert_after_paragraph": 6,
+          "condition": "GAME_OVER AND ANNOTATION:bihac_pocket_collapse_1994",
+          "variant": "ghost",
+          "content": "In this campaign the pocket did not merely approach collapse; the Cost Ledger records: {cost_annotation_bihac_pocket_collapse_1994}"
+        },
+        {
+          "id": "v091_annotation_bihac_refugee_crisis",
+          "insert_after_paragraph": 6,
+          "condition": "GAME_OVER AND ANNOTATION:bihac_refugee_crisis_1994",
+          "variant": "divergence",
+          "content": "The resulting displacement pressure is recorded as: {cost_annotation_bihac_refugee_crisis_1994}"
         }
       ]
     },
@@ -1619,6 +1656,13 @@
           "condition": "GAME_OVER AND MILESTONE:dayton_accords",
           "variant": "note",
           "content": "The 1993 threat is an early marker on the intervention path whose endpoint is read here through Dayton timing. {milestone_dayton_accords_summary}"
+        },
+        {
+          "id": "v091_annotation_early_nato_threshold",
+          "insert_after_paragraph": 5,
+          "condition": "GAME_OVER AND ANNOTATION:early_nato_threshold_1994",
+          "variant": "note",
+          "content": "Later intervention pressure is recorded here as a consequence annotation: {cost_annotation_early_nato_threshold_1994}"
         }
       ]
     },

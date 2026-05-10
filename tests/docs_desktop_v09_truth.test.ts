@@ -65,7 +65,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('Packet C2 patron-distance pressure completion');
     expect(roadmap).toContain('Packet C3 accepted-peace bridging');
     expect(roadmap).toContain('early_peace_implementation_record');
-    expect(roadmap).toContain('242 definitions / 812 effect instances');
+    expect(roadmap).toContain('242 definitions / 818 effect instances');
     expect(roadmap).toContain('| Cost Ledger | Advanced');
     expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
     expect(roadmap).not.toContain('full prosecutorial authoring still open');
@@ -103,9 +103,13 @@ describe('desktop and roadmap truth docs', () => {
     expect(plan).toContain('`VerdictScreen` now renders deterministic milestone comparison rows');
     expect(plan).toContain('historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton');
     expect(plan).toContain('Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms');
+    expect(plan).toContain('Cost Ledger annotation atoms/tokens');
+    expect(plan).toContain('`ANNOTATION:<tag>`, `{cost_annotations}`, `{cost_annotation_<tag>}`');
     expect(plan).toContain('optional `milestone_comparison` row contract');
     expect(plan).toContain('`dynamic_sections`, `ghost_when`');
     expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
+    expect(roadmap).toContain('Consequence Wave 19 is a reader-only closure');
+    expect(roadmap).toContain('`ANNOTATION:<tag>`, `{cost_annotations}`, and `{cost_annotation_<tag>}` tokens');
     expect(roadmap).toContain('milestone atoms/tokens');
     expect(roadmap).toContain('Srebrenica/Dayton milestone-week comparison rows live');
     expect(roadmap).toContain('eight authored breadth waves plus the early-peace reader bridge add forty-one more endgame-aware essays');
@@ -132,6 +136,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
+    expect(bible).toContain('Cost Ledger annotations from existing consequence events');
+    expect(bible).toContain('accelerated camps discovery, early ICTY mandate expansion, accelerated safe areas, early NATO threshold, Bihac pocket collapse, and Bihac refugee crisis');
     expect(bible).toContain('milestone comparison rows inside historical essays');
     expect(bible).toContain("current authored consumers include Srebrenica, Dayton, Ahmici, Operation Storm, Zepa, the Federation Offensive, Drina, Prijedor camps, HVO camps, Markale shelling, Dayton talks, Grabovica/Uzdol, Tuzla Gate, Second Markale, Stupni Do, Vance-Owen early peace, RS strategic goals, Herceg-Bosna political project, the arms embargo, Operation Corridor, JNA withdrawal, Owen-Stoltenberg, Bosnian Assembly rejection of Owen-Stoltenberg, Contact Group plan, Bihac crisis, Carter cessation of hostilities, ceasefire expiry, Operation Deliberate Force, UN hostage crisis, Gorazde crisis, Operation Mistral 2, Operation Sana, Operation Summer '95, Washington halts the Federation advance, Washington Agreement, London Conference, UN Resolution 808, UN Resolution 819, UN Resolution 836, no-fly zone enforcement, Operation Sharp Guard, NATO air-strike threat, and UN Resolution 820 sanctions");
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');

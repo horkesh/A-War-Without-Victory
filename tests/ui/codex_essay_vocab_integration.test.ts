@@ -1206,3 +1206,111 @@ describe('v0.9.1 vocab - UN mandate and sanctions breadth wave', () => {
         expect(resolveCodexEssay(sanctionsEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
     });
 });
+
+describe('v0.9.1 vocab - consequence reader annotation follow-through', () => {
+    const campsEssay = findEssay('essay_concentration_camps_revealed_1992');
+    const tribunalEssay = findEssay('essay_un_resolution_808_tribunal_1993');
+    const safeAreasEssay = findEssay('essay_un_safe_areas_declared_1993');
+    const strikeThreatEssay = findEssay('essay_nato_air_strike_threat_1993');
+    const bihacEssay = findEssay('essay_bihac_crisis_1994');
+
+    const sections = {
+        camps: (campsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_accelerated_camps_discovery'),
+        tribunal: (tribunalEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_early_war_crimes_tribunal'),
+        safeAreas: (safeAreasEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_accelerated_safe_areas'),
+        strikeThreat: (strikeThreatEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_early_nato_threshold'),
+        bihacCollapse: (bihacEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_bihac_pocket_collapse'),
+        bihacRefugees: (bihacEssay.dynamic_sections ?? []).find(s => s.id === 'v091_annotation_bihac_refugee_crisis'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 0,
+        total_civilian_killed: 0,
+        findings: [],
+        annotations: [
+            {
+                event_id: 'accelerated_camps_discovery_1992',
+                tag: 'accelerated_camps_discovery_1992',
+                text: 'Detention-camp documentation reaches Western capitals weeks earlier than in the historical record.',
+                turn: 8,
+                faction: 'RS',
+            },
+            {
+                event_id: 'early_war_crimes_tribunal_1993',
+                tag: 'early_war_crimes_tribunal_1993',
+                text: 'ICTY mandate expanded; Belgrade distances itself from the VRS earlier than in history.',
+                turn: 36,
+                faction: 'RS',
+            },
+            {
+                event_id: 'accelerated_safe_areas_1993',
+                tag: 'accelerated_safe_areas_1993',
+                text: 'UN Safe Areas arrive with a defence mandate; RS operations against Bihac, Srebrenica, Gorazde, and Zepa are constrained.',
+                turn: 42,
+                faction: 'RBiH',
+            },
+            {
+                event_id: 'early_nato_threshold_1994',
+                tag: 'early_nato_threshold_1994',
+                text: 'NATO intervention threshold lowered; VRS operational freedom constrained.',
+                turn: 90,
+                faction: 'RS',
+            },
+            {
+                event_id: 'bihac_pocket_collapse_1994',
+                tag: 'bihac_pocket_collapse_1994',
+                text: 'The Bihac pocket collapses; 5th Corps is destroyed or captured.',
+                turn: 130,
+                faction: 'RBiH',
+            },
+            {
+                event_id: 'bihac_refugee_crisis_1994',
+                tag: 'bihac_refugee_crisis_1994',
+                text: 'A massive refugee wave floods RBiH-held central Bosnia.',
+                turn: 132,
+                faction: 'RBiH',
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds six annotation-gated Codex sections for existing consequence facts', () => {
+        expect(sections.camps?.condition).toBe('GAME_OVER AND ANNOTATION:accelerated_camps_discovery_1992');
+        expect(sections.tribunal?.condition).toBe('GAME_OVER AND ANNOTATION:early_war_crimes_tribunal_1993');
+        expect(sections.safeAreas?.condition).toBe('GAME_OVER AND ANNOTATION:accelerated_safe_areas_1993');
+        expect(sections.strikeThreat?.condition).toBe('GAME_OVER AND ANNOTATION:early_nato_threshold_1994');
+        expect(sections.bihacCollapse?.condition).toBe('GAME_OVER AND ANNOTATION:bihac_pocket_collapse_1994');
+        expect(sections.bihacRefugees?.condition).toBe('GAME_OVER AND ANNOTATION:bihac_refugee_crisis_1994');
+
+        expect(sections.camps?.variant).toBe('divergence');
+        expect(sections.tribunal?.variant).toBe('divergence');
+        expect(sections.safeAreas?.variant).toBe('divergence');
+        expect(sections.strikeThreat?.variant).toBe('note');
+        expect(sections.bihacCollapse?.variant).toBe('ghost');
+        expect(sections.bihacRefugees?.variant).toBe('divergence');
+    });
+
+    it('renders annotation text through the new Cost Ledger annotation tokens', () => {
+        const baseCtx = {
+            gameOver: true,
+            costLedger,
+            historicalComparison: {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+            },
+        };
+
+        expect(resolveCodexEssay(campsEssay, { ...baseCtx, firedEventIds: new Set(['concentration_camps_revealed_1992']) }).paragraphs.some(p => p.text.includes('accelerated_camps_discovery_1992 [RS, W8]'))).toBe(true);
+        expect(resolveCodexEssay(tribunalEssay, { ...baseCtx, firedEventIds: new Set(['un_resolution_808_tribunal_1993']) }).paragraphs.some(p => p.text.includes('early_war_crimes_tribunal_1993 [RS, W36]'))).toBe(true);
+        expect(resolveCodexEssay(safeAreasEssay, { ...baseCtx, firedEventIds: new Set(['un_safe_areas_declared_1993']) }).paragraphs.some(p => p.text.includes('accelerated_safe_areas_1993 [RBiH, W42]'))).toBe(true);
+        expect(resolveCodexEssay(strikeThreatEssay, { ...baseCtx, firedEventIds: new Set(['nato_air_strike_threat_1993']) }).paragraphs.some(p => p.text.includes('early_nato_threshold_1994 [RS, W90]'))).toBe(true);
+        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('bihac_pocket_collapse_1994 [RBiH, W130]'))).toBe(true);
+        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('bihac_refugee_crisis_1994 [RBiH, W132]'))).toBe(true);
+    });
+});

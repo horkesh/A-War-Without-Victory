@@ -3714,6 +3714,22 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 **Type:** Harness artifact + desktop/UI data-consumer hardening. No simulation behavior, combat math, scenario data, OOB, operation definitions, political controller writes, rupture wiring, or canon files changed.
 
+## [2026-05-10] content(consequence/codex): annotation reader bridge
+
+**Type:** Reader-only consequence annotation + Dynamic Codex rendering support. No new event families, event predicates, player responses, rupture wiring, scoring mechanics, OOB, operation definitions, combat math, or scenario timing changes.
+
+**Change:** Six existing consequence records now stamp audit-only Cost Ledger annotations: accelerated camps discovery, early ICTY mandate expansion, accelerated safe areas, early NATO threshold, Bihac pocket collapse, and Bihac refugee crisis. `codexEssayResolver` now supports `ANNOTATION:<tag>` conditions plus `{cost_annotations}` and `{cost_annotation_<tag>}` tokens. Six historical essays consume those packet facts through dynamic sections.
+
+**Determinism:** Annotations are written by existing event effects, reflected by `buildCostLedger`, sorted deterministically by turn/tag/event id, and rendered read-only by Codex. They do not feed scoring or simulation decisions.
+
+**Verification:** Red-first tests covered resolver atoms/tokens, Wave 19 annotations, and essay-index consumers. Focused green suite: `cmd /c npx vitest run tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_resolver.test.ts tests/divergence_events_wave_19_reader_annotations.test.ts` passed 81/81.
+
+**Roadmap delta:** The scoped v0.9.0 consequence narrative-reader follow-up is closed for the Chain 4/5 facts selected tonight, and v0.9.1 Dynamic Codex now consumes real Cost Ledger annotations in addition to findings and milestones.
+
+**Report:** `docs/40_reports/implemented/20260510_CONSEQUENCE_READER_ANNOTATION_BRIDGE.md`
+
+---
+
 **Change:** `replay_save_emit.ts` now writes `replay_save_manifest.json` beside the full `replay_save_sequence.json`. Desktop load prefers the manifest and broadcasts it before `game-state-updated`; the renderer stages it through preload/useIPC/useDesktopSession/gameStore/GameStateAdapter and `ReplayScrubber` can render from either full frames or sparse summary frames.
 
 **Determinism:** Read-only and derived from canonical serialized replay frames in harness turn order. Summary generation uses the deterministic `buildReplayFrameSummary` path, including stable sorted control counts. The full replay sequence remains byte-compatible; the manifest is additive.
