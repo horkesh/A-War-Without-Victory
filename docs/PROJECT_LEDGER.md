@@ -3638,3 +3638,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** v0.9.1 authored Dynamic Codex breadth now includes Tuzla Gate, Second Markale, and Stupni Do on top of the earlier Cost Ledger/milestone consumers. Broader dynamic essay authoring remains open.
 
 **Report:** `docs/40_reports/implemented/20260510_DYNAMIC_CODEX_LATE_WAR_MEMORY_BREADTH.md`
+
+---
+
+## [2026-05-10] docs(tooling): consequence substrate inventory C1
+
+**Type:** Read-only diagnostic plus roadmap/report updates. No gameplay behavior, event authoring, effect semantics, simulation output, OOB, scenario timing, or sensitive-history mechanics changed.
+
+**Change:** Added `tools/diagnostics/consequence_substrate_inventory.cjs`, a deterministic scanner for `data/scenarios/events/` that inventories event-effect substrates, writer/consumer ownership, faction coverage, live/partial-reader status, and unknown effect kinds. Added fixture-backed test coverage and the C1 audit report.
+
+**Evidence:** Real catalog scan reports 238 event definitions, 796 effect instances, 18 effect kinds, 16 live substrates, two partial-reader substrates (`guerrilla_threat`, `recruitment_modifier`), and zero unknown substrates.
+
+**Verification:** `npx.cmd vitest run tests/consequence_substrate_inventory_diagnostic.test.ts --reporter=dot` passed 3/3.
+
+**Roadmap delta:** v0.9.0 Consequence System Packet C1 is complete. Next consequence work should target C2 pressure completion or a focused reader proof for one partial-reader substrate, not another broad audit.
+
+**Report:** `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`

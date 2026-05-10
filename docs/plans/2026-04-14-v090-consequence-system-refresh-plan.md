@@ -71,6 +71,8 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 
 **Deliverable:** one consequence substrate inventory and owner matrix
 
+**Status 2026-05-10:** COMPLETE. `tools/diagnostics/consequence_substrate_inventory.cjs` now emits a deterministic owner matrix over the authored event catalog. Current scan: 238 events, 796 effect instances, 18 effect kinds, 16 live substrates, two partial-reader substrates (`guerrilla_threat`, `recruitment_modifier`), and zero unknown substrates. Report: `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`.
+
 ### Program B. Pressure And Exhaustion Consequences
 
 **Goal:** Finish the most immediate negative-sum identity loop before broader alt-history chains.
@@ -121,6 +123,8 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 **Goal:** Produce a current owner map for pressure, exhaustion, political response, consequence-capable effect types, and known dead/stale wires.
 
 **Done means:** a reviewer can tell exactly what the current consequence substrate already owns.
+
+**Status 2026-05-10:** DONE. The owner matrix is executable, fixture-tested, and run against the real catalog.
 
 ### Packet C2. Pressure Consequence Completion
 
@@ -190,4 +194,3 @@ Canonical UI surface:
 
 Done means:
 - the repo can hand Claude bounded consequence packets tied to current truth, and reviewers can tell which large branch ideas are still intentionally blocked.
-
