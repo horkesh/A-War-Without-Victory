@@ -30,7 +30,15 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards');
     expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards + sparse manifest loading');
     expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards + sparse manifest loading + selected-frame map inspection');
+    expect(roadmap).toContain('| Map That Scars | Complete');
+    expect(roadmap).toContain('| Refugee Column | Complete');
+    expect(roadmap).toContain('| Corridor Heartbeat | Complete');
+    expect(roadmap).toContain('selected-frame map inspection is live');
     expect(roadmap).toContain('replay auto-play/animation polish remains future work');
+    expect(roadmap).not.toContain('| Map That Scars | Not started');
+    expect(roadmap).not.toContain('| Refugee Column | Not started');
+    expect(roadmap).not.toContain('| Corridor Heartbeat | Not started');
+    expect(roadmap).not.toContain('richer map-state playback remains future polish');
     expect(roadmap).not.toContain('richer replay-map inspection is still future work');
     expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
     expect(roadmap).not.toContain('Warroom React Shell Recovery / Feature Parity** Ã¢â‚¬â€ main desktop entry surface still needs parity/polish');

@@ -79,3 +79,29 @@ The wall-clock probe is debug-only and does not write into game state, save stat
 ## Next CPU Lane
 
 The next proven wall-clock target remains commander-loop internals, now with better names. `buildBriefing` is the largest single top-level slice, while `emitCommanderOutput` and `assessSituation` are the largest named decision sub-phases. Further optimization should start from one of those three measured buckets.
+
+## Follow-Up: Briefing Candidate Rejected
+
+A 2026-05-10 follow-up pass tested `buildBriefing` more directly because the profile kept naming it as the largest single commander bucket.
+
+Pre-candidate 40w profile:
+
+| Label | Total |
+|---|---:|
+| `commander.runCommanderForCorps.buildBriefing` | 1,047.460 ms |
+| `commander.runCommanderForCorps.commanderDecide` | 1,009.717 ms |
+| `commander.runCommanderForCorps.total` | 2,062.019 ms |
+| `bot_orders.executeFactionDirectives.total` | 1,563.882 ms |
+
+Candidate tested: replace repeated `findSectorForEnemyOsid(...)` calls in enemy-equipment summaries with a per-briefing defender-sector lookup that preserves sorted sector precedence and territory fallback semantics.
+
+Post-candidate 40w profile:
+
+| Label | Total |
+|---|---:|
+| `commander.runCommanderForCorps.buildBriefing` | 1,082.252 ms |
+| `commander.runCommanderForCorps.commanderDecide` | 987.511 ms |
+| `commander.runCommanderForCorps.total` | 2,074.604 ms |
+| `bot_orders.executeFactionDirectives.total` | 1,552.730 ms |
+
+Both runs produced final hash `ea9f3db7ac59a443`, so the candidate was deterministic, but it was not a proven wall-clock win. The code change was rejected and not retained. The next CPU pass should instrument inside `buildBriefing` before changing it again, or instead take the already named `emitCommanderOutput` / `assessSituation` sub-buckets.

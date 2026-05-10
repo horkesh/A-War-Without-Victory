@@ -6,7 +6,7 @@
 **v0.9.6 CLOSED 2026-05-08 (Option 2 partial PASS):** persona suppressor cb13e605-bis empirical -8.1% reduction (3/4 cluster PASS; C3 structural resistance documented); SRK siege defender Phase 1 recommendation shipped at `8e974004` (implementation deferred to v0.9.7+). Stale-assertion fixes shipped at `521fe408`.
 **v0.9.7 followups CLOSED 2026-05-09/10:** SRK siege defender Phase 1 + Phase 2 closed at `32c128f8`; Persona suppressor C3 structural fix shipped (`6cebf13e`); president cue enrichment shipped (`37b5843a`); Windows fast Vitest runner recovered at `476836e4`; war-dispatch displacement window restored at `bc7fcc49`; directive metadata shipped at `bbe5a26b`; bridge metadata defaults shipped at `be66d1cc`; latest state migration default covered at `750e1c14`.
 **v0.9.3 perf-memory CLOSED 2026-05-08 (LANE D Path A):** displacement_event_log streaming + 2 new bounded aggregate fields; named accumulator eliminated. The cosmetic war-dispatch 4-turn/monthly recent displacement cue was restored on top of the bounded `displacement_recent_by_turn` aggregate at `bc7fcc49`. New baselines: 40w n1740 `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 `a4bf8b8095050881` (final_save 30.11 MB → 6.84 MB; -76.2%). Wall-clock perf still open (v0.9.4+).
-**v0.9.3/v0.9.4 wall-clock CPU profiling 2026-05-10:** bot-orders/commander profiling is now available behind `PERF_PROFILE_BOT_ORDERS=true` with stable JSON output at `data/derived/_debug/bot_orders_perf_profile.json`. First measured optimization cached per-brigade sector assignment/front sets: current local 40w hash stayed `ea9f3db7ac59a443` flag OFF/ON, `executeFactionDirectives.total` dropped 1,807.542ms -> 1,555.460ms, and `sectorMarch` dropped 461.641ms -> 319.196ms. Commander decision profiling now splits `assessSituation`, `allocateBrigades`, `managePlan`, `assembleBeliefState`, `makeDecisions`, and `emitCommanderOutput`; the first measured commander cleanup removed a repeated any-zone scan from `assessThreats`. Next proven CPU target is either `buildBriefing` or the newly named `emitCommanderOutput` / `assessSituation` internals after another profiled 40w run. Report: `docs/40_reports/implemented/20260510_BOT_ORDERS_WALL_CLOCK_PROFILE.md`.
+**v0.9.3/v0.9.4 wall-clock CPU profiling 2026-05-10:** bot-orders/commander profiling is now available behind `PERF_PROFILE_BOT_ORDERS=true` with stable JSON output at `data/derived/_debug/bot_orders_perf_profile.json`. First measured optimization cached per-brigade sector assignment/front sets: current local 40w hash stayed `ea9f3db7ac59a443` flag OFF/ON, `executeFactionDirectives.total` dropped 1,807.542ms -> 1,555.460ms, and `sectorMarch` dropped 461.641ms -> 319.196ms. Commander decision profiling now splits `assessSituation`, `allocateBrigades`, `managePlan`, `assembleBeliefState`, `makeDecisions`, and `emitCommanderOutput`; the first measured commander cleanup removed a repeated any-zone scan from `assessThreats`. A follow-up 40w profile confirmed `buildBriefing` as the largest single named commander bucket, but rejected an attempted defender-sector lookup cache because it did not produce a wall-clock win. Next proven CPU target remains `buildBriefing`, `emitCommanderOutput`, or `assessSituation`, but only after another measured candidate. Report: `docs/40_reports/implemented/20260510_BOT_ORDERS_WALL_CLOCK_PROFILE.md`.
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -823,16 +823,16 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | Consequence system | Partial (`v0.9.0` substrate live: consequence owner cleanup, stranded lifecycle, verdict contract, locked rupture path; broader divergence chains still open) |
 | Cost Ledger | Partial (`CostLedger` / historical comparison builders and War Cost surface live; full prosecutorial authoring still open) |
 | Ghost Map | Implemented (live on tactical map; roadmap-owned cleanup/polish only if needed) |
-| Map That Scars | Not started (v0.9.4) |
+| Map That Scars | Complete (v0.9.4 legendary map feature live; polish only if future UX evidence demands it) |
 | Letter Home | Implemented (Chief of Staff briefing) |
-| Refugee Column | Not started (v0.9.4) |
-| Corridor Heartbeat | Not started (v0.9.4) |
+| Refugee Column | Complete (v0.9.4 legendary map feature live; tuning/presentation polish only) |
+| Corridor Heartbeat | Complete (v0.9.4 legendary map feature live; tuning/presentation polish only) |
 | Endgame Comparison | Partial (`VerdictScreen`, Chronicle, Wrapped, and first dynamic Codex comparison slices live; richer milestone-week UX still open) |
 | Tutorial | Partial (onboarding skeleton + tutorial hardening live; playtest recruitment assets in `docs/playtesting/v092/`) |
 | Sound/audio | Not started (post-1.0) |
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT â€” game starts April 1992 |
-| Save/load | Current live product truth is strong: headless + desktop save/load truth are proven, continue-from-save equivalence is direct, and `VerdictScreen` has a read-only replay scrubber with deterministic selected-frame summary cards. Large-replay UI loading now prefers sparse manifests; richer map-state playback remains future polish. |
+| Save/load | Current live product truth is strong: headless + desktop save/load truth are proven, continue-from-save equivalence is direct, and `VerdictScreen` has a read-only replay scrubber with deterministic selected-frame summary cards. Large-replay UI loading now prefers sparse manifests, selected-frame map inspection is live, and replay auto-play/animation polish remains future work. |
 | Victory conditions | **Canonical 2026-04-16** — `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. `outcome_class`, `condemnation_flags`, Pyrrhic score, verdict display, termination-vs-judgment split, scenario fallback all settled. Remaining `v0.9.0` work is divergence-event matrix authoring, not the gate. |
 | Sensitive-history handling | **Canonical 2026-04-16** — `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three-ring boundary, rupture expansion rule, Cost Ledger wording constraints, and sign-off structure all settled. |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
@@ -855,9 +855,9 @@ Features that make AWWV 10x more powerful, assigned to specific versions. Source
 | **Command Chain That Disobeys** | v0.8.3 | High | Officers interpret, delay, refuse orders |
 | **Cost Ledger** | v0.9.0 | Medium | ICTY-style prosecutorial endgame narrative |
 | **Endgame Comparison** | v0.9.1 | Medium | Your war vs real war side-by-side |
-| **Map That Scars** | v0.9.4 | Low-Med | Visual degradation over time |
-| **Refugee Column** | v0.9.4 | Medium | Displacement as visible map entity |
-| **Corridor Heartbeat** | v0.9.4 | Low | Supply corridor pulse visualization |
+| **Map That Scars** | Implemented | Low-Med | Visual degradation over time |
+| **Refugee Column** | Implemented | Medium | Displacement as visible map entity |
+| **Corridor Heartbeat** | Implemented | Low | Supply corridor pulse visualization |
 | **The Silence** | v1.3.0 | Medium | Audio degradation design |
 | **The Other Side's Briefing** | v1.4.0 | Medium | Enemy CoS briefing after major battles |
 

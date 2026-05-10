@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] CPU follow-up profile + roadmap truth cleanup
+
+**Scope:** Follow-up CPU performance profiling lane plus Master Roadmap truth cleanup. The user asked for the next two lanes to be executed, not merely recommended.
+
+**Fix:** Ran a fresh profiled 40w pass and confirmed `buildBriefing` remains the largest single commander bucket. Tested a defender-sector lookup cache candidate for enemy-equipment briefing summaries, but rejected it because the follow-up profile did not show a wall-clock win. Updated `MASTER_ROADMAP.md` so the v0.9.4 legendary map rows no longer contradict the closed Phase 3 note, and so save/load/replay status reflects that selected-frame map inspection is live while auto-play/animation remains future polish.
+
+**Validation:** Red doc-truth test first: `npx.cmd vitest run tests/docs_desktop_v09_truth.test.ts --reporter=dot` failed on the stale `Map That Scars | Not started` state. CPU profiling evidence stayed deterministic across pre/post candidate 40w runs with final hash `ea9f3db7ac59a443`, but the candidate was not retained because `buildBriefing` moved from 1,047.460ms to 1,082.252ms.
+
+**Behavior:** Documentation/test-only after rejecting the unproven CPU code candidate. No simulation, scenario, UI, save schema, or canon mechanic changed.
+
+---
+
 ## [2026-05-10] v0.9.2 playtest operator package
 
 **Scope:** Tutorial/playtesting closure lane. The 2026-05-09 recruitment-pack report contained the strategy, but the assets were still buried in a closeout report rather than deployable operator files.
