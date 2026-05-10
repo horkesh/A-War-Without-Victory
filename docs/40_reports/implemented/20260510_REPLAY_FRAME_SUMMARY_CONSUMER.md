@@ -29,6 +29,5 @@ The summary reader sorts object keys with `strictCompare`, does not use randomne
 
 ## Remaining Replay Work
 
-- Richer map-state inspection inside the replay view.
-- Sparse or streaming UI loading for very large replay sidecars.
+- Richer cinematic replay presentation beyond the basic scrubber/playback controls.
 - Optional visual QA against a loaded replay fixture once a representative local replay artifact is available.

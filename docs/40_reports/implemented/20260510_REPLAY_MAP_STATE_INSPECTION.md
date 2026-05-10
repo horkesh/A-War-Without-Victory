@@ -44,4 +44,4 @@ Canon impact is limited to documentation truth: `Systems_Manual_v0_9_0.md` now n
 
 ## Roadmap Delta
 
-The replay consumer lane now covers summary scrubber, sparse manifest loading, and selected-frame map inspection. Remaining replay polish is auto-play/animation and richer post-run presentation, not the basic product-shell inspection loop.
+The replay consumer lane now covers summary scrubber, sparse manifest loading, selected-frame map inspection, and read-only Play/Pause plus step controls. Remaining replay polish is richer cinematic post-run presentation, not the basic product-shell inspection loop.

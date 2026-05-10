@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] replay: read-only autoplay controls
+
+**Scope:** Replay consumer closure follow-up. The endgame scrubber already rendered selected-frame summaries, sparse manifests, and full-frame map inspection, but still required manual slider/jump interaction.
+
+**Fix:** Added read-only Play/Pause, previous-frame, and next-frame controls to `ReplayScrubber`. Playback advances only the component's local replay cursor at a fixed UI interval; manual scrub, jump, or step pauses playback. Sparse manifests and full replay sequences share the same control path. The feature does not advance campaign turns, run sim phases, write state, or change replay artifacts.
+
+**Validation:** Red interaction proof first: `tests/ui/replay_scrubber_autoplay.test.ts` failed on missing playback controls. Green focused proof passed 3/3 after wiring controls and timer behavior.
+
+**Canon posture:** UI/read-model only. `Systems_Manual_v0_9_0.md`, `TACTICAL_MAP_SYSTEM.md`, and `MASTER_ROADMAP.md` now record that basic replay playback controls are live; richer cinematic replay presentation remains future polish.
+
+---
+
 ## [2026-05-10] Commander briefing front-geometry wall-clock cut
 
 **Scope:** Follow-on CPU performance lane. The previous profiled commander pass named `buildBriefing` as the largest single commander bucket but lacked enough internal labels to choose a safe optimization.
@@ -80,7 +92,7 @@
 
 **Scope:** Follow-up CPU performance profiling lane plus Master Roadmap truth cleanup. The user asked for the next two lanes to be executed, not merely recommended.
 
-**Fix:** Ran a fresh profiled 40w pass and confirmed `buildBriefing` remains the largest single commander bucket. Tested a defender-sector lookup cache candidate for enemy-equipment briefing summaries, but rejected it because the follow-up profile did not show a wall-clock win. Updated `MASTER_ROADMAP.md` so the v0.9.4 legendary map rows no longer contradict the closed Phase 3 note, and so save/load/replay status reflects that selected-frame map inspection is live while auto-play/animation remains future polish.
+**Fix:** Ran a fresh profiled 40w pass and confirmed `buildBriefing` remains the largest single commander bucket. Tested a defender-sector lookup cache candidate for enemy-equipment briefing summaries, but rejected it because the follow-up profile did not show a wall-clock win. Updated `MASTER_ROADMAP.md` so the v0.9.4 legendary map rows no longer contradict the closed Phase 3 note, and so save/load/replay status reflects that selected-frame map inspection is live while richer cinematic replay presentation remains future polish.
 
 **Validation:** Red doc-truth test first: `npx.cmd vitest run tests/docs_desktop_v09_truth.test.ts --reporter=dot` failed on the stale `Map That Scars | Not started` state. CPU profiling evidence stayed deterministic across pre/post candidate 40w runs with final hash `ea9f3db7ac59a443`, but the candidate was not retained because `buildBriefing` moved from 1,047.460ms to 1,082.252ms.
 
@@ -3452,7 +3464,7 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 **Verification:** Red tests first: `gamestore_load_reset` failed on missing `startReplayInspection`, and `endgame_verdict_screen_mount` failed on missing `Inspect Map`. Green focused replay UI/store suite: `npx.cmd vitest run tests/ui/gamestore_load_reset.test.ts tests/ui/endgame_verdict_screen_mount.test.ts --reporter=dot` passed 51/51. Final lane verification also covered replay/doc truth tests, typecheck, desktop map build, and diff whitespace checks.
 
-**Roadmap delta:** Replay consumer closure now includes selected-frame map inspection. Remaining replay polish is auto-play/animation and richer post-run presentation, not the basic product-shell inspection loop.
+**Roadmap delta:** Replay consumer closure now includes selected-frame map inspection and read-only playback controls. Remaining replay polish is richer cinematic post-run presentation, not the basic product-shell inspection loop.
 
 **Report:** `docs/40_reports/implemented/20260510_REPLAY_MAP_STATE_INSPECTION.md`
 

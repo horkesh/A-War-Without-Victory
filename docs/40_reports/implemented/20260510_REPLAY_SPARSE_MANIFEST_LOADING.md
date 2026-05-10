@@ -33,4 +33,4 @@ The manifest is read-only and derived from canonical serialized replay frames in
 
 ## Remaining Replay Work
 
-Richer replay-map inspection remains future polish. The current closure makes replay load-safe and reviewable at summary level without treating the full replay sequence as a renderer payload requirement.
+Richer cinematic replay presentation remains future polish. The current closure makes replay load-safe and reviewable at summary level without treating the full replay sequence as a renderer payload requirement.

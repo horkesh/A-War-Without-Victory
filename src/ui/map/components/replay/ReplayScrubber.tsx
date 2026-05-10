@@ -12,7 +12,7 @@
  *
  * Faction-agnostic. Visible only when the parent passes a non-empty sequence.
  */
-import { useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../../../../state/game_state.js';
 import type { ReplaySaveManifest } from '../../../../sim/replay/replay_manifest.js';
 import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
@@ -26,6 +26,8 @@ export interface ReplayScrubberProps {
     /** Optional full-frame map inspection callback. Hidden for sparse manifests. */
     onInspectFrame?: (frame: GameState, frameIndex: number) => void;
 }
+
+const REPLAY_AUTOPLAY_INTERVAL_MS = 650;
 
 /**
  * Render a turn-by-turn scrubber for a finished war.
@@ -52,11 +54,14 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
 
     // Cursor: local UI state. Defaults to first frame; clamped on every change.
     const [cursor, setCursor] = useState<number>(turnCount > 0 ? 0 : -1);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const canStep = turnCount > 1;
 
     const onScrub = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const raw = Number(e.target.value);
             const next = useManifest ? summaryPlayer.seekToTurn(raw) : player.seekToTurn(raw);
+            setIsPlaying(false);
             setCursor(next);
         },
         [player, summaryPlayer, useManifest],
@@ -65,10 +70,49 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
     const onJump = useCallback(
         (idx: number) => {
             const next = useManifest ? summaryPlayer.seekToTurn(idx) : player.seekToTurn(idx);
+            setIsPlaying(false);
             setCursor(next);
         },
         [player, summaryPlayer, useManifest],
     );
+
+    const onStep = useCallback(
+        (delta: number) => {
+            const next = useManifest ? summaryPlayer.seekToTurn(cursor + delta) : player.seekToTurn(cursor + delta);
+            setIsPlaying(false);
+            setCursor(next);
+        },
+        [cursor, player, summaryPlayer, useManifest],
+    );
+
+    const onTogglePlay = useCallback(
+        () => {
+            if (isPlaying) {
+                setIsPlaying(false);
+                return;
+            }
+            if (!canStep) return;
+            if (cursor >= turnCount - 1) {
+                const next = useManifest ? summaryPlayer.seekToTurn(0) : player.seekToTurn(0);
+                setCursor(next);
+            }
+            setIsPlaying(true);
+        },
+        [canStep, cursor, isPlaying, player, summaryPlayer, turnCount, useManifest],
+    );
+
+    useEffect(() => {
+        if (!isPlaying || !canStep) return undefined;
+        const intervalId = window.setInterval(() => {
+            setCursor((currentCursor) => {
+                const nextTarget = currentCursor + 1;
+                const next = useManifest ? summaryPlayer.seekToTurn(nextTarget) : player.seekToTurn(nextTarget);
+                if (next >= turnCount - 1) setIsPlaying(false);
+                return next;
+            });
+        }, REPLAY_AUTOPLAY_INTERVAL_MS);
+        return () => window.clearInterval(intervalId);
+    }, [canStep, isPlaying, player, summaryPlayer, turnCount, useManifest]);
 
     if (turnCount === 0) {
         return (
@@ -101,6 +145,8 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
             data-awwv-replay-surface="scrubber"
             data-awwv-replay-turn-count={turnCount}
             data-awwv-replay-cursor={cursor}
+            data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
+            data-testid="replay-scrubber"
         >
             <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
                 Replay &mdash; Scrub Your War
@@ -141,6 +187,43 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 className="w-full h-1.5 accent-accent-gold cursor-pointer"
                 data-awwv-replay-input="slider"
             />
+
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-[9px] uppercase tracking-[0.16em] text-text-secondary/70">
+                <button
+                    type="button"
+                    onClick={() => onStep(-1)}
+                    disabled={!canStep || cursor <= 0}
+                    aria-label="Previous replay turn"
+                    className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                    data-awwv-replay-step="prev"
+                >
+                    Prev
+                </button>
+                <button
+                    type="button"
+                    onClick={onTogglePlay}
+                    disabled={!canStep}
+                    aria-label={isPlaying ? 'Pause replay playback' : 'Play replay playback'}
+                    className="rounded border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 font-bold text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
+                    data-awwv-replay-play-toggle="true"
+                    data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
+                >
+                    {isPlaying ? 'Pause' : 'Play'}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => onStep(1)}
+                    disabled={!canStep || cursor >= turnCount - 1}
+                    aria-label="Next replay turn"
+                    className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
+                    data-awwv-replay-step="next"
+                >
+                    Next
+                </button>
+                <span className="ml-auto normal-case tracking-normal text-text-secondary/50">
+                    {REPLAY_AUTOPLAY_INTERVAL_MS} ms / turn
+                </span>
+            </div>
 
             <div className="flex items-center justify-between mt-2 text-[9px] text-text-secondary/70">
                 <button
