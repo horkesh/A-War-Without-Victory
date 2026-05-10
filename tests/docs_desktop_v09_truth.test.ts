@@ -127,4 +127,24 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).not.toContain('richer milestone-week comparison UX still open');
     expect(roadmap).not.toContain('richer authored milestone data still open');
   });
+
+  it('keeps force-quality roadmap truth aligned with the current audit closure', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const calibrationMaster = readRepoFile('docs', '40_reports', 'CALIBRATION_MASTER.md');
+    const issue = readRepoFile('docs', 'plans', '2026-05-01-force-quality-trajectory-calibration-issue.md');
+
+    expect(roadmap).toContain('audit reassessed 2026-05-10');
+    expect(roadmap).toContain('The broad audit packet is now complete on current artifacts');
+    expect(roadmap).toContain('n1741` 188w hash `a4bf8b8095050881');
+    expect(roadmap).toContain('RS/HRHB average personnel still rises');
+    expect(roadmap).toContain('focused owner lanes (personnel/reconstitution, fatigue/exhaustion, HRHB trajectory, operation delivery)');
+    expect(roadmap).toContain('docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md');
+
+    expect(calibrationMaster).toContain('Audit status:');
+    expect(calibrationMaster).toContain('Required broad audit packet complete as of 2026-05-10');
+    expect(calibrationMaster).toContain('next work should be focused owner lanes, not another broad audit');
+    expect(issue).toContain('**Status:** Audit packet complete; successor calibration/design lanes open');
+    expect(issue).toContain('tools/diagnostics/force_quality_checkpoint_windows.cjs');
+    expect(issue).toContain('Report: `docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md`');
+  });
 });

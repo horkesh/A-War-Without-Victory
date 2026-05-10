@@ -3557,3 +3557,12 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Verification:** Red test first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on the missing commander sub-buckets/current-zone cache guard. Green focused test passed 5/5. Profiled 40w run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1760` kept final hash `ea9f3db7ac59a443` and showed `emitCommanderOutput` and `assessSituation` as the largest named decision sub-buckets.
 
 **Roadmap delta:** CPU profiling has moved from an opaque commander-decision bucket to actionable named commander internals. Next CPU work should target `buildBriefing`, `emitCommanderOutput`, or the remaining `assessSituation` internals based on a fresh profile.
+## [2026-05-10] docs(force-quality): close current trajectory audit packet
+
+**Type:** Documentation / calibration audit closure. No engine behavior, scenario data, OOB, operation definitions, painted targets, or canon files changed.
+
+**Change:** Added deterministic read-only diagnostic `tools/diagnostics/force_quality_checkpoint_windows.cjs` with fixture-backed coverage in `tests/force_quality_checkpoint_windows_diagnostic.test.ts`. Added `docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md`, updated the force-quality issue plan, refreshed `docs/40_reports/CALIBRATION_MASTER.md`, and made `docs/plans/MASTER_ROADMAP.md` explicit that the broad audit packet is complete on current artifacts. Extended `tests/docs_desktop_v09_truth.test.ts` so the roadmap/master/issue status stays aligned.
+
+**Evidence:** Current reassessment uses `n1768` 40w (`ea9f3db7ac59a443`) and `n1741` 188w (`a4bf8b8095050881`) with read-only diagnostics. The new checkpoint diagnostic emits 40/104/156/188 distributions, windowed weekly-operation metrics, completed-operation metrics, and an explicit `opportunity_comparison.status = artifact_missing` when paired opportunity on/off artifacts are absent. Verdict: RBiH professionalization and RS officer degradation are visible; remaining work is owner-specific: personnel/reconstitution, fatigue/exhaustion, HRHB trajectory, and late-war operation delivery.
+
+**Determinism impact:** None. Read-only diagnostics and docs/test guard only. Generated run artifacts already dirty in `data/derived/` are intentionally not part of this lane.

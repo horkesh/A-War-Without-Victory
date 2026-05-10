@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-05-07 (post-5-lane batch + 3-lane backlog closure: n1728 40w + n1729 188w baselines)
+**Updated:** 2026-05-10 (post-force-quality reassessment on n1768 40w + n1741 188w artifacts)
 
 ## n1729 (2026-05-07) — 188w post-5-lane
 
@@ -73,6 +73,7 @@ Relevant report: `docs/40_reports/implemented/20260430_SCENARIO_PAINTED_CONTROL_
 
 **Opened:** 2026-05-01
 **Plan:** `docs/plans/2026-05-01-force-quality-trajectory-calibration-issue.md`
+**Audit status:** Required broad audit packet complete as of 2026-05-10. Current report: `docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md`.
 
 The current long-run evidence suggests the engine is under-realizing the full-war faction arcs recorded later in this file:
 
@@ -82,7 +83,7 @@ The current long-run evidence suggests the engine is under-realizing the full-wa
 
 Late-war painted targets and operation experiments are evaluation tools, not the fix. If 1994-1995 territorial movement only appears when historical operations are forced as naked calendar scripts, then the deeper calibration failure is the force-quality trajectory model: officer learning/brain drain, cohesion/morale, equipment maintenance, war exhaustion, operation-readiness gates, corps coordination, and commander doctrine are not yet producing enough asymmetric change over time.
 
-**Classification:** separate calibration/design issue, not a scripted-op content issue. Next work should be a Force Quality Trajectory Audit across 40w, 104w, 156w, and 183/188w before any tuning. Do not apply global multipliers or forced late-war map rails without owner evidence.
+**Classification:** separate calibration/design issue, not a scripted-op content issue. The broad Force Quality Trajectory Audit is now complete on current artifacts; next work should be focused owner lanes, not another broad audit. Current evidence says RBiH professionalization and RS officer degradation are visible, while the unresolved gaps are RS/HRHB average personnel growth, fatigue reset, HRHB late-war shape, and late-war operation capture delivery. Do not apply global multipliers or forced late-war map rails without owner-specific evidence.
 
 ## n1622 (2026-05-02) — B-1 PLANNING_INVALIDATED_COOLDOWN behavioral surface
 

@@ -1,7 +1,7 @@
 # Force Quality Trajectory Calibration Issue
 
 **Date opened:** 2026-05-01
-**Status:** Open P1 calibration/design issue
+**Status:** Audit packet complete; successor calibration/design lanes open
 **Scope:** Full-war force-quality trajectory, especially 1994-1995 behavior after the Washington Agreement.
 **Not scope:** Adding more scripted operations, changing painted targets, one-off territorial patches, or forcing historical outcomes.
 
@@ -13,6 +13,20 @@ The game currently fails an obvious full-war premise:
 - **ARBiH should improve** from under-equipped 1992 militia / Territorial Defense fragments into a more competent, coordinated, corps-level army by 1995.
 
 Recent late-war evidence exposed the gap. Date-specific painted targets and late-war operations helped us evaluate the issue, but the lack of organic territorial movement without scripted intervention shows that the engine is not yet making the force-quality arcs decisive enough. If historical 1994-1995 operations need to be forced on a calendar to create any meaningful late-war movement, the deeper calibration issue is not the operation list; it is the force-quality trajectory model.
+
+## Audit Closure Update (2026-05-10)
+
+The required Force Quality Trajectory Audit packet is now complete for the current run line. The 2026-05-10 reassessment used:
+
+- 40w proof run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1768` (`ea9f3db7ac59a443`)
+- 188w proof run `runs/apr1992_definitive_188w__210e69404d054959__w188_n1741` (`a4bf8b8095050881`)
+- `tools/diagnostics/force_quality_trajectory.cjs`
+- `tools/diagnostics/force_quality_audit_metrics.cjs`
+- `tools/diagnostics/force_quality_checkpoint_windows.cjs`
+
+Report: `docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md`.
+
+Verdict: the core audit ask is closed, but the calibration/design issue remains open as follow-on owner lanes. The current evidence says RBiH professionalization and RS officer degradation are now visible, while the remaining gaps are multi-owner: RS/HRHB average personnel still rises instead of degrading, fatigue still resets instead of accumulating, HRHB late-war quality/morale remains mis-shaped, and late-war operation execution still produces little capture delivery. Per this plan's stop rule, do not apply global multipliers; dispatch separate reconstitution/personnel, fatigue/exhaustion, HRHB trajectory, and late-war operation-delivery lanes.
 
 ## Existing Canon / Calibration Basis
 
