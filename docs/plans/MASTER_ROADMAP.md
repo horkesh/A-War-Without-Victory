@@ -493,6 +493,8 @@ Closed alpha: 10-20 testers from strategy game community. Structured feedback co
 
 Plan: `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md`.
 
+**Status update 2026-05-10:** the operator-facing playtest recruitment package is now deployable as standalone assets under `docs/playtesting/v092/` (recruitment messages, feedback form schema, and playtest runbook). Actual outreach, Discord/form setup, and response triage remain operator-driven.
+
 ### v0.9.3 â€” Performance + Accessibility
 
 **Performance:** Profiling pass on hot paths (sector building, BFS, combat resolution). Target: <100ms per turn on mid-range hardware. Map rendering optimization. Memory audit for 208-turn games. Startup < 3 seconds.
@@ -651,7 +653,7 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 **Open milestone work carried forward (not blockers, but unfinished):**
 - **v0.9.0 Consequence System** — PARTIAL with gold-blocker gates closed; broader divergence-event matrix still has authoring debt. Trip-session-6 added jna_withdrawal + jajce_falls consequence blocks; remaining authoring per `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md` and Cost Ledger full prosecutorial authoring per `docs/plans/2026-03-26-cost-ledger-template-format.md`. Events-authoring surface CLOSED 2026-05-08 at 121 events across 17 waves (`6fa3c707` final). Cost Ledger / divergence-event matrix authoring portion of v0.9.0 PARTIAL closure remains. v0.9.0 still PARTIAL overall pending Cost Ledger full prosecutorial authoring. Saturation closeout: `docs/40_reports/implemented/20260508_V090_EVENTS_AUTHORING_SATURATION.md`.
 - **v0.9.1 Dynamic Essay + Endgame Comparison** — PARTIAL via pulled-forward; broader dynamic-essay authoring + richer milestone-week comparison UX still open.
-- **v0.9.2 Tutorial + External Playtesting** — OPENED with onboarding skeleton (R2-3 trip session 2); tutorial Lanes B/C/E shipped in v1.0 ship-readiness sprint Wave 1+2 (anchor coverage, auto-dismiss, role=dialog + focus trap + ESC). External playtesting recruitment + structured feedback collection still untouched.
+- **v0.9.2 Tutorial + External Playtesting** — OPENED with onboarding skeleton (R2-3 trip session 2); tutorial Lanes B/C/E shipped in v1.0 ship-readiness sprint Wave 1+2 (anchor coverage, auto-dismiss, role=dialog + focus trap + ESC). External playtesting recruitment + structured feedback collection now has deployable operator assets under `docs/playtesting/v092/`; outreach and response triage remain operator-driven.
 - **v0.9.3 Performance + Accessibility** — perf-memory surface **CLOSED-FOR-V0.9.3 2026-05-08** via LANE D streaming (commits `0796ff26`/`d04adc81` heap-profile re-dispatch; `1c5e1323` D-PRE substrate; `834f59f9`/`0c9c44e1`/`45404e43` D-CONTENT Path A; `68273083` 188w validation). Named accumulator `displacement_event_log` (87,538 entries / 13.86 MB at t188 = 46% of final_save) eliminated: per-turn buffer + JSONL stream + 2 new bounded aggregate fields (`displacement_humanitarian_aggregates` + `displacement_origin_dest_arrivals`); semantic shift to capture-time controller attribution accepted; 40w hash re-baselined `765c1c19912ce9e8` → `86ebf26ae0271465` (anchors 26/27 + benchmarks 6/6 byte-identical). 188w n1741 `a4bf8b8095050881` validation: final_save.json 30.11 MB → 6.84 MB (-76.2%); heap snapshots -36/-46/-48% at t60/120/180; dominant string node -73/-77/-77%. Sector-partition cold-start instrumentation already shipped at `ce72fc40`/`e33c2a09`. a11y Lanes A/B/C/D/E shipped (4/4 P0 v1.0-ship blockers CLOSED). Wall-clock perf profiling pass on hot paths (target <100ms/turn vs current 3,094ms) remains open as v0.9.4+ work; LANE D was perf-memory-only.
 - **v0.9.4 Visual Polish + Legendary Map Features** — Phase 3 (Legendary Map Features) FULLY CLOSED 2026-05-05 (Map That Scars + Force-Quality Glow + Refugee Column + Corridor Heartbeat all live). Phase 1 (Shell + Transition Polish) + Phase 2 (Visual Consistency) BACKLOG CLOSED 2026-05-05 (palette canonicalization, z-index tokens, modal wrapper, loading + error states, empty-state pass; 4 modal migrations + Wave 2 + dismissible extension + installer bloat trim + z-tier expansion all shipped).
 
@@ -826,7 +828,7 @@ Single rollup of every doc in `docs/10_canon/`. Maintained as a living section �
 | Refugee Column | Not started (v0.9.4) |
 | Corridor Heartbeat | Not started (v0.9.4) |
 | Endgame Comparison | Partial (`VerdictScreen`, Chronicle, Wrapped, and first dynamic Codex comparison slices live; richer milestone-week UX still open) |
-| Tutorial | Not started (roadmap-owned in v0.9.2) |
+| Tutorial | Partial (onboarding skeleton + tutorial hardening live; playtest recruitment assets in `docs/playtesting/v092/`) |
 | Sound/audio | Not started (post-1.0) |
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT â€” game starts April 1992 |

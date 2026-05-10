@@ -4,6 +4,16 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] v0.9.2 playtest operator package
+
+**Scope:** Tutorial/playtesting closure lane. The 2026-05-09 recruitment-pack report contained the strategy, but the assets were still buried in a closeout report rather than deployable operator files.
+
+**Fix:** Added `docs/playtesting/v092/` with standalone recruitment messages, feedback form schema, and an operator playtest runbook. Updated `MASTER_ROADMAP.md` so v0.9.2 no longer says external playtesting recruitment/structured feedback are untouched.
+
+**Validation:** Documentation-only. No simulation, scenario, runtime, save, or canon mechanics changed.
+
+---
+
 ## [2026-05-10] Bot-orders wall-clock profile + sector assignment cache
 
 **Scope:** CPU performance profiling lane from the v0.9.3/v0.9.4 wall-clock backlog. Prior evidence named bot orders and commander loops as real wall-clock surfaces, but there was no default-off repo profiler for the current hot paths.
