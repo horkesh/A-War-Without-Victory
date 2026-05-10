@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): add diplomatic and siege continuity readers
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the founding-constraint readers.
+
+**Fix:** Added seven read-only `dynamic_sections` that consume existing Cost Ledger and milestone atoms/tokens in JNA withdrawal, Owen-Stoltenberg, Bosnian Assembly rejection of Owen-Stoltenberg, Contact Group plan, Bihac crisis, Carter cessation of hostilities, and ceasefire expiry essays.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing seven dynamic section hooks and missing rendered output. Green after implementation: 37/37 passed.
+
+**Canon posture:** Read-only Ring 2 narrative reflection. No Cost Ledger producer, event trigger, rupture logic, score rule, save schema, scenario data, casualty/displacement math, diplomacy resolution, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, v0.9.1 plan, docs truth guard, ledger, and napkin.
+
+---
+
 ## [2026-05-10] perf(commander): gate probe predictor work
 
 **Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander `emitCommanderOutput.buildOperations`.

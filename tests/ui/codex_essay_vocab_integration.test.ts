@@ -799,3 +799,146 @@ describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
         expect(dyn.some(p => p.text.includes('Srebrenica Genocide: historical W171; player not recorded; status absent.'))).toBe(true);
     });
 });
+
+describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
+    const jnaEssay = findEssay('essay_jna_withdrawal_1992');
+    const owenStoltenbergEssay = findEssay('essay_owen_stoltenberg_plan_1993');
+    const bosnianAssemblyEssay = findEssay('essay_bosnian_assembly_rejects_os_1993');
+    const contactGroupEssay = findEssay('essay_contact_group_plan_1994');
+    const bihacCrisisEssay = findEssay('essay_bihac_crisis_1994');
+    const cohaBeginsEssay = findEssay('essay_coha_ceasefire_begins_1995');
+    const cohaExpiresEssay = findEssay('essay_coha_expires_1995');
+
+    const sections = {
+        jna: (jnaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_jna_vrs_continuity_rs_war_crimes_findings'),
+        owenStoltenberg: (owenStoltenbergEssay.dynamic_sections ?? []).find(s => s.id === 'v091_owen_stoltenberg_early_peace_record'),
+        bosnianAssembly: (bosnianAssemblyEssay.dynamic_sections ?? []).find(s => s.id === 'v091_bosnian_assembly_early_peace_record'),
+        contactGroup: (contactGroupEssay.dynamic_sections ?? []).find(s => s.id === 'v091_contact_group_dayton_timing_note'),
+        bihacCrisis: (bihacCrisisEssay.dynamic_sections ?? []).find(s => s.id === 'v091_bihac_crisis_displacement_findings'),
+        cohaBegins: (cohaBeginsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_coha_begins_extended_human_cost_note'),
+        cohaExpires: (cohaExpiresEssay.dynamic_sections ?? []).find(s => s.id === 'v091_coha_expires_srebrenica_absent_note'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 46000,
+        total_civilian_killed: 38000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 46,000 military killed and 38,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'civilian_displacement_record',
+                category: 'displacement',
+                severity: 'grave',
+                title: 'Civilian displacement record',
+                text: 'The ledger records 2,200,000 civilians displaced or killed.',
+                sources: ['UNHCR (1996) and ICTY findings'],
+            },
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'record',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 14 war-crime events.',
+                sources: ['Sensitive History Design Gate section 4'],
+            },
+            {
+                id: 'early_peace_implementation_record',
+                category: 'duration',
+                severity: 'record',
+                title: 'Early negotiated settlement',
+                text: 'The ledger records acceptance of peace plan owen_stoltenberg at week 72.',
+                sources: ['Victory Conditions and Pyrrhic Scoring section 1'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    const comparison: NonNullable<CodexRenderContext['historicalComparison']> = {
+        duration_delta_weeks: 8,
+        territory_divergence: {},
+        casualty_ratio: 1.25,
+        displacement_ratio: 1.3,
+        rupture_divergence: [],
+        divergence_notes: [],
+        milestone_comparison: [
+            {
+                id: 'srebrenica_genocide_1995',
+                label: 'Srebrenica Genocide',
+                historical_week: 171,
+                player_week: null,
+                delta_weeks: null,
+                status: 'absent',
+                summary: 'Srebrenica Genocide did not occur in this run.',
+            },
+            {
+                id: 'dayton_accords',
+                label: 'Dayton Accords',
+                historical_week: 182,
+                player_week: 190,
+                delta_weeks: 8,
+                status: 'late',
+                summary: 'Dayton Accords occurred at player week 190 against historical week 182.',
+            },
+        ],
+    };
+
+    it('adds seven authored dynamic sections with deterministic gates', () => {
+        expect(sections.jna?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+        expect(sections.owenStoltenberg?.condition).toBe('GAME_OVER AND FINDING:early_peace_implementation_record');
+        expect(sections.bosnianAssembly?.condition).toBe('GAME_OVER AND DURATION_SHORTER AND FINDING:early_peace_implementation_record');
+        expect(sections.contactGroup?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.bihacCrisis?.condition).toBe('GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1');
+        expect(sections.cohaBegins?.condition).toBe('GAME_OVER AND DURATION_LONGER AND FINDING:human_cost_record');
+        expect(sections.cohaExpires?.condition).toBe('GAME_OVER AND MILESTONE:srebrenica_genocide_1995:absent');
+
+        expect(sections.jna?.variant).toBe('divergence');
+        expect(sections.owenStoltenberg?.variant).toBe('note');
+        expect(sections.bosnianAssembly?.variant).toBe('note');
+        expect(sections.contactGroup?.variant).toBe('note');
+        expect(sections.bihacCrisis?.variant).toBe('divergence');
+        expect(sections.cohaBegins?.variant).toBe('note');
+        expect(sections.cohaExpires?.variant).toBe('ghost');
+    });
+
+    it('renders the new sections through existing Cost Ledger and milestone tokens', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set([
+                'jna_withdrawal_1992',
+                'owen_stoltenberg_plan_1993',
+                'bosnian_assembly_rejects_os_1993',
+                'contact_group_plan_1994',
+                'bihac_crisis_1994',
+                'coha_ceasefire_begins_1995',
+                'coha_expires_1995',
+            ]),
+            gameOver: true,
+            costLedger,
+            historicalComparison: {
+                ...comparison,
+                duration_delta_weeks: -116,
+            },
+        };
+
+        expect(resolveCodexEssay(jnaEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(owenStoltenbergEssay, ctx).paragraphs.some(p => p.text.includes('Early negotiated settlement'))).toBe(true);
+        expect(resolveCodexEssay(bosnianAssemblyEssay, ctx).paragraphs.some(p => p.text.includes('116 weeks shorter'))).toBe(true);
+        expect(resolveCodexEssay(contactGroupEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 190'))).toBe(true);
+        expect(resolveCodexEssay(bihacCrisisEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
+
+        const longerCtx = {
+            ...ctx,
+            historicalComparison: comparison,
+        };
+        expect(resolveCodexEssay(cohaBeginsEssay, longerCtx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
+        expect(resolveCodexEssay(cohaExpiresEssay, longerCtx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
+    });
+});
