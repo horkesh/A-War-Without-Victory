@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] perf(commander): gate probe predictor work
+
+**Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander `emitCommanderOutput.buildOperations`.
+
+**Fix:** Probe operation emission now builds direct enemy target candidates before running `predictAllAdjacentTargets(...)`, skips the predictor entirely when no direct target can survive the later filter, and uses an OSID-keyed prediction map instead of repeated linear searches.
+
+**Validation:** Red first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on missing direct-target/prediction-map guards. Green focused suite passed 47/47 after implementation. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced `n1773` with final hash `ea9f3db7ac59a443`; `emitCommanderOutput.buildOperations` dropped 306.524ms -> 258.813ms and commander total dropped 1,313.706ms -> 1,256.282ms versus the prior retained profile.
+
+**Canon posture:** Runtime performance only. No scenario data, OOB, combat math, probe eligibility semantics, operation lifecycle, event trigger, score rule, save schema, player command lever, or sensitive-history canon changed.
+
+**Docs:** Added the implementation report and updated master roadmap, ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-10] perf(commander): index enemy equipment sector lookups
 
 **Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander briefing enemy equipment summary.

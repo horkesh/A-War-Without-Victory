@@ -121,6 +121,8 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPlanUpdates');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPrepositioningOrders');
+        expect(commanderEmit).toContain('directEnemyTargets');
+        expect(commanderEmit).toContain('predictedTargetByOsid');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');

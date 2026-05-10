@@ -913,7 +913,24 @@ function buildOperations(
                     const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
                     const terrainCache = briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null;
                     if (adjacency && friendlySet && probeBrigLoc) {
-                        const predictedTargets = briefing.state_ref && briefing.reverse_map
+                        const enemyTargets = new Set<string>();
+                        for (const sub of sector.sub_segments ?? []) {
+                            for (const fOsid of sub.friendly_osids ?? []) {
+                                for (const neighbor of adjacency.get(fOsid) ?? []) {
+                                    if (!friendlySet.has(neighbor)) {
+                                        enemyTargets.add(neighbor);
+                                    }
+                                }
+                            }
+                        }
+                        const directEnemyTargets = new Set<string>();
+                        for (const target of [...enemyTargets].sort(strictCompare)) {
+                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                            if (targetNeighbors.includes(probeBrigLoc)) {
+                                directEnemyTargets.add(target);
+                            }
+                        }
+                        const predictedTargets = directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
                             ? predictAllAdjacentTargets(
                                 briefing.state_ref,
                                 probeBrigade.brigade_id,
@@ -927,25 +944,18 @@ function buildOperations(
                                 briefing.ethnic_map ?? undefined,
                             )
                             : [];
-                        const enemyTargets = new Set<string>();
-                        for (const sub of sector.sub_segments ?? []) {
-                            for (const fOsid of sub.friendly_osids ?? []) {
-                                for (const neighbor of adjacency.get(fOsid) ?? []) {
-                                    if (!friendlySet.has(neighbor)) {
-                                        enemyTargets.add(neighbor);
-                                    }
-                                }
-                            }
-                        }
-                        const rankedTargets = [...enemyTargets]
+                        const predictedTargetByOsid = new Map(
+                            predictedTargets.map((candidate) => [candidate.osid, candidate]),
+                        );
+                        const rankedTargets = [...directEnemyTargets]
                             .map((target) => {
                                 const cooldown = briefing.failed_offensive_objectives?.[target];
                                 const targetController = briefing.reverse_map && briefing.state_ref
                                     ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
                                     : null;
                                 const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
-                                const direct = targetNeighbors.includes(probeBrigLoc);
-                                const directPrediction = predictedTargets.find((candidate) => candidate.osid === target);
+                                const direct = true;
+                                const directPrediction = predictedTargetByOsid.get(target);
                                 let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
                                 for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
                                     const dist = spatialFriendlyDistance(

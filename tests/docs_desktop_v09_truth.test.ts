@@ -124,6 +124,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('enemy-equipment summary pass replaces repeated defender-sector scans');
     expect(roadmap).toContain('`enemyEquipmentSummary` dropped 166.376ms -> 119.960ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_ENEMY_EQUIPMENT_INDEX_PROFILE.md');
+    expect(roadmap).toContain('probe emission pass gates `predictAllAdjacentTargets(...)`');
+    expect(roadmap).toContain('`emitCommanderOutput.buildOperations` dropped 306.524ms -> 258.813ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_PROBE_EMISSION_PREDICTOR_GATE_PROFILE.md');
     expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
     expect(roadmap).toContain('`assessSituation.detectZones`');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
