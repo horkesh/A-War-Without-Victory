@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] docs(playtest): v0.9.2 operator-deployable playtest kit
+
+**Scope:** Tutorial/playtesting closure follow-up. The recruitment pack already existed, but the operator still had to assemble launch-support assets from prose.
+
+**Fix:** Added `tester_quickstart.md`, `known_issues_template.md`, `triage_board.md`, and `weekly_digest_template.md` under `docs/playtesting/v092/`. Updated the playtest runbook to point at the quickstart, known-issues template, triage board, and digest shell. Added a docs guard so the package cannot silently lose the operator-deployable assets.
+
+**Validation:** Red first: `npx.cmd vitest run tests/v092_playtest_package_docs.test.ts --reporter=dot` failed on missing docs. Green after implementation: 3/3 passed.
+
+**Canon posture:** Documentation-only, operator workflow only. No game rule, save schema, scenario data, historical claim, or sensitive-history mechanic changed.
+
+---
+
 ## [2026-05-10] commander emit/assess profiling sub-buckets
 
 **Scope:** CPU performance profiling follow-up. The prior commander pass named `emitCommanderOutput` and `assessSituation` as large decision buckets, but they were still too coarse to choose the next safe optimization.

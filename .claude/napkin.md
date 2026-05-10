@@ -26,6 +26,8 @@
 
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
+**2026-05-10 v0.9.2 playtest package latest:** `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, and weekly digest template. Do instead: treat playtest package work as agent-closed/operator-open unless adding new outreach channels or post-response synthesis; do not rebuild the same kit.
+
 **~25+ commits shipped across A1-A5 + Krivaja-95 + B-lane (DDR+B1+B2) + C-lane (DDR+C1+C2) + API-Directive Bridge + Q1 revert + drina-fix + D-lane (DDR+D1+D2) + telemetry wire + 5-lane batch (NW Bosnia OOB `be7e0715` + Persona restructure `cb13e605` + SRK siege `aa115a99` + JNA `ecae99da` + Jajce `ec837dca`) + 3-lane backlog closure (RBiH benchmark reanchor `d377e07b` + SRK siege Phase 0 DDR `bb0e449e` + Stupčanica name-collision `759a35cd`).** All CI green (latest `759a35cd`).
 
 **Claude-roleplay-as-all-3-layers QA infrastructure LIVE:** presidents + army COs + corps COs; per-layer × per-faction env flags (`CLAUDE_AS_PRESIDENT_*`, `CLAUDE_AS_COMMANDER_*`, `CLAUDE_AS_CORPS_*`); auto-swap on A4 roster; side-channel telemetry at `data/derived/_debug/d_lane_persona_decisions.jsonl`. Default OFF — byte-stable. Real-API D3 cost calibration: ~$2.79 total across 3 configs at Haiku 4.5.

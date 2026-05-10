@@ -111,6 +111,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('probe-target lookup map (316.271ms -> 316.829ms)');
     expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
     expect(roadmap).toContain('`assessSituation.detectZones`');
+    expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
+    expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
     expect(bible).toContain('milestone comparison rows inside historical essays');
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');

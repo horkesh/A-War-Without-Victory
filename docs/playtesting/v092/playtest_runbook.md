@@ -3,12 +3,15 @@
 ## Pre-Launch Checklist
 
 - [ ] Stable build link exists.
+- [ ] Tester quickstart is posted beside the build link.
 - [ ] Feedback form is live and tested once by the operator.
 - [ ] Support channel exists with a pinned start-here message.
 - [ ] GitHub Issues or Discussions are enabled for deeper bug reports.
 - [ ] Privacy note is posted: what feedback is collected, where it is stored, and whether quotes may be anonymized.
 - [ ] Code of conduct is posted.
-- [ ] Known rough edges are listed honestly.
+- [ ] Known rough edges are listed honestly from `known_issues_template.md`.
+- [ ] Triage board is created from `triage_board.md`.
+- [ ] Weekly digest shell is copied from `weekly_digest_template.md`.
 - [ ] First-run instructions cover install, start scenario, advance turn, save, and where logs live.
 
 ## Pinned Start-Here Message
@@ -20,6 +23,7 @@ Please start with one 40-week scenario unless you already know you want the full
 Useful links:
 
 - Build: `[build link]`
+- Tester quickstart: `[tester_quickstart.md link]`
 - Feedback form: `[form link]`
 - Known issues: `[known issues link]`
 - Bug reports: `[GitHub issues link]`
