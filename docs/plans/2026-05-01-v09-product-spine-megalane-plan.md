@@ -227,7 +227,7 @@ Scope:
 Internal phases:
 1. Research and family design, with OSID mapping checklist.
 2. Catalog topology audit before coding: every T1 needs at least two meaningful optional axes; no saturated single-signal gate.
-3. Implement Central Bosnia / Vlasic family entries and tests.
+3. Implement Central Bosnia / Vlasic family entries and tests. **Status 2026-05-10:** first non-sensitive slice shipped as `vlasic_ridge_95` in `src/sim/combat/operation_opportunity_catalog_central_bosnia.ts`, with a family design doc at `docs/plans/late-war-central-bosnia-vlasic-kupres-design.md` and regression coverage in `tests/operation_opportunities_central_bosnia_catalog.test.ts`. Remaining Phase 2 work: Kupres/Cincar dependency entries and Federation-Western Bosnia expansion.
 4. Implement Federation-Western Bosnia family entries and tests.
 5. Run opportunity/catalog tests, tsc, and targeted UI/read-model tests if DTOs change.
 6. Run or consume 188w stress evidence and classify surfacing/execution/cost outcomes.

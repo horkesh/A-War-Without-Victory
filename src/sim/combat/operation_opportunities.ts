@@ -78,6 +78,7 @@ import {
 } from './corps_operation_readiness.js';
 import type { OperationAAR } from './operation_aar.js';
 import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_corps.js';
+import { CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES } from './operation_opportunity_catalog_central_bosnia.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -413,6 +414,7 @@ export function linkOpportunityResolutionToAAR(
  */
 export const OPERATION_OPPORTUNITY_CATALOG: readonly OperationOpportunityDef[] = [
     ...FIFTH_CORPS_OPPORTUNITIES,
+    ...CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════

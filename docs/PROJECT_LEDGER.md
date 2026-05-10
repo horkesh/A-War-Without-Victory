@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(operations): Central Bosnia Vlasic opportunity family
+
+**Scope:** Operation Opportunity Families Phase 2. Adds the first Central Bosnia / Vlasic non-sensitive family slice on top of the existing prerequisite-driven opportunity substrate.
+
+**Fix:** Added `src/sim/combat/operation_opportunity_catalog_central_bosnia.ts` and composed it into the canonical catalog. The new `vlasic_ridge_95` T1 opportunity surfaces for RBiH 3rd Corps only when the spring 1995 window, corps readiness, Travnik staging access, live RS-held Vlasic objectives, and post-Washington alliance context are green, with at least two optional axes across logistics, weather/season, commander confidence, and force quality. Redirect variants cover a narrower ridge probe and Bugojno-support posture.
+
+**Validation:** Red first: `npx.cmd vitest run tests/operation_opportunities_central_bosnia_catalog.test.ts --reporter=dot` failed on the missing catalog module. Green focused: the same suite passed 6/6. Green broader opportunity pack: `npx.cmd vitest run tests/operation_opportunities_catalog.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/operation_opportunities_central_bosnia_catalog.test.ts --reporter=dot` passed 62/62.
+
+**Canon posture:** Additive Ring 1 operation opportunity content only. No combat math, triggered operation, OOB, scenario paint, save schema, sensitive-history event, or UI-specific family surface changed. Approval and redirect route through the existing `buildCorpsOperation` lifecycle; decline records a resolution without spawning an operation.
+
+**Docs:** Added the Central Bosnia / Vlasic / Kupres family design doc and implementation report; updated the Systems Manual, master roadmap, product-spine plan, and napkin.
+
+---
+
 ## [2026-05-10] perf(commander): front-geometry input scan cut
 
 **Scope:** CPU performance profiling lane for the largest remaining `buildBriefing` sub-bucket after the retained front-geometry BFS and `detectZones` cuts.
