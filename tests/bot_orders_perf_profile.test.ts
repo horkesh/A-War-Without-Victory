@@ -126,6 +126,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSubordinates');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.collectOsids');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.analyze');
+        expect(commanderBriefing).toContain('collectFrontGeometryEnemyOsids');
+        expect(commanderBriefing).toContain('subSegment.enemy_osids');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectIntelData');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectFatigueSummary');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.enemyEquipmentSummary');

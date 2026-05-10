@@ -146,41 +146,76 @@ function tryAnalyzeFrontGeometry(
     // Need at least one sector with territory
     if (sectors.length === 0) return null;
 
-    // Collect faction OSIDs from sectors' territory
+    const { factionOsids, enemyOsids } = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.frontGeometry.collectOsids',
+        () => collectFrontGeometryOsids(faction, sectors, spatial),
+    );
+    if (factionOsids.length === 0) return null;
+
+    // analyzeFrontGeometry expects mutable Map — cast adjacency (read-only access)
+    const adjMap = spatial.adjacency as Map<string, string[]>;
+
+    return botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.frontGeometry.analyze',
+        () => analyzeFrontGeometry(
+            faction,
+            factionOsids,
+            enemyOsids,
+            enemyOsids, // target OSIDs = full hostile boundary
+            adjMap,
+            ethnicMap,
+        ),
+    );
+}
+
+function collectFrontGeometryOsids(
+    faction: FactionId,
+    sectors: readonly CorpsFrontSector[],
+    spatial: SpatialContext,
+): { factionOsids: string[]; enemyOsids: string[] } {
     const factionOsidSet = new Set<string>();
     for (const sector of sectors) {
         for (const osid of sector.territory_osids) {
             factionOsidSet.add(osid);
         }
     }
-    const factionOsids = [...factionOsidSet].sort(strictCompare);
-    if (factionOsids.length === 0) return null;
 
-    // Collect enemy OSIDs adjacent to this corps's front
+    const factionOsids = [...factionOsidSet].sort(strictCompare);
+    return {
+        factionOsids,
+        enemyOsids: collectFrontGeometryEnemyOsids(factionOsids, faction, sectors, spatial),
+    };
+}
+
+function collectFrontGeometryEnemyOsids(
+    factionOsids: readonly string[],
+    faction: FactionId,
+    sectors: readonly CorpsFrontSector[],
+    spatial: SpatialContext,
+): string[] {
     const enemyOsidSet = new Set<string>();
+    for (const sector of sectors) {
+        for (const subSegment of sector.sub_segments) {
+            for (const enemyOsid of subSegment.enemy_osids) {
+                enemyOsidSet.add(enemyOsid);
+            }
+        }
+    }
+    if (enemyOsidSet.size > 0) {
+        return [...enemyOsidSet].sort(strictCompare);
+    }
+
     const friendlySet = spatial.friendlyOsidsByFaction.get(faction);
     for (const osid of factionOsids) {
         const neighbors = spatial.adjacency.get(osid as string & { readonly __brand?: unknown });
         if (!neighbors) continue;
-        for (const n of neighbors) {
-            if (!friendlySet || !friendlySet.has(n)) {
-                enemyOsidSet.add(n);
+        for (const neighbor of neighbors) {
+            if (!friendlySet || !friendlySet.has(neighbor)) {
+                enemyOsidSet.add(neighbor);
             }
         }
     }
-    const enemyOsids = [...enemyOsidSet].sort(strictCompare);
-
-    // analyzeFrontGeometry expects mutable Map — cast adjacency (read-only access)
-    const adjMap = spatial.adjacency as Map<string, string[]>;
-
-    return analyzeFrontGeometry(
-        faction,
-        factionOsids,
-        enemyOsids,
-        enemyOsids, // target OSIDs = full hostile boundary
-        adjMap,
-        ethnicMap,
-    );
+    return [...enemyOsidSet].sort(strictCompare);
 }
 
 // ---------------------------------------------------------------------------

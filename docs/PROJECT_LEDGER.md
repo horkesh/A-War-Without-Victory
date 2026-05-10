@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] perf(commander): front-geometry input scan cut
+
+**Scope:** CPU performance profiling lane for the largest remaining `buildBriefing` sub-bucket after the retained front-geometry BFS and `detectZones` cuts.
+
+**Fix:** Added default-off `frontGeometry.collectOsids` and `frontGeometry.analyze` sub-buckets. `tryAnalyzeFrontGeometry(...)` now collects hostile-boundary OSIDs from existing sector `sub_segments[].enemy_osids` first, preserving the old friendly-adjacency scan as fallback for sparse/pre-subsegment states. Ordering remains `strictCompare`-sorted and the analysis path remains pure/read-only.
+
+**Measured result:** Profiled 40w n1768 -> n1769 kept final hash `ea9f3db7ac59a443`. `frontGeometry` dropped 647.155ms -> 517.222ms, `buildBriefing` dropped 1,010.406ms -> 892.256ms, and `commander.runCommanderForCorps.total` dropped 1,977.369ms -> 1,889.297ms. New sub-buckets in n1769: `frontGeometry.collectOsids` 16.850ms and `frontGeometry.analyze` 497.416ms.
+
+**Validation:** Red profiler guard first failed on missing `frontGeometry.collectOsids`. Green focused tests: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts tests/front_geometry_analysis.test.ts tests/commander/briefing_campaign_intent.test.ts --reporter=dot` passed 31/31. Profiled 40w n1769 kept final hash `ea9f3db7ac59a443`.
+
+**Canon posture:** Pure performance and default-off diagnostic instrumentation. No scenario data, save schema, canon rule, event trigger, score rule, operation definition, OOB, sensitive-history text, or player lever changed.
+
+---
+
 ## [2026-05-10] feat(codex): humanitarian and diplomatic breadth wave
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Extends already-live Cost Ledger/milestone consumers without adding resolver behavior.
