@@ -148,7 +148,147 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
     } as CommanderBriefing;
 }
 
+function withCommanderFrontGeometryEnv<T>(
+    value: string | undefined,
+    run: () => T,
+): T {
+    const previous = process.env.AWWV_COMMANDER_FRONT_GEOMETRY;
+    if (value === undefined) {
+        delete process.env.AWWV_COMMANDER_FRONT_GEOMETRY;
+    } else {
+        process.env.AWWV_COMMANDER_FRONT_GEOMETRY = value;
+    }
+    try {
+        return run();
+    } finally {
+        if (previous === undefined) {
+            delete process.env.AWWV_COMMANDER_FRONT_GEOMETRY;
+        } else {
+            process.env.AWWV_COMMANDER_FRONT_GEOMETRY = previous;
+        }
+    }
+}
+
 describe('commander briefing campaign intent', () => {
+    it('skips front geometry briefing analysis unless diagnostics opt in', () => {
+        const corpsId = 'test_corps' as FormationId;
+        const faction = 'RBiH' as FactionId;
+        const sector: CorpsFrontSector = {
+            sector_id: 'sector:test',
+            corps_id: corpsId,
+            faction,
+            opposing_factions: ['RS' as FactionId],
+            edge_ids: ['e1'],
+            sub_segments: [{
+                id: 'ss1',
+                friendly_osids: ['op:test:t1'],
+                enemy_osids: ['op:enemy:e1'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: ['op:test:t1', 'op:test:t2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+        const state = {
+            meta: { turn: 10 },
+            military: {
+                formations: {},
+                corps_front_sectors: { [sector.sector_id]: sector },
+                corps_command: { [corpsId]: { stance: 'balanced', active_operations: [] } },
+                must_hold_osids_by_corps: {},
+                sector_intel: {},
+                opsec_sectors: [],
+            },
+        } as unknown as GameState;
+
+        const briefing = withCommanderFrontGeometryEnv(undefined, () => buildBriefing(
+            state,
+            corpsId,
+            faction,
+            {
+                adjacency: new Map<string, string[]>([
+                    ['op:test:t1', ['op:test:t2', 'op:enemy:e1']],
+                    ['op:test:t2', ['op:test:t1']],
+                    ['op:enemy:e1', ['op:test:t1']],
+                ]),
+                friendlyOsidsByFaction: new Map([[faction, new Set(['op:test:t1', 'op:test:t2'])]]),
+            } as any,
+            [],
+            null,
+            null,
+            null,
+            null,
+        ));
+
+        expect(briefing.front_geometry).toBeNull();
+    });
+
+    it('keeps front geometry briefing available when diagnostics opt in', () => {
+        const corpsId = 'test_corps' as FormationId;
+        const faction = 'RBiH' as FactionId;
+        const sector: CorpsFrontSector = {
+            sector_id: 'sector:test',
+            corps_id: corpsId,
+            faction,
+            opposing_factions: ['RS' as FactionId],
+            edge_ids: ['e1'],
+            sub_segments: [{
+                id: 'ss1',
+                friendly_osids: ['op:test:t1'],
+                enemy_osids: ['op:enemy:e1'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: ['op:test:t1', 'op:test:t2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+        const state = {
+            meta: { turn: 10 },
+            military: {
+                formations: {},
+                corps_front_sectors: { [sector.sector_id]: sector },
+                corps_command: { [corpsId]: { stance: 'balanced', active_operations: [] } },
+                must_hold_osids_by_corps: {},
+                sector_intel: {},
+                opsec_sectors: [],
+            },
+        } as unknown as GameState;
+
+        const briefing = withCommanderFrontGeometryEnv('true', () => buildBriefing(
+            state,
+            corpsId,
+            faction,
+            {
+                adjacency: new Map<string, string[]>([
+                    ['op:test:t1', ['op:test:t2', 'op:enemy:e1']],
+                    ['op:test:t2', ['op:test:t1']],
+                    ['op:enemy:e1', ['op:test:t1']],
+                ]),
+                friendlyOsidsByFaction: new Map([[faction, new Set(['op:test:t1', 'op:test:t2'])]]),
+            } as any,
+            [],
+            null,
+            null,
+            null,
+            null,
+        ));
+
+        expect(briefing.front_geometry).not.toBeNull();
+        expect(briefing.front_geometry?.line_shortening_scores.has('op:enemy:e1')).toBe(true);
+    });
+
     it('buildBriefing carries campaign front intent and merges campaign hold targets', () => {
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RBiH' as FactionId;

@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] perf(commander): gate unused front geometry briefing
+
+**Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander briefing hot path.
+
+**Fix:** `CommanderBriefing.front_geometry` now remains a stable nullable field but skips the expensive analysis by default. The diagnostic read model is still available with `AWWV_COMMANDER_FRONT_GEOMETRY=true` or `1`.
+
+**Validation:** Red first: `npx.cmd vitest run tests/commander/briefing_campaign_intent.test.ts --reporter=dot` failed on default analysis still being present. Green focused suite passed 16/16 after the gate. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced `n1771` with final hash `ea9f3db7ac59a443`; `buildBriefing.frontGeometry` dropped 517.222ms -> 2.247ms and commander total dropped 1,889.297ms -> 1,381.411ms versus the prior retained profile.
+
+**Canon posture:** Runtime performance/read-model gating only. No scenario data, OOB, combat math, AI decision consumer, event trigger, score rule, save schema, player command lever, or sensitive-history canon changed.
+
+**Docs:** Added the implementation report and updated master roadmap, ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-10] feat(codex): founding-constraint finding readers
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the early-peace reader bridge.

@@ -72,6 +72,11 @@ const DEFAULT_PERSONALITY: OfficerPersonality = Object.freeze({
     competence: 0.5,
 });
 
+function isCommanderFrontGeometryDiagnosticEnabled(): boolean {
+    const raw = process.env.AWWV_COMMANDER_FRONT_GEOMETRY;
+    return raw === 'true' || raw === '1';
+}
+
 // ---------------------------------------------------------------------------
 // Officer personality derivation
 // ---------------------------------------------------------------------------
@@ -143,6 +148,8 @@ function tryAnalyzeFrontGeometry(
     spatial: SpatialContext,
     ethnicMap: OsidEthnicComposition | null,
 ): FrontGeometryAssessment | null {
+    if (!isCommanderFrontGeometryDiagnosticEnabled()) return null;
+
     // Need at least one sector with territory
     if (sectors.length === 0) return null;
 

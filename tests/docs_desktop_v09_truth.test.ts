@@ -117,6 +117,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('probe-target lookup map (316.271ms -> 316.829ms)');
     expect(roadmap).toContain('`detectZones.mustHold` dropped 126.351ms -> 115.098ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_DETECT_ZONES_MUST_HOLD_PROFILE.md');
+    expect(roadmap).toContain('front-geometry diagnostic gate shipped');
+    expect(roadmap).toContain('`AWWV_COMMANDER_FRONT_GEOMETRY=true` or `1`');
+    expect(roadmap).toContain('`frontGeometry` dropped 517.222ms -> 2.247ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_FRONT_GEOMETRY_DIAGNOSTIC_GATE.md');
     expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
     expect(roadmap).toContain('`assessSituation.detectZones`');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
