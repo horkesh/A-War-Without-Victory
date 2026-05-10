@@ -87,7 +87,7 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
         // They won't attack (combat predictor penalizes critical supply), but they can march.
         if (isActiveSectorOperationParticipant) return false;
         // Line brigades off their sector front must reach the front before sitting in defend.
-        if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) return false;
+        if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, ctx.assignedSectorFrontOsids)) return false;
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
@@ -101,7 +101,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
     // Uses MIN_ATTACK_PERSONNEL from formation_constants (canonical single source).
     // NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
-    if (!isActiveSectorOperationParticipant && assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
+    if (!isActiveSectorOperationParticipant && assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, ctx.assignedSectorFrontOsids)) {
         return false;
     }
     if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {

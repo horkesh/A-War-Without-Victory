@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Bot-orders wall-clock profile + sector assignment cache
+
+**Scope:** CPU performance profiling lane from the v0.9.3/v0.9.4 wall-clock backlog. Prior evidence named bot orders and commander loops as real wall-clock surfaces, but there was no default-off repo profiler for the current hot paths.
+
+**Fix:** Added `PERF_PROFILE_BOT_ORDERS=true` instrumentation for `executeFactionDirectives`, individual bot-brigade evaluators, `runCommanderForCorps`, briefing construction, and commander decisions. The scenario runner now dumps a stable JSON profile to `data/derived/_debug/bot_orders_perf_profile.json` only when the flag is enabled. Used the profile to cache per-brigade sector/front membership once per faction pass, eliminating repeated sorted sector scans and front-set construction in `sectorMarch`, garrison, and attack-gate checks.
+
+**Validation:** Red test first: `vitest tests/bot_orders_perf_profile.test.ts` failed on missing profiler/cache wiring. Green focused tests: `vitest tests/bot_orders_perf_profile.test.ts tests/brigade_aor_subsegment.test.ts` passed 29/29; `npm.cmd run typecheck` clean. 40w default-off and profile-on runs both produced current local final hash `ea9f3db7ac59a443`. Profile evidence: `executeFactionDirectives.total` 1,807.542ms -> 1,555.460ms; `sectorMarch` 461.641ms -> 319.196ms.
+
+**Determinism/canon:** No gameplay rule, canon mechanic, save schema, or baseline artifact changed. Wall-clock timing remains debug-only, env-gated, and excluded from game state. `CODE_CANON` now documents the profiling exception boundary.
+
+---
+
 ## [2026-05-10] Master/canon repo-truth guard
 
 **Scope:** Studio Health / Repo Truth permanent side lane from the master roadmap. The roadmap, canon pointer docs, durable knowledge ledger, and napkin had fallen behind the 2026-05-10 Codex-owned closure set: Windows Vitest runner recovery, war-dispatch displacement-window restoration, directive metadata, pure president rich-verb bridge defaults, state fixture coverage, and green GitHub CI at `750e1c14`.

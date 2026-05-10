@@ -18,6 +18,8 @@ Non-negotiables (must hold for all sim execution paths):
 - Byte-identical reruns from identical inputs.
 - Derived state must not be serialized as source of truth.
 
+Debug-only profiling exception: wall-clock probes may use monotonic process timers only when gated by an explicit profiling environment flag, kept out of game state/save state/scenario truth artifacts, and documented with a deterministic-output guard. Current example: bot-orders profiling behind `PERF_PROFILE_BOT_ORDERS=true`, which writes only `data/derived/_debug/bot_orders_perf_profile.json`.
+
 If you touch determinism-sensitive areas, also read:
 - `docs/20_engineering/DETERMINISM_AUDIT.md`
 - `docs/20_engineering/INVARIANTS_IN_CODE.md`

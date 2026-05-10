@@ -40,8 +40,14 @@ import type { FormationState, GameState, SettlementId } from '../../state/game_s
 export function assignedBrigadeNotOnSectorFrontOsids(
     state: GameState,
     brigade: FormationState,
-    loc: string
+    loc: string,
+    assignedSectorFrontOsids?: Set<string> | null,
 ): boolean {
+    if (assignedSectorFrontOsids !== undefined) {
+        return assignedSectorFrontOsids != null
+            && assignedSectorFrontOsids.size > 0
+            && !assignedSectorFrontOsids.has(loc);
+    }
     const sectors = state.military.corps_front_sectors;
     if (!sectors) return false;
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
@@ -58,8 +64,8 @@ export function assignedBrigadeNotOnSectorFrontOsids(
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive } = ctx;
-    const offAssignedFront = assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc);
+    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids } = ctx;
+    const offAssignedFront = assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, assignedSectorFrontOsids);
 
     // --- Sector reassignment: corps AI issued explicit reassignment order ---
     // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
@@ -92,18 +98,21 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // The old `|| offAssignedFront` caused oscillation — op participants advancing off-sector
     // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
     if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
-        let assignedSector: (typeof state.military.corps_front_sectors)[string] | null = null;
-        let isReserve = false;
-        for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
-            const sec = state.military.corps_front_sectors[sid]!;
-            if (sec.assigned_brigade_ids.includes(brigade.id)) {
-                assignedSector = sec;
-                break;
-            }
-            if (sec.reserve_brigade_ids.includes(brigade.id)) {
-                assignedSector = sec;
-                isReserve = true;
-                break;
+        let assignedSector = sectorAssignment?.sector ?? null;
+        let isReserve = sectorAssignment?.isReserve ?? false;
+        let cachedFrontSet = sectorAssignment?.frontOsids ?? null;
+        if (!sectorAssignment) {
+            for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
+                const sec = state.military.corps_front_sectors[sid]!;
+                if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                    assignedSector = sec;
+                    break;
+                }
+                if (sec.reserve_brigade_ids.includes(brigade.id)) {
+                    assignedSector = sec;
+                    isReserve = true;
+                    break;
+                }
             }
         }
         if (assignedSector) {
@@ -119,9 +128,11 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
-            const frontSet = new Set<string>();
-            for (const ss of assignedSector.sub_segments) {
-                for (const o of ss.friendly_osids) frontSet.add(o);
+            const frontSet = cachedFrontSet ?? new Set<string>();
+            if (!cachedFrontSet) {
+                for (const ss of assignedSector.sub_segments) {
+                    for (const o of ss.friendly_osids) frontSet.add(o);
+                }
             }
             if (!frontSet.has(loc)) {
                 // Reserve brigades only column march if deep rear (2+ hops).

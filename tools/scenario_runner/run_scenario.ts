@@ -13,6 +13,7 @@ import { join } from 'node:path';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
+import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot_orders.js';
 
 /** Default scenario when user asks to "run scenarios" without specifying one (historical 52w, full OOB). */
 const DEFAULT_SCENARIO = 'data/scenarios/apr1992_historical_52w.json';
@@ -114,6 +115,10 @@ async function main(): Promise<void> {
     }
   }
   process.stdout.write(`final_state_hash: ${result.final_state_hash}\n`);
+  const botOrdersPerfPath = dumpBotOrdersPerfProfile();
+  if (botOrdersPerfPath) {
+    process.stdout.write(`bot_orders_perf_profile: ${botOrdersPerfPath}\n`);
+  }
 
   if (enableMap) {
     const derivedDir = join(process.cwd(), 'data', 'derived');

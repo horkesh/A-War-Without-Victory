@@ -24,6 +24,7 @@
 
 import type {
     BrigadePosture,
+    CorpsFrontSector,
     CorpsOperation,
     CorpsStance,
     FactionId,
@@ -68,6 +69,7 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -357,6 +359,68 @@ function executeFactionDirectives(
     ethnicMap?: OsidEthnicComposition,
     osidPopulationMap?: OsidPopulationMap
 ): OsidBotOrdersResult {
+    return botOrdersPerfTime('bot_orders.executeFactionDirectives.total', () => executeFactionDirectivesImpl(
+        state,
+        faction,
+        brigades,
+        adjacency,
+        reverseMap,
+        terrainCache,
+        graphAnalysis,
+        supplyStateByOsid,
+        ethnicMap,
+        osidPopulationMap,
+    ));
+}
+
+interface SectorAssignmentCacheEntry {
+    sector: CorpsFrontSector;
+    isReserve: boolean;
+    frontOsids: Set<string>;
+}
+
+function collectSectorFrontOsids(sector: CorpsFrontSector): Set<string> {
+    const frontOsids = new Set<string>();
+    for (const subSegment of sector.sub_segments) {
+        for (const osid of subSegment.friendly_osids) frontOsids.add(osid);
+    }
+    return frontOsids;
+}
+
+function buildSectorAssignmentByBrigade(state: GameState): Map<FormationId, SectorAssignmentCacheEntry> {
+    const sectors = state.military.corps_front_sectors;
+    const byBrigade = new Map<FormationId, SectorAssignmentCacheEntry>();
+    if (!sectors) return byBrigade;
+
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId]!;
+        const frontOsids = collectSectorFrontOsids(sector);
+        for (const brigadeId of sector.assigned_brigade_ids) {
+            if (!byBrigade.has(brigadeId)) {
+                byBrigade.set(brigadeId, { sector, isReserve: false, frontOsids });
+            }
+        }
+        for (const brigadeId of sector.reserve_brigade_ids) {
+            if (!byBrigade.has(brigadeId)) {
+                byBrigade.set(brigadeId, { sector, isReserve: true, frontOsids });
+            }
+        }
+    }
+    return byBrigade;
+}
+
+function executeFactionDirectivesImpl(
+    state: GameState,
+    faction: FactionId,
+    brigades: FormationState[],
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+    terrainCache: Record<string, number>,
+    graphAnalysis: FactionGraphAnalysis,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    ethnicMap?: OsidEthnicComposition,
+    osidPopulationMap?: OsidPopulationMap
+): OsidBotOrdersResult {
     const result: OsidBotOrdersResult = {
         posture_orders: [],
         attack_orders: {},
@@ -367,6 +431,7 @@ function executeFactionDirectives(
     };
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
+    const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -437,7 +502,10 @@ function executeFactionDirectives(
             
         const directive = cmd?.directive ?? null;
         const corpsStance = cmd?.stance ?? 'balanced';
-        const adjEnemy = getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap);
+        const adjEnemy = botOrdersPerfTime(
+            'bot_orders.executeFactionDirectives.adjacentEnemyScan',
+            () => getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap),
+        );
 
         const retreatInfo = (brigade as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
         const currentTurn = state.meta?.turn ?? 0;
@@ -451,6 +519,10 @@ function executeFactionDirectives(
         const brigadeSupplyState = state.meta?.supply_reserves_enabled
             ? getEffectiveSupplyState(rawOsidSupplyState, factionReserveLevel)
             : rawOsidSupplyState;
+        const sectorAssignment = sectorAssignmentByBrigade.get(brigade.id) ?? null;
+        const assignedSectorFrontOsids = sectorAssignment && !sectorAssignment.isReserve
+            ? sectorAssignment.frontOsids
+            : null;
 
         const ctx: BrigadeEvaluationContext = {
             state,
@@ -474,6 +546,8 @@ function executeFactionDirectives(
             isHoldBrigade: false,
             sectorRecentRetreats,
             sectorCounterAttackCount,
+            sectorAssignment,
+            assignedSectorFrontOsids,
             adjacency,
             reverseMap,
             terrainCache,
@@ -490,21 +564,25 @@ function executeFactionDirectives(
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             continue;
         }
-        if (evaluateGarrisonAndDetachments(ctx)) continue;
-        if (evaluateSectorMarch(ctx)) continue;
-        if (evaluateReturnToCorps(ctx)) continue; // Before hold/defense — orphans march home first
-        if (evaluatePocketEvacuation(ctx)) continue; // Evacuate tiny non-enclave pockets
-        if (evaluateHomeDefense(ctx)) continue;
-        if (evaluateReserve(ctx)) continue;
-        if (evaluateSupplyGate(ctx)) continue;
-        if (evaluateSectorAttack(ctx)) continue;
-        if (evaluateUncontestedOccupation(ctx)) continue;
-        if (evaluateHold(ctx)) continue;
-        if (evaluateReorganize(ctx)) continue;
-        if (evaluateDefensive(ctx)) continue;
-        if (evaluateOffensive(ctx)) continue;
-        if (evaluateFrontCoverage(ctx)) continue;
-        evaluateInteriorMovement(ctx);
+        const handled = botOrdersPerfTime('bot_orders.executeFactionDirectives.evaluators', () => {
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.garrisonAndDetachments', () => evaluateGarrisonAndDetachments(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.sectorMarch', () => evaluateSectorMarch(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.returnToCorps', () => evaluateReturnToCorps(ctx))) return true; // Before hold/defense — orphans march home first
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.pocketEvacuation', () => evaluatePocketEvacuation(ctx))) return true; // Evacuate tiny non-enclave pockets
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.homeDefense', () => evaluateHomeDefense(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reserve', () => evaluateReserve(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.supplyGate', () => evaluateSupplyGate(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.offensive', () => evaluateOffensive(ctx))) return true;
+            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.frontCoverage', () => evaluateFrontCoverage(ctx))) return true;
+            botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.interiorMovement', () => evaluateInteriorMovement(ctx));
+            return true;
+        });
+        if (handled) continue;
     }
 
     return result;

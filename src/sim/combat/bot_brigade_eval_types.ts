@@ -2,6 +2,7 @@ import type {
     BrigadePosture,
     CorpsCommandState,
     CorpsDirective,
+    CorpsFrontSector,
     CorpsOperation,
     CorpsStance,
     FactionId,
@@ -41,6 +42,15 @@ export interface BrigadeEvaluationContext {
     sectorRecentRetreats: Map<string, Array<{ osid: string; turn: number }>>;
     /** Mutable counter: how many sector-level counter-attacks have been issued per sector this turn. */
     sectorCounterAttackCount: Map<string, number>;
+
+    /** Cached sector membership for this brigade, built once per faction-order pass. */
+    sectorAssignment?: {
+        sector: CorpsFrontSector;
+        isReserve: boolean;
+        frontOsids: Set<string>;
+    } | null;
+    /** Cached line-sector front OSIDs; reserve brigades intentionally receive null. */
+    assignedSectorFrontOsids?: Set<string> | null;
 
     
     // Global context dependencies:

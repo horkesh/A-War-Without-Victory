@@ -35,6 +35,7 @@ import { makeDecisions } from './decide.js';
 import { emitCommanderOutput } from './emit.js';
 import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
+import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -149,14 +150,22 @@ export function runCommanderForCorps(
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
 ): CommanderOutput {
-    const briefing = buildBriefing(
-        state, corpsId, faction, spatial, edges,
-        reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
-    );
-    const previousState: CommanderState | null =
-        state.military.corps_command?.[corpsId]?.commander_state ?? null;
-    const commander = new BotCorpsCommander();
-    return commander.decide(briefing, previousState);
+    return botOrdersPerfTime('commander.runCommanderForCorps.total', () => {
+        const briefing = botOrdersPerfTime(
+            'commander.runCommanderForCorps.buildBriefing',
+            () => buildBriefing(
+                state, corpsId, faction, spatial, edges,
+                reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
+            ),
+        );
+        const previousState: CommanderState | null =
+            state.military.corps_command?.[corpsId]?.commander_state ?? null;
+        const commander = new BotCorpsCommander();
+        return botOrdersPerfTime(
+            'commander.runCommanderForCorps.commanderDecide',
+            () => commander.decide(briefing, previousState),
+        );
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
