@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): early-peace duration finding reader
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison follow-up to the Packet C3 early-peace Cost Ledger bridge.
+
+**Fix:** Added a `cost_duration_findings` Codex interpolation token and a Vance-Owen dynamic section gated by `GAME_OVER AND FINDING:early_peace_implementation_record`, allowing accepted-peace termination facts to appear in the relevant historical essay when the real endgame packet emits them.
+
+**Validation:** Focused Codex suites passed: `npx.cmd vitest run tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` (65/65).
+
+**Canon posture:** Read-only Ring 2 narrative reflection. No peace-plan acceptance logic, scoring, save schema, rupture handling, scenario data, or sensitive-history adjudication changed. Early peace remains a duration record, not moral credit.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, v0.9.1 plan, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(consequences): Packet C2 patron-distance pressure completion
 
 **Scope:** v0.9.0 Consequence System Refresh, Packet C2. Closes the RBiH/HRHB patron-distance seam where downstream arms-pipeline events already consumed faction-scoped review flags but no local pressure writers authored those flags.

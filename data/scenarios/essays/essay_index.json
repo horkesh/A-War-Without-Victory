@@ -369,6 +369,13 @@
           "condition": "GAME_OVER AND FLAG:vance_owen_accepted AND DURATION_SHORTER",
           "variant": "note",
           "content": "The peace this run reached arrived {duration_delta_abs} weeks earlier than the historical settlement at Dayton. Whether the Vance-Owen architecture proved durable beyond the recorded turn is not within the campaign's resolution; what is recorded is that the war ended at terms the historical record did not produce."
+        },
+        {
+          "id": "v091_vance_owen_early_peace_ledger_finding",
+          "insert_after_paragraph": 5,
+          "condition": "GAME_OVER AND FINDING:early_peace_implementation_record",
+          "variant": "divergence",
+          "content": "{cost_duration_findings}"
         }
       ]
     },

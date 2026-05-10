@@ -523,8 +523,10 @@ describe('v0.9.1 vocab - late-war humanitarian memory breadth wave', () => {
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');
+    const vanceOwenEssay = findEssay('essay_vance_owen_plan_1993');
     const srebrenicaSection = (srebrenicaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_cost_ledger_srebrenica_finding');
     const daytonSection = (daytonEssay.dynamic_sections ?? []).find(s => s.id === 'v091_cost_ledger_findings_docket');
+    const earlyPeaceSection = (vanceOwenEssay.dynamic_sections ?? []).find(s => s.id === 'v091_vance_owen_early_peace_ledger_finding');
 
     const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
         war_duration_weeks: 188,
@@ -559,6 +561,14 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
                 text: 'RS capital records contain 14 war-crime events.',
                 sources: ['Sensitive History Design Gate §4'],
             },
+            {
+                id: 'early_peace_implementation_record',
+                category: 'duration',
+                severity: 'record',
+                title: 'Early negotiated settlement',
+                text: 'The ledger records acceptance of peace plan vance_owen at week 50.',
+                sources: ['Victory Conditions and Pyrrhic Scoring section 1'],
+            },
         ],
     } as NonNullable<CodexRenderContext['costLedger']>;
 
@@ -586,6 +596,12 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         expect(daytonSection?.condition).toBe('GAME_OVER AND FINDING_SEVERITY:grave');
     });
 
+    it('adds a Vance-Owen early-peace finding section gated by the duration finding', () => {
+        expect(earlyPeaceSection).toBeDefined();
+        expect(earlyPeaceSection?.variant).toBe('divergence');
+        expect(earlyPeaceSection?.condition).toBe('GAME_OVER AND FINDING:early_peace_implementation_record');
+    });
+
     it('renders a deterministic source-labeled findings docket in Dayton', () => {
         const ctx: CodexRenderContext = {
             firedEventIds: new Set(['dayton_signed_1995']),
@@ -604,6 +620,17 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
         expect(dyn.some(p => p.text.includes('Human cost record: The ledger records 46,500'))).toBe(true);
         expect(dyn.some(p => p.text.includes('Sources: ICJ Bosnia v. Serbia'))).toBe(true);
+    });
+
+    it('renders the early-peace Cost Ledger duration finding in Vance-Owen', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set(['vance_owen_plan_1993']),
+            gameOver: true,
+            costLedger,
+        };
+        const resolved = resolveCodexEssay(vanceOwenEssay, ctx);
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Early negotiated settlement: The ledger records acceptance of peace plan vance_owen at week 50.'))).toBe(true);
     });
 });
 

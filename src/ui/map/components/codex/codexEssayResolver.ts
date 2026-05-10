@@ -367,6 +367,7 @@ function expandToken(token: string, context: CodexRenderContext): string | undef
     if (token === 'cost_rupture_findings') return formatCostFindingsByCategory(context, 'rupture');
     if (token === 'cost_human_findings') return formatCostFindingsByCategory(context, 'human_cost');
     if (token === 'cost_displacement_findings') return formatCostFindingsByCategory(context, 'displacement');
+    if (token === 'cost_duration_findings') return formatCostFindingsByCategory(context, 'duration');
     if (token === 'cost_war_crimes_findings') return formatCostFindingsByCategory(context, 'war_crimes');
     if (token === 'cost_finding_sources') return costFindingSources(context).join('; ');
 
