@@ -103,6 +103,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('milestone atoms/tokens');
     expect(roadmap).toContain('Srebrenica/Dayton milestone-week comparison rows live');
     expect(roadmap).toContain('| Endgame Comparison | Advanced');
+    expect(roadmap).toContain('index-based front-geometry BFS queue');
+    expect(roadmap).toContain('`buildBriefing` 1,077.718ms -> 1,041.042ms');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
     expect(bible).toContain('milestone comparison rows inside historical essays');
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');

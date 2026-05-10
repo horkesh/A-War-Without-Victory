@@ -59,6 +59,7 @@ import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geo
 import { findSectorForEnemyOsid } from '../sector_utils.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
+import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 
 // ---------------------------------------------------------------------------
 // Default officer personality (used when no named officer is assigned)
@@ -507,10 +508,16 @@ export function buildBriefing(
     const corpsStance = corpsCmd?.stance ?? 'balanced';
 
     // 2. Sectors for this corps
-    const sectors = getCorpsSectors(state, corpsId);
+    const sectors = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.getCorpsSectors',
+        () => getCorpsSectors(state, corpsId),
+    );
 
     // 3. Brigades subordinate to this corps
-    const brigades: readonly FormationState[] = getCorpsSubordinates(state, corpsId);
+    const brigades: readonly FormationState[] = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.getCorpsSubordinates',
+        () => getCorpsSubordinates(state, corpsId),
+    );
 
     // 4. Officer personality
     let personality: OfficerPersonality = DEFAULT_PERSONALITY;
@@ -530,16 +537,22 @@ export function buildBriefing(
     const doctrineStance = 'balanced';
 
     // 6. Front geometry (best-effort)
-    const frontGeometry = tryAnalyzeFrontGeometry(
-        state,
-        faction,
-        sectors,
-        spatial,
-        ethnicMap,
+    const frontGeometry = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.frontGeometry',
+        () => tryAnalyzeFrontGeometry(
+            state,
+            faction,
+            sectors,
+            spatial,
+            ethnicMap,
+        ),
     );
 
     // 7. Intel data
-    const intelData = collectIntelData(state, corpsId, sectors);
+    const intelData = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.collectIntelData',
+        () => collectIntelData(state, corpsId, sectors),
+    );
 
     // 8. Pre-planned operations
     const prePlannedOps = getPrePlannedOps(state, corpsId);
@@ -551,12 +564,24 @@ export function buildBriefing(
     const activeOperations = getActiveOperations(state, corpsId);
     const corpsExhaustion = getCorpsExhaustion(state, corpsId);
     const factionWarExhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
-    const fatigueSummary = collectFatigueSummary(brigades);
-    const enemyEquipmentSummary = collectEnemyEquipmentSummary(state, sectors);
-    const adjacentCorps = collectAdjacentCorpsSummaries(state, corpsId, faction, sectors, spatial);
+    const fatigueSummary = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.collectFatigueSummary',
+        () => collectFatigueSummary(brigades),
+    );
+    const enemyEquipmentSummary = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.enemyEquipmentSummary',
+        () => collectEnemyEquipmentSummary(state, sectors),
+    );
+    const adjacentCorps = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.adjacentCorps',
+        () => collectAdjacentCorpsSummaries(state, corpsId, faction, sectors, spatial),
+    );
 
     // 11. Army HQ campaign intent for this corps
-    const campaignIntent = collectCampaignIntent(state, faction, corpsId);
+    const campaignIntent = botOrdersPerfTime(
+        'commander.runCommanderForCorps.buildBriefing.campaignIntent',
+        () => collectCampaignIntent(state, faction, corpsId),
+    );
 
     // 12. Assemble briefing
     const mustHoldOsids = [

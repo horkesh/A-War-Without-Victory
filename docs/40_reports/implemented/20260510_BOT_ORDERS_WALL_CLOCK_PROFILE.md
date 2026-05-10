@@ -105,3 +105,17 @@ Post-candidate 40w profile:
 | `bot_orders.executeFactionDirectives.total` | 1,552.730 ms |
 
 Both runs produced final hash `ea9f3db7ac59a443`, so the candidate was deterministic, but it was not a proven wall-clock win. The code change was rejected and not retained. The next CPU pass should instrument inside `buildBriefing` before changing it again, or instead take the already named `emitCommanderOutput` / `assessSituation` sub-buckets.
+
+## Follow-Up: Briefing Sub-Buckets And Front-Geometry Queue
+
+The next pass added default-off `buildBriefing` sub-buckets and retained a measured front-geometry cut. Report: `docs/40_reports/implemented/20260510_COMMANDER_BRIEFING_FRONT_GEOMETRY_PROFILE.md`.
+
+Key retained result:
+
+| Label | Before | After |
+|---|---:|---:|
+| `commander.runCommanderForCorps.total` | 2,110.601 ms | 2,026.497 ms |
+| `commander.runCommanderForCorps.buildBriefing` | 1,077.718 ms | 1,041.042 ms |
+| `commander.runCommanderForCorps.buildBriefing.frontGeometry` | 691.284 ms | 659.228 ms |
+
+Both profiled runs produced final hash `ea9f3db7ac59a443`.

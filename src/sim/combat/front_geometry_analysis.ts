@@ -66,8 +66,9 @@ function bfsReachable(
     const visited = new Set<string>();
     const queue: string[] = [seed];
     visited.add(seed);
-    while (queue.length > 0) {
-        const current = queue.shift()!;
+    let queueIndex = 0;
+    while (queueIndex < queue.length) {
+        const current = queue[queueIndex++]!;
         for (const neighbor of adjacency.get(current) ?? []) {
             if (!neighbor.startsWith('op:')) continue;
             if (allowed.has(neighbor) && !visited.has(neighbor)) {

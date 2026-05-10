@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectSalients, getLineShorteningScore, analyzeFrontGeometry, DEFAULT_ETHNIC_NECK_THRESHOLD } from '../src/sim/combat/front_geometry_analysis.js';
+import { readFileSync } from 'node:fs';
 import type { OsidEthnicComposition } from '../src/sim/combat/ethnic_defense.js';
 
 // ── Helper: build adjacency from edge pairs ───────────────────────────────
@@ -307,5 +308,16 @@ describe('analyzeFrontGeometry ethnic holds', () => {
         expect(result.enemy_salients.length).toBe(1);
         expect(result.enemy_salients[0]!.neck_osids).toContain('op:e:neck');
         expect(result.enemy_salients[0]!.side).toBe('enemy');
+    });
+});
+
+describe('front geometry performance guards', () => {
+    it('uses index-based BFS queues instead of Array.shift compaction', () => {
+        const src = readFileSync('src/sim/combat/front_geometry_analysis.ts', 'utf8')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+        expect(src).not.toMatch(/\.shift\s*\(/);
+        expect(src).toContain('queueIndex');
     });
 });

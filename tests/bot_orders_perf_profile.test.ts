@@ -101,6 +101,16 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.makeDecisions');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput');
         expect(commanderAssess).toContain('currentZoneOsids');
+        const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
+        expect(commanderBriefing).toContain('botOrdersPerfTime');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSubordinates');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectIntelData');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectFatigueSummary');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.enemyEquipmentSummary');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.adjacentCorps');
+        expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.campaignIntent');
         expect(runnerCli).toContain('dumpBotOrdersPerfProfile');
     });
 

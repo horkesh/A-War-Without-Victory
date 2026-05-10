@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Commander briefing front-geometry wall-clock cut
+
+**Scope:** Follow-on CPU performance lane. The previous profiled commander pass named `buildBriefing` as the largest single commander bucket but lacked enough internal labels to choose a safe optimization.
+
+**Fix:** Added default-off `buildBriefing` sub-buckets under the existing `PERF_PROFILE_BOT_ORDERS=true` profiler. The profiled 40w run showed `frontGeometry` as the largest briefing sub-bucket. Replaced the salient detector BFS `queue.shift()` loop with an index-based queue, preserving deterministic traversal order while removing repeated array compaction.
+
+**Validation:** Red tests first: `bot_orders_perf_profile` failed on missing briefing labels, and `front_geometry_analysis` failed on the existing `.shift()` BFS pattern. Green focused tests passed. Profiled 40w before/after kept final hash `ea9f3db7ac59a443`; `buildBriefing` dropped 1,077.718ms -> 1,041.042ms, `frontGeometry` dropped 691.284ms -> 659.228ms, and commander total dropped 2,110.601ms -> 2,026.497ms.
+
+**Canon posture:** Pure performance/diagnostic change. No game state, scenario data, scoring, event trigger, player lever, or save schema changed; the profiler remains default-off and writes only `data/derived/_debug/bot_orders_perf_profile.json` when explicitly enabled.
+
+---
+
 ## [2026-05-10] Codex milestone dynamic sections
 
 **Scope:** Follow-on v0.9.1 Dynamic Essay + Endgame Comparison slice. The comparison producer emitted milestone rows, but Codex essays could not yet consume them through authored conditions or tokens.
