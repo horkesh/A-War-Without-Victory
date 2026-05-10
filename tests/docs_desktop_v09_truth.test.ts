@@ -65,7 +65,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('Packet C2 patron-distance pressure completion');
     expect(roadmap).toContain('Packet C3 accepted-peace bridging');
     expect(roadmap).toContain('early_peace_implementation_record');
-    expect(roadmap).toContain('242 definitions / 818 effect instances');
+    expect(roadmap).toContain('244 definitions / 827 effect instances');
+    expect(roadmap).toContain('v0.9.0 Consequence System CLOSED-FOR-AGENT-SCOPE');
+    expect(roadmap).toContain('csq_civic_identity_consolidation_1993');
+    expect(roadmap).toContain('csq_pragmatic_coalition_1993');
     expect(roadmap).toContain('| Cost Ledger | Advanced');
     expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
     expect(roadmap).not.toContain('full prosecutorial authoring still open');

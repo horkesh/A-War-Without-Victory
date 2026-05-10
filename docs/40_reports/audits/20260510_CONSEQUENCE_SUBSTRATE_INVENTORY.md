@@ -8,10 +8,10 @@
 
 Packet C1 is now executable. `tools/diagnostics/consequence_substrate_inventory.cjs` scans the authored event catalog and emits a deterministic owner matrix for every event-effect substrate that consequence work can use.
 
-Current catalog measurement after the Packet C2 patron-distance pressure slice:
+Current catalog measurement after the v0.9.0 identity closure slice:
 
-- Events scanned: 242
-- Effect instances: 812
+- Events scanned: 244
+- Effect instances: 827
 - Effect kinds: 18
 - Live substrates: 18
 - Partial-reader substrates: none
@@ -46,7 +46,9 @@ The diagnostic reports asymmetric faction coverage where a kind has a `faction` 
 
 ## Roadmap Disposition
 
-Packet C1 is complete, and the first C2 patron-distance seam has now been implemented. The next v0.9.0 consequence lane should not be another broad audit. It should pick one of the grounded follow-ups:
+Packet C1 is complete. Packet C2, Packet C3, the annotation-reader bridge, and the RBiH identity follow-through slice have now closed the non-sensitive agent-owned v0.9.0 consequence seams. Future consequence work should be treated as post-milestone extension unless it first opens a new, explicit scoped packet.
 
-- C3 early-peace consequence bridging, using already-live termination / endgame handoff surfaces.
+The remaining notes are not v0.9.0 closure blockers:
+
 - Authoring-coverage work for `guerrilla_threat` only if a concrete future divergence chain needs faction mirrors.
+- Sensitive-history/enclave/genocide variants remain governed by `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`, not ordinary event-wave authoring.

@@ -1,0 +1,93 @@
+{
+  "status": "agent_closed_operator_open",
+  "agent_owned_scope": [
+    "onboarding_overlay_contract",
+    "tutorial_anchor_coverage",
+    "tutorial_restart_skip_completion",
+    "structured_feedback_package",
+    "operator_runbook",
+    "triage_templates"
+  ],
+  "operator_owned_scope": [
+    "outreach",
+    "discord_or_forum_setup",
+    "feedback_form_creation",
+    "incoming_response_triage",
+    "weekly_digest_publication"
+  ],
+  "documents": [
+    {
+      "path": "README.md",
+      "purpose": "Operator entrypoint for deploying the full v0.9.2 playtest package.",
+      "required_tokens": [
+        "deployable operator package",
+        "feedback_form_schema.md",
+        "operator-driven"
+      ]
+    },
+    {
+      "path": "feedback_form_schema.md",
+      "purpose": "Structured feedback schema for forms and response routing.",
+      "required_tokens": [
+        "bug-ui",
+        "history",
+        "onboarding"
+      ]
+    },
+    {
+      "path": "known_issues_template.md",
+      "purpose": "Known-issues starter text for tester-facing build notes.",
+      "required_tokens": [
+        "Known Rough Edges",
+        "Not A Bug",
+        "tutorial"
+      ]
+    },
+    {
+      "path": "playtest_runbook.md",
+      "purpose": "Operator procedure for recruitment, intake, triage, and weekly closure.",
+      "required_tokens": [
+        "Welcome to the AWWV v0.9.2 playtest",
+        "Privacy note",
+        "Do not debate sensitive-history feedback"
+      ]
+    },
+    {
+      "path": "recruitment_messages.md",
+      "purpose": "Reusable recruitment copy for Discord, forums, direct outreach, and social posts.",
+      "required_tokens": [
+        "15-25 testers",
+        "deterministic Bosnian War strategic sim",
+        "structured AAR"
+      ]
+    },
+    {
+      "path": "tester_quickstart.md",
+      "purpose": "Tester-facing quickstart for running a session and sending useful feedback.",
+      "required_tokens": [
+        "Start with the 40-week scenario",
+        "What To Send Back",
+        "Crash, freeze, or save/load failure"
+      ]
+    },
+    {
+      "path": "triage_board.md",
+      "purpose": "Feedback routing board for classifying tester reports into product, canon, and fix lanes.",
+      "required_tokens": [
+        "Intake",
+        "Canon review",
+        "Ready for fix",
+        "Release note / response"
+      ]
+    },
+    {
+      "path": "weekly_digest_template.md",
+      "purpose": "Weekly synthesis template for turning raw feedback into actionable follow-up.",
+      "required_tokens": [
+        "Top confusion points",
+        "Calibration/history flags",
+        "Already fixed"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # v0.9.2 Tutorial And Onboarding
 
 **Date:** 2026-03-31  
-**Status:** PLAN - READY FOR EXECUTION WHEN v0.9.2 OPENS  
+**Status:** AGENT-CLOSED / OPERATOR-OPEN  
 **Roadmap slot:** v0.9.2  
 **Overseer:** Orchestrator  
 **Architect:** Product Manager / UI/UX Developer - may define onboarding flow, but must flag scope decisions for user review  
@@ -97,19 +97,21 @@ Tutorial and onboarding belong with external playtesting because that is when:
 
 ## 4. Completion Checklist
 
-- [ ] tutorial inventory exists
-- [ ] onboarding scope exists
-- [ ] command-chain literacy flow exists
-- [ ] playtest loop exists
-- [ ] roadmap/status table aligned
-- [ ] `docs/PROJECT_LEDGER.md` appended
-- [ ] `.claude/napkin.md` updated
-- [ ] implementation report created
+- [x] tutorial inventory exists
+- [x] onboarding scope exists
+- [x] command-chain literacy flow exists
+- [x] playtest loop exists
+- [x] roadmap/status table aligned
+- [x] `docs/PROJECT_LEDGER.md` appended
+- [x] `.claude/napkin.md` updated
+- [x] implementation report created
+
+**Closure 2026-05-10:** Agent-owned scope is closed. The live app has the onboarding overlay/tutorial state/restart and hardening lanes, and `docs/playtesting/v092/package_manifest.json` now guards the deployable playtest package. Outreach, Discord/forum setup, form creation, incoming-response triage, and weekly digest publication remain operator-owned.
 
 ---
 
 ## 5. Success Criteria
 
-- [ ] tutorial/onboarding has a real roadmap home
-- [ ] the game can teach command friction and review systems honestly
-- [ ] external playtesting has an explicit onboarding target
+- [x] tutorial/onboarding has a real roadmap home
+- [x] the game can teach command friction and review systems honestly
+- [x] external playtesting has an explicit onboarding target

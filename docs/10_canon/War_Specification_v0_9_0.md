@@ -103,7 +103,8 @@ Divergence events fire within the existing event pipeline (`update-event-readine
 - **`cost_ledger_annotation` effect family:** new effect kind that records prosecutorial-voice annotations for endgame Cost Ledger consumption. Faction-agnostic effect application; emit-only at event resolution.
 - **`MilitaryState.cost_ledger_annotations` field:** additive optional array on `MilitaryState`; deserializes to empty on legacy saves.
 - **New condition kinds** layered on existing `EventCondition` union: `alliance_holds_past_w35`, `paramilitary_authorization_refused`, `enclave_held_alt_intervention`, `patron_pressure_resisted_streak`, `early_peace_acceptance_w120`, `force_quality_inversion`, plus Wave 4 additions consuming `equipment_quality_modifier` substrate. All faction-agnostic predicates.
-- **Cumulative count:** 28+ divergence events authored at `data/scenarios/events/consequences.json` as of Wave 4. Closure target ~30; the matrix is open and additive.
+- **Cumulative count:** 244 event definitions across the event catalog as of the 2026-05-10 v0.9.0 consequence milestone closure, with 827 effect instances, 18 known effect kinds, 18 live substrates, zero partial-reader substrates, and zero unknown substrates.
+- **Closure note:** The refreshed v0.9.0 scope is agent-closed after Packets C1-C3, the annotation-reader bridge, and RBiH identity follow-through (`csq_civic_identity_consolidation_1993`, `csq_pragmatic_coalition_1993`). Old Chain 7 implementation IDs are superseded by the accepted-peace engine/endgame contract (`war_ended_early`, `early_peace_implemented`, endgame snapshot, and `early_peace_implementation_record`). Sensitive-history/enclave/genocide expansion remains governed by `SENSITIVE_HISTORY_DESIGN_GATE.md`, not ordinary event-wave authoring.
 
 ### 12.3 `equipment_quality_modifier` substrate (Wave 3, commit `658241df`, 2026-05-04)
 

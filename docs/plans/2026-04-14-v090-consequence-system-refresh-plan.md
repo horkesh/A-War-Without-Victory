@@ -1,7 +1,7 @@
 # v0.9.0 Consequence System Refresh
 
 **Date:** 2026-04-14  
-**Status:** PLAN - REFRESHED FOR CURRENT REPO TRUTH  
+**Status:** CLOSED-FOR-AGENT-SCOPE - REFRESHED MILESTONE COMPLETE  
 **Roadmap slot:** v0.9.0  
 **Supersedes for sequencing purposes:** `2026-03-24-v090-consequence-system-plan.md`  
 **Purpose:** Re-scope the older consequence-system draft into smaller programs that fit current repo truth and current design decisions.
@@ -108,11 +108,15 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 
 **Rule:** one chain per packet, never multiple giant chains in one lane.
 
+**Status 2026-05-10:** DONE for the non-sensitive refreshed milestone scope. The old seven-chain draft is reconciled by live Chain 1-6 consequence IDs plus the RBiH identity follow-through pair `csq_civic_identity_consolidation_1993` and `csq_pragmatic_coalition_1993`. Sensitive-history/enclave/genocide variants remain governed by `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` and are not ordinary consequence-packet debt.
+
 ### Program E. Consequence Narrative Integration
 
 **Goal:** Connect real consequence mechanics to dynamic essays, ghost entries, and endgame explanation after the gameplay substrate exists.
 
 **Rule:** no narrative patching over missing mechanical truth.
+
+**Status 2026-05-10:** DONE for v0.9.0 closure handoff. Cost Ledger annotations, findings, milestones, and Dynamic Codex readers now consume real consequence packets; the reader bridge added annotation atoms/tokens for existing Chain 4/5 facts, and v0.9.1 owns any future breadth/polish beyond this milestone.
 
 ---
 
@@ -153,6 +157,8 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 These are inseparable from the sensitive-history design gate.
 Do not hand them to Claude as ordinary event implementation work first.
 
+**Status 2026-05-10:** Still blocked by design, not by v0.9.0 implementation capacity. This block is explicitly outside agent-owned milestone closure.
+
 ### Deferred: the full seven-chain mega-sprint
 
 This should only happen after:
@@ -161,6 +167,8 @@ This should only happen after:
 - pressure and early-peace programs are grounded
 - the scoring/endgame contract exists
 - sensitive-history boundaries are explicit
+
+**Status 2026-05-10:** Superseded for milestone closure. The refreshed packet sequence, accepted-peace engine/endgame contract, and milestone closure audit now own the v0.9.0 done-state instead of a literal old mega-sprint.
 
 ### Deferred: broad new effect-type expansion
 
@@ -198,3 +206,5 @@ Canonical UI surface:
 
 Done means:
 - the repo can hand Claude bounded consequence packets tied to current truth, and reviewers can tell which large branch ideas are still intentionally blocked.
+
+**Closure 2026-05-10:** Done for v0.9.0 agent-owned scope. `tests/v090_consequence_milestone_closure.test.ts` now guards the reconciliation: live non-sensitive chain IDs are present, old Chain 7 is superseded by the accepted-peace engine/endgame contract, and sensitive-history variants stay behind the canon gate.

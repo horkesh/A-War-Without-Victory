@@ -51,4 +51,42 @@ describe('v0.9.2 playtest package docs', () => {
         expect(knownIssues).toContain('Known Rough Edges');
         expect(knownIssues).toContain('Not A Bug');
     });
+
+    it('ships a manifest that binds the complete v0.9.2 agent-owned closure package', () => {
+        const manifestPath = join(PLAYTEST_DIR, 'package_manifest.json');
+        expect(existsSync(manifestPath)).toBe(true);
+
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+            status: string;
+            agent_owned_scope: string[];
+            operator_owned_scope: string[];
+            documents: Array<{ path: string; purpose: string; required_tokens: string[] }>;
+        };
+
+        expect(manifest.status).toBe('agent_closed_operator_open');
+        expect(manifest.agent_owned_scope).toContain('onboarding_overlay_contract');
+        expect(manifest.agent_owned_scope).toContain('structured_feedback_package');
+        expect(manifest.operator_owned_scope).toContain('outreach');
+        expect(manifest.operator_owned_scope).toContain('incoming_response_triage');
+
+        const paths = manifest.documents.map(d => d.path).sort();
+        expect(paths).toEqual([
+            'README.md',
+            'feedback_form_schema.md',
+            'known_issues_template.md',
+            'playtest_runbook.md',
+            'recruitment_messages.md',
+            'tester_quickstart.md',
+            'triage_board.md',
+            'weekly_digest_template.md',
+        ].sort());
+
+        for (const doc of manifest.documents) {
+            const body = readPlaytestDoc(doc.path);
+            expect(doc.purpose.length, `${doc.path} purpose`).toBeGreaterThan(10);
+            for (const token of doc.required_tokens) {
+                expect(body, `${doc.path} should contain ${token}`).toContain(token);
+            }
+        }
+    });
 });

@@ -4,6 +4,34 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] docs(playtest): close v0.9.2 agent-owned milestone scope
+
+**Scope:** v0.9.2 Tutorial + External Playtesting milestone closure.
+
+**Fix:** Added `docs/playtesting/v092/package_manifest.json`, a machine-readable contract binding the operator playtest kit to its required documents and content tokens. Expanded the docs regression so the package cannot silently lose recruitment, quickstart, schema, runbook, triage, known-issues, digest, or README coverage.
+
+**Validation:** Red first: `npx.cmd vitest run tests/v092_playtest_package_docs.test.ts --reporter=dot` failed on missing `package_manifest.json`. Green focused: 4/4 passed.
+
+**Canon posture:** Documentation/test package closure only. No tutorial runtime behavior, command-chain mechanics, scenario data, save schema, event trigger, score rule, or sensitive-history adjudication changed. Outreach, form creation, incoming-response triage, and weekly digest publication remain operator-owned.
+
+**Docs:** Added the implementation report and updated v0.9.2 plan, master roadmap, report index, ledger, and napkin.
+
+---
+
+## [2026-05-10] feat(consequences): close v0.9.0 consequence milestone scope
+
+**Scope:** v0.9.0 Consequence System refreshed milestone closure.
+
+**Fix:** Added `csq_civic_identity_consolidation_1993` and `csq_pragmatic_coalition_1993` to close the non-sensitive RBiH identity follow-through gap left by the old seven-chain draft. Added a milestone closure audit test that reconciles old Chain 7 to the accepted-peace engine/endgame contract rather than inventing duplicate `csq_*` peace implementation events.
+
+**Validation:** Red first: `npx.cmd vitest run tests/consequence_identity_completion.test.ts tests/v090_consequence_milestone_closure.test.ts --reporter=dot` failed 5/7 on missing identity events. Green focused: 7/7 passed. Inventory now reports 244 events / 827 effect instances / 18 live effect kinds / zero partial-reader or unknown substrates.
+
+**Canon posture:** Additive Ring 1/2 consequence content. No new condition/effect kind, save schema, rupture rule, score rule, scenario paint, OOB data, political-controller data, or sensitive-history adjudication. Sensitive-history/enclave/genocide expansion remains governed by `SENSITIVE_HISTORY_DESIGN_GATE.md`, outside ordinary v0.9.0 event-wave closure.
+
+**Docs:** Added the implementation report and updated master roadmap, consequence refresh plan, Game Bible, War Specification, substrate inventory, reports index, ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-10] feat(codex): add UN mandate and sanctions readers
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the late-intervention/final-offensive readers.

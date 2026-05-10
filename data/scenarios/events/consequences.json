@@ -147,6 +147,155 @@
     "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Counterfactual mirror of Contact Group diplomatic calculus 1993-94."
   },
   {
+    "id": "csq_civic_identity_consolidation_1993",
+    "title": "The Civic Platform Holds",
+    "narrative": "The Presidency's early pledge to a civic republic does not stay a communique. Through mixed units, municipal committees, and repeated diplomatic briefings, it becomes a working claim: Bosnia is not only a Bosniak war aim, even when Bosniaks carry the heaviest burden. The bargain is difficult and often resented, but it keeps minority cadres in the state project and gives foreign envoys a language they can still defend.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "civic"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "civic_identity_consolidation_1993"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH civic-state identity consolidates into a fragile but real coalition."
+    },
+    "effects": [
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.04,
+        "duration_turns": 28
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "faction": "RBiH",
+        "tag": "civic_identity_consolidation_1993",
+        "text": "RBiH civic identity consolidated after the founding choice. Cohesion +3 and recruitment +4% for 28 turns reflect minority-cadre retention and diplomatic legitimacy, not a claim that civic politics erased wartime coercion or suffering."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 4
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 3
+      }
+    ],
+    "sets_flags": {
+      "civic_identity_consolidation_1993": true
+    },
+    "historical_source": "v0.9.0 milestone closure, Chain 6 identity follow-through. Mirrors the historical civic-platform path in the May 1992 Presidency declaration and subsequent multi-ethnic RBiH legitimacy claim as documented by Burg & Shoup, The War in Bosnia-Herzegovina (2000), and Hoare, How Bosnia Armed (2004)."
+  },
+  {
+    "id": "csq_pragmatic_coalition_1993",
+    "title": "The Coalition of Necessity",
+    "narrative": "The republic keeps the language of civic Bosnia while ministries and recruitment offices quietly bend toward Bosniak institutional control. The arrangement works because it must: some non-Bosniak cadres remain, foreign sponsors still hear a pluralist vocabulary, and the army gains a little organizational focus. But the gap between declaration and practice is now visible enough that every negotiation carries a second conversation about what the state really intends to become.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 34,
+      "turn_max": 64,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "pragmatic"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "pragmatic_coalition_1993"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH pragmatic identity produces a mixed coalition: steadier mobilization, thinner legitimacy."
+    },
+    "effects": [
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": -2
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.02,
+        "duration_turns": 24
+      },
+      {
+        "kind": "cost_ledger_annotation",
+        "faction": "RBiH",
+        "tag": "pragmatic_coalition_1993",
+        "text": "RBiH pragmatic identity produced a weaker mixed result: cohesion +2 and recruitment +2% for 24 turns, offset by legitimacy ambiguity in negotiation dimensions. This is a coalition-management record, not a new ethnic-cleansing or rupture mechanic."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 4
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": -3
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": -3
+      }
+    ],
+    "sets_flags": {
+      "pragmatic_coalition_1993": true
+    },
+    "historical_source": "v0.9.0 milestone closure, Chain 6 pragmatic-variant follow-through. Counterfactual variant of RBiH state-identity politics using the same non-sensitive identity/recruitment/legitimacy substrate as the original Chain 6 plan."
+  },
+  {
     "id": "csq_bihac_pocket_collapses_1994",
     "title": "The Pocket Falls",
     "narrative": "The 5th Corps has held against VRS, RSK, and Abdic's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
