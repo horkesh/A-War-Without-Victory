@@ -76,9 +76,11 @@
 
 import type { WriteStream } from 'node:fs';
 import { createReadStream, createWriteStream } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
 import { join } from 'node:path';
+import { buildReplaySaveManifest } from '../sim/replay/replay_manifest.js';
+import { buildReplayFrameSummary } from '../sim/replay/replay_frame_summary.js';
 import type { GameState } from '../state/game_state.js';
 import { serializeState } from '../state/serialize.js';
 
@@ -154,6 +156,12 @@ function extractStateString(row: { state?: unknown }): string {
     return s;
 }
 
+async function writeReplayManifest(outDir: string, summaries: ReadonlyArray<ReturnType<typeof buildReplayFrameSummary>>): Promise<string> {
+    const manifestPath = join(outDir, 'replay_save_manifest.json');
+    await writeFile(manifestPath, JSON.stringify(buildReplaySaveManifest(summaries)), 'utf8');
+    return manifestPath;
+}
+
 /**
  * Stream-finalize the consolidated `replay_save_sequence.json` from the
  * per-turn `replay_sequence.jsonl` stream on disk. Bounded peak memory:
@@ -217,11 +225,13 @@ export async function streamFinalizeReplaySaveSequenceFromJsonl(
 
     await writeChunk('[');
     let firstFrame = true;
+    const summaries: ReturnType<typeof buildReplayFrameSummary>[] = [];
     try {
         for await (const line of rl) {
             if (line.length === 0) continue; // tolerate trailing newline
             const row = JSON.parse(line) as { state?: unknown };
             const stateStr = extractStateString(row);
+            summaries.push(buildReplayFrameSummary(JSON.parse(stateStr) as GameState));
             if (!firstFrame) {
                 await writeChunk(',');
             }
@@ -234,6 +244,7 @@ export async function streamFinalizeReplaySaveSequenceFromJsonl(
     }
     await writeChunk(']');
     await closeStream();
+    await writeReplayManifest(outDir, summaries);
     return sequencePath;
 }
 
@@ -275,13 +286,17 @@ export async function finalizeReplaySaveSequence(
         });
 
     await writeChunk('[');
+    const summaries: ReturnType<typeof buildReplayFrameSummary>[] = [];
     for (let i = 0; i < frames.length; i++) {
         if (i > 0) {
             await writeChunk(',');
         }
-        await writeChunk(extractStateString(frames[i]));
+        const stateStr = extractStateString(frames[i]);
+        summaries.push(buildReplayFrameSummary(JSON.parse(stateStr) as GameState));
+        await writeChunk(stateStr);
     }
     await writeChunk(']');
     await closeStream();
+    await writeReplayManifest(outDir, summaries);
     return sequencePath;
 }

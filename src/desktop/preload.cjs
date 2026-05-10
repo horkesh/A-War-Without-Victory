@@ -5,6 +5,7 @@ const gameStateUpdatedListeners = new Set();
 const turnReportUpdatedListeners = new Set();
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar broadcast.
 const replaySequenceUpdatedListeners = new Set();
+const replayManifestUpdatedListeners = new Set();
 
 function emitToListeners(listeners, payload) {
   for (const listener of Array.from(listeners)) {
@@ -37,6 +38,9 @@ ipcRenderer.on('turn-report-updated', (_event, report) => {
 ipcRenderer.on('replay-sequence-updated', (_event, sequenceJson) => {
   emitToListeners(replaySequenceUpdatedListeners, sequenceJson);
 });
+ipcRenderer.on('replay-manifest-updated', (_event, manifestJson) => {
+  emitToListeners(replayManifestUpdatedListeners, manifestJson);
+});
 contextBridge.exposeInMainWorld('awwv', {
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
   startNewCampaign: (payload) => ipcRenderer.invoke('start-new-campaign', payload),
@@ -48,6 +52,7 @@ contextBridge.exposeInMainWorld('awwv', {
   subscribeTurnReportUpdated: (cb) => subscribe(turnReportUpdatedListeners, cb),
   // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER
   subscribeReplaySequenceUpdated: (cb) => subscribe(replaySequenceUpdatedListeners, cb),
+  subscribeReplayManifestUpdated: (cb) => subscribe(replayManifestUpdatedListeners, cb),
   getCurrentGameState: () => ipcRenderer.invoke('get-current-game-state'),
   openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),

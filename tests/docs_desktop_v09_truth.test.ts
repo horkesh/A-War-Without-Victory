@@ -28,7 +28,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('RESOLVED 2026-04-16 as a pre-0.9 truth lane');
     expect(roadmap).toContain('loaded-game Warroom entry now stays on the React shell path');
     expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards');
-    expect(roadmap).toContain('large replay sidecar loading/richer replay-map inspection are still future work');
+    expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards + sparse manifest loading');
+    expect(roadmap).toContain('richer replay-map inspection is still future work');
     expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
     expect(roadmap).not.toContain('Warroom React Shell Recovery / Feature Parity** Ã¢â‚¬â€ main desktop entry surface still needs parity/polish');
     expect(roadmap).not.toContain('replay is still absent, tutorial/onboarding is still untouched');

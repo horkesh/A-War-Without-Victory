@@ -225,6 +225,8 @@ function deriveEnclaveSupplyState(
 export interface ParseGameStateOptions {
     /** Per-turn GameState snapshots in turn order. Optional and additive. */
     replaySaveSequence?: ReadonlyArray<unknown>;
+    /** Small per-frame replay summary manifest. Optional and additive. */
+    replaySaveManifest?: import('../../../sim/replay/replay_manifest.js').ReplaySaveManifest;
 }
 
 /**
@@ -1835,6 +1837,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         // anything that requires deeper validation.
         replaySaveSequence: options?.replaySaveSequence && options.replaySaveSequence.length > 0
             ? options.replaySaveSequence as ReadonlyArray<import('../../../state/game_state.js').GameState>
+            : undefined,
+        replaySaveManifest: options?.replaySaveManifest && options.replaySaveManifest.frame_count > 0
+            ? options.replaySaveManifest
             : undefined,
     };
 }

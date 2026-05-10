@@ -14,12 +14,15 @@
  */
 import { useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../../../../state/game_state.js';
+import type { ReplaySaveManifest } from '../../../../sim/replay/replay_manifest.js';
 import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
+import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
 
 export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
-    saveSequence: readonly GameState[] | null | undefined;
+    saveSequence?: readonly GameState[] | null | undefined;
+    saveManifest?: ReplaySaveManifest | null | undefined;
 }
 
 /**
@@ -28,14 +31,22 @@ export interface ReplayScrubberProps {
  * Internal cursor state is React-local; the underlying player is recreated only
  * when the input sequence reference changes. No engine state is mutated.
  */
-export function ReplayScrubber({ saveSequence }: ReplayScrubberProps): JSX.Element {
+export function ReplayScrubber({ saveSequence, saveManifest }: ReplayScrubberProps): JSX.Element {
     const player = useMemo(
         () => replayPlayer(saveSequence ?? []),
         [saveSequence],
     );
+    const summaryPlayer = useMemo(
+        () => replaySummaryPlayer(saveManifest),
+        [saveManifest],
+    );
 
-    const turnCount = player.getTurnCount();
-    const metadata = useMemo(() => player.getMetadata(), [player]);
+    const useManifest = player.getTurnCount() === 0 && summaryPlayer.getTurnCount() > 0;
+    const turnCount = useManifest ? summaryPlayer.getTurnCount() : player.getTurnCount();
+    const metadata = useMemo(
+        () => (useManifest ? summaryPlayer.getMetadata() : player.getMetadata()),
+        [player, summaryPlayer, useManifest],
+    );
 
     // Cursor: local UI state. Defaults to first frame; clamped on every change.
     const [cursor, setCursor] = useState<number>(turnCount > 0 ? 0 : -1);
@@ -43,18 +54,18 @@ export function ReplayScrubber({ saveSequence }: ReplayScrubberProps): JSX.Eleme
     const onScrub = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const raw = Number(e.target.value);
-            const next = player.seekToTurn(raw);
+            const next = useManifest ? summaryPlayer.seekToTurn(raw) : player.seekToTurn(raw);
             setCursor(next);
         },
-        [player],
+        [player, summaryPlayer, useManifest],
     );
 
     const onJump = useCallback(
         (idx: number) => {
-            const next = player.seekToTurn(idx);
+            const next = useManifest ? summaryPlayer.seekToTurn(idx) : player.seekToTurn(idx);
             setCursor(next);
         },
-        [player],
+        [player, summaryPlayer, useManifest],
     );
 
     if (turnCount === 0) {
@@ -68,14 +79,19 @@ export function ReplayScrubber({ saveSequence }: ReplayScrubberProps): JSX.Eleme
         );
     }
 
-    const current = player.getTurn(cursor);
+    const current = useManifest ? null : player.getTurn(cursor);
+    const manifestFrame = useManifest ? summaryPlayer.getTurn(cursor) : null;
     const currentTurn =
+        manifestFrame?.summary.turn
+        ??
         (current as { turn?: number; metadata?: { turn?: number } } | null)?.turn
         ?? (current as { metadata?: { turn?: number } } | null)?.metadata?.turn
         ?? cursor;
     const currentDate =
-        (current as { metadata?: { date?: string } } | null)?.metadata?.date ?? null;
-    const summary = buildReplayFrameSummary(current);
+        manifestFrame?.summary.date
+        ?? (current as { metadata?: { date?: string } } | null)?.metadata?.date
+        ?? null;
+    const summary = manifestFrame?.summary ?? buildReplayFrameSummary(current);
 
     return (
         <div

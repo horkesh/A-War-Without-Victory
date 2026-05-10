@@ -346,11 +346,14 @@ export function VerdictScreen() {
                     gameOver === true (already gated above) AND a save sequence
                     has been plumbed into the loaded adapter. Read-only; does
                     NOT advance turns or mutate engine state. */}
-                {loadedGameState.replaySaveSequence
-                    && loadedGameState.replaySaveSequence.length > 0 && (
+                {((loadedGameState.replaySaveSequence && loadedGameState.replaySaveSequence.length > 0)
+                    || (loadedGameState.replaySaveManifest && loadedGameState.replaySaveManifest.frame_count > 0)) && (
                     <div className="border-t border-panel-border"
                          data-awwv-endgame-section="replay">
-                        <ReplayScrubber saveSequence={loadedGameState.replaySaveSequence} />
+                        <ReplayScrubber
+                            saveSequence={loadedGameState.replaySaveSequence}
+                            saveManifest={loadedGameState.replaySaveManifest}
+                        />
                     </div>
                 )}
 

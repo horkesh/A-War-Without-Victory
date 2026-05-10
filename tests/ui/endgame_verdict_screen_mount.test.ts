@@ -156,6 +156,30 @@ describe('VerdictScreen mount — verdict content', () => {
         const h = render();
         expect(h).toContain('least bad version'); expect(h).toContain('View Your War'); expect(h).toContain('New Game');
     });
+
+    it('renders replay from a sparse manifest when full frame sequence is absent', () => {
+        storeState = {
+            loadedGameState: endgame({
+                replaySaveManifest: {
+                    schema_version: 1,
+                    frame_count: 1,
+                    frames: [{
+                        turn: 188,
+                        date: '1995-10-01',
+                        activeFormations: 37,
+                        totalCasualties: 46500,
+                        totalDisplaced: 900000,
+                        controlByFaction: [{ faction: 'RS', osids: 42 }],
+                    }],
+                },
+            }),
+        };
+        const h = render();
+        expect(h).toContain('Replay');
+        expect(h).toContain('Active formations');
+        expect(h).toContain('46500');
+        expect(h).toContain('RS:42');
+    });
 });
 
 describe('VerdictScreen mount — cost ledger', () => {

@@ -3339,3 +3339,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The old roadmap statement that live replay playback/consumer was absent from the product shell is retired. Remaining replay work is now richer map-state inspection and sparse/streaming UI loading for very large replay sidecars, not absence of the consumer surface.
 
 **Report:** `docs/40_reports/implemented/20260510_REPLAY_FRAME_SUMMARY_CONSUMER.md`
+
+---
+
+## [2026-05-10] replay: sparse manifest loading for large sidecars
+
+**Type:** Harness artifact + desktop/UI data-consumer hardening. No simulation behavior, combat math, scenario data, OOB, operation definitions, political controller writes, rupture wiring, or canon files changed.
+
+**Change:** `replay_save_emit.ts` now writes `replay_save_manifest.json` beside the full `replay_save_sequence.json`. Desktop load prefers the manifest and broadcasts it before `game-state-updated`; the renderer stages it through preload/useIPC/useDesktopSession/gameStore/GameStateAdapter and `ReplayScrubber` can render from either full frames or sparse summary frames.
+
+**Determinism:** Read-only and derived from canonical serialized replay frames in harness turn order. Summary generation uses the deterministic `buildReplayFrameSummary` path, including stable sorted control counts. The full replay sequence remains byte-compatible; the manifest is additive.
+
+**Verification:** Red tests first: replay manifest test failed on missing `replay_save_manifest.json`, sparse-player test failed on missing `replay_summary_player`, and manifest-only `VerdictScreen` test failed because replay did not render. Green replay suite: `npx.cmd vitest run tests/replay_save_emit.test.ts tests/replay_player.test.ts tests/ui/endgame_verdict_screen_mount.test.ts --reporter=dot` passed 52/52. Engineering-doc guard: `npx.cmd vitest run tests/replay_surface_truth.test.ts --reporter=dot` passed 4/4. `npm.cmd run typecheck` passed.
+
+**Roadmap delta:** Large replay sidecar loading is no longer a known product-shell blocker; the remaining replay lane is richer replay-map inspection/playback polish.
+
+**Report:** `docs/40_reports/implemented/20260510_REPLAY_SPARSE_MANIFEST_LOADING.md`

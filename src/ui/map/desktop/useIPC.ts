@@ -56,6 +56,7 @@ interface WindowAwwv {
      * via `setPendingReplaySaveSequence` BEFORE the next `loadSave` call.
      */
     subscribeReplaySequenceUpdated: (cb: (sequenceJson: string) => void) => () => void;
+    subscribeReplayManifestUpdated: (cb: (manifestJson: string) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
@@ -174,6 +175,9 @@ export function useIPC() {
             subscribeReplaySequenceUpdated: awwv
                 ? (cb: (sequenceJson: string) => void) => awwv.subscribeReplaySequenceUpdated(cb)
                 : (_cb: (sequenceJson: string) => void) => () => { /* noop */ },
+            subscribeReplayManifestUpdated: awwv
+                ? (cb: (manifestJson: string) => void) => awwv.subscribeReplayManifestUpdated(cb)
+                : (_cb: (manifestJson: string) => void) => () => { /* noop */ },
 
             getRecruitmentCatalog: awwv
                 ? () => awwv.getRecruitmentCatalog()

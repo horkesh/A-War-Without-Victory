@@ -25,8 +25,8 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then sets `meta.player_faction`, initializes `recruitment_state` if missing, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called by warroom launcher and tactical-map side picker. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0).
 
 - `load-state-dialog` (invoke)
-  - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: opens state file picker, loads serialized GameState via `loadStateFromPath()`.
+  - Returns: `{ ok: boolean, error?: string, stateJson?: string, replaySequenceJson?: string | null, replayManifestJson?: string | null }`
+  - Behavior: opens state file picker, loads serialized GameState via `loadStateFromPath()`. If the selected save has a sibling `replay_save_manifest.json`, main process broadcasts it via `replay-manifest-updated` before `game-state-updated`; otherwise it falls back to sibling `replay_save_sequence.json` via `replay-sequence-updated`. This is not a standalone replay-loader contract: replay sidecars attach only to a loaded save.
 
 - `advance-turn` (invoke)
   - Payload (optional): `{}`
@@ -213,7 +213,15 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `query-battle-events` (invoke)
   - Payload: none
   - Returns: `{ ok: boolean, error?: string, turn?: number, events?: Array<{ turn, settlement_id, from, to, mechanism, mun_id }> }`
-  - Behavior: returns normalized and stable-sorted battle/control events for current-turn marker surfaces. Read-only. This is not a replay playback or replay-loader contract.
+  - Behavior: returns normalized and stable-sorted battle/control events for current-turn marker surfaces. Read-only. This is not a standalone replay-loader contract.
+
+- `replay-manifest-updated` (event)
+  - Payload: `manifestJson: string`
+  - Behavior: optional replay sidecar broadcast emitted before `game-state-updated` on state loads when a sibling `replay_save_manifest.json` exists. Renderer stages the parsed manifest and attaches it to `LoadedGameState.replaySaveManifest` during the next `loadSave()`.
+
+- `replay-sequence-updated` (event)
+  - Payload: `sequenceJson: string`
+  - Behavior: backward-compatible optional replay sidecar broadcast used only when no manifest exists. Renderer stages the parsed full sequence and attaches it to `LoadedGameState.replaySaveSequence`.
 
 - `game-state-updated` (event)
   - Payload: `stateJson: string`

@@ -1015,6 +1015,7 @@ export interface LoadedGameState {
      * via the replayPlayer() read-only player. Never mutated by UI.
      */
     replaySaveSequence?: ReadonlyArray<import('../../../state/game_state.js').GameState>;
+    replaySaveManifest?: import('../../../sim/replay/replay_manifest.js').ReplaySaveManifest;
 
     /** Active (in-progress) operations. */
     activeOperations?: Array<{

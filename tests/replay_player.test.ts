@@ -13,8 +13,10 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
+import type { ReplaySaveManifest } from '../src/sim/replay/replay_manifest.js';
 import { buildReplayFrameSummary } from '../src/sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../src/sim/replay/replay_player.js';
+import { replaySummaryPlayer } from '../src/sim/replay/replay_summary_player.js';
 
 // Build a minimal GameState-shaped frame for replay testing. We are exercising
 // only the shape that ReplayPlayer reads — turn / metadata.date — so the rest
@@ -236,5 +238,42 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
             { faction: 'RBiH', osids: 2 },
             { faction: 'RS', osids: 1 },
         ]);
+    });
+
+    it('T8: plays sparse replay manifests without requiring full GameState frames', () => {
+        const manifest: ReplaySaveManifest = {
+            schema_version: 1,
+            frame_count: 2,
+            frames: [
+                {
+                    turn: 10,
+                    date: '1992-W10',
+                    activeFormations: 4,
+                    totalCasualties: 12,
+                    totalDisplaced: 100,
+                    controlByFaction: [{ faction: 'RBiH', osids: 2 }],
+                },
+                {
+                    turn: 11,
+                    date: '1992-W11',
+                    activeFormations: 5,
+                    totalCasualties: 20,
+                    totalDisplaced: 110,
+                    controlByFaction: [{ faction: 'RS', osids: 3 }],
+                },
+            ],
+        };
+
+        const player = replaySummaryPlayer(manifest);
+        expect(player.getTurnCount()).toBe(2);
+        expect(player.getMetadata()).toEqual({
+            turnCount: 2,
+            firstTurn: 10,
+            firstTurnDate: '1992-W10',
+            lastTurn: 11,
+            lastTurnDate: '1992-W11',
+        });
+        expect(player.seekToTurn(99)).toBe(1);
+        expect(player.getCurrent()?.summary.totalDisplaced).toBe(110);
     });
 });

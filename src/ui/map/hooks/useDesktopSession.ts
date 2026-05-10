@@ -38,6 +38,7 @@ export function useDesktopSession(): void {
     const setLastTurnReport = useGameStore((s) => s.setLastTurnReport);
     // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: stage sidecar before next loadSave().
     const setPendingReplaySaveSequence = useGameStore((s) => s.setPendingReplaySaveSequence);
+    const setPendingReplaySaveManifest = useGameStore((s) => s.setPendingReplaySaveManifest);
 
     useEffect(() => {
         if (typeof document !== 'undefined') {
@@ -86,6 +87,20 @@ export function useDesktopSession(): void {
             }
         });
 
+        const unsubscribeReplayManifest = ipc.subscribeReplayManifestUpdated((manifestJson: string) => {
+            if (!active || !manifestJson) return;
+            try {
+                const parsed = JSON.parse(manifestJson);
+                if (parsed?.schema_version === 1 && Array.isArray(parsed.frames) && parsed.frames.length > 0) {
+                    setPendingReplaySaveManifest(parsed);
+                } else {
+                    setPendingReplaySaveManifest(null);
+                }
+            } catch (_err) {
+                setPendingReplaySaveManifest(null);
+            }
+        });
+
         const unsubscribeGameState = ipc.subscribeGameStateUpdated((stateJson: string) => {
             void applyStateJson(stateJson);
         });
@@ -121,6 +136,7 @@ export function useDesktopSession(): void {
             unsubscribeGameState();
             unsubscribeTurnReport();
             unsubscribeReplaySequence();
+            unsubscribeReplayManifest();
             if (typeof document !== 'undefined') {
                 delete document.documentElement.dataset.awwvDesktopSessionReady;
             }

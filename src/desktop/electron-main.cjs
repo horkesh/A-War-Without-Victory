@@ -93,6 +93,17 @@ function readReplaySaveSequenceSidecar(statePath) {
   }
 }
 
+function readReplaySaveManifestSidecar(statePath) {
+  try {
+    const dir = path.dirname(statePath);
+    const manifestPath = path.join(dir, 'replay_save_manifest.json');
+    if (!fs.existsSync(manifestPath)) return null;
+    return fs.readFileSync(manifestPath, 'utf-8');
+  } catch (_e) {
+    return null;
+  }
+}
+
 /** Forward a replay save sequence (raw JSON string of GameState[]) to renderers. */
 function sendReplaySequenceToRenderer(sequenceJson, excludeSender) {
   if (!sequenceJson) return;
@@ -101,6 +112,17 @@ function sendReplaySequenceToRenderer(sequenceJson, excludeSender) {
     if (win && !win.isDestroyed()) {
       if (excludeSender && win.webContents === excludeSender) continue;
       win.webContents.send('replay-sequence-updated', sequenceJson);
+    }
+  }
+}
+
+function sendReplayManifestToRenderer(manifestJson, excludeSender) {
+  if (!manifestJson) return;
+  const targets = [mainWindow, tacticalMapWindow];
+  for (const win of targets) {
+    if (win && !win.isDestroyed()) {
+      if (excludeSender && win.webContents === excludeSender) continue;
+      win.webContents.send('replay-manifest-updated', manifestJson);
     }
   }
 }
@@ -1535,14 +1557,21 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.loadStateFromPath(result.filePaths[0]);
       currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
       // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar.
       // Carried alongside the state so the VerdictScreen Replay tab works
       // when the user loads a final_save.json that has a sibling
       // replay_save_sequence.json (produced by the scenario harness).
-      const sequenceJson = readReplaySaveSequenceSidecar(result.filePaths[0]);
+      const manifestJson = readReplaySaveManifestSidecar(result.filePaths[0]);
+      if (manifestJson) sendReplayManifestToRenderer(manifestJson, _event.sender);
+      const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
       if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson, _event.sender);
-      return { ok: true, stateJson: currentGameStateJson, replaySequenceJson: sequenceJson ?? null };
+      sendGameStateToRenderer(currentGameStateJson, _event.sender);
+      return {
+        ok: true,
+        stateJson: currentGameStateJson,
+        replaySequenceJson: sequenceJson ?? null,
+        replayManifestJson: manifestJson ?? null,
+      };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }

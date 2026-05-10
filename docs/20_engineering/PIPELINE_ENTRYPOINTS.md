@@ -139,17 +139,18 @@ Intermediaries (not load entrypoints, do not add new callers): `src/desktop/desk
 
 Direct proof that exists today: roundtrip idempotency on real saves (`tests/save_load_real_roundtrip.test.ts`), adapter-after-deserialize field completeness and boundary tests, post-load UI reset, desktop load-error classification, and serializer allow-list enforcement. Source-verified only (no runtime binding yet): the canonical-owner prose in this section is not guarded by a grep-test; doc drift is possible if a migration registry moves or the allow-list is renamed.
 
-### Replay (future)
+### Replay
 
-There is still **no live replay consumer/playback owner** in the canonical desktop/map product surface today. The desktop GUI does not expose replay loading or replay scrubbing, and no canonical IPC / renderer owner exists for replay playback.
+There is now a **live replay consumer/playback owner** in the canonical desktop/map product surface. `VerdictScreen` owns the read-only replay surface, `ReplayScrubber` owns the scrubber UI, and `src/sim/replay/*` owns deterministic frame/summary playback helpers.
 
-Harness-side replay artifacts **do** exist:
+Harness-side replay artifacts feed that surface:
 
 - `src/scenario/scenario_runner.ts` can emit `replay.jsonl` and `replay_timeline.json` for offline analysis/video workflows.
+- `src/scenario/replay_save_emit.ts` emits full `replay_save_sequence.json` plus sparse `replay_save_manifest.json` summaries for desktop replay loading.
 - AI commander decision-log code uses "replay" in the determinism sense (`src/sim/ai_commander/decision_log.ts`, related types).
 - Archived legacy map replay code still exists under `src/_archived/`.
 
-Replay remains Phase 4 of `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` because the missing piece is the live product consumer/playback lane, not the total absence of replay-related artifacts or terminology anywhere in the repo.
+Replay scale hardening is now the active follow-up, not absence of a consumer: large desktop loads prefer `replay_save_manifest.json` so the renderer can inspect post-run frames without parsing multi-GB replay arrays. Richer map-state playback remains future product polish.
 
 When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
 

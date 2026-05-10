@@ -277,4 +277,76 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
             await rm(dir, { recursive: true, force: true });
         }
     });
+
+    it('T8 sparse_manifest — finalizers emit deterministic replay summaries beside the full sequence', async () => {
+        const dir = await mkdtemp(join(tmpdir(), 'replay-manifest-test-'));
+        try {
+            const frames: ReplayFrameRow[] = [
+                buildReplayFrameRow({
+                    ...makeState(1),
+                    political: {
+                        political_controllers: {
+                            'op:b': 'RS',
+                            'op:a': 'RBiH',
+                        },
+                        control_overrides: {},
+                    },
+                    military: {
+                        formations: {
+                            z: { status: 'destroyed' },
+                            a: { status: 'active' },
+                        },
+                        front_segments: {},
+                        front_posture: {},
+                        front_posture_regions: {},
+                        front_pressure: {},
+                        militia_pools: {},
+                        casualty_totals_by_faction: {
+                            RS: { killed: 2 },
+                            RBiH: { killed: 3, wounded: 4 },
+                        },
+                    },
+                    displacement: {
+                        displacement_humanitarian_aggregates: {
+                            total_displaced: 25,
+                        },
+                    },
+                } as unknown as GameState, 0),
+                buildReplayFrameRow(makeState(2), 1),
+            ];
+
+            const sequencePath = await finalizeReplaySaveSequence(dir, frames);
+            expect(sequencePath).toBe(join(dir, 'replay_save_sequence.json'));
+
+            const manifestBytes = await readFile(join(dir, 'replay_save_manifest.json'), 'utf8');
+            const manifest = JSON.parse(manifestBytes) as {
+                schema_version: number;
+                frame_count: number;
+                frames: Array<{
+                    turn: number | null;
+                    activeFormations: number;
+                    totalCasualties: number;
+                    totalDisplaced: number;
+                    controlByFaction: Array<{ faction: string; osids: number }>;
+                }>;
+            };
+
+            expect(manifest.schema_version).toBe(1);
+            expect(manifest.frame_count).toBe(2);
+            expect(manifest.frames.map((frame) => frame.turn)).toEqual([1, 2]);
+            expect(manifest.frames[0]).toMatchObject({
+                activeFormations: 1,
+                totalCasualties: 9,
+                totalDisplaced: 25,
+                controlByFaction: [
+                    { faction: 'RBiH', osids: 1 },
+                    { faction: 'RS', osids: 1 },
+                ],
+            });
+            expect(manifestBytes).not.toContain('political_controllers');
+            expect(manifestBytes).not.toContain('formations');
+        } finally {
+            await rm(dir, { recursive: true, force: true });
+        }
+    });
 });

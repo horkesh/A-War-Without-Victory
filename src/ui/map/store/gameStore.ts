@@ -3,6 +3,7 @@ import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
 import type { TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
+import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -242,6 +243,8 @@ export interface GameStore {
    */
   pendingReplaySaveSequence: ReadonlyArray<unknown> | null;
   setPendingReplaySaveSequence: (sequence: ReadonlyArray<unknown> | null) => void;
+  pendingReplaySaveManifest: ReplaySaveManifest | null;
+  setPendingReplaySaveManifest: (manifest: ReplaySaveManifest | null) => void;
   /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
   lastTurnReport: LastTurnReport | null;
   setLastTurnReport: (report: LastTurnReport | null) => void;
@@ -506,6 +509,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // it into the resulting LoadedGameState via `parseGameState(json, opts)`.
   pendingReplaySaveSequence: null,
   setPendingReplaySaveSequence: (sequence) => set({ pendingReplaySaveSequence: sequence }),
+  pendingReplaySaveManifest: null,
+  setPendingReplaySaveManifest: (manifest) => set({ pendingReplaySaveManifest: manifest }),
 
   lastTurnReport: null,
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
@@ -570,7 +575,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
           // Validated minimally — must be an array; deeper shape is checked by
           // the read-only `replayPlayer()` consumer downstream.
           const pendingSequence = (get().pendingReplaySaveSequence ?? null) as ReadonlyArray<unknown> | null;
-          state = parseGameState(json, pendingSequence ? { replaySaveSequence: pendingSequence } : undefined);
+          const pendingManifest = get().pendingReplaySaveManifest;
+          state = parseGameState(json, {
+            ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
+            ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
+          });
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           set({ loadError: message });
