@@ -16,6 +16,8 @@ interface TurnAftermathModalProps {
   onOpenInbox: () => void;
   onOpenSummary: () => void;
   onOpenRecords: () => void;
+  onOpenChronicle: () => void;
+  onOpenCodex: () => void;
 }
 
 function formatSigned(value: number): string {
@@ -49,6 +51,14 @@ function signalTone(severity: TurnAftermathView['signals'][number]['severity']):
   return 'border-white/10 text-text-secondary bg-white/[0.03]';
 }
 
+function memoryToneClasses(tone: TurnAftermathView['judgment']['memoryTone']): string {
+  if (tone === 'cost') return 'border-red-400/35 text-red-300 bg-red-950/25';
+  if (tone === 'signal') return 'border-amber-400/35 text-amber-300 bg-amber-950/20';
+  if (tone === 'action') return 'border-sky-400/35 text-sky-300 bg-sky-950/20';
+  if (tone === 'territory') return 'border-emerald-400/35 text-emerald-300 bg-emerald-950/20';
+  return 'border-white/15 text-text-secondary bg-white/[0.03]';
+}
+
 export function TurnAftermathModal({
   isOpen,
   view,
@@ -56,6 +66,8 @@ export function TurnAftermathModal({
   onOpenInbox,
   onOpenSummary,
   onOpenRecords,
+  onOpenChronicle,
+  onOpenCodex,
 }: TurnAftermathModalProps) {
   if (!view) return null;
 
@@ -160,6 +172,27 @@ export function TurnAftermathModal({
               </div>
               <div className="border-t border-white/10 px-3 py-2 text-[10px] text-text-secondary">
                 {view.cost.reasons.slice(0, 3).join(' / ')}
+              </div>
+            </div>
+
+            <div className={`border px-3 py-3 ${memoryToneClasses(view.judgment.memoryTone)}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-70">Judgment / Memory</div>
+                  <div className="mt-1 text-sm font-semibold">{view.judgment.headline}</div>
+                  <div className="mt-1 text-[11px] leading-5 opacity-80">{view.judgment.detail}</div>
+                </div>
+                <span className="shrink-0 rounded border border-current/30 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em] opacity-80">
+                  {view.judgment.memoryTone}
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button type="button" onClick={onOpenChronicle} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
+                  Chronicle
+                </button>
+                <button type="button" onClick={onOpenCodex} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
+                  Codex
+                </button>
               </div>
             </div>
 

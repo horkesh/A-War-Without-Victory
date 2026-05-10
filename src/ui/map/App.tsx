@@ -867,6 +867,14 @@ function App() {
           setTurnAftermathOpen(false);
           openArmyHQRecords('aftermath');
         }}
+        onOpenChronicle={() => {
+          setTurnAftermathOpen(false);
+          openChronicle(useGameStore.getState());
+        }}
+        onOpenCodex={() => {
+          setTurnAftermathOpen(false);
+          openCodex(useGameStore.getState());
+        }}
       />
       <ArmyHQModal />
       <ChronicleOverlay />

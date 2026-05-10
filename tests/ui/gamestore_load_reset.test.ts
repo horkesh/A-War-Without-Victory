@@ -109,6 +109,13 @@ function dirtyStoreState(): void {
                 reasons: ['No major costs recorded'],
             },
             signals: [],
+            judgment: {
+                headline: 'No judgment recorded yet.',
+                detail: 'No major cost, signal, action, or territorial change was recorded for this turn.',
+                memoryTone: 'quiet',
+                primarySurface: 'records',
+                secondarySurface: 'codex',
+            },
             nextActions: { actionableCount: 0, blockingCount: 0, opportunityCount: 0, reserveCount: 0, officerCount: 0, eventDecisionCount: 0, peaceCount: 0, topItems: [] },
         },
         turnAftermathOpen: true,

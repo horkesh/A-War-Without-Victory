@@ -10,6 +10,8 @@ export type TurnAftermathSignalKind = 'event' | 'decoration' | 'arc' | 'supply' 
 export type TurnAftermathSignalSeverity = 'routine' | 'notable' | 'urgent';
 export type TurnAftermathCampaignMomentum = 'advancing' | 'contested' | 'bleeding' | 'quiet';
 export type TurnAftermathRecordFilter = 'all' | 'hard' | 'signals' | 'actions' | 'territory';
+export type TurnAftermathMemoryTone = 'cost' | 'signal' | 'action' | 'territory' | 'quiet';
+export type TurnAftermathMemorySurface = 'chronicle' | 'codex' | 'records';
 
 export interface TurnAftermathReportInput {
   turn?: number;
@@ -64,6 +66,14 @@ export interface TurnAftermathSignalView {
   label: string;
   detail: string;
   severity: TurnAftermathSignalSeverity;
+}
+
+export interface TurnAftermathJudgmentView {
+  headline: string;
+  detail: string;
+  memoryTone: TurnAftermathMemoryTone;
+  primarySurface: TurnAftermathMemorySurface;
+  secondarySurface: TurnAftermathMemorySurface;
 }
 
 export interface TurnAftermathLedgerSummary {
@@ -154,6 +164,7 @@ export interface TurnAftermathView {
   };
   cost: TurnAftermathCostView;
   signals: TurnAftermathSignalView[];
+  judgment: TurnAftermathJudgmentView;
   nextActions: {
     actionableCount: number;
     blockingCount: number;
@@ -400,6 +411,64 @@ function buildStrategicSignals(
   return signals.slice(0, 12);
 }
 
+function buildTurnJudgment(input: {
+  tone: TurnAftermathTone;
+  friendlyNet: number;
+  cost: TurnAftermathCostView;
+  signals: readonly TurnAftermathSignalView[];
+  nextActions: TurnAftermathView['nextActions'];
+}): TurnAftermathJudgmentView {
+  const { tone, friendlyNet, cost, signals, nextActions } = input;
+  if (cost.severity === 'critical' || cost.severity === 'severe') {
+    return {
+      headline: 'Hard turn entered the record.',
+      detail: `The turn cost register is ${cost.severity}: ${cost.reasons.slice(0, 3).join(' / ')}.`,
+      memoryTone: 'cost',
+      primarySurface: 'chronicle',
+      secondarySurface: 'codex',
+    };
+  }
+  const urgentSignal = signals.find((signal) => signal.severity === 'urgent') ?? signals[0];
+  if (urgentSignal) {
+    return {
+      headline: 'Strategic signal entered the record.',
+      detail: `${urgentSignal.label} (${urgentSignal.detail}).`,
+      memoryTone: 'signal',
+      primarySurface: 'chronicle',
+      secondarySurface: 'codex',
+    };
+  }
+  if (nextActions.actionableCount > 0) {
+    const top = nextActions.topItems[0];
+    return {
+      headline: 'Decision pressure carries forward.',
+      detail: top
+        ? `${nextActions.actionableCount} actionable desk items remain; first up: ${top.title}.`
+        : `${nextActions.actionableCount} actionable desk items remain.`,
+      memoryTone: 'action',
+      primarySurface: 'records',
+      secondarySurface: 'chronicle',
+    };
+  }
+  if (tone === 'gain' || tone === 'loss' || tone === 'mixed') {
+    const signed = friendlyNet > 0 ? `+${friendlyNet}` : String(friendlyNet);
+    return {
+      headline: 'Territory changed the campaign memory.',
+      detail: `The front line recorded ${signed} net OSIDs for the player faction.`,
+      memoryTone: 'territory',
+      primarySurface: 'chronicle',
+      secondarySurface: 'records',
+    };
+  }
+  return {
+    headline: 'No judgment recorded yet.',
+    detail: 'No major cost, signal, action, or territorial change was recorded for this turn.',
+    memoryTone: 'quiet',
+    primarySurface: 'records',
+    secondarySurface: 'codex',
+  };
+}
+
 function emptyNextActions(): TurnAftermathView['nextActions'] {
   return {
     actionableCount: 0,
@@ -453,6 +522,16 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
   }
   const ownFormationsDestroyed = (summary?.formation_destructions ?? [])
     .filter((formation) => formation.faction === playerFaction).length;
+  const cost = buildTurnCost({
+    summary,
+    playerFaction,
+    friendlyMilitaryCasualties: friendlyCasualties,
+    ownFormationsDestroyed,
+  });
+  const signals = buildStrategicSignals(summary, input.osidNameMap ?? null);
+  const nextActions = input.includeNextActions === false
+    ? emptyNextActions()
+    : buildNextActions(nextState, input.osidNameMap ?? null);
 
   return {
     turn,
@@ -487,16 +566,16 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       ownSupplyDelta: playerFaction ? (summary?.supply_deltas?.[playerFaction] ?? 0) : 0,
       ownHeavyMunitionsDelta: playerFaction ? (summary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
     },
-    cost: buildTurnCost({
-      summary,
-      playerFaction,
-      friendlyMilitaryCasualties: friendlyCasualties,
-      ownFormationsDestroyed,
+    cost,
+    signals,
+    judgment: buildTurnJudgment({
+      tone,
+      friendlyNet,
+      cost,
+      signals,
+      nextActions,
     }),
-    signals: buildStrategicSignals(summary, input.osidNameMap ?? null),
-    nextActions: input.includeNextActions === false
-      ? emptyNextActions()
-      : buildNextActions(nextState, input.osidNameMap ?? null),
+    nextActions,
   };
 }
 

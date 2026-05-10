@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(ui): Turn Aftermath judgment memory bridge
+
+**Scope:** Presidential product spine follow-up. Closes more of the Report -> Cost -> Judge -> Next loop from the post-turn surface.
+
+**Fix:** Added `TurnAftermathJudgmentView` to the pure `turnAftermath` read model, classifying turns as cost, signal, action pressure, territorial change, or quiet. `TurnAftermathModal` now renders a Judgment / Memory panel with Chronicle and Codex handoffs, wired through existing shell navigation helpers in `App.tsx`.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/turn_aftermath.test.ts --reporter=dot` failed on missing `view.judgment`. Green after implementation: 11/11. Broader UI/navigation pack passed 34/34 before fixture cleanup.
+
+**Canon posture:** UI/read-model only. No sim rule, event trigger, scenario data, save schema, historical claim, sensitive-history rupture, Cost Ledger math, or player command authority changed.
+
+**Docs:** Added implementation report and updated GUI master, master roadmap, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(consequences): divergence events wave 18
 
 **Scope:** v0.9.0 Consequence System breadth. Adds a small but substantive Wave 18 to close ordinary non-sensitive mirror gaps after the prior saturation report.

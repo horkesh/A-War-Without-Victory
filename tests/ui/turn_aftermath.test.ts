@@ -214,6 +214,13 @@ describe('buildTurnAftermathView', () => {
       severity: 'critical',
       reasons: ['40 friendly casualties', '1 formation destroyed', '350 displaced'],
     });
+    expect(view?.judgment).toEqual({
+      headline: 'Hard turn entered the record.',
+      detail: 'The turn cost register is critical: 40 friendly casualties / 1 formation destroyed / 350 displaced.',
+      memoryTone: 'cost',
+      primarySurface: 'chronicle',
+      secondarySurface: 'codex',
+    });
     expect(view?.nextActions).toMatchObject({
       actionableCount: 5,
       blockingCount: 1,
@@ -249,6 +256,11 @@ describe('buildTurnAftermathView', () => {
     expect(view?.turn).toBe(12);
     expect(view?.tone).toBe('quiet');
     expect(view?.headline).toBe('Turn advanced.');
+    expect(view?.judgment).toMatchObject({
+      headline: 'No judgment recorded yet.',
+      memoryTone: 'quiet',
+      primarySurface: 'records',
+    });
     expect(view?.nextActions.actionableCount).toBe(0);
     expect(view?.cost.severity).toBe('low');
   });
@@ -480,6 +492,11 @@ describe('buildTurnAftermathView', () => {
     expect(view?.signals[5]).toMatchObject({
       label: '503rd Brigade moved',
       detail: 'Cazin -> Izacic (Bihac)',
+    });
+    expect(view?.judgment).toMatchObject({
+      headline: 'Strategic signal entered the record.',
+      memoryTone: 'signal',
+      primarySurface: 'chronicle',
     });
   });
 
