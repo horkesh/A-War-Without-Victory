@@ -21,6 +21,7 @@
 - 2026-05-10 update: authored findings breadth now extends beyond Srebrenica/Dayton. The Ahmici essay consumes HRHB war-crimes findings, and the Operation Storm essay consumes displacement findings through the same deterministic Cost Ledger atoms/tokens.
 - 2026-05-10 update: the second findings-breadth wave adds Zepa rupture-finding consumption and Federation Offensive human-cost finding consumption, again using existing Cost Ledger atoms/tokens only.
 - 2026-05-10 update: the third authored breadth wave adds Drina, Prijedor camps, HVO camps, Markale shelling, Dayton talks, and Grabovica/Uzdol consumers using existing Cost Ledger and milestone atoms/tokens only.
+- 2026-05-10 update: the fourth authored breadth wave adds Tuzla Gate, Second Markale, and Stupni Do consumers using existing human-cost and HRHB war-crimes Cost Ledger atoms/tokens only.
 - 2026-05-10 update: `VerdictScreen` now renders deterministic milestone comparison rows from `historicalComparison.milestone_comparison`, with an older-save `War Duration` fallback derived from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
 - 2026-05-10 update: `historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton; `compareToHistorical(...)` emits them from baseline data and preserved rupture record turns.
 - 2026-05-10 update: the Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms plus milestone interpolation tokens, and the Srebrenica / Dayton essays consume those rows through authored dynamic sections.

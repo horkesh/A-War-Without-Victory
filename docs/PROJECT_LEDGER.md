@@ -3622,3 +3622,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Evidence:** Current reassessment uses `n1768` 40w (`ea9f3db7ac59a443`) and `n1741` 188w (`a4bf8b8095050881`) with read-only diagnostics. The new checkpoint diagnostic emits 40/104/156/188 distributions, windowed weekly-operation metrics, completed-operation metrics, and an explicit `opportunity_comparison.status = artifact_missing` when paired opportunity on/off artifacts are absent. Verdict: RBiH professionalization and RS officer degradation are visible; remaining work is owner-specific: personnel/reconstitution, fatigue/exhaustion, HRHB trajectory, and late-war operation delivery.
 
 **Determinism impact:** None. Read-only diagnostics and docs/test guard only. Generated run artifacts already dirty in `data/derived/` are intentionally not part of this lane.
+
+---
+
+## [2026-05-10] content(codex): late-war humanitarian memory breadth
+
+**Type:** Declarative Dynamic Codex content. No simulation behavior, scenario timing, OOB, operation definitions, event conditions, casualty math, displacement math, rupture wiring, victory scoring, or sensitive-history mechanics changed.
+
+**Change:** Added three v0.9.1 dynamic essay sections to `essay_index.json`: Tuzla Gate and Second Markale now consume endgame `human_cost_record` findings when casualty ratio is above the historical comparison threshold; Stupni Do now consumes the HRHB war-crimes record. These sections reuse existing Cost Ledger tokens and resolver atoms.
+
+**Determinism:** Render-only Ring 2 narrative reflection. It reads already-emitted `CostLedger` and `historicalComparison` packets and does not write turn state, saved simulation output, or generated artifacts.
+
+**Verification:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing sections/rendered paragraphs. Green after content additions: same command passed 30/30.
+
+**Roadmap delta:** v0.9.1 authored Dynamic Codex breadth now includes Tuzla Gate, Second Markale, and Stupni Do on top of the earlier Cost Ledger/milestone consumers. Broader dynamic essay authoring remains open.
+
+**Report:** `docs/40_reports/implemented/20260510_DYNAMIC_CODEX_LATE_WAR_MEMORY_BREADTH.md`

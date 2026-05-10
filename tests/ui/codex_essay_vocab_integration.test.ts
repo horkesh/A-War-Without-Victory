@@ -444,6 +444,82 @@ describe('v0.9.1 vocab - humanitarian/diplomatic findings breadth wave', () => {
     });
 });
 
+describe('v0.9.1 vocab - late-war humanitarian memory breadth wave', () => {
+    const tuzlaEssay = findEssay('essay_tuzla_gate_massacre_1995');
+    const secondMarkaleEssay = findEssay('essay_second_markale_massacre_1995');
+    const stupniDoEssay = findEssay('essay_stupni_do_massacre_1993');
+
+    const sections = {
+        tuzla: (tuzlaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_tuzla_gate_human_cost_findings'),
+        secondMarkale: (secondMarkaleEssay.dynamic_sections ?? []).find(s => s.id === 'v091_second_markale_human_cost_findings'),
+        stupniDo: (stupniDoEssay.dynamic_sections ?? []).find(s => s.id === 'v091_stupni_do_hrhb_war_crimes_findings'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 56000,
+        total_civilian_killed: 45000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 56,000 military killed and 45,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 7 war-crime events.',
+                sources: ['ICTY Prlic Trial Judgment'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    const costlyComparison: NonNullable<CodexRenderContext['historicalComparison']> = {
+        duration_delta_weeks: 0,
+        territory_divergence: {},
+        casualty_ratio: 1.25,
+        displacement_ratio: 1,
+        rupture_divergence: [],
+        divergence_notes: [],
+    };
+
+    it('adds the expected authored sections and conditions', () => {
+        expect(sections.tuzla?.condition).toBe('GAME_OVER AND FINDING:human_cost_record AND CASUALTY_ABOVE:1.1');
+        expect(sections.secondMarkale?.condition).toBe('GAME_OVER AND FINDING:human_cost_record AND CASUALTY_ABOVE:1.1');
+        expect(sections.stupniDo?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_HRHB');
+    });
+
+    it('renders late-war human-cost findings into massacre essays', () => {
+        const rendered = [
+            resolveCodexEssay(tuzlaEssay, { firedEventIds: new Set(['tuzla_gate_massacre_1995']), gameOver: true, historicalComparison: costlyComparison, costLedger }),
+            resolveCodexEssay(secondMarkaleEssay, { firedEventIds: new Set(['second_markale_massacre_1995']), gameOver: true, historicalComparison: costlyComparison, costLedger }),
+        ].flatMap(r => r.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text));
+
+        expect(rendered.filter(text => text.includes('Human cost record: The ledger records 56,000')).length).toBe(2);
+        expect(rendered.some(text => text.includes('RDC Sarajevo'))).toBe(true);
+    });
+
+    it('renders HRHB war-crimes findings into the Stupni Do essay', () => {
+        const resolved = resolveCodexEssay(stupniDoEssay, {
+            firedEventIds: new Set(['stupni_do_massacre_1993']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('ICTY Prlic'))).toBe(true);
+    });
+});
+
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');
