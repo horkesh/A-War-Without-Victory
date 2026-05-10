@@ -14,6 +14,7 @@
  */
 import { useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../../../../state/game_state.js';
+import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 
 export interface ReplayScrubberProps {
@@ -74,6 +75,7 @@ export function ReplayScrubber({ saveSequence }: ReplayScrubberProps): JSX.Eleme
         ?? cursor;
     const currentDate =
         (current as { metadata?: { date?: string } } | null)?.metadata?.date ?? null;
+    const summary = buildReplayFrameSummary(current);
 
     return (
         <div
@@ -129,6 +131,32 @@ export function ReplayScrubber({ saveSequence }: ReplayScrubberProps): JSX.Eleme
                 >
                     {metadata.lastTurnDate ?? `Turn ${metadata.lastTurn ?? turnCount - 1}`}
                 </button>
+            </div>
+
+            <div
+                className="mt-4 grid grid-cols-2 gap-2 text-[10px] text-text-secondary sm:grid-cols-4"
+                data-awwv-replay-summary="true"
+            >
+                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Active formations</div>
+                    <div className="mt-1 font-mono text-text-primary tabular-nums">{summary.activeFormations}</div>
+                </div>
+                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Casualties</div>
+                    <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalCasualties)}</div>
+                </div>
+                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Displaced</div>
+                    <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalDisplaced)}</div>
+                </div>
+                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Control</div>
+                    <div className="mt-1 break-words font-mono leading-relaxed text-text-primary tabular-nums">
+                        {summary.controlByFaction.length === 0
+                            ? 'n/a'
+                            : summary.controlByFaction.map((row) => `${row.faction}:${row.osids}`).join(' ')}
+                    </div>
+                </div>
             </div>
         </div>
     );

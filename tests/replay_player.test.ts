@@ -13,6 +13,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
+import { buildReplayFrameSummary } from '../src/sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../src/sim/replay/replay_player.js';
 
 // Build a minimal GameState-shaped frame for replay testing. We are exercising
@@ -190,5 +191,50 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
         const pn = replayPlayer(null as unknown as readonly GameState[]);
         expect(pn.getTurnCount()).toBe(0);
         expect(pn.getCurrent()).toBeNull();
+    });
+
+    it('T7: builds a deterministic selected-frame summary for UI replay inspection', () => {
+        const frame = {
+            ...makeFrame(12, '1992-W13'),
+            political: {
+                political_controllers: {
+                    'op:a': 'RBiH',
+                    'op:b': 'RS',
+                    'op:c': 'RBiH',
+                    'op:d': 'HRHB',
+                },
+            },
+            military: {
+                formations: {
+                    z: { status: 'active' },
+                    a: { status: 'destroyed' },
+                    b: { status: 'active' },
+                },
+                casualty_totals_by_faction: {
+                    RBiH: { killed: 11, wounded: 3 },
+                    RS: { killed: 7 },
+                },
+            },
+            displacement: {
+                displacement_humanitarian_aggregates: {
+                    total_displaced: 1234,
+                },
+            },
+        } as unknown as GameState;
+
+        const before = JSON.stringify(frame);
+        const summary = buildReplayFrameSummary(frame);
+
+        expect(JSON.stringify(frame)).toBe(before);
+        expect(summary.turn).toBe(12);
+        expect(summary.date).toBe('1992-W13');
+        expect(summary.activeFormations).toBe(2);
+        expect(summary.totalCasualties).toBe(21);
+        expect(summary.totalDisplaced).toBe(1234);
+        expect(summary.controlByFaction).toEqual([
+            { faction: 'HRHB', osids: 1 },
+            { faction: 'RBiH', osids: 2 },
+            { faction: 'RS', osids: 1 },
+        ]);
     });
 });

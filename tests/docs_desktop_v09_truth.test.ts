@@ -20,14 +20,15 @@ describe('desktop and roadmap truth docs', () => {
     expect(ipcContract).toContain('data/scenarios/apr1992_definitive_52w.json');
   });
 
-  it('keeps the roadmap honest about the closed startup residue and remaining replay gap', () => {
+  it('keeps the roadmap honest about the closed startup residue and replay consumer status', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
 
     expect(roadmap).toContain('The startup-snapshot interference residue is now closed');
     expect(roadmap).toContain('desktop `startNewCampaign(...)` and the Warroom/browser fallback now use the baked `apr_1992` startup snapshot as the primary start-state source');
     expect(roadmap).toContain('RESOLVED 2026-04-16 as a pre-0.9 truth lane');
     expect(roadmap).toContain('loaded-game Warroom entry now stays on the React shell path');
-    expect(roadmap).toContain('live replay playback/consumer is still absent from the product shell');
+    expect(roadmap).toContain('replay scrubber + deterministic selected-frame summary cards');
+    expect(roadmap).toContain('large replay sidecar loading/richer replay-map inspection are still future work');
     expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
     expect(roadmap).not.toContain('Warroom React Shell Recovery / Feature Parity** Ã¢â‚¬â€ main desktop entry surface still needs parity/polish');
     expect(roadmap).not.toContain('replay is still absent, tutorial/onboarding is still untouched');

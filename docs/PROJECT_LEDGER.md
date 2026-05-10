@@ -3323,3 +3323,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 - `docs/40_reports/audits/20260505_V094_PHASE_1_2_UI_SHELL_AUDIT.md`
 - `docs/40_reports/implemented/20260505_CODEX_CONTENT_EXPANSION.md`
 - `docs/40_reports/implemented/20260505_V094_FACTION_PALETTE_CANONICALIZATION.md`
+
+---
+
+## [2026-05-10] replay: selected-frame summary consumer in VerdictScreen
+
+**Type:** UI/data-consumer feature. No simulation behavior, combat math, scenario data, OOB, operation definitions, political controller writes, rupture wiring, or canon files changed.
+
+**Change:** Added `src/sim/replay/replay_frame_summary.ts` and wired `ReplayScrubber` to show deterministic selected-frame summary cards for active formations, casualties, displaced population, and control counts by faction. The existing `VerdictScreen` replay scrubber now does more than expose a timeline cursor: it gives the player a compact post-run inspection readout for the currently selected frame.
+
+**Determinism:** Read-only and non-mutating. Summary generation sorts object keys with `strictCompare`, uses no randomness, wall-clock time, or locale formatting, and preserves the input frame byte-for-byte in regression coverage.
+
+**Verification:** Red test first: `npx.cmd vitest run tests/replay_player.test.ts --reporter=dot` failed on the missing summary module. Green regression: `npx.cmd vitest run tests/replay_player.test.ts --reporter=dot` passed 7/7. `npm.cmd run typecheck` passed after the summary cast was tightened.
+
+**Roadmap delta:** The old roadmap statement that live replay playback/consumer was absent from the product shell is retired. Remaining replay work is now richer map-state inspection and sparse/streaming UI loading for very large replay sidecars, not absence of the consumer surface.
+
+**Report:** `docs/40_reports/implemented/20260510_REPLAY_FRAME_SUMMARY_CONSUMER.md`
