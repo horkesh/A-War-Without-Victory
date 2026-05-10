@@ -121,6 +121,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('`AWWV_COMMANDER_FRONT_GEOMETRY=true` or `1`');
     expect(roadmap).toContain('`frontGeometry` dropped 517.222ms -> 2.247ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_FRONT_GEOMETRY_DIAGNOSTIC_GATE.md');
+    expect(roadmap).toContain('enemy-equipment summary pass replaces repeated defender-sector scans');
+    expect(roadmap).toContain('`enemyEquipmentSummary` dropped 166.376ms -> 119.960ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260510_COMMANDER_ENEMY_EQUIPMENT_INDEX_PROFILE.md');
     expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
     expect(roadmap).toContain('`assessSituation.detectZones`');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');

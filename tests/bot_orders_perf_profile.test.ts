@@ -134,6 +134,8 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectIntelData');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.collectFatigueSummary');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.enemyEquipmentSummary');
+        expect(commanderBriefing).toContain('buildEnemySectorByOsid');
+        expect(commanderBriefing).toContain('enemySectorByOsid.get(enemyOsid)');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.adjacentCorps');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.campaignIntent');
         expect(runnerCli).toContain('dumpBotOrdersPerfProfile');

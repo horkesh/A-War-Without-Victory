@@ -56,7 +56,6 @@ import type {
 import { getCorpsSubordinates } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
-import { findSectorForEnemyOsid } from '../sector_utils.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
@@ -328,11 +327,12 @@ function collectEnemyEquipmentSummary(
     const sectorLookup = state.military.corps_front_sectors ?? {};
     const formations = state.military.formations ?? {};
     const adjacentEnemySectorIds = new Set<string>();
+    const enemySectorByOsid = buildEnemySectorByOsid(sectorLookup);
 
     for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
         for (const subSegment of [...sector.sub_segments].sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id))) {
             for (const enemyOsid of [...subSegment.enemy_osids].sort(strictCompare)) {
-                const enemySector = findSectorForEnemyOsid(state, enemyOsid);
+                const enemySector = enemySectorByOsid.get(enemyOsid);
                 if (!enemySector) continue;
                 if (enemySector.faction === sector.faction) continue;
                 adjacentEnemySectorIds.add(enemySector.sector_id);
@@ -358,6 +358,34 @@ function collectEnemyEquipmentSummary(
         artillery,
         infantry_only: tanks === 0 && artillery === 0,
     };
+}
+
+function buildEnemySectorByOsid(
+    sectorLookup: Record<string, CorpsFrontSector>,
+): Map<string, CorpsFrontSector> {
+    const enemySectorByOsid = new Map<string, CorpsFrontSector>();
+    const sectors = Object.keys(sectorLookup)
+        .sort(strictCompare)
+        .map(sectorId => sectorLookup[sectorId]!)
+        .filter(Boolean);
+
+    for (const sector of sectors) {
+        for (const subSegment of sector.sub_segments) {
+            for (const osid of subSegment.friendly_osids) {
+                if (!enemySectorByOsid.has(osid)) {
+                    enemySectorByOsid.set(osid, sector);
+                }
+            }
+        }
+    }
+    for (const sector of sectors) {
+        for (const osid of sector.territory_osids ?? []) {
+            if (!enemySectorByOsid.has(osid)) {
+                enemySectorByOsid.set(osid, sector);
+            }
+        }
+    }
+    return enemySectorByOsid;
 }
 
 function collectAdjacentCorpsSummaries(

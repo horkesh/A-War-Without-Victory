@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] perf(commander): index enemy equipment sector lookups
+
+**Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander briefing enemy equipment summary.
+
+**Fix:** Replaced repeated `findSectorForEnemyOsid(...)` scans inside `collectEnemyEquipmentSummary(...)` with one deterministic per-briefing `buildEnemySectorByOsid(...)` index that preserves friendly-front precedence and territory fallback ordering.
+
+**Validation:** Red first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on missing indexed lookup guard. Green focused suite passed 21/21 after implementation. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced `n1772` with final hash `ea9f3db7ac59a443`; `enemyEquipmentSummary` dropped 166.376ms -> 119.960ms and commander total dropped 1,381.411ms -> 1,313.706ms versus the prior retained profile.
+
+**Canon posture:** Runtime performance only. No scenario data, OOB, combat math, AI decision semantics, event trigger, score rule, save schema, player command lever, or sensitive-history canon changed.
+
+**Docs:** Added the implementation report and updated master roadmap, ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-10] perf(commander): gate unused front geometry briefing
 
 **Scope:** v0.9.3/v0.9.4 wall-clock CPU profiling lane, commander briefing hot path.
