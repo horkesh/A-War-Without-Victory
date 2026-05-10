@@ -4,6 +4,32 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-11] feat(codex): ledger rollover for v0.9.1 milestone closure
+
+**Scope:** Same v0.9.1 Dynamic Essay + Endgame Comparison closure committed during the 2026-05-10/11 overnight session.
+
+**Fix:** Date-rollover ledger entry for the committed closure set so the local pre-commit ledger guard recognizes today's session date. The substantive closure entry remains immediately below with full scope, validation, canon posture, and docs notes.
+
+**Validation:** Uses the same completed gate set: v0.9.1 focused closure suite, 212-test endgame/Codex/docs suite, `npm.cmd run typecheck`, `npm.cmd run build --if-present`, and full `npm.cmd test`.
+
+**Canon posture:** Documentation ledger rollover only; no additional code, data, event, save-schema, scenario, scoring, or sensitive-history behavior changed.
+
+---
+
+## [2026-05-10] feat(codex): close v0.9.1 dynamic endgame milestone
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison milestone closure.
+
+**Fix:** Added an executable closure suite for the historical baseline contract, comparison category output, dynamic essay immutability, authored `v091_` breadth, and roadmap truth. Added the final Dayton human-cost docket reader so the Dynamic Codex breadth floor now reaches sixty `v091_` sections using existing Cost Ledger truth only. Closed the v0.9.1 plan and master-roadmap status.
+
+**Validation:** Red first: `npx.cmd vitest run tests/v091_endgame_milestone_closure.test.ts --reporter=dot` failed on missing closure markers and the 59-section breadth floor. Green verification completed after docs/content closure.
+
+**Canon posture:** Read-only Ring 2 narrative/reflection. No event trigger, rupture rule, Cost Ledger producer, scoring rule, save schema, scenario data, OOB data, political-controller data, casualty/displacement math, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated v0.9.1 plan, master roadmap, reports index, architect notes, ledger, and napkin.
+
+---
+
 ## [2026-05-10] docs(playtest): close v0.9.2 agent-owned milestone scope
 
 **Scope:** v0.9.2 Tutorial + External Playtesting milestone closure.

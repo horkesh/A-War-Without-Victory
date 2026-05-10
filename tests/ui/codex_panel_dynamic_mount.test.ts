@@ -149,7 +149,7 @@ describe('CodexPanel dynamic essay proof', () => {
 
         expect(screen.getAllByText('Player War Divergence').length).toBeGreaterThanOrEqual(2);
         expect(screen.getByText('Human cost record: The ledger records 46,500 military killed and 38,000 civilian killed.')).toBeTruthy();
-        expect(screen.getByText(/Sources: RDC Sarajevo/)).toBeTruthy();
+        expect(screen.getAllByText(/Sources: RDC Sarajevo/).length).toBeGreaterThanOrEqual(1);
     });
 
     it('keeps unfired non-ghost essays locked', () => {

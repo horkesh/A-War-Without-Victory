@@ -36,6 +36,10 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **v0.9.1 Dynamic Essay + Endgame Comparison** - CLOSED-FOR-AGENT-SCOPE 2026-05-10. Single historical baseline owner is `data/reference/historical_baseline.json`; `compareToHistorical(...)` emits duration, territory, casualty, displacement, rupture, divergence-note, and milestone rows; `resolveCodexEssay(...)` preserves canonical essay text and appends dynamic sections; authored `v091_` catalog now has 60 sections. Report: `docs/40_reports/implemented/20260510_V091_DYNAMIC_ENDGAME_MILESTONE_CLOSURE.md`.
+  - **Canonical owners after closure:** baseline data in `data/reference/historical_baseline.json`; comparison producer in `src/sim/endgame/endgame_comparison.ts`; Codex dynamic renderer in `src/ui/map/components/codex/codexEssayResolver.ts`; endgame presentation in `VerdictScreen`, Chronicle, and Wrapped.
+  - **Demoted path:** treating broader dynamic-essay authoring as open v0.9.1 debt. Future dynamic sections are post-milestone content polish and must consume real emitted Cost Ledger, annotation, milestone, or comparison truth.
+
 - **Autonomous nightshift campaign 2026-04-14** — 3 bounded lanes shipped, 1 pending. (1) Save/load real-save round-trip proof: 9 tests against 13MB production save proving byte-identity idempotency, field preservation for autonomy/corps/exhaustion state. (2) Exhaustion → commander wiring: `faction_war_exhaustion` field on `CommanderBriefing`, `factionExhaustionDrag` multiplier in `plan.ts` scoring (1.0→0.3 floor at 600+), makes offensive intents less attractive as nation exhausts. 40w scenario proof pending. (3) Resolved proposal GC: `apply-autonomy-transition` now clears ALL prior-turn proposals (was only clearing unresolved). Report: `docs/40_reports/implemented/20260414_CAMPAIGN_NIGHTSHIFT_ROADMAP_CLEARANCE.md`.
   - **Canonical owner (exhaustion):** `plan.ts:exhaustionPenalty` = `corpsExhaustionCapacity * factionExhaustionDrag`. Briefing reads `state.political?.war_exhaustion?.[faction]`.
   - **Canonical owner (proposal GC):** `apply-autonomy-transition` pipeline step.

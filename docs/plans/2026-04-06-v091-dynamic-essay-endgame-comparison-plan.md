@@ -1,7 +1,7 @@
 # v0.9.1 Dynamic Essay Content + Endgame Comparison
 
 **Date:** 2026-04-06  
-**Status:** PLAN - READY FOR EXECUTION  
+**Status:** CLOSED-FOR-AGENT-SCOPE  
 **Roadmap slot:** v0.9.1  
 **Overseer:** Orchestrator  
 **Architect:** Technical Architect - owns milestone reshaping against repo truth  
@@ -10,6 +10,8 @@
 **Sign-off:** Orchestrator, Technical Architect, Documentation Specialist
 
 **Purpose:** Finish the dynamic Codex milestone around what is actually still open. Ghost Map, Exhaustion Clock, and Letter Home are already live; this milestone now covers the remaining dynamic essay engine, divergence notes / ghost entries, and endgame comparison.
+
+**Closure summary (2026-05-10):** All five execution phases are agent-closed. The live milestone now has a single historical baseline artifact at `data/reference/historical_baseline.json`, deterministic comparison categories for duration, territory, casualties, displacement, rupture divergence, and milestone timing, immutable base essay rendering with dynamic insertions, Cost Ledger finding/annotation atoms, milestone atoms/tokens, ghost entries, VerdictScreen milestone rows, Chronicle/Wrapped propagation, and sixty `v091_` authored dynamic sections. Remaining work is future content polish, not v0.9.1 milestone debt.
 
 **Repo-truth baseline (do not re-invent already shipped work):**
 - `Ghost Map` is implemented
@@ -76,16 +78,16 @@
 - [x] define the canonical dynamic essay schema (`dynamic_sections`, `ghost_when`, dynamic variants)
 - [x] add runtime condition evaluation for dynamic sections, including comparison, Cost Ledger finding, Cost Ledger annotation, and milestone atoms
 - [x] support divergence notes, ghost entries, Cost Ledger findings, Cost Ledger annotations, and milestone rows in dynamic essay output
-- [ ] ensure canonical historical text remains immutable substrate
+- [x] ensure canonical historical text remains immutable substrate
 
 **Gate:** A dynamic essay can render canonical text plus deterministic inserted sections without mutating the base essay.
 
 ### Phase 2. Historical Baseline and Comparison Contract
 **Assigned to:** Historian + Technical Architect
 
-- [ ] resolve the historical baseline data contract
+- [x] resolve the historical baseline data contract
 - [x] create the first `historical_baseline` artifact
-- [ ] settle comparison categories:
+- [x] settle comparison categories:
   - territory
   - casualties
   - displacement
@@ -109,24 +111,24 @@
 ### Phase 4. Verification
 **Assigned to:** QA Engineer
 
-- [ ] targeted tests for:
+- [x] targeted tests for:
   - dynamic essay condition evaluation
   - ghost entry visibility
   - divergence note rendering
   - Cost Ledger finding and annotation atom/token rendering
   - historical baseline loading
   - endgame comparison data integrity
-- [ ] full vitest
-- [ ] `npx.cmd tsc --noEmit -p tsconfig.json`
-- [ ] `npm.cmd run build`
+- [x] full vitest
+- [x] `npx.cmd tsc --noEmit -p tsconfig.json`
+- [x] `npm.cmd run build`
 
 ### Phase 5. Documentation and Roadmap Truth
 **Assigned to:** Documentation Specialist
 
-- [ ] implementation report in `docs/40_reports/implemented/`
-- [ ] update `docs/PROJECT_LEDGER.md`
-- [ ] update `.claude/architect_notes.md`
-- [ ] ensure `MASTER_ROADMAP.md` reflects that Ghost Map / Exhaustion Clock / Letter Home are already implemented inputs, not open milestone deliverables
+- [x] implementation report in `docs/40_reports/implemented/`
+- [x] update `docs/PROJECT_LEDGER.md`
+- [x] update `.claude/architect_notes.md`
+- [x] ensure `MASTER_ROADMAP.md` reflects that Ghost Map / Exhaustion Clock / Letter Home are already implemented inputs, not open milestone deliverables
 
 ---
 
