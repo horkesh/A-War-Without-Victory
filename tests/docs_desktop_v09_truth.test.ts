@@ -62,6 +62,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('Baseline Regression and Desktop Release Guard green at `750e1c14`');
     expect(roadmap).toContain('Persona suppressor C3 structural fix shipped (`6cebf13e`)');
     expect(roadmap).toContain('Cost Ledger prosecutorial findings shipped 2026-05-10');
+    expect(roadmap).toContain('Packet C2 patron-distance pressure completion');
+    expect(roadmap).toContain('242 definitions / 812 effect instances');
     expect(roadmap).toContain('| Cost Ledger | Advanced');
     expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
     expect(roadmap).not.toContain('full prosecutorial authoring still open');

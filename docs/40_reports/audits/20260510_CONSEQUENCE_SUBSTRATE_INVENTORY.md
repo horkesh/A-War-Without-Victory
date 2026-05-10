@@ -8,10 +8,10 @@
 
 Packet C1 is now executable. `tools/diagnostics/consequence_substrate_inventory.cjs` scans the authored event catalog and emits a deterministic owner matrix for every event-effect substrate that consequence work can use.
 
-Current catalog measurement:
+Current catalog measurement after the Packet C2 patron-distance pressure slice:
 
-- Events scanned: 238
-- Effect instances: 796
+- Events scanned: 242
+- Effect instances: 812
 - Effect kinds: 18
 - Live substrates: 18
 - Partial-reader substrates: none
@@ -46,7 +46,7 @@ The diagnostic reports asymmetric faction coverage where a kind has a `faction` 
 
 ## Roadmap Disposition
 
-Packet C1 is complete. The next v0.9.0 consequence lane should not be another broad audit. It should pick one of the two grounded follow-ups:
+Packet C1 is complete, and the first C2 patron-distance seam has now been implemented. The next v0.9.0 consequence lane should not be another broad audit. It should pick one of the grounded follow-ups:
 
-- C2 pressure consequence completion using already-live `patron_pressure` / `negotiation_capital` / `cost_ledger_annotation` surfaces.
+- C3 early-peace consequence bridging, using already-live termination / endgame handoff surfaces.
 - Authoring-coverage work for `guerrilla_threat` only if a concrete future divergence chain needs faction mirrors.

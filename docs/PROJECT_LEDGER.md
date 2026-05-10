@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(consequences): Packet C2 patron-distance pressure completion
+
+**Scope:** v0.9.0 Consequence System Refresh, Packet C2. Closes the RBiH/HRHB patron-distance seam where downstream arms-pipeline events already consumed faction-scoped review flags but no local pressure writers authored those flags.
+
+**Fix:** Added four consequence events: `csq_patron_arms_review_imposed_RBiH`, `csq_patron_disavowal_partial_RBiH`, `csq_patron_arms_review_imposed_HRHB`, and `csq_patron_disavowal_partial_HRHB`. They reuse existing predicates and live effect substrates only: `recruitment_modifier`, `supply_delta`, `patron_pressure`, dimension shifts, and CostLedger annotations.
+
+**Validation:** Red first: `npx.cmd vitest run tests/consequence_pressure_c2_patron_distance.test.ts --reporter=dot` failed 4/4 on missing IDs. Green focused: 4/4 passed after authoring. Real inventory now reports 242 event definitions / 812 effect instances / 18 live effect kinds / zero unknown or partial-reader substrates.
+
+**Canon posture:** Additive Ring 1 consequence content. No new condition/effect kind, save schema, rupture mechanic, patron model, scenario paint, player lever, or sensitive-history adjudication. RBiH/HRHB text is framed as conditional external-channel pressure rather than a Belgrade-Pale disavowal clone.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, consequence refresh plan, substrate inventory report, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(ui): Turn Aftermath judgment memory bridge
 
 **Scope:** Presidential product spine follow-up. Closes more of the Report -> Cost -> Judge -> Next loop from the post-turn surface.

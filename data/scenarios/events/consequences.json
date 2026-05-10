@@ -1725,6 +1725,148 @@
     "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to historical (which here is acceptance under Milosevic 1995 pressure)."
   },
   {
+    "id": "csq_patron_arms_review_imposed_RBiH",
+    "title": "Channel Review Notice",
+    "narrative": "External backers move from warning to procedure. Shipment lists are rechecked, intermediaries demand cleaner routing, and mobilization officers lose time to the politics of every crate. This is not abandonment, but the pipeline now carries conditions.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 15,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "patron_resist_streak_RBiH", "min": 2 },
+          { "type": "dimension_below", "faction": "RBiH", "dimension": "patron_confidence", "threshold": 40 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 49,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH external supply channel enters formal review; throughput slows."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.90, "duration_turns": 15 },
+      { "kind": "supply_delta", "faction": "RBiH", "delta": -12 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_arms_review_imposed_RBiH", "text": "RBiH patron-channel review under sustained resistance and patron_confidence below 40. Faction-scoped pressure surface; audit-only annotation and no sensitive-history rupture wiring." }
+    ],
+    "sets_flags": {
+      "patron_arms_review_active_RBiH": 1,
+      "patron_arms_review_imposed_turn_RBiH": 1
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-PRESSURE-C2 (patron-distance mirror). Structural counterpart to csq_patron_arms_review_imposed using the already-authored RBiH patron_arms_review_active_RBiH flag consumed by csq_arms_pipeline_disrupted_RBiH. Models conditional external-channel scrutiny without claiming a single Belgrade-style patron or any sensitive-history adjudication."
+  },
+  {
+    "id": "csq_patron_disavowal_partial_RBiH",
+    "title": "Conditional Support Statement",
+    "narrative": "The language of support narrows. Envoys still speak of survival and legitimacy, but every sentence now carries reservations. The material channel does not close, yet the relationship becomes conditional enough to shape mobilization and bargaining alike.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 25,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "patron_arms_review_active_RBiH", "min": 1 },
+          { "type": "flag_at_least", "flag": "patron_resist_streak_RBiH", "min": 4 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 49,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "RBiH support becomes conditional after continued resistance to channel review."
+    },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "RBiH", "delta": -12 },
+      { "kind": "recruitment_modifier", "faction": "RBiH", "pool_multiplier": 0.85, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_partial_disavowal_RBiH", "text": "RBiH conditional-support pressure after the faction-scoped arms-review flag persists with patron_resist_streak_RBiH >=4. Audit-only patron-distance reckoning; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "international_standing", "delta": -2 },
+      { "faction": "RBiH", "dimension": "patron_confidence", "delta": -12 }
+    ],
+    "sets_flags": {
+      "patron_partial_disavowal_RBiH": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-PRESSURE-C2 (patron-distance mirror). Structural follow-up to csq_patron_arms_review_imposed_RBiH; reuses live patron_pressure, recruitment_modifier, dimension_shifts, and CostLedger substrates. The wording is deliberately conditional/support-channel focused rather than a Belgrade-Pale disavowal clone."
+  },
+  {
+    "id": "csq_patron_arms_review_imposed_HRHB",
+    "title": "Pipeline Review From Zagreb",
+    "narrative": "The review arrives as administration: convoy lists, liaison approvals, and sharper questions from the rear. The channel remains open, but its political owner has made the cost of defiance visible to every quartermaster.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 15,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "patron_resist_streak_HRHB", "min": 2 },
+          { "type": "dimension_below", "faction": "HRHB", "dimension": "patron_confidence", "threshold": 40 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 49,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "HRHB external pipeline enters formal review; throughput slows."
+    },
+    "effects": [
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.90, "duration_turns": 15 },
+      { "kind": "supply_delta", "faction": "HRHB", "delta": -10 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_arms_review_imposed_HRHB", "text": "HRHB patron-channel review under sustained resistance and patron_confidence below 40. Faction-scoped pressure surface; audit-only annotation and no sensitive-history rupture wiring." }
+    ],
+    "sets_flags": {
+      "patron_arms_review_active_HRHB": 1,
+      "patron_arms_review_imposed_turn_HRHB": 1
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-PRESSURE-C2 (patron-distance mirror). Structural counterpart to csq_patron_arms_review_imposed and the existing HRHB patron_arms_review_active_HRHB consumer csq_arms_pipeline_disrupted_HRHB. Models Croatia-side channel scrutiny without creating a new mechanic or a sensitive-history rupture surface."
+  },
+  {
+    "id": "csq_patron_disavowal_partial_HRHB",
+    "title": "Distance From The Patron",
+    "narrative": "The patron does not close the door, but the corridor grows narrower. Liaison officers speak in conditions; shipments arrive with explanations attached. Autonomy is preserved, yet the cost is now carried by recruitment offices and negotiating rooms.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 25,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "patron_arms_review_active_HRHB", "min": 1 },
+          { "type": "flag_at_least", "flag": "patron_resist_streak_HRHB", "min": 4 }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 49,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "HRHB patron channel becomes conditional after continued resistance to review."
+    },
+    "effects": [
+      { "kind": "patron_pressure", "faction": "HRHB", "delta": -12 },
+      { "kind": "recruitment_modifier", "faction": "HRHB", "pool_multiplier": 0.85, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "patron_partial_disavowal_HRHB", "text": "HRHB conditional-patron pressure after the faction-scoped arms-review flag persists with patron_resist_streak_HRHB >=4. Audit-only patron-distance reckoning; no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "international_standing", "delta": -2 },
+      { "faction": "HRHB", "dimension": "patron_confidence", "delta": -12 }
+    ],
+    "sets_flags": {
+      "patron_partial_disavowal_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-PRESSURE-C2 (patron-distance mirror). Structural follow-up to csq_patron_arms_review_imposed_HRHB; reuses live patron_pressure, recruitment_modifier, dimension_shifts, and CostLedger substrates. The event is scoped as a conditional channel-distance surface rather than a canonical rupture."
+  },
+  {
     "id": "csq_industrial_conscription_wave",
     "title": "Industrial Conscription Wave",
     "narrative": "The exhaustion of the front pushes the rear into emergency mobilization. Factories release their reserved categories. Universities suspend exemptions. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",

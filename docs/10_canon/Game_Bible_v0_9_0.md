@@ -124,6 +124,8 @@ External patrons exert influence through material support, diplomatic pressure, 
 
 External involvement often destabilizes internal dynamics rather than resolving them.
 
+**Implementation-note (2026-05-10 consequence pressure):** Patron-distance consequences are faction-scoped where the engine already owns faction-scoped patron review flags. The canonical Belgrade-Pale arms-review / partial-disavowal chain remains the strongest historical pattern, while RBiH and HRHB now have conditional external-channel review and partial-distance surfaces that write existing pressure substrates (`recruitment_modifier`, `supply_delta`, `patron_pressure`, and CostLedger annotations). These mirrors are audit-only pressure consequences: they do not create a rupture mechanic, new patron model, sensitive-history adjudication, or new player command lever.
+
 ## 15. Negotiation, intervention, and war termination
 
 Wars end through negotiation, collapse, imposed settlement, or unresolved stalemate. No decisive victory state exists.

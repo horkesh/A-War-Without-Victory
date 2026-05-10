@@ -134,6 +134,8 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 
 **Done means:** pressure is no longer “active for one path, decorative for the rest” in the chosen owned seam.
 
+**Status 2026-05-10:** DONE for the patron-distance pressure seam. `csq_patron_arms_review_imposed_RBiH`, `csq_patron_disavowal_partial_RBiH`, `csq_patron_arms_review_imposed_HRHB`, and `csq_patron_disavowal_partial_HRHB` now write faction-scoped review/disavowal flags plus live `recruitment_modifier`, `supply_delta`, `patron_pressure`, and CostLedger annotations. This closes the previously awkward state where RBiH/HRHB downstream arms-pipeline consumers could read faction-scoped review flags but no local pressure event authored those flags.
+
 ### Packet C3. Early Peace Consequence Bridge
 
 **Goal:** Define and implement the first bounded consequence path for accepted peace plans / shortened-war outcomes.
