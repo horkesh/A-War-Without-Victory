@@ -101,6 +101,18 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.makeDecisions');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput');
         expect(commanderAssess).toContain('currentZoneOsids');
+        expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.collectCorpsOsids');
+        expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.detectZones');
+        expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.evaluateForces');
+        expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.concentrationZones');
+        expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.assessThreats');
+        const commanderEmit = readFileSync(resolve('src/sim/combat/commander/emit.ts'), 'utf8');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildDirective');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildSectorStances');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPlanUpdates');
+        expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPrepositioningOrders');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');
@@ -127,4 +139,5 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(withoutComments).not.toMatch(/localeCompare\s*\(/);
         expect(withoutComments).toMatch(/process\.hrtime\.bigint\s*\(/);
     });
+
 });

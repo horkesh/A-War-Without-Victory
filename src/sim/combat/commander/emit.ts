@@ -68,6 +68,7 @@ import type { PlanDecision } from './plan.js';
 import { MIN_BRIGADES_FOR_PLAN } from './plan.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
+import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -165,36 +166,48 @@ export function emitCommanderOutput(
     const personality = briefing.officer_personality;
 
     // 1. Build CorpsDirective
-    const directive = buildDirective(
-        briefing,
-        zones,
-        forces,
-        allocation,
-        planDecision,
-        decisions,
-        personality,
+    const directive = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildDirective',
+        () => buildDirective(
+            briefing,
+            zones,
+            forces,
+            allocation,
+            planDecision,
+            decisions,
+            personality,
+        ),
     );
 
     // 2. Build operations list
-    const operations = buildOperations(
-        briefing,
-        allocation,
-        planDecision,
-        personality,
+    const operations = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations',
+        () => buildOperations(
+            briefing,
+            allocation,
+            planDecision,
+            personality,
+        ),
     );
 
     // 3. Build sector stances
-    const sectorStances = buildSectorStances(briefing, decisions);
+    const sectorStances = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildSectorStances',
+        () => buildSectorStances(briefing, decisions),
+    );
 
     // 4. Build updated commander state
-    const updatedState = buildUpdatedState(
-        briefing,
-        zones,
-        forces,
-        threats,
-        planDecision,
-        decisions,
-        beliefState ?? null,
+    const updatedState = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState',
+        () => buildUpdatedState(
+            briefing,
+            zones,
+            forces,
+            threats,
+            planDecision,
+            decisions,
+            beliefState ?? null,
+        ),
     );
 
     // 5. Garrison locks directly from allocation (same shape, pass through)
@@ -204,10 +217,16 @@ export function emitCommanderOutput(
     const reinforcementRequests = decisions.reinforcement_requests;
 
     // 7. Plan updates from plan decision
-    const planUpdates = buildPlanUpdates(planDecision);
+    const planUpdates = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildPlanUpdates',
+        () => buildPlanUpdates(planDecision),
+    );
 
     // 8. Prepositioning: move unreachable main_effort surplus toward front
-    const prepositioningOrders = buildPrepositioningOrders(briefing, allocation);
+    const prepositioningOrders = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildPrepositioningOrders',
+        () => buildPrepositioningOrders(briefing, allocation),
+    );
 
     return {
         directive,

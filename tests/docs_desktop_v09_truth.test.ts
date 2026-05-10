@@ -107,6 +107,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('| Endgame Comparison | Advanced');
     expect(roadmap).toContain('index-based front-geometry BFS queue');
     expect(roadmap).toContain('`buildBriefing` 1,077.718ms -> 1,041.042ms');
+    expect(roadmap).toContain('split `assessSituation` and `emitCommanderOutput` internals');
+    expect(roadmap).toContain('probe-target lookup map (316.271ms -> 316.829ms)');
+    expect(roadmap).toContain('`emitCommanderOutput.buildOperations`');
+    expect(roadmap).toContain('`assessSituation.detectZones`');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
     expect(bible).toContain('milestone comparison rows inside historical essays');
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');

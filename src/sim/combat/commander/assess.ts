@@ -28,6 +28,7 @@
  */
 
 import { strictCompare } from '../../../state/validateGameState.js';
+import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import type {
     CommanderBriefing,
     CommanderState,
@@ -64,65 +65,86 @@ export function assessSituation(
     briefing: CommanderBriefing,
 ): { zones: ZoneAssessment[]; forces: ForceAssessment; threats: ThreatAssessment } {
     // 1. Collect all corps territory OSIDs from sectors
-    const corpsOsidSet = new Set<string>();
-    const corpsSectors = briefing.sectors.filter(s => s.corps_id === briefing.corps_id);
-    for (const sector of corpsSectors) {
-        for (const osid of sector.territory_osids) {
-            corpsOsidSet.add(osid);
-        }
-    }
-    const corpsOsids = [...corpsOsidSet].sort(strictCompare);
-
-    // Filter brigades to mutable array for detectZones
-    const corpsBrigades = [...briefing.brigades].sort((a, b) => strictCompare(a.id, b.id));
+    const { corpsSectors, corpsOsids, corpsBrigades } = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.assessSituation.collectCorpsOsids',
+        () => {
+            const corpsOsidSet = new Set<string>();
+            const matchingSectors = briefing.sectors.filter(s => s.corps_id === briefing.corps_id);
+            for (const sector of matchingSectors) {
+                for (const osid of sector.territory_osids) {
+                    corpsOsidSet.add(osid);
+                }
+            }
+            return {
+                corpsSectors: matchingSectors,
+                corpsOsids: [...corpsOsidSet].sort(strictCompare),
+                corpsBrigades: [...briefing.brigades].sort((a, b) => strictCompare(a.id, b.id)),
+            };
+        },
+    );
 
     // 2. Detect zones from spatial context
-    const zones = detectZones(
-        briefing.corps_id,
-        briefing.faction,
-        corpsBrigades,
-        corpsOsids,
-        briefing.spatial,
-        [...corpsSectors],
-        briefing.ethnic_map,
-        briefing.graph_analysis,
-        new Set(briefing.must_hold_osids),
+    const zones = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.assessSituation.detectZones',
+        () => detectZones(
+            briefing.corps_id,
+            briefing.faction,
+            corpsBrigades,
+            corpsOsids,
+            briefing.spatial,
+            [...corpsSectors],
+            briefing.ethnic_map,
+            briefing.graph_analysis,
+            new Set(briefing.must_hold_osids),
+        ),
     );
 
     // 3. Evaluate forces
-    const forces = evaluateCorpsForces(briefing.brigades, zones, briefing.supply_by_osid);
+    const forces = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.assessSituation.evaluateForces',
+        () => evaluateCorpsForces(briefing.brigades, zones, briefing.supply_by_osid),
+    );
 
     // 4. Build concentration zone list from previous intel picture
     // concentration_detected is keyed by sector_id; map via osid overlap to zone_id.
-    const concentrationZoneIds: ZoneId[] = [];
-    const prevIntel = briefing.previous_state?.intel_picture ?? null;
-    if (prevIntel) {
-        // Build osid → zone_id reverse map
-        const osidToZone = new Map<string, ZoneId>();
-        for (const zone of zones) {
-            for (const osid of zone.osids) {
-                osidToZone.set(osid, zone.zone_id);
-            }
-        }
-        const seenZones = new Set<ZoneId>();
-        for (const [sectorId, detected] of Object.entries(prevIntel.concentration_detected).sort(
-            (a, b) => strictCompare(a[0], b[0]),
-        )) {
-            if (!detected) continue;
-            const sector = corpsSectors.find(s => s.sector_id === sectorId);
-            if (!sector) continue;
-            for (const osid of [...sector.territory_osids].sort(strictCompare)) {
-                const zoneId = osidToZone.get(osid);
-                if (zoneId && !seenZones.has(zoneId)) {
-                    seenZones.add(zoneId);
-                    concentrationZoneIds.push(zoneId);
+    const concentrationZoneIds: ZoneId[] = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.assessSituation.concentrationZones',
+        () => {
+            const concentrationZoneIds: ZoneId[] = [];
+            const prevIntel = briefing.previous_state?.intel_picture ?? null;
+            if (prevIntel) {
+                // Build osid → zone_id reverse map
+                const osidToZone = new Map<string, ZoneId>();
+                for (const zone of zones) {
+                    for (const osid of zone.osids) {
+                        osidToZone.set(osid, zone.zone_id);
+                    }
+                }
+                const seenZones = new Set<ZoneId>();
+                for (const [sectorId, detected] of Object.entries(prevIntel.concentration_detected).sort(
+                    (a, b) => strictCompare(a[0], b[0]),
+                )) {
+                    if (!detected) continue;
+                    const sector = corpsSectors.find(s => s.sector_id === sectorId);
+                    if (!sector) continue;
+                    for (const osid of [...sector.territory_osids].sort(strictCompare)) {
+                        const zoneId = osidToZone.get(osid);
+                        if (zoneId && !seenZones.has(zoneId)) {
+                            seenZones.add(zoneId);
+                            concentrationZoneIds.push(zoneId);
+                        }
+                    }
                 }
             }
-        }
-    }
+            return concentrationZoneIds;
+        },
+    );
 
     // 5. Assess threats
-    const threats = assessThreats(zones, briefing.previous_state, briefing.turn, concentrationZoneIds);
+    const threats = botOrdersPerfTime(
+        'commander.runCommanderForCorps.decide.assessSituation.assessThreats',
+        () => assessThreats(zones, briefing.previous_state, briefing.turn, concentrationZoneIds),
+    );
 
     return { zones, forces, threats };
 }

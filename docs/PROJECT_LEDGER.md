@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] commander emit/assess profiling sub-buckets
+
+**Scope:** CPU performance profiling follow-up. The prior commander pass named `emitCommanderOutput` and `assessSituation` as large decision buckets, but they were still too coarse to choose the next safe optimization.
+
+**Fix:** Added default-off `assessSituation` sub-buckets for corps OSID collection, zone detection, force evaluation, concentration-zone mapping, and threat assessment. Added default-off `emitCommanderOutput` sub-buckets for directive, operations, sector stances, updated state, plan updates, and prepositioning orders.
+
+**Measured result:** Profiled 40w run `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1766` kept final hash `ea9f3db7ac59a443`. The largest retained sub-buckets were `emitCommanderOutput.buildOperations` at 316.829ms and `assessSituation.detectZones` at 271.783ms. A candidate probe-target lookup map was tested and rejected because `buildOperations` was effectively flat/worse versus the prior profile (316.271ms -> 316.829ms), so only the labels stayed.
+
+**Validation:** Red profiler guard first: `npx.cmd vitest run tests/bot_orders_perf_profile.test.ts --reporter=dot` failed on the missing labels, then passed 6/6 after implementation. `npm.cmd run typecheck` passed before the profiled 40w comparison.
+
+**Canon posture:** Diagnostic/performance instrumentation only. Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`; normal runs do not collect samples or change game state.
+
+---
+
 ## [2026-05-10] replay: read-only autoplay controls
 
 **Scope:** Replay consumer closure follow-up. The endgame scrubber already rendered selected-frame summaries, sparse manifests, and full-frame map inspection, but still required manual slider/jump interaction.
