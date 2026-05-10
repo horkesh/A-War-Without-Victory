@@ -16,9 +16,11 @@
 
 **Decision Room command-loop lanes, source handoffs, and priority dossier are live (Codex UI/product, 2026-05-02).** Reports: `docs/40_reports/implemented/20260502_DECISION_ROOM_COMMAND_LOOP_LANES.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_SOURCE_HANDOFFS.md`, `docs/40_reports/implemented/20260502_DECISION_ROOM_PRIORITY_DOSSIER.md`. `buildPresidentialDecisionRoomView(...)` now projects the same sorted Strategic Priorities card archive into five lanes: Urgent, Decisions, Fronts, Inspect, Advance, grouped `sourceHandoffs` by existing owning inspection surface, and an `activeDossier` for the selected/top card. Pre-advance selection is category-diverse before duplicate categories fill remaining slots; pre-advance and Warroom docket handoffs are grouped from their own item slices. Do instead: answer new "what next?", "why this?", and "where should I inspect?" questions by projecting existing Decision Room cards and preserving their navigation targets; do not add another queue, checklist, records owner, or history owner.
 
-## Current State (2026-05-07, post-5-lane batch + 3-lane backlog closure — n1728 40w + n1729 188w baselines)
+## Current State (2026-05-10, Codex-owned repo truth + v0.9.7 followup cleanup)
 
-**Latest baselines:** n1728 40w hash `79fa407377b40083` (26/27 anchors, 6/6 benchmarks post RBiH-t40 reanchor); n1729 188w hash `e85303890ff4b601` (26/27 anchors, 6/6 post-reanchor, §6 floors PASS).
+**Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.
+
+**2026-05-10 repo-truth closures:** Windows fast Vitest runner recovered (`476836e4`), war-dispatch 4-turn/monthly displacement cue restored via `displacement_recent_by_turn` (`bc7fcc49`), directive metadata shipped (`bbe5a26b`), pure president rich-verb bridge + metadata defaults shipped (`be66d1cc`), state migration default fixture covered (`750e1c14`). Do instead: treat `docs/plans/MASTER_ROADMAP.md`, FORAWWV, Systems Manual, and `docs_desktop_v09_truth.test.ts` as the first sync targets after command-chain/doc-affecting work.
 
 **~25+ commits shipped across A1-A5 + Krivaja-95 + B-lane (DDR+B1+B2) + C-lane (DDR+C1+C2) + API-Directive Bridge + Q1 revert + drina-fix + D-lane (DDR+D1+D2) + telemetry wire + 5-lane batch (NW Bosnia OOB `be7e0715` + Persona restructure `cb13e605` + SRK siege `aa115a99` + JNA `ecae99da` + Jajce `ec837dca`) + 3-lane backlog closure (RBiH benchmark reanchor `d377e07b` + SRK siege Phase 0 DDR `bb0e449e` + Stupčanica name-collision `759a35cd`).** All CI green (latest `759a35cd`).
 
@@ -28,7 +30,7 @@
 1. Calibration-overshoot risk: prefer OOB-data audit over engine-gate fixes (Q1 revert + Lane 2 NW Bosnia).
 2. Bot-pool name-collision with canonical sensitive-history names (Stupčanica fix; data-not-comment exclusion).
 3. Persona-grounded LLM commanders don't auto-improve calibration signal quality (~11.5% genuine, indistinguishable from baseline; SHAPE of noise shifts, QUALITY doesn't).
-4. Schema mismatch between agent-designed types and engine-canonical interfaces (D1+D2 16-verb vs engine 6-verb; PRESIDENT_TO_CANONICAL bridge).
+4. Schema mismatch between agent-designed types and engine-canonical interfaces (D1+D2 16-verb vs engine 6-verb; pure `president_directive_bridge.ts` + `PRESIDENT_TO_CANONICAL_DIRECTIVE`).
 5. Default-off `if (apiClient)` guards depend on apiClient init — gate apiClient init on env flags too (D3 wire-up bug).
 6. Side-effect suppression is NOT a canonical resolution; preserve the original bug for proper fix (Stupčanica appeared absent in n1728 5-lane batch but root cause was untouched).
 

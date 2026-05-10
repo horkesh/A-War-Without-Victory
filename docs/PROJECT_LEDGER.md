@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Master/canon repo-truth guard
+
+**Scope:** Studio Health / Repo Truth permanent side lane from the master roadmap. The roadmap, canon pointer docs, durable knowledge ledger, and napkin had fallen behind the 2026-05-10 Codex-owned closure set: Windows Vitest runner recovery, war-dispatch displacement-window restoration, directive metadata, pure president rich-verb bridge defaults, state fixture coverage, and green GitHub CI at `750e1c14`.
+
+**Fix:** Updated `docs/plans/MASTER_ROADMAP.md` top-line status, v0.9.7 followup closure list, Path to v1.0 synthesis, feature table, and Current paragraph. Updated `docs/10_canon/Systems_Manual_v0_9_0.md` to point at the pure `president_directive_bridge.ts` / `PRESIDENT_TO_CANONICAL_DIRECTIVE` table and refreshed its Last Updated date. Updated `docs/PROJECT_LEDGER_KNOWLEDGE.md` and `.claude/napkin.md` so durable process memory points to the pure bridge helper instead of the old inline table.
+
+**Validation:** Red test first: `vitest tests/docs_desktop_v09_truth.test.ts` failed on the stale roadmap `Last Updated` line. The new docs-truth case now guards the 2026-05-10 roadmap/canon/knowledge alignment and prevents the closed war-dispatch and persona-C3 followups from reappearing as active master-roadmap work.
+
+**Behavior:** Documentation/test-only. No simulation, scenario, UI, or packaged runtime behavior changed.
+
+---
+
 ## [2026-05-10] President rich-verb bridge metadata defaults
 
 **Scope:** Extra v0.9.7 bridge lane after directive vocabulary metadata. The three-layer Claude QA harness previously mapped president rich verbs to six canonical engine verbs inline inside `run_three_commanders.ts`, and metadata depended on the model returning optional `magnitude` / `permission_flags`.

@@ -1,6 +1,6 @@
 # A War Without Victory -- Systems and Mechanics Manual v0.9.0
 
-**Last Updated:** 2026-05-05
+**Last Updated:** 2026-05-10
 
 One game turn equals one week.
 
@@ -151,7 +151,7 @@ Operational Groups are temporary coordination overlays authorized at Corps level
 
 ### 6.4 Corps command and army stance (OSID model)
 
-**Implementation-note (Claude-API persona-roleplay QA mode pointer, updated 2026-05-10):** The 6-verb canonical army-stance interface (`HOLD_AT_ALL_COSTS`, `PRESS_OFFENSIVE`, `MAINTAIN_CORRIDOR`, `PREPARE_RESERVE`, `HONOR_TRUCE`, `BALANCE_FRONTS`) is unchanged by the Claude-API persona-roleplay QA mode. Persona output (16-verb president intent etc.) is canonicalized via `PRESIDENT_TO_CANONICAL` before reaching corps-CO briefings; optional directive metadata (`target_corps_id`, `magnitude`, `permission_flags`) may be carried through the political -> army -> corps chain as intent clarification, but it does not expand the canonical verb vocabulary. The harness is opt-in, env-flag-gated, default-OFF byte-stable, and telemetry-only. Full spec lives in §7.9 and is authoritative in `docs/10_canon/FORAWWV.md` §XII.
+**Implementation-note (Claude-API persona-roleplay QA mode pointer, updated 2026-05-10):** The 6-verb canonical army-stance interface (`HOLD_AT_ALL_COSTS`, `PRESS_OFFENSIVE`, `MAINTAIN_CORRIDOR`, `PREPARE_RESERVE`, `HONOR_TRUCE`, `BALANCE_FRONTS`) is unchanged by the Claude-API persona-roleplay QA mode. Persona output (16-verb president intent etc.) is canonicalized via `tools/claude_plays_vrs/president_directive_bridge.ts` and its `PRESIDENT_TO_CANONICAL_DIRECTIVE` table before reaching corps-CO briefings; optional directive metadata (`target_corps_id`, `magnitude`, `permission_flags`) may be carried through the political -> army -> corps chain as intent clarification, but it does not expand the canonical verb vocabulary. The harness is opt-in, env-flag-gated, default-OFF byte-stable, and telemetry-only. Full spec lives in §7.9 and is authoritative in `docs/10_canon/FORAWWV.md` §XII.
 
 **Implementation-note (player agency plan A-H, 2026-03-07):** Live corps-operation shaping now extends beyond the original sector-offensive minimum. `CorpsOperation` can persist player-selected `min_attack_outcome`, `tempo`, `schwerpunkt_osid`, `artillery_preparation`, `artillery_preparation_consumed`, `force_launch`, `dig_in_on_halt`, deception types (`feint`, `probe`), and `commander_officer_id` (named officer commanding the operation — see §7.5 Operation commander) in addition to the sector/objective fields below. Execution behavior now includes early-launch cohesion penalty when forced before readiness, a first-turn artillery-preparation shock bonus, extra cohesion burn for `all_out` tempo, manual halt into recovery, optional dig-in on halt, probe-driven intel reveal, feint self-termination after limited execution, and immediate collapse of zero-eligibility idle execution shells into recovery so they do not register as invalid combat samples. Sector-level defensive intent also exists above brigades as `sector_stance_orders`; `applySectorStanceOrders()` translates those into standard brigade posture orders during the pipeline instead of mutating brigade state directly in UI or IPC.
 

@@ -34,6 +34,32 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).not.toContain('desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot');
   });
 
+  it('keeps the master/canon docs aligned with the 2026-05-10 directive and dispatch closures', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const fora = readRepoFile('docs', '10_canon', 'FORAWWV.md');
+    const systems = readRepoFile('docs', '10_canon', 'Systems_Manual_v0_9_0.md');
+    const knowledge = readRepoFile('docs', 'PROJECT_LEDGER_KNOWLEDGE.md');
+
+    expect(roadmap).toContain('**Last Updated:** 2026-05-10');
+    expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
+    expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
+    expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
+    expect(roadmap).toContain('bridge metadata defaults shipped at `be66d1cc`');
+    expect(roadmap).toContain('Baseline Regression and Desktop Release Guard green at `750e1c14`');
+    expect(roadmap).toContain('Persona suppressor C3 structural fix shipped (`6cebf13e`)');
+    expect(roadmap).not.toContain('war_dispatches.ts:149` 4-turn rolling window adapt to per-turn-buffer');
+    expect(roadmap).not.toContain('Persona suppressor C3 structural fix — prune routine op-lifecycle states');
+
+    expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
+    expect(fora).toContain('magnitude');
+    expect(fora).toContain('permission_flags');
+    expect(systems).toContain('displacement_recent_by_turn');
+    expect(systems).toContain('bounded 4-turn recent displacement cue');
+    expect(knowledge).toContain('president_directive_bridge.ts');
+    expect(knowledge).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
+    expect(knowledge).not.toContain('Reference run_three_commanders.ts `PRESIDENT_TO_CANONICAL` table');
+  });
+
   it('retires the stale scenario-board reds once direct proof has landed', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
 
