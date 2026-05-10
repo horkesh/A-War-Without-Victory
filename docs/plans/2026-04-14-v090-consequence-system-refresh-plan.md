@@ -71,7 +71,7 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 
 **Deliverable:** one consequence substrate inventory and owner matrix
 
-**Status 2026-05-10:** COMPLETE. `tools/diagnostics/consequence_substrate_inventory.cjs` now emits a deterministic owner matrix over the authored event catalog. Current scan: 238 events, 796 effect instances, 18 effect kinds, 16 live substrates, two partial-reader substrates (`guerrilla_threat`, `recruitment_modifier`), and zero unknown substrates. Report: `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`.
+**Status 2026-05-10:** COMPLETE. `tools/diagnostics/consequence_substrate_inventory.cjs` now emits a deterministic owner matrix over the authored event catalog. Current scan: 238 events, 796 effect instances, 18 effect kinds, 18 live substrates, no partial-reader substrates, and zero unknown substrates. `guerrilla_threat` and `recruitment_modifier` are confirmed live through `applyGuerrillaAttrition(...)` and `ongoing_mobilization`. Report: `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`.
 
 ### Program B. Pressure And Exhaustion Consequences
 

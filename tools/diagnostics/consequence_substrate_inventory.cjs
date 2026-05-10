@@ -83,8 +83,8 @@ const SUBSTRATE_OWNERS = {
   guerrilla_threat: {
     class: 'mechanical',
     writer: 'applyEventEffects -> state.military.guerrilla_threats',
-    consumer: 'guerrilla attrition / supply pressure readers',
-    status: 'partial-reader',
+    consumer: 'applyGuerrillaAttrition via getActiveGuerrillaThreatIntensity',
+    status: 'live',
   },
   humanitarian_impact: {
     class: 'mechanical',
@@ -119,8 +119,8 @@ const SUBSTRATE_OWNERS = {
   recruitment_modifier: {
     class: 'mechanical',
     writer: 'applyEventEffects -> active recruitment modifiers',
-    consumer: 'ongoing mobilization readers',
-    status: 'partial-reader',
+    consumer: 'ongoing_mobilization via getActiveRecruitmentMultiplier',
+    status: 'live',
   },
   supply_delta: {
     class: 'mechanical',

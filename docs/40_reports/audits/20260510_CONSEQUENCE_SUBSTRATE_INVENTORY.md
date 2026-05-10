@@ -13,8 +13,8 @@ Current catalog measurement:
 - Events scanned: 238
 - Effect instances: 796
 - Effect kinds: 18
-- Live substrates: 16
-- Partial-reader substrates: `guerrilla_threat`, `recruitment_modifier`
+- Live substrates: 18
+- Partial-reader substrates: none
 - Unknown substrates: none
 
 ## Owner Matrix Result
@@ -28,10 +28,7 @@ The audit confirms there is no unknown effect substrate in the current catalog. 
 - Narrative/endgame recording: `narrative`, `humanitarian_impact`, `cost_ledger_annotation`
 - Territorial facts: `control_change`
 
-Two substrates remain marked as partial-reader rather than closed owner truth:
-
-- `guerrilla_threat`: authored once, RS-scoped, still needs a focused reader/impact confirmation before it should carry a large divergence chain.
-- `recruitment_modifier`: broadly authored and faction-covered, but still belongs to a bounded mobilization-reader proof before being treated as a fully closed consequence substrate.
+The follow-up reader pass confirmed both previously suspicious substrates are live: `guerrilla_threat` is consumed by `applyGuerrillaAttrition(...)` through `getActiveGuerrillaThreatIntensity(...)`, and `recruitment_modifier` is consumed by `ongoing_mobilization` through `getActiveRecruitmentMultiplier(...)`.
 
 ## Faction Coverage Notes
 
@@ -40,11 +37,11 @@ The diagnostic reports asymmetric faction coverage where a kind has a `faction` 
 - `control_change` is RBiH-only in the current catalog because it is used for specific early-war territorial events, not a generic consequence path.
 - `doctrine_constraint` is RS-only because the current authored constraints are Drina/safe-area focused.
 - `equipment_grant` has no RS use because current grants are barracks/captured-supply and RBiH/HRHB arms-flow shaped.
-- `guerrilla_threat` is the one asymmetric substrate worth treating as future work because it is both partial-reader and single-use.
+- `guerrilla_threat` is still single-use and RS-scoped, but the reader is live; future work should treat it as an authoring-coverage question, not a missing-substrate question.
 
 ## Verification
 
-- `npx.cmd vitest run tests/consequence_substrate_inventory_diagnostic.test.ts --reporter=dot` passed 3/3.
+- `npx.cmd vitest run tests/consequence_substrate_inventory_diagnostic.test.ts tests/consequence_consumers.test.ts --reporter=dot` passed 25/25.
 - Real catalog command: `node tools/diagnostics/consequence_substrate_inventory.cjs --json`.
 
 ## Roadmap Disposition
@@ -52,4 +49,4 @@ The diagnostic reports asymmetric faction coverage where a kind has a `faction` 
 Packet C1 is complete. The next v0.9.0 consequence lane should not be another broad audit. It should pick one of the two grounded follow-ups:
 
 - C2 pressure consequence completion using already-live `patron_pressure` / `negotiation_capital` / `cost_ledger_annotation` surfaces.
-- A narrow reader proof for `guerrilla_threat` or `recruitment_modifier`, depending on which future chain needs it first.
+- Authoring-coverage work for `guerrilla_threat` only if a concrete future divergence chain needs faction mirrors.

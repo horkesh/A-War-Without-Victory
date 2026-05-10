@@ -78,7 +78,8 @@ describe('consequence_substrate_inventory diagnostic', () => {
         expect(inventory.total_effects).toBe(5);
         expect(inventory.live_substrates).toContain('cost_ledger_annotation');
         expect(inventory.live_substrates).toContain('equipment_quality_modifier');
-        expect(inventory.partial_substrates).toEqual(['recruitment_modifier']);
+        expect(inventory.live_substrates).toContain('recruitment_modifier');
+        expect(inventory.partial_substrates).toEqual([]);
         expect(inventory.missing_factions_by_kind.patron_pressure).toEqual(['RBiH', 'RS']);
         expect(inventory.effect_kinds.find(row => row.kind === 'cost_ledger_annotation')).toMatchObject({
             status: 'live-reader',
@@ -113,7 +114,35 @@ describe('consequence_substrate_inventory diagnostic', () => {
         expect(JSON.parse(json)).toMatchObject({
             total_events: 1,
             effect_kind_count: 1,
+            live_substrates: ['cost_ledger_annotation'],
+            partial_substrates: [],
             unknown_substrates: [],
+        });
+    });
+
+    it('keeps the real catalog free of partial or unknown substrates', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/consequence_substrate_inventory.cjs') as {
+            buildInventory: () => {
+                live_substrates: string[];
+                partial_substrates: string[];
+                unknown_substrates: string[];
+                effect_kinds: Array<{ kind: string; status: string; consumer: string }>;
+            };
+        };
+
+        const inventory = diagnostic.buildInventory();
+        expect(inventory.partial_substrates).toEqual([]);
+        expect(inventory.unknown_substrates).toEqual([]);
+        expect(inventory.live_substrates).toContain('guerrilla_threat');
+        expect(inventory.live_substrates).toContain('recruitment_modifier');
+        expect(inventory.effect_kinds.find(row => row.kind === 'guerrilla_threat')).toMatchObject({
+            status: 'live',
+            consumer: 'applyGuerrillaAttrition via getActiveGuerrillaThreatIntensity',
+        });
+        expect(inventory.effect_kinds.find(row => row.kind === 'recruitment_modifier')).toMatchObject({
+            status: 'live',
+            consumer: 'ongoing_mobilization via getActiveRecruitmentMultiplier',
         });
     });
 });

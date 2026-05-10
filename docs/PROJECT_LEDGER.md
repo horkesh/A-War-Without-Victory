@@ -3647,10 +3647,10 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 **Change:** Added `tools/diagnostics/consequence_substrate_inventory.cjs`, a deterministic scanner for `data/scenarios/events/` that inventories event-effect substrates, writer/consumer ownership, faction coverage, live/partial-reader status, and unknown effect kinds. Added fixture-backed test coverage and the C1 audit report.
 
-**Evidence:** Real catalog scan reports 238 event definitions, 796 effect instances, 18 effect kinds, 16 live substrates, two partial-reader substrates (`guerrilla_threat`, `recruitment_modifier`), and zero unknown substrates.
+**Evidence:** Real catalog scan reports 238 event definitions, 796 effect instances, 18 effect kinds, 18 live substrates, no partial-reader substrates, and zero unknown substrates. `guerrilla_threat` is reader-confirmed through `applyGuerrillaAttrition(...)`; `recruitment_modifier` is reader-confirmed through `ongoing_mobilization`.
 
-**Verification:** `npx.cmd vitest run tests/consequence_substrate_inventory_diagnostic.test.ts --reporter=dot` passed 3/3.
+**Verification:** `npx.cmd vitest run tests/consequence_substrate_inventory_diagnostic.test.ts tests/consequence_consumers.test.ts --reporter=dot` passed 25/25.
 
-**Roadmap delta:** v0.9.0 Consequence System Packet C1 is complete. Next consequence work should target C2 pressure completion or a focused reader proof for one partial-reader substrate, not another broad audit.
+**Roadmap delta:** v0.9.0 Consequence System Packet C1 is complete with all known effect substrates reader-confirmed. Next consequence work should target C2 pressure completion, not another broad audit.
 
 **Report:** `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`
