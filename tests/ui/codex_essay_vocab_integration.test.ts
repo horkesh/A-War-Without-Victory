@@ -170,6 +170,77 @@ describe('v0.9.1 vocab — Bihac 5th Corps fell ghost epilogue', () => {
     });
 });
 
+describe('v0.9.1 vocab - authored findings breadth wave', () => {
+    const ahmiciEssay = findEssay('essay_ahmici_massacre_1993');
+    const stormEssay = findEssay('essay_operation_storm_1995');
+    const ahmiciWarCrimesSection = (ahmiciEssay.dynamic_sections ?? []).find(s => s.id === 'v091_ahmici_war_crimes_findings');
+    const stormDisplacementSection = (stormEssay.dynamic_sections ?? []).find(s => s.id === 'v091_operation_storm_displacement_findings');
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 42000,
+        total_civilian_killed: 36000,
+        findings: [
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 6 war-crime events.',
+                sources: ['Sensitive History Design Gate Section 4'],
+            },
+            {
+                id: 'displacement_record_HRHB',
+                category: 'displacement',
+                severity: 'grave',
+                faction: 'HRHB',
+                title: 'HRHB displacement record',
+                text: 'The ledger records a major west-Bosnia displacement wave.',
+                sources: ['AWWV displacement ledger'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds Ahmici war-crimes findings gated by HRHB grave findings', () => {
+        expect(ahmiciWarCrimesSection).toBeDefined();
+        expect(ahmiciWarCrimesSection?.variant).toBe('divergence');
+        expect(ahmiciWarCrimesSection?.condition).toBe('GAME_OVER AND FINDING_CATEGORY:war_crimes AND FINDING_FACTION:HRHB');
+    });
+
+    it('renders HRHB war-crimes findings inside the Ahmici essay', () => {
+        const resolved = resolveCodexEssay(ahmiciEssay, {
+            firedEventIds: new Set(['ahmici_massacre_1993']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('Sensitive History Design Gate'))).toBe(true);
+    });
+
+    it('adds Operation Storm displacement findings gated by displacement findings', () => {
+        expect(stormDisplacementSection).toBeDefined();
+        expect(stormDisplacementSection?.variant).toBe('divergence');
+        expect(stormDisplacementSection?.condition).toBe('GAME_OVER AND FINDING_CATEGORY:displacement');
+    });
+
+    it('renders displacement findings inside the Operation Storm essay', () => {
+        const resolved = resolveCodexEssay(stormEssay, {
+            firedEventIds: new Set(['operation_storm_1995']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('HRHB displacement record [HRHB]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('AWWV displacement ledger'))).toBe(true);
+    });
+});
+
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');

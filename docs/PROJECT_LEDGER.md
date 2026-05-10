@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): Ahmici and Operation Storm findings-breadth wave
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Existing Cost Ledger and milestone tokens were live, but the newest endgame-aware essay inserts were concentrated in Srebrenica and Dayton.
+
+**Fix:** Added two authored `dynamic_sections` to `data/scenarios/essays/essay_index.json`: Ahmici now consumes HRHB war-crimes Cost Ledger findings, and Operation Storm now consumes displacement findings. Both use existing deterministic resolver atoms/tokens; no new resolver behavior was needed.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing sections and render paths. Green after authoring: 20/20 passed.
+
+**Canon posture:** Ring 2 narrative reflection only. No event trigger, rupture rule, score rule, save schema, historical baseline, or player lever changed. The inserts quote source-labeled Cost Ledger findings and remain subject to the Cost Ledger wording rules and sensitive-history voice register.
+
+---
+
 ## [2026-05-10] docs(playtest): v0.9.2 operator-deployable playtest kit
 
 **Scope:** Tutorial/playtesting closure follow-up. The recruitment pack already existed, but the operator still had to assemble launch-support assets from prose.

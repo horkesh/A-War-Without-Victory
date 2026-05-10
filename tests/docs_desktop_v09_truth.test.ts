@@ -104,6 +104,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
     expect(roadmap).toContain('milestone atoms/tokens');
     expect(roadmap).toContain('Srebrenica/Dayton milestone-week comparison rows live');
+    expect(roadmap).toContain('Ahmici/Operation Storm findings-breadth wave');
     expect(roadmap).toContain('| Endgame Comparison | Advanced');
     expect(roadmap).toContain('index-based front-geometry BFS queue');
     expect(roadmap).toContain('`buildBriefing` 1,077.718ms -> 1,041.042ms');
@@ -115,6 +116,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
     expect(bible).toContain('milestone comparison rows inside historical essays');
+    expect(bible).toContain('current authored consumers include Srebrenica, Dayton, Ahmici, and Operation Storm');
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');
     expect(bible).toContain('the first authored baseline rows are Srebrenica and Dayton');
     expect(plan).not.toContain('Endgame Comparison` is not implemented');
