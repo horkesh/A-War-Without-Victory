@@ -96,12 +96,15 @@ describe('desktop and roadmap truth docs', () => {
     expect(plan).toContain('Cost Ledger findings through deterministic atoms/tokens');
     expect(plan).toContain('`VerdictScreen` now renders deterministic milestone comparison rows');
     expect(plan).toContain('historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton');
+    expect(plan).toContain('Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms');
     expect(plan).toContain('optional `milestone_comparison` row contract');
     expect(plan).toContain('`dynamic_sections`, `ghost_when`');
     expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
+    expect(roadmap).toContain('milestone atoms/tokens');
     expect(roadmap).toContain('Srebrenica/Dayton milestone-week comparison rows live');
     expect(roadmap).toContain('| Endgame Comparison | Advanced');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
+    expect(bible).toContain('milestone comparison rows inside historical essays');
     expect(bible).toContain('VerdictScreen` may render milestone comparison rows');
     expect(bible).toContain('the first authored baseline rows are Srebrenica and Dayton');
     expect(plan).not.toContain('Endgame Comparison` is not implemented');

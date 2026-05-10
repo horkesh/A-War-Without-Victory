@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Codex milestone dynamic sections
+
+**Scope:** Follow-on v0.9.1 Dynamic Essay + Endgame Comparison slice. The comparison producer emitted milestone rows, but Codex essays could not yet consume them through authored conditions or tokens.
+
+**Fix:** Extended `codexEssayResolver` with deterministic `MILESTONE:<id>` and `MILESTONE:<id>:<status>` atoms plus milestone interpolation tokens. Authored a Srebrenica absent-milestone dynamic section and a Dayton milestone timing docket in `essay_index.json`.
+
+**Validation:** Red tests first: resolver tests failed on missing milestone atoms/tokens, and essay-index integration failed on missing authored sections. Green focused pack passed 48/48.
+
+**Canon posture:** Ring 2 narrative reflection only. Codex reads `historicalComparison.milestone_comparison`; it does not compute rupture truth, score outcomes, or create player levers.
+
+---
+
 ## [2026-05-10] Baseline milestone comparison producer
 
 **Scope:** Follow-on v0.9.1 Endgame Comparison producer slice. The previous slice rendered milestone rows when supplied, but the comparison producer still lacked authored baseline milestone rows.

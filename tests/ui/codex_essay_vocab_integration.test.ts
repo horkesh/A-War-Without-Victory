@@ -256,3 +256,88 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         expect(dyn.some(p => p.text.includes('Sources: ICJ Bosnia v. Serbia'))).toBe(true);
     });
 });
+
+describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
+    const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
+    const daytonEssay = findEssay('essay_dayton_signed_1995');
+    const srebrenicaSection = (srebrenicaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_milestone_srebrenica_absent');
+    const daytonSection = (daytonEssay.dynamic_sections ?? []).find(s => s.id === 'v091_milestone_timing_docket');
+
+    it('adds a Srebrenica absent-milestone section gated by milestone status', () => {
+        expect(srebrenicaSection).toBeDefined();
+        expect(srebrenicaSection?.variant).toBe('ghost');
+        expect(srebrenicaSection?.condition).toBe('GAME_OVER AND MILESTONE:srebrenica_genocide_1995:absent');
+    });
+
+    it('renders the Srebrenica absent milestone summary in the ghost essay', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set<string>(),
+            gameOver: true,
+            historicalComparison: {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+                milestone_comparison: [{
+                    id: 'srebrenica_genocide_1995',
+                    label: 'Srebrenica Genocide',
+                    historical_week: 171,
+                    player_week: null,
+                    delta_weeks: null,
+                    status: 'absent',
+                    summary: 'Srebrenica Genocide did not occur in this run.',
+                }],
+            },
+        };
+        const resolved = resolveCodexEssay(srebrenicaEssay, ctx);
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'ghost');
+        expect(dyn.some(p => p.text.includes('Srebrenica Genocide did not occur in this run.'))).toBe(true);
+    });
+
+    it('adds a Dayton milestone timing docket gated by the Dayton milestone', () => {
+        expect(daytonSection).toBeDefined();
+        expect(daytonSection?.variant).toBe('divergence');
+        expect(daytonSection?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+    });
+
+    it('renders milestone comparison text inside the Dayton essay', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set(['dayton_signed_1995']),
+            gameOver: true,
+            historicalComparison: {
+                duration_delta_weeks: 6,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+                milestone_comparison: [
+                    {
+                        id: 'srebrenica_genocide_1995',
+                        label: 'Srebrenica Genocide',
+                        historical_week: 171,
+                        player_week: null,
+                        delta_weeks: null,
+                        status: 'absent',
+                        summary: 'Srebrenica Genocide did not occur in this run.',
+                    },
+                    {
+                        id: 'dayton_accords',
+                        label: 'Dayton Accords',
+                        historical_week: 182,
+                        player_week: 188,
+                        delta_weeks: 6,
+                        status: 'late',
+                        summary: 'Dayton Accords occurred at player week 188 against historical week 182.',
+                    },
+                ],
+            },
+        };
+        const resolved = resolveCodexEssay(daytonEssay, ctx);
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Dayton Accords: historical W182; player W188; delta +6w; status late.'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('Srebrenica Genocide: historical W171; player not recorded; status absent.'))).toBe(true);
+    });
+});

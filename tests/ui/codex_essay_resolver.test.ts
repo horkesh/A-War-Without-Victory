@@ -229,6 +229,37 @@ describe('codexEssayResolver — comparison condition atoms', () => {
             ctx,
         )).toBe(true);
     });
+
+    it('MILESTONE atoms match by id and optional status', () => {
+        const ctx = withComparison({
+            milestone_comparison: [
+                {
+                    id: 'srebrenica_genocide_1995',
+                    label: 'Srebrenica Genocide',
+                    historical_week: 171,
+                    player_week: null,
+                    delta_weeks: null,
+                    status: 'absent',
+                    summary: 'Srebrenica Genocide did not occur in this run.',
+                },
+                {
+                    id: 'dayton_accords',
+                    label: 'Dayton Accords',
+                    historical_week: 182,
+                    player_week: 188,
+                    delta_weeks: 6,
+                    status: 'late',
+                    summary: 'Dayton Accords occurred at player week 188 against historical week 182.',
+                },
+            ],
+        });
+
+        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995', ctx)).toBe(true);
+        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995:absent', ctx)).toBe(true);
+        expect(evaluateEssayCondition('MILESTONE:dayton_accords:late', ctx)).toBe(true);
+        expect(evaluateEssayCondition('MILESTONE:dayton_accords:early', ctx)).toBe(false);
+        expect(evaluateEssayCondition('MILESTONE:washington_agreement', ctx)).toBe(false);
+    });
 });
 
 // ─── v0.9.1: template interpolation tokens ───────────────────────────────
@@ -339,6 +370,48 @@ describe('codexEssayResolver — template interpolation tokens', () => {
         expect(resolveWith('{comparison_notes}', {
             divergence_notes: ['Note A', 'Note B'],
         })).toEqual(['Note A', 'Note B']);
+    });
+
+    it('milestone tokens render deterministic row summaries', () => {
+        expect(resolveWith('{milestone_comparison}', {
+            milestone_comparison: [
+                {
+                    id: 'dayton_accords',
+                    label: 'Dayton Accords',
+                    historical_week: 182,
+                    player_week: 188,
+                    delta_weeks: 6,
+                    status: 'late',
+                    summary: 'Dayton Accords occurred at player week 188 against historical week 182.',
+                },
+                {
+                    id: 'srebrenica_genocide_1995',
+                    label: 'Srebrenica Genocide',
+                    historical_week: 171,
+                    player_week: null,
+                    delta_weeks: null,
+                    status: 'absent',
+                    summary: 'Srebrenica Genocide did not occur in this run.',
+                },
+            ],
+        })).toEqual([
+            'Srebrenica Genocide: historical W171; player not recorded; status absent. Srebrenica Genocide did not occur in this run.',
+            'Dayton Accords: historical W182; player W188; delta +6w; status late. Dayton Accords occurred at player week 188 against historical week 182.',
+        ]);
+    });
+
+    it('single milestone tokens render summary, status, and signed delta', () => {
+        expect(resolveWith('{milestone_dayton_accords_status} / {milestone_dayton_accords_delta_weeks} / {milestone_dayton_accords_summary}', {
+            milestone_comparison: [{
+                id: 'dayton_accords',
+                label: 'Dayton Accords',
+                historical_week: 182,
+                player_week: 188,
+                delta_weeks: 6,
+                status: 'late',
+                summary: 'Dayton Accords occurred at player week 188 against historical week 182.',
+            }],
+        })).toEqual(['late / +6 / Dayton Accords occurred at player week 188 against historical week 182.']);
     });
 });
 

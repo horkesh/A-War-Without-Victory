@@ -68,6 +68,25 @@ function hasRupture(context: CodexRenderContext, ruptureId: string): boolean {
     return Array.isArray(raw) && raw.includes(ruptureId);
 }
 
+type MilestoneRow = NonNullable<ComparisonResult['milestone_comparison']>[number];
+
+function milestoneRows(context: CodexRenderContext): MilestoneRow[] {
+    const raw = context.historicalComparison?.milestone_comparison;
+    return Array.isArray(raw)
+        ? raw
+            .filter((row): row is MilestoneRow => Boolean(row && typeof row.id === 'string'))
+            .slice()
+            .sort((a, b) => {
+                if (a.historical_week !== b.historical_week) return a.historical_week - b.historical_week;
+                return strictCompare(a.id, b.id);
+            })
+        : [];
+}
+
+function findMilestone(context: CodexRenderContext, id: string): MilestoneRow | undefined {
+    return milestoneRows(context).find((row) => row.id === id);
+}
+
 /** Safe numeric getter for a ratio/delta field on historicalComparison.
  *  Returns undefined when the field is absent or non-finite; callers treat
  *  that as "condition does not match". */
@@ -169,6 +188,16 @@ function evaluateAtom(token: string, context: CodexRenderContext): boolean {
 
     if (token.startsWith('RUPTURE:')) {
         return hasRupture(context, token.slice('RUPTURE:'.length));
+    }
+
+    if (token.startsWith('MILESTONE:')) {
+        const parts = token.slice('MILESTONE:'.length).split(':');
+        const id = parts[0];
+        if (!id) return false;
+        const milestone = findMilestone(context, id);
+        if (!milestone) return false;
+        const status = parts[1];
+        return status ? milestone.status === status : true;
     }
 
     if (token.startsWith('FINDING:')) {
@@ -296,8 +325,44 @@ function formatCostFindingsByCategory(
 /** Expand a single template token against the render context. Returns
  *  undefined when the token is not recognized — caller leaves the literal
  *  `{token}` in place so missing tokens are visible in content review. */
+function formatMilestoneDelta(deltaWeeks: number | null): string {
+    return deltaWeeks === null ? '' : `${signed(deltaWeeks)}w`;
+}
+
+function formatMilestoneRow(row: MilestoneRow): string {
+    const player = row.player_week === null ? 'not recorded' : `W${row.player_week}`;
+    const delta = row.delta_weeks === null ? '' : `; delta ${formatMilestoneDelta(row.delta_weeks)}`;
+    return `${row.label}: historical W${row.historical_week}; player ${player}${delta}; status ${row.status}. ${row.summary}`;
+}
+
+function milestoneTokenValue(token: string, context: CodexRenderContext): string | undefined {
+    if (token === 'milestone_comparison') {
+        return milestoneRows(context).map(formatMilestoneRow).join('\n\n');
+    }
+
+    const suffixes = [
+        { suffix: '_summary', field: 'summary' as const },
+        { suffix: '_status', field: 'status' as const },
+        { suffix: '_delta_weeks', field: 'delta_weeks' as const },
+    ];
+    for (const { suffix, field } of suffixes) {
+        if (!token.startsWith('milestone_') || !token.endsWith(suffix)) continue;
+        const id = token.slice('milestone_'.length, -suffix.length);
+        const milestone = findMilestone(context, id);
+        if (!milestone) return '';
+        if (field === 'delta_weeks') {
+            return milestone.delta_weeks === null ? '' : signed(milestone.delta_weeks);
+        }
+        return String(milestone[field]);
+    }
+
+    return undefined;
+}
+
 function expandToken(token: string, context: CodexRenderContext): string | undefined {
     if (token === 'comparison_notes') return comparisonNotes(context).join('\n\n');
+    const milestoneValue = milestoneTokenValue(token, context);
+    if (milestoneValue !== undefined) return milestoneValue;
     if (token === 'cost_findings') return costFindings(context).map(formatCostFinding).join('\n\n');
     if (token === 'cost_rupture_findings') return formatCostFindingsByCategory(context, 'rupture');
     if (token === 'cost_human_findings') return formatCostFindingsByCategory(context, 'human_cost');

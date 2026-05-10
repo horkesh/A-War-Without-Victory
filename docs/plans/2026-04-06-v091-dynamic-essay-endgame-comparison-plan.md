@@ -20,6 +20,7 @@
 - 2026-05-10 update: the Codex resolver also consumes Cost Ledger findings through deterministic atoms/tokens, and the Srebrenica + Dayton essays render source-labeled prosecutorial finding inserts.
 - 2026-05-10 update: `VerdictScreen` now renders deterministic milestone comparison rows from `historicalComparison.milestone_comparison`, with an older-save `War Duration` fallback derived from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
 - 2026-05-10 update: `historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton; `compareToHistorical(...)` emits them from baseline data and preserved rupture record turns.
+- 2026-05-10 update: the Codex resolver now supports deterministic `MILESTONE:<id>[:status]` atoms plus milestone interpolation tokens, and the Srebrenica / Dayton essays consume those rows through authored dynamic sections.
 
 **Input docs (supporting, not milestone authorities by themselves):**
 - `docs/plans/2026-03-23-essay-template-engine-plan.md`
@@ -63,8 +64,8 @@
 **Assigned to:** Systems Programmer + Documentation Specialist
 
 - [x] define the canonical dynamic essay schema (`dynamic_sections`, `ghost_when`, dynamic variants)
-- [x] add runtime condition evaluation for dynamic sections, including comparison and Cost Ledger finding atoms
-- [x] support divergence notes, ghost entries, and Cost Ledger findings in dynamic essay output
+- [x] add runtime condition evaluation for dynamic sections, including comparison, Cost Ledger finding, and milestone atoms
+- [x] support divergence notes, ghost entries, Cost Ledger findings, and milestone rows in dynamic essay output
 - [ ] ensure canonical historical text remains immutable substrate
 
 **Gate:** A dynamic essay can render canonical text plus deterministic inserted sections without mutating the base essay.
