@@ -91,6 +91,23 @@ function makeBaseline(overrides: Partial<HistoricalBaseline> = {}): HistoricalBa
         civilian_killed: 38476,
         total_displaced: 2200000,
         srebrenica_killed: 8372,
+        milestones: [
+            {
+                id: 'srebrenica_genocide_1995',
+                label: 'Srebrenica Genocide',
+                historical_week: 171,
+                kind: 'rupture',
+                event_id: 'srebrenica_genocide_1995',
+                source_notes: 'ICTY Krstic judgment',
+            },
+            {
+                id: 'dayton_accords',
+                label: 'Dayton Accords',
+                historical_week: 182,
+                kind: 'war_end',
+                source_notes: 'Dayton Agreement initialed November 1995',
+            },
+        ],
         source_notes: 'RDC 2007',
         ...overrides,
     };
@@ -165,6 +182,7 @@ describe('buildCostLedger', () => {
         expect(ledger.rupture_consequences).toHaveLength(1);
         expect(ledger.rupture_consequences[0].id).toBe('srebrenica_genocide_1995');
         expect(ledger.rupture_consequences[0].perpetrator_faction).toBe('RS');
+        expect(ledger.rupture_consequences[0].recorded_turn).toBe(160);
     });
 
     it('is deterministic — same input produces same output', () => {
@@ -408,6 +426,54 @@ describe('compareToHistorical', () => {
 
         expect(result.rupture_divergence).toContain('srebrenica_genocide_1995');
         expect(result.divergence_notes.some(n => n.includes('Srebrenica genocide occurred'))).toBe(true);
+    });
+
+    it('emits milestone comparison rows from the historical baseline', () => {
+        const ruptures: RuptureConsequence[] = [
+            {
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 160,
+                perpetrator_faction: 'RS',
+                description: 'Fall of Srebrenica',
+                condemnation_flag: 'genocide_condemnation',
+            },
+        ];
+        const state = makeState({ turn: 188, ruptures });
+        const ledger = buildCostLedger(state);
+        const result = compareToHistorical(ledger, makeBaseline());
+
+        expect(result.milestone_comparison?.map(row => row.id)).toEqual([
+            'srebrenica_genocide_1995',
+            'dayton_accords',
+        ]);
+        expect(result.milestone_comparison?.[0]).toMatchObject({
+            id: 'srebrenica_genocide_1995',
+            historical_week: 171,
+            player_week: 160,
+            delta_weeks: -11,
+            status: 'early',
+        });
+        expect(result.milestone_comparison?.[1]).toMatchObject({
+            id: 'dayton_accords',
+            historical_week: 182,
+            player_week: 188,
+            delta_weeks: 6,
+            status: 'late',
+        });
+    });
+
+    it('marks rupture milestones absent when the player run avoided the rupture', () => {
+        const state = makeState({ turn: 182 });
+        const ledger = buildCostLedger(state);
+        const result = compareToHistorical(ledger, makeBaseline());
+        const srebrenica = result.milestone_comparison?.find(row => row.id === 'srebrenica_genocide_1995');
+
+        expect(srebrenica).toMatchObject({
+            player_week: null,
+            delta_weeks: null,
+            status: 'absent',
+        });
+        expect(srebrenica?.summary).toContain('did not occur');
     });
 
     it('generates Srebrenica survived note when no rupture', () => {

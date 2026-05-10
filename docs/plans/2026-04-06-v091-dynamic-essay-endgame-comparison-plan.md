@@ -19,6 +19,7 @@
 - dynamic essay sections / ghost entries / divergence notes are partially implemented in the first Codex slice (`dynamic_sections`, `ghost_when`, ghost essays / entries for paths not taken)
 - 2026-05-10 update: the Codex resolver also consumes Cost Ledger findings through deterministic atoms/tokens, and the Srebrenica + Dayton essays render source-labeled prosecutorial finding inserts.
 - 2026-05-10 update: `VerdictScreen` now renders deterministic milestone comparison rows from `historicalComparison.milestone_comparison`, with an older-save `War Duration` fallback derived from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
+- 2026-05-10 update: `historical_baseline.json` now authors the first milestone rows for Srebrenica and Dayton; `compareToHistorical(...)` emits them from baseline data and preserved rupture record turns.
 
 **Input docs (supporting, not milestone authorities by themselves):**
 - `docs/plans/2026-03-23-essay-template-engine-plan.md`
@@ -72,7 +73,7 @@
 **Assigned to:** Historian + Technical Architect
 
 - [ ] resolve the historical baseline data contract
-- [ ] create the first `historical_baseline` artifact
+- [x] create the first `historical_baseline` artifact
 - [ ] settle comparison categories:
   - territory
   - casualties
@@ -80,6 +81,7 @@
   - duration
   - key event divergence
 - [x] define the optional `milestone_comparison` row contract for downstream endgame surfaces
+- [x] author first Srebrenica/Dayton milestone rows in `historical_baseline.json`
 
 **Gate:** Endgame comparison has one authoritative baseline format and one authority owner.
 
@@ -89,7 +91,7 @@
 - [x] implement the first player-facing endgame comparison surface
 - [x] show player-war vs historical-war side-by-side for milestone timing rows
 - [x] include divergence notes and Cost Ledger findings sourced from real endgame state
-- [ ] broaden authored milestone inputs beyond the duration fallback
+- [x] preserve rupture record turns so Srebrenica milestone timing can compare player week vs historical week
 
 **Gate:** The player can see a truthful comparison between their war and the historical baseline.
 

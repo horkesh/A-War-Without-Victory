@@ -8,7 +8,7 @@
  */
 
 import type { CostLedger } from './cost_ledger.js';
-import type { HistoricalBaseline } from '../../state/negotiation_types.js';
+import type { HistoricalBaseline, HistoricalBaselineMilestone } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -54,6 +54,56 @@ export interface ComparisonResult {
 // ═══════════════════════════════════════════════════════════════════════════
 // Comparison
 // ═══════════════════════════════════════════════════════════════════════════
+
+function statusFromDelta(deltaWeeks: number | null): MilestoneComparisonStatus {
+    if (deltaWeeks === null) return 'absent';
+    if (deltaWeeks < 0) return 'early';
+    if (deltaWeeks > 0) return 'late';
+    return 'on_time';
+}
+
+function compareMilestones(a: HistoricalBaselineMilestone, b: HistoricalBaselineMilestone): number {
+    if (a.historical_week !== b.historical_week) return a.historical_week - b.historical_week;
+    return strictCompare(a.id, b.id);
+}
+
+function buildMilestoneComparison(
+    costLedger: CostLedger,
+    baseline: HistoricalBaseline,
+): MilestoneComparison[] | undefined {
+    const milestones = baseline.milestones ?? [];
+    if (milestones.length === 0) return undefined;
+
+    return milestones
+        .filter(m => Number.isFinite(m.historical_week))
+        .slice()
+        .sort(compareMilestones)
+        .map((milestone): MilestoneComparison => {
+            let playerWeek: number | null = null;
+            if (milestone.kind === 'war_end') {
+                playerWeek = costLedger.war_duration_weeks;
+            } else if (milestone.kind === 'rupture' && milestone.event_id) {
+                const rupture = costLedger.rupture_consequences.find(r => r.id === milestone.event_id);
+                playerWeek = Number.isFinite(rupture?.recorded_turn) ? rupture!.recorded_turn! : null;
+            }
+
+            const deltaWeeks = playerWeek === null ? null : playerWeek - milestone.historical_week;
+            const status = statusFromDelta(deltaWeeks);
+            const summary = playerWeek === null
+                ? `${milestone.label} did not occur in this run.`
+                : `${milestone.label} occurred at player week ${playerWeek} against historical week ${milestone.historical_week}.`;
+
+            return {
+                id: milestone.id,
+                label: milestone.label,
+                historical_week: milestone.historical_week,
+                player_week: playerWeek,
+                delta_weeks: deltaWeeks,
+                status,
+                summary,
+            };
+        });
+}
 
 /**
  * Compare player war against historical baseline. Pure, deterministic.
@@ -144,5 +194,6 @@ export function compareToHistorical(
         displacement_ratio: displacementRatio,
         rupture_divergence: ruptureDivergence,
         divergence_notes: notes,
+        milestone_comparison: buildMilestoneComparison(costLedger, baseline),
     };
 }

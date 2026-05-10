@@ -255,7 +255,7 @@ export interface CostLedgerFinding {
 export interface CostLedger {
     war_duration_weeks: number;
     entries: CostLedgerEntry[];
-    rupture_consequences: { id: string; perpetrator_faction: string; description: string }[];
+    rupture_consequences: { id: string; recorded_turn?: number; perpetrator_faction: string; description: string }[];
     operation_opportunities?: OpportunityCostLedger;
     total_military_killed: number;
     total_civilian_killed: number;
@@ -431,6 +431,7 @@ export function buildCostLedger(state: GameState): CostLedger {
         .sort((a, b) => strictCompare(a.id, b.id))
         .map((r: RuptureConsequence) => ({
             id: r.id,
+            recorded_turn: r.recorded_turn,
             perpetrator_faction: r.perpetrator_faction,
             description: r.description,
         }));

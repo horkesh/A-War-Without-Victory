@@ -284,6 +284,18 @@ export interface GameVerdict {
 
 /** Historical baseline data for endgame comparison.
  *  Loaded from data/reference/historical_baseline.json — not computed. */
+export interface HistoricalBaselineMilestone {
+    id: string;
+    label: string;
+    /** Week counted from April 1992. */
+    historical_week: number;
+    /** How the player-side week is resolved. */
+    kind: 'war_end' | 'rupture';
+    /** Required when kind is rupture. */
+    event_id?: string;
+    source_notes: string;
+}
+
 export interface HistoricalBaseline {
     war_duration_weeks: number;
     territory_final: Record<string, number>;
@@ -292,6 +304,7 @@ export interface HistoricalBaseline {
     civilian_killed: number;
     total_displaced: number;
     srebrenica_killed: number;
+    milestones?: HistoricalBaselineMilestone[];
     source_notes: string;
 }
 

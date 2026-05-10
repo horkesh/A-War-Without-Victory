@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Baseline milestone comparison producer
+
+**Scope:** Follow-on v0.9.1 Endgame Comparison producer slice. The previous slice rendered milestone rows when supplied, but the comparison producer still lacked authored baseline milestone rows.
+
+**Fix:** Added `HistoricalBaselineMilestone` and authored Srebrenica / Dayton rows in `data/reference/historical_baseline.json`. `buildCostLedger(...)` now preserves rupture `recorded_turn` in its reflection packet, and `compareToHistorical(...)` emits sorted `milestone_comparison` rows from the baseline. Avoided rupture milestones are marked absent rather than inventing a player week.
+
+**Validation:** Red tests first: `cost_ledger_comparison` failed on the dropped rupture turn and absent milestone rows. Green focused pack passed 16/16.
+
+**Canon posture:** Ring 2 downstream comparison only. No rupture trigger, score rule, termination rule, player lever, or save writer changed. Timing rows remain historical reflection, not an optimization surface.
+
+---
+
 ## [2026-05-10] Endgame milestone comparison rows
 
 **Scope:** Substantial v0.9.1 Endgame Comparison slice. The previous final screen rendered aggregate War Cost / Historical Comparison data, but the roadmap still correctly called out richer milestone-week comparison UX as open.

@@ -13,5 +13,22 @@
     "civilian_killed": 38476,
     "total_displaced": 2200000,
     "srebrenica_killed": 8372,
+    "milestones": [
+        {
+            "id": "srebrenica_genocide_1995",
+            "label": "Srebrenica Genocide",
+            "historical_week": 171,
+            "kind": "rupture",
+            "event_id": "srebrenica_genocide_1995",
+            "source_notes": "July 1995; ICTY Krstic judgment and later tribunal findings"
+        },
+        {
+            "id": "dayton_accords",
+            "label": "Dayton Accords",
+            "historical_week": 182,
+            "kind": "war_end",
+            "source_notes": "November 1995 Dayton Agreement reference endpoint"
+        }
+    ],
     "source_notes": "RDC 2007 (total killed), ICTY Krstic judgment (Srebrenica), UNHCR (displaced), Dayton Annex 2 (territory)"
 }
