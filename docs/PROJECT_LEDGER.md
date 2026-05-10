@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(consequences): divergence events wave 18
+
+**Scope:** v0.9.0 Consequence System breadth. Adds a small but substantive Wave 18 to close ordinary non-sensitive mirror gaps after the prior saturation report.
+
+**Fix:** Added four Ring 1 consequence records to `data/scenarios/events/consequences.json`: `csq_third_party_arms_channel_HRHB`, `csq_captured_equipment_windfall_HRHB`, `csq_winter_supply_attrition_RS`, and `csq_doctrine_drift_RS`. Catalog count moves 121 -> 125 events. All four reuse existing predicates/effects and write audit-only Cost Ledger annotations where applicable.
+
+**Validation:** Red first: `npx.cmd vitest run tests/divergence_events_wave_18.test.ts --reporter=dot` failed 6/6 on missing event IDs. Green after implementation: the same suite passed 6/6.
+
+**Canon posture:** Additive, condition-gated, non-sensitive consequence content. No new condition/effect kinds, no state schema change, no scenario paint, no OOB, no FORAWWV, no `political_controllers`, no rupture wiring, and no sensitive-history gate mutation. All four events have `turn_min >= 50`, so 40w calibration is inert by construction.
+
+**Docs:** Added the Wave 18 closeout report, patched the saturation report with a supersession note, and updated roadmap/canon/napkin status.
+
+---
+
 ## [2026-05-10] feat(operations): Central Bosnia Vlasic opportunity family
 
 **Scope:** Operation Opportunity Families Phase 2. Adds the first Central Bosnia / Vlasic non-sensitive family slice on top of the existing prerequisite-driven opportunity substrate.

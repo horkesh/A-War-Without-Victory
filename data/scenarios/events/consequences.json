@@ -5218,5 +5218,154 @@
       "captured_equipment_windfall_active_RS": true
     },
     "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-5 mirror — RS variant of csq_captured_equipment_windfall; the RBiH progenitor ships at Wave-5). Predicate structurally identical to the Wave-5 progenitor; only the faction parameter, victim parameter, and mutex flag differ. Mirrors documented VRS capture patterns from 1992-1993 Drina and Posavina operations (BB II Ch.20-25; Hoare 'How Bosnia Armed' 2004 on early-war ARBiH equipment loss). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface."
+  },
+  {
+    "id": "csq_third_party_arms_channel_HRHB",
+    "title": "The Croatia Side Channel",
+    "narrative": "The principal Croatia-side pipeline has been registering pressure for two quarters. A parallel channel begins running through private brokers, municipal depots, and units whose paperwork no longer matches the cargo. The crates are not formally acknowledged, but the HVO depots in western Herzegovina and Central Bosnia register the difference. The combat-power column ticks upward for a season. The mediator capitals know enough to watch the manifests and not enough to stop them outright.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 60,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "dimension_below", "faction": "HRHB", "dimension": "patron_confidence", "threshold": 40 },
+          { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 20 },
+          { "type": "flag_not_set", "flag": "third_party_arms_channel_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 55,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Third-party arms channel opens on the HRHB side; equipment quality uplifts while patron confidence remains low."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 1.05, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "third_party_arms_channel_HRHB", "text": "HRHB third-party arms channel under patron_confidence<40 and patron_pressure>20. Equipment quality +5% for 25 turns; audit-only record of alternate-pipeline substitution, with no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": 3 }
+    ],
+    "sets_flags": {
+      "third_party_arms_channel_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-9 mirror — HRHB variant of csq_third_party_arms_channel). Predicate structurally mirrors the RBiH progenitor and feeds the already-authored HRHB attenuation event. Mirrors Croatia-side private-broker and depot-routing substitutions in the post-Washington period (Balkan Battlegrounds Vol. II Ch.41-42; Wiebes 2002 on Croatian arms-flow channels). Ring 1 logistics/patron consequence; no §6 surface."
+  },
+  {
+    "id": "csq_captured_equipment_windfall_HRHB",
+    "title": "The Captured Stockpile (HRHB)",
+    "narrative": "A successful HVO operation closes around an ARBiH depot that had been counted in the other faction's order of battle for two years. Crates, vehicles, and ammunition that had been missing from the HVO manifests are inventoried by the captors and rotated out within the month. The combat-power uplift is short, but it is real. The losing side's manifests register the gap.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "major_operation_success_HRHB", "min": 1 },
+          { "type": "territory_loss_window", "faction": "RBiH", "min_loss_pct": 0.02, "window_turns": 6 },
+          { "type": "flag_not_set", "flag": "captured_equipment_windfall_active_HRHB" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Captured equipment from a successful HRHB operation provides a short-window combat-power uplift."
+    },
+    "effects": [
+      { "kind": "equipment_quality_modifier", "faction": "HRHB", "multiplier": 1.06, "duration_turns": 20 },
+      { "kind": "morale_change", "faction": "HRHB", "delta": 3 },
+      { "kind": "cost_ledger_annotation", "tag": "captured_equipment_windfall_HRHB", "text": "HRHB captured equipment windfall under major_operation_success_HRHB and territory_loss_window(RBiH,2%). Equipment quality +6% for 20 turns; morale +3; audit-only annotation, no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "HRHB", "dimension": "military_credibility", "delta": 4 }
+    ],
+    "sets_flags": {
+      "captured_equipment_windfall_active_HRHB": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-5 mirror — HRHB variant of csq_captured_equipment_windfall; closes the RBiH/RS/HRHB capture-windfall family). Predicate structurally mirrors the RBiH and RS variants with faction and victim parameters adjusted. Mirrors documented HVO depot capture and battlefield-recovery patterns during Central Bosnia and Herzegovina operations (Balkan Battlegrounds Vol. II Ch.41-42; Burg & Shoup 2000). Ring 1 military consequence; no §6 surface."
+  },
+  {
+    "id": "csq_winter_supply_attrition_RS",
+    "title": "The Corridor Winter",
+    "narrative": "The Posavina and eastern-Bosnia supply corridors enter winter with depots that looked adequate on the autumn manifest and no longer look adequate in December. Trucks move slower, fuel is rationed harder, and forward stockpiles are rebuilt by improvisation. The VRS communique describes normal winter posture. The brigade staffs describe shortened patrols, fewer training cycles, and ammunition counted by the crate.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 50,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "supply_below", "faction": "RS", "threshold": 40 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 50 },
+          { "type": "morale_average_below", "faction": "RS", "threshold": 55 },
+          { "type": "flag_not_set", "flag": "winter_supply_attrition_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Winter logistics gap intersects with high exhaustion and sub-baseline morale (RS variant); cohesion drains across the active force."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": -3 },
+      { "kind": "supply_delta", "faction": "RS", "delta": -8 },
+      { "kind": "cost_ledger_annotation", "tag": "winter_supply_attrition_RS", "text": "RS winter supply attrition under supply<40, war_exhaustion>50, and morale_avg<55. Cohesion -3 and supply -8; audit-only annotation, no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "winter_supply_attrition_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-9/Wave-11 mirror — RS variant of csq_winter_supply_attrition; closes the winter-attrition triad). Predicate structurally mirrors the RBiH and HRHB variants. Mirrors documented VRS winter corridor strain around Posavina, eastern Bosnia, and the Brcko bottleneck (Balkan Battlegrounds Vol. II Ch.30-34). Ring 1 logistics consequence; no §6 surface."
+  },
+  {
+    "id": "csq_doctrine_drift_RS",
+    "title": "The Manual in Pale",
+    "narrative": "The reorganization that had promised cleaner corps-level command has drifted off the agenda. The new tables sit in the headquarters binders while the officers who knew them rotate, fall, or return to local political obligations. Brigades that had been training to the new pattern return to older habits. The combat-power column does not register a cliff. It registers a slow institutional drag.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 100,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          { "type": "flag_at_least", "flag": "corps_reorganization_active_RS", "min": 1 },
+          { "type": "flag_at_least", "flag": "war_exhaustion_x100_RS", "min": 70 },
+          { "type": "morale_average_below", "faction": "RS", "threshold": 45 },
+          { "type": "flag_not_set", "flag": "doctrine_drift_active_RS" }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 60,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Doctrine drift after corps-reorganization inflection (RS variant); institutional drag returns as the cadre rotates out."
+    },
+    "effects": [
+      { "kind": "cohesion_change", "faction": "RS", "delta": -3 },
+      { "kind": "recruitment_modifier", "faction": "RS", "pool_multiplier": 0.94, "duration_turns": 25 },
+      { "kind": "cost_ledger_annotation", "tag": "doctrine_drift_RS", "text": "RS doctrine drift under prior corps_reorganization_active_RS, war_exhaustion>70, and morale_avg<45. Cohesion -3 and recruitment -6% for 25 turns; audit-only annotation, no rupture wiring." }
+    ],
+    "dimension_shifts": [
+      { "faction": "RS", "dimension": "military_credibility", "delta": -2 }
+    ],
+    "sets_flags": {
+      "doctrine_drift_active_RS": true
+    },
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-10/Wave-11 mirror — RS variant of csq_doctrine_drift; closes the doctrine-drift triad). Predicate structurally mirrors the RBiH and HRHB variants with the RS reorganization flag. Mirrors documented late-war VRS institutional strain under officer rotation, casualty pressure, and Pale/Banja Luka command friction (Balkan Battlegrounds Vol. II Ch.34, Ch.49; Burg & Shoup 2000). Ring 1 command consequence; no §6 surface."
   }
 ]

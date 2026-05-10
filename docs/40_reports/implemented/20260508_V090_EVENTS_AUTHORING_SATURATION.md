@@ -6,6 +6,8 @@
 **Predecessor lane:** Wave 17 at `6fa3c707` (121 events) — saturation note in closeout flagged Wave 18 as an "honest assessment turn"
 **Scope:** docs-only. No code, no engine/sim/test touch. Ring 1; no §6 surface.
 
+> **2026-05-10 update:** superseded in part by Wave 18 (`docs/40_reports/implemented/20260510_DIVERGENCE_EVENTS_WAVE_18.md`). The catalog now stands at **125 events**. Wave 18 folded in the previously named `csq_captured_equipment_windfall_HRHB` candidate plus three non-sensitive substrate-backed mirrors (`csq_third_party_arms_channel_HRHB`, `csq_winter_supply_attrition_RS`, `csq_doctrine_drift_RS`). The saturation verdict still applies to giant undifferentiated authoring waves; ordinary closure should now prefer reader/narrative integration or substrate-audit lanes.
+
 ---
 
 ## 1. Catalog state at saturation
