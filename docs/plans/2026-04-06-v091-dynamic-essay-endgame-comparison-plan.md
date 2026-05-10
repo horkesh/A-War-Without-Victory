@@ -17,6 +17,7 @@
 - `Letter Home` is implemented
 - `Endgame Comparison` is partially implemented: `historicalComparison` already feeds `VerdictScreen`, Chronicle, and Wrapped
 - dynamic essay sections / ghost entries / divergence notes are partially implemented in the first Codex slice (`dynamic_sections`, `ghost_when`, ghost essays / entries for paths not taken)
+- 2026-05-10 update: the Codex resolver also consumes Cost Ledger findings through deterministic atoms/tokens, and the Srebrenica + Dayton essays render source-labeled prosecutorial finding inserts.
 
 **Input docs (supporting, not milestone authorities by themselves):**
 - `docs/plans/2026-03-23-essay-template-engine-plan.md`
@@ -59,9 +60,9 @@
 ### Phase 1. Dynamic Essay Engine
 **Assigned to:** Systems Programmer + Documentation Specialist
 
-- [ ] define the canonical dynamic essay schema
-- [ ] add runtime condition evaluation for dynamic sections
-- [ ] support divergence notes and ghost entries
+- [x] define the canonical dynamic essay schema (`dynamic_sections`, `ghost_when`, dynamic variants)
+- [x] add runtime condition evaluation for dynamic sections, including comparison and Cost Ledger finding atoms
+- [x] support divergence notes, ghost entries, and Cost Ledger findings in dynamic essay output
 - [ ] ensure canonical historical text remains immutable substrate
 
 **Gate:** A dynamic essay can render canonical text plus deterministic inserted sections without mutating the base essay.
@@ -85,7 +86,7 @@
 
 - [ ] implement the first player-facing endgame comparison surface
 - [ ] show player-war vs historical-war side-by-side
-- [ ] include divergence notes sourced from real dynamic/Codex state
+- [x] include divergence notes and Cost Ledger findings sourced from real endgame state
 
 **Gate:** The player can see a truthful comparison between their war and the historical baseline.
 
@@ -96,6 +97,7 @@
   - dynamic essay condition evaluation
   - ghost entry visibility
   - divergence note rendering
+  - Cost Ledger finding atom/token rendering
   - historical baseline loading
   - endgame comparison data integrity
 - [ ] full vitest

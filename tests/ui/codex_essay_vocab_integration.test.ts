@@ -169,3 +169,90 @@ describe('v0.9.1 vocab — Bihac 5th Corps fell ghost epilogue', () => {
         expect(ghostEpilogue).toBeUndefined();
     });
 });
+
+describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
+    const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
+    const daytonEssay = findEssay('essay_dayton_signed_1995');
+    const srebrenicaSection = (srebrenicaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_cost_ledger_srebrenica_finding');
+    const daytonSection = (daytonEssay.dynamic_sections ?? []).find(s => s.id === 'v091_cost_ledger_findings_docket');
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 46500,
+        total_civilian_killed: 38000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 46,500 military killed and 38,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'rupture_srebrenica_genocide_1995',
+                category: 'rupture',
+                severity: 'rupture',
+                faction: 'RS',
+                title: 'Srebrenica genocide',
+                text: 'The ledger records the Srebrenica genocide after Fall of Srebrenica.',
+                sources: ['ICTY Krstic IT-98-33-T', 'ICJ Bosnia v. Serbia (2007)'],
+            },
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 14 war-crime events.',
+                sources: ['Sensitive History Design Gate §4'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds a Srebrenica finding section gated by the rupture finding id', () => {
+        expect(srebrenicaSection).toBeDefined();
+        expect(srebrenicaSection?.variant).toBe('divergence');
+        expect(srebrenicaSection?.condition).toBe('GAME_OVER AND FINDING:rupture_srebrenica_genocide_1995');
+    });
+
+    it('renders the Srebrenica finding text and sources inside the historical essay', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set(['srebrenica_falls_1995']),
+            gameOver: true,
+            costLedger,
+        };
+        const resolved = resolveCodexEssay(srebrenicaEssay, ctx);
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Srebrenica genocide [RS]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('ICJ Bosnia v. Serbia'))).toBe(true);
+    });
+
+    it('adds a Dayton findings docket gated by any grave finding', () => {
+        expect(daytonSection).toBeDefined();
+        expect(daytonSection?.variant).toBe('divergence');
+        expect(daytonSection?.condition).toBe('GAME_OVER AND FINDING_SEVERITY:grave');
+    });
+
+    it('renders a deterministic source-labeled findings docket in Dayton', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set(['dayton_signed_1995']),
+            gameOver: true,
+            historicalComparison: {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+            },
+            costLedger,
+        };
+        const resolved = resolveCodexEssay(daytonEssay, ctx);
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Human cost record: The ledger records 46,500'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('Sources: ICJ Bosnia v. Serbia'))).toBe(true);
+    });
+});

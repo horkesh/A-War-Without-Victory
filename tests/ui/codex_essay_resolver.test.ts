@@ -11,6 +11,7 @@ function context(overrides: Partial<CodexRenderContext> = {}): CodexRenderContex
         firedEventIds: new Set<string>(),
         eventFlags: {},
         historicalComparison: undefined,
+        costLedger: undefined,
         gameOver: false,
         ...overrides,
     };
@@ -338,5 +339,112 @@ describe('codexEssayResolver — template interpolation tokens', () => {
         expect(resolveWith('{comparison_notes}', {
             divergence_notes: ['Note A', 'Note B'],
         })).toEqual(['Note A', 'Note B']);
+    });
+});
+
+describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 46000,
+        total_civilian_killed: 38000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 46,000 military killed and 38,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'rupture_srebrenica_genocide_1995',
+                category: 'rupture',
+                severity: 'rupture',
+                faction: 'RS',
+                title: 'Srebrenica genocide',
+                text: 'The ledger records the Srebrenica genocide.',
+                sources: ['ICTY Krstic IT-98-33-T', 'ICJ Bosnia v. Serbia (2007)'],
+            },
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'record',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 4 war-crime events.',
+                sources: ['Sensitive History Design Gate §4'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('matches finding id, category, severity, and faction atoms', () => {
+        const ctx = context({ gameOver: true, costLedger });
+
+        expect(evaluateEssayCondition('FINDING:rupture_srebrenica_genocide_1995', ctx)).toBe(true);
+        expect(evaluateEssayCondition('FINDING_CATEGORY:war_crimes', ctx)).toBe(true);
+        expect(evaluateEssayCondition('FINDING_SEVERITY:rupture', ctx)).toBe(true);
+        expect(evaluateEssayCondition('FINDING_FACTION:HRHB', ctx)).toBe(true);
+        expect(evaluateEssayCondition('FINDING_FACTION:RBiH', ctx)).toBe(false);
+    });
+
+    it('renders deterministic cost finding body and source tokens', () => {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [{
+                    id: 'cost-findings',
+                    insert_after_paragraph: -1,
+                    condition: 'GAME_OVER AND FINDING_CATEGORY:rupture',
+                    variant: 'divergence',
+                    content: '{cost_findings}\n\nSources: {cost_finding_sources}',
+                }],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                costLedger,
+            }),
+        );
+
+        const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+        expect(dynamic).toEqual([
+            'Human cost record: The ledger records 46,000 military killed and 38,000 civilian killed.',
+            'Srebrenica genocide [RS]: The ledger records the Srebrenica genocide.',
+            'HRHB war-crimes record [HRHB]: HRHB capital records contain 4 war-crime events.',
+            'Sources: ICJ Bosnia v. Serbia (2007); ICTY Krstic IT-98-33-T; RDC Sarajevo, Bosnian Book of the Dead (2007); Sensitive History Design Gate §4',
+        ]);
+    });
+
+    it('renders category-filtered Cost Ledger finding tokens', () => {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [{
+                    id: 'rupture-findings',
+                    insert_after_paragraph: -1,
+                    condition: 'GAME_OVER AND FINDING_CATEGORY:rupture',
+                    variant: 'divergence',
+                    content: '{cost_rupture_findings}',
+                }],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                costLedger,
+            }),
+        );
+
+        const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+        expect(dynamic).toEqual([
+            'Srebrenica genocide [RS]: The ledger records the Srebrenica genocide.',
+        ]);
+    });
+
+    it('cost-ledger atoms return false when the ledger is absent', () => {
+        const ctx = context({ gameOver: true, costLedger: undefined });
+        expect(evaluateEssayCondition('FINDING:human_cost_record', ctx)).toBe(false);
+        expect(evaluateEssayCondition('FINDING_CATEGORY:human_cost', ctx)).toBe(false);
+        expect(evaluateEssayCondition('FINDING_SEVERITY:grave', ctx)).toBe(false);
+        expect(evaluateEssayCondition('FINDING_FACTION:RS', ctx)).toBe(false);
     });
 });

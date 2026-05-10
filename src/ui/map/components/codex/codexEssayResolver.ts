@@ -1,4 +1,6 @@
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
+import type { CostLedger, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
+import { strictCompare } from '../../../../state/validateGameState.js';
 
 export interface DynamicSection {
     id?: string;
@@ -27,6 +29,7 @@ export interface CodexRenderContext {
     firedEventIds: Set<string>;
     eventFlags?: Record<string, string | number | boolean>;
     historicalComparison?: ComparisonResult;
+    costLedger?: CostLedger;
     gameOver?: boolean;
 }
 
@@ -81,6 +84,25 @@ function territoryDelta(context: CodexRenderContext, factionKey: string): number
     if (!map) return undefined;
     const value = map[factionKey];
     return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function costFindings(context: CodexRenderContext): CostLedgerFinding[] {
+    const raw = context.costLedger?.findings;
+    return Array.isArray(raw)
+        ? raw.filter((finding): finding is CostLedgerFinding => Boolean(finding && typeof finding.id === 'string'))
+        : [];
+}
+
+function hasCostFinding(context: CodexRenderContext, id: string): boolean {
+    return costFindings(context).some((finding) => finding.id === id);
+}
+
+function hasCostFindingField(
+    context: CodexRenderContext,
+    field: 'category' | 'severity' | 'faction',
+    value: string,
+): boolean {
+    return costFindings(context).some((finding) => finding[field] === value);
 }
 
 /** Parse a threshold from a token like "CASUALTY_ABOVE:1.2". Returns NaN on
@@ -147,6 +169,19 @@ function evaluateAtom(token: string, context: CodexRenderContext): boolean {
 
     if (token.startsWith('RUPTURE:')) {
         return hasRupture(context, token.slice('RUPTURE:'.length));
+    }
+
+    if (token.startsWith('FINDING:')) {
+        return hasCostFinding(context, token.slice('FINDING:'.length));
+    }
+    if (token.startsWith('FINDING_CATEGORY:')) {
+        return hasCostFindingField(context, 'category', token.slice('FINDING_CATEGORY:'.length));
+    }
+    if (token.startsWith('FINDING_SEVERITY:')) {
+        return hasCostFindingField(context, 'severity', token.slice('FINDING_SEVERITY:'.length));
+    }
+    if (token.startsWith('FINDING_FACTION:')) {
+        return hasCostFindingField(context, 'faction', token.slice('FINDING_FACTION:'.length));
     }
 
     if (token.startsWith('EVENT:')) {
@@ -231,11 +266,44 @@ function signed(n: number): string {
     return String(n);
 }
 
+function formatCostFinding(finding: CostLedgerFinding): string {
+    const faction = finding.faction ? ` [${finding.faction}]` : '';
+    return `${finding.title}${faction}: ${finding.text}`;
+}
+
+function costFindingSources(context: CodexRenderContext): string[] {
+    const sources = new Set<string>();
+    for (const finding of costFindings(context)) {
+        for (const source of finding.sources ?? []) {
+            if (typeof source === 'string' && source.trim().length > 0) {
+                sources.add(source.trim());
+            }
+        }
+    }
+    return [...sources].sort(strictCompare);
+}
+
+function formatCostFindingsByCategory(
+    context: CodexRenderContext,
+    category: CostLedgerFinding['category'],
+): string {
+    return costFindings(context)
+        .filter((finding) => finding.category === category)
+        .map(formatCostFinding)
+        .join('\n\n');
+}
+
 /** Expand a single template token against the render context. Returns
  *  undefined when the token is not recognized — caller leaves the literal
  *  `{token}` in place so missing tokens are visible in content review. */
 function expandToken(token: string, context: CodexRenderContext): string | undefined {
     if (token === 'comparison_notes') return comparisonNotes(context).join('\n\n');
+    if (token === 'cost_findings') return costFindings(context).map(formatCostFinding).join('\n\n');
+    if (token === 'cost_rupture_findings') return formatCostFindingsByCategory(context, 'rupture');
+    if (token === 'cost_human_findings') return formatCostFindingsByCategory(context, 'human_cost');
+    if (token === 'cost_displacement_findings') return formatCostFindingsByCategory(context, 'displacement');
+    if (token === 'cost_war_crimes_findings') return formatCostFindingsByCategory(context, 'war_crimes');
+    if (token === 'cost_finding_sources') return costFindingSources(context).join('; ');
 
     if (token === 'duration_delta_weeks') {
         const n = comparisonNumber(context, 'duration_delta_weeks');

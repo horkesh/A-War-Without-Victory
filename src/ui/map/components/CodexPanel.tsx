@@ -65,10 +65,11 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
             firedEventIds,
             eventFlags: loadedGameState?.eventFlags,
             historicalComparison: loadedGameState?.historicalComparison,
+            costLedger: loadedGameState?.costLedger,
             gameOver: loadedGameState?.gameOver,
         };
         return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context)]));
-    }, [essays, firedEventIds, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.gameOver]);
+    }, [essays, firedEventIds, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
 
     const essaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();

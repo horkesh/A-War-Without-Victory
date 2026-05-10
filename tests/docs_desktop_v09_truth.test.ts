@@ -88,10 +88,16 @@ describe('desktop and roadmap truth docs', () => {
 
   it('keeps the v0.9.1 plan baseline aligned with already-landed comparison and codex slices', () => {
     const plan = readRepoFile('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+    const bible = readRepoFile('docs', '10_canon', 'Game_Bible_v0_9_0.md');
 
     expect(plan).toContain('Endgame Comparison` is partially implemented');
     expect(plan).toContain('dynamic essay sections / ghost entries / divergence notes are partially implemented');
+    expect(plan).toContain('Cost Ledger findings through deterministic atoms/tokens');
     expect(plan).toContain('`dynamic_sections`, `ghost_when`');
+    expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
+    expect(roadmap).toContain('| Endgame Comparison | Advanced');
+    expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
     expect(plan).not.toContain('Endgame Comparison` is not implemented');
     expect(plan).not.toContain('dynamic essay sections / ghost entries / divergence notes are not implemented');
   });

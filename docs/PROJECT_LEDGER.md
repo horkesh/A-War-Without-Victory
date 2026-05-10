@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Dynamic Codex Cost Ledger findings
+
+**Scope:** Substantial v0.9.1 Dynamic Essay + Endgame Comparison slice. The previous Codex resolver consumed event flags and historical comparison deltas, but the new prosecutorial Cost Ledger findings still stopped at the War Cost tab.
+
+**Fix:** Extended `codexEssayResolver` with deterministic Cost Ledger finding atoms (`FINDING`, `FINDING_CATEGORY`, `FINDING_SEVERITY`, `FINDING_FACTION`) and template tokens (`cost_findings`, category-filtered finding tokens, `cost_finding_sources`). `CodexPanel` now passes `costLedger` into essay resolution. Authored two endgame essay insertions: a Srebrenica rupture-finding section and a Dayton findings docket, both source-labeled and gated by real Cost Ledger findings.
+
+**Validation:** Red tests first: resolver, essay-index integration, and CodexPanel mount tests failed on missing Cost Ledger atoms/tokens, missing authored sections, and absent UI rendering. Green focused pack passed 44/44.
+
+**Canon posture:** Ring 2 narrative reflection only. No sim writer, rupture trigger, score change, player lever, or save schema change. The Codex now reuses the same source-labeled prosecutorial findings as the War Cost surface and remains under `SENSITIVE_HISTORY_DESIGN_GATE.md` §4/§5 wording boundaries.
+
+---
+
 ## [2026-05-10] Cost Ledger prosecutorial findings
 
 **Scope:** Substantial v0.9.0 Cost Ledger closure slice. The existing Cost Ledger had numeric aggregation, opportunity reckoning, and historical comparison, but the roadmap still correctly called out full prosecutorial authoring as open.

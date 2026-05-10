@@ -101,6 +101,57 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText('Federation controlled 54.0% territory vs historical 51%')).toBeTruthy();
     });
 
+    it('renders Cost Ledger prosecutorial findings in Codex endgame essays', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [firedEvent('dayton_signed_1995')],
+                gameOver: true,
+                historicalComparison: {
+                    duration_delta_weeks: 0,
+                    territory_divergence: {},
+                    casualty_ratio: 1,
+                    displacement_ratio: 1,
+                    rupture_divergence: [],
+                    divergence_notes: [],
+                },
+                costLedger: {
+                    war_duration_weeks: 188,
+                    entries: [],
+                    rupture_consequences: [],
+                    total_military_killed: 46500,
+                    total_civilian_killed: 38000,
+                    findings: [
+                        {
+                            id: 'human_cost_record',
+                            category: 'human_cost',
+                            severity: 'grave',
+                            title: 'Human cost record',
+                            text: 'The ledger records 46,500 military killed and 38,000 civilian killed.',
+                            sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+                        },
+                        {
+                            id: 'war_crimes_record_RS',
+                            category: 'war_crimes',
+                            severity: 'grave',
+                            faction: 'RS',
+                            title: 'RS war-crimes record',
+                            text: 'RS capital records contain 14 war-crime events.',
+                            sources: ['Sensitive History Design Gate §4'],
+                        },
+                    ],
+                },
+            },
+        };
+
+        renderPanel();
+        fireEvent.click(screen.getByText('1995'));
+        fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
+
+        expect(screen.getAllByText('Player War Divergence').length).toBeGreaterThanOrEqual(2);
+        expect(screen.getByText('Human cost record: The ledger records 46,500 military killed and 38,000 civilian killed.')).toBeTruthy();
+        expect(screen.getByText(/Sources: RDC Sarajevo/)).toBeTruthy();
+    });
+
     it('keeps unfired non-ghost essays locked', () => {
         storeState = {
             loadedGameState: {
