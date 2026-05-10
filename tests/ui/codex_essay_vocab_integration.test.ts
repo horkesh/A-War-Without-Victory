@@ -942,3 +942,134 @@ describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
         expect(resolveCodexEssay(cohaExpiresEssay, longerCtx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
     });
 });
+
+describe('v0.9.1 vocab - late intervention and final offensive breadth wave', () => {
+    const natoEssay = findEssay('essay_nato_deliberate_force_1995');
+    const hostageEssay = findEssay('essay_un_hostage_crisis_1995');
+    const gorazdeEssay = findEssay('essay_gorazde_crisis_1994');
+    const mistralEssay = findEssay('essay_operation_mistral_2_1995');
+    const sanaEssay = findEssay('essay_operation_sana_1995');
+    const summerEssay = findEssay('essay_operation_summer_95');
+    const haltEssay = findEssay('essay_us_halts_federation_advance_1995');
+    const washingtonEssay = findEssay('essay_washington_agreement_1994');
+
+    const sections = {
+        nato: (natoEssay.dynamic_sections ?? []).find(s => s.id === 'v091_deliberate_force_dayton_timing_note'),
+        hostage: (hostageEssay.dynamic_sections ?? []).find(s => s.id === 'v091_un_hostage_rs_war_crimes_findings'),
+        gorazde: (gorazdeEssay.dynamic_sections ?? []).find(s => s.id === 'v091_gorazde_crisis_displacement_findings'),
+        mistral: (mistralEssay.dynamic_sections ?? []).find(s => s.id === 'v091_mistral_human_cost_findings'),
+        sana: (sanaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_sana_displacement_findings'),
+        summer: (summerEssay.dynamic_sections ?? []).find(s => s.id === 'v091_summer95_hrhb_war_crimes_findings'),
+        halt: (haltEssay.dynamic_sections ?? []).find(s => s.id === 'v091_us_halts_dayton_timing_note'),
+        washington: (washingtonEssay.dynamic_sections ?? []).find(s => s.id === 'v091_washington_to_dayton_timing_note'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 46000,
+        total_civilian_killed: 38000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 46,000 military killed and 38,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'civilian_displacement_record',
+                category: 'displacement',
+                severity: 'grave',
+                title: 'Civilian displacement record',
+                text: 'The ledger records 2,200,000 civilians displaced or killed.',
+                sources: ['UNHCR (1996) and ICTY findings'],
+            },
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'record',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 14 war-crime events.',
+                sources: ['Sensitive History Design Gate section 4'],
+            },
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'record',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 4 war-crime events.',
+                sources: ['Sensitive History Design Gate section 4'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    const comparison: NonNullable<CodexRenderContext['historicalComparison']> = {
+        duration_delta_weeks: 7,
+        territory_divergence: {},
+        casualty_ratio: 1.25,
+        displacement_ratio: 1.3,
+        rupture_divergence: [],
+        divergence_notes: [],
+        milestone_comparison: [{
+            id: 'dayton_accords',
+            label: 'Dayton Accords',
+            historical_week: 182,
+            player_week: 189,
+            delta_weeks: 7,
+            status: 'late',
+            summary: 'Dayton Accords occurred at player week 189 against historical week 182.',
+        }],
+    };
+
+    it('adds eight authored dynamic sections with deterministic gates', () => {
+        expect(sections.nato?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.hostage?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+        expect(sections.gorazde?.condition).toBe('GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1');
+        expect(sections.mistral?.condition).toBe('GAME_OVER AND FINDING:human_cost_record AND CASUALTY_ABOVE:1.1');
+        expect(sections.sana?.condition).toBe('GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1');
+        expect(sections.summer?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_HRHB');
+        expect(sections.halt?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.washington?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+
+        expect(sections.nato?.variant).toBe('note');
+        expect(sections.hostage?.variant).toBe('divergence');
+        expect(sections.gorazde?.variant).toBe('divergence');
+        expect(sections.mistral?.variant).toBe('divergence');
+        expect(sections.sana?.variant).toBe('divergence');
+        expect(sections.summer?.variant).toBe('divergence');
+        expect(sections.halt?.variant).toBe('note');
+        expect(sections.washington?.variant).toBe('note');
+    });
+
+    it('renders the new late-war sections through existing tokens only', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set([
+                'nato_deliberate_force_1995',
+                'un_hostage_crisis_1995',
+                'gorazde_crisis_1994',
+                'operation_mistral_2_1995',
+                'operation_sana_1995',
+                'operation_summer_95',
+                'us_halts_federation_advance_1995',
+                'washington_agreement_1994',
+            ]),
+            gameOver: true,
+            costLedger,
+            historicalComparison: comparison,
+        };
+
+        expect(resolveCodexEssay(natoEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
+        expect(resolveCodexEssay(hostageEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(gorazdeEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
+        expect(resolveCodexEssay(mistralEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
+        expect(resolveCodexEssay(sanaEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
+        expect(resolveCodexEssay(summerEssay, ctx).paragraphs.some(p => p.text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(resolveCodexEssay(haltEssay, ctx).paragraphs.some(p => p.text.includes('Delta from historical baseline: +7 weeks'))).toBe(true);
+        expect(resolveCodexEssay(washingtonEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
+    });
+});

@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): add late intervention final-offensive readers
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the diplomatic/siege continuity readers.
+
+**Fix:** Added eight read-only `dynamic_sections` that consume existing Cost Ledger and milestone atoms/tokens in Operation Deliberate Force, UN hostage crisis, Gorazde crisis, Operation Mistral 2, Operation Sana, Operation Summer '95, Washington halts the Federation advance, and Washington Agreement essays.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing eight dynamic section hooks and missing rendered output. Green after implementation: 39/39 passed.
+
+**Canon posture:** Read-only Ring 2 narrative reflection. No NATO/intervention trigger, operation result, Cost Ledger producer, event trigger, rupture logic, score rule, save schema, scenario data, casualty/displacement math, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, v0.9.1 plan, docs truth guard, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(codex): add diplomatic and siege continuity readers
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the founding-constraint readers.
