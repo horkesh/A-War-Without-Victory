@@ -142,6 +142,8 @@ This keeps the system explainable, auditable, and less likely to collapse under 
 
 **Done means:** an accepted early peace path has a real state-transition and endgame handoff contract instead of just being a future idea.
 
+**Status 2026-05-10:** DONE for the first bounded path. Accepted all-faction peace plans already set `meta.game_over`, `meta.outcome`, `war_ended_early`, `early_peace_implemented`, and freeze `meta.endgame_snapshot`; Packet C3 now adds the missing Cost Ledger handoff by emitting `early_peace_implementation_record` when `war_ended_early` is present. This records the accepted plan id and termination week as a duration finding without claiming that civilian or political costs vanished.
+
 ---
 
 ## 5. Blocked or deferred work

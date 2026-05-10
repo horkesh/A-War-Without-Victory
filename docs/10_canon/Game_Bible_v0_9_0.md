@@ -138,6 +138,8 @@ Treaties are terminal: any accepted peace-triggering territorial treaty ends the
 
 Any peace-triggering treaty must explicitly address Brčko special status. Treaties without Brčko resolution are rejected.
 
+**Implementation-note (2026-05-10 early-peace handoff):** Accepted all-faction peace plans write the termination signal (`meta.game_over`, `meta.outcome`, `war_ended_early`, `early_peace_implemented`) and freeze the endgame snapshot. The Cost Ledger also records `early_peace_implementation_record`, a duration finding that names the accepted plan and termination week. This is a handoff fact, not a moral credit or proof that political or civilian costs vanished.
+
 ### 15.2 Institutional competences
 
 Institutions are negotiated as competence allocations. Treaties may allocate specific competences (police, defense, education, health, customs, taxation, currency, airspace, international representation) to faction holders.

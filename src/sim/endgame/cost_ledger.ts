@@ -238,6 +238,7 @@ export type CostLedgerFindingCategory =
     | 'human_cost'
     | 'displacement'
     | 'rupture'
+    | 'duration'
     | 'war_crimes';
 
 export type CostLedgerFindingSeverity = 'record' | 'grave' | 'rupture';
@@ -266,6 +267,7 @@ export interface CostLedger {
 
 const COST_LEDGER_SOURCES = Object.freeze({
     sensitiveHistoryGate: 'Sensitive History Design Gate §4',
+    victoryScoring: 'Victory Conditions and Pyrrhic Scoring section 1',
     rdc: 'RDC Sarajevo, Bosnian Book of the Dead (2007)',
     unhcr: 'UNHCR (1996) displacement estimates',
     srebrenica: 'ICTY Krstic IT-98-33-T; Karadzic IT-95-5/18-T; Mladic IT-09-92-T; ICJ Bosnia v. Serbia (2007)',
@@ -284,9 +286,14 @@ function buildProsecutorialFindings(
     ruptures: readonly { id: string; perpetrator_faction: string; description: string }[],
     totalMilitaryKilled: number,
     totalCivilianKilled: number,
+    state: GameState,
 ): CostLedgerFinding[] {
     const findings: CostLedgerFinding[] = [];
     const totalRefugeesCreated = entries.reduce((sum, entry) => sum + Math.max(0, entry.refugees_created), 0);
+    const flags = state.military?.event_flags ?? {};
+    const earlyPeaceId = flags.war_ended_early === true
+        ? String(flags.early_peace_implemented ?? 'negotiated')
+        : null;
 
     findings.push({
         id: 'human_cost_record',
@@ -299,6 +306,19 @@ function buildProsecutorialFindings(
             'These counts are accounting facts for the verdict surface, not a score.',
         sources: [COST_LEDGER_SOURCES.rdc, COST_LEDGER_SOURCES.sensitiveHistoryGate],
     });
+
+    if (earlyPeaceId) {
+        findings.push({
+            id: 'early_peace_implementation_record',
+            category: 'duration',
+            severity: 'record',
+            title: 'Early negotiated settlement',
+            text:
+                `The ledger records acceptance of peace plan ${earlyPeaceId} at week ${state.meta?.turn ?? 0}. ` +
+                'This is a termination fact, not proof that political or civilian costs vanished.',
+            sources: [COST_LEDGER_SOURCES.victoryScoring, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+        });
+    }
 
     if (totalRefugeesCreated > 0) {
         findings.push({
@@ -460,7 +480,7 @@ export function buildCostLedger(state: GameState): CostLedger {
         operation_opportunities: buildOpportunityCostLedger(state),
         total_military_killed: totalMilitaryKilled,
         total_civilian_killed: totalCivilianKilled,
-        findings: buildProsecutorialFindings(entries, ruptureEntries, totalMilitaryKilled, totalCivilianKilled),
+        findings: buildProsecutorialFindings(entries, ruptureEntries, totalMilitaryKilled, totalCivilianKilled, state),
         annotations: annotations.length > 0 ? annotations : undefined,
     };
 }

@@ -22,6 +22,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
+import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { GameState } from '../src/state/game_state.js';
 
@@ -103,6 +104,28 @@ describe('LANE-D1 war_ended_early producer', () => {
         expect(state.military.event_flags).toBeDefined();
         expect(state.military.event_flags!.war_ended_early).toBe(true);
         expect(state.military.event_flags!.early_peace_implemented).toBe(planId);
+    });
+
+    it('records accepted early peace as a Cost Ledger finding', () => {
+        const state = makeState();
+        const planId = getFirstPeacePlanId();
+        const neg = state.military.negotiation!;
+        (neg as any).pending_peace_plan = {
+            plan_id: planId,
+            turn_offered: 50,
+            bot_responses: { RS: 'accepted', HRHB: 'accepted' },
+        };
+
+        resolvePeacePlan(state, planId, 'accepted');
+
+        const ledger = buildCostLedger(state);
+        const finding = ledger.findings.find(f => f.id === 'early_peace_implementation_record');
+        expect(finding).toBeTruthy();
+        expect(finding?.category).toBe('duration');
+        expect(finding?.severity).toBe('record');
+        expect(finding?.text).toContain('vance_owen');
+        expect(finding?.text).toContain('week 50');
+        expect(finding?.text).toContain('not proof that political or civilian costs vanished');
     });
 
     it('does NOT set war_ended_early when any faction rejects', () => {

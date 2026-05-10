@@ -18,6 +18,20 @@
 
 ---
 
+## [2026-05-10] feat(consequences): Packet C3 early peace ledger bridge
+
+**Scope:** v0.9.0 Consequence System Refresh, Packet C3. Closes the first accepted-peace endgame handoff gap after the existing `resolvePeacePlan` termination writer and endgame snapshot freeze.
+
+**Fix:** `buildCostLedger(...)` now emits `early_peace_implementation_record` when `war_ended_early` is present. The finding records the accepted peace plan id and termination week as a duration fact, explicitly not as proof that political or civilian costs vanished.
+
+**Validation:** Red first: `npx.cmd vitest run tests/peace_plans_war_ended_early_producer.test.ts --reporter=dot` failed on missing `early_peace_implementation_record`. Green focused: 3/3 passed.
+
+**Canon posture:** Read-only endgame reflection. No treaty acceptance logic, termination priority, scoring anchor, scenario data, save schema, rupture logic, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, consequence refresh plan, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(ui): Turn Aftermath judgment memory bridge
 
 **Scope:** Presidential product spine follow-up. Closes more of the Report -> Cost -> Judge -> Next loop from the post-turn surface.
