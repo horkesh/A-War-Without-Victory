@@ -241,6 +241,76 @@ describe('v0.9.1 vocab - authored findings breadth wave', () => {
     });
 });
 
+describe('v0.9.1 vocab - late-war findings breadth wave', () => {
+    const zepaEssay = findEssay('essay_zepa_falls_1995');
+    const federationEssay = findEssay('essay_federation_ground_offensive_1995');
+    const zepaRuptureSection = (zepaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_zepa_rupture_finding');
+    const federationHumanCostSection = (federationEssay.dynamic_sections ?? []).find(s => s.id === 'v091_federation_offensive_human_cost_findings');
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 52000,
+        total_civilian_killed: 41000,
+        findings: [
+            {
+                id: 'rupture_zepa_falls_1995',
+                category: 'rupture',
+                severity: 'grave',
+                faction: 'RS',
+                title: 'Zepa safe area collapse',
+                text: 'The ledger records the fall of Zepa and forced removal of civilians.',
+                sources: ['ICTY Tolimir IT-05-88/2-T'],
+            },
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 52,000 military killed and 41,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds a Zepa rupture finding section gated by the Zepa rupture id', () => {
+        expect(zepaRuptureSection).toBeDefined();
+        expect(zepaRuptureSection?.variant).toBe('divergence');
+        expect(zepaRuptureSection?.condition).toBe('GAME_OVER AND FINDING:rupture_zepa_falls_1995');
+    });
+
+    it('renders Zepa rupture findings inside the Zepa essay', () => {
+        const resolved = resolveCodexEssay(zepaEssay, {
+            firedEventIds: new Set(['zepa_falls_1995']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Zepa safe area collapse [RS]'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('ICTY Tolimir'))).toBe(true);
+    });
+
+    it('adds a Federation offensive human-cost findings section', () => {
+        expect(federationHumanCostSection).toBeDefined();
+        expect(federationHumanCostSection?.variant).toBe('divergence');
+        expect(federationHumanCostSection?.condition).toBe('GAME_OVER AND FINDING_CATEGORY:human_cost');
+    });
+
+    it('renders human-cost findings inside the Federation offensive essay', () => {
+        const resolved = resolveCodexEssay(federationEssay, {
+            firedEventIds: new Set(['federation_ground_offensive_1995']),
+            gameOver: true,
+            costLedger,
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Human cost record: The ledger records 52,000'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('RDC Sarajevo'))).toBe(true);
+    });
+});
+
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');

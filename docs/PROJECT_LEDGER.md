@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): Zepa and Federation Offensive findings-breadth wave
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Continues the same existing-atoms pattern from the Ahmici/Operation Storm wave.
+
+**Fix:** Added two authored `dynamic_sections` to `data/scenarios/essays/essay_index.json`: Zepa now consumes its rupture Cost Ledger finding, and the Federation Offensive now consumes human-cost findings. No resolver behavior changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing late-war sections and render paths. Green after authoring: 24/24 passed.
+
+**Canon posture:** Ring 2 narrative reflection only. No event trigger, rupture rule, score rule, save schema, historical baseline, or player lever changed. The inserts render source-labeled Cost Ledger findings generated elsewhere.
+
+---
+
 ## [2026-05-10] feat(codex): Ahmici and Operation Storm findings-breadth wave
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Existing Cost Ledger and milestone tokens were live, but the newest endgame-aware essay inserts were concentrated in Srebrenica and Dayton.
