@@ -1073,3 +1073,136 @@ describe('v0.9.1 vocab - late intervention and final offensive breadth wave', ()
         expect(resolveCodexEssay(washingtonEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
     });
 });
+
+describe('v0.9.1 vocab - UN mandate and sanctions breadth wave', () => {
+    const londonEssay = findEssay('essay_london_conference_1992');
+    const tribunalEssay = findEssay('essay_un_resolution_808_tribunal_1993');
+    const srebrenicaSafeAreaEssay = findEssay('essay_un_resolution_819_srebrenica_1993');
+    const forceAuthorityEssay = findEssay('essay_un_resolution_836_force_1993');
+    const noFlyEssay = findEssay('essay_un_nfz_enforcement_1993');
+    const sharpGuardEssay = findEssay('essay_operation_sharp_guard_1993');
+    const strikeThreatEssay = findEssay('essay_nato_air_strike_threat_1993');
+    const sanctionsEssay = findEssay('essay_un_resolution_820_sanctions_1993');
+
+    const sections = {
+        london: (londonEssay.dynamic_sections ?? []).find(s => s.id === 'v091_london_conference_human_cost_findings'),
+        tribunal: (tribunalEssay.dynamic_sections ?? []).find(s => s.id === 'v091_resolution_808_cost_findings_docket'),
+        srebrenicaSafeArea: (srebrenicaSafeAreaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_resolution_819_srebrenica_absent_note'),
+        forceAuthority: (forceAuthorityEssay.dynamic_sections ?? []).find(s => s.id === 'v091_resolution_836_displacement_findings'),
+        noFly: (noFlyEssay.dynamic_sections ?? []).find(s => s.id === 'v091_no_fly_dayton_timing_note'),
+        sharpGuard: (sharpGuardEssay.dynamic_sections ?? []).find(s => s.id === 'v091_sharp_guard_human_cost_findings'),
+        strikeThreat: (strikeThreatEssay.dynamic_sections ?? []).find(s => s.id === 'v091_air_strike_threat_dayton_timing_note'),
+        sanctions: (sanctionsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_resolution_820_rs_war_crimes_findings'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 46000,
+        total_civilian_killed: 38000,
+        findings: [
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 46,000 military killed and 38,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'civilian_displacement_record',
+                category: 'displacement',
+                severity: 'grave',
+                title: 'Civilian displacement record',
+                text: 'The ledger records 2,200,000 civilians displaced or killed.',
+                sources: ['UNHCR (1996) and ICTY findings'],
+            },
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'record',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 14 war-crime events.',
+                sources: ['Sensitive History Design Gate section 4'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    const comparison: NonNullable<CodexRenderContext['historicalComparison']> = {
+        duration_delta_weeks: 5,
+        territory_divergence: {},
+        casualty_ratio: 1.2,
+        displacement_ratio: 1.25,
+        rupture_divergence: [],
+        divergence_notes: [],
+        milestone_comparison: [
+            {
+                id: 'srebrenica_genocide_1995',
+                label: 'Srebrenica Genocide',
+                historical_week: 171,
+                player_week: null,
+                delta_weeks: null,
+                status: 'absent',
+                summary: 'Srebrenica Genocide did not occur in this run.',
+            },
+            {
+                id: 'dayton_accords',
+                label: 'Dayton Accords',
+                historical_week: 182,
+                player_week: 187,
+                delta_weeks: 5,
+                status: 'late',
+                summary: 'Dayton Accords occurred at player week 187 against historical week 182.',
+            },
+        ],
+    };
+
+    it('adds eight UN mandate / sanctions dynamic sections with deterministic gates', () => {
+        expect(sections.london?.condition).toBe('GAME_OVER AND FINDING:human_cost_record');
+        expect(sections.tribunal?.condition).toBe('GAME_OVER AND FINDING_CATEGORY:war_crimes');
+        expect(sections.srebrenicaSafeArea?.condition).toBe('GAME_OVER AND MILESTONE:srebrenica_genocide_1995:absent');
+        expect(sections.forceAuthority?.condition).toBe('GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1');
+        expect(sections.noFly?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.sharpGuard?.condition).toBe('GAME_OVER AND FINDING:human_cost_record');
+        expect(sections.strikeThreat?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.sanctions?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+
+        expect(sections.london?.variant).toBe('note');
+        expect(sections.tribunal?.variant).toBe('divergence');
+        expect(sections.srebrenicaSafeArea?.variant).toBe('ghost');
+        expect(sections.forceAuthority?.variant).toBe('divergence');
+        expect(sections.noFly?.variant).toBe('note');
+        expect(sections.sharpGuard?.variant).toBe('note');
+        expect(sections.strikeThreat?.variant).toBe('note');
+        expect(sections.sanctions?.variant).toBe('divergence');
+    });
+
+    it('renders the UN mandate / sanctions sections from existing endgame packets', () => {
+        const ctx: CodexRenderContext = {
+            firedEventIds: new Set([
+                'london_conference_1992',
+                'un_resolution_808_tribunal_1993',
+                'un_resolution_819_srebrenica_1993',
+                'un_resolution_836_force_1993',
+                'un_nfz_enforcement_1993',
+                'operation_sharp_guard_1993',
+                'nato_air_strike_threat_1993',
+                'un_resolution_820_sanctions_1993',
+            ]),
+            gameOver: true,
+            costLedger,
+            historicalComparison: comparison,
+        };
+
+        expect(resolveCodexEssay(londonEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
+        expect(resolveCodexEssay(tribunalEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(resolveCodexEssay(srebrenicaSafeAreaEssay, ctx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
+        expect(resolveCodexEssay(forceAuthorityEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
+        expect(resolveCodexEssay(noFlyEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
+        expect(resolveCodexEssay(sharpGuardEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
+        expect(resolveCodexEssay(strikeThreatEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
+        expect(resolveCodexEssay(sanctionsEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [RS]'))).toBe(true);
+    });
+});

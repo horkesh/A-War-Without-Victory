@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): add UN mandate and sanctions readers
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the late-intervention/final-offensive readers.
+
+**Fix:** Added eight read-only `dynamic_sections` that consume existing Cost Ledger and milestone atoms/tokens in London Conference, UN Resolution 808, UN Resolution 819, UN Resolution 836, no-fly zone enforcement, Operation Sharp Guard, NATO air-strike threat, and UN Resolution 820 sanctions essays.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on the missing eight dynamic section hooks and missing rendered output. Green after implementation: 41/41 passed.
+
+**Canon posture:** Read-only Ring 2 narrative reflection. No UN/NATO mandate logic, sanctions mechanics, Cost Ledger producer, event trigger, rupture logic, score rule, save schema, scenario data, casualty/displacement math, or sensitive-history adjudication changed.
+
+**Docs:** Added the implementation report and updated Game Bible, master roadmap, v0.9.1 plan, docs truth guard, ledger, and napkin.
+
+---
+
 ## [2026-05-10] feat(codex): add late intervention final-offensive readers
 
 **Scope:** v0.9.1 Dynamic Essay + Endgame Comparison breadth wave after the diplomatic/siege continuity readers.
