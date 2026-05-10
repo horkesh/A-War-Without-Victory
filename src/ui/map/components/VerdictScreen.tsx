@@ -17,6 +17,8 @@ import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
+import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
+import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only consumption of ghost-entry
 // path-not-taken records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
@@ -128,6 +130,107 @@ export function buildEndgameSummary(
     };
 }
 
+export interface EndgameMilestoneRow {
+    id: string;
+    label: string;
+    historicalWeekLabel: string;
+    playerWeekLabel: string;
+    deltaLabel: string;
+    status: MilestoneComparisonStatus;
+    statusLabel: string;
+    summary: string;
+}
+
+function compareMilestones(a: MilestoneComparison, b: MilestoneComparison): number {
+    const weekDelta = a.historical_week - b.historical_week;
+    if (weekDelta !== 0) return weekDelta;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+function statusFromDelta(deltaWeeks: number | null): MilestoneComparisonStatus {
+    if (deltaWeeks === null) return 'absent';
+    if (deltaWeeks < 0) return 'early';
+    if (deltaWeeks > 0) return 'late';
+    return 'on_time';
+}
+
+function formatMilestoneStatus(status: MilestoneComparisonStatus): string {
+    const labels: Record<MilestoneComparisonStatus, string> = {
+        early: 'Early',
+        late: 'Late',
+        on_time: 'On Time',
+        absent: 'Absent',
+    };
+    return labels[status];
+}
+
+function formatWeekLabel(week: number | null): string {
+    return week === null ? 'Not recorded' : `W${week}`;
+}
+
+function formatDeltaLabel(deltaWeeks: number | null): string {
+    if (deltaWeeks === null) return 'No player match';
+    if (deltaWeeks === 0) return 'On historical week';
+    const direction = deltaWeeks < 0 ? 'early' : 'late';
+    return `${Math.abs(deltaWeeks)}w ${direction}`;
+}
+
+function rowFromMilestone(milestone: MilestoneComparison): EndgameMilestoneRow {
+    const status = milestone.status ?? statusFromDelta(milestone.delta_weeks);
+    return {
+        id: milestone.id,
+        label: milestone.label,
+        historicalWeekLabel: formatWeekLabel(milestone.historical_week),
+        playerWeekLabel: formatWeekLabel(milestone.player_week),
+        deltaLabel: formatDeltaLabel(milestone.delta_weeks),
+        status,
+        statusLabel: formatMilestoneStatus(status),
+        summary: milestone.summary,
+    };
+}
+
+/**
+ * Build milestone comparison rows for endgame presentation.
+ * Explicit upstream rows are authoritative; the duration fallback keeps
+ * older saves from losing the milestone comparison section entirely.
+ */
+export function buildMilestoneComparisonRows(
+    costLedger: CostLedger | undefined,
+    comparison: ComparisonResult | undefined,
+): EndgameMilestoneRow[] {
+    const explicit = comparison?.milestone_comparison ?? [];
+    if (explicit.length > 0) {
+        return explicit
+            .filter(m => Number.isFinite(m.historical_week))
+            .slice()
+            .sort(compareMilestones)
+            .map(rowFromMilestone);
+    }
+
+    if (!costLedger || !comparison || !Number.isFinite(costLedger.war_duration_weeks) || !Number.isFinite(comparison.duration_delta_weeks)) {
+        return [];
+    }
+
+    const historicalWeek = costLedger.war_duration_weeks - comparison.duration_delta_weeks;
+    const deltaWeeks = comparison.duration_delta_weeks;
+    const status = statusFromDelta(deltaWeeks);
+    const timingPhrase = deltaWeeks < 0
+        ? `${Math.abs(deltaWeeks)} weeks earlier`
+        : `${deltaWeeks} weeks later`;
+
+    return [rowFromMilestone({
+        id: 'war_duration',
+        label: 'War Duration',
+        historical_week: historicalWeek,
+        player_week: costLedger.war_duration_weeks,
+        delta_weeks: deltaWeeks,
+        status,
+        summary: deltaWeeks === 0
+            ? 'The campaign reached its end on the historical reference week.'
+            : `The campaign ended ${timingPhrase} than the historical reference.`,
+    })];
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction hex colors (from tailwind.config.ts)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -231,6 +334,10 @@ export function VerdictScreen() {
     }
 
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
+    const milestoneRows = buildMilestoneComparisonRows(
+        loadedGameState.costLedger,
+        loadedGameState.historicalComparison,
+    );
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
@@ -317,6 +424,9 @@ export function VerdictScreen() {
                             costLedger={loadedGameState.costLedger}
                             comparison={loadedGameState.historicalComparison}
                         />
+                        {milestoneRows.length > 0 && (
+                            <EndgameMilestoneComparison rows={milestoneRows} />
+                        )}
                     </div>
                 )}
 
@@ -395,6 +505,51 @@ export function VerdictScreen() {
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction Report Card
 // ═══════════════════════════════════════════════════════════════════════════
+
+export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow[] }) {
+    return (
+        <div className="px-6 pb-5 space-y-2"
+             data-awwv-milestone-comparison={rows.length}>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
+                Milestone Comparison
+            </div>
+            <div className="space-y-2">
+                {rows.map(row => (
+                    <div key={row.id}
+                         className="grid grid-cols-[1.4fr_0.6fr_0.6fr_0.7fr_0.7fr] gap-3 items-start rounded border border-panel-border bg-panel-card/30 px-3 py-2"
+                         data-awwv-milestone-id={row.id}
+                         data-awwv-milestone-status={row.status}>
+                        <div>
+                            <div className="text-[11px] text-text-primary font-semibold">
+                                {row.label}
+                            </div>
+                            <div className="text-[9px] text-text-secondary leading-relaxed mt-0.5">
+                                {row.summary}
+                            </div>
+                        </div>
+                        <MilestoneCell label="History" value={row.historicalWeekLabel} />
+                        <MilestoneCell label="You" value={row.playerWeekLabel} />
+                        <MilestoneCell label="Delta" value={row.deltaLabel} />
+                        <MilestoneCell label="Status" value={row.statusLabel} />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function MilestoneCell({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="min-w-0">
+            <div className="text-[8px] uppercase tracking-wider text-text-secondary/70">
+                {label}
+            </div>
+            <div className="text-[10px] text-text-primary tabular-nums leading-snug break-words">
+                {value}
+            </div>
+        </div>
+    );
+}
 
 /** Exported for direct mount proof testing. */
 export function FactionReport({

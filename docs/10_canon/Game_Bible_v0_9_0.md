@@ -413,7 +413,7 @@ ICTY-style prosecutorial endgame narrative, drawing on the war-crimes counter, d
 
 ### 25.5 Endgame Comparison and Dynamic Codex (v0.9.1)
 
-Your war vs the historical war, side-by-side. Ghost essay sections in the Codex note where your campaign diverged from history. The Dynamic Codex may also render source-labeled Cost Ledger findings inside historical essays when the endgame ledger emits them; those inserts inherit the Cost Ledger wording rules in §22.4 and remain Ring 2 narrative reflection. The §3 register (`SENSITIVE_HISTORY_DESIGN_GATE.md` §5) governs counterfactual narrative voice — historical recording, not celebration or minimization.
+Your war vs the historical war, side-by-side. Ghost essay sections in the Codex note where your campaign diverged from history. `VerdictScreen` may render milestone comparison rows from `historicalComparison.milestone_comparison`, with a duration-only fallback for older saves; those rows are downstream reflection, not score inputs. The Dynamic Codex may also render source-labeled Cost Ledger findings inside historical essays when the endgame ledger emits them; those inserts inherit the Cost Ledger wording rules in §22.4 and remain Ring 2 narrative reflection. The §3 register (`SENSITIVE_HISTORY_DESIGN_GATE.md` §5) governs counterfactual narrative voice — historical recording, not celebration or minimization.
 
 ### 25.6 Tutorial / Onboarding (v0.9.2)
 

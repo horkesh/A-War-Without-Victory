@@ -94,11 +94,16 @@ describe('desktop and roadmap truth docs', () => {
     expect(plan).toContain('Endgame Comparison` is partially implemented');
     expect(plan).toContain('dynamic essay sections / ghost entries / divergence notes are partially implemented');
     expect(plan).toContain('Cost Ledger findings through deterministic atoms/tokens');
+    expect(plan).toContain('`VerdictScreen` now renders deterministic milestone comparison rows');
+    expect(plan).toContain('optional `milestone_comparison` row contract');
     expect(plan).toContain('`dynamic_sections`, `ghost_when`');
     expect(roadmap).toContain('Cost Ledger finding atoms/tokens');
+    expect(roadmap).toContain('milestone-week comparison rows live');
     expect(roadmap).toContain('| Endgame Comparison | Advanced');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
+    expect(bible).toContain('VerdictScreen` may render milestone comparison rows');
     expect(plan).not.toContain('Endgame Comparison` is not implemented');
     expect(plan).not.toContain('dynamic essay sections / ghost entries / divergence notes are not implemented');
+    expect(roadmap).not.toContain('richer milestone-week comparison UX still open');
   });
 });

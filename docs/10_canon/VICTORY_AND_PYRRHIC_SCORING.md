@@ -210,6 +210,7 @@ Victory conditions terminate the war. They do **not** assign grades, outcome cla
 - Per-faction tabs (pyrrhic_score, grade, outcome_class badge)
 - Selected faction detail (FactionReport: dimension bars, grade description, capital breakdown)
 - War Cost Summary (cost ledger + historical comparison)
+- Milestone Comparison rows (optional `historicalComparison.milestone_comparison`, with a duration fallback for older saves)
 - Condemnation notice (if any `condemnation_flags` present)
 
 **What VerdictScreen must never do:**
@@ -218,6 +219,7 @@ Victory conditions terminate the war. They do **not** assign grades, outcome cla
 - Show a leaderboard comparing factions
 - Minimize condemnation ("despite some issues…")
 - Treat Pyrrhic score as the primary verdict
+- Treat milestone timing rows as new scoring inputs or player optimization targets
 
 ### 5.2 Chronicle and Wrapped
 

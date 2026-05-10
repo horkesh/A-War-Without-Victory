@@ -44,7 +44,7 @@ The game depicts these in player-facing content, drawing on ICTY judgments and p
 - **Historical events** in `data/scenarios/events/` — Ahmići massacre, Markale I/II shellings, Bijeljina massacre, Kravica raid, Stupni Do, Grabovica/Uždol, Tuzla Gate, Cerska breakthrough, Srebrenica arc (enclave forms → shelling → demilitarization → UN 819 → Morillon → fall).
 - **Historical essays** in `data/scenarios/essays/` — ICTY-cited essays for every major atrocity, including the full Srebrenica arc with Krstić, Karadžić, Mladić tribunal findings and the ICJ 2007 genocide declaration.
 - **Chronicle entries and Wrapped slides** — endgame narrative drawing on `costLedger`, `historicalComparison`, and `rupture_consequences`.
-- **Cost Ledger prose** — prosecutorial voice at endgame, constrained by §4.
+- **Cost Ledger prose and milestone comparison rows** — prosecutorial / comparative endgame voice, constrained by §4.
 
 ### Ring 3 — Refused
 
@@ -131,7 +131,7 @@ The `paramilitary_policy` field on `GameState` (`'always_allow' | 'always_deny' 
 
 ## 4. Cost Ledger Wording Constraints
 
-The Cost Ledger is the game's closing summary — the closest thing AWWV has to a prosecutorial voice. Its wording carries moral weight. These constraints are binding on every string rendered by `WarCostSummary.tsx`, `VerdictScreen.tsx`, Chronicle endgame entries, and Wrapped slides.
+The Cost Ledger is the game's closing summary — the closest thing AWWV has to a prosecutorial voice. Its wording carries moral weight. These constraints are binding on every string rendered by `WarCostSummary.tsx`, `VerdictScreen.tsx` including milestone comparison rows, Chronicle endgame entries, and Wrapped slides.
 
 ### Required
 

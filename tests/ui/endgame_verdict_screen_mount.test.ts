@@ -111,7 +111,25 @@ function endgame(ov?: Partial<LoadedGameState>): LoadedGameState {
             },
         } as GameVerdict,
         costLedger: { war_duration_weeks: 188, total_military_killed: 46500, total_civilian_killed: 38000, entries: [], rupture_consequences: [{ id: 'srebrenica_genocide_1995', perpetrator_faction: 'RS', description: 'Fall of Srebrenica' }], findings: [] } as CostLedger,
-        historicalComparison: { duration_delta_weeks: 6, territory_divergence: { RS: 9.0, RBiH_HRHB_Federation: -9.0 }, casualty_ratio: 0.85, displacement_ratio: 0.9, rupture_divergence: [], divergence_notes: ['War lasted 6 weeks longer than the historical 182 weeks', 'Srebrenica genocide occurred as in the historical war'] } as ComparisonResult,
+        historicalComparison: {
+            duration_delta_weeks: 6,
+            territory_divergence: { RS: 9.0, RBiH_HRHB_Federation: -9.0 },
+            casualty_ratio: 0.85,
+            displacement_ratio: 0.9,
+            rupture_divergence: [],
+            divergence_notes: ['War lasted 6 weeks longer than the historical 182 weeks', 'Srebrenica genocide occurred as in the historical war'],
+            milestone_comparison: [
+                {
+                    id: 'washington',
+                    label: 'Washington Agreement',
+                    historical_week: 101,
+                    player_week: 109,
+                    delta_weeks: 8,
+                    status: 'late',
+                    summary: 'Federation alignment came later than the reference timeline.',
+                },
+            ],
+        } as ComparisonResult,
         ...ov,
     } as LoadedGameState;
 }
@@ -214,6 +232,15 @@ describe('VerdictScreen mount — cost ledger', () => {
         const h = render();
         expect(h).toContain('6 weeks longer'); expect(h).toContain('Srebrenica genocide occurred');
         expect(h.indexOf('6 weeks longer')).toBeLessThan(h.indexOf('Srebrenica genocide occurred'));
+    });
+    it('renders milestone comparison rows', () => {
+        const h = render();
+        expect(h).toContain('Milestone Comparison');
+        expect(h).toContain('Washington Agreement');
+        expect(h).toContain('W101');
+        expect(h).toContain('W109');
+        expect(h).toContain('8w late');
+        expect(h).toContain('data-awwv-milestone-comparison');
     });
     it('omits cost section when absent', () => {
         storeState = { loadedGameState: endgame({ costLedger: undefined, historicalComparison: undefined }) };

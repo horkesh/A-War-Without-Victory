@@ -15,6 +15,25 @@ import { strictCompare } from '../../state/validateGameState.js';
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
 
+export type MilestoneComparisonStatus = 'early' | 'late' | 'on_time' | 'absent';
+
+export interface MilestoneComparison {
+    /** Stable milestone id, e.g. washington_agreement or dayton_accords. */
+    id: string;
+    /** Player-facing milestone label. */
+    label: string;
+    /** Historical reference week counted from April 1992. */
+    historical_week: number;
+    /** Player-run week, or null when the milestone did not occur. */
+    player_week: number | null;
+    /** Positive = later than history, negative = earlier, null = absent. */
+    delta_weeks: number | null;
+    /** Canonical timing classification for presentation surfaces. */
+    status: MilestoneComparisonStatus;
+    /** Short downstream explanation; authored by comparison producer. */
+    summary: string;
+}
+
 export interface ComparisonResult {
     /** Positive = longer than history, negative = shorter. */
     duration_delta_weeks: number;
@@ -28,6 +47,8 @@ export interface ComparisonResult {
     rupture_divergence: string[];
     /** Human-readable divergence descriptions, sorted deterministically. */
     divergence_notes: string[];
+    /** Optional milestone-level timing comparison rows for endgame surfaces. */
+    milestone_comparison?: MilestoneComparison[];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -23,6 +23,7 @@ import {
     getOutcomeClassStyle,
     formatCondemnationFlag,
     buildEndgameSummary,
+    buildMilestoneComparisonRows,
     type EndgameSummary,
 } from '../../src/ui/map/components/VerdictScreen';
 import {
@@ -32,6 +33,7 @@ import {
 } from '../../src/ui/map/components/WarCostSummary';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
+import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 
 // ── Realistic fixtures ──────────────────────────────────────────────────────
 
@@ -289,6 +291,104 @@ describe('cost / comparison formatting — full chain', () => {
         const text = formatTerritoryDivergence('RBiH_HRHB_Federation', -5.0);
         expect(text).toContain('Federation');
         expect(text).not.toContain('RBiH_HRHB_Federation');
+    });
+});
+
+// ── Milestone comparison rows — deterministic contract ──────────────────────
+
+describe('milestone comparison rows — deterministic contract', () => {
+    it('sorts explicit milestone rows by historical week then id', () => {
+        const comparison: ComparisonResult = {
+            duration_delta_weeks: 6,
+            territory_divergence: {},
+            casualty_ratio: 0.85,
+            displacement_ratio: 0.9,
+            rupture_divergence: [],
+            divergence_notes: [],
+            milestone_comparison: [
+                {
+                    id: 'dayton',
+                    label: 'Dayton Accords',
+                    historical_week: 188,
+                    player_week: 194,
+                    delta_weeks: 6,
+                    status: 'late',
+                    summary: 'Peace came later than the reference timeline.',
+                },
+                {
+                    id: 'washington',
+                    label: 'Washington Agreement',
+                    historical_week: 101,
+                    player_week: 93,
+                    delta_weeks: -8,
+                    status: 'early',
+                    summary: 'Federation alignment arrived earlier.',
+                },
+            ],
+        };
+
+        const rows = buildMilestoneComparisonRows(makeCostLedger(), comparison);
+
+        expect(rows.map(row => row.id)).toEqual(['washington', 'dayton']);
+        expect(rows[0]).toMatchObject({
+            label: 'Washington Agreement',
+            historicalWeekLabel: 'W101',
+            playerWeekLabel: 'W93',
+            deltaLabel: '8w early',
+            statusLabel: 'Early',
+        });
+        expect(rows[1].deltaLabel).toBe('6w late');
+    });
+
+    it('falls back to a duration milestone when no explicit milestones exist', () => {
+        const rows = buildMilestoneComparisonRows(
+            makeCostLedger({ war_duration_weeks: 170 }),
+            {
+                duration_delta_weeks: -12,
+                territory_divergence: {},
+                casualty_ratio: 0.78,
+                displacement_ratio: 0.89,
+                rupture_divergence: [],
+                divergence_notes: [],
+            },
+        );
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+            id: 'war_duration',
+            label: 'War Duration',
+            historicalWeekLabel: 'W182',
+            playerWeekLabel: 'W170',
+            deltaLabel: '12w early',
+            statusLabel: 'Early',
+        });
+    });
+
+    it('formats absent player milestones without inventing a player week', () => {
+        const rows = buildMilestoneComparisonRows(
+            makeCostLedger(),
+            {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+                milestone_comparison: [{
+                    id: 'srebrenica',
+                    label: 'Srebrenica Rupture',
+                    historical_week: 171,
+                    player_week: null,
+                    delta_weeks: null,
+                    status: 'absent',
+                    summary: 'The rupture did not occur in this run.',
+                }],
+            },
+        );
+
+        expect(rows[0].playerWeekLabel).toBe('Not recorded');
+        expect(rows[0].deltaLabel).toBe('No player match');
+        expect(rows[0].statusLabel).toBe('Absent');
     });
 });
 

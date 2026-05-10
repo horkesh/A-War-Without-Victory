@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] Endgame milestone comparison rows
+
+**Scope:** Substantial v0.9.1 Endgame Comparison slice. The previous final screen rendered aggregate War Cost / Historical Comparison data, but the roadmap still correctly called out richer milestone-week comparison UX as open.
+
+**Fix:** Added optional `historicalComparison.milestone_comparison` rows to the comparison contract and a pure `buildMilestoneComparisonRows(...)` presenter. `VerdictScreen` now renders a **Milestone Comparison** section with historical week, player week, delta, status, and summary. Older saves get a truthful duration-only fallback row from `costLedger.war_duration_weeks` and `duration_delta_weeks`.
+
+**Validation:** Red tests first: `endgame_presentation_proof` failed on the missing row builder, and `endgame_verdict_screen_mount` failed on the absent rendered section. Green focused pack passed 70/70.
+
+**Canon posture:** Ring 2 downstream reflection only. No sim writer, scoring rule, rupture trigger, player lever, or save producer changed. Milestone rows are read-only comparison prose under the same sensitive-history/endgame wording constraints as the Cost Ledger.
+
+---
+
 ## [2026-05-10] Dynamic Codex Cost Ledger findings
 
 **Scope:** Substantial v0.9.1 Dynamic Essay + Endgame Comparison slice. The previous Codex resolver consumed event flags and historical comparison deltas, but the new prosecutorial Cost Ledger findings still stopped at the War Cost tab.
