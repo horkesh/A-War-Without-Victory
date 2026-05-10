@@ -311,6 +311,139 @@ describe('v0.9.1 vocab - late-war findings breadth wave', () => {
     });
 });
 
+describe('v0.9.1 vocab - humanitarian/diplomatic findings breadth wave', () => {
+    const drinaEssay = findEssay('essay_drina_valley_ethnic_cleansing_1992');
+    const campsEssay = findEssay('essay_concentration_camps_revealed_1992');
+    const hvoCampsEssay = findEssay('essay_hvo_detention_camps_1993');
+    const markaleEssay = findEssay('essay_markale_area_shelling_1993');
+    const daytonTalksEssay = findEssay('essay_dayton_talks_begin_1995');
+    const grabovicaEssay = findEssay('essay_grabovica_uzdol_massacres_1993');
+
+    const sections = {
+        drina: (drinaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_drina_rs_war_crimes_findings'),
+        camps: (campsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_camps_displacement_findings'),
+        hvoCamps: (hvoCampsEssay.dynamic_sections ?? []).find(s => s.id === 'v091_hvo_camps_hrhb_war_crimes_findings'),
+        markale: (markaleEssay.dynamic_sections ?? []).find(s => s.id === 'v091_sarajevo_shelling_human_cost_findings'),
+        daytonTalks: (daytonTalksEssay.dynamic_sections ?? []).find(s => s.id === 'v091_dayton_talks_milestone_timing_note'),
+        grabovica: (grabovicaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_grabovica_uzdol_rbih_war_crimes_findings'),
+    };
+
+    const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
+        war_duration_weeks: 188,
+        entries: [],
+        rupture_consequences: [],
+        total_military_killed: 56000,
+        total_civilian_killed: 45000,
+        findings: [
+            {
+                id: 'war_crimes_record_RS',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'RS',
+                title: 'RS war-crimes record',
+                text: 'RS capital records contain 15 war-crime events.',
+                sources: ['ICTY Karadzic Trial Judgment'],
+            },
+            {
+                id: 'civilian_displacement_record',
+                category: 'displacement',
+                severity: 'grave',
+                title: 'Civilian displacement record',
+                text: 'The ledger records 2,400,000 displaced civilians.',
+                sources: ['UNHCR displacement statistics'],
+            },
+            {
+                id: 'war_crimes_record_HRHB',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'HRHB',
+                title: 'HRHB war-crimes record',
+                text: 'HRHB capital records contain 7 war-crime events.',
+                sources: ['ICTY Prlic Trial Judgment'],
+            },
+            {
+                id: 'human_cost_record',
+                category: 'human_cost',
+                severity: 'grave',
+                title: 'Human cost record',
+                text: 'The ledger records 56,000 military killed and 45,000 civilian killed.',
+                sources: ['RDC Sarajevo, Bosnian Book of the Dead (2007)'],
+            },
+            {
+                id: 'war_crimes_record_RBiH',
+                category: 'war_crimes',
+                severity: 'grave',
+                faction: 'RBiH',
+                title: 'RBiH war-crimes record',
+                text: 'RBiH capital records contain 4 war-crime events.',
+                sources: ['ICTY Halilovic Trial Judgment'],
+            },
+        ],
+    } as NonNullable<CodexRenderContext['costLedger']>;
+
+    it('adds the expected authored sections and conditions', () => {
+        expect(sections.drina?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RS');
+        expect(sections.camps?.condition).toBe('GAME_OVER AND FINDING:civilian_displacement_record AND DISPLACEMENT_ABOVE:1.1');
+        expect(sections.hvoCamps?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_HRHB');
+        expect(sections.markale?.condition).toBe('GAME_OVER AND FINDING:human_cost_record AND CASUALTY_ABOVE:1.1');
+        expect(sections.daytonTalks?.condition).toBe('GAME_OVER AND MILESTONE:dayton_accords');
+        expect(sections.grabovica?.condition).toBe('GAME_OVER AND FINDING:war_crimes_record_RBiH');
+    });
+
+    it('renders findings into the matching humanitarian essays', () => {
+        const baseComparison: NonNullable<CodexRenderContext['historicalComparison']> = {
+            duration_delta_weeks: 0,
+            territory_divergence: {},
+            casualty_ratio: 1.25,
+            displacement_ratio: 1.2,
+            rupture_divergence: [],
+            divergence_notes: [],
+        };
+
+        const rendered = [
+            resolveCodexEssay(drinaEssay, { firedEventIds: new Set(['drina_valley_ethnic_cleansing_1992']), gameOver: true, costLedger }),
+            resolveCodexEssay(campsEssay, { firedEventIds: new Set(['concentration_camps_revealed_1992']), gameOver: true, historicalComparison: baseComparison, costLedger }),
+            resolveCodexEssay(hvoCampsEssay, { firedEventIds: new Set(['hvo_detention_camps_1993']), gameOver: true, costLedger }),
+            resolveCodexEssay(markaleEssay, { firedEventIds: new Set(['markale_area_shelling_1993']), gameOver: true, historicalComparison: baseComparison, costLedger }),
+            resolveCodexEssay(grabovicaEssay, { firedEventIds: new Set(['grabovica_uzdol_massacres_1993']), gameOver: true, costLedger }),
+        ].flatMap(r => r.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text));
+
+        expect(rendered.some(text => text.includes('RS war-crimes record [RS]'))).toBe(true);
+        expect(rendered.some(text => text.includes('Civilian displacement record: The ledger records 2,400,000'))).toBe(true);
+        expect(rendered.some(text => text.includes('HRHB war-crimes record [HRHB]'))).toBe(true);
+        expect(rendered.some(text => text.includes('Human cost record: The ledger records 56,000'))).toBe(true);
+        expect(rendered.some(text => text.includes('RBiH war-crimes record [RBiH]'))).toBe(true);
+    });
+
+    it('renders Dayton talks milestone timing from the existing milestone row contract', () => {
+        const resolved = resolveCodexEssay(daytonTalksEssay, {
+            firedEventIds: new Set(['dayton_talks_begin_1995']),
+            gameOver: true,
+            historicalComparison: {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+                milestone_comparison: [{
+                    id: 'dayton_accords',
+                    label: 'Dayton Accords',
+                    historical_week: 189,
+                    player_week: 181,
+                    delta_weeks: -8,
+                    status: 'early',
+                    summary: 'Dayton Accords arrived 8 weeks earlier than the historical baseline.',
+                }],
+            },
+        });
+
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
+        expect(dyn.some(p => p.text.includes('Dayton Accords arrived 8 weeks earlier'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('-8'))).toBe(true);
+    });
+});
+
 describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
     const srebrenicaEssay = findEssay('essay_srebrenica_falls_1995');
     const daytonEssay = findEssay('essay_dayton_signed_1995');

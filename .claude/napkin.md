@@ -28,7 +28,7 @@
 
 **2026-05-10 v0.9.2 playtest package latest:** `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, and weekly digest template. Do instead: treat playtest package work as agent-closed/operator-open unless adding new outreach channels or post-response synthesis; do not rebuild the same kit.
 
-**2026-05-10 Dynamic Codex latest:** Cost Ledger findings/milestone tokens now feed Srebrenica, Dayton, Ahmici, Operation Storm, Zepa, and Federation Offensive authored sections. Do instead: extend `essay_index.json` dynamic_sections only where existing endgame packets emit real findings/milestones; no new speculative narrative without a packet.
+**2026-05-10 Dynamic Codex latest:** Cost Ledger findings/milestone tokens now feed Srebrenica, Dayton, Ahmici, Operation Storm, Zepa, Federation Offensive, Drina, Prijedor camps, HVO camps, Markale, Dayton talks, and Grabovica/Uzdol authored sections. Do instead: extend `essay_index.json` dynamic_sections only where existing endgame packets emit real findings/milestones; no new speculative narrative without a packet.
 
 **~25+ commits shipped across A1-A5 + Krivaja-95 + B-lane (DDR+B1+B2) + C-lane (DDR+C1+C2) + API-Directive Bridge + Q1 revert + drina-fix + D-lane (DDR+D1+D2) + telemetry wire + 5-lane batch (NW Bosnia OOB `be7e0715` + Persona restructure `cb13e605` + SRK siege `aa115a99` + JNA `ecae99da` + Jajce `ec837dca`) + 3-lane backlog closure (RBiH benchmark reanchor `d377e07b` + SRK siege Phase 0 DDR `bb0e449e` + Stupčanica name-collision `759a35cd`).** All CI green (latest `759a35cd`).
 

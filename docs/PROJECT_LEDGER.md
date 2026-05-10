@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-10] feat(codex): humanitarian and diplomatic breadth wave
+
+**Scope:** v0.9.1 Dynamic Essay + Endgame Comparison authoring breadth. Extends already-live Cost Ledger/milestone consumers without adding resolver behavior.
+
+**Fix:** Added six authored `dynamic_sections` to `data/scenarios/essays/essay_index.json`: Drina consumes RS war-crimes findings, Prijedor camps consume displacement findings gated by elevated displacement, HVO camps consume HRHB war-crimes findings, Markale consumes human-cost findings gated by elevated casualty ratio, Dayton talks consumes Dayton milestone timing, and Grabovica/Uzdol consumes RBiH war-crimes findings.
+
+**Validation:** Red first: `npx.cmd vitest run tests/ui/codex_essay_vocab_integration.test.ts --reporter=dot` failed on missing sections and render paths. Green after authoring: 27/27 passed.
+
+**Canon posture:** Ring 2 narrative reflection only. No event trigger, rupture rule, score rule, save schema, historical baseline, or player lever changed. The inserts render existing source-labeled Cost Ledger findings or milestone rows generated elsewhere.
+
+---
+
 ## [2026-05-10] perf(commander): detectZones must-hold prefilter
 
 **Scope:** CPU performance profiling lane for `assessSituation.detectZones`, following the retained emit/assess sub-buckets.
