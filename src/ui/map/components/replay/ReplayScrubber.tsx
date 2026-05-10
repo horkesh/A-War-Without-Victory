@@ -23,6 +23,8 @@ export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
     saveSequence?: readonly GameState[] | null | undefined;
     saveManifest?: ReplaySaveManifest | null | undefined;
+    /** Optional full-frame map inspection callback. Hidden for sparse manifests. */
+    onInspectFrame?: (frame: GameState, frameIndex: number) => void;
 }
 
 /**
@@ -31,7 +33,7 @@ export interface ReplayScrubberProps {
  * Internal cursor state is React-local; the underlying player is recreated only
  * when the input sequence reference changes. No engine state is mutated.
  */
-export function ReplayScrubber({ saveSequence, saveManifest }: ReplayScrubberProps): JSX.Element {
+export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: ReplayScrubberProps): JSX.Element {
     const player = useMemo(
         () => replayPlayer(saveSequence ?? []),
         [saveSequence],
@@ -112,6 +114,16 @@ export function ReplayScrubber({ saveSequence, saveManifest }: ReplayScrubberPro
                     <span className="text-[10px] text-text-primary font-mono">
                         {currentDate}
                     </span>
+                )}
+                {current && onInspectFrame && (
+                    <button
+                        type="button"
+                        onClick={() => onInspectFrame(current, cursor)}
+                        className="rounded border border-accent-gold/40 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+                        data-awwv-replay-inspect="true"
+                    >
+                        Inspect Map
+                    </button>
                 )}
                 <span className="text-[10px] text-text-secondary/60 ml-auto tabular-nums">
                     {cursor + 1} / {turnCount}

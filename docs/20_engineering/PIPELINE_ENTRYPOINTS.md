@@ -141,7 +141,7 @@ Direct proof that exists today: roundtrip idempotency on real saves (`tests/save
 
 ### Replay
 
-There is now a **live replay consumer/playback owner** in the canonical desktop/map product surface. `VerdictScreen` owns the read-only replay surface, `ReplayScrubber` owns the scrubber UI, and `src/sim/replay/*` owns deterministic frame/summary playback helpers.
+There is now a **live replay consumer/playback owner** in the canonical desktop/map product surface. `VerdictScreen` owns the read-only replay surface, `ReplayScrubber` owns the scrubber UI, `gameStore.startReplayInspection(...)` owns selected full-frame map inspection, and `src/sim/replay/*` owns deterministic frame/summary playback helpers.
 
 Harness-side replay artifacts feed that surface:
 
@@ -150,7 +150,7 @@ Harness-side replay artifacts feed that surface:
 - AI commander decision-log code uses "replay" in the determinism sense (`src/sim/ai_commander/decision_log.ts`, related types).
 - Archived legacy map replay code still exists under `src/_archived/`.
 
-Replay scale hardening is now the active follow-up, not absence of a consumer: large desktop loads prefer `replay_save_manifest.json` so the renderer can inspect post-run frames without parsing multi-GB replay arrays. Richer map-state playback remains future product polish.
+Replay scale hardening remains separate from replay inspection: large desktop loads prefer `replay_save_manifest.json` so the renderer can inspect post-run summaries without parsing multi-GB replay arrays. Full `replay_save_sequence.json` sidecars can also be inspected as read-only tactical-map frames from the Verdict replay scrubber; sparse manifests stay summary-only because they do not contain raw `GameState` frames.
 
 When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
 

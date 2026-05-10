@@ -9,7 +9,7 @@
    - Left sidebar `WAR STATUS` + `ORDER OF BATTLE`
    - Center map order arrows and front lines
    - Right panel tabs (`OVER`, `ADMIN`, `CTRL`, `INTEL`, `ORDERS`, `AAR`, `EVENTS`)
-5. Review the loaded save state in-place. Completed saves with replay sidecars expose the `VerdictScreen` replay scrubber; large replay sidecars use manifest summaries rather than parsing the full frame sequence in the renderer.
+5. Review the loaded save state in-place. Completed saves with replay sidecars expose the `VerdictScreen` replay scrubber; large replay sidecars use manifest summaries rather than parsing the full frame sequence in the renderer. When a full `replay_save_sequence.json` sidecar is loaded, the scrubber also exposes `Inspect Map` for read-only tactical-map inspection of the selected frame.
 
 ## New UI Elements
 
@@ -20,7 +20,7 @@
   - CRT visual pass (optional)
   - UI audio cue toggle (optional)
 - Help modal: keyboard shortcuts.
-- Replay scrubber: available on the endgame verdict surface when `replay_save_manifest.json` or a compatible `replay_save_sequence.json` sidecar is present.
+- Replay scrubber: available on the endgame verdict surface when `replay_save_manifest.json` or a compatible `replay_save_sequence.json` sidecar is present. Full sequences support selected-frame map inspection; sparse manifests are summary-only.
 
 ## Keyboard Shortcuts
 
@@ -37,4 +37,4 @@
 - Scenario/state load updates map + OOB + war status.
 - Advance turn updates state and can surface AAR summary.
 - Order arrows render when `brigade_attack_orders` / `brigade_mun_orders` exist in loaded state.
-- Desktop replay validation: load an endgame save with sibling `replay_save_manifest.json`, open the verdict surface, and verify the Replay summary cards render without requiring full `replay_save_sequence.json` parsing.
+- Desktop replay validation: load an endgame save with sibling `replay_save_manifest.json`, open the verdict surface, and verify the Replay summary cards render without requiring full `replay_save_sequence.json` parsing. For a full sequence sidecar, scrub to a frame, click `Inspect Map`, verify the tactical map swaps to that frame, then use `Return to Final`.

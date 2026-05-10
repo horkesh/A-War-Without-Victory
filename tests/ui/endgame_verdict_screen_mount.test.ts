@@ -55,6 +55,8 @@ vi.mock('../../src/ui/map/desktop/useIPC', () => ({
 // Dynamic import after mocks — vitest handles top-level await in ESM.
 // @ts-expect-error TS1378: top-level await requires module=esnext in tsconfig; vitest provides it at runtime.
 const { VerdictScreen } = await import('../../src/ui/map/components/VerdictScreen');
+// @ts-expect-error TS1378: top-level await requires module=esnext in tsconfig; vitest provides it at runtime.
+const { ReplayInspectionBanner } = await import('../../src/ui/map/components/replay/ReplayInspectionBanner');
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -179,6 +181,25 @@ describe('VerdictScreen mount — verdict content', () => {
         expect(h).toContain('Active formations');
         expect(h).toContain('46500');
         expect(h).toContain('RS:42');
+    });
+
+    it('renders a map inspection action when full replay frames are available', () => {
+        storeState = {
+            loadedGameState: endgame({
+                replaySaveSequence: [
+                    {
+                        meta: { turn: 12, phase: 'war', date: '1992-06-21' },
+                        military: { formations: {}, militia_pools: {} },
+                        political: { political_controllers: {} },
+                        displacement: { displacement_event_log: [] },
+                    } as any,
+                ],
+            }),
+            startReplayInspection: () => undefined,
+        };
+        const h = render();
+        expect(h).toContain('Inspect Map');
+        expect(h).toContain('data-awwv-replay-inspect');
     });
 });
 
@@ -587,5 +608,33 @@ describe('WarCostSummary — direct component mount proof', () => {
         expect(html).toContain('Operation Sana');
         expect(html).toContain('Partial Success');
         expect(html).toContain('7 attacks');
+    });
+});
+
+describe('ReplayInspectionBanner mount', () => {
+    beforeEach(() => { storeState = { loadedGameState: endgame(), exitReplayInspection: () => undefined }; });
+
+    it('is empty outside replay inspection mode', () => {
+        storeState = { loadedGameState: endgame(), replayInspection: null, exitReplayInspection: () => undefined };
+        expect(renderToStaticMarkup(createElement(ReplayInspectionBanner))).toBe('');
+    });
+
+    it('renders the inspected frame and return action', () => {
+        storeState = {
+            loadedGameState: endgame(),
+            replayInspection: {
+                frameIndex: 0,
+                turn: 12,
+                date: '1992-06-21',
+                finalTurn: 188,
+                finalDate: '1995-10-01',
+            },
+            exitReplayInspection: () => undefined,
+        };
+        const h = renderToStaticMarkup(createElement(ReplayInspectionBanner));
+        expect(h).toContain('Replay Inspection');
+        expect(h).toContain('Turn 12');
+        expect(h).toContain('Return to Final');
+        expect(h).toContain('data-awwv-replay-inspection-banner');
     });
 });

@@ -53,6 +53,7 @@ import { OnboardingOverlay } from './components/onboarding';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
+import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
@@ -936,6 +937,7 @@ function App() {
       <PeaceWarTransitionOverlay />
       <FirstTurnOrientationWrapper />
       <VerdictScreen />
+      <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal
         onReviewPriorities={reviewPreAdvancePriorities}

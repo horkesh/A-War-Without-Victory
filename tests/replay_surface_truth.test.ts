@@ -58,13 +58,18 @@ describe('replay surface truth', () => {
 
     expect(pipelineEntrypoints).toContain('live replay consumer/playback owner');
     expect(pipelineEntrypoints).toContain('replay_save_manifest.json');
+    expect(pipelineEntrypoints).toContain('gameStore.startReplayInspection');
+    expect(pipelineEntrypoints).toContain('sparse manifests stay summary-only');
     expect(pipelineEntrypoints).not.toContain('Replay code does **not** exist in the repo today.');
 
     expect(repoMap).toContain('Replay consumer/playback owner exists');
     expect(repoMap).toContain('replay_save_manifest.json');
+    expect(repoMap).toContain('ReplayInspectionBanner.tsx');
     expect(repoMap).not.toContain('No replay code exists in the repo today.');
 
     expect(tacticalMap).toContain('ReplayScrubber consumes the manifest-backed summary path');
+    expect(tacticalMap).toContain('gameStore.startReplayInspection');
+    expect(tacticalMap).toContain('manifests provide deterministic summaries but not map-state inspection');
     expect(tacticalMap).not.toContain('advance turn, replay) supply the same raw `GameState`');
   });
 });

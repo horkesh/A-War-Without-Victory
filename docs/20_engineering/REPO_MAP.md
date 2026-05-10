@@ -59,7 +59,7 @@ Populate this section from the discovery checklist.
   - Desktop load-path (Electron): `src/desktop/electron-main.cjs` — `load-scenario-dialog`, `start-new-campaign`, `load-state-dialog`; error classification via `classifyLoadError()`.
   - Browser load-path + post-load UI reset owner: `src/ui/map/store/gameStore.ts` — `loadSave()`.
   - Adapter after deserialize: `src/ui/map/data/GameStateAdapter.ts`.
-- **Replay:** Replay consumer/playback owner exists in the canonical desktop/map UI today. Harness-side replay artifacts include `replay.jsonl`, `replay_timeline.json`, full `replay_save_sequence.json`, and sparse `replay_save_manifest.json`; desktop load prefers the manifest for large-sidecar safety. Product playback owner: `src/ui/map/components/VerdictScreen.tsx` + `src/ui/map/components/replay/ReplayScrubber.tsx`; deterministic helpers: `src/sim/replay/*`.
+- **Replay:** Replay consumer/playback owner exists in the canonical desktop/map UI today. Harness-side replay artifacts include `replay.jsonl`, `replay_timeline.json`, full `replay_save_sequence.json`, and sparse `replay_save_manifest.json`; desktop load prefers the manifest for large-sidecar safety. Product playback owner: `src/ui/map/components/VerdictScreen.tsx` + `src/ui/map/components/replay/ReplayScrubber.tsx`; selected-frame map inspection owner: `src/ui/map/store/gameStore.ts` + `src/ui/map/components/replay/ReplayInspectionBanner.tsx`; deterministic helpers: `src/sim/replay/*`.
 
 ### Map Build Pipeline
 - Canon reference: `docs/20_engineering/MAP_BUILD_SYSTEM.md`

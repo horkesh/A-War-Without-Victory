@@ -3358,6 +3358,22 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 ---
 
+## [2026-05-10] replay: selected-frame map-state inspection
+
+**Type:** UI/store read-model feature. No simulation behavior, combat math, scenario data, OOB, operation definitions, political controller writes, rupture wiring, or sensitive-history mechanics changed.
+
+**Change:** Full replay sequences now expose `Inspect Map` from the endgame `ReplayScrubber`. `gameStore.startReplayInspection(...)` parses the selected raw replay frame into the tactical-map read model, stores the final endgame `LoadedGameState` as the return target, and clears transient selections/orders. `ReplayInspectionBanner` lets the player return to the final endgame state. Sparse manifests remain summary-only because they do not carry raw `GameState` frames.
+
+**Determinism:** Read-only and non-mutating. Inspection uses the existing deterministic `GameStateAdapter.parseGameState(...)` path and restores the exact final loaded state reference on exit. No turn pipeline, IPC advance, replay artifact write, random source, or wall-clock source is touched.
+
+**Verification:** Red tests first: `gamestore_load_reset` failed on missing `startReplayInspection`, and `endgame_verdict_screen_mount` failed on missing `Inspect Map`. Green focused replay UI/store suite: `npx.cmd vitest run tests/ui/gamestore_load_reset.test.ts tests/ui/endgame_verdict_screen_mount.test.ts --reporter=dot` passed 51/51. Final lane verification also covered replay/doc truth tests, typecheck, desktop map build, and diff whitespace checks.
+
+**Roadmap delta:** Replay consumer closure now includes selected-frame map inspection. Remaining replay polish is auto-play/animation and richer post-run presentation, not the basic product-shell inspection loop.
+
+**Report:** `docs/40_reports/implemented/20260510_REPLAY_MAP_STATE_INSPECTION.md`
+
+---
+
 ## [2026-05-10] perf: commander decision buckets and assessThreats cache
 
 **Type:** Default-off profiling instrumentation plus CPU cleanup. No gameplay rule, scenario data, OOB, political controller, rupture, or sensitive-history canon change.

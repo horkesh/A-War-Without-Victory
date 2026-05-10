@@ -165,6 +165,7 @@ const GRADE_COLORS: Record<string, string> = {
 
 export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
 
@@ -353,6 +354,7 @@ export function VerdictScreen() {
                         <ReplayScrubber
                             saveSequence={loadedGameState.replaySaveSequence}
                             saveManifest={loadedGameState.replaySaveManifest}
+                            onInspectFrame={startReplayInspection}
                         />
                     </div>
                 )}

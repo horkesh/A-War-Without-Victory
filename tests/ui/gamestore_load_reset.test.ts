@@ -204,6 +204,52 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
     });
 });
 
+describe('gameStore replay inspection - read-only map frame swap', () => {
+    beforeEach(() => {
+        useGameStore.setState(useGameStore.getInitialState());
+    });
+
+    it('swaps loadedGameState to a selected replay frame and restores the final state', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(40));
+        useGameStore.setState((state) => ({
+            loadedGameState: state.loadedGameState
+                ? {
+                    ...state.loadedGameState,
+                    gameOver: true,
+                    replaySaveSequence: [JSON.parse(makeMinimalSaveJson(5)), JSON.parse(makeMinimalSaveJson(40))],
+                }
+                : null,
+            selectedOsid: 'op:stale:selection',
+            stagedOrders: [{ id: 'staged_0', type: 'move', formationId: 'brig_1', targetOsid: 'op:test:target' }],
+        }));
+
+        const finalState = useGameStore.getState().loadedGameState;
+        expect(finalState?.turn).toBe(40);
+        expect(finalState?.gameOver).toBe(true);
+
+        useGameStore.getState().startReplayInspection(JSON.parse(makeMinimalSaveJson(5)), 0);
+
+        const inspecting = useGameStore.getState();
+        expect(inspecting.loadedGameState?.turn).toBe(5);
+        expect(inspecting.loadedGameState?.gameOver).not.toBe(true);
+        expect(inspecting.loadedGameState?.replaySaveSequence).toHaveLength(2);
+        expect(inspecting.replayInspection?.frameIndex).toBe(0);
+        expect(inspecting.replayInspection?.turn).toBe(5);
+        expect(inspecting.replayInspection?.finalTurn).toBe(40);
+        expect(inspecting.selectedOsid).toBeNull();
+        expect(inspecting.stagedOrders).toEqual([]);
+
+        useGameStore.getState().exitReplayInspection();
+
+        const restored = useGameStore.getState();
+        expect(restored.loadedGameState).toBe(finalState);
+        expect(restored.loadedGameState?.turn).toBe(40);
+        expect(restored.loadedGameState?.gameOver).toBe(true);
+        expect(restored.loadedGameState?.replaySaveSequence).toHaveLength(2);
+        expect(restored.replayInspection).toBeNull();
+    });
+});
+
 describe('gameStore.loadSave — error handling for malformed input', () => {
     beforeEach(() => {
         useGameStore.setState(useGameStore.getInitialState());

@@ -4,6 +4,7 @@ import { parseGameState } from '../data/GameStateAdapter';
 import type { TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
+import type { GameState as RawGameState } from '../../../state/game_state';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -232,6 +233,20 @@ export interface GameStore {
   setOperationTargetOsids: (osids: string[]) => void;
 
   loadedGameState: LoadedGameState | null;
+  /** Active replay map-inspection overlay. Null means the map is showing the live/final loaded save. */
+  replayInspection: {
+    frameIndex: number;
+    turn: number;
+    date: string | null;
+    finalTurn: number;
+    finalDate: string | null;
+  } | null;
+  /** Final/endgame UI state to restore after read-only replay map inspection. */
+  replayInspectionReturnState: LoadedGameState | null;
+  /** Swap the UI read model to a replay frame for map inspection. Does not advance or mutate sim state. */
+  startReplayInspection: (frame: RawGameState, frameIndex: number) => void;
+  /** Restore the final/endgame UI state after replay map inspection. */
+  exitReplayInspection: () => void;
   /**
    * LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: optional sidecar carrying
    * the per-turn GameState snapshots produced by the scenario harness's
@@ -503,6 +518,81 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setOperationTargetOsids: (osids) => set({ operationTargetOsids: [...new Set(osids)] }),
 
   loadedGameState: null,
+  replayInspection: null,
+  replayInspectionReturnState: null,
+  startReplayInspection: (frame, frameIndex) => {
+    const current = get().loadedGameState;
+    if (!current) return;
+    const finalState = get().replayInspectionReturnState ?? current;
+    let inspected: LoadedGameState;
+    try {
+      inspected = parseGameState(frame, {
+        ...(finalState.replaySaveSequence ? { replaySaveSequence: finalState.replaySaveSequence } : {}),
+        ...(finalState.replaySaveManifest ? { replaySaveManifest: finalState.replaySaveManifest } : {}),
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      set({ loadError: message });
+      return;
+    }
+
+    set({
+      loadedGameState: inspected,
+      replayInspectionReturnState: finalState,
+      replayInspection: {
+        frameIndex,
+        turn: inspected.turn,
+        date: inspected.metadata?.date ?? null,
+        finalTurn: finalState.turn,
+        finalDate: finalState.metadata?.date ?? null,
+      },
+      selectedOsid: null,
+      selectedFormationId: null,
+      selectedCorpsId: null,
+      selectedCorpsFrontSectorId: null,
+      selectedArmyId: null,
+      selectedArmyHqId: null,
+      selectedOperationKey: null,
+      selectedOrbatCorpsId: null,
+      orderModeForFormation: null,
+      pendingAttackConfirmation: null,
+      stagedOrders: [],
+      operationTargetOsids: [],
+      ghostLinePoint: null,
+      flashOsid: null,
+      tooltipTarget: null,
+      tooltipPosition: null,
+      loadError: null,
+    });
+  },
+  exitReplayInspection: () => {
+    const finalState = get().replayInspectionReturnState;
+    if (!finalState) {
+      set({ replayInspection: null });
+      return;
+    }
+    set({
+      loadedGameState: finalState,
+      replayInspection: null,
+      replayInspectionReturnState: null,
+      selectedOsid: null,
+      selectedFormationId: null,
+      selectedCorpsId: null,
+      selectedCorpsFrontSectorId: null,
+      selectedArmyId: null,
+      selectedArmyHqId: null,
+      selectedOperationKey: null,
+      selectedOrbatCorpsId: null,
+      orderModeForFormation: null,
+      pendingAttackConfirmation: null,
+      stagedOrders: [],
+      operationTargetOsids: [],
+      ghostLinePoint: null,
+      flashOsid: null,
+      tooltipTarget: null,
+      tooltipPosition: null,
+    });
+  },
 
   // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: sidecar staging slot. The
   // desktop IPC layer pushes this before/with `loadSave`; `loadSave` merges
@@ -592,6 +682,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
           try {
             set({
               loadedGameState: state,
+              replayInspection: null,
+              replayInspectionReturnState: null,
               loadError: null,
               lastLoadedStateFingerprint: fingerprint,
               // ── Post-load UI state reset ──
