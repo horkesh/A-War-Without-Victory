@@ -117,8 +117,30 @@ export function getFactionCorps(state: GameState, faction: FactionId): Formation
     return result;
 }
 
+export type CorpsSubordinatesByCorps = ReadonlyMap<FormationId, readonly FormationState[]>;
+
+export function buildCorpsSubordinatesByCorps(state: GameState): Map<FormationId, FormationState[]> {
+    const formations = state.military.formations ?? {};
+    const result = new Map<FormationId, FormationState[]>();
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[id];
+        if (!f || f.status !== 'active') continue;
+        if ((f.kind ?? 'brigade') !== 'brigade') continue;
+        if (!f.corps_id) continue;
+        const existing = result.get(f.corps_id) ?? [];
+        existing.push(f);
+        result.set(f.corps_id, existing);
+    }
+    return result;
+}
+
 /** Get active brigades subordinate to a given corps. */
-export function getCorpsSubordinates(state: GameState, corpsId: FormationId): FormationState[] {
+export function getCorpsSubordinates(
+    state: GameState,
+    corpsId: FormationId,
+    corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
+): FormationState[] {
+    if (corpsSubordinatesByCorps) return [...(corpsSubordinatesByCorps.get(corpsId) ?? [])];
     const formations = state.military.formations ?? {};
     const result: FormationState[] = [];
     for (const id of Object.keys(formations).sort(strictCompare)) {

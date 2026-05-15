@@ -53,7 +53,7 @@ import type {
     OfficerPersonality,
 } from './commander_state.js';
 
-import { getCorpsSubordinates } from '../bot_corps_helpers.js';
+import { getCorpsSubordinates, type CorpsSubordinatesByCorps } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -570,6 +570,7 @@ export function buildBriefing(
     graphAnalysis: FactionGraphAnalysis | null,
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
+    corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;
 
@@ -586,7 +587,7 @@ export function buildBriefing(
     // 3. Brigades subordinate to this corps
     const brigades: readonly FormationState[] = botOrdersPerfTime(
         'commander.runCommanderForCorps.buildBriefing.getCorpsSubordinates',
-        () => getCorpsSubordinates(state, corpsId),
+        () => getCorpsSubordinates(state, corpsId, corpsSubordinatesByCorps),
     );
 
     // 4. Officer personality

@@ -4540,3 +4540,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not optimize operational-prefix, controller, alliance, or enclave candidate gates from n1836 evidence. The broad `.candidateGates` parent is nested-profiler inflated after adding child timers; choose the next CPU lane from a fresh top profile.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CANDIDATE_GATES_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(commander): index corps subordinates for briefing
+
+**Type:** Commander CPU optimization in briefing assembly. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `buildCorpsSubordinatesByCorps(...)` and threaded a pass-local subordinate index from `generateAllCorpsOrders(...)` through `runCommanderForCorps(...)` into `buildBriefing(...)`. `getCorpsSubordinates(...)` keeps the old full-scan fallback for direct callers and returns a fresh array from indexed results.
+
+**Determinism:** The index is built from sorted formation IDs, includes the same active-brigade/corps-id filters as the old helper, and is read-only after construction. It is built after sector stance evaluation and before the commander loop, preserving existing branch order, directive/operation writes, RNG behavior, save schema, and serialized state. Profiled 40w n1837 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `commander.runCommanderForCorps.corpsSubordinatesIndex`. Green focused guard and behavior test passed 6/6 with `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts tests/corps_subordinates_index.test.ts`, `npm.cmd run typecheck` passed, and profiled 40w n1837 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.buildBriefing.getCorpsSubordinates` dropped 63.641ms -> 0.597ms, with 13.532ms index construction cost and 14.129ms net subordinate cost.
+
+**Roadmap delta:** Keep commander subordinate lookup indexed at the faction-pass commander-loop boundary. Do not reintroduce per-corps full-formation scans for briefing; next CPU work should use a fresh profile and focus on larger remaining buckets.
+
+**Report:** `docs/40_reports/implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md`

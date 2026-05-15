@@ -20,6 +20,7 @@ import type { SupplyStateByOsidReport } from '../../../state/supply_state_deriva
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { SpatialContext } from '../../spatial_context.js';
+import type { CorpsSubordinatesByCorps } from '../bot_corps_helpers.js';
 import type {
     CommanderBriefing,
     CommanderOutput,
@@ -167,6 +168,7 @@ export function runCommanderForCorps(
     graphAnalysis: FactionGraphAnalysis | null,
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
+    corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
 ): CommanderOutput {
     return botOrdersPerfTime('commander.runCommanderForCorps.total', () => {
         const briefing = botOrdersPerfTime(
@@ -174,6 +176,7 @@ export function runCommanderForCorps(
             () => buildBriefing(
                 state, corpsId, faction, spatial, edges,
                 reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
+                corpsSubordinatesByCorps,
             ),
         );
         const previousState: CommanderState | null =

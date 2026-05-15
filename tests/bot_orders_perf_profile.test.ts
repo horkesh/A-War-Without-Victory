@@ -309,6 +309,12 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSubordinates');
+        const botCorpsAi = readFileSync(resolve('src/sim/combat/bot_corps_ai.ts'), 'utf8');
+        const botCorpsHelpers = readFileSync(resolve('src/sim/combat/bot_corps_helpers.ts'), 'utf8');
+        expect(botCorpsAi).toContain('commander.runCommanderForCorps.corpsSubordinatesIndex');
+        expect(botCorpsAi).toContain('buildCorpsSubordinatesByCorps');
+        expect(commanderBriefing).toContain('corpsSubordinatesByCorps');
+        expect(botCorpsHelpers).toContain('buildCorpsSubordinatesByCorps');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.collectOsids');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.analyze');

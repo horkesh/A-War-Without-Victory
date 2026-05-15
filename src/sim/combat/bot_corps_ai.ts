@@ -36,8 +36,13 @@ import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
 import { evaluateSectorStances } from './bot_corps_directives.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
-import { getFactionCorps, getCorpsSubordinates } from './bot_corps_helpers.js';
+import {
+    buildCorpsSubordinatesByCorps,
+    getFactionCorps,
+    getCorpsSubordinates,
+} from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 // ── v0.8 Commander Loop ────────────────────────────────────────────────
 import { runCommanderForCorps, applyCommanderOutput } from './commander/commander_loop.js';
@@ -50,6 +55,7 @@ import { runCommanderForCorps, applyCommanderOutput } from './commander/commande
 // From bot_corps_helpers
 export {
     assessCorpsSupplyHealth,
+    buildCorpsSubordinatesByCorps,
     getFactionCorps,
     getCorpsSubordinates,
     averagePersonnelFraction,
@@ -230,6 +236,10 @@ export function generateAllCorpsOrders(
     if (spatial) {
         // v0.8 Commander Loop: per-corps PERCEIVE→DECIDE→EXECUTE pipeline
         const corpsList = getFactionCorps(state, faction);
+        const corpsSubordinatesByCorps = botOrdersPerfTime(
+            'commander.runCommanderForCorps.corpsSubordinatesIndex',
+            () => buildCorpsSubordinatesByCorps(state),
+        );
         for (const corps of corpsList) {
             const output = runCommanderForCorps(
                 state,
@@ -241,6 +251,7 @@ export function generateAllCorpsOrders(
                 graphAnalysis,
                 supplyByOsid ?? null,
                 ethnicMap ?? null,
+                corpsSubordinatesByCorps,
             );
             applyCommanderOutput(state, corps.id, output);
         }
