@@ -4236,3 +4236,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The pocket-evacuation roster scan hotspot from n1814 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `defensive`, and `homeDefense`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split defensive profile attribution
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added default-off sub-labels inside `evaluateDefensive(...)` for deep-rear near-front checks, self-retreat counterattack prediction and sector lookup, sector-retreat counterattack lookup/target collection/prediction, front-gap count/search, and nested `evaluateUncontestedOccupation(...)`.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers preserve branch order, sorted candidate filters, movement/posture/attack-order writes, RNG behavior, save schema, and serialization. Profiled 40w n1817 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `DEFENSIVE_PROFILE_PREFIX`. Green focused test passed 5/5, `npm.cmd run typecheck` passed, and `git diff --check` passed before profiling. Profiled 40w n1817 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `.defensive.frontGapCountHere` measured 50.198ms, `.defensive.uncontestedOccupation` 23.666ms, and `.defensive.sectorCounterAttackSectorLookup` 11.516ms.
+
+**Roadmap delta:** Defensive attribution is now visible. The next bot-order CPU lane should optimize repeated defensive front-gap count scans before sector lookup or counterattack prediction.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md`

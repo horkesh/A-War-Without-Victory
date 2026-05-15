@@ -34,11 +34,16 @@ import {
 
 export const UNCONTESTED_OCCUPATION_SCORE = 600;
 const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const DEFENSIVE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const SECTOR_ATTACK_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function defensiveProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${DEFENSIVE_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
 function sectorAttackProfileTime<T>(labelSuffix: string, fn: () => T): T {
@@ -466,10 +471,10 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
             const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
             if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
                 const neighbors = adjacency.get(loc as Osid) ?? [];
-                const nearFront = neighbors.some(n => {
+                const nearFront = defensiveProfileTime('.defensive.deepRearNearFront', () => neighbors.some(n => {
                     const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
                     return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
-                });
+                }));
                 if (!nearFront) return false; // deep rear — fall through to interior movement
             }
         }
@@ -482,7 +487,10 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
         // AND the brigade is not disrupted (routed brigades can't counter-attack)
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
-            const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
+            const targets = defensiveProfileTime(
+                '.defensive.selfRetreatPredictTargets',
+                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap)
+            );
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
                 isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
@@ -492,7 +500,10 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                 result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
                 chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
                 // Increment sector counter-attack count for cap enforcement
-                const sectorId = findBrigadeSectorId(state, brigade);
+                const sectorId = defensiveProfileTime(
+                    '.defensive.selfRetreatSectorLookup',
+                    () => findBrigadeSectorId(state, brigade)
+                );
                 if (sectorId) {
                     sectorCounterAttackCount.set(sectorId, (sectorCounterAttackCount.get(sectorId) ?? 0) + 1);
                 }
@@ -509,32 +520,40 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
             && (brigade.personnel ?? 0) >= COUNTER_ATTACK_MIN_PERSONNEL
             && (brigade.cohesion ?? 0) >= COUNTER_ATTACK_MIN_COHESION
         ) {
-            const sectorId = findBrigadeSectorId(state, brigade);
+            const sectorId = defensiveProfileTime(
+                '.defensive.sectorCounterAttackSectorLookup',
+                () => findBrigadeSectorId(state, brigade)
+            );
             if (sectorId) {
                 const sectorRetreats = sectorRecentRetreats.get(sectorId);
                 const sectorCount = sectorCounterAttackCount.get(sectorId) ?? 0;
                 if (sectorRetreats && sectorRetreats.length > 0
                     && sectorCount < MAX_SECTOR_COUNTER_ATTACKS_PER_TURN
                 ) {
-                    // Find enemy OSIDs within COUNTER_ATTACK_MAX_HOPS of any retreat OSID
-                    const retreatOsids = sectorRetreats.map(r => r.osid);
-                    const enemyTargetOsids = getEnemyOsidsWithinHops(
-                        retreatOsids,
-                        COUNTER_ATTACK_MAX_HOPS,
-                        adjacency,
-                        state,
-                        faction,
-                    );
+                    const candidateTargets = defensiveProfileTime('.defensive.sectorCounterAttackCollectTargets', () => {
+                        // Find enemy OSIDs within COUNTER_ATTACK_MAX_HOPS of any retreat OSID
+                        const retreatOsids = sectorRetreats.map(r => r.osid);
+                        const enemyTargetOsids = getEnemyOsidsWithinHops(
+                            retreatOsids,
+                            COUNTER_ATTACK_MAX_HOPS,
+                            adjacency,
+                            state,
+                            faction,
+                        );
 
-                    // Filter to only adjacent enemy OSIDs that are within range
-                    const candidateTargets = adjEnemy
-                        .filter(e => enemyTargetOsids.has(e))
-                        .sort(strictCompare);
+                        // Filter to only adjacent enemy OSIDs that are within range
+                        return adjEnemy
+                            .filter(e => enemyTargetOsids.has(e))
+                            .sort(strictCompare);
+                    });
 
                     if (candidateTargets.length > 0) {
-                        const targets = predictAllAdjacentTargets(
-                            state, brigade.id, adjacency, reverseMap, terrainCache,
-                            'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap,
+                        const targets = defensiveProfileTime(
+                            '.defensive.sectorCounterAttackPredictTargets',
+                            () => predictAllAdjacentTargets(
+                                state, brigade.id, adjacency, reverseMap, terrainCache,
+                                'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap,
+                            )
                         );
 
                         // Find best target among candidates with sufficient predicted outcome
@@ -565,9 +584,15 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         }
 
         // Fill adjacent front gaps even in defensive stance
-        const defHere = countFactionBrigadesAtOsid(state, faction, loc);
+        const defHere = defensiveProfileTime(
+            '.defensive.frontGapCountHere',
+            () => countFactionBrigadesAtOsid(state, faction, loc)
+        );
         if (defHere >= 2) {
-            const gap = findAdjacentFrontGap(state, loc, faction, adjacency, reverseMap, graphAnalysis);
+            const gap = defensiveProfileTime(
+                '.defensive.frontGapSearch',
+                () => findAdjacentFrontGap(state, loc, faction, adjacency, reverseMap, graphAnalysis)
+            );
             if (gap) {
                 result.movement_orders[brigade.id] = gap;
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -577,7 +602,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         // Defensive corps should still walk into truly undefended adjacent territory.
         // Keep this after higher-priority retreat counterattacks and front-gap movement,
         // but before passive dig-in/defend so empty enemy OSIDs do not persist forever.
-        if (evaluateUncontestedOccupation(ctx)) {
+        if (defensiveProfileTime('.defensive.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) {
             return true;
         }
         // Defensive stance, no attack — dig_in if cohesion sufficient
