@@ -82,6 +82,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const commanderLoop = readFileSync(resolve('src/sim/combat/commander/commander_loop.ts'), 'utf8');
         const commanderAssess = readFileSync(resolve('src/sim/combat/commander/assess.ts'), 'utf8');
         const combatPredictor = readFileSync(resolve('src/sim/combat/combat_predictor.ts'), 'utf8');
+        const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -167,7 +168,20 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('getDefenderFormations()');
         expect(combatPredictor).toContain('.rankDefendersByPower.computeDefenderPower');
         expect(combatPredictor).toContain('.rankDefendersByPower.sortAndTotal');
+        expect(combatPredictor).toContain('defenderPowerProfilePrefix');
+        expect(combatPredictor).toContain('profilePrefix ? `${profilePrefix}.rankDefendersByPower.computeDefenderPower` : undefined');
+        expect(combatPredictor).toContain('defenderPowerProfileTime');
         expect(combatPredictor).toContain('rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix)');
+        expect(combatMath).toContain('type CombatMathProfileTimer');
+        expect(combatMath).toContain('combatMathProfileTime');
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.base'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.supply'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.terrainFactors'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.frontDensity'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.officer'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.home'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.equipmentQuality'");
+        expect(combatMath).not.toContain("'.computeDefenderPower.base'");
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');

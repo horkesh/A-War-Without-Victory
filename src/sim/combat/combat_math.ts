@@ -31,6 +31,16 @@ import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.js';
 
+type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
+
+function combatMathProfileTime<T>(
+    profileTime: CombatMathProfileTimer | undefined,
+    labelSuffix: string,
+    fn: () => T,
+): T {
+    return profileTime ? profileTime(labelSuffix, fn) : fn();
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome type
 // ═══════════════════════════════════════════════════════════════════════════
@@ -748,15 +758,14 @@ export function getSupplyMult(
         ?? (formation as { location_osid?: string }).location_osid;
     const factionId = formation.faction as string;
     if (supplyStateByOsid?.factions && locationOsid) {
-        const facEntry = supplyStateByOsid.factions.find((f) => f.faction_id === factionId);
-        const entry = facEntry?.by_osid?.find((e) => e.osid === locationOsid);
-        if (entry) {
-            let effectiveState: SupplyStateLevel = entry.state;
+        const rawState = getSupplyStateForOsid(supplyStateByOsid, state.meta.turn, factionId, locationOsid);
+        if (rawState) {
+            let effectiveState: SupplyStateLevel = rawState;
 
             // Phase A: When reserves enabled, combine reachability with reserves
             if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve) {
                 const reserveLevel = (state.military.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
-                effectiveState = getEffectiveSupplyState(entry.state, reserveLevel);
+                effectiveState = getEffectiveSupplyState(rawState, reserveLevel);
             }
 
             if (effectiveState === 'adequate') return 1.0;
@@ -767,6 +776,50 @@ export function getSupplyMult(
     const lastSupplied = formation.ops?.last_supplied_turn;
     if (lastSupplied != null && state.meta.turn - lastSupplied <= 2) return 1.0;
     return mode === 'attack' ? 0.4 : 0.5;
+}
+
+interface SupplyStateLookupIndex {
+    factionsRef: SupplyStateByOsidReport['factions'];
+    stateTurn: number;
+    turn: number;
+    byFactionOsid: Map<string, Map<string, SupplyStateLevel>>;
+}
+
+const supplyStateLookupCache: WeakMap<SupplyStateByOsidReport, SupplyStateLookupIndex> = new WeakMap();
+
+function buildSupplyStateLookupIndex(report: SupplyStateByOsidReport, stateTurn: number): SupplyStateLookupIndex {
+    const byFactionOsid = new Map<string, Map<string, SupplyStateLevel>>();
+    for (const factionEntry of report.factions ?? []) {
+        if (byFactionOsid.has(factionEntry.faction_id)) continue;
+        const byOsid = new Map<string, SupplyStateLevel>();
+        for (const osidEntry of factionEntry.by_osid ?? []) {
+            if (!byOsid.has(osidEntry.osid)) byOsid.set(osidEntry.osid, osidEntry.state);
+        }
+        byFactionOsid.set(factionEntry.faction_id, byOsid);
+    }
+    const index = {
+        factionsRef: report.factions,
+        stateTurn,
+        turn: report.turn,
+        byFactionOsid,
+    };
+    supplyStateLookupCache.set(report, index);
+    return index;
+}
+
+function getSupplyStateLookupIndex(report: SupplyStateByOsidReport, stateTurn: number): SupplyStateLookupIndex {
+    const cached = supplyStateLookupCache.get(report);
+    if (cached && cached.factionsRef === report.factions && cached.turn === report.turn && cached.stateTurn === stateTurn) return cached;
+    return buildSupplyStateLookupIndex(report, stateTurn);
+}
+
+function getSupplyStateForOsid(
+    report: SupplyStateByOsidReport,
+    stateTurn: number,
+    factionId: string,
+    osid: string,
+): SupplyStateLevel | undefined {
+    return getSupplyStateLookupIndex(report, stateTurn).byFactionOsid.get(factionId)?.get(osid);
 }
 
 export function getCorpsStance(state: GameState, formation: FormationState): CorpsStance | null {
@@ -1029,15 +1082,17 @@ export function computeDefenderPower(
     terrainMultByOsid: Record<string, number>,
     artillerySuppression: number = 0,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
-    ethnicDefenseBonus?: number
+    ethnicDefenseBonus?: number,
+    profileTime?: CombatMathProfileTimer,
 ): number {
-    const base = basePower(formation);
+    const base = combatMathProfileTime(profileTime, '.base', () => basePower(formation));
     const posture = formation.posture ?? 'defend';
     const rawPostureMult = posture === 'dig_in'
         ? computeDigInDefMult(formation.dig_in_progress)
         : POSTURE_DEFENSE[posture] ?? 1;
-    const supplyMult = getSupplyMult(formation, state, 'defend', supplyStateByOsid);
-    const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+    const supplyMult = combatMathProfileTime(profileTime, '.supply', () =>
+        getSupplyMult(formation, state, 'defend', supplyStateByOsid)
+    );
     const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
     const suppressionFactor = 1.0 - artillerySuppression;
 
@@ -1055,18 +1110,35 @@ export function computeDefenderPower(
     const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
     const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
     const resilienceMult = 1.0 + defenseStreak * RESILIENCE_PER_DEFENSE;
-    const urbanMult = getUrbanMult(targetOsid);
-    const forestMult = getForestMult(targetOsid);
     const disruptionMult = getDisruptionMult(formation, 'defend');
-    const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
-    const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
-    const decorationDefBonus = getDecorationDefBonus(formation);
-    const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? decorationDefBonus);
-    const frontDensityMult = getLocalFrontDensityModifier(state, formation);
-    const officerMult = getThreeTierOfficerMod(formation, state, 'defend');
+    const {
+        terrainMult,
+        urbanMult,
+        forestMult,
+        enclaveMult,
+        toTerrainMult,
+        perBrigadeTerrainBonus,
+    } = combatMathProfileTime(profileTime, '.terrainFactors', () => {
+        const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
+        const urbanMult = getUrbanMult(targetOsid);
+        const forestMult = getForestMult(targetOsid);
+        const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
+        const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
+        const decorationDefBonus = getDecorationDefBonus(formation);
+        const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? decorationDefBonus);
+        return { terrainMult, urbanMult, forestMult, enclaveMult, toTerrainMult, perBrigadeTerrainBonus };
+    });
+    const frontDensityMult = combatMathProfileTime(profileTime, '.frontDensity', () =>
+        getLocalFrontDensityModifier(state, formation)
+    );
+    const officerMult = combatMathProfileTime(profileTime, '.officer', () =>
+        getThreeTierOfficerMod(formation, state, 'defend')
+    );
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
     const fatigueMult = getFatigueMult(formation, 'defend');
-    const homeMult = getHomeDistanceMultFromCache(state, formation);
+    const homeMult = combatMathProfileTime(profileTime, '.home', () =>
+        getHomeDistanceMultFromCache(state, formation)
+    );
     const moralePenalty = getCriticalMoralePenalty(formation);
 
     // ── LANE-NIGHTSHIFT-STUPCANICA-DEFENDER-STACK-PHASE-1-IMPLEMENTATION ──
@@ -1108,7 +1180,9 @@ export function computeDefenderPower(
     // LANE-NIGHTSHIFT-EQUIPMENT-QUALITY-MODIFIER-SUBSTRATE: faction-scoped power
     // multiplier from arms-flow / embargo-lift events. Gated `!== 1.0` so the
     // historical (no-event) path is byte-stable.
-    const eqMult = getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0);
+    const eqMult = combatMathProfileTime(profileTime, '.equipmentQuality', () =>
+        getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0)
+    );
     if (eqMult !== 1.0) power *= eqMult;
     return power;
 }

@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): split defender power profile
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the defender-ranking compute-vs-sort split.
+
+**Fix:** Threaded an optional timing callback from the direct-probe predictor into `computeDefenderPower(...)` so shared `combat_math.ts` can split defender-power substeps without importing the bot-orders profiler. The split covers base power, supply, terrain factors, front-density lookup, officer lookup, home-distance lookup, and equipment-quality lookup. No combat formula, resolver caller, ranking rule, target ordering, scenario data, output schema, or save schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `defenderPowerProfilePrefix`; a second red label-shape guard failed until doubled `.computeDefenderPower.computeDefenderPower.*` labels were removed. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed; `git diff --check` passed with CRLF warnings only. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1788 with final hash `7ef09f55d6494edd`, matching n1784. The split shows `.officer` at 22.682ms, `.frontDensity` at 15.177ms, `.terrainFactors` at 5.115ms, and `.supply` at only 1.710ms; nested timers add opt-in profile overhead, so this lane is attribution, not a runtime cut.
+
+**Canon posture:** Default-off deterministic instrumentation in a read-only predictor path. Shared combat math remains profiler-import-free, and serialized output remained hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): split defender ranking profile
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the lazy defender formation scan.

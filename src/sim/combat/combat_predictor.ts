@@ -127,6 +127,10 @@ function rankDefendersByPowerWithEntries(
     ethnicBonusFn: (d: FormationState) => number,
     profilePrefix?: string,
 ): RankedDefenderPowers {
+    const defenderPowerProfilePrefix = profilePrefix ? `${profilePrefix}.rankDefendersByPower.computeDefenderPower` : undefined;
+    const defenderPowerProfileTime = defenderPowerProfilePrefix
+        ? <T>(labelSuffix: string, fn: () => T): T => predictorPerfTime(defenderPowerProfilePrefix, labelSuffix, fn)
+        : undefined;
     const scored = predictorPerfTime(
         profilePrefix,
         '.rankDefendersByPower.computeDefenderPower',
@@ -140,6 +144,7 @@ function rankDefendersByPowerWithEntries(
                 artSuppression,
                 supplyStateByOsid,
                 ethnicBonusFn(formation),
+                defenderPowerProfileTime,
             ),
         })),
     );
