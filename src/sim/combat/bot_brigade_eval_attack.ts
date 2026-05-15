@@ -4,7 +4,7 @@ import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
-import { predictAllAdjacentTargets } from './combat_predictor.js';
+import { predictAllAdjacentTargets, predictCombatOutcome } from './combat_predictor.js';
 import {
     scoreTargetFromDirective,
     estimateConcentratedOutcome,
@@ -201,37 +201,36 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 return true;
             }
 
-            const allTargets = sectorAttackProfileTime(
-                '.sectorAttack.executionPredictTargets',
-                () => predictAllAdjacentTargets(
-                    state,
-                    brigade.id,
-                    adjacency,
-                    reverseMap,
-                    terrainCache,
-                    'attack',
-                    supplyStateByOsid,
-                    osidPopulationMap,
-                    undefined,
-                    ethnicMap
-                )
-            );
-            // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
-            // when combat is not enabled (allied OR mobilizing). Applies to ALL operation attack paths.
-            const targets = (faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)
-                ? allTargets.filter(t => {
-                    const tc = getPoliticalControllerOSID(state, t.osid, reverseMap);
-                    return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
-                })
-                : allTargets;
             const tacticallyAdjacentToObjective = sectorAttackProfileTime(
                 '.sectorAttack.executionTacticalAdjacency',
                 () => getTacticalAdjacentOsids(state, loc as Osid, adjacency).includes(currentObjective)
             );
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
-            const directObjectiveAttack = avoidedOsidsForFaction?.includes(currentObjective as string)
-                ? undefined
-                : targets.find((t) => t.osid === currentObjective);
+            const directObjectiveAttack = tacticallyAdjacentToObjective
+                ? sectorAttackProfileTime('.sectorAttack.executionDirectObjective', () => {
+                    if (avoidedOsidsForFaction?.includes(currentObjective as string)) return undefined;
+                    if (objController === null || objController === faction) return undefined;
+                    if ((faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)) {
+                        const alliedOpponent = faction === 'HRHB' ? 'RBiH' : 'HRHB';
+                        if (objController === alliedOpponent) return undefined;
+                    }
+                    const prediction = predictCombatOutcome(
+                        state,
+                        brigade.id,
+                        currentObjective as Osid,
+                        adjacency,
+                        reverseMap,
+                        terrainCache,
+                        'attack',
+                        undefined,
+                        supplyStateByOsid,
+                        osidPopulationMap,
+                        undefined,
+                        ethnicMap,
+                    );
+                    return prediction ? { osid: currentObjective as Osid, prediction } : undefined;
+                })
+                : undefined;
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
             if (directObjectiveAttack) {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
@@ -324,6 +323,29 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // as attack-through intermediaries (e.g. Brčko city center — VRS held
             // the corridor but not the city core; without this, operation brigades
             // sweep through avoided OSIDs opportunistically).
+            const allTargets = sectorAttackProfileTime(
+                '.sectorAttack.executionPredictTargets',
+                () => predictAllAdjacentTargets(
+                    state,
+                    brigade.id,
+                    adjacency,
+                    reverseMap,
+                    terrainCache,
+                    'attack',
+                    supplyStateByOsid,
+                    osidPopulationMap,
+                    undefined,
+                    ethnicMap
+                )
+            );
+            // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
+            // when combat is not enabled (allied OR mobilizing). Applies to attack-through fallback.
+            const targets = (faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)
+                ? allTargets.filter(t => {
+                    const tc = getPoliticalControllerOSID(state, t.osid, reverseMap);
+                    return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
+                })
+                : allTargets;
             const { intermediateTargets, bestIntermediate } = sectorAttackProfileTime(
                 '.sectorAttack.executionIntermediateTargets',
                 () => {

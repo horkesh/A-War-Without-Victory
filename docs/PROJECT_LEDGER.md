@@ -4204,3 +4204,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Sector-attack attribution is now visible. The next bot-order CPU pass should target sector-attack prediction scope/laziness before path or adjacency work, but start from a fresh profile because `sectorMarch` and `sectorAttack` are nearly tied at the parent level.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): use direct sector-attack prediction
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateSectorAttack(...)` now predicts the current objective directly with `predictCombatOutcome(...)` when a brigade is tactically adjacent to that objective, and defers full `predictAllAdjacentTargets(...)` work until the attack-through fallback after objective approach pathing fails.
+
+**Determinism:** The direct path uses the same prediction inputs that the previous all-neighbor call used for the current objective. The broad adjacent-target prediction remains in the fallback branch for attack-through semantics. The change does not mutate `GameState`, save schema, candidate ordering, movement-order writes, attack-order writes, RNG behavior, or serialization. Profiled 40w n1814 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `.sectorAttack.executionDirectObjective`. Green focused profile test passed 5/5, `tests\operation_execution_staging_truth.test.ts` passed 1/1, and `npm.cmd run typecheck` passed. Profiled 40w n1814 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `sectorAttack` dropped 126.089ms -> 61.800ms and `bot_orders.executeFactionDirectives.total` dropped 980.382ms -> 919.104ms.
+
+**Roadmap delta:** SectorAttack is no longer the leading bot-order evaluator. The next CPU lane should use a fresh profile; current top candidates are `sectorMarch`, `defensive`, `pocketEvacuation`, and `homeDefense`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_PREDICTION.md`

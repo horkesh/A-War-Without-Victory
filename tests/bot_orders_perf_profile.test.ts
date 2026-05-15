@@ -85,6 +85,10 @@ describe('bot-orders perf profile instrumentation', () => {
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
         const brigadeEvalAttack = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
+        const sectorAttackEvaluator = brigadeEvalAttack.slice(
+            brigadeEvalAttack.indexOf('export function evaluateSectorAttack'),
+            brigadeEvalAttack.indexOf('export function evaluateReorganize'),
+        );
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -123,10 +127,15 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproaches');
         expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproachPath');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionPredictTargets');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionDirectObjective');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionTacticalAdjacency');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionAdjacentParticipants');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionApproachPath');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionIntermediateTargets');
+        expect(sectorAttackEvaluator).toContain('predictCombatOutcome');
+        expect(sectorAttackEvaluator.indexOf('.sectorAttack.executionApproachPath')).toBeLessThan(
+            sectorAttackEvaluator.indexOf('.sectorAttack.executionPredictTargets'),
+        );
         expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.uncontestedOccupation.salient');
         expect(brigadeEvalAttack).toContain('.uncontestedOccupation.defenderScan');

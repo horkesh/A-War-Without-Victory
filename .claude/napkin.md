@@ -42,6 +42,8 @@
 
 **2026-05-15 sectorAttack profile split:** n1813 kept hash `0cb626c032204372`; `.sectorAttack.executionPredictTargets` accounts for 94.286ms of the 126.089ms parent, while planning/path/adjacency labels are secondary. Do instead: target sector-attack prediction scope/laziness before path or adjacency work, and compare against a fresh profile because `sectorMarch` (128.351ms) and `sectorAttack` (126.089ms) are nearly tied.
 
+**2026-05-15 sectorAttack direct prediction:** n1814 kept hash `0cb626c032204372`; direct current-objective prediction plus deferred attack-through fallback cut `sectorAttack` 126.089ms -> 61.800ms and total bot orders 980.382ms -> 919.104ms. Do instead: treat sectorAttack as no longer leading; next bot-order CPU lane should start from a fresh profile, with current candidates `sectorMarch`, `defensive`, `pocketEvacuation`, and `homeDefense`.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.
