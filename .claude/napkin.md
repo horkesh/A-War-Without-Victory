@@ -58,6 +58,8 @@
 
 **2026-05-15 interiorMovement profile split:** n1823 kept hash `0cb626c032204372`; default-off branch labels showed `interiorMovement` at 23.830ms, led by `.interiorMovement.fallback` 12.864ms and `.interiorMovement.prioritySector` 8.017ms. Do instead: record fallback attribution but do not optimize `interiorMovement` before larger current buckets unless a fresh profile shows it has grown; check profile suffixes for doubled parent labels before writing reports.
 
+**2026-05-15 uncontested salient cache rejected:** n1824 kept hash `0cb626c032204372`, but exact faction+loc+target caching worsened `.uncontestedOccupation.salient` 20.629ms -> 23.320ms and did not cut total bot orders. Do instead: do not retry that cache shape without new evidence; prefer `sectorAttack.executionDirectObjective`, remaining `homeDefense.uncontestedOccupation` attribution, or defensive shared work from the fresh profile.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.

@@ -10,6 +10,8 @@
 
 **Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md) - n1823 kept final hash `0cb626c032204372` and split `evaluateInteriorMovement(...)`; `.interiorMovement.fallback` measured 12.864ms and `.interiorMovement.prioritySector` measured 8.017ms.
 
+**Latest bot-order rejected CPU candidate:** [implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md) - n1824 kept final hash `0cb626c032204372`, but the exact faction+loc+target uncontested-salient cache worsened `.uncontestedOccupation.salient` 20.629ms -> 23.320ms, so the implementation was reverted.
+
 **As of 2026-02-15:** All implemented report content has been consolidated into one dated document. Individual reports have been archived (not deleted).
 
 | What you need | Where to go |

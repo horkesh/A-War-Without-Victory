@@ -4332,3 +4332,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Interior movement attribution is now visible and does not outrank the larger current buckets. The next CPU lane should use a fresh profile; current candidates are `sectorMarch` residual attribution, `homeDefense`, `sectorAttack`, and remaining defensive/uncontested shared work.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): reject uncontested salient cache
+
+**Type:** VERDICT-REPORT-ONLY for a rejected bot-order CPU optimization candidate. No code change is retained; no gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change tested and reverted:** A pass-local `evaluateUncontestedOccupation(...)` salient verdict cache keyed by faction, current location, and target OSID. The exact key preserved the old rule where the current brigade location counts as friendly, but the measured overhead outweighed the saved neighbor scans.
+
+**Determinism:** The candidate only read current state and used a pass-local `Map`; profiled 40w n1824 kept final hash `0cb626c032204372`. Because it failed the performance gate, the implementation and test were reverted before this docs-only commit.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/uncontested_salient_cache.test.ts` failed because `uncontestedSalientCacheKey` did not exist. Green candidate suite passed 14/14, `npm.cmd run typecheck` passed, and n1824 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. The targeted label worsened: `.uncontestedOccupation.salient` 20.629ms -> 23.320ms, and total bot orders stayed noisy/flat at 771.414ms -> 772.211ms.
+
+**Roadmap delta:** Do not retry the exact faction+loc+target salient cache without new evidence. The next CPU lane should use the fresh profile and prefer concrete remaining labels such as `sectorAttack.executionDirectObjective`, remaining `homeDefense.uncontestedOccupation` attribution, or defensive shared work.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md`
