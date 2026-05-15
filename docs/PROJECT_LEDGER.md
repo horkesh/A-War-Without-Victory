@@ -4060,3 +4060,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** v0.9.0 Consequence System Packet C1 is complete with all known effect substrates reader-confirmed. Next consequence work should target C2 pressure completion, not another broad audit.
 
 **Report:** `docs/40_reports/audits/20260510_CONSEQUENCE_SUBSTRATE_INVENTORY.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache overstack corps OSID counts
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added a per-faction directive-pass cache for active brigade/OG/operational_group counts by corps and OSID. `executeFactionDirectivesImpl(...)` builds the cache once from `state.military.formations`; `evaluateSectorMarch(...)` uses it for overstack redistribution's current-location, candidate-ranking, and destination-count checks while preserving the existing same-turn `columnAssignments` departure/arrival adjustment.
+
+**Determinism:** The cache is rebuilt inside the deterministic faction-order pass, iterates formation IDs with `strictCompare`, and mirrors the old scanner's filters and no-corps all-faction fallback. It is read-only during evaluation, so movement-order sequencing and serialized output stay stable.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_brigade_context_counts.test.ts --reporter=dot` failed on the missing exported cache builder. Green focused suite: `npx.cmd vitest run tests\bot_brigade_context_counts.test.ts tests\bot_orders_perf_profile.test.ts tests\tooth_guard.test.ts tests\retroactive_tooth_eviction.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck` passed. Profiled 40w n1805 kept final hash `0cb626c032204372`; `.overstackRedistribution.countHere` dropped 189.557ms -> 3.615ms and `.overstackRedistribution` dropped 264.194ms -> 24.234ms.
+
+**Roadmap delta:** The overstack count hotspot from n1804 is closed. The next bot-order CPU pass should use a fresh profile; n1805 points toward `.retroactiveTooth` and `.assignedSectorLookup`, not overstack destination pathfinding.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_COUNT_CACHE.md`

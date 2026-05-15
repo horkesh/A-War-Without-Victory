@@ -70,6 +70,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1803 kept hash `0cb626c032204372`');
     expect(roadmap).toContain('overstack split');
     expect(roadmap).toContain('n1804 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('overstack count-cache');
+    expect(roadmap).toContain('n1805 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.overstackRedistribution.countHere` dropped 189.557ms -> 3.615ms');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');

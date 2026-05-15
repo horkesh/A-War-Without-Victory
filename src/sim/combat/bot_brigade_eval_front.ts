@@ -1,5 +1,5 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
-import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination, isMovementDestinationRisky } from './bot_brigade_context.js';
+import { findNearestFriendlyOsidInSet, findNearestFriendlyOsidDestination, getCorpsBrigadeCountAtOsid, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
@@ -71,7 +71,10 @@ export function assignedBrigadeNotOnSectorFrontOsids(
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids, corpsBrigadeCountsByOsid } = ctx;
+    const countCorpsAt = (osid: Osid): number => corpsBrigadeCountsByOsid
+        ? getCorpsBrigadeCountAtOsid(corpsBrigadeCountsByOsid, brigade.corps_id, osid)
+        : countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, osid);
     const offAssignedFront = sectorMarchProfileTime('.offAssignedFront', () =>
         assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, assignedSectorFrontOsids)
     );
@@ -330,7 +333,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
                     // Negative values in columnAssignments = planned departures from this OSID
                     const effectiveCountHere = sectorMarchProfileTime('.overstackRedistribution.countHere', () =>
-                        countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
+                        countCorpsAt(loc)
                         + Math.min(0, plannedDepartures) // departures reduce count
                     );
                     if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
@@ -344,9 +347,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                 .filter(o => o !== loc)
                                 .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
                                 .sort((a, b) => {
-                                    const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
+                                    const ca = countCorpsAt(a as Osid)
                                         + (columnAssignments.get(a as Osid) ?? 0);
-                                    const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
+                                    const cb = countCorpsAt(b as Osid)
                                         + (columnAssignments.get(b as Osid) ?? 0);
                                     return ca - cb || strictCompare(a, b);
                                 })
@@ -354,7 +357,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         for (const candidate of otherFronts) {
                             // Check: would this destination be overstacked after planned arrivals?
                             const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
-                            const destCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, candidate)
+                            const destCount = countCorpsAt(candidate as Osid)
                                 + Math.max(0, plannedAtDest); // arrivals increase count
                             if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
 

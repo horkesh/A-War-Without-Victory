@@ -103,8 +103,10 @@ import {
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
     findNearestFriendlyOsidInSet,
+    buildCorpsBrigadeCountsByOsid,
     countCorpsBrigadesAtOsid,
     countFactionBrigadesAtOsid,
+    getCorpsBrigadeCountAtOsid,
     isMovementDestinationRisky,
     MAX_CORPS_BRIGADES_PER_OSID,
 } from './bot_brigade_context.js';
@@ -154,8 +156,10 @@ export {
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
     findNearestFriendlyOsidInSet,
+    buildCorpsBrigadeCountsByOsid,
     countCorpsBrigadesAtOsid,
     countFactionBrigadesAtOsid,
+    getCorpsBrigadeCountAtOsid,
     isMovementDestinationRisky,
     MAX_CORPS_BRIGADES_PER_OSID,
     // movement
@@ -432,6 +436,7 @@ function executeFactionDirectivesImpl(
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
     const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
+    const corpsBrigadeCountsByOsid = buildCorpsBrigadeCountsByOsid(state, faction);
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -548,6 +553,7 @@ function executeFactionDirectivesImpl(
             sectorCounterAttackCount,
             sectorAssignment,
             assignedSectorFrontOsids,
+            corpsBrigadeCountsByOsid,
             adjacency,
             reverseMap,
             terrainCache,

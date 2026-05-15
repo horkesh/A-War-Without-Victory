@@ -32,6 +32,9 @@ import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
  * within its zone. At corps boundary junctions, 2+2=4 total is acceptable
  * since those are natural concentration points. */
 export const MAX_CORPS_BRIGADES_PER_OSID = 2;
+const ALL_FACTION_CORPS_COUNT_KEY = '__all__';
+
+export type CorpsBrigadeCountsByOsid = Map<string, Map<Osid, number>>;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Functions
@@ -184,6 +187,43 @@ export function countCorpsBrigadesAtOsid(state: GameState, faction: FactionId, c
         }
     }
     return count;
+}
+
+export function buildCorpsBrigadeCountsByOsid(state: GameState, faction: FactionId): CorpsBrigadeCountsByOsid {
+    const counts: CorpsBrigadeCountsByOsid = new Map();
+    const formations = state.military.formations ?? {};
+
+    const increment = (key: string, osid: Osid): void => {
+        let osidCounts = counts.get(key);
+        if (!osidCounts) {
+            osidCounts = new Map();
+            counts.set(key, osidCounts);
+        }
+        osidCounts.set(osid, (osidCounts.get(osid) ?? 0) + 1);
+    };
+
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid]!;
+        if (f.faction !== faction) continue;
+        if (f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+
+        const osid = f.location_osid as Osid;
+        increment(ALL_FACTION_CORPS_COUNT_KEY, osid);
+        if (f.corps_id) increment(f.corps_id, osid);
+    }
+
+    return counts;
+}
+
+export function getCorpsBrigadeCountAtOsid(
+    counts: CorpsBrigadeCountsByOsid | null | undefined,
+    corpsId: FormationId | null | undefined,
+    osid: Osid
+): number {
+    const key = corpsId ? corpsId : ALL_FACTION_CORPS_COUNT_KEY;
+    return counts?.get(key)?.get(osid) ?? 0;
 }
 
 /** Count ALL faction brigades at an OSID (regardless of corps). Used for
