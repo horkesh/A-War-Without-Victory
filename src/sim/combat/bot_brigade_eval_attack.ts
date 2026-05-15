@@ -120,7 +120,7 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result } = ctx;
+    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup } = ctx;
 
     // Combat ineffective gate: brigades below minimum personnel (500) defend only.
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
@@ -235,6 +235,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         undefined,
                         ethnicMap,
                         SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
+                        officerCombatLookup,
                     );
                     return prediction ? { osid: currentObjective as Osid, prediction } : undefined;
                 })

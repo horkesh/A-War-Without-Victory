@@ -4364,3 +4364,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Direct current-objective sector-attack predictor attribution is now visible. The next bot-order CPU lane should inspect direct-objective defender-power reuse/index opportunities before pathing or tactical-adjacency work, and should not retry the exact uncontested-salient cache shape rejected in n1824.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): reuse officer lookup for direct sector attack
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `executeFactionDirectivesImpl(...)` now builds one pass-local `OfficerCombatLookup` when named-officer state/data exist, carries it through `BrigadeEvaluationContext`, and passes it into the sector-attack direct current-objective `predictCombatOutcome(...)` call. The retained shape reuses the existing predictor/combat-math lookup hook instead of adding a new officer-cache implementation.
+
+**Determinism:** The lookup is built from existing named-officer state and data and only read by combat math. It does not mutate `GameState`, save schema, order sequencing, RNG state, or serialization. Determinism constraints remain the existing stable-order/no-wall-clock game-state contract from `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, Engine Invariants v0.9.0 §9.8, and `docs/20_engineering/CODE_CANON.md`. Profiled 40w n1826 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed because `buildOfficerCombatLookup` was not wired into bot-order directive execution. Green focused guard passed 5/5, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1826 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.computeDefenderPower.officer` dropped 6.107ms -> 0.696ms, `.sectorAttack.executionDirectObjective` dropped 45.700ms -> 36.409ms, and `sectorAttack` dropped 77.130ms -> 66.983ms; new pass-level `officerIndex` cost was 8.425ms.
+
+**Roadmap delta:** Direct sector-attack officer lookup is no longer the next target. Future sector-attack work should compare net costs and inspect remaining direct-objective defender-power, sector-defense, or attacker-power labels from a fresh profile.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md`

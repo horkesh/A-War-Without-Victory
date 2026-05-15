@@ -85,6 +85,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
         const brigadeEvalAttack = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
+        const brigadeEvalTypes = readFileSync(resolve('src/sim/combat/bot_brigade_eval_types.ts'), 'utf8');
         const brigadeEvalMovement = readFileSync(resolve('src/sim/combat/bot_brigade_eval_movement.ts'), 'utf8');
         const sectorAttackEvaluator = brigadeEvalAttack.slice(
             brigadeEvalAttack.indexOf('export function evaluateSectorAttack'),
@@ -109,6 +110,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('adjacentEnemyByLoc.get(loc)');
         expect(brigadeAi).toContain('buildCorpsTerritoryOsidsByCorps');
         expect(brigadeAi).toContain('corpsTerritoryOsidsByCorps');
+        expect(brigadeAi).toContain('buildOfficerCombatLookup');
+        expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.officerIndex');
+        expect(brigadeAi).toContain('officerCombatLookup');
+        expect(brigadeEvalTypes).toContain('officerCombatLookup?: OfficerCombatLookup');
         expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
         expect(brigadeEvalFront).toContain('.offAssignedFront');
         expect(brigadeEvalFront).toContain('.sectorReassignment');
@@ -151,6 +156,8 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionPredictTargets');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionDirectObjective');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionDirectObjective.predictCombatOutcome');
+        expect(sectorAttackEvaluator).toContain('SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,');
+        expect(sectorAttackEvaluator).toContain('officerCombatLookup');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionTacticalAdjacency');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionAdjacentParticipants');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionApproachPath');

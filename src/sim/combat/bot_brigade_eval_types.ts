@@ -18,6 +18,7 @@ import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type { OsidBotOrdersResult } from './bot_brigade_ai_osid.js'; // I'll need to export this or move it here
 import type { ActiveFormationLocationsByFaction, CorpsBrigadeCountsByOsid, CorpsTerritoryOsidsByCorps } from './bot_brigade_context.js';
 import type { SectorDefenseByFactionAndOsid } from './sector_utils.js';
+import type { OfficerCombatLookup } from './combat_math.js';
 
 export interface BrigadeEvaluationContext {
     state: GameState;
@@ -61,6 +62,8 @@ export interface BrigadeEvaluationContext {
     sectorDefenseByFactionAndOsid?: SectorDefenseByFactionAndOsid;
     /** Cached corps territory OSIDs for this faction-order pass. */
     corpsTerritoryOsidsByCorps?: CorpsTerritoryOsidsByCorps;
+    /** Cached officer combat lookup for predictor power calculations in this faction-order pass. */
+    officerCombatLookup?: OfficerCombatLookup;
 
     
     // Global context dependencies:

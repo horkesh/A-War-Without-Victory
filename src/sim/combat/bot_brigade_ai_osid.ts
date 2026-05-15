@@ -58,7 +58,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
-import { getCorpsStance } from './combat_math.js';
+import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
@@ -454,6 +454,12 @@ function executeFactionDirectivesImpl(
     const activeFormationLocationsByFaction = buildActiveFormationLocationsByFaction(state);
     const sectorDefenseByFactionAndOsid = buildSectorDefenseByFactionAndOsid(state);
     const corpsTerritoryOsidsByCorps = buildCorpsTerritoryOsidsByCorps(state);
+    const officerCombatLookup = state.military.named_officers && state.military.named_officer_data
+        ? botOrdersPerfTime(
+            'bot_orders.executeFactionDirectives.officerIndex',
+            () => buildOfficerCombatLookup(state),
+        )
+        : undefined;
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -574,6 +580,7 @@ function executeFactionDirectivesImpl(
             activeFormationLocationsByFaction,
             sectorDefenseByFactionAndOsid,
             corpsTerritoryOsidsByCorps,
+            officerCombatLookup,
             adjacency,
             reverseMap,
             terrainCache,

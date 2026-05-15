@@ -62,6 +62,8 @@
 
 **2026-05-15 sectorAttack direct-objective profile split:** n1825 kept hash `0cb626c032204372`; threading the existing `predictCombatOutcome(...)` prefix into the direct current-objective path showed `.rankDefendersByPower` 22.117ms, `.rankDefendersByPower.computeDefenderPower` 20.229ms, `.computeDefenderPower.officer` 6.107ms, and `sectorDefensePower` 4.040ms. Do instead: inspect direct-objective defender-power reuse/index opportunities before path or adjacency work; parent labels are nested-timer inflated.
 
+**2026-05-15 sectorAttack direct-objective officer lookup:** n1826 kept hash `0cb626c032204372`; pass-local `OfficerCombatLookup` cut `.computeDefenderPower.officer` 6.107ms -> 0.696ms and `sectorAttack` 77.130ms -> 66.983ms, with new `officerIndex` cost 8.425ms. Do instead: build officer lookup at the directive-pass boundary only, report net index cost, and do not build rank-local officer indexes.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.
