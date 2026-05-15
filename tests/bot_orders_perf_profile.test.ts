@@ -173,9 +173,14 @@ describe('bot-orders perf profile instrumentation', () => {
             sectorAttackEvaluator.indexOf('.sectorAttack.executionPredictTargets'),
         );
         expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
-        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.salient');
-        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.defenderScan');
-        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.sectorDefense');
+        expect(brigadeEvalAttack).toContain('profileLabelPrefix = \'.uncontestedOccupation\'');
+        expect(brigadeEvalAttack).toContain("evaluateUncontestedOccupation(ctx, '.homeDefense.uncontestedOccupation')");
+        expect(brigadeEvalAttack).toContain("evaluateUncontestedOccupation(ctx, '.defensive.uncontestedOccupation')");
+        expect(brigadeEvalAttack).toContain('uncontestedOccupationCallerProfileTime');
+        expect(brigadeEvalAttack).toContain('${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${profileLabelPrefix}${labelSuffix}');
+        expect(brigadeEvalAttack).toContain("profileTime('.salient'");
+        expect(brigadeEvalAttack).toContain("profileTime('.defenderScan'");
+        expect(brigadeEvalAttack).toContain("profileTime('.sectorDefense'");
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

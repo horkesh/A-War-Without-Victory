@@ -4428,3 +4428,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Direct-objective sectorAttack is predictor-bound, not local-gate-bound. Future sectorAttack CPU work should inspect predictor child labels (`rankDefendersByPower`, `sectorDefensePower`, `attackerPower`) before touching local wrapper gates.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_WRAPPER_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split uncontested occupation caller profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateUncontestedOccupation(...)` now accepts a caller-specific profile label prefix. Home-defense calls record children under `.homeDefense.uncontestedOccupation.*`, defensive calls under `.defensive.uncontestedOccupation.*`, and direct standalone calls keep the default `.uncontestedOccupation.*` family.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The change only threads label strings through existing timing wrappers and preserves branch order, prediction semantics, movement/posture/attack order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1830 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed because `profileLabelPrefix = '.uncontestedOccupation'` was missing. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1830 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. Largest child labels were `homeDefense.uncontestedOccupation.salient` at 12.603ms, standalone `eval.uncontestedOccupation.salient` at 8.838ms, and `defensive.uncontestedOccupation.salient` at 3.403ms.
+
+**Roadmap delta:** Uncontested-occupation caller attribution is now visible. The split does not justify retrying the exact n1824 salient cache; the next CPU lane should use a fresh top profile and prefer larger measured buckets before small uncontested child labels.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md`

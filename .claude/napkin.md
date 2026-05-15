@@ -70,6 +70,8 @@
 
 **2026-05-15 sectorAttack direct-objective wrapper split:** n1829 kept hash `0cb626c032204372`; `.executionDirectObjective.predict` is 39.897ms while `.gates` is only 0.178ms. Do instead: do not optimize local direct-objective gates; inspect predictor child labels (`rankDefendersByPower`, `sectorDefensePower`, `attackerPower`) or pivot to a larger shared bucket.
 
+**2026-05-15 uncontested caller profile split:** n1830 kept hash `0cb626c032204372`; caller-specific `evaluateUncontestedOccupation(...)` children show `homeDefense.uncontestedOccupation.salient` 12.603ms, standalone `eval.uncontestedOccupation.salient` 8.838ms, and `defensive.uncontestedOccupation.salient` 3.403ms. Do instead: split shared evaluator labels by caller before optimizing mixed child totals, but do not retry the exact n1824 faction+loc+target salient cache from this evidence alone.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.

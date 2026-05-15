@@ -161,6 +161,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1829 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`.sectorAttack.executionDirectObjective.predict` measured 39.897ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_WRAPPER_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('uncontested caller profile split');
+    expect(roadmap).toContain('n1830 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`homeDefense.uncontestedOccupation.salient` measured 12.603ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');

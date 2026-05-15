@@ -52,8 +52,8 @@ function sectorAttackProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${SECTOR_ATTACK_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
-function uncontestedOccupationProfileTime<T>(labelSuffix: string, fn: () => T): T {
-    return botOrdersPerfTime(`${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${labelSuffix}`, fn);
+function uncontestedOccupationCallerProfileTime<T>(profileLabelPrefix: string, labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${profileLabelPrefix}${labelSuffix}`, fn);
 }
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
@@ -93,7 +93,7 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
-            if (homeDefenseProfileTime('.homeDefense.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) {
+            if (homeDefenseProfileTime('.homeDefense.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx, '.homeDefense.uncontestedOccupation'))) {
                 return true;
             }
             // Home defense: defend in place. Attacks only through operations.
@@ -618,7 +618,7 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         // Defensive corps should still walk into truly undefended adjacent territory.
         // Keep this after higher-priority retreat counterattacks and front-gap movement,
         // but before passive dig-in/defend so empty enemy OSIDs do not persist forever.
-        if (defensiveProfileTime('.defensive.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) {
+        if (defensiveProfileTime('.defensive.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx, '.defensive.uncontestedOccupation'))) {
             return true;
         }
         // Defensive stance, no attack — dig_in if cohesion sufficient
@@ -670,8 +670,13 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
  * Guards: brigade must not be in an active operation, not disrupted, not in
  * column march. Maximum 1 uncontested occupation per brigade per turn.
  */
-export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): boolean {
+export function evaluateUncontestedOccupation(
+    ctx: BrigadeEvaluationContext,
+    profileLabelPrefix = '.uncontestedOccupation',
+): boolean {
     const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result, activeFormationLocationsByFaction, sectorDefenseByFactionAndOsid } = ctx;
+    const profileTime = <T>(labelSuffix: string, fn: () => T): T =>
+        uncontestedOccupationCallerProfileTime(profileLabelPrefix, labelSuffix, fn);
 
     // Early-war throttle: no uncontested occupation in first 2 weeks (deployment phase).
     // Historically, territory grab was rapid but not instantaneous — units need time to
@@ -709,7 +714,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Salient aversion: don't walk into undefended territory if it creates
         // an indefensible salient (>75% of neighbors are enemy after capture).
         // No commander holds one OSID deep inside enemy territory with no supply line.
-        const salientBlocked = uncontestedOccupationProfileTime('.uncontestedOccupation.salient', () => {
+        const salientBlocked = profileTime('.salient', () => {
             const nNeighbors = adjacency.get(n as import('./osid_adjacency.js').Osid) ?? [];
             let friendlyN = 0, enemyN = 0;
             for (const nn of nNeighbors) {
@@ -735,7 +740,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         if (avoidedOsids?.includes(n)) continue;
 
         // Check: no enemy formations physically at this OSID
-        const hasDefender = uncontestedOccupationProfileTime('.uncontestedOccupation.defenderScan', () => {
+        const hasDefender = profileTime('.defenderScan', () => {
             if (activeFormationLocationsByFaction) {
                 return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller as FactionId, n as Osid);
             }
@@ -754,7 +759,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Only checking assigned_brigade_ids misses sectors where all brigades are
         // in reserve (0-assigned cycle): the sector physically defends the OSID via
         // unified sector defense even without a front-line assignment.
-        const sectorHasBrigades = uncontestedOccupationProfileTime('.uncontestedOccupation.sectorDefense', () => {
+        const sectorHasBrigades = profileTime('.sectorDefense', () => {
             const sector = sectorDefenseByFactionAndOsid?.get(controller)?.get(n)
                 ?? findSectorForEnemyOsid(state, n as Osid, controller);
             if (!sector) return false;
