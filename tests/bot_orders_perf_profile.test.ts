@@ -112,6 +112,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
         expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
+        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.salient');
+        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.defenderScan');
+        expect(brigadeEvalAttack).toContain('.uncontestedOccupation.sectorDefense');
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

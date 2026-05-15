@@ -4108,3 +4108,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Local home-defense logic is not the next optimization target. The next bot-order CPU pass should split or optimize shared `evaluateUncontestedOccupation(...)`, because it dominates the home-defense parent bucket and also appears as a standalone evaluator.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_HOME_DEFENSE_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split uncontested occupation profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added default-off sub-labels inside `evaluateUncontestedOccupation(...)` for salient checks, enemy formation scans, and defending-sector lookup/active-brigade checks.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers preserve candidate order, formation iteration, sector lookup semantics, command output, RNG, saved state, and serialized artifacts. Profiled n1808 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `UNCONTESTED_OCCUPATION_PROFILE_PREFIX`. Green focused test passed 5/5, focused bot-order guard suite passed 21/21, and `npm.cmd run typecheck` passed. Profiled 40w n1808 kept final hash `0cb626c032204372`; `.uncontestedOccupation.defenderScan` dominated at 287.853ms, `.sectorDefense` was 57.867ms, and `.salient` was 22.783ms.
+
+**Roadmap delta:** The next bot-order CPU pass should optimize repeated enemy-formation presence checks for candidate OSIDs. Sector-defense lookup is visible but secondary in n1808.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_OCCUPATION_PROFILE_SPLIT.md`

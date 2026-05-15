@@ -34,9 +34,14 @@ import {
 
 export const UNCONTESTED_OCCUPATION_SCORE = 600;
 const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function uncontestedOccupationProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
@@ -604,7 +609,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Salient aversion: don't walk into undefended territory if it creates
         // an indefensible salient (>75% of neighbors are enemy after capture).
         // No commander holds one OSID deep inside enemy territory with no supply line.
-        {
+        const salientBlocked = uncontestedOccupationProfileTime('.uncontestedOccupation.salient', () => {
             const nNeighbors = adjacency.get(n as import('./osid_adjacency.js').Osid) ?? [];
             let friendlyN = 0, enemyN = 0;
             for (const nn of nNeighbors) {
@@ -613,8 +618,9 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
                 else if (nnCtrl && nnCtrl !== faction) enemyN++;
             }
             const totalN = friendlyN + enemyN;
-            if (totalN > 0 && enemyN / totalN >= 0.75) continue;
-        }
+            return totalN > 0 && enemyN / totalN >= 0.75;
+        });
+        if (salientBlocked) continue;
 
         // NOTE: Corps operational area guard was tested (n778) but too restrictive —
         // blocked legitimate VRS advances, -0.9pp regression. The salient aversion
@@ -629,14 +635,15 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         if (avoidedOsids?.includes(n)) continue;
 
         // Check: no enemy formations physically at this OSID
-        let hasDefender = false;
-        for (const fid of Object.keys(formations)) {
-            const f = formations[fid] as FormationState | undefined;
-            if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {
-                hasDefender = true;
-                break;
+        const hasDefender = uncontestedOccupationProfileTime('.uncontestedOccupation.defenderScan', () => {
+            for (const fid of Object.keys(formations)) {
+                const f = formations[fid] as FormationState | undefined;
+                if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {
+                    return true;
+                }
             }
-        }
+            return false;
+        });
         if (hasDefender) continue;
 
         // Check: no sector covering this OSID with active brigades.
@@ -644,15 +651,16 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Only checking assigned_brigade_ids misses sectors where all brigades are
         // in reserve (0-assigned cycle): the sector physically defends the OSID via
         // unified sector defense even without a front-line assignment.
-        const sector = findSectorForEnemyOsid(state, n as Osid, controller);
-        if (sector) {
+        const sectorHasBrigades = uncontestedOccupationProfileTime('.uncontestedOccupation.sectorDefense', () => {
+            const sector = findSectorForEnemyOsid(state, n as Osid, controller);
+            if (!sector) return false;
             const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
-            const sectorHasBrigades = allSectorBrigades.some(bid => {
+            return allSectorBrigades.some(bid => {
                 const f = formations[bid];
                 return f != null && f.status === 'active';
             });
-            if (sectorHasBrigades) continue;
-        }
+        });
+        if (sectorHasBrigades) continue;
 
         // Truly undefended — walk in
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
