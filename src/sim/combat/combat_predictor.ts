@@ -125,26 +125,33 @@ function rankDefendersByPowerWithEntries(
     artSuppression: number,
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number,
+    profilePrefix?: string,
 ): RankedDefenderPowers {
-    const scored = defenders.map((formation) => ({
-        formation,
-        power: computeDefenderPower(
-            state,
+    const scored = predictorPerfTime(
+        profilePrefix,
+        '.rankDefendersByPower.computeDefenderPower',
+        () => defenders.map((formation) => ({
             formation,
-            targetOsid,
-            terrainMultByOsid,
-            artSuppression,
-            supplyStateByOsid,
-            ethnicBonusFn(formation),
-        ),
-    }));
-    const sorted = [...scored].sort((a, b) => b.power - a.power);
-    const totalPower = sorted[0]!.power + sorted.slice(1).reduce(
-        (sum, entry) => sum + entry.power * STACKING_DEFENDER_SUPPORT,
-        0,
+            power: computeDefenderPower(
+                state,
+                formation,
+                targetOsid,
+                terrainMultByOsid,
+                artSuppression,
+                supplyStateByOsid,
+                ethnicBonusFn(formation),
+            ),
+        })),
     );
-    const powerByFormationId = new Map(scored.map(({ formation, power }) => [formation.id, power]));
-    return { primary: sorted[0]!.formation, totalPower, powerByFormationId };
+    return predictorPerfTime(profilePrefix, '.rankDefendersByPower.sortAndTotal', () => {
+        const sorted = [...scored].sort((a, b) => b.power - a.power);
+        const totalPower = sorted[0]!.power + sorted.slice(1).reduce(
+            (sum, entry) => sum + entry.power * STACKING_DEFENDER_SUPPORT,
+            0,
+        );
+        const powerByFormationId = new Map(scored.map(({ formation, power }) => [formation.id, power]));
+        return { primary: sorted[0]!.formation, totalPower, powerByFormationId };
+    });
 }
 
 function collectDefenderFormationsAtTarget(
@@ -316,7 +323,7 @@ export function predictCombatOutcome(
             const { primary, totalPower, powerByFormationId } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
-                () => rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+                () => rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix),
             );
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);

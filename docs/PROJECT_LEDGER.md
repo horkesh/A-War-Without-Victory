@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): split defender ranking profile
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the lazy defender formation scan.
+
+**Fix:** Added default-off nested profile labels inside `rankDefendersByPowerWithEntries(...)`, splitting per-defender `computeDefenderPower(...)` work from the existing sort/stacked-total/map creation work. The sector branch now passes the existing direct-probe profile prefix into the helper. No combat formula, ranking rule, stacked support formula, target ordering, scenario data, output schema, or save schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `.rankDefendersByPower.computeDefenderPower`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed; `git diff --check` passed with CRLF warnings only. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1784 with final hash `7ef09f55d6494edd`, matching n1782. The split shows `.rankDefendersByPower.computeDefenderPower` at 56.651ms and `.rankDefendersByPower.sortAndTotal` at 2.391ms; nested timers add opt-in profile overhead, so this lane is attribution, not a runtime cut.
+
+**Canon posture:** Default-off deterministic instrumentation in a read-only predictor hot path. Serialized output remained hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_RANK_DEFENDER_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): defer defender formation scan
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after ranked defender-power reuse.

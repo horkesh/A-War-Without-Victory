@@ -61,6 +61,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('direct-target prediction cut the probe objective bucket');
     expect(roadmap).toContain('`predictCombatOutcome(...)` internals identified defender ranking/reactive defense as the next measured hotspot');
     expect(roadmap).toContain('ranked defender powers are now reused by sector defense');
+    expect(roadmap).toContain('fallback defender formation scanning is now lazy');
+    expect(roadmap).toContain('defender ranking now has compute-vs-sort profile attribution');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -162,6 +164,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('commander lazy defender formation scan');
     expect(roadmap).toContain('`defenderFormationScan` dropped from 591 calls / 28.514ms to 20 calls / 1.802ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_LAZY_DEFENDER_FORMATION_SCAN_PROFILE.md');
+    expect(roadmap).toContain('commander defender ranking profile split');
+    expect(roadmap).toContain('`.rankDefendersByPower.computeDefenderPower` measured 56.651ms');
+    expect(roadmap).toContain('`.rankDefendersByPower.sortAndTotal` measured only 2.391ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_RANK_DEFENDER_PROFILE_SPLIT.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
