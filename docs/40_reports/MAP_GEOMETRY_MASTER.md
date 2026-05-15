@@ -1,7 +1,7 @@
 # Map Geometry Master Reference
 
 **Purpose:** Living reference for OSID polygon geometry, front edge rendering, and map data pipeline issues.
-**Updated:** 2026-03-18 (edges viewer investigation)
+**Updated:** 2026-05-15 (front-edge strict ordering)
 
 ## Pipeline Overview
 
@@ -110,3 +110,9 @@ Same three-step algorithm as game renderer, plus:
 | `data/derived/operational/operational_settlements.geojson` | 712 OSID polygons |
 | `data/derived/operational/operational_contact_graph.json` | 2,047 adjacency edges |
 | `data/derived/operational/canonical_to_operational_map.json` | 5,797 SID→OSID mappings |
+
+## Deterministic Output Ordering
+
+- `computeFrontEdges(...)` and `computeFrontEdgesOsid(...)` must sort final edge output with `strictCompare`, not `localeCompare`.
+- This protects SID/OSID outputs from locale collation differences and matches Engine Invariants §13.1 stable OSID ordering.
+- Regression gate: `tests/front_edges_strict_order.test.ts`.

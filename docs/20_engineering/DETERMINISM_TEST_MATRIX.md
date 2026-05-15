@@ -12,6 +12,7 @@
 - Gate: `tests/phase_e_pressure_determinism.test.ts`
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
 - Gate: `tests/sandbox_slice_determinism.test.ts` (slice settlements/edges/controllers canonical ordering)
+- Gate: `tests/front_edges_strict_order.test.ts` (SID/OSID front-edge output uses `strictCompare`, not locale collation)
 
 ### Derived state not serialized as source of truth
 - Code invariant: `src/state/serializeGameState.ts` (denylist + key ordering + wrapper rejection)

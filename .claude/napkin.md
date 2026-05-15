@@ -954,6 +954,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: EPIPE guard on init logging. Preload script + `getDataBaseUrl()` for iframe/Electron data fetches.
 
 ## Map & Geometry
+1. **[2026-05-15] Front-edge outputs use strict ordering**
+   Do instead: Sort SID/OSID front-edge output with `strictCompare`, not `localeCompare`; `tests/front_edges_strict_order.test.ts` guards both `computeFrontEdges` and `computeFrontEdgesOsid`.
 1. **[2026-03-03] Front line style: black-white stripe — no chevrons**
    Do instead: `front-line-base` (dark) + `front-line-dash` (white). Do NOT implement HoI4 chevron variants.
 2. **[2026-02-21] FRONT definition**

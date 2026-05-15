@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] fix(map): sort front edges with strict comparator
+
+**Scope:** Deterministic front-edge output ordering for SID-keyed and OSID-keyed front edge computation.
+
+**Fix:** Replaced final `localeCompare` ordering in `computeFrontEdges(...)` and `computeFrontEdgesOsid(...)` with `strictCompare`. Edge detection, edge normalization, political control checks, HRHB/RBiH alliance gating, gap filtering, and front-edge schemas are unchanged.
+
+**Validation:** Red first: temporarily restoring `localeCompare` made `tests/front_edges_strict_order.test.ts` fail 2/2 because locale collation reversed `op:ljubinje:bancici` and `op:lopare:celic_3`. Green after `strictCompare`: the same focused test passed 2/2. Final gate: `npx.cmd vitest run tests\front_edges_strict_order.test.ts tests\calibration.test.ts tests\dev_ui_phase17.test.ts tests\sandbox_slice_determinism.test.ts --reporter=dot` passed 15/15, `npm.cmd run typecheck` passed, and `git diff --check` passed with CRLF warnings only.
+
+**Canon posture:** Determinism-only output ordering fix. It aligns front-edge output with `docs/20_engineering/CODE_CANON.md` stable-ordering requirements and `docs/10_canon/Engine_Invariants_v0_9_0.md` §13.1/§13.2 `strictCompare` guidance. No simulation formula, state schema, scenario data, map geometry data, or control logic changed.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_FRONT_EDGE_STRICT_ORDERING.md` and updated the determinism matrix, map geometry master, report index, knowledge ledger, and napkin.
+
+---
+
 ## [2026-05-15] perf(commander): reuse officer combat lookup
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the front-density index.

@@ -1,9 +1,9 @@
 import { areRbihHrhbAllied } from '../sim/early_war/alliance_update.js';
 import { GameState } from '../state/game_state.js';
 import { getPoliticalControllerOSID, getSettlementControlStatus } from '../state/settlement_control.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../data/operational_data_types.js';
 import type { EdgeRecord } from './settlements.js';
-
 
 export interface FrontEdge {
     edge_id: string;
@@ -76,9 +76,9 @@ export function computeFrontEdges(
     // Sort for deterministic output
     frontEdges.sort((e1, e2) => {
         if (e1.a !== e2.a) {
-            return e1.a.localeCompare(e2.a);
+            return strictCompare(e1.a, e2.a);
         }
-        return e1.b.localeCompare(e2.b);
+        return strictCompare(e1.b, e2.b);
     });
 
     return frontEdges;
@@ -139,8 +139,8 @@ export function computeFrontEdgesOsid(
         });
     }
     frontEdges.sort((e1, e2) => {
-        if (e1.a !== e2.a) return e1.a.localeCompare(e2.a);
-        return e1.b.localeCompare(e2.b);
+        if (e1.a !== e2.a) return strictCompare(e1.a, e2.a);
+        return strictCompare(e1.b, e2.b);
     });
     return frontEdges;
 }
