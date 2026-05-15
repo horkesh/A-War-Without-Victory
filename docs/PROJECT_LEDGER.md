@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): trim detectZones must-hold component allocation
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after crash recovery.
+
+**Fix:** Replaced per-component `Set` allocation in `collectFriendlyComponentsExcluding` with a numeric `memberCount`, because the must-hold predicate only needs component size plus zone/outside-corps flags. Removed the unused `bfsCountExcluding` helper and added a static regression guard preventing the allocation-heavy shape from coming back.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `memberCount`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; `tests\commander\briefing_campaign_intent.test.ts` + `tests\commander\commander.test.ts` passed 70/70; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1776 with final hash `7ef09f55d6494edd`, matching n1775. `detectZones.mustHold` dropped 131.504ms -> 112.200ms; `detectZones` dropped 278.073ms -> 248.538ms.
+
+**Canon posture:** Pure deterministic performance refactor in the commander read path. No scenario data, OOB data, event trigger, combat math, score rule, save schema, player command lever, or sensitive-history adjudication changed. Profiling remains opt-in via `PERF_PROFILE_BOT_ORDERS=true`.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_COMPONENT_COUNT_PROFILE.md` and updated roadmap, report index, knowledge ledger, and napkin.
+
+---
+
 ## [2026-05-11] feat(codex): ledger rollover for v0.9.1 milestone closure
 
 **Scope:** Same v0.9.1 Dynamic Essay + Endgame Comparison closure committed during the 2026-05-10/11 overnight session.

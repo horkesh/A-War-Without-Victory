@@ -27,35 +27,8 @@ import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 const MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05;
 const DETECT_ZONES_PROFILE_PREFIX = 'commander.runCommanderForCorps.decide.assessSituation.detectZones';
 
-/**
- * BFS count of reachable OSIDs from `source` through `friendlySet`, excluding
- * `excludeOsid`. Used to measure the cluster size isolated by a chokepoint removal.
- */
-function bfsCountExcluding(
-    source: string,
-    friendlySet: ReadonlySet<string>,
-    adjacency: ReadonlyMap<string, readonly string[]>,
-    excludeOsid: string,
-): number {
-    const visited = new Set<string>([source]);
-    let frontier = [source];
-    while (frontier.length > 0) {
-        const next: string[] = [];
-        for (const osid of frontier) {
-            for (const n of (adjacency.get(osid) ?? [])) {
-                if (!visited.has(n) && friendlySet.has(n) && n !== excludeOsid) {
-                    visited.add(n);
-                    next.push(n);
-                }
-            }
-        }
-        frontier = next;
-    }
-    return visited.size;
-}
-
 interface FriendlyComponentFacts {
-    members: Set<string>;
+    memberCount: number;
     hasZoneOsid: boolean;
     hasOutsideCorpsOsid: boolean;
 }
@@ -74,7 +47,7 @@ function collectFriendlyComponentsExcluding(
     for (const source of sortedFriendlyOsids) {
         if (source === excludeOsid || visited.has(source)) continue;
 
-        const members = new Set<string>([source]);
+        let memberCount = 1;
         let frontier = [source];
         visited.add(source);
         let hasZoneOsid = zoneOsidSet.has(source);
@@ -86,7 +59,7 @@ function collectFriendlyComponentsExcluding(
                 for (const n of (adjacency.get(osid) ?? [])) {
                     if (n === excludeOsid || visited.has(n) || !friendlySet.has(n)) continue;
                     visited.add(n);
-                    members.add(n);
+                    memberCount++;
                     if (zoneOsidSet.has(n)) hasZoneOsid = true;
                     if (!corpsOsidSet.has(n)) hasOutsideCorpsOsid = true;
                     next.push(n);
@@ -96,7 +69,7 @@ function collectFriendlyComponentsExcluding(
             frontier = next;
         }
 
-        components.push({ members, hasZoneOsid, hasOutsideCorpsOsid });
+        components.push({ memberCount, hasZoneOsid, hasOutsideCorpsOsid });
     }
 
     return components;
@@ -326,7 +299,7 @@ export function detectZones(
                     return components.some(component =>
                         component !== zoneComponent &&
                         component.hasOutsideCorpsOsid &&
-                        component.members.size >= minIsolated
+                        component.memberCount >= minIsolated
                     );
                 });
             });

@@ -114,6 +114,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(zoneDetection).toContain('.depth');
         expect(zoneDetection).toContain('.corridorWidth');
         expect(zoneDetection).toContain('.mustHold');
+        expect(zoneDetection).toContain('memberCount');
+        expect(zoneDetection).not.toContain('members: Set<string>');
+        expect(zoneDetection).not.toContain('component.members.size');
+        expect(zoneDetection).not.toContain('function bfsCountExcluding');
         const commanderEmit = readFileSync(resolve('src/sim/combat/commander/emit.ts'), 'utf8');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildDirective');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations');
