@@ -72,6 +72,24 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain('commandLoopQueue');
   });
 
+  it('renders product-loop handoffs without creating another history owner', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
+
+    expect(model).toContain('loopSteps');
+    expect(model).toContain('buildLoopSteps');
+    expect(model).toContain('buildReportLoopStep');
+    expect(model).toContain('buildCostLoopStep');
+    expect(model).toContain('buildJudgeLoopStep');
+    expect(panel).toContain('ProductLoopStep');
+    expect(panel).toContain('view.loopSteps.map');
+    expect(panel).toContain('Product Loop');
+    expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(step.navigationTarget)');
+    expect(panel).not.toContain('productLoopQueue');
+    expect(panel).not.toContain('historyOwner');
+    expect(model).not.toContain('productLoopLedger');
+  });
+
   it('renders source handoffs as grouped shell routes without creating another records owner', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');

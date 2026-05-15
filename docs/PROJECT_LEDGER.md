@@ -4604,3 +4604,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Future CPU lane selection should start from a real V8 profile, not nested label totals alone. The current top wall-clock boundaries are sector reconstruction/reconciliation, map/front graph work, and replay/final-save serialization; commander/bot-order CPU should move to one broader read-only decision context if revisited. The active product lane is formation-life believability classification, with active-never-fights interpretation as the safe next packet.
 
 **Reports:** `docs/40_reports/implemented/20260515_REAL_CPU_PROFILE_AND_COMMAND_CONTEXT_PLAN.md`, `docs/40_reports/implemented/20260515_FORMATION_LIFE_WARNING_CLASSIFICATION.md`
+
+---
+
+## [2026-05-15] feat(ui): add Decision Room product-loop heartbeat
+
+**Type:** UI/read-model product-spine cohesion. No gameplay rule, scenario data, OOB, operation-opportunity catalog file, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added a deterministic `loopSteps` projection to `buildPresidentialDecisionRoomView(...)` and rendered it in the existing Army HQ Presidential Decision Room as a compact `Brief -> Inspect -> Decide -> Execute -> Report -> Cost -> Judge -> Next` route strip. The heartbeat derives from the existing Decision Room card archive, `inspectNext`, `advanceReadiness`, Turn Aftermath records, active campaign cost, and Chronicle handoffs; it routes through `openPresidentialDecisionRoomNavigationTarget(...)` and does not create a new queue, ledger, cost owner, history owner, or panel.
+
+**Determinism:** UI/read-model only. The new projection is built from already-sorted Decision Room cards and stable turn-summary/archive inputs. It adds no timestamps, randomness, locale sorting, runtime state writes, simulation mutations, IPC payload changes, or save/load changes.
+
+**Verification:** Red first: focused Decision Room Vitest failed on missing `loopSteps`. Green targeted `..\\..\\node_modules\\.bin\\vitest.cmd run tests/ui/presidential_decision_room.test.ts --reporter=dot` passed 10/10. Focused regression `..\\..\\node_modules\\.bin\\vitest.cmd run tests/ui_presidential_decision_room_wiring.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui/presidential_decision_room.test.ts --reporter=dot` passed 22/22. Full typecheck was attempted with `..\\..\\node_modules\\.bin\\tsc.cmd --noEmit -p tsconfig.json` but this worktree lacks local UI dependencies (`maplibre-gl`, Deck.gl packages, `@vitejs/plugin-react`), so TypeScript stops on dependency resolution before checking the changed files.
+
+**Roadmap delta:** The presidential product-loop lane now has an explicit in-Decision-Room heartbeat over existing owners. Remaining validation is operator/playtest judgment on whether the strip improves first-minute scan clarity; any visual density adjustment should stay inside the existing Decision Room panel.
+
+**Report:** `docs/40_reports/implemented/20260515_DECISION_ROOM_PRODUCT_LOOP_HEARTBEAT.md`

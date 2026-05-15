@@ -6,6 +6,7 @@ import {
   type PresidentialDecisionRoomCommandQuestion,
   type PresidentialDecisionRoomDossier,
   type PresidentialDecisionRoomLens,
+  type PresidentialDecisionRoomLoopStep,
   type PresidentialDecisionRoomSeverity,
   type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
@@ -110,6 +111,36 @@ function CommandQuestionLane({ question }: { question: PresidentialDecisionRoomC
         {question.actionLabel}
       </button>
     </article>
+  );
+}
+
+function ProductLoopStep({ step }: { step: PresidentialDecisionRoomLoopStep }) {
+  const disabled = step.navigationTarget.kind === 'none';
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() => openPresidentialDecisionRoomNavigationTarget(step.navigationTarget)}
+      className="flex min-h-[4.75rem] min-w-0 flex-col justify-between rounded border border-panel-border/55 bg-panel-card/50 px-2 py-2 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
+    >
+      <span className="min-w-0">
+        <span className="block truncate text-[8px] font-bold uppercase tracking-[0.14em] text-amber-300">
+          {step.label}
+        </span>
+        <span className="mt-1 block truncate text-[10px] font-semibold text-text-primary">
+          {step.headline}
+        </span>
+      </span>
+      <span className="mt-1 flex min-w-0 items-center justify-between gap-2">
+        <span className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{step.summary}</span>
+        <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${step.urgentCount > 0
+          ? 'border-red-400/35 bg-red-500/10 text-red-300'
+          : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
+        >
+          {step.count}
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -380,6 +411,17 @@ export function PresidentialDecisionRoomPanel() {
         <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
         <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
       </div>
+
+      {view.loopSteps.length > 0 && (
+        <div className="mb-2">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Product Loop</div>
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
+            {view.loopSteps.map((step) => (
+              <ProductLoopStep key={step.id} step={step} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {view.commandQuestions.length > 0 && (
         <div className="mb-2">

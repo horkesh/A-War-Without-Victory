@@ -73,8 +73,30 @@ export type PresidentialDecisionRoomCommandQuestionId =
   | 'inspect'
   | 'advance';
 
+export type PresidentialDecisionRoomLoopStepId =
+  | 'brief'
+  | 'inspect'
+  | 'decide'
+  | 'execute'
+  | 'report'
+  | 'cost'
+  | 'judge'
+  | 'next';
+
 export interface PresidentialDecisionRoomCommandQuestion {
   id: PresidentialDecisionRoomCommandQuestionId;
+  label: string;
+  headline: string;
+  summary: string;
+  count: number;
+  urgentCount: number;
+  cardIds: string[];
+  actionLabel: string;
+  navigationTarget: PresidentialDecisionRoomNavigationTarget;
+}
+
+export interface PresidentialDecisionRoomLoopStep {
+  id: PresidentialDecisionRoomLoopStepId;
   label: string;
   headline: string;
   summary: string;
@@ -120,6 +142,7 @@ export interface PresidentialDecisionRoomView {
   cards: PresidentialDecisionRoomCard[];
   lenses: PresidentialDecisionRoomLens[];
   commandQuestions: PresidentialDecisionRoomCommandQuestion[];
+  loopSteps: PresidentialDecisionRoomLoopStep[];
   sourceHandoffs: PresidentialDecisionRoomSourceHandoff[];
   activeDossier: PresidentialDecisionRoomDossier | null;
   inspectNext: PresidentialDecisionRoomCard[];
@@ -768,6 +791,164 @@ function buildCommandQuestions(
   ];
 }
 
+function loopStepSummary(count: number, urgentCount: number, noun: string): string {
+  if (count === 0) return `0 ${noun}`;
+  if (urgentCount > 0) return `${count} ${noun} / ${urgentCount} urgent`;
+  return `${count} ${noun}`;
+}
+
+function buildCardLoopStep(
+  id: PresidentialDecisionRoomLoopStepId,
+  label: string,
+  cards: PresidentialDecisionRoomCard[],
+  options: {
+    fallbackHeadline: string;
+    fallbackSummary: string;
+    fallbackActionLabel: string;
+    fallbackNavigationTarget?: PresidentialDecisionRoomNavigationTarget;
+    noun?: string;
+  },
+): PresidentialDecisionRoomLoopStep {
+  const topCard = cards[0] ?? null;
+  const urgentCount = cards.filter(isUrgentCard).length;
+  return {
+    id,
+    label,
+    headline: topCard?.title ?? options.fallbackHeadline,
+    summary: cards.length > 0
+      ? loopStepSummary(cards.length, urgentCount, options.noun ?? 'items')
+      : options.fallbackSummary,
+    count: cards.length,
+    urgentCount,
+    cardIds: cards.map((card) => card.id),
+    actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel,
+    navigationTarget: topCard?.navigationTarget ?? options.fallbackNavigationTarget ?? { kind: 'none' },
+  };
+}
+
+function buildReportLoopStep(
+  state: LoadedGameState,
+  turnCards: PresidentialDecisionRoomCard[],
+): PresidentialDecisionRoomLoopStep {
+  const recordCount = state.turnSummaries?.length ?? 0;
+  const latestTurn = state.latestTurnSummary?.turn ?? null;
+  const urgentCount = turnCards.filter(isUrgentCard).length;
+  return {
+    id: 'report',
+    label: 'Report',
+    headline: turnCards[0]?.title ?? (latestTurn != null ? `Latest turn record: T${latestTurn}` : 'No turn records yet'),
+    summary: recordCount > 0
+      ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}${urgentCount > 0 ? ` / ${urgentCount} urgent` : ''}`
+      : '0 records',
+    count: recordCount,
+    urgentCount,
+    cardIds: turnCards.map((card) => card.id),
+    actionLabel: 'Turn Records',
+    navigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
+  };
+}
+
+function buildCostLoopStep(
+  state: LoadedGameState,
+  costCards: PresidentialDecisionRoomCard[],
+): PresidentialDecisionRoomLoopStep {
+  const recordCount = state.turnSummaries?.length ?? 0;
+  const cardStep = buildCardLoopStep('cost', 'Cost', costCards, {
+    fallbackHeadline: recordCount > 0 ? 'Campaign cost archive available' : 'No campaign cost yet',
+    fallbackSummary: recordCount > 0 ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}` : '0 cost records',
+    fallbackActionLabel: 'Turn Records',
+    fallbackNavigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
+    noun: 'cost items',
+  });
+  if (costCards.length > 0) return cardStep;
+  return {
+    ...cardStep,
+    count: recordCount,
+  };
+}
+
+function buildJudgeLoopStep(
+  state: LoadedGameState,
+  memoryCards: PresidentialDecisionRoomCard[],
+): PresidentialDecisionRoomLoopStep {
+  const recordCount = state.turnSummaries?.length ?? 0;
+  const cardStep = buildCardLoopStep('judge', 'Judge', memoryCards, {
+    fallbackHeadline: recordCount > 0 ? 'Chronicle memory available' : 'No campaign memory yet',
+    fallbackSummary: recordCount > 0 ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}` : '0 memory records',
+    fallbackActionLabel: 'Show Chronicle',
+    fallbackNavigationTarget: recordCount > 0 ? { kind: 'chronicle' } : { kind: 'none' },
+    noun: 'memory items',
+  });
+  if (memoryCards.length > 0) return cardStep;
+  return {
+    ...cardStep,
+    count: recordCount,
+  };
+}
+
+function buildNextLoopStep(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRoomLoopStep {
+  const nextCards = cards.filter((card) =>
+    card.category === 'decision' || card.category === 'opportunity' || isUrgentCard(card),
+  );
+  return buildCardLoopStep('next', 'Next', nextCards.length > 0 ? nextCards : cards.slice(0, 1), {
+    fallbackHeadline: 'Return to the briefing',
+    fallbackSummary: '0 next actions',
+    fallbackActionLabel: 'Briefing',
+    fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    noun: 'next items',
+  });
+}
+
+function buildLoopSteps(
+  state: LoadedGameState,
+  cards: PresidentialDecisionRoomCard[],
+  inspectNext: PresidentialDecisionRoomCard[],
+  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
+): PresidentialDecisionRoomLoopStep[] {
+  const briefCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
+  const decideCards = cards.filter((card) => card.category === 'decision' || card.category === 'opportunity');
+  const turnCards = cards.filter((card) => card.category === 'turn');
+  const costCards = cards.filter((card) => card.category === 'cost');
+  const memoryCards = cards.filter((card) => card.category === 'memory');
+
+  return [
+    buildCardLoopStep('brief', 'Brief', briefCards, {
+      fallbackHeadline: 'Open strategic briefing',
+      fallbackSummary: '0 brief cues',
+      fallbackActionLabel: 'War Summary',
+      fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+      noun: 'brief cues',
+    }),
+    buildCardLoopStep('inspect', 'Inspect', inspectNext, {
+      fallbackHeadline: 'No inspection handoff',
+      fallbackSummary: '0 handoffs',
+      fallbackActionLabel: 'Inspect',
+      noun: 'handoffs',
+    }),
+    buildCardLoopStep('decide', 'Decide', decideCards, {
+      fallbackHeadline: 'No pending decision',
+      fallbackSummary: '0 decisions',
+      fallbackActionLabel: 'Review Queue',
+      fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      noun: 'decisions',
+    }),
+    {
+      ...buildCardLoopStep('execute', 'Execute', advanceReadiness.items, {
+        fallbackHeadline: advanceReadiness.headline,
+        fallbackSummary: '0 advance items',
+        fallbackActionLabel: 'Review Advance',
+        fallbackNavigationTarget: { kind: 'none' },
+        noun: 'advance items',
+      }),
+      headline: advanceReadiness.headline,
+    },
+    buildReportLoopStep(state, turnCards),
+    buildCostLoopStep(state, costCards),
+    buildJudgeLoopStep(state, memoryCards),
+    buildNextLoopStep(cards),
+  ];
+}
+
 function buildActiveDossier(
   cards: PresidentialDecisionRoomCard[],
   sourceHandoffs: PresidentialDecisionRoomSourceHandoff[],
@@ -815,6 +996,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       cards: [],
       lenses: [],
       commandQuestions: [],
+      loopSteps: [],
       sourceHandoffs: [],
       activeDossier: null,
       inspectNext: [],
@@ -839,6 +1021,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       cards: [],
       lenses: [],
       commandQuestions: [],
+      loopSteps: [],
       sourceHandoffs: [],
       activeDossier: null,
       inspectNext: [],
@@ -873,6 +1056,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const inspectNext = cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
   const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
+  const loopSteps = buildLoopSteps(state, cards, inspectNext, advanceReadiness);
   const activeDossier = buildActiveDossier(cards, sourceHandoffs, advanceReadiness, input.selectedCardId);
 
   return {
@@ -881,6 +1065,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     cards,
     lenses,
     commandQuestions,
+    loopSteps,
     sourceHandoffs,
     activeDossier,
     inspectNext,
