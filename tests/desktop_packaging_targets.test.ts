@@ -1,6 +1,9 @@
 import assert from 'node:assert';
-import { existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { test } from 'vitest';
 
 /**
@@ -97,4 +100,56 @@ test('T3: tools/build/ contains both smoke scripts', () => {
     assert.ok(winSrc.startsWith("'use strict'"), 'win smoke script must be strict-mode CJS');
     assert.ok(linuxSrc.includes("require('node:fs')"), 'linux smoke script must use node:fs');
     assert.ok(winSrc.includes("require('node:fs')"), 'win smoke script must use node:fs');
+});
+
+test('T4: artifact smoke reports include deterministic release-log facts', () => {
+    const root = process.cwd();
+    const tmp = mkdtempSync(join(tmpdir(), 'awwv-smoke-report-'));
+    try {
+        const appImagePath = join(tmp, 'AWWV-Test.AppImage');
+        const appImage = Buffer.alloc(32, 0);
+        Buffer.from([0x7f, 0x45, 0x4c, 0x46]).copy(appImage, 0);
+        Buffer.from([0x41, 0x49, 0x02]).copy(appImage, 8);
+        writeFileSync(appImagePath, appImage);
+        chmodSync(appImagePath, 0o755);
+
+        const exePath = join(tmp, 'AWWV Test Setup.exe');
+        const exe = Buffer.alloc(4 * 1024 * 1024, 0);
+        Buffer.from([0x4d, 0x5a]).copy(exe, 0);
+        exe.writeUInt32LE(0x80, 0x3c);
+        Buffer.from([0x50, 0x45, 0x00, 0x00]).copy(exe, 0x80);
+        writeFileSync(exePath, exe);
+
+        const linuxResult = spawnSync(process.execPath, ['tools/build/linux_appimage_smoke.cjs', appImagePath], {
+            cwd: root,
+            encoding: 'utf8',
+        });
+        assert.strictEqual(linuxResult.status, 0, linuxResult.stderr);
+        const linuxReport = JSON.parse(linuxResult.stdout) as {
+            sizeBytes?: number;
+            sha256?: string;
+            releaseLog?: string;
+        };
+        assert.strictEqual(linuxReport.sizeBytes, appImage.length);
+        assert.strictEqual(linuxReport.sha256, createHash('sha256').update(appImage).digest('hex'));
+        assert.match(linuxReport.releaseLog ?? '', /sha256=/);
+        assert.match(linuxReport.releaseLog ?? '', /sizeBytes=32/);
+
+        const winResult = spawnSync(process.execPath, ['tools/build/win_nsis_smoke.cjs', exePath], {
+            cwd: root,
+            encoding: 'utf8',
+        });
+        assert.strictEqual(winResult.status, 0, winResult.stderr);
+        const winReport = JSON.parse(winResult.stdout) as {
+            sizeBytes?: number;
+            sha256?: string;
+            releaseLog?: string;
+        };
+        assert.strictEqual(winReport.sizeBytes, exe.length);
+        assert.strictEqual(winReport.sha256, createHash('sha256').update(exe).digest('hex'));
+        assert.match(winReport.releaseLog ?? '', /sha256=/);
+        assert.match(winReport.releaseLog ?? '', /sizeBytes=4194304/);
+    } finally {
+        rmSync(tmp, { recursive: true, force: true });
+    }
 });

@@ -134,6 +134,8 @@
 ## Current State (2026-05-05, v0.9.5 PLATFORM PACKAGING — 6 of 8 P1 + 4 of 8 P2 gaps CLOSED, all pushed)
 **9-commit batch shipped + pushed (`c2e11c72..c2d209e3`):** v0.9.5 Platform Packaging audit + 5 parallel lanes + 2 backfills + version bump. All Ring N/A (sim-orthogonal); 40w hash drift = NONE by construction (zero `npm_package_version` reads in any code path).
 
+**[2026-05-15] Packaging smoke release logs:** AppImage/NSIS smoke scripts should emit deterministic `target`, `sizeBytes`, `sha256`, and copy-ready `releaseLog`. Do instead: paste `releaseLog` into release notes/platform matrix, but keep SmartScreen, Settings -> Apps, `%APPDATA%`, registry, and clean-VM save/load checks operator-only.
+
 - `c2e11c72` audit + backlog (8+8 gaps, 10 lanes prioritized)
 - `55b4653a`+`f9f9c351` `LANE-V095-CI-PACKAGE-MATRIX` (P1-G5+G6+QW-4) — desktop-release-guard.yml extended w/ caching + AppImage/NSIS package + smoke + artifact upload
 - `9c9f4a3c` `LANE-V095-PLATFORM-TEST-MATRIX-DOC` (P2-G4+G5) — `docs/40_reports/PLATFORM_TEST_MATRIX.md` 289-line manual clean-VM checklist; self-recovered from sibling-sweep at `db974e19` via reset-soft + pathspec

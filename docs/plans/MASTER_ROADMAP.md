@@ -597,6 +597,8 @@ Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 - Platform test matrix execution per `docs/40_reports/PLATFORM_TEST_MATRIX.md` on Win10/11 + Ubuntu/Fedora/Debian clean VMs. Runbook ready at `docs/40_reports/implemented/20260507_V095_P1_G3_G4_BUILD_RUNBOOK.md` (632 lines, every step pre-flighted on this Windows host: PE/MZ headers GREEN, smoke `--report-only` exits 0, package.json build block well-formed, Node v24.13.0 / npm v11.6.2 above engines floor).
 - P2-G2: reproducible build harness (gated on test matrix completion).
 
+**Operator-support update 2026-05-15:** `tools/build/linux_appimage_smoke.cjs` and `tools/build/win_nsis_smoke.cjs` now emit deterministic `sizeBytes`, `sha256`, and copy-ready `releaseLog` fields, pinned by `tests/desktop_packaging_targets.test.ts`. This reduces release-log transcription burden and ties manual matrix rows to exact artifacts. It does **not** close the remaining operator-only clean-VM checks: Windows SmartScreen UX, Settings -> Apps visibility, `%APPDATA%` persistence, and NSIS uninstaller registry cleanup still require an actual target VM/environment.
+
 **Out of v0.9.5 scope (audit §6 R7):** macOS notarized DMG, Steam integration, signed Win cert, electron-updater auto-update — all flagged for v0.9.6+ / v1.0 prep.
 
 **Closure threshold:** v0.9.5 is closure-floor PARTIAL — all infrastructure (icon, version, CI matrix, release workflow, test matrix, release-notes generator, RELEASE_PROCESS.md) shipped + first-real-builds COMPLETE on disk + test matrix runbook ready. Closure to FULL pending operator-executed test matrix on clean VMs (template + commit instructions in runbook §5).
