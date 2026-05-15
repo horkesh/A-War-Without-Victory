@@ -60,6 +60,7 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
+import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
@@ -440,6 +441,7 @@ function executeFactionDirectivesImpl(
     const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
     const corpsBrigadeCountsByOsid = buildCorpsBrigadeCountsByOsid(state, faction);
     const activeFormationLocationsByFaction = buildActiveFormationLocationsByFaction(state);
+    const sectorDefenseByFactionAndOsid = buildSectorDefenseByFactionAndOsid(state);
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -558,6 +560,7 @@ function executeFactionDirectivesImpl(
             assignedSectorFrontOsids,
             corpsBrigadeCountsByOsid,
             activeFormationLocationsByFaction,
+            sectorDefenseByFactionAndOsid,
             adjacency,
             reverseMap,
             terrainCache,

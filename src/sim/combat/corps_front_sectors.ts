@@ -2704,6 +2704,7 @@ export {
     getSectorComponent,
     getSectorFrontOsids,
     findSectorForEnemyOsid,
+    buildSectorDefenseByFactionAndOsid,
     getCorpsHqOsid,
     bfsToNearestSector,
     bfsDistance,

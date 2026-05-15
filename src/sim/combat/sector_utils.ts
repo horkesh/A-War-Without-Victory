@@ -28,6 +28,7 @@ import {
 
 /** Fraction of entrenchment_turns retained when a brigade is reassigned to a different sub-segment. */
 export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
+export type SectorDefenseByFactionAndOsid = Map<string, Map<string, CorpsFrontSector>>;
 
 /**
  * Partition friendly OSIDs into connected components via BFS.
@@ -109,6 +110,35 @@ export function findSectorForEnemyOsid(
         if (sector.territory_osids?.includes(targetOsid)) return sector;
     }
     return null;
+}
+
+export function buildSectorDefenseByFactionAndOsid(state: GameState): SectorDefenseByFactionAndOsid {
+    const sectors = state.military.corps_front_sectors;
+    const byFaction: SectorDefenseByFactionAndOsid = new Map();
+    if (!sectors) return byFaction;
+
+    const setFirst = (sector: CorpsFrontSector, osid: string): void => {
+        if (!sector.faction) return;
+        let byOsid = byFaction.get(sector.faction);
+        if (!byOsid) {
+            byOsid = new Map();
+            byFaction.set(sector.faction, byOsid);
+        }
+        if (!byOsid.has(osid)) byOsid.set(osid, sector);
+    };
+
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        for (const sub of sector.sub_segments) {
+            for (const osid of sub.friendly_osids) setFirst(sector, osid);
+        }
+    }
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sid]!;
+        for (const osid of sector.territory_osids ?? []) setFirst(sector, osid);
+    }
+
+    return byFaction;
 }
 
 /**

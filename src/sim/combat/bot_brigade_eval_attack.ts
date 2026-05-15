@@ -657,7 +657,7 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
  * column march. Maximum 1 uncontested occupation per brigade per turn.
  */
 export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result, activeFormationLocationsByFaction } = ctx;
+    const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result, activeFormationLocationsByFaction, sectorDefenseByFactionAndOsid } = ctx;
 
     // Early-war throttle: no uncontested occupation in first 2 weeks (deployment phase).
     // Historically, territory grab was rapid but not instantaneous — units need time to
@@ -741,7 +741,8 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // in reserve (0-assigned cycle): the sector physically defends the OSID via
         // unified sector defense even without a front-line assignment.
         const sectorHasBrigades = uncontestedOccupationProfileTime('.uncontestedOccupation.sectorDefense', () => {
-            const sector = findSectorForEnemyOsid(state, n as Osid, controller);
+            const sector = sectorDefenseByFactionAndOsid?.get(controller)?.get(n)
+                ?? findSectorForEnemyOsid(state, n as Osid, controller);
             if (!sector) return false;
             const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
             return allSectorBrigades.some(bid => {

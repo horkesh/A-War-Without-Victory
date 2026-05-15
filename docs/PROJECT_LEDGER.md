@@ -4268,3 +4268,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The defensive front-gap count hotspot from n1817 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `homeDefense`, `sectorAttack`, and the remaining defensive sub-labels.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_COUNT_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache uncontested sector-defense lookup
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `buildSectorDefenseByFactionAndOsid(...)`, a pass-local defender-sector index keyed by defender faction and defended OSID. `executeFactionDirectivesImpl(...)` builds it once per faction directive pass and `evaluateUncontestedOccupation(...)` reads it before falling back to `findSectorForEnemyOsid(...)`.
+
+**Determinism:** The index is built from `corps_front_sectors` in sector IDs sorted with `strictCompare`, preserves the legacy friendly-front-before-territory precedence, and keeps first-sector-wins behavior by setting each faction/OSID entry only once. The evaluator only reads the index and does not mutate `GameState`, save schema, order sequencing, RNG state, or serialization. Profiled 40w n1819 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\uncontested_sector_defense_cache.test.ts --reporter=dot` failed because uncached lookup allowed an occupation despite a cached defender sector. Green focused suite `npx.cmd vitest run tests\uncontested_sector_defense_cache.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` passed 6/6, `npm.cmd run typecheck` passed, and `git diff --check` passed before profiling. Profiled 40w n1819 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `.uncontestedOccupation.sectorDefense` dropped 53.448ms -> 6.697ms, `homeDefense.uncontestedOccupation` dropped 75.882ms -> 53.941ms, and evaluator time dropped 561.867ms -> 517.579ms.
+
+**Roadmap delta:** The shared uncontested sector-defense scan hotspot from n1818 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `homeDefense`, `sectorAttack`, and remaining defensive sub-labels.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SECTOR_DEFENSE_CACHE.md`

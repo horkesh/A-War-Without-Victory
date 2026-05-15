@@ -17,6 +17,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type { OsidBotOrdersResult } from './bot_brigade_ai_osid.js'; // I'll need to export this or move it here
 import type { ActiveFormationLocationsByFaction, CorpsBrigadeCountsByOsid } from './bot_brigade_context.js';
+import type { SectorDefenseByFactionAndOsid } from './sector_utils.js';
 
 export interface BrigadeEvaluationContext {
     state: GameState;
@@ -56,6 +57,8 @@ export interface BrigadeEvaluationContext {
     corpsBrigadeCountsByOsid?: CorpsBrigadeCountsByOsid;
     /** Cached active formation locations by faction for this faction-order pass. */
     activeFormationLocationsByFaction?: ActiveFormationLocationsByFaction;
+    /** Cached defender-sector lookup by faction and defended OSID for this faction-order pass. */
+    sectorDefenseByFactionAndOsid?: SectorDefenseByFactionAndOsid;
 
     
     // Global context dependencies:
