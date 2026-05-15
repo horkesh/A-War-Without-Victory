@@ -209,6 +209,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.concentrationZones');
         expect(commanderAssess).toContain('commander.runCommanderForCorps.decide.assessSituation.assessThreats');
         const zoneDetection = readFileSync(resolve('src/sim/combat/commander/zone_detection.ts'), 'utf8');
+        const friendlyComponentHelper = zoneDetection.slice(
+            zoneDetection.indexOf('function collectFriendlyComponentsExcluding'),
+            zoneDetection.indexOf('// detectZones'),
+        );
         expect(zoneDetection).toContain('DETECT_ZONES_PROFILE_PREFIX');
         expect(zoneDetection).toContain('.groupComponents');
         expect(zoneDetection).toContain('.buildZoneAssessments');
@@ -220,6 +224,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(zoneDetection).not.toContain('members: Set<string>');
         expect(zoneDetection).not.toContain('component.members.size');
         expect(zoneDetection).not.toContain('function bfsCountExcluding');
+        expect(friendlyComponentHelper).toContain('let queue = [source]');
+        expect(friendlyComponentHelper).not.toContain('let frontier = [source]');
+        expect(friendlyComponentHelper).not.toContain('next.sort(strictCompare)');
         const commanderEmit = readFileSync(resolve('src/sim/combat/commander/emit.ts'), 'utf8');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildDirective');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations');

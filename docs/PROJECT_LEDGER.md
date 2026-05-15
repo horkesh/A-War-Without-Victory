@@ -4572,3 +4572,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Keep enemy-equipment summary support maps at the commander-loop faction-pass boundary. Do not rebuild OSID-to-sector or per-sector equipment totals inside each corps briefing; next CPU work should use a fresh profile and focus on larger remaining buckets.
 
 **Report:** `docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md`
+
+---
+
+## [2026-05-15] perf(commander): queue detectZones must-hold traversal
+
+**Type:** Commander CPU optimization in zone detection. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Replaced `collectFriendlyComponentsExcluding(...)` per-depth frontier arrays and layer-level sorting with an append-only queue. The helper still iterates sorted component sources and returns the same component facts (`memberCount`, `hasZoneOsid`, `hasOutsideCorpsOsid`) consumed by `detectZones.mustHold`.
+
+**Determinism:** The traversal still visits the same friendly component membership for each excluded chokepoint and returns no ordered member list, so removing layer sorting does not alter serialized state. Existing sorted source iteration, branch outcomes, directive/operation writes, RNG behavior, save schema, and serialized state are preserved. Profiled 40w n1840 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests\bot_orders_perf_profile.test.ts` failed on missing `let queue = [source]`. Green focused guard and briefing tests passed 21/21 with `npm.cmd run test:vitest:fast -- -- tests\bot_orders_perf_profile.test.ts tests\commander\briefing_campaign_intent.test.ts`, `npm.cmd run typecheck` passed, and profiled 40w n1840 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. Final docs-truth gate after bookkeeping passed 27/27 with `npm.cmd run test:vitest:fast -- -- tests\bot_orders_perf_profile.test.ts tests\commander\briefing_campaign_intent.test.ts tests\docs_desktop_v09_truth.test.ts`, `npm.cmd run typecheck` passed, and `git diff --check` reported only line-ending normalization warnings. `detectZones.mustHold` dropped 110.264ms -> 75.965ms and `detectZones` dropped 236.936ms -> 202.165ms.
+
+**Roadmap delta:** Keep `collectFriendlyComponentsExcluding(...)` queue-based unless future code needs ordered component members. Do not retry the adjacent-corps context cache shape without a broader reuse boundary; its measured 20.050ms context build cost outweighed the child-label cut in n1839.
+
+**Report:** `docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md`

@@ -48,25 +48,21 @@ function collectFriendlyComponentsExcluding(
         if (source === excludeOsid || visited.has(source)) continue;
 
         let memberCount = 1;
-        let frontier = [source];
+        let queue = [source];
         visited.add(source);
         let hasZoneOsid = zoneOsidSet.has(source);
         let hasOutsideCorpsOsid = !corpsOsidSet.has(source);
 
-        while (frontier.length > 0) {
-            const next: string[] = [];
-            for (const osid of frontier) {
-                for (const n of (adjacency.get(osid) ?? [])) {
-                    if (n === excludeOsid || visited.has(n) || !friendlySet.has(n)) continue;
-                    visited.add(n);
-                    memberCount++;
-                    if (zoneOsidSet.has(n)) hasZoneOsid = true;
-                    if (!corpsOsidSet.has(n)) hasOutsideCorpsOsid = true;
-                    next.push(n);
-                }
+        for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
+            const osid = queue[queueIndex]!;
+            for (const n of (adjacency.get(osid) ?? [])) {
+                if (n === excludeOsid || visited.has(n) || !friendlySet.has(n)) continue;
+                visited.add(n);
+                memberCount++;
+                if (zoneOsidSet.has(n)) hasZoneOsid = true;
+                if (!corpsOsidSet.has(n)) hasOutsideCorpsOsid = true;
+                queue.push(n);
             }
-            next.sort(strictCompare);
-            frontier = next;
         }
 
         components.push({ memberCount, hasZoneOsid, hasOutsideCorpsOsid });

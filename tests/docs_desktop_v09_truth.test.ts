@@ -201,6 +201,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('`.buildBriefing.enemyEquipmentSummary` dropped 115.916ms -> 11.176ms');
     expect(roadmap).toContain('`commander.runCommanderForCorps.enemyEquipmentSummaryContext` cost 54.218ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md');
+    expect(roadmap).toContain('commander detectZones must-hold queue');
+    expect(roadmap).toContain('n1840 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`detectZones.mustHold` dropped 110.264ms -> 75.965ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -320,6 +324,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md');
     expect(roadmap).toContain('commander enemy-equipment summary context');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md');
+    expect(roadmap).toContain('commander detectZones must-hold queue');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md');
     expect(roadmap).toContain('Bot-order sectorMarch now has default-off overstack/retroactive-tooth attribution');
     expect(roadmap).toContain('`.overstackRedistribution` at 233.130ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_PROFILE_SPLIT.md');
