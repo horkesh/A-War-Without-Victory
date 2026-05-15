@@ -4444,3 +4444,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Uncontested-occupation caller attribution is now visible. The split does not justify retrying the exact n1824 salient cache; the next CPU lane should use a fresh top profile and prefer larger measured buckets before small uncontested child labels.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): reject defensive sector lookup cache
+
+**Type:** VERDICT-REPORT-ONLY for a rejected bot-order CPU optimization candidate. No production code or tests are retained; no gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change tested and reverted:** A lazy pass-local corps sector-id lookup that preserved `findBrigadeSectorId(...)` first-sector match and largest-sector fallback semantics, then reused that lookup for retreat grouping and defensive self/sector counterattack sector lookups.
+
+**Determinism:** The candidate only read `corps_front_sectors` and current brigade state into a pass-local map. Profiled 40w n1831 kept final hash `0cb626c032204372`. Because it failed the performance gate, the implementation and tests were reverted before this docs-only commit.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/defensive_sector_lookup_cache.test.ts tests/bot_orders_perf_profile.test.ts` failed because the lookup helper and wiring did not exist. Candidate green suite passed 6/6 and `npm.cmd run typecheck` passed. Profiled n1831 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. The candidate regressed the target: `.defensive.sectorCounterAttackSectorLookup` 13.205ms -> 14.669ms and added `corpsSectorIdLookup` at 15.278ms.
+
+**Roadmap delta:** Do not retry the lazy corps sector-id lookup shape. A future defensive lookup optimization needs either no new index construction or a broader already-owned sector lookup that other hot callers can amortize.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_SECTOR_LOOKUP_CACHE_REJECTED.md`

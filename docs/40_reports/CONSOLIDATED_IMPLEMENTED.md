@@ -10,7 +10,7 @@
 
 **Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_CALLER_PROFILE_SPLIT.md) - n1830 kept final hash `0cb626c032204372` and split shared uncontested-occupation child labels by caller; `homeDefense.uncontestedOccupation.salient` measured 12.603ms, `defensive.uncontestedOccupation.salient` measured 3.403ms, and standalone `eval.uncontestedOccupation.salient` measured 8.838ms, so this is attribution rather than a new cache target.
 
-**Latest bot-order rejected CPU candidate:** [implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md) - n1824 kept final hash `0cb626c032204372`, but the exact faction+loc+target uncontested-salient cache worsened `.uncontestedOccupation.salient` 20.629ms -> 23.320ms, so the implementation was reverted.
+**Latest bot-order rejected CPU candidate:** [implemented/20260515_BOT_ORDERS_DEFENSIVE_SECTOR_LOOKUP_CACHE_REJECTED.md](implemented/20260515_BOT_ORDERS_DEFENSIVE_SECTOR_LOOKUP_CACHE_REJECTED.md) - n1831 kept final hash `0cb626c032204372`, but the lazy corps sector-id lookup added 15.278ms of index cost and worsened `.defensive.sectorCounterAttackSectorLookup` 13.205ms -> 14.669ms, so the implementation was reverted. Earlier rejected shape: [implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md).
 
 **As of 2026-02-15:** All implemented report content has been consolidated into one dated document. Individual reports have been archived (not deleted).
 
