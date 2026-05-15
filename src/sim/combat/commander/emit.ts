@@ -954,100 +954,127 @@ function buildOperations(
                             const adjacency = briefing.spatial.adjacency;
                             const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
                             const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
-                            const terrainCache = briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null;
+                            const terrainCache = botOrdersPerfTime(
+                                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.terrainCache`,
+                                () => briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null,
+                            );
                             if (adjacency && friendlySet && probeBrigLoc) {
-                                const enemyTargets = new Set<string>();
-                                for (const sub of sector.sub_segments ?? []) {
-                                    for (const fOsid of sub.friendly_osids ?? []) {
-                                        for (const neighbor of adjacency.get(fOsid) ?? []) {
-                                            if (!friendlySet.has(neighbor)) {
-                                                enemyTargets.add(neighbor);
+                                const enemyTargets = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.enemyTargets`,
+                                    () => {
+                                        const enemyTargets = new Set<string>();
+                                        for (const sub of sector.sub_segments ?? []) {
+                                            for (const fOsid of sub.friendly_osids ?? []) {
+                                                for (const neighbor of adjacency.get(fOsid) ?? []) {
+                                                    if (!friendlySet.has(neighbor)) {
+                                                        enemyTargets.add(neighbor);
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                }
-                                const directEnemyTargets = new Set<string>();
-                                for (const target of [...enemyTargets].sort(strictCompare)) {
-                                    const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
-                                    if (targetNeighbors.includes(probeBrigLoc)) {
-                                        directEnemyTargets.add(target);
-                                    }
-                                }
-                                const predictedTargets = directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
-                                    ? predictAllAdjacentTargets(
-                                        briefing.state_ref,
-                                        probeBrigade.brigade_id,
-                                        adjacency as Map<any, any>,
-                                        briefing.reverse_map,
-                                        terrainCache ?? {},
-                                        'attack',
-                                        briefing.supply_by_osid ?? undefined,
-                                        undefined,
-                                        undefined,
-                                        briefing.ethnic_map ?? undefined,
-                                    )
-                                    : [];
-                                const predictedTargetByOsid = new Map(
-                                    predictedTargets.map((candidate) => [candidate.osid, candidate]),
+                                        return enemyTargets;
+                                    },
                                 );
-                                const rankedTargets = [...directEnemyTargets]
-                                    .map((target) => {
-                                        const cooldown = briefing.failed_offensive_objectives?.[target];
-                                        const targetController = briefing.reverse_map && briefing.state_ref
-                                            ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
-                                            : null;
-                                        const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
-                                        const direct = true;
-                                        const directPrediction = predictedTargetByOsid.get(target);
-                                        let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
-                                        for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
-                                            const dist = spatialFriendlyDistance(
-                                                briefing.spatial,
-                                                briefing.faction,
-                                                probeBrigLoc,
-                                                approachOsid,
-                                                MAX_REACHABILITY_HOPS,
-                                            );
-                                            if (dist >= 0 && dist < bestApproachDistance) {
-                                                bestApproachDistance = dist;
+                                const directEnemyTargets = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.directEnemyTargets`,
+                                    () => {
+                                        const directEnemyTargets = new Set<string>();
+                                        for (const target of [...enemyTargets].sort(strictCompare)) {
+                                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                            if (targetNeighbors.includes(probeBrigLoc)) {
+                                                directEnemyTargets.add(target);
                                             }
                                         }
-                                        return {
-                                            target,
-                                            onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
-                                            direct,
-                                            politicallyBlocked: briefing.state_ref != null
-                                                && targetController != null
-                                                && shouldGrazBlockAttack(
-                                                    briefing.state_ref,
-                                                    briefing.corps_id,
+                                        return directEnemyTargets;
+                                    },
+                                );
+                                const predictedTargets = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictAllAdjacentTargets`,
+                                    () => directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
+                                        ? predictAllAdjacentTargets(
+                                            briefing.state_ref,
+                                            probeBrigade.brigade_id,
+                                            adjacency as Map<any, any>,
+                                            briefing.reverse_map,
+                                            terrainCache ?? {},
+                                            'attack',
+                                            briefing.supply_by_osid ?? undefined,
+                                            undefined,
+                                            undefined,
+                                            briefing.ethnic_map ?? undefined,
+                                        )
+                                        : [],
+                                );
+                                const predictedTargetByOsid = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictedTargetMap`,
+                                    () => new Map(
+                                        predictedTargets.map((candidate) => [candidate.osid, candidate]),
+                                    ),
+                                );
+                                const rankedTargets = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.rankTargets`,
+                                    () => [...directEnemyTargets]
+                                        .map((target) => {
+                                            const cooldown = briefing.failed_offensive_objectives?.[target];
+                                            const targetController = briefing.reverse_map && briefing.state_ref
+                                                ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
+                                                : null;
+                                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                            const direct = true;
+                                            const directPrediction = predictedTargetByOsid.get(target);
+                                            let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
+                                            for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
+                                                const dist = spatialFriendlyDistance(
+                                                    briefing.spatial,
                                                     briefing.faction,
-                                                    target,
-                                                    targetController,
-                                                ),
-                                            predictedViable: directPrediction == null
-                                                ? true
-                                                : isOutcomeSufficientForAttack(
-                                                    directPrediction.prediction.predicted_outcome,
-                                                    'stalemate',
-                                                ),
-                                            reachable: Number.isFinite(bestApproachDistance),
-                                            approachDistance: bestApproachDistance,
-                                        };
-                                    })
-                                    .filter((candidate) => !candidate.onCooldown)
-                                    .filter((candidate) => !candidate.politicallyBlocked)
-                                    // Probe ops are one-brigade recon-by-force, not small marches.
-                                    // Only launch when the chosen brigade is already on a valid
-                                    // approach node for the target this turn and the brigade can
-                                    // already clear the probe threshold on that exact target.
-                                    .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
-                                    .sort((a, b) =>
-                                        Number(b.direct) - Number(a.direct)
-                                        || a.approachDistance - b.approachDistance
-                                        || strictCompare(a.target, b.target)
-                                    );
-                                probeObjectives = rankedTargets.slice(0, 1).map((candidate) => candidate.target);
+                                                    probeBrigLoc,
+                                                    approachOsid,
+                                                    MAX_REACHABILITY_HOPS,
+                                                );
+                                                if (dist >= 0 && dist < bestApproachDistance) {
+                                                    bestApproachDistance = dist;
+                                                }
+                                            }
+                                            return {
+                                                target,
+                                                onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
+                                                direct,
+                                                politicallyBlocked: briefing.state_ref != null
+                                                    && targetController != null
+                                                    && shouldGrazBlockAttack(
+                                                        briefing.state_ref,
+                                                        briefing.corps_id,
+                                                        briefing.faction,
+                                                        target,
+                                                        targetController,
+                                                    ),
+                                                predictedViable: directPrediction == null
+                                                    ? true
+                                                    : isOutcomeSufficientForAttack(
+                                                        directPrediction.prediction.predicted_outcome,
+                                                        'stalemate',
+                                                    ),
+                                                reachable: Number.isFinite(bestApproachDistance),
+                                                approachDistance: bestApproachDistance,
+                                            };
+                                        })
+                                        .filter((candidate) => !candidate.onCooldown)
+                                        .filter((candidate) => !candidate.politicallyBlocked)
+                                        // Probe ops are one-brigade recon-by-force, not small marches.
+                                        // Only launch when the chosen brigade is already on a valid
+                                        // approach node for the target this turn and the brigade can
+                                        // already clear the probe threshold on that exact target.
+                                        .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
+                                        .sort((a, b) =>
+                                            Number(b.direct) - Number(a.direct)
+                                            || a.approachDistance - b.approachDistance
+                                            || strictCompare(a.target, b.target)
+                                        ),
+                                );
+                                probeObjectives = botOrdersPerfTime(
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.pickObjective`,
+                                    () => rankedTargets.slice(0, 1).map((candidate) => candidate.target),
+                                );
                             }
                         }
                     }

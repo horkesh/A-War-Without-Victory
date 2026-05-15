@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): split probe objective profile
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the `buildOperations` plan/probe split.
+
+**Fix:** Added default-off profile sub-buckets inside `buildOperations.probe.deriveObjectives`, covering terrain-cache construction, enemy-target collection, direct-target filtering, `predictAllAdjacentTargets(...)`, prediction-map construction, candidate ranking, and final objective selection. No probe objective selection rule, candidate sort order, prediction threshold, scenario data, or output schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `.probe.deriveObjectives.terrainCache`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1778 with final hash `7ef09f55d6494edd`, matching n1777. The new split identified `predictAllAdjacentTargets(...)` at 238.334ms of the 263.514ms `probe.deriveObjectives` bucket.
+
+**Canon posture:** Pure deterministic instrumentation. Profiling remains opt-in via `PERF_PROFILE_BOT_ORDERS=true`; flag-off simulation behavior and serialized output are unchanged.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_PROBE_DERIVE_OBJECTIVES_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): split buildOperations profile
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the count-only `detectZones.mustHold` pass.
