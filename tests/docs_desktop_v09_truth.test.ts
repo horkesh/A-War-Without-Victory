@@ -149,6 +149,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('`.computeDefenderPower.officer` dropped 6.107ms -> 0.696ms');
     expect(roadmap).toContain('`sectorAttack` dropped 77.130ms -> 66.983ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md');
+    expect(roadmap).toContain('overstack dest-count profile split');
+    expect(roadmap).toContain('n1827 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.overstackRedistribution.destCount` measured only 0.503ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_DEST_COUNT_PROFILE_SPLIT.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -297,6 +301,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md');
     expect(roadmap).toContain('sectorAttack direct-objective officer lookup');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md');
+    expect(roadmap).toContain('overstack dest-count profile split');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_DEST_COUNT_PROFILE_SPLIT.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');

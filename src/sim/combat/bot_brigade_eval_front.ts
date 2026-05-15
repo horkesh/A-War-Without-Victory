@@ -366,8 +366,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         for (const candidate of otherFronts) {
                             // Check: would this destination be overstacked after planned arrivals?
                             const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
-                            const destCount = countCorpsAt(candidate as Osid)
-                                + Math.max(0, plannedAtDest); // arrivals increase count
+                            const destCount = sectorMarchProfileTime('.overstackRedistribution.destCount', () =>
+                                countCorpsAt(candidate as Osid)
+                                + Math.max(0, plannedAtDest) // arrivals increase count
+                            );
                             if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
 
                             const dest = sectorMarchProfileTime('.overstackRedistribution.destination', () =>

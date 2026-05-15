@@ -4380,3 +4380,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Direct sector-attack officer lookup is no longer the next target. Future sector-attack work should compare net costs and inspect remaining direct-objective defender-power, sector-defense, or attacker-power labels from a fresh profile.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_OFFICER_LOOKUP.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split overstack destination-count profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Wrapped the overstack redistribution candidate destination count in `sectorMarchProfileTime('.overstackRedistribution.destCount', ...)` and added a source guard in `tests/bot_orders_perf_profile.test.ts`.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrapper only times an existing pure count expression plus the existing `columnAssignments` arrival adjustment; it preserves branch order, movement/posture order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1827 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.overstackRedistribution.destCount`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1827 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.overstackRedistribution.destCount` measured 0.503ms across 1,081 calls while `.overstackRedistribution` remained 23.589ms.
+
+**Roadmap delta:** Destination-count checks are not the next overstack optimization target. Future work should use a fresh profile and, if overstack remains interesting, split the residual parent further before touching pathfinding or candidate-count mechanics.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_DEST_COUNT_PROFILE_SPLIT.md`
