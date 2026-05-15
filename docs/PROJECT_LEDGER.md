@@ -4156,3 +4156,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The next bot-order CPU pass should optimize repeated all-sector assigned/reserve roster scans with a deterministic pass-local brigade-sector membership index. BFS and target collection are not current targets.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache return-to-corps roster membership
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateReturnToCorps(...)` now uses the existing pass-local `sectorAssignmentByBrigade` cache carried on `BrigadeEvaluationContext` to decide whether a brigade is already assigned/reserve in any sector. The legacy all-sector roster scan remains for direct callers that do not provide the cache.
+
+**Determinism:** The cache is built once per faction directive pass from sector IDs sorted with `strictCompare`. The evaluator only reads this pass-local cache and does not mutate `GameState`, save schema, BFS behavior, movement-order writes, RNG, or serialization. Profiled 40w n1811 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\elite_loan_return_to_corps.test.ts --reporter=dot` failed because cached sector membership was ignored. Green focused suite passed 7/7, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1811 kept final hash `0cb626c032204372`; `.returnToCorps.rosterScan` dropped 144.998ms -> 1.002ms, `returnToCorps` dropped 190.872ms -> 47.789ms, and `bot_orders.executeFactionDirectives.total` dropped 1,151.786ms -> 979.235ms.
+
+**Roadmap delta:** The return-to-corps roster scan hotspot from n1810 is closed. The next CPU lane should start from a fresh profile; top bot-order evaluator candidates are now `sectorMarch`, `sectorAttack`, `defensive`, `pocketEvacuation`, and `homeDefense`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_ROSTER_CACHE.md`

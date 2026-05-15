@@ -36,6 +36,8 @@
 
 **2026-05-15 return-to-corps split:** n1810 kept hash `0cb626c032204372`; `.returnToCorps.rosterScan` dominates at 144.998ms, while `.territoryCheck` is 18.271ms, `.bfs` 3.413ms, `.collectTargets` 2.590ms, and `.walkBack` 0.054ms. Do instead: optimize repeated all-sector assigned/reserve roster scans with a deterministic pass-local brigade-sector membership index before touching BFS or target collection.
 
+**2026-05-15 return-to-corps roster cache:** n1811 kept hash `0cb626c032204372`; using existing `sectorAssignmentByBrigade` cut `.returnToCorps.rosterScan` 144.998ms -> 1.002ms and parent `returnToCorps` 190.872ms -> 47.789ms. Do instead: choose the next bot-order CPU lane from a fresh profile; current candidates are `sectorMarch`, `sectorAttack`, `defensive`, `pocketEvacuation`, and `homeDefense`.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.

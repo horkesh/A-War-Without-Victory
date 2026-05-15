@@ -95,4 +95,19 @@ describe('evaluateReturnToCorps', () => {
         expect(handled).toBe(true);
         expect(ctx.result.movement_orders[ctx.brigade.id]).toBe('op:mid:b');
     });
+
+    it('uses cached sector assignment membership to skip already-rostered brigades', () => {
+        const ctx = makeContext();
+        const sector = ctx.state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!;
+        ctx.sectorAssignment = {
+            sector,
+            isReserve: false,
+            frontOsids: new Set(sector.territory_osids),
+        };
+
+        const handled = evaluateReturnToCorps(ctx);
+
+        expect(handled).toBe(false);
+        expect(ctx.result.movement_orders[ctx.brigade.id]).toBeUndefined();
+    });
 });

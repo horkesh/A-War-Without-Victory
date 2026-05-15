@@ -401,12 +401,13 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
  * assigned to a sector through the normal pipeline.
  */
 export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, adjacency, result } = ctx;
+    const { brigade, state, loc, adjacency, result, sectorAssignment } = ctx;
 
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
     const sectors = state.military.corps_front_sectors;
     const isRostered = returnToCorpsProfileTime('.returnToCorps.rosterScan', () => {
+        if (sectorAssignment !== undefined) return sectorAssignment != null;
         for (const s of Object.values(sectors)) {
             if (s.assigned_brigade_ids.includes(brigade.id)) return true;
             if ((s.reserve_brigade_ids ?? []).includes(brigade.id)) return true;
