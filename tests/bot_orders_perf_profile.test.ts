@@ -85,6 +85,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
         const brigadeEvalAttack = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
+        const brigadeEvalMovement = readFileSync(resolve('src/sim/combat/bot_brigade_eval_movement.ts'), 'utf8');
         const sectorAttackEvaluator = brigadeEvalAttack.slice(
             brigadeEvalAttack.indexOf('export function evaluateSectorAttack'),
             brigadeEvalAttack.indexOf('export function evaluateReorganize'),
@@ -97,6 +98,11 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.eval.garrisonAndDetachments');
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.eval.sectorAttack');
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.eval.interiorMovement');
+        expect(brigadeEvalMovement).toContain('INTERIOR_MOVEMENT_PROFILE_PREFIX');
+        expect(brigadeEvalMovement).toContain('.prioritySector');
+        expect(brigadeEvalMovement).toContain('.offensiveTarget');
+        expect(brigadeEvalMovement).toContain('.ownCorpsFront');
+        expect(brigadeEvalMovement).toContain('.fallback');
         expect(brigadeAi).toContain('buildSectorAssignmentByBrigade');
         expect(brigadeAi).toContain('sectorAssignmentByBrigade.get(brigade.id)');
         expect(brigadeAi).toContain('buildAdjacentEnemyOsidsByLoc');

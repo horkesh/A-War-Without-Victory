@@ -4316,3 +4316,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The return-to-corps territory scan hotspot from n1820 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `sectorAttack`, `homeDefense`, and `defensive`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split interior movement profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateInteriorMovement(...)` now has default-off profile sub-labels for priority-sector movement, offensive-target movement, own-corps-front repositioning, and final fallback interior movement.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers preserve branch order, movement/posture-order writes, fallback behavior, RNG behavior, save schema, and serialized state. Profiled 40w n1823 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `INTERIOR_MOVEMENT_PROFILE_PREFIX`. Green focused profile guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1823 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `interiorMovement` measured 23.830ms, led by `.interiorMovement.fallback` at 12.864ms and `.interiorMovement.prioritySector` at 8.017ms.
+
+**Roadmap delta:** Interior movement attribution is now visible and does not outrank the larger current buckets. The next CPU lane should use a fresh profile; current candidates are `sectorMarch` residual attribution, `homeDefense`, `sectorAttack`, and remaining defensive/uncontested shared work.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md`

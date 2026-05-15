@@ -1,37 +1,38 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { issueInteriorMovement, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
-import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import type { Osid } from './osid_adjacency.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
+
+const INTERIOR_MOVEMENT_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.interiorMovement';
+
+function interiorMovementProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${INTERIOR_MOVEMENT_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
 
 /**
- * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Canonical
- * DOMAIN:    Interior reposition evaluation — rear-area brigade movement
- * ═══════════════════════════════════════════════════════════════
+ * DOMAIN: Interior reposition evaluation - rear-area brigade movement
  *
- * DECIDES:   Whether a rear-area brigade should move toward the front or a priority sector
- * WRITES:    brigade_movement_orders (rear-area repositioning)
- * READS:     brigade location, sector assignment, front state, directive.priority_sector_id
- * MUST NOT:  move a brigade cross-component (Codex principle #2 — connected-component boundary)
+ * DECIDES: Whether a rear-area brigade should move toward the front or a priority sector
+ * WRITES: brigade_movement_orders (rear-area repositioning)
+ * READS: brigade location, sector assignment, front state, directive.priority_sector_id
+ * MUST NOT: move a brigade cross-component (Codex principle #2 - connected-component boundary)
  *
- * UPSTREAM:  commander_loop.ts directive (priority_sector_id)
+ * UPSTREAM: commander_loop.ts directive (priority_sector_id)
  * DOWNSTREAM: osid_column_movement.ts (column march), brigade_movement_orders.ts (single-hop)
  *
  * TRUTH INVARIANTS:
  * - Respects connected-component boundaries (no cross-faction-graph movement)
  * - Only moves brigades already inside their assigned sector's component
  *
- * MOVEMENT TIER: T2 — Tactical Routing (Interior Reposition) (see MOVEMENT_AUTHORITY.md)
- * ═══════════════════════════════════════════════════════════════
+ * MOVEMENT TIER: T2 - Tactical Routing (Interior Reposition) (see MOVEMENT_AUTHORITY.md)
  */
-
 export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, directive, result, columnAssignments } = ctx;
 
-    // --- Rule 7: Interior — move toward front, preferring offensive targets ---
     // First: if directive has a priority sector, march toward it (offensive concentration).
-    if (directive?.priority_sector_id) {
+    if (interiorMovementProfileTime('.prioritySector', () => {
+        if (!directive?.priority_sector_id) return false;
         const prioritySec = state.military.corps_front_sectors?.[directive.priority_sector_id];
         if (prioritySec) {
             const priorityOsids = new Set<string>();
@@ -49,10 +50,12 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 }
             }
         }
-    }
-    if (directive && directive.offensive_targets.length > 0) {
+        return false;
+    })) return true;
+
+    if (interiorMovementProfileTime('.offensiveTarget', () => {
+        if (!directive || directive.offensive_targets.length === 0) return false;
         const targetSet = new Set(directive.offensive_targets);
-        // BFS through friendly territory toward nearest offensive_target neighbor
         const directiveTarget = findNearestOffensiveTarget(state, faction, loc, targetSet, adjacency, reverseMap, 30);
         if (directiveTarget) {
             if (!isMovementDestinationRisky(directiveTarget, graphAnalysis)) {
@@ -61,11 +64,14 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
         }
-    }
+        return false;
+    })) return true;
+
     const effectiveCorpsId = brigade.elite_loan_state?.on_loan && brigade.elite_loan_state.loaned_to_corps
         ? brigade.elite_loan_state.loaned_to_corps
         : brigade.corps_id;
-    if (!brigade.assignment && effectiveCorpsId && state.military.corps_front_sectors) {
+    if (interiorMovementProfileTime('.ownCorpsFront', () => {
+        if (brigade.assignment || !effectiveCorpsId || !state.military.corps_front_sectors) return false;
         const ownCorpsFrontOsids = new Set<string>();
         let insideOwnCorpsTerritory = false;
         for (const sector of Object.values(state.military.corps_front_sectors)) {
@@ -87,10 +93,13 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
         }
-    }
-    // Fallback: standard interior movement toward nearest front
-    issueInteriorMovement(brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, result,
-        ['undefended', 'critical', 'threatened', 'active'], columnAssignments);
-        
-    return true; // interior movement is the final fallback for unhandled brigades (though technically they just move and we process next)
+        return false;
+    })) return true;
+
+    interiorMovementProfileTime('.fallback', () => {
+        issueInteriorMovement(brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, result,
+            ['undefended', 'critical', 'threatened', 'active'], columnAssignments);
+    });
+
+    return true; // interior movement is the final fallback for unhandled brigades.
 }

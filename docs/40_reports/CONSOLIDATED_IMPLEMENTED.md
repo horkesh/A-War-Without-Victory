@@ -8,7 +8,7 @@
 
 **Latest bot-order CPU optimization:** [implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md](implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md) - n1821 kept final hash `0cb626c032204372` and reused pass-local corps territory sets in `evaluateReturnToCorps(...)`; `.returnToCorps.territoryCheck` dropped 20.496ms -> 1.072ms and `returnToCorps` dropped 46.883ms -> 25.514ms. Full bot-order total was run-noisy/slightly higher, so this is recorded as a targeted evaluator cut.
 
-**Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md) - n1817 kept final hash `0cb626c032204372` and split `evaluateDefensive(...)`; `.defensive.frontGapCountHere` was the leading sub-label at 50.198ms.
+**Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md) - n1823 kept final hash `0cb626c032204372` and split `evaluateInteriorMovement(...)`; `.interiorMovement.fallback` measured 12.864ms and `.interiorMovement.prioritySector` measured 8.017ms.
 
 **As of 2026-02-15:** All implemented report content has been consolidated into one dated document. Individual reports have been archived (not deleted).
 
