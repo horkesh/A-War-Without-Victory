@@ -329,24 +329,28 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 if (sectorMarchProfileTime('.overstackRedistribution', () => {
                     const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
                     // Negative values in columnAssignments = planned departures from this OSID
-                    const effectiveCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
-                        + Math.min(0, plannedDepartures); // departures reduce count
+                    const effectiveCountHere = sectorMarchProfileTime('.overstackRedistribution.countHere', () =>
+                        countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
+                        + Math.min(0, plannedDepartures) // departures reduce count
+                    );
                     if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
                         // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
                         // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                         // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
                         // front OSIDs in the same sector when those OSIDs have fewer brigades.
                         const enclave = isEnclaveBrigade(brigade);
-                        const otherFronts = [...frontSet]
-                            .filter(o => o !== loc)
-                            .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
-                            .sort((a, b) => {
-                                const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
-                                    + (columnAssignments.get(a as Osid) ?? 0);
-                                const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
-                                    + (columnAssignments.get(b as Osid) ?? 0);
-                                return ca - cb || strictCompare(a, b);
-                            });
+                        const otherFronts = sectorMarchProfileTime('.overstackRedistribution.rankCandidates', () =>
+                            [...frontSet]
+                                .filter(o => o !== loc)
+                                .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
+                                .sort((a, b) => {
+                                    const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
+                                        + (columnAssignments.get(a as Osid) ?? 0);
+                                    const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
+                                        + (columnAssignments.get(b as Osid) ?? 0);
+                                    return ca - cb || strictCompare(a, b);
+                                })
+                        );
                         for (const candidate of otherFronts) {
                             // Check: would this destination be overstacked after planned arrivals?
                             const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
@@ -354,8 +358,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                 + Math.max(0, plannedAtDest); // arrivals increase count
                             if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
 
-                            const dest = findNearestFriendlyOsidDestination(
-                                state, faction, loc, adjacency, reverseMap, new Set([candidate])
+                            const dest = sectorMarchProfileTime('.overstackRedistribution.destination', () =>
+                                findNearestFriendlyOsidDestination(
+                                    state, faction, loc, adjacency, reverseMap, new Set([candidate])
+                                )
                             );
                             // No isMovementDestinationRisky check here — the brigade is being
                             // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently

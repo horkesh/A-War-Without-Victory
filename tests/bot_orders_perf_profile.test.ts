@@ -105,6 +105,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.trapReroute');
         expect(brigadeEvalFront).toContain('.retroactiveTooth');
         expect(brigadeEvalFront).toContain('.overstackRedistribution');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution.countHere');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution.rankCandidates');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution.destination');
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

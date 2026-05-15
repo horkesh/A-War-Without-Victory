@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(bot-orders): split overstack redistribution profile
+
+**Scope:** Default-off CPU attribution inside the hot `sectorMarch.overstackRedistribution` bucket.
+
+**Fix:** Added nested `PERF_PROFILE_BOT_ORDERS=true` labels for `.overstackRedistribution.countHere`, `.overstackRedistribution.rankCandidates`, and `.overstackRedistribution.destination`. Movement decisions, same-corps count semantics, candidate ordering, destination pathfinding, and `columnAssignments` updates are unchanged.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing nested overstack labels. Green focused: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts tests\tooth_guard.test.ts tests\retroactive_tooth_eviction.test.ts --reporter=dot` passed 19/19 and `npm.cmd run typecheck` passed. Profile proof: n1804 kept final hash `0cb626c032204372`, matching n1803/n1802. The split shows `.countHere` at 189.557ms, `.rankCandidates` at 27.299ms, and `.destination` at 0.760ms.
+
+**Canon posture:** Default-off deterministic instrumentation only. It writes no game state or save state and kept serialized output hash-identical.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-15] perf(bot-orders): split sectorMarch profile
 
 **Scope:** Default-off bot-orders CPU attribution for `evaluateSectorMarch(...)`.

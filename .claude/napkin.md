@@ -26,6 +26,8 @@
 
 **2026-05-15 bot-order sectorMarch split:** Fresh n1803 profile kept hash `0cb626c032204372` and split `sectorMarch` attribution. Leading sub-labels: `.overstackRedistribution` 233.130ms, `.retroactiveTooth` 89.897ms, `.assignedSectorLookup` 20.067ms. Top-level `sectorMarch` rose due nested timer overhead, not behavior. Do instead: target overstack redistribution first; treat nested profile parent totals as overhead-inflated and use sub-labels for lane selection.
 
+**2026-05-15 overstack split:** n1804 kept hash `0cb626c032204372`; `.overstackRedistribution.countHere` 189.557ms dominates `.rankCandidates` 27.299ms and `.destination` 0.760ms. Do instead: optimize repeated same-corps OSID counts next; do not work on overstack destination pathfinding first.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.
