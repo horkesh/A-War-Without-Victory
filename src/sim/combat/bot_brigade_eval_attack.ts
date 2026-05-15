@@ -1,4 +1,5 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -32,6 +33,11 @@ import {
 } from './bot_constants.js';
 
 export const UNCONTESTED_OCCUPATION_SCORE = 600;
+const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+
+function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -47,7 +53,7 @@ import {
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, cmd, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
+    const { brigade, loc, adjacency, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
 
     // --- Home-ground brigades: defend or counterattack only, never attack ---
     if (brigade.home_defense_active === true && !isActiveSectorOperationParticipant) {
@@ -55,20 +61,22 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
         // should NOT be trapped here — they must march toward the front via
         // evaluateInteriorMovement instead of sitting idle in the rear.
         if (adjEnemy.length === 0) {
-            const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
-            if (!osidAnalysis || osidAnalysis.enemy_neighbors.length === 0) {
+            const shouldFallThroughToInterior = homeDefenseProfileTime('.homeDefense.deepRearNearFront', () => {
+                const osidAnalysis = graphAnalysis.osid_analysis.get(loc);
+                if (osidAnalysis && osidAnalysis.enemy_neighbors.length > 0) return false;
                 const neighbors = adjacency.get(loc as Osid) ?? [];
                 const nearFront = neighbors.some(n => {
                     const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
                     return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
                 });
-                if (!nearFront) return false; // deep rear — fall through to interior movement
-            }
+                return !nearFront;
+            });
+            if (shouldFallThroughToInterior) return false; // deep rear - fall through to interior movement
         }
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
-            if (evaluateUncontestedOccupation(ctx)) {
+            if (homeDefenseProfileTime('.homeDefense.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) {
                 return true;
             }
             // Home defense: defend in place. Attacks only through operations.

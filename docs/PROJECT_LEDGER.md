@@ -4092,3 +4092,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The retroactive-tooth scan hotspot from n1805 is closed. The next bot-order CPU pass should start with a fresh profile because `.overstackRedistribution`, `.assignedSectorLookup`, and `.retroactiveTooth` are now close.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETROACTIVE_TOOTH_SECTOR_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split home-defense profile attribution
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added default-off sub-labels inside `evaluateHomeDefense(...)` for the deep-rear near-front check and the nested `evaluateUncontestedOccupation(...)` call. Also narrowed the local destructuring in `evaluateHomeDefense(...)` to fields it actually uses.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers do not change iteration order, command output, RNG, saved state, or serialized artifacts. Profiled n1807 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `HOME_DEFENSE_PROFILE_PREFIX`. Green focused test passed 5/5, focused bot-order guard suite passed 21/21, and `npm.cmd run typecheck` passed. Profiled 40w n1807 kept final hash `0cb626c032204372`; `homeDefense.uncontestedOccupation` accounted for 193.515ms of the 209.140ms parent `homeDefense` bucket, while `homeDefense.deepRearNearFront` was only 0.529ms.
+
+**Roadmap delta:** Local home-defense logic is not the next optimization target. The next bot-order CPU pass should split or optimize shared `evaluateUncontestedOccupation(...)`, because it dominates the home-defense parent bucket and also appears as a standalone evaluator.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_HOME_DEFENSE_PROFILE_SPLIT.md`

@@ -76,6 +76,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('retroactive-tooth sector cache');
     expect(roadmap).toContain('n1806 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`.retroactiveTooth` dropped 82.802ms -> 17.620ms');
+    expect(roadmap).toContain('home-defense profile split');
+    expect(roadmap).toContain('n1807 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`homeDefense.uncontestedOccupation` accounted for 193.515ms');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -196,6 +199,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_PROFILE_SPLIT.md');
     expect(roadmap).toContain('`.countHere` measured 189.557ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('home-defense profile split');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_HOME_DEFENSE_PROFILE_SPLIT.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');

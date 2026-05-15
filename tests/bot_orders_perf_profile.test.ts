@@ -84,6 +84,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const combatPredictor = readFileSync(resolve('src/sim/combat/combat_predictor.ts'), 'utf8');
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
         const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
+        const brigadeEvalAttack = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -108,6 +109,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.overstackRedistribution.countHere');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.rankCandidates');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.destination');
+        expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
+        expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
+        expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');
