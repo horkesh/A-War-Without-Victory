@@ -103,6 +103,7 @@ import {
     getFactionBrigades,
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
+    buildAdjacentEnemyOsidsByLoc,
     findNearestFriendlyOsidInSet,
     buildActiveFormationLocationsByFaction,
     buildCorpsBrigadeCountsByOsid,
@@ -157,6 +158,7 @@ export {
     getFactionBrigades,
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
+    buildAdjacentEnemyOsidsByLoc,
     findNearestFriendlyOsidInSet,
     buildActiveFormationLocationsByFaction,
     buildCorpsBrigadeCountsByOsid,
@@ -439,6 +441,13 @@ function executeFactionDirectivesImpl(
     const chosenTargets = new Map<Osid, number>();
     const columnAssignments = new Map<Osid, number>();
     const sectorAssignmentByBrigade = buildSectorAssignmentByBrigade(state);
+    const adjacentEnemyByLoc = buildAdjacentEnemyOsidsByLoc(
+        state,
+        faction,
+        adjacency,
+        reverseMap,
+        brigades.map(b => b.location_osid as Osid),
+    );
     const corpsBrigadeCountsByOsid = buildCorpsBrigadeCountsByOsid(state, faction);
     const activeFormationLocationsByFaction = buildActiveFormationLocationsByFaction(state);
     const sectorDefenseByFactionAndOsid = buildSectorDefenseByFactionAndOsid(state);
@@ -514,7 +523,7 @@ function executeFactionDirectivesImpl(
         const corpsStance = cmd?.stance ?? 'balanced';
         const adjEnemy = botOrdersPerfTime(
             'bot_orders.executeFactionDirectives.adjacentEnemyScan',
-            () => getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap),
+            () => adjacentEnemyByLoc.get(loc) ?? getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap),
         );
 
         const retreatInfo = (brigade as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;

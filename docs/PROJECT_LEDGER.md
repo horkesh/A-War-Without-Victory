@@ -4284,3 +4284,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The shared uncontested sector-defense scan hotspot from n1818 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `homeDefense`, `sectorAttack`, and remaining defensive sub-labels.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SECTOR_DEFENSE_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache adjacent enemy lists
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `buildAdjacentEnemyOsidsByLoc(...)`, a pass-local adjacent-enemy list cache keyed by brigade location OSID. `executeFactionDirectivesImpl(...)` builds it once per faction directive pass and uses `adjacentEnemyByLoc.get(loc)` inside the existing `adjacentEnemyScan` wrapper, with the legacy scan retained as fallback.
+
+**Determinism:** The cache deduplicates brigade locations and sorts them with `strictCompare`; each value is produced by the legacy `getAdjacentEnemyOsids(...)`, preserving tactical war-front edge inclusion, controller filtering, and sorted output. The evaluator only reads the cache and does not mutate `GameState`, save schema, order sequencing, RNG state, or serialization. Profiled 40w n1820 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\adjacent_enemy_cache.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` failed because the cache helper did not exist and the order loop was not wired to it. Green focused suite passed 6/6, `npm.cmd run typecheck` passed, and `git diff --check` passed before profiling. Profiled 40w n1820 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `adjacentEnemyScan` dropped 63.837ms -> 2.468ms and total bot orders dropped 792.167ms -> 766.933ms.
+
+**Roadmap delta:** The adjacent-enemy scan hotspot from n1819 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `sectorAttack`, `homeDefense`, `defensive`, and `returnToCorps`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md`

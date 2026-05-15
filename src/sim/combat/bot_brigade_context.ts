@@ -36,6 +36,7 @@ const ALL_FACTION_CORPS_COUNT_KEY = '__all__';
 
 export type CorpsBrigadeCountsByOsid = Map<string, Map<Osid, number>>;
 export type ActiveFormationLocationsByFaction = Map<FactionId, Set<Osid>>;
+export type AdjacentEnemyOsidsByLoc = Map<Osid, Osid[]>;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Functions
@@ -102,6 +103,25 @@ export function getAdjacentEnemyOsids(
         if (c !== null && c !== faction) result.push(n);
     }
     return result.sort(strictCompare);
+}
+
+export function buildAdjacentEnemyOsidsByLoc(
+    state: GameState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+    locs: Iterable<Osid | string | null | undefined>,
+): AdjacentEnemyOsidsByLoc {
+    const uniqueLocs = new Set<Osid>();
+    for (const loc of locs) {
+        if (loc) uniqueLocs.add(loc as Osid);
+    }
+
+    const byLoc: AdjacentEnemyOsidsByLoc = new Map();
+    for (const loc of [...uniqueLocs].sort(strictCompare)) {
+        byLoc.set(loc, getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap));
+    }
+    return byLoc;
 }
 
 /**

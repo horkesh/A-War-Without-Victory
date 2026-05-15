@@ -99,6 +99,8 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.eval.interiorMovement');
         expect(brigadeAi).toContain('buildSectorAssignmentByBrigade');
         expect(brigadeAi).toContain('sectorAssignmentByBrigade.get(brigade.id)');
+        expect(brigadeAi).toContain('buildAdjacentEnemyOsidsByLoc');
+        expect(brigadeAi).toContain('adjacentEnemyByLoc.get(loc)');
         expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
         expect(brigadeEvalFront).toContain('.offAssignedFront');
         expect(brigadeEvalFront).toContain('.sectorReassignment');

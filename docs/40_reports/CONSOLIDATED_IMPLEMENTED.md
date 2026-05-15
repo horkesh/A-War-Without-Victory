@@ -6,7 +6,7 @@
 
 **Latest opportunity surface:** [implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md](implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md) - pending opportunity proposals now persist objective/staging footprints and redirect variant snapshots; Army HQ dossiers render player-safe labels, map highlighting, and variant-specific Redirect controls.
 
-**Latest bot-order CPU optimization:** [implemented/20260515_BOT_ORDERS_UNCONTESTED_SECTOR_DEFENSE_CACHE.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_SECTOR_DEFENSE_CACHE.md) - n1819 kept final hash `0cb626c032204372` and reused a pass-local defender-sector lookup in `evaluateUncontestedOccupation(...)`; `.uncontestedOccupation.sectorDefense` dropped 53.448ms -> 6.697ms and evaluator time dropped 561.867ms -> 517.579ms.
+**Latest bot-order CPU optimization:** [implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md](implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md) - n1820 kept final hash `0cb626c032204372` and reused pass-local adjacent-enemy lists by brigade location; `adjacentEnemyScan` dropped 63.837ms -> 2.468ms and total bot orders dropped 792.167ms -> 766.933ms.
 
 **Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md) - n1817 kept final hash `0cb626c032204372` and split `evaluateDefensive(...)`; `.defensive.frontGapCountHere` was the leading sub-label at 50.198ms.
 
