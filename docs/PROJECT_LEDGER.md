@@ -4630,3 +4630,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The next behavior investigation should start with the `sector_front` live-inert set or the separate `operation_participant` staging/execution set. Reserve/rear and loan cases should not be treated as equivalent to live-front inert formations.
 
 **Report:** `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`
+
+---
+
+## [2026-05-15] docs(roadmap): record autonomous roadmap closure heartbeat
+
+**Type:** Coordination documentation only. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, UI behavior, packaging script, or generated output changed.
+
+**Change:** Added the root live heartbeat file and a cross-lane closure audit for the autonomous v1.0-readiness execution packet. The audit indexes the committed performance work on `main`, isolated lane commits for force-quality, formation-life, operation opportunities, product-loop cohesion, packaging/playtest support, docs/canon maintenance, and the remaining human/operator-only tasks.
+
+**Determinism:** Docs-only status/index update. No runtime path, generated artifact, scenario state, or persisted output changed.
+
+**Verification:** Root coordination `npm.cmd run test:vitest:fast -- -- tests\docs_desktop_v09_truth.test.ts` passed 6/6. Root `git diff --check` reported only CRLF normalization warnings.
+
+**Roadmap delta:** The agent-actionable packet is closed or deferred in committed branches; remaining work is branch integration/review plus operator-only clean-VM/package proof and human/canon review where explicitly identified.
+
+**Report:** `docs/40_reports/audits/20260515_AUTONOMOUS_ROADMAP_EXECUTION_CLOSURE.md`
