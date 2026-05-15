@@ -315,6 +315,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(botCorpsAi).toContain('buildCorpsSubordinatesByCorps');
         expect(commanderBriefing).toContain('corpsSubordinatesByCorps');
         expect(botCorpsHelpers).toContain('buildCorpsSubordinatesByCorps');
+        expect(botCorpsAi).toContain('commander.runCommanderForCorps.enemyEquipmentSummaryContext');
+        expect(botCorpsAi).toContain('buildEnemyEquipmentSummaryContext');
+        expect(commanderBriefing).toContain('enemyEquipmentSummaryContext');
+        expect(commanderBriefing).toContain('buildEnemyEquipmentSummaryContext');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.collectOsids');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.frontGeometry.analyze');

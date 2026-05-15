@@ -28,7 +28,7 @@ import type {
     ICorpsCommander,
 } from './commander_state.js';
 
-import { buildBriefing } from './briefing.js';
+import { buildBriefing, type EnemyEquipmentSummaryContext } from './briefing.js';
 import { assessSituation } from './assess.js';
 import { allocateBrigades } from './allocate.js';
 import { managePlan } from './plan.js';
@@ -169,6 +169,7 @@ export function runCommanderForCorps(
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
+    enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
 ): CommanderOutput {
     return botOrdersPerfTime('commander.runCommanderForCorps.total', () => {
         const briefing = botOrdersPerfTime(
@@ -177,6 +178,7 @@ export function runCommanderForCorps(
                 state, corpsId, faction, spatial, edges,
                 reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
                 corpsSubordinatesByCorps,
+                enemyEquipmentSummaryContext,
             ),
         );
         const previousState: CommanderState | null =

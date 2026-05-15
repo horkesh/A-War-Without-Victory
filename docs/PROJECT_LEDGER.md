@@ -4556,3 +4556,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Keep commander subordinate lookup indexed at the faction-pass commander-loop boundary. Do not reintroduce per-corps full-formation scans for briefing; next CPU work should use a fresh profile and focus on larger remaining buckets.
 
 **Report:** `docs/40_reports/implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md`
+
+---
+
+## [2026-05-15] perf(commander): cache enemy equipment summary context
+
+**Type:** Commander CPU optimization in briefing assembly. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `EnemyEquipmentSummaryContext` and `buildEnemyEquipmentSummaryContext(...)`, then threaded the pass-local context from `generateAllCorpsOrders(...)` through `runCommanderForCorps(...)` into `buildBriefing(...)`. The context precomputes OSID-to-sector ownership and per-sector tank/artillery totals once per faction pass, while `buildBriefing(...)` keeps the old local fallback when no context is supplied.
+
+**Determinism:** The context is built from sorted sector IDs and sorted assigned brigade IDs, using the same active-formation and assigned-brigade filters as the old summary path. It is read-only after construction and is built after sector stance evaluation and before the commander loop, preserving existing branch order, directive/operation writes, RNG behavior, save schema, and serialized state. Profiled 40w n1838 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `commander.runCommanderForCorps.enemyEquipmentSummaryContext`. Green focused guard and briefing tests passed 21/21 with `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts tests/commander/briefing_campaign_intent.test.ts`, `npm.cmd run typecheck` passed, and profiled 40w n1838 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.buildBriefing.enemyEquipmentSummary` dropped 115.916ms -> 11.176ms, with 54.218ms context construction cost and 65.394ms net enemy-equipment summary cost.
+
+**Roadmap delta:** Keep enemy-equipment summary support maps at the commander-loop faction-pass boundary. Do not rebuild OSID-to-sector or per-sector equipment totals inside each corps briefing; next CPU work should use a fresh profile and focus on larger remaining buckets.
+
+**Report:** `docs/40_reports/implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md`

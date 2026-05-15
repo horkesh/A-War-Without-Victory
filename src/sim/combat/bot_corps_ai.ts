@@ -46,6 +46,7 @@ import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 // ── v0.8 Commander Loop ────────────────────────────────────────────────
 import { runCommanderForCorps, applyCommanderOutput } from './commander/commander_loop.js';
+import { buildEnemyEquipmentSummaryContext } from './commander/briefing.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Re-exports for backward compatibility
@@ -240,6 +241,10 @@ export function generateAllCorpsOrders(
             'commander.runCommanderForCorps.corpsSubordinatesIndex',
             () => buildCorpsSubordinatesByCorps(state),
         );
+        const enemyEquipmentSummaryContext = botOrdersPerfTime(
+            'commander.runCommanderForCorps.enemyEquipmentSummaryContext',
+            () => buildEnemyEquipmentSummaryContext(state),
+        );
         for (const corps of corpsList) {
             const output = runCommanderForCorps(
                 state,
@@ -252,6 +257,7 @@ export function generateAllCorpsOrders(
                 supplyByOsid ?? null,
                 ethnicMap ?? null,
                 corpsSubordinatesByCorps,
+                enemyEquipmentSummaryContext,
             );
             applyCommanderOutput(state, corps.id, output);
         }

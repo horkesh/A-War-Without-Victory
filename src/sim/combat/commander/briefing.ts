@@ -320,14 +320,29 @@ function collectIntelData(
     };
 }
 
+export interface EnemyEquipmentSummaryContext {
+    enemySectorByOsid: ReadonlyMap<string, CorpsFrontSector>;
+    equipmentBySectorId: ReadonlyMap<string, EnemyEquipmentSummary>;
+}
+
+export function buildEnemyEquipmentSummaryContext(state: GameState): EnemyEquipmentSummaryContext {
+    const sectorLookup = state.military.corps_front_sectors ?? {};
+    return {
+        enemySectorByOsid: buildEnemySectorByOsid(sectorLookup),
+        equipmentBySectorId: buildEnemyEquipmentBySectorId(state, sectorLookup),
+    };
+}
+
 function collectEnemyEquipmentSummary(
     state: GameState,
     sectors: readonly CorpsFrontSector[],
+    enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
 ): EnemyEquipmentSummary {
     const sectorLookup = state.military.corps_front_sectors ?? {};
     const formations = state.military.formations ?? {};
     const adjacentEnemySectorIds = new Set<string>();
-    const enemySectorByOsid = buildEnemySectorByOsid(sectorLookup);
+    const enemySectorByOsid = enemyEquipmentSummaryContext?.enemySectorByOsid ?? buildEnemySectorByOsid(sectorLookup);
+    const equipmentBySectorId = enemyEquipmentSummaryContext?.equipmentBySectorId;
 
     for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
         for (const subSegment of [...sector.sub_segments].sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id))) {
@@ -343,6 +358,12 @@ function collectEnemyEquipmentSummary(
     let tanks = 0;
     let artillery = 0;
     for (const sectorId of [...adjacentEnemySectorIds].sort(strictCompare)) {
+        const indexedEquipment = equipmentBySectorId?.get(sectorId);
+        if (indexedEquipment) {
+            tanks += indexedEquipment.tanks;
+            artillery += indexedEquipment.artillery;
+            continue;
+        }
         const enemySector = sectorLookup[sectorId];
         if (!enemySector) continue;
         for (const brigadeId of [...enemySector.assigned_brigade_ids].sort(strictCompare)) {
@@ -358,6 +379,32 @@ function collectEnemyEquipmentSummary(
         artillery,
         infantry_only: tanks === 0 && artillery === 0,
     };
+}
+
+function buildEnemyEquipmentBySectorId(
+    state: GameState,
+    sectorLookup: Record<string, CorpsFrontSector>,
+): Map<string, EnemyEquipmentSummary> {
+    const formations = state.military.formations ?? {};
+    const equipmentBySectorId = new Map<string, EnemyEquipmentSummary>();
+    for (const sectorId of Object.keys(sectorLookup).sort(strictCompare)) {
+        const sector = sectorLookup[sectorId];
+        if (!sector) continue;
+        let tanks = 0;
+        let artillery = 0;
+        for (const brigadeId of [...sector.assigned_brigade_ids].sort(strictCompare)) {
+            const brigade = formations[brigadeId];
+            if (!brigade || brigade.status !== 'active') continue;
+            tanks += brigade.composition?.tanks ?? 0;
+            artillery += brigade.composition?.artillery ?? 0;
+        }
+        equipmentBySectorId.set(sectorId, {
+            tanks,
+            artillery,
+            infantry_only: tanks === 0 && artillery === 0,
+        });
+    }
+    return equipmentBySectorId;
 }
 
 function buildEnemySectorByOsid(
@@ -571,6 +618,7 @@ export function buildBriefing(
     supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
+    enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;
 
@@ -641,7 +689,7 @@ export function buildBriefing(
     );
     const enemyEquipmentSummary = botOrdersPerfTime(
         'commander.runCommanderForCorps.buildBriefing.enemyEquipmentSummary',
-        () => collectEnemyEquipmentSummary(state, sectors),
+        () => collectEnemyEquipmentSummary(state, sectors, enemyEquipmentSummaryContext),
     );
     const adjacentCorps = botOrdersPerfTime(
         'commander.runCommanderForCorps.buildBriefing.adjacentCorps',
