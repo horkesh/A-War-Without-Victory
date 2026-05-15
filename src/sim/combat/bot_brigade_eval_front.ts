@@ -11,10 +11,15 @@ import type { CorpsFrontSector, FormationState, GameState, SettlementId } from '
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 const SECTOR_MARCH_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.sectorMarch';
+const POCKET_EVACUATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const RETURN_TO_CORPS_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function sectorMarchProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${SECTOR_MARCH_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function pocketEvacuationProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${POCKET_EVACUATION_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
 function returnToCorpsProfileTime<T>(labelSuffix: string, fn: () => T): T {
@@ -497,18 +502,29 @@ const POCKET_EVACUATION_MAX_TERRITORY = 2;
  * Placed after evaluateReturnToCorps and before hold/defense evaluations.
  */
 export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, result } = ctx;
+    const { brigade, state, loc, result, sectorAssignment } = ctx;
 
     if (!state.military.corps_front_sectors) return false;
 
     // Find the sector this brigade is assigned to
     const sectors = state.military.corps_front_sectors;
-    let assignedSector: (typeof sectors)[string] | null = null;
-    for (const sid of Object.keys(sectors).sort(strictCompare)) {
-        const sec = sectors[sid]!;
-        if (sec.assigned_brigade_ids.includes(brigade.id)) {
-            assignedSector = sec;
-            break;
+    let assignedSector: (typeof sectors)[string] | null = sectorAssignment?.sector ?? null;
+    if (sectorAssignment === undefined) {
+        assignedSector = pocketEvacuationProfileTime('.pocketEvacuation.assignedSectorLookup', () => {
+            for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                const sec = sectors[sid]!;
+                if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                    return sec;
+                }
+            }
+            return null;
+        });
+    } else {
+        pocketEvacuationProfileTime('.pocketEvacuation.assignedSectorLookup', () => {
+            return assignedSector;
+        });
+        if (sectorAssignment?.isReserve) {
+            return false;
         }
     }
     if (!assignedSector) return false;

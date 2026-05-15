@@ -6,6 +6,8 @@
 
 **Latest opportunity surface:** [implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md](implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md) - pending opportunity proposals now persist objective/staging footprints and redirect variant snapshots; Army HQ dossiers render player-safe labels, map highlighting, and variant-specific Redirect controls.
 
+**Latest bot-order CPU optimization:** [implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md](implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md) - n1815 kept final hash `0cb626c032204372` and reused pass-local sector assignment in `evaluatePocketEvacuation(...)`; `pocketEvacuation` dropped 89.141ms -> 19.739ms and total bot orders dropped 919.104ms -> 836.077ms.
+
 **As of 2026-02-15:** All implemented report content has been consolidated into one dated document. Individual reports have been archived (not deleted).
 
 | What you need | Where to go |

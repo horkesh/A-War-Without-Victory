@@ -4220,3 +4220,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** SectorAttack is no longer the leading bot-order evaluator. The next CPU lane should use a fresh profile; current top candidates are `sectorMarch`, `defensive`, `pocketEvacuation`, and `homeDefense`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_PREDICTION.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache pocket evacuation sector
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluatePocketEvacuation(...)` now uses the existing pass-local `sectorAssignment` cache carried on `BrigadeEvaluationContext` instead of rescanning all corps-front sectors for assigned brigade membership. The legacy sorted roster scan remains for direct callers without a cache, and cached reserve membership returns `false` to preserve the old assigned-only behavior.
+
+**Determinism:** The sector-assignment cache is built once per faction directive pass from sector IDs sorted with `strictCompare`. The evaluator only reads the cache and does not mutate `GameState`, save schema, movement-order sequencing beyond the already-existing evacuation order, RNG state, or serialization. Profiled 40w n1815 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\tooth_guard.test.ts --reporter=dot` failed because cached pocket-evacuation assignment was ignored. Green focused suite `npx.cmd vitest run tests\tooth_guard.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` passed 14/14, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1815 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `pocketEvacuation` dropped 89.141ms -> 19.739ms and `bot_orders.executeFactionDirectives.total` dropped 919.104ms -> 836.077ms.
+
+**Roadmap delta:** The pocket-evacuation roster scan hotspot from n1814 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `defensive`, and `homeDefense`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_POCKET_EVACUATION_CACHE.md`

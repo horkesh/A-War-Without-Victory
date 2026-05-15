@@ -119,6 +119,7 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.returnToCorps.collectTargets');
         expect(brigadeEvalFront).toContain('.returnToCorps.bfs');
         expect(brigadeEvalFront).toContain('.returnToCorps.walkBack');
+        expect(brigadeEvalFront).toContain('.pocketEvacuation.assignedSectorLookup');
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
         expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');

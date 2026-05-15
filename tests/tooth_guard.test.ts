@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { evaluateSectorMarch } from '../src/sim/combat/bot_brigade_eval_front.js';
+import { evaluatePocketEvacuation, evaluateSectorMarch } from '../src/sim/combat/bot_brigade_eval_front.js';
 import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
 import type { FactionGraphAnalysis, OsidAnalysis } from '../src/sim/combat/osid_graph_analysis.js';
 import type { GameState, FactionId, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
@@ -596,5 +596,44 @@ describe('evaluateSectorMarch — tooth guard', () => {
         expect(ctx.result.column_march_orders['brig_test']).not.toBe(tooth);
         // Rerouted to safe alternate
         expect(ctx.result.column_march_orders['brig_test']).toBe(safe);
+    });
+});
+
+describe('evaluatePocketEvacuation', () => {
+    it('uses cached sector assignment instead of rescanning sector rosters', () => {
+        const loc = 'op:test:pocket' as Osid;
+        const home = 'op:test:home' as Osid;
+        const subSegments: CorpsFrontSector['sub_segments'] = [
+            {
+                sub_segment_id: 'subseg:vrs_test_corps:pocket',
+                edge_ids: ['e1'],
+                enemy_osids: ['op:rbih:enemy_1'],
+                friendly_osids: [loc],
+                primary_brigade_ids: [],
+                length_edges: 1,
+            },
+        ];
+        const state = makeState('brig_test', loc, subSegments, {
+            [loc]: FACTION,
+            [home]: FACTION,
+        });
+        const sector = state.military.corps_front_sectors![`sector:${CORPS_ID}:0`]!;
+        sector.assigned_brigade_ids = [];
+        sector.reserve_brigade_ids = [];
+        sector.territory_osids = [loc];
+
+        const ctx = makeCtx({ loc, state, subSegments });
+        ctx.sectorAssignment = {
+            sector,
+            isReserve: false,
+            frontOsids: new Set([loc]),
+        };
+        ctx.brigade.home_osid = home;
+
+        const returned = evaluatePocketEvacuation(ctx);
+
+        expect(returned).toBe(true);
+        expect(state.military.brigade_movement_orders?.brig_test?.destination_sids).toEqual([home]);
+        expect(ctx.result.posture_orders).toContainEqual({ brigade_id: 'brig_test', posture: 'defend' });
     });
 });
