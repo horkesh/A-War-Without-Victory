@@ -684,104 +684,110 @@ export function evaluateUncontestedOccupation(
     // Early-war throttle: no uncontested occupation in first 2 weeks (deployment phase).
     // Historically, territory grab was rapid but not instantaneous — units need time to
     // deploy, establish control, and move supplies forward.
-    const turn = state.meta?.turn ?? 0;
-    if (turn <= 2) return false;
-
-    // Don't interrupt active operations
-    if (isActiveSectorOperationParticipant) return false;
-
-    // Don't move disrupted or column-marching brigades
-    if ((brigade as { disrupted_turns?: number }).disrupted_turns != null &&
-        ((brigade as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0) return false;
+    const earlyBlocked = profileTime('.earlyGates', () => {
+        const turn = state.meta?.turn ?? 0;
+        if (turn <= 2) return true;
+        if (isActiveSectorOperationParticipant) return true;
+        return (brigade as { disrupted_turns?: number }).disrupted_turns != null
+            && ((brigade as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0;
+    });
+    if (earlyBlocked) return false;
 
     const neighbors = adjacency.get(loc) ?? [];
     const formations = state.military.formations ?? {};
     const pc = state.political.political_controllers ?? {};
 
     // Find adjacent enemy OSIDs that are truly undefended
-    for (const n of neighbors) {
-        if (!n.startsWith('op:')) continue;
-        const controller = pc[n] as string | undefined;
-        if (!controller || controller === faction) continue;
+    const occupied = profileTime('.candidateLoop', () => {
+        for (const n of neighbors) {
+            const controller = profileTime('.candidateGates', () => {
+                if (!n.startsWith('op:')) return undefined;
+                const controller = pc[n] as string | undefined;
+                if (!controller || controller === faction) return undefined;
 
-        // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied or mobilizing
-        if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
-            && !isRbihHrhbCombatEnabled(state)) continue;
+                // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied or mobilizing
+                if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
+                    && !isRbihHrhbCombatEnabled(state)) return undefined;
 
-        // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
-        // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
-        // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
-        // from the Srebrenica pocket, undoing Ring operations).
-        if (isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc as string, n)) continue;
-
-        // Salient aversion: don't walk into undefended territory if it creates
-        // an indefensible salient (>75% of neighbors are enemy after capture).
-        // No commander holds one OSID deep inside enemy territory with no supply line.
-        const salientBlocked = profileTime('.salient', () => {
-            const nNeighbors = adjacency.get(n as import('./osid_adjacency.js').Osid) ?? [];
-            let friendlyN = 0, enemyN = 0;
-            for (const nn of nNeighbors) {
-                const nnCtrl = pc[nn] as string | undefined;
-                if (nnCtrl === faction || nn === loc) friendlyN++; // current position counts as friendly
-                else if (nnCtrl && nnCtrl !== faction) enemyN++;
-            }
-            const totalN = friendlyN + enemyN;
-            return totalN > 0 && enemyN / totalN >= 0.75;
-        });
-        if (salientBlocked) continue;
-
-        // NOTE: Corps operational area guard was tested (n778) but too restrictive —
-        // blocked legitimate VRS advances, -0.9pp regression. The salient aversion
-        // filter (Phase C) handles geometric overextension. Demographic filter (#42)
-        // is the right approach for strategic scope, not municipality whitelisting.
-
-        // Scenario avoid-list guard: historically, some OSIDs were not captured even when
-        // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
-        // Without this guard, brigades sweeping through during operation execution walk into
-        // avoided OSIDs opportunistically, bypassing the operation-level avoid check.
-        const avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
-        if (avoidedOsids?.includes(n)) continue;
-
-        // Check: no enemy formations physically at this OSID
-        const hasDefender = profileTime('.defenderScan', () => {
-            if (activeFormationLocationsByFaction) {
-                return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller as FactionId, n as Osid);
-            }
-            for (const fid of Object.keys(formations)) {
-                const f = formations[fid] as FormationState | undefined;
-                if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {
-                    return true;
-                }
-            }
-            return false;
-        });
-        if (hasDefender) continue;
-
-        // Check: no sector covering this OSID with active brigades.
-        // A sector is defended if it has ANY active brigade — assigned OR reserve.
-        // Only checking assigned_brigade_ids misses sectors where all brigades are
-        // in reserve (0-assigned cycle): the sector physically defends the OSID via
-        // unified sector defense even without a front-line assignment.
-        const sectorHasBrigades = profileTime('.sectorDefense', () => {
-            const sector = sectorDefenseByFactionAndOsid?.get(controller)?.get(n)
-                ?? findSectorForEnemyOsid(state, n as Osid, controller);
-            if (!sector) return false;
-            const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
-            return allSectorBrigades.some(bid => {
-                const f = formations[bid];
-                return f != null && f.status === 'active';
+                // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
+                // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
+                // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
+                // from the Srebrenica pocket, undoing Ring operations).
+                if (isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc as string, n)) return undefined;
+                return controller;
             });
-        });
-        if (sectorHasBrigades) continue;
+            if (!controller) continue;
 
-        // Truly undefended — walk in
-        result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-        result.attack_orders[brigade.id] = n as Osid;
-        result.attack_scores[brigade.id] = UNCONTESTED_OCCUPATION_SCORE; // lower priority than formal ops (800/900)
-        return true;
-    }
+            // Salient aversion: don't walk into undefended territory if it creates
+            // an indefensible salient (>75% of neighbors are enemy after capture).
+            // No commander holds one OSID deep inside enemy territory with no supply line.
+            const salientBlocked = profileTime('.salient', () => {
+                const nNeighbors = adjacency.get(n as import('./osid_adjacency.js').Osid) ?? [];
+                let friendlyN = 0, enemyN = 0;
+                for (const nn of nNeighbors) {
+                    const nnCtrl = pc[nn] as string | undefined;
+                    if (nnCtrl === faction || nn === loc) friendlyN++; // current position counts as friendly
+                    else if (nnCtrl && nnCtrl !== faction) enemyN++;
+                }
+                const totalN = friendlyN + enemyN;
+                return totalN > 0 && enemyN / totalN >= 0.75;
+            });
+            if (salientBlocked) continue;
 
-    return false;
+            // NOTE: Corps operational area guard was tested (n778) but too restrictive —
+            // blocked legitimate VRS advances, -0.9pp regression. The salient aversion
+            // filter (Phase C) handles geometric overextension. Demographic filter (#42)
+            // is the right approach for strategic scope, not municipality whitelisting.
+
+            // Scenario avoid-list guard: historically, some OSIDs were not captured even when
+            // undefended (e.g. Brčko city center — VRS held the corridor but not the city core).
+            // Without this guard, brigades sweeping through during operation execution walk into
+            // avoided OSIDs opportunistically, bypassing the operation-level avoid check.
+            const avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
+            if (avoidedOsids?.includes(n)) continue;
+
+            // Check: no enemy formations physically at this OSID
+            const hasDefender = profileTime('.defenderScan', () => {
+                if (activeFormationLocationsByFaction) {
+                    return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller as FactionId, n as Osid);
+                }
+                for (const fid of Object.keys(formations)) {
+                    const f = formations[fid] as FormationState | undefined;
+                    if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (hasDefender) continue;
+
+            // Check: no sector covering this OSID with active brigades.
+            // A sector is defended if it has ANY active brigade — assigned OR reserve.
+            // Only checking assigned_brigade_ids misses sectors where all brigades are
+            // in reserve (0-assigned cycle): the sector physically defends the OSID via
+            // unified sector defense even without a front-line assignment.
+            const sectorHasBrigades = profileTime('.sectorDefense', () => {
+                const sector = sectorDefenseByFactionAndOsid?.get(controller)?.get(n)
+                    ?? findSectorForEnemyOsid(state, n as Osid, controller);
+                if (!sector) return false;
+                const allSectorBrigades = [...sector.assigned_brigade_ids, ...(sector.reserve_brigade_ids ?? [])];
+                return allSectorBrigades.some(bid => {
+                    const f = formations[bid];
+                    return f != null && f.status === 'active';
+                });
+            });
+            if (sectorHasBrigades) continue;
+
+            // Truly undefended — walk in
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+            result.attack_orders[brigade.id] = n as Osid;
+            result.attack_scores[brigade.id] = UNCONTESTED_OCCUPATION_SCORE; // lower priority than formal ops (800/900)
+            return true;
+        }
+        return false;
+    });
+
+    return occupied;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

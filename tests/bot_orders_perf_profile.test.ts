@@ -183,6 +183,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain("evaluateUncontestedOccupation(ctx, '.defensive.uncontestedOccupation')");
         expect(brigadeEvalAttack).toContain('uncontestedOccupationCallerProfileTime');
         expect(brigadeEvalAttack).toContain('${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${profileLabelPrefix}${labelSuffix}');
+        expect(brigadeEvalAttack).toContain("profileTime('.earlyGates'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateLoop'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates'");
         expect(brigadeEvalAttack).toContain("profileTime('.salient'");
         expect(brigadeEvalAttack).toContain("profileTime('.defenderScan'");
         expect(brigadeEvalAttack).toContain("profileTime('.sectorDefense'");

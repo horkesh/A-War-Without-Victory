@@ -4492,3 +4492,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Keep officer lookup construction at a pass-level reuse boundary, but build it lazily when only a subset of faction passes reach prediction. The commander probe `officerIndex` remains separate and may be a future lane.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_LAZY_OFFICER_LOOKUP.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split uncontested residual profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `.earlyGates`, `.candidateLoop`, and `.candidateGates` labels inside shared `evaluateUncontestedOccupation(...)`, preserving the caller-specific profile prefixes from n1830.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers time existing guards and the existing candidate loop; they preserve neighbor order, gate order, attack/posture write order, RNG behavior, save schema, and serialized state. Profiled 40w n1834 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.earlyGates`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1834 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `homeDefense.uncontestedOccupation.candidateLoop` measured 105.288ms but is nested-profiler inflated; `homeDefense.uncontestedOccupation.candidateGates` measured 11.581ms / 21,038 checks and `.earlyGates` measured 1.455ms.
+
+**Roadmap delta:** Do not optimize `.candidateLoop` or `.earlyGates` directly. If the uncontested-occupation lane continues, split `.candidateGates` before changing local gate semantics; otherwise pivot to a larger fresh-profile bucket.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_RESIDUAL_PROFILE_SPLIT.md`
