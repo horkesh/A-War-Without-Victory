@@ -147,6 +147,19 @@ function rankDefendersByPowerWithEntries(
     return { primary: sorted[0]!.formation, totalPower, powerByFormationId };
 }
 
+function collectDefenderFormationsAtTarget(
+    state: GameState,
+    targetOsid: Osid,
+    attackerFaction: FactionId,
+    profilePrefix?: string,
+): FormationState[] {
+    return predictorPerfTime(profilePrefix, '.defenderFormationScan', () =>
+        (Object.values(state.military.formations ?? {}) as FormationState[])
+            .filter(f => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
+            .sort((a, b) => strictCompare(a.id, b.id))
+    );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -235,11 +248,16 @@ export function predictCombatOutcome(
         .filter((f): f is FormationState => f != null && f.status === 'active');
     if (attackerFormations.length === 0) return null;
 
-    const defenderFormations = predictorPerfTime(profilePrefix, '.defenderFormationScan', () =>
-        (Object.values(state.military.formations ?? {}) as FormationState[])
-            .filter(f => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
-            .sort((a, b) => strictCompare(a.id, b.id))
-    );
+    let defenderFormations: FormationState[] | null = null;
+    const getDefenderFormations = (): FormationState[] => {
+        defenderFormations ??= collectDefenderFormationsAtTarget(
+            state,
+            targetOsid,
+            attackerFaction,
+            profilePrefix,
+        );
+        return defenderFormations;
+    };
 
     const controller = predictorPerfTime(
         profilePrefix,
@@ -357,39 +375,45 @@ export function predictCombatOutcome(
             sectorDefBrigades = sectorBrigades;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
-        } else if (defenderFormations.length > 0) {
-            // Brigade at OSID but not in any sector (enclave/garrison edge case)
-            // No sector → no intel → blind (confidence 0)
+        } else {
+            const fallbackDefenders = getDefenderFormations();
+            if (fallbackDefenders.length > 0) {
+                // Brigade at OSID but not in any sector (enclave/garrison edge case)
+                // No sector → no intel → blind (confidence 0)
+                defenderHasBrigade = true;
+                const { primary, totalPower } = predictorPerfTime(
+                    profilePrefix,
+                    '.rankDefendersByPower',
+                    () => rankDefendersByPower(fallbackDefenders, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+                );
+                const noSectorFog = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+                defenderPower = totalPower * noSectorFog;
+                defenderFormation = primary;
+                defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
+                defenderCohesion = defenderFormation.cohesion ?? 60;
+            } else {
+                // Truly undefended: no sector, no brigade — militia ghost only
+                defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+            }
+        }
+    } else {
+        const fallbackDefenders = getDefenderFormations();
+        if (fallbackDefenders.length > 0) {
+            // Not enemy-controlled territory but enemy brigade present — no sector intel available
             defenderHasBrigade = true;
             const { primary, totalPower } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
-                () => rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+                () => rankDefendersByPower(fallbackDefenders, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
             );
-            const noSectorFog = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
-            defenderPower = totalPower * noSectorFog;
+            const noSectorFog2 = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+            defenderPower = totalPower * noSectorFog2;
             defenderFormation = primary;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
         } else {
-            // Truly undefended: no sector, no brigade — militia ghost only
-            defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+            return null;
         }
-    } else if (defenderFormations.length > 0) {
-        // Not enemy-controlled territory but enemy brigade present — no sector intel available
-        defenderHasBrigade = true;
-        const { primary, totalPower } = predictorPerfTime(
-            profilePrefix,
-            '.rankDefendersByPower',
-            () => rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
-        );
-        const noSectorFog2 = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
-        defenderPower = totalPower * noSectorFog2;
-        defenderFormation = primary;
-        defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
-        defenderCohesion = defenderFormation.cohesion ?? 60;
-    } else {
-        return null;
     }
 
     // Enclave garrison: organized civilian defense (same as resolver)

@@ -162,6 +162,9 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('rankDefendersByPowerWithEntries');
         expect(combatPredictor).toContain('powerByFormationId');
         expect(combatPredictor).toContain('powerByFormationId.get(b.id)');
+        expect(combatPredictor).toContain('collectDefenderFormationsAtTarget');
+        expect(combatPredictor).toContain('let defenderFormations: FormationState[] | null = null');
+        expect(combatPredictor).toContain('getDefenderFormations()');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');

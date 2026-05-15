@@ -159,6 +159,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('commander defender-power reuse');
     expect(roadmap).toContain('`predictDirectTargets` dropped 255.571ms -> 193.777ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_REUSE_PROFILE.md');
+    expect(roadmap).toContain('commander lazy defender formation scan');
+    expect(roadmap).toContain('`defenderFormationScan` dropped from 591 calls / 28.514ms to 20 calls / 1.802ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_LAZY_DEFENDER_FORMATION_SCAN_PROFILE.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');

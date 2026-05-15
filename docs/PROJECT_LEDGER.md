@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): defer defender formation scan
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after ranked defender-power reuse.
+
+**Fix:** Moved the fallback all-formations defender scan in `predictCombatOutcome(...)` behind a memoized `getDefenderFormations()` helper. Enemy-controlled sector predictions with assigned sector brigades now avoid the fallback scan entirely; enclave/garrison fallback, militia ghost fallback, and non-enemy-controlled hostile-brigade fallback still use the same sorted defender list when needed. No combat formula, ranking rule, target ordering, scenario data, output schema, or save schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `collectDefenderFormationsAtTarget`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed; `git diff --check` passed with CRLF warnings only. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1782 with final hash `7ef09f55d6494edd`, matching n1781. `predictDirectTargets` dropped 193.777ms -> 163.489ms and `defenderFormationScan` dropped 591 calls / 28.514ms -> 20 calls / 1.802ms.
+
+**Canon posture:** Deterministic read-path performance refactor. The deferred scan preserves `strictCompare` ordering and only changes when the pre-existing fallback list is collected; serialized output remained hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_LAZY_DEFENDER_FORMATION_SCAN_PROFILE.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): reuse ranked defender powers
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the direct `predictCombatOutcome(...)` profile split.
