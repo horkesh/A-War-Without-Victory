@@ -187,6 +187,7 @@ function predictDirectEnemyTargets(
             undefined,
             undefined,
             briefing.ethnic_map ?? undefined,
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets.predictCombatOutcome`,
         );
         if (prediction) {
             predictedTargets.push({ osid: target, prediction });

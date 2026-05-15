@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): split combat predictor profile
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after direct-target probe prediction.
+
+**Fix:** Added optional profile-prefix instrumentation to `predictCombatOutcome(...)` and passed it only from the commander probe direct-target path. The new nested labels split defender formation scanning, controller lookup, artillery suppression, sector lookup/brigade collection, defender ranking, sector reactive-defense power, attacker power, casualties, and overextension. No combat math, target ordering, scenario data, output schema, or default caller behavior changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `.predictDirectTargets.predictCombatOutcome`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1780 with final hash `7ef09f55d6494edd`, matching n1779. The split identifies `rankDefendersByPower` (61.218ms), `sectorDefensePower` (49.935ms), and `defenderFormationScan` (34.093ms) as the leading direct probe predictor internals.
+
+**Canon posture:** Default-off deterministic instrumentation in a read-only predictor. The optional prefix is supplied only by the commander probe profile path; serialized output remained hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_PREDICT_COMBAT_OUTCOME_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): narrow probe predictor to direct targets
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the probe derive-objective profile split.

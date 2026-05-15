@@ -39,6 +39,7 @@ import {
     getCoEthnicShare,
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -105,6 +106,10 @@ export const OUTCOME_SCORE: Record<CombatOutcome, number> = {
     repulsed: -50,
     catastrophic: -200
 };
+
+function predictorPerfTime<T>(profilePrefix: string | undefined, labelSuffix: string, fn: () => T): T {
+    return profilePrefix ? botOrdersPerfTime(`${profilePrefix}${labelSuffix}`, fn) : fn();
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -174,7 +179,8 @@ export function predictCombatOutcome(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     osidPopulationMap?: OsidPopulationMap | null,
     slopeByOsid?: Record<string, number> | null,
-    ethnicComposition?: OsidEthnicComposition | null
+    ethnicComposition?: OsidEthnicComposition | null,
+    profilePrefix?: string
 ): CombatPrediction | null {
     const attacker = state.military.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
@@ -193,11 +199,17 @@ export function predictCombatOutcome(
         .filter((f): f is FormationState => f != null && f.status === 'active');
     if (attackerFormations.length === 0) return null;
 
-    const defenderFormations = (Object.values(state.military.formations ?? {}) as FormationState[])
-        .filter(f => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
-        .sort((a, b) => strictCompare(a.id, b.id));
+    const defenderFormations = predictorPerfTime(profilePrefix, '.defenderFormationScan', () =>
+        (Object.values(state.military.formations ?? {}) as FormationState[])
+            .filter(f => f.status === 'active' && f.location_osid === targetOsid && f.faction !== attackerFaction)
+            .sort((a, b) => strictCompare(a.id, b.id))
+    );
 
-    const controller = getPoliticalControllerOSID(state, targetOsid, reverseMap);
+    const controller = predictorPerfTime(
+        profilePrefix,
+        '.controller',
+        () => getPoliticalControllerOSID(state, targetOsid, reverseMap),
+    );
     const isEnemyControlled = controller !== null && controller !== attackerFaction;
 
     let defenderPower: number;
@@ -208,7 +220,11 @@ export function predictCombatOutcome(
     let sectorDefBrigades: FormationState[] | null = null;
     // Phase B: sub-segment responsible for defending this OSID
     let defendingSubSegmentId: string | undefined;
-    const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
+    const artSuppression = predictorPerfTime(
+        profilePrefix,
+        '.artSuppression',
+        () => getArtillerySuppression(attackerFormations, attackerFaction, state),
+    );
 
     // Fog of war: did this brigade previously fail at this target?
     const currentTurn = state.meta?.turn ?? 0;
@@ -224,39 +240,58 @@ export function predictCombatOutcome(
     // Physical defenders at OSID fight at full power. Reserves contribute
     // proportional to BFS distance + home-municipality bonus.
     if (isEnemyControlled) {
-        const sector = findSectorForEnemyOsid(state, targetOsid, controller);
+        const sector = predictorPerfTime(
+            profilePrefix,
+            '.sectorLookup',
+            () => findSectorForEnemyOsid(state, targetOsid, controller),
+        );
         // Phase B: identify which sub-segment is responsible for this OSID
         const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
         defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
-        const sectorBrigades = sector
-            ? sector.assigned_brigade_ids
-                .map(id => state.military.formations?.[id])
-                .filter((f): f is FormationState => f != null && f.status === 'active')
-            : [];
+        const sectorBrigades = predictorPerfTime(
+            profilePrefix,
+            '.sectorBrigades',
+            () => sector
+                ? sector.assigned_brigade_ids
+                    .map(id => state.military.formations?.[id])
+                    .filter((f): f is FormationState => f != null && f.status === 'active')
+                : [],
+        );
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
-            const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            const { primary, totalPower } = predictorPerfTime(
+                profilePrefix,
+                '.rankDefendersByPower',
+                () => rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+            );
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);
             const targetMun = munFromOsid(targetOsid);
             const pc = state.political?.political_controllers ?? {};
 
             // Per-brigade distance-weighted contribution
-            let physicalPower = 0;
-            let effectiveReserves = 0;
-            for (const b of sectorBrigades) {
-                const locOsid = (b as { location_osid?: string }).location_osid ?? '';
-                const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
-                if (locOsid === targetOsid) {
-                    physicalPower += bPower;
-                } else {
-                    const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
-                    const distWeight = getReactiveDistanceWeight(hops);
-                    const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
-                    const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
-                    effectiveReserves += bPower * distWeight * homeBonus;
+            const { physicalPower, effectiveReserves } = predictorPerfTime(
+                profilePrefix,
+                '.sectorDefensePower',
+                () => {
+                    let physicalPower = 0;
+                    let effectiveReserves = 0;
+                    for (const b of sectorBrigades) {
+                        const locOsid = (b as { location_osid?: string }).location_osid ?? '';
+                        const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
+                        if (locOsid === targetOsid) {
+                            physicalPower += bPower;
+                        } else {
+                            const hops = bfsDistanceFriendly(locOsid, targetOsid, adjacency, pc, controller!);
+                            const distWeight = getReactiveDistanceWeight(hops);
+                            const homeMun = munFromOsid((b as { home_osid?: string }).home_osid ?? '');
+                            const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
+                            effectiveReserves += bPower * distWeight * homeBonus;
+                        }
+                    }
+                    return { physicalPower, effectiveReserves };
                 }
-            }
+            );
 
             // Apply sector stance reactive bonus (Layer B)
             const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
@@ -282,7 +317,11 @@ export function predictCombatOutcome(
             // Brigade at OSID but not in any sector (enclave/garrison edge case)
             // No sector → no intel → blind (confidence 0)
             defenderHasBrigade = true;
-            const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+            const { primary, totalPower } = predictorPerfTime(
+                profilePrefix,
+                '.rankDefendersByPower',
+                () => rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+            );
             const noSectorFog = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
             defenderPower = totalPower * noSectorFog;
             defenderFormation = primary;
@@ -295,7 +334,11 @@ export function predictCombatOutcome(
     } else if (defenderFormations.length > 0) {
         // Not enemy-controlled territory but enemy brigade present — no sector intel available
         defenderHasBrigade = true;
-        const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+        const { primary, totalPower } = predictorPerfTime(
+            profilePrefix,
+            '.rankDefendersByPower',
+            () => rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+        );
         const noSectorFog2 = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
         defenderPower = totalPower * noSectorFog2;
         defenderFormation = primary;
@@ -319,9 +362,13 @@ export function predictCombatOutcome(
     // Resolver default: 'defend' (formation.posture is always set for ordered brigades).
     const effectivePosture = attackerPosture ?? 'attack';
     const targetTerrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
-    const attackerPower = attackerFormations.reduce(
-        (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid), 0
-    ) * coordPenalty * seasonal.attack_mult;
+    const attackerPower = predictorPerfTime(
+        profilePrefix,
+        '.attackerPower',
+        () => attackerFormations.reduce(
+            (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid), 0
+        ) * coordPenalty * seasonal.attack_mult,
+    );
     defenderPower *= seasonal.defense_mult;
 
     const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
@@ -334,21 +381,29 @@ export function predictCombatOutcome(
         predicted = 'stalemate';
     }
 
-    const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
-    // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
+    const {
+        personnelAttacker,
+        personnelDefender,
+        expectedAttCas,
+        expectedDefCas,
+    } = predictorPerfTime(profilePrefix, '.casualties', () => {
+        const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
+        // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
     // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP × attacker
-    const rawPersonnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
-        ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
-        : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
-    const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
-        ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
-        : rawPersonnelDefender;
-    const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
-    const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
-    const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1) * attCasMult;
-    const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult * defCasMult;
-    const expectedAttCas = Math.max(0, Math.round(baseAttCas));
-    const expectedDefCas = Math.max(0, Math.round(baseDefCas));
+        const rawPersonnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
+            ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
+            : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
+        const personnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
+            ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
+            : rawPersonnelDefender;
+        const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
+        const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
+        const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1) * attCasMult;
+        const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult * defCasMult;
+        const expectedAttCas = Math.max(0, Math.round(baseAttCas));
+        const expectedDefCas = Math.max(0, Math.round(baseDefCas));
+        return { personnelAttacker, personnelDefender, expectedAttCas, expectedDefCas };
+    });
 
     const defEntTurns = defenderFormation
         ? Math.min(MAX_ENTRENCHMENT, (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0)
@@ -356,13 +411,16 @@ export function predictCombatOutcome(
 
     const isCounterAttack = false;
 
-    const targetNeighbors = getTacticalAdjacentOsids(state, targetOsid as Osid, adjacency);
-    let enemyAdj = 0;
-    for (const n of targetNeighbors) {
-        const c = getPoliticalControllerOSID(state, n, reverseMap);
-        if (c !== null && c !== attackerFaction) enemyAdj++;
-    }
-    const friendlyNeighborsAfterCapture = targetNeighbors.length - enemyAdj;
+    const { enemyAdj, friendlyNeighborsAfterCapture } = predictorPerfTime(profilePrefix, '.overextension', () => {
+        const targetNeighbors = getTacticalAdjacentOsids(state, targetOsid as Osid, adjacency);
+        let enemyAdj = 0;
+        for (const n of targetNeighbors) {
+            const c = getPoliticalControllerOSID(state, n, reverseMap);
+            if (c !== null && c !== attackerFaction) enemyAdj++;
+        }
+        const friendlyNeighborsAfterCapture = targetNeighbors.length - enemyAdj;
+        return { enemyAdj, friendlyNeighborsAfterCapture };
+    });
 
     return {
         attacker_power: attackerPower,

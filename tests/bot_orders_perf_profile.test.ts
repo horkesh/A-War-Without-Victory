@@ -81,6 +81,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const brigadeAi = readFileSync(resolve('src/sim/combat/bot_brigade_ai_osid.ts'), 'utf8');
         const commanderLoop = readFileSync(resolve('src/sim/combat/commander/commander_loop.ts'), 'utf8');
         const commanderAssess = readFileSync(resolve('src/sim/combat/commander/assess.ts'), 'utf8');
+        const combatPredictor = readFileSync(resolve('src/sim/combat/combat_predictor.ts'), 'utf8');
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -146,9 +147,18 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderEmit).toContain('.probe.buildProbeOperation');
         expect(commanderEmit).toContain('predictDirectEnemyTargets');
         expect(commanderEmit).toContain('predictCombatOutcome');
+        expect(commanderEmit).toContain('.predictDirectTargets.predictCombatOutcome');
         expect(commanderEmit).not.toContain('predictAllAdjacentTargets');
         expect(commanderEmit).toContain('directEnemyTargets');
         expect(commanderEmit).toContain('predictedTargetByOsid');
+        expect(combatPredictor).toContain('predictorPerfTime');
+        expect(combatPredictor).toContain('profilePrefix?: string');
+        expect(combatPredictor).toContain('.defenderFormationScan');
+        expect(combatPredictor).toContain('.sectorLookup');
+        expect(combatPredictor).toContain('.sectorDefensePower');
+        expect(combatPredictor).toContain('.attackerPower');
+        expect(combatPredictor).toContain('.casualties');
+        expect(combatPredictor).toContain('.overextension');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
         expect(commanderBriefing).toContain('botOrdersPerfTime');
         expect(commanderBriefing).toContain('commander.runCommanderForCorps.buildBriefing.getCorpsSectors');
