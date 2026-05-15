@@ -83,6 +83,7 @@ describe('bot-orders perf profile instrumentation', () => {
         const commanderAssess = readFileSync(resolve('src/sim/combat/commander/assess.ts'), 'utf8');
         const combatPredictor = readFileSync(resolve('src/sim/combat/combat_predictor.ts'), 'utf8');
         const combatMath = readFileSync(resolve('src/sim/combat/combat_math.ts'), 'utf8');
+        const brigadeEvalFront = readFileSync(resolve('src/sim/combat/bot_brigade_eval_front.ts'), 'utf8');
         const runnerCli = readFileSync(resolve('tools/scenario_runner/run_scenario.ts'), 'utf8');
 
         expect(brigadeAi).toContain('botOrdersPerfTime');
@@ -93,6 +94,17 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.eval.interiorMovement');
         expect(brigadeAi).toContain('buildSectorAssignmentByBrigade');
         expect(brigadeAi).toContain('sectorAssignmentByBrigade.get(brigade.id)');
+        expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
+        expect(brigadeEvalFront).toContain('.offAssignedFront');
+        expect(brigadeEvalFront).toContain('.sectorReassignment');
+        expect(brigadeEvalFront).toContain('.assignedSectorLookup');
+        expect(brigadeEvalFront).toContain('.frontSet');
+        expect(brigadeEvalFront).toContain('.reserveNearFront');
+        expect(brigadeEvalFront).toContain('.enclaveGuard');
+        expect(brigadeEvalFront).toContain('.destination');
+        expect(brigadeEvalFront).toContain('.trapReroute');
+        expect(brigadeEvalFront).toContain('.retroactiveTooth');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution');
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

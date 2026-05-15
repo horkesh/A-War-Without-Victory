@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(bot-orders): split sectorMarch profile
+
+**Scope:** Default-off bot-orders CPU attribution for `evaluateSectorMarch(...)`.
+
+**Fix:** Added nested `PERF_PROFILE_BOT_ORDERS=true` labels under `bot_orders.executeFactionDirectives.eval.sectorMarch` for assigned-front checks, sector reassignment, assignment lookup, front-set construction, reserve/enclave checks, destination selection, trap rerouting, retroactive-tooth eviction, and overstack redistribution. No movement rule, combat formula, target ordering, scenario data, serialization order, or save schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on the missing sectorMarch profile prefix/labels. Green focused: the same test passed 5/5 and `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1803 with final hash `0cb626c032204372`, matching the n1802 current-main baseline. The split identifies `.overstackRedistribution` at 233.130ms and `.retroactiveTooth` at 89.897ms as the leading sectorMarch internals; the top-level sectorMarch bucket increased because nested timers add opt-in attribution overhead.
+
+**Canon posture:** Default-off deterministic instrumentation permitted by `docs/20_engineering/CODE_CANON.md`: monotonic process timers stay behind an explicit profiling flag, write only `data/derived/_debug/bot_orders_perf_profile.json`, and do not enter game state or save state. Final-save hash equality confirms no serialized-output change.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-15] fix(map): sort front edges with strict comparator
 
 **Scope:** Deterministic front-edge output ordering for SID-keyed and OSID-keyed front edge computation.

@@ -8,6 +8,13 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isEnclaveBrigade, isOsidInSameEnclave, ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 import type { FormationState, GameState, SettlementId } from '../../state/game_state.js';
+import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
+
+const SECTOR_MARCH_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.sectorMarch';
+
+function sectorMarchProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${SECTOR_MARCH_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -65,57 +72,66 @@ export function assignedBrigadeNotOnSectorFrontOsids(
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids } = ctx;
-    const offAssignedFront = assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, assignedSectorFrontOsids);
+    const offAssignedFront = sectorMarchProfileTime('.offAssignedFront', () =>
+        assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, assignedSectorFrontOsids)
+    );
 
     // --- Sector reassignment: corps AI issued explicit reassignment order ---
     // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
     // on its current sector's front returns true and evaluateFrontCoverage (which
     // also processes sector_reassignment_orders) never runs.
-    if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
-        const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
-        if (reassign) {
-            const targetSec = state.military.corps_front_sectors[reassign.to_sector_id];
-            if (targetSec) {
-                const targetOsids = new Set<string>();
-                for (const ss of targetSec.sub_segments) {
-                    for (const o of ss.friendly_osids) targetOsids.add(o);
-                }
-                if (targetOsids.size > 0 && !targetOsids.has(loc)) {
-                    const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, targetOsids);
-                    if (dest) {
-                        result.column_march_orders[brigade.id] = dest;
-                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                        return true;
+    if (sectorMarchProfileTime('.sectorReassignment', () => {
+        if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
+            const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
+            if (reassign) {
+                const targetSec = state.military.corps_front_sectors[reassign.to_sector_id];
+                if (targetSec) {
+                    const targetOsids = new Set<string>();
+                    for (const ss of targetSec.sub_segments) {
+                        for (const o of ss.friendly_osids) targetOsids.add(o);
+                    }
+                    if (targetOsids.size > 0 && !targetOsids.has(loc)) {
+                        const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, targetOsids);
+                        if (dest) {
+                            result.column_march_orders[brigade.id] = dest;
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            return true;
+                        }
                     }
                 }
             }
         }
-    }
+        return false;
+    })) return true;
 
     // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.
     // Op participants are exempt: they march toward objectives (evaluateSectorAttack handles them).
     // The old `|| offAssignedFront` caused oscillation — op participants advancing off-sector
     // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
-    if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
+    const sectors = state.military.corps_front_sectors;
+    if (sectors && !isActiveSectorOperationParticipant) {
         let assignedSector = sectorAssignment?.sector ?? null;
         let isReserve = sectorAssignment?.isReserve ?? false;
         let cachedFrontSet = sectorAssignment?.frontOsids ?? null;
         if (!sectorAssignment) {
-            for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
-                const sec = state.military.corps_front_sectors[sid]!;
-                if (sec.assigned_brigade_ids.includes(brigade.id)) {
-                    assignedSector = sec;
-                    break;
+            sectorMarchProfileTime('.assignedSectorLookup', () => {
+                for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                    const sec = sectors[sid]!;
+                    if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                        assignedSector = sec;
+                        break;
+                    }
+                    if (sec.reserve_brigade_ids.includes(brigade.id)) {
+                        assignedSector = sec;
+                        isReserve = true;
+                        break;
+                    }
                 }
-                if (sec.reserve_brigade_ids.includes(brigade.id)) {
-                    assignedSector = sec;
-                    isReserve = true;
-                    break;
-                }
-            }
+            });
         }
         if (assignedSector) {
+            const sector = assignedSector;
             // If brigade has a pending return-to-home movement order, normally don't override it.
             // Exception: line-assigned brigades that are still off their assigned sector front
             // must be pulled to the sector front (root fix for rear lock-in).
@@ -128,23 +144,26 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 }
             }
 
-            const frontSet = cachedFrontSet ?? new Set<string>();
-            if (!cachedFrontSet) {
-                for (const ss of assignedSector.sub_segments) {
-                    for (const o of ss.friendly_osids) frontSet.add(o);
+            const frontSet = sectorMarchProfileTime('.frontSet', () => {
+                const resolvedFrontSet = cachedFrontSet ?? new Set<string>();
+                if (!cachedFrontSet) {
+                    for (const ss of sector.sub_segments) {
+                        for (const o of ss.friendly_osids) resolvedFrontSet.add(o);
+                    }
                 }
-            }
+                return resolvedFrontSet;
+            });
             if (!frontSet.has(loc)) {
                 // Reserve brigades only column march if deep rear (2+ hops).
                 // 1-hop reserves stay put when the sector already has line holders. If the
                 // sector has no line holder, the reserve must march forward to close the seam.
                 if (isReserve) {
                     const neighbors = adjacency.get(loc as Osid) ?? [];
-                    const nearFront = neighbors.some(n => {
+                    const nearFront = sectorMarchProfileTime('.reserveNearFront', () => neighbors.some(n => {
                         const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
                         return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
-                    });
-                    if (nearFront && assignedSector.assigned_brigade_ids.length > 0) return false;
+                    }));
+                    if (nearFront && sector.assigned_brigade_ids.length > 0) return false;
                 }
                 // Not on sector front — column march there (use actual destination
                 // for multi-hop Dijkstra pathfinding, not just first step)
@@ -152,16 +171,20 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // Without this, Goražde brigades march to Visoko via temporary corridors.
                 if (frontSet.size > 0) {
                     if (isEnclaveBrigade(brigade)) {
-                        const hasEnclaveTarget = [...frontSet].some(f => isOsidInSameEnclave(loc, f));
+                        const hasEnclaveTarget = sectorMarchProfileTime('.enclaveGuard', () =>
+                            [...frontSet].some(f => isOsidInSameEnclave(loc, f))
+                        );
                         if (!hasEnclaveTarget) return false; // Skip march — no enclave-local sector front
                     }
-                    const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
+                    const dest = sectorMarchProfileTime('.destination', () =>
+                        findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet)
+                    );
                     if (dest) {
                         // "Do not garrison the tooth" guard:
                         // A single-OSID sub-segment has no lateral support — if the tooth is risky
                         // (salient: ≥3 enemy neighbors, or cut-off risk: ≤1 friendly neighbor),
                         // the brigade should not march there. Fall through to corps-wide rerouting.
-                        const isToothDest = assignedSector.sub_segments.some(
+                        const isToothDest = sector.sub_segments.some(
                             ss => ss.friendly_osids.length === 1 && ss.friendly_osids[0] === dest
                         );
                         if (isToothDest && graphAnalysis && isMovementDestinationRisky(dest as Osid, graphAnalysis)) {
@@ -182,34 +205,37 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     // picking the same tooth as the previous guard just blocked achieves nothing.
                     // If the entire corps front is teeth with no safe alternative, suppress the march
                     // (brigade holds at current depth position — reactive defense).
-                    const corpsId = brigade.corps_id;
-                    if (corpsId && state.military.corps_front_sectors) {
-                        const reachableCorpsFront = new Set<string>();
-                        for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
-                            const sec = state.military.corps_front_sectors[sid]!;
-                            if (sec.corps_id !== corpsId) continue;
-                            for (const ss of sec.sub_segments) {
-                                const isTooth = ss.friendly_osids.length === 1;
-                                for (const o of ss.friendly_osids) {
-                                    if (isTooth && graphAnalysis && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
-                                        continue; // exclude risky tooth from rerouting candidates
+                    if (sectorMarchProfileTime('.trapReroute', () => {
+                        const corpsId = brigade.corps_id;
+                        if (corpsId) {
+                            const reachableCorpsFront = new Set<string>();
+                            for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                                const sec = sectors[sid]!;
+                                if (sec.corps_id !== corpsId) continue;
+                                for (const ss of sec.sub_segments) {
+                                    const isTooth = ss.friendly_osids.length === 1;
+                                    for (const o of ss.friendly_osids) {
+                                        if (isTooth && graphAnalysis && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
+                                            continue; // exclude risky tooth from rerouting candidates
+                                        }
+                                        reachableCorpsFront.add(o);
                                     }
-                                    reachableCorpsFront.add(o);
                                 }
                             }
-                        }
-                        if (reachableCorpsFront.size > 0) {
-                            const rerouteDest = findNearestFriendlyOsidDestination(
-                                state, faction, loc, adjacency, reverseMap, reachableCorpsFront
-                            );
-                            if (rerouteDest) {
-                                result.column_march_orders[brigade.id] = rerouteDest;
-                                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                                return true;
+                            if (reachableCorpsFront.size > 0) {
+                                const rerouteDest = findNearestFriendlyOsidDestination(
+                                    state, faction, loc, adjacency, reverseMap, reachableCorpsFront
+                                );
+                                if (rerouteDest) {
+                                    result.column_march_orders[brigade.id] = rerouteDest;
+                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                    return true;
+                                }
                             }
+                            // No safe corps front available — suppress march (hold at current depth position).
                         }
-                        // No safe corps front available — suppress march (hold at current depth position).
-                    }
+                        return false;
+                    })) return true;
                 }
             } else {
                 // Already on assigned sector front: cancel stale home-return column orders.
@@ -233,13 +259,13 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 //   3. No column march is already in flight (pendingMove is falsy).
                 //   4. The OSID is NOT in must_hold_osids_by_corps for this brigade's corps.
                 //   5. The brigade is not disrupted (disrupted_turns > 0).
-                if (!pendingMove && graphAnalysis) {
-                    const corpsIdEvict = brigade.corps_id;
-                    // Find the sub-segment the brigade belongs to (via its current sector).
-                    let isRetroactiveTooth = false;
-                    if (state.military.corps_front_sectors) {
-                        outer: for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
-                            const sec = state.military.corps_front_sectors[sid]!;
+                if (sectorMarchProfileTime('.retroactiveTooth', () => {
+                    if (!pendingMove && graphAnalysis) {
+                        const corpsIdEvict = brigade.corps_id;
+                        // Find the sub-segment the brigade belongs to (via its current sector).
+                        let isRetroactiveTooth = false;
+                        outer: for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                            const sec = sectors[sid]!;
                             if (!sec.assigned_brigade_ids.includes(brigade.id)) continue;
                             for (const ss of sec.sub_segments) {
                                 if (ss.friendly_osids.includes(loc)) {
@@ -248,48 +274,49 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                 }
                             }
                         }
-                    }
-                    if (isRetroactiveTooth && isMovementDestinationRisky(loc as Osid, graphAnalysis)) {
-                        // Check must_hold override
-                        const mustHoldOsids: string[] =
-                            (corpsIdEvict ? (state.military.must_hold_osids_by_corps?.[corpsIdEvict] ?? []) : []);
-                        const isMustHold = mustHoldOsids.includes(loc);
-                        // Check disruption
-                        const isDisrupted = (brigade.disrupted_turns ?? 0) > 0;
-                        if (!isMustHold && !isDisrupted) {
-                            // Build safe destination set: all corps front OSIDs excluding the
-                            // current tooth and any other risky sole-OSID teeth.
-                            const safeFront = new Set<string>();
-                            if (corpsIdEvict && state.military.corps_front_sectors) {
-                                for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
-                                    const sec = state.military.corps_front_sectors[sid]!;
-                                    if (sec.corps_id !== corpsIdEvict) continue;
-                                    for (const ss of sec.sub_segments) {
-                                        const ssIsTooth = ss.friendly_osids.length === 1;
-                                        for (const o of ss.friendly_osids) {
-                                            if (o === loc) continue; // exclude current tooth
-                                            if (ssIsTooth && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
-                                                continue; // exclude other risky teeth
+                        if (isRetroactiveTooth && isMovementDestinationRisky(loc as Osid, graphAnalysis)) {
+                            // Check must_hold override
+                            const mustHoldOsids: string[] =
+                                (corpsIdEvict ? (state.military.must_hold_osids_by_corps?.[corpsIdEvict] ?? []) : []);
+                            const isMustHold = mustHoldOsids.includes(loc);
+                            // Check disruption
+                            const isDisrupted = (brigade.disrupted_turns ?? 0) > 0;
+                            if (!isMustHold && !isDisrupted) {
+                                // Build safe destination set: all corps front OSIDs excluding the
+                                // current tooth and any other risky sole-OSID teeth.
+                                const safeFront = new Set<string>();
+                                if (corpsIdEvict) {
+                                    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                                        const sec = sectors[sid]!;
+                                        if (sec.corps_id !== corpsIdEvict) continue;
+                                        for (const ss of sec.sub_segments) {
+                                            const ssIsTooth = ss.friendly_osids.length === 1;
+                                            for (const o of ss.friendly_osids) {
+                                                if (o === loc) continue; // exclude current tooth
+                                                if (ssIsTooth && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
+                                                    continue; // exclude other risky teeth
+                                                }
+                                                safeFront.add(o);
                                             }
-                                            safeFront.add(o);
                                         }
                                     }
                                 }
-                            }
-                            if (safeFront.size > 0) {
-                                const evictDest = findNearestFriendlyOsidDestination(
-                                    state, faction, loc, adjacency, reverseMap, safeFront
-                                );
-                                if (evictDest) {
-                                    result.column_march_orders[brigade.id] = evictDest;
-                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                                    return true;
+                                if (safeFront.size > 0) {
+                                    const evictDest = findNearestFriendlyOsidDestination(
+                                        state, faction, loc, adjacency, reverseMap, safeFront
+                                    );
+                                    if (evictDest) {
+                                        result.column_march_orders[brigade.id] = evictDest;
+                                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                        return true;
+                                    }
                                 }
+                                // No safe destination found — brigade is fully trapped; hold in place.
                             }
-                            // No safe destination found — brigade is fully trapped; hold in place.
                         }
                     }
-                }
+                    return false;
+                })) return true;
                 // ── End retroactive-tooth eviction guard ─────────────────────────────
                 // Brigade IS on a sector front OSID. Check if this position is overstacked
                 // while other front OSIDs in the same sector are under-covered.
@@ -299,49 +326,52 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // CRITICAL: Use columnAssignments to track planned departures/arrivals THIS turn.
                 // Without this, all stacked brigades see the same static count and all pick the
                 // same destination — causing perpetual ping-pong oscillation.
-                const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
-                // Negative values in columnAssignments = planned departures from this OSID
-                const effectiveCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
-                    + Math.min(0, plannedDepartures); // departures reduce count
-                if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
-                    // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
-                    // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
-                    // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
-                    // front OSIDs in the same sector when those OSIDs have fewer brigades.
-                    const enclave = isEnclaveBrigade(brigade);
-                    const otherFronts = [...frontSet]
-                        .filter(o => o !== loc)
-                        .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
-                        .sort((a, b) => {
-                            const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
-                                + (columnAssignments.get(a as Osid) ?? 0);
-                            const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
-                                + (columnAssignments.get(b as Osid) ?? 0);
-                            return ca - cb || strictCompare(a, b);
-                        });
-                    for (const candidate of otherFronts) {
-                        // Check: would this destination be overstacked after planned arrivals?
-                        const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
-                        const destCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, candidate)
-                            + Math.max(0, plannedAtDest); // arrivals increase count
-                        if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
+                if (sectorMarchProfileTime('.overstackRedistribution', () => {
+                    const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
+                    // Negative values in columnAssignments = planned departures from this OSID
+                    const effectiveCountHere = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, loc)
+                        + Math.min(0, plannedDepartures); // departures reduce count
+                    if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
+                        // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
+                        // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
+                        // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
+                        // front OSIDs in the same sector when those OSIDs have fewer brigades.
+                        const enclave = isEnclaveBrigade(brigade);
+                        const otherFronts = [...frontSet]
+                            .filter(o => o !== loc)
+                            .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
+                            .sort((a, b) => {
+                                const ca = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, a)
+                                    + (columnAssignments.get(a as Osid) ?? 0);
+                                const cb = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, b)
+                                    + (columnAssignments.get(b as Osid) ?? 0);
+                                return ca - cb || strictCompare(a, b);
+                            });
+                        for (const candidate of otherFronts) {
+                            // Check: would this destination be overstacked after planned arrivals?
+                            const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
+                            const destCount = countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, candidate)
+                                + Math.max(0, plannedAtDest); // arrivals increase count
+                            if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
 
-                        const dest = findNearestFriendlyOsidDestination(
-                            state, faction, loc, adjacency, reverseMap, new Set([candidate])
-                        );
-                        // No isMovementDestinationRisky check here — the brigade is being
-                        // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
-                        // "risky" (adjacent to enemy) but that's where defenders must be.
-                        if (dest) {
-                            result.column_march_orders[brigade.id] = dest;
-                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                            // Track this movement so next brigade sees updated counts
-                            columnAssignments.set(loc as Osid, (columnAssignments.get(loc as Osid) ?? 0) - 1);
-                            columnAssignments.set(dest, (columnAssignments.get(dest) ?? 0) + 1);
-                            return true;
+                            const dest = findNearestFriendlyOsidDestination(
+                                state, faction, loc, adjacency, reverseMap, new Set([candidate])
+                            );
+                            // No isMovementDestinationRisky check here — the brigade is being
+                            // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
+                            // "risky" (adjacent to enemy) but that's where defenders must be.
+                            if (dest) {
+                                result.column_march_orders[brigade.id] = dest;
+                                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                // Track this movement so next brigade sees updated counts
+                                columnAssignments.set(loc as Osid, (columnAssignments.get(loc as Osid) ?? 0) - 1);
+                                columnAssignments.set(dest, (columnAssignments.get(dest) ?? 0) + 1);
+                                return true;
+                            }
                         }
                     }
-                }
+                    return false;
+                })) return true;
             }
         }
     }
