@@ -17,6 +17,7 @@
  */
 
 import type {
+    CorpsFrontSector,
     FactionId,
     FormationId,
     FormationState,
@@ -76,6 +77,7 @@ import {
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
+import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -119,6 +121,7 @@ type RankedDefenderPowers = {
 
 function rankDefendersByPowerWithEntries(
     defenders: FormationState[],
+    sector: CorpsFrontSector | null | undefined,
     state: GameState,
     targetOsid: Osid,
     terrainMultByOsid: Record<string, number>,
@@ -130,6 +133,13 @@ function rankDefendersByPowerWithEntries(
     const defenderPowerProfilePrefix = profilePrefix ? `${profilePrefix}.rankDefendersByPower.computeDefenderPower` : undefined;
     const defenderPowerProfileTime = defenderPowerProfilePrefix
         ? <T>(labelSuffix: string, fn: () => T): T => predictorPerfTime(defenderPowerProfilePrefix, labelSuffix, fn)
+        : undefined;
+    const frontDensityModifierByFormationId = defenders.length > 1 && sector
+        ? predictorPerfTime(
+            profilePrefix,
+            '.rankDefendersByPower.frontDensityIndex',
+            () => buildLocalFrontDensityModifierByFormationIdForSector(sector),
+        )
         : undefined;
     const scored = predictorPerfTime(
         profilePrefix,
@@ -145,6 +155,7 @@ function rankDefendersByPowerWithEntries(
                 supplyStateByOsid,
                 ethnicBonusFn(formation),
                 defenderPowerProfileTime,
+                frontDensityModifierByFormationId,
             ),
         })),
     );
@@ -328,7 +339,7 @@ export function predictCombatOutcome(
             const { primary, totalPower, powerByFormationId } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
-                () => rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix),
+                () => rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix),
             );
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);

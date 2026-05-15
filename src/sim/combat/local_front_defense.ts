@@ -9,7 +9,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
-import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { CorpsFrontSector, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Coverage density: below this ratio, defense power is penalized. */
@@ -23,6 +23,8 @@ const MAX_DENSITY_BONUS = 1.25;
 
 /** Minimum coverage penalty for very thin fronts. */
 const MIN_COVERAGE_PENALTY = 0.6;
+
+export type LocalFrontDensityModifierLookup = ReadonlyMap<FormationId, number>;
 
 /**
  * Compute brigade power contribution to a frontage.
@@ -103,6 +105,22 @@ function findSectorDensityModifier(
 
     return null;
 }
+
+export function buildLocalFrontDensityModifierByFormationIdForSector(
+    sector: Pick<CorpsFrontSector, 'assigned_brigade_ids' | 'length_edges'>
+): Map<FormationId, number> {
+    const densityByFormationId = new Map<FormationId, number>();
+    const assignedBrigadeIds = sector.assigned_brigade_ids;
+    const densityModifier = frontDensityModifier(assignedBrigadeIds.length, sector.length_edges);
+    for (const brigadeId of assignedBrigadeIds) {
+        if (!densityByFormationId.has(brigadeId)) {
+            densityByFormationId.set(brigadeId, densityModifier);
+        }
+    }
+
+    return densityByFormationId;
+}
+
 /**
  * Get the frontline density modifier for a specific brigade.
  *
@@ -114,8 +132,13 @@ function findSectorDensityModifier(
  */
 export function getLocalFrontDensityModifier(
     state: GameState,
-    formation: FormationState
+    formation: FormationState,
+    densityModifierByFormationId?: LocalFrontDensityModifierLookup
 ): number {
+    if (densityModifierByFormationId) {
+        return densityModifierByFormationId.get(formation.id) ?? 1.0;
+    }
+
     const sectorModifier = findSectorDensityModifier(state, formation);
     if (sectorModifier !== null) return sectorModifier;
 

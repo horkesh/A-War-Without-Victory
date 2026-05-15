@@ -25,7 +25,10 @@ import {
 } from '../../state/supply_reserve_constants.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
-import { getLocalFrontDensityModifier } from './local_front_defense.js';
+import {
+    getLocalFrontDensityModifier,
+    type LocalFrontDensityModifierLookup,
+} from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
@@ -1084,6 +1087,7 @@ export function computeDefenderPower(
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     ethnicDefenseBonus?: number,
     profileTime?: CombatMathProfileTimer,
+    densityModifierByFormationId?: LocalFrontDensityModifierLookup,
 ): number {
     const base = combatMathProfileTime(profileTime, '.base', () => basePower(formation));
     const posture = formation.posture ?? 'defend';
@@ -1129,7 +1133,7 @@ export function computeDefenderPower(
         return { terrainMult, urbanMult, forestMult, enclaveMult, toTerrainMult, perBrigadeTerrainBonus };
     });
     const frontDensityMult = combatMathProfileTime(profileTime, '.frontDensity', () =>
-        getLocalFrontDensityModifier(state, formation)
+        getLocalFrontDensityModifier(state, formation, densityModifierByFormationId)
     );
     const officerMult = combatMathProfileTime(profileTime, '.officer', () =>
         getThreeTierOfficerMod(formation, state, 'defend')

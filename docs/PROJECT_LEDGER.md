@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): index front density by sector
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the defender-power internal split.
+
+**Fix:** Added a sector-local front-density lookup for multi-defender direct-probe ranking. `combat_predictor.ts` now builds a tiny density map from the already-resolved `CorpsFrontSector`, passes it through `computeDefenderPower(...)`, and `getLocalFrontDensityModifier(...)` consumes it without rescanning sector assignments. The existing sorted-sector scan path remains for all callers without a precomputed lookup. No combat formula, ranking rule, target ordering, scenario data, serialization order, or save schema changed.
+
+**Validation:** Red first: the local-front guard failed on missing lookup builder, and the bot-orders profile guard failed until the predictor wired the lookup. A first full-state index candidate was rejected after n1793 because `.frontDensityIndex` cost 16.929ms, worse than the 15.177ms scan it replaced. The retained sector-local version passed focused guards, `npm.cmd run typecheck`, and profiled 40w n1794 with final hash `7ef09f55d6494edd`, matching n1788. Measured front-density net cost dropped 15.177ms -> 3.174ms including index-build cost; `.rankDefendersByPower` dropped 88.417ms -> 83.109ms.
+
+**Canon posture:** Deterministic read-only predictor hot-path optimization. It reuses already-derived sector truth and kept the final-save hash unchanged.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_FRONT_DENSITY_INDEX.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): split defender power profile
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the defender-ranking compute-vs-sort split.

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
-import { getLocalFrontDensityModifier } from '../src/sim/combat/local_front_defense.js';
+import {
+    buildLocalFrontDensityModifierByFormationIdForSector,
+    getLocalFrontDensityModifier,
+} from '../src/sim/combat/local_front_defense.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -86,4 +89,32 @@ test('getLocalFrontDensityModifier no longer revives legacy front density withou
 
     const modifier = getLocalFrontDensityModifier(state, brigade as any);
     assert.equal(modifier, 1.0);
+});
+
+test('sector-local density lookup avoids sector scans for repeated modifier reads', () => {
+    const state = makeState();
+    const sector = state.military.corps_front_sectors!.sector_1!;
+    const brigade = state.military.formations!.brig1!;
+    let assignedReads = 0;
+    let assignedBrigadeIds = sector.assigned_brigade_ids;
+
+    Object.defineProperty(sector, 'assigned_brigade_ids', {
+        configurable: true,
+        get() {
+            assignedReads += 1;
+            return assignedBrigadeIds;
+        },
+        set(next: string[]) {
+            assignedBrigadeIds = next;
+        },
+    });
+
+    const lookup = buildLocalFrontDensityModifierByFormationIdForSector(sector);
+    assert.equal(assignedReads, 1);
+
+    assignedReads = 0;
+
+    assert.equal(getLocalFrontDensityModifier(state, brigade as any, lookup), 1.0);
+    assert.equal(getLocalFrontDensityModifier(state, brigade as any, lookup), 1.0);
+    assert.equal(assignedReads, 0);
 });

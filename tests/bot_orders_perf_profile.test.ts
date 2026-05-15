@@ -171,9 +171,17 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatPredictor).toContain('defenderPowerProfilePrefix');
         expect(combatPredictor).toContain('profilePrefix ? `${profilePrefix}.rankDefendersByPower.computeDefenderPower` : undefined');
         expect(combatPredictor).toContain('defenderPowerProfileTime');
-        expect(combatPredictor).toContain('rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix)');
+        expect(combatPredictor).toContain('rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix)');
+        expect(combatPredictor).toContain('buildLocalFrontDensityModifierByFormationIdForSector');
+        expect(combatPredictor).toContain('buildLocalFrontDensityModifierByFormationIdForSector(sector)');
+        expect(combatPredictor).toContain('.rankDefendersByPower.frontDensityIndex');
+        expect(combatPredictor).toContain('defenders.length > 1');
+        expect(combatPredictor).toContain('frontDensityModifierByFormationId');
         expect(combatMath).toContain('type CombatMathProfileTimer');
         expect(combatMath).toContain('combatMathProfileTime');
+        expect(combatMath).toContain('type LocalFrontDensityModifierLookup');
+        expect(combatMath).toContain('densityModifierByFormationId?: LocalFrontDensityModifierLookup');
+        expect(combatMath).toContain('getLocalFrontDensityModifier(state, formation, densityModifierByFormationId)');
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.base'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.supply'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.terrainFactors'");

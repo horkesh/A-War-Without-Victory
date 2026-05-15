@@ -64,6 +64,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('fallback defender formation scanning is now lazy');
     expect(roadmap).toContain('defender ranking now has compute-vs-sort profile attribution');
     expect(roadmap).toContain('defender power now has officer/front-density attribution');
+    expect(roadmap).toContain('sector-local front-density indexing shipped');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -173,6 +174,9 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('defender-power internals measured `.officer` at 22.682ms');
     expect(roadmap).toContain('`.frontDensity` at 15.177ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('commander front-density index');
+    expect(roadmap).toContain('net front-density cost dropped 15.177ms -> 3.174ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_COMMANDER_FRONT_DENSITY_INDEX.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');
