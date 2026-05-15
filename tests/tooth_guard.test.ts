@@ -216,6 +216,23 @@ function makeCtx(overrides: {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('evaluateSectorMarch — tooth guard', () => {
+    it('uses cached null sector assignment to skip fallback assigned-sector lookup', () => {
+        const loc = 'op:jablanica:jablanica_2' as Osid;
+        const front = 'op:kalinovik:sela_2' as Osid;
+        const ctx = makeCtx({
+            loc,
+            graphAnalysis: makeGraphAnalysis([
+                [front, makeOsidAnalysis(front, ['op:rbih:enemy_1' as Osid], [loc, 'op:rs:friend_2' as Osid])],
+            ]),
+        });
+        ctx.sectorAssignment = null;
+        ctx.assignedSectorFrontOsids = null;
+
+        const returned = evaluateSectorMarch(ctx);
+
+        expect(returned).toBe(false);
+        expect(ctx.result.column_march_orders[ctx.brigade.id]).toBeUndefined();
+    });
 
     it('marches a one-hop sector reserve forward when its sector has no line holder', () => {
         const loc = 'op:jablanica:jablanica_2' as Osid;

@@ -4172,3 +4172,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The return-to-corps roster scan hotspot from n1810 is closed. The next CPU lane should start from a fresh profile; top bot-order evaluator candidates are now `sectorMarch`, `sectorAttack`, `defensive`, `pocketEvacuation`, and `homeDefense`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_ROSTER_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): use cached sector assignment miss
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateSectorMarch(...)` now distinguishes a missing cache field (`sectorAssignment === undefined`, direct-call fallback) from a cached miss (`sectorAssignment === null`, main order-pass no-assignment result). The main order pass no longer performs a redundant all-sector assigned/reserve lookup for brigades already known to be unassigned.
+
+**Determinism:** The sector assignment cache is built once per faction directive pass from sector IDs sorted with `strictCompare`. The change only reads the cached null marker and does not mutate `GameState`, save schema, movement-order sequencing, RNG, or serialization. Profiled 40w n1812 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\tooth_guard.test.ts --reporter=dot` failed because cached `null` still fell back to roster scanning. Green focused suite passed 13/13, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1812 kept final hash `0cb626c032204372`; `.sectorMarch.assignedSectorLookup` dropped 19.337ms -> 0ms and `sectorMarch` dropped 145.870ms -> 128.025ms.
+
+**Roadmap delta:** The redundant sectorMarch assignment lookup from n1811 is closed. The next CPU lane should use a fresh profile; top bot-order evaluator candidates are now `sectorAttack`, `defensive`, `homeDefense`, and `pocketEvacuation`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_ASSIGNMENT_CACHE.md`

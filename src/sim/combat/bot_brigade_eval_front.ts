@@ -131,7 +131,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
         let assignedSector = sectorAssignment?.sector ?? null;
         let isReserve = sectorAssignment?.isReserve ?? false;
         let cachedFrontSet = sectorAssignment?.frontOsids ?? null;
-        if (!sectorAssignment) {
+        if (sectorAssignment === undefined) {
             sectorMarchProfileTime('.assignedSectorLookup', () => {
                 for (const sid of Object.keys(sectors).sort(strictCompare)) {
                     const sec = sectors[sid]!;
