@@ -32,7 +32,7 @@
 
 **2026-05-15 home-defense profile split:** n1807 kept hash `0cb626c032204372`; `homeDefense.uncontestedOccupation` accounts for 193.515ms of the 209.140ms `homeDefense` parent, while `homeDefense.deepRearNearFront` is only 0.529ms. Do instead: split or optimize shared `evaluateUncontestedOccupation(...)` next; do not spend time on local home-defense logic without new evidence.
 
-**2026-05-15 uncontested-occupation split:** n1808 kept hash `0cb626c032204372`; `.uncontestedOccupation.defenderScan` dominates at 287.853ms, with sector defense 57.867ms and salient 22.783ms. Do instead: optimize repeated active enemy formation presence checks with a deterministic pass-local OSID/location index before touching sector lookup.
+**2026-05-15 uncontested defender index:** n1809 kept hash `0cb626c032204372`; pass-local active formation locations cut `.uncontestedOccupation.defenderScan` 287.853ms -> 3.673ms, `homeDefense.uncontestedOccupation` 225.082ms -> 77.403ms, and standalone `eval.uncontestedOccupation` 148.579ms -> 51.172ms. Do instead: choose the next bot-order CPU lane from a fresh profile; `sectorDefense` is now the leading uncontested sub-label, but top-level pressure also points at `returnToCorps`, `sectorMarch`, and `sectorAttack`.
 
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 

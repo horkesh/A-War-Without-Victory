@@ -4124,3 +4124,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The next bot-order CPU pass should optimize repeated enemy-formation presence checks for candidate OSIDs. Sector-defense lookup is visible but secondary in n1808.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_OCCUPATION_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): index uncontested defender locations
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added a deterministic pass-local active formation location index keyed by faction and OSID. `executeFactionDirectivesImpl(...)` builds it once per faction directive pass, `BrigadeEvaluationContext` carries it, and `evaluateUncontestedOccupation(...)` uses it for active enemy-formation presence checks while retaining the old full-scan fallback for direct callers.
+
+**Determinism:** The index iterates formation IDs with `strictCompare`, mirrors the old scan's active/location/controller-faction semantics, and is read-only during evaluation. It is not serialized into `GameState`. Profiled 40w n1809 kept final hash `0cb626c032204372`, matching n1808.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_brigade_context_counts.test.ts --reporter=dot` failed on the missing exported index builder. Green focused suite passed 22/22, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1809 kept final hash `0cb626c032204372`; `.uncontestedOccupation.defenderScan` dropped 287.853ms -> 3.673ms, `homeDefense.uncontestedOccupation` dropped 225.082ms -> 77.403ms, and standalone `eval.uncontestedOccupation` dropped 148.579ms -> 51.172ms.
+
+**Roadmap delta:** The repeated defender-scan hotspot from n1808 is closed. The next bot-order CPU pass should use a fresh profile; `sectorDefense` is now the largest uncontested-occupation sub-label, while top-level evaluator pressure now also points at `returnToCorps`, `sectorMarch`, and `sectorAttack`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md`

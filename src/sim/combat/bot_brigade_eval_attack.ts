@@ -16,7 +16,7 @@ import {
 } from './bot_brigade_targeting.js';
 import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supply_ethnic.js';
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
-import { countFactionBrigadesAtOsid } from './bot_brigade_context.js';
+import { countFactionBrigadesAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
@@ -571,7 +571,7 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
  * column march. Maximum 1 uncontested occupation per brigade per turn.
  */
 export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result } = ctx;
+    const { brigade, loc, faction, adjacency, state, isActiveSectorOperationParticipant, result, activeFormationLocationsByFaction } = ctx;
 
     // Early-war throttle: no uncontested occupation in first 2 weeks (deployment phase).
     // Historically, territory grab was rapid but not instantaneous — units need time to
@@ -636,6 +636,9 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
 
         // Check: no enemy formations physically at this OSID
         const hasDefender = uncontestedOccupationProfileTime('.uncontestedOccupation.defenderScan', () => {
+            if (activeFormationLocationsByFaction) {
+                return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller as FactionId, n as Osid);
+            }
             for (const fid of Object.keys(formations)) {
                 const f = formations[fid] as FormationState | undefined;
                 if (f && f.status === 'active' && f.location_osid === n && f.faction === controller) {

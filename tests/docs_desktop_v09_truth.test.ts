@@ -82,6 +82,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('uncontested-occupation profile split');
     expect(roadmap).toContain('n1808 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`.uncontestedOccupation.defenderScan` dominated at 287.853ms');
+    expect(roadmap).toContain('uncontested defender index');
+    expect(roadmap).toContain('n1809 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.uncontestedOccupation.defenderScan` dropped 287.853ms -> 3.673ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
@@ -206,6 +210,8 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_HOME_DEFENSE_PROFILE_SPLIT.md');
     expect(roadmap).toContain('uncontested-occupation profile split');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_OCCUPATION_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('uncontested defender index');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md');
     expect(roadmap).toContain('AGENT-CLOSED / OPERATOR-OPEN for the playtest package');
     expect(roadmap).toContain('tester quickstart, known-issues template, triage board, and weekly digest template');
     expect(bible).toContain('Dynamic Codex may also render source-labeled Cost Ledger findings');

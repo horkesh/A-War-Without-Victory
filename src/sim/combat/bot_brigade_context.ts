@@ -35,6 +35,7 @@ export const MAX_CORPS_BRIGADES_PER_OSID = 2;
 const ALL_FACTION_CORPS_COUNT_KEY = '__all__';
 
 export type CorpsBrigadeCountsByOsid = Map<string, Map<Osid, number>>;
+export type ActiveFormationLocationsByFaction = Map<FactionId, Set<Osid>>;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Functions
@@ -224,6 +225,34 @@ export function getCorpsBrigadeCountAtOsid(
 ): number {
     const key = corpsId ? corpsId : ALL_FACTION_CORPS_COUNT_KEY;
     return counts?.get(key)?.get(osid) ?? 0;
+}
+
+export function buildActiveFormationLocationsByFaction(state: GameState): ActiveFormationLocationsByFaction {
+    const locations: ActiveFormationLocationsByFaction = new Map();
+    const formations = state.military.formations ?? {};
+
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid]!;
+        if (f.status !== 'active') continue;
+        if (!f.location_osid) continue;
+
+        let factionLocations = locations.get(f.faction);
+        if (!factionLocations) {
+            factionLocations = new Set<Osid>();
+            locations.set(f.faction, factionLocations);
+        }
+        factionLocations.add(f.location_osid as Osid);
+    }
+
+    return locations;
+}
+
+export function hasActiveFormationAtOsid(
+    locations: ActiveFormationLocationsByFaction | null | undefined,
+    faction: FactionId,
+    osid: Osid,
+): boolean {
+    return locations?.get(faction)?.has(osid) ?? false;
 }
 
 /** Count ALL faction brigades at an OSID (regardless of corps). Used for
