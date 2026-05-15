@@ -216,13 +216,49 @@ describe('anomaly detector deployment truth', () => {
         expect(anomalies.some((report) => report.type === 'brigade_far_from_home')).toBe(false);
     });
 
-    it('limits brigade_never_fights to live non-cold owners and demotes it to info', () => {
+    it('splits brigade_never_fights by live non-cold owner subtype and keeps it informational', () => {
         const state = {
             meta: { turn: 40, phase: 'war' },
             military: {
                 formations: {
                     brig_owned: {
                         id: 'brig_owned',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:test:owned',
+                        home_osid: 'op:test:home',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'front', sector_id: 'sector:arbih_1st_corps:0' },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_reserve: {
+                        id: 'brig_reserve',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:test:owned',
+                        home_osid: 'op:test:home',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'reserve', sector_id: 'sector:arbih_1st_corps:0' },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_rear: {
+                        id: 'brig_rear',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:test:rear',
+                        home_osid: 'op:test:home',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'rear', sector_id: 'sector:arbih_1st_corps:0' },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_operation: {
+                        id: 'brig_operation',
                         faction: 'RBiH',
                         kind: 'brigade',
                         status: 'active',
@@ -279,18 +315,18 @@ describe('anomaly detector deployment truth', () => {
                         sector_id: 'sector:arbih_1st_corps:0',
                         corps_id: 'arbih_1st_corps',
                         faction: 'RBiH',
-                        assigned_brigade_ids: ['brig_owned'],
-                        reserve_brigade_ids: [],
+                        assigned_brigade_ids: ['brig_owned', 'brig_operation'],
+                        reserve_brigade_ids: ['brig_reserve'],
                         sub_segments: [{
                             sub_segment_id: 'subseg:owned',
                             edge_ids: ['edge:owned'],
                             friendly_osids: ['op:test:owned'],
                             enemy_osids: ['op:test:enemy'],
-                            primary_brigade_ids: ['brig_owned'],
+                            primary_brigade_ids: ['brig_owned', 'brig_operation'],
                             length_edges: 1,
                         }],
                         edge_ids: ['edge:owned'],
-                        territory_osids: ['op:test:owned'],
+                        territory_osids: ['op:test:owned', 'op:test:rear'],
                         opposing_factions: ['RS'],
                         density: 1,
                         defensive_power: 100,
@@ -323,6 +359,15 @@ describe('anomaly detector deployment truth', () => {
                     },
                 },
                 unresolved_sector_brigades: [],
+                corps_command: {
+                    arbih_1st_corps: {
+                        active_operations: [{
+                            name: 'Operacija Test',
+                            phase: 'execution',
+                            participating_brigades: ['brig_operation'],
+                        }],
+                    },
+                },
             },
             political: {
                 political_controllers: {
@@ -341,11 +386,17 @@ describe('anomaly detector deployment truth', () => {
             },
         } as unknown as GameState;
 
-        const report = runAnomalyDetection(state).find((anomaly) => anomaly.type === 'brigade_never_fights');
+        const reports = runAnomalyDetection(state).filter((anomaly) => anomaly.type === 'brigade_never_fights');
+        const bySubtype = Object.fromEntries(reports.map((report) => [report.subtype, report]));
 
-        expect(report).toBeDefined();
-        expect(report?.severity).toBe('info');
-        expect(report?.entities).toEqual(['brig_loaned', 'brig_owned']);
-        expect(report?.description).toContain('live sector/loan ownership');
+        expect(reports).toHaveLength(5);
+        expect(reports.map((report) => report.severity)).toEqual(['info', 'info', 'info', 'info', 'info']);
+        expect(bySubtype.loan?.entities).toEqual(['brig_loaned']);
+        expect(bySubtype.operation_participant?.entities).toEqual(['brig_operation']);
+        expect(bySubtype.sector_front?.entities).toEqual(['brig_owned']);
+        expect(bySubtype.sector_reserve?.entities).toEqual(['brig_reserve']);
+        expect(bySubtype.sector_rear?.entities).toEqual(['brig_rear']);
+        expect(reports.flatMap((report) => report.entities ?? [])).not.toContain('brig_ownerless');
+        expect(reports.flatMap((report) => report.entities ?? [])).not.toContain('brig_cold');
     });
 });

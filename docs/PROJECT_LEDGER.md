@@ -4604,3 +4604,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Future CPU lane selection should start from a real V8 profile, not nested label totals alone. The current top wall-clock boundaries are sector reconstruction/reconciliation, map/front graph work, and replay/final-save serialization; commander/bot-order CPU should move to one broader read-only decision context if revisited. The active product lane is formation-life believability classification, with active-never-fights interpretation as the safe next packet.
 
 **Reports:** `docs/40_reports/implemented/20260515_REAL_CPU_PROFILE_AND_COMMAND_CONTEXT_PLAN.md`, `docs/40_reports/implemented/20260515_FORMATION_LIFE_WARNING_CLASSIFICATION.md`
+
+---
+
+## [2026-05-15] classify(formation-life): split active-never-fights ownership
+
+**Type:** Detector interpretation and formation-life classification. No gameplay rule, sector ownership, movement, combat math, political controller write, HRHB/HVO gate, OOB/source data, personnel/reconstitution logic, save schema, or serialization format changed.
+
+**Change:** `brigade_never_fights` now emits subtype-specific `info` reports for `loan`, `operation_participant`, `sector_front`, `sector_reserve`, `sector_rear`, and fallback `sector_owned` ownership. This closes the blended active-never-fights diagnostic by routing quiet reserve/rear/loan cases away from the live-front inert behavior signal.
+
+**Determinism:** The detector builds active operation participants from sorted corps-command keys, iterates formations with `strictCompare`, emits subtypes in a fixed order, and writes no state. The retained 40w final hash remains `0cb626c032204372` because the change is post-run analysis only.
+
+**Verification:** Focused detector test passed 4/4 with `npm.cmd run test:vitest:fast -- -- tests/anomaly_detector_deployment_truth.test.ts`. Read-only retained-run proof on `F:/A-War-Without-Victory/data/derived/_debug/cpu_profile_runs/apr1992_definitive_40w__3649b3861a87e6ea__w40` produced `loan=3`, `operation_participant=4`, `sector_front=61`, `sector_reserve=3`, `sector_rear=7`; `diagnose_run.cjs` reported 0 errors / 29 warnings, and `validate_run_consistency.cjs` passed.
+
+**Roadmap delta:** Active-never-fights is classified, not behavior-fixed. Future behavior work should trace the 61 `sector_front` cases against sector pressure, stance, objectives, and target scoring; do not tune personnel/reconstitution, HRHB/HVO gates, or formation lifecycle from the blended aggregate.
+
+**Report:** `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`

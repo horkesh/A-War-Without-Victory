@@ -73,7 +73,7 @@ The common pattern is live sector ownership without an operation participant rec
 
 ## Safe Next Packet
 
-The safest next implementation packet is `Active-Never-Fights Interpretation`.
+The safest next implementation packet was `Active-Never-Fights Interpretation`; it is now executed in `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`.
 
 Scope:
 
@@ -86,6 +86,12 @@ Acceptance:
 - No change to sector ownership, battle resolution, political controllers, or save schema in the classification slice.
 - Report should no longer treat quiet reserves and live-front inert brigades as the same product concern.
 - Any behavior change after classification requires a fresh 40w hash/gates proof.
+
+Result:
+
+- `loan=3`, `operation_participant=4`, `sector_front=61`, `sector_reserve=3`, `sector_rear=7`.
+- No behavior, ownership, combat, OOB, personnel, HRHB/HVO gate, save-schema, or serialization change.
+- Next behavior packet, if any, should start from the 61 `sector_front` cases only.
 
 ## Needs Design Or Canon Review
 
