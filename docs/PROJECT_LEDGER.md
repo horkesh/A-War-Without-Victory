@@ -4348,3 +4348,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not retry the exact faction+loc+target salient cache without new evidence. The next CPU lane should use the fresh profile and prefer concrete remaining labels such as `sectorAttack.executionDirectObjective`, remaining `homeDefense.uncontestedOccupation` attribution, or defensive shared work.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split sector-attack direct objective profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Threaded the existing optional `predictCombatOutcome(...)` profile-prefix hook into the sector-attack direct current-objective branch and added a profile guard for `.sectorAttack.executionDirectObjective.predictCombatOutcome`.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The change only passes a label prefix into an existing optional profiler hook; it preserves branch order, prediction semantics, order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1825 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on the missing direct-objective predictor label. Green focused suite `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts tests/uncontested_occupation_priority.test.ts` passed 12/12, and `npm.cmd run typecheck` passed before profiling. Profiled 40w n1825 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. Leading direct-objective internals were `.sectorAttack.executionDirectObjective.predictCombatOutcome.rankDefendersByPower` at 22.117ms and `.rankDefendersByPower.computeDefenderPower` at 20.229ms.
+
+**Roadmap delta:** Direct current-objective sector-attack predictor attribution is now visible. The next bot-order CPU lane should inspect direct-objective defender-power reuse/index opportunities before pathing or tactical-adjacency work, and should not retry the exact uncontested-salient cache shape rejected in n1824.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md`

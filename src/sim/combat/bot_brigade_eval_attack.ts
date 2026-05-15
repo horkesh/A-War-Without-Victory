@@ -36,6 +36,8 @@ export const UNCONTESTED_OCCUPATION_SCORE = 600;
 const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const DEFENSIVE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const SECTOR_ATTACK_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX =
+    'bot_orders.executeFactionDirectives.eval.sectorAttack.executionDirectObjective.predictCombatOutcome';
 const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
@@ -232,6 +234,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         osidPopulationMap,
                         undefined,
                         ethnicMap,
+                        SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
                     );
                     return prediction ? { osid: currentObjective as Osid, prediction } : undefined;
                 })

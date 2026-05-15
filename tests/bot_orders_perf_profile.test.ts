@@ -150,6 +150,7 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproachPath');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionPredictTargets');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionDirectObjective');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionDirectObjective.predictCombatOutcome');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionTacticalAdjacency');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionAdjacentParticipants');
         expect(brigadeEvalAttack).toContain('.sectorAttack.executionApproachPath');

@@ -8,7 +8,7 @@
 
 **Latest bot-order CPU optimization:** [implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md](implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md) - n1821 kept final hash `0cb626c032204372` and reused pass-local corps territory sets in `evaluateReturnToCorps(...)`; `.returnToCorps.territoryCheck` dropped 20.496ms -> 1.072ms and `returnToCorps` dropped 46.883ms -> 25.514ms. Full bot-order total was run-noisy/slightly higher, so this is recorded as a targeted evaluator cut.
 
-**Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_INTERIOR_MOVEMENT_PROFILE_SPLIT.md) - n1823 kept final hash `0cb626c032204372` and split `evaluateInteriorMovement(...)`; `.interiorMovement.fallback` measured 12.864ms and `.interiorMovement.prioritySector` measured 8.017ms.
+**Latest bot-order CPU profile split:** [implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md](implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_PROFILE_SPLIT.md) - n1825 kept final hash `0cb626c032204372` and split the sector-attack direct current-objective `predictCombatOutcome(...)` internals; `.rankDefendersByPower` measured 22.117ms and `.rankDefendersByPower.computeDefenderPower` measured 20.229ms.
 
 **Latest bot-order rejected CPU candidate:** [implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md](implemented/20260515_BOT_ORDERS_UNCONTESTED_SALIENT_CACHE_REJECTED.md) - n1824 kept final hash `0cb626c032204372`, but the exact faction+loc+target uncontested-salient cache worsened `.uncontestedOccupation.salient` 20.629ms -> 23.320ms, so the implementation was reverted.
 
