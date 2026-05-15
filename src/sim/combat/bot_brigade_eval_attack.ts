@@ -215,27 +215,37 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
             const directObjectiveAttack = tacticallyAdjacentToObjective
                 ? sectorAttackProfileTime('.sectorAttack.executionDirectObjective', () => {
-                    if (avoidedOsidsForFaction?.includes(currentObjective as string)) return undefined;
-                    if (objController === null || objController === faction) return undefined;
-                    if ((faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)) {
-                        const alliedOpponent = faction === 'HRHB' ? 'RBiH' : 'HRHB';
-                        if (objController === alliedOpponent) return undefined;
-                    }
-                    const prediction = predictCombatOutcome(
-                        state,
-                        brigade.id,
-                        currentObjective as Osid,
-                        adjacency,
-                        reverseMap,
-                        terrainCache,
-                        'attack',
-                        undefined,
-                        supplyStateByOsid,
-                        osidPopulationMap,
-                        undefined,
-                        ethnicMap,
-                        SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
-                        officerCombatLookup,
+                    const skipDirectObjective = sectorAttackProfileTime(
+                        '.sectorAttack.executionDirectObjective.gates',
+                        () => {
+                            if (avoidedOsidsForFaction?.includes(currentObjective as string)) return true;
+                            if (objController === null || objController === faction) return true;
+                            if ((faction === 'HRHB' || faction === 'RBiH') && !isRbihHrhbCombatEnabled(state)) {
+                                const alliedOpponent = faction === 'HRHB' ? 'RBiH' : 'HRHB';
+                                if (objController === alliedOpponent) return true;
+                            }
+                            return false;
+                        },
+                    );
+                    if (skipDirectObjective) return undefined;
+                    const prediction = sectorAttackProfileTime(
+                        '.sectorAttack.executionDirectObjective.predict',
+                        () => predictCombatOutcome(
+                            state,
+                            brigade.id,
+                            currentObjective as Osid,
+                            adjacency,
+                            reverseMap,
+                            terrainCache,
+                            'attack',
+                            undefined,
+                            supplyStateByOsid,
+                            osidPopulationMap,
+                            undefined,
+                            ethnicMap,
+                            SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
+                            officerCombatLookup,
+                        ),
                     );
                     return prediction ? { osid: currentObjective as Osid, prediction } : undefined;
                 })

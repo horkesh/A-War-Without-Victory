@@ -4412,3 +4412,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The residual assignment/front-membership checks are not next optimization targets. The next CPU lane should pivot to a larger measured bucket or a deeper targeted split of remaining shared evaluator work.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_RESIDUAL_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split sector-attack direct-objective wrapper
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added direct-objective sectorAttack wrapper labels for local gate checks and the direct `predictCombatOutcome(...)` call while retaining existing predictor-internal labels.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The change wraps existing pure checks and the existing predictor call; it preserves branch order, prediction semantics, movement/posture/attack order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1829 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.sectorAttack.executionDirectObjective.gates`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1829 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.sectorAttack.executionDirectObjective.predict` measured 39.897ms while `.sectorAttack.executionDirectObjective.gates` measured only 0.178ms.
+
+**Roadmap delta:** Direct-objective sectorAttack is predictor-bound, not local-gate-bound. Future sectorAttack CPU work should inspect predictor child labels (`rankDefendersByPower`, `sectorDefensePower`, `attackerPower`) before touching local wrapper gates.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_DIRECT_OBJECTIVE_WRAPPER_PROFILE_SPLIT.md`
