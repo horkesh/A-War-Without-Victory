@@ -43,7 +43,7 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import { pickOperationName } from '../operation_names.js';
-import { buildTerrainCache, predictAllAdjacentTargets } from '../combat_predictor.js';
+import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
@@ -145,6 +145,56 @@ const PLAN_ACTION_MAP: Record<string, 'advance' | 'suspend' | 'abandon' | undefi
 };
 
 const BUILD_OPERATIONS_PROFILE_PREFIX = 'commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations';
+
+type PredictedProbeTarget = {
+    osid: string;
+    prediction: CombatPrediction;
+};
+
+function predictDirectEnemyTargets(
+    briefing: CommanderBriefing,
+    probeBrigadeId: string,
+    directEnemyTargets: ReadonlySet<string>,
+    adjacency: Map<any, any>,
+    terrainCache: Record<string, number> | null,
+): PredictedProbeTarget[] {
+    if (directEnemyTargets.size === 0 || !briefing.state_ref || !briefing.reverse_map) {
+        return [];
+    }
+
+    const terrainMultByOsid = terrainCache ?? {};
+    const predictedTargets: PredictedProbeTarget[] = [];
+    for (const target of [...directEnemyTargets].sort(strictCompare)) {
+        const targetController = getPoliticalControllerOSID(
+            briefing.state_ref,
+            target,
+            briefing.reverse_map,
+        );
+        if (targetController === null || targetController === briefing.faction) {
+            continue;
+        }
+
+        const prediction = predictCombatOutcome(
+            briefing.state_ref,
+            probeBrigadeId,
+            target as any,
+            adjacency,
+            briefing.reverse_map,
+            terrainMultByOsid,
+            'attack',
+            undefined,
+            briefing.supply_by_osid ?? undefined,
+            undefined,
+            undefined,
+            briefing.ethnic_map ?? undefined,
+        );
+        if (prediction) {
+            predictedTargets.push({ osid: target, prediction });
+        }
+    }
+
+    return predictedTargets;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // emitCommanderOutput — main entry point
@@ -989,21 +1039,14 @@ function buildOperations(
                                     },
                                 );
                                 const predictedTargets = botOrdersPerfTime(
-                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictAllAdjacentTargets`,
-                                    () => directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
-                                        ? predictAllAdjacentTargets(
-                                            briefing.state_ref,
-                                            probeBrigade.brigade_id,
-                                            adjacency as Map<any, any>,
-                                            briefing.reverse_map,
-                                            terrainCache ?? {},
-                                            'attack',
-                                            briefing.supply_by_osid ?? undefined,
-                                            undefined,
-                                            undefined,
-                                            briefing.ethnic_map ?? undefined,
-                                        )
-                                        : [],
+                                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets`,
+                                    () => predictDirectEnemyTargets(
+                                        briefing,
+                                        probeBrigade.brigade_id,
+                                        directEnemyTargets,
+                                        adjacency as Map<any, any>,
+                                        terrainCache,
+                                    ),
                                 );
                                 const predictedTargetByOsid = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictedTargetMap`,

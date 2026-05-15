@@ -138,12 +138,15 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderEmit).toContain('.probe.deriveObjectives.terrainCache');
         expect(commanderEmit).toContain('.probe.deriveObjectives.enemyTargets');
         expect(commanderEmit).toContain('.probe.deriveObjectives.directEnemyTargets');
-        expect(commanderEmit).toContain('.probe.deriveObjectives.predictAllAdjacentTargets');
+        expect(commanderEmit).toContain('.probe.deriveObjectives.predictDirectTargets');
         expect(commanderEmit).toContain('.probe.deriveObjectives.predictedTargetMap');
         expect(commanderEmit).toContain('.probe.deriveObjectives.rankTargets');
         expect(commanderEmit).toContain('.probe.deriveObjectives.pickObjective');
         expect(commanderEmit).toContain('.probe.reachability');
         expect(commanderEmit).toContain('.probe.buildProbeOperation');
+        expect(commanderEmit).toContain('predictDirectEnemyTargets');
+        expect(commanderEmit).toContain('predictCombatOutcome');
+        expect(commanderEmit).not.toContain('predictAllAdjacentTargets');
         expect(commanderEmit).toContain('directEnemyTargets');
         expect(commanderEmit).toContain('predictedTargetByOsid');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');

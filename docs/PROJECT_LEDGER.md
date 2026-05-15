@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): narrow probe predictor to direct targets
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the probe derive-objective profile split.
+
+**Fix:** Replaced the probe objective path's whole-neighbor `predictAllAdjacentTargets(...)` call with `predictDirectEnemyTargets(...)`, which preserves the same political-controller filter but calls `predictCombatOutcome(...)` only for the already-filtered direct target candidates consumed by `predictedTargetByOsid`. No probe objective ranking rule, cooldown filter, Graz block, reachability filter, scenario data, or output schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `.probe.deriveObjectives.predictDirectTargets`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1779 with final hash `7ef09f55d6494edd`, matching n1778. `probe.deriveObjectives` dropped 263.514ms -> 244.752ms; the predictor sub-step dropped 238.334ms -> 219.768ms.
+
+**Canon posture:** Deterministic performance refactor in the commander read path. Profiling remains opt-in via `PERF_PROFILE_BOT_ORDERS=true`; final serialized output was hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_PROBE_DIRECT_TARGET_PREDICTOR_PROFILE.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): split probe objective profile
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the `buildOperations` plan/probe split.
