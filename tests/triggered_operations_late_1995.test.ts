@@ -4,20 +4,20 @@
  * Source: docs/40_reports/implemented/20260501_LATE_1995_SCRIPTED_OPS_PACKET.md
  *
  * Verifies the late-1995 operations added to close the Family-1 (missing
- * scenario content) gap. Operation Sana was migrated to the opportunity
+ * scenario content) gap. Operation Sana and Mistral 2 were migrated to the opportunity
  * catalog (LANE B Phase 3, 2026-05-01); see
  * tests/operation_opportunities_5th_corps_sana.test.ts for its coverage.
  * Krivaja-95 / Stupčanica-95 are sensitive-history T4 candidates — they
  * remain calendar-triggered until the SENSITIVE_HISTORY_DESIGN_GATE.md §6
  * sign-off chain authors a T4 opportunity replacement.
  *
- * Contract for the remaining three:
+ * Contract for the remaining two:
  *   1. Each op exists with the correct faction / primary_corps / turn gate.
  *   2. Each op's trigger returns false before its historical turn window.
  *   3. Each op's objective OSIDs are 712-OSID universe canonical names.
  *   4. Each op's objectives are painted-flipped between apr1995 and oct1995.
  *   5. No op fires before turn 168 (the earliest historical turn = Krivaja-95).
- *   6. The three remaining ops appear after the four legacy ops in the catalog.
+ *   6. The two remaining ops appear after the four legacy ops in the catalog.
  */
 
 import assert from 'node:assert/strict';
@@ -30,7 +30,6 @@ import type { GameState } from '../src/state/game_state.js';
 const NEW_OP_NAMES = [
     'Operation Krivaja-95',
     'Operation Stupčanica-95',
-    'Operation Mistral 2',
 ] as const;
 
 const PAINTED_OCT_1995 = JSON.parse(
@@ -54,14 +53,14 @@ function trivialState(turn: number): GameState {
 }
 
 describe('late-1995 triggered operations — catalog', () => {
-    it('contains the three late-1995 reversal operations after the four legacy ops', () => {
+    it('contains the two sensitive-history late-1995 reversal operations after the four legacy ops', () => {
         const names = _TRIGGERED_OPS.map((def) => def.name);
         for (const name of NEW_OP_NAMES) {
             assert.ok(names.includes(name), `expected catalog to contain ${name}`);
         }
-        // Ordering: legacy four first, late-1995 three after (Sana migrated to
-        // opportunity catalog 2026-05-01), chronologically by turn-gate.
-        assert.deepEqual(names.slice(-3), [...NEW_OP_NAMES]);
+        // Ordering: legacy four first, late-1995 sensitive-history two after.
+        // Sana and Mistral 2 are migrated to opportunity catalogs.
+        assert.deepEqual(names.slice(-2), [...NEW_OP_NAMES]);
     });
 
     it('Operation Krivaja-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
@@ -95,24 +94,13 @@ describe('late-1995 triggered operations — catalog', () => {
         assert.equal(def!.trigger(trivialState(172), 172), true);
     });
 
-    it('Operation Mistral 2 has the expected faction/corps/turn-gate/two-axis shape', () => {
+    it('Operation Mistral 2 has migrated out of triggered operations', () => {
         const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Mistral 2');
-        assert.ok(def);
-        assert.equal(def!.faction, 'HRHB');
-        assert.equal(def!.primary_corps, 'hvo_main_staff');
-        assert.equal(def!.axes.length, 2);
-        const axisCorps = new Set(def!.axes.map((a) => a.corps));
-        assert.deepEqual(axisCorps, new Set(['hvo_main_staff', 'hvo_tomislavgrad']));
-        assert.equal(def!.staging_osid, 'op:livno:misi_2');
-        // Trigger gate: w >= 175 (Sep 1995 historical)
-        assert.equal(def!.trigger(trivialState(174), 174), false);
-        assert.equal(def!.trigger(trivialState(175), 175), true);
+        assert.equal(def, undefined);
     });
 
-    // Operation Sana shape test migrated to
-    // tests/operation_opportunities_5th_corps_sana.test.ts (LANE B Phase 3,
-    // 2026-05-01). The opportunity catalog now owns the Sana axis layout +
-    // brigade roster.
+    // Operation Sana and Mistral 2 shape tests migrated to opportunity catalog
+    // suites. The opportunity catalog now owns the axis layout + brigade roster.
 });
 
 describe('late-1995 triggered operations — turn gates protect early-war runs', () => {
@@ -165,22 +153,7 @@ describe('late-1995 triggered operations — objective OSIDs are valid + painted
         assert.equal(oct1995Map[objective!], 'RS');
     });
 
-    it('Mistral 2 objectives are all painted=HRHB at oct1995 (post-Mistral truth)', () => {
-        const def = _TRIGGERED_OPS.find((d) => d.name === 'Operation Mistral 2');
-        assert.ok(def);
-        for (const axis of def!.axes) {
-            for (const osid of axis.objectives) {
-                assert.equal(
-                    oct1995Map[osid],
-                    'HRHB',
-                    `${osid} (${axis.axis_id}) should be oct1995=HRHB`,
-                );
-            }
-        }
-    });
-
-    // Sana painted-truth assertion migrated to opportunity-catalog test pack
-    // (Phase 3 single-owner migration, 2026-05-01).
+    // Sana and Mistral 2 painted-truth assertions migrated to opportunity-catalog test packs.
 
     it('all new-op objectives are deterministic (each axis preserves declared order, no duplicates)', () => {
         for (const name of NEW_OP_NAMES) {

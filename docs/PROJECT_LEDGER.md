@@ -4588,3 +4588,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Keep `collectFriendlyComponentsExcluding(...)` queue-based unless future code needs ordered component members. Do not retry the adjacent-corps context cache shape without a broader reuse boundary; its measured 20.050ms context build cost outweighed the child-label cut in n1839.
 
 **Report:** `docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md`
+
+---
+
+## [2026-05-15] feat(operations): add Kupres/Cincar and Mistral opportunity families
+
+**Scope:** Operation Opportunity Families Phase 2. Adds the Kupres/Cincar dependency node and the first Federation-Western Bosnia opportunity slice.
+
+**Change:** Added `kupres_cincar_94` to `operation_opportunity_catalog_central_bosnia.ts` and added `mistral_2_95` in the new `operation_opportunity_catalog_federation_western_bosnia.ts`. Mistral 2 is now removed from the active triggered-operation catalog and owned by the opportunity catalog, with tests enforcing single ownership.
+
+**Canon posture:** Additive non-sensitive Ring 1 operation-opportunity content plus a non-sensitive single-owner migration. No combat math, scenario paint, OOB, sensitive-history event, rupture/enclave rule, genocide representation, or UI-specific family surface changed. Approval routes through `applyOpportunityDecision` and the canonical `buildCorpsOperation` path.
+
+**Verification:** Red first: focused catalog tests failed on the missing Kupres/Cincar export and missing Federation-Western Bosnia catalog. Green focused: 13/13 focused catalog tests passed. Green expanded: `npm.cmd run test:vitest:fast -- -- tests\operation_opportunities_catalog.test.ts tests\operation_opportunities_central_bosnia_catalog.test.ts tests\operation_opportunities_federation_western_bosnia_catalog.test.ts tests\triggered_operations.test.ts tests\triggered_operations_late_1995.test.ts` passed 80/80. `npm.cmd run sim:scenario:run:40w` passed with run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` and final hash `0cb626c032204372`; opportunity health audit found 0 decisions and no broken rows. `npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs` passed with run `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` and final hash `a0111273f26f907d`; opportunity health audit found 7 decisions, 7 completed resolutions, 0 unlinked offensive resolutions, 0 broken AAR links, and 0 duplicate resolution rows. `npm.cmd run typecheck` is blocked in this isolated worktree by missing UI map package declarations (`maplibre-gl`, `pmtiles`, `@deck.gl/*`, `@vitejs/plugin-react`); the new tests no longer produce type errors.
+
+**Docs:** Updated Central Bosnia and Federation-Western Bosnia design docs, master roadmap, product-spine mega-lane plan, knowledge ledger, napkin, and implementation report.
+
+**Report:** `docs/40_reports/implemented/20260515_KUPRES_CINCAR_MISTRAL_OPPORTUNITY_FAMILIES.md`

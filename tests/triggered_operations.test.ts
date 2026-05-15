@@ -110,7 +110,7 @@ describe('triggered operations definitions', () => {
         // Operation Sana migrated to the opportunity catalog (LANE B Phase 3,
         // 2026-05-01). Its coverage now lives in
         // tests/operation_opportunities_5th_corps_sana.test.ts.
-        assert.equal(_TRIGGERED_OPS.length, 7);
+        assert.equal(_TRIGGERED_OPS.length, 6);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),
             [
@@ -120,7 +120,6 @@ describe('triggered operations definitions', () => {
                 'Operation Cerska-Kamenica',
                 'Operation Krivaja-95',
                 'Operation Stupčanica-95',
-                'Operation Mistral 2',
             ],
         );
     });
