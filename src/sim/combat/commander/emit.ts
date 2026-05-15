@@ -144,6 +144,8 @@ const PLAN_ACTION_MAP: Record<string, 'advance' | 'suspend' | 'abandon' | undefi
     abandoned: 'abandon',
 };
 
+const BUILD_OPERATIONS_PROFILE_PREFIX = 'commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations';
+
 // ═══════════════════════════════════════════════════════════════════════════
 // emitCommanderOutput — main entry point
 // ═══════════════════════════════════════════════════════════════════════════
@@ -181,7 +183,7 @@ export function emitCommanderOutput(
 
     // 2. Build operations list
     const operations = botOrdersPerfTime(
-        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildOperations',
+        BUILD_OPERATIONS_PROFILE_PREFIX,
         () => buildOperations(
             briefing,
             allocation,
@@ -644,10 +646,14 @@ function buildOperations(
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
         (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
     ) {
+        const activePlan = planDecision.plan;
         // Slot cap guard: don't emit a new op if corps is already at capacity.
         // Mirrors hasAvailableSlot() used in bot_corps_directives / bot_corps_operations.
         // Exclude recovery-phase ops — they don't occupy an active slot.
-        const activeSlotUsers = briefing.active_operations.filter(op => op.phase !== 'recovery');
+        const activeSlotUsers = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.activeSlotUsers`,
+            () => briefing.active_operations.filter(op => op.phase !== 'recovery'),
+        );
         if (activeSlotUsers.length >= getMaxOperationSlots(briefing.brigades.length)) {
             return ops;
         }
@@ -675,7 +681,7 @@ function buildOperations(
         // When plan has no specific target OSIDs, pre-derive them so reachability
         // validation can still apply (prevents rear-area brigades entering the pool).
         // Root of the original ZEA / 13-15 turn stall bug — preserve this guard.
-        const planTargetOsids = planDecision.plan.target_osids;
+        const planTargetOsids = activePlan.target_osids;
         const firstObjectiveOsid = planTargetOsids.length > 0
             ? [...planTargetOsids].sort(strictCompare)[0]!
             : null;
@@ -709,53 +715,62 @@ function buildOperations(
         };
 
         // Primary pool: brigades assigned to the primary sector that are surplus + reachable.
-        const primaryPool: string[] = primarySector
-            ? primarySector.assigned_brigade_ids
-                .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
-                .sort(strictCompare)
-            : [];
+        const primaryPool: string[] = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.primaryPool`,
+            () => primarySector
+                ? primarySector.assigned_brigade_ids
+                    .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
+                    .sort(strictCompare)
+                : [],
+        );
 
         // Adjacent-sector attachments: bounded by ADJACENT_SECTOR_ATTACH_RATE per sector.
         // Only sectors territory-adjacent to the primary sector may contribute.
-        const attachedPool: string[] = [];
-        const attachmentSectorIds = new Set<string>();
-        if (primarySector) {
-            // Pre-build the set of all OSIDs neighboring any primary-sector territory OSID.
-            // Avoids creating a new Set per candidate sector inside the filter.
-            const primaryNeighborSet = new Set<string>();
-            for (const osid of primarySector.territory_osids) {
-                for (const n of (adjacencyMap.get(osid as any) ?? []) as readonly string[]) {
-                    primaryNeighborSet.add(n);
+        const { attachedPool, attachmentSectorIds } = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.attachedPool`,
+            () => {
+                const attachedPool: string[] = [];
+                const attachmentSectorIds = new Set<string>();
+                if (primarySector) {
+                    // Pre-build the set of all OSIDs neighboring any primary-sector territory OSID.
+                    // Avoids creating a new Set per candidate sector inside the filter.
+                    const primaryNeighborSet = new Set<string>();
+                    for (const osid of primarySector.territory_osids) {
+                        for (const n of (adjacencyMap.get(osid as any) ?? []) as readonly string[]) {
+                            primaryNeighborSet.add(n);
+                        }
+                    }
+
+                    const adjacentCorpsSectors = briefing.sectors
+                        .filter(s => {
+                            if (s.corps_id !== briefing.corps_id || s.sector_id === sectorId) return false;
+                            return s.territory_osids.some(osid => primaryNeighborSet.has(osid));
+                        })
+                        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+                    for (const adjSector of adjacentCorpsSectors) {
+                        const totalAssigned = adjSector.assigned_brigade_ids.length;
+                        // Cap: floor(total × ADJACENT_SECTOR_ATTACH_RATE), leaving ≥ ADJACENT_SECTOR_MIN_RESIDUAL behind.
+                        const maxAttachable = Math.min(
+                            Math.floor(totalAssigned * ADJACENT_SECTOR_ATTACH_RATE),
+                            Math.max(0, totalAssigned - ADJACENT_SECTOR_MIN_RESIDUAL),
+                        );
+                        if (maxAttachable <= 0) continue;
+
+                        const eligibleFromSector = adjSector.assigned_brigade_ids
+                            .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
+                            .sort(strictCompare)
+                            .slice(0, maxAttachable);
+
+                        if (eligibleFromSector.length > 0) {
+                            attachedPool.push(...eligibleFromSector);
+                            attachmentSectorIds.add(adjSector.sector_id);
+                        }
+                    }
                 }
-            }
-
-            const adjacentCorpsSectors = briefing.sectors
-                .filter(s => {
-                    if (s.corps_id !== briefing.corps_id || s.sector_id === sectorId) return false;
-                    return s.territory_osids.some(osid => primaryNeighborSet.has(osid));
-                })
-                .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-
-            for (const adjSector of adjacentCorpsSectors) {
-                const totalAssigned = adjSector.assigned_brigade_ids.length;
-                // Cap: floor(total × ADJACENT_SECTOR_ATTACH_RATE), leaving ≥ ADJACENT_SECTOR_MIN_RESIDUAL behind.
-                const maxAttachable = Math.min(
-                    Math.floor(totalAssigned * ADJACENT_SECTOR_ATTACH_RATE),
-                    Math.max(0, totalAssigned - ADJACENT_SECTOR_MIN_RESIDUAL),
-                );
-                if (maxAttachable <= 0) continue;
-
-                const eligibleFromSector = adjSector.assigned_brigade_ids
-                    .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
-                    .sort(strictCompare)
-                    .slice(0, maxAttachable);
-
-                if (eligibleFromSector.length > 0) {
-                    attachedPool.push(...eligibleFromSector);
-                    attachmentSectorIds.add(adjSector.sector_id);
-                }
-            }
-        }
+                return { attachedPool, attachmentSectorIds };
+            },
+        );
 
         let participatingBrigades = [...primaryPool, ...attachedPool].sort(strictCompare);
 
@@ -773,26 +788,37 @@ function buildOperations(
         // front has shifted and collectObjectiveApproachOsids will return an empty approach
         // set — causing every brigade to have no valid attack position and the op to stall
         // indefinitely (zero attacks per turn). Drop such stale objectives now.
-        const reachableEnemyOsids = new Set<string>();
-        for (const sector of briefing.sectors) {
-            if (sector.corps_id !== briefing.corps_id) continue;
-            for (const seg of sector.sub_segments ?? []) {
-                for (const osid of seg.enemy_osids ?? []) {
-                    reachableEnemyOsids.add(osid);
+        const reachableEnemyOsids = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.reachableEnemyOsids`,
+            () => {
+                const reachableEnemyOsids = new Set<string>();
+                for (const sector of briefing.sectors) {
+                    if (sector.corps_id !== briefing.corps_id) continue;
+                    for (const seg of sector.sub_segments ?? []) {
+                        for (const osid of seg.enemy_osids ?? []) {
+                            reachableEnemyOsids.add(osid);
+                        }
+                    }
                 }
-            }
-        }
+                return reachableEnemyOsids;
+            },
+        );
 
-        const rawObjectives = planDecision.plan.target_osids.length > 0
-            ? [...planDecision.plan.target_osids].sort(strictCompare)
-            : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
+        const objectives = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.objectives`,
+            () => {
+                const rawObjectives = activePlan.target_osids.length > 0
+                    ? [...activePlan.target_osids].sort(strictCompare)
+                    : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
 
-        // Filter: drop any objective OSID not reachable from this corps's front segments.
-        // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
-        // is non-empty), to avoid incorrectly zeroing objectives for a corps with no sectors.
-        const objectives = reachableEnemyOsids.size > 0
-            ? rawObjectives.filter(osid => reachableEnemyOsids.has(osid))
-            : rawObjectives;
+                // Filter: drop any objective OSID not reachable from this corps's front segments.
+                // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
+                // is non-empty), to avoid incorrectly zeroing objectives for a corps with no sectors.
+                return reachableEnemyOsids.size > 0
+                    ? rawObjectives.filter(osid => reachableEnemyOsids.has(osid))
+                    : rawObjectives;
+            },
+        );
 
         // Guard: if every plan objective was stale (none survived the filter), skip
         // creating this operation rather than injecting an empty-objectives op that
@@ -801,36 +827,42 @@ function buildOperations(
             return ops;
         }
 
-        // Build a personnel lookup for initial_strength calculation.
-        const personnelById = new Map<string, number>();
-        for (const b of briefing.brigades) personnelById.set(b.id, b.personnel ?? 0);
+        const op = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.buildOperation`,
+            () => {
+                // Build a personnel lookup for initial_strength calculation.
+                const personnelById = new Map<string, number>();
+                for (const b of briefing.brigades) personnelById.set(b.id, b.personnel ?? 0);
 
-        const initialStrength = participatingBrigades.reduce(
-            (sum, id) => sum + (personnelById.get(id) ?? 0), 0,
+                const initialStrength = participatingBrigades.reduce(
+                    (sum, id) => sum + (personnelById.get(id) ?? 0), 0,
+                );
+
+                // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
+                // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+                const opName = pickOperationName(briefing.corps_id, briefing.turn, briefing.faction, briefing.state_ref);
+                const op = buildCommanderOperation(
+                    briefing.corps_id,
+                    briefing.turn,
+                    participatingBrigades,
+                    sectorId ?? undefined,
+                    objectives,
+                    initialStrength,
+                    opName,
+                );
+
+                // Sector-anchored launch contract fields — direct from Phase 3 pool selection.
+                if (primaryPool.length > 0) op.primary_sector_brigades = primaryPool;
+                if (attachedPool.length > 0) {
+                    op.attached_brigades = attachedPool;
+                    op.reinforcement_source = 'adjacent_sector';
+                }
+                if (attachmentSectorIds.size > 0) {
+                    op.supporting_sector_ids = [...attachmentSectorIds].sort(strictCompare);
+                }
+                return op;
+            },
         );
-
-        // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
-        // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
-        const opName = pickOperationName(briefing.corps_id, briefing.turn, briefing.faction, briefing.state_ref);
-        const op = buildCommanderOperation(
-            briefing.corps_id,
-            briefing.turn,
-            participatingBrigades,
-            sectorId ?? undefined,
-            objectives,
-            initialStrength,
-            opName,
-        );
-
-        // Sector-anchored launch contract fields — direct from Phase 3 pool selection.
-        if (primaryPool.length > 0) op.primary_sector_brigades = primaryPool;
-        if (attachedPool.length > 0) {
-            op.attached_brigades = attachedPool;
-            op.reinforcement_source = 'adjacent_sector';
-        }
-        if (attachmentSectorIds.size > 0) {
-            op.supporting_sector_ids = [...attachmentSectorIds].sort(strictCompare);
-        }
 
         const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, op));
         if (conflictingOp) {
@@ -841,14 +873,14 @@ function buildOperations(
         // taken at plan-creation time into the operation lifecycle. This is the
         // single transfer point — sector_offensive's finalizeOperationAAR reads
         // it back into the AAR. No new computation here; pure copy.
-        if (planDecision.plan.force_quality_traits) {
-            op.force_quality_traits_at_launch = planDecision.plan.force_quality_traits;
+        if (activePlan.force_quality_traits) {
+            op.force_quality_traits_at_launch = activePlan.force_quality_traits;
         }
-        if (planDecision.plan.force_quality_blocked) {
+        if (activePlan.force_quality_blocked) {
             op.force_quality_blocked_at_launch = true;
         }
-        if (typeof planDecision.plan.force_quality_max_axes === 'number') {
-            op.force_quality_max_axes_at_launch = planDecision.plan.force_quality_max_axes;
+        if (typeof activePlan.force_quality_max_axes === 'number') {
+            op.force_quality_max_axes_at_launch = activePlan.force_quality_max_axes;
         }
 
         ops.push(op);
@@ -861,17 +893,22 @@ function buildOperations(
     // in-flight probes (active_operations) and previously-completed probes
     // (previous_state.operation_history) to bridge the recovery transition.
     const PROBE_COOLDOWN_TURNS = 4;
-    const recentProbeStartTurns: number[] = [];
-    for (const op of briefing.active_operations) {
-        if (op.type === 'probe') recentProbeStartTurns.push(op.started_turn);
-    }
-    for (const entry of briefing.previous_state?.operation_history ?? []) {
-        if (entry.type === 'probe') recentProbeStartTurns.push(entry.started_turn);
-    }
-    const lastProbeTurn = recentProbeStartTurns.length > 0
-        ? recentProbeStartTurns.reduce((max, t) => t > max ? t : max, -Infinity)
-        : -Infinity;
-    const probeOnCooldown = Number.isFinite(lastProbeTurn) && (briefing.turn - lastProbeTurn) < PROBE_COOLDOWN_TURNS;
+    const probeOnCooldown = botOrdersPerfTime(
+        `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.cooldown`,
+        () => {
+            const recentProbeStartTurns: number[] = [];
+            for (const op of briefing.active_operations) {
+                if (op.type === 'probe') recentProbeStartTurns.push(op.started_turn);
+            }
+            for (const entry of briefing.previous_state?.operation_history ?? []) {
+                if (entry.type === 'probe') recentProbeStartTurns.push(entry.started_turn);
+            }
+            const lastProbeTurn = recentProbeStartTurns.length > 0
+                ? recentProbeStartTurns.reduce((max, t) => t > max ? t : max, -Infinity)
+                : -Infinity;
+            return Number.isFinite(lastProbeTurn) && (briefing.turn - lastProbeTurn) < PROBE_COOLDOWN_TURNS;
+        },
+    );
 
     // If no plan but surplus and high-initiative commander: probe weak positions
     if (
@@ -885,14 +922,17 @@ function buildOperations(
         // Probe operations use a single surplus brigade on the weakest enemy position.
         // The actual probe target selection is left to sector_offensive downstream;
         // we just create the shell operation so the pipeline knows to attempt it.
-        const probeBrigade = allocation.surplus_pool
-            .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
-            .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
-            .sort((a, b) => {
-                const fitDiff = b.fitness_offense - a.fitness_offense;
-                if (fitDiff !== 0) return fitDiff;
-                return strictCompare(a.brigade_id, b.brigade_id);
-            })[0];
+        const probeBrigade = botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.selectBrigade`,
+            () => allocation.surplus_pool
+                .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+                .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
+                .sort((a, b) => {
+                    const fitDiff = b.fitness_offense - a.fitness_offense;
+                    if (fitDiff !== 0) return fitDiff;
+                    return strictCompare(a.brigade_id, b.brigade_id);
+                })[0],
+        );
 
         if (probeBrigade) {
             const probeSectorId = derivePrimarySectorForBrigades(
@@ -904,137 +944,153 @@ function buildOperations(
 
             // Derive probe objective: first enemy-adjacent OSID in the probe sector.
             // Without objectives the probe op has no axis targets and would be ZEA.
-            let probeObjectives: string[] = [];
-            if (probeSectorId) {
-                const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
-                if (sector) {
-                    const adjacency = briefing.spatial.adjacency;
-                    const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
-                    const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
-                    const terrainCache = briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null;
-                    if (adjacency && friendlySet && probeBrigLoc) {
-                        const enemyTargets = new Set<string>();
-                        for (const sub of sector.sub_segments ?? []) {
-                            for (const fOsid of sub.friendly_osids ?? []) {
-                                for (const neighbor of adjacency.get(fOsid) ?? []) {
-                                    if (!friendlySet.has(neighbor)) {
-                                        enemyTargets.add(neighbor);
+            const probeObjectives: string[] = botOrdersPerfTime(
+                `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives`,
+                () => {
+                    let probeObjectives: string[] = [];
+                    if (probeSectorId) {
+                        const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
+                        if (sector) {
+                            const adjacency = briefing.spatial.adjacency;
+                            const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                            const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                            const terrainCache = briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null;
+                            if (adjacency && friendlySet && probeBrigLoc) {
+                                const enemyTargets = new Set<string>();
+                                for (const sub of sector.sub_segments ?? []) {
+                                    for (const fOsid of sub.friendly_osids ?? []) {
+                                        for (const neighbor of adjacency.get(fOsid) ?? []) {
+                                            if (!friendlySet.has(neighbor)) {
+                                                enemyTargets.add(neighbor);
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        }
-                        const directEnemyTargets = new Set<string>();
-                        for (const target of [...enemyTargets].sort(strictCompare)) {
-                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
-                            if (targetNeighbors.includes(probeBrigLoc)) {
-                                directEnemyTargets.add(target);
-                            }
-                        }
-                        const predictedTargets = directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
-                            ? predictAllAdjacentTargets(
-                                briefing.state_ref,
-                                probeBrigade.brigade_id,
-                                adjacency as Map<any, any>,
-                                briefing.reverse_map,
-                                terrainCache ?? {},
-                                'attack',
-                                briefing.supply_by_osid ?? undefined,
-                                undefined,
-                                undefined,
-                                briefing.ethnic_map ?? undefined,
-                            )
-                            : [];
-                        const predictedTargetByOsid = new Map(
-                            predictedTargets.map((candidate) => [candidate.osid, candidate]),
-                        );
-                        const rankedTargets = [...directEnemyTargets]
-                            .map((target) => {
-                                const cooldown = briefing.failed_offensive_objectives?.[target];
-                                const targetController = briefing.reverse_map && briefing.state_ref
-                                    ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
-                                    : null;
-                                const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
-                                const direct = true;
-                                const directPrediction = predictedTargetByOsid.get(target);
-                                let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
-                                for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
-                                    const dist = spatialFriendlyDistance(
-                                        briefing.spatial,
-                                        briefing.faction,
-                                        probeBrigLoc,
-                                        approachOsid,
-                                        MAX_REACHABILITY_HOPS,
-                                    );
-                                    if (dist >= 0 && dist < bestApproachDistance) {
-                                        bestApproachDistance = dist;
+                                const directEnemyTargets = new Set<string>();
+                                for (const target of [...enemyTargets].sort(strictCompare)) {
+                                    const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                    if (targetNeighbors.includes(probeBrigLoc)) {
+                                        directEnemyTargets.add(target);
                                     }
                                 }
-                                return {
-                                    target,
-                                    onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
-                                    direct,
-                                    politicallyBlocked: briefing.state_ref != null
-                                        && targetController != null
-                                        && shouldGrazBlockAttack(
-                                            briefing.state_ref,
-                                            briefing.corps_id,
-                                            briefing.faction,
+                                const predictedTargets = directEnemyTargets.size > 0 && briefing.state_ref && briefing.reverse_map
+                                    ? predictAllAdjacentTargets(
+                                        briefing.state_ref,
+                                        probeBrigade.brigade_id,
+                                        adjacency as Map<any, any>,
+                                        briefing.reverse_map,
+                                        terrainCache ?? {},
+                                        'attack',
+                                        briefing.supply_by_osid ?? undefined,
+                                        undefined,
+                                        undefined,
+                                        briefing.ethnic_map ?? undefined,
+                                    )
+                                    : [];
+                                const predictedTargetByOsid = new Map(
+                                    predictedTargets.map((candidate) => [candidate.osid, candidate]),
+                                );
+                                const rankedTargets = [...directEnemyTargets]
+                                    .map((target) => {
+                                        const cooldown = briefing.failed_offensive_objectives?.[target];
+                                        const targetController = briefing.reverse_map && briefing.state_ref
+                                            ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
+                                            : null;
+                                        const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                        const direct = true;
+                                        const directPrediction = predictedTargetByOsid.get(target);
+                                        let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
+                                        for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
+                                            const dist = spatialFriendlyDistance(
+                                                briefing.spatial,
+                                                briefing.faction,
+                                                probeBrigLoc,
+                                                approachOsid,
+                                                MAX_REACHABILITY_HOPS,
+                                            );
+                                            if (dist >= 0 && dist < bestApproachDistance) {
+                                                bestApproachDistance = dist;
+                                            }
+                                        }
+                                        return {
                                             target,
-                                            targetController,
-                                        ),
-                                    predictedViable: directPrediction == null
-                                        ? true
-                                        : isOutcomeSufficientForAttack(
-                                            directPrediction.prediction.predicted_outcome,
-                                            'stalemate',
-                                        ),
-                                    reachable: Number.isFinite(bestApproachDistance),
-                                    approachDistance: bestApproachDistance,
-                                };
-                            })
-                            .filter((candidate) => !candidate.onCooldown)
-                            .filter((candidate) => !candidate.politicallyBlocked)
-                            // Probe ops are one-brigade recon-by-force, not small marches.
-                            // Only launch when the chosen brigade is already on a valid
-                            // approach node for the target this turn and the brigade can
-                            // already clear the probe threshold on that exact target.
-                            .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
-                            .sort((a, b) =>
-                                Number(b.direct) - Number(a.direct)
-                                || a.approachDistance - b.approachDistance
-                                || strictCompare(a.target, b.target)
-                            );
-                        probeObjectives = rankedTargets.slice(0, 1).map((candidate) => candidate.target);
+                                            onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
+                                            direct,
+                                            politicallyBlocked: briefing.state_ref != null
+                                                && targetController != null
+                                                && shouldGrazBlockAttack(
+                                                    briefing.state_ref,
+                                                    briefing.corps_id,
+                                                    briefing.faction,
+                                                    target,
+                                                    targetController,
+                                                ),
+                                            predictedViable: directPrediction == null
+                                                ? true
+                                                : isOutcomeSufficientForAttack(
+                                                    directPrediction.prediction.predicted_outcome,
+                                                    'stalemate',
+                                                ),
+                                            reachable: Number.isFinite(bestApproachDistance),
+                                            approachDistance: bestApproachDistance,
+                                        };
+                                    })
+                                    .filter((candidate) => !candidate.onCooldown)
+                                    .filter((candidate) => !candidate.politicallyBlocked)
+                                    // Probe ops are one-brigade recon-by-force, not small marches.
+                                    // Only launch when the chosen brigade is already on a valid
+                                    // approach node for the target this turn and the brigade can
+                                    // already clear the probe threshold on that exact target.
+                                    .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
+                                    .sort((a, b) =>
+                                        Number(b.direct) - Number(a.direct)
+                                        || a.approachDistance - b.approachDistance
+                                        || strictCompare(a.target, b.target)
+                                    );
+                                probeObjectives = rankedTargets.slice(0, 1).map((candidate) => candidate.target);
+                            }
+                        }
                     }
-                }
-            }
+                    return probeObjectives;
+                },
+            );
 
             // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
             if (probeObjectives.length > 0) {
-                // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
-                const probeTarget = probeObjectives[0]!;
-                const probeAdj = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
-                const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
-                const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
-                let probeReachable = false;
-                if (probeAdj && probeFriendly && probeBrigLoc) {
-                    const targetNeighbors = (probeAdj.get(probeTarget as any) ?? []) as readonly string[];
-                    const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
-                    for (const approachOsid of approachOsids) {
-                        const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);
-                        if (dist >= 0) { probeReachable = true; break; }
+                const probeReachable = botOrdersPerfTime(
+                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.reachability`,
+                    () => {
+                        // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
+                        const probeTarget = probeObjectives[0]!;
+                        const probeAdj = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
+                        const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                        const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                        if (probeAdj && probeFriendly && probeBrigLoc) {
+                            const targetNeighbors = (probeAdj.get(probeTarget as any) ?? []) as readonly string[];
+                            const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
+                            for (const approachOsid of approachOsids) {
+                                const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);
+                                if (dist >= 0) return true;
+                            }
+                        }
+                        return false;
                     }
-                }
+                );
 
                 if (probeReachable) {
-                    // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
-                    // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
-                    const probeOp = buildProbeOperation(
-                        briefing.corps_id,
-                        briefing.turn,
-                        probeBrigade.brigade_id,
-                        probeSectorId,
-                        probeObjectives,
+                    const probeOp = botOrdersPerfTime(
+                        `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildProbeOperation`,
+                        () => {
+                            // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
+                            // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+                            return buildProbeOperation(
+                                briefing.corps_id,
+                                briefing.turn,
+                                probeBrigade.brigade_id,
+                                probeSectorId,
+                                probeObjectives,
+                            );
+                        },
                     );
                     const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, probeOp));
                     if (!conflictingOp) {

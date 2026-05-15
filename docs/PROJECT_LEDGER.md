@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): split buildOperations profile
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the count-only `detectZones.mustHold` pass.
+
+**Fix:** Added default-off profile sub-buckets under `emitCommanderOutput.buildOperations` so the plan and probe paths can be measured separately. The split covers plan slot/pool/objective/build work and probe cooldown, brigade selection, objective derivation, reachability, and probe-op construction. No operation selection rule, sort order, scenario data, or output schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `BUILD_OPERATIONS_PROFILE_PREFIX`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; `tests\bot_orders_perf_profile.test.ts` + emit-adjacent commander suites passed 49/49; `tests\commander\commander.test.ts` passed 54/54; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1777 with final hash `7ef09f55d6494edd`, matching n1776. The new split identified `buildOperations.probe.deriveObjectives` at 257.393ms of the 293.331ms `buildOperations` bucket.
+
+**Canon posture:** Pure deterministic instrumentation. Profiling remains opt-in via `PERF_PROFILE_BOT_ORDERS=true`; flag-off simulation behavior and serialized output are unchanged.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_BUILD_OPERATIONS_PROFILE_SPLIT.md` and updated roadmap, report index, knowledge ledger, and napkin.
+
+---
+
 ## [2026-05-15] perf(commander): trim detectZones must-hold component allocation
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after crash recovery.

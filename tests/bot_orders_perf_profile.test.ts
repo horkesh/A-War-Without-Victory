@@ -125,6 +125,18 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPlanUpdates');
         expect(commanderEmit).toContain('commander.runCommanderForCorps.decide.emitCommanderOutput.buildPrepositioningOrders');
+        expect(commanderEmit).toContain('BUILD_OPERATIONS_PROFILE_PREFIX');
+        expect(commanderEmit).toContain('.plan.activeSlotUsers');
+        expect(commanderEmit).toContain('.plan.primaryPool');
+        expect(commanderEmit).toContain('.plan.attachedPool');
+        expect(commanderEmit).toContain('.plan.reachableEnemyOsids');
+        expect(commanderEmit).toContain('.plan.objectives');
+        expect(commanderEmit).toContain('.plan.buildOperation');
+        expect(commanderEmit).toContain('.probe.cooldown');
+        expect(commanderEmit).toContain('.probe.selectBrigade');
+        expect(commanderEmit).toContain('.probe.deriveObjectives');
+        expect(commanderEmit).toContain('.probe.reachability');
+        expect(commanderEmit).toContain('.probe.buildProbeOperation');
         expect(commanderEmit).toContain('directEnemyTargets');
         expect(commanderEmit).toContain('predictedTargetByOsid');
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
