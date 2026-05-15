@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): reuse ranked defender powers
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the direct `predictCombatOutcome(...)` profile split.
+
+**Fix:** Added a local ranked-defender helper in `combat_predictor.ts` that returns the same primary defender and stacked total as `rankDefendersByPower(...)`, plus a `powerByFormationId` map. The sector reactive-defense loop now reuses those computed defender powers instead of recomputing `computeDefenderPower(...)` for the same sector brigade list. No combat formula, ranking rule, target ordering, scenario data, or output schema changed.
+
+**Validation:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `rankDefendersByPowerWithEntries`. Green focused: `tests\bot_orders_perf_profile.test.ts` passed 5/5; the focused bot-orders/commander suite passed 103/103; `npm.cmd run typecheck` passed. Profile proof: `PERF_PROFILE_BOT_ORDERS=true npm.cmd run sim:scenario:run:40w -- --unique --out runs` produced n1781 with final hash `7ef09f55d6494edd`, matching n1780. `predictDirectTargets` dropped 255.571ms -> 193.777ms and `sectorDefensePower` dropped 49.935ms -> 10.754ms.
+
+**Canon posture:** Deterministic read-path performance refactor. The helper reuses already-computed defender powers inside a single prediction call only; serialized output remained hash-identical in the proof run.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_DEFENDER_POWER_REUSE_PROFILE.md` and updated roadmap, report index, knowledge ledger, docs truth guard, napkin, and working note.
+
+---
+
 ## [2026-05-15] perf(commander): split combat predictor profile
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after direct-target probe prediction.

@@ -111,6 +111,42 @@ function predictorPerfTime<T>(profilePrefix: string | undefined, labelSuffix: st
     return profilePrefix ? botOrdersPerfTime(`${profilePrefix}${labelSuffix}`, fn) : fn();
 }
 
+type RankedDefenderPowers = {
+    primary: FormationState;
+    totalPower: number;
+    powerByFormationId: Map<string, number>;
+};
+
+function rankDefendersByPowerWithEntries(
+    defenders: FormationState[],
+    state: GameState,
+    targetOsid: Osid,
+    terrainMultByOsid: Record<string, number>,
+    artSuppression: number,
+    supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
+    ethnicBonusFn: (d: FormationState) => number,
+): RankedDefenderPowers {
+    const scored = defenders.map((formation) => ({
+        formation,
+        power: computeDefenderPower(
+            state,
+            formation,
+            targetOsid,
+            terrainMultByOsid,
+            artSuppression,
+            supplyStateByOsid,
+            ethnicBonusFn(formation),
+        ),
+    }));
+    const sorted = [...scored].sort((a, b) => b.power - a.power);
+    const totalPower = sorted[0]!.power + sorted.slice(1).reduce(
+        (sum, entry) => sum + entry.power * STACKING_DEFENDER_SUPPORT,
+        0,
+    );
+    const powerByFormationId = new Map(scored.map(({ formation, power }) => [formation.id, power]));
+    return { primary: sorted[0]!.formation, totalPower, powerByFormationId };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -259,10 +295,10 @@ export function predictCombatOutcome(
         );
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
-            const { primary, totalPower } = predictorPerfTime(
+            const { primary, totalPower, powerByFormationId } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
-                () => rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
+                () => rankDefendersByPowerWithEntries(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus),
             );
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);
@@ -278,7 +314,15 @@ export function predictCombatOutcome(
                     let effectiveReserves = 0;
                     for (const b of sectorBrigades) {
                         const locOsid = (b as { location_osid?: string }).location_osid ?? '';
-                        const bPower = computeDefenderPower(state, b, targetOsid as Osid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus(b));
+                        const bPower = powerByFormationId.get(b.id) ?? computeDefenderPower(
+                            state,
+                            b,
+                            targetOsid as Osid,
+                            terrainMultByOsid,
+                            artSuppression,
+                            supplyStateByOsid,
+                            ethBonus(b),
+                        );
                         if (locOsid === targetOsid) {
                             physicalPower += bPower;
                         } else {
@@ -389,7 +433,7 @@ export function predictCombatOutcome(
     } = predictorPerfTime(profilePrefix, '.casualties', () => {
         const personnelAttacker = attackerFormations.reduce((s, a) => s + (a.personnel ?? 0), 0);
         // Sector defense: use total sector personnel as casualty base (mirrors resolver fix n590)
-    // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP × attacker
+        // n647 fix: cap engaged defender personnel at DEFENDER_CASUALTY_ENGAGEMENT_CAP x attacker
         const rawPersonnelDefender = sectorDefBrigades && sectorDefBrigades.length > 1
             ? sectorDefBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0)
             : defenderFormation ? (defenderFormation.personnel ?? 0) : 5000 * MILITIA_DEFENSE_RATIO;
