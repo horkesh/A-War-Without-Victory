@@ -7,7 +7,7 @@ import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isEnclaveBrigade, isOsidInSameEnclave, ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
-import type { FormationState, GameState, SettlementId } from '../../state/game_state.js';
+import type { CorpsFrontSector, FormationState, GameState, SettlementId } from '../../state/game_state.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 const SECTOR_MARCH_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.sectorMarch';
@@ -66,6 +66,15 @@ export function assignedBrigadeNotOnSectorFrontOsids(
         }
         if (frontSet.size === 0) continue;
         return !frontSet.has(loc);
+    }
+    return false;
+}
+
+export function isCurrentSectorRetroactiveTooth(sector: CorpsFrontSector, loc: string): boolean {
+    for (const ss of sector.sub_segments) {
+        if (ss.friendly_osids.includes(loc)) {
+            return ss.friendly_osids.length === 1;
+        }
     }
     return false;
 }
@@ -265,18 +274,8 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 if (sectorMarchProfileTime('.retroactiveTooth', () => {
                     if (!pendingMove && graphAnalysis) {
                         const corpsIdEvict = brigade.corps_id;
-                        // Find the sub-segment the brigade belongs to (via its current sector).
-                        let isRetroactiveTooth = false;
-                        outer: for (const sid of Object.keys(sectors).sort(strictCompare)) {
-                            const sec = sectors[sid]!;
-                            if (!sec.assigned_brigade_ids.includes(brigade.id)) continue;
-                            for (const ss of sec.sub_segments) {
-                                if (ss.friendly_osids.includes(loc)) {
-                                    isRetroactiveTooth = ss.friendly_osids.length === 1;
-                                    break outer;
-                                }
-                            }
-                        }
+                        const isRetroactiveTooth = !isReserve
+                            && isCurrentSectorRetroactiveTooth(sector, loc);
                         if (isRetroactiveTooth && isMovementDestinationRisky(loc as Osid, graphAnalysis)) {
                             // Check must_hold override
                             const mustHoldOsids: string[] =

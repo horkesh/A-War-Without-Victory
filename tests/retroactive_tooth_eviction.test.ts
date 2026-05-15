@@ -19,7 +19,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { evaluateSectorMarch } from '../src/sim/combat/bot_brigade_eval_front.js';
+import { evaluateSectorMarch, isCurrentSectorRetroactiveTooth } from '../src/sim/combat/bot_brigade_eval_front.js';
 import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
 import type { FactionGraphAnalysis, OsidAnalysis } from '../src/sim/combat/osid_graph_analysis.js';
 import type { GameState, FactionId, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
@@ -280,6 +280,18 @@ function makeEvictionCtx(overrides: {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('evaluateSectorMarch — retroactive tooth eviction guard', () => {
+    it('detects a retroactive tooth from the already-resolved sector', () => {
+        const toothSubSeg = makeSubSegment(`subseg:${CORPS_ID}:0`, [TOOTH_OSID]);
+        const multiSubSeg = makeSubSegment(`subseg:${CORPS_ID}:1`, [
+            SAFE_OSID,
+            'op:zvornik:support_1' as Osid,
+        ]);
+        const sector = makeSector(0, [toothSubSeg, multiSubSeg], ['brig_evict_test']);
+
+        expect(isCurrentSectorRetroactiveTooth(sector, TOOTH_OSID)).toBe(true);
+        expect(isCurrentSectorRetroactiveTooth(sector, SAFE_OSID)).toBe(false);
+        expect(isCurrentSectorRetroactiveTooth(sector, 'op:zvornik:missing_1' as Osid)).toBe(false);
+    });
 
     it('Test 1: eviction fires for retroactive tooth with 4 enemy neighbors → march to safe front OSID', () => {
         // Brigade is already AT the tooth (sole OSID in its sub-segment).

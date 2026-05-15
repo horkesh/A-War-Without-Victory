@@ -4076,3 +4076,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The overstack count hotspot from n1804 is closed. The next bot-order CPU pass should use a fresh profile; n1805 points toward `.retroactiveTooth` and `.assignedSectorLookup`, not overstack destination pathfinding.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_COUNT_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): reuse sector for retroactive tooth detection
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `isCurrentSectorRetroactiveTooth(...)` and replaced the retroactive-tooth guard's repeated all-sector scan for the brigade's current sub-segment with the already-resolved sector local in `evaluateSectorMarch(...)`. The safe-destination scan remains unchanged because it needs same-corps front candidates across sectors.
+
+**Determinism:** The helper reads the same `CorpsFrontSector.sub_segments` selected by the deterministic sector assignment path. The old scanner only considered `assigned_brigade_ids`; the new path preserves that by requiring `!isReserve` before evaluating the current sector as a retroactive tooth source.
+
+**Verification:** Red first: `npx.cmd vitest run tests\retroactive_tooth_eviction.test.ts --reporter=dot` failed on the missing helper export. Green focused suite: `npx.cmd vitest run tests\bot_brigade_context_counts.test.ts tests\bot_orders_perf_profile.test.ts tests\tooth_guard.test.ts tests\retroactive_tooth_eviction.test.ts --reporter=dot` passed 21/21. `npm.cmd run typecheck` passed. Profiled 40w n1806 kept final hash `0cb626c032204372`; `.retroactiveTooth` dropped 82.802ms -> 17.620ms and `sectorMarch` dropped 226.873ms -> 152.032ms.
+
+**Roadmap delta:** The retroactive-tooth scan hotspot from n1805 is closed. The next bot-order CPU pass should start with a fresh profile because `.overstackRedistribution`, `.assignedSectorLookup`, and `.retroactiveTooth` are now close.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETROACTIVE_TOOTH_SECTOR_CACHE.md`
