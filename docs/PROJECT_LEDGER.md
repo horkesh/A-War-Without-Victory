@@ -4588,3 +4588,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Keep `collectFriendlyComponentsExcluding(...)` queue-based unless future code needs ordered component members. Do not retry the adjacent-corps context cache shape without a broader reuse boundary; its measured 20.050ms context build cost outweighed the child-label cut in n1839.
 
 **Report:** `docs/40_reports/implemented/20260515_COMMANDER_DETECT_ZONES_MUST_HOLD_QUEUE.md`
+
+---
+
+## [2026-05-15] perf(tooling): add real V8 CPU profile analysis and park commander micro-CPU
+
+**Type:** Debug/profiling tooling and reports. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `tools/perf/cpu_profile_analysis.ts` and `tools/perf/analyze_cpu_profile.ts` to summarize Node/V8 `.cpuprofile` files into stable self-time and inclusive total-time Markdown/JSON reports. Ran a full 40w V8 CPU profile with label profiling off, rejected the unfinished n1841 commander officer lookup candidate, and documented a bounded shared-context architecture for future commander/bot-order data reuse. Produced the first formation-life warning classification report after parking CPU micro-optimization.
+
+**Determinism:** Tooling reads generated `.cpuprofile` files and writes explicit debug outputs only when invoked; it is not imported by the simulation runtime. Summary ordering is deterministic: frames are sorted by measured time with stable key tie-breaks. Raw profiler artifacts and run outputs remain under `data/derived/_debug/` and are not staged.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/cpu_profile_analysis.test.ts` failed before the analyzer existed. Green focused analyzer test passed 2/2. Green focused guard after rejecting n1841 and path-neutral fixture cleanup passed 7/7 with `npm.cmd run test:vitest:fast -- -- tests/cpu_profile_analysis.test.ts tests/bot_orders_perf_profile.test.ts`. `npm.cmd run typecheck` passed. Retained 40w V8 profile kept final hash `0cb626c032204372`. Formation-life classification ran `diagnose_run.cjs` (0 errors, 29 warnings) and `validate_run_consistency.cjs` (PASS) on the same retained run.
+
+**Roadmap delta:** Future CPU lane selection should start from a real V8 profile, not nested label totals alone. The current top wall-clock boundaries are sector reconstruction/reconciliation, map/front graph work, and replay/final-save serialization; commander/bot-order CPU should move to one broader read-only decision context if revisited. The active product lane is formation-life believability classification, with active-never-fights interpretation as the safe next packet.
+
+**Reports:** `docs/40_reports/implemented/20260515_REAL_CPU_PROFILE_AND_COMMAND_CONTEXT_PLAN.md`, `docs/40_reports/implemented/20260515_FORMATION_LIFE_WARNING_CLASSIFICATION.md`
