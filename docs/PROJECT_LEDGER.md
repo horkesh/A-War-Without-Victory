@@ -4508,3 +4508,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not optimize `.candidateLoop` or `.earlyGates` directly. If the uncontested-occupation lane continues, split `.candidateGates` before changing local gate semantics; otherwise pivot to a larger fresh-profile bucket.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_RESIDUAL_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split defender-power residual profile
+
+**Type:** Default-off profiling instrumentation in shared combat math, reached by bot-order direct-objective prediction and commander direct-probe prediction. No gameplay rule, scenario data, OOB, combat formula, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `computeDefenderPower(...)` residual labels for `.postureContext`, `.fatigue`, `.morale`, `.environmentCap`, and `.powerProduct` while retaining the existing base, supply, terrain, front-density, officer, home, and equipment-quality labels.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers time existing pure calculations and preserve multiplier formulas, branch outcomes, attack/movement/posture order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1835 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.postureContext`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1835 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. Direct-objective defender-power children were small: `.terrainFactors` 1.381ms, `.postureContext` 1.282ms, `.base` 1.251ms, `.fatigue` 0.243ms, `.morale` 0.193ms, `.environmentCap` 0.284ms, and `.powerProduct` 0.169ms.
+
+**Roadmap delta:** Do not optimize defender posture-context, fatigue, morale, environment-cap, or final multiplication from n1835 evidence. The direct-objective defender-power residual is not concentrated in the newly split local math; choose the next CPU lane from a fresh profile.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENDER_POWER_RESIDUAL_PROFILE_SPLIT.md`

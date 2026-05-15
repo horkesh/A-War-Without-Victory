@@ -66,6 +66,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('defender power now has officer/front-density attribution');
     expect(roadmap).toContain('sector-local front-density indexing shipped');
     expect(roadmap).toContain('batch-level officer lookup indexing shipped');
+    expect(roadmap).toContain('direct-objective defender-power residual math split closed as no local optimization target');
     expect(roadmap).toContain('Bot-order sectorMarch now has default-off overstack/retroactive-tooth attribution');
     expect(roadmap).toContain('n1803 kept hash `0cb626c032204372`');
     expect(roadmap).toContain('overstack split');
@@ -182,6 +183,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1834 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`homeDefense.uncontestedOccupation.candidateGates` at 11.581ms / 21,038 checks');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_RESIDUAL_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('defender-power residual profile split');
+    expect(roadmap).toContain('n1835 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.postureContext` 1.282ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENDER_POWER_RESIDUAL_PROFILE_SPLIT.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');

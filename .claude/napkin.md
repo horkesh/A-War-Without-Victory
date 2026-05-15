@@ -80,6 +80,8 @@
 
 **2026-05-15 uncontested residual split:** n1834 kept hash `0cb626c032204372`; `candidateLoop` is nested-profiler inflated, `candidateGates` is the useful local signal (homeDefense 11.581ms/21,038 checks), and `earlyGates` is tiny. Do instead: do not optimize broad uncontested loop wrappers; split candidate gates further or pivot to larger fresh-profile buckets.
 
+**2026-05-15 defender-power residual split:** n1835 kept hash `0cb626c032204372`; direct-objective `computeDefenderPower` parent remained high but the new children were small (`.terrainFactors` 1.381ms, `.postureContext` 1.282ms, `.base` 1.251ms, `.fatigue`/`.morale`/`.environmentCap`/`.powerProduct` all sub-0.3ms). Do instead: do not micro-optimize defender posture/fatigue/morale/environment-cap/final multiplication from n1835 evidence; choose a fresh larger CPU lane.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.

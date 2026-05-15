@@ -1184,31 +1184,40 @@ export function computeDefenderPower(
     officerLookup?: OfficerCombatLookup,
 ): number {
     const base = combatMathProfileTime(profileTime, '.base', () => basePower(formation));
-    const posture = formation.posture ?? 'defend';
-    const rawPostureMult = posture === 'dig_in'
-        ? computeDigInDefMult(formation.dig_in_progress)
-        : POSTURE_DEFENSE[posture] ?? 1;
+    const {
+        postureMult,
+        entrenchmentMult,
+        corpsDefMult,
+        resilienceMult,
+        disruptionMult,
+    } = combatMathProfileTime(profileTime, '.postureContext', () => {
+        const posture = formation.posture ?? 'defend';
+        const rawPostureMult = posture === 'dig_in'
+            ? computeDigInDefMult(formation.dig_in_progress)
+            : POSTURE_DEFENSE[posture] ?? 1;
+        const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
+        const suppressionFactor = 1.0 - artillerySuppression;
+
+        // ── Mechanic A: Hasty defense penalty ──────────────────────────────
+        // Formations that haven't been in position long enough get reduced posture
+        // defense effectiveness. At et=0, posture contributes nothing (1.0×).
+        // Ramps to full over HASTY_DEFENSE_RAMP turns.
+        const hastyFactor = Math.min(1.0, entrenchmentTurns / HASTY_DEFENSE_RAMP);
+        const postureMult = 1.0 + (rawPostureMult - 1.0) * hastyFactor;
+
+        // Diminishing returns: sqrt curve — first turns of digging in matter most.
+        // At 1 turn: 0.07 (was 0.035). At 6 turns: 0.07×√6 = 0.171 (was 0.21).
+        const entrenchmentMult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2 * suppressionFactor;
+        const corpsStance = getCorpsStance(state, formation);
+        const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
+        const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
+        const resilienceMult = 1.0 + defenseStreak * RESILIENCE_PER_DEFENSE;
+        const disruptionMult = getDisruptionMult(formation, 'defend');
+        return { postureMult, entrenchmentMult, corpsDefMult, resilienceMult, disruptionMult };
+    });
     const supplyMult = combatMathProfileTime(profileTime, '.supply', () =>
         getSupplyMult(formation, state, 'defend', supplyStateByOsid)
     );
-    const entrenchmentTurns = Math.min(MAX_ENTRENCHMENT, (formation as { entrenchment_turns?: number }).entrenchment_turns ?? 0);
-    const suppressionFactor = 1.0 - artillerySuppression;
-
-    // ── Mechanic A: Hasty defense penalty ──────────────────────────────
-    // Formations that haven't been in position long enough get reduced posture
-    // defense effectiveness. At et=0, posture contributes nothing (1.0×).
-    // Ramps to full over HASTY_DEFENSE_RAMP turns.
-    const hastyFactor = Math.min(1.0, entrenchmentTurns / HASTY_DEFENSE_RAMP);
-    const postureMult = 1.0 + (rawPostureMult - 1.0) * hastyFactor;
-
-    // Diminishing returns: sqrt curve — first turns of digging in matter most.
-    // At 1 turn: 0.07 (was 0.035). At 6 turns: 0.07×√6 = 0.171 (was 0.21).
-    const entrenchmentMult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2 * suppressionFactor;
-    const corpsStance = getCorpsStance(state, formation);
-    const corpsDefMult = corpsStance ? CORPS_STANCE_DEFENSE[corpsStance] ?? 1 : 1;
-    const defenseStreak = Math.min(MAX_RESILIENCE_STREAK, (formation as { defense_streak?: number }).defense_streak ?? 0);
-    const resilienceMult = 1.0 + defenseStreak * RESILIENCE_PER_DEFENSE;
-    const disruptionMult = getDisruptionMult(formation, 'defend');
     const {
         terrainMult,
         urbanMult,
@@ -1233,11 +1242,15 @@ export function computeDefenderPower(
         getThreeTierOfficerMod(formation, state, 'defend', officerLookup)
     );
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
-    const fatigueMult = getFatigueMult(formation, 'defend');
+    const fatigueMult = combatMathProfileTime(profileTime, '.fatigue', () =>
+        getFatigueMult(formation, 'defend')
+    );
     const homeMult = combatMathProfileTime(profileTime, '.home', () =>
         getHomeDistanceMultFromCache(state, formation)
     );
-    const moralePenalty = getCriticalMoralePenalty(formation);
+    const moralePenalty = combatMathProfileTime(profileTime, '.morale', () =>
+        getCriticalMoralePenalty(formation)
+    );
 
     // ── LANE-NIGHTSHIFT-STUPCANICA-DEFENDER-STACK-PHASE-1-IMPLEMENTATION ──
     // SHAPE B mutual-exclusivity collapse on the terrain-class triplet
@@ -1258,23 +1271,27 @@ export function computeDefenderPower(
     // where two or more of {urban, forest, enclave} are >1.0, irrespective of
     // faction or operation. ICTY Krstić IT-98-33-T §§120-150 + Popović IT-05-88-T
     // §§240-250 ground the historical record (an OSID is one terrain class).
-    const terrainClassMult = Math.max(urbanMult, forestMult, enclaveMult);
+    const finalEnvMult = combatMathProfileTime(profileTime, '.environmentCap', () => {
+        const terrainClassMult = Math.max(urbanMult, forestMult, enclaveMult);
 
-    // ── Mechanic B: Defense environmental soft cap ─────────────────────
-    // The product of environmental defense multipliers uses diminishing returns
-    // above DEFENSE_ENV_CAP_THRESHOLD to prevent 17 small multipliers from
-    // compounding to absurd levels.
-    const envProduct = terrainMult * entrenchmentMult * corpsDefMult * resilienceMult
-        * terrainClassMult * toTerrainMult * perBrigadeTerrainBonus
-        * frontDensityMult * ethnicMult;
-    const envBonus = envProduct - 1.0;
-    const cappedBonus = envBonus <= DEFENSE_ENV_CAP_THRESHOLD
-        ? envBonus
-        : DEFENSE_ENV_CAP_THRESHOLD + (envBonus - DEFENSE_ENV_CAP_THRESHOLD) * DEFENSE_ENV_COMPRESSION;
-    const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
-    const finalEnvMult = Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP);
+        // ── Mechanic B: Defense environmental soft cap ─────────────────────
+        // The product of environmental defense multipliers uses diminishing returns
+        // above DEFENSE_ENV_CAP_THRESHOLD to prevent 17 small multipliers from
+        // compounding to absurd levels.
+        const envProduct = terrainMult * entrenchmentMult * corpsDefMult * resilienceMult
+            * terrainClassMult * toTerrainMult * perBrigadeTerrainBonus
+            * frontDensityMult * ethnicMult;
+        const envBonus = envProduct - 1.0;
+        const cappedBonus = envBonus <= DEFENSE_ENV_CAP_THRESHOLD
+            ? envBonus
+            : DEFENSE_ENV_CAP_THRESHOLD + (envBonus - DEFENSE_ENV_CAP_THRESHOLD) * DEFENSE_ENV_COMPRESSION;
+        const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
+        return Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP);
+    });
 
-    let power = base * postureMult * supplyMult * finalEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty;
+    let power = combatMathProfileTime(profileTime, '.powerProduct', () =>
+        base * postureMult * supplyMult * finalEnvMult * disruptionMult * officerMult * fatigueMult * homeMult * moralePenalty
+    );
     // LANE-NIGHTSHIFT-EQUIPMENT-QUALITY-MODIFIER-SUBSTRATE: faction-scoped power
     // multiplier from arms-flow / embargo-lift events. Gated `!== 1.0` so the
     // historical (no-event) path is byte-stable.

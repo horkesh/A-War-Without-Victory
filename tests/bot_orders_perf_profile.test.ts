@@ -289,11 +289,16 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(combatMath).toContain('getLocalFrontDensityModifier(state, formation, densityModifierByFormationId)');
         expect(combatMath).toContain("getThreeTierOfficerMod(formation, state, 'defend', officerLookup)");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.base'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.postureContext'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.supply'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.terrainFactors'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.frontDensity'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.officer'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.fatigue'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.home'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.morale'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.environmentCap'");
+        expect(combatMath).toContain("combatMathProfileTime(profileTime, '.powerProduct'");
         expect(combatMath).toContain("combatMathProfileTime(profileTime, '.equipmentQuality'");
         expect(combatMath).not.toContain("'.computeDefenderPower.base'");
         const commanderBriefing = readFileSync(resolve('src/sim/combat/commander/briefing.ts'), 'utf8');
