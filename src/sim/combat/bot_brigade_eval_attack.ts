@@ -16,7 +16,7 @@ import {
 } from './bot_brigade_targeting.js';
 import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supply_ethnic.js';
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
-import { countFactionBrigadesAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
+import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
@@ -586,7 +586,9 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
         // Fill adjacent front gaps even in defensive stance
         const defHere = defensiveProfileTime(
             '.defensive.frontGapCountHere',
-            () => countFactionBrigadesAtOsid(state, faction, loc)
+            () => ctx.corpsBrigadeCountsByOsid
+                ? getCorpsBrigadeCountAtOsid(ctx.corpsBrigadeCountsByOsid, null, loc)
+                : countFactionBrigadesAtOsid(state, faction, loc)
         );
         if (defHere >= 2) {
             const gap = defensiveProfileTime(

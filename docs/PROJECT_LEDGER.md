@@ -4252,3 +4252,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Defensive attribution is now visible. The next bot-order CPU lane should optimize repeated defensive front-gap count scans before sector lookup or counterattack prediction.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache defensive front-gap count
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `evaluateDefensive(...)` now uses the existing pass-local `corpsBrigadeCountsByOsid` cache for the defensive front-gap current-location friendly count. Passing `corpsId = null` reads the all-faction `__all__` count from the cache. Direct callers without the cache still use the legacy `countFactionBrigadesAtOsid(...)` scan.
+
+**Determinism:** `corpsBrigadeCountsByOsid` is built once per faction directive pass from active formation IDs sorted with `strictCompare`. The evaluator only reads the cache and does not mutate `GameState`, save schema, movement/posture/attack-order sequencing, RNG state, or serialization. Profiled 40w n1818 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\defensive_front_gap_count_cache.test.ts --reporter=dot` failed because the raw-state scan saw only one friendly brigade and did not fill the front gap. Green focused suite `npx.cmd vitest run tests\defensive_front_gap_count_cache.test.ts tests\bot_orders_perf_profile.test.ts --reporter=dot` passed 6/6, `npm.cmd run typecheck` passed, and `git diff --check` passed before profiling. Profiled 40w n1818 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `.defensive.frontGapCountHere` dropped 50.198ms -> 0.753ms, `defensive` dropped 105.076ms -> 57.865ms, and total bot orders dropped 857.887ms -> 808.943ms.
+
+**Roadmap delta:** The defensive front-gap count hotspot from n1817 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `homeDefense`, `sectorAttack`, and the remaining defensive sub-labels.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_COUNT_CACHE.md`

@@ -114,6 +114,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1817 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`.defensive.frontGapCountHere` measured 50.198ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('defensive front-gap count cache');
+    expect(roadmap).toContain('n1818 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.defensive.frontGapCountHere` dropped 50.198ms -> 0.753ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_COUNT_CACHE.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');

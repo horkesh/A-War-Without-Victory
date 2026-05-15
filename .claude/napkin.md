@@ -48,6 +48,8 @@
 
 **2026-05-15 defensive profile split:** n1817 kept hash `0cb626c032204372`; `evaluateDefensive(...)` split shows `.defensive.frontGapCountHere` at 50.198ms, `.defensive.uncontestedOccupation` at 23.666ms, and `.defensive.sectorCounterAttackSectorLookup` at 11.516ms. Do instead: optimize the repeated defensive front-gap count scan before sector lookup or counterattack prediction.
 
+**2026-05-15 defensive front-gap count cache:** n1818 kept hash `0cb626c032204372`; reusing pass-local all-faction `corpsBrigadeCountsByOsid` cut `.defensive.frontGapCountHere` 50.198ms -> 0.753ms, `defensive` 105.076ms -> 57.865ms, and total bot orders 857.887ms -> 808.943ms. Do instead: choose the next bot-order CPU lane from a fresh profile; current candidates are `sectorMarch`, `homeDefense`, `sectorAttack`, and the remaining defensive sub-labels.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.
