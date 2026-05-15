@@ -4460,3 +4460,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not retry the lazy corps sector-id lookup shape. A future defensive lookup optimization needs either no new index construction or a broader already-owned sector lookup that other hot callers can amortize.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENSIVE_SECTOR_LOOKUP_CACHE_REJECTED.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split overstack residual profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Split the remaining overstack redistribution residual in `evaluateSectorMarch(...)` into `.overstackRedistribution.gate` and `.overstackRedistribution.candidateLoop` while preserving the existing count, rank, destination-count, and destination labels.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers only time existing eligibility checks and candidate-loop work; they preserve branch order, movement/posture order writes, `columnAssignments` same-turn delta semantics, RNG behavior, save schema, and serialized state. Profiled 40w n1832 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.overstackRedistribution.gate`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1832 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.overstackRedistribution.gate` measured 17.214ms and `.candidateLoop` measured 4.956ms, while `.destCount` and `.destination` stayed below 1ms.
+
+**Roadmap delta:** Do not optimize overstack destination counts, candidate ranking, or pathfinding from this evidence. Treat the remaining overstack parent as nested-profiler inflated unless a fresh wall-clock profile says otherwise, and choose the next CPU lane from a larger measured bucket.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_RESIDUAL_PROFILE_SPLIT.md`

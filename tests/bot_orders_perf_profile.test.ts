@@ -128,8 +128,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.trapReroute');
         expect(brigadeEvalFront).toContain('.retroactiveTooth');
         expect(brigadeEvalFront).toContain('.overstackRedistribution');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution.gate');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.countHere');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.rankCandidates');
+        expect(brigadeEvalFront).toContain('.overstackRedistribution.candidateLoop');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.destCount');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.destination');
         expect(brigadeEvalFront).toContain('RETURN_TO_CORPS_PROFILE_PREFIX');

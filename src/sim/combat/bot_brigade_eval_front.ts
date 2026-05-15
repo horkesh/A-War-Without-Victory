@@ -344,13 +344,16 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // Without this, all stacked brigades see the same static count and all pick the
                 // same destination — causing perpetual ping-pong oscillation.
                 if (sectorMarchProfileTime('.overstackRedistribution', () => {
-                    const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
-                    // Negative values in columnAssignments = planned departures from this OSID
-                    const effectiveCountHere = sectorMarchProfileTime('.overstackRedistribution.countHere', () =>
-                        countCorpsAt(loc)
-                        + Math.min(0, plannedDepartures) // departures reduce count
-                    );
-                    if (effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1) {
+                    const overstackGate = sectorMarchProfileTime('.overstackRedistribution.gate', () => {
+                        const plannedDepartures = columnAssignments.get(loc as Osid) ?? 0;
+                        // Negative values in columnAssignments = planned departures from this OSID
+                        const effectiveCountHere = sectorMarchProfileTime('.overstackRedistribution.countHere', () =>
+                            countCorpsAt(loc)
+                            + Math.min(0, plannedDepartures) // departures reduce count
+                        );
+                        return effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1;
+                    });
+                    if (overstackGate) {
                         // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
                         // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                         // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
@@ -368,32 +371,36 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                     return ca - cb || strictCompare(a, b);
                                 })
                         );
-                        for (const candidate of otherFronts) {
-                            // Check: would this destination be overstacked after planned arrivals?
-                            const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
-                            const destCount = sectorMarchProfileTime('.overstackRedistribution.destCount', () =>
-                                countCorpsAt(candidate as Osid)
-                                + Math.max(0, plannedAtDest) // arrivals increase count
-                            );
-                            if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
+                        const redistributed = sectorMarchProfileTime('.overstackRedistribution.candidateLoop', () => {
+                            for (const candidate of otherFronts) {
+                                // Check: would this destination be overstacked after planned arrivals?
+                                const plannedAtDest = columnAssignments.get(candidate as Osid) ?? 0;
+                                const destCount = sectorMarchProfileTime('.overstackRedistribution.destCount', () =>
+                                    countCorpsAt(candidate as Osid)
+                                    + Math.max(0, plannedAtDest) // arrivals increase count
+                                );
+                                if (destCount >= MAX_CORPS_BRIGADES_PER_OSID) continue; // already full
 
-                            const dest = sectorMarchProfileTime('.overstackRedistribution.destination', () =>
-                                findNearestFriendlyOsidDestination(
-                                    state, faction, loc, adjacency, reverseMap, new Set([candidate])
-                                )
-                            );
-                            // No isMovementDestinationRisky check here — the brigade is being
-                            // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
-                            // "risky" (adjacent to enemy) but that's where defenders must be.
-                            if (dest) {
-                                result.column_march_orders[brigade.id] = dest;
-                                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                                // Track this movement so next brigade sees updated counts
-                                columnAssignments.set(loc as Osid, (columnAssignments.get(loc as Osid) ?? 0) - 1);
-                                columnAssignments.set(dest, (columnAssignments.get(dest) ?? 0) + 1);
-                                return true;
+                                const dest = sectorMarchProfileTime('.overstackRedistribution.destination', () =>
+                                    findNearestFriendlyOsidDestination(
+                                        state, faction, loc, adjacency, reverseMap, new Set([candidate])
+                                    )
+                                );
+                                // No isMovementDestinationRisky check here — the brigade is being
+                                // ordered to a FRONT OSID in its own sector. Front OSIDs are inherently
+                                // "risky" (adjacent to enemy) but that's where defenders must be.
+                                if (dest) {
+                                    result.column_march_orders[brigade.id] = dest;
+                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                    // Track this movement so next brigade sees updated counts
+                                    columnAssignments.set(loc as Osid, (columnAssignments.get(loc as Osid) ?? 0) - 1);
+                                    columnAssignments.set(dest, (columnAssignments.get(dest) ?? 0) + 1);
+                                    return true;
+                                }
                             }
-                        }
+                            return false;
+                        });
+                        if (redistributed) return true;
                     }
                     return false;
                 })) return true;
