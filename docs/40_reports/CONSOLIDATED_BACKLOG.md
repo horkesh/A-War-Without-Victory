@@ -21,6 +21,7 @@
 | Report | Summary | Priority / owner |
 |--------|---------|-------------------|
 | [BACKLOG_HISTORICAL_FIDELITY_AND_RESEARCH.md](backlog/BACKLOG_HISTORICAL_FIDELITY_AND_RESEARCH.md) | Research plan, success criteria, model design, VRS/ARBiH trajectory analysis, Apr 1992 runs examination. Originals (5) → _old/40_reports/backlog/. | Research / design. |
+| [20260515_FORCE_QUALITY_TRAJECTORY_FATIGUE_DEFERMENT.md](audits/20260515_FORCE_QUALITY_TRAJECTORY_FATIGUE_DEFERMENT.md) | Force-quality lane classification: personnel/reconstitution and HRHB already have recent focused evidence; the remaining safe owner is fatigue/exhaustion, but code changes require a design-gated residue/retention packet because the obvious levers are global fatigue retunes. | Focused design packet; Fatigue/exhaustion owner. |
 | [PARADOX_HISTORICAL_TROOP_NUMBERS_SEPT1992_CONVENE.md](convenes/PARADOX_HISTORICAL_TROOP_NUMBERS_SEPT1992_CONVENE.md) | Convene on historical troop numbers (Sept 1992). | Design input. |
 
 ---
