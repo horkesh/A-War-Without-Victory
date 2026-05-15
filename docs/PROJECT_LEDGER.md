@@ -4604,3 +4604,29 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Future CPU lane selection should start from a real V8 profile, not nested label totals alone. The current top wall-clock boundaries are sector reconstruction/reconciliation, map/front graph work, and replay/final-save serialization; commander/bot-order CPU should move to one broader read-only decision context if revisited. The active product lane is formation-life believability classification, with active-never-fights interpretation as the safe next packet.
 
 **Reports:** `docs/40_reports/implemented/20260515_REAL_CPU_PROFILE_AND_COMMAND_CONTEXT_PLAN.md`, `docs/40_reports/implemented/20260515_FORMATION_LIFE_WARNING_CLASSIFICATION.md`
+
+---
+
+## [2026-05-15] in-progress(gameplay/product): active-never-fights interpretation packet
+
+**Type:** In-progress ownership marker for parallel-agent coordination. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed by this marker.
+
+**Change:** This session is taking ownership of the formation-life believability follow-up identified by the real CPU profile handoff: split `brigade_never_fights` cases into player-meaningful categories before any behavior changes. Intended scope is diagnostic/report interpretation only unless fresh evidence proves a bounded owner behavior fix is necessary.
+
+**Determinism:** Marker only; no runtime path touched yet. Any retained implementation must preserve stable ordering and must not stage generated run/profile artifacts.
+
+---
+
+## [2026-05-15] fix(diagnostics): split active-never-fights interpretation by owner subtype
+
+**Type:** Diagnostic/report output interpretation change in scenario anomaly detection. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** `brigade_never_fights` now emits one info report per deterministic subtype instead of one mixed aggregate report. Subtypes are `loan`, `operation_participant`, `sector_front`, `sector_reserve`, `sector_rear`, and fallback `sector_owned`. The detector keeps the previous scope filters: active brigade-level units, turn >= 10, live sector/loan ownership, and cold-front sector assignments excluded.
+
+**Determinism:** Active operation participants are collected from sorted corps command IDs, subtype output order is fixed, and entity lists remain `strictCompare` sorted. This changes `run_summary.json` anomaly report shape/count, but not simulation state, final save, RNG, movement/combat writes, or serialized save schema.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/anomaly_detector_deployment_truth.test.ts` failed because the old detector emitted one unsplit report with no subtype. Green focused: the same command passed 4/4 after implementation. `npm.cmd run typecheck` passed. Fresh 40w scenario proof at `data/derived/_debug/active_never_fights_runs/apr1992_definitive_40w__3649b3861a87e6ea__w40` kept final hash `0cb626c032204372`; `diagnose_run.cjs` reported 0 errors / 29 warnings; `validate_run_consistency.cjs` passed. The new run-summary anomaly counts are 13 total, 0 critical, 2 warning, 11 info. The 78 never-fights entities split as `loan` 3, `operation_participant` 4, `sector_front` 61, `sector_reserve` 3, and `sector_rear` 7.
+
+**Roadmap delta:** The next behavior investigation should start with the `sector_front` live-inert set or the separate `operation_participant` staging/execution set. Reserve/rear and loan cases should not be treated as equivalent to live-front inert formations.
+
+**Report:** `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`

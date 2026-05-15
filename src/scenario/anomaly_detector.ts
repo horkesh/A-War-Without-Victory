@@ -33,6 +33,56 @@ function isBrigadeKind(kind: string | undefined): boolean {
     return kind === undefined || kind === 'brigade' || kind === 'operational_group';
 }
 
+type NeverFightsSubtype =
+    | 'loan'
+    | 'operation_participant'
+    | 'sector_front'
+    | 'sector_reserve'
+    | 'sector_rear'
+    | 'sector_owned';
+
+const NEVER_FIGHTS_SUBTYPE_ORDER: NeverFightsSubtype[] = [
+    'loan',
+    'operation_participant',
+    'sector_front',
+    'sector_reserve',
+    'sector_rear',
+    'sector_owned',
+];
+
+function buildActiveOperationParticipantSet(state: GameState): Set<string> {
+    const participants = new Set<string>();
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
+        const command = corpsCommand[corpsId] as Record<string, any>;
+        for (const operation of command?.active_operations ?? []) {
+            for (const brigadeId of operation?.participating_brigades ?? []) {
+                if (typeof brigadeId === 'string' && brigadeId.length > 0) {
+                    participants.add(brigadeId);
+                }
+            }
+        }
+    }
+    return participants;
+}
+
+function describeNeverFightsSubtype(subtype: NeverFightsSubtype): string {
+    switch (subtype) {
+        case 'loan':
+            return 'loaned elite/general-staff brigade(s)';
+        case 'operation_participant':
+            return 'active operation participant brigade(s)';
+        case 'sector_front':
+            return 'sector-front brigade(s)';
+        case 'sector_reserve':
+            return 'sector reserve/rear-support brigade(s)';
+        case 'sector_rear':
+            return 'sector-rear brigade(s)';
+        case 'sector_owned':
+            return 'sector-owned brigade(s)';
+    }
+}
+
 function getAssignedSector(state: GameState, formation: Record<string, any>) {
     const sectorId = formation.assignment?.kind === 'sector'
         ? formation.assignment.sector_id
@@ -280,7 +330,8 @@ function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
     // Only flag after enough turns for combat to have occurred
     if (state.meta.turn < 10) return reports;
 
-    const neverFought: string[] = [];
+    const activeOperationParticipants = buildActiveOperationParticipantSet(state);
+    const neverFoughtBySubtype = new Map<NeverFightsSubtype, string[]>();
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
         const f = formations[fid];
         if (f.status !== 'active') continue;
@@ -292,16 +343,33 @@ function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
         if (assignedSector && isSectorColdFront(state, assignedSector)) continue;
         const battlesFought = f.brigade_history?.battles_fought ?? 0;
         if (battlesFought === 0) {
-            neverFought.push(fid);
+            const subtype: NeverFightsSubtype = onLoan
+                ? 'loan'
+                : activeOperationParticipants.has(fid)
+                    ? 'operation_participant'
+                    : f.assignment?.role === 'front'
+                        ? 'sector_front'
+                        : f.assignment?.role === 'reserve'
+                            ? 'sector_reserve'
+                            : f.assignment?.role === 'rear'
+                                ? 'sector_rear'
+                                : 'sector_owned';
+            const list = neverFoughtBySubtype.get(subtype) ?? [];
+            list.push(fid);
+            neverFoughtBySubtype.set(subtype, list);
         }
     }
 
-    if (neverFought.length > 0) {
+    for (const subtype of NEVER_FIGHTS_SUBTYPE_ORDER) {
+        const neverFought = neverFoughtBySubtype.get(subtype);
+        if (!neverFought || neverFought.length === 0) continue;
+        const descriptionPrefix = describeNeverFightsSubtype(subtype);
         reports.push({
             category: 'deployment',
             severity: 'info',
             type: 'brigade_never_fights',
-            description: `${neverFought.length} active brigade(s) with live sector/loan ownership outside cold-front sectors have 0 battles in brigade_history after ${state.meta.turn} turns.`,
+            subtype,
+            description: `${neverFought.length} ${descriptionPrefix} with live non-cold ownership have 0 battles in brigade_history after ${state.meta.turn} turns.`,
             entities: neverFought.slice().sort(strictCompare),
         });
     }

@@ -40,7 +40,7 @@ Additional inspected artifacts:
 
 | Family | Evidence | Classification | Owner |
 |---|---:|---|---|
-| Active-never-fights | 78 active brigades with live sector/loan ownership and 0 battles after 40 turns | Mixed product concern; must split quiet-but-valid reserve/garrison cases from live-front inert cases before changing behavior | Detector interpretation first, then commander stance/target scoring if live-front cases remain |
+| Active-never-fights | 78 active brigades with live sector/loan ownership and 0 battles after 40 turns | Mixed product concern; now split by subtype before behavior changes | Detector interpretation first, then commander stance/target scoring if live-front cases remain |
 | Far-from-home live ownership | 20/217 eligible brigades more than 6 hops from home with live sector/loan ownership | Commander doctrine and formation lifecycle issue, not sector-truth failure | Commander assignment/reposition path plus `formation_lifecycle` return/loan semantics |
 | Brigade drift | 28 active non-militia/non-paramilitary brigades more than 4 hops from home in `diagnose_run` | Same owner family as far-from-home, with some possible historical redeployments | Commander assignment/reposition path; scenario data only when historical redeployment is proven |
 | Corps out-of-area | 4 corps above 60 percent outside home municipality: `hvo_southeast_herzegovina`, `hvo_tomislavgrad`, `vrs_1st_krajina`, `vrs_sarajevo_romanija` | Aggregate symptom of far-from-home/sector ownership, not a separate fix surface | Same as drift/far-from-home |
@@ -74,6 +74,18 @@ The common pattern is live sector ownership without an operation participant rec
 ## Safe Next Packet
 
 The safest next implementation packet is `Active-Never-Fights Interpretation`.
+
+Status: implemented as `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`.
+
+Current split on the retained 40w final save:
+
+| Subtype | Count | Interpretation |
+|---|---:|---|
+| `loan` | 3 | Loaned elite/general-staff brigades; route to loan/return semantics before treating as inert fronts. |
+| `operation_participant` | 4 | Brigade is attached to an active operation but has no battles; route to staging/execution. |
+| `sector_front` | 61 | Main live-front inert set; route to pressure, stance, target scoring, and quiet-front interpretation. |
+| `sector_reserve` | 3 | Reserve ownership; likely quiet-valid unless pressure/assignment evidence says otherwise. |
+| `sector_rear` | 7 | Rear support ownership; likely quiet-valid unless it hides stranded ownership. |
 
 Scope:
 
