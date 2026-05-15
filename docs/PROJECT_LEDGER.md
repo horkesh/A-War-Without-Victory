@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-15] perf(commander): reuse officer combat lookup
+
+**Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the front-density index.
+
+**Fix:** Added a caller-supplied `OfficerCombatLookup` for direct-probe defender power. `buildOfficerCombatLookup(...)` indexes named officer state/data once for a direct-target batch, preserves lowest-officer-id precedence for army/corps command lookups, and `getThreeTierOfficerMod(...)` consumes it while retaining the original scan fallback for all other callers. No combat formula, commander selection rule, target ordering, scenario data, serialization order, or save schema changed.
+
+**Validation:** Red first: `tests/officer_system.test.ts` failed on missing `buildOfficerCombatLookup`, and `tests/bot_orders_perf_profile.test.ts` failed until direct-probe lookup wiring existed. A rank-local index candidate was rejected after n1797 because `.rankDefendersByPower.officerIndex` cost 26.870ms and regressed the net officer path. The retained one-pass batch-level index passed focused guards, `npm.cmd run typecheck`, and profiled 40w n1799 with final hash `7ef09f55d6494edd`, matching n1794. Officer net cost dropped 23.404ms -> 21.991ms including index cost; rank+officer-index net dropped 83.109ms -> 76.369ms.
+
+**Canon posture:** Deterministic read-only predictor hot-path optimization. It changes only lookup placement in the direct-probe prediction path and kept the final-save hash unchanged.
+
+**Docs:** Added `docs/40_reports/implemented/20260515_COMMANDER_OFFICER_LOOKUP_INDEX.md` and updated roadmap, report index, knowledge ledger, docs truth guard, and napkin.
+
+---
+
 ## [2026-05-15] perf(commander): index front density by sector
 
 **Scope:** v0.9.3/v0.9.4 commander CPU profiling follow-up after the defender-power internal split.

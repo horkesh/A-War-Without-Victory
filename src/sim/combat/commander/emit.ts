@@ -44,6 +44,7 @@ import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_con
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import { pickOperationName } from '../operation_names.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
+import { buildOfficerCombatLookup } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
@@ -163,6 +164,13 @@ function predictDirectEnemyTargets(
     }
 
     const terrainMultByOsid = terrainCache ?? {};
+    const officerCombatLookup = briefing.state_ref.military.named_officers && briefing.state_ref.military.named_officer_data
+        ? botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets.officerIndex`,
+            () => buildOfficerCombatLookup(briefing.state_ref!),
+        )
+        : undefined;
+    const profilePrefix = `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets.predictCombatOutcome`;
     const predictedTargets: PredictedProbeTarget[] = [];
     for (const target of [...directEnemyTargets].sort(strictCompare)) {
         const targetController = getPoliticalControllerOSID(
@@ -187,7 +195,8 @@ function predictDirectEnemyTargets(
             undefined,
             undefined,
             briefing.ethnic_map ?? undefined,
-            `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets.predictCombatOutcome`,
+            profilePrefix,
+            officerCombatLookup,
         );
         if (prediction) {
             predictedTargets.push({ osid: target, prediction });

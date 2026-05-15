@@ -21,6 +21,7 @@ import {
     validateOfficerData,
 } from '../src/sim/combat/officer_system.js';
 import {
+    buildOfficerCombatLookup,
     getThreeTierOfficerMod,
     getOfficerQualityMult,
     getBrigadeOfficerMod,
@@ -378,6 +379,49 @@ describe('getThreeTierOfficerMod', () => {
         const mod = getThreeTierOfficerMod(formation, state, 'attack');
         const expected = getOfficerQualityMult('RS', 0);
         assert.ok(Math.abs(mod - expected) < 0.001);
+    });
+
+    it('uses a prebuilt lookup without rescanning named officer collections', () => {
+        const data = makeOfficer({ id: 'cmd', faction: 'RS', competence: 4, aggressiveness: 3, defensive_skill: 5 });
+        let officerDataReads = 0;
+        let namedOfficerKeyScans = 0;
+        const trackedOfficerData = new Proxy([data], {
+            get(target, prop, receiver) {
+                if (typeof prop === 'string' && /^\d+$/.test(prop)) officerDataReads += 1;
+                return Reflect.get(target, prop, receiver);
+            },
+        });
+        const trackedNamedOfficers = new Proxy({
+            cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_1kk' }),
+        }, {
+            ownKeys(target) {
+                namedOfficerKeyScans += 1;
+                return Reflect.ownKeys(target);
+            },
+        });
+        const state = makeMinimalState({
+            military: {
+                named_officer_data: trackedOfficerData,
+                named_officers: trackedNamedOfficers,
+                corps_command: {
+                    vrs_1kk: makeCorpsCommand(),
+                },
+            } as any,
+        });
+        const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });
+        const lookup = buildOfficerCombatLookup(state);
+        const brigMod = 1.0 + (0.50 - 0.30) * 0.4;
+        const corpsDefMod = 0.90 + 4 * 0.03 + 5 * 0.01;
+
+        officerDataReads = 0;
+        namedOfficerKeyScans = 0;
+        const first = getThreeTierOfficerMod(formation, state, 'defend', lookup);
+        const second = getThreeTierOfficerMod(formation, state, 'defend', lookup);
+
+        assert.ok(Math.abs(first - brigMod * corpsDefMod) < 0.001);
+        assert.equal(second, first);
+        assert.equal(officerDataReads, 0);
+        assert.equal(namedOfficerKeyScans, 0);
     });
 });
 

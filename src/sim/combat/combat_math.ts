@@ -15,6 +15,7 @@ import type {
     GameState,
     SectorStance,
 } from '../../state/game_state.js';
+import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -473,6 +474,72 @@ export function getBrigadeOfficerMod(formation: FormationState, turn: number): n
     return 1.0 + (quality - 0.30) * 0.4;
 }
 
+type OfficerCombatEntry = {
+    officerId: string;
+    state: NamedOfficerState;
+    data: NamedOfficer;
+};
+
+export type OfficerCombatLookup = {
+    stateById: ReadonlyMap<string, NamedOfficerState>;
+    dataById: ReadonlyMap<string, NamedOfficer>;
+    activeArmyCommanderByFaction: ReadonlyMap<string, OfficerCombatEntry>;
+    activeCommanderByCorpsId: ReadonlyMap<string, OfficerCombatEntry>;
+};
+
+export function buildOfficerCombatLookup(state: GameState): OfficerCombatLookup | undefined {
+    const officerStates = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    if (!officerStates || !officerData) return undefined;
+
+    const stateById = new Map<string, NamedOfficerState>();
+    const dataById = new Map<string, NamedOfficer>();
+    for (const data of officerData) {
+        if (!dataById.has(data.id)) dataById.set(data.id, data);
+    }
+
+    const activeArmyCommanderByFaction = new Map<string, OfficerCombatEntry>();
+    const activeCommanderByCorpsId = new Map<string, OfficerCombatEntry>();
+    for (const id in officerStates) {
+        const officerState = officerStates[id];
+        if (!officerState) continue;
+        stateById.set(id, officerState);
+
+        const data = dataById.get(id);
+        if (!data || officerState.status !== 'active') continue;
+        const entry = { officerId: id, state: officerState, data };
+        const activeArmyCommander = activeArmyCommanderByFaction.get(data.faction);
+        if (
+            data.rank === 'army_commander'
+            && (!activeArmyCommander || strictCompare(id, activeArmyCommander.officerId) < 0)
+        ) {
+            activeArmyCommanderByFaction.set(data.faction, entry);
+        }
+        if (officerState.assigned_corps_id) {
+            const activeCorpsCommander = activeCommanderByCorpsId.get(officerState.assigned_corps_id);
+            if (!activeCorpsCommander || strictCompare(id, activeCorpsCommander.officerId) < 0) {
+                activeCommanderByCorpsId.set(officerState.assigned_corps_id, entry);
+            }
+        }
+    }
+
+    return {
+        stateById,
+        dataById,
+        activeArmyCommanderByFaction,
+        activeCommanderByCorpsId,
+    };
+}
+
+function getOfficerCombatEntryById(
+    lookup: OfficerCombatLookup | undefined,
+    officerId: string,
+): OfficerCombatEntry | undefined {
+    const officerState = lookup?.stateById.get(officerId);
+    const data = lookup?.dataById.get(officerId);
+    return officerState && data ? { officerId, state: officerState, data } : undefined;
+}
+
 /**
  * Three-tier officer combat modifier:
  *   1. named_officers present → corps commander × brigade mod
@@ -484,7 +551,8 @@ export function getBrigadeOfficerMod(formation: FormationState, turn: number): n
 export function getThreeTierOfficerMod(
     formation: FormationState,
     state: GameState,
-    role: 'attack' | 'defend'
+    role: 'attack' | 'defend',
+    officerLookup?: OfficerCombatLookup,
 ): number {
     const turn = state.meta?.turn ?? 0;
 
@@ -498,17 +566,26 @@ export function getThreeTierOfficerMod(
         if (formation.faction === 'RS' && role === 'attack') {
             const brigadeOp = findBrigadeOperation(state.military.corps_command![corpsId]!, formation.id);
             if (brigadeOp?.type === 'general_offensive' && brigadeOp.phase === 'execution') {
-                // Find army commander instead of corps commander
-                const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
-                for (const id of officerIds) {
-                    const os = state.military.named_officers[id]!;
-                    if (os.status !== 'active') continue;
-                    const data = state.military.named_officer_data.find(o => o.id === id);
-                    if (!data || data.faction !== 'RS' || data.rank !== 'army_commander') continue;
-                    const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
-                    const comp = Math.max(1, Math.min(5, data.competence - penalty));
-                    const armyMod = 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+                const armyCommander = officerLookup?.activeArmyCommanderByFaction.get('RS');
+                if (armyCommander) {
+                    const penalty = armyCommander.state.penalty_turns_remaining > 0 ? armyCommander.state.effective_competence_penalty : 0;
+                    const comp = Math.max(1, Math.min(5, armyCommander.data.competence - penalty));
+                    const armyMod = 0.90 + comp * 0.03 + armyCommander.data.aggressiveness * 0.01;
                     return brigMod * armyMod;
+                }
+                if (!officerLookup) {
+                    // Find army commander instead of corps commander
+                    const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
+                    for (const id of officerIds) {
+                        const os = state.military.named_officers[id]!;
+                        if (os.status !== 'active') continue;
+                        const data = state.military.named_officer_data.find(o => o.id === id);
+                        if (!data || data.faction !== 'RS' || data.rank !== 'army_commander') continue;
+                        const penalty = os.penalty_turns_remaining > 0 ? os.effective_competence_penalty : 0;
+                        const comp = Math.max(1, Math.min(5, data.competence - penalty));
+                        const armyMod = 0.90 + comp * 0.03 + data.aggressiveness * 0.01;
+                        return brigMod * armyMod;
+                    }
                 }
             }
         }
@@ -517,8 +594,11 @@ export function getThreeTierOfficerMod(
         const corpsCmd = state.military.corps_command?.[corpsId];
         const activeOp = corpsCmd ? findBrigadeOperation(corpsCmd, formation.id) : null;
         if (activeOp?.commander_officer_id && activeOp.phase === 'execution') {
-            const opsOs = state.military.named_officers[activeOp.commander_officer_id];
-            const opsData = opsOs ? state.military.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null;
+            const opsEntry = officerLookup
+                ? getOfficerCombatEntryById(officerLookup, activeOp.commander_officer_id)
+                : undefined;
+            const opsOs = opsEntry?.state ?? state.military.named_officers[activeOp.commander_officer_id];
+            const opsData = opsEntry?.data ?? (opsOs ? state.military.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null);
             if (opsOs && opsData && opsOs.status === 'active') {
                 const penalty = opsOs.penalty_turns_remaining > 0 ? opsOs.effective_competence_penalty : 0;
                 const comp = Math.max(1, Math.min(5, opsData.competence - penalty));
@@ -530,6 +610,19 @@ export function getThreeTierOfficerMod(
         }
 
         // Find corps commander
+        const lookupCommander = officerLookup?.activeCommanderByCorpsId.get(corpsId);
+        if (lookupCommander) {
+            const penalty = lookupCommander.state.penalty_turns_remaining > 0 ? lookupCommander.state.effective_competence_penalty : 0;
+            const comp = Math.max(1, Math.min(5, lookupCommander.data.competence - penalty));
+            const corpsMod = lookupCommander.state.acting_commander
+                ? 0.92
+                : role === 'attack'
+                    ? 0.90 + comp * 0.03 + lookupCommander.data.aggressiveness * 0.01
+                    : 0.90 + comp * 0.03 + lookupCommander.data.defensive_skill * 0.01;
+            return brigMod * corpsMod;
+        }
+        if (officerLookup) return brigMod; // No commander found for corps
+
         const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
         for (const id of officerIds) {
             const os = state.military.named_officers[id]!;
@@ -1088,6 +1181,7 @@ export function computeDefenderPower(
     ethnicDefenseBonus?: number,
     profileTime?: CombatMathProfileTimer,
     densityModifierByFormationId?: LocalFrontDensityModifierLookup,
+    officerLookup?: OfficerCombatLookup,
 ): number {
     const base = combatMathProfileTime(profileTime, '.base', () => basePower(formation));
     const posture = formation.posture ?? 'defend';
@@ -1136,7 +1230,7 @@ export function computeDefenderPower(
         getLocalFrontDensityModifier(state, formation, densityModifierByFormationId)
     );
     const officerMult = combatMathProfileTime(profileTime, '.officer', () =>
-        getThreeTierOfficerMod(formation, state, 'defend')
+        getThreeTierOfficerMod(formation, state, 'defend', officerLookup)
     );
     const ethnicMult = 1.0 + (ethnicDefenseBonus ?? 0);
     const fatigueMult = getFatigueMult(formation, 'defend');

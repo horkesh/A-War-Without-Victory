@@ -61,6 +61,7 @@ import {
     classifyOutcome,
     computeAttackerPower,
     computeDefenderPower,
+    type OfficerCombatLookup,
     buildTerrainMultByOsid,
     getBombardmentCasualtyMult,
     rankDefendersByPower,
@@ -129,6 +130,7 @@ function rankDefendersByPowerWithEntries(
     supplyStateByOsid: SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number,
     profilePrefix?: string,
+    officerLookup?: OfficerCombatLookup,
 ): RankedDefenderPowers {
     const defenderPowerProfilePrefix = profilePrefix ? `${profilePrefix}.rankDefendersByPower.computeDefenderPower` : undefined;
     const defenderPowerProfileTime = defenderPowerProfilePrefix
@@ -156,6 +158,7 @@ function rankDefendersByPowerWithEntries(
                 ethnicBonusFn(formation),
                 defenderPowerProfileTime,
                 frontDensityModifierByFormationId,
+                officerLookup,
             ),
         })),
     );
@@ -252,7 +255,8 @@ export function predictCombatOutcome(
     osidPopulationMap?: OsidPopulationMap | null,
     slopeByOsid?: Record<string, number> | null,
     ethnicComposition?: OsidEthnicComposition | null,
-    profilePrefix?: string
+    profilePrefix?: string,
+    officerLookup?: OfficerCombatLookup,
 ): CombatPrediction | null {
     const attacker = state.military.formations?.[attackerId];
     if (!attacker || attacker.status !== 'active') return null;
@@ -339,7 +343,7 @@ export function predictCombatOutcome(
             const { primary, totalPower, powerByFormationId } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
-                () => rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix),
+                () => rankDefendersByPowerWithEntries(sectorBrigades, sector, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus, profilePrefix, officerLookup),
             );
             const avgBrigadePower = totalPower / sectorBrigades.length;
             const attackerCount = 1 + (additionalAttackers?.length ?? 0);
