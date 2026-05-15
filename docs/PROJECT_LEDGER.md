@@ -4300,3 +4300,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The adjacent-enemy scan hotspot from n1819 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `sectorAttack`, `homeDefense`, `defensive`, and `returnToCorps`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): cache return-to-corps territory
+
+**Type:** Performance optimization in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added `buildCorpsTerritoryOsidsByCorps(...)`, a pass-local corps-territory set cache built from `corps_front_sectors`. `executeFactionDirectivesImpl(...)` builds it once per faction directive pass and `evaluateReturnToCorps(...)` now reads it for `.returnToCorps.territoryCheck` and `.returnToCorps.collectTargets`, with sorted legacy scans retained for direct callers without the cache.
+
+**Determinism:** The cache is built from sector ids and territory OSIDs sorted with `strictCompare`, then returned in corps-id order. The evaluator only reads this pass-local cache and does not mutate `GameState`, save schema, movement-order sequencing, RNG state, or serialization. Profiled 40w n1821 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/elite_loan_return_to_corps.test.ts` failed because cached corps territory was ignored and the helper did not exist. Green focused suite passed 4/4. Follow-up focused suite `npm.cmd run test:vitest:fast -- -- tests/elite_loan_return_to_corps.test.ts tests/bot_orders_perf_profile.test.ts tests/adjacent_enemy_cache.test.ts tests/uncontested_sector_defense_cache.test.ts tests/defensive_front_gap_count_cache.test.ts` passed 12/12, and `npm.cmd run typecheck` passed. Profiled 40w n1821 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `.returnToCorps.territoryCheck` dropped 20.496ms -> 1.072ms, `returnToCorps` dropped 46.883ms -> 25.514ms, and evaluator time dropped 503.935ms -> 480.012ms. Total bot-orders time was run-noisy/slightly higher at 766.933ms -> 771.974ms, so the result is recorded as a targeted evaluator cut rather than a total wall-clock win.
+
+**Roadmap delta:** The return-to-corps territory scan hotspot from n1820 is closed. The next CPU lane should use a fresh profile; current top bot-order evaluator candidates are `sectorMarch`, `sectorAttack`, `homeDefense`, and `defensive`.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md`

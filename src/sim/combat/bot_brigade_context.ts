@@ -37,6 +37,7 @@ const ALL_FACTION_CORPS_COUNT_KEY = '__all__';
 export type CorpsBrigadeCountsByOsid = Map<string, Map<Osid, number>>;
 export type ActiveFormationLocationsByFaction = Map<FactionId, Set<Osid>>;
 export type AdjacentEnemyOsidsByLoc = Map<Osid, Osid[]>;
+export type CorpsTerritoryOsidsByCorps = Map<string, Set<Osid>>;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Functions
@@ -122,6 +123,29 @@ export function buildAdjacentEnemyOsidsByLoc(
         byLoc.set(loc, getAdjacentEnemyOsids(loc, faction, adjacency, state, reverseMap));
     }
     return byLoc;
+}
+
+export function buildCorpsTerritoryOsidsByCorps(state: GameState): CorpsTerritoryOsidsByCorps {
+    const sectors = state.military.corps_front_sectors;
+    const unsortedByCorps: CorpsTerritoryOsidsByCorps = new Map();
+    if (!sectors) return unsortedByCorps;
+
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId]!;
+        const corpsId = sector.corps_id;
+        if (!corpsId) continue;
+
+        let territory = unsortedByCorps.get(corpsId);
+        if (!territory) {
+            territory = new Set();
+            unsortedByCorps.set(corpsId, territory);
+        }
+        for (const osid of [...(sector.territory_osids ?? [])].sort(strictCompare)) {
+            territory.add(osid as Osid);
+        }
+    }
+
+    return new Map([...unsortedByCorps.entries()].sort(([a], [b]) => strictCompare(a, b)));
 }
 
 /**

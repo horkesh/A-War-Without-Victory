@@ -406,7 +406,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
  * assigned to a sector through the normal pipeline.
  */
 export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, adjacency, result, sectorAssignment } = ctx;
+    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps } = ctx;
 
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
@@ -428,8 +428,11 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         ? brigade.elite_loan_state.loaned_to_corps
         : brigade.corps_id;
     if (!corpsId) return false;
+    const cachedCorpsTerritory = corpsTerritoryOsidsByCorps?.get(corpsId);
     const inCorpsTerritory = returnToCorpsProfileTime('.returnToCorps.territoryCheck', () => {
-        for (const s of Object.values(sectors)) {
+        if (cachedCorpsTerritory !== undefined) return cachedCorpsTerritory.has(loc);
+        for (const sid of Object.keys(sectors).sort(strictCompare)) {
+            const s = sectors[sid]!;
             if (s.corps_id === corpsId && s.territory_osids.includes(loc)) return true;
         }
         return false;
@@ -443,10 +446,12 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
 
     // Collect all own-corps territory OSIDs as BFS targets
     const corpsTerritory = returnToCorpsProfileTime('.returnToCorps.collectTargets', () => {
+        if (cachedCorpsTerritory !== undefined) return cachedCorpsTerritory;
         const targets = new Set<string>();
-        for (const s of Object.values(sectors)) {
+        for (const sid of Object.keys(sectors).sort(strictCompare)) {
+            const s = sectors[sid]!;
             if (s.corps_id === corpsId) {
-                for (const o of s.territory_osids) targets.add(o);
+                for (const o of [...s.territory_osids].sort(strictCompare)) targets.add(o);
             }
         }
         return targets;

@@ -126,6 +126,11 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1820 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`adjacentEnemyScan` dropped 63.837ms -> 2.468ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_ADJACENT_ENEMY_CACHE.md');
+    expect(roadmap).toContain('return-to-corps territory cache');
+    expect(roadmap).toContain('n1821 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.returnToCorps.territoryCheck` dropped 20.496ms -> 1.072ms');
+    expect(roadmap).toContain('`returnToCorps` dropped 46.883ms -> 25.514ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_TERRITORY_CACHE.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');

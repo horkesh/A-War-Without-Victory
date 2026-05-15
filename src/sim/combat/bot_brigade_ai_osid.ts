@@ -104,6 +104,7 @@ import {
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
     buildAdjacentEnemyOsidsByLoc,
+    buildCorpsTerritoryOsidsByCorps,
     findNearestFriendlyOsidInSet,
     buildActiveFormationLocationsByFaction,
     buildCorpsBrigadeCountsByOsid,
@@ -159,6 +160,7 @@ export {
     findBrigadeSectorId,
     getAdjacentEnemyOsids,
     buildAdjacentEnemyOsidsByLoc,
+    buildCorpsTerritoryOsidsByCorps,
     findNearestFriendlyOsidInSet,
     buildActiveFormationLocationsByFaction,
     buildCorpsBrigadeCountsByOsid,
@@ -451,6 +453,7 @@ function executeFactionDirectivesImpl(
     const corpsBrigadeCountsByOsid = buildCorpsBrigadeCountsByOsid(state, faction);
     const activeFormationLocationsByFaction = buildActiveFormationLocationsByFaction(state);
     const sectorDefenseByFactionAndOsid = buildSectorDefenseByFactionAndOsid(state);
+    const corpsTerritoryOsidsByCorps = buildCorpsTerritoryOsidsByCorps(state);
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -570,6 +573,7 @@ function executeFactionDirectivesImpl(
             corpsBrigadeCountsByOsid,
             activeFormationLocationsByFaction,
             sectorDefenseByFactionAndOsid,
+            corpsTerritoryOsidsByCorps,
             adjacency,
             reverseMap,
             terrainCache,

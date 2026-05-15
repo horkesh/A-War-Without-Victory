@@ -101,6 +101,8 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('sectorAssignmentByBrigade.get(brigade.id)');
         expect(brigadeAi).toContain('buildAdjacentEnemyOsidsByLoc');
         expect(brigadeAi).toContain('adjacentEnemyByLoc.get(loc)');
+        expect(brigadeAi).toContain('buildCorpsTerritoryOsidsByCorps');
+        expect(brigadeAi).toContain('corpsTerritoryOsidsByCorps');
         expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
         expect(brigadeEvalFront).toContain('.offAssignedFront');
         expect(brigadeEvalFront).toContain('.sectorReassignment');
@@ -121,6 +123,7 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.returnToCorps.collectTargets');
         expect(brigadeEvalFront).toContain('.returnToCorps.bfs');
         expect(brigadeEvalFront).toContain('.returnToCorps.walkBack');
+        expect(brigadeEvalFront).toContain('corpsTerritoryOsidsByCorps?.get(corpsId)');
         expect(brigadeEvalFront).toContain('.pocketEvacuation.assignedSectorLookup');
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');

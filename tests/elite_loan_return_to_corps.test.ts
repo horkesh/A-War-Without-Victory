@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluateReturnToCorps } from '../src/sim/combat/bot_brigade_eval_front.js';
+import * as botBrigadeContext from '../src/sim/combat/bot_brigade_context.js';
 import type { BrigadeEvaluationContext } from '../src/sim/combat/bot_brigade_eval_types.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -109,5 +110,51 @@ describe('evaluateReturnToCorps', () => {
 
         expect(handled).toBe(false);
         expect(ctx.result.movement_orders[ctx.brigade.id]).toBeUndefined();
+    });
+
+    it('uses cached corps territory to skip brigades already inside the receiving corps footprint', () => {
+        const ctx = makeContext() as BrigadeEvaluationContext & {
+            corpsTerritoryOsidsByCorps: Map<string, Set<string>>;
+        };
+        ctx.corpsTerritoryOsidsByCorps = new Map([
+            ['arbih_2nd_corps', new Set(['op:home:a', 'op:front:c'])],
+        ]);
+
+        const handled = evaluateReturnToCorps(ctx);
+
+        expect(handled).toBe(false);
+        expect(ctx.result.movement_orders[ctx.brigade.id]).toBeUndefined();
+    });
+});
+
+describe('buildCorpsTerritoryOsidsByCorps', () => {
+    it('builds deterministic corps territory sets from sorted sector ids', () => {
+        const build = (botBrigadeContext as {
+            buildCorpsTerritoryOsidsByCorps?: (state: unknown) => Map<string, Set<string>>;
+        }).buildCorpsTerritoryOsidsByCorps;
+        expect(build).toBeTypeOf('function');
+
+        const cache = build!({
+            military: {
+                corps_front_sectors: {
+                    'sector:z': {
+                        corps_id: 'arbih_2nd_corps',
+                        territory_osids: ['op:z'],
+                    },
+                    'sector:a': {
+                        corps_id: 'arbih_2nd_corps',
+                        territory_osids: ['op:a'],
+                    },
+                    'sector:b': {
+                        corps_id: 'arbih_3rd_corps',
+                        territory_osids: ['op:b'],
+                    },
+                },
+            },
+        });
+
+        expect([...cache.keys()]).toEqual(['arbih_2nd_corps', 'arbih_3rd_corps']);
+        expect([...(cache.get('arbih_2nd_corps') ?? [])]).toEqual(['op:a', 'op:z']);
+        expect([...(cache.get('arbih_3rd_corps') ?? [])]).toEqual(['op:b']);
     });
 });

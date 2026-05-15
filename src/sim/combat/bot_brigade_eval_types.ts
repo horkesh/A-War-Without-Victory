@@ -16,7 +16,7 @@ import type { Osid } from './osid_adjacency.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type { OsidBotOrdersResult } from './bot_brigade_ai_osid.js'; // I'll need to export this or move it here
-import type { ActiveFormationLocationsByFaction, CorpsBrigadeCountsByOsid } from './bot_brigade_context.js';
+import type { ActiveFormationLocationsByFaction, CorpsBrigadeCountsByOsid, CorpsTerritoryOsidsByCorps } from './bot_brigade_context.js';
 import type { SectorDefenseByFactionAndOsid } from './sector_utils.js';
 
 export interface BrigadeEvaluationContext {
@@ -59,6 +59,8 @@ export interface BrigadeEvaluationContext {
     activeFormationLocationsByFaction?: ActiveFormationLocationsByFaction;
     /** Cached defender-sector lookup by faction and defended OSID for this faction-order pass. */
     sectorDefenseByFactionAndOsid?: SectorDefenseByFactionAndOsid;
+    /** Cached corps territory OSIDs for this faction-order pass. */
+    corpsTerritoryOsidsByCorps?: CorpsTerritoryOsidsByCorps;
 
     
     // Global context dependencies:
