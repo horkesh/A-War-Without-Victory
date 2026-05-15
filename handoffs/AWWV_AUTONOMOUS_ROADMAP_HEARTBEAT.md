@@ -4,7 +4,7 @@
 **Branch:** `codex/docs-canon-maintenance`  
 **Worktree:** `F:\A-War-Without-Victory\.worktrees\docs-canon-maintenance`  
 **Lane:** docs/canon maintenance, docs-only/audit-only  
-**Status:** Verified; commit pending.
+**Status:** Verified; docs maintenance commit recorded.
 
 ## Files Changed
 
@@ -30,7 +30,7 @@
 
 ## Commit
 
-- Pending.
+- Docs maintenance commit: `a1ff5ae0`
 
 ## Next Recommendation
 
