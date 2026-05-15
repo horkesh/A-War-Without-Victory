@@ -109,6 +109,12 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.overstackRedistribution.countHere');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.rankCandidates');
         expect(brigadeEvalFront).toContain('.overstackRedistribution.destination');
+        expect(brigadeEvalFront).toContain('RETURN_TO_CORPS_PROFILE_PREFIX');
+        expect(brigadeEvalFront).toContain('.returnToCorps.rosterScan');
+        expect(brigadeEvalFront).toContain('.returnToCorps.territoryCheck');
+        expect(brigadeEvalFront).toContain('.returnToCorps.collectTargets');
+        expect(brigadeEvalFront).toContain('.returnToCorps.bfs');
+        expect(brigadeEvalFront).toContain('.returnToCorps.walkBack');
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
         expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');

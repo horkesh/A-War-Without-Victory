@@ -11,9 +11,14 @@ import type { CorpsFrontSector, FormationState, GameState, SettlementId } from '
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 const SECTOR_MARCH_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.sectorMarch';
+const RETURN_TO_CORPS_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function sectorMarchProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${SECTOR_MARCH_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function returnToCorpsProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${RETURN_TO_CORPS_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
 /**
@@ -401,10 +406,14 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
     const sectors = state.military.corps_front_sectors;
-    for (const s of Object.values(sectors)) {
-        if (s.assigned_brigade_ids.includes(brigade.id)) return false;
-        if ((s.reserve_brigade_ids ?? []).includes(brigade.id)) return false;
-    }
+    const isRostered = returnToCorpsProfileTime('.returnToCorps.rosterScan', () => {
+        for (const s of Object.values(sectors)) {
+            if (s.assigned_brigade_ids.includes(brigade.id)) return true;
+            if ((s.reserve_brigade_ids ?? []).includes(brigade.id)) return true;
+        }
+        return false;
+    });
+    if (isRostered) return false;
 
     // Check: is the brigade in ANY of its target corps's sector territories?
     // Elite reserve loans remain owned by main staff in corps_id, but while on
@@ -413,9 +422,13 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         ? brigade.elite_loan_state.loaned_to_corps
         : brigade.corps_id;
     if (!corpsId) return false;
-    for (const s of Object.values(sectors)) {
-        if (s.corps_id === corpsId && s.territory_osids.includes(loc)) return false;
-    }
+    const inCorpsTerritory = returnToCorpsProfileTime('.returnToCorps.territoryCheck', () => {
+        for (const s of Object.values(sectors)) {
+            if (s.corps_id === corpsId && s.territory_osids.includes(loc)) return true;
+        }
+        return false;
+    });
+    if (inCorpsTerritory) return false;
 
     // Brigade is orphaned and outside corps territory — march toward nearest
     // own-corps sector territory. BFS from current location through friendly
@@ -423,38 +436,47 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
     const pc = state.political.political_controllers ?? {};
 
     // Collect all own-corps territory OSIDs as BFS targets
-    const corpsTerritory = new Set<string>();
-    for (const s of Object.values(sectors)) {
-        if (s.corps_id === corpsId) {
-            for (const o of s.territory_osids) corpsTerritory.add(o);
+    const corpsTerritory = returnToCorpsProfileTime('.returnToCorps.collectTargets', () => {
+        const targets = new Set<string>();
+        for (const s of Object.values(sectors)) {
+            if (s.corps_id === corpsId) {
+                for (const o of s.territory_osids) targets.add(o);
+            }
         }
-    }
+        return targets;
+    });
     if (corpsTerritory.size === 0) return false;
 
     // BFS from current location toward nearest corps territory OSID
-    const visited = new Set<string>([loc]);
-    const parent = new Map<string, string>();
-    const queue: string[] = [loc];
-    let targetFound: string | null = null;
-    while (queue.length > 0 && !targetFound) {
-        const curr = queue.shift()!;
-        const neighbors = adjacency.get(curr as Osid) ?? [];
-        for (const n of neighbors) {
-            if (visited.has(n)) continue;
-            if (pc[n] !== brigade.faction) continue;
-            visited.add(n);
-            parent.set(n, curr);
-            if (corpsTerritory.has(n)) { targetFound = n; break; }
-            queue.push(n);
+    const { targetFound, parent } = returnToCorpsProfileTime('.returnToCorps.bfs', () => {
+        const visited = new Set<string>([loc]);
+        const parent = new Map<string, string>();
+        const queue: string[] = [loc];
+        let targetFound: string | null = null;
+        while (queue.length > 0 && !targetFound) {
+            const curr = queue.shift()!;
+            const neighbors = adjacency.get(curr as Osid) ?? [];
+            for (const n of neighbors) {
+                if (visited.has(n)) continue;
+                if (pc[n] !== brigade.faction) continue;
+                visited.add(n);
+                parent.set(n, curr);
+                if (corpsTerritory.has(n)) { targetFound = n; break; }
+                queue.push(n);
+            }
         }
-    }
+        return { targetFound, parent };
+    });
     if (!targetFound) return false;
 
     // Walk back from target to loc to find the first step
-    let step = targetFound;
-    while (parent.has(step) && parent.get(step) !== loc) {
-        step = parent.get(step)!;
-    }
+    const step = returnToCorpsProfileTime('.returnToCorps.walkBack', () => {
+        let nextStep = targetFound;
+        while (parent.has(nextStep) && parent.get(nextStep) !== loc) {
+            nextStep = parent.get(nextStep)!;
+        }
+        return nextStep;
+    });
     if (step && step !== loc) {
         result.movement_orders[brigade.id] = step as Osid;
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'hold' });

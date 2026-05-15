@@ -4140,3 +4140,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The repeated defender-scan hotspot from n1808 is closed. The next bot-order CPU pass should use a fresh profile; `sectorDefense` is now the largest uncontested-occupation sub-label, while top-level evaluator pressure now also points at `returnToCorps`, `sectorMarch`, and `sectorAttack`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_DEFENDER_INDEX.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split return-to-corps profile attribution
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added return-to-corps sub-labels for assigned/reserve roster scanning, target-corps territory membership, corps-territory target collection, friendly-territory BFS, and path walk-back.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers preserve branch order, sector iteration, BFS queue behavior, movement-order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1810 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `RETURN_TO_CORPS_PROFILE_PREFIX`. Green focused suite `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts tests\elite_loan_return_to_corps.test.ts --reporter=dot` passed 6/6, and `npm.cmd run typecheck` passed. Profiled 40w n1810 kept final hash `0cb626c032204372`; `.returnToCorps.rosterScan` dominated at 144.998ms, `.territoryCheck` was 18.271ms, `.bfs` was 3.413ms, `.collectTargets` was 2.590ms, and `.walkBack` was 0.054ms.
+
+**Roadmap delta:** The next bot-order CPU pass should optimize repeated all-sector assigned/reserve roster scans with a deterministic pass-local brigade-sector membership index. BFS and target collection are not current targets.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_RETURN_TO_CORPS_PROFILE_SPLIT.md`
