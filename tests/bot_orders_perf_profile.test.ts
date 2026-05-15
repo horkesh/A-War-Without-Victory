@@ -117,8 +117,11 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
         expect(brigadeEvalFront).toContain('.offAssignedFront');
         expect(brigadeEvalFront).toContain('.sectorReassignment');
+        expect(brigadeEvalFront).toContain('.sectorAssignmentContext');
         expect(brigadeEvalFront).toContain('.assignedSectorLookup');
+        expect(brigadeEvalFront).toContain('.pendingHomeReturn');
         expect(brigadeEvalFront).toContain('.frontSet');
+        expect(brigadeEvalFront).toContain('.frontMembership');
         expect(brigadeEvalFront).toContain('.reserveNearFront');
         expect(brigadeEvalFront).toContain('.enclaveGuard');
         expect(brigadeEvalFront).toContain('.destination');

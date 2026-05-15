@@ -133,38 +133,42 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
     const sectors = state.military.corps_front_sectors;
     if (sectors && !isActiveSectorOperationParticipant) {
-        let assignedSector = sectorAssignment?.sector ?? null;
-        let isReserve = sectorAssignment?.isReserve ?? false;
-        let cachedFrontSet = sectorAssignment?.frontOsids ?? null;
-        if (sectorAssignment === undefined) {
-            sectorMarchProfileTime('.assignedSectorLookup', () => {
-                for (const sid of Object.keys(sectors).sort(strictCompare)) {
-                    const sec = sectors[sid]!;
-                    if (sec.assigned_brigade_ids.includes(brigade.id)) {
-                        assignedSector = sec;
-                        break;
+        const { assignedSector, isReserve, cachedFrontSet } = sectorMarchProfileTime('.sectorAssignmentContext', () => {
+            let resolvedSector = sectorAssignment?.sector ?? null;
+            let resolvedIsReserve = sectorAssignment?.isReserve ?? false;
+            let resolvedFrontSet = sectorAssignment?.frontOsids ?? null;
+            if (sectorAssignment === undefined) {
+                sectorMarchProfileTime('.assignedSectorLookup', () => {
+                    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                        const sec = sectors[sid]!;
+                        if (sec.assigned_brigade_ids.includes(brigade.id)) {
+                            resolvedSector = sec;
+                            break;
+                        }
+                        if (sec.reserve_brigade_ids.includes(brigade.id)) {
+                            resolvedSector = sec;
+                            resolvedIsReserve = true;
+                            break;
+                        }
                     }
-                    if (sec.reserve_brigade_ids.includes(brigade.id)) {
-                        assignedSector = sec;
-                        isReserve = true;
-                        break;
-                    }
-                }
-            });
-        }
+                });
+            }
+            return { assignedSector: resolvedSector, isReserve: resolvedIsReserve, cachedFrontSet: resolvedFrontSet };
+        });
         if (assignedSector) {
             const sector = assignedSector;
             // If brigade has a pending return-to-home movement order, normally don't override it.
             // Exception: line-assigned brigades that are still off their assigned sector front
             // must be pulled to the sector front (root fix for rear lock-in).
             const pendingMove = state.military.brigade_movement_orders?.[brigade.id];
-            if (pendingMove) {
+            if (sectorMarchProfileTime('.pendingHomeReturn', () => {
+                if (!pendingMove) return false;
                 const destSids = pendingMove.destination_sids ?? [];
                 const homeOsid = brigade.home_osid;
-                if (homeOsid && destSids.some((d: string) => d === homeOsid) && !offAssignedFront) {
-                    return false; // Returning home — don't redirect to sector front
-                }
-            }
+                return homeOsid != null
+                    && destSids.some((d: string) => d === homeOsid)
+                    && !offAssignedFront;
+            })) return false; // Returning home — don't redirect to sector front
 
             const frontSet = sectorMarchProfileTime('.frontSet', () => {
                 const resolvedFrontSet = cachedFrontSet ?? new Set<string>();
@@ -175,7 +179,8 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 }
                 return resolvedFrontSet;
             });
-            if (!frontSet.has(loc)) {
+            const offSectorFront = sectorMarchProfileTime('.frontMembership', () => !frontSet.has(loc));
+            if (offSectorFront) {
                 // Reserve brigades only column march if deep rear (2+ hops).
                 // 1-hop reserves stay put when the sector already has line holders. If the
                 // sector has no line holder, the reserve must march forward to close the seam.
