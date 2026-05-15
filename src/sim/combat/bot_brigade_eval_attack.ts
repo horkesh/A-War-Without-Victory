@@ -34,10 +34,15 @@ import {
 
 export const UNCONTESTED_OCCUPATION_SCORE = 600;
 const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const SECTOR_ATTACK_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function sectorAttackProfileTime<T>(labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${SECTOR_ATTACK_PROFILE_PREFIX}${labelSuffix}`, fn);
 }
 
 function uncontestedOccupationProfileTime<T>(labelSuffix: string, fn: () => T): T {
@@ -114,7 +119,11 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
     // Uses MIN_ATTACK_PERSONNEL from formation_constants (canonical single source).
     // NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
-    if (!isActiveSectorOperationParticipant && assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, ctx.assignedSectorFrontOsids)) {
+    const offAssignedFront = sectorAttackProfileTime('.sectorAttack.offAssignedFront', () =>
+        !isActiveSectorOperationParticipant &&
+        assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, ctx.assignedSectorFrontOsids)
+    );
+    if (offAssignedFront) {
         return false;
     }
     if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
@@ -124,43 +133,51 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
 
     if (isActiveSectorOperationParticipant && (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe')) {
         if (activeOp.phase === 'planning') {
-            const planningApproachOsids = getSectorOffensiveApproachOsids(
-                state,
-                activeOp,
-                faction,
-                adjacency,
-                reverseMap,
-                brigade.id,
+            const planningApproachOsids = sectorAttackProfileTime(
+                '.sectorAttack.planningApproaches',
+                () => getSectorOffensiveApproachOsids(
+                    state,
+                    activeOp,
+                    faction,
+                    adjacency,
+                    reverseMap,
+                    brigade.id,
+                )
             );
             if (planningApproachOsids.size > 0 && !planningApproachOsids.has(loc)) {
                 // Not at an approach OSID — march toward one
-                const nearestApproach = findNearestFriendlyOsidInSet(
-                    state,
-                    faction,
-                    loc,
-                    adjacency,
-                    reverseMap,
-                    planningApproachOsids
+                const nearestApproach = sectorAttackProfileTime(
+                    '.sectorAttack.planningApproachPath',
+                    () => findNearestFriendlyOsidInSet(
+                        state,
+                        faction,
+                        loc,
+                        adjacency,
+                        reverseMap,
+                        planningApproachOsids
+                    )
                 );
                 if (nearestApproach) {
                     result.column_march_orders[brigade.id] = nearestApproach;
                 }
             } else if (planningApproachOsids.size === 0) {
                 // No approach OSIDs found — fall back to staging area
-                const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
-                if (axisStaging && loc !== axisStaging) {
-                    const nearestStaging = findNearestFriendlyOsidInSet(
-                        state,
-                        faction,
-                        loc,
-                        adjacency,
-                        reverseMap,
-                        new Set([axisStaging])
-                    );
-                    if (nearestStaging) {
-                        result.column_march_orders[brigade.id] = nearestStaging;
+                sectorAttackProfileTime('.sectorAttack.planningApproachPath', () => {
+                    const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
+                    if (axisStaging && loc !== axisStaging) {
+                        const nearestStaging = findNearestFriendlyOsidInSet(
+                            state,
+                            faction,
+                            loc,
+                            adjacency,
+                            reverseMap,
+                            new Set([axisStaging])
+                        );
+                        if (nearestStaging) {
+                            result.column_march_orders[brigade.id] = nearestStaging;
+                        }
                     }
-                }
+                });
             }
             // else: already at an approach OSID — stay in position
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -184,17 +201,20 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 return true;
             }
 
-            const allTargets = predictAllAdjacentTargets(
-                state,
-                brigade.id,
-                adjacency,
-                reverseMap,
-                terrainCache,
-                'attack',
-                supplyStateByOsid,
-                osidPopulationMap,
-                undefined,
-                ethnicMap
+            const allTargets = sectorAttackProfileTime(
+                '.sectorAttack.executionPredictTargets',
+                () => predictAllAdjacentTargets(
+                    state,
+                    brigade.id,
+                    adjacency,
+                    reverseMap,
+                    terrainCache,
+                    'attack',
+                    supplyStateByOsid,
+                    osidPopulationMap,
+                    undefined,
+                    ethnicMap
+                )
             );
             // Alliance filter: HRHB must not attack RBiH targets (and vice versa)
             // when combat is not enabled (allied OR mobilizing). Applies to ALL operation attack paths.
@@ -204,8 +224,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
                 })
                 : allTargets;
-            const tacticallyAdjacentToObjective = getTacticalAdjacentOsids(state, loc as Osid, adjacency)
-                .includes(currentObjective);
+            const tacticallyAdjacentToObjective = sectorAttackProfileTime(
+                '.sectorAttack.executionTacticalAdjacency',
+                () => getTacticalAdjacentOsids(state, loc as Osid, adjacency).includes(currentObjective)
+            );
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
             const directObjectiveAttack = avoidedOsidsForFaction?.includes(currentObjective as string)
                 ? undefined
@@ -216,12 +238,15 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
                 const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
                     ?? activeOp.participating_brigades ?? [];
-                const adjacentOperationParticipants = axisBrigades.filter((brigadeId) => {
-                    const participant = state.military.formations?.[brigadeId];
-                    if (!participant?.location_osid || participant.status !== 'active') return false;
-                    return getTacticalAdjacentOsids(state, participant.location_osid as Osid, adjacency)
-                        .includes(currentObjective);
-                }).length;
+                const adjacentOperationParticipants = sectorAttackProfileTime(
+                    '.sectorAttack.executionAdjacentParticipants',
+                    () => axisBrigades.filter((brigadeId) => {
+                        const participant = state.military.formations?.[brigadeId];
+                        if (!participant?.location_osid || participant.status !== 'active') return false;
+                        return getTacticalAdjacentOsids(state, participant.location_osid as Osid, adjacency)
+                            .includes(currentObjective);
+                    }).length
+                );
                 const concentratedOutcome = adjacentOperationParticipants > 1
                     ? estimateConcentratedOutcome(
                         directObjectiveAttack.prediction.power_ratio,
@@ -257,26 +282,32 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // movement_orders (1-hop regular move) is invisible to anyMoved and causes
             // the idle_execution_turn_streak to accumulate incorrectly — leading to
             // premature axis stall before brigades reach attack position (#34 root cause).
-            const objectiveApproachOsids = getSectorOffensiveApproachOsids(
-                state,
-                activeOp,
-                faction,
-                adjacency,
-                reverseMap,
-                brigade.id,
+            const objectiveApproachOsids = sectorAttackProfileTime(
+                '.sectorAttack.executionApproachOsids',
+                () => getSectorOffensiveApproachOsids(
+                    state,
+                    activeOp,
+                    faction,
+                    adjacency,
+                    reverseMap,
+                    brigade.id,
+                )
             );
             objectiveApproachOsids.delete(loc);
             if (objectiveApproachOsids.size > 0) {
                 // Use Destination (actual target OSID) so the Dijkstra path covers all hops.
                 // findNearestFriendlyOsidInSet returns only the first step — passing a 1-hop
                 // destination to column_march_orders would stop the column after 1 hop.
-                const approachDest = findNearestFriendlyOsidDestination(
-                    state,
-                    faction,
-                    loc,
-                    adjacency,
-                    reverseMap,
-                    objectiveApproachOsids
+                const approachDest = sectorAttackProfileTime(
+                    '.sectorAttack.executionApproachPath',
+                    () => findNearestFriendlyOsidDestination(
+                        state,
+                        faction,
+                        loc,
+                        adjacency,
+                        reverseMap,
+                        objectiveApproachOsids
+                    )
                 );
                 if (approachDest) {
                     result.column_march_orders[brigade.id] = approachDest;
@@ -293,18 +324,24 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // as attack-through intermediaries (e.g. Brčko city center — VRS held
             // the corridor but not the city core; without this, operation brigades
             // sweep through avoided OSIDs opportunistically).
-            const _avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
-            const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
-            const intermediateTargets = (objectiveController
-                ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
-                : targets).filter(t => !_avoidedOsids?.includes(t.osid));
+            const { intermediateTargets, bestIntermediate } = sectorAttackProfileTime(
+                '.sectorAttack.executionIntermediateTargets',
+                () => {
+                    const _avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
+                    const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
+                    const filteredIntermediateTargets = (objectiveController
+                        ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
+                        : targets).filter(t => !_avoidedOsids?.includes(t.osid));
+                    const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
+                    const best = filteredIntermediateTargets.find((t) => {
+                        const alreadyAt = chosenTargets.get(t.osid) ?? 0;
+                        if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
+                        return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, intermediateThreshold);
+                    });
+                    return { intermediateTargets: filteredIntermediateTargets, bestIntermediate: best };
+                }
+            );
             if (intermediateTargets.length > 0) {
-                const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
-                const bestIntermediate = intermediateTargets.find((t) => {
-                    const alreadyAt = chosenTargets.get(t.osid) ?? 0;
-                    if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;
-                    return isOutcomeSufficientForAttack(t.prediction.predicted_outcome, intermediateThreshold);
-                });
                 if (bestIntermediate) {
                     const attackPosture: BrigadePosture = (brigade.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });

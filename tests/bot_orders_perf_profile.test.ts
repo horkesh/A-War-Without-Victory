@@ -118,6 +118,15 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
         expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('SECTOR_ATTACK_PROFILE_PREFIX');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.offAssignedFront');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproaches');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproachPath');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionPredictTargets');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionTacticalAdjacency');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionAdjacentParticipants');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionApproachPath');
+        expect(brigadeEvalAttack).toContain('.sectorAttack.executionIntermediateTargets');
         expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.uncontestedOccupation.salient');
         expect(brigadeEvalAttack).toContain('.uncontestedOccupation.defenderScan');

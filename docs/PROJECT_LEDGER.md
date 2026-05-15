@@ -4188,3 +4188,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The redundant sectorMarch assignment lookup from n1811 is closed. The next CPU lane should use a fresh profile; top bot-order evaluator candidates are now `sectorAttack`, `defensive`, `homeDefense`, and `pocketEvacuation`.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_MARCH_ASSIGNMENT_CACHE.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split sector-attack profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added sector-attack sub-labels for off-assigned-front checks, planning approach discovery/pathing, execution target prediction, tactical adjacency, adjacent operation participant counts, objective approach OSID/pathing, and attack-through intermediate target filtering.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers preserve branch order, candidate order, movement-order writes, attack-order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1813 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts --reporter=dot` failed on missing `SECTOR_ATTACK_PROFILE_PREFIX`. Green focused suite `npx.cmd vitest run tests\bot_orders_perf_profile.test.ts tests\operation_execution_staging_truth.test.ts --reporter=dot` passed 6/6, and `npm.cmd run typecheck` passed. Profiled 40w n1813 kept final hash `0cb626c032204372`; anchors were 26/27, anomaly count 9, warnings 2, critical 0. `.sectorAttack.executionPredictTargets` accounted for 94.286ms of the 126.089ms parent.
+
+**Roadmap delta:** Sector-attack attribution is now visible. The next bot-order CPU pass should target sector-attack prediction scope/laziness before path or adjacency work, but start from a fresh profile because `sectorMarch` and `sectorAttack` are nearly tied at the parent level.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_SECTOR_ATTACK_PROFILE_SPLIT.md`
