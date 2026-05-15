@@ -76,6 +76,8 @@
 
 **2026-05-15 overstack residual split:** n1832 kept hash `0cb626c032204372`; `.overstackRedistribution.gate` measured 17.214ms and `.candidateLoop` 4.956ms, while count/rank/destination-count/pathfinding children stayed small. Do instead: do not chase overstack destination count, ranking, or pathfinding from the parent total; choose larger fresh-profile buckets unless a new child label exposes repeated work.
 
+**2026-05-15 lazy bot-order officer lookup:** n1833 kept hash `0cb626c032204372`; lazy first-use pass-local officer lookup cut `bot_orders.executeFactionDirectives.officerIndex` 42.553ms/120 builds -> 4.279ms/46 builds. Do instead: build pass-local indexes lazily when only late gated branches use them; do not move officer lookup back into rank-local/predictor-local loops.
+
 **2026-05-10 replay consumer latest:** `ReplayScrubber` now covers deterministic selected-frame summaries, sparse manifest loading, full-frame map inspection, and read-only Play/Pause + step controls. Do instead: treat remaining replay work as richer cinematic presentation/visual QA, not absence of product-shell replay consumption.
 
 **2026-05-10 v0.9.2 playtest package latest:** v0.9.2 is CLOSED-FOR-AGENT-SCOPE / OPERATOR-OPEN. `docs/playtesting/v092/` now has recruitment copy, feedback schema, runbook, tester quickstart, known-issues template, triage board, weekly digest template, and `package_manifest.json` guarding required docs/tokens. Do instead: treat playtest package work as closed unless adding new outreach channels or post-response synthesis; actual outreach/form setup/incoming-response triage is operator-owned.

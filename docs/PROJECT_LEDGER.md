@@ -4476,3 +4476,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not optimize overstack destination counts, candidate ranking, or pathfinding from this evidence. Treat the remaining overstack parent as nested-profiler inflated unless a fresh wall-clock profile says otherwise, and choose the next CPU lane from a larger measured bucket.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_OVERSTACK_RESIDUAL_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): lazy officer combat lookup
+
+**Type:** Bot-order CPU optimization in directive execution. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Replaced eager per-faction-pass `buildOfficerCombatLookup(state)` construction with a memoized `getOfficerCombatLookup()` on `BrigadeEvaluationContext`. `evaluateSectorAttack(...)` now asks for the lookup only inside direct-objective prediction after local gates pass, while direct callers can still supply `officerCombatLookup` explicitly.
+
+**Determinism:** The lookup remains pass-local, read-only, and built from the same `named_officers` / `named_officer_data` state. The change only delays construction until the first predictor use in a faction pass; it preserves branch order, prediction inputs, attack/movement/posture order writes, RNG behavior, save schema, and serialized state. Profiled 40w n1833 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing lazy officer lookup wiring. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1833 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. `bot_orders.executeFactionDirectives.officerIndex` dropped 42.553ms / 120 builds -> 4.279ms / 46 builds.
+
+**Roadmap delta:** Keep officer lookup construction at a pass-level reuse boundary, but build it lazily when only a subset of faction passes reach prediction. The commander probe `officerIndex` remains separate and may be a future lane.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_LAZY_OFFICER_LOOKUP.md`

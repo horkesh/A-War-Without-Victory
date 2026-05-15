@@ -64,7 +64,8 @@ export interface BrigadeEvaluationContext {
     corpsTerritoryOsidsByCorps?: CorpsTerritoryOsidsByCorps;
     /** Cached officer combat lookup for predictor power calculations in this faction-order pass. */
     officerCombatLookup?: OfficerCombatLookup;
-
+    /** Lazily builds the officer combat lookup on first predictor use in this faction-order pass. */
+    getOfficerCombatLookup?: () => OfficerCombatLookup | undefined;
     
     // Global context dependencies:
     adjacency: Map<Osid, Osid[]>;

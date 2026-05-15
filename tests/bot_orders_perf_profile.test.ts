@@ -113,7 +113,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeAi).toContain('buildOfficerCombatLookup');
         expect(brigadeAi).toContain('bot_orders.executeFactionDirectives.officerIndex');
         expect(brigadeAi).toContain('officerCombatLookup');
+        expect(brigadeAi).toContain('let officerCombatLookup');
+        expect(brigadeAi).toContain('getOfficerCombatLookup');
         expect(brigadeEvalTypes).toContain('officerCombatLookup?: OfficerCombatLookup');
+        expect(brigadeEvalTypes).toContain('getOfficerCombatLookup?: () => OfficerCombatLookup | undefined');
         expect(brigadeEvalFront).toContain('SECTOR_MARCH_PROFILE_PREFIX');
         expect(brigadeEvalFront).toContain('.offAssignedFront');
         expect(brigadeEvalFront).toContain('.sectorReassignment');

@@ -454,12 +454,19 @@ function executeFactionDirectivesImpl(
     const activeFormationLocationsByFaction = buildActiveFormationLocationsByFaction(state);
     const sectorDefenseByFactionAndOsid = buildSectorDefenseByFactionAndOsid(state);
     const corpsTerritoryOsidsByCorps = buildCorpsTerritoryOsidsByCorps(state);
-    const officerCombatLookup = state.military.named_officers && state.military.named_officer_data
-        ? botOrdersPerfTime(
-            'bot_orders.executeFactionDirectives.officerIndex',
-            () => buildOfficerCombatLookup(state),
-        )
-        : undefined;
+    let officerCombatLookup: ReturnType<typeof buildOfficerCombatLookup> | undefined;
+    let officerCombatLookupBuilt = false;
+    const getOfficerCombatLookup = (): ReturnType<typeof buildOfficerCombatLookup> | undefined => {
+        if (!state.military.named_officers || !state.military.named_officer_data) return undefined;
+        if (!officerCombatLookupBuilt) {
+            officerCombatLookupBuilt = true;
+            officerCombatLookup = botOrdersPerfTime(
+                'bot_orders.executeFactionDirectives.officerIndex',
+                () => buildOfficerCombatLookup(state),
+            );
+        }
+        return officerCombatLookup;
+    };
 
     const corpsReserve = new Map<string, { total: number; reserved: number }>();
     for (const b of brigades) {
@@ -581,6 +588,7 @@ function executeFactionDirectivesImpl(
             sectorDefenseByFactionAndOsid,
             corpsTerritoryOsidsByCorps,
             officerCombatLookup,
+            getOfficerCombatLookup,
             adjacency,
             reverseMap,
             terrainCache,

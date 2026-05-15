@@ -120,7 +120,7 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
 }
 
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup } = ctx;
+    const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, officerCombatLookup, getOfficerCombatLookup } = ctx;
 
     // Combat ineffective gate: brigades below minimum personnel (500) defend only.
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
@@ -230,22 +230,25 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     if (skipDirectObjective) return undefined;
                     const prediction = sectorAttackProfileTime(
                         '.sectorAttack.executionDirectObjective.predict',
-                        () => predictCombatOutcome(
-                            state,
-                            brigade.id,
-                            currentObjective as Osid,
-                            adjacency,
-                            reverseMap,
-                            terrainCache,
-                            'attack',
-                            undefined,
-                            supplyStateByOsid,
-                            osidPopulationMap,
-                            undefined,
-                            ethnicMap,
-                            SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
-                            officerCombatLookup,
-                        ),
+                        () => {
+                            const combatOfficerLookup = getOfficerCombatLookup?.() ?? officerCombatLookup;
+                            return predictCombatOutcome(
+                                state,
+                                brigade.id,
+                                currentObjective as Osid,
+                                adjacency,
+                                reverseMap,
+                                terrainCache,
+                                'attack',
+                                undefined,
+                                supplyStateByOsid,
+                                osidPopulationMap,
+                                undefined,
+                                ethnicMap,
+                                SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
+                                combatOfficerLookup,
+                            );
+                        },
                     );
                     return prediction ? { osid: currentObjective as Osid, prediction } : undefined;
                 })
