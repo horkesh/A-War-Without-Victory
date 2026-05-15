@@ -4524,3 +4524,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Do not optimize defender posture-context, fatigue, morale, environment-cap, or final multiplication from n1835 evidence. The direct-objective defender-power residual is not concentrated in the newly split local math; choose the next CPU lane from a fresh profile.
 
 **Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENDER_POWER_RESIDUAL_PROFILE_SPLIT.md`
+
+---
+
+## [2026-05-15] perf(bot-orders): split uncontested candidate gates profile
+
+**Type:** Default-off profiling instrumentation in bot brigade order generation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Split `evaluateUncontestedOccupation(...)` candidate-gate timing into `.candidateGates.opPrefix`, `.candidateGates.controller`, `.candidateGates.alliance`, and `.candidateGates.enclave`, while preserving caller-specific profile prefixes from n1830/n1834.
+
+**Determinism:** Profiling remains gated by `PERF_PROFILE_BOT_ORDERS=true` and writes only `data/derived/_debug/bot_orders_perf_profile.json`. The wrappers time existing prefix, controller, alliance, and enclave guards in the same order; they preserve neighbor order, all branch outcomes, attack/posture write order, RNG behavior, save schema, and serialized state. Profiled 40w n1836 kept final hash `0cb626c032204372`.
+
+**Verification:** Red first: `npm.cmd run test:vitest:fast -- -- tests/bot_orders_perf_profile.test.ts` failed on missing `.candidateGates.opPrefix`. Green focused guard passed 5/5, `npm.cmd run typecheck` passed, and profiled 40w n1836 kept final hash `0cb626c032204372`; anchors were 26/27, benchmarks 6/6, anomaly count 9, warnings 2, critical 0. Home-defense child labels were small: `.candidateGates.controller` 6.802ms, `.candidateGates.enclave` 3.378ms, `.candidateGates.opPrefix` 3.093ms, and `.candidateGates.alliance` 1.635ms.
+
+**Roadmap delta:** Do not optimize operational-prefix, controller, alliance, or enclave candidate gates from n1836 evidence. The broad `.candidateGates` parent is nested-profiler inflated after adding child timers; choose the next CPU lane from a fresh top profile.
+
+**Report:** `docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CANDIDATE_GATES_PROFILE_SPLIT.md`

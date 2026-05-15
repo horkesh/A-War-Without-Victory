@@ -701,19 +701,29 @@ export function evaluateUncontestedOccupation(
     const occupied = profileTime('.candidateLoop', () => {
         for (const n of neighbors) {
             const controller = profileTime('.candidateGates', () => {
-                if (!n.startsWith('op:')) return undefined;
-                const controller = pc[n] as string | undefined;
-                if (!controller || controller === faction) return undefined;
+                const isOperationalOsid = profileTime('.candidateGates.opPrefix', () => n.startsWith('op:'));
+                if (!isOperationalOsid) return undefined;
+                const controller = profileTime('.candidateGates.controller', () => {
+                    const controller = pc[n] as string | undefined;
+                    return !controller || controller === faction ? undefined : controller;
+                });
+                if (!controller) return undefined;
 
                 // Alliance guard: HRHB/RBiH don't occupy each other's territory while allied or mobilizing
-                if ((faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
-                    && !isRbihHrhbCombatEnabled(state)) return undefined;
+                const allianceBlocked = profileTime('.candidateGates.alliance', () =>
+                    (faction === 'HRHB' && controller === 'RBiH' || faction === 'RBiH' && controller === 'HRHB')
+                    && !isRbihHrhbCombatEnabled(state)
+                );
+                if (allianceBlocked) return undefined;
 
                 // Enclave guard: enclave brigades must not expand beyond their enclave perimeter.
                 // Without this, besieged ARBiH enclave brigades walk into adjacent RS positions
                 // when VRS brigades sector-march away (e.g. 280th–284th recapturing obadi/vranesevici
                 // from the Srebrenica pocket, undoing Ring operations).
-                if (isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc as string, n)) return undefined;
+                const enclaveBlocked = profileTime('.candidateGates.enclave', () =>
+                    isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc as string, n)
+                );
+                if (enclaveBlocked) return undefined;
                 return controller;
             });
             if (!controller) continue;

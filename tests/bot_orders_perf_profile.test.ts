@@ -186,6 +186,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain("profileTime('.earlyGates'");
         expect(brigadeEvalAttack).toContain("profileTime('.candidateLoop'");
         expect(brigadeEvalAttack).toContain("profileTime('.candidateGates'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.opPrefix'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.controller'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.alliance'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.enclave'");
         expect(brigadeEvalAttack).toContain("profileTime('.salient'");
         expect(brigadeEvalAttack).toContain("profileTime('.defenderScan'");
         expect(brigadeEvalAttack).toContain("profileTime('.sectorDefense'");

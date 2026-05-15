@@ -187,6 +187,10 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).toContain('n1835 profile kept hash `0cb626c032204372`');
     expect(roadmap).toContain('`.postureContext` 1.282ms');
     expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_DEFENDER_POWER_RESIDUAL_PROFILE_SPLIT.md');
+    expect(roadmap).toContain('uncontested candidate-gates profile split');
+    expect(roadmap).toContain('n1836 profile kept hash `0cb626c032204372`');
+    expect(roadmap).toContain('`.candidateGates.controller` 6.802ms');
+    expect(roadmap).toContain('docs/40_reports/implemented/20260515_BOT_ORDERS_UNCONTESTED_CANDIDATE_GATES_PROFILE_SPLIT.md');
     expect(roadmap).toContain('Windows fast Vitest runner recovered at `476836e4`');
     expect(roadmap).toContain('war-dispatch displacement window restored at `bc7fcc49`');
     expect(roadmap).toContain('directive metadata shipped at `bbe5a26b`');
