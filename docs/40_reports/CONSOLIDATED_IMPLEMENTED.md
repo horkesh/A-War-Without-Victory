@@ -116,7 +116,7 @@
 # 2026-05-16 - Tactical shell frame cohesion
 
 - Aligned the command sidebar, right rail, legacy side panels, and bottom strip under shared shell clearances.
-- Fixed corps-card flip layout so hidden back faces no longer create large blank gaps, raised War Begins above side rails, replaced first-screen emoji glyphs with in-game icons, and brought AdvanceTurnModal into the dark command-shell palette.
+- Fixed corps-card flip layout so hidden back faces no longer create large blank gaps, raised War Begins above side rails, replaced first-screen emoji glyphs with in-game icons, brought AdvanceTurnModal into the dark command-shell palette, and hid/docked the order queue so empty chrome no longer floats over the command rail.
 - Report: `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
 
 # 2026-05-16 - First-run inbox and HQ flow polish

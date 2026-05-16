@@ -462,7 +462,7 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - Command sidebar, right rail panels, legacy side panels, and bottom strip now share top/bottom frame clearances instead of independent offsets.
 - Corps cards no longer reserve blank space for hidden flip-card backs.
-- War Begins now covers side rails, first-screen actions use the in-game icon system, and the advance-turn confirmation uses the dark command-shell palette.
+- War Begins now covers side rails, first-screen actions use the in-game icon system, the advance-turn confirmation uses the dark command-shell palette, and the empty order queue no longer floats over the command rail.
 - See `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
 
 ## 2026-05-16 - First-run inbox and HQ flow polish

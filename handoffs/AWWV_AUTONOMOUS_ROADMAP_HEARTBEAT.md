@@ -1,12 +1,12 @@
 # AWWV Autonomous Roadmap Heartbeat
 
 - Current branch/worktree: `main` at `F:\A-War-Without-Victory`
-- Lane name: Presidential Inbox player-faction action filtering
-- Files changed: `src/ui/map/data/inboxItems.ts`, `tests/ui/inbox_items.test.ts`, GUI/report index docs, project ledgers, root heartbeat.
-- Tests run and exact result: `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\ui_shell_navigation.test.ts` passed 46/46.
+- Lane name: Order queue shell-frame docking
+- Files changed: `src/ui/map/components/OrderQueue.tsx`, `tests/ui_shell_frame_contract.test.ts`, GUI/report index docs, project ledgers, root heartbeat.
+- Tests run and exact result: `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\z_index_canonical.test.ts` passed 14/14. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the default shell no longer renders `ORDER QUEUE (0)`.
 - Scenario/run IDs and hashes: performance and formation lanes retained 40w hash `0cb626c032204372`; operation-opportunity proof used 40w `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0cb626c032204372` and 188w `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` hash `a0111273f26f907d`.
 - Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
-- Commit SHA: `74d14a36` (`fix(ui): scope inbox items to player faction`).
+- Commit SHA: pending.
 - Next lane selected and why: continue the broader AAA-style UI inspection requested by the user. The next likely owner is remaining hard-coded offsets and visually detached surfaces in ops planning, minimap, map legend, modal trays, and Warroom/tactical handoffs.
 
 ## Lane Status

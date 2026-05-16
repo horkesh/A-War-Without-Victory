@@ -16,7 +16,7 @@ function orderTargetLabel(order: StagedOrder, osidDisplayNames: Record<string, s
 
 /**
  * Order queue panel (Phase C5): list of staged orders for the current turn.
- * Placed below the left sidebar as a collapsible strip; does not overlap SelectionPanel (right).
+ * Docks to the left command rail when orders exist; hidden when empty.
  */
 export function OrderQueue() {
   const [collapsed, setCollapsed] = useState(false);
@@ -33,25 +33,7 @@ export function OrderQueue() {
     }
   }
 
-  if (stagedOrders.length === 0) {
-    return (
-      <div
-        className="flex items-center bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-t-lg border-b-0"
-        style={{
-          position: 'absolute',
-          left: 0,
-          bottom: '2.25rem',
-          width: '18rem',
-          zIndex: Z.ORDER_QUEUE,
-          direction: 'ltr',
-        }}
-      >
-        <div className="px-3 py-2 font-sans text-xs text-text-secondary uppercase tracking-wide">
-          Order queue (0)
-        </div>
-      </div>
-    );
-  }
+  if (stagedOrders.length === 0) return null;
 
   if (collapsed) {
     return (
@@ -62,8 +44,8 @@ export function OrderQueue() {
         style={{
           position: 'absolute',
           left: 0,
-          bottom: '2.25rem',
-          width: '18rem',
+          bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+          width: '15.5rem',
           zIndex: Z.ORDER_QUEUE,
           direction: 'ltr',
         }}
@@ -82,8 +64,8 @@ export function OrderQueue() {
       style={{
         position: 'absolute',
         left: 0,
-        bottom: '2rem',
-        width: '18rem',
+        bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+        width: '15.5rem',
         zIndex: Z.ORDER_QUEUE,
         direction: 'ltr',
       }}

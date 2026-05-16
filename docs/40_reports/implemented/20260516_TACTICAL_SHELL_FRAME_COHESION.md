@@ -21,6 +21,7 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - Updated legacy left/right `GlassPanel` side panels to consume the same top/bottom frame variables.
 - Replaced Side Picker load/continue emoji glyphs with the existing in-game `Icon` component.
 - Restyled `AdvanceTurnModal` from the old light form palette to command-shell surfaces, status chips, and action buttons.
+- Hid the empty `Order queue (0)` strip and docked the non-empty queue to the shared bottom clearance and left-rail width.
 - Added `tests/ui_shell_frame_contract.test.ts` to pin the frame and flip-card contracts.
 
 ## Verification
@@ -30,6 +31,8 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed War Begins covers both rails, corps cards stack without hidden back-face gaps, and command/inbox rails align to the shared tactical frame.
 - Follow-up browser inspection confirmed the Side Picker no longer renders the save/continue emoji glyphs.
 - `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\modal_migration.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts` passed 35/35 after the advance-turn modal palette pass.
+- `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\z_index_canonical.test.ts` passed 14/14 after the order-queue docking pass.
+- Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the empty order-queue strip is no longer visible in the default shell.
 - `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings.
 - `git diff --check` reported only CRLF normalization warnings.
 

@@ -4849,6 +4849,22 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 ---
 
+## [2026-05-16] fix(ui): dock order queue to shell frame and hide empty strip
+
+**Type:** Tactical shell layout / chrome polish fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** `OrderQueue` no longer renders an empty `Order queue (0)` strip over the lower-left command rail. When staged orders exist, the queue now docks to the shared bottom-frame clearance and uses the same `15.5rem` width as the command sidebar instead of floating wider at a local bottom offset.
+
+**Determinism:** UI layout only. No scenario state, sim state, save state, generated artifact, random input, timestamp, or persisted output changed.
+
+**Verification:** `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\z_index_canonical.test.ts` passed 14/14. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the empty order-queue strip is no longer visible in the default shell.
+
+**Roadmap delta:** Continues the tactical-shell AAA polish pass by removing low-value empty chrome and aligning another lower-left surface to the shared frame.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
+
+---
+
 ## [2026-05-16] fix(ui): align tactical shell frame and card stacking
 
 **Type:** Tactical shell layout / UI polish fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.

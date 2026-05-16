@@ -69,4 +69,15 @@ describe('tactical shell frame contract', () => {
     expect(advanceTurnModal).not.toMatch(/text-(?:neutral-900|neutral-950|neutral-800|neutral-700|amber-800)/);
     expect(advanceTurnModal).not.toMatch(/border-(?:neutral-300|neutral-400)/);
   });
+
+  it('keeps the order queue docked to the left rail instead of floating over it empty', () => {
+    const orderQueue = read('src/ui/map/components/OrderQueue.tsx');
+
+    expect(orderQueue).toContain('if (stagedOrders.length === 0) return null;');
+    expect(orderQueue).toContain("bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)'");
+    expect(orderQueue).toContain("width: '15.5rem'");
+    expect(orderQueue).not.toContain('Order queue (0)');
+    expect(orderQueue).not.toContain("width: '18rem'");
+    expect(orderQueue).not.toContain("bottom: '2.25rem'");
+  });
 });
