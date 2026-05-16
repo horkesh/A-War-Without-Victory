@@ -227,8 +227,8 @@ Scope:
 Internal phases:
 1. Research and family design, with OSID mapping checklist.
 2. Catalog topology audit before coding: every T1 needs at least two meaningful optional axes; no saturated single-signal gate.
-3. Implement Central Bosnia / Vlasic family entries and tests. **Status 2026-05-10:** first non-sensitive slice shipped as `vlasic_ridge_95` in `src/sim/combat/operation_opportunity_catalog_central_bosnia.ts`, with a family design doc at `docs/plans/late-war-central-bosnia-vlasic-kupres-design.md` and regression coverage in `tests/operation_opportunities_central_bosnia_catalog.test.ts`. Remaining Phase 2 work: Kupres/Cincar dependency entries and Federation-Western Bosnia expansion.
-4. Implement Federation-Western Bosnia family entries and tests.
+3. Implement Central Bosnia / Vlasic family entries and tests. **Status 2026-05-15:** `kupres_cincar_94` and `vlasic_ridge_95` ship in `src/sim/combat/operation_opportunity_catalog_central_bosnia.ts`, with family design coverage at `docs/plans/late-war-central-bosnia-vlasic-kupres-design.md` and regression coverage in `tests/operation_opportunities_central_bosnia_catalog.test.ts`.
+4. Implement Federation-Western Bosnia family entries and tests. **Status 2026-05-15:** first slice ships as `mistral_2_95` in `src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts`, with design doc `docs/plans/late-war-federation-western-bosnia-design.md` and regression coverage in `tests/operation_opportunities_federation_western_bosnia_catalog.test.ts`. Additional Winter/Leap/Summer/Southern Move entries remain evidence-gated follow-up work.
 5. Run opportunity/catalog tests, tsc, and targeted UI/read-model tests if DTOs change.
 6. Run or consume 188w stress evidence and classify surfacing/execution/cost outcomes.
 7. Report, ledger, knowledge, napkin, and next-lane handoff.

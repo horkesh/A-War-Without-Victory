@@ -107,7 +107,7 @@ function opStillHasEnemyObjectives(state: GameState, def: TriggeredOpDef): boole
 // Definitions
 // ═══════════════════════════════════════════════════════════════════════════
 
-const TRIGGERED_OPS: TriggeredOpDef[] = [
+const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     {
         // Operation Posavina Corridor — 1KK reduces the HRHB Orašje pocket (~w31+).
         // Historically VRS isolated then squeezed the Croatian Orašje enclave (BB1 p.182).
@@ -561,6 +561,13 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     // set this entry shipped — but only when the opportunity preconditions
     // are satisfied. Removal is the single-owner enforcement.
 ];
+
+// Operation Mistral 2 is migrated to the Federation / Western Bosnia
+// opportunity catalog. Keep the legacy definition inert as historical footprint
+// source text only; the active triggered catalog must not dual-own it.
+const TRIGGERED_OPS: TriggeredOpDef[] = TRIGGERED_OPS_RAW.filter(
+    (def) => def.name !== 'Operation Mistral 2',
+);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Re-offer constants
