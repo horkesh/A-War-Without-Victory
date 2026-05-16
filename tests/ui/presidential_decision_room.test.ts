@@ -432,6 +432,94 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('builds the full presidential product loop as handoffs to existing owners', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [makeOpportunity({ expires_turn: 24 })],
+      operationalSitrep: makeSitrep(),
+      commandBriefing: {
+        headline: 'Critical command alert.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'briefing:zeta',
+            kind: 'command',
+            severity: 'critical',
+            title: 'Corps command strain rising',
+            detail: 'Staff reports command friction around the main effort.',
+            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
+          },
+        ],
+      },
+      latestTurnSummary: makeSummary({
+        turn: 24,
+        territory_net: { RBiH: -1 },
+        displacement_total: 1600,
+      }),
+      turnSummaries: [makeSummary({ turn: 23, territory_net: { RBiH: 1 } })],
+    });
+
+    const first = buildPresidentialDecisionRoomView({ state });
+    const second = buildPresidentialDecisionRoomView({ state });
+    const byId = Object.fromEntries(first.loopSteps.map((step) => [step.id, step]));
+
+    expect(second.loopSteps).toEqual(first.loopSteps);
+    expect(first.loopSteps.map((step) => step.id)).toEqual([
+      'brief',
+      'inspect',
+      'decide',
+      'execute',
+      'report',
+      'cost',
+      'judge',
+      'next',
+    ]);
+    expect(byId.brief).toMatchObject({
+      label: 'Brief',
+      count: 2,
+      navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+    });
+    expect(byId.inspect).toMatchObject({
+      label: 'Inspect',
+      count: first.inspectNext.length,
+      navigationTarget: first.inspectNext[0]?.navigationTarget,
+    });
+    expect(byId.decide).toMatchObject({
+      label: 'Decide',
+      cardIds: ['review:pending', 'opportunity:opp_alpha'],
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(byId.execute).toMatchObject({
+      label: 'Execute',
+      headline: 'Review before advance',
+      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
+    });
+    expect(byId.report).toMatchObject({
+      label: 'Report',
+      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
+    });
+    expect(byId.cost).toMatchObject({
+      label: 'Cost',
+      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
+    });
+    expect(byId.judge).toMatchObject({
+      label: 'Judge',
+      navigationTarget: { kind: 'chronicle' },
+    });
+    expect(byId.next).toMatchObject({
+      label: 'Next',
+      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+  });
+
   it('marks what should be reviewed before advancing without blocking beyond existing systems', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
