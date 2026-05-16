@@ -64,7 +64,10 @@ function stageAssets(): void {
     { src: 'data/derived/mun1990_names.json', dest: 'data/derived/mun1990_names.json' },
     { src: 'data/derived/settlements_meta.json', dest: 'data/derived/settlements_meta.json' },
     { src: 'data/derived/municipalities_meta.json', dest: 'data/derived/municipalities_meta.json' },
-    { src: 'data/derived/political_control_data.json', dest: 'data/derived/political_control_data.json' }
+    { src: 'data/derived/political_control_data.json', dest: 'data/derived/political_control_data.json' },
+    { src: 'data/ui/hq_rbih_clickable_regions.json', dest: 'data/ui/hq_rbih_clickable_regions.json' },
+    { src: 'data/ui/hq_rs_clickable_regions.json', dest: 'data/ui/hq_rs_clickable_regions.json' },
+    { src: 'data/ui/hq_hrhb_clickable_regions.json', dest: 'data/ui/hq_hrhb_clickable_regions.json' }
   ];
 
   for (const entry of dataToStage) {

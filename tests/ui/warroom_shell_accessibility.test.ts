@@ -29,10 +29,15 @@ function renderShell(onNavigate = vi.fn()) {
 describe('WarroomShellLayer accessibility proof', () => {
     beforeEach(() => {
         storeState = { loadedGameState: null };
+        vi.stubGlobal('fetch', vi.fn(async () => ({
+            ok: false,
+            json: async () => ({}),
+        })));
     });
 
     afterEach(() => {
         cleanup();
+        vi.unstubAllGlobals();
     });
 
     it('exposes hotspots as keyboard-focusable buttons with stable labels', () => {
@@ -73,5 +78,40 @@ describe('WarroomShellLayer accessibility proof', () => {
 
         const status = screen.getByRole('status');
         expect(status.textContent).toContain('Warroom unavailable until a campaign side is selected.');
+    });
+
+    it('loads canonical /data/ui clickable regions and maps desk_map to the game view', async () => {
+        storeState = {
+            loadedGameState: {
+                player_faction: 'RBiH',
+                metadata: { date: 'April 1993' },
+            },
+        };
+        vi.stubGlobal('fetch', vi.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                regions: [
+                    {
+                        id: 'desk_map',
+                        bounds: { x: 854, y: 576, width: 602, height: 325 },
+                        polygon: [
+                            [854, 584],
+                            [1456, 576],
+                            [1454, 896],
+                            [854, 901],
+                        ],
+                        tooltip: 'Operational Map',
+                    },
+                ],
+            }),
+        })));
+
+        const { onNavigate } = renderShell();
+
+        const mapButton = await screen.findByRole('button', { name: 'Operational Map' });
+        fireEvent.click(mapButton);
+
+        expect(fetch).toHaveBeenCalledWith('/data/ui/hq_rbih_clickable_regions.json');
+        expect(onNavigate).toHaveBeenCalledWith(undefined);
     });
 });

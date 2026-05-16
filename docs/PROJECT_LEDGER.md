@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-16] fix(ui): restore React Warroom hotspot contract
+
+**Scope:** React Warroom room-shell hotspot routing, region-data source selection, and Warroom asset staging.
+
+**Fix:** `WarroomShellLayer` now loads canonical faction clickable-region files from `/data/ui/hq_<faction>_clickable_regions.json`, keeps bundled JSON only as fallback, fits hotspots to the centered 2752x1536 scene plate, and honors authored polygon geometry through CSS clip paths. Current region data has been restored to canonical `desk_map` / `open_operational_map` / `Operational Map` semantics instead of the wrong `wall_cork_board` strategic-overview alias. `warroom_stage_assets.ts` now stages all three faction clickable-region files into the Warroom public data folder so stale public JSON cannot diverge from repo-root data.
+
+**Validation:** `npx.cmd vitest run tests\warroom_shell_layer.test.ts tests\ui\warroom_shell_accessibility.test.ts` passed 38/38, `npm.cmd run typecheck` passed, `npm.cmd run desktop:map:build` passed, and `npm.cmd run warroom:build` passed. Build warnings were the pre-existing Vite externalization/chunk warnings. `npm.cmd run warroom:regions:validate -- data\ui\hq_rbih_clickable_regions.json data\ui\hq_rs_clickable_regions.json data\ui\hq_hrhb_clickable_regions.json` remains non-gating red on known planned anchors not present in current room art.
+
+**Canon posture:** UI/read-model contract fix only. No simulation state, scenario behavior, save schema, random source, turn ordering, or scenario output changed.
+
+**Docs:** Added `docs/40_reports/implemented/20260516_REACT_WARROOM_HOTSPOT_CONTRACT_FIX.md`; updated Warroom/GUI master docs, report index, and knowledge ledger.
+
+---
+
 ## [2026-05-15] perf(bot-orders): split overstack redistribution profile
 
 **Scope:** Default-off CPU attribution inside the hot `sectorMarch.overstackRedistribution` bucket.

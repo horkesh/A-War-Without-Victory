@@ -1,5 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { regionToShellHandoff } from '../src/ui/map/components/warroom/WarroomShellLayer';
+import {
+  getWarroomRegionClipPath,
+  regionToShellHandoff,
+  warroomRegionsUrlForFaction,
+} from '../src/ui/map/components/warroom/WarroomShellLayer';
 import { isShellHandoffCommand, type ShellHandoffCommand } from '../src/ui/shared/shellHandoff';
 import { warroomCommandStaysInRoom } from '../src/ui/map/utils/shellNavigation';
 import { isWarroomLocalCommand, type WarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation';
@@ -33,8 +37,8 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('unknown_region')).toBeUndefined();
   });
 
-  it('wall_cork_board → strategic-overview', () => {
-    expect(regionToShellHandoff('wall_cork_board')).toEqual({ kind: 'strategic-overview' });
+  it('wall_cork_board legacy alias → undefined (same behavior as desk_map)', () => {
+    expect(regionToShellHandoff('wall_cork_board')).toBeUndefined();
   });
 
   it('desk_radio → event-log', () => {
@@ -137,26 +141,21 @@ describe('WarroomShellLayer onNavigate contract', () => {
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
-  it('local strategic-overview command opens the overlay without leaving warroom', () => {
+  it('legacy wall_cork_board hotspot transitions to game/map view', () => {
     const applySpy = vi.fn().mockReturnValue(true);
-    const setStrategicDashboardOpen = vi.fn();
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) {
-        setStrategicDashboardOpen(command.kind === 'strategic-overview');
-        return;
-      }
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
 
-    const command = regionToShellHandoff('wall_cork_board'); // → strategic-overview, handled locally
+    const command = regionToShellHandoff('wall_cork_board'); // legacy alias, same transition as desk_map
     onNavigate(command);
 
     expect(applySpy).not.toHaveBeenCalled();
-    expect(setStrategicDashboardOpen).toHaveBeenCalledWith(true);
-    expect(setAppScreen).not.toHaveBeenCalled();
+    expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
   it('when called with undefined (unmapped region), transitions to game without applying a command', () => {
@@ -209,6 +208,27 @@ describe('shared-vs-local Warroom command split', () => {
 });
 
 // ── warroomCommandStaysInRoom ─────────────────────────────────────────────────
+
+describe('warroom region data contract', () => {
+  it('loads canonical clickable-region files from /data/ui by faction', () => {
+    expect(warroomRegionsUrlForFaction('RBiH')).toBe('/data/ui/hq_rbih_clickable_regions.json');
+    expect(warroomRegionsUrlForFaction('RS')).toBe('/data/ui/hq_rs_clickable_regions.json');
+    expect(warroomRegionsUrlForFaction('HRHB')).toBe('/data/ui/hq_hrhb_clickable_regions.json');
+  });
+
+  it('converts authored absolute polygons to local hotspot clip paths', () => {
+    expect(getWarroomRegionClipPath({
+      id: 'desk_map',
+      bounds: { x: 100, y: 200, width: 200, height: 100 },
+      polygon: [
+        [100, 200],
+        [300, 200],
+        [300, 300],
+        [100, 300],
+      ],
+    })).toBe('polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)');
+  });
+});
 
 describe('warroomCommandStaysInRoom', () => {
   it('advance-turn stays in room', () => {

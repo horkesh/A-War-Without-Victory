@@ -87,7 +87,7 @@
       "layer": "wall"
     },
     {
-      "id": "wall_cork_board",
+      "id": "desk_map",
       "type": "dynamic_render",
       "bounds": {
         "x": 854,
@@ -113,10 +113,10 @@
           901
         ]
       ],
-      "action": "open_strategic_map",
+      "action": "open_operational_map",
       "hover_style": "glow",
       "cursor": "pointer",
-      "tooltip": "Strategic Map",
+      "tooltip": "Operational Map",
       "layer": "wall"
     },
     {

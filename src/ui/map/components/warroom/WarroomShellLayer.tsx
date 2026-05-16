@@ -13,14 +13,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { ShellHandoffCommand } from '../../../shared/shellHandoff';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
 import { useGameStore } from '../../store/gameStore';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
-import rbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
-import rsRegions from '../../../warroom/assets/hq_rs_regions.json';
-import hrhbRegions from '../../../warroom/assets/hq_hrhb_regions.json';
+import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
+import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
+import fallbackHrhbRegions from '../../../warroom/assets/hq_hrhb_regions.json';
 
 // ── Region types (subset of regions JSON schema v2.1) ──────────────────────
 
@@ -34,12 +33,14 @@ interface WarroomRegionBounds {
 interface WarroomRegion {
   id: string;
   bounds: WarroomRegionBounds;
+  polygon?: [number, number][];
   tooltip?: string;
 }
 
 // Authoring canvas dimensions (schema v2.1)
 const CANVAS_W = 2752;
 const CANVAS_H = 1536;
+const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
 
 // ── Region → Warroom navigation mapping ────────────────────────────────────
 
@@ -77,7 +78,9 @@ export function regionToShellHandoff(regionId: string): WarroomNavigationCommand
       // Most-used Warroom hotspot: clicking the wall calendar advances the turn.
       return { kind: 'advance-turn' };
     case 'wall_cork_board':
-      return { kind: 'strategic-overview' };
+      // Legacy alias for the authored cork-board region. The Warroom contract
+      // treats this as primary map access, same as desk_map.
+      return undefined;
     case 'desk_radio':
       return { kind: 'event-log' };
     case 'diplomatic_telephone':
@@ -107,6 +110,19 @@ export function getWarroomRegionLabel(region: Pick<WarroomRegion, 'id' | 'toolti
   return region.tooltip?.trim() || humanizeRegionId(region.id);
 }
 
+export function getWarroomRegionClipPath(region: WarroomRegion): string | undefined {
+  if (!region.polygon || region.polygon.length < 3) return undefined;
+
+  const { bounds } = region;
+  const points = region.polygon.map(([x, y]) => {
+    const localX = ((x - bounds.x) / bounds.width) * 100;
+    const localY = ((y - bounds.y) / bounds.height) * 100;
+    return `${localX}% ${localY}%`;
+  });
+
+  return `polygon(${points.join(', ')})`;
+}
+
 function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
   const [hovered, setHovered] = useState(false);
   const { bounds, tooltip, id } = region;
@@ -131,6 +147,7 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
         outline: hovered ? '2px solid rgba(255,220,100,0.7)' : 'none',
         background: hovered ? 'rgba(255,220,100,0.08)' : 'transparent',
         transition: 'outline 0.1s, background 0.1s',
+        clipPath: getWarroomRegionClipPath(region),
         border: 'none',
         padding: 0,
       }}
@@ -153,11 +170,32 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
 
 // ── Region data by faction ─────────────────────────────────────────────────
 
-const REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
-  RBiH: (rbihRegions as { regions: WarroomRegion[] }).regions,
-  RS: (rsRegions as { regions: WarroomRegion[] }).regions,
-  HRHB: (hrhbRegions as { regions: WarroomRegion[] }).regions,
+const FALLBACK_REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
+  RBiH: (fallbackRbihRegions as { regions: WarroomRegion[] }).regions,
+  RS: (fallbackRsRegions as { regions: WarroomRegion[] }).regions,
+  HRHB: (fallbackHrhbRegions as { regions: WarroomRegion[] }).regions,
 };
+
+const CANONICAL_REGION_URLS_BY_FACTION: Record<string, string> = {
+  RBiH: '/data/ui/hq_rbih_clickable_regions.json',
+  RS: '/data/ui/hq_rs_clickable_regions.json',
+  HRHB: '/data/ui/hq_hrhb_clickable_regions.json',
+};
+
+export function warroomRegionsUrlForFaction(faction: string): string | undefined {
+  return CANONICAL_REGION_URLS_BY_FACTION[faction];
+}
+
+function fallbackRegionsForFaction(faction: string | null): WarroomRegion[] {
+  return faction ? (FALLBACK_REGIONS_BY_FACTION[faction] ?? []) : [];
+}
+
+function regionsFromPayload(payload: unknown): WarroomRegion[] {
+  if (!payload || typeof payload !== 'object') return [];
+
+  const regions = (payload as { regions?: unknown }).regions;
+  return Array.isArray(regions) ? (regions as WarroomRegion[]) : [];
+}
 
 // ── WarroomShellLayer ──────────────────────────────────────────────────────
 
@@ -180,14 +218,33 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
     ? (WARROOM_SCENE_URLS[playerFaction]?.[year] ?? WARROOM_SCENE_URLS[playerFaction]?.[1992])
     : null;
 
-  const regions = playerFaction ? REGIONS_BY_FACTION[playerFaction] : [];
-
-  // Suppress unused-effect warning: regions are imported statically, no async needed.
-  // The useState/useEffect pattern is retained for future dynamic loading if required.
-  const [activeRegions, setActiveRegions] = useState<WarroomRegion[]>(regions);
+  const [activeRegions, setActiveRegions] = useState<WarroomRegion[]>(
+    fallbackRegionsForFaction(playerFaction),
+  );
 
   useEffect(() => {
-    setActiveRegions(playerFaction ? REGIONS_BY_FACTION[playerFaction] : []);
+    const fallbackRegions = fallbackRegionsForFaction(playerFaction);
+    setActiveRegions(fallbackRegions);
+
+    const regionsUrl = playerFaction ? warroomRegionsUrlForFaction(playerFaction) : undefined;
+    if (!regionsUrl) return undefined;
+
+    let cancelled = false;
+
+    fetch(regionsUrl)
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((payload) => {
+        if (cancelled) return;
+        const canonicalRegions = regionsFromPayload(payload);
+        if (canonicalRegions.length > 0) setActiveRegions(canonicalRegions);
+      })
+      .catch(() => {
+        if (!cancelled) setActiveRegions(fallbackRegions);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [playerFaction]);
 
   if (!playerFaction || !scenePlateUrl) {
@@ -236,26 +293,38 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
         overflow: 'hidden',
       }}
     >
-      <img
-        src={scenePlateUrl}
-        alt=""
-        draggable={false}
+      <div
         style={{
           position: 'absolute',
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-          display: 'block',
-          userSelect: 'none',
+          left: '50%',
+          top: '50%',
+          width: `min(100%, calc(100vh * ${CANVAS_ASPECT}))`,
+          height: `min(100%, calc(100vw / ${CANVAS_ASPECT}))`,
+          aspectRatio: `${CANVAS_ASPECT}`,
+          transform: 'translate(-50%, -50%)',
         }}
-      />
-      {activeRegions.map((region) => (
-        <WarroomHotspot
-          key={region.id}
-          region={region}
-          onClick={() => handleRegionClick(region)}
+      >
+        <img
+          src={scenePlateUrl}
+          alt=""
+          draggable={false}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            userSelect: 'none',
+          }}
         />
-      ))}
+        {activeRegions.map((region) => (
+          <WarroomHotspot
+            key={region.id}
+            region={region}
+            onClick={() => handleRegionClick(region)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
