@@ -173,7 +173,7 @@ import {
   toZoomWidthExpression,
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
-import { resolveDeckFormationClickTarget } from './clickSelectionPriority';
+import { pickNearestFormationAtPoint, resolveDeckFormationClickTarget } from './clickSelectionPriority';
 import {
   deckLayerRenderInputsChanged,
   shouldRunPulseAnimation,
@@ -181,9 +181,27 @@ import {
 } from './renderChurnGuards';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
+const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [15.7243, 42.55719],
+  [19.62278, 45.270542],
+];
+const TACTICAL_MAP_PITCH_DEGREES = 30;
 const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
+
+function selectFormationFromMap(formationId: string) {
+  useGameStore.setState({
+    selectedFormationId: formationId,
+    selectedOsid: null,
+    selectedCorpsFrontSectorId: null,
+    selectedCorpsId: null,
+    selectedArmyId: null,
+    selectedArmyHqId: null,
+    selectedOperationKey: null,
+    selectedOrbatCorpsId: null,
+  });
+}
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
 const FRONT_LAYER_IDS = ['faction-border-glow-pos', 'faction-border-glow-neg', 'front-line-base', 'front-line-stripe'];
@@ -732,7 +750,13 @@ export function MapContainer() {
         style,
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
-        pitch: 15,
+        pitch: TACTICAL_MAP_PITCH_DEGREES,
+        minPitch: TACTICAL_MAP_PITCH_DEGREES,
+        maxPitch: TACTICAL_MAP_PITCH_DEGREES,
+        maxBounds: BOSNIA_MAX_BOUNDS,
+        minZoom: 7.8,
+        dragRotate: false,
+        touchPitch: false,
         attributionControl: false,
       });
       map.on('error', (e) => {
@@ -749,12 +773,24 @@ export function MapContainer() {
         onClick: (info: any) => {
           const store = useGameStore.getState();
           const mapAtClick = mapRef.current;
+          const formationFallback =
+            mapAtClick
+            && lastFormationsGeoJsonRef.current
+            && typeof info?.x === 'number'
+            && typeof info?.y === 'number'
+              ? pickNearestFormationAtPoint({
+                formations: lastFormationsGeoJsonRef.current.features,
+                point: { x: info.x, y: info.y },
+                zoom: mapAtClick.getZoom(),
+                project: (coordinates) => mapAtClick.project(coordinates),
+              })
+              : null;
           const frontFeature =
             mapAtClick && typeof info?.x === 'number' && typeof info?.y === 'number'
               ? queryPreferredFrontFeatureNearPoint(mapAtClick, { x: info.x, y: info.y }, true)
               : undefined;
           const clickTarget = resolveDeckFormationClickTarget({
-            deckObjectProperties: info?.object?.properties ?? null,
+            deckObjectProperties: info?.object?.properties ?? formationFallback?.properties ?? null,
             nearbyFrontFeature: frontFeature,
           });
 
@@ -775,8 +811,9 @@ export function MapContainer() {
           // the formation selection we're about to set.
           deckHandledFormationClickRef.current = true;
 
-          const props = info.object.properties;
-          store.setSelectedFormationId(clickTarget.formationId);
+          const props = info?.object?.properties ?? formationFallback?.properties;
+          if (!props) return;
+          selectFormationFromMap(clickTarget.formationId);
           // Use pre-computed stack_count from GeoJSON feature properties
           const osid = props.location_osid as string | undefined;
           const stackCount = props.stack_count ?? 1;
@@ -884,6 +921,17 @@ export function MapContainer() {
       cleanup?.();
       if (!mapRef.current) return;
       cleanup = useMapInteractions(mapRef.current, {
+        getFormationClickFallback: (point) => {
+          const map = mapRef.current;
+          const formationsGeoJson = lastFormationsGeoJsonRef.current;
+          if (!map || !formationsGeoJson) return null;
+          return pickNearestFormationAtPoint({
+            formations: formationsGeoJson.features,
+            point,
+            zoom: map.getZoom(),
+            project: (coordinates) => map.project(coordinates),
+          });
+        },
         onOsidClick: (osid) => {
           if (orderModeForFormation === 'attack' && selectedFormationId) {
             setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
@@ -921,7 +969,7 @@ export function MapContainer() {
           }
         },
         onFormationClick: (id, props, point) => {
-          setSelectedFormationId(id);
+          selectFormationFromMap(id);
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
@@ -988,7 +1036,7 @@ export function MapContainer() {
             mapRef.current.flyTo({
               center,
               zoom: Math.max(mapRef.current.getZoom(), 11),
-              pitch: 35,
+              pitch: TACTICAL_MAP_PITCH_DEGREES,
               bearing: 0,
               duration: 1200,
               essential: true,
@@ -3118,7 +3166,7 @@ export function MapContainer() {
       case 'Home':
       case 'End':
         e.preventDefault();
-        map.jumpTo({ center: BOSNIA_CENTER, zoom: DEFAULT_ZOOM });
+        map.jumpTo({ center: BOSNIA_CENTER, zoom: DEFAULT_ZOOM, pitch: TACTICAL_MAP_PITCH_DEGREES });
         break;
       default:
         break;

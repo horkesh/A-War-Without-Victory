@@ -6,6 +6,8 @@
 
 **Latest tactical map overlay cleanup:** [implemented/20260516_REMOVE_SECTOR_DEMARCATION_OVERLAY.md](implemented/20260516_REMOVE_SECTOR_DEMARCATION_OVERLAY.md) - same-faction lateral sector demarcation lines and their hit layers were removed from the tactical map; sector readability now uses front/contact lines, selected-sector fill/glow, and brigade rings.
 
+**Latest tactical map click/camera fix:** [implemented/20260516_TACTICAL_MAP_CLICK_PICKING_AND_CAMERA_BOUNDS.md](implemented/20260516_TACTICAL_MAP_CLICK_PICKING_AND_CAMERA_BOUNDS.md) - brigade counter clicks now resolve through deterministic screen-space fallback before OSID/sector hitboxes, direct formation clicks clear stale rail context, panel/control chrome clears the command shell, and the map is fixed to 30-degree BiH-bounded navigation.
+
 **Latest opportunity surface:** [implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md](implemented/20260501_OPERATION_OPPORTUNITY_FOOTPRINT_REDIRECT_DTO.md) - pending opportunity proposals now persist objective/staging footprints and redirect variant snapshots; Army HQ dossiers render player-safe labels, map highlighting, and variant-specific Redirect controls.
 
 **Latest commander CPU optimization:** [implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md](implemented/20260515_COMMANDER_ENEMY_EQUIPMENT_SUMMARY_CONTEXT.md) - n1838 kept final hash `0cb626c032204372` and moved enemy-equipment summary support maps to a pass-local context; `.buildBriefing.enemyEquipmentSummary` dropped 115.916ms -> 11.176ms, with 54.218ms of context construction cost. Prior commander optimization: [implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md](implemented/20260515_COMMANDER_CORPS_SUBORDINATES_INDEX.md).

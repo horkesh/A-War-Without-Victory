@@ -483,6 +483,98 @@ describe('useMapInteractions', () => {
     expect(onFrontEdgeClick).not.toHaveBeenCalled();
   });
 
+  it('uses formation fallback before OSID or sector fallback when Deck.gl misses the icon object', () => {
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onFrontEdgeClick = vi.fn();
+    const onFormationClick = vi.fn();
+    const onOsidClick = vi.fn();
+    const features: TestFeature[] = [
+      {
+        layer: { id: 'sector-edge-hit-pos' },
+        properties: {
+          edge_id: 'op:foca:donje_zesce__op:foca:mazlina:RS',
+          sector_id: 'sector:vrs_herzegovina:0',
+        },
+      },
+      {
+        layer: { id: 'osid-control-fill' },
+        properties: { osid: 'op:foca:donje_zesce' },
+      },
+    ];
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') mapHandlers.set(event, layerOrHandler);
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures: () => features,
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], {
+      onFrontEdgeClick,
+      onFormationClick,
+      onOsidClick,
+      getFormationClickFallback: () => ({
+        id: 'vrs_herzegovina_brigade',
+        properties: { id: 'vrs_herzegovina_brigade', location_osid: 'op:foca:donje_zesce' },
+      }),
+    });
+    mapHandlers.get('click')?.({ point: { x: 10, y: 10 }, originalEvent: { clientX: 10, clientY: 10 } });
+
+    expect(onFormationClick).toHaveBeenCalledTimes(1);
+    expect(onFormationClick).toHaveBeenCalledWith(
+      'vrs_herzegovina_brigade',
+      expect.objectContaining({ id: 'vrs_herzegovina_brigade' }),
+      { x: 10, y: 10 },
+    );
+    expect(onFrontEdgeClick).not.toHaveBeenCalled();
+    expect(onOsidClick).not.toHaveBeenCalled();
+  });
+
+  it('uses formation fallback before layer-specific sector hitbox clicks', () => {
+    const layerHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onFrontEdgeClick = vi.fn();
+    const onFormationClick = vi.fn();
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'string' && handler) {
+          layerHandlers.set(`${event}:${layerOrHandler}`, handler);
+        }
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures: () => [
+        {
+          layer: { id: 'sector-edge-hit-pos' },
+          properties: {
+            edge_id: 'op:foca:donje_zesce__op:foca:mazlina:RS',
+            sector_id: 'sector:vrs_herzegovina:0',
+          },
+        },
+      ],
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], {
+      onFrontEdgeClick,
+      onFormationClick,
+      getFormationClickFallback: () => ({
+        id: 'vrs_herzegovina_brigade',
+        properties: { id: 'vrs_herzegovina_brigade', location_osid: 'op:foca:donje_zesce' },
+      }),
+    });
+    layerHandlers.get('click:sector-edge-hit-pos')?.({ point: { x: 10, y: 10 }, originalEvent: { clientX: 10, clientY: 10 } });
+
+    expect(onFormationClick).toHaveBeenCalledTimes(1);
+    expect(onFormationClick).toHaveBeenCalledWith(
+      'vrs_herzegovina_brigade',
+      expect.objectContaining({ id: 'vrs_herzegovina_brigade' }),
+      { x: 10, y: 10 },
+    );
+    expect(onFrontEdgeClick).not.toHaveBeenCalled();
+  });
+
   it('does not suppress OSID hover when only a non-selectable front hit is present', () => {
     vi.useFakeTimers();
     const layerHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();

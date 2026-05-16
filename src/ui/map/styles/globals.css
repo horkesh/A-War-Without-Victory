@@ -96,6 +96,11 @@ body {
   font-family: "IBM Plex Sans Condensed", sans-serif;
 }
 
+.maplibregl-ctrl-top-right {
+  top: var(--awwv-toolbar-clearance, 5.5rem);
+  right: 0.75rem;
+}
+
 /* Custom Tactical Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

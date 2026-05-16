@@ -43,12 +43,17 @@ export const DETAIL_PANEL_STYLE: CSSProperties = {
 };
 
 /**
- * Nested panel anchored to the LEFT sidebar (width 18rem/w-72).
- * Slides out immediately to the right of the Command sidebar.
+ * Nested panels anchored to the left Command sidebar.
+ * Keep these offsets in sync with OOBSidebar's `w-[15.5rem]`.
  */
+const LEFT_SIDEBAR_WIDTH = '15.5rem';
+const PANEL_GAP = '0.5rem';
+const LEFT_PRIMARY_OFFSET = `calc(${LEFT_SIDEBAR_WIDTH} + ${PANEL_GAP})`;
+const LEFT_SECONDARY_OFFSET = `calc(${LEFT_PRIMARY_OFFSET} + 24rem + ${PANEL_GAP})`;
+
 export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  left: '18rem', // Width of OOBSidebar (w-72 = 18rem)
+  left: LEFT_PRIMARY_OFFSET,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
   zIndex: Z.PANEL_RAIL_PRIMARY,
@@ -73,7 +78,7 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
  */
 export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  left: '42.5rem', // 18rem (sidebar) + 24rem (primary) + 0.5rem (gap)
+  left: LEFT_SECONDARY_OFFSET,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: '2.5rem',
   zIndex: Z.PANEL_RAIL_SECONDARY,

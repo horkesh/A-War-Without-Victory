@@ -3,6 +3,7 @@ import type { Map as MapLibreMap, MapLayerMouseEvent } from 'maplibre-gl';
 export interface MapInteractionCallbacks {
   onOsidClick?: (osid: string, properties: Record<string, unknown>) => void;
   onFormationClick?: (id: string, props: any, point: { x: number; y: number }) => void;
+  getFormationClickFallback?: (point: { x: number; y: number }) => { id: string; properties: Record<string, unknown> } | null;
   onFrontEdgeClick?: (edgeId: string, properties: Record<string, unknown>) => void;
   onBattleClick?: (osid: string, properties: Record<string, unknown>) => void;
   /** Tooltip: set after 300ms hover; position from event. */
@@ -171,6 +172,7 @@ export function useMapInteractions(
 
   const onOsidClick = typeof callbacks === 'function' ? callbacks : callbacks.onOsidClick;
   const onFormationClick = typeof callbacks === 'function' ? undefined : callbacks.onFormationClick;
+  const getFormationClickFallback = typeof callbacks === 'function' ? undefined : callbacks.getFormationClickFallback;
   const onFrontEdgeClick = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeClick;
   const onBattleClick = typeof callbacks === 'function' ? undefined : callbacks.onBattleClick;
   const onOsidHover = typeof callbacks === 'function' ? undefined : callbacks.onOsidHover;
@@ -333,6 +335,12 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
+    const fallbackFormation = e.point ? getFormationClickFallback?.(e.point) : null;
+    if (fallbackFormation) {
+      onFormationClick?.(fallbackFormation.id, fallbackFormation.properties, e.point);
+      return;
+    }
+
     const fallbackFeatures = e.features as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined;
     const pointFeature = queryPreferredFrontFeatureNearPoint(map, e.point, true);
     const feature = pickPreferredFrontFeature([
@@ -410,6 +418,12 @@ export function useMapInteractions(
         if (osid) { onBattleClick?.(osid, battleFeature.properties as Record<string, unknown>); return; }
       }
 
+      const fallbackFormation = getFormationClickFallback?.(e.point);
+      if (fallbackFormation) {
+        onFormationClick?.(fallbackFormation.id, fallbackFormation.properties, e.point);
+        return;
+      }
+
       // Exact formation hits own the click; nearby front rescue must not steal brigade selection.
       const formationFeature = features.find(f => f.layer.id.startsWith('formation-'));
       if (formationFeature) {
@@ -454,6 +468,12 @@ export function useMapInteractions(
         const osid = feature.properties?.osid as string | undefined;
         if (osid) onOsidClick?.(osid, feature.properties as Record<string, unknown>);
       }
+      return;
+    }
+
+    const fallbackFormation = getFormationClickFallback?.(e.point);
+    if (fallbackFormation) {
+      onFormationClick?.(fallbackFormation.id, fallbackFormation.properties, e.point);
       return;
     }
 

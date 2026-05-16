@@ -2,6 +2,14 @@ import { expect, it } from 'vitest';
 
 import * as panelRail from '../src/ui/map/components/panelRail.js';
 
+it('left rail panels align to the visible command sidebar without the old blank gap', () => {
+    const primary = panelRail.getPanelRailStyle('primary', '24rem', 'left');
+    const secondary = panelRail.getPanelRailStyle('secondary', '24rem', 'left');
+
+    expect(primary.left).toBe('calc(15.5rem + 0.5rem)');
+    expect(secondary.left).toBe('calc(calc(15.5rem + 0.5rem) + 24rem + 0.5rem)');
+});
+
 it('derivePanelRailState keeps sector as primary when a brigade drills in from it', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {

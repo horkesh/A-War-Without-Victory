@@ -4802,3 +4802,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Closes the immediate user-reported Electron/tactical-map UI blockers found during live inspection. Remaining UI polish is product judgment: sector-click left-rail density, turn-0 HQ Records empty-state wording, and clearer disabled-Advance explanation in browser/dev mode.
 
 **Report:** `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`
+
+---
+
+## [2026-05-16] fix(ui): tighten tactical map click picking and camera bounds
+
+**Type:** Tactical map UI interaction/camera fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Added deterministic screen-space fallback picking for Deck.gl formation counters and made layer-specific sector/front hitboxes defer to that fallback, so brigade clicks open the formation rather than the OSID/sector underneath. Direct map formation clicks now clear stale OSID/sector rail context. Left rail offsets match the visible command sidebar, MapLibre controls sit below the toolbar/floating crest, and the map is fixed at 30-degree pitch with BiH operational bounds and rotation/pitch gestures disabled.
+
+**Determinism:** UI-only interaction and camera constraints. Bounds are fixed constants from the operational settlement dataset extent. Fallback picking uses deterministic projection math and id-order tie-breaks. No sim state, save state, generated run artifact, timestamps, randomness, or unstable ordering introduced.
+
+**Verification:** `npx.cmd vitest run tests\deck_click_selection_priority.test.ts tests\ui_map_interactions.test.ts tests\ui_map_panel_rail.test.ts tests\ui_map_camera_constraints.test.ts` passed 32/32. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk warnings. Browser inspection on `http://127.0.0.1:3002/tactical_map.html` confirmed a visible brigade click opens a single Formation panel, stale sector/settlement panels clear, MapLibre controls are below the toolbar, and the 30-degree pitched map is bounded to BiH.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_MAP_CLICK_PICKING_AND_CAMERA_BOUNDS.md`
