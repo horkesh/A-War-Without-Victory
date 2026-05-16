@@ -1,13 +1,13 @@
 # AWWV Autonomous Roadmap Heartbeat
 
 - Current branch/worktree: `main` at `F:\A-War-Without-Victory`
-- Lane name: Tactical map click picking and camera bounds
-- Files changed: `src/ui/map/map/clickSelectionPriority.ts`, `src/ui/map/map/useMapInteractions.ts`, `src/ui/map/map/MapContainer.tsx`, `src/ui/map/components/panelRail.ts`, `src/ui/map/styles/globals.css`, focused regression tests, GUI/report docs, project ledgers, root heartbeat.
-- Tests run and exact result: `npx.cmd vitest run tests\deck_click_selection_priority.test.ts tests\ui_map_interactions.test.ts tests\ui_map_panel_rail.test.ts tests\ui_map_camera_constraints.test.ts` passed 32/32. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk warnings. Browser inspection confirmed a visible brigade click opens one Formation panel, no stale sector/settlement rail remains, MapLibre controls clear the toolbar/floating crest, and the 30-degree pitched map stays bounded to the operational BiH extent.
+- Lane name: React Warroom dynamic board overlays
+- Files changed: `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `tests/warroom_shell_layer.test.ts`, GUI/Warroom/report index docs, project ledgers, root heartbeat.
+- Tests run and exact result: `npx.cmd vitest run tests\warroom_shell_layer.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_smoke.test.ts` passed 42/42. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?view=warroom&dev=1` confirmed the corkboard SVG map rendered with 2,086 projected map/frontline paths and the blue marker board read `1 Apr 1992`. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
 - Scenario/run IDs and hashes: performance and formation lanes retained 40w hash `0cb626c032204372`; operation-opportunity proof used 40w `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0cb626c032204372` and 188w `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` hash `a0111273f26f907d`.
-- Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/20260516_TACTICAL_MAP_CLICK_PICKING_AND_CAMERA_BOUNDS.md`.
-- Commit SHA: `d6a6bf03` (`fix(ui): tighten tactical map picking and camera bounds`).
-- Next lane selected and why: continue the user's tactical/HQ UI inspection lane, with emphasis on remaining overlapping panels, hidden controls, HQ density around the floating crest, and disabled-action readability.
+- Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md`, `docs/40_reports/implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md`.
+- Commit SHA: `134d4299` (`fix(ui): restore warroom board overlays`).
+- Next lane selected and why: continue the user's tactical/HQ UI inspection lane after this focused Warroom regression fix, with emphasis on remaining overlapping panels, hidden controls, HQ density around the floating crest, and disabled-action readability.
 
 ## Lane Status
 
