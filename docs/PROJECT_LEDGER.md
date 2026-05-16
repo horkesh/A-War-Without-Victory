@@ -4830,3 +4830,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Verification:** `npx.cmd vitest run tests\warroom_shell_layer.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_smoke.test.ts` passed 42/42. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?view=warroom&dev=1` confirmed the corkboard SVG map rendered with 2,086 projected map/frontline paths and the blue marker board read `1 Apr 1992`. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
 
 **Report:** `docs/40_reports/implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md`
+
+---
+
+## [2026-05-16] fix(ui): sequence first-run shell and route inbox situation cards
+
+**Type:** Tactical shell / Army HQ UI routing and first-run flow fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** First-run overlays no longer stack: the War Begins briefing shows before tutorial, and the first-turn orientation card is suppressed while War Begins or tutorial is active. Presidential Inbox situation cards remain excluded from the actionable badge count but now click through to Army HQ BRIEFING instead of being disabled/no-op. Army HQ BRIEFING now starts with the Chief of Staff daily briefing row, with the Presidential Decision Room synthesis below it. War Begins date text now falls back from legacy/dev `UNKNOWN` metadata to the deterministic turn calendar label.
+
+**Determinism:** UI/read-model only. Inbox routing uses existing Army HQ tab helpers. Date fallback derives from the turn number through the existing formatter. No random input, timestamp, unstable ordering, persisted output, generated scenario artifact, or sim-state mutation is introduced.
+
+**Verification:** `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\first_turn_orientation.test.ts tests\ui\peace_war_transition.test.ts` passed 61/61. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed RBiH start shows War Begins alone, then tutorial, inbox situation cards are enabled, and clicking `Territory Lost` opens Army HQ with Daily Briefing before Presidential Decision Room.
+
+**Roadmap delta:** Closes the immediate first-run/HQ confusion reported during live UI playtest. Remaining work is a broader post-fix inspection pass across the rest of the tactical shell and Warroom surfaces.
+
+**Report:** `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`

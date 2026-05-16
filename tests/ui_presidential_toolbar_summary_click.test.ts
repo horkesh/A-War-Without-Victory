@@ -12,4 +12,23 @@ describe('presidential toolbar summary action', () => {
     expect(toolbarProps).toContain('onOpenSummary={() => openSummary()}');
     expect(toolbarProps).not.toContain('onOpenSummary={openSummary}');
   });
+
+  it('keeps first-run intro overlays sequenced instead of stacked', () => {
+    const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+
+    expect(source).toContain('peaceWarTransitionActive');
+    expect(source).toContain('onboardingActive');
+    expect(source).toContain('<FirstTurnOrientationWrapper disabled={peaceWarTransitionActive || onboardingActive} />');
+    expect(source).toContain("appScreen === 'game' && loadedGameState && !peaceWarTransitionActive && <OnboardingOverlayWrapper />");
+  });
+
+  it('routes informational inbox situation cards into Army HQ briefing', () => {
+    const source = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const inbox = readFileSync('src/ui/map/components/PresidentialInbox.tsx', 'utf8');
+
+    expect(source).toContain("if (action === 'army_hq_briefing')");
+    expect(source).toContain("openArmyHQTab(gs, 'briefing')");
+    expect(inbox).toContain('onClick={() => onAction(item.action, item.id)}');
+    expect(inbox).not.toContain('onClick={() => {}}');
+  });
 });

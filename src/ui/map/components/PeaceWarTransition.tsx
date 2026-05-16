@@ -5,6 +5,7 @@
 import { GlassPanel } from './GlassPanel';
 import type { LoadedGameState } from '../data/types';
 import { Z } from '../../shared/zIndex';
+import { turnToDateString } from '../utils/formatters';
 
 interface PeaceWarTransitionProps {
     onDismiss: () => void;
@@ -40,8 +41,15 @@ function formatNumber(n: number): string {
     return String(n);
 }
 
+export function getPeaceWarTransitionDateLabel(state: Pick<LoadedGameState, 'metadata' | 'turn'>): string {
+    const metadataDate = state.metadata?.date?.trim();
+    return metadataDate && metadataDate !== 'UNKNOWN'
+        ? metadataDate
+        : turnToDateString(state.turn ?? 0);
+}
+
 export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps) {
-    const date = state.metadata?.date ?? `Turn ${state.turn}`;
+    const date = getPeaceWarTransitionDateLabel(state);
 
     // OOB summary per faction
     const factionSummary: Record<string, { brigades: number; personnel: number; tanks: number; artillery: number }> = {};

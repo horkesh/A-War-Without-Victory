@@ -23,7 +23,7 @@ export interface InboxItem {
     title: string;
     subtitle: string;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'autonomy_panel' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'autonomy_panel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -165,7 +165,7 @@ export function deriveInboxItems(
             subtitle: losses.length === 1
                 ? `Enemy forces captured ${placeName}.`
                 : `Enemy forces captured ${losses.length} positions including ${placeName}.`,
-            action: 'none',
+            action: 'army_hq_briefing',
             priority: 60,
         });
     }
@@ -179,7 +179,7 @@ export function deriveInboxItems(
             subtitle: gains.length === 1
                 ? `Your forces secured ${placeName}.`
                 : `Your forces secured ${gains.length} positions including ${placeName}.`,
-            action: 'none',
+            action: 'army_hq_briefing',
             priority: 65,
         });
     }
@@ -191,7 +191,7 @@ export function deriveInboxItems(
         severity: 'info',
         title: dateStr,
         subtitle: `Situation as of ${dateStr}.`,
-        action: 'none',
+        action: 'army_hq_briefing',
         priority: 99,
     });
 

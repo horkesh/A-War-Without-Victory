@@ -189,7 +189,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                                 <InboxCard
                                     key={item.id}
                                     item={item}
-                                    onClick={() => {}}
+                                    onClick={() => onAction(item.action, item.id)}
                                 />
                             ))}
                         </div>

@@ -49,7 +49,7 @@ import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
 import { FirstTurnOrientationCard, FIRST_TURN_INTRO_STORAGE_KEY } from './components/FirstTurnOrientationCard';
 import { buildFirstTurnOrientation } from './data/firstTurnOrientation';
-import { OnboardingOverlay } from './components/onboarding';
+import { OnboardingOverlay, shouldShowOnboarding } from './components/onboarding';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
@@ -157,7 +157,7 @@ function StrategicDashboardWrapper() {
   return <StrategicDashboard />;
 }
 
-function FirstTurnOrientationWrapper() {
+function FirstTurnOrientationWrapper({ disabled = false }: { disabled?: boolean }) {
   // NIGHTSHIFT-G2: One-time orientation card shown after the side picker on a
   // fresh save. Reads localStorage at mount; persistence is handled inside
   // FirstTurnOrientationCard on dismiss / item click.
@@ -175,6 +175,7 @@ function FirstTurnOrientationWrapper() {
       setHasSeenIntro(false);
     }
   }, []);
+  if (disabled) return null;
   const view = buildFirstTurnOrientation(state, hasSeenIntro);
   if (!view) return null;
   return <FirstTurnOrientationCard view={view} onDismiss={() => setHasSeenIntro(true)} />;
@@ -245,7 +246,19 @@ function App() {
   const turnAftermath = useGameStore((s) => s.turnAftermath);
   const turnAftermathOpen = useGameStore((s) => s.turnAftermathOpen);
   const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
+  const peaceWarTransitionSeen = useGameStore((s) => s.peaceWarTransitionSeen);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
+  const peaceWarTransitionActive = Boolean(
+    loadedGameState
+      && !peaceWarTransitionSeen
+      && loadedGameState.phase === 'war'
+      && (loadedGameState.turn ?? 0) <= 5,
+  );
+  const onboardingActive = Boolean(
+    loadedGameState
+      && !peaceWarTransitionActive
+      && shouldShowOnboarding(loadedGameState.tutorial_state),
+  );
   const mapMode = useGameStore((s) => s.mapMode);
   const railState = derivePanelRailState({
     selectedOsid,
@@ -796,6 +809,9 @@ function App() {
         if (action === 'army_hq_opportunity') {
           openArmyHQTab(gs, 'briefing');
         }
+        if (action === 'army_hq_briefing') {
+          openArmyHQTab(gs, 'briefing');
+        }
         if (action === 'peace_plan_modal') {
           // Reset dismissal so the PeacePlanModal renders again
           setPeacePlanDismissed(false);
@@ -943,7 +959,7 @@ function App() {
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
-      <FirstTurnOrientationWrapper />
+      <FirstTurnOrientationWrapper disabled={peaceWarTransitionActive || onboardingActive} />
       <VerdictScreen />
       <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
@@ -1019,7 +1035,7 @@ function App() {
           Only visible on the in-game screen with a loaded save; hidden during
           main menu / side picker. The overlay's own predicate handles the
           dismissed-state branch. */}
-      {appScreen === 'game' && loadedGameState && <OnboardingOverlayWrapper />}
+      {appScreen === 'game' && loadedGameState && !peaceWarTransitionActive && <OnboardingOverlayWrapper />}
       {/* LANE-V094-LOADING-AND-ERROR — first-paint scenario-load skeleton.
           Shown when the in-game shell has been requested but no save has
           loaded yet. Auto-dismisses when `loadedGameState` resolves. We

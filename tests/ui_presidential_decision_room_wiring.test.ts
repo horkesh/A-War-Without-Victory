@@ -6,10 +6,13 @@ function read(path: string): string {
 }
 
 describe('Presidential Decision Room wiring', () => {
-  it('mounts the decision room as the first Army HQ briefing section', () => {
+  it('keeps the Chief of Staff report before the decision-room synthesis in Army HQ briefing', () => {
     const armyHq = read('../src/ui/map/components/army_hq/ArmyHQModal.tsx');
 
     expect(armyHq).toContain('PresidentialDecisionRoomPanel');
+    expect(armyHq.indexOf('<ChiefOfStaffBriefing')).toBeLessThan(
+      armyHq.indexOf('<PresidentialDecisionRoomPanel'),
+    );
     expect(armyHq.indexOf('<PresidentialDecisionRoomPanel')).toBeLessThan(
       armyHq.indexOf('<PresidentialAttentionPanel'),
     );

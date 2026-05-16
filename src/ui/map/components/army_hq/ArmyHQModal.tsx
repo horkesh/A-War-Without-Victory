@@ -348,13 +348,19 @@ export function ArmyHQModal() {
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
-                            {!expandedCorpsId && (
-                                <PresidentialDecisionRoomPanel />
-                            )}
-
-                            {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
+                            {/* Top section: CoS Brief | Commander | Crest | Strategic Position */}
                             {!expandedCorpsId && (
                                 <div className="grid grid-cols-1 gap-1.5 mb-2 items-start lg:grid-cols-12 lg:gap-2">
+                                    {/* Chief of Staff Briefing */}
+                                    <div className="lg:col-span-4">
+                                        <ChiefOfStaffBriefing
+                                            briefingItems={data.briefingItems}
+                                            gameState={state}
+                                            faction={faction}
+                                            onCorpsClick={navigateToCorps}
+                                        />
+                                    </div>
+
                                     {/* Commander */}
                                     <div className="bg-panel-card border border-panel-border rounded-lg p-2 lg:col-span-3">
                                         <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-1 pb-1 border-b border-panel-border">
@@ -389,18 +395,8 @@ export function ArmyHQModal() {
                                         </div>
                                     </div>
 
-                                    {/* Chief of Staff Briefing */}
-                                    <div className="lg:col-span-3">
-                                        <ChiefOfStaffBriefing
-                                            briefingItems={data.briefingItems}
-                                            gameState={state}
-                                            faction={faction}
-                                            onCorpsClick={navigateToCorps}
-                                        />
-                                    </div>
-
                                     {/* Army Crest */}
-                                        <div className="flex flex-col items-center justify-center px-1 py-0.5 select-none lg:col-span-2">
+                                    <div className="flex flex-col items-center justify-center px-1 py-0.5 select-none lg:col-span-1">
                                         {crestSrc && (
                                             <img
                                                 src={crestSrc}
@@ -431,6 +427,10 @@ export function ArmyHQModal() {
                                         />
                                     </div>
                                 </div>
+                            )}
+
+                            {!expandedCorpsId && (
+                                <PresidentialDecisionRoomPanel />
                             )}
 
                             {!expandedCorpsId && (
