@@ -33784,20 +33784,6 @@
     ],
     "war_front_edges_osid": [
       {
-        "a": "op:banovici:seona",
-        "b": "op:lukavac:brijesnica_donja_2",
-        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
-        "a": "op:banovici:seona",
-        "b": "op:zavidovici:vozuca_2",
-        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
         "a": "op:banja_luka:banja_luka_2",
         "b": "op:banja_luka:dragocaj",
         "edge_id": "op:banja_luka:banja_luka_2__op:banja_luka:dragocaj",
@@ -33887,6 +33873,20 @@
         "edge_id": "op:banja_luka:rekavice_2__op:mrkonjic_grad:baljvine_2",
         "side_a": "RS",
         "side_b": "HRHB"
+      },
+      {
+        "a": "op:banovici:seona",
+        "b": "op:lukavac:brijesnica_donja_2",
+        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
+        "a": "op:banovici:seona",
+        "b": "op:zavidovici:vozuca_2",
+        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
       },
       {
         "a": "op:bihac:bihac_2",
@@ -36647,6 +36647,20 @@
         "side_b": "HRHB"
       },
       {
+        "a": "op:ljubinje:bancici",
+        "b": "op:neum:gornje_hrasno_2",
+        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
+        "side_a": "RS",
+        "side_b": "HRHB"
+      },
+      {
+        "a": "op:ljubinje:bancici",
+        "b": "op:stolac:prenj",
+        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
+        "side_a": "RS",
+        "side_b": "HRHB"
+      },
+      {
         "a": "op:lopare:celic_3",
         "b": "op:lopare:koraj_4",
         "edge_id": "op:lopare:celic_3__op:lopare:koraj_4",
@@ -36743,20 +36757,6 @@
         "edge_id": "op:lukavac:brijesnica_donja_2__op:lukavac:orahovica_2",
         "side_a": "RS",
         "side_b": "RBiH"
-      },
-      {
-        "a": "op:ljubinje:bancici",
-        "b": "op:neum:gornje_hrasno_2",
-        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
-        "side_a": "RS",
-        "side_b": "HRHB"
-      },
-      {
-        "a": "op:ljubinje:bancici",
-        "b": "op:stolac:prenj",
-        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
-        "side_a": "RS",
-        "side_b": "HRHB"
       },
       {
         "a": "op:maglaj:cobe_2",
@@ -37459,13 +37459,6 @@
         "side_b": "RS"
       },
       {
-        "a": "op:srebrenica:luka_2",
-        "b": "op:vlasenica:sebiocina",
-        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:srebrenica:obadi",
         "edge_id": "op:srebrenica:ljeskovik_2__op:srebrenica:obadi",
@@ -37476,6 +37469,13 @@
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:visegrad:zlijeb",
         "edge_id": "op:srebrenica:ljeskovik_2__op:visegrad:zlijeb",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
+        "a": "op:srebrenica:luka_2",
+        "b": "op:vlasenica:sebiocina",
+        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
         "side_a": "RBiH",
         "side_b": "RS"
       },

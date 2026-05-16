@@ -4710,3 +4710,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** v0.9.5 remains operator-open for clean-VM checks. This commit reduces release-log transcription burden but does not claim SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, or Linux distro install verification without a target VM.
 
 **Report:** `docs/40_reports/implemented/20260515_PACKAGING_PLAYTEST_OPERATOR_SUPPORT.md`
+
+---
+
+## [2026-05-16] merge(roadmap): integrate autonomous roadmap branches
+
+**Type:** Integration of previously committed roadmap branches. No new gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, UI behavior, packaging script behavior, or generated output was authored beyond conflict resolution and coordination docs.
+
+**Change:** Merged the autonomous roadmap branches into `main`: force-quality trajectory audit (`22ff3b5e`), docs/canon maintenance (`e2ee1bb2`), formation-life believability (`0847eb44`), operation opportunity families (`761ab2b8`), product-loop cohesion (`1e7b3b5b`), and packaging/playtest support (`69510b4b`). Conflict resolution kept the root heartbeat as the canonical coordination file, preserved the newer `main` active-never-fights detector implementation, combined ledger/roadmap/report-index entries, and normalized operation-family Markdown whitespace.
+
+**Determinism:** Merge/conflict-resolution only. Runtime determinism relies on the merged branch verification already recorded in each lane entry; no generated run artifacts were staged.
+
+**Verification:** Post-merge focused slice passed 113/113 with `npm.cmd run test:vitest:fast -- -- tests\docs_desktop_v09_truth.test.ts tests\anomaly_detector_deployment_truth.test.ts tests\operation_opportunities_catalog.test.ts tests\operation_opportunities_central_bosnia_catalog.test.ts tests\operation_opportunities_federation_western_bosnia_catalog.test.ts tests\triggered_operations.test.ts tests\triggered_operations_late_1995.test.ts tests\ui\presidential_decision_room.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\desktop_packaging_targets.test.ts`. `git diff --check` reported only CRLF warnings before the startup artifact refresh. `npm.cmd run typecheck` passed. Full `npm.cmd run test:vitest:fast` initially failed only the startup snapshot contract because the operation catalog merge changed canonical builder output while the baked artifact was still stale; after `npm.cmd run desktop:startup-snapshot:build`, `npm.cmd run test:vitest:fast -- -- tests\startup_snapshot_contract.test.ts` passed 5/5, `npm.cmd run desktop:startup-snapshot:check` passed, and full `npm.cmd run test:vitest:fast` passed 633 files / 6643 tests with 18 skipped.
+
+**Roadmap delta:** The isolated autonomous roadmap branches are now integrated on `main`; remaining work is push/PR policy plus operator-only packaging and human/canon-review tasks already listed in the heartbeat.
