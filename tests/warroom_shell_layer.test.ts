@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+  buildWarroomProjectedMapModel,
+  getWarroomBoardDateLabel,
   getWarroomRegionClipPath,
   regionToShellHandoff,
   warroomRegionsUrlForFaction,
@@ -227,6 +229,60 @@ describe('warroom region data contract', () => {
         [100, 300],
       ],
     })).toBe('polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)');
+  });
+
+  it('builds a faction-only projected corkboard map with current front lines', () => {
+    const model = buildWarroomProjectedMapModel({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: { osid: 'op:left' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [17, 44],
+              [18, 44],
+              [18, 45],
+              [17, 45],
+              [17, 44],
+            ]],
+          },
+        },
+        {
+          type: 'Feature',
+          properties: { osid: 'op:right' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [18, 44],
+              [19, 44],
+              [19, 45],
+              [18, 45],
+              [18, 44],
+            ]],
+          },
+        },
+      ],
+    }, {
+      'op:left': 'RBiH',
+      'op:right': 'RS',
+    }, 'RBiH');
+
+    expect(model?.territoryPaths).toHaveLength(1);
+    expect(model?.frontLinePaths).toHaveLength(1);
+    expect(model?.outlinePaths).toHaveLength(2);
+  });
+
+  it('formats the whiteboard date from loaded game metadata', () => {
+    expect(getWarroomBoardDateLabel({ metadata: { turn: 12, date: '24 June 1992' }, turn: 12 }))
+      .toBe('24 June 1992');
+    expect(getWarroomBoardDateLabel({ metadata: { turn: 0, date: '1 Apr 1992 · Turn 0 (War)' }, turn: 0 }))
+      .toBe('1 Apr 1992');
+    expect(getWarroomBoardDateLabel({ label: 'Turn 0 (war)', metadata: { turn: 0, date: 'UNKNOWN' }, turn: 0 }))
+      .toBe('1 Apr 1992');
+    expect(getWarroomBoardDateLabel({ metadata: { turn: 7, date: 'UNKNOWN' }, turn: 7 }))
+      .toBe('Turn 7');
   });
 });
 

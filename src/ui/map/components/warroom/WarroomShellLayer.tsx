@@ -13,8 +13,14 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { Feature, FeatureCollection, Geometry, LineString, MultiPolygon, Polygon } from 'geojson';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
+import { loadOperationalSettlements } from '../../data/DataLoader';
+import type { LoadedGameState } from '../../data/types';
+import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
+import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
 import { useGameStore } from '../../store/gameStore';
+import { formatTurnLabel } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
@@ -32,9 +38,16 @@ interface WarroomRegionBounds {
 
 interface WarroomRegion {
   id: string;
+  type?: string;
   bounds: WarroomRegionBounds;
   polygon?: [number, number][];
   tooltip?: string;
+}
+
+interface WarroomMapOverlayModel {
+  outlinePaths: string[];
+  territoryPaths: string[];
+  frontLinePaths: string[];
 }
 
 // Authoring canvas dimensions (schema v2.1)
@@ -121,6 +134,278 @@ export function getWarroomRegionClipPath(region: WarroomRegion): string | undefi
   });
 
   return `polygon(${points.join(', ')})`;
+}
+
+function getWarroomRegionBoxStyle(region: WarroomRegion): {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  clipPath?: string;
+} {
+  const { bounds } = region;
+  return {
+    left: `${(bounds.x / CANVAS_W) * 100}%`,
+    top: `${(bounds.y / CANVAS_H) * 100}%`,
+    width: `${(bounds.width / CANVAS_W) * 100}%`,
+    height: `${(bounds.height / CANVAS_H) * 100}%`,
+    clipPath: getWarroomRegionClipPath(region),
+  };
+}
+
+function collectPositions(geometry: Geometry | null | undefined): Array<[number, number]> {
+  if (!geometry) return [];
+  if (geometry.type === 'Polygon') {
+    return (geometry.coordinates as Polygon['coordinates']).flat().map(([x, y]) => [x, y]);
+  }
+  if (geometry.type === 'MultiPolygon') {
+    return (geometry.coordinates as MultiPolygon['coordinates']).flat(2).map(([x, y]) => [x, y]);
+  }
+  if (geometry.type === 'LineString') {
+    return (geometry.coordinates as LineString['coordinates']).map(([x, y]) => [x, y]);
+  }
+  return [];
+}
+
+function computeMapBounds(features: Feature[]): { minX: number; minY: number; maxX: number; maxY: number } | null {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const feature of features) {
+    for (const [x, y] of collectPositions(feature.geometry)) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+    return null;
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+function makeProjector(bounds: { minX: number; minY: number; maxX: number; maxY: number }) {
+  const rangeX = Math.max(0.000001, bounds.maxX - bounds.minX);
+  const rangeY = Math.max(0.000001, bounds.maxY - bounds.minY);
+  const scale = Math.min(92 / rangeX, 84 / rangeY);
+  const projectedW = rangeX * scale;
+  const projectedH = rangeY * scale;
+  const offsetX = (100 - projectedW) / 2;
+  const offsetY = (100 - projectedH) / 2;
+
+  return ([x, y]: [number, number]): [number, number] => [
+    offsetX + (x - bounds.minX) * scale,
+    offsetY + (bounds.maxY - y) * scale,
+  ];
+}
+
+function fmtSvg(value: number): string {
+  return Number.isFinite(value) ? value.toFixed(3).replace(/\.?0+$/, '') : '0';
+}
+
+function ringToPath(ring: Array<[number, number]>, project: (point: [number, number]) => [number, number]): string {
+  if (ring.length === 0) return '';
+  const [firstX, firstY] = project(ring[0]);
+  const parts = [`M${fmtSvg(firstX)} ${fmtSvg(firstY)}`];
+  for (const point of ring.slice(1)) {
+    const [x, y] = project(point);
+    parts.push(`L${fmtSvg(x)} ${fmtSvg(y)}`);
+  }
+  parts.push('Z');
+  return parts.join(' ');
+}
+
+function polygonGeometryToPath(
+  geometry: Polygon | MultiPolygon,
+  project: (point: [number, number]) => [number, number],
+): string {
+  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+  return polygons
+    .flatMap((polygon) => polygon.map((ring) => ringToPath(ring.map(([x, y]) => [x, y]), project)))
+    .filter(Boolean)
+    .join(' ');
+}
+
+function lineGeometryToPath(
+  geometry: LineString,
+  project: (point: [number, number]) => [number, number],
+): string {
+  const coords = geometry.coordinates.map(([x, y]) => project([x, y]));
+  if (coords.length === 0) return '';
+  const [[firstX, firstY], ...rest] = coords;
+  return [
+    `M${fmtSvg(firstX)} ${fmtSvg(firstY)}`,
+    ...rest.map(([x, y]) => `L${fmtSvg(x)} ${fmtSvg(y)}`),
+  ].join(' ');
+}
+
+function featureSortKey(feature: Feature): string {
+  const props = feature.properties as { osid?: unknown; edge_id?: unknown } | null;
+  if (typeof props?.osid === 'string') return props.osid;
+  if (typeof props?.edge_id === 'string') return props.edge_id;
+  return JSON.stringify(feature.geometry);
+}
+
+export function buildWarroomProjectedMapModel(
+  baseGeoJson: FeatureCollection,
+  controlBySettlement: Record<string, string | null>,
+  playerFaction: string | null | undefined,
+  rbihHrhbAlliance?: number | null,
+): WarroomMapOverlayModel | null {
+  if (!playerFaction || !Array.isArray(baseGeoJson.features) || baseGeoJson.features.length === 0) {
+    return null;
+  }
+
+  const bounds = computeMapBounds(baseGeoJson.features as Feature[]);
+  if (!bounds) return null;
+
+  const project = makeProjector(bounds);
+  const controlledGeoJson = buildControlGeoJSON(baseGeoJson, controlBySettlement);
+  const sortedControlFeatures = [...controlledGeoJson.features].sort((a, b) => featureSortKey(a).localeCompare(featureSortKey(b)));
+
+  const outlinePaths = sortedControlFeatures
+    .filter((feature): feature is Feature<Polygon | MultiPolygon> => feature.geometry?.type === 'Polygon' || feature.geometry?.type === 'MultiPolygon')
+    .map((feature) => polygonGeometryToPath(feature.geometry, project))
+    .filter(Boolean);
+
+  const territoryPaths = sortedControlFeatures
+    .filter((feature): feature is Feature<Polygon | MultiPolygon, { controller?: string | null }> =>
+      (feature.geometry?.type === 'Polygon' || feature.geometry?.type === 'MultiPolygon')
+      && (feature.properties as { controller?: string | null } | null)?.controller === playerFaction)
+    .map((feature) => polygonGeometryToPath(feature.geometry, project))
+    .filter(Boolean);
+
+  const frontLinePaths = buildFrontLinesGeoJSON(controlledGeoJson, rbihHrhbAlliance)
+    .features
+    .filter((feature): feature is Feature<LineString, { lineType?: string }> =>
+      feature.geometry?.type === 'LineString'
+      && (feature.properties as { lineType?: string } | null)?.lineType === 'front')
+    .map((feature) => lineGeometryToPath(feature.geometry, project))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  return { outlinePaths, territoryPaths, frontLinePaths };
+}
+
+export function getWarroomBoardDateLabel(
+  state: (Pick<LoadedGameState, 'metadata' | 'turn'> & Partial<Pick<LoadedGameState, 'label'>>) | null | undefined,
+): string {
+  const rawDate = state?.metadata?.date?.trim();
+  if (rawDate && rawDate !== 'UNKNOWN') return rawDate.split('·')[0].trim();
+  const labelDate = state?.label ? formatTurnLabel(state.label).split('·')[0].trim() : '';
+  if (labelDate && !labelDate.toLowerCase().startsWith('turn ')) return labelDate;
+  return typeof state?.turn === 'number' ? `Turn ${state.turn}` : 'Date Pending';
+}
+
+function factionInkColor(faction: string | null): string {
+  if (faction === 'RS') return 'rgba(165, 45, 45, 0.72)';
+  if (faction === 'HRHB') return 'rgba(42, 91, 160, 0.72)';
+  return 'rgba(35, 112, 63, 0.72)';
+}
+
+function WarroomProjectedMap({ region, model, playerFaction }: {
+  region: WarroomRegion;
+  model: WarroomMapOverlayModel | null;
+  playerFaction: string | null;
+}) {
+  const box = getWarroomRegionBoxStyle(region);
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        ...box,
+        pointerEvents: 'none',
+        zIndex: 1,
+        padding: '2.4%',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, rgba(238,228,196,0.94), rgba(213,197,159,0.92))',
+          border: '1px solid rgba(68,48,30,0.42)',
+          boxShadow: '0 3px 9px rgba(0,0,0,0.24), inset 0 0 14px rgba(84,59,35,0.18)',
+          transform: 'rotate(-0.6deg)',
+          overflow: 'hidden',
+        }}
+      >
+        {model ? (
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', width: '100%', height: '100%' }}>
+            <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.76)" />
+            <g fill="none" stroke="rgba(66,58,45,0.18)" strokeWidth="0.18">
+              {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
+            </g>
+            <g fill={factionInkColor(playerFaction)} stroke="rgba(48,40,31,0.22)" strokeWidth="0.12">
+              {model.territoryPaths.map((path, index) => <path key={`territory-${index}`} d={path} />)}
+            </g>
+            <g fill="none" stroke="rgba(26,22,18,0.82)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1.7 1.1">
+              {model.frontLinePaths.map((path, index) => <path key={`front-${index}`} d={path} />)}
+            </g>
+          </svg>
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: '"Courier New", Courier, monospace',
+              fontSize: '9px',
+              letterSpacing: '0.12em',
+              color: 'rgba(55,45,34,0.58)',
+              textTransform: 'uppercase',
+            }}
+          >
+            Map updating
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: string }) {
+  const box = getWarroomRegionBoxStyle(region);
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        ...box,
+        pointerEvents: 'none',
+        zIndex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <div
+        style={{
+          color: 'rgba(28, 84, 172, 0.86)',
+          fontFamily: '"Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive',
+          fontSize: 'clamp(10px, 1.65vw, 29px)',
+          fontWeight: 700,
+          lineHeight: 1,
+          transform: 'rotate(-2deg)',
+          textShadow: '0 0 1px rgba(255,255,255,0.24)',
+          whiteSpace: 'nowrap',
+          maxWidth: '92%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
 }
 
 function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
@@ -221,6 +506,7 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
   const [activeRegions, setActiveRegions] = useState<WarroomRegion[]>(
     fallbackRegionsForFaction(playerFaction),
   );
+  const [projectedMapModel, setProjectedMapModel] = useState<WarroomMapOverlayModel | null>(null);
 
   useEffect(() => {
     const fallbackRegions = fallbackRegionsForFaction(playerFaction);
@@ -246,6 +532,36 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
       cancelled = true;
     };
   }, [playerFaction]);
+
+  useEffect(() => {
+    if (!loadedGameState?.controlBySettlement || !playerFaction) {
+      setProjectedMapModel(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    loadOperationalSettlements()
+      .then((geojson) => {
+        if (cancelled) return;
+        setProjectedMapModel(buildWarroomProjectedMapModel(
+          geojson,
+          loadedGameState.controlBySettlement,
+          playerFaction,
+          loadedGameState.war_alliance_rbih_hrhb,
+        ));
+      })
+      .catch(() => {
+        if (!cancelled) setProjectedMapModel(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    loadedGameState?.controlBySettlement,
+    loadedGameState?.war_alliance_rbih_hrhb,
+    playerFaction,
+  ]);
 
   if (!playerFaction || !scenePlateUrl) {
     return (
@@ -283,6 +599,10 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
     onNavigate(command);
   };
 
+  const deskMapRegion = activeRegions.find((region) => region.id === 'desk_map' || region.id === 'wall_cork_board');
+  const dateBoardRegion = activeRegions.find((region) => region.id === 'wall_calendar_area' || region.id === 'wall_calendar');
+  const dateLabel = getWarroomBoardDateLabel(loadedGameState);
+
   return (
     <div
       style={{
@@ -317,6 +637,16 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
             userSelect: 'none',
           }}
         />
+        {deskMapRegion ? (
+          <WarroomProjectedMap
+            region={deskMapRegion}
+            model={projectedMapModel}
+            playerFaction={playerFaction}
+          />
+        ) : null}
+        {dateBoardRegion ? (
+          <WarroomDateBoard region={dateBoardRegion} label={dateLabel} />
+        ) : null}
         {activeRegions.map((region) => (
           <WarroomHotspot
             key={region.id}

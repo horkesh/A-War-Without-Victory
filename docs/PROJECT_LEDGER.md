@@ -4816,3 +4816,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Verification:** `npx.cmd vitest run tests\deck_click_selection_priority.test.ts tests\ui_map_interactions.test.ts tests\ui_map_panel_rail.test.ts tests\ui_map_camera_constraints.test.ts` passed 32/32. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk warnings. Browser inspection on `http://127.0.0.1:3002/tactical_map.html` confirmed a visible brigade click opens a single Formation panel, stale sector/settlement panels clear, MapLibre controls are below the toolbar, and the 30-degree pitched map is bounded to BiH.
 
 **Report:** `docs/40_reports/implemented/20260516_TACTICAL_MAP_CLICK_PICKING_AND_CAMERA_BOUNDS.md`
+
+---
+
+## [2026-05-16] fix(ui): restore React Warroom dynamic board overlays
+
+**Type:** Warroom UI/render restoration. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** React Warroom now honors the authored dynamic board surfaces instead of treating every region as a hotspot only. The corkboard/desk-map region renders a paper BiH map from operational settlement geometry with live current front lines and fill only for the player faction's controlled territory, while leaving the clickable map hotspot on top. The wall calendar/whiteboard region renders the current game date in blue marker styling, using metadata when present and the same turn-label fallback as the tactical shell when older/dev saves omit `meta.date`.
+
+**Determinism:** UI-only projection from fixed operational settlement GeoJSON plus `LoadedGameState.controlBySettlement`. Feature/path iteration is stable-sorted by OSID/path, no randomness/timestamps/persisted outputs are introduced, and no sim or save state changes.
+
+**Verification:** `npx.cmd vitest run tests\warroom_shell_layer.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_smoke.test.ts` passed 42/42. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?view=warroom&dev=1` confirmed the corkboard SVG map rendered with 2,086 projected map/frontline paths and the blue marker board read `1 Apr 1992`. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
+
+**Report:** `docs/40_reports/implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md`

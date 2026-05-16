@@ -56,6 +56,7 @@
 | **Comprehensive GUI review (player perspective)** | [convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md](convenes/20260307_GUI_COMPREHENSIVE_REVIEW_PLAYER_PERSPECTIVE.md) — warroom recommendations, faction fantasy |
 | **GUI expert advice (what to change)** | [handovers/GUI_EXPERT_ADVICE_WHAT_TO_CHANGE.md](handovers/GUI_EXPERT_ADVICE_WHAT_TO_CHANGE.md) — P0/P1 recommendations including IVP breakdown |
 | **Code entrypoints** | `src/ui/warroom/` — warroom.ts, ClickableRegionManager.ts, components/*.ts, data/*.ts |
+| **React dynamic board overlays** | [implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md](implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md), `src/ui/map/components/warroom/WarroomShellLayer.tsx` - React Warroom renders the authored dynamic `desk_map`/`wall_cork_board` and `wall_calendar_area`/`wall_calendar` surfaces under their hotspots: player-faction-only paper map, current front lines, and blue marker date. |
 
 ---
 
@@ -91,6 +92,7 @@
 - **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records. The old desk-map `OperationalSituationModal` has been retired; the desk map now goes straight to the tactical shell.
 
 - **React shell hotspot contract (2026-05-16):** React Warroom loads canonical `/data/ui/hq_<faction>_clickable_regions.json` by faction, falls back to bundled JSON only if needed, fits hotspots to the centered 2752x1536 plate, and honors polygon geometry. The cork-board/map anchor is canonical `desk_map` and returns to the tactical map; `wall_cork_board` is legacy alias only.
+- **React dynamic board overlays (2026-05-16):** React Warroom now renders dynamic board visuals beneath the hotspot layer. The corkboard/desk-map surface projects operational settlement geometry into a paper BiH map with current front lines and fill only for the player faction's current territory; the wall calendar/whiteboard renders the current date in blue marker styling.
 
 - **Priority docket (2026-05-02):** The React Warroom status bar shows `PRIORITIES` counts and can open a compact docket tray derived from the Decision Room pre-advance packet. The tray is a shell summary only: `Open Decision Room` routes to Army HQ BRIEFING, and row actions route to the preserved Decision Room source targets through the App shell.
 
@@ -157,6 +159,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-05-16 | **React Warroom dynamic board overlays restored:** the React shell now honors dynamic board regions under their hotspots, projecting a player-faction-only paper map with current front lines onto the corkboard/desk-map and rendering the current date on the wall board in blue marker. | [implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md](implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md) |
 | 2026-05-02 | **Warroom priority docket:** the Warroom status bar now opens a compact `Review Before Advance` tray with source-backed rows and deep links to existing Decision Room targets, while Army HQ remains the command-review owner. | [implemented/20260502_WARROOM_PRIORITY_DOCKET.md](implemented/20260502_WARROOM_PRIORITY_DOCKET.md) |
 | 2026-04-03 | **Player-scoped operation summaries + honest enemy contact:** Warroom no longer relies on raw `CorpsOperation` payloads or enemy casualty-ledger inference. `extractWarData()` now emits summary-only corps operation data and derives hostile contact from engaged front edges, keeping Warroom aligned with a believable headquarters information model. | [implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md](implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md) |
 | 2026-04-02 | **Tactical-map return restoration:** the live mounted tactical toolbar now exposes a visible `WARROOM` return path in standalone desktop and embedded tactical-map modes, using the real shell bridge instead of dead legacy toolbar code. | [implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md](implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md) |
