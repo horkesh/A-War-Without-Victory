@@ -28,6 +28,6 @@ No simulation state, scenario data, save schema, turn ordering, random source, o
 - `npm.cmd run warroom:build` - passed with existing Vite warning.
 - `npm.cmd run warroom:regions:validate -- data\ui\hq_rbih_clickable_regions.json data\ui\hq_rs_clickable_regions.json data\ui\hq_hrhb_clickable_regions.json` - non-gating fail on known planned anchors not present in current room art (`enclave_dispatch_folder`, `honors_memorial`, `intelligence_packet`, and `intelligence_journal` in current faction files). The hotspot fix does not add planned modal anchors.
 
-## Notes
+## Installer Rebuild
 
-The installed build must be regenerated after this patch before Windows testing can reflect the fix.
+The Windows NSIS installer was regenerated after this patch. Smoke proof for `dist-packaged\A War Without Victory Setup 0.9.6-alpha.1.exe`: `sizeBytes=957497059`, SHA-256 `49e6eff3be7761a4c0fe0d8dbb269032ccda80c9704c921cb99d45ebb0b2cdac`, valid MZ/PE header.

@@ -21,8 +21,8 @@
 - `npm.cmd run typecheck` passed.
 - `npm.cmd run desktop:package:win:nsis` passed and produced `dist-packaged\A War Without Victory Setup 0.9.6-alpha.1.exe`.
 - `npm.cmd run desktop:package:win:nsis:smoke -- "F:\A-War-Without-Victory\dist-packaged\A War Without Victory Setup 0.9.6-alpha.1.exe"` passed with:
-  - `sizeBytes=957496842`
-  - `sha256=c51f9bf8fe798ad8eed8dd01aba1b679412b8fb84b019994303dfe3aeb126c77`
+  - `sizeBytes=957497059`
+  - `sha256=49e6eff3be7761a4c0fe0d8dbb269032ccda80c9704c921cb99d45ebb0b2cdac`
   - valid MZ/PE header.
 
 ## Operator-Only Remainder
@@ -31,4 +31,3 @@
 - Settings -> Apps entry/version.
 - `%APPDATA%\A War Without Victory\` persistence and uninstall behavior.
 - NSIS uninstaller registry entry checks.
-
