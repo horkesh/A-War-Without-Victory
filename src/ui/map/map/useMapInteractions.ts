@@ -34,7 +34,6 @@ const SECTOR_EDGE_GLOW_POS_LAYER = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER = 'sector-edge-glow-neg';
 const SECTOR_EDGE_HIT_POS_LAYER = 'sector-edge-hit-pos';
 const SECTOR_EDGE_HIT_NEG_LAYER = 'sector-edge-hit-neg';
-const SECTOR_DEMARCATION_HIT_LAYER = 'sector-demarcation-lines-hit';
 export const FRONT_EDGE_INTERACTIVE_LAYERS = [
   'front-edges-hover-pos',
   'front-edges-hover-neg',
@@ -44,11 +43,10 @@ export const FRONT_EDGE_INTERACTIVE_LAYERS = [
   SECTOR_EDGE_GLOW_NEG_LAYER,
   SECTOR_EDGE_HIT_POS_LAYER,
   SECTOR_EDGE_HIT_NEG_LAYER,
-  SECTOR_DEMARCATION_HIT_LAYER,
 ];
 
 export const getFrontFeatureSectorId = (feature: { properties?: Record<string, unknown> } | undefined): string | null => {
-  const sectorId = feature?.properties?.sector_id ?? feature?.properties?.sector_a;
+  const sectorId = feature?.properties?.sector_id;
   return typeof sectorId === 'string' && sectorId.length > 0 ? sectorId : null;
 };
 
@@ -65,7 +63,6 @@ export const isSelectableFrontFeature = (feature: { layer?: { id?: string }; pro
 
 const frontFeatureInteractionPriority = (feature: { layer?: { id?: string } } | undefined): number => {
   const layerId = feature?.layer?.id ?? '';
-  if (layerId === SECTOR_DEMARCATION_HIT_LAYER) return 0;
   if (layerId === SECTOR_EDGE_HIT_POS_LAYER || layerId === SECTOR_EDGE_HIT_NEG_LAYER) return 1;
   if (layerId === 'front-edges-hover-pos' || layerId === 'front-edges-hover-neg') return 2;
   if (layerId === SECTOR_EDGE_GLOW_POS_LAYER || layerId === SECTOR_EDGE_GLOW_NEG_LAYER) return 3;
@@ -397,7 +394,6 @@ export function useMapInteractions(
       SECTOR_EDGE_GLOW_NEG_LAYER,
       SECTOR_EDGE_HIT_POS_LAYER,
       SECTOR_EDGE_HIT_NEG_LAYER,
-      SECTOR_DEMARCATION_HIT_LAYER,
       'sector-fill',
       'osid-control-fill',
       'osid-ethnic-fill',
@@ -475,7 +471,6 @@ export function useMapInteractions(
       'front-edges-highlight-pos', 'front-edges-highlight-neg',
       SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER,
       SECTOR_EDGE_HIT_POS_LAYER, SECTOR_EDGE_HIT_NEG_LAYER,
-      SECTOR_DEMARCATION_HIT_LAYER,
       'osid-control-fill'].filter(id => !!map.getLayer(id));
 
     const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
@@ -498,7 +493,6 @@ export function useMapInteractions(
       first.layer.id.includes('front-edges')
       || first.layer.id.startsWith('sector-edge-glow-')
       || first.layer.id.startsWith('sector-edge-hit-')
-      || first.layer.id === SECTOR_DEMARCATION_HIT_LAYER
     ) {
       onContextMenu('front', props, point);
     } else {
@@ -518,7 +512,6 @@ export function useMapInteractions(
   const frontEdgeHighlightLayers = ['front-edges-highlight-pos', 'front-edges-highlight-neg'];
   const sectorGlowLayers = [SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER];
   const sectorHitLayers = [SECTOR_EDGE_HIT_POS_LAYER, SECTOR_EDGE_HIT_NEG_LAYER];
-  const sectorDemarcationHitLayers = [SECTOR_DEMARCATION_HIT_LAYER];
   safeOn('mousemove', 'osid-control-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
   safeOn('click', 'sector-fill', handleOsidClick);
@@ -548,10 +541,6 @@ export function useMapInteractions(
   }
 
   for (const layerId of sectorHitLayers) {
-    safeOn('click', layerId, handleFrontEdgeClick);
-  }
-
-  for (const layerId of sectorDemarcationHitLayers) {
     safeOn('click', layerId, handleFrontEdgeClick);
   }
 
@@ -605,9 +594,6 @@ export function useMapInteractions(
       safeOff('click', layerId, handleFrontEdgeClick);
     }
     for (const layerId of sectorHitLayers) {
-      safeOff('click', layerId, handleFrontEdgeClick);
-    }
-    for (const layerId of sectorDemarcationHitLayers) {
       safeOff('click', layerId, handleFrontEdgeClick);
     }
     setHoverHighlight(null, null);

@@ -24,7 +24,6 @@ import { buildOperationalWeightGeoJSON } from './builders/buildOperationalWeight
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
-import { buildSectorDemarcationGeoJSON } from './builders/buildSectorDemarcationGeoJSON';
 import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSON } from './builders/buildOperationTargetIconsGeoJSON';
 import { buildOperationArrowsGeoJSON } from './builders/buildOperationArrowsGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
@@ -170,7 +169,6 @@ import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../sh
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
   INTERACTION_HITBOX_OPACITY,
-  SECTOR_DEMARCATION_HITBOX_WIDTHS,
   toZoomWidthExpression,
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
@@ -271,8 +269,6 @@ const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
 const SECTOR_BRIGADE_RINGS_LAYER_ID = 'sector-brigade-rings';
 const SECTOR_UNIT_PULSE_LAYER_ID = 'sector-unit-pulse';
-const SECTOR_DEMARCATION_SOURCE_ID = 'sector-demarcation';
-const SECTOR_DEMARCATION_LAYER_ID = 'sector-demarcation-lines';
 const OP_TARGET_POLYGON_SOURCE_ID = 'operation-target-polygons';
 const OP_TARGET_POINT_SOURCE_ID = 'operation-target-points';
 const OP_TARGET_CROSSHAIR_SOURCE_ID = 'operation-target-crosshairs';
@@ -1286,73 +1282,6 @@ export function MapContainer() {
                 );
               } else {
                 (m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID) as GeoJSONSource).setData(frontEdgesHoverData);
-              }
-
-              // Sector demarcation lines: dashed lines showing boundaries between sectors of the same faction
-              if (state.corpsFrontSectors && state.corpsFrontSectors!.length > 0) {
-                const demarcData = buildSectorDemarcationGeoJSON(controlledGeoJson, state.corpsFrontSectors!, frontEdgesOsid!);
-                if (!m2.getSource(SECTOR_DEMARCATION_SOURCE_ID)) {
-                  m2.addSource(SECTOR_DEMARCATION_SOURCE_ID, { type: 'geojson', data: demarcData });
-                  // Dark base line (like front-line pattern: dark base + lighter dash on top)
-                  m2.addLayer(
-                    {
-                      id: SECTOR_DEMARCATION_LAYER_ID,
-                      type: 'line',
-                      source: SECTOR_DEMARCATION_SOURCE_ID,
-                      paint: {
-                        'line-color': [
-                          'match', ['get', 'faction'],
-                          'RS', 'rgba(100, 30,  30,  0.7)',
-                          'RBiH', 'rgba(30,  80,  40,  0.7)',
-                          'HRHB', 'rgba(30,  60,  110, 0.7)',
-                          'rgba(60, 60, 70, 0.5)',
-                        ],
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.2, 10, 2.0, 14, 3.0],
-                        'line-opacity': 0.6,
-                      },
-                      layout: { 'line-cap': 'round', 'line-join': 'round' },
-                    },
-                    'faction-border-glow-pos'
-                  );
-                  // Lighter dash stripe on top
-                  m2.addLayer(
-                    {
-                      id: SECTOR_DEMARCATION_LAYER_ID + '-stripe',
-                      type: 'line',
-                      source: SECTOR_DEMARCATION_SOURCE_ID,
-                      paint: {
-                        'line-color': [
-                          'match', ['get', 'faction'],
-                          'RS', 'rgba(200, 120, 120, 0.8)',
-                          'RBiH', 'rgba(120, 200, 130, 0.8)',
-                          'HRHB', 'rgba(120, 160, 220, 0.8)',
-                          'rgba(160, 160, 170, 0.6)',
-                        ],
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 10, 0.8, 14, 1.2],
-                        'line-dasharray': [4, 3],
-                        'line-opacity': 0.7,
-                      },
-                      layout: { 'line-cap': 'butt', 'line-join': 'round' },
-                    },
-                    'faction-border-glow-pos'
-                  );
-                  // Invisible wide hit-target layer for easier click/hover on sector demarcation
-                  m2.addLayer(
-                    {
-                      id: SECTOR_DEMARCATION_LAYER_ID + '-hit',
-                      type: 'line',
-                      source: SECTOR_DEMARCATION_SOURCE_ID,
-                      paint: {
-                        'line-width': toZoomWidthExpression(SECTOR_DEMARCATION_HITBOX_WIDTHS),
-                        'line-opacity': INTERACTION_HITBOX_OPACITY,
-                      },
-                      layout: { 'line-cap': 'round', 'line-join': 'round' },
-                    },
-                    'faction-border-glow-pos'
-                  );
-                } else {
-                  (m2.getSource(SECTOR_DEMARCATION_SOURCE_ID) as GeoJSONSource).setData(demarcData);
-                }
               }
 
               const nextInteractionSignature = getDynamicInteractionLayerSignature(m2);
@@ -2748,16 +2677,6 @@ export function MapContainer() {
       FRONT_LAYER_IDS.forEach((id) => {
         if (!safeSetLayoutVisibility(map, id, effectiveFrontsVisible)) allExist = false;
       });
-      // Sector demarcation lines: visible when a corps is selected (sectorsVisible).
-      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID)) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID, sectorsVisible);
-      }
-      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe')) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-stripe', sectorsVisible);
-      }
-      if (safeHasLayer(map, SECTOR_DEMARCATION_LAYER_ID + '-hit')) {
-        safeSetLayoutVisibility(map, SECTOR_DEMARCATION_LAYER_ID + '-hit', sectorsVisible);
-      }
       if (!safeSetLayoutVisibility(
         map,
         FORMATION_MARKERS_LAYER_ID,

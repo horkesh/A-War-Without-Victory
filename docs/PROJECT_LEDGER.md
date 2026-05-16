@@ -4770,3 +4770,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Windows installer creation is locally proven. Clean-VM Windows validation remains operator-only: SmartScreen UX, Settings -> Apps entry/version, `%APPDATA%` persistence/uninstall behavior, uninstaller registry entries, and first-run playtest on a real target VM.
 
 **Report:** `docs/40_reports/implemented/20260516_WIN_NSIS_PACKAGE_BUILD.md`
+
+---
+
+## [2026-05-16] fix(ui): remove tactical map sector demarcation overlay
+
+**Type:** Tactical map UI/render cleanup. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Removed the same-faction lateral sector demarcation overlay from the tactical map. `MapContainer.tsx` no longer creates the `sector-demarcation` source or `sector-demarcation-lines*` layers, `useMapInteractions.ts` no longer registers demarcation hit layers, the demarcation builder/test were deleted, and shared hitbox constants now cover only retained front-surface hitboxes. Added a regression guard that prevents rematerializing the demarcation source/layers in `MapContainer.tsx`.
+
+**Determinism:** UI-only removal. No timestamps, randomness, unstable ordering, scenario state, save state, persisted output, or generated run artifact is affected.
+
+**Verification:** Red first: `npx.cmd vitest run tests\dynamic_interaction_layers.test.ts tests\ui_map_no_sector_demarcation_overlay.test.ts` failed before implementation because `MapContainer.tsx` still contained `sector-demarcation`. Green focused: `npx.cmd vitest run tests\dynamic_interaction_layers.test.ts tests\ui_map_no_sector_demarcation_overlay.test.ts tests\ui_map_interactions.test.ts tests\map_interaction_hitbox_contract.test.ts` passed 24/24. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external warnings. `npx.cmd vitest run tests\docs_desktop_v09_truth.test.ts` passed 6/6. `git diff --check` reported only existing CRLF normalization warnings.
+
+**Docs:** Updated `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, and `docs/60_visualisations/strategic_design_terrain_map_ux.html`.
+
+**Report:** `docs/40_reports/implemented/20260516_REMOVE_SECTOR_DEMARCATION_OVERLAY.md`

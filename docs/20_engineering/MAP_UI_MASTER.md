@@ -4,8 +4,8 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-04-03
-**Dev/live mode (2026-03-10):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`); lateral demarcation hidden. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
+**Last updated:** 2026-05-16
+**Dev/live mode (2026-03-10; demarcation removal 2026-05-16):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`). Lateral same-faction sector demarcation lines are removed from the tactical map entirely; sector readability is carried by front edges, selected-sector fill/glow, and brigade rings. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,
@@ -48,7 +48,6 @@ src/ui/map/
 │       ├── buildFormationsGeoJSON.ts           Formation Point markers at OSID centroids
 │       ├── buildOrderArrowsGeoJSON.ts          Attack/move arrow LineStrings
 │       ├── buildCorpsFrontLinesGeoJSON.ts      Corps-colored front lines (glow + tooth edge)
-│       ├── buildSectorDemarcationGeoJSON.ts    Lateral boundaries between same-faction sectors
 │       ├── buildFrontEdgesHoverGeoJSON.ts      Per-segment offset features for asymmetric hover/click
 │       ├── buildOperationTargetIconsGeoJSON.ts Op objective markers: points + crosshairs
 │       ├── formationIconId.ts                  Icon ID string from kind + faction
@@ -336,7 +335,7 @@ Layer toggles (no keys):
 | Fronts | `frontsVisible` | faction-border-glow-pos/neg, front-line-base, front-line-stripe |
 | Units | `formationsVisible` | formation-markers |
 | Labels | `labelsVisible` | formation-labels (requires formationsVisible) |
-| Sectors | `sectorsVisible` | sector-fill, sector-demarcation, sector-glow-pos/neg, brigade-rings |
+| Sectors | `sectorsVisible` | sector-fill, sector-glow-pos/neg, brigade-rings |
 | Minimap | `minimapVisible` | Minimap component visibility |
 | Fog | `fogVisible` | fog-fill (AND-gated with player_faction + fogOfWar; no-op in observer mode) |
 | Battles | `battlesVisible` | battle-markers-pulse (white circles at recent combat flip OSIDs; opacity by age) |
@@ -589,7 +588,6 @@ interface MilitiaPoolView {
 | `buildFormationsGeoJSON` | state, controlledGeoJson | Point markers with `icon_id` | Unit symbols on map |
 | `buildOrderArrowsGeoJSON` | state, controlledGeoJson | LineString arrows | Attack/move orders |
 | `buildCorpsFrontLinesGeoJSON` | sectors, frontEdgesOsid | LineString front lines | Corps-colored front display |
-| `buildSectorDemarcationGeoJSON` | controlledGeoJson, sectors, frontEdgesOsid | LineString boundaries | Sector lateral boundaries |
 | `buildFrontEdgesHoverGeoJSON` | controlledGeoJson, frontEdgesOsid, sectors, centroids | 2× LineString per polygon boundary segment (per-segment offset) | Asymmetric click/hover hitboxes; each feature carries sector_id for filter-based highlighting |
 | `buildOperationTargetPointsGeoJSON` | centroidLookup, osids | Point features at OSID centroids | Op target ring + dot layers |
 | `buildOperationTargetCrosshairsGeoJSON` | centroidLookup, osids | LineString ± pairs per OSID | Op target crosshair layer |
@@ -603,18 +601,6 @@ interface MilitiaPoolView {
 (horizontal + vertical arms, ARM=0.038°), drawn around the centroid. Used by crosshair line layer.
 
 Both return `FeatureCollection` with `properties.osid` for debugging.
-
-### Sector Demarcation Detail
-
-`buildSectorDemarcationGeoJSON` finds lateral boundaries (lines between adjacent sectors of the
-**same faction** along the rear/lateral edge). It:
-
-1. Collects shared polygon edges from the controlled GeoJSON
-2. For each edge with exactly 2 OSID owners, looks up which sector each OSID belongs to
-3. Skips edges where the two sectors are from different factions (those are front lines)
-4. Groups segments by `(sector_a, sector_b)` pair
-5. Chains adjacent 2-point segments into continuous LineStrings using `chainSegments()`
-6. Emits one feature per chain with `{ faction, sector_a, sector_b }`
 
 ### Corps Front Lines Detail
 
@@ -654,8 +640,6 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 | Layer ID | Purpose |
 |----------|---------|
 | `sector-fill` | Per-sector translucent fill |
-| `sector-demarcation-lines` | Lateral sector boundary (dark base) — front-proximity filtered, Douglas-Peucker simplified |
-| `sector-demarcation-lines-stripe` | Sector boundary dash stripe (lighter, on top of base) |
 | `sector-glow-pos` / `sector-glow-neg` | Sector boundary glows |
 | `sector-brigade-rings` | Brigade position rings |
 

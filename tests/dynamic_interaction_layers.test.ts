@@ -22,7 +22,6 @@ describe('dynamic interaction layers', () => {
       'sector-edge-hit-neg',
       'front-edges-hover-pos',
       'front-edges-highlight-neg',
-      'sector-demarcation-lines-hit',
     ]);
 
     expect(getPresentDynamicInteractionLayerIds(map as never)).toEqual([
@@ -30,19 +29,17 @@ describe('dynamic interaction layers', () => {
       'front-edges-highlight-neg',
       'sector-edge-glow-pos',
       'sector-edge-hit-neg',
-      'sector-demarcation-lines-hit',
     ]);
   });
 
   it('produces a stable signature for the currently materialized interaction surface', () => {
     const map = createMockMap([
-      DYNAMIC_INTERACTION_LAYER_IDS[8],
       DYNAMIC_INTERACTION_LAYER_IDS[0],
       DYNAMIC_INTERACTION_LAYER_IDS[6],
     ]);
 
     expect(getDynamicInteractionLayerSignature(map as never)).toBe(
-      'front-edges-hover-pos|sector-edge-hit-pos|sector-demarcation-lines-hit',
+      'front-edges-hover-pos|sector-edge-hit-pos',
     );
   });
 

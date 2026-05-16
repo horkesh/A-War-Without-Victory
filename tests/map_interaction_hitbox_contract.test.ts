@@ -4,8 +4,6 @@ import {
   FRONT_SURFACE_HITBOX_WIDTHS,
   FRONT_SURFACE_VISIBLE_WIDTHS,
   INTERACTION_HITBOX_OPACITY,
-  SECTOR_DEMARCATION_HITBOX_WIDTHS,
-  SECTOR_DEMARCATION_VISIBLE_WIDTHS,
   toZoomWidthExpression,
 } from '../src/ui/map/map/interactionLayerConfig.js';
 
@@ -18,12 +16,6 @@ describe('map interaction hitbox contract', () => {
     expect(FRONT_SURFACE_HITBOX_WIDTHS.z6).toBeGreaterThan(FRONT_SURFACE_VISIBLE_WIDTHS.z6);
     expect(FRONT_SURFACE_HITBOX_WIDTHS.z10).toBeGreaterThan(FRONT_SURFACE_VISIBLE_WIDTHS.z10);
     expect(FRONT_SURFACE_HITBOX_WIDTHS.z14).toBeGreaterThan(FRONT_SURFACE_VISIBLE_WIDTHS.z14);
-  });
-
-  it('keeps demarcation hitboxes wider than the visible demarcation at every zoom stop', () => {
-    expect(SECTOR_DEMARCATION_HITBOX_WIDTHS.z6).toBeGreaterThan(SECTOR_DEMARCATION_VISIBLE_WIDTHS.z6);
-    expect(SECTOR_DEMARCATION_HITBOX_WIDTHS.z10).toBeGreaterThan(SECTOR_DEMARCATION_VISIBLE_WIDTHS.z10);
-    expect(SECTOR_DEMARCATION_HITBOX_WIDTHS.z14).toBeGreaterThan(SECTOR_DEMARCATION_VISIBLE_WIDTHS.z14);
   });
 
   it('serializes stable maplibre zoom expressions from the shared width config', () => {
