@@ -20,10 +20,15 @@ export interface GlassPanelProps {
 }
 
 const POSITION_CLASSES: Record<GlassPanelProps['position'], string> = {
-    left: 'fixed left-0 top-14 bottom-0',
-    right: 'fixed right-0 top-14 bottom-0',
+    left: 'fixed left-0',
+    right: 'fixed right-0',
     overlay: 'fixed inset-0 flex items-center justify-center',
     'bottom-tray': 'fixed bottom-0 left-0 right-0',
+};
+
+const SIDE_PANEL_FRAME_STYLE = {
+    top: 'var(--awwv-toolbar-clearance, 5.5rem)',
+    bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
 };
 
 export function GlassPanel({
@@ -91,7 +96,7 @@ export function GlassPanel({
         <div
             ref={panelRef}
             className={`${POSITION_CLASSES[position]} bg-panel-bg/90 backdrop-blur-md border-${position === 'left' ? 'r' : 'l'} border-[rgba(180,160,130,0.15)] shadow-xl overflow-hidden animate-fadeIn ${className}`}
-            style={{ zIndex, width }}
+            style={{ zIndex, width, ...SIDE_PANEL_FRAME_STYLE }}
         >
             <PanelHeader title={title} onClose={onClose} />
             <div className="overflow-y-auto px-2.5 py-2" style={{ height: 'calc(100% - 38px)' }}>

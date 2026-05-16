@@ -3,6 +3,7 @@ import { getFactionFlag, getArmyName } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { Icon } from './icons/Icon';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -91,7 +92,8 @@ export function SidePickerOverlay({
               onClick={() => document.getElementById('map-file-input')?.click()}
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded border border-dashed border-panel-border bg-panel-bg hover:bg-panel-hover text-text-secondary hover:text-interactive transition-all text-xs uppercase tracking-wider font-semibold"
             >
-              <span>📂 Load Save from Disk</span>
+              <Icon name="locked" size={13} />
+              <span>Load Save from Disk</span>
             </button>
             <button
               type="button"
@@ -99,7 +101,8 @@ export function SidePickerOverlay({
               onClick={() => (window as any).handleContinueLastRun?.()}
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 mt-2 rounded border border-interactive/30 bg-interactive/10 hover:bg-interactive/20 text-interactive transition-all text-xs uppercase tracking-wider font-semibold"
             >
-              <span>🔄 Continue (Last Run)</span>
+              <Icon name="transit" size={13} />
+              <span>Continue (Last Run)</span>
             </button>
           </div>
         </div>

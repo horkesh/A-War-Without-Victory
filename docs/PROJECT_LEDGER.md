@@ -4862,3 +4862,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Starts the broader AAA-style tactical-shell coherence pass requested during live playtest. Remaining UI polish includes replacing remaining hard-coded offsets in ops planning/minimap/legend surfaces and auditing modal visual hierarchy.
 
 **Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
+
+---
+
+## [2026-05-16] fix(ui): remove first-screen emoji and align legacy side panels
+
+**Type:** Tactical shell / first-screen UI polish. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Replaced Side Picker load/continue emoji glyphs with the existing in-game `Icon` component so the first screen stays inside the wargame visual language. Updated `GlassPanel` left/right side-panel positioning to consume the shared tactical top and bottom frame clearance instead of hard-coded `top-14 bottom-0`, bringing legacy Event/Economy/Autonomy/AI side panels under the same shell contract as the primary panel rail.
+
+**Determinism:** UI-only chrome change. No sim state, save state, scenario output, random input, timestamp, or persisted artifact changed.
+
+**Verification:** `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\v093_a11y_lane_b_map_landmarks.test.ts` passed 12/12. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the side picker no longer renders the save/continue emoji glyphs. `git diff --check` reported only CRLF normalization warnings.
+
+**Roadmap delta:** Continues the tactical-shell AAA polish pass by removing first-contact tone breaks and extending the shared frame contract to legacy side panels.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`

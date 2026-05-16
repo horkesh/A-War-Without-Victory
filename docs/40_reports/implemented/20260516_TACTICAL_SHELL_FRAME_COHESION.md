@@ -18,6 +18,8 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - Made the primary right rail flush with the viewport edge.
 - Changed `FlipCard` so only the active face participates in normal layout; the inactive face is absolute and pointer-inert.
 - Raised War Begins to `Z.MODAL_HARD` so it blocks the full tactical shell.
+- Updated legacy left/right `GlassPanel` side panels to consume the same top/bottom frame variables.
+- Replaced Side Picker load/continue emoji glyphs with the existing in-game `Icon` component.
 - Added `tests/ui_shell_frame_contract.test.ts` to pin the frame and flip-card contracts.
 
 ## Verification
@@ -25,6 +27,7 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\ui\peace_war_transition.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\v093_a11y_lane_b_map_landmarks.test.ts` passed 16/16.
 - `npm.cmd run typecheck` passed.
 - Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed War Begins covers both rails, corps cards stack without hidden back-face gaps, and command/inbox rails align to the shared tactical frame.
+- Follow-up browser inspection confirmed the Side Picker no longer renders the save/continue emoji glyphs.
 - `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings.
 - `git diff --check` reported only CRLF normalization warnings.
 

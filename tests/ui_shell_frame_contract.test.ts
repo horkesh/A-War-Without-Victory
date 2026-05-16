@@ -10,6 +10,7 @@ describe('tactical shell frame contract', () => {
     const app = read('src/ui/map/App.tsx');
     const oob = read('src/ui/map/components/OOBSidebar.tsx');
     const panelRail = read('src/ui/map/components/panelRail.ts');
+    const glassPanel = read('src/ui/map/components/GlassPanel.tsx');
 
     expect(app).toContain("'--awwv-toolbar-clearance' as string");
     expect(app).toContain("'--awwv-bottom-bar-clearance' as string");
@@ -18,6 +19,10 @@ describe('tactical shell frame contract', () => {
     expect(oob).not.toContain('bottom-9');
     expect(panelRail).toContain("top: 'var(--awwv-toolbar-clearance, 5.5rem)'");
     expect(panelRail).toContain("bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)'");
+    expect(glassPanel).toContain('SIDE_PANEL_FRAME_STYLE');
+    expect(glassPanel).toContain("top: 'var(--awwv-toolbar-clearance, 5.5rem)'");
+    expect(glassPanel).toContain("bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)'");
+    expect(glassPanel).not.toContain('top-14 bottom-0');
   });
 
   it('keeps right rail panels flush with the viewport edge instead of floating off-grid', () => {
@@ -42,5 +47,14 @@ describe('tactical shell frame contract', () => {
 
     expect(transition).toContain('zIndex={Z.MODAL_HARD}');
     expect(transition).not.toContain('zIndex={Z.GLASS_PANEL_PEACE_WAR}');
+  });
+
+  it('keeps the faction picker in the wargame icon system instead of emoji glyphs', () => {
+    const sidePicker = read('src/ui/map/components/SidePickerOverlay.tsx');
+
+    expect(sidePicker).toContain("import { Icon } from './icons/Icon'");
+    expect(sidePicker).toContain('<Icon name="locked" size={13} />');
+    expect(sidePicker).toContain('<Icon name="transit" size={13} />');
+    expect(sidePicker).not.toMatch(/ð|📂|🔄/);
   });
 });
