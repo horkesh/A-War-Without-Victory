@@ -22,7 +22,6 @@
 | [Rulebook_v0_9_0.md](../10_canon/Rulebook_v0_9_0.md) | Player-facing rules |
 | [Game_Bible_v0_9_0.md](../10_canon/Game_Bible_v0_9_0.md) | Design philosophy |
 | [Phase_Specifications_v0_9_0.md](../10_canon/Phase_Specifications_v0_9_0.md) | Frozen phase specs |
-| [Peace_Specification_v0_6_0.md](../10_canon/Peace_Specification_v0_6_0.md) | Peace spec |
 | [War_Specification_v0_9_0.md](../10_canon/War_Specification_v0_9_0.md) | War spec |
 
 ## Engineering (docs/20_engineering/)
@@ -80,7 +79,7 @@
 
 ## Versioning
 
-See [docs/20_engineering/VERSIONING.md](../20_engineering/VERSIONING.md) for the game versioning system (MAJOR.MINOR.PATCH). Current: **v0.2.0** (Core Engine). Canon document versions (v0.6, v0.7) are independent of the game version.
+See [docs/20_engineering/VERSIONING.md](../20_engineering/VERSIONING.md) for the game versioning system (MAJOR.MINOR.PATCH). Current package version: **v0.9.6-alpha.1**. Canon document versions are independent of the game/package version; active canon is **v0.9.0**.
 
 ---
 

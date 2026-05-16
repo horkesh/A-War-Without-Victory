@@ -3,7 +3,7 @@
 **Status:** DESIGN SPEC (not implementation)
 **Author:** Game Designer
 **Date:** 2026-03-29
-**Canon refs:** Rulebook v0.7 SS6.4, SS7.1-7.3; Systems Manual v0.7 SS6.8, SS7.4, SS7.6
+**Canon refs:** `Rulebook_v0_9_0.md` §§6.4, 7.1-7.3; `Systems_Manual_v0_9_0.md` §§6.8, 7.4, 7.6
 
 ---
 
