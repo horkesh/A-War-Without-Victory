@@ -118,3 +118,9 @@
 - Aligned the command sidebar, right rail, legacy side panels, and bottom strip under shared shell clearances.
 - Fixed corps-card flip layout so hidden back faces no longer create large blank gaps, raised War Begins above side rails, replaced first-screen emoji glyphs with in-game icons, and brought AdvanceTurnModal into the dark command-shell palette.
 - Report: `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
+
+# 2026-05-16 - First-run inbox and HQ flow polish
+
+- Sequenced War Begins, tutorial, and first-turn orientation; routed Presidential Inbox situation cards into Army HQ BRIEFING; and moved the Chief of Staff report above Presidential Decision Room synthesis.
+- Filtered faction-owned event, proposal, reserve, and officer inbox cards to the current player faction.
+- Report: `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`

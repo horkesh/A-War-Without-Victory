@@ -4865,6 +4865,20 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 
 ---
 
+## [2026-05-16] fix(ui): filter presidential inbox action queues by player faction
+
+**Type:** Presidential Inbox read-model / product-loop fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** `deriveInboxItems(...)` now filters faction-owned event decisions, command proposals, reserve requests, and officer/personnel events to `state.player_faction` when source rows carry a faction. This prevents an RS run from surfacing ARBiH personnel/proposal work in the Presidential Inbox while preserving factionless/global rows such as peace plans and date/situation markers.
+
+**Determinism:** UI read-model filtering only. Existing queue order and priority sort are preserved after filtering. No random input, timestamp, generated artifact, persisted output, scenario state, or sim mutation changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\ui_shell_navigation.test.ts` passed 46/46.
+
+**Roadmap delta:** Continues product-loop cohesion by keeping the Presidential Inbox scoped to the current president's obligations instead of leaking other factions' staff work.
+
+**Report:** `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`
+
 ## [2026-05-16] fix(ui): remove first-screen emoji and align legacy side panels
 
 **Type:** Tactical shell / first-screen UI polish. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
@@ -4894,3 +4908,15 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Continues the tactical-shell AAA polish pass by removing a high-frequency modal tone break from the end-turn loop.
 
 **Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
+
+---
+
+## [2026-05-16] docs(gui): turn GUI polish findings into implementation plan
+
+**Type:** Documentation-only GUI implementation planning. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Added `docs/plans/2026-05-16-gui-polish-action-plan.md` and linked it from `docs/40_reports/GUI_POLISH_MASTER.md`. The plan turns the live GUI observations into ordered TDD work packages: paramilitary inbox surfacing and review routing, player-faction officer-event filtering, browser-dev turn-loop QA documentation, warroom no-state/hotspot affordances, AdvanceTurnModal verification, first-run sequence acceptance, final regression, and ledger/report closeout.
+
+**Determinism:** Documentation-only plan. No generated scenario artifact, runtime state, timestamped output, random input, or persisted simulation data changed.
+
+**Verification:** Read back the plan and report link. No code tests were run because this was a docs-only planning update.

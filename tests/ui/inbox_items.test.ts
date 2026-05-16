@@ -85,6 +85,69 @@ describe('deriveInboxItems — event decisions', () => {
         const eventItems = items.filter(i => i.type === 'event_decision');
         expect(eventItems).toHaveLength(2);
     });
+
+    it('filters faction-owned action queues to the player faction', () => {
+        const state = makeStub({
+            player_faction: 'RS',
+            pendingEventDecisions: [
+                { event_id: 'evt_rs', event_title: 'RS Crisis', turn_fired: 5, faction: 'RS', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+                { event_id: 'evt_rbih', event_title: 'RBiH Crisis', turn_fired: 5, faction: 'RBiH', response_options: [{ id: 'b', label: 'B', effects: [] }] },
+            ],
+            pendingProposalReviews: [
+                { id: 'PROP_rs', turn: 5, faction: 'RS', domain: 'ops', description: 'RS proposal' },
+                { id: 'PROP_rbih', turn: 5, faction: 'RBiH', domain: 'ops', description: 'RBiH proposal' },
+            ],
+            pendingReserveRequests: [
+                {
+                    request_id: 'reserve_rs', corps_id: 'drina_corps', faction: 'RS', reason: 'test',
+                    priority: 1, severityBand: 'routine' as const, travel_hops: 1, description: 'test',
+                    suggested_brigade_id: null, turn_requested: 5,
+                },
+                {
+                    request_id: 'reserve_rbih', corps_id: 'first_corps', faction: 'RBiH', reason: 'test',
+                    priority: 1, severityBand: 'routine' as const, travel_hops: 1, description: 'test',
+                    suggested_brigade_id: null, turn_requested: 5,
+                },
+            ],
+            pendingOfficerEvents: [
+                {
+                    event_id: 'off_rs',
+                    type: 'officer_available',
+                    faction: 'RS',
+                    turn: 5,
+                    officer_id: 'rs_officer',
+                    officer_name: 'RS Officer',
+                    officer_competence: 0.7,
+                    officer_aggressiveness: 0.6,
+                    officer_defensive_skill: 0.6,
+                    acknowledged: false,
+                },
+                {
+                    event_id: 'off_rbih',
+                    type: 'officer_available',
+                    faction: 'RBiH',
+                    turn: 5,
+                    officer_id: 'rbih_officer',
+                    officer_name: 'RBiH Officer',
+                    officer_competence: 0.7,
+                    officer_aggressiveness: 0.6,
+                    officer_defensive_skill: 0.6,
+                    acknowledged: false,
+                },
+            ],
+        });
+
+        const itemIds = deriveInboxItems(state, null).map(i => i.id);
+
+        expect(itemIds).toContain('event:evt_rs');
+        expect(itemIds).toContain('proposal:PROP_rs');
+        expect(itemIds).toContain('reserve:reserve_rs');
+        expect(itemIds).toContain('officer:off_rs');
+        expect(itemIds).not.toContain('event:evt_rbih');
+        expect(itemIds).not.toContain('proposal:PROP_rbih');
+        expect(itemIds).not.toContain('reserve:reserve_rbih');
+        expect(itemIds).not.toContain('officer:off_rbih');
+    });
 });
 
 // ---------------------------------------------------------------------------

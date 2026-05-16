@@ -465,6 +465,13 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - War Begins now covers side rails, first-screen actions use the in-game icon system, and the advance-turn confirmation uses the dark command-shell palette.
 - See `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
 
+## 2026-05-16 - First-run inbox and HQ flow polish
+
+- War Begins, tutorial, and first-turn orientation now sequence instead of stacking.
+- Presidential Inbox situation cards route to Army HQ BRIEFING, and faction-owned action cards are filtered to the current player faction.
+- Army HQ BRIEFING leads with the Chief of Staff report before Presidential Decision Room synthesis.
+- See `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`.
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.

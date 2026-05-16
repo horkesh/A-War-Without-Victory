@@ -28,6 +28,10 @@ export interface InboxItem {
     priority: number;
 }
 
+function matchesPlayerFaction(itemFaction: string | null | undefined, playerFaction: string | null | undefined): boolean {
+    return !playerFaction || !itemFaction || itemFaction === playerFaction;
+}
+
 function splitOpportunityDescription(description: string): { title: string; detail: string } {
     const trimmed = description.trim();
     if (!trimmed) return { title: 'Operation Opportunity', detail: 'ops proposal requires your review.' };
@@ -53,11 +57,13 @@ export function deriveInboxItems(
     if (!state) return [];
 
     const items: InboxItem[] = [];
+    const playerFaction = state.player_faction;
 
     // 1. Pending event decisions (BLOCKING — turn won't advance)
     const eventDecisions = state.pendingEventDecisions;
     if (eventDecisions) {
         for (const evt of eventDecisions) {
+            if (!matchesPlayerFaction(evt.faction, playerFaction)) continue;
             items.push({
                 id: `event:${evt.event_id}`,
                 type: 'event_decision',
@@ -88,6 +94,7 @@ export function deriveInboxItems(
     const proposals = state.pendingProposalReviews;
     if (proposals && proposals.length > 0) {
         for (const prop of proposals) {
+            if (!matchesPlayerFaction(prop.faction, playerFaction)) continue;
             if (isOperationOpportunityReview(prop)) {
                 const { title, detail } = splitOpportunityDescription(prop.description || '');
                 items.push({
@@ -117,6 +124,7 @@ export function deriveInboxItems(
     const reserveRequests = state.pendingReserveRequests;
     if (reserveRequests) {
         for (const req of reserveRequests) {
+            if (!matchesPlayerFaction(req.faction, playerFaction)) continue;
             const corpsName = req.corps_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? 'A corps';
             items.push({
                 id: `reserve:${req.request_id}`,
@@ -134,6 +142,7 @@ export function deriveInboxItems(
     const officerEvents = state.pendingOfficerEvents;
     if (officerEvents) {
         for (const evt of officerEvents) {
+            if (!matchesPlayerFaction(evt.faction, playerFaction)) continue;
             items.push({
                 id: `officer:${evt.event_id}`,
                 type: 'officer_event',
@@ -152,7 +161,6 @@ export function deriveInboxItems(
 
     // Territory changes from recent control events (current turn only)
     const recentEvents = (state.recentControlEvents ?? []).filter(e => e.turn === turn);
-    const playerFaction = state.player_faction;
     const losses = recentEvents.filter(e => e.from === playerFaction && e.to !== playerFaction);
     const gains = recentEvents.filter(e => e.to === playerFaction && e.from !== playerFaction);
     if (losses.length > 0) {
