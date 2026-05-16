@@ -4646,3 +4646,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The agent-actionable packet is closed or deferred in committed branches; remaining work is branch integration/review plus operator-only clean-VM/package proof and human/canon review where explicitly identified.
 
 **Report:** `docs/40_reports/audits/20260515_AUTONOMOUS_ROADMAP_EXECUTION_CLOSURE.md`
+
+---
+
+## [2026-05-15] docs(audit): classify force-quality fatigue trajectory deferment
+
+**Type:** Documentation-only force-quality trajectory lane classification. No engine behavior, scenario data, OOB, operation definitions, painted targets, sensitive-history surfaces, save schema, or serialization changed.
+
+**Change:** Added `docs/40_reports/audits/20260515_FORCE_QUALITY_TRAJECTORY_FATIGUE_DEFERMENT.md`, linked it from `docs/40_reports/README.md` and `docs/40_reports/CONSOLIDATED_BACKLOG.md`, and recorded the durable knowledge entry in `docs/PROJECT_LEDGER_KNOWLEDGE.md`. The report classifies fatigue/exhaustion as the remaining safe owner but defers code because the likely fixes are global fatigue-retention retunes requiring design sign-off.
+
+**Determinism:** Documentation-only. No runtime code, generated timestamps, randomness, unstable ordering, scenario artifacts, or serialized state changed.
+
+**Verification:** `git diff --check` passed for the intended documentation pathspecs, grep/link checks found the new report references, and the forbidden-path check found no operation-opportunity or FORAWWV changes. No 40w or 188w run was executed because no behavior changed.
+
+**Roadmap delta:** Next lane should be a focused fatigue/exhaustion residue design packet with red tests around `applyFatigueRecovery(...)`, then focused tests, 40w no-regression, and 188w only after 40w holds.
+
+**Report:** `docs/40_reports/audits/20260515_FORCE_QUALITY_TRAJECTORY_FATIGUE_DEFERMENT.md`
