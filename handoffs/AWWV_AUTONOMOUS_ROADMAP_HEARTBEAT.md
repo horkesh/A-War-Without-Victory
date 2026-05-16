@@ -1,13 +1,13 @@
 # AWWV Autonomous Roadmap Heartbeat
 
 - Current branch/worktree: `main` at `F:\A-War-Without-Victory`
-- Lane name: React Warroom dynamic board overlays
-- Files changed: `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `tests/warroom_shell_layer.test.ts`, GUI/Warroom/report index docs, project ledgers, root heartbeat.
-- Tests run and exact result: `npx.cmd vitest run tests\warroom_shell_layer.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_smoke.test.ts` passed 42/42. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?view=warroom&dev=1` confirmed the corkboard SVG map rendered with 2,086 projected map/frontline paths and the blue marker board read `1 Apr 1992`. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
+- Lane name: First-run inbox / Army HQ flow polish
+- Files changed: `src/ui/map/App.tsx`, `src/ui/map/components/PresidentialInbox.tsx`, `src/ui/map/components/PeaceWarTransition.tsx`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, `src/ui/map/data/inboxItems.ts`, focused UI tests, GUI/report index docs, project ledgers, root heartbeat.
+- Tests run and exact result: `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\first_turn_orientation.test.ts tests\ui\peace_war_transition.test.ts` passed 61/61. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `npx.cmd vitest run tests\docs_desktop_v09_truth.test.ts` passed 6/6. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed RBiH start shows War Begins alone, then tutorial, inbox situation cards are enabled, and clicking `Territory Lost` opens Army HQ with Daily Briefing before Presidential Decision Room. `git diff --check` reported only CRLF normalization warnings.
 - Scenario/run IDs and hashes: performance and formation lanes retained 40w hash `0cb626c032204372`; operation-opportunity proof used 40w `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0cb626c032204372` and 188w `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` hash `a0111273f26f907d`.
-- Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/WARROOM_MASTER.md`, `docs/40_reports/implemented/20260516_REACT_WARROOM_DYNAMIC_BOARD_OVERLAYS.md`.
-- Commit SHA: `134d4299` (`fix(ui): restore warroom board overlays`).
-- Next lane selected and why: continue the user's tactical/HQ UI inspection lane after this focused Warroom regression fix, with emphasis on remaining overlapping panels, hidden controls, HQ density around the floating crest, and disabled-action readability.
+- Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`.
+- Commit SHA: `87d72b11` (`fix(ui): polish first-run inbox and hq flow`).
+- Next lane selected and why: broader post-fix tactical/HQ/Warroom inspection requested by the user, with emphasis on remaining confusing openings, Presidential Inbox routing, overlapping panels, hidden controls, HQ density around the floating crest, and readability/polish opportunities.
 
 ## Lane Status
 
