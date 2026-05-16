@@ -112,3 +112,9 @@
 - Fixed IPC-less browser/dev tactical-map inspection by loading the baked April 1992 startup snapshot, guarding Node `process` access, and enabling tutorial progression without desktop IPC.
 - Rebuilt the top toolbar around the intentionally floating HQ crest, fixed the Summary modal blank state, defaulted the Corridor Heartbeat red/green path network off, and raised the layer popover above right-side panels.
 - Report: `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`
+
+# 2026-05-16 - Tactical shell frame cohesion
+
+- Aligned the command sidebar, right rail, legacy side panels, and bottom strip under shared shell clearances.
+- Fixed corps-card flip layout so hidden back faces no longer create large blank gaps, raised War Begins above side rails, replaced first-screen emoji glyphs with in-game icons, and brought AdvanceTurnModal into the dark command-shell palette.
+- Report: `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`

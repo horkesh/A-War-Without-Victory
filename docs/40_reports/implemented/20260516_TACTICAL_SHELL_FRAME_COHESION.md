@@ -20,6 +20,7 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - Raised War Begins to `Z.MODAL_HARD` so it blocks the full tactical shell.
 - Updated legacy left/right `GlassPanel` side panels to consume the same top/bottom frame variables.
 - Replaced Side Picker load/continue emoji glyphs with the existing in-game `Icon` component.
+- Restyled `AdvanceTurnModal` from the old light form palette to command-shell surfaces, status chips, and action buttons.
 - Added `tests/ui_shell_frame_contract.test.ts` to pin the frame and flip-card contracts.
 
 ## Verification
@@ -28,9 +29,10 @@ This slice addresses the visible "UI islands" problem in the tactical shell. The
 - `npm.cmd run typecheck` passed.
 - Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed War Begins covers both rails, corps cards stack without hidden back-face gaps, and command/inbox rails align to the shared tactical frame.
 - Follow-up browser inspection confirmed the Side Picker no longer renders the save/continue emoji glyphs.
+- `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\modal_migration.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts` passed 35/35 after the advance-turn modal palette pass.
 - `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings.
 - `git diff --check` reported only CRLF normalization warnings.
 
 ## Remaining Polish
 
-This does not finish the full AAA-style pass. Follow-up should audit remaining hard-coded offsets in ops planning, minimap, map legend, modal trays, and Warroom/tactical handoffs, then consolidate them under the same frame contract where appropriate.
+This does not finish the full AAA-style pass. Follow-up should audit remaining hard-coded offsets in ops planning, minimap, map legend, modal trays, and Warroom/tactical handoffs, then consolidate them under the same frame contract where appropriate. Browser/dev cannot trigger the real Electron-backed advance-turn path from the toolbar, so visual proof for that modal should be repeated in the packaged desktop app once Electron IPC is available.

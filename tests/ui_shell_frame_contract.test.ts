@@ -57,4 +57,16 @@ describe('tactical shell frame contract', () => {
     expect(sidePicker).toContain('<Icon name="transit" size={13} />');
     expect(sidePicker).not.toMatch(/ð|📂|🔄/);
   });
+  it('keeps the advance-turn confirmation in the dark command-shell palette', () => {
+    const advanceTurnModal = read('src/ui/map/components/warroom/AdvanceTurnModal.tsx');
+
+    expect(advanceTurnModal).toContain('bg-panel-bg/97');
+    expect(advanceTurnModal).toContain('bg-panel-card/70');
+    expect(advanceTurnModal).toContain('border-panel-border');
+    expect(advanceTurnModal).toContain('text-text-primary');
+    expect(advanceTurnModal).toContain('bg-accent-gold');
+    expect(advanceTurnModal).not.toMatch(/bg-(?:white|neutral-50|neutral-100|neutral-200|amber-100|green-600)/);
+    expect(advanceTurnModal).not.toMatch(/text-(?:neutral-900|neutral-950|neutral-800|neutral-700|amber-800)/);
+    expect(advanceTurnModal).not.toMatch(/border-(?:neutral-300|neutral-400)/);
+  });
 });

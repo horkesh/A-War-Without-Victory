@@ -458,6 +458,13 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - The layer popover now renders above right-side panels.
 - See `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`.
 
+## 2026-05-16 - Tactical shell frame cohesion
+
+- Command sidebar, right rail panels, legacy side panels, and bottom strip now share top/bottom frame clearances instead of independent offsets.
+- Corps cards no longer reserve blank space for hidden flip-card backs.
+- War Begins now covers side rails, first-screen actions use the in-game icon system, and the advance-turn confirmation uses the dark command-shell palette.
+- See `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.

@@ -1,13 +1,13 @@
 # AWWV Autonomous Roadmap Heartbeat
 
 - Current branch/worktree: `main` at `F:\A-War-Without-Victory`
-- Lane name: First-screen shell chrome and legacy side-panel frame polish
-- Files changed: `src/ui/map/components/GlassPanel.tsx`, `src/ui/map/components/SidePickerOverlay.tsx`, `tests/ui_shell_frame_contract.test.ts`, GUI/report index docs, project ledgers, root heartbeat.
-- Tests run and exact result: `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\v093_a11y_lane_b_map_landmarks.test.ts` passed 12/12. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed the side picker no longer renders the save/continue emoji glyphs. `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\docs_desktop_v09_truth.test.ts` passed 11/11. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
+- Lane name: Advance-turn modal command-shell palette polish
+- Files changed: `src/ui/map/components/warroom/AdvanceTurnModal.tsx`, `tests/ui_shell_frame_contract.test.ts`, GUI/report index docs, project ledgers, root heartbeat.
+- Tests run and exact result: `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\modal_migration.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts` passed 35/35. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` reached the live tactical shell, but the IPC-less browser path cannot open the real advance-turn confirmation from the toolbar.
 - Scenario/run IDs and hashes: performance and formation lanes retained 40w hash `0cb626c032204372`; operation-opportunity proof used 40w `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` hash `0cb626c032204372` and 188w `runs\apr1992_definitive_188w__210e69404d054959__w188_n1` hash `a0111273f26f907d`.
 - Ledger/report docs updated: `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`.
-- Commit SHA: `5a0d6a21` (`fix(ui): polish first-screen shell chrome`).
-- Next lane selected and why: continue the broader AAA-style UI inspection requested by the user. The next likely owner is high-frequency modal visual hierarchy, especially the light-themed Advance Turn modal and remaining hard-coded offsets in ops planning/minimap/legend surfaces.
+- Commit SHA: pending.
+- Next lane selected and why: continue the broader AAA-style UI inspection requested by the user. The next likely owner is remaining hard-coded offsets and visually detached surfaces in ops planning, minimap, map legend, modal trays, and Warroom/tactical handoffs.
 
 ## Lane Status
 

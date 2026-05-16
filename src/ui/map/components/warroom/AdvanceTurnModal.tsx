@@ -50,10 +50,10 @@ export interface AdvanceTurnModalProps {
 }
 
 function statusClass(status: PreAdvanceCommandReviewStatus): string {
-  if (status === 'blocked') return 'border-red-500 bg-red-50 text-red-700';
-  if (status === 'review') return 'border-amber-500 bg-amber-50 text-amber-700';
-  if (status === 'clear') return 'border-emerald-500 bg-emerald-50 text-emerald-700';
-  return 'border-neutral-300 bg-neutral-100 text-neutral-600';
+  if (status === 'blocked') return 'border-red-500/60 bg-red-950/40 text-red-300';
+  if (status === 'review') return 'border-amber-500/60 bg-amber-950/35 text-amber-300';
+  if (status === 'clear') return 'border-emerald-500/50 bg-emerald-950/30 text-emerald-300';
+  return 'border-panel-border bg-panel-card text-text-secondary';
 }
 
 function categoryLabel(category: PreAdvanceCommandReviewItem['category']): string {
@@ -68,9 +68,9 @@ function categoryLabel(category: PreAdvanceCommandReviewItem['category']): strin
 
 function MetricCell({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) {
   return (
-    <div className="min-w-0 border border-neutral-300 bg-white px-2 py-1.5">
-      <div className="truncate text-[8px] font-bold uppercase tracking-[0.14em] text-neutral-500">{label}</div>
-      <div className={`text-base font-bold tabular-nums ${urgent ? 'text-amber-700' : 'text-neutral-900'}`}>
+    <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
+      <div className="truncate text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{label}</div>
+      <div className={`text-base font-bold tabular-nums ${urgent ? 'text-amber-300' : 'text-text-primary'}`}>
         {value}
       </div>
     </div>
@@ -89,30 +89,30 @@ function ReviewItemRow({
   const canReview = item.navigationTarget.kind !== 'none';
 
   return (
-    <div className="border border-neutral-300 bg-white px-2 py-1.5">
+    <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
       <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="border border-neutral-300 bg-neutral-100 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-neutral-600">
+            <span className="border border-panel-border/70 bg-panel-bg/70 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-secondary">
               {categoryLabel(item.category)}
             </span>
-            <span className="border border-neutral-300 bg-neutral-50 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-neutral-500">
+            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
               {item.severity}
             </span>
           </div>
-          <div className="mt-1 truncate text-[11px] font-bold text-neutral-900">{item.title}</div>
-          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-neutral-600">{item.explanation}</div>
+          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{item.title}</div>
+          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-text-secondary">{item.explanation}</div>
         </div>
         <div className="shrink-0 text-right">
           <button
             type="button"
             onClick={() => onReview(item)}
             disabled={disabled || !canReview}
-            className="border border-amber-500 bg-amber-100 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-800 transition-colors hover:bg-amber-200 disabled:cursor-default disabled:border-neutral-300 disabled:bg-neutral-100 disabled:text-neutral-400"
+            className="border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
           >
             {item.actionLabel}
           </button>
-          <div className="mt-1 max-w-[8rem] truncate text-[8px] uppercase tracking-[0.1em] text-neutral-400">
+          <div className="mt-1 max-w-[8rem] truncate text-[8px] uppercase tracking-[0.1em] text-text-muted">
             {item.sourceOwner}
           </div>
         </div>
@@ -271,16 +271,16 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
       closeOnBackdropClick={false}
       ariaLabelledBy="advance-turn-title"
       backdropClassName="bg-black/65 px-4"
-      panelClassName="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border-2 border-neutral-400 bg-neutral-50 shadow-xl"
+      panelClassName="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto border border-panel-border bg-panel-bg/97 text-text-primary shadow-2xl backdrop-blur-md"
     >
       <>
-        <div className="border-b-2 border-neutral-300 bg-neutral-100 px-4 py-3">
+        <div className="border-b border-panel-border bg-panel-card/70 px-4 py-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <div id="advance-turn-title" className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              <div id="advance-turn-title" className="text-[10px] font-bold uppercase tracking-wider text-accent-gold">
                 End of Turn
               </div>
-              <div className="mt-0.5 text-sm font-bold text-neutral-950">Advance to next turn?</div>
+              <div className="mt-0.5 text-sm font-bold text-text-primary">Advance to next turn?</div>
             </div>
             <div className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
               {review.headline}
@@ -289,12 +289,12 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
         </div>
 
         <div className="space-y-3 px-4 py-3">
-          <div className="text-[11px] leading-snug text-neutral-600">
+          <div className="text-[11px] leading-snug text-text-secondary">
             All pending orders will be processed. This cannot be undone.
           </div>
 
           <section>
-            <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-neutral-500">
+            <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-text-muted">
               Review Before Advance
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -307,7 +307,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
 
           <section className="space-y-1.5">
             {review.items.length === 0 ? (
-              <div className="border border-neutral-300 bg-white px-2 py-2 text-[11px] text-neutral-600">
+              <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-[11px] text-text-secondary">
                 No live desk item will be buried by the next turn.
               </div>
             ) : review.items.map((item) => (
@@ -332,12 +332,12 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 border-t-2 border-neutral-300 bg-neutral-100 px-4 py-3">
+        <div className="flex flex-wrap gap-2 border-t border-panel-border bg-panel-card/70 px-4 py-3">
           <button
             type="button"
             onClick={() => void handleConfirm()}
             disabled={advancing}
-            className="border border-green-700 bg-green-600 px-3 py-1.5 text-[10px] font-bold uppercase text-white transition-colors hover:bg-green-700 disabled:opacity-50"
+            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-[10px] font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:opacity-50"
           >
             {advancing ? 'Advancing...' : 'Advance Turn'}
           </button>
@@ -346,7 +346,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
               type="button"
               onClick={handleReviewPriorities}
               disabled={advancing}
-              className="border border-amber-500 bg-amber-100 px-3 py-1.5 text-[10px] font-bold uppercase text-amber-800 transition-colors hover:bg-amber-200 disabled:opacity-50"
+              className="border border-amber-400/35 bg-amber-400/10 px-3 py-1.5 text-[10px] font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:opacity-50"
             >
               Review Priorities
             </button>
@@ -355,7 +355,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
             type="button"
             onClick={handleCancel}
             disabled={advancing}
-            className="border border-neutral-400 bg-neutral-200 px-3 py-1.5 text-[10px] font-bold uppercase text-neutral-800 transition-colors hover:bg-neutral-300 disabled:opacity-50"
+            className="border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-[10px] font-bold uppercase text-text-secondary transition-colors hover:bg-panel-hover hover:text-text-primary disabled:opacity-50"
           >
             Cancel
           </button>

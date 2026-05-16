@@ -4878,3 +4878,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Continues the tactical-shell AAA polish pass by removing first-contact tone breaks and extending the shared frame contract to legacy side panels.
 
 **Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
+
+---
+
+## [2026-05-16] fix(ui): bring advance-turn confirmation into shell palette
+
+**Type:** Tactical shell modal visual-polish fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** `AdvanceTurnModal` now uses the dark command-shell palette instead of the old light form palette. The modal panel, header/footer, review metrics, review rows, status chip, and action buttons now use shell tokens (`bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-*`, `bg-accent-gold`) and avoid white/neutral card surfaces that visually broke from the tactical frame.
+
+**Determinism:** UI styling only. No scenario state, sim state, save state, generated artifact, random input, timestamp, or persisted output changed.
+
+**Verification:** `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\modal_migration.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts` passed 35/35. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk warnings. Live browser inspection was attempted on `http://127.0.0.1:3002/index.html?dev=1`; the IPC-less browser path cannot open the real advance-turn confirmation from the toolbar, so verification is source-contract plus build/type/a11y.
+
+**Roadmap delta:** Continues the tactical-shell AAA polish pass by removing a high-frequency modal tone break from the end-turn loop.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`
