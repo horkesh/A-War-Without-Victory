@@ -1,5 +1,12 @@
 # AWWV Calibration Master Reference
 
+## n1840 formation-life active-never-fights classification (2026-05-15)
+
+- **40w retained run. Hash: `0cb626c032204372`. `diagnose_run.cjs`: 0 errors / 29 warnings. `validate_run_consistency.cjs`: PASS.**
+- `brigade_never_fights` was detector-split without behavior change: loan=3, operation_participant=4, sector_front=61, sector_reserve=3, sector_rear=7.
+- Calibration implication: do not tune global combat, personnel, reconstitution, HRHB/HVO gates, or formation lifecycle from the blended aggregate. The next behavior packet should trace the 61 `sector_front` cases against pressure, stance, objective selection, and target scoring.
+- Report: `docs/40_reports/implemented/20260515_ACTIVE_NEVER_FIGHTS_INTERPRETATION.md`.
+
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
 **Updated:** 2026-05-10 (post-force-quality reassessment on n1768 40w + n1741 188w artifacts)
 
