@@ -18,6 +18,20 @@
 
 ---
 
+## [2026-05-16] fix(desktop): unblock tutorial overlay buttons
+
+**Scope:** Desktop tutorial IPC state-broadcast path.
+
+**Fix:** `tutorial:dismiss`, `tutorial:advance-step`, and `tutorial:restart` now call `writeCanonicalCurrentState(sim, state)` instead of excluding `event.sender`. The prior code wrote canonical `meta.tutorial_state` but withheld the `game-state-updated` broadcast from the renderer that clicked `Next` or `Skip Tutorial`; because tutorial IPC responses do not return `stateJson`, the overlay stayed on step 1.
+
+**Validation:** `npx.cmd vitest run tests\tutorial_onboarding_skeleton.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\v092_tutorial_lane_b_auto_dismiss.test.ts` passed 17/17. `node --check src\desktop\electron-main.cjs` passed. `npm.cmd run typecheck` passed. `git diff --check` passed with CRLF warnings only.
+
+**Canon posture:** Desktop UI delivery fix only. No gameplay rule, scenario data, save schema, turn ordering, random source, or scenario output changed.
+
+**Docs:** Added `docs/40_reports/implemented/20260516_TUTORIAL_OVERLAY_IPC_BROADCAST_FIX.md`.
+
+---
+
 ## [2026-05-15] perf(bot-orders): split overstack redistribution profile
 
 **Scope:** Default-off CPU attribution inside the hot `sectorMarch.overstackRedistribution` bucket.

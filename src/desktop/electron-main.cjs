@@ -3037,9 +3037,11 @@ app.whenReady().then(() => {
   // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
   //
   // Single-owner: these handlers are the only writers of `meta.tutorial_state`.
-  // Both go through readCanonicalCurrentState / writeCanonicalCurrentState so
+  // All go through readCanonicalCurrentState / writeCanonicalCurrentState so
   // the tutorial state round-trips through the canonical serializer (matches
   // desktop_persistence_contract).
+  // The originating renderer must receive the broadcast: the overlay reads
+  // store state and tutorial IPC responses do not carry stateJson payloads.
   //
   // Determinism: completed_steps is appended-in-call-order; no clock, no
   // sorting. Idempotent — a duplicate advance-step request is a no-op.
@@ -3054,7 +3056,7 @@ app.whenReady().then(() => {
       current_step: prior.current_step,
       completed_steps: Array.isArray(prior.completed_steps) ? prior.completed_steps.slice() : [],
     };
-    writeCanonicalCurrentState(sim, state, event.sender);
+    writeCanonicalCurrentState(sim, state);
     return { ok: true };
   });
 
@@ -3078,7 +3080,7 @@ app.whenReady().then(() => {
       current_step: stepId,
       completed_steps: completed,
     };
-    writeCanonicalCurrentState(sim, state, event.sender);
+    writeCanonicalCurrentState(sim, state);
     return { ok: true };
   });
 
@@ -3095,7 +3097,7 @@ app.whenReady().then(() => {
       current_step: undefined,
       completed_steps: [],
     };
-    writeCanonicalCurrentState(sim, state, event.sender);
+    writeCanonicalCurrentState(sim, state);
     return { ok: true };
   });
 

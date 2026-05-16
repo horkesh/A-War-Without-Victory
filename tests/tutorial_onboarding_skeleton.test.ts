@@ -17,6 +17,8 @@
  * Determinism: no clock, no Math.random, pure synchronous mutation.
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { StateMeta } from '../src/state/game_state.js';
 
@@ -151,5 +153,16 @@ describe('LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON tutorial state', (
         // Save/load through advance preserves the order.
         const reloaded = jsonRoundTrip(replay.tutorial_state);
         expect(reloaded?.completed_steps).toEqual(['welcome', 'the_map', 'first_turn']);
+    });
+
+    it('T4 - tutorial IPC broadcasts state updates back to the clicking renderer', () => {
+        const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf-8');
+        const tutorialBlock = source.slice(
+            source.indexOf("ipcMain.handle('tutorial:dismiss'"),
+            source.indexOf('// Start the tactical map HTTP server'),
+        );
+
+        expect(tutorialBlock).toContain('writeCanonicalCurrentState(sim, state);');
+        expect(tutorialBlock).not.toContain('writeCanonicalCurrentState(sim, state, event.sender);');
     });
 });
