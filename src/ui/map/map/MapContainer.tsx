@@ -162,9 +162,10 @@ const REFUGEE_COLUMN_FEATURE_FLAG = true;
  * time-keyed pulses; `period_ms` is retained on each datum for a future
  * TripsLayer / shader follow-on.
  *
- * Flip back to false only if a regression is detected on the live map.
+ * Disabled after live UI review: the red/green path network added visual
+ * noise and was too easy to mistake for player-issued orders.
  */
-const CORRIDOR_HEARTBEAT_FEATURE_FLAG = true;
+const CORRIDOR_HEARTBEAT_FEATURE_FLAG = false;
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,

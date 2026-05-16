@@ -756,7 +756,7 @@ function App() {
             }
             : null}
           pressureWarning={loadedGameState?.pressureWarning ?? false}
-          onOpenSummary={openSummary}
+          onOpenSummary={() => openSummary()}
           onOpenRecords={() => openArmyHQRecords('aar')}
           onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
           onOpenCodex={() => openCodex(useGameStore.getState())}

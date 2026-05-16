@@ -98,3 +98,9 @@
 - Warroom `FactionOverviewPanel` no longer renders detailed formations, officer rosters, or commander reassignment.
 - Warroom now summarizes command-shell posture and explicitly hands detailed command review back to Army HQ via the desk map.
 - Report: `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`
+
+# 2026-05-16 - Tactical React shell audit and polish
+
+- Fixed IPC-less browser/dev tactical-map inspection by loading the baked April 1992 startup snapshot, guarding Node `process` access, and enabling tutorial progression without desktop IPC.
+- Rebuilt the top toolbar around the intentionally floating HQ crest, fixed the Summary modal blank state, defaulted the Corridor Heartbeat red/green path network off, and raised the layer popover above right-side panels.
+- Report: `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`

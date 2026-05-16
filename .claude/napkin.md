@@ -988,6 +988,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `issuePostOperationReturnMarches()` in `sector_offensive.ts`. Fires at recovery completion for ALL participants outside home municipality (no distance threshold). Orders consumed by `osid-column-movement` (step 496) next turn. Existing `return-displaced-brigades` (step 608) only catches >3 hops + runs every 4 turns. Pipeline order: step 496 osid-column-movement → step 517 apply-brigade-movement → step 608 return-displaced → step 708 advance-sector-offensives. Column-stance orders from step 708 survive to next turn's step 496.
 
 ## GUI / HoI Map
+1. **[2026-05-16] Browser/dev UI must use real startup state and wrapped semantic callbacks**
+   Do instead: For local React-shell inspection without IPC, load the baked April 1992 startup snapshot rather than hollow mock state; keep tutorial preview controls locally functional. When a handler accepts a semantic argument such as `SummaryFocusSection`, wrap React event props with `() => handler()` so click events do not become domain values. Keep default visual overlays off unless their player meaning is obvious or explicitly legended.
 1. **[2026-04-01] Fog is not enough - player-facing state must be filtered before render**
    Do instead: Treat desktop / tactical-map player knowledge as a data-boundary contract. Do not ship near-full GameState to the renderer and trust fog or panel discipline to hide it later. Raw ids like `arbih_3rd_corps`, raw sector ids, and enemy/internal ops belong only in explicit debug surfaces.
 2. **[2026-04-02] PresidentialToolbar is the live shell; Army HQ RECORDS owns history**

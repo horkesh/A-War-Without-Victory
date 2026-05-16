@@ -14,6 +14,7 @@ import { advanceTurnAndSync } from '../desktop/orderActions';
 import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import { formatTurnLabel } from '../utils/formatters';
 import { getFactionCrest } from '../utils/factionAssets';
+import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { OfficerEventBadge } from './OfficerEventBadge';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 
@@ -228,7 +229,7 @@ export function TopToolbar({
             Warroom Console
           </span>
           <span className="font-mono text-[8px] text-text-secondary uppercase tracking-[0.24em] opacity-60 leading-tight">
-            A War Without Victory v0.6.1
+            A War Without Victory {AWWV_APP_VERSION}
           </span>
         </div>
         {devMode && (

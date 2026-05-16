@@ -221,12 +221,12 @@ export function PresidentialToolbar({
             {/* Toolbar bar — LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1 spotlight target for step 03_brief. */}
             <div
                 data-tutorial-step="presidential-toolbar"
-                className="fixed top-0 left-0 right-0 flex items-center justify-between h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
+                className="fixed top-0 left-0 right-0 grid grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)] items-center h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
                 style={{ zIndex: Z.TOOLBAR }}
             >
 
                 {/* LEFT: Date */}
-                <div className="flex items-center gap-3 min-w-[180px]">
+                <div className="col-start-1 flex items-center gap-2 min-w-0 pr-2 justify-start">
                     {showWarroomReturn && (
                         <button
                             onClick={() => {
@@ -266,7 +266,7 @@ export function PresidentialToolbar({
                             DEV
                         </span>
                     )}
-                    <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                    <div className="flex items-center gap-1 border-l border-white/10 pl-2">
                         <button
                             onClick={onOpenSummary}
                             disabled={!loadedGameState}
@@ -291,6 +291,15 @@ export function PresidentialToolbar({
                         >
                             OPS
                         </button>
+                    </div>
+                </div>
+
+                {/* CENTER: reserved for the floating crest. */}
+                <div className="col-start-2 row-start-1 h-full pointer-events-none" aria-hidden="true" />
+
+                {/* RIGHT: Reference, alert badges, command authority, advance turn. */}
+                <div className="col-start-3 row-start-1 flex items-center justify-end gap-3 min-w-0">
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={onOpenEventLog}
                             disabled={!loadedGameState}
@@ -308,10 +317,6 @@ export function PresidentialToolbar({
                             CODEX
                         </button>
                     </div>
-                </div>
-
-                {/* CENTER: Alert badges (crest is separate floating element below) */}
-                <div className="flex items-center gap-4">
                     {/*
                       NIGHTSHIFT-G5: Pre-Advance Severity Pip.
                       The InboxBadge surfaces inboxItems count/severity. The ring
@@ -381,9 +386,6 @@ export function PresidentialToolbar({
                         </button>
                     )}
 
-                    {/* Spacer for crest area */}
-                    <div className="w-24" />
-
                     {/* Right alert: Pressure warning */}
                     {pressureWarning && (
                         <button
@@ -394,10 +396,7 @@ export function PresidentialToolbar({
                             TENSIONS RISING
                         </button>
                     )}
-                </div>
-
-                {/* RIGHT: Command Authority + Advance Turn */}
-                <div className="flex items-center gap-3 min-w-[180px] justify-end">
+                    {/* Command Authority + Advance Turn */}
                     {loadedGameState?.commandAuthority && (
                         <CommandAuthorityGauge
                             current={loadedGameState.commandAuthority.current}

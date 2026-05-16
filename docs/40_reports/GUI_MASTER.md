@@ -436,6 +436,15 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Chronicle and ops-planning hover labels now stay on the player-safe geography/faction helpers too.
 - See `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`.
 
+## 2026-05-16 - Tactical React shell audit and polish
+
+- Browser/dev tactical-map startup now loads the baked April 1992 snapshot instead of an empty mock state, so live UI inspection reflects real formations and HQ data.
+- The floating HQ crest remains the central anchor; the presidential toolbar now reserves a center gap and places reference/inbox/advance controls to the right.
+- The top-level Summary modal no longer receives the React click event as a focus section, so its overview cards render correctly.
+- The Corridor Heartbeat red/green path network is default-off after live inspection showed it cluttered the map and read like orders.
+- The layer popover now renders above right-side panels.
+- See `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`.
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.

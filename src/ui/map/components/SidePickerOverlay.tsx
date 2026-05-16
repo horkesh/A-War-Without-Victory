@@ -1,5 +1,6 @@
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getFactionFlag, getArmyName } from '../utils/factionAssets';
+import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 
@@ -104,7 +105,7 @@ export function SidePickerOverlay({
         </div>
         <div className="px-4 py-3 border-t border-panel-border bg-panel-bg flex justify-between items-center">
           <div className="text-[10px] text-text-secondary italic">
-            v0.6.1
+            {AWWV_APP_VERSION}
           </div>
           <button
             type="button"

@@ -194,7 +194,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         // Positive guard: the instrumentation block MUST contain the
         // canonical hrtime.bigint() and env-flag patterns.
-        expect(/process\.hrtime\.bigint\s*\(/.test(region)).toBe(true);
+        expect(/(?:nodeProcess|process)!\.hrtime\.bigint\s*\(/.test(region)).toBe(true);
         expect(/PERF_PROFILE_SECTOR_PARTITION/.test(region)).toBe(true);
     });
 

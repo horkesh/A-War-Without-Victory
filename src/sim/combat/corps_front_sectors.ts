@@ -114,8 +114,10 @@ import * as _pathModule from 'node:path';
 //     vs flag-OFF runs (verified by tests/sector_partition_instrumentation.test.ts).
 // ═══════════════════════════════════════════════════════════════════════════
 
+const nodeProcess = (globalThis as { process?: NodeJS.Process }).process;
+
 const SECTOR_PARTITION_PERF_FLAG: boolean =
-    process.env.PERF_PROFILE_SECTOR_PARTITION === 'true';
+    nodeProcess?.env?.PERF_PROFILE_SECTOR_PARTITION === 'true';
 
 /** Returns true iff the sector-partition perf-profile flag is enabled for this process. */
 export function isSectorPartitionPerfEnabled(): boolean {
@@ -165,11 +167,11 @@ function _newInvocation(): SectorPartitionInvocationRecord {
 function _perfTime<T>(label: string, fn: () => T): T {
     if (!SECTOR_PARTITION_PERF_FLAG) return fn();
     if (!_activeInvocation) return fn();
-    const start = process.hrtime.bigint();
+    const start = nodeProcess!.hrtime.bigint();
     try {
         return fn();
     } finally {
-        const elapsed = process.hrtime.bigint() - start;
+        const elapsed = nodeProcess!.hrtime.bigint() - start;
         const inv = _activeInvocation!;
         let bucket = inv.subFunctionNs.get(label);
         if (!bucket) {
@@ -196,7 +198,7 @@ function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolea
     if (!_activeInvocation) return null;
     const fs = _fsModule;
     const path = _pathModule;
-    const cwd = process.cwd();
+    const cwd = nodeProcess!.cwd();
     const outDir = path.join(cwd, 'data', 'derived', '_debug');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const outPath = path.join(outDir, 'sector_partition_perf.jsonl');
@@ -310,7 +312,7 @@ export function buildCorpsFrontSectors(
     if (!edges || edges.length === 0) return {};
 
     // Open a per-invocation perf record (no-op when flag is OFF).
-    const _invStart: bigint = SECTOR_PARTITION_PERF_FLAG ? process.hrtime.bigint() : 0n;
+    const _invStart: bigint = SECTOR_PARTITION_PERF_FLAG ? nodeProcess!.hrtime.bigint() : 0n;
     if (SECTOR_PARTITION_PERF_FLAG) {
         _activeInvocation = _newInvocation();
     }
@@ -560,7 +562,7 @@ export function buildCorpsFrontSectors(
 
     // Flush jsonl line for this invocation (no-op when flag is OFF).
     if (SECTOR_PARTITION_PERF_FLAG) {
-        const totalNs = process.hrtime.bigint() - _invStart;
+        const totalNs = nodeProcess!.hrtime.bigint() - _invStart;
         _flushInvocation(state, totalNs, isFinalPass);
     }
 

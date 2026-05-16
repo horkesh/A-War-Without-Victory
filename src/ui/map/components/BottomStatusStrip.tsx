@@ -6,6 +6,7 @@ import { Icon } from './icons/Icon';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { Z } from '../../shared/zIndex';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -116,7 +117,10 @@ export function BottomStatusStrip() {
   const showAlliance = playerFaction === 'RBiH' || playerFaction === 'HRHB';
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+    <div
+      className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
+      style={{ zIndex: Z.SHELL_FLOATING }}
+    >
 
       {/* 1. Map mode pills (primary) + R8: inline secondary expansion */}
       <div className="flex items-center gap-0.5 shrink-0" ref={moreRef}>
@@ -275,7 +279,10 @@ export function BottomStatusStrip() {
           LAYERS
         </button>
         {layersOpen && (
-          <div className="absolute bottom-full right-0 mb-1 bg-[#0c0c18]/95 backdrop-blur-md border border-white/10 rounded-md shadow-xl overflow-hidden min-w-[120px]">
+          <div
+            className="absolute bottom-full right-0 mb-1 bg-[#0c0c18]/95 backdrop-blur-md border border-white/10 rounded-md shadow-xl overflow-hidden min-w-[120px]"
+            style={{ zIndex: Z.SHELL_FLOATING }}
+          >
             {LAYER_TOGGLES.map(({ key, label }) => {
               const t = toggles[key];
               return (

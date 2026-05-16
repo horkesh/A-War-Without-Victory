@@ -4786,3 +4786,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Docs:** Updated `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`, and `docs/60_visualisations/strategic_design_terrain_map_ux.html`.
 
 **Report:** `docs/40_reports/implemented/20260516_REMOVE_SECTOR_DEMARCATION_OVERLAY.md`
+
+---
+
+## [2026-05-16] fix(ui): audit and polish tactical React shell
+
+**Type:** Tactical map / Army HQ UI polish and browser-dev runtime recovery. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Fixed the browser/dev tactical-map runtime by guarding Node `process` usage in `corps_front_sectors.ts`; changed browser/dev campaign start to load the baked April 1992 startup snapshot instead of an empty mock state; enabled tutorial next/skip progression without IPC in local preview; removed the default Corridor Heartbeat red/green path network; rebuilt the presidential toolbar around the intentionally floating HQ crest; fixed the Summary modal blank state by wrapping the toolbar callback; raised the bottom layer popover above right-side panels; and replaced stale `v0.6.1` shell labels with the shared app version constant.
+
+**Determinism:** UI/read-model only. The baked startup fallback reads a fixed local JSON snapshot and sets the selected player faction before store load. The Node-global guard only prevents browser module-load crashes. No timestamps, randomness, unstable ordering, save mutation, scenario state, or persisted artifacts are introduced.
+
+**Verification:** Focused UI/import/tutorial regression set passed 47/47 with `npx.cmd vitest run tests\ui_presidential_toolbar_summary_click.test.ts tests\ui_map_no_corridor_heartbeat_default_overlay.test.ts tests\ui_map_no_sector_demarcation_overlay.test.ts tests\sector_partition_instrumentation.test.ts tests\ui_map_browser_safe_imports.test.ts tests\engine_honesty_legacy_contracts.test.ts tests\v092_tutorial_lane_b_auto_dismiss.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts`. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk warnings. Browser inspection confirmed map render, absence of the red/green path network, functional Summary modal cards, floating-crest toolbar clearance, and readable layer popover.
+
+**Roadmap delta:** Closes the immediate user-reported Electron/tactical-map UI blockers found during live inspection. Remaining UI polish is product judgment: sector-click left-rail density, turn-0 HQ Records empty-state wording, and clearer disabled-Advance explanation in browser/dev mode.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md`

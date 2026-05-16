@@ -1,6 +1,8 @@
 import type { IPC } from './useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './types';
 
+const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
+
 interface LoadDeps {
     ipc: IPC;
     loadSave: (jsonOrText: unknown | string) => Promise<void>;
@@ -31,46 +33,29 @@ export async function startCampaignFromSidePicker(
             return false;
         }
     } else {
-        // Browser fallback: construct a mock state for April 1992
-        console.warn('[dev-map] Desktop bridge unavailable, using browser fallback for scenario:', scenarioKey);
+        console.warn('[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario:', scenarioKey);
         try {
-            let polControl: Record<string, string | null> = {};
-            if (scenarioKey === 'apr_1992') {
-                const r = await fetch('/data/derived/operational/operational_political_control.json');
-                if (r.ok) {
-                    const data = await r.json();
-                    polControl = data.by_settlement_id || {};
-                }
+            if (scenarioKey !== 'apr_1992') {
+                setLoadError(`Browser fallback does not support scenario: ${scenarioKey ?? 'unknown'}.`);
+                return false;
             }
-
-            const mockState: any = {
-                meta: {
-                    turn: scenarioKey === 'apr_1992' ? 30 : 0,
-                    phase: scenarioKey === 'apr_1992' ? 'war' : 'peace',
-                    player_faction: faction,
-                    date: scenarioKey === 'apr_1992' ? 'Apr 1992' : 'Sep 1991',
-                },
-                military: {
-                    formations: {},
-                    militia_pools: {},
-                    brigade_movement_state: {},
-                    casualty_ledger: {},
-                },
-                political: {
-                    political_controllers: polControl,
-                    contested_control: {},
-                    control_events: [],
-                },
-                displacement: {
-                    civilian_casualties: {},
-                },
-            };
-
-            await loadSave(mockState);
+            const response = await fetch(BROWSER_STARTUP_SNAPSHOT_PATH);
+            if (!response.ok) {
+                setLoadError(`Baked startup snapshot unavailable (${response.status}).`);
+                return false;
+            }
+            const snapshot = await response.json();
+            if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+                setLoadError('Baked startup snapshot is not a valid game state object.');
+                return false;
+            }
+            const state = snapshot as { meta?: { player_faction?: StartNewCampaignPayload['playerFaction'] } };
+            state.meta = { ...(state.meta ?? {}), player_faction: faction };
+            await loadSave(state);
             return true;
         } catch (err) {
             console.error('[dev-map] Fallback failed:', err);
-            setLoadError('Browser fallback failed to initialize mock state.');
+            setLoadError('Browser fallback failed to initialize baked startup snapshot.');
             return false;
         }
     }

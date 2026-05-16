@@ -157,4 +157,5 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md](implemented/20260516_TACTICAL_UI_AUDIT_AND_POLISH.md) - Tactical React shell audit: browser/dev startup fallback, floating-crest toolbar clearance, Summary modal fix, Corridor Heartbeat default-off, and layer popover z-order.
 - [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md) - Warroom faction overview now stays strategic and hands detailed command review back to Army HQ.

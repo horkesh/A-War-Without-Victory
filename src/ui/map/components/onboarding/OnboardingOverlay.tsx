@@ -63,7 +63,7 @@ export interface OnboardingIpcBridge {
 export interface OnboardingOverlayProps {
     /** Current `meta.tutorial_state` value, or null/undefined for fresh save. */
     tutorialState: TutorialStateShape | null | undefined;
-    /** IPC bridge. Pass null to disable writes (e.g. headless preview). */
+    /** IPC bridge. Pass null for local preview-only progression without persisted writes. */
     ipc: OnboardingIpcBridge | null;
 }
 
@@ -166,6 +166,7 @@ function getOverlayFocusables(root: HTMLElement | null): HTMLElement[] {
 export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | null {
     const { tutorialState, ipc } = props;
     const [pending, setPending] = useState(false);
+    const [previewTutorialState, setPreviewTutorialState] = useState<TutorialStateShape | null>(null);
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E refs.
     // overlayRef: the overlay root, used by the focus trap and Tab cycle.
@@ -174,8 +175,9 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const overlayRef = useRef<HTMLDivElement | null>(null);
     const previousActiveRef = useRef<HTMLElement | null>(null);
 
-    const visible = shouldShowOnboarding(tutorialState);
-    const completed = tutorialState?.completed_steps ?? [];
+    const effectiveTutorialState = ipc ? tutorialState : (previewTutorialState ?? tutorialState);
+    const visible = shouldShowOnboarding(effectiveTutorialState);
+    const completed = effectiveTutorialState?.completed_steps ?? [];
     const next = visible ? resolveNextStep(completed) : null;
     const active = visible && next !== null;
 
@@ -215,9 +217,13 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         if (!active) return;
         const handler = (e: KeyboardEvent) => {
             if (e.key !== 'Escape') return;
-            if (pending || !ipc) return;
+            if (pending) return;
             e.preventDefault();
             e.stopPropagation();
+            if (!ipc) {
+                setPreviewTutorialState((prior) => applyDismissPure(prior ?? effectiveTutorialState));
+                return;
+            }
             setPending(true);
             // Fire-and-forget: ipc.dismissTutorial() is a pure synchronous
             // transform of meta.tutorial_state in the ipcMain handler, so
@@ -227,7 +233,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
         };
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [active, pending, ipc]);
+    }, [active, pending, ipc, effectiveTutorialState]);
 
     if (!active || !next) return null;
 
@@ -240,7 +246,14 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const titleId = `onboarding-title-${next.id}`;
 
     const onAdvance = async () => {
-        if (pending || !ipc) return;
+        if (pending) return;
+        if (!ipc) {
+            setPreviewTutorialState((prior) => {
+                const advanced = applyAdvanceStepPure(prior ?? effectiveTutorialState, next.id);
+                return isFinalStep(next.id) ? applyDismissPure(advanced) : advanced;
+            });
+            return;
+        }
         setPending(true);
         try {
             await ipc.advanceStep(next.id);
@@ -261,7 +274,11 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     };
 
     const onSkip = async () => {
-        if (pending || !ipc) return;
+        if (pending) return;
+        if (!ipc) {
+            setPreviewTutorialState((prior) => applyDismissPure(prior ?? effectiveTutorialState));
+            return;
+        }
         setPending(true);
         try {
             await ipc.dismissTutorial();
@@ -346,7 +363,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                 step={next}
                 indexOneBased={indexOneBased}
                 total={total}
-                disabled={pending || !ipc}
+                disabled={pending}
                 onAdvance={onAdvance}
                 onSkip={onSkip}
             />
