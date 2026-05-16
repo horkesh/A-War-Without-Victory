@@ -113,6 +113,13 @@ first real tag:
 4. Download the artifacts from the run's **Artifacts** panel and verify
    them locally.
 
+Both artifact smoke scripts emit one deterministic JSON object. For release
+notes and the platform execution log, copy the `releaseLog` value; it contains
+the relative target path, `sizeBytes`, and SHA-256 hash. These fields prove
+artifact identity only. They do not replace the clean-VM install, SmartScreen,
+save-path, Settings -> Apps, or uninstall checks in
+`docs/40_reports/PLATFORM_TEST_MATRIX.md`.
+
 ---
 
 ## 3. Manual fallback (`gh release create`)
@@ -140,6 +147,7 @@ npm run desktop:release:check
 npm run desktop:package:linux:appimage
 npm run desktop:package:linux:appimage:smoke
 ls -lah dist-packaged/*.AppImage
+# Copy the smoke JSON `releaseLog` field into RELEASE_NOTES.md.
 ```
 
 ### 3.3 Build NSIS on Windows
@@ -154,6 +162,7 @@ npm run desktop:release:check
 npm run desktop:package:win:nsis
 npm run desktop:package:win:nsis:smoke
 Get-ChildItem dist-packaged/*.exe
+# Copy the smoke JSON `releaseLog` field into RELEASE_NOTES.md.
 ```
 
 ### 3.4 Tag + create the release

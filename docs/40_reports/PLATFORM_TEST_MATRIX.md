@@ -19,6 +19,8 @@
 
 This is a **manual** matrix. CI smoke (`tools/build/linux_appimage_smoke.cjs`, `tools/build/win_nsis_smoke.cjs`) verifies that an artifact exists and has correct headers / minimum size. CI does NOT verify install cleanliness, SmartScreen behavior, save round-trip across executions, Start Menu wiring, or AppData cleanup. Those require a human on a clean VM.
 
+The smoke JSON includes deterministic release-log facts (`target`, `sizeBytes`, `sha256`, and `releaseLog`). Operators should paste the `releaseLog` string into the release body or this matrix's execution notes so every manual result is tied to the exact artifact tested.
+
 ---
 
 ## 2. Supported platforms — declared floors
@@ -205,6 +207,8 @@ Append one filled-out copy of this block to each release tag's GitHub Release bo
 | Tester initials | `<XX>` |
 | Linux target | Ubuntu / Fedora / Debian (version) |
 | Windows target | Windows 10 / 11 (build number) |
+| AppImage smoke releaseLog | `<linux_appimage target=... sizeBytes=... sha256=...>` |
+| NSIS smoke releaseLog | `<win_nsis target=... sizeBytes=... sha256=...>` |
 
 ### 7.2 Linux execution log
 

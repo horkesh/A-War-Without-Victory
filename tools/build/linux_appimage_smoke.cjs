@@ -24,6 +24,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 
 const ELF_MAGIC = Buffer.from([0x7f, 0x45, 0x4c, 0x46]); // 0x7F 'E' 'L' 'F'
@@ -75,6 +76,10 @@ function isExecutable(filePath) {
   return { ok: (st.mode & 0o100) !== 0, mode: st.mode };
 }
 
+function sha256File(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
 function tryLaunch(filePath) {
   if (process.platform !== 'linux') {
     return { ok: false, skipped: true, reason: 'launch requires linux host' };
@@ -101,6 +106,9 @@ function main() {
     tool: 'linux_appimage_smoke',
     target: target ? path.relative(rootDir, target) : null,
     exists: false,
+    sizeBytes: null,
+    sha256: null,
+    releaseLog: null,
     executable: null,
     header: null,
     launch: null,
@@ -120,6 +128,10 @@ function main() {
   }
 
   report.exists = true;
+  const st = fs.statSync(target);
+  report.sizeBytes = st.size;
+  report.sha256 = sha256File(target);
+  report.releaseLog = `linux_appimage target=${report.target} sizeBytes=${report.sizeBytes} sha256=${report.sha256}`;
   report.executable = isExecutable(target);
   report.header = checkHeader(target);
 

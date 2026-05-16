@@ -4694,3 +4694,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** The presidential product-loop lane now has an explicit in-Decision-Room heartbeat over existing owners. Remaining validation is operator/playtest judgment on whether the strip improves first-minute scan clarity; any visual density adjustment should stay inside the existing Decision Room panel.
 
 **Report:** `docs/40_reports/implemented/20260515_DECISION_ROOM_PRODUCT_LOOP_HEARTBEAT.md`
+
+---
+
+## [2026-05-15] chore(packaging): add copy-ready artifact smoke release logs
+
+**Type:** Packaging / release-operator support. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Added deterministic `sizeBytes`, `sha256`, and copy-ready `releaseLog` fields to the Linux AppImage smoke report, and deterministic `sha256` / `releaseLog` fields to the Windows NSIS smoke report. Updated the release process and platform matrix so operators can paste these values into release notes and clean-VM execution logs.
+
+**Determinism:** The scripts read fixed artifact bytes from an explicit local file path and compute SHA-256 with Node's crypto module. They do not write game state, save state, scenario output, or network data. The change is sim-orthogonal and Ring N/A.
+
+**Verification:** Red first: focused Vitest failed on missing smoke JSON fields. Green focused: `node F:\A-War-Without-Victory\node_modules\vitest\vitest.mjs run tests\desktop_packaging_targets.test.ts` passed 4/4 from the packaging worktree.
+
+**Roadmap delta:** v0.9.5 remains operator-open for clean-VM checks. This commit reduces release-log transcription burden but does not claim SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, or Linux distro install verification without a target VM.
+
+**Report:** `docs/40_reports/implemented/20260515_PACKAGING_PLAYTEST_OPERATOR_SUPPORT.md`

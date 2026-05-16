@@ -24,6 +24,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 const MZ_MAGIC = Buffer.from([0x4d, 0x5a]); // 'MZ'
 const PE_MAGIC = Buffer.from([0x50, 0x45, 0x00, 0x00]); // 'PE\0\0'
@@ -69,6 +70,10 @@ function checkPeHeader(filePath) {
   }
 }
 
+function sha256File(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
 function main() {
   const args = parseArgs(process.argv);
   const rootDir = path.resolve(__dirname, '..', '..');
@@ -79,6 +84,8 @@ function main() {
     target: target ? path.relative(rootDir, target) : null,
     exists: false,
     sizeBytes: null,
+    sha256: null,
+    releaseLog: null,
     sizeFloorBytes: MIN_INSTALLER_BYTES,
     header: null,
   };
@@ -99,6 +106,8 @@ function main() {
   report.exists = true;
   const st = fs.statSync(target);
   report.sizeBytes = st.size;
+  report.sha256 = sha256File(target);
+  report.releaseLog = `win_nsis target=${report.target} sizeBytes=${report.sizeBytes} sha256=${report.sha256}`;
   report.header = checkPeHeader(target);
 
   process.stdout.write(JSON.stringify(report) + '\n');
