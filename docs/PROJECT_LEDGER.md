@@ -4724,3 +4724,21 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Verification:** Post-merge focused slice passed 113/113 with `npm.cmd run test:vitest:fast -- -- tests\docs_desktop_v09_truth.test.ts tests\anomaly_detector_deployment_truth.test.ts tests\operation_opportunities_catalog.test.ts tests\operation_opportunities_central_bosnia_catalog.test.ts tests\operation_opportunities_federation_western_bosnia_catalog.test.ts tests\triggered_operations.test.ts tests\triggered_operations_late_1995.test.ts tests\ui\presidential_decision_room.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\desktop_packaging_targets.test.ts`. `git diff --check` reported only CRLF warnings before the startup artifact refresh. `npm.cmd run typecheck` passed. Full `npm.cmd run test:vitest:fast` initially failed only the startup snapshot contract because the operation catalog merge changed canonical builder output while the baked artifact was still stale; after `npm.cmd run desktop:startup-snapshot:build`, `npm.cmd run test:vitest:fast -- -- tests\startup_snapshot_contract.test.ts` passed 5/5, `npm.cmd run desktop:startup-snapshot:check` passed, and full `npm.cmd run test:vitest:fast` passed 633 files / 6643 tests with 18 skipped.
 
 **Roadmap delta:** The isolated autonomous roadmap branches are now integrated on `main`; remaining work is push/PR policy plus operator-only packaging and human/canon-review tasks already listed in the heartbeat.
+
+**Report:** `docs/40_reports/audits/20260515_AUTONOMOUS_ROADMAP_EXECUTION_CLOSURE.md`
+
+---
+
+## [2026-05-16] fix(packaging): build Windows NSIS installer
+
+**Type:** Packaging/build fix plus local artifact smoke. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, or serialization format changed.
+
+**Change:** Split Node-only bot-order profiler file output into `src/sim/combat/_perf_profile_bot_orders_node.ts`, leaving `src/sim/combat/_perf_profile_bot_orders.ts` browser-safe for tactical-map bundling. The scenario runner still writes the profiler JSON through the Node-only helper, and the focused profiler test now guards against reintroducing `node:fs` / `node:path` into the browser-reachable core module.
+
+**Determinism:** The profiler remains default-off and uses sorted label snapshots when enabled. The new Node-only dump helper preserves the existing stable JSON writer and output path. No scenario artifact, save state, generated run output, or runtime game behavior was changed.
+
+**Verification:** `npm.cmd run test:vitest:fast -- -- tests\bot_orders_perf_profile.test.ts` passed 5/5. `npm.cmd run desktop:map:build` passed. `npm.cmd run typecheck` passed. `npm.cmd run desktop:package:win:nsis` passed and produced `dist-packaged\A War Without Victory Setup 0.9.6-alpha.1.exe`. `npm.cmd run desktop:package:win:nsis:smoke -- "F:\A-War-Without-Victory\dist-packaged\A War Without Victory Setup 0.9.6-alpha.1.exe"` passed with `sizeBytes=957496842`, SHA-256 `c51f9bf8fe798ad8eed8dd01aba1b679412b8fb84b019994303dfe3aeb126c77`, and valid MZ/PE headers.
+
+**Roadmap delta:** Windows installer creation is locally proven. Clean-VM Windows validation remains operator-only: SmartScreen UX, Settings -> Apps entry/version, `%APPDATA%` persistence/uninstall behavior, uninstaller registry entries, and first-run playtest on a real target VM.
+
+**Report:** `docs/40_reports/implemented/20260516_WIN_NSIS_PACKAGE_BUILD.md`

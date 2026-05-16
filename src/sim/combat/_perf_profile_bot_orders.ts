@@ -1,8 +1,3 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-
-import { stableStringify } from '../../utils/stable_json.js';
-
 export const BOT_ORDERS_PERF_FLAG = 'PERF_PROFILE_BOT_ORDERS';
 
 interface PerfBucket {
@@ -30,12 +25,23 @@ export interface BotOrdersPerfSnapshot {
 
 const buckets = new Map<string, PerfBucket>();
 
+interface PerfProcessLike {
+    env?: Record<string, string | undefined>;
+    hrtime?: {
+        bigint?: () => bigint;
+    };
+}
+
 function strictCompare(left: string, right: string): number {
     return left < right ? -1 : left > right ? 1 : 0;
 }
 
+function getPerfProcess(): PerfProcessLike | undefined {
+    return (globalThis as typeof globalThis & { process?: PerfProcessLike }).process;
+}
+
 export function isBotOrdersPerfEnabled(): boolean {
-    return process.env[BOT_ORDERS_PERF_FLAG] === 'true';
+    return getPerfProcess()?.env?.[BOT_ORDERS_PERF_FLAG] === 'true';
 }
 
 export function resetBotOrdersPerfProfile(): void {
@@ -43,12 +49,14 @@ export function resetBotOrdersPerfProfile(): void {
 }
 
 export function botOrdersPerfTime<T>(label: string, fn: () => T): T {
-    if (!isBotOrdersPerfEnabled()) return fn();
-    const start = process.hrtime.bigint();
+    const hrtime = getPerfProcess()?.hrtime;
+    const hrtimeBigint = hrtime?.bigint?.bind(hrtime);
+    if (!isBotOrdersPerfEnabled() || typeof hrtimeBigint !== 'function') return fn();
+    const start = hrtimeBigint();
     try {
         return fn();
     } finally {
-        const elapsed = process.hrtime.bigint() - start;
+        const elapsed = hrtimeBigint() - start;
         const bucket = buckets.get(label) ?? { count: 0, totalNs: 0n, samples: [] };
         bucket.count += 1;
         bucket.totalNs += elapsed;
@@ -88,15 +96,4 @@ export function buildBotOrdersPerfSnapshot(): BotOrdersPerfSnapshot {
         flag: BOT_ORDERS_PERF_FLAG,
         labels,
     };
-}
-
-export function defaultBotOrdersPerfProfilePath(): string {
-    return join(process.cwd(), 'data', 'derived', '_debug', 'bot_orders_perf_profile.json');
-}
-
-export function dumpBotOrdersPerfProfile(outPath = defaultBotOrdersPerfProfilePath()): string | null {
-    if (!isBotOrdersPerfEnabled()) return null;
-    mkdirSync(dirname(outPath), { recursive: true });
-    writeFileSync(outPath, stableStringify(buildBotOrdersPerfSnapshot(), 2) + '\n', 'utf8');
-    return outPath;
 }

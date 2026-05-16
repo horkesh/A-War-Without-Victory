@@ -8,10 +8,10 @@ import {
     BOT_ORDERS_PERF_FLAG,
     buildBotOrdersPerfSnapshot,
     botOrdersPerfTime,
-    dumpBotOrdersPerfProfile,
     isBotOrdersPerfEnabled,
     resetBotOrdersPerfProfile,
 } from '../src/sim/combat/_perf_profile_bot_orders.js';
+import { dumpBotOrdersPerfProfile } from '../src/sim/combat/_perf_profile_bot_orders_node.js';
 
 const ORIGINAL_FLAG = process.env[BOT_ORDERS_PERF_FLAG];
 
@@ -353,7 +353,10 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(withoutComments).not.toMatch(/\bnew\s+Date\s*\(/);
         expect(withoutComments).not.toMatch(/\bperformance\.now\s*\(/);
         expect(withoutComments).not.toMatch(/localeCompare\s*\(/);
-        expect(withoutComments).toMatch(/process\.hrtime\.bigint\s*\(/);
+        expect(withoutComments).not.toMatch(/node:fs/);
+        expect(withoutComments).not.toMatch(/node:path/);
+        expect(withoutComments).not.toMatch(/writeFileSync|mkdirSync/);
+        expect(withoutComments).toMatch(/hrtimeBigint\s*\(/);
     });
 
 });

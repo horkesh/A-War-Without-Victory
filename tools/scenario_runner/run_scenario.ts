@@ -13,7 +13,7 @@ import { join } from 'node:path';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../../src/scenario/scenario_runner.js';
-import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot_orders.js';
+import { dumpBotOrdersPerfProfile } from '../../src/sim/combat/_perf_profile_bot_orders_node.js';
 
 /** Default scenario when user asks to "run scenarios" without specifying one (historical 52w, full OOB). */
 const DEFAULT_SCENARIO = 'data/scenarios/apr1992_historical_52w.json';
