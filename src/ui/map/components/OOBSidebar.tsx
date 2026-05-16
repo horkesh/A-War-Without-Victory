@@ -220,8 +220,8 @@ export function OOBSidebar() {
   if (!loadedGameState) {
     return (
       <div
-        className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
-        style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)' }}
+        className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
       >
         <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
           Command
@@ -233,8 +233,8 @@ export function OOBSidebar() {
 
   return (
     <div
-        className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
-      style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)' }}
+        className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+      style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
       <div

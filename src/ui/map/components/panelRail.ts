@@ -34,10 +34,10 @@ export interface PanelRailState {
  */
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
-  right: '1rem',
+  right: 0,
   // Toolbar-safe clearance is injected by App via CSS variable.
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: '2.5rem',
+  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
@@ -55,7 +55,7 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   left: LEFT_PRIMARY_OFFSET,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: '2.5rem',
+  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
@@ -67,7 +67,7 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: '25.5rem', // Offset by primary panel width (24rem + 1rem padding + 0.5rem gap)
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: '2.5rem',
+  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_SECONDARY, // Slightly behind primary
   overflow: 'hidden',
 };
@@ -80,7 +80,7 @@ export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   left: LEFT_SECONDARY_OFFSET,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: '2.5rem',
+  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_SECONDARY,
   overflow: 'hidden',
 };
@@ -92,7 +92,7 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: '2.5rem',
+  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_TERTIARY,
   overflow: 'hidden',
 };

@@ -4846,3 +4846,19 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Roadmap delta:** Closes the immediate first-run/HQ confusion reported during live UI playtest. Remaining work is a broader post-fix inspection pass across the rest of the tactical shell and Warroom surfaces.
 
 **Report:** `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`
+
+---
+
+## [2026-05-16] fix(ui): align tactical shell frame and card stacking
+
+**Type:** Tactical shell layout / UI polish fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** The command sidebar, right rail panels, and bottom status strip now share one bottom clearance variable instead of mixing `bottom-9`, `2.5rem`, and right-side gutter offsets. Right rail panels sit flush to the viewport edge, matching the top and bottom shell bars. `FlipCard` no longer lets the hidden back face reserve vertical space, so command-sidebar corps cards stack by the visible face instead of leaving large blank gaps. The War Begins overlay now uses the hard-modal tier so it covers tactical side panels instead of rendering underneath the right rail.
+
+**Determinism:** UI layout only. No scenario state, sim state, save state, generated artifacts, random input, timestamp, or persisted output changed.
+
+**Verification:** `npx.cmd vitest run tests\ui_shell_frame_contract.test.ts tests\ui\peace_war_transition.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\v093_a11y_lane_b_map_landmarks.test.ts` passed 16/16. `npm.cmd run typecheck` passed. Browser inspection on `http://127.0.0.1:3002/index.html?dev=1` confirmed War Begins covers both rails, corps cards stack without hidden back-face gaps, and the command sidebar/right inbox rail align to the top and bottom tactical frame. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/chunk warnings. `git diff --check` reported only CRLF normalization warnings.
+
+**Roadmap delta:** Starts the broader AAA-style tactical-shell coherence pass requested during live playtest. Remaining UI polish includes replacing remaining hard-coded offsets in ops planning/minimap/legend surfaces and auditing modal visual hierarchy.
+
+**Report:** `docs/40_reports/implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md`

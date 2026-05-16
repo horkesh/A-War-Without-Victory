@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest tactical shell frame cohesion:** [implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md](implemented/20260516_TACTICAL_SHELL_FRAME_COHESION.md) - tactical side rails now share top/bottom frame clearance, right rail panels dock flush to the viewport edge, War Begins covers tactical rails, and hidden flip-card backs no longer create corps-card gaps.
+
 **Latest first-run inbox / HQ flow polish:** [implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md](implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md) - tactical first-run overlays now sequence War Begins before tutorial and suppress orientation while blocking onboarding is active; Presidential Inbox situation cards route to Army HQ BRIEFING without becoming badge obligations; and Army HQ BRIEFING starts with Chief of Staff context before Decision Room synthesis.
 
 **Latest presidential decision room:** [implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md](implemented/20260502_PRESIDENTIAL_DECISION_ROOM_STRATEGIC_PRIORITIES.md), [implemented/20260502_DECISION_ROOM_PRIORITY_LENSES.md](implemented/20260502_DECISION_ROOM_PRIORITY_LENSES.md), [implemented/20260502_PRE_ADVANCE_REVIEW_ITEM_DEEP_LINKS.md](implemented/20260502_PRE_ADVANCE_REVIEW_ITEM_DEEP_LINKS.md) - Army HQ BRIEFING contains a deterministic Strategic Priorities board that prioritizes existing review, opportunity, SITREP, briefing, hard-turn, active-cost, and Chronicle signals and routes each card to an existing owner; local lenses filter the board by source category and pre-advance review rows preserve source targets.

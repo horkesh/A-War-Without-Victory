@@ -739,7 +739,10 @@ function App() {
   return (
     <div
       className="h-screen w-screen relative"
-      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '6.5rem' : '5.5rem' }}
+      style={{
+        ['--awwv-toolbar-clearance' as string]: devMode ? '6.5rem' : '5.5rem',
+        ['--awwv-bottom-bar-clearance' as string]: '2.5rem',
+      }}
     >
       {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
           - <main>: MapContainer (the primary tactical-map view; landmark

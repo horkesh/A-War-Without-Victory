@@ -15,24 +15,28 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
     return (
         <div className={className} style={{ perspective: '1200px' }}>
             <div
-                className="relative grid transition-transform duration-[600ms] ease-in-out"
+                className="relative transition-transform duration-[600ms] ease-in-out"
                 style={{
                     transformStyle: 'preserve-3d',
                     transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
-                <div style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', gridArea: '1/1' }}>
+                <div
+                    className={isFlipped ? 'absolute inset-0 pointer-events-none' : 'relative'}
+                    style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                    aria-hidden={isFlipped}
+                >
                     {front}
                 </div>
                 <div
-                    className="overflow-y-auto"
+                    className={`${isFlipped ? 'relative overflow-y-auto' : 'absolute inset-0 overflow-hidden pointer-events-none'}`}
                     style={{
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)',
-                        gridArea: '1/1',
                         maxHeight: '70vh',
                     }}
+                    aria-hidden={!isFlipped}
                 >
                     {back}
                 </div>
