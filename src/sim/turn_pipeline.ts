@@ -23,10 +23,13 @@ export type {
     TurnReport,
     TurnContext,
     PhaseHandler,
+    PhaseSkipDiagnostic,
+    PhaseSkipPredicate,
     NamedPhase
 } from './turn_pipeline_types.js';
 
 import type { TurnInput, TurnReport, TurnContext, Rng, NamedPhase } from './turn_pipeline_types.js';
+import { recordPhaseSkipDiagnostic } from './turn_pipeline_types.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Orchestrator
@@ -106,8 +109,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
     const context: TurnContext = { state: working, rng, input, report };
 
     for (const step of warPhases) {
-        report.phases.push({ name: step.name });
-        await step.run(context);
+        await runNamedPhase(context, step, 'war');
     }
 
     // Bottom-up formation mode: run militia/pool/formation steps in war context.
@@ -123,8 +125,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         ]);
         for (const step of earlyWarPhases) {
             if (!bottomUpStepNames.has(step.name)) continue;
-            report.phases.push({ name: step.name });
-            await step.run(context);
+            await runNamedPhase(context, step, 'early-war');
         }
     }
 
@@ -150,6 +151,17 @@ async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
         edges = graph.edges;
     }
     return edges;
+}
+
+async function runNamedPhase(context: TurnContext, step: NamedPhase, phase: string): Promise<void> {
+    context.report.phases.push({ name: step.name });
+    for (const skipIf of step.skipIf ?? []) {
+        const skipReason = skipIf(context);
+        if (!skipReason) continue;
+        recordPhaseSkipDiagnostic(context, phase, step.name, skipReason);
+        return;
+    }
+    await step.run(context);
 }
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {

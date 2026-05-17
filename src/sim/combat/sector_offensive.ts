@@ -118,6 +118,7 @@ import {
     hasEligibleAttackersForLaunch,
     isStagingCorridorSafe,
     resolveEquipmentClass,
+    shouldStallAxisForRecentCatastrophicObjective,
 } from './sector_offensive_launch_helpers.js';
 
 export {
@@ -919,6 +920,23 @@ export function advanceSectorOffensives(
             }
 
             if (multiAxis) {
+                const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+                for (const axis of op.axes!) {
+                    if (axis.status !== 'executing') continue;
+                    const objective = axis.objectives[axis.current_objective_index ?? 0];
+                    if (shouldStallAxisForRecentCatastrophicObjective(
+                        state,
+                        corpsId,
+                        faction,
+                        objective,
+                        axis.assigned_brigades,
+                        adjacency,
+                        turn,
+                    )) {
+                        axis.status = 'stalled';
+                        axis.launch_blocker = 'recent_catastrophic_losses_at_objective';
+                    }
+                }
                 // Multi-axis: check if all axes are terminal
                 if (allAxesTerminal(op.axes!)) {
                     beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);

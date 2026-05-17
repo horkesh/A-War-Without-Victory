@@ -266,7 +266,7 @@ export interface OperationAxis {
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
+    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective';
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */

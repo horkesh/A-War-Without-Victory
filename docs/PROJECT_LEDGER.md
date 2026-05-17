@@ -4,6 +4,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-18] feat(roadmap): close catastrophic, settings, and pipeline backlog lanes
+
+**Scope:** Second execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` backlog, following the player-faction and operation-stall batch.
+
+**Change:**
+- Implemented catastrophic-repeat attack protection for sector offensives: objective-level prior-turn catastrophic memory is recorded by faction/corps/objective, repeat attacks stall when current prediction remains catastrophic below the 0.3 power-ratio guard, and first desperate attacks remain allowed.
+- Implemented typed phase skip diagnostics via `NamedPhase.skipIf` and `TurnReport.phase_skip_diagnostics`, with `sync-front-segments` now reporting missing settlement-edge inputs instead of silently returning.
+- Cleaned `SettingsScreen` by removing local-only dead controls and keeping real-backed audio, tutorial restart, accessibility, and BCS-language settings.
+- Verified the HRHB cohesion-floor and 65th Protection Regiment rows as stale/already-correct in current data, with a focused implementation report rather than unnecessary data churn.
+
+**Determinism / scenario evidence:** 40w n1873 completed with final hash `42607f83870e01d5`, 27/27 anchors, and 6/6 benchmarks, hash-identical to n1872 after Batch 1. The catastrophic guard adds diagnostics/control-flow for repeat catastrophic attacks without moving the integrated 40w calibration state.
+
+**Verification:** Focused catastrophic/offensive, phase-pipeline, settings/UI, and HRHB/OOB regression suites passed; `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, `npm.cmd run sim:scenario:run:40w`, and `git diff --check` were run for this batch.
+
+**Canon posture:** No `docs/10_canon/FORAWWV.md` edit. The combat change prevents repeated gamey catastrophic attacks without forcing historical outcomes; the OOB/HRHB rows were verified against current data rather than retuned.
+
+---
+
 ## [2026-05-18] feat(roadmap): implement player-faction and operation-stall backlog batch
 
 **Scope:** First execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` backlog after the 2026-05-17 plan consolidation.

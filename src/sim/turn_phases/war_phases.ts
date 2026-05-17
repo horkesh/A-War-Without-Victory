@@ -195,7 +195,8 @@ import {
     setSiegeStateCache,
     getSpatialContextCache,
     setSpatialContextCache,
-    loadRecruitmentCatalog
+    loadRecruitmentCatalog,
+    missingSettlementEdges
 } from '../turn_pipeline_types.js';
 import { computeSpatialContext } from '../spatial_context.js';
 import type { EffectivePostureState } from '../../state/front_posture_commitment.js';
@@ -313,6 +314,7 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'sync-front-segments',
+        skipIf: [missingSettlementEdges],
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;

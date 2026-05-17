@@ -127,6 +127,7 @@ export interface TurnInput {
 export interface TurnReport {
     seed: string;
     phases: { name: string }[];
+    phase_skip_diagnostics?: PhaseSkipDiagnostic[];
     region_posture_expansion?: { expanded_edges_count: number };
     formation_fatigue?: FormationFatigueStepReport;
     formation_lifecycle?: FormationLifecycleStepReport;
@@ -292,10 +293,34 @@ export interface TurnContext {
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
+export type PhaseSkipPredicate = (context: TurnContext) => string | null | undefined;
+
+export interface PhaseSkipDiagnostic {
+    phase: string;
+    step: string;
+    skip_reason: string;
+}
 
 export interface NamedPhase {
     name: string;
     run: PhaseHandler;
+    skipIf?: PhaseSkipPredicate[];
+}
+
+export function missingSettlementEdges(context: TurnContext): string | undefined {
+    return context.input.settlementEdges && context.input.settlementEdges.length > 0
+        ? undefined
+        : 'missing_settlement_edges';
+}
+
+export function recordPhaseSkipDiagnostic(
+    context: TurnContext,
+    phase: string,
+    step: string,
+    skipReason: string,
+): void {
+    const diagnostics = context.report.phase_skip_diagnostics ??= [];
+    diagnostics.push({ phase, step, skip_reason: skipReason });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

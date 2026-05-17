@@ -581,6 +581,77 @@ function hasAttackFloorParticipant(
     return false;
 }
 
+const RECENT_CATASTROPHIC_OBJECTIVE_MEMORY_TURNS = 4;
+const RECENT_CATASTROPHIC_OBJECTIVE_POWER_RATIO_FLOOR = 0.3;
+
+export function hasRecentCatastrophicObjectiveMemory(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objective: string,
+    turn: number,
+): boolean {
+    const formations = state.military.formations ?? {};
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[formationId];
+        if (!formation || formation.faction !== faction || formation.corps_id !== corpsId) continue;
+        if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+        const engagements = formation.brigade_history?.engagements ?? [];
+        for (const engagement of engagements) {
+            if (engagement.role !== 'attacker') continue;
+            if (engagement.outcome !== 'catastrophic') continue;
+            if (engagement.osid !== objective) continue;
+            if (typeof engagement.turn !== 'number') continue;
+            if (engagement.turn >= turn) continue;
+            if (turn - engagement.turn > RECENT_CATASTROPHIC_OBJECTIVE_MEMORY_TURNS) continue;
+            return true;
+        }
+    }
+    return false;
+}
+
+export function shouldStallAxisForRecentCatastrophicObjective(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objective: string | undefined,
+    brigadeIds: readonly FormationId[],
+    adjacency: Map<string, string[]>,
+    turn: number,
+): boolean {
+    if (typeof objective !== 'string' || objective.length === 0) return false;
+    if (!hasRecentCatastrophicObjectiveMemory(state, corpsId, faction, objective, turn)) return false;
+
+    let sawPrediction = false;
+    for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade || brigade.faction !== faction || brigade.status !== 'active') continue;
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+
+        const directObjectiveAttack = predictAllAdjacentTargets(
+            state,
+            brigadeId,
+            adjacency,
+            undefined as unknown as OperationalToCanonicalReverseMap,
+            {},
+            'attack',
+        ).find((target) => target.osid === objective);
+        if (!directObjectiveAttack) continue;
+
+        sawPrediction = true;
+        const prediction = directObjectiveAttack.prediction;
+        if (
+            prediction.predicted_outcome !== 'catastrophic'
+            || prediction.power_ratio >= RECENT_CATASTROPHIC_OBJECTIVE_POWER_RATIO_FLOOR
+        ) {
+            return false;
+        }
+    }
+
+    return sawPrediction;
+}
+
 function rankOpeningAttackBlocker(blockers: readonly OpeningAttackBlocker[]): OpeningAttackBlocker {
     if (blockers.length === 0) return 'no_launch_readiness';
     if (blockers.every((blocker) => blocker === 'participants_below_attack_floor')) {

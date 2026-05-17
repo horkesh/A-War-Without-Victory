@@ -11,14 +11,24 @@
 | VRS Corridor 92 + ARBiH zero-attack operation stalls | Implemented/diagnosed | Hegel | Report: `docs/40_reports/implemented/20260518_OPERATION_STALL_BACKLOG_LANE.md`; 40w n1872 hash `42607f83870e01d5`. |
 | Elite-loan recall/tracker + pressure-system cleanup | Verified stale/already closed | Dalton | `tests/elite_loan_recall.test.ts` and `tests/pressure_system.test.ts` passed; backlog rows reconciled. |
 
+## Completed Batch 2
+
+| Lane | Status | Owner | Source |
+|---|---|---|---|
+| Catastrophic attack stall guard | Implemented | Wegener | Report: `docs/40_reports/implemented/20260518_CATASTROPHIC_ATTACK_STALL_GUARD.md`; 40w n1873 hash `42607f83870e01d5`. |
+| HRHB cohesion floor + 65th Protection Regiment tagging | Verified stale/already correct | Carson | Report: `docs/40_reports/implemented/20260518_HRHB_COHESION_65TH_TAGGING_VERIFICATION.md`. |
+| SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
+| Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
+
 ## Next Implementable Batches
 
 | Batch | Candidate lanes | Notes |
 |---|---|---|
-| Batch 2 engine cleanup | Catastrophic attack stall, HRHB cohesion floor, 65th Protection Regiment tagging, morale-resist-floor documentation/data decision | Keep separate from operation-staging files if Batch 1 operation changes are still integrating. |
-| Batch 2 product/UI | Chronicle hybrid chapter implementation, telemetry local-first implementation, SettingsScreen cleanup or real settings behavior, primary Army/Corps quick-select cleanup | Avoid `App.tsx` until player-faction worker returns. |
-| Batch 2 diagnostics/perf | Wall-clock performance follow-up, phase pipeline silent-skip diagnostics, strict-null Phase 2 | These are tooling/quality lanes and can run in parallel after Batch 1 integration. |
-| Batch 3 launch/operator support | Gold gate/launch-day automation, clean-VM evidence templates, external playtest artifact dry-run support | Operator-only validation remains outside autonomous repo execution; repo can improve scripts/templates. |
+| Batch 3 design/data cleanup | Morale-resist-floor documentation/data decision, ceasefire/Washington threshold drift check | Keep canon/doc decisions separate from behavior changes unless evidence requires data promotion. |
+| Batch 3 product/UI | Chronicle hybrid chapter implementation, telemetry local-first implementation, primary Army/Corps quick-select cleanup | `App.tsx` is available again after Batch 1 integration; keep UI-only lanes disjoint. |
+| Batch 3 diagnostics/perf | Wall-clock performance follow-up, strict-null Phase 2 | Tooling/quality lanes can proceed in parallel with product/UI. |
+| Batch 4 notifications/content | Phase C two-level event surfacing, Phase D notification content backfill | Phase C is implementable behind flag; Phase D content still needs historian/narrative review before broad copy lands. |
+| Batch 4 launch/operator support | Gold gate/launch-day automation, clean-VM evidence templates, external playtest artifact dry-run support | Operator-only validation remains outside autonomous repo execution; repo can improve scripts/templates. |
 
 ## Stale Or Already Closed Rows To Reconcile
 

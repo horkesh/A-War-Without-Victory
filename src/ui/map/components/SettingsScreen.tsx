@@ -61,7 +61,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
-    const [activeSection, setActiveSection] = useState('gameplay');
+    const [activeSection, setActiveSection] = useState('audio');
     const [locale, setLocale] = useLocale();
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: tutorial restart affordance.
@@ -149,8 +149,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
     };
 
     const allSections: Array<{ id: string; title: string }> = [
-        { id: 'gameplay', title: t('settings.tab.gameplay') },
-        { id: 'display', title: t('settings.tab.display') },
+        ...(tutorialDismissed ? [{ id: 'gameplay', title: t('settings.tab.gameplay') }] : []),
         { id: 'audio', title: 'Audio' },
         { id: 'a11y', title: t('settings.tab.a11y') },
         { id: 'language', title: t('settings.tab.language') },
@@ -195,12 +194,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <div className="space-y-3 mb-6">
                     {activeSection === 'gameplay' && (
                         <>
-                            <SettingRow label={t('settings.turnConfirmation.label')} description={t('settings.turnConfirmation.description')}>
-                                <ToggleSwitch />
-                            </SettingRow>
-                            <SettingRow label={t('settings.fogOfWar.label')} description={t('settings.fogOfWar.description')}>
-                                <ToggleSwitch />
-                            </SettingRow>
                             {/*
                               LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET:
                               tutorial restart affordance. Only rendered when
@@ -217,19 +210,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     </div>
                                 </SettingRow>
                             )}
-                        </>
-                    )}
-                    {activeSection === 'display' && (
-                        <>
-                            <SettingRow label={t('settings.mapQuality.label')} description={t('settings.mapQuality.description')}>
-                                <select className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
-                                    aria-label={t('settings.mapQuality.ariaLabel')}
-                                    defaultValue="medium">
-                                    <option value="low">{t('settings.mapQuality.low')}</option>
-                                    <option value="medium">{t('settings.mapQuality.medium')}</option>
-                                    <option value="high">{t('settings.mapQuality.high')}</option>
-                                </select>
-                            </SettingRow>
                         </>
                     )}
                     {activeSection === 'audio' && (
@@ -323,20 +303,6 @@ function SettingRow({ label, description, children }: { label: string; descripti
             </div>
             {children}
         </div>
-    );
-}
-
-function ToggleSwitch() {
-    const [on, setOn] = useState(true);
-    return (
-        <button type="button" onClick={() => setOn(!on)}
-            className={`w-10 h-5 rounded-full border transition-colors relative ${
-                on ? 'bg-[#c4a35a]/30 border-[#c4a35a]/50' : 'bg-[#2a2720] border-[#8a7a60]/30'
-            }`}>
-            <div className={`w-3.5 h-3.5 rounded-full absolute top-0.5 transition-all ${
-                on ? 'left-5 bg-[#c4a35a]' : 'left-0.5 bg-[#8a7a60]'
-            }`} />
-        </button>
     );
 }
 

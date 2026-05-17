@@ -6,7 +6,7 @@
  * After 2 consecutive catastrophic outcomes on the same objective, axis stalls.
  */
 import { describe, it, expect } from 'vitest';
-import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import type { CorpsFrontSector, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -46,22 +46,35 @@ function makeSector(
 function makeBrigade(
     id: string,
     locationOsid: string,
-    opts?: { posture?: string; lastOutcome?: string; lastOsid?: string; lastTurn?: number }
+    opts?: {
+        faction?: 'RS' | 'RBiH';
+        corpsId?: string;
+        posture?: string;
+        lastOutcome?: string;
+        lastOsid?: string;
+        lastTurn?: number;
+        personnel?: number;
+        cohesion?: number;
+        morale?: number;
+        entrenchmentTurns?: number;
+    }
 ): FormationState {
     const f: any = {
         id,
-        faction: 'RBiH',
-        corps_id: 'arbih_corps',
+        faction: opts?.faction ?? 'RBiH',
+        corps_id: opts?.corpsId ?? 'arbih_corps',
         name: id,
         created_turn: 1,
         status: 'active',
         assignment: null,
         kind: 'brigade',
-        personnel: 1000,
-        cohesion: 70,
+        personnel: opts?.personnel ?? 1000,
+        cohesion: opts?.cohesion ?? 70,
+        morale: opts?.morale ?? 60,
         hq_sid: 'S1',
         location_osid: locationOsid,
         posture: opts?.posture ?? 'hold',
+        entrenchment_turns: opts?.entrenchmentTurns ?? 0,
         tags: [],
     };
     if (opts?.lastOutcome) {
@@ -119,8 +132,18 @@ function makeState(overrides: {
                 },
                 ...overrides.brigades,
             },
+            war_front_edges_osid: [
+                { a: 'op:front:approach', b: 'op:target:obj' },
+            ],
             corps_front_sectors: {
-                s1: makeSector('s1', 'arbih_corps', 'RBiH', ['op:front:approach'], ['op:target:obj']),
+                s1: {
+                    ...makeSector('s1', 'arbih_corps', 'RBiH', ['op:front:approach'], ['op:target:obj']),
+                    assigned_brigade_ids: Object.keys(overrides.brigades).filter((id) => overrides.brigades[id]?.faction === 'RBiH'),
+                },
+                rs_defense: {
+                    ...makeSector('rs_defense', 'rs_corps', 'RS', ['op:target:obj'], ['op:front:approach']),
+                    assigned_brigade_ids: Object.keys(overrides.brigades).filter((id) => overrides.brigades[id]?.faction === 'RS'),
+                },
             },
             corps_command: {
                 arbih_corps: {
@@ -152,6 +175,52 @@ function makeState(overrides: {
 }
 
 describe('catastrophic outcome stall (#39)', () => {
+    it('stalls a fresh axis brigade before repeating a recent catastrophic low-ratio objective attack', () => {
+        const spentProbe = makeBrigade('spent_probe', 'op:front:approach', {
+            posture: 'hold',
+            lastOutcome: 'catastrophic',
+            lastOsid: 'op:target:obj',
+            lastTurn: 9,
+            personnel: 300,
+        });
+        const freshBrigade = makeBrigade('fresh_brigade', 'op:front:approach', {
+            posture: 'hold',
+            personnel: 700,
+            cohesion: 45,
+            morale: 45,
+        });
+        const hardDefender = makeBrigade('hard_defender', 'op:target:obj', {
+            faction: 'RS',
+            corpsId: 'rs_corps',
+            posture: 'dig_in',
+            personnel: 3200,
+            cohesion: 95,
+            morale: 90,
+            entrenchmentTurns: 8,
+        });
+        const state = makeState({
+            turn: 10,
+            brigades: { spent_probe: spentProbe, fresh_brigade: freshBrigade, hard_defender: hardDefender },
+            axes: [{
+                axis_id: 'a1', name: 'Main', assigned_brigades: ['fresh_brigade'],
+                objectives: ['op:target:obj'], current_objective_index: 0,
+                status: 'executing', failure_count: 0,
+                consecutive_failures_on_current: 0, momentum: 0,
+                attack_attempt_count: 0, objective_capture_count: 0,
+                movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+            }],
+        });
+
+        advanceSectorOffensives(state);
+
+        const op = (state.military.corps_command as any).arbih_corps.active_operations[0];
+        const axis = op.axes[0];
+        expect(axis.status).toBe('stalled');
+        expect(axis.launch_blocker).toBe('recent_catastrophic_losses_at_objective');
+        expect(op.phase).toBe('recovery');
+        expect(op.recovery_reason).toBe('no_logged_attempt');
+    });
+
     it('first catastrophic attack does NOT stall the axis', () => {
         const b1 = makeBrigade('b1', 'op:front:approach', {
             posture: 'attack',
