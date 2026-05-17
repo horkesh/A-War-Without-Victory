@@ -933,6 +933,13 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         return controller === effectiveDef.faction;
     });
     if (allAchieved) {
+        collectOpInjectionWarnings(state, [{
+            op_name: effectiveDef.name,
+            check: 'all_objectives_owned',
+            detail: `Queued operation skipped because all ${allObjectives.length} objective(s) are already controlled by ${effectiveDef.faction}`,
+            severity: 'warning',
+            turn,
+        }]);
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
         return false;
@@ -946,7 +953,16 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(effectiveDef, state, adjacency);
     if (!result) return false;
-    if (result.participating.length < MIN_OPERATION_PARTICIPANTS) return false;
+    if (result.participating.length < MIN_OPERATION_PARTICIPANTS) {
+        collectOpInjectionWarnings(state, [{
+            op_name: effectiveDef.name,
+            check: 'participants_below_attack_floor',
+            detail: `Queued operation has ${result.participating.length} viable participant(s); ${MIN_OPERATION_PARTICIPANTS} required`,
+            severity: 'warning',
+            turn,
+        }]);
+        return false;
+    }
 
     deployPrePlannedEliteLoans(state, result.eliteLoans, effectiveDef, turn, adjacency);
 

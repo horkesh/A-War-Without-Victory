@@ -556,6 +556,133 @@ export function axisHasExecutableOpeningAttack(
     return false;
 }
 
+export type OpeningAttackBlocker =
+    | 'participants_below_attack_floor'
+    | 'no_approach_osid'
+    | 'zero_eligible_axis'
+    | 'no_launch_readiness';
+
+export interface OpeningAttackReadinessResult {
+    executable: boolean;
+    blocker?: OpeningAttackBlocker;
+}
+
+function hasAttackFloorParticipant(
+    state: GameState,
+    brigadeIds: readonly FormationId[],
+): boolean {
+    for (const brigadeId of [...brigadeIds].sort(strictCompare)) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+        return true;
+    }
+    return false;
+}
+
+function rankOpeningAttackBlocker(blockers: readonly OpeningAttackBlocker[]): OpeningAttackBlocker {
+    if (blockers.length === 0) return 'no_launch_readiness';
+    if (blockers.every((blocker) => blocker === 'participants_below_attack_floor')) {
+        return 'participants_below_attack_floor';
+    }
+    if (blockers.every((blocker) => blocker === 'no_approach_osid')) {
+        return 'no_approach_osid';
+    }
+    if (blockers.includes('zero_eligible_axis')) return 'zero_eligible_axis';
+    return blockers[0] ?? 'no_launch_readiness';
+}
+
+function classifyAxisOpeningAttack(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    axis: NonNullable<CorpsOperation['axes']>[number],
+    adjacency: Map<string, string[]>,
+    threshold: PredictedOutcome,
+): OpeningAttackReadinessResult {
+    const objective = axis.objectives[axis.current_objective_index ?? 0];
+    if (typeof objective !== 'string' || objective.length === 0) {
+        axis.launch_blocker = 'zero_eligible_axis';
+        return { executable: false, blocker: 'zero_eligible_axis' };
+    }
+
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective]);
+    if (approachOsids.size === 0) {
+        axis.unreachable_at_launch = true;
+        axis.launch_blocker = 'no_approach_osid';
+        return { executable: false, blocker: 'no_approach_osid' };
+    }
+
+    if (!hasAttackFloorParticipant(state, axis.assigned_brigades)) {
+        axis.launch_blocker = 'participants_below_attack_floor';
+        return { executable: false, blocker: 'participants_below_attack_floor' };
+    }
+
+    if (!axisHasExecutableOpeningAttack(
+        state,
+        faction,
+        objective,
+        axis.assigned_brigades,
+        adjacency,
+        threshold,
+    )) {
+        axis.launch_blocker = 'zero_eligible_axis';
+        return { executable: false, blocker: 'zero_eligible_axis' };
+    }
+
+    delete axis.launch_blocker;
+    return { executable: true };
+}
+
+export function evaluateOpeningAttackReadiness(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    op: CorpsOperation,
+): OpeningAttackReadinessResult {
+    const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+    if (adjacency.size === 0 && !isMultiAxis(op)) {
+        return hasAttackFloorParticipant(state, op.participating_brigades ?? [])
+            ? { executable: true }
+            : { executable: false, blocker: 'participants_below_attack_floor' };
+    }
+    const threshold = getPlanningAttackThreshold(op);
+
+    if (isMultiAxis(op) && op.axes) {
+        const blockers: OpeningAttackBlocker[] = [];
+        for (const axis of op.axes) {
+            if (axis.status === 'complete' || axis.status === 'stalled') continue;
+            const result = classifyAxisOpeningAttack(state, corpsId, faction, axis, adjacency, threshold);
+            if (result.executable) return { executable: true };
+            if (result.blocker) blockers.push(result.blocker);
+        }
+        return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
+    }
+
+    const objective = op.objectives?.[op.current_objective_index ?? 0];
+    if (typeof objective !== 'string' || objective.length === 0) {
+        return { executable: false, blocker: 'zero_eligible_axis' };
+    }
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [objective]);
+    if (approachOsids.size === 0) {
+        return { executable: false, blocker: 'no_approach_osid' };
+    }
+    if (!hasAttackFloorParticipant(state, op.participating_brigades ?? [])) {
+        return { executable: false, blocker: 'participants_below_attack_floor' };
+    }
+    return axisHasExecutableOpeningAttack(
+        state,
+        faction,
+        objective,
+        op.participating_brigades ?? [],
+        adjacency,
+        threshold,
+    )
+        ? { executable: true }
+        : { executable: false, blocker: 'zero_eligible_axis' };
+}
+
 export function hasExecutableOpeningAttack(
     state: GameState,
     faction: FactionId,

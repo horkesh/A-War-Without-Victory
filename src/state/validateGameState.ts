@@ -10,6 +10,7 @@ import type { PhaseName } from './game_state.js';
 
 /** Known phase names (must match PhaseName in game_state.ts). */
 const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
+const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 
 /**
  * Strict comparator for deterministic ordering (Engine Invariants §11.3).
@@ -62,6 +63,10 @@ interface VersionRequiredField {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isCanonicalPlayerFaction(value: unknown): boolean {
+    return typeof value === 'string' && CANONICAL_PLAYER_FACTIONS.includes(value as typeof CANONICAL_PLAYER_FACTIONS[number]);
 }
 
 function getPathValue(root: unknown, path: string): unknown {
@@ -160,11 +165,15 @@ export function validateGameStateShape(
                     errors.push(`meta.phase must be one of: ${KNOWN_PHASES.join(', ')}`);
                 }
             }
-            // player_faction (optional for back-compat with legacy saves; required for new state).
-            // Default is set in scenario_runner.ts buildScenarioStartupState; desktop overrides via desktop_sim.ts.
-            if ('player_faction' in m && m.player_faction !== undefined) {
-                const pf = m.player_faction;
-                if (typeof pf !== 'string' || (pf !== 'RBiH' && pf !== 'RS' && pf !== 'HRHB')) {
+            // player_faction is required for current loaded gameplay state. Scenario JSON may remain neutral;
+            // legacy saves receive the desktop default through save migration v14.
+            const requirePlayerFaction = stateVersion >= 14 || (options.requireVersion !== undefined && options.requireVersion >= 14);
+            if (requirePlayerFaction) {
+                if (!isCanonicalPlayerFaction(m.player_faction)) {
+                    errors.push('meta.player_faction is required and must be one of: RBiH, RS, HRHB');
+                }
+            } else if ('player_faction' in m && m.player_faction !== undefined) {
+                if (!isCanonicalPlayerFaction(m.player_faction)) {
                     errors.push('meta.player_faction must be one of: RBiH, RS, HRHB when present');
                 }
             }

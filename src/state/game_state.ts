@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 13 as const;
+export const CURRENT_SCHEMA_VERSION = 14 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -265,6 +265,8 @@ export interface OperationAxis {
      *  never attacks. Persists through to AxisAAR for post-mortem visibility.
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
+    /** Typed diagnostic for axes that fail the opening-attack launch gate. */
+    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */
@@ -340,7 +342,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** True when this operation was launched from the pre-planned operations catalog

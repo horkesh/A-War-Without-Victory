@@ -4,6 +4,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-18] feat(roadmap): implement player-faction and operation-stall backlog batch
+
+**Scope:** First execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` backlog after the 2026-05-17 plan consolidation.
+
+**Change:**
+- Implemented player-faction Phase A/B/B+: schema v14 legacy migration/default, required loaded-state `meta.player_faction`, validation, shared `playerFactionMatch` helpers, and tightened player-facing Inbox, Operation Opportunity, Autonomy, adapter, and Warroom filters.
+- Implemented operation-stall diagnostics for VRS Corridor 92 and ARBiH zero-attack cases: queued operations now emit explicit already-owned / below-floor warnings, and launch readiness persists typed blockers through operation recovery and AAR state.
+- Reconciled stale backlog rows for B3 counter-offers, RBiH-HRHB Phase B/C, paramilitary flavor/consequences, brigade dissolution, RBiH arms embargo, elite-loan recall/tracking, and `pressure_system.ts` cleanup.
+- Added implementation reports `20260518_player_faction_contract_and_codex_visibility.md` and `20260518_OPERATION_STALL_BACKLOG_LANE.md`, plus the parent execution queue audit `20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`.
+
+**Determinism / scenario evidence:** 40w n1872 completed after integration with final hash `42607f83870e01d5`, 27/27 anchors, and 6/6 benchmarks; Operation Corridor records `all_objectives_owned` at turn 5 rather than disappearing silently. Player-faction migration is deterministic and affects legacy saves missing canonical `meta.player_faction`.
+
+**Verification:** Focused player-faction/Codex/UI/save-migration suites, operation-stall suites, elite-loan/pressure stale-row suites, `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, `npm.cmd run sim:scenario:run:40w`, and `git diff --check` were run for this batch.
+
+**Canon posture:** No `docs/10_canon/FORAWWV.md` edit. Scenario JSON remains faction-neutral; the new required player-faction contract is enforced at loaded gameplay/read-model boundaries. Operation changes add diagnostics and do not force Corridor outcome rails.
+
+---
+
 ## [2026-05-17] feat(audit): implement code-audit follow-up lanes
 
 **Scope:** Implementation of the three 2026-05-17 code-audit follow-up plans covering EOL/scenario guardrails, Round 2 residual QA, and Round 3 AAA polish.

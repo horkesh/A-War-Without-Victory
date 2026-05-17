@@ -62,6 +62,7 @@ import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
 import { buildDiplomacyView } from './diplomacyView.js';
+import { playerFactionMatch } from './playerFactionMatch.js';
 import {
     deriveFactionSupplyConditionFromFlatOsidState,
     deriveFactionSupplyConditionFromOsidReport,
@@ -78,7 +79,7 @@ function pointsByFaction(rec: Record<string, { points?: number }>): Record<strin
 
 /** Filter a faction-keyed record to only the player's faction (defense-in-depth). */
 function scopeToPlayerFaction<T>(record: Record<string, T> | undefined, playerFaction: string | null | undefined): Record<string, T> | undefined {
-    if (!record || !playerFaction) return record;
+    if (!record || !playerFaction) return undefined;
     const entry = record[playerFaction];
     return entry !== undefined ? { [playerFaction]: entry } : undefined;
 }
@@ -265,7 +266,7 @@ function deriveSupplyStateByOsidView(
 ): LoadedGameState['supplyStateByOsid'] {
     const result: NonNullable<LoadedGameState['supplyStateByOsid']> = {};
     const includeOsid = (osid: string, factionHint?: string): boolean => {
-        if (!playerFaction) return true;
+        if (!playerFaction) return false;
         if (factionHint) return factionHint === playerFaction;
         return politicalControllers?.[osid] === playerFaction;
     };
@@ -273,7 +274,7 @@ function deriveSupplyStateByOsidView(
     const factions = Array.isArray(rawSupplyStateByOsid?.factions) ? rawSupplyStateByOsid.factions as Array<Record<string, unknown>> : [];
     for (const factionEntry of factions) {
         const factionId = typeof factionEntry.faction_id === 'string' ? factionEntry.faction_id : undefined;
-        if (playerFaction && factionId !== playerFaction) continue;
+        if (!playerFactionMatch(factionId, playerFaction)) continue;
         const byOsid = Array.isArray(factionEntry.by_osid) ? factionEntry.by_osid as Array<Record<string, unknown>> : [];
         for (const entry of [...byOsid].sort((a, b) => strictCompare(String(a.osid ?? ''), String(b.osid ?? '')))) {
             const osid = typeof entry.osid === 'string' ? entry.osid : '';
@@ -1506,9 +1507,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     const rbih_hrhb_war_earliest_turn = typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
     const war_alliance_rbih_hrhb = typeof state.political.war_alliance_rbih_hrhb === 'number' ? state.political.war_alliance_rbih_hrhb : undefined;
-    // Default to RS in dev mode when no player faction set (headless scenario runs)
     const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
-    const playerFaction = rawPlayerFaction ?? (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1' ? 'RS' : null) ?? (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'RS' : null);
+    const playerFaction = rawPlayerFaction;
 
     // Single pass: derive fogOfWar + sectorIntel from sector_intel records
     let fogOfWar: FogOfWarView | undefined;
@@ -1870,7 +1870,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     const rawCommandBriefing = state.military?.last_briefing;
     const commandBriefing = rawCommandBriefing
-        && (!playerFaction || rawCommandBriefing.faction === playerFaction)
+        && playerFactionMatch(rawCommandBriefing.faction, playerFaction)
         ? toCommandBriefingView(rawCommandBriefing)
         : undefined;
     const operationalSitrep = (phase === 'war' || phase === 'phase_ii')
@@ -1952,7 +1952,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         unresolvedSectorBrigades: (() => {
             const raw = state.military?.unresolved_sector_brigades as string[] | undefined;
             if (!Array.isArray(raw) || raw.length === 0) return undefined;
-            if (!playerFaction) return raw;
             // Filter to player faction only — formations keyed by formation id
             const formationFactionMap = new Map<string, string>();
             for (const f of formations) formationFactionMap.set(f.id, f.faction ?? '');
@@ -2257,7 +2256,6 @@ function filterPlayerFacingEntriesByFaction<T extends { faction?: string | null 
     playerFaction: string | null,
 ): T[] | undefined {
     if (!entries || entries.length === 0) return undefined;
-    if (!playerFaction) return entries;
     const filtered = entries.filter((entry) => entry.faction === playerFaction);
     return filtered.length > 0 ? filtered : undefined;
 }
@@ -2365,7 +2363,7 @@ function derivePendingOfficerEvents(
 
     return events
         .filter((e: any) => !e.acknowledged)
-        .filter((e: any) => !playerFaction || e.faction === playerFaction)
+        .filter((e: any) => playerFactionMatch(e.faction, playerFaction))
         .map((e: any) => {
             const stats = getOfficerStats(e.officer_id);
             return {
@@ -2409,7 +2407,7 @@ function derivePendingParamilitaryRequests(
     if (!Array.isArray(requests) || requests.length === 0) return undefined;
 
     const parsed = requests
-        .filter((request) => !playerFaction || request?.faction === playerFaction)
+        .filter((request) => playerFactionMatch(request?.faction, playerFaction))
         .filter((request) =>
             typeof request?.faction === 'string'
             && typeof request?.target_osid === 'string'
@@ -2641,7 +2639,7 @@ function derivePendingReserveRequests(
                 suggested_brigade_id: request.suggested_brigade_id ? String(request.suggested_brigade_id) : null,
                 turn_requested: Number(request.turn_requested ?? 0),
             }))
-            .filter((request) => !playerFaction || request.faction === playerFaction)
+            .filter((request) => playerFactionMatch(request.faction, playerFaction))
             .sort((a, b) =>
                 b.priority - a.priority
                 || a.turn_requested - b.turn_requested
@@ -2862,7 +2860,7 @@ function derivePendingProposalReviews(
     const reviews = state.meta?.pending_proposal_reviews as any[] | undefined;
     if (!reviews || reviews.length === 0) return undefined;
     const pending = reviews
-        .filter((r: any) => r && r.accepted == null && (!playerFaction || r.faction === playerFaction))
+        .filter((r: any) => r && r.accepted == null && playerFactionMatch(r.faction, playerFaction))
         .map((r: any) => ({
             id: String(r.id ?? ''),
             turn: typeof r.turn === 'number' ? r.turn : 0,
@@ -2918,4 +2916,3 @@ function derivePressureWarning(state: any): boolean {
     }
     return false;
 }
-

@@ -4,6 +4,7 @@ import type {
     OperationOpportunityFootprintOsidView,
     OperationOpportunityProposalView,
 } from './types';
+import { playerFactionMatch } from './playerFactionMatch';
 import { humanizeOsid } from '../utils/osidDisplayName';
 
 type RawRecord = Record<string, unknown>;
@@ -208,7 +209,7 @@ export function deriveOperationOpportunityProposals(
         const status = typeof proposal.status === 'string' ? proposal.status : '';
         const faction = typeof proposal.approver_faction === 'string' ? proposal.approver_faction : undefined;
         if (!proposalId || !opportunityId || !LIVE_PROPOSAL_STATUSES.has(status)) continue;
-        if (playerFaction && faction !== playerFaction) continue;
+        if (!playerFactionMatch(faction, playerFaction)) continue;
 
         const review = reviewByProposalId.get(proposalId);
         const reviewDescription = typeof review?.description === 'string' ? review.description : undefined;

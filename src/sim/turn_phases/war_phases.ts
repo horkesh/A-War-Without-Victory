@@ -962,7 +962,7 @@ export const warPhases: NamedPhase[] = [
             if (!cc) return;
             const spatial = getSpatialContextCache(context);
             const adjacency = spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined;
-            for (const corpsId of Object.keys(cc).sort()) {
+            for (const corpsId of Object.keys(cc).sort(strictCompare)) {
                 const cmd = cc[corpsId];
                 // Queued pre-planned ops are sequential and occupy slot 0.
                 // Bot AI ops in other slots do NOT block queue injection.

@@ -44,6 +44,8 @@
 
 **2026-05-17 code-audit execution closure:** Audit follow-up lanes are implemented. `npm run repo:eol:check` is the mixed-EOL guard; non-empty `avoided_osids_by_faction` now fails scenario normalization; Round 2 residual QA has Codex source and scenario-integrity diagnostics; Round 3 polish closes opening-brief, status-strip, priority-front, adapter, and panel-boundary issues. Do instead: after running scenario commands, decide intentionally whether `data/derived/latest_run_final_save.json` is a committed fixture refresh or transient run output.
 
+**2026-05-18 roadmap/backlog execution wave:** Player-faction Phase A/B/B+ is live with schema v14, required loaded-state `meta.player_faction`, shared `playerFactionMatch.ts`, no local Warroom `?? 'RBiH'` fallback, and tightened player-facing Inbox/OpOp/Autonomy filters. VRS Corridor/ARBiH zero-attack stalls now emit typed blockers (`all_objectives_owned`, `participants_below_attack_floor`, `no_approach_osid`, `zero_eligible_axis`) instead of disappearing silently. Do instead: enforce player identity at loaded-state/read-model boundaries while keeping scenario JSON neutral; for operation stalls, preserve typed causality in recovery/AAR before considering data/tempo retunes.
+
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
 **Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.

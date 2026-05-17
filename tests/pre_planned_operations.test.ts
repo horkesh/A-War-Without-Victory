@@ -270,9 +270,55 @@ describe('pre-planned operations', () => {
 
         assert.equal(injected, false);
         assert.deepEqual(state.military.corps_command!.vrs_herzegovina!.queued_operations, ['Operation Foca']);
+        assert.ok(
+            (state.military.op_injection_warnings ?? []).some((warning) =>
+                warning.op_name === 'Operation Foca' &&
+                warning.check === 'participants_below_attack_floor'
+            ),
+            'queued operation should leave a typed non-consuming blocker when viable participants are below launch floor'
+        );
         assert.equal(
             state.military.corps_command!.vrs_herzegovina!.active_operations.filter((op) => op.name === 'Operation Foca').length,
             0,
+        );
+    });
+
+    it('injects Operation Corridor after Operation Prijedor leaves slot 0 and preserves the remaining 1KK queue', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 10;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi'];
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+        assert.equal(injected, true);
+        assert.equal(command.active_operations[0]?.name, 'Operation Corridor');
+        assert.deepEqual(command.queued_operations, ['Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+    });
+
+    it('records a typed Corridor status when the queued operation is moot because all objectives are already held', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 10;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Corridor', 'Operation Jajce'];
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor');
+        assert.ok(corridor);
+        for (const objective of corridor!.axes.flatMap((axis) => axis.objectives)) {
+            state.political.political_controllers![objective] = 'RS';
+        }
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+        assert.equal(injected, false);
+        assert.deepEqual(command.queued_operations, ['Operation Jajce']);
+        assert.ok(
+            (state.military.op_injection_warnings ?? []).some((warning) =>
+                warning.op_name === 'Operation Corridor' &&
+                warning.check === 'all_objectives_owned'
+            ),
+            'moot Corridor queue skip should leave a typed all_objectives_owned status'
         );
     });
 

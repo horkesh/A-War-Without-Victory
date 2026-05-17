@@ -15,6 +15,7 @@
  */
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
+import { playerFactionMatch } from '../data/playerFactionMatch';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -43,8 +44,7 @@ export function filterPendingProposalsForPlayer(
     playerFaction: string | null | undefined,
 ): PendingProposalReview[] {
     if (!Array.isArray(proposals)) return [];
-    if (!playerFaction) return proposals;
-    return proposals.filter((proposal) => proposal.faction === playerFaction);
+    return proposals.filter((proposal) => playerFactionMatch(proposal.faction, playerFaction));
 }
 
 // Minimal extension of window.awwv for autonomy Phase C methods.

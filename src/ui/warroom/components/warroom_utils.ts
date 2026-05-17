@@ -9,6 +9,7 @@
 
 import type { FactionId, GameState, OrganizationalPenetration } from '../../../state/game_state.js';
 import { factionAccentTriple } from '../../shared/factionPalette.js';
+import { requirePlayerFaction } from '../../map/data/playerFactionMatch.js';
 
 /** Months in title case (January, February, …). */
 const MONTHS = [
@@ -213,9 +214,8 @@ export function factionCssClass(factionId: FactionId): string {
 
 /**
  * Get the player faction from game state.
- * Reads meta.player_faction; falls back to first faction in array, then RBiH.
+ * Reads the required loaded-state meta.player_faction contract.
  */
 export function getPlayerFaction(gameState: GameState): FactionId {
-    if (gameState.meta?.player_faction) return gameState.meta.player_faction;
-    return (gameState.factions[0]?.id as FactionId) || 'RBiH';
+    return requirePlayerFaction(gameState.meta?.player_faction, 'warroom player faction') as FactionId;
 }

@@ -111,11 +111,11 @@ import {
     collectObjectiveApproachOsids,
     computeSupplyReadiness,
     evaluateLaunchFeasibility,
+    evaluateOpeningAttackReadiness,
     getEquipmentOffensivePriority,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
     hasEligibleAttackersForLaunch,
-    hasExecutableOpeningAttack,
     isStagingCorridorSafe,
     resolveEquipmentClass,
 } from './sector_offensive_launch_helpers.js';
@@ -449,6 +449,9 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'planning_invalidated':
         case 'no_launch_readiness':
         case 'defender_power_too_high':
+        case 'participants_below_attack_floor':
+        case 'no_approach_osid':
+        case 'zero_eligible_axis':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -504,6 +507,9 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'planning_invalidated':
         case 'no_launch_readiness':
         case 'defender_power_too_high':
+        case 'participants_below_attack_floor':
+        case 'no_approach_osid':
+        case 'zero_eligible_axis':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -698,6 +704,20 @@ export function advanceSectorOffensives(
             // Probes and feints skip preparation — they are too small/fast.
             // force_launch bypasses preparation entirely (player override).
             // RS blitz phase (w0-12): pre-planned JNA-style ops skip preparation.
+            const earlyElapsed = turn - op.phase_started_turn;
+            const earlyPlanDuration = op.planning_duration
+                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!, computePlanningDuration) : 1);
+            if (
+                op.force_launch !== true &&
+                earlyElapsed > earlyPlanDuration + PLANNING_INVALIDATION_GRACE_TURNS
+            ) {
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                if (!openingReadiness.executable) {
+                    beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
+                    continue;
+                }
+            }
+
             const activePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
             const isPrePlannedBlitz = activePhase?.probe_exempt === true;
             if (op.type === 'sector_attack' && op.force_launch !== true && !isPrePlannedBlitz) {
@@ -845,8 +865,9 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
-                if (!forcedLaunch && !hasExecutableOpeningAttack(state, faction, op)) {
-                    beginRecovery(op, turn, 'no_launch_readiness', state);
+                const openingReadiness = evaluateOpeningAttackReadiness(state, corpsId, faction, op);
+                if (!forcedLaunch && !openingReadiness.executable) {
+                    beginRecovery(op, turn, openingReadiness.blocker ?? 'no_launch_readiness', state);
                     continue;
                 }
                 // LANE-NIGHTSHIFT-A2 (2026-05-03): predictor force-ratio launch

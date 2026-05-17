@@ -10,6 +10,7 @@
 
 import type { LoadedGameState } from './types';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
+import { playerFactionMatch } from './playerFactionMatch';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
@@ -30,10 +31,6 @@ export interface InboxItem {
     action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'autonomy_panel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
-}
-
-function matchesPlayerFaction(itemFaction: string | null | undefined, playerFaction: string | null | undefined): boolean {
-    return !playerFaction || !itemFaction || itemFaction === playerFaction;
 }
 
 function splitOpportunityDescription(description: string): { title: string; detail: string } {
@@ -99,7 +96,7 @@ export function deriveInboxItems(
     const eventDecisions = state.pendingEventDecisions;
     if (eventDecisions) {
         for (const evt of eventDecisions) {
-            if (!matchesPlayerFaction(evt.faction, playerFaction)) continue;
+            if (!playerFactionMatch(evt.faction, playerFaction)) continue;
             items.push({
                 id: `event:${evt.event_id}`,
                 type: 'event_decision',
@@ -143,7 +140,7 @@ export function deriveInboxItems(
     const proposals = state.pendingProposalReviews;
     if (proposals && proposals.length > 0) {
         for (const prop of proposals) {
-            if (!matchesPlayerFaction(prop.faction, playerFaction)) continue;
+            if (!playerFactionMatch(prop.faction, playerFaction)) continue;
             if (isOperationOpportunityReview(prop)) {
                 const { title, detail } = splitOpportunityDescription(prop.description || '');
                 items.push({
@@ -207,7 +204,7 @@ export function deriveInboxItems(
     const reserveRequests = state.pendingReserveRequests;
     if (reserveRequests) {
         for (const req of reserveRequests) {
-            if (!matchesPlayerFaction(req.faction, playerFaction)) continue;
+            if (!playerFactionMatch(req.faction, playerFaction)) continue;
             const corpsName = req.corps_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? 'A corps';
             items.push({
                 id: `reserve:${req.request_id}`,
@@ -226,7 +223,7 @@ export function deriveInboxItems(
     if (officerEvents) {
         const officerGroups = new Map<string, OfficerEvent[]>();
         for (const evt of officerEvents) {
-            if (!matchesPlayerFaction(evt.faction, playerFaction)) continue;
+            if (!playerFactionMatch(evt.faction, playerFaction)) continue;
             const key = officerEventDedupeKey(evt);
             const existing = officerGroups.get(key);
             if (existing) existing.push(evt);

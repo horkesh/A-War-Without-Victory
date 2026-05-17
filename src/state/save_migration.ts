@@ -9,7 +9,7 @@
  *   require explicit ledger/user sign-off before shipping.
  */
 
-import type { GameState } from './game_state.js';
+import type { FactionId, GameState } from './game_state.js';
 import { canonicalizePoliticalSideId, defaultArmyLabelForSide, POLITICAL_SIDES, type ArmyLabel, type PoliticalSideId } from './identity.js';
 
 interface SaveMigration {
@@ -34,6 +34,10 @@ function sortedKeys(record: Record<string, unknown>): string[] {
 function asRecord(value: unknown): Record<string, any> | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
     return value as Record<string, any>;
+}
+
+function isCanonicalPlayerFaction(value: unknown): value is FactionId {
+    return value === 'RBiH' || value === 'RS' || value === 'HRHB';
 }
 
 function currentTurn(state: GameState): number {
@@ -520,5 +524,17 @@ registerMigration({
     description: 'Negotiation counter-offer docket and per-faction counter-turn defaults. Sensitive: no.',
     migrate: (state) => {
         ensureNegotiationCounterOfferDefaults(state);
+    },
+});
+
+registerMigration({
+    version: 14,
+    description: 'Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH.',
+    migrate: (state) => {
+        const meta = asRecord((state as any).meta);
+        if (!meta) return;
+        if (!isCanonicalPlayerFaction(meta.player_faction)) {
+            meta.player_faction = 'RBiH';
+        }
     },
 });

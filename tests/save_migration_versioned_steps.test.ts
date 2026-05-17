@@ -50,7 +50,7 @@ function minimalLegacyState(schemaVersion = 2): any {
 describe('versioned save migration steps', () => {
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(13);
+        expect(getLatestSchemaVersion()).toBe(14);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -77,6 +77,7 @@ describe('versioned save migration steps', () => {
             last_offer_turn: null,
             last_counter_turn: {},
         });
+        expect(state.meta.player_faction).toBe('RBiH');
         expect(state.military.negotiation.pending_counter_offers).toEqual([]);
         expect(state.political.supply_rights).toEqual({ corridors: [] });
         expect(state.displacement.displacement_event_log).toEqual([]);

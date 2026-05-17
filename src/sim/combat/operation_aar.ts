@@ -77,6 +77,8 @@ export interface AxisAAR {
      *  i.e. the silent-skip path was taken. The op still launches on its other axes;
      *  this axis never attacks. Surfaced on AAR so post-mortem tools see it. */
     unreachable_at_launch?: boolean;
+    /** Typed launch blocker for axes that never had an executable opening attack. */
+    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis';
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -706,6 +708,9 @@ export function finalizeOperationAAR(
             // Diagnostic carryover (Phase C): preserve unreachable_at_launch flag.
             if (axis.unreachable_at_launch) {
                 axisSummary.unreachable_at_launch = true;
+            }
+            if (axis.launch_blocker) {
+                axisSummary.launch_blocker = axis.launch_blocker;
             }
             axisSummaries.push(axisSummary);
         }

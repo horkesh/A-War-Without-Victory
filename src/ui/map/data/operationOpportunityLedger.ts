@@ -1,4 +1,5 @@
 import type { LoadedGameState, OperationOpportunityRecordView, OperationOpportunitySummaryView } from './types';
+import { playerFactionMatch } from './playerFactionMatch';
 
 type RawRecord = Record<string, unknown>;
 
@@ -144,8 +145,7 @@ export function deriveOperationOpportunityRecords(
             ?? (typeof review?.faction === 'string' ? review.faction : undefined)
             ?? (typeof aar?.faction === 'string' ? aar.faction : undefined);
 
-        if (playerFaction && faction && faction !== playerFaction) continue;
-        if (playerFaction && !faction) continue;
+        if (!playerFactionMatch(faction, playerFaction)) continue;
 
         records.push({
             proposal_id: proposalId,

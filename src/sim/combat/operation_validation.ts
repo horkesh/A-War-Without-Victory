@@ -34,7 +34,8 @@ export type OpInjectionCheck =
     | 'all_objectives_owned'
     | 'axis_empty'
     | 'op_empty'
-    | 'objective_overlap';
+    | 'objective_overlap'
+    | 'participants_below_attack_floor';
 
 export interface OpInjectionWarning {
     op_name: string;
