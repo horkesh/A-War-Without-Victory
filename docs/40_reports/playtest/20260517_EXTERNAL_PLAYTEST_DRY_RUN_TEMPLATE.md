@@ -30,3 +30,9 @@ Run the playtest instructions without internal repo knowledge. Record whether in
 ## Verdict
 
 External distribution approved: pending
+
+## Recommended Playtest Policy
+
+Use only the exact artifact that passed clean-VM validation. Record its SHA-256 above before distribution.
+
+For public pre-release Steam testing, prefer Steam Playtest where available: it uses a separate child appID, allows access gating, and avoids mixing playtest behavior with the main game's reviews, wishlist, refunds, or playtime. For confidential tests, use hidden Playtest keys or main-app release override keys with a separate NDA/intake process.

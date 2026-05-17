@@ -12,11 +12,21 @@ HRHB/HVO patron pressure needs one selected interpretation before code changes:
 2. **Per-corps ceiling**: Posavina, Central Bosnia, Herzegovina, and Tomislavgrad can carry distinct patron pressure.
 3. **Hybrid**: a faction-wide default with named corps exemptions.
 
-Selected scope: pending user decision
+Recommended scope: **hybrid**. Keep a faction-wide Zagreb patron ceiling as the default, with a small deterministic table of named HVO/OZ exceptions where the historical record or calibration evidence requires different local behavior.
+
+Approval status: pending user approval before runtime behavior changes.
+
+## Research Basis
+
+- Zagreb belongs in the default layer: Balkan Battlegrounds describes Croatian state involvement in Bosnian Croat organization, arming, and deployment decisions, which supports a broad patron ceiling rather than purely local pressure. Source: BB1 p.180.
+- Regional behavior was not uniform: Herzegovina and Posavina carry different evidence patterns for HV/HVO activity, and the local OOB canon models HVO as operational zones rather than ordinary corps. Sources: BB1 p.180; `docs/knowledge/HVO_ORDER_OF_BATTLE_MASTER.md`.
+- Posavina needs exemption capacity: Bosanski Brod/Odzak and Orasje/Brcko evidence includes HVO, HV, and Bosnian Army pressure against VRS/corridor objectives that a flat ceiling could suppress. Sources: BB1 p.182, BB1 p.219.
+- Central Bosnia and northern Herzegovina need local tension capacity: mixed Croat-Muslim areas had collocated forces, competing control, and chain-of-command friction, so local overrides are historically safer than a single all-HRHB modifier. Source: BB1 p.225.
+- Full per-corps patron state overfits the current evidence and expands calibration risk without enough benefit.
 
 ## Recommendation Frame
 
-Use **hybrid** if the goal is to represent a broad Zagreb political ceiling while preserving room for region-specific HVO behavior where evidence or design needs require it.
+Use **hybrid**. It represents Zagreb as a real faction-level constraint while preserving historically important regional variation.
 
 Use **faction-wide** if the goal is lowest implementation risk and easiest calibration. This is simplest to reason about, but it may flatten Central Bosnia versus Herzegovina behavior.
 
@@ -31,4 +41,4 @@ Use **per-corps** only if the design needs every HRHB/HVO corps to carry indepen
 
 ## Next Step
 
-After selection, implement `tests/hrhb_patron_directive_scope.test.ts` first, verify it fails for the current behavior, then add the smallest deterministic scope helper in the directive owner identified by the test.
+After approval, implement `tests/hrhb_patron_directive_scope.test.ts` first, verify it fails for the current behavior, then add the smallest deterministic scope helper in the directive owner identified by the test. The first implementation should cover only default HRHB behavior, named exception lookup, non-HRHB no-op behavior, and calibration drift attribution.

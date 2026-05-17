@@ -8,6 +8,8 @@
 
 **Tech Stack:** TypeScript command/political directive code, scenario runner, calibration reports.
 
+**Research recommendation 2026-05-17:** choose **hybrid**: a faction-wide Zagreb patron ceiling by default, plus named HVO/OZ exceptions for Posavina, Central Bosnia, Herzegovina, or other evidence-backed cases. Rationale and citations live in `docs/40_reports/audits/20260517_HRHB_PATRON_DIRECTIVE_SCOPE_DECISION.md` and `docs/40_reports/audits/20260517_GATED_ITEM_RECOMMENDATIONS.md`.
+
 ---
 
 ## Task 1: Decision Memo
@@ -22,9 +24,9 @@
 2. **Per-corps ceiling:** Posavina, Central Bosnia, Herzegovina, and Tomislavgrad can have distinct patron pressure.
 3. **Hybrid:** faction-wide default with named corps exemptions.
 
-**Acceptance:** User selects one option before code changes.
+**Acceptance:** User selects one option before code changes. Current recommendation is hybrid, but it is not approved until the user explicitly accepts it.
 
-The decision memo must include a single line exactly in this form: `Selected scope: faction-wide | per-corps | hybrid`.
+The decision memo must include a single line exactly in this form after approval: `Selected scope: faction-wide | per-corps | hybrid`.
 
 ## Task 2: Red Tests for Selected Scope
 

@@ -17,7 +17,7 @@ Before implementation, user chooses:
 2. End-of-phase chapters.
 3. User-triggered bookmarks.
 
-Default recommendation: end-of-phase chapters for v1.0, user bookmarks later.
+Research recommendation 2026-05-17: **hybrid phase-first chapters** for v1.0. Use deterministic player-faction campaign/doctrine windows as the primary boundary, add month labels inside long chapters, and defer user bookmarks until a save-backed UX pass. Rationale lives in `docs/40_reports/audits/20260517_CHRONICLE_CHAPTER_BOUNDARY_DECISION.md` and `docs/40_reports/audits/20260517_GATED_ITEM_RECOMMENDATIONS.md`.
 
 Record the chosen boundary in `docs/40_reports/audits/YYYYMMDD_CHRONICLE_CHAPTER_BOUNDARY_DECISION.md` before writing implementation code.
 

@@ -9,6 +9,8 @@ Close the remaining v0.9.5 clean-VM cosmetic validation items: SmartScreen UX, W
 
 This is an operator/environment validation lane over existing package artifacts. Code changes are allowed only if a clean-VM run proves an installer/package defect. Validation evidence must record exact artifact paths, hashes, Windows version, and VM state.
 
+Research recommendation 2026-05-17: treat clean-VM validation as the manual half of a two-layer release proof. Automated package smoke proves artifact shape, but only a fresh Windows VM can prove SmartScreen wording, Settings -> Apps registration, Start Menu launch, save/load persistence, AppData behavior, uninstall cleanup, and registry cleanup. Do not treat EV signing as a guaranteed SmartScreen solution; current Microsoft guidance says EV no longer bypasses SmartScreen reputation for new files.
+
 ## Tech Stack
 
 - Existing Windows NSIS package artifacts
@@ -23,11 +25,13 @@ This is an operator/environment validation lane over existing package artifacts.
    - Record OS build, user type, network state, and Defender/SmartScreen defaults.
    - Copy the exact packaged artifact and release-log hash into the VM.
    - Record artifact path, SHA256, installer filename, app version, VM snapshot name, Windows edition, and Windows build number.
+   - Confirm this artifact is the same SHA-256 recorded in the release evidence report.
 
 2. Validate SmartScreen UX
    - Launch the installer from a normal user download path.
    - Capture whether SmartScreen appears, the wording, and whether "Run anyway" path is available.
    - Record whether signing status or reputation is the limiting factor.
+   - If SmartScreen appears on a signed build, classify it as expected reputation behavior unless the publisher/signature metadata is missing or incoherent.
 
 3. Validate Settings -> Apps visibility
    - Install normally.

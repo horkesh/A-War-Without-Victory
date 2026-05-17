@@ -9,6 +9,8 @@ Prepare a controlled external playtest package with a current build, scenario se
 
 External playtest readiness is a release-ops and product-validation lane. It packages only verified artifacts and gives testers a narrow task script that exercises the presidential loop without requiring internal repo knowledge.
 
+Research recommendation 2026-05-17: separate testing from gameplay/release distribution. Use only the exact artifact that passed clean-VM validation, record its SHA-256 in the dry-run report, and prefer Steam Playtest for public pre-release testing where available because it isolates the test app from the main game's reviews, wishlist, refunds, and playtime. For confidential testing, use hidden Playtest keys or release-override keys with a separate NDA/intake process.
+
 ## Tech Stack
 
 - Existing desktop package artifacts
@@ -27,6 +29,7 @@ External playtest readiness is a release-ops and product-validation lane. It pac
 2. Select build and scenario state
    - Pick exact commit SHA and package artifact.
    - Record `git rev-parse HEAD`, package path, package size, and SHA-256 hash.
+   - Confirm the package SHA-256 matches the clean-VM-passed artifact before any external distribution.
    - Choose default faction and save/scenario setup.
    - Record expected first-session path and known blockers.
 

@@ -29,6 +29,12 @@
 | Privacy/telemetry policy | `docs/40_reports/audits/20260517_TELEMETRY_CONSENT_POLICY_DECISION.md` | pending approval |
 | Clean VM cosmetic validation | clean-VM report | pending external VM evidence |
 
+## Recommended Gate Policy
+
+- **Telemetry/privacy:** approve only default-off, local-first crash diagnostics with explicit opt-in, export/delete/withdrawal, and no upload provider until a second approval.
+- **Clean VM:** treat automated packaging proof and clean-VM proof as separate gates. Automated smoke can prove artifact shape; only a fresh Windows VM can prove SmartScreen, Settings -> Apps, Start Menu, save/load persistence, uninstall cleanup, and registry behavior.
+- **External playtest:** distribute only the exact artifact that passed clean-VM validation. Record its SHA-256 in the playtest dry-run report. If using Steam for public testing, prefer Steam Playtest over main-app release override because it isolates the test app from the main game's reviews, wishlist, refunds, and playtime.
+
 ## Launch-Day Operations
 
 1. Freeze non-blocking feature work.

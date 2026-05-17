@@ -19,6 +19,14 @@
 | Package probe | `npm.cmd run desktop:package:probe` | pending | |
 | NSIS smoke | `npm.cmd run desktop:package:win:nsis:smoke -- --report-only` | pending | |
 
+## Recommended Evidence Policy
+
+Automated release evidence and clean-VM evidence are separate. Do not mark this report complete from CI/package smoke alone. Record the exact artifact SHA-256 here, then use that same artifact for clean-VM validation.
+
+Automated evidence should include typecheck, fast tests, scenario tests, desktop release guard, packaged runtime probe, NSIS build/smoke, installer size, and SHA-256.
+
+Clean-VM evidence should include Windows version, VM snapshot identity, SmartScreen wording, Settings -> Apps entry, Start Menu/shortcut launch, new campaign, one-turn advance, save/relaunch/load/advance, `%APPDATA%` persistence, uninstall cleanup, and registry cleanup.
+
 ## Scenario / Save Evidence
 
 - scenario run:

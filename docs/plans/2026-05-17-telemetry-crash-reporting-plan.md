@@ -9,6 +9,8 @@ Add an opt-in telemetry and crash reporting design that helps diagnose launch is
 
 Telemetry is a UI/platform-side service. It records only explicitly approved event categories and never feeds back into simulation decisions, RNG, scenario outputs, or save compatibility. Crash reports are locally inspectable and upload only after opt-in.
 
+Research recommendation 2026-05-17: implement **local-first, explicit opt-in crash diagnostics only**. Do not add general gameplay analytics in the first pass. Do not add upload in the first pass. After consent approval, write local reports with export/delete/withdrawal controls; require a second approval before selecting or wiring any upload provider. See `docs/40_reports/audits/20260517_TELEMETRY_CONSENT_POLICY_DECISION.md` and `docs/40_reports/audits/20260517_GATED_ITEM_RECOMMENDATIONS.md`.
+
 ## Tech Stack
 
 - Desktop shell or browser runtime error hooks
@@ -20,6 +22,7 @@ Telemetry is a UI/platform-side service. It records only explicitly approved eve
 
 1. Define policy and consent model
    - Decide default state: off unless explicitly enabled.
+   - Use local-first crash diagnostics only unless the owner approves broader telemetry.
    - Define settings copy and privacy summary.
    - Define data retention and local deletion behavior.
    - Stop here until the product owner approves the consent and privacy wording.
@@ -34,10 +37,10 @@ Telemetry is a UI/platform-side service. It records only explicitly approved eve
    - Store local reports in a bounded queue.
    - Provide user-visible export/delete controls.
 
-4. Implement telemetry queue
+4. Implement local diagnostics queue
    - Add typed event emitter for allowed UI/platform events.
    - Batch locally with size limits.
-   - Add upload adapter stub until endpoint/provider is selected.
+   - Keep upload disabled/not configured; do not select a provider in this pass.
 
 5. Add settings and diagnostics UI
    - Add opt-in toggle, export report button, clear reports button, and status text.

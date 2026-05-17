@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(roadmap): add recommendations for gated launch decisions
+
+**Scope:** Documentation-only research and recommendation pass for roadmap items previously marked gated.
+
+**Change:** Added `docs/40_reports/audits/20260517_GATED_ITEM_RECOMMENDATIONS.md`; updated the HRHB patron directive, Chronicle chapter, telemetry consent, release evidence, external playtest, gold-gate checklist, and master roadmap docs with recommended solutions and next implementation/evidence steps. Recommendations: HRHB hybrid faction default plus named HVO/OZ exceptions; Chronicle hybrid player-faction campaign-phase chapters with month sublabels; telemetry default-off local-first crash diagnostics only; clean-VM validation as separate manual Windows VM evidence after automated package proof; external playtest only from the clean-VM-passed hashed artifact, with Steam Playtest preferred for public pre-release testing where available.
+
+**Determinism:** Documentation only. No runtime code, scenario data, generated artifact, random source, save schema, CI workflow, or package script changed.
+
+**Research basis:** Local BB/canon/repo research for HRHB and Chronicle; official EDPB/FTC guidance for consent; Microsoft SmartScreen guidance; Steamworks release/review/playtest docs.
+
+---
+
 ## [2026-05-17] test(ci): add focused scenario anchor feedback loop
 
 **Scope:** First implementation batch from `docs/plans/2026-05-17-ci-test-feedback-loop-plan.md`.
