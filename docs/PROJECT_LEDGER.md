@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(plans): add general backlog implementation plans
+
+**Scope:** Documentation-only planning closeout for remaining roadmap/general backlog items after parallel specialist review.
+
+**Change:** Added separate implementation-ready plans for Logistics Priority sim wiring, 188w endgame verification, Sarajevo special-case canon decision, B3 counter-offers, RBiH-HRHB Phases B/C, paramilitary consequence/batch/flavor, intel extensions, VRS Corridor 92, ARBiH zero-attack stalls, catastrophic attack stalls, brigade dissolution threshold, RBiH supply constraint, fatigue rebalance, save migration hardening, strict-null cleanup, war termination spec, Player Turn Guide, and full supply spec. Wired the plan set into `docs/plans/2026-05-17-roadmap-plan-coverage-closure.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/40_reports/CONSOLIDATED_BACKLOG.md`. Updated accepted HRHB/Chronicle/telemetry decision statuses and corrected release known-issues wording for telemetry and BCS localization.
+
+**Determinism:** Documentation only. No runtime code, scenario data, generated artifact, random source, save schema, CI workflow, package script, or calibration baseline changed.
+
+**Verification:** `git diff --check` and coverage path scan required before commit.
+
+---
+
 ## [2026-05-17] docs(roadmap): add recommendations for gated launch decisions
 
 **Scope:** Documentation-only research and recommendation pass for roadmap items previously marked gated.

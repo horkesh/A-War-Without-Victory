@@ -44,6 +44,29 @@ This is a planning-control document. It does not implement features. It maps roa
 | Master launch synthesis | `docs/plans/2026-05-16-aaa-triple-plus-shipping-plan.md` |
 | Gold readiness integration | `docs/plans/2026-04-30-v1-gold-readiness-integration-plan.md` |
 
+## General Backlog Plan Coverage Addendum
+
+| Backlog Point | Plan |
+| --- | --- |
+| Logistics Priority lever sim wiring | `docs/plans/2026-05-17-logistics-priority-sim-wiring-plan.md` |
+| 188w endgame verification | `docs/plans/2026-05-17-188w-endgame-verification-plan.md` |
+| Sarajevo railroad/special-case canon decision | `docs/plans/2026-05-17-sarajevo-special-case-canon-decision-plan.md` |
+| B3 negotiation counter-offers | `docs/plans/2026-05-17-b3-negotiation-counteroffers-plan.md` |
+| RBiH-HRHB alliance breakdown Phases B/C | `docs/plans/2026-05-17-rbih-hrhb-alliance-breakdown-bc-plan.md` |
+| Paramilitary consequence scaling, batch UI, and named units | `docs/plans/2026-05-17-paramilitary-consequence-batch-flavor-plan.md` |
+| Intel extensions | `docs/plans/2026-05-17-intel-extensions-plan.md` |
+| VRS 1KK Corridor 92 | `docs/plans/2026-05-17-vrs-corridor-92-plan.md` |
+| ARBiH 2nd/3rd/4th Corps zero-attack operation stalls | `docs/plans/2026-05-17-arbih-zero-attack-stalls-plan.md` |
+| ARBiH catastrophic attack stalls | `docs/plans/2026-05-17-catastrophic-attack-stall-plan.md` |
+| Brigade dissolution threshold | `docs/plans/2026-05-17-brigade-dissolution-threshold-plan.md` |
+| RBiH supply constraint | `docs/plans/2026-05-17-rbih-supply-constraint-plan.md` |
+| Fatigue recovery/rebalance | `docs/plans/2026-05-17-fatigue-recovery-rebalance-plan.md` |
+| Save migration hardening | `docs/plans/2026-05-17-save-migration-hardening-plan.md` |
+| Strict null contract cleanup | `docs/plans/2026-05-17-strict-null-cleanup-plan.md` |
+| War termination minimal spec | `docs/plans/2026-05-17-war-termination-minimal-spec-plan.md` |
+| Player Turn Guide | `docs/plans/2026-05-17-player-turn-guide-plan.md` |
+| Full supply spec | `docs/plans/2026-05-17-full-supply-spec-plan.md` |
+
 ## Implementation Tasks
 
 1. Keep this matrix synchronized when roadmap points are added, closed, split, or removed.

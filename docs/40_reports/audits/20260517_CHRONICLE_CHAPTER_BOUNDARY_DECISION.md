@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-17
 **Lane:** Chronicle chapters
-**Status:** Design-gated; no Chronicle runtime changes.
+**Status:** Recommendation accepted; ready for Chronicle runtime implementation plan execution.
 
 ## Decision Required
 
@@ -14,7 +14,7 @@ Chronicle chapters need one boundary rule before implementation:
 
 Recommended boundary: **hybrid phase-first**. Use deterministic player-faction campaign-phase chapters as the primary boundary, add month labels/subsections inside long chapters for scanability, and defer user-authored bookmarks until a later save-backed UX pass.
 
-Approval status: pending user approval before Chronicle runtime changes.
+Approval status: accepted 2026-05-17. Implement the hybrid phase-first chapter approach in `docs/plans/2026-05-17-chronicle-chapter-plan.md`.
 
 ## Recommendation
 
@@ -39,4 +39,4 @@ Use **hybrid phase-first chapters** for v1.0. The repo's current "end-of-phase" 
 
 ## Ready Follow-Up
 
-After approval, implement `src/ui/map/data/chronicleChapters.ts` with tests for grouping, stable ordering, month labels inside long chapters, source id preservation, player-faction scoping, and sensitive-history guardrails.
+Implement `src/ui/map/data/chronicleChapters.ts` with tests for grouping, stable ordering, month labels inside long chapters, source id preservation, player-faction scoping, and sensitive-history guardrails.

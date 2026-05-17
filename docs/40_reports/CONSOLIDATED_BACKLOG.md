@@ -8,6 +8,33 @@
 
 ---
 
+## 2026-05-17 Backlog Plan Coverage Update
+
+The active roadmap/general backlog points below now have separate actionable plans. Use these as the implementation entry points before changing code or scenario data.
+
+| Backlog Point | Plan |
+|---|---|
+| Logistics Priority lever sim wiring | [2026-05-17-logistics-priority-sim-wiring-plan.md](../plans/2026-05-17-logistics-priority-sim-wiring-plan.md) |
+| 188w endgame verification | [2026-05-17-188w-endgame-verification-plan.md](../plans/2026-05-17-188w-endgame-verification-plan.md) |
+| Sarajevo railroad/special-case canon decision | [2026-05-17-sarajevo-special-case-canon-decision-plan.md](../plans/2026-05-17-sarajevo-special-case-canon-decision-plan.md) |
+| B3 negotiation counter-offers | [2026-05-17-b3-negotiation-counteroffers-plan.md](../plans/2026-05-17-b3-negotiation-counteroffers-plan.md) |
+| RBiH-HRHB alliance breakdown Phases B/C | [2026-05-17-rbih-hrhb-alliance-breakdown-bc-plan.md](../plans/2026-05-17-rbih-hrhb-alliance-breakdown-bc-plan.md) |
+| Paramilitary consequence scaling, batch UI, and named units | [2026-05-17-paramilitary-consequence-batch-flavor-plan.md](../plans/2026-05-17-paramilitary-consequence-batch-flavor-plan.md) |
+| Intel extensions | [2026-05-17-intel-extensions-plan.md](../plans/2026-05-17-intel-extensions-plan.md) |
+| VRS 1KK Corridor 92 | [2026-05-17-vrs-corridor-92-plan.md](../plans/2026-05-17-vrs-corridor-92-plan.md) |
+| ARBiH 2nd/3rd/4th Corps zero-attack operation stalls | [2026-05-17-arbih-zero-attack-stalls-plan.md](../plans/2026-05-17-arbih-zero-attack-stalls-plan.md) |
+| ARBiH catastrophic attack stalls | [2026-05-17-catastrophic-attack-stall-plan.md](../plans/2026-05-17-catastrophic-attack-stall-plan.md) |
+| Brigade dissolution threshold | [2026-05-17-brigade-dissolution-threshold-plan.md](../plans/2026-05-17-brigade-dissolution-threshold-plan.md) |
+| RBiH supply constraint | [2026-05-17-rbih-supply-constraint-plan.md](../plans/2026-05-17-rbih-supply-constraint-plan.md) |
+| Fatigue recovery/rebalance | [2026-05-17-fatigue-recovery-rebalance-plan.md](../plans/2026-05-17-fatigue-recovery-rebalance-plan.md) |
+| Save migration hardening | [2026-05-17-save-migration-hardening-plan.md](../plans/2026-05-17-save-migration-hardening-plan.md) |
+| Strict null contract cleanup | [2026-05-17-strict-null-cleanup-plan.md](../plans/2026-05-17-strict-null-cleanup-plan.md) |
+| War termination minimal spec | [2026-05-17-war-termination-minimal-spec-plan.md](../plans/2026-05-17-war-termination-minimal-spec-plan.md) |
+| Player Turn Guide | [2026-05-17-player-turn-guide-plan.md](../plans/2026-05-17-player-turn-guide-plan.md) |
+| Full supply spec | [2026-05-17-full-supply-spec-plan.md](../plans/2026-05-17-full-supply-spec-plan.md) |
+
+---
+
 ## 1. Phase 7 / Master Early Docs queue
 
 | Report | Summary | Priority / owner |

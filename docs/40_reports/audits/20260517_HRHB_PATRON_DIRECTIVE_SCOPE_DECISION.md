@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-17
 **Lane:** HRHB patron directive scope
-**Status:** Design-gated; no runtime behavior change.
+**Status:** Recommendation accepted; ready for runtime implementation plan execution.
 
 ## Decision Required
 
@@ -14,7 +14,7 @@ HRHB/HVO patron pressure needs one selected interpretation before code changes:
 
 Recommended scope: **hybrid**. Keep a faction-wide Zagreb patron ceiling as the default, with a small deterministic table of named HVO/OZ exceptions where the historical record or calibration evidence requires different local behavior.
 
-Approval status: pending user approval before runtime behavior changes.
+Approval status: accepted 2026-05-17. Implement the hybrid scope in `docs/plans/2026-05-17-hrhb-patron-directive-scope-plan.md`.
 
 ## Research Basis
 
@@ -41,4 +41,4 @@ Use **per-corps** only if the design needs every HRHB/HVO corps to carry indepen
 
 ## Next Step
 
-After approval, implement `tests/hrhb_patron_directive_scope.test.ts` first, verify it fails for the current behavior, then add the smallest deterministic scope helper in the directive owner identified by the test. The first implementation should cover only default HRHB behavior, named exception lookup, non-HRHB no-op behavior, and calibration drift attribution.
+Implement `tests/hrhb_patron_directive_scope.test.ts` first, verify it fails for the current behavior, then add the smallest deterministic scope helper in the directive owner identified by the test. The first implementation should cover only default HRHB behavior, named exception lookup, non-HRHB no-op behavior, and calibration drift attribution.

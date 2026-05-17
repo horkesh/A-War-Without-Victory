@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-17
 **Lane:** telemetry/crash reporting
-**Status:** Privacy-gated; no telemetry capture code enabled.
+**Status:** Default-off local-first policy accepted; runtime capture still starts with local-only implementation and no upload adapter.
 
 ## Default Policy Recommendation
 
@@ -10,7 +10,7 @@ Telemetry and crash reporting should be **off by default**. Reports should be lo
 
 Recommended decision: approve a **local-first, explicit opt-in crash diagnostics** policy only. Do not add general gameplay analytics in the first pass. Runtime capture may write local reports after consent; upload remains a separate future decision.
 
-Approval status: pending user approval of wording and policy before runtime capture, upload adapters, or Settings controls.
+Approval status: accepted 2026-05-17 for default-off local-first crash diagnostics. Upload adapters still require a second approval.
 
 ## Research Basis
 
@@ -22,9 +22,9 @@ Approval status: pending user approval of wording and policy before runtime capt
 
 > Share optional crash diagnostics to help improve A War Without Victory. Reports may include app version, platform, UI surface, error category, and redacted stack traces. Reports never include saves, scenario dumps, player notes, or local usernames. You can export or delete local reports at any time.
 
-Selected consent wording: pending user approval
+Selected consent wording: default-off local-first wording approved as implementation baseline; exact UI copy may be edited during `docs/plans/2026-05-17-telemetry-crash-reporting-plan.md`.
 
-## Approved Data Shape To Implement After Approval
+## Approved Data Shape To Implement
 
 - app version
 - platform and OS family
@@ -44,4 +44,4 @@ Selected consent wording: pending user approval
 
 ## Stop Gate
 
-Do not implement runtime crash capture, upload adapters, or Settings controls until the consent wording and default-off policy are approved. After approval, implement local-only capture and Settings export/delete/withdrawal first; require a second approval before any network upload provider.
+Implement local-only capture and Settings export/delete/withdrawal first; require a second approval before any network upload provider.
