@@ -3,7 +3,7 @@ import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
 } from '../../src/ui/map/data/presidentialDecisionRoom.js';
-import type { LoadedGameState, OperationOpportunityProposalView } from '../../src/ui/map/data/types.js';
+import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionSummaryView } from '../../src/ui/map/data/types.js';
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
@@ -124,6 +124,21 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
     player_faction: 'RBiH',
     ...overrides,
   } as LoadedGameState;
+}
+
+function makePlayerDecisionSummary(overrides: Partial<PlayerDecisionSummaryView> = {}): PlayerDecisionSummaryView {
+  return {
+    totalCount: 5,
+    blockingCount: 3,
+    families: [
+      { id: 'peace_plan', count: 1, gatePolicy: 'modal_required' },
+      { id: 'dayton_negotiation', count: 1, gatePolicy: 'modal_required' },
+      { id: 'convoy_decision', count: 1, gatePolicy: 'modal_required' },
+      { id: 'reserve_request', count: 1, gatePolicy: 'advisory' },
+      { id: 'officer_event', count: 1, gatePolicy: 'advisory' },
+    ],
+    ...overrides,
+  };
 }
 
 const severityRank: Record<PresidentialDecisionRoomCard['severity'], number> = {
@@ -547,6 +562,69 @@ describe('buildPresidentialDecisionRoomView', () => {
       'turn:24:hard-turn',
     ]);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+  });
+
+  it('uses the manifest summary to block advance for modal-required decisions without treating advisory families as blockers', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        playerDecisionSummary: makePlayerDecisionSummary(),
+        pendingConvoyDecisions: [
+          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RS', supply_amount: 20 },
+        ],
+        pendingDayton: {
+          territorialPackages: [],
+          institutionalPackages: [],
+          factionCapital: {},
+          patronOverride: {},
+        },
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 24,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
+        pendingReserveRequests: [
+          {
+            request_id: 'reserve_1',
+            corps_id: 'arbih_3rd_corps',
+            faction: 'RBiH',
+            reason: 'defensive_gap',
+            priority: 40,
+            severityBand: 'routine',
+            travel_hops: 2,
+            description: 'Routine reserve request.',
+            suggested_brigade_id: null,
+            turn_requested: 24,
+          },
+        ],
+        pendingOfficerEvents: [
+          {
+            event_id: 'officer_1',
+            type: 'officer_available',
+            faction: 'RBiH',
+            turn: 24,
+            officer_id: 'officer_new',
+            officer_name: 'Staff Officer',
+            officer_competence: 0.5,
+            officer_aggressiveness: 0.4,
+            officer_defensive_skill: 0.6,
+            acknowledged: false,
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+    expect(view.advanceReadiness.headline).toBe('Review before advance');
+    expect(view.cards.find((card) => card.id === 'review:pending')).toBeUndefined();
+    expect(view.metrics.pendingReviews).toBe(5);
+    expect(view.cards.map((card) => card.id)).toContain('manifest:peace_plan');
+    expect(view.cards.map((card) => card.id)).toContain('manifest:dayton_negotiation');
+    expect(view.cards.map((card) => card.id)).toContain('manifest:convoy_decision');
+    expect(view.advanceReadiness.items.map((item) => item.id)).toContain('manifest:peace_plan');
   });
 
   it('builds a deterministic priority dossier for the top card by default', () => {

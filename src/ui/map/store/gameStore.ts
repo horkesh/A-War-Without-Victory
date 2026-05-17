@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
+import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
@@ -36,7 +37,7 @@ function isRuntimeProbeActive(): boolean {
 }
 
 /** Map overlay mode (HOI §3.1, §6). */
-export type MapMode = 'political' | 'ethnic' | 'supply' | 'casualties' | 'morale' | 'operations' | 'defense';
+export type MapMode = 'political' | 'ethnic' | 'supply' | 'casualties' | 'morale' | 'operations' | 'defense' | 'authority' | 'legitimacy';
 
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {
@@ -645,6 +646,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       schedule(() => {
         const fingerprint = buildStateFingerprint(jsonOrText);
+        const previousLoadedGameState = get().loadedGameState;
         let state: LoadedGameState;
         try {
           const json =
@@ -719,8 +721,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               isOperationsPanelOpen: false,
               // Staged orders are for the old save's turn — invalid after load
               stagedOrders: [],
-              // Transition overlay: new save may be in a different phase
-              peaceWarTransitionSeen: false,
+              // Transition overlay: only a live peace->war handoff should arm it.
+              peaceWarTransitionSeen: shouldMarkPeaceWarTransitionSeenOnLoad(previousLoadedGameState, state),
               // Tooltip: clear to avoid stale hover references
               tooltipTarget: null,
               tooltipPosition: null,

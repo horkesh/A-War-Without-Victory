@@ -10,7 +10,7 @@ import type { EdgeRecord } from '../src/map/settlements.js';
 import { updateSupplyPressure } from '../src/sim/combat/supply_pressure.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import type { SupplyStateDerivationReport } from '../src/state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport, SupplyStateDerivationReport } from '../src/state/supply_state_derivation.js';
 
 function minimalPhaseIIState(controllers?: Record<string, string | null>): GameState {
     return {
@@ -79,6 +79,54 @@ describe('supply pressure', () => {
         updateSupplyPressure(state, edges);
         expect((state.political.war_supply_pressure?.RBiH ?? 0) >= 50).toBe(true);
         expect((state.political.war_supply_pressure?.RS ?? 0) >= 50).toBe(true);
+    });
+
+    it('derives live supply condition from OSID state while preserving cumulative pressure', () => {
+        const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
+        state.political.war_supply_pressure = { RBiH: 100, RS: 100, HRHB: 100 };
+        const supplyByOsid: SupplyStateByOsidReport = {
+            schema: 1,
+            turn: 20,
+            factions: [
+                {
+                    faction_id: 'RBiH',
+                    by_osid: [
+                        { osid: 'op:a:1', state: 'adequate' },
+                        { osid: 'op:a:2', state: 'strained' },
+                        { osid: 'op:a:3', state: 'critical' },
+                    ],
+                },
+                {
+                    faction_id: 'RS',
+                    by_osid: [
+                        { osid: 'op:b:1', state: 'adequate' },
+                        { osid: 'op:b:2', state: 'adequate' },
+                    ],
+                },
+                {
+                    faction_id: 'HRHB',
+                    by_osid: [
+                        { osid: 'op:c:1', state: 'critical' },
+                    ],
+                },
+            ],
+        };
+
+        updateSupplyPressure(state, [], undefined, undefined, undefined, supplyByOsid);
+
+        expect(state.political.war_supply_pressure).toEqual({ RBiH: 100, RS: 100, HRHB: 100 });
+        expect(state.political.war_supply_condition).toEqual({ HRHB: 0, RBiH: 50, RS: 100 });
+    });
+
+    it('clears stale live supply condition when OSID state is unavailable', () => {
+        const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
+        state.political.war_supply_pressure = { RBiH: 20, RS: 20, HRHB: 20 };
+        state.political.war_supply_condition = { RBiH: 100, RS: 0, HRHB: 50 };
+
+        updateSupplyPressure(state, [], undefined, undefined, undefined, undefined);
+
+        expect(state.political.war_supply_condition).toBeUndefined();
+        expect(state.political.war_supply_pressure).toEqual({ RBiH: 20, RS: 20, HRHB: 20 });
     });
 
     it('prefers sector-owned frontage when live sector truth exists', () => {

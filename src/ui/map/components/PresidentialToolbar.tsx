@@ -14,7 +14,7 @@
  * - Reference: EVENTS, CODEX, CHRONICLE
  */
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { InboxBadge } from './PresidentialInbox';
 import { useIPC } from '../desktop/useIPC';
@@ -26,6 +26,10 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import {
+    buildPreAdvanceCommandReviewView,
+    formatPreAdvanceGateBlockTitle,
+} from '../data/preAdvanceCommandReview';
 import { Z } from '../../shared/zIndex';
 
 /**
@@ -69,9 +73,15 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
     return (
         <div
             className="flex items-center gap-1.5"
+            role="group"
+            aria-label={`Command Authority: ${current}/${max}`}
+            aria-describedby="command-authority-description"
             title={`Command Authority: ${current}/${max}\nSpent on Level 3 overrides (force-launch, manual orders).\nRecovers +2 per turn.`}
         >
-            <span className="text-[8px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>
+            <span id="command-authority-description" className="sr-only">
+                Command Authority is the president's override resource. Level 3 overrides spend it, and it recovers by 2 per turn.
+            </span>
+            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>
             <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
@@ -131,6 +141,8 @@ export function PresidentialToolbar({
     const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId);
     const loadError = useGameStore((s) => s.loadError);
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+    const setAdvanceTurnPending = useGameStore((s) => s.setAdvanceTurnPending);
     const devMode = useGameStore((s) => s.devMode);
     const [advancing, setAdvancing] = useState(false);
 
@@ -144,8 +156,22 @@ export function PresidentialToolbar({
     // Reads canonical adapter-owned presidentialReviewQueue (criticalCount / pendingCount).
     // Visual-only; no new state; deterministic count-threshold derivation.
     const preAdvanceSeverityTone = derivePreAdvanceSeverityTone(loadedGameState?.presidentialReviewQueue);
+    const preAdvanceReview = useMemo(
+        () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
+        [loadedGameState, osidDisplayNames],
+    );
+    const advanceBlocked = preAdvanceReview.status === 'blocked';
+    const advanceGateTitle = advanceBlocked
+        ? formatPreAdvanceGateBlockTitle(preAdvanceReview)
+        : !ipc.isAvailable
+            ? 'Advance turn requires the desktop app.'
+            : 'Advance turn';
 
     const handleAdvanceTurn = useCallback(async () => {
+        if (advanceBlocked) {
+            setAdvanceTurnPending(true);
+            return;
+        }
         if (!ipc.isAvailable || advancing) return;
         setAdvancing(true);
         try {
@@ -159,7 +185,7 @@ export function PresidentialToolbar({
         } finally {
             setAdvancing(false);
         }
-    }, [ipc, advancing, loadSave, clearStagedOrders, setLoadError]);
+    }, [advanceBlocked, setAdvanceTurnPending, ipc, advancing, loadSave, clearStagedOrders, setLoadError]);
 
     const handleOpenHQ = useCallback(() => {
         if (!playerFaction) return;
@@ -279,7 +305,7 @@ export function PresidentialToolbar({
                             onClick={onOpenRecords}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Army HQ staff records"
+                            title="Open Army HQ Records: after-action reports"
                         >
                             RECORDS
                         </button>
@@ -311,6 +337,7 @@ export function PresidentialToolbar({
                         <button
                             onClick={onOpenCodex}
                             disabled={!loadedGameState}
+                            data-coachmark-id="codex"
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                             title="Historical reference"
                         >
@@ -406,8 +433,14 @@ export function PresidentialToolbar({
                     <button
                         data-tutorial-step="advance-turn-button"
                         onClick={handleAdvanceTurn}
-                        disabled={advancing || !loadedGameState || !ipc.isAvailable}
-                        className="px-5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-[0.15em] bg-amber-400/10 text-amber-400 border border-amber-400/30 rounded hover:bg-amber-400/20 hover:border-amber-400/50 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                        disabled={advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
+                        title={advanceGateTitle}
+                        aria-label={advanceBlocked ? advanceGateTitle : undefined}
+                        className={`px-5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
+                            advanceBlocked
+                                ? 'bg-red-500/10 text-red-300 border-red-500/45 hover:bg-red-500/20 hover:border-red-400/60'
+                                : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'
+                        }`}
                     >
                         {advancing ? 'ADVANCING...' : 'ADVANCE TURN →'}
                     </button>
@@ -422,7 +455,7 @@ export function PresidentialToolbar({
                 aria-label={`${armyName ?? 'Army'} HQ [H]`}
                 title="Visit Army HQ [H]"
             >
-                <span className="text-[7px] font-mono font-bold uppercase tracking-[0.22em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-[0.18em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
                     {armyName ?? playerFaction ?? 'COMMAND'}
                 </span>
                 {crestUrl && (

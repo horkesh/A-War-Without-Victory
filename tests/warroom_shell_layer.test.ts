@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   buildWarroomProjectedMapModel,
   getWarroomBoardDateLabel,
+  getWarroomRegionLabel,
   getWarroomRegionClipPath,
   regionToShellHandoff,
   warroomRegionsUrlForFaction,
@@ -212,6 +213,11 @@ describe('shared-vs-local Warroom command split', () => {
 // ── warroomCommandStaysInRoom ─────────────────────────────────────────────────
 
 describe('warroom region data contract', () => {
+  it('uses player-facing hotspot labels for visible ribbons', () => {
+    expect(getWarroomRegionLabel({ id: 'desk_map', tooltip: 'Operational Map' })).toBe('Operational Map');
+    expect(getWarroomRegionLabel({ id: 'wall_calendar_area' })).toBe('Wall Calendar Area');
+  });
+
   it('loads canonical clickable-region files from /data/ui by faction', () => {
     expect(warroomRegionsUrlForFaction('RBiH')).toBe('/data/ui/hq_rbih_clickable_regions.json');
     expect(warroomRegionsUrlForFaction('RS')).toBe('/data/ui/hq_rs_clickable_regions.json');

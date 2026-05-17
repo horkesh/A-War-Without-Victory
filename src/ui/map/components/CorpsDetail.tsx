@@ -19,6 +19,7 @@ import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -130,7 +131,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   ];
 
   const handleOpenOpsPlanning = () => {
-    const primarySector = corpsSectors[0];
+    const primarySector = chooseOpsPlanningSector(corpsSectors);
     if (primarySector) {
       setOpsPlanningContext(selectedCorpsId, primarySector.sector_id);
     } else {

@@ -8,6 +8,8 @@ export const MAP_MODES: { id: MapMode; label: string; key: string }[] = [
   { id: 'morale', label: 'Morale', key: '5' },
   { id: 'operations', label: 'Operations', key: '6' },
   { id: 'defense', label: 'Defense', key: '7' },
+  { id: 'authority', label: 'Authority', key: '8' },
+  { id: 'legitimacy', label: 'Legitimacy', key: '9' },
 ];
 
 export const DEV_LAYER_TOGGLES = [

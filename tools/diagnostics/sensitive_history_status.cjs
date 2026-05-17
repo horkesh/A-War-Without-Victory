@@ -202,6 +202,7 @@ function summarizeOperationAars(runDir, state) {
                 started_turn: null,
                 outcome: 'missing',
                 recovery_reason: '',
+                blocker: '',
                 total_attacks: 0,
                 captured: 0,
                 targeted: 0,
@@ -225,6 +226,7 @@ function summarizeOperationAars(runDir, state) {
             started_turn: aar.started_turn === undefined ? null : numeric(aar.started_turn, null),
             outcome: String(aar.outcome || ''),
             recovery_reason: String(aar.recovery_reason || ''),
+            blocker: String(aar.blocker || aar.recovery_reason || ''),
             total_attacks: numeric(aar.total_attacks, 0),
             captured: asArray(aar.objectives_captured).length,
             targeted: asArray(aar.objectives_targeted).length,
@@ -332,11 +334,11 @@ function formatMarkdown(results) {
 
         out.push('### Watched Operations');
         out.push('');
-        out.push('| Operation | Turn | Outcome | Recovery | Attacks | Captures | Ratio | Axes |');
-        out.push('|---|---:|---|---|---:|---:|---:|---|');
+        out.push('| Operation | Turn | Outcome | Recovery | Blocker | Attacks | Captures | Ratio | Axes |');
+        out.push('|---|---:|---|---|---|---:|---:|---:|---|');
         for (const op of result.operations) {
             const axes = op.axes.map(axis => `${axis.axis_id}:${axis.captured}/${axis.targeted}@${axis.staging_osid || '-'}${axis.unreachable_at_launch ? ':unreachable' : ''}`).join('; ') || '-';
-            out.push(`| ${op.operation_name} | ${op.started_turn ?? '-'} | ${op.outcome} | ${op.recovery_reason || '-'} | ${op.total_attacks} | ${op.captured}/${op.targeted} | ${formatNumber(op.force_ratio_estimate)} | ${axes} |`);
+            out.push(`| ${op.operation_name} | ${op.started_turn ?? '-'} | ${op.outcome} | ${op.recovery_reason || '-'} | ${op.blocker || '-'} | ${op.total_attacks} | ${op.captured}/${op.targeted} | ${formatNumber(op.force_ratio_estimate)} | ${axes} |`);
         }
         out.push('');
 

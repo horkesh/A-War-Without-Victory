@@ -13,12 +13,13 @@ describe('presidential toolbar summary action', () => {
     expect(toolbarProps).not.toContain('onOpenSummary={openSummary}');
   });
 
-  it('keeps first-run intro overlays sequenced instead of stacked', () => {
+  it('keeps first-run onboarding single-owned instead of stacking intro overlays', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
 
     expect(source).toContain('peaceWarTransitionActive');
     expect(source).toContain('onboardingActive');
-    expect(source).toContain('<FirstTurnOrientationWrapper disabled={peaceWarTransitionActive || onboardingActive} />');
+    expect(source).not.toContain('FirstTurnOrientationWrapper');
+    expect(source).not.toContain('FirstTurnOrientationCard');
     expect(source).toContain("appScreen === 'game' && loadedGameState && !peaceWarTransitionActive && <OnboardingOverlayWrapper />");
   });
 

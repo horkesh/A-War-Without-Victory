@@ -104,7 +104,7 @@ describe('sensitive_history_status diagnostic script', () => {
         expect(output).toContain('| srebrenica | 0/11 | 11/11 | 0 | RBiH | no | RBiH:11 |');
         expect(output).toContain('| zepa | 0/1 | 1/1 | 0 | RBiH | no | RBiH:1 |');
         expect(output).toContain('| srebrenica_genocide_1995 | no | 0 | - | - |');
-        expect(output).toContain('| Operation Krivaja-95 | 168 | failure | planning_invalidated | 0 | 0/1 | 0.080 | srebrenica_enclave:0/1@op:bratunac:bratunac_2 |');
+        expect(output).toContain('| Operation Krivaja-95 | 168 | failure | planning_invalidated | planning_invalidated | 0 | 0/1 | 0.080 | srebrenica_enclave:0/1@op:bratunac:bratunac_2 |');
         expect(output).toContain('| rs_skelani_battalion | inactive | 0 | 65 | 10 | vrs_drina | op:srebrenica:mala_daljegosta_2 |');
     });
 

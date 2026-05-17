@@ -108,9 +108,9 @@ import {
 import {
     areParticipantsReadyForExecution,
     buildOsidAdjacencyFromFrontEdges,
-    checkLaunchFeasibility,
     collectObjectiveApproachOsids,
     computeSupplyReadiness,
+    evaluateLaunchFeasibility,
     getEquipmentOffensivePriority,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
@@ -447,6 +447,8 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'brigade_attrition':
         case 'political_blocked':
         case 'planning_invalidated':
+        case 'no_launch_readiness':
+        case 'defender_power_too_high':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -500,6 +502,8 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'probe_complete':
         case 'political_blocked':
         case 'planning_invalidated':
+        case 'no_launch_readiness':
+        case 'defender_power_too_high':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -718,6 +722,15 @@ export function advanceSectorOffensives(
                     probe_ordered: prepResult.probe_ordered || undefined,
                 });
 
+                if (
+                    typeof prepResult.force_ratio_estimate === 'number'
+                    && prepResult.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                ) {
+                    op.force_ratio_estimate = prepResult.force_ratio_estimate;
+                    beginRecovery(op, turn, 'defender_power_too_high', state);
+                    continue;
+                }
+
                 if (prepResult.aborted) {
                     // Commander recommends abort — low exhaustion cost
                     beginRecovery(op, turn, 'manual_termination', state);
@@ -765,6 +778,14 @@ export function advanceSectorOffensives(
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
                 ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!, computePlanningDuration) : 1);
+            if (
+                op.force_launch !== true
+                && typeof op.force_ratio_estimate === 'number'
+                && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+            ) {
+                beginRecovery(op, turn, 'defender_power_too_high', state);
+                continue;
+            }
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
@@ -790,7 +811,7 @@ export function advanceSectorOffensives(
             // after one full planning turn, invalidate the plan instead of letting it
             // drift into an execution/recovery no-attempt artifact.
             if (op.type === 'probe' && elapsed >= 1 && !stagedEarly && !forcedLaunch) {
-                beginRecovery(op, turn, 'planning_invalidated', state);
+                beginRecovery(op, turn, 'no_launch_readiness', state);
                 continue;
             }
 
@@ -821,11 +842,11 @@ export function advanceSectorOffensives(
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
                     }
-                    beginRecovery(op, turn, 'planning_invalidated', state);
+                    beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
                 if (!forcedLaunch && !hasExecutableOpeningAttack(state, faction, op)) {
-                    beginRecovery(op, turn, 'planning_invalidated', state);
+                    beginRecovery(op, turn, 'no_launch_readiness', state);
                     continue;
                 }
                 // LANE-NIGHTSHIFT-A2 (2026-05-03): predictor force-ratio launch
@@ -838,7 +859,7 @@ export function advanceSectorOffensives(
                     && typeof op.force_ratio_estimate === 'number'
                     && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
                 ) {
-                    beginRecovery(op, turn, 'planning_invalidated', state);
+                    beginRecovery(op, turn, 'defender_power_too_high', state);
                     continue;
                 }
                 op.phase = 'execution';
@@ -1469,6 +1490,7 @@ export function evaluateCorpsOffensiveLaunch(
     minAttackOutcome?: CorpsOperation['min_attack_outcome'],
     primarySectorId?: string,
     osidAdjacency?: Map<string, readonly string[]>,
+    terrainMultByOsid?: Record<string, number>,
 ): CorpsOperation | null {
     const turn = state.meta?.turn ?? 0;
     const formations = state.military.formations ?? {};
@@ -1568,9 +1590,17 @@ export function evaluateCorpsOffensiveLaunch(
     // Reject operations where the attacker pool cannot achieve even costly_victory
     // against ANY proposed objective. Prevents zombie ops that permanently block
     // the corps slot because brigades refuse to execute hopeless attacks.
-    if (!checkLaunchFeasibility(state, corpsBrigadeIds, objectives, faction)) {
+    const initialFeasibility = evaluateLaunchFeasibility(
+        state,
+        corpsBrigadeIds,
+        objectives,
+        faction,
+        supplyByOsid,
+        terrainMultByOsid,
+    );
+    if (!initialFeasibility.feasible) {
         const corpsName = formations[corpsId]?.name ?? corpsId;
-        console.warn(`[feasibility] ${corpsName}: rejected op — no objective achievable at costly_victory (${objectives.length} objectives, ${corpsBrigadeIds.length} brigades)`);
+        console.warn(`[feasibility] ${corpsName}: rejected op — ${initialFeasibility.blocker ?? 'launch_infeasible'} (${objectives.length} objectives, ${corpsBrigadeIds.length} brigades, ratio ${initialFeasibility.ratio.toFixed(3)})`);
         return null;
     }
 
@@ -1609,9 +1639,17 @@ export function evaluateCorpsOffensiveLaunch(
         .slice(0, MAX_PARTICIPATING_BRIGADES);
     if (participating.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
     if (!hasEligibleAttackersForLaunch(formations, participating)) return null;
-    if (!checkLaunchFeasibility(state, participating, objectives, faction)) {
+    const trimmedFeasibility = evaluateLaunchFeasibility(
+        state,
+        participating,
+        objectives,
+        faction,
+        supplyByOsid,
+        terrainMultByOsid,
+    );
+    if (!trimmedFeasibility.feasible) {
         const corpsName = formations[corpsId]?.name ?? corpsId;
-        console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - no objective achievable at costly_victory (${objectives.length} objectives, ${participating.length} participating brigades)`);
+        console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - ${trimmedFeasibility.blocker ?? 'launch_infeasible'} (${objectives.length} objectives, ${participating.length} participating brigades, ratio ${trimmedFeasibility.ratio.toFixed(3)})`);
         return null;
     }
 

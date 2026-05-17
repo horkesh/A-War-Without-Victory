@@ -512,7 +512,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('invalidates probes that miss their immediate launch window instead of aging into no-attempt recovery', () => {
@@ -580,7 +580,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('never promotes a planning operation into execution when positioned participants are combat-ineffective', () => {
@@ -657,7 +657,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('never promotes a planning operation when brigades only sit on a later-objective approach', () => {
@@ -750,7 +750,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('invalidates planning when coarse subsegment membership makes non-adjacent brigades look execution-ready', () => {
@@ -835,7 +835,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('never promotes a planning operation when brigades are only assembled at rear staging', () => {
@@ -908,7 +908,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 
     it('invalidates planning when objective approaches are occupied but the predictor still rejects every opening attack', () => {
@@ -1014,6 +1014,6 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('planning_invalidated');
+        expect(op?.recovery_reason).toBe('no_launch_readiness');
     });
 });

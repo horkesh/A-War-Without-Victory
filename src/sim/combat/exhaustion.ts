@@ -12,6 +12,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getMaxEnclaveResilienceForFaction } from './enclave_resilience.js';
 import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
 import { isSectorColdFront } from './sector_utils.js';
+import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -40,7 +41,6 @@ export function updateExhaustion(
     }
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-    const supplyPressure = state.political.war_supply_pressure ?? {};
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
     const sarajevo = state.political.sarajevo_state;
     const staticFrontCountByFaction = new Map<FactionId, number>();
@@ -72,7 +72,7 @@ export function updateExhaustion(
 
     for (const fid of factionIds) {
         const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
-        const supplyContrib = (supplyPressure[fid] ?? 0) * EXHAUSTION_PER_SUPPLY_PRESSURE_POINT;
+        const supplyContrib = getFactionLiveSupplyPressure(state, fid) * EXHAUSTION_PER_SUPPLY_PRESSURE_POINT;
         const staticContrib = (staticFrontCountByFaction.get(fid) ?? 0) * EXHAUSTION_PER_STATIC_FRONT;
         const delta = Math.min(MAX_DELTA_PER_TURN, supplyContrib + staticContrib);
         const multiplier = frictionMultipliers?.[fid] ?? 1;

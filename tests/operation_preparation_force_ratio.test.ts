@@ -26,6 +26,7 @@ import type {
     GameState,
 } from '../src/state/game_state.js';
 import { estimateForceRatio } from '../src/sim/combat/operation_preparation.js';
+import { evaluateLaunchFeasibility } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import { setUrbanOsidSet, setForestOsidSet } from '../src/sim/combat/combat_math.js';
 import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
 
@@ -851,5 +852,34 @@ describe('Family 5 determinism', () => {
         const rB = estimateForceRatio(fB.state, fB.op, 5, 0.9);
 
         expect(rA).toBe(rB);
+    });
+});
+
+describe('Shared launch feasibility alignment', () => {
+    it('defender-heavy matchup blocks launch with the same combat-power inputs as estimateForceRatio', () => {
+        setForestOsidSet(new Set<string>(['op:test:enemy_target']));
+        setUrbanOsidSet(new Set<string>());
+        const fixture = makeFixture({
+            attackers: [
+                makeBrigade({ id: 'atk_launch_1', faction: 'RBiH', personnel: 1200, composition: LIGHT_INFANTRY_COMP, posture: 'attack', morale: 60, cohesion: 70, experience: 0.4 }),
+            ],
+            defenders: [
+                makeBrigade({ id: 'def_launch_1', faction: 'RS', personnel: 2600, composition: EQUIPPED_COMP, posture: 'dig_in', morale: 85, cohesion: 90, experience: 0.7, entrenchment_turns: 6 }),
+            ],
+            intelConfidence: 0.9,
+        });
+
+        const estimate = estimateForceRatio(fixture.state, fixture.op, 5, 0.9);
+        const feasibility = evaluateLaunchFeasibility(
+            fixture.state,
+            fixture.op.participating_brigades,
+            fixture.op.objectives ?? [],
+            'RBiH',
+        );
+
+        expect(estimate).toBeLessThan(1.0);
+        expect(feasibility.feasible).toBe(false);
+        expect(feasibility.blocker).toBe('defender_power_too_high');
+        expect(feasibility.defenderPower).toBeGreaterThan(feasibility.attackerPower);
     });
 });

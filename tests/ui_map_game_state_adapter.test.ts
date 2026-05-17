@@ -248,6 +248,68 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 2);
 });
 
+test('parseGameState derives player-scoped live supply condition from flat OSID state', () => {
+    const parsed = parseGameState({
+  meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+  factions: [
+            { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+        ],
+  military: { formations: {}, militia_pools: {} } as any,
+  political: {
+            political_controllers: {
+                'op:a:1': 'RBiH',
+                'op:a:2': 'RBiH',
+                'op:a:3': 'RBiH',
+                'op:b:1': 'RS',
+            },
+            last_supply_state_by_osid: {
+                'op:a:1': 'adequate',
+                'op:a:2': 'strained',
+                'op:a:3': 'critical',
+                'op:b:1': 'critical',
+            },
+            war_supply_pressure: { RBiH: 100, RS: 100 },
+        } as any,
+  displacement: {} as any,
+});
+
+    assert.deepEqual(parsed.warPhaseSupplyPressure, { RBiH: 100 });
+    assert.deepEqual(parsed.warPhaseSupplyCondition, { RBiH: 50 });
+    assert.deepEqual(parsed.supplyStateByOsid, {
+        'op:a:1': 'adequate',
+        'op:a:2': 'strained',
+        'op:a:3': 'critical',
+    });
+});
+
+test('parseGameState derives per-OSID political authority and legitimacy metrics', () => {
+    const parsed = parseGameState({
+  meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+  factions: [
+            { id: 'RBiH', profile: { authority: 0.82, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'RS', profile: { authority: 25, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+        ],
+  military: { formations: {}, militia_pools: {} } as any,
+  political: {
+            political_controllers: {
+                'op:a:1': 'RBiH',
+                'op:b:1': 'RS',
+            },
+            settlements: {
+                'op:a:1': { legitimacy_state: { legitimacy_score: 0.74 } },
+                'op:b:1': { legitimacy_state: { legitimacy_score: 41 } },
+            },
+        } as any,
+  displacement: {} as any,
+});
+
+    assert.deepEqual(parsed.politicalMetricsByOsid, {
+        'op:a:1': { controller: 'RBiH', authority: 82, legitimacy: 74 },
+        'op:b:1': { controller: 'RS', authority: 25, legitimacy: 41 },
+    });
+});
+
 test('parseGameState derives operation readiness and offensive metadata', () => {
     const parsed = parseGameState({
   meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },

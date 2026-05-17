@@ -111,7 +111,9 @@ function loadAdjacency(repoRoot) {
 // collapsed three distinct binding mechanisms. Sub-predicates now split by
 // op-level `recovery_reason` when total_attacks == 0 and the first objective
 // is front-adjacent:
-//   'no_launch_readiness'         : recovery_reason == 'planning_invalidated'.
+//   'no_launch_readiness'         : recovery_reason in {'planning_invalidated',
+//                                   'no_launch_readiness'}.
+//   'defender_power_too_high'     : recovery_reason == 'defender_power_too_high'.
 //                                   Commander invalidated the plan during
 //                                   planning (e.g. participants never reached
 //                                   staging before plan abandoned, intel
@@ -187,7 +189,9 @@ function classifyAxis(axis, opTotalAttacks, controllers, adjacency, faction, axe
             // /operations-expert Tier 1 evidence: n1621 had 23 ops collapsed
             // under no_contact_other masking distinct binding mechanisms.
             const reason = typeof recoveryReason === 'string' ? recoveryReason : '';
-            if (reason === 'planning_invalidated') {
+            if (reason === 'defender_power_too_high') {
+                predicate = 'defender_power_too_high';
+            } else if (reason === 'planning_invalidated' || reason === 'no_launch_readiness') {
                 predicate = 'no_launch_readiness';
             } else if (reason === 'max_failures' || reason === 'no_logged_attempt') {
                 predicate = 'no_opening_attack';
@@ -340,6 +344,7 @@ function buildOpRows({ runDir, includeActive }) {
             ended_turn: Number.isFinite(+aar.ended_turn) ? +aar.ended_turn : 0,
             outcome: String(aar.outcome || ''),
             recovery_reason: typeof aar.recovery_reason === 'string' ? aar.recovery_reason : '',
+            blocker: typeof aar.recovery_reason === 'string' ? aar.recovery_reason : '',
             capture_provenance: String(aar.capture_provenance || ''),
             total_attacks: totalAttacks,
             objectives_targeted: totalTargeted,
@@ -376,6 +381,7 @@ function buildOpRows({ runDir, includeActive }) {
                     ended_turn: 0,
                     outcome: 'active',
                     recovery_reason: op.recovery_reason || '',
+                    blocker: op.recovery_reason || '',
                     capture_provenance: '',
                     total_attacks: op.attack_attempt_count || 0,
                     objectives_targeted: asArray(op.objectives).length || 0,
@@ -403,6 +409,7 @@ function buildOpRows({ runDir, includeActive }) {
                     ended_turn: 0,
                     outcome: 'active',
                     recovery_reason: synthAar.recovery_reason,
+                    blocker: synthAar.blocker,
                     capture_provenance: '(active)',
                     total_attacks: synthAar.total_attacks,
                     objectives_targeted: synthAar.objectives_targeted,
@@ -445,6 +452,7 @@ function predicateEmoji(predicate) {
         case 'contacted_but_underdelivered': return 'UNDERDELIV';
         case 'no_contact_pathing': return 'NO-CONTACT-PATH';
         case 'no_launch_readiness': return 'NO-LAUNCH-READINESS';
+        case 'defender_power_too_high': return 'DEFENDER-POWER-HIGH';
         case 'no_opening_attack': return 'NO-OPENING-ATTACK';
         case 'no_staging_march': return 'NO-STAGING-MARCH';
         case 'no_contact_other': return 'NO-CONTACT-OTHER';
@@ -481,11 +489,11 @@ function printMarkdown(runs) {
         // Op-level rollup table
         lines.push('### Operations (op-level rollup)');
         lines.push('');
-        lines.push('| Started | Op | Corps | Faction | Outcome | Attacks | Captured | Provenance | Recovery | Predicate | Opp | Resp | Exit |');
-        lines.push('|---:|---|---|---|---|---:|---|---|---|---|---|---|---|');
+        lines.push('| Started | Op | Corps | Faction | Outcome | Attacks | Captured | Provenance | Recovery | Blocker | Predicate | Opp | Resp | Exit |');
+        lines.push('|---:|---|---|---|---|---:|---|---|---|---|---|---|---|---|');
         for (const op of run.opRows) {
             const captured = `${op.objectives_captured}/${op.objectives_targeted}`;
-            lines.push(`| ${op.started_turn} | ${op.operation_name} | ${op.corps_id} | ${op.faction} | ${op.outcome} | ${op.total_attacks} | ${captured} | ${op.capture_provenance || 'n/a'} | ${op.recovery_reason || 'n/a'} | ${predicateEmoji(op.op_predicate)} | ${op.opportunity_id || '-'} | ${op.proposal_response || '-'} | ${op.exit_class || '-'} |`);
+            lines.push(`| ${op.started_turn} | ${op.operation_name} | ${op.corps_id} | ${op.faction} | ${op.outcome} | ${op.total_attacks} | ${captured} | ${op.capture_provenance || 'n/a'} | ${op.recovery_reason || 'n/a'} | ${op.blocker || '-'} | ${predicateEmoji(op.op_predicate)} | ${op.opportunity_id || '-'} | ${op.proposal_response || '-'} | ${op.exit_class || '-'} |`);
         }
         lines.push('');
 

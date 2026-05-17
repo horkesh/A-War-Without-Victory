@@ -304,7 +304,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
     };
 
     return (
-        <section className="space-y-2">
+        <section className="space-y-2" data-coachmark-id="operation-opportunity">
             <div className="flex items-center justify-between gap-3 border-b border-panel-border pb-1">
                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
                     Operational Opportunities

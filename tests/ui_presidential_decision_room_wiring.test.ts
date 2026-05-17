@@ -62,6 +62,18 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain("lens.id === 'all'");
   });
 
+  it('keeps advanced decision-room telemetry behind an explicit progressive-disclosure control', () => {
+    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+
+    expect(panel).toContain('showAdvanced');
+    expect(panel).toContain('setShowAdvanced');
+    expect(panel).toContain('View Advanced');
+    expect(panel).toContain('Hide Advanced');
+    expect(panel).toContain('data-testid="decision-room-advanced"');
+    expect(panel).toContain('{showAdvanced && view.lenses.length > 0');
+    expect(panel).toContain('{showAdvanced && (');
+  });
+
   it('renders command-loop lanes without creating another queue owner', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');

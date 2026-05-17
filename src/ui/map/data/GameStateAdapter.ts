@@ -56,10 +56,15 @@ import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js'
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
+import { summarizePlayerDecisions } from '../../../state/player_decision_manifest.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
+import {
+    deriveFactionSupplyConditionFromFlatOsidState,
+    deriveFactionSupplyConditionFromOsidReport,
+} from '../../../sim/combat/supply_condition.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -80,8 +85,37 @@ function scopeToPlayerFaction<T>(record: Record<string, T> | undefined, playerFa
 const ATTACKER_WIN_OUTCOMES = ['decisive_victory', 'victory', 'costly_victory'];
 const ATTACKER_LOSS_OUTCOMES = ['repulsed', 'catastrophic'];
 
+type TutorialStateView = NonNullable<LoadedGameState['tutorial_state']>;
+
+function normalizeTutorialState(meta: Record<string, unknown>, turn: number): TutorialStateView | undefined {
+    const raw = meta.tutorial_state;
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+        const value = raw as Record<string, unknown>;
+        return {
+            dismissed: value.dismissed === true,
+            current_step: typeof value.current_step === 'string' ? value.current_step : undefined,
+            completed_steps: Array.isArray(value.completed_steps)
+                ? value.completed_steps.filter((step): step is string => typeof step === 'string')
+                : [],
+        };
+    }
+    if (turn > 0) {
+        return {
+            dismissed: true,
+            completed_steps: [],
+        };
+    }
+    return undefined;
+}
+
 function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function normalizePercent(value: unknown): number | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    const percent = value >= 0 && value <= 1 ? value * 100 : value;
+    return Math.max(0, Math.min(100, Math.round(percent * 100) / 100));
 }
 
 const MUNICIPALITY_DISPLAY_NAMES: Record<string, string> = {
@@ -212,6 +246,74 @@ function deriveEnclaveSupplyState(
     if (fallbackIsolationTurns <= 0) return 'adequate';
     if (fallbackHardening || fallbackResilience >= 8) return 'critical';
     return 'strained';
+}
+
+function normalizeSupplyState(value: unknown): 'adequate' | 'strained' | 'critical' | null {
+    return value === 'adequate' || value === 'strained' || value === 'critical' ? value : null;
+}
+
+function deriveSupplyStateByOsidView(
+    rawSupplyStateByOsid: Record<string, unknown> | undefined,
+    fallbackFlatState: Record<string, unknown> | undefined,
+    politicalControllers: Record<string, string | null | undefined> | undefined,
+    playerFaction: string | null | undefined,
+): LoadedGameState['supplyStateByOsid'] {
+    const result: NonNullable<LoadedGameState['supplyStateByOsid']> = {};
+    const includeOsid = (osid: string, factionHint?: string): boolean => {
+        if (!playerFaction) return true;
+        if (factionHint) return factionHint === playerFaction;
+        return politicalControllers?.[osid] === playerFaction;
+    };
+
+    const factions = Array.isArray(rawSupplyStateByOsid?.factions) ? rawSupplyStateByOsid.factions as Array<Record<string, unknown>> : [];
+    for (const factionEntry of factions) {
+        const factionId = typeof factionEntry.faction_id === 'string' ? factionEntry.faction_id : undefined;
+        if (playerFaction && factionId !== playerFaction) continue;
+        const byOsid = Array.isArray(factionEntry.by_osid) ? factionEntry.by_osid as Array<Record<string, unknown>> : [];
+        for (const entry of [...byOsid].sort((a, b) => strictCompare(String(a.osid ?? ''), String(b.osid ?? '')))) {
+            const osid = typeof entry.osid === 'string' ? entry.osid : '';
+            const supplyState = normalizeSupplyState(entry.state);
+            if (!osid || !supplyState || !includeOsid(osid, factionId)) continue;
+            result[osid] = supplyState;
+        }
+    }
+
+    if (Object.keys(result).length === 0 && fallbackFlatState && typeof fallbackFlatState === 'object' && !Array.isArray(fallbackFlatState)) {
+        for (const osid of Object.keys(fallbackFlatState).sort(strictCompare)) {
+            const supplyState = normalizeSupplyState(fallbackFlatState[osid]);
+            if (!supplyState || !includeOsid(osid)) continue;
+            result[osid] = supplyState;
+        }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function derivePoliticalMetricsByOsid(state: any): LoadedGameState['politicalMetricsByOsid'] {
+    const controllers = state.political?.political_controllers as Record<string, string | null | undefined> | undefined;
+    const settlements = state.political?.settlements as Record<string, Record<string, unknown>> | undefined;
+    if (!controllers || typeof controllers !== 'object') return undefined;
+
+    const authorityByFaction = new Map<string, number>();
+    const factions = Array.isArray(state.factions) ? state.factions as Array<Record<string, unknown>> : [];
+    for (const faction of factions) {
+        const id = typeof faction.id === 'string' ? faction.id : '';
+        const profile = faction.profile as Record<string, unknown> | undefined;
+        const authority = normalizePercent(profile?.authority);
+        if (id && authority != null) authorityByFaction.set(id, authority);
+    }
+
+    const result: NonNullable<LoadedGameState['politicalMetricsByOsid']> = {};
+    for (const osid of Object.keys(controllers).sort(strictCompare)) {
+        const controller = typeof controllers[osid] === 'string' ? controllers[osid] as string : null;
+        const legitimacyState = settlements?.[osid]?.legitimacy_state as Record<string, unknown> | undefined;
+        const legitimacy = normalizePercent(legitimacyState?.legitimacy_score);
+        const authority = controller ? authorityByFaction.get(controller) ?? null : null;
+        if (authority == null && legitimacy == null) continue;
+        result[osid] = { controller, authority, legitimacy };
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**
@@ -1093,6 +1195,24 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (Object.keys(out).length > 0) warPhaseSupplyPressure = out;
     }
 
+    const rawSupplyStateByOsid = state.supply_state_by_osid as any | undefined;
+    let warPhaseSupplyCondition: LoadedGameState['warPhaseSupplyCondition'] | undefined;
+    const rawSupplyCondition = state.political.war_supply_condition as any | undefined;
+    if (rawSupplyCondition && typeof rawSupplyCondition === 'object' && !Array.isArray(rawSupplyCondition)) {
+        const out: NonNullable<LoadedGameState['warPhaseSupplyCondition']> = {};
+        for (const faction of Object.keys(rawSupplyCondition).sort((a, b) => a.localeCompare(b))) {
+            out[faction] = finiteNumber(rawSupplyCondition[faction], 0);
+        }
+        if (Object.keys(out).length > 0) warPhaseSupplyCondition = out;
+    } else {
+        warPhaseSupplyCondition =
+            deriveFactionSupplyConditionFromOsidReport(rawSupplyStateByOsid)
+            ?? deriveFactionSupplyConditionFromFlatOsidState(
+                state.political.last_supply_state_by_osid as Record<string, unknown> | undefined,
+                state.political.political_controllers as Record<string, string | null | undefined> | undefined,
+            );
+    }
+
     let factionReserves: LoadedGameState['factionReserves'] | undefined;
     const rawGeneral = state.military.general_supply_reserve as any | undefined;
     if (rawGeneral && typeof rawGeneral === 'object' && !Array.isArray(rawGeneral)) {
@@ -1647,7 +1767,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     let enclaveResilience: LoadedGameState['enclaveResilience'] | undefined;
     const rawEnclave = state.political.enclave_resilience as any | undefined;
-    const rawSupplyStateByOsid = state.supply_state_by_osid as any | undefined;
     if (rawEnclave && typeof rawEnclave === 'object' && !Array.isArray(rawEnclave)) {
         const out: Record<string, EnclaveResilienceView> = {};
         for (const key of Object.keys(rawEnclave).sort()) {
@@ -1700,7 +1819,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         && Array.isArray((state as any).factions)
         ? getOperationalSitrepView(state as GameState, playerFaction as any)
         : undefined;
-    const pendingOfficerEvents = derivePendingOfficerEvents(state);
+    const pendingOfficerEvents = derivePendingOfficerEvents(state, playerFaction);
     const pendingEventDecisions = derivePendingEventDecisions(state);
     const pendingProposalReviews = derivePendingProposalReviews(state, playerFaction);
     const operationOpportunityProposals = deriveOperationOpportunityProposals(state, playerFaction);
@@ -1713,6 +1832,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
     });
+    const pendingParamilitaryRequests = derivePendingParamilitaryRequests(state, playerFaction);
+    const playerDecisionSummary = summarizePlayerDecisions(state, playerFaction);
     const operationOpportunityRecords = deriveOperationOpportunityRecords(state, playerFaction);
     const operationOpportunitySummary = deriveOperationOpportunitySummary(operationOpportunityRecords);
 
@@ -1748,13 +1869,14 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
-        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
+        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
-        // v0.9.2 tutorial onboarding skeleton: pass through unchanged.
-        // Absent on older saves — OnboardingOverlay treats undefined as "not dismissed".
-        tutorial_state: meta?.tutorial_state ?? undefined,
+        // v0.9.2 tutorial onboarding skeleton: pass through saved state.
+        // Older progressed saves predate the field; treat turn > 0 as already
+        // seen so Continue does not replay first-run onboarding.
+        tutorial_state: normalizeTutorialState(meta, turn),
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
         frontPressureByEdge,
@@ -1795,9 +1917,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         } : undefined,
         commandBriefing,
         operationalSitrep,
+        playerDecisionSummary,
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),
         supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
+        supplyStateByOsid: deriveSupplyStateByOsidView(
+            rawSupplyStateByOsid,
+            state.political.last_supply_state_by_osid as Record<string, unknown> | undefined,
+            state.political.political_controllers as Record<string, string | null | undefined> | undefined,
+            playerFaction,
+        ),
+        politicalMetricsByOsid: derivePoliticalMetricsByOsid(state),
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
@@ -1805,6 +1935,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests,
+        pendingParamilitaryRequests,
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,
@@ -2135,7 +2266,10 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
     return activeOps.length > 0 ? activeOps : undefined;
 }
 
-function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficerEvents'] {
+function derivePendingOfficerEvents(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['pendingOfficerEvents'] {
     const events = state.military?.pending_officer_events as any[] | undefined;
     if (!events || events.length === 0) return undefined;
 
@@ -2165,6 +2299,7 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
 
     return events
         .filter((e: any) => !e.acknowledged)
+        .filter((e: any) => !playerFaction || e.faction === playerFaction)
         .map((e: any) => {
             const stats = getOfficerStats(e.officer_id);
             return {
@@ -2198,6 +2333,31 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
                 override_action: typeof e.override_action === 'string' ? e.override_action : undefined,
             };
         });
+}
+
+function derivePendingParamilitaryRequests(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['pendingParamilitaryRequests'] {
+    const requests = state.pending_paramilitary_requests as any[] | undefined;
+    if (!Array.isArray(requests) || requests.length === 0) return undefined;
+
+    const parsed = requests
+        .filter((request) => !playerFaction || request?.faction === playerFaction)
+        .filter((request) =>
+            typeof request?.faction === 'string'
+            && typeof request?.target_osid === 'string'
+            && Number.isFinite(Number(request?.strength)),
+        )
+        .map((request) => ({
+            faction: request.faction,
+            strength: Number(request.strength),
+            target_osid: request.target_osid,
+            ...(request.decision === 'allow' || request.decision === 'deny' ? { decision: request.decision } : {}),
+            ...(request.mode === 'rear_pocket' || request.mode === 'offensive' ? { mode: request.mode } : {}),
+        }));
+
+    return parsed.length > 0 ? parsed : undefined;
 }
 
 function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameState> {

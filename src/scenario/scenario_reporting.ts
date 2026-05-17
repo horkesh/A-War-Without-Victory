@@ -8,6 +8,7 @@ import { strictCompare } from '../state/validateGameState.js';
 import type { OperationCombatDiagnostic } from './combat_causality.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
+import { getFactionLiveSupplyCondition } from '../sim/combat/supply_condition.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
 export interface WeeklyActivityCounts {
@@ -56,7 +57,7 @@ export interface WeeklyBehavioralHealthSummary {
 export interface WeeklyReportRow {
     week_index: number;
     phase: string | undefined;
-    factions: Array<{ id: string; exhaustion: number; supply_pressure?: number }>;
+    factions: Array<{ id: string; exhaustion: number; supply_pressure?: number; supply_condition?: number }>;
     control_counts: Record<string, number>;
     settlement_displacement_count: number;
     settlement_displacement_total: number;
@@ -156,7 +157,8 @@ export function buildWeeklyReport(
     const factions = (state.factions ?? []).map((f) => ({
         id: f.id,
         exhaustion: warExhaustion[f.id] ?? 0,
-        supply_pressure: state.political.war_supply_pressure?.[f.id]
+        supply_pressure: state.political.war_supply_pressure?.[f.id],
+        supply_condition: getFactionLiveSupplyCondition(state, f.id)
     })).sort((a, b) => strictCompare(a.id, b.id));
 
     const control_counts: Record<string, number> = {};

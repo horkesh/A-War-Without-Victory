@@ -2,14 +2,14 @@
  * First-turn orientation card (NIGHTSHIFT-G2).
  *
  * One-time onboarding overlay shown after the side picker on a fresh save.
- * Dismissal is persisted in localStorage under `awwv_seen_first_turn_intro`.
+ * Dismissal is owned by the caller's session state, not browser storage.
  *
  * Pure UI — routes through canonical shellNavigation helpers (`openArmyHQTab`,
  * `openChronicle`, `openCodex`) and the warroom `advance-turn` handoff. Does
  * NOT touch Decision Room / Pre-Advance / Warroom data files.
  *
- * Determinism: pure render. localStorage is read at mount in App.tsx and
- * passed in via the `view` prop; this component only writes on dismiss.
+ * Determinism: pure render. The caller passes in the `view` prop and handles
+ * dismissal; this component does not read or write persistence.
  */
 
 import { useGameStore } from '../store/gameStore';
@@ -23,21 +23,9 @@ import type {
     FirstTurnOrientationView,
 } from '../data/firstTurnOrientation';
 
-export const FIRST_TURN_INTRO_STORAGE_KEY = 'awwv_seen_first_turn_intro';
-
 export interface FirstTurnOrientationCardProps {
     view: FirstTurnOrientationView | null;
     onDismiss: () => void;
-}
-
-function persistSeenFlag(): void {
-    try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem(FIRST_TURN_INTRO_STORAGE_KEY, '1');
-        }
-    } catch {
-        // localStorage unavailable (private mode, SSR, etc.) — silently no-op.
-    }
 }
 
 function dispatchItem(item: FirstTurnOrientationItem): void {
@@ -76,14 +64,12 @@ export function FirstTurnOrientationCard({ view, onDismiss }: FirstTurnOrientati
     if (!view) return null;
 
     const handleDismiss = () => {
-        persistSeenFlag();
         onDismiss();
     };
 
     const handleItem = (item: FirstTurnOrientationItem) => {
         dispatchItem(item);
         // Visiting any surface counts as having seen the intro.
-        persistSeenFlag();
         onDismiss();
     };
 

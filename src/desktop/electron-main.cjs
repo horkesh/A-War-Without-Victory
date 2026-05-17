@@ -20,6 +20,7 @@ const {
   resolveOpportunityDecisionPayload,
 } = require('./autonomy_ipc_contract.cjs');
 const { computeCorpsCommandStrain } = require('./command_strain.cjs');
+const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
@@ -1585,18 +1586,27 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
 
-      // Block turn advance if any high-stakes decision awaits player response.
-      // The block clears when resolve-decision IPC removes the entry from pending_event_decisions.
-      const pending = state.military.pending_event_decisions ?? [];
-      const blocked = pending.filter(d => d.requires_player_response === true);
+      // Block turn advance from the shared generated player-decision manifest,
+      // so desktop hard-gating stays aligned with UI readiness policy.
+      if (typeof sim.listBlockingPlayerDecisions !== 'function') {
+        return {
+          ok: false,
+          error: 'Desktop sim missing player decision manifest. Run: npm run desktop:sim:build',
+        };
+      }
+      const playerFaction = state.meta?.player_faction ?? null;
+      const blocked = sim.listBlockingPlayerDecisions(state, playerFaction);
       if (blocked.length > 0) {
         return {
           ok: false,
           error: 'pending_required_decisions',
-          blocked_decisions: blocked.map(d => ({
-            event_id: d.event_id,
-            event_title: d.event_title,
-            faction: d.faction,
+          blocked_decisions: blocked.map((d) => ({
+            family_id: d.familyId,
+            decision_id: d.id,
+            label: d.label,
+            faction: d.faction ?? playerFaction,
+            event_id: d.event_id ?? d.eventId ?? d.id,
+            event_title: d.event_title ?? d.eventTitle ?? d.label,
           })),
         };
       }
@@ -2291,25 +2301,14 @@ app.whenReady().then(() => {
 
   ipcMain.handle('stage-convoy-decision', async (_event, payload) => {
     const { convoyId, decision } = payload || {};
-    if (!currentGameStateJson || typeof convoyId !== 'string' || typeof decision !== 'string') {
+    if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    if (!['allow', 'block', 'divert'].includes(decision)) {
-      return { ok: false, error: `Invalid convoy decision: ${decision}` };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const pending = Array.isArray(state.pending_convoy_decisions) ? [...state.pending_convoy_decisions] : [];
-      let found = false;
-      state.pending_convoy_decisions = pending.map((convoy) => {
-        if (convoy?.id !== convoyId) return convoy;
-        found = true;
-        return { ...convoy, decision };
-      });
-      if (!found) {
-        return { ok: false, error: 'Convoy not found' };
-      }
+      const result = stageConvoyDecisionOnState(state, convoyId, decision);
+      if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -2525,6 +2524,60 @@ app.whenReady().then(() => {
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true, all_accepted: result.all_accepted, rejection_factions: result.rejection_factions };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('resolve-paramilitary-requests', async (_event, payload) => {
+    const decisions = Array.isArray(payload?.decisions) ? payload.decisions : null;
+    if (!currentGameStateJson || !decisions) {
+      return { ok: false, error: 'no_state_or_invalid_payload' };
+    }
+
+    const decisionByTarget = new Map();
+    for (const item of decisions) {
+      if (
+        item
+        && typeof item.target_osid === 'string'
+        && (item.decision === 'allow' || item.decision === 'deny')
+      ) {
+        decisionByTarget.set(item.target_osid, item.decision);
+      }
+    }
+    if (decisionByTarget.size === 0) return { ok: false, error: 'invalid_decisions' };
+
+    try {
+      const sim = getDesktopSim();
+      const state = readCanonicalCurrentState(sim);
+      const pending = Array.isArray(state.pending_paramilitary_requests)
+        ? state.pending_paramilitary_requests
+        : [];
+      const playerFaction = state.meta?.player_faction ?? null;
+      let matched = 0;
+
+      for (const request of pending) {
+        if (!request || typeof request.target_osid !== 'string') continue;
+        if (playerFaction && request.faction !== playerFaction) continue;
+        const decision = decisionByTarget.get(request.target_osid);
+        if (!decision) continue;
+        request.decision = decision;
+        matched += 1;
+      }
+
+      if (matched === 0) return { ok: false, error: 'request_not_found' };
+
+      const unresolved = pending.filter((request) =>
+        request
+        && (!playerFaction || request.faction === playerFaction)
+        && request.decision !== 'allow'
+        && request.decision !== 'deny'
+      );
+      if (unresolved.length > 0) return { ok: false, error: 'incomplete_decisions' };
+
+      const report = sim.resolvePlayerParamilitaryDecisions(state);
+      const stateJson = writeCanonicalCurrentState(sim, state);
+      return { ok: true, stateJson, report };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

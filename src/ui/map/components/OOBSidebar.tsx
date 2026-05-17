@@ -76,7 +76,7 @@ export function OOBSidebar() {
   const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    situation: false,
+    situation: true,
     army: true,
     mobilization: false,
     operations: false,
@@ -237,11 +237,6 @@ export function OOBSidebar() {
       style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
-      <div
-        className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"
-        style={{ position: 'absolute' }}
-      ></div>
-
       <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
         Command
       </div>

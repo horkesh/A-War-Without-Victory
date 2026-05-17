@@ -6,6 +6,9 @@ export const WAR_SUMMARY_FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 export interface WarSummaryOverviewModel {
     playerFaction: (typeof WAR_SUMMARY_FACTIONS)[number] | null;
     areaPct: Record<(typeof WAR_SUMMARY_FACTIONS)[number], number>;
+    atArmsByFaction: Record<string, number>;
+    mobilizedPoolByFaction: Record<string, number>;
+    mobilizedTotalByFaction: Record<string, number>;
     personnelByFaction: Record<string, number>;
     totalDisplaced: number;
     displacedByFaction: Record<string, number>;
@@ -36,10 +39,26 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         HRHB: totalArea > 0 ? ((areaByFaction.HRHB ?? 0) / totalArea) * 100 : 0,
     };
 
-    const personnelByFaction: Record<string, number> = {};
+    const atArmsByFaction: Record<string, number> = {};
     for (const formation of state.formations) {
         if (formation.status === 'destroyed' || formation.personnel == null) continue;
-        personnelByFaction[formation.faction] = (personnelByFaction[formation.faction] ?? 0) + formation.personnel;
+        atArmsByFaction[formation.faction] = (atArmsByFaction[formation.faction] ?? 0) + formation.personnel;
+    }
+
+    const mobilizedPoolByFaction: Record<string, number> = {};
+    for (const pool of state.militiaPools ?? []) {
+        const poolTotal =
+            Math.max(0, pool.available ?? 0)
+            + Math.max(0, pool.committed ?? 0)
+            + Math.max(0, pool.exhausted ?? 0);
+        if (poolTotal <= 0) continue;
+        mobilizedPoolByFaction[pool.faction] = (mobilizedPoolByFaction[pool.faction] ?? 0) + poolTotal;
+    }
+
+    const mobilizedTotalByFaction: Record<string, number> = {};
+    for (const f of WAR_SUMMARY_FACTIONS) {
+        const total = (atArmsByFaction[f] ?? 0) + (mobilizedPoolByFaction[f] ?? 0);
+        if (total > 0) mobilizedTotalByFaction[f] = total;
     }
 
     let totalDisplaced = 0;
@@ -76,7 +95,10 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
     return {
         playerFaction,
         areaPct,
-        personnelByFaction,
+        atArmsByFaction,
+        mobilizedPoolByFaction,
+        mobilizedTotalByFaction,
+        personnelByFaction: atArmsByFaction,
         totalDisplaced,
         displacedByFaction,
         warExhaustionByFaction,

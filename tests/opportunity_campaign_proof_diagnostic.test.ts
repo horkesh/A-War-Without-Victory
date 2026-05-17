@@ -107,7 +107,7 @@ describe('opportunity campaign proof diagnostic script', () => {
 
         expect(output).toContain('# Opportunity Campaign Proof Matrix');
         expect(output).toContain('| Opportunities observed | 2 |');
-        expect(output).toContain('| sana_95 | surfaced_executed | 175 | approve | failed | failure | 0 | 0/1 | NO-CONTACT-PATH:1 | n/a |');
+        expect(output).toContain('| sana_95 | surfaced_executed | 175 | approve | failed | failure | 0 | 0/1 | NO-CONTACT-PATH:1 | aar:max_failures |');
         expect(output).toContain('| breza_94 | blocked_in_window | 125-126 | - | - | - | 0 | 0/0 | - | alliance_context x2; logistics x2 |');
         expect(output).toContain('| Operation Sana | sana_sanski_most_kljuc | true | NO-CONTACT-PATH | (none) |');
     });

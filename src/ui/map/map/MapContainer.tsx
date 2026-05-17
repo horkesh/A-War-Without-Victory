@@ -20,8 +20,12 @@ import { buildCasualtiesGeoJSON } from './builders/buildCasualtiesGeoJSON';
 import { buildDefenseStrengthGeoJSON } from './builders/buildDefenseStrengthGeoJSON';
 import { buildEthnicGeoJSON } from './builders/buildEthnicGeoJSON';
 import { buildSupplyGeoJSON } from './builders/buildSupplyGeoJSON';
+import { buildSupplyReachGeoJSON } from './builders/buildSupplyReachGeoJSON';
 import { buildOperationalWeightGeoJSON } from './builders/buildOperationalWeightGeoJSON';
 import { buildFrontLinesGeoJSON } from './builders/buildFrontLinesGeoJSON';
+import { buildContestedBandsGeoJSON } from './builders/buildContestedBandsGeoJSON';
+import { buildFrontStabilityGeoJSON } from './builders/buildFrontStabilityGeoJSON';
+import { buildPoliticalMetricGeoJSON } from './builders/buildPoliticalMetricGeoJSON';
 import { buildFrontEdgesHoverGeoJSON } from './builders/buildFrontEdgesHoverGeoJSON';
 import { buildCorpsFrontLinesGeoJSON, buildCorpsColorExpression } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSON } from './builders/buildOperationTargetIconsGeoJSON';
@@ -258,10 +262,18 @@ const OSID_CASUALTIES_FILL_LAYER_ID = 'osid-casualties-fill';
 const OSID_CASUALTIES_SOURCE_ID = 'osid-casualties';
 const OSID_SUPPLY_FILL_LAYER_ID = 'osid-supply-fill';
 const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
+const SUPPLY_REACH_SOURCE_ID = 'supply-reach';
+const SUPPLY_REACH_FILL_LAYER_ID = 'supply-reach-fill';
+const SUPPLY_REACH_OUTLINE_LAYER_ID = 'supply-reach-outline';
+const POLITICAL_METRIC_SOURCE_ID = 'political-metric';
+const POLITICAL_METRIC_FILL_LAYER_ID = 'political-metric-fill';
 const OSID_OPERATIONS_FILL_LAYER_ID = 'osid-operations-fill';
 const OSID_OPERATIONS_SOURCE_ID = 'osid-operations';
 const OSID_DEFENSE_FILL_LAYER_ID = 'osid-defense-fill';
 const OSID_DEFENSE_SOURCE_ID = 'osid-defense';
+const CONTESTED_BANDS_SOURCE_ID = 'contested-bands';
+const CONTESTED_BANDS_FILL_LAYER_ID = 'contested-bands-fill';
+const CONTESTED_BANDS_OUTLINE_LAYER_ID = 'contested-bands-outline';
 /** Layer ID for formation markers (formationsVisible). */
 const FORMATION_MARKERS_LAYER_ID = 'formation-markers';
 const FORMATION_WHITE_OVERLAY_LAYER_ID = 'formation-white-pulse-overlay';
@@ -717,7 +729,7 @@ export function MapContainer() {
         const controlledGeoJson = buildControlGeoJSON(geojson, byOsid);
         const majorCityLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
         setSettlementLabelData(majorCityLabels.features);
-        const frontLinesGeoJson = buildFrontLinesGeoJSON(controlledGeoJson);
+        const frontLinesGeoJson = buildFrontStabilityGeoJSON(buildFrontLinesGeoJSON(controlledGeoJson));
         const sources = style.sources as Record<
           string,
           { type?: string; data?: FeatureCollection }
@@ -738,6 +750,9 @@ export function MapContainer() {
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[BATTLE_MARKERS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[MAJOR_CITY_LABELS_SOURCE_ID] = { type: 'geojson', data: majorCityLabels };
         (sources as Record<string, { type?: string; data?: FeatureCollection }>)[GHOST_PATH_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[CONTESTED_BANDS_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[SUPPLY_REACH_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
+        (sources as Record<string, { type?: string; data?: FeatureCollection }>)[POLITICAL_METRIC_SOURCE_ID] = { type: 'geojson', data: EMPTY_GEOJSON };
         // NOTE: front-edges-hover source is NOT pre-registered here — it's created via addSource
         // in runUpdate so that addLayer calls in the same block also execute.
       } catch (e) {
@@ -1129,6 +1144,73 @@ export function MapContainer() {
           const m1 = mapRef.current;
           controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement, useGameStore.getState().osidPropertiesMap);
           (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+          const contestedBandsGeoJson = buildContestedBandsGeoJSON({
+            controlGeoJson: controlledGeoJson,
+            currentTurn: state.turn,
+            recentControlEvents: state.allControlEvents ?? state.recentControlEvents ?? [],
+            frontEdgesOsid: state.frontEdgesOsid ?? [],
+            formations: state.formations,
+          });
+          safeEnsureSource(m1, CONTESTED_BANDS_SOURCE_ID, { type: 'geojson', data: contestedBandsGeoJson });
+          const contestedSource = m1.getSource(CONTESTED_BANDS_SOURCE_ID) as GeoJSONSource | undefined;
+          if (contestedSource) contestedSource.setData(contestedBandsGeoJson);
+          if (!safeHasLayer(m1, CONTESTED_BANDS_FILL_LAYER_ID)) {
+            m1.addLayer(
+              {
+                id: CONTESTED_BANDS_FILL_LAYER_ID,
+                type: 'fill',
+                source: CONTESTED_BANDS_SOURCE_ID,
+                paint: {
+                  'fill-color': [
+                    'match',
+                    ['get', 'contested_reason'],
+                    'recent_change', 'rgba(230, 178, 80, 0.30)',
+                    'adjacent_pressure', 'rgba(220, 80, 70, 0.24)',
+                    'rgba(210, 210, 210, 0.16)',
+                  ],
+                  'fill-opacity': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'contested_score'],
+                    0.5, 0.20,
+                    1.0, 0.42,
+                  ],
+                },
+              },
+              OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID,
+            );
+          }
+          if (!safeHasLayer(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID)) {
+            m1.addLayer(
+              {
+                id: CONTESTED_BANDS_OUTLINE_LAYER_ID,
+                type: 'line',
+                source: CONTESTED_BANDS_SOURCE_ID,
+                paint: {
+                  'line-color': [
+                    'match',
+                    ['get', 'contested_reason'],
+                    'recent_change', 'rgba(245, 196, 96, 0.78)',
+                    'adjacent_pressure', 'rgba(238, 103, 88, 0.70)',
+                    'rgba(230, 230, 230, 0.45)',
+                  ],
+                  'line-width': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    7, 0.6,
+                    10, 1.1,
+                    13, 1.8,
+                  ],
+                  'line-dasharray': [2, 2],
+                },
+              },
+              'front-line-base',
+            );
+          }
+          const showContestedBands = mapMode === 'political' || mapMode === 'ethnic';
+          safeSetLayoutVisibility(m1, CONTESTED_BANDS_FILL_LAYER_ID, showContestedBands);
+          safeSetLayoutVisibility(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID, showContestedBands);
           try {
             const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
             setSettlementLabelData(majorLabels.features);
@@ -1177,7 +1259,20 @@ export function MapContainer() {
                 osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
               );
             }
-            (m2.getSource('front-lines') as GeoJSONSource)?.setData(frontLinesGeoJson);
+            const stableFrontLinesGeoJson = buildFrontStabilityGeoJSON(frontLinesGeoJson);
+            (m2.getSource('front-lines') as GeoJSONSource)?.setData(stableFrontLinesGeoJson);
+            try {
+              m2.setPaintProperty('front-line-stripe', 'line-dasharray', [
+                'match',
+                ['get', 'stability_class'],
+                'static', ['literal', [7, 3]],
+                'fluid', ['literal', [2, 2]],
+                'oscillating', ['literal', [1, 1]],
+                ['literal', [4, 3]],
+              ] as maplibregl.ExpressionSpecification);
+            } catch (e) {
+              console.warn('[MapContainer] Failed to set front stability dash expression:', e);
+            }
 
             // Operational Heatmap (Mode 7) update
             if (Number(mapMode) === 7 && osidCentroidsRef.current.size > 0) {
@@ -2448,6 +2543,12 @@ export function MapContainer() {
       if (safeHasLayer(m, OSID_ETHNIC_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic');
       }
+      if (safeHasLayer(m, CONTESTED_BANDS_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, CONTESTED_BANDS_FILL_LAYER_ID, mapMode === 'political' || mapMode === 'ethnic');
+      }
+      if (safeHasLayer(m, CONTESTED_BANDS_OUTLINE_LAYER_ID)) {
+        safeSetLayoutVisibility(m, CONTESTED_BANDS_OUTLINE_LAYER_ID, mapMode === 'political' || mapMode === 'ethnic');
+      }
       if (safeHasLayer(m, OSID_MORALE_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_MORALE_FILL_LAYER_ID, mapMode === 'morale');
       }
@@ -2456,6 +2557,15 @@ export function MapContainer() {
       }
       if (safeHasLayer(m, OSID_SUPPLY_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
+      }
+      if (safeHasLayer(m, POLITICAL_METRIC_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, POLITICAL_METRIC_FILL_LAYER_ID, mapMode === 'authority' || mapMode === 'legitimacy');
+      }
+      if (safeHasLayer(m, SUPPLY_REACH_FILL_LAYER_ID)) {
+        safeSetLayoutVisibility(m, SUPPLY_REACH_FILL_LAYER_ID, mapMode === 'supply');
+      }
+      if (safeHasLayer(m, SUPPLY_REACH_OUTLINE_LAYER_ID)) {
+        safeSetLayoutVisibility(m, SUPPLY_REACH_OUTLINE_LAYER_ID, mapMode === 'supply');
       }
       if (safeHasLayer(m, OSID_OPERATIONS_FILL_LAYER_ID)) {
         safeSetLayoutVisibility(m, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations');
@@ -2469,6 +2579,58 @@ export function MapContainer() {
       cancelAnimationFrame(rafId);
     };
   }, [mapReady, osidPropertiesMap, mapMode, loadedGameState]);
+
+  // Authority / legitimacy map modes: separate political metrics over the same control polygons.
+  useEffect(() => {
+    const map = mapRef.current;
+    const baseGeoJson = osidBaseRef.current;
+    if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
+
+    let cancelled = false;
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled || !mapRef.current || !loadedGameState) return;
+      const metric = mapMode === 'legitimacy' ? 'legitimacy' : 'authority';
+      const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
+      const metricGeoJson = buildPoliticalMetricGeoJSON({
+        controlGeoJson,
+        metric,
+        politicalMetricsByOsid: loadedGameState.politicalMetricsByOsid,
+      });
+      if (cancelled || !mapRef.current) return;
+      const m = mapRef.current;
+      safeEnsureSource(m, POLITICAL_METRIC_SOURCE_ID, { type: 'geojson', data: metricGeoJson });
+      const source = m.getSource(POLITICAL_METRIC_SOURCE_ID) as GeoJSONSource | undefined;
+      if (source) source.setData(metricGeoJson);
+      if (!safeHasLayer(m, POLITICAL_METRIC_FILL_LAYER_ID)) {
+        m.addLayer(
+          {
+            id: POLITICAL_METRIC_FILL_LAYER_ID,
+            type: 'fill',
+            source: POLITICAL_METRIC_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'metric_value'],
+                0, 'rgba(127, 29, 29, 0.62)',
+                50, 'rgba(161, 98, 7, 0.46)',
+                100, 'rgba(22, 101, 52, 0.52)',
+              ],
+              'fill-opacity': 1,
+            },
+            layout: { visibility: mapMode === 'authority' || mapMode === 'legitimacy' ? 'visible' : 'none' },
+          },
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID,
+        );
+      }
+      safeSetLayoutVisibility(m, POLITICAL_METRIC_FILL_LAYER_ID, mapMode === 'authority' || mapMode === 'legitimacy');
+      safeSetLayoutVisibility(m, 'osid-control-fill', mapMode === 'political');
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+    };
+  }, [mapReady, mapMode, loadedGameState]);
 
   // Morale map mode — color front-adjacent OSIDs by sector average morale (continuous gradient).
   useEffect(() => {
@@ -2680,8 +2842,13 @@ export function MapContainer() {
         controlGeoJson,
         loadedGameState.controlBySettlement,
         loadedGameState.factionReserves,
-        loadedGameState.warPhaseSupplyPressure
+        loadedGameState.warPhaseSupplyPressure,
+        loadedGameState.warPhaseSupplyCondition
       );
+      const supplyReachGeoJson = buildSupplyReachGeoJSON({
+        controlGeoJson,
+        supplyStateByOsid: loadedGameState.supplyStateByOsid,
+      });
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;
       if (!m.getSource(OSID_SUPPLY_SOURCE_ID)) {
@@ -2708,7 +2875,75 @@ export function MapContainer() {
       } else {
         (m.getSource(OSID_SUPPLY_SOURCE_ID) as GeoJSONSource).setData(supplyGeoJson);
       }
+      safeEnsureSource(m, SUPPLY_REACH_SOURCE_ID, { type: 'geojson', data: supplyReachGeoJson });
+      const reachSource = m.getSource(SUPPLY_REACH_SOURCE_ID) as GeoJSONSource | undefined;
+      if (reachSource) reachSource.setData(supplyReachGeoJson);
+      if (!safeHasLayer(m, SUPPLY_REACH_FILL_LAYER_ID)) {
+        m.addLayer(
+          {
+            id: SUPPLY_REACH_FILL_LAYER_ID,
+            type: 'fill',
+            source: SUPPLY_REACH_SOURCE_ID,
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'supply_reach_class'],
+                'adequate', 'rgba(42, 154, 96, 0.12)',
+                'strained', 'rgba(245, 158, 11, 0.28)',
+                'critical', 'rgba(220, 38, 38, 0.40)',
+                'rgba(156, 163, 175, 0.10)',
+              ],
+              'fill-opacity': [
+                'interpolate',
+                ['linear'],
+                ['get', 'supply_reach_score'],
+                0.15, 0.75,
+                1.0, 0.35,
+              ],
+            },
+            layout: { visibility: mapMode === 'supply' ? 'visible' : 'none' },
+          },
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
+        );
+      }
+      if (!safeHasLayer(m, SUPPLY_REACH_OUTLINE_LAYER_ID)) {
+        m.addLayer(
+          {
+            id: SUPPLY_REACH_OUTLINE_LAYER_ID,
+            type: 'line',
+            source: SUPPLY_REACH_SOURCE_ID,
+            paint: {
+              'line-color': [
+                'match',
+                ['get', 'supply_reach_class'],
+                'adequate', 'rgba(74, 222, 128, 0.35)',
+                'strained', 'rgba(251, 191, 36, 0.70)',
+                'critical', 'rgba(248, 113, 113, 0.88)',
+                'rgba(156, 163, 175, 0.25)',
+              ],
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                7, 0.3,
+                10, 0.8,
+                13, 1.7,
+              ],
+              'line-dasharray': [
+                'case',
+                ['==', ['get', 'isolated'], true],
+                ['literal', [1.5, 1.5]],
+                ['literal', [6, 3]],
+              ],
+            },
+            layout: { visibility: mapMode === 'supply' ? 'visible' : 'none' },
+          },
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
+        );
+      }
       safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
+      safeSetLayoutVisibility(m, SUPPLY_REACH_FILL_LAYER_ID, mapMode === 'supply');
+      safeSetLayoutVisibility(m, SUPPLY_REACH_OUTLINE_LAYER_ID, mapMode === 'supply');
     });
     return () => {
       cancelled = true;
@@ -2745,9 +2980,14 @@ export function MapContainer() {
       const showPolitical = mapMode === 'political';
       if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;
       if (safeHasLayer(map, OSID_ETHNIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_ETHNIC_FILL_LAYER_ID, mapMode === 'ethnic')) allExist = false;
+      if (safeHasLayer(map, CONTESTED_BANDS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, CONTESTED_BANDS_FILL_LAYER_ID, showPolitical || mapMode === 'ethnic')) allExist = false;
+      if (safeHasLayer(map, CONTESTED_BANDS_OUTLINE_LAYER_ID) && !safeSetLayoutVisibility(map, CONTESTED_BANDS_OUTLINE_LAYER_ID, showPolitical || mapMode === 'ethnic')) allExist = false;
       if (safeHasLayer(map, OSID_MORALE_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_MORALE_FILL_LAYER_ID, mapMode === 'morale')) allExist = false;
       if (safeHasLayer(map, OSID_CASUALTIES_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_CASUALTIES_FILL_LAYER_ID, mapMode === 'casualties')) allExist = false;
       if (safeHasLayer(map, OSID_SUPPLY_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
+      if (safeHasLayer(map, POLITICAL_METRIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, POLITICAL_METRIC_FILL_LAYER_ID, mapMode === 'authority' || mapMode === 'legitimacy')) allExist = false;
+      if (safeHasLayer(map, SUPPLY_REACH_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, SUPPLY_REACH_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
+      if (safeHasLayer(map, SUPPLY_REACH_OUTLINE_LAYER_ID) && !safeSetLayoutVisibility(map, SUPPLY_REACH_OUTLINE_LAYER_ID, mapMode === 'supply')) allExist = false;
       if (safeHasLayer(map, OSID_OPERATIONS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations')) allExist = false;
       // Operation arrows: only visible in operations map mode
       const showOps = mapMode === 'operations';

@@ -1,0 +1,55 @@
+// @vitest-environment jsdom
+
+import { readFileSync } from 'node:fs';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { createElement, type ReactNode } from 'react';
+import { RootErrorBoundary } from '../../src/ui/map/components/RootErrorBoundary.js';
+
+function ThrowingPanel(): never {
+  throw new Error('right rail render failed');
+}
+
+function Zone({ testId, children }: { testId: string; children?: ReactNode }) {
+  return createElement('section', { 'data-testid': testId }, children);
+}
+
+describe('RootErrorBoundary panel isolation', () => {
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it('contains a right rail render error without blanking the map, sidebar, or toolbar zones', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    render(createElement('div', null,
+      createElement(Zone, { testId: 'map-zone' }, 'Map remains mounted'),
+      createElement(Zone, { testId: 'sidebar-zone' }, 'Sidebar remains mounted'),
+      createElement(Zone, { testId: 'toolbar-zone' }, 'Toolbar remains mounted'),
+      createElement(RootErrorBoundary, { zone: 'right panel' },
+        createElement(ThrowingPanel),
+      ),
+    ));
+
+    expect(screen.getByTestId('map-zone').textContent).toContain('Map remains mounted');
+    expect(screen.getByTestId('sidebar-zone').textContent).toContain('Sidebar remains mounted');
+    expect(screen.getByTestId('toolbar-zone').textContent).toContain('Toolbar remains mounted');
+    expect(screen.getByRole('status', { name: /right panel unavailable/i }).textContent)
+      .toContain('Right panel unavailable');
+    expect(screen.getByRole('status', { name: /right panel unavailable/i }).textContent)
+      .toContain('Open another panel or reload the map.');
+  });
+
+  it('App wraps the tactical detail rail in a localized boundary instead of relying on a root-only catch', () => {
+    const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+
+    expect(appSource).toContain("import { RootErrorBoundary } from './components/RootErrorBoundary';");
+    expect(appSource).toMatch(
+      /<RootErrorBoundary zone="right panel">[\s\S]*railState\.primary[\s\S]*railState\.secondary[\s\S]*<\/RootErrorBoundary>/,
+    );
+    expect(appSource).toMatch(/<RootErrorBoundary zone="map">[\s\S]*<MapContainer \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(appSource).toMatch(/<RootErrorBoundary zone="toolbar">[\s\S]*<PresidentialToolbar/);
+    expect(appSource).toMatch(/<RootErrorBoundary zone="sidebar">[\s\S]*<OOBSidebar \/>[\s\S]*<\/RootErrorBoundary>/);
+  });
+});

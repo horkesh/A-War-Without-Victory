@@ -347,6 +347,14 @@ export interface PendingConvoyDecisionView {
     decision?: 'allow' | 'block' | 'divert';
 }
 
+export interface LoadedParamilitaryRequest {
+    faction: string;
+    strength: number;
+    target_osid: string;
+    decision?: 'allow' | 'deny';
+    mode?: 'rear_pocket' | 'offensive';
+}
+
 export interface MunicipalitySupportOrderView {
     faction: Exclude<FactionId, null>;
     mun_id: string;
@@ -394,6 +402,31 @@ export interface PresidentialReviewQueueView {
     commandInterpretationCount: number;
     personnelDirectiveCount: number;
     operationOpportunityCount: number;
+}
+
+export type PlayerDecisionGatePolicyView = 'hard_block' | 'modal_required' | 'advisory';
+
+export interface PlayerDecisionFamilySummaryView {
+    id: string;
+    count: number;
+    gatePolicy: PlayerDecisionGatePolicyView;
+    blockingCount?: number;
+    modalRequiredCount?: number;
+    advisoryCount?: number;
+}
+
+export interface PlayerDecisionSummaryView {
+    totalCount: number;
+    blockingCount: number;
+    modalRequiredCount?: number;
+    advisoryCount?: number;
+    families: PlayerDecisionFamilySummaryView[];
+}
+
+export interface PoliticalMetricView {
+    controller: string | null;
+    authority: number | null;
+    legitimacy: number | null;
 }
 
 export interface ArmyReserveQueueView {
@@ -742,6 +775,10 @@ export interface LoadedGameState {
     movementsByOsid: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
     /** Per-OSID supply state transitions from all turn summaries. */
     supplyTransitionsByOsid: Record<string, Array<{ turn: number; from: string; to: string }>>;
+    /** Current player-visible per-OSID supply state. */
+    supplyStateByOsid?: Record<string, 'adequate' | 'strained' | 'critical'>;
+    /** Current per-OSID political authority/legitimacy metrics, normalized to 0-100. */
+    politicalMetricsByOsid?: Record<string, PoliticalMetricView>;
     /** Historical events fired per turn (from scenario event definitions). */
     historicalEventsByTurn: Array<{ turn: number; id: string; text: string }>;
     recruitment?: RecruitmentView;
@@ -754,6 +791,8 @@ export interface LoadedGameState {
     municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
     warPhaseSupplyPressure?: Record<string, number>;
+    /** Live per-faction supply condition [0,100], higher is better. */
+    warPhaseSupplyCondition?: Record<string, number>;
     warPhaseExhaustion?: Record<string, number>;
     player_faction?: string | null;
     rbih_hrhb_war_earliest_turn?: number | null;
@@ -761,9 +800,10 @@ export interface LoadedGameState {
     /**
      * v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
      *
-     * Mirrors `state.meta.tutorial_state`. Optional / absent on older saves;
-     * the OnboardingOverlay treats absent as "not yet dismissed". UI-only:
-     * sim engine does not read this.
+     * Mirrors `state.meta.tutorial_state`. Optional / absent on older saves.
+     * The adapter keeps turn 0 saves eligible for first-run onboarding, but
+     * defaults progressed saves to dismissed so Continue does not replay it.
+     * UI-only: sim engine does not read this.
      */
     tutorial_state?: {
         dismissed: boolean;
@@ -822,6 +862,8 @@ export interface LoadedGameState {
     operationalSitrep?: OperationalSitrepView;
     /** Canonical Army HQ / presidential military review queue summary derived from pending review owners. */
     presidentialReviewQueue?: PresidentialReviewQueueView;
+    /** Manifest-backed generated player decision summary shared by Inbox, Decision Room, and advance readiness. */
+    playerDecisionSummary?: PlayerDecisionSummaryView;
     /** Canonical Army Reserve management queue summary derived from pending reserve requests. */
     armyReserveQueue?: ArmyReserveQueueView;
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */
@@ -907,6 +949,8 @@ export interface LoadedGameState {
         suggested_brigade_id: string | null;
         turn_requested: number;
     }>;
+    /** Pending paramilitary deployment requests awaiting player decision. */
+    pendingParamilitaryRequests?: LoadedParamilitaryRequest[];
     /** Per-elite-brigade deployment history. */
     eliteBrigadeTracker?: Record<string, {
         total_loans: number;

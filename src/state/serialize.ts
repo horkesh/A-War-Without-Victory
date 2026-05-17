@@ -255,6 +255,7 @@ function migrateState(raw: unknown): GameState {
                 'war_alliance_rbih_hrhb',
                 'municipalities',
                 'war_supply_pressure',
+                'war_supply_condition',
                 'war_exhaustion',
                 'war_exhaustion_local',
             ]);
@@ -578,6 +579,7 @@ function migrateState(raw: unknown): GameState {
             const dispWar = disp;
             const hasAnyPhaseII =
                 (polWar && polWar.war_supply_pressure !== undefined) ||
+                (polWar && polWar.war_supply_condition !== undefined) ||
                 (polWar && polWar.war_exhaustion !== undefined) ||
                 (polWar && polWar.war_exhaustion_local !== undefined) ||
                 (dispWar && dispWar.hostile_takeover_timers !== undefined) ||
@@ -680,7 +682,7 @@ function migrateState(raw: unknown): GameState {
             if (polSweep) {
                 for (const k of ['negotiation_status', 'ceasefire', 'negotiation_ledger', 'supply_rights',
                     'war_consolidation_until', 'war_control_strain', 'war_alliance_rbih_hrhb',
-                    'municipalities', 'war_supply_pressure', 'war_exhaustion', 'war_exhaustion_local'] as const) {
+                    'municipalities', 'war_supply_pressure', 'war_supply_condition', 'war_exhaustion', 'war_exhaustion_local'] as const) {
                     if (k in candidate && !(k in polSweep)) {
                         polSweep[k] = (candidate as any)[k];
                     }

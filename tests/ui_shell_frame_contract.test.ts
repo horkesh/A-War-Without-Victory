@@ -80,4 +80,11 @@ describe('tactical shell frame contract', () => {
     expect(orderQueue).not.toContain("width: '18rem'");
     expect(orderQueue).not.toContain("bottom: '2.25rem'");
   });
+
+  it('opens useful OOB sections by default for the unselected command view', () => {
+    const oob = read('src/ui/map/components/OOBSidebar.tsx');
+
+    expect(oob).toContain('situation: true');
+    expect(oob).toContain('army: true');
+  });
 });

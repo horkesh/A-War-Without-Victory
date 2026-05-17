@@ -34,7 +34,8 @@ const read = (p: string) => readFileSync(resolve(repoRoot, p), 'utf8');
 const AI_SETTINGS_PATH = 'src/ui/map/components/AiSettingsPanel.tsx';
 const PRESIDENTIAL_TOOLBAR_PATH =
     'src/ui/map/components/PresidentialToolbar.tsx';
-const TOP_TOOLBAR_PATH = 'src/ui/map/components/TopToolbar.tsx';
+const TOP_TOOLBAR_PATH =
+    'src/ui/map/components/_retired_chrome/TopToolbar.tsx';
 const SIDE_PICKER_PATH = 'src/ui/map/components/SidePickerOverlay.tsx';
 const COMMAND_TOPBAR_PATH = 'src/ui/map/components/plan_ui/CommandTopBar.tsx';
 const PLAN_PARAMETERS_PATH = 'src/ui/map/components/ops_modal/PlanParameters.tsx';
@@ -68,7 +69,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         expect(src).toContain('aria-label="Dev: load save file"');
     });
 
-    it('T3 — TopToolbar dev inputs carry aria-label', () => {
+    it('T3 — retired TopToolbar dev inputs carry aria-label', () => {
         const src = read(TOP_TOOLBAR_PATH);
         expect(src).toContain('aria-label="Dev: load run by ID"');
         expect(src).toContain('aria-label="Dev: load save file"');

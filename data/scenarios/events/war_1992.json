@@ -20,6 +20,7 @@
       "text": "The strategic goals are presented to the Assembly."
     },
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "response_options": [
       {
@@ -165,6 +166,7 @@
       "text": "The Presidency platform is debated."
     },
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "response_options": [
       {
@@ -292,6 +294,7 @@
       "text": "The political direction of Herceg-Bosna is debated."
     },
     "requires_player_response": true,
+    "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "response_options": [
       {
@@ -1011,6 +1014,7 @@
       "text": "The Drina valley campaign reaches its critical phase."
     },
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "response_options": [
       {
@@ -1268,6 +1272,7 @@
       }
     ],
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "strategic_weighted",
     "enables_events": [
       "london_conference_1992"
@@ -1410,6 +1415,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",
     "effect": {
       "kind": "narrative",

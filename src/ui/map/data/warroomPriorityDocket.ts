@@ -23,6 +23,7 @@ export interface WarroomPriorityDocketView {
   items: WarroomPriorityDocketItem[];
   sourceHandoffs: WarroomPriorityDocketSourceHandoff[];
   metrics: PreAdvanceCommandReviewMetrics;
+  blockingDecisionCount: number;
 }
 
 export interface WarroomPriorityDocketInput extends PreAdvanceCommandReviewInput {
@@ -66,5 +67,6 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
     items: review.items.slice(0, safeLimit),
     sourceHandoffs: review.sourceHandoffs,
     metrics: review.metrics,
+    blockingDecisionCount: review.blockingDecisionCount,
   };
 }

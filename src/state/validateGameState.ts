@@ -215,6 +215,18 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                 errors.push('political.war_supply_pressure must be an object (Record<FactionId, number>) when present');
             }
         }
+        if ('war_supply_condition' in political && political.war_supply_condition !== undefined) {
+            const sc = political.war_supply_condition;
+            if (sc !== null && typeof sc === 'object' && !Array.isArray(sc)) {
+                for (const [fid, val] of Object.entries(sc)) {
+                    if (typeof val !== 'number' || val < 0 || val > 100) {
+                        errors.push(`political.war_supply_condition.${fid} must be a number in [0, 100] when present`);
+                    }
+                }
+            } else {
+                errors.push('political.war_supply_condition must be an object (Record<FactionId, number>) when present');
+            }
+        }
         if ('war_exhaustion' in political && political.war_exhaustion !== undefined) {
             const ex = political.war_exhaustion;
             if (ex !== null && typeof ex === 'object' && !Array.isArray(ex)) {

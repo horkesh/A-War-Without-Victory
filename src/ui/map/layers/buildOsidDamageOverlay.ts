@@ -24,6 +24,7 @@
  */
 import { PolygonLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Polygon, MultiPolygon } from 'geojson';
+import { hasValidLngLatCoordinates, warnInvalidOverlayPolygonOnce } from './coordinateValidation';
 
 /** Single record consumed from `osid_damage_seed.json`. */
 export interface OsidDamageRecord {
@@ -117,6 +118,10 @@ export function buildOsidDamageData(
     if (alpha <= 0) continue;
     const geom = byOsid.get(osid);
     if (!geom) continue;
+    if (!hasValidLngLatCoordinates(geom)) {
+      warnInvalidOverlayPolygonOnce('osid-damage-overlay', osid);
+      continue;
+    }
     if (geom.type === 'Polygon') {
       out.push({
         osid,

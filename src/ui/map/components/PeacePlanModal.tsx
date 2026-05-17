@@ -2,14 +2,16 @@
  * Peace Plan Modal — production UI for responding to international peace plans.
  *
  * Renders when a pending peace plan exists in LoadedGameState.
- * Player must accept or reject before proceeding. Bot responses displayed alongside.
+ * Player can accept/reject through IPC, or review later while the plan stays pending.
+ * Bot responses displayed alongside.
  * Paper document aesthetic matching EventModal.
  *
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-respond modal:
  * `dismissible={false}` (no ESC, no click-outside) — the only valid close
- * path is the player choosing Accept or Reject, which calls `onDismiss`
- * (parent flips render guard) and resolves the plan via IPC. The
+ * path is an explicit panel action. Accept/Reject call `onDismiss`
+ * (parent flips render guard) and resolve the plan via IPC; Review Later
+ * only calls `onDismiss`. The
  * `onDismiss` prop is preserved on the panel content (NOT passed to Modal
  * as `onClose`) since Modal's master switch is `dismissible={false}`.
  */
@@ -26,7 +28,27 @@ const INSTITUTIONAL_LABELS: Record<string, string> = {
     two_entity: 'Two-Entity Federation',
     loose_confederation: 'Loose Confederation',
     unitary: 'Unitary State',
+    '10_provinces': '10 Decentralized Provinces',
 };
+
+const FACTION_ORDER = ['RBiH', 'RS', 'HRHB'] as const;
+type PeacePlanFaction = typeof FACTION_ORDER[number];
+
+const FACTION_BAR_COLORS: Record<PeacePlanFaction, string> = {
+    RBiH: 'bg-[#4a7a4a]',
+    RS: 'bg-[#4a5a8a]',
+    HRHB: 'bg-[#8a6a3a]',
+};
+
+function normalizePercent(value: number): number {
+    if (!Number.isFinite(value) || value <= 0) return 0;
+    return value;
+}
+
+function formatPercent(value: number): string {
+    if (Number.isInteger(value)) return String(value);
+    return value.toFixed(1).replace(/\.0$/, '');
+}
 
 interface PeacePlanModalProps {
     plan: NonNullable<LoadedGameState['pendingPeacePlan']>;
@@ -36,6 +58,7 @@ interface PeacePlanModalProps {
 export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const playerFaction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
     const proposedFactionLabels = {
         RBiH: getPlayerSafePoliticalFactionName('RBiH'),
         RS: getPlayerSafePoliticalFactionName('RS'),
@@ -56,7 +79,24 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
         }
     };
 
-    const splitTotal = plan.proposedSplit.RBiH + plan.proposedSplit.RS + plan.proposedSplit.HRHB;
+    const splitValues: Record<PeacePlanFaction, number> = {
+        RBiH: normalizePercent(plan.proposedSplit.RBiH),
+        RS: normalizePercent(plan.proposedSplit.RS),
+        HRHB: normalizePercent(plan.proposedSplit.HRHB),
+    };
+    const splitTotal = FACTION_ORDER.reduce((sum, faction) => sum + splitValues[faction], 0);
+    const splitRows = FACTION_ORDER.map((faction) => {
+        const displayPercent = splitValues[faction];
+        const widthPercent = splitTotal > 0 ? (displayPercent / splitTotal) * 100 : 0;
+        return {
+            faction,
+            label: proposedFactionLabels[faction],
+            displayPercent,
+            widthPercent,
+        };
+    });
+    const otherFactionResponses = Object.entries(plan.botResponses)
+        .filter(([faction]) => faction !== playerFaction);
 
     return (
         <Modal
@@ -100,18 +140,25 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         Proposed Territorial Division
                     </div>
                     <div className="flex gap-1 h-5 rounded overflow-hidden border border-[#8a7a60]/30 mb-2">
-                        <div className="bg-[#4a7a4a]" style={{ width: `${(plan.proposedSplit.RBiH / splitTotal) * 100}%` }}
-                             title={`${proposedFactionLabels.RBiH}: ${plan.proposedSplit.RBiH}%`} />
-                        <div className="bg-[#4a5a8a]" style={{ width: `${(plan.proposedSplit.RS / splitTotal) * 100}%` }}
-                             title={`${proposedFactionLabels.RS}: ${plan.proposedSplit.RS}%`} />
-                        <div className="bg-[#8a6a3a]" style={{ width: `${(plan.proposedSplit.HRHB / splitTotal) * 100}%` }}
-                             title={`${proposedFactionLabels.HRHB}: ${plan.proposedSplit.HRHB}%`} />
+                        {splitRows.map((row) => (
+                            <div
+                                key={row.faction}
+                                role="meter"
+                                aria-label={`${row.label} territory share`}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-valuenow={row.displayPercent}
+                                className={FACTION_BAR_COLORS[row.faction]}
+                                style={{ width: `${row.widthPercent}%` }}
+                                title={`${row.label}: ${formatPercent(row.displayPercent)}%`}
+                            />
+                        ))}
                     </div>
                     <div className="flex justify-between text-[11px] text-[#6a5a40]"
                          style={{ fontFamily: 'Courier New, monospace' }}>
-                        <span>{proposedFactionLabels.RBiH} {plan.proposedSplit.RBiH}%</span>
-                        <span>{proposedFactionLabels.RS} {plan.proposedSplit.RS}%</span>
-                        <span>{proposedFactionLabels.HRHB} {plan.proposedSplit.HRHB}%</span>
+                        {splitRows.map((row) => (
+                            <span key={row.faction}>{row.label} {formatPercent(row.displayPercent)}%</span>
+                        ))}
                     </div>
                     <div className="text-[11px] text-[#6a5a40] mt-2">
                         <span className="font-bold text-[#2a2016]">Institutional model:</span>{' '}
@@ -124,8 +171,8 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
                         Other Faction Responses
                     </div>
-                    <div className="space-y-1.5">
-                        {Object.entries(plan.botResponses).map(([faction, response]) => (
+                    <div className="space-y-1.5" data-testid="peace-plan-other-responses">
+                        {otherFactionResponses.map(([faction, response]) => (
                             <div key={faction} className="flex items-center justify-between text-[12px]">
                                 <span className="text-[#2a2016]">{getPlayerSafePoliticalFactionName(faction)}</span>
                                 <span className={`font-bold uppercase text-[11px] px-2 py-0.5 rounded border ${
@@ -153,6 +200,14 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
                             Accept Plan
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onDismiss}
+                            className="px-6 py-2.5 rounded border-2 border-[#6a5a40]/35 bg-[#d8ceb8] text-[#4a3a24] font-bold text-[13px] uppercase tracking-wider hover:bg-[#c8b898] transition-colors"
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            Review Later
                         </button>
                         <button
                             type="button"

@@ -89,6 +89,7 @@ interface StateOptions {
     };
     corps_exhaustion?: number;
     war_supply_pressure?: number;
+    war_supply_condition?: number;
     operation_history_failures?: number;
 }
 
@@ -153,6 +154,9 @@ function makeState(opts: StateOptions): GameState {
     const political: Record<string, unknown> = {};
     if (typeof opts.war_supply_pressure === 'number') {
         political.war_supply_pressure = { [faction]: opts.war_supply_pressure };
+    }
+    if (typeof opts.war_supply_condition === 'number') {
+        political.war_supply_condition = { [faction]: opts.war_supply_condition };
     }
 
     return {
@@ -408,6 +412,34 @@ describe('computeCorpsOperationReadiness — Phase 4', () => {
         const tHigh = computeCorpsOperationReadiness(highEquip, 'corps_test_1');
         assert.ok(tHigh.support_delivery > tLow.support_delivery,
             `support_delivery did not respond to operational equipment: ${tLow.support_delivery} vs ${tHigh.support_delivery}`);
+    });
+
+    it('8b: live supply condition overrides saturated cumulative pressure for readiness inputs', () => {
+        const base = {
+            brigades: [
+                makeBrigade({ id: 'b1', officer_quality: 0.4, tanks: 20, artillery: 40, tank_op_frac: 0.8, art_op_frac: 0.8 }),
+                makeBrigade({ id: 'b2', officer_quality: 0.4 }),
+            ],
+            faction_officer_maturity: { RBiH: 3.0 },
+            capability_profile: { training_quality: 0.5, organizational_maturity: 0.5, equipment_access: 0.5, doctrine_attack: 0.5 },
+            war_supply_pressure: 100,
+        };
+        const saturatedLegacy = computeCorpsOperationReadiness(makeState(base), 'corps_test_1');
+        const liveAdequate = computeCorpsOperationReadiness(
+            makeState({ ...base, war_supply_condition: 100 }),
+            'corps_test_1',
+        );
+
+        assert.ok(liveAdequate.support_delivery > saturatedLegacy.support_delivery,
+            `support_delivery should recover from live adequate supply: ${saturatedLegacy.support_delivery} vs ${liveAdequate.support_delivery}`);
+        assert.ok(liveAdequate.reserve_response > saturatedLegacy.reserve_response,
+            `reserve_response should recover from live adequate supply: ${saturatedLegacy.reserve_response} vs ${liveAdequate.reserve_response}`);
+
+        const snapshot = buildCorpsOperationReadinessInputSnapshot(
+            makeState({ ...base, war_supply_condition: 100 }),
+            'corps_test_1',
+        );
+        assert.equal(snapshot.faction_pool_pressure, 0);
     });
 
     // ═══════════════════════════════════════════════════════════════════════

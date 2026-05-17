@@ -214,7 +214,15 @@ export function evaluateEvents(
         // Diplomatic events fire once globally. Player gets a decision; bots auto-respond once.
         if (def.response_options && def.response_options.length > 0) {
             const autonomyLevel = state.meta.autonomy_level ?? 0;
-            const mustShowPlayer = playerFaction && (autonomyLevel < 3 || def.requires_player_response === true);
+            // Explicit owner first. Legacy soft derivation is kept only from authored event data,
+            // never from the current player faction.
+            const respondingFaction: FactionId | null =
+                (def.responding_faction as FactionId | undefined)
+                ?? (def.dimension_shifts?.[0]?.faction as FactionId | undefined)
+                ?? (def.response_options?.[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined)
+                ?? null;
+            const isPlayerRespondent = playerFaction != null && respondingFaction === playerFaction;
+            const mustShowPlayer = isPlayerRespondent && (autonomyLevel < 3 || def.requires_player_response === true);
             if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
@@ -225,20 +233,12 @@ export function evaluateEvents(
                     event_title: text,
                     turn_fired: currentTurn,
                     response_options: def.response_options,
-                    faction: playerFaction,
+                    faction: respondingFaction,
                     requires_player_response: def.requires_player_response,
                 });
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Political personality path for dimension-weighted logic types.
-                // Phase 3: Explicit responding_faction field → top-level dimension_shifts → first option's shifts → null.
-                // New events should author responding_faction directly; legacy events fall back gracefully.
-                const respondingFaction: FactionId | null =
-                    (def.responding_faction as FactionId | undefined)
-                    ?? (def.dimension_shifts?.[0]?.faction as FactionId | undefined)
-                    ?? (def.response_options?.[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined)
-                    ?? (playerFaction ?? null);
-
                 let chosen: EventResponseOption;
                 if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
                     const personality = getPoliticalPersonality(respondingFaction);

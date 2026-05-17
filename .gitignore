@@ -66,6 +66,7 @@ tools/tmp_*.cjs
 
 # Codex temp diagnostic artifacts (do not track)
 .codex_tmp*
+tmp_gui_observation/
 
 # Sector audit snapshots (research only, do not track)
 tmp_sector_audit/

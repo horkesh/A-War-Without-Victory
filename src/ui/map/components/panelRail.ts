@@ -146,6 +146,13 @@ export function derivePanelRailState(state: PanelRailSelectionState): PanelRailS
   return { primary: 'inbox', secondary: null };
 }
 
+export function shouldRenderInboxPanel(
+  primary: PanelRailPanel | null,
+  operationsPanelOpen: boolean,
+): boolean {
+  return primary === 'inbox' && !operationsPanelOpen;
+}
+
 export function getPanelRailStyle(
   slot: 'primary' | 'secondary',
   width: string,

@@ -789,6 +789,18 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
             }
             lines.push('');
         }
+        const hasSupplyCondition =
+            startWeeklyReport.factions.some((f) => f.supply_condition != null) ||
+            endWeeklyReport.factions.some((f) => f.supply_condition != null);
+        if (hasSupplyCondition) {
+            lines.push('Supply condition (start → end):');
+            for (const f of endWeeklyReport.factions) {
+                const s = startWeeklyReport.factions.find((x) => x.id === f.id)?.supply_condition ?? '—';
+                const e = f.supply_condition ?? '—';
+                lines.push(`  - ${f.id}: ${s} → ${e}`);
+            }
+            lines.push('');
+        }
         lines.push(
             'Displacement: settlement count/total (start → end): ' +
             `${startWeeklyReport.settlement_displacement_count}/${startWeeklyReport.settlement_displacement_total} → ` +

@@ -285,6 +285,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "accept_first",
     "effect": {
       "kind": "alliance_change",
@@ -532,6 +533,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",
     "effect": {
       "kind": "narrative",
@@ -591,6 +593,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "effect": {
       "kind": "supply_delta",
@@ -863,6 +866,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",
     "effect": {
       "kind": "narrative",

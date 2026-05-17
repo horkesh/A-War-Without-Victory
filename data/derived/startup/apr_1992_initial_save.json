@@ -1168,6 +1168,15 @@
         "stance": "balanced",
         "subordinate_count": 8
       },
+      "arbih_7th_corps": {
+        "active_ogs": [],
+        "active_operations": [],
+        "command_span": 5,
+        "corps_exhaustion": 0,
+        "og_slots": 1,
+        "stance": "balanced",
+        "subordinate_count": 0
+      },
       "hvo_central_bosnia": {
         "active_ogs": [],
         "active_operations": [],
@@ -1257,7 +1266,7 @@
                 "status": "executing"
               }
             ],
-            "commander_officer_id": "vrs_andric",
+            "commander_officer_id": "vrs_lisica",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1382,7 +1391,7 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_arsic",
+            "commander_officer_id": "vrs_zeljaja",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1612,7 +1621,7 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_lisica",
+            "commander_officer_id": "vrs_despotovic",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -1695,7 +1704,7 @@
                 ]
               }
             ],
-            "commander_officer_id": "vrs_zeljaja",
+            "commander_officer_id": "vrs_gusic_n",
             "consecutive_failures_on_current": 0,
             "current_objective_index": 0,
             "failure_count": 0,
@@ -17804,6 +17813,30 @@
           "placement:fixed_home_osid"
         ]
       },
+      "arbih_7th_corps": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": null,
+        "cohesion": 60,
+        "created_turn": 0,
+        "faction": "RBiH",
+        "force_label": "ARBiH",
+        "hq_sid": "op:travnik:gluha_bukovica",
+        "id": "arbih_7th_corps",
+        "kind": "corps_asset",
+        "morale": 60,
+        "name": "7th Corps",
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "personnel": 0,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "mun:travnik"
+        ]
+      },
       "arbih_7th_vitezka_muslim_liberation": {
         "activation_gated": false,
         "activation_turn": null,
@@ -21197,6 +21230,30 @@
           "corps:jna_herzegovina_command"
         ],
         "withdrawal_turn": 8
+      },
+      "jna_herzegovina_command": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": null,
+        "cohesion": 60,
+        "created_turn": 0,
+        "faction": "RS",
+        "force_label": "VRS",
+        "hq_sid": "op:nevesinje:hrusta_2",
+        "id": "jna_herzegovina_command",
+        "kind": "corps_asset",
+        "morale": 60,
+        "name": "JNA Herzegovina Command",
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "personnel": 0,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "mun:nevesinje"
+        ]
       },
       "jna_ilijas_garrison_det": {
         "activation_gated": false,
@@ -30599,7 +30656,7 @@
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "compatible_corps_ids": [
-          "vrs_ibk"
+          "vrs_east_bosnian"
         ],
         "competence": 5,
         "defensive_skill": 4,
@@ -30667,8 +30724,8 @@
         "competence": 4,
         "defensive_skill": 4,
         "faction": "RS",
-        "historical_corps_id": "vrs_ibk",
-        "home_corps_id": "vrs_ibk",
+        "historical_corps_id": "vrs_east_bosnian",
+        "home_corps_id": "vrs_east_bosnian",
         "id": "vrs_simic",
         "improvement_rate": 0,
         "is_historical_start": true,
@@ -30817,8 +30874,8 @@
         "competence": 3,
         "defensive_skill": 4,
         "faction": "RS",
-        "historical_corps_id": "vrs_hk",
-        "home_corps_id": "vrs_hk",
+        "historical_corps_id": "vrs_herzegovina",
+        "home_corps_id": "vrs_herzegovina",
         "id": "vrs_grubac",
         "improvement_rate": 0,
         "is_historical_start": true,
@@ -30834,7 +30891,7 @@
         "can_improve": false,
         "casualty_vulnerability": 0.15,
         "compatible_corps_ids": [
-          "vrs_ibk"
+          "vrs_east_bosnian"
         ],
         "competence": 4,
         "defensive_skill": 3,
@@ -30903,7 +30960,7 @@
         "can_improve": false,
         "casualty_vulnerability": 0.1,
         "compatible_corps_ids": [
-          "vrs_ibk"
+          "vrs_east_bosnian"
         ],
         "competence": 3,
         "defensive_skill": 4,
@@ -30947,7 +31004,7 @@
         "competence": 3,
         "defensive_skill": 3,
         "faction": "RS",
-        "home_corps_id": "vrs_ibk",
+        "home_corps_id": "vrs_east_bosnian",
         "id": "vrs_gavric",
         "improvement_rate": 0,
         "is_historical_start": false,
@@ -30988,7 +31045,7 @@
         "can_improve": false,
         "casualty_vulnerability": 0.15,
         "compatible_corps_ids": [
-          "vrs_ibk"
+          "vrs_east_bosnian"
         ],
         "competence": 4,
         "defensive_skill": 4,
@@ -31050,7 +31107,7 @@
         "competence": 3,
         "defensive_skill": 5,
         "faction": "RS",
-        "home_corps_id": "vrs_ibk",
+        "home_corps_id": "vrs_east_bosnian",
         "id": "vrs_kutlesic",
         "improvement_rate": 0,
         "is_historical_start": false,
@@ -31068,7 +31125,7 @@
         "competence": 4,
         "defensive_skill": 5,
         "faction": "RS",
-        "home_corps_id": "vrs_hk",
+        "home_corps_id": "vrs_herzegovina",
         "id": "vrs_gusic_n",
         "improvement_rate": 0,
         "is_historical_start": false,
@@ -31107,7 +31164,7 @@
         "competence": 3,
         "defensive_skill": 4,
         "faction": "RS",
-        "home_corps_id": "vrs_hk",
+        "home_corps_id": "vrs_herzegovina",
         "id": "vrs_lalovic",
         "improvement_rate": 0,
         "is_historical_start": false,
@@ -31128,7 +31185,7 @@
         "competence": 3,
         "defensive_skill": 3,
         "faction": "RS",
-        "home_corps_id": "vrs_ibk",
+        "home_corps_id": "vrs_east_bosnian",
         "id": "vrs_despotovic",
         "improvement_rate": 0,
         "is_historical_start": false,
@@ -31144,7 +31201,7 @@
         "can_improve": false,
         "casualty_vulnerability": 0.15,
         "compatible_corps_ids": [
-          "vrs_ibk"
+          "vrs_east_bosnian"
         ],
         "competence": 3,
         "defensive_skill": 3,
@@ -33151,24 +33208,22 @@
       "vrs_andric": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Herzegovina",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_andric",
         "penalty_turns_remaining": 0,
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
       "vrs_arsic": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Prijedor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_arsic",
         "penalty_turns_remaining": 0,
-        "status": "active",
+        "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33197,11 +33252,12 @@
       "vrs_despotovic": {
         "acting_commander": false,
         "assigned_corps_id": null,
+        "assigned_operation": "Operation Koridor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_despotovic",
         "penalty_turns_remaining": 0,
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33218,7 +33274,7 @@
       },
       "vrs_grubac": {
         "acting_commander": false,
-        "assigned_corps_id": "vrs_hk",
+        "assigned_corps_id": "vrs_herzegovina",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_grubac",
@@ -33230,11 +33286,12 @@
       "vrs_gusic_n": {
         "acting_commander": false,
         "assigned_corps_id": null,
+        "assigned_operation": "Operation Visegrad",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_gusic_n",
         "penalty_turns_remaining": 0,
-        "status": "reserve",
+        "status": "active",
         "turns_in_command": 0,
         "victories": 0
       },
@@ -33274,7 +33331,7 @@
       "vrs_lisica": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Koridor",
+        "assigned_operation": "Operation Herzegovina",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lisica",
@@ -33375,7 +33432,7 @@
       },
       "vrs_simic": {
         "acting_commander": false,
-        "assigned_corps_id": "vrs_ibk",
+        "assigned_corps_id": "vrs_east_bosnian",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_simic",
@@ -33442,7 +33499,7 @@
       "vrs_zeljaja": {
         "acting_commander": false,
         "assigned_corps_id": null,
-        "assigned_operation": "Operation Visegrad",
+        "assigned_operation": "Operation Prijedor",
         "battles": 0,
         "effective_competence_penalty": 0,
         "officer_id": "vrs_zeljaja",

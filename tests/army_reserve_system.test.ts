@@ -12,13 +12,22 @@ import {
     generateArmyReserveRequests,
 } from '../src/sim/combat/army_reserve_system.js';
 import {
+    classifyBrigadesByTerritory,
+    collectUnresolvedSectorBrigades,
+    syncSectorAssignmentsToFormations,
+} from '../src/sim/combat/corps_front_sectors.js';
+import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
+import {
     createEliteLoanState,
     ELITE_LOAN_MIN_DURATION,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
     MAX_AUTO_DEPLOY_HOPS,
 } from '../src/state/elite_loan_types.js';
-import type { GameState, FormationState } from '../src/state/game_state.js';
+import type { CorpsFrontSector, FactionId, GameState, FormationState } from '../src/state/game_state.js';
+import type { EdgeRecord } from '../src/map/settlements.js';
+import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
+import type { TerrainScalars, TerrainScalarsData } from '../src/map/terrain_scalars.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -30,6 +39,7 @@ function makeElite(id: string, faction: string, locationOsid: string, overrides:
         name: id,
         created_turn: 0,
         status: 'active',
+        kind: 'brigade',
         assignment: null,
         personnel: 2000,
         morale: 70,
@@ -40,6 +50,61 @@ function makeElite(id: string, faction: string, locationOsid: string, overrides:
         elite_loan_state: createEliteLoanState(),
         ...overrides,
     } as FormationState;
+}
+
+function makeSector(corpsId: string, faction: FactionId, targetOsid = 'op:mun:o3', overrides: Partial<CorpsFrontSector> = {}): CorpsFrontSector {
+    return {
+        sector_id: `sector:${corpsId}:0`,
+        corps_id: corpsId,
+        faction,
+        opposing_factions: [faction === 'RS' ? 'RBiH' : 'RS'] as FactionId[],
+        edge_ids: [`${targetOsid}__op:enemy:e0`],
+        sub_segments: [{
+            sub_segment_id: `subseg:${corpsId}:0`,
+            edge_ids: [`${targetOsid}__op:enemy:e0`],
+            friendly_osids: [targetOsid],
+            enemy_osids: ['op:enemy:e0'],
+            primary_brigade_ids: [],
+            length_edges: 1,
+        }],
+        length_edges: 1,
+        territory_osids: [targetOsid],
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: [],
+        density: 0,
+        threat_ratio: 2.5,
+        defensive_power: 100,
+        sector_stance: 'defend',
+        stance_source: 'bot',
+        ...overrides,
+    } as CorpsFrontSector;
+}
+
+function makeEdge(a: string, b: string): EdgeRecord {
+    return { a, b } as EdgeRecord;
+}
+
+function mockReverseMap(osids: string[]): OperationalToCanonicalReverseMap {
+    const map = new Map<string, string[]>();
+    for (const osid of osids) map.set(osid, [osid]);
+    return map;
+}
+
+function flatTerrain(): TerrainScalarsData {
+    const flat: TerrainScalars = {
+        road_access_index: 0.5,
+        river_crossing_penalty: 0,
+        elevation_mean_m: 200,
+        elevation_stddev_m: 10,
+        slope_index: 0.1,
+        terrain_friction_index: 0.1,
+    };
+    return {
+        by_sid: {},
+        by_osid: {},
+        by_municipality: {},
+        default: flat,
+    } as TerrainScalarsData;
 }
 
 function makeState(overrides: {
@@ -176,6 +241,285 @@ describe('deployEliteLoan', () => {
         const activeOp = state.military.corps_command!.arbih_1st_corps.active_operations[0];
         expect(activeOp.participating_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['arbih_guards']);
+    });
+
+    it('adds offensive loan elites to planning operations that drive deployment staging', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [{
+                        name: 'Operation Planning',
+                        phase: 'planning',
+                        preparation_sub_phase: 'force_staging',
+                        participating_brigades: ['arbih_line_1'],
+                        axes: [{
+                            axis_id: 'axis:main',
+                            assigned_brigades: ['arbih_line_1'],
+                            objectives: ['op:enemy:e0'],
+                            current_objective_index: 0,
+                            status: 'preparing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                            staging_osid: 'op:mun:o2',
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                'sector:arbih_1st_corps:0': makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o3'),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5, undefined, undefined, 'army_ai', chainAdj(4));
+
+        const activeOp = state.military.corps_command!.arbih_1st_corps.active_operations[0];
+        expect(activeOp.participating_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
+        expect(activeOp.axes?.[0]?.assigned_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
+            destination_sids: ['op:mun:o2'],
+            stance: 'column',
+        });
+    });
+
+    it('issues a column deployment order to the receiving corps sector when the loan is accepted', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_front_sectors: {
+                'sector:arbih_1st_corps:0': makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o3'),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'defensive_gap', 3, 5, undefined, undefined, 'army_ai', chainAdj(4));
+
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
+            destination_sids: ['op:mun:o3'],
+            stance: 'column',
+        });
+    });
+
+    it('uses active operation axis staging evidence before generic threatened-sector evidence', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [{
+                        name: 'Operation Staged',
+                        phase: 'execution',
+                        participating_brigades: [],
+                        axes: [{
+                            axis_id: 'axis:main',
+                            assigned_brigades: [],
+                            objectives: ['op:enemy:e0'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                            staging_osid: 'op:mun:o2',
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                'sector:arbih_1st_corps:0': makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o3'),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 3, 5, undefined, undefined, 'army_ai', chainAdj(4));
+
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
+            destination_sids: ['op:mun:o2'],
+            stance: 'column',
+        });
+    });
+
+    it('uses nearest target-corps sector when no active operation or threatened sector exists', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_front_sectors: {
+                'sector:arbih_1st_corps:0': makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o4', { threat_ratio: 0 }),
+                'sector:arbih_1st_corps:1': makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1', {
+                    sector_id: 'sector:arbih_1st_corps:1',
+                    threat_ratio: 0,
+                }),
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'defensive_gap', 1, 5, undefined, undefined, 'army_ai', chainAdj(5));
+
+        expect(state.military.brigade_movement_orders?.arbih_guards).toEqual({
+            destination_sids: ['op:mun:o1'],
+            stance: 'column',
+        });
+    });
+
+    const eliteLoanCases: Array<[string, string, string, string]> = [
+        ['arbih_guards_brigade', 'RBiH', 'arbih_general_staff', 'arbih_1st_corps'],
+        ['arbih_120th_liberation_black_swans', 'RBiH', 'arbih_general_staff', 'arbih_2nd_corps'],
+        ['rs_1st_guards_motorized', 'RS', 'vrs_main_staff', 'vrs_drina'],
+        ['rs_65th_protection_motorized_regiment', 'RS', 'vrs_main_staff', 'vrs_sarajevo_romanija'],
+        ['hvo_1st_guard_abb', 'HRHB', 'hvo_main_staff', 'hvo_central_bosnia'],
+        ['hvo_2nd_guard_mechanized', 'HRHB', 'hvo_main_staff', 'hvo_tomislavgrad'],
+        ['hvo_3rd_guard_jastrebovi', 'HRHB', 'hvo_main_staff', 'hvo_tomislavgrad'],
+    ];
+
+    for (const [brigadeId, faction, staffCorps, targetCorps] of eliteLoanCases) {
+        it(`creates a concrete deployment order for ${brigadeId}`, () => {
+            const brigade = makeElite(brigadeId, faction, 'op:mun:o0', { corps_id: staffCorps });
+            const state = makeState({
+                formations: { [brigadeId]: brigade },
+                corps_front_sectors: {
+                    [`sector:${targetCorps}:0`]: makeSector(targetCorps, faction as FactionId, 'op:mun:o1'),
+                },
+                turn: 5,
+            });
+
+            deployEliteLoan(state, brigadeId, targetCorps, 'defensive_gap', 1, 5, undefined, undefined, 'army_ai', chainAdj(2));
+
+            expect(state.military.brigade_movement_orders?.[brigadeId]).toEqual({
+                destination_sids: ['op:mun:o1'],
+                stance: 'column',
+            });
+        });
+    }
+
+    it('does not report a loaned elite with a valid column deployment order as fallen through', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'arbih_1st_corps';
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RBiH',
+            side_b: 'RS',
+        }] as any;
+        state.military.brigade_movement_orders = {
+            arbih_guards_brigade: { destination_sids: ['op:mun:o1'], stance: 'column' } as any,
+        };
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual([]);
+    });
+
+    it('still reports a loaned elite when the only movement order lacks column deployment ownership', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'arbih_1st_corps';
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RBiH',
+            side_b: 'RS',
+        }] as any;
+        state.military.brigade_movement_orders = {
+            arbih_guards_brigade: { destination_sids: ['op:mun:o1'] },
+        };
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual(['arbih_guards_brigade']);
+    });
+
+    it('syncs a loaned army-HQ elite into receiving corps sector assignment after column arrival', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RBiH',
+            'op:mun:o1': 'RBiH',
+            'op:enemy:e0': 'RS',
+        } as any;
+
+        deployEliteLoan(state, 'arbih_guards_brigade', 'arbih_1st_corps', 'defensive_gap', 1, 5, undefined, undefined, 'army_ai', chainAdj(2));
+        processOsidColumnMovement(
+            state,
+            [makeEdge('op:mun:o0', 'op:mun:o1')],
+            mockReverseMap(['op:mun:o0', 'op:mun:o1']),
+            flatTerrain(),
+        );
+        state.military.brigade_movement_state!.arbih_guards_brigade.turns_remaining = 1;
+        processOsidColumnMovement(
+            state,
+            [makeEdge('op:mun:o0', 'op:mun:o1')],
+            mockReverseMap(['op:mun:o0', 'op:mun:o1']),
+            flatTerrain(),
+        );
+
+        classifyBrigadesByTerritory(
+            [sector],
+            'RBiH',
+            state.military.formations!,
+            chainAdj(2),
+            new Set(['op:mun:o0', 'op:mun:o1']),
+            new Map([
+                ['op:mun:o0', 0],
+                ['op:mun:o1', 0],
+            ]),
+            new Map(),
+            undefined,
+            state,
+        );
+        syncSectorAssignmentsToFormations({ [sector.sector_id]: sector }, state.military.formations!, chainAdj(2));
+
+        expect(state.military.formations!.arbih_guards_brigade.location_osid).toBe('op:mun:o1');
+        expect(sector.assigned_brigade_ids).toEqual(['arbih_guards_brigade']);
+        expect(state.military.formations!.arbih_guards_brigade.assignment).toEqual({
+            kind: 'sector',
+            role: 'front',
+            sector_id: 'sector:arbih_1st_corps:0',
+        });
+    });
+
+    it('keeps idle not-on-loan army-HQ elites sector-exempt', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RBiH',
+            side_b: 'RS',
+        }] as any;
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual([]);
     });
 });
 

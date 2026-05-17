@@ -6,17 +6,17 @@
  * either intentionally revived or archived more aggressively.
  */
 import { useRef, useCallback, useState } from 'react';
-import { useGameStore } from '../store/gameStore';
-import { openCodex } from '../utils/shellNavigation';
-import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
-import { useIPC } from '../desktop/useIPC';
-import { advanceTurnAndSync } from '../desktop/orderActions';
-import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
-import { formatTurnLabel } from '../utils/formatters';
-import { getFactionCrest } from '../utils/factionAssets';
-import { AWWV_APP_VERSION } from '../utils/appVersion';
-import { OfficerEventBadge } from './OfficerEventBadge';
-import type { LoadedGameState, SummaryFocusSection } from '../data/types';
+import { useGameStore } from '../../store/gameStore';
+import { openCodex } from '../../utils/shellNavigation';
+import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../../data/DataLoader';
+import { useIPC } from '../../desktop/useIPC';
+import { advanceTurnAndSync } from '../../desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from '../../desktop/turnAftermathAdvanceDeps';
+import { formatTurnLabel } from '../../utils/formatters';
+import { getFactionCrest } from '../../utils/factionAssets';
+import { AWWV_APP_VERSION } from '../../utils/appVersion';
+import { OfficerEventBadge } from '../OfficerEventBadge';
+import type { LoadedGameState, SummaryFocusSection } from '../../data/types';
 
 const LOAD_TIMEOUT_MS = 25000;
 

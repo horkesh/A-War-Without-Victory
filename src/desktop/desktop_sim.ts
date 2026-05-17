@@ -39,6 +39,7 @@ import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
+import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
     return {
@@ -392,7 +393,13 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */
-export { deserializeState, serializeState };
+export { deserializeState, resolvePlayerParamilitaryDecisions, serializeState };
+export {
+    PLAYER_DECISION_FAMILIES,
+    summarizePlayerDecisions,
+    countBlockingPlayerDecisions,
+    listBlockingPlayerDecisions,
+} from '../state/player_decision_manifest.js';
 
 function getReserveRequestId(request: {
     request_id?: string;

@@ -215,13 +215,14 @@ export function isMovementOwnedReturnToCorps(
     }
     if (ownCorpsTerritory.size === 0 || ownCorpsTerritory.has(formation.location_osid)) return false;
 
-    const moveOrder = state.military.brigade_movement_orders?.[formationId];
+    const moveOrder = state.military.brigade_movement_orders?.[formationId] as { destination_sids?: string[]; stance?: string } | undefined;
     const orderedDestination = moveOrder?.destination_sids?.[0];
-    if (orderedDestination && ownCorpsTerritory.has(orderedDestination)) return true;
+    if (moveOrder?.stance === 'column' && orderedDestination && ownCorpsTerritory.has(orderedDestination)) return true;
 
     const movementState = state.military.brigade_movement_state?.[formationId];
     const activeDestination = movementState?.destination_sids?.[0];
     return movementState?.status === 'in_transit'
+        && movementState?.stance === 'column'
         && activeDestination != null
         && ownCorpsTerritory.has(activeDestination);
 }

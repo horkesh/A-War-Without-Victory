@@ -4,6 +4,34 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-16] feat(ui): add ops planning target discovery and convoy modal
+
+**Scope:** Renderer/player-decision roadmap continuation from `docs/plans/2026-05-16-ops-planning-modal-target-discovery-plan.md` and `docs/plans/2026-05-16-convoy-system-completion-plan.md`.
+
+**Change:** Ops Planning now exposes `Suggest Plan`, available target counts, available-target map highlighting, phase-gate feedback, guarded Plan -> G-2 advance, and forward-sector default staging from CorpsDetail. Convoys now have direct lifecycle unit coverage and a dedicated `ConvoyDecisionModal` opened from Presidential Inbox; convoy Inbox actions and the player-decision manifest now point at `convoy_decision_modal` instead of War Summary.
+
+**Validation:** `npx.cmd vitest run tests\ui\ops_planning_target_discovery.test.ts tests\ui\ops_modal_auto_propose.test.ts tests\ui\convoy_decision_modal.test.ts tests\ui\inbox_items.test.ts tests\player_decision_manifest.test.ts tests\humanitarian_convoy_lifecycle.test.ts tests\phase_c_supply_agency.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\presidential_decision_room.test.ts tests\ui_presidential_decision_room_wiring.test.ts` passed 100/100. `npm.cmd run typecheck` passed. `git diff --check` on touched files passed with CRLF normalization warnings only.
+
+**Canon posture:** Renderer/coverage work for ops planning and convoy decision surfacing. No scenario data, random source, save schema, or simulation behavior changed. Convoy aging/expiry and target-owner advisory semantics remain blocked on canon/design rulings.
+
+**Docs:** Added `docs/40_reports/implemented/20260516_OPS_PLANNING_TARGET_DISCOVERY.md` and `docs/40_reports/implemented/20260516_CONVOY_SYSTEM_COMPLETION.md`; updated roadmap, GUI master, report index, convoy plan, ops plan, and decision-surface audit addendum.
+
+---
+
+## [2026-05-16] fix(desktop): route convoy decisions to canonical military queue
+
+**Scope:** Desktop IPC convoy decision correctness — Task 1 of `docs/plans/2026-05-16-presidential-decision-surface-correctness-plan.md` (lane A).
+
+**Fix:** `stage-convoy-decision` IPC handler previously read and wrote root `state.pending_convoy_decisions`, while the engine owns `state.military.pending_convoy_decisions` (`src/state/supply_reserves.ts:evaluateHumanitarianConvoys` / `applyHumanitarianConvoyDecisions`). Player decisions were therefore silently dropped — the canonical queue still showed "pending" and convoy resolution applied default behavior. New CJS helper `src/desktop/convoy_ipc_contract.cjs` exposes `stageConvoyDecisionOnState(state, convoyId, decision)`; the IPC handler is now a thin shell over it. Root `state.pending_convoy_decisions` is intentionally ignored — fail-closed "Convoy not found" when only root has the entry. Valid decisions still constrained to `allow` / `block` / `divert`. Renderer broadcast after successful mutation is preserved.
+
+**Validation:** `npx.cmd vitest run tests\desktop_convoy_decision_contract.test.ts` passed 5/5. `npx.cmd vitest run tests\desktop_convoy_decision_contract.test.ts tests\phase_c_supply_agency.test.ts tests\ui\inbox_items.test.ts` passed 39/39. `npm.cmd run desktop:sim:build` produced `dist/desktop/desktop_sim.cjs` (pre-existing `import.meta` warning unchanged).
+
+**Canon posture:** Desktop IPC correctness only. Canonical queue mutation, no random/timestamp source, no scenario output or save schema change. Restores player agency over already-implemented Phase B humanitarian convoy lifecycle.
+
+**Docs:** None beyond this ledger entry; plan tracks lane completion.
+
+---
+
 ## [2026-05-16] fix(ui): restore React Warroom hotspot contract
 
 **Scope:** React Warroom room-shell hotspot routing, region-data source selection, and Warroom asset staging.
@@ -4936,3 +4964,301 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Determinism:** Documentation-only plan. No generated scenario artifact, runtime state, timestamped output, random input, or persisted simulation data changed.
 
 **Verification:** Read back the plan and report link. No code tests were run because this was a docs-only planning update.
+
+---
+
+## [2026-05-16] fix(ui): guard Deck.gl overlay polygons against invalid coordinates
+
+**Type:** Tactical map overlay renderer hardening. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** `buildOsidDamageData(...)` and `buildForceQualityData(...)` now validate polygon coordinates at the Deck.gl layer-builder boundary before emitting `PolygonLayer` data. Polygons with non-finite longitude/latitude or out-of-range longitude/latitude are skipped, and each skipped overlay/OSID pair emits a stable one-time console warning. Valid polygons continue through the existing deterministic sort and layer construction paths.
+
+**Determinism:** UI read-model filtering only. The guard uses deterministic coordinate predicates and stable OSID/layer warning keys. It does not mutate simulation state, generated data, saves, scenario outputs, random input, or timestamps.
+
+**Verification:** `npx.cmd vitest run tests\ui\osid_damage_overlay_coord_validity.test.ts tests\ui\force_quality_overlay_coord_validity.test.ts` passed 2/2 after RED failure confirmed both builders previously emitted invalid polygons. `npx.cmd vitest run tests\osid_damage_overlay_builder.test.ts tests\force_quality_overlay_builder.test.ts tests\ui\osid_damage_overlay_coord_validity.test.ts tests\ui\force_quality_overlay_coord_validity.test.ts` passed 18/18.
+
+---
+
+## [2026-05-16] fix(ui): complete War Summary empty states and count labels
+
+**Type:** Tactical map / Army HQ War Summary UI completeness fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** War Summary focused tabs for Convoys, Support, and Capital now render the shared `EmptyState` component when their underlying read models have no rows, instead of leaving a blank container. The War Summary overview labels live formation personnel as `Personnel at arms` and, when militia pool data is available, shows `Mobilized pool` and `Mobilized total` so the two personnel concepts are visible on the same surface. The OPSEC tab now labels its operation-health list as a filtered count against all active player-facing operations, preserving the existing data filter while making the mismatch explicit.
+
+**Determinism:** UI read-model and render-label change only. No simulation state, generated artifact, random input, timestamp, save output, scenario output, or serialized state changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_personnel_label.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui_army_hq_war_summary_visibility.test.ts tests\empty_state.test.ts` passed 20/20. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-16] fix(ui): surface blocked advance-turn review path
+
+**Type:** Tactical shell / Warroom primary-action feedback. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** `PresidentialToolbar` and `WarroomStatusBar` now consume the existing pre-advance command-review projection before handling ADVANCE. When existing event-decision systems block turn advancement, the buttons expose a title/aria label such as `Resolve 2 pending decisions to continue. Opens Decision Room review.` The tactical toolbar opens the shared advance-review modal instead of attempting IPC advance; the Warroom status bar routes to its existing Decision Room callback when available, otherwise it falls back to the same advance-review modal. Clear states keep the existing advance behavior.
+
+**Determinism:** UI read-model and click routing only. The block count is derived from existing `presidentialReviewQueue.eventDecisionCount` / `pendingEventDecisions` data, with no sim mutation, random input, timestamp, generated artifact, persisted output, or scenario state change.
+
+**Verification:** `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts` passed 3/3 after RED failure confirmed missing title/aria/routing. `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\presidential_toolbar_severity_pip.test.ts` passed 15/15.
+
+---
+
+## [2026-05-16] fix(ui): default progressed saves past first-run tutorial
+
+**Type:** Tactical map tutorial persistence / save-load compatibility fix. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, serialization format, or scenario output changed.
+
+**Change:** `GameStateAdapter` now normalizes absent `meta.tutorial_state` during UI load. Fresh turn-0 saves still leave tutorial state absent so onboarding renders, but progressed saves (`meta.turn > 0`) default to `{ dismissed: true, completed_steps: [] }`, preventing Continue from replaying the first-run tutorial on older saves that predate the saved tutorial flag. Explicit saved tutorial state remains authoritative.
+
+**Determinism:** UI read-model migration only. The default is a pure function of persisted `meta.turn` and `meta.tutorial_state`; it does not mutate the save, simulation state, generated artifacts, random input, timestamps, or scenario outputs.
+
+**Verification:** RED confirmed with `npx.cmd vitest run tests\ui\tutorial_persistence.test.ts` failing because turn-40 saves parsed `tutorial_state` as `undefined`. After the fix, `npx.cmd vitest run tests\ui\tutorial_persistence.test.ts` passed 3/3; `npx.cmd vitest run tests\ui\tutorial_persistence.test.ts tests\tutorial_content_v1.test.ts tests\tutorial_onboarding_skeleton.test.ts tests\v092_tutorial_lane_b_auto_dismiss.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts` passed 25/25; `npx.cmd vitest run tests\ui_map_game_state_adapter.test.ts tests\ui_adapter_boundary.test.ts tests\ui\tutorial_persistence.test.ts` passed 36/36.
+
+**Roadmap delta:** Implements Track D5 from `docs/plans/2026-05-16-gui-playtest-defects-plan.md`: Continue at turn 40 no longer replays tutorial solely because the save lacks the newer tutorial metadata field.
+
+**Report:** `docs/40_reports/implemented/20260516_TUTORIAL_CONTINUE_PERSISTENCE.md`
+
+---
+
+## [2026-05-16] feat(ui): close GUI Phase 0 decision surface and polish gates
+
+**Type:** Tactical map / Presidential Inbox / Warroom UI decision-surface and polish implementation. No gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Phase 0 Track A0 and the non-design-blocked GUI polish/playtest lanes are implemented. Presidential Inbox now surfaces the audited player-facing decision families: paramilitary requests, Dayton negotiation, convoy decisions, event decisions, peace-plan/autonomy/opportunity/reserve rows, and player-scoped officer/personnel events. RS paramilitary decisions include explicit war-crimes/civilian-risk warning copy and route through `ParamilitaryReviewModal` to the canonical paramilitary resolver. The same wave adds panel-level `RootErrorBoundary` isolation, blocked ADVANCE review routing, PeacePlan modal filtering/accessibility, War Summary empty states/count labels, progressed-save tutorial persistence, Inbox dedupe and RECORDS clarity, Warroom no-state CTA/hotspot labels/advance parity, Decision Room progressive disclosure, Emergency Posture confirmation, active typography-floor regressions, OOB Situation default-open, quiet Inbox Command Watch, retired dead chrome, and pause/ESC regression coverage.
+
+**Determinism:** UI read-model, IPC routing to an existing deterministic resolver, and render/control-flow changes only. The new coordinate guards and Inbox projections use deterministic predicates and stable sorting/ids. No simulation state, random input, timestamp, generated scenario artifact, baseline hash, save schema, or serialized output changed by the UI closeout itself.
+
+**Verification:** `npm.cmd run typecheck` passed. Integrated focused regression passed 81/81: `tests\ui\paramilitary_review_modal.test.ts`, `tests\ui\peace_plan_modal.test.ts`, `tests\ui\inbox_items.test.ts`, `tests\ui\inbox_dedup.test.ts`, `tests\ui\records_button_behavior.test.ts`, `tests\ui\no_unicode_escapes_in_rendered_text.test.ts`, `tests\ui\bottom_status_strip_labels.test.ts`, `tests\ui\error_boundary_isolation.test.ts`, `tests\ui\emergency_posture_confirm.test.ts`, `tests\ui\pause_escape_shortcuts.test.ts`, `tests\ui\gui_polish_typography_floor.test.ts`, `tests\ui\retired_chrome_imports.test.ts`, `tests\ui_presidential_decision_room_wiring.test.ts`, `tests\ui\pre_advance_command_review.test.ts`, `tests\sim\command\phase4_ui_data_layer.test.ts`, and `tests\desktop_persistence_contract.test.ts`. `npm.cmd run desktop:sim:build` passed with the existing `import.meta` CJS warning. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/dynamic-import/chunk warnings. `git diff --check` passed with CRLF normalization warnings only before docs closeout.
+
+**Roadmap delta:** Phase 0 Track A0 is closed for engineering scope. `GAME_STATE_RATING_MASTER.md` restores #12 Event/decision system and #32 Sensitive history handling to A- for current engineering truth; remaining AAA+++ work is outcome-arc depth, Codex framing, full onboarding consolidation, Phase 1 map information design, CRT-overlay art direction, and later audio/localization/marketing/telemetry/store tracks.
+
+**Reports:** `docs/40_reports/implemented/20260516_GUI_PHASE0_DECISION_SURFACE_AND_POLISH.md`; `docs/40_reports/audits/20260516_PRESIDENTIAL_INBOX_DECISION_SURFACE_AUDIT.md`
+
+---
+
+## [2026-05-16] docs(audit): supersede inbox-only decision-surface closure
+
+**Type:** Documentation-only decision-surface audit correction. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Added `docs/40_reports/audits/20260516_PRESIDENTIAL_DECISION_SURFACE_SECOND_PASS_AUDIT.md` and updated the reports index, GUI master, master roadmap, consolidated backlog, napkin, and prior Inbox audit to mark the first audit as superseded. The second pass explains why paramilitary requests were not the only issue: decision queues are scattered and there is no manifest enforcing producer -> adapter -> Inbox/Decision Room -> action route -> resolver -> gate classification. It records residual P0s for convoy IPC canonical path, event `responding_faction` ownership, and manifest-backed gate/counter policy.
+
+**Determinism:** Documentation-only audit. No generated artifact, runtime state, timestamped simulation output, random input, persisted save, or scenario result changed.
+
+**Verification:** Re-ran direct source inspection for convoy queue paths, event decision queuing, adapter exposure, and pre-advance/desktop gating; PowerShell JSON audit over `data/scenarios/events/*.json` found 44 response-option events, 36 required-response events, and 26 required-response events without explicit `responding_faction`.
+
+---
+
+## [2026-05-16] docs(plan): create presidential decision-surface correctness plan
+
+**Type:** Documentation-only implementation planning and roadmap integration. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Added `docs/plans/2026-05-16-presidential-decision-surface-correctness-plan.md` and integrated it into `docs/plans/MASTER_ROADMAP.md` as the active Phase 0.1 P0 hard blocker. The plan converts the second-pass audit into six TDD tasks: convoy IPC canonical state path, required-response event ownership, player-decision manifest, UI pre-advance/Decision Room counter wiring, desktop advance gate wiring, and final regression/docs/ledger closeout. Linked the plan from the second-pass audit, GUI master, reports README, consolidated backlog, and napkin.
+
+**Determinism:** Documentation-only plan. No generated artifact, runtime state, random input, timestamped simulation output, persisted save, or scenario result changed.
+
+**Verification:** Read back the new plan and roadmap links; ran `git diff --check` on the edited documentation set with no whitespace errors beyond existing CRLF normalization warnings.
+
+---
+
+## [2026-05-16] fix(ui/desktop): enforce presidential decision-surface contract
+
+**Type:** UI/desktop/gameplay event decision-surface correctness. No combat math, political controller write, OOB, save schema, random system, timestamp behavior, calibration baseline, or scenario output was intentionally changed.
+
+**Change:** Phase 0.1 decision-surface correctness is implemented. `stage-convoy-decision` now resolves through canonical `state.military.pending_convoy_decisions`; required event decisions respect explicit `responding_faction`; all required-response 1992-1995 events declare valid owners; `src/state/player_decision_manifest.ts` registers the current generated player-decision families; `GameStateAdapter`, pre-advance review, Presidential Decision Room readiness/metrics, and desktop `advance-turn` consume the manifest; manifest-blocking modal families get fallback Decision Room cards so a block always has an actionable row.
+
+**Determinism:** Manifest family order is static, event catalog ownership tests sort files deterministically, and UI/desktop gate projections are pure reads over persisted state. JSON event edits add ownership metadata only; they do not change triggers, effects, weights, narrative text, generated artifacts, or scenario baselines.
+
+**Verification:** Focused decision-surface regression passed 110/110: `tests\desktop_convoy_decision_contract.test.ts`, `tests\event_response_ownership_catalog.test.ts`, `tests\event_decisions.test.ts`, `tests\events_evaluate.test.ts`, `tests\integration_event_system.test.ts`, `tests\player_decision_manifest.test.ts`, `tests\desktop_player_decision_gate_contract.test.ts`, `tests\desktop_persistence_contract.test.ts`, `tests\ui\pre_advance_command_review.test.ts`, `tests\ui_presidential_decision_room_wiring.test.ts`, `tests\ui\presidential_decision_room.test.ts`, `tests\ui\inbox_items.test.ts`, `tests\ui\inbox_dedup.test.ts`, and `tests\phase_c_supply_agency.test.ts`. `npm.cmd run typecheck` passed. `npm.cmd run desktop:sim:build` passed with the existing `import.meta` CJS warning. `npm.cmd run desktop:map:build` passed with existing Vite/browser-external/dynamic-import/chunk warnings. `git diff --check` reported CRLF normalization warnings only.
+
+**Report:** `docs/40_reports/implemented/20260516_PRESIDENTIAL_DECISION_SURFACE_CORRECTNESS.md`
+
+---
+
+## [2026-05-16] docs(engine-health): close n1842 H2/H3 as report-only classifications
+
+**Type:** Documentation-only engine-health classification. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed.
+
+**Change:** Added implemented reports for n1842 H2/H3 and updated the engine-health plan/audit. H2 is closed as by-design compatibility: `brigade_front_assignment` is empty because `corps_front_sectors` is the runtime/UI authority. H3 is closed as report-only: `rs_1st_novigrad_infantry` and `rs_2nd_tesli_light_infantry` are not drifters, and `vrs_1st_laktasi` is same-corps redeployment to Teslic.
+
+**Determinism:** Documentation-only classification over existing n1842 artifacts. No runtime state, generated artifact, random input, timestamped simulation output, persisted save, or scenario result changed.
+
+**Verification:** Re-read n1842 `final_save.json` and `brigade_temporal_log.jsonl`; grep-confirmed `brigade_front_assignment` live authority remains compatibility-only and `GameStateAdapter` reads `corps_front_sectors`. Ran docs grep/diff checks before closeout.
+
+**Reports:** `docs/40_reports/implemented/20260516_BRIGADE_FRONT_ASSIGNMENT_ADAPTER_AUDIT.md`; `docs/40_reports/implemented/20260516_VRS_1ST_KRAJINA_TESLIC_DRIFTERS.md`
+
+---
+
+## [2026-05-16] docs(engine-health): report H4/H5 implementation and current H0 rerun evidence
+
+**Type:** Documentation-only engine-health closeout/update. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed by this docs worker.
+
+**Change:** Added implementation reports for n1842 H4/H5 and updated the engine-health plan, audit, roadmap, reports index, consolidated implemented index, and napkin. H4 documents live `political.war_supply_condition` as the higher-is-better current supply aggregate derived from `supply_state_by_osid`, while `war_supply_pressure` remains cumulative legacy pressure. H5 documents target-corps column deployment for loaned army-HQ elites and bounded movement-owned unresolved warning suppression. H2/H3 remain closed report-only. Later n1844 verification supersedes the original open-verification wording for H4/H5.
+
+**H0 evidence:** Recorded current rerun `runs/apr1992_definitive_188w__210e69404d054959__w188_n1843` with `final_state_hash` `a0111273f26f907d`. This matches n1842 but is not accepted as the formal H0 hash audit because the workspace changed. The rerun still confirms the H5 unresolved evidence for `arbih_guards_brigade`.
+
+**Determinism:** Documentation-only update. No runtime state, generated artifact, random input, timestamped simulation output, persisted save, or scenario result changed.
+
+**Verification:** Ran focused grep/source inspection over H4/H5 implementation references, n1843 run-summary/end-report evidence, and docs links. Ran docs diff/grep checks before closeout.
+
+**Reports:** `docs/40_reports/implemented/20260516_SUPPLY_CONDITION_LIVE_AGGREGATE.md`; `docs/40_reports/implemented/20260516_ARMY_HQ_ELITE_LOAN_DEPLOYMENT.md`
+
+---
+
+## [2026-05-16] docs(engine-health): report H1 launch-feasibility blockers
+
+**Type:** Documentation-only engine-health closeout/update. No code, gameplay rule, scenario data, OOB, combat math, political controller write, sensitive-history rule, save schema, serialization format, or scenario output changed by this docs worker.
+
+**Change:** Added `docs/40_reports/implemented/20260516_OPERATION_LAUNCH_FEASIBILITY_BLOCKERS.md` and updated the engine-health plan, n1842 audit, master roadmap, reports index, consolidated implemented index, and napkin. H1 is now recorded as implemented with focused verification: shared pure `evaluateLaunchFeasibility(...)` returns `feasible`, `ratio`, `attackerPower`, `defenderPower`, and typed `blocker`; launch/readiness and triggered-operation paths expose `defender_power_too_high` and `no_launch_readiness`; operation-delivery, opportunity-proof, and sensitive-history diagnostics expose blockers.
+
+**Verification boundary:** Initial parent H1 verification was focused-suite/typecheck only: 12 files, 127 passed, 4 skipped; full typecheck passed after the parent fixed movement-order typing. Later n1844 verification supersedes the original pending scenario-evidence wording: NO_LAUNCH_READINESS is verified at 5, DELIV remains open at 6, and sensitive-history watched operations are missing. Opportunity spawn gating was not applied because current fixtures/catalog paths lack enough front-sector context; opportunity operations are caught at first planning tick.
+
+**Determinism:** Documentation-only update. No runtime state, generated artifact, random input, timestamped simulation output, persisted save, or scenario result changed.
+
+**Verification:** Ran docs grep/diff checks before closeout.
+
+**Report:** `docs/40_reports/implemented/20260516_OPERATION_LAUNCH_FEASIBILITY_BLOCKERS.md`
+
+---
+
+## [2026-05-16] docs(engine-health): record n1844 post-fix verification for H1/H4/H5
+
+**Type:** Documentation update over completed verification artifacts. Runtime changes were made earlier in this session; this entry records the post-fix 188w/audit evidence and does not introduce new mechanics.
+
+**Change:** Updated the H1/H4/H5 implementation reports, the n1842 engine-health plan, the n1842 audit, the master roadmap, and napkin with post-fix n1844 evidence. H4 and H5 are now verified in n1844. H1's blocker surface is verified, but DELIV uplift and sensitive-history watched-operation outcomes remain open.
+
+**Verification evidence:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1844` completed with final hash `ccd3f9f770052614`. `operation_delivery_audit.cjs` reports `NO-LAUNCH-READINESS` 5, `DEFENDER-POWER-HIGH` 9, and `DELIV` 6. `sensitive_history_status.cjs` still reports `OPEN_P0` and lists Krivaja-95/Stupcanica-95/Cerska-Kamenica as missing watched operations. `end_report.md` now includes live supply condition: HRHB `40 -> 69`, RBiH `59 -> 81`, RS `62 -> 79`. `audit_sector_truth.ts` on n1844 final save returns `ok: true`, `saved_unresolved: 0`; `arbih_guards_brigade` is sector-assigned to `sector:arbih_1st_corps:8`.
+
+**Determinism:** The n1844 hash differs from n1842/n1843 because it includes the H1/H4/H5 implementation changes and current dirty workspace state. It is verification evidence, not a formal H0 baseline-hash verdict.
+
+**Commands:** `npm.cmd run desktop:sim:build`; `npm.cmd run desktop:map:build`; `npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --unique --out runs`; `npm.cmd run sim:scenario:audit-sectors -- --save runs\apr1992_definitive_188w__210e69404d054959__w188_n1844\final_save.json`; `node tools\diagnostics\operation_delivery_audit.cjs runs\apr1992_definitive_188w__210e69404d054959__w188_n1844`; `node tools\diagnostics\sensitive_history_status.cjs runs\apr1992_definitive_188w__210e69404d054959__w188_n1844`.
+
+---
+
+## [2026-05-16] fix(ui): close D7 right-rail and dev-host gaps
+
+**Type:** UI shell polish and dev-host consistency. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Added a shared right-rail predicate so the Presidential Inbox is suppressed while the map-local Field Ops Snapshot owns the right rail. Standardized the Warroom browser tactical-map launcher on `127.0.0.1:3002`, matching the Electron probe/docs host. Added focused regressions for both gaps.
+
+**Determinism:** UI render gating and browser dev URL construction only. No runtime simulation ordering, random input, persisted state, or scenario artifact is affected.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_panel_rail.test.ts tests\ui\dev_host_consistency.test.ts tests\ui\bottom_status_strip_labels.test.ts tests\ui\no_unicode_escapes_in_rendered_text.test.ts` passed 8/8. `npm.cmd run typecheck` passed. `git diff --check -- src\ui\map\App.tsx src\ui\map\components\panelRail.ts src\ui\warroom\warroom.ts tests\ui_map_panel_rail.test.ts tests\ui\dev_host_consistency.test.ts` exited 0 with CRLF normalization warnings only.
+
+---
+
+## [2026-05-16] fix(ui): finish D5 first-turn orientation persistence cleanup
+
+**Type:** UI persistence cleanup for GUI playtest Track D5. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Removed the residual first-turn orientation card dependency on the global `awwv_seen_first_turn_intro` browser-storage flag. The orientation wrapper now uses current renderer-session state for dismissal, while progressed saves continue to be suppressed by the existing turn gate and the tutorial overlay remains governed by save-backed `meta.tutorial_state`.
+
+**Determinism:** UI-only React state and pure read-model comments/tests. No runtime simulation ordering, random input, persisted save data, or scenario artifact is affected.
+
+**Verification:** `npx.cmd vitest run tests\ui\first_turn_orientation_persistence.test.ts tests\ui\first_turn_orientation.test.ts tests\ui\tutorial_persistence.test.ts` passed 17/17. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-16] fix(data): close officer roster dead corps references
+
+**Type:** Scenario data and OOB source correction. Officer corps-affinity references and source OOB corps coverage changed; no code path, combat math, save schema, serialization format, random system, or generated scenario artifact changed.
+
+**Change:** Replaced stale officer roster corps IDs `vrs_ibk` -> `vrs_east_bosnian` and `vrs_hk` -> `vrs_herzegovina` in `data/scenarios/officers/apr1992_officers.json`. Added `arbih_7th_corps` to `data/source/oob_corps.json` with Travnik HQ metadata because existing OOB/HQ data was sufficient to model the historically correct late-1992 corps rather than stripping the three officer references. Added source OOB coverage for the runtime synthetic `jna_herzegovina_command` as an RS-owned JNA/VRS Herzegovina command using the Nevesinje/Sopilja metadata from the JNA phantom source and startup save.
+
+**Regression:** Added `tests/canon_officer_corps_refs.test.ts`, asserting every officer `home_corps_id` and `compatible_corps_ids` entry exists in `oob_corps.json`.
+
+**Determinism:** JSON data correction only. The new ARBiH 7th Corps source row may affect scenarios that instantiate future OOB corps after its `available_from` turn; the 40w hash anchor was not rerun in this lane.
+
+**Verification:** `npx.cmd vitest run tests\canon_officer_corps_refs.test.ts` passed 2/2. `npx.cmd vitest run tests\oob_loader.test.ts tests\oob_early_war_entry.test.ts tests\officer_system.test.ts tests\officer_quality.test.ts` passed 76/76. Direct Node orphan check reported counts 0 for officer home refs, officer compatible refs, and runtime corps missing from OOB.
+
+---
+
+## [2026-05-16] fix(ui): harden desktop IPC contract shapes
+
+**Type:** Desktop/UI IPC contract cleanup. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Added concrete `WindowAwwv` result interfaces for movement range/path, supply paths, corps sectors, battle events, and advisor recommendations. Browser-mode `getAdvisorRecommendation` now returns `{ ok: false, error: 'Desktop IPC not available' }`, matching the failed IPC envelope used by other desktop-unavailable calls. Added a deterministic contract test that rejects bare `Promise<unknown>` methods on `WindowAwwv` and checks the advisor fallback shape.
+
+**Determinism:** Renderer type/fallback behavior and source-shape lint only. No runtime simulation ordering, random input, persisted save data, or scenario artifact is affected.
+
+**Verification:** `npx.cmd vitest run tests\ipc_contract_shape.test.ts` passed 3/3. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-16] fix(ui): tighten onboarding copy and spotlight target lint
+
+**Type:** Tutorial copy and renderer anchor hygiene. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Updated onboarding steps 03, 05, and 06 to remove redundant records wording, internal Decision Room jargon, and the Turn 0 operations promise gap. Kept step 08 pointed at the existing `cost-ledger` renderer anchor in the Verdict cost summary rather than introducing a new top-level Cost Ledger surface. Added a focused lint regression requiring every non-null onboarding `target_ui_element` to resolve to a rendered `data-tutorial-step` emitter under `src/ui/map`.
+
+**Determinism:** UI text and static test coverage only. No runtime simulation ordering, random input, persisted save data, or scenario artifact is affected.
+
+**Verification:** `npx.cmd vitest run tests\onboarding_spotlight_targets.test.ts` passed 2/2. `npx.cmd vitest run tests\onboarding_spotlight_targets.test.ts tests\tutorial_content_v1.test.ts tests\v092_tutorial_anchor_coverage.test.ts` passed 15/15. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-16] docs(roadmap): close Audit Round 2 O7-O9
+
+**Type:** Mixed closeout documentation over data/UI contract/tutorial changes already recorded above. No additional code, gameplay rule, combat math, save schema, serialization format, random system, or scenario data changed in this ledger entry.
+
+**Change:** Added `docs/40_reports/implemented/20260516_AUDIT_ROUND2_O7_O9_CLOSEOUT.md` and updated the Audit Round 2 plan, master roadmap, report indexes, GUI master, and napkin. O7-O9 are closed; O10 remains optional canon/content QA; O11 remains Windows-host/operator verification.
+
+**Verification evidence:** Combined O7-O9 focused suite passed 96/96. Direct Node orphan check returned zero missing officer home refs, compatible refs, and runtime corps refs. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run sim:scenario:run:40w` completed at `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1845` with `final_state_hash` `d6d1e1c9decf6b00`, 26/26 anchor checks passed, and 6/6 benchmark checks passed; this is current dirty-workspace evidence, not an isolated O7-only hash verdict against old `n1740`.
+
+---
+
+## [2026-05-16] feat(ui): implement tactical map information-design Track C
+
+**Type:** Tactical-map UI read-model and renderer overlay implementation. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Implemented AAA+++ Phase 1 Track C C1-C4. The tactical map now renders contested/disputed OSID bands in political/ethnic modes, front-line stability classes, supply-reach/isolation overlays in supply mode, and separate Authority/Legitimacy map modes. `GameStateAdapter` now exposes player-visible `supplyStateByOsid` and normalized `politicalMetricsByOsid`; all new map builders are pure and sort emitted features with `strictCompare`.
+
+**Determinism:** UI-only deterministic projections over existing saved state. No state mutation, random input, scenario artifact, serialization output, or sim pipeline ordering is affected.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_contested_bands.test.ts tests\ui_map_front_stability.test.ts tests\ui_map_supply_reach.test.ts tests\ui_map_political_metrics.test.ts tests\ui_map_modes.test.ts tests\ui_map_game_state_adapter.test.ts tests\ui_map_front_lines_phase_a.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_no_corridor_heartbeat_default_overlay.test.ts tests\ui\bottom_status_strip_labels.test.ts tests\ui\supply_fallbacks.test.ts` passed 58/58. `npx.cmd tsc --noEmit` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `Invoke-WebRequest http://127.0.0.1:3002/?dev=1` returned HTTP 200 and the tactical root HTML.
+
+---
+
+## [2026-05-16] feat(ui): implement onboarding consolidation Track D
+
+**Type:** UI onboarding, coachmark, and first-session documentation. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Implemented AAA+++ Phase 1 Track D D1-D4. `App.tsx` no longer mounts the legacy first-turn orientation overlay; `PeaceWarTransition` is transition-gated through `peaceWarTransitionGate.ts` and store load state so direct war-save loads do not replay it; `CoachmarkLayer` adds first-hover `localStorage` coachmarks for Decision Room, Operation Opportunity, Chronicle filters, and Codex; `PresidentialInbox` opening briefs are now 3-bullet scan cards with `Begin` / `Read later`; onboarding step 01 now introduces the first-session command loop.
+
+**Determinism:** UI-only renderer behavior and browser storage for coachmark seen flags. No runtime simulation ordering, random input, persisted save schema, scenario artifact, or combat pipeline behavior is affected.
+
+**Verification:** `npx.cmd vitest run tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts` passed 5/5. `npx.cmd vitest run tests\tutorial_content_v1.test.ts tests\onboarding_spotlight_targets.test.ts tests\v092_tutorial_anchor_coverage.test.ts tests\v092_tutorial_lane_b_auto_dismiss.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\tutorial_persistence.test.ts tests\ui\gamestore_load_reset.test.ts tests\ui_presidential_toolbar_summary_click.test.ts tests\ui\first_turn_orientation.test.ts tests\ui\first_turn_orientation_persistence.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts` passed 65/65. `npx.cmd tsc --noEmit` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+---
+
+## [2026-05-17] fix(ui): close Track C/D browser visual validation
+
+**Type:** Tactical-map browser validation, coachmark geometry fix, and report/index update. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Added `docs/40_reports/implemented/20260517_TRACK_C_D_BROWSER_VISUAL_VALIDATION.md` plus captured browser screenshots under `docs/40_reports/implemented/visual_validation/`. Browser validation covered Supply, Authority, and Legitimacy map modes in the latest Turn 40 tactical shell. It also found the Chronicle filter coachmark target was attached to a `display: contents` wrapper with a `0x0` runtime rectangle; `ChronicleOverlay.tsx` now places `data-coachmark-id="chronicle-filter"` on the actual filter row. Decision Room coachmark geometry was validated through the HQ shell. The current latest save did not expose active operation-opportunity proposals, so that live screenshot remains data-dependent while the component path remains regression-covered.
+
+**Determinism:** UI-only DOM attribute placement and documentation/artifact capture. No state mutation, random input, scenario artifact, serialization output, or sim pipeline ordering is affected.
+
+**Verification:** Browser validation on `http://127.0.0.1:3002/` confirmed nonblocking Supply/Authority/Legitimacy captures, Decision Room coachmark rectangle approximately `1246x667`, and Chronicle filter rectangle approximately `675x24` after the fix.
+
+---
+
+## [2026-05-17] fix(ui): remove CRT overlay from live command surfaces
+
+**Type:** Tactical UI art-direction cleanup. No simulation rule, combat math, scenario data, save schema, serialization format, random system, or generated scenario output changed.
+
+**Change:** Removed `crt-overlay` from the live tactical command rail (`OOBSidebar.tsx`) and Field Ops Snapshot / `OperationsPanel.tsx` paths. Added `tests/ui/no_crt_command_surfaces.test.ts` to prevent reintroducing the scanline overlay on those repeated-use command surfaces. Added `docs/40_reports/implemented/20260517_CRT_COMMAND_SURFACE_ART_DIRECTION.md` and updated GUI/report roadmap indexes.
+
+**Determinism:** Renderer-only class removal and documentation update. No state mutation, random input, scenario artifact, serialization output, or sim pipeline ordering is affected.
+
+**Verification:** `npx.cmd vitest run tests\ui\no_crt_command_surfaces.test.ts tests\ui_shell_frame_contract.test.ts` passed 9/9. `npx.cmd tsc --noEmit` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/dynamic-import/chunk warnings.
+
+---
+
+## [2026-05-17] docs(process): final propagation and push readiness pass
+
+**Type:** Documentation/process closeout over the accumulated AAA+++ Phase 0/1, engine-health, audit, GUI, onboarding, map-information, and browser-validation work. No additional gameplay rule, combat math, scenario event, save schema, random source, or turn-ordering behavior was introduced by this entry.
+
+**Change:** Rechecked master roadmap, report indexes, GUI/map masters, project ledger, knowledge ledger, and napkin propagation for the current push payload. Added `tmp_gui_observation/` to `.gitignore` because the GUI polish plan explicitly marks those local browser-observation artifacts as non-commit scratch output; curated visual-validation captures remain tracked under `docs/40_reports/implemented/visual_validation/`. Regenerated the baked April 1992 desktop startup snapshot after `desktop:sim:build` reported the canonical artifact stale.
+
+**Determinism:** Documentation, ignore policy, and generated startup artifact refresh only. The startup snapshot is the canonical desktop boot artifact and was rebuilt through `npm.cmd run desktop:startup-snapshot:build`; this entry makes no independent simulation tuning claim.
+
+**Verification:** `git diff --check` exited 0 with CRLF normalization warnings only. `npm.cmd run typecheck` passed. Focused regression suite passed 406/406 with 4 skips across 66 files. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run warroom:build` passed with existing Vite/browser-external warnings. First `npm.cmd run desktop:sim:build` failed on stale startup snapshot, then `npm.cmd run desktop:startup-snapshot:build` refreshed `data/derived/startup/apr_1992_initial_save.json`, and the rerun of `npm.cmd run desktop:sim:build` passed with the pre-existing `import.meta` CJS warning.

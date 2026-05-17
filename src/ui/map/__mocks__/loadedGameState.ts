@@ -63,5 +63,5 @@ export function makeMockLoadedGameState(): LoadedGameState {
     movementsByOsid: {},
     supplyTransitionsByOsid: {},
     controlEventsByOsid: {},
-  } as LoadedGameState;
+  } as unknown as LoadedGameState;
 }

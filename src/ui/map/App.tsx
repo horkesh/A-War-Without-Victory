@@ -36,6 +36,8 @@ import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
+import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
+import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
@@ -47,8 +49,7 @@ import { PeaceWarTransition } from './components/PeaceWarTransition';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
-import { FirstTurnOrientationCard, FIRST_TURN_INTRO_STORAGE_KEY } from './components/FirstTurnOrientationCard';
-import { buildFirstTurnOrientation } from './data/firstTurnOrientation';
+import { CoachmarkLayer } from './components/CoachmarkLayer';
 import { OnboardingOverlay, shouldShowOnboarding } from './components/onboarding';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
@@ -58,7 +59,8 @@ import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
-import { derivePanelRailState } from './components/panelRail';
+import { RootErrorBoundary } from './components/RootErrorBoundary';
+import { derivePanelRailState, shouldRenderInboxPanel } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
 import { getOsidDisplayName } from './utils/osidDisplayName';
@@ -72,6 +74,7 @@ import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './deskt
 import type { SummaryFocusSection } from './data/types';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
+import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { isWarroomLocalCommand } from './utils/warroomNavigation';
@@ -157,30 +160,6 @@ function StrategicDashboardWrapper() {
   return <StrategicDashboard />;
 }
 
-function FirstTurnOrientationWrapper({ disabled = false }: { disabled?: boolean }) {
-  // NIGHTSHIFT-G2: One-time orientation card shown after the side picker on a
-  // fresh save. Reads localStorage at mount; persistence is handled inside
-  // FirstTurnOrientationCard on dismiss / item click.
-  const state = useGameStore((s) => s.loadedGameState);
-  // Read localStorage inside an effect, not in pure render — keeps render deterministic.
-  const [hasSeenIntro, setHasSeenIntro] = useState<boolean>(true);
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        setHasSeenIntro(window.localStorage.getItem(FIRST_TURN_INTRO_STORAGE_KEY) === '1');
-      } else {
-        setHasSeenIntro(false);
-      }
-    } catch {
-      setHasSeenIntro(false);
-    }
-  }, []);
-  if (disabled) return null;
-  const view = buildFirstTurnOrientation(state, hasSeenIntro);
-  if (!view) return null;
-  return <FirstTurnOrientationCard view={view} onDismiss={() => setHasSeenIntro(true)} />;
-}
-
 function OnboardingOverlayWrapper() {
   // v0.9.2 tutorial onboarding skeleton (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON).
   //
@@ -210,11 +189,7 @@ function PeaceWarTransitionOverlay() {
   const seen = useGameStore((s) => s.peaceWarTransitionSeen);
   const setSeen = useGameStore((s) => s.setPeaceWarTransitionSeen);
 
-  // Show when phase is 'war' and turn is early (first war turn) and not yet dismissed
-  if (!state || seen || state.phase !== 'war') return null;
-  // Only show on the first war turn (turn <= 1 from war start, approximated by low turn number or first load)
-  // Since we can't easily detect "just transitioned", show if turn <= 5 and not yet seen
-  if ((state.turn ?? 0) > 5) return null;
+  if (!state || !shouldShowPeaceWarTransition(state, seen)) return null;
 
   return <PeaceWarTransition state={state} onDismiss={() => setSeen(true)} />;
 }
@@ -248,18 +223,14 @@ function App() {
   const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
   const peaceWarTransitionSeen = useGameStore((s) => s.peaceWarTransitionSeen);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
-  const peaceWarTransitionActive = Boolean(
-    loadedGameState
-      && !peaceWarTransitionSeen
-      && loadedGameState.phase === 'war'
-      && (loadedGameState.turn ?? 0) <= 5,
-  );
+  const peaceWarTransitionActive = shouldShowPeaceWarTransition(loadedGameState, peaceWarTransitionSeen);
   const onboardingActive = Boolean(
     loadedGameState
       && !peaceWarTransitionActive
       && shouldShowOnboarding(loadedGameState.tutorial_state),
   );
   const mapMode = useGameStore((s) => s.mapMode);
+  const isOperationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const railState = derivePanelRailState({
     selectedOsid,
     selectedArmyId,
@@ -293,6 +264,8 @@ function App() {
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [peacePlanDismissed, setPeacePlanDismissed] = useState(false);
+  const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
+  const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -753,31 +726,35 @@ function App() {
           Each wrapper uses display:contents so the wrapped components retain
           their existing absolute/fixed positioning unaffected by the new tag.
           Faction-agnostic; UI-only; no sim path touched. */}
-      <MapContainer />
+      <RootErrorBoundary zone="map">
+        <MapContainer />
+      </RootErrorBoundary>
       <header
         role="banner"
         aria-label="Presidential command toolbar"
         style={{ display: 'contents' }}
       >
-        <PresidentialToolbar
-          pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
-          reserveAttention={loadedGameState?.armyReserveQueue
-            ? {
-              pendingCount: loadedGameState.armyReserveQueue.pendingCount,
-              criticalCount: loadedGameState.armyReserveQueue.criticalCount,
-              leadCriticalReason: loadedGameState.armyReserveQueue.leadCriticalReason,
-              leadCriticalPurpose: loadedGameState.armyReserveQueue.leadCriticalPurpose,
-              leadCriticalWhyNeeded: loadedGameState.armyReserveQueue.leadCriticalWhyNeeded,
-              leadCriticalDescription: loadedGameState.armyReserveQueue.leadCriticalDescription,
-            }
-            : null}
-          pressureWarning={loadedGameState?.pressureWarning ?? false}
-          onOpenSummary={() => openSummary()}
-          onOpenRecords={() => openArmyHQRecords('aar')}
-          onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
-          onOpenCodex={() => openCodex(useGameStore.getState())}
-          onOpenEventLog={() => setEventLogOpen(true)}
-        />
+        <RootErrorBoundary zone="toolbar">
+          <PresidentialToolbar
+            pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
+            reserveAttention={loadedGameState?.armyReserveQueue
+              ? {
+                pendingCount: loadedGameState.armyReserveQueue.pendingCount,
+                criticalCount: loadedGameState.armyReserveQueue.criticalCount,
+                leadCriticalReason: loadedGameState.armyReserveQueue.leadCriticalReason,
+                leadCriticalPurpose: loadedGameState.armyReserveQueue.leadCriticalPurpose,
+                leadCriticalWhyNeeded: loadedGameState.armyReserveQueue.leadCriticalWhyNeeded,
+                leadCriticalDescription: loadedGameState.armyReserveQueue.leadCriticalDescription,
+              }
+              : null}
+            pressureWarning={loadedGameState?.pressureWarning ?? false}
+            onOpenSummary={() => openSummary()}
+            onOpenRecords={() => openArmyHQRecords('aar')}
+            onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
+            onOpenCodex={() => openCodex(useGameStore.getState())}
+            onOpenEventLog={() => setEventLogOpen(true)}
+          />
+        </RootErrorBoundary>
       </header>
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -787,54 +764,67 @@ function App() {
         aria-label="Order of Battle"
         style={{ display: 'contents' }}
       >
-        <OOBSidebar />
+        <RootErrorBoundary zone="sidebar">
+          <OOBSidebar />
+        </RootErrorBoundary>
       </aside>
-      <OperationsPanel />
-      <OrderQueue />
       {/* Tactical Detail Panels (Nested Rail Architecture) */}
-      {railState.primary === 'inbox' && <PresidentialInbox onAction={(action, itemId) => {
-        const gs = useGameStore.getState();
-        if (action === 'army_reserve') {
-          const hqId = playerFaction === 'RS' ? 'vrs_main_staff' : playerFaction === 'HRHB' ? 'hvo_main_staff' : 'arbih_general_staff';
-          gs.setSelectedArmyHqId(hqId);
-        }
-        if (action === 'army_hq_personnel') {
-          // Route through canonical shellNavigation helper — single chokepoint
-          // for Tactical → Army HQ navigation dispatch.
-          openArmyHQTab(gs, 'personnel');
-        }
-        if (action === 'event_modal') {
-          // Presidential event decisions are executed inside PresidentialAttentionPanel
-          // (Army HQ briefing tab). Route the president to that surface; do not execute
-          // here. Inbox is navigation-only for this family; the panel owns IPC.
-          openArmyHQTab(gs, 'briefing');
-        }
-        if (action === 'army_hq_opportunity') {
-          openArmyHQTab(gs, 'briefing');
-        }
-        if (action === 'army_hq_briefing') {
-          openArmyHQTab(gs, 'briefing');
-        }
-        if (action === 'peace_plan_modal') {
-          // Reset dismissal so the PeacePlanModal renders again
-          setPeacePlanDismissed(false);
-        }
-        if (action === 'autonomy_panel') {
-          setAutonomyPanelOpen(true);
-        }
-      }} />}
-      {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
-      {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
-      {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
-      {/* ArmyDetail retired — faction click opens Army HQ modal */}
-      {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
-      {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
-      {railState.primary === 'orbat' && <OrbatPanel />}
+      <RootErrorBoundary zone="right panel">
+        <OperationsPanel />
+        <OrderQueue />
+        {shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && <PresidentialInbox onAction={(action, itemId) => {
+          const gs = useGameStore.getState();
+          if (action === 'army_reserve') {
+            const hqId = playerFaction === 'RS' ? 'vrs_main_staff' : playerFaction === 'HRHB' ? 'hvo_main_staff' : 'arbih_general_staff';
+            gs.setSelectedArmyHqId(hqId);
+          }
+          if (action === 'army_hq_personnel') {
+            // Route through canonical shellNavigation helper — single chokepoint
+            // for Tactical → Army HQ navigation dispatch.
+            openArmyHQTab(gs, 'personnel');
+          }
+          if (action === 'event_modal') {
+            // Presidential event decisions are executed inside PresidentialAttentionPanel
+            // (Army HQ briefing tab). Route the president to that surface; do not execute
+            // here. Inbox is navigation-only for this family; the panel owns IPC.
+            openArmyHQTab(gs, 'briefing');
+          }
+          if (action === 'army_hq_opportunity') {
+            openArmyHQTab(gs, 'briefing');
+          }
+          if (action === 'army_hq_briefing') {
+            openArmyHQTab(gs, 'briefing');
+          }
+          if (action === 'peace_plan_modal') {
+            // Reset dismissal so the PeacePlanModal renders again
+            setPeacePlanDismissed(false);
+          }
+          if (action === 'dayton_modal') {
+            setPeacePlanDismissed(false);
+          }
+          if (action === 'paramilitary_review') {
+            setParamilitaryReviewOpen(true);
+          }
+          if (action === 'convoy_decision_modal') {
+            setSelectedConvoyDecisionId(itemId.startsWith('convoy:') ? itemId.slice('convoy:'.length) : itemId);
+          }
+          if (action === 'autonomy_panel') {
+            setAutonomyPanelOpen(true);
+          }
+        }} />}
+        {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
+        {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
+        {railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
+        {/* ArmyDetail retired — faction click opens Army HQ modal */}
+        {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
+        {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
+        {railState.primary === 'orbat' && <OrbatPanel />}
 
-      {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
-      {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
-      {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
-      {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+        {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
+        {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
+        {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
+        {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+      </RootErrorBoundary>
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation
@@ -953,6 +943,19 @@ function App() {
           onDismiss={() => setPeacePlanDismissed(true)}
         />
       )}
+      <ParamilitaryReviewModal
+        isOpen={paramilitaryReviewOpen}
+        onClose={() => setParamilitaryReviewOpen(false)}
+      />
+      <ConvoyDecisionModal
+        convoy={loadedGameState?.pendingConvoyDecisions?.find((convoy) => convoy.id === selectedConvoyDecisionId) ?? null}
+        onClose={() => setSelectedConvoyDecisionId(null)}
+        onDecide={(convoyId, decision) => (
+          ipc.isAvailable
+            ? ipc.stageConvoyDecision(convoyId, decision)
+            : Promise.resolve({ ok: false, error: 'Convoy decisions are available in desktop mode only.' })
+        )}
+      />
       {/* v0.4.1 Phase 5: Event log panel */}
       {eventLogOpen && (
         <EventLogPanel events={eventLogEntries} onClose={() => setEventLogOpen(false)} />
@@ -962,9 +965,9 @@ function App() {
         <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
       )}
       <PeaceWarTransitionOverlay />
-      <FirstTurnOrientationWrapper disabled={peaceWarTransitionActive || onboardingActive} />
       <VerdictScreen />
       <ReplayInspectionBanner />
+      <CoachmarkLayer />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal
         onReviewPriorities={reviewPreAdvancePriorities}
@@ -983,6 +986,11 @@ function App() {
       {appScreen === 'warroom' && (
         <div className="fixed inset-0 z-50 bg-black">
           <WarroomShellLayer
+            onOpenSidePicker={() => {
+              setAppScreen('game');
+              setSidePickerOpen(true);
+              setSidePickerDismissed(false);
+            }}
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
                 if (command.kind === 'strategic-overview') {

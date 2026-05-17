@@ -39,6 +39,7 @@
 import { PolygonLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Polygon, MultiPolygon } from 'geojson';
 import type { FormationView } from '../data/types';
+import { hasValidLngLatCoordinates, warnInvalidOverlayPolygonOnce } from './coordinateValidation';
 
 /** Flat datum for the PolygonLayer. */
 export interface ForceQualityDatum {
@@ -180,6 +181,10 @@ export function buildForceQualityData(
     if (officerQualityToAlpha(mean) <= 0) continue;
     const geom = byOsid.get(entry.osid);
     if (!geom) continue;
+    if (!hasValidLngLatCoordinates(geom)) {
+      warnInvalidOverlayPolygonOnce('force-quality-glow-overlay', entry.osid);
+      continue;
+    }
     if (geom.type === 'Polygon') {
       out.push({
         osid: entry.osid,

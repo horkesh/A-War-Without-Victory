@@ -64,25 +64,25 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Corps</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Corps</div>
                         <div className="text-[10px] font-bold text-white truncate">{corpsName || corpsId}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Date</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Date</div>
                         <div className="text-[10px] font-bold text-white">{date || 'N/A'}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Objectives</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Objectives</div>
                         <div className="text-[10px] font-bold text-white">{totalObjectives}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Brigades</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Brigades</div>
                         <div className="text-[10px] font-bold text-white">{totalAssignedBrigades}</div>
                     </div>
                 </div>
                 {prediction && (
                     <div className="mt-2 rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Predicted Outcome</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Predicted Outcome</div>
                         <div className="text-[10px] font-bold text-white">{prediction.overall.predictedOutcome}</div>
                     </div>
                 )}

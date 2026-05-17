@@ -3,8 +3,8 @@
  * Horizontal bar centered at bottom, above BottomStatusStrip.
  * Styled per HOI §9.2 warm palette.
  */
-import { useGameStore } from '../store/gameStore';
-import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
+import { useGameStore } from '../../store/gameStore';
+import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../../utils/mapModes';
 
 export function MapModeToolbar() {
   const devMode = useGameStore((s) => s.devMode);

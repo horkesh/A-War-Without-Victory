@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
-import { formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
+import { formatPersonnel, formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
 import { getFactionFlag } from '../../utils/factionAssets';
 import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
@@ -43,7 +43,16 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
     const campaignCost = useMemo(() => buildTurnAftermathCampaignCost({ state: loadedGameState }), [loadedGameState]);
     const sitrep = loadedGameState.operationalSitrep;
 
-    const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction, warExhaustionByFaction } = data;
+    const {
+        playerFaction,
+        areaPct,
+        atArmsByFaction,
+        mobilizedPoolByFaction,
+        mobilizedTotalByFaction,
+        totalDisplaced,
+        displacedByFaction,
+        warExhaustionByFaction,
+    } = data;
 
     // Cluster C — campaign drag handoff. WarSummary summarises + routes;
     // canonical per-corps explanation lives in Army HQ → Command Relationship.
@@ -101,9 +110,21 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 <PlayerFactionHeader faction={playerFaction} />
                                 <div className="mt-2 space-y-1 text-[12px]">
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-text-secondary">Personnel</span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(personnelByFaction[playerFaction] ?? 0)}</span>
+                                        <span className="text-text-secondary">Personnel at arms</span>
+                                        <span className="text-text-primary tabular-nums">{formatPersonnel(atArmsByFaction[playerFaction] ?? 0)}</span>
                                     </div>
+                                    {(mobilizedPoolByFaction[playerFaction] ?? 0) > 0 && (
+                                        <>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-text-secondary">Mobilized pool</span>
+                                                <span className="text-text-primary tabular-nums">{formatPersonnel(mobilizedPoolByFaction[playerFaction] ?? 0)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-text-secondary">Mobilized total</span>
+                                                <span className="text-text-primary tabular-nums">{formatPersonnel(mobilizedTotalByFaction[playerFaction] ?? 0)}</span>
+                                            </div>
+                                        </>
+                                    )}
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">KIA</span>
                                         <span className="text-text-primary tabular-nums">{fmtK(casualtyLedger?.[playerFaction]?.killed ?? 0)}</span>
@@ -235,11 +256,27 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td className="text-[11px] text-text-secondary py-0.5">Personnel</td>
+                                            <td className="text-[11px] text-text-secondary py-0.5">At arms</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(personnelByFaction[f] ?? 0)}</td>
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(atArmsByFaction[f] ?? 0)}</td>
                                             ))}
                                         </tr>
+                                        {WAR_SUMMARY_FACTIONS.some((f) => (mobilizedPoolByFaction[f] ?? 0) > 0) && (
+                                            <>
+                                                <tr>
+                                                    <td className="text-[11px] text-text-secondary py-0.5">Mobilized pool</td>
+                                                    {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedPoolByFaction[f] ?? 0)}</td>
+                                                    ))}
+                                                </tr>
+                                                <tr>
+                                                    <td className="text-[11px] text-text-secondary py-0.5">Mobilized total</td>
+                                                    {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedTotalByFaction[f] ?? atArmsByFaction[f] ?? 0)}</td>
+                                                    ))}
+                                                </tr>
+                                            </>
+                                        )}
                                         <tr>
                                             <td className="text-[11px] text-text-secondary py-0.5">KIA</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (

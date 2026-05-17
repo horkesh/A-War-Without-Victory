@@ -44,6 +44,7 @@ import type {
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
 import { isPreStormWesternTheater, isWesternTheaterRuptured } from './operation_storm_theater.js';
+import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_5th_corps';
 
@@ -264,7 +265,7 @@ const enemyWeaknessSanaFollowOn: AxisPredicate = (state) => {
 
 /** logistics: optional. 5th Corps faction supply pressure not in the bottom band. */
 const logisticsSana: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= 90) {
         return { green: false, reason: 'RBiH supply pressure critical for Sana logistics' };
     }
@@ -508,7 +509,7 @@ const commanderConfidenceTigar: AxisPredicate = (state) => {
 /** logistics: the June 1994 BiH-VRS ceasefire frees 5th Corps reserves; the
  *  axis goes red only if RBiH supply pressure is critical (>= 95). */
 const logisticsTigar: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= TIGAR_LOGISTICS_PRESSURE_CEILING) {
         return { green: false, reason: 'RBiH supply pressure critical for the deception thrust' };
     }
@@ -787,7 +788,7 @@ const commanderConfidenceApwb: AxisPredicate = (state) => {
 /** logistics: optional. June 1994 BiH-VRS ceasefire in effect → only flips
  *  red if RBiH supply pressure is critical (>= 95). */
 const logisticsApwb: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= APWB_LOGISTICS_PRESSURE_CEILING) {
         return { green: false, reason: 'RBiH supply pressure critical for the sustained drive' };
     }
@@ -1019,7 +1020,7 @@ const threatPressureT3: AxisPredicate = (state) => {
  *  authorized on whether the threat is real (see `threatPressureT3`), not on
  *  whether the supply pipeline is in good shape. */
 const logisticsT3: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= T3_LOGISTICS_PRESSURE_CEILING) {
         return { green: false, reason: 'RBiH supply pressure critical — defensive commit will hurt' };
     }
@@ -1503,7 +1504,7 @@ const commanderConfidenceGrmec: AxisPredicate = (state) => {
  *  advance into the Grmeč ridge needs supply margin. Satisfies
  *  min_optional_axes:1. */
 const logisticsGrmec: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= GRMEC_LOGISTICS_PRESSURE_CEILING) {
         return { green: false, reason: 'RBiH supply pressure too high for a deep ridge breakout' };
     }

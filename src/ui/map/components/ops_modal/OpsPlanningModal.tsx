@@ -10,6 +10,7 @@ import { OpsMap } from './OpsMap';
 import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
 import { Z } from '../../../shared/zIndex';
+import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
 
 let nextAxisCounter = 0;
 function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
@@ -35,19 +36,28 @@ export function OpsPlanningModal() {
 
     const [phase, setPhase] = useState<OpsPhase>('commander');
     const [highestPhase, setHighestPhase] = useState(0);
+    const [g2AssessmentViewed, setG2AssessmentViewed] = useState(false);
+    const [phaseGateMessage, setPhaseGateMessage] = useState<string | null>(null);
+    const phaseGateTimeoutRef = useRef<number | null>(null);
     const [centroidLookup, setCentroidLookup] = useState<Map<string, [number, number]>>(new Map());
 
     // --- Plan state (lifted to shell for cross-phase access) ---
     const defaultStagingOsid = useMemo(() => {
         if (!loadedGameState?.corpsFrontSectors || !corpsId) return '';
         const sectors = loadedGameState.corpsFrontSectors.filter((s) => s.corps_id === corpsId);
+        const originSector = sectors.find((sector) => sector.sector_id === originSectorId);
+        if (originSector) {
+            for (const sub of (originSector.sub_segments ?? [])) {
+                if (sub.friendly_osids.length > 0) return sub.friendly_osids[0];
+            }
+        }
         for (const sec of sectors) {
             for (const sub of (sec.sub_segments ?? [])) {
                 if (sub.friendly_osids.length > 0) return sub.friendly_osids[0];
             }
         }
         return '';
-    }, [loadedGameState, corpsId]);
+    }, [loadedGameState, corpsId, originSectorId]);
 
     const [plan, setPlan] = useState<OpsPlanState>(() => ({
         opName: '',
@@ -79,6 +89,8 @@ export function OpsPlanningModal() {
             });
             setPhase('commander');
             setHighestPhase(0);
+            setG2AssessmentViewed(false);
+            setPhaseGateMessage(null);
         }
     }, [isOpen, corpsId, defaultStagingOsid, loadedGameState?.turn]);
 
@@ -86,6 +98,7 @@ export function OpsPlanningModal() {
     useEffect(() => {
         const idx = PHASE_ORDER.indexOf(phase);
         setHighestPhase((prev) => Math.max(prev, idx));
+        if (phase === 'g2_assessment') setG2AssessmentViewed(true);
     }, [phase]);
 
     // Keyboard navigation
@@ -109,15 +122,49 @@ export function OpsPlanningModal() {
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [isOpen, phase, highestPhase, clearContext]);
 
+    const hasCommander = selectedOfficerId != null && selectedOfficerId.length > 0;
+
+    const showPhaseGateMessage = useCallback((message: string) => {
+        if (phaseGateTimeoutRef.current != null) {
+            window.clearTimeout(phaseGateTimeoutRef.current);
+        }
+        setPhaseGateMessage(message);
+        phaseGateTimeoutRef.current = window.setTimeout(() => {
+            setPhaseGateMessage(null);
+            phaseGateTimeoutRef.current = null;
+        }, 2000);
+    }, []);
+
+    useEffect(() => () => {
+        if (phaseGateTimeoutRef.current != null) {
+            window.clearTimeout(phaseGateTimeoutRef.current);
+        }
+    }, []);
+
     const advancePhase = useCallback(() => {
         const idx = PHASE_ORDER.indexOf(phase);
-        if (idx < PHASE_ORDER.length - 1) setPhase(PHASE_ORDER[idx + 1]);
-    }, [phase]);
+        if (idx >= PHASE_ORDER.length - 1) return;
+        const message = getOpsPhaseAdvanceMessage(phase, hasCommander, plan, g2AssessmentViewed);
+        if (message) {
+            showPhaseGateMessage(message);
+            return;
+        }
+        setPhase(PHASE_ORDER[idx + 1]);
+        setPhaseGateMessage(null);
+    }, [g2AssessmentViewed, hasCommander, phase, plan, showPhaseGateMessage]);
 
     const goToPhase = useCallback((target: OpsPhase) => {
         const targetIdx = PHASE_ORDER.indexOf(target);
-        if (targetIdx <= highestPhase) setPhase(target);
-    }, [highestPhase]);
+        const message = getOpsPhaseGateMessage(target, hasCommander, plan, g2AssessmentViewed);
+        if (message) {
+            showPhaseGateMessage(message);
+            return;
+        }
+        if (targetIdx <= highestPhase || targetIdx <= PHASE_ORDER.indexOf(phase) + 1) {
+            setPhase(target);
+            setPhaseGateMessage(null);
+        }
+    }, [g2AssessmentViewed, hasCommander, highestPhase, phase, plan, showPhaseGateMessage]);
 
     // Map click handler — adds objectives or sets staging
     const handleOsidClick = useCallback((osid: string, isFriendly: boolean) => {
@@ -254,6 +301,15 @@ export function OpsPlanningModal() {
         return new Set([...allFrontFriendly, ...allFrontEnemy]);
     }, [plan.axes, plan.activeAxisId, plan.defaultStagingOsid, friendlyToEnemy, enemyToFriendly, allFrontFriendly, allFrontEnemy]);
 
+    const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
+    const availableObjectiveOsids = useMemo(() => {
+        const currentObjectives = new Set(plan.axes.flatMap((axis) => axis.objectives));
+        return [...validTargetOsids]
+            .filter((osid) => selectableOsids.has(osid) && !currentObjectives.has(osid))
+            .sort();
+    }, [plan.axes, selectableOsids, validTargetOsids]);
+    const canAdvanceToG2 = planHasObjectiveAndBrigade(plan);
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
@@ -267,6 +323,7 @@ export function OpsPlanningModal() {
                 objectives={allObjectives}
                 validTargetOsids={validTargetOsids}
                 selectableOsids={selectableOsids}
+                availableObjectiveOsids={availableObjectiveOsids}
                 stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
                 schwerpunktOsid={plan.schwerpunktOsid}
                 axes={plan.axes}
@@ -284,7 +341,7 @@ export function OpsPlanningModal() {
                         key={p}
                         type="button"
                         onClick={() => goToPhase(p)}
-                        disabled={i > highestPhase}
+                        data-locked={i > highestPhase ? 'true' : undefined}
                         className="flex items-center gap-2 group"
                     >
                         {/* WP4c: Enlarged phase dots */}
@@ -308,6 +365,16 @@ export function OpsPlanningModal() {
                 ))}
             </div>
 
+            {phaseGateMessage && (
+                <div
+                    role="status"
+                    className="absolute top-16 left-1/2 -translate-x-1/2 z-30 rounded-md border border-accent-gold/25
+                               bg-[rgba(20,18,15,0.92)] px-3 py-2 text-[11px] font-semibold text-accent-gold shadow-lg"
+                >
+                    {phaseGateMessage}
+                </div>
+            )}
+
             {/* Phase content */}
             {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
             {phase === 'plan' && (
@@ -317,6 +384,9 @@ export function OpsPlanningModal() {
                     corpsId={corpsId}
                     onAdvance={advancePhase}
                     centroidLookup={centroidLookup}
+                    availableObjectiveOsids={availableObjectiveOsids}
+                    canSuggestPlan={hasCommander}
+                    canAdvanceToG2={canAdvanceToG2}
                 />
             )}
             {phase === 'g2_assessment' && (

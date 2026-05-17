@@ -10,10 +10,21 @@
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-submit modal:
  * `dismissible={false}` (no ESC, no click-outside) — the only valid close
- * path is `handleSubmit` -> IPC `resolveDayton` -> game state push that
- * clears `pendingDayton` (parent stops rendering this modal). No `onClose`
- * prop exists; the bespoke `Submit Proposal` button stays on the inner
- * panel content, NOT on Modal props.
+ * paths are (a) `handleSubmit` (Submit Proposal) and (b) `handleDeclineTalks`
+ * (Decline Talks — submit empty proposal). Both route through IPC
+ * `resolveDayton` and a game-state push that clears `pendingDayton` so the
+ * parent stops rendering this modal. No `onClose` prop exists; the bespoke
+ * action buttons stay on the inner panel content, NOT on Modal props.
+ *
+ * 2026-05-16 (decline-talks escape valve): added `handleDeclineTalks` to fix
+ * a UX deadlock surfaced during external audit playtest. If the player's
+ * available negotiation capital is too small to fund any viable proposal,
+ * the original modal was hard-stuck — Submit was disabled by `overBudget`,
+ * ESC/click-outside disabled by design, and no decline action existed. The
+ * new button submits an empty proposal (no demands, no concessions, no
+ * institutional choices) which is always within budget (capitalSpent=0)
+ * and is interpreted at the IPC layer as the player refusing to negotiate
+ * meaningfully.
  */
 import { useState } from 'react';
 import type { LoadedGameState } from '../data/types';
@@ -92,6 +103,26 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
             setSubmitting(false);
         }
         // On success, game state push will trigger VerdictScreen (game_over = true)
+    };
+
+    /**
+     * Decline Talks — escape valve from an unsolvable Dayton.
+     * Always within budget (empty proposal -> capitalSpent=0). Routes through
+     * the existing `resolveDayton` IPC; the main process is expected to
+     * interpret an empty proposal as the player refusing to negotiate.
+     */
+    const handleDeclineTalks = async () => {
+        if (!ipc.isAvailable || submitting || !playerFaction) return;
+        setSubmitting(true);
+        const result = await ipc.resolveDayton({
+            territorial_demands: [],
+            territorial_concessions: [],
+            institutional_choices: {},
+        });
+        if (!result.ok) {
+            setLoadError(result.error ?? 'Failed to decline Dayton negotiation.');
+            setSubmitting(false);
+        }
     };
 
     const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
@@ -224,26 +255,45 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
 
                 {/* Submit */}
                 <div className="px-8 py-5 flex flex-col items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => void handleSubmit()}
-                        disabled={submitting || overBudget}
-                        className={`px-8 py-3 rounded border-2 font-bold text-[14px] uppercase tracking-wider transition-colors ${
-                            overBudget
-                                ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#8a7a60] cursor-not-allowed'
-                                : submitting
+                    <div className="flex flex-row items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={() => void handleSubmit()}
+                            disabled={submitting || overBudget}
+                            className={`px-8 py-3 rounded border-2 font-bold text-[14px] uppercase tracking-wider transition-colors ${
+                                overBudget
+                                    ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#8a7a60] cursor-not-allowed'
+                                    : submitting
+                                        ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
+                                        : 'border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] hover:bg-[#b8d8b8]'
+                            }`}
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => void handleDeclineTalks()}
+                            disabled={submitting}
+                            title="Submit an empty proposal — refuse to negotiate meaningfully. Always within budget."
+                            className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
+                                submitting
                                     ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'
-                                    : 'border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] hover:bg-[#b8d8b8]'
-                        }`}
-                        style={{ fontFamily: 'Courier New, monospace' }}
-                    >
-                        {submitting ? 'Negotiating...' : overBudget ? 'Over Budget' : 'Submit Proposal'}
-                    </button>
+                                    : 'border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#5a1a1a] hover:bg-[#d8b8b8]'
+                            }`}
+                            style={{ fontFamily: 'Courier New, monospace' }}
+                        >
+                            Decline Talks
+                        </button>
+                    </div>
                     {overBudget && (
                         <div className="text-[11px] text-red-700 font-bold">
                             Reduce demands — capital spent ({capitalSpent}) exceeds available ({Math.round(capitalAvailable)})
                         </div>
                     )}
+                    <div className="text-[10px] text-[#6a5a40] mt-1" style={{ fontFamily: 'Courier New, monospace' }}>
+                        Submit a proposal to negotiate, or Decline Talks to refuse meaningful negotiation.
+                    </div>
                 </div>
             </>
         </Modal>

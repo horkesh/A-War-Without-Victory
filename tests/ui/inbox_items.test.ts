@@ -142,11 +142,11 @@ describe('deriveInboxItems — event decisions', () => {
         expect(itemIds).toContain('event:evt_rs');
         expect(itemIds).toContain('proposal:PROP_rs');
         expect(itemIds).toContain('reserve:reserve_rs');
-        expect(itemIds).toContain('officer:off_rs');
+        expect(itemIds).toContain('officer:officer_available:rs_officer');
         expect(itemIds).not.toContain('event:evt_rbih');
         expect(itemIds).not.toContain('proposal:PROP_rbih');
         expect(itemIds).not.toContain('reserve:reserve_rbih');
-        expect(itemIds).not.toContain('officer:off_rbih');
+        expect(itemIds).not.toContain('officer:officer_available:rbih_officer');
     });
 });
 
@@ -194,7 +194,57 @@ describe('deriveInboxItems — peace plan', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. Reserve requests
+// 3. Dayton and convoy decisions
+// ---------------------------------------------------------------------------
+describe('deriveInboxItems - Dayton and convoy decisions', () => {
+    it('surfaces a pending Dayton negotiation as a blocking inbox item', () => {
+        const state = makeStub({
+            pendingDayton: {
+                territorialPackages: [],
+                institutionalPackages: [],
+                factionCapital: { RBiH: 50, RS: 50, HRHB: 50 },
+                patronOverride: { RBiH: 0, RS: 0, HRHB: 0 },
+            },
+        });
+
+        const daytonItems = deriveInboxItems(state, null).filter(i => i.type === 'dayton_negotiation');
+
+        expect(daytonItems).toHaveLength(1);
+        expect(daytonItems[0]).toMatchObject({
+            id: 'dayton:5',
+            severity: 'blocking',
+            action: 'dayton_modal',
+            title: 'Dayton Negotiation',
+        });
+    });
+
+    it('surfaces pending convoy decisions and routes them to the convoy decision modal', () => {
+        const state = makeStub({
+            pendingConvoyDecisions: [
+                {
+                    id: 'convoy_1',
+                    target_enclave: 'Gorazde',
+                    route_faction: 'RS',
+                    supply_amount: 25,
+                },
+            ],
+        });
+
+        const convoyItems = deriveInboxItems(state, null).filter(i => i.type === 'convoy_decision');
+
+        expect(convoyItems).toHaveLength(1);
+        expect(convoyItems[0]).toMatchObject({
+            id: 'convoy:convoy_1',
+            severity: 'normal',
+            action: 'convoy_decision_modal',
+            title: 'Humanitarian Convoy',
+        });
+        expect(convoyItems[0].subtitle).toContain('allow, block, or divert');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 4. Reserve requests
 // ---------------------------------------------------------------------------
 describe('deriveInboxItems — reserve requests', () => {
     it('returns reserve request items with army_reserve action', () => {

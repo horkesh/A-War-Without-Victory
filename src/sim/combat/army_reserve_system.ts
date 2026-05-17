@@ -38,7 +38,17 @@
  * Determinism: all iteration sorted via strictCompare; no Math.random(), no Date.now().
  */
 
-import type { GameState, FormationState, FactionId, FormationId } from '../../state/game_state.js';
+import type {
+    BrigadeMovementOrder,
+    CorpsFrontSector,
+    CorpsOperation,
+    FormationId,
+    FormationState,
+    FactionId,
+    GameState,
+    OperationAxis,
+    SettlementId,
+} from '../../state/game_state.js';
 import type { Osid } from './osid_adjacency.js';
 import {
     ELITE_LOAN_MIN_DURATION,
@@ -262,6 +272,201 @@ function attachEliteToOperation(operation: { participating_brigades: FormationId
 
     targetAxis.assigned_brigades.push(brigadeId);
     targetAxis.assigned_brigades.sort(strictCompare);
+}
+
+function sortedCorpsSectors(state: GameState, corpsId: string): CorpsFrontSector[] {
+    return Object.values(state.military.corps_front_sectors ?? {})
+        .filter((sector) => sector.corps_id === corpsId)
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+}
+
+function sectorFrontOsids(sector: CorpsFrontSector): string[] {
+    const frontOsids = new Set<string>();
+    for (const subSegment of sector.sub_segments ?? []) {
+        for (const osid of subSegment.friendly_osids ?? []) frontOsids.add(osid);
+    }
+    return [...frontOsids].sort(strictCompare);
+}
+
+function isFriendlyOrUnknownTarget(state: GameState, faction: FactionId, osid: string | undefined): osid is string {
+    if (!osid) return false;
+    const controller = getPoliticalControllerOSID(state, osid as Osid);
+    return controller == null || controller === faction;
+}
+
+function firstFriendlySectorOsid(state: GameState, faction: FactionId, sector: CorpsFrontSector): string | null {
+    const frontOsids = sectorFrontOsids(sector);
+    for (const osid of frontOsids) {
+        if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+    }
+    for (const osid of [...(sector.territory_osids ?? [])].sort(strictCompare)) {
+        if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+    }
+    return null;
+}
+
+function currentAxisObjective(axis: OperationAxis): string | null {
+    const objectives = axis.objectives ?? [];
+    if (objectives.length === 0) return null;
+    const index = Math.max(0, Math.min(axis.current_objective_index ?? 0, objectives.length - 1));
+    return objectives[index] ?? null;
+}
+
+function currentOperationObjective(operation: CorpsOperation): string | null {
+    const axisObjectives = (operation.axes ?? [])
+        .filter((axis) => axis.status !== 'complete')
+        .sort((a, b) => strictCompare(a.axis_id, b.axis_id))
+        .map(currentAxisObjective)
+        .find((objective): objective is string => objective != null);
+    if (axisObjectives) return axisObjectives;
+
+    const objectives = operation.objectives ?? operation.target_settlements ?? [];
+    if (objectives.length === 0) return operation.schwerpunkt_osid ?? null;
+    const index = Math.max(0, Math.min(operation.current_objective_index ?? 0, objectives.length - 1));
+    return operation.schwerpunkt_osid ?? objectives[index] ?? null;
+}
+
+function sectorFrontForEnemyObjective(state: GameState, faction: FactionId, sector: CorpsFrontSector, objective: string | null): string | null {
+    if (!objective) return null;
+    for (const subSegment of [...(sector.sub_segments ?? [])].sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id))) {
+        if (!(subSegment.enemy_osids ?? []).includes(objective)) continue;
+        for (const osid of [...(subSegment.friendly_osids ?? [])].sort(strictCompare)) {
+            if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+        }
+    }
+    return null;
+}
+
+function pickOperationAxis(operation: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
+    const axes = [...(operation.axes ?? [])]
+        .filter((axis) => axis.status !== 'complete')
+        .sort((a, b) => {
+            const aHasBrigade = a.assigned_brigades?.includes(brigadeId) ? 1 : 0;
+            const bHasBrigade = b.assigned_brigades?.includes(brigadeId) ? 1 : 0;
+            return bHasBrigade - aHasBrigade
+                || (a.assigned_brigades?.length ?? 0) - (b.assigned_brigades?.length ?? 0)
+                || strictCompare(a.axis_id, b.axis_id);
+        });
+    return axes[0] ?? null;
+}
+
+function pickActiveOperation(state: GameState, corpsId: string, brigadeId: FormationId): CorpsOperation | null {
+    const operations = [...(state.military.corps_command?.[corpsId]?.active_operations ?? [])]
+        .filter((operation) => operation.phase === 'planning' || operation.phase === 'execution')
+        .sort((a, b) => {
+            const phaseRank = (operation: CorpsOperation): number => operation.phase === 'execution' ? 0 : 1;
+            const aHasBrigade = a.participating_brigades?.includes(brigadeId) ? 1 : 0;
+            const bHasBrigade = b.participating_brigades?.includes(brigadeId) ? 1 : 0;
+            return bHasBrigade - aHasBrigade
+                || phaseRank(a) - phaseRank(b)
+                || strictCompare(a.name, b.name);
+        });
+    return operations[0] ?? null;
+}
+
+function nearestSectorTarget(
+    state: GameState,
+    formation: FormationState,
+    sectors: CorpsFrontSector[],
+    adjacency?: Map<Osid, Osid[]>,
+): string | null {
+    const faction = formation.faction as FactionId;
+    const startOsid = formation.location_osid ?? formation.home_osid;
+    const candidates: Array<{ sectorId: string; osid: string; hops: number; threat: number }> = [];
+
+    for (const sector of sectors) {
+        const targetOsids = [
+            ...sectorFrontOsids(sector),
+            ...[...(sector.territory_osids ?? [])].sort(strictCompare),
+        ];
+        for (const osid of targetOsids) {
+            if (!isFriendlyOrUnknownTarget(state, faction, osid)) continue;
+            const hops = startOsid && adjacency
+                ? computeOsidGraphDistance(startOsid as Osid, osid as Osid, adjacency)
+                : Infinity;
+            candidates.push({
+                sectorId: sector.sector_id,
+                osid,
+                hops,
+                threat: sector.threat_ratio ?? 0,
+            });
+        }
+    }
+
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => {
+        const aFinite = Number.isFinite(a.hops) ? 0 : 1;
+        const bFinite = Number.isFinite(b.hops) ? 0 : 1;
+        return aFinite - bFinite
+            || a.hops - b.hops
+            || b.threat - a.threat
+            || strictCompare(a.sectorId, b.sectorId)
+            || strictCompare(a.osid, b.osid);
+    });
+    return candidates[0]!.osid;
+}
+
+function resolveEliteDeploymentTarget(
+    state: GameState,
+    formation: FormationState,
+    brigadeId: FormationId,
+    corpsId: string,
+    adjacency?: Map<Osid, Osid[]>,
+): string | null {
+    const faction = formation.faction as FactionId;
+    const sectors = sortedCorpsSectors(state, corpsId);
+    const sectorById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
+    const operation = pickActiveOperation(state, corpsId, brigadeId);
+
+    if (operation) {
+        const axis = pickOperationAxis(operation, brigadeId);
+        const axisStaging = axis?.staging_osid;
+        if (isFriendlyOrUnknownTarget(state, faction, axisStaging)) return axisStaging;
+        if (isFriendlyOrUnknownTarget(state, faction, operation.staging_osid)) return operation.staging_osid!;
+
+        const primarySector = operation.sector_id ? sectorById.get(operation.sector_id) : undefined;
+        const objective = axis ? currentAxisObjective(axis) : currentOperationObjective(operation);
+        if (primarySector) {
+            const objectiveFront = sectorFrontForEnemyObjective(state, faction, primarySector, objective);
+            if (objectiveFront) return objectiveFront;
+            const primaryFront = firstFriendlySectorOsid(state, faction, primarySector);
+            if (primaryFront) return primaryFront;
+        }
+        for (const sector of sectors) {
+            const objectiveFront = sectorFrontForEnemyObjective(state, faction, sector, objective);
+            if (objectiveFront) return objectiveFront;
+        }
+    }
+
+    const threatened = sectors
+        .filter((sector) => (sector.threat_ratio ?? 0) > 0)
+        .sort((a, b) =>
+            (b.threat_ratio ?? 0) - (a.threat_ratio ?? 0)
+            || (a.assigned_brigade_ids?.length ?? 0) - (b.assigned_brigade_ids?.length ?? 0)
+            || strictCompare(a.sector_id, b.sector_id)
+        );
+    for (const sector of threatened) {
+        const target = firstFriendlySectorOsid(state, faction, sector);
+        if (target) return target;
+    }
+
+    return nearestSectorTarget(state, formation, sectors, adjacency);
+}
+
+function issueEliteDeploymentOrder(
+    state: GameState,
+    formation: FormationState,
+    brigadeId: FormationId,
+    corpsId: string,
+    adjacency?: Map<Osid, Osid[]>,
+): void {
+    const targetOsid = resolveEliteDeploymentTarget(state, formation, brigadeId, corpsId, adjacency);
+    if (!targetOsid || targetOsid === formation.location_osid) return;
+    if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+    (state.military.brigade_movement_orders as Record<FormationId, BrigadeMovementOrder>)[brigadeId] = {
+        destination_sids: [targetOsid as SettlementId],
+        stance: 'column',
+    };
 }
 
 const COMMANDER_REQUEST_PRIORITY_SCORE: Record<'critical' | 'high' | 'medium' | 'low', number> = {
@@ -530,7 +735,8 @@ export function deployEliteLoan(
     turn: number,
     requestDialogue?: { purpose: ReserveRequestPurpose; why_needed: string; how_to_use: string },
     approvalReason?: string,
-    approvalBy: 'army_ai' | 'player' = 'army_ai'
+    approvalBy: 'army_ai' | 'player' = 'army_ai',
+    adjacency?: Map<Osid, Osid[]>,
 ): void {
     const f = state.military.formations?.[brigadeId];
     if (!f?.elite_loan_state) return;
@@ -589,12 +795,13 @@ export function deployEliteLoan(
     // If deployed for offensive reasons and the corps has an active operation,
     // add the elite to participating_brigades so march-first logic moves it to the front.
     if (reason === 'offensive_support' || reason === 'exploitation') {
-        const cmd = state.military.corps_command?.[corpsId];
-        const activeOp = cmd?.active_operations?.find(op => op.phase === 'execution') ?? null;
+        const activeOp = pickActiveOperation(state, corpsId, brigadeId);
         if (activeOp) {
             attachEliteToOperation(activeOp, brigadeId);
         }
     }
+
+    issueEliteDeploymentOrder(state, f, brigadeId, corpsId, adjacency);
 }
 
 /**
@@ -717,7 +924,8 @@ export function evaluateArmyReserveAssignments(
                 turn,
                 { purpose, why_needed: whyNeeded, how_to_use: howToUse },
                 'Army CO accepted: nearest available elite can reinforce in time.',
-                'army_ai'
+                'army_ai',
+                adjacency,
             );
             appendReserveDecision(state, {
                 request_id: requestId,
@@ -757,7 +965,8 @@ export function evaluateArmyReserveAssignments(
             turn,
             { purpose, why_needed: whyNeeded, how_to_use: howToUse },
             'Army CO accepted: request aligns with current operational priorities.',
-            'army_ai'
+            'army_ai',
+            adjacency,
         );
         appendReserveDecision(state, {
             request_id: requestId,

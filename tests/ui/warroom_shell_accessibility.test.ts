@@ -19,10 +19,11 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 // @ts-expect-error TS1378: top-level await is supported by vitest runtime.
 const { WarroomShellLayer } = await import('../../src/ui/map/components/warroom/WarroomShellLayer');
 
-function renderShell(onNavigate = vi.fn()) {
+function renderShell(onNavigate = vi.fn(), onOpenSidePicker = vi.fn()) {
     return {
         onNavigate,
-        ...render(createElement(WarroomShellLayer, { onNavigate })),
+        onOpenSidePicker,
+        ...render(createElement(WarroomShellLayer, { onNavigate, onOpenSidePicker })),
     };
 }
 
@@ -78,6 +79,39 @@ describe('WarroomShellLayer accessibility proof', () => {
 
         const status = screen.getByRole('status');
         expect(status.textContent).toContain('Warroom unavailable until a campaign side is selected.');
+    });
+
+    it('offers a no-state side picker CTA', () => {
+        const { onOpenSidePicker } = renderShell();
+
+        const button = screen.getByRole('button', { name: /choose side|open side picker/i });
+        fireEvent.click(button);
+
+        expect(button.textContent).toMatch(/choose side|open side picker/i);
+        expect(onOpenSidePicker).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders a visible hotspot label on hover and keyboard focus', () => {
+        storeState = {
+            loadedGameState: {
+                player_faction: 'RBiH',
+                metadata: { date: 'April 1993' },
+            },
+        };
+
+        renderShell();
+
+        const calendar = screen.getByRole('button', { name: 'Calendar' });
+        expect(screen.queryByText('Calendar')).toBeNull();
+
+        fireEvent.mouseEnter(calendar);
+        expect(screen.getByText('Calendar')).toBeTruthy();
+
+        fireEvent.mouseLeave(calendar);
+        expect(screen.queryByText('Calendar')).toBeNull();
+
+        fireEvent.focus(calendar);
+        expect(screen.getByText('Calendar')).toBeTruthy();
     });
 
     it('loads canonical /data/ui clickable regions and maps desk_map to the game view', async () => {

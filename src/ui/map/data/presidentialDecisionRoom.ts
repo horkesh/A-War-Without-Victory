@@ -23,6 +23,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'army-hq-records'; recordsSubTab: ArmyHQRecordsSubTab }
   | { kind: 'army-hq-aftermath-record'; turn: number }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
+  | { kind: 'inbox' }
   | { kind: 'chronicle' }
   | { kind: 'none' };
 
@@ -306,6 +307,88 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
   });
 }
 
+function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
+  const requests = state.pendingParamilitaryRequests ?? [];
+  if (requests.length === 0) return;
+
+  const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
+  cards.push({
+    id: 'paramilitary:pending',
+    category: 'decision',
+    severity: 'blocking',
+    title: 'Paramilitary authorization pending',
+    explanation: 'Paramilitary deployment requests require an explicit presidential decision before the turn should advance.',
+    sourceOwner: 'Presidential Inbox',
+    sourceLabel: 'Paramilitary review',
+    actionLabel: 'Open Inbox',
+    evidence: [
+      `${requests.length} deployment ${pluralize(requests.length, 'request')}`,
+      `estimated strength ${totalStrength}`,
+      'war crimes risk',
+    ],
+    navigationTarget: { kind: 'inbox' },
+    urgencySort: 0,
+    sourceSort: 'paramilitary',
+  });
+}
+
+function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const summary = state.playerDecisionSummary;
+  if (!summary || summary.blockingCount <= 0) return;
+
+  const existingIds = new Set(cards.map((card) => card.id));
+  const cardSpecs: Record<string, {
+    title: string;
+    explanation: string;
+    sourceLabel: string;
+    actionLabel: string;
+  }> = {
+    peace_plan: {
+      title: 'Peace plan response pending',
+      explanation: 'A formal peace proposal still needs presidential review before the turn advances.',
+      sourceLabel: 'Peace proposal',
+      actionLabel: 'Open Inbox',
+    },
+    dayton_negotiation: {
+      title: 'Dayton negotiation pending',
+      explanation: 'The Dayton negotiation package requires a submitted presidential position.',
+      sourceLabel: 'Dayton talks',
+      actionLabel: 'Open Inbox',
+    },
+    convoy_decision: {
+      title: 'Humanitarian convoy decision pending',
+      explanation: 'A convoy request still needs an allow, block, or divert decision on the owning surface.',
+      sourceLabel: 'Convoy review',
+      actionLabel: 'Open Inbox',
+    },
+  };
+
+  for (const family of summary.families) {
+    const blockingCount = family.blockingCount ?? (family.gatePolicy === 'advisory' ? 0 : family.count);
+    if (blockingCount <= 0) continue;
+    if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
+    const spec = cardSpecs[family.id];
+    if (!spec) continue;
+    const id = `manifest:${family.id}`;
+    if (existingIds.has(id)) continue;
+    cards.push({
+      id,
+      category: 'decision',
+      severity: 'blocking',
+      title: spec.title,
+      explanation: spec.explanation,
+      sourceOwner: 'Presidential decision manifest',
+      sourceLabel: spec.sourceLabel,
+      actionLabel: spec.actionLabel,
+      evidence: [`${blockingCount} pending ${pluralize(blockingCount, 'item')}`],
+      navigationTarget: { kind: 'inbox' },
+      urgencySort: -1,
+      sourceSort: `manifest:${family.id}`,
+    });
+    existingIds.add(id);
+  }
+}
+
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const opportunities = [...(state.operationOpportunityProposals ?? [])].sort((a, b) => {
     const aExpiry = a.expires_turn ?? LARGE_SORT;
@@ -556,10 +639,15 @@ function buildAdvanceReadiness(
     usedIds.add(card.id);
   }
 
+  const blockedByExistingSystems = state.playerDecisionSummary
+    ? state.playerDecisionSummary.blockingCount > 0
+    : (state.presidentialReviewQueue?.eventDecisionCount ?? 0) > 0
+      || (state.pendingEventDecisions?.length ?? 0) > 0
+      || (state.pendingParamilitaryRequests?.length ?? 0) > 0;
+
   return {
-    headline: items.length > 0 ? 'Review before advance' : 'Clear to advance',
-    blockedByExistingSystems: (state.presidentialReviewQueue?.eventDecisionCount ?? 0) > 0
-      || (state.pendingEventDecisions?.length ?? 0) > 0,
+    headline: items.length > 0 || blockedByExistingSystems ? 'Review before advance' : 'Clear to advance',
+    blockedByExistingSystems,
     items,
   };
 }
@@ -1043,6 +1131,8 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const osidNameMap = input.osidNameMap ?? null;
   const candidates: CandidateCard[] = [];
   addReviewCard(state, candidates);
+  addParamilitaryReviewCard(state, candidates);
+  addManifestDecisionCards(state, candidates);
   addOpportunityCards(state, candidates);
   addSitrepCards(state, candidates);
   addBriefingCards(state, candidates);
@@ -1072,7 +1162,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     advanceReadiness,
     metrics: {
       urgentCount: cards.filter((card) => card.severity === 'blocking' || card.severity === 'critical').length,
-      pendingReviews: state.presidentialReviewQueue?.pendingCount ?? 0,
+      pendingReviews: state.playerDecisionSummary?.totalCount ?? state.presidentialReviewQueue?.pendingCount ?? 0,
       opportunities: state.operationOpportunityProposals?.length ?? 0,
       hardTurns: cards.filter((card) => card.category === 'turn').length,
       advanceReviewCount: advanceReadiness.items.length,

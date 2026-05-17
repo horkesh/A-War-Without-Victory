@@ -127,6 +127,14 @@ export interface BrigadeMovementState {
     turns_remaining?: number;
 }
 
+/** Pending movement order consumed by combat/column movement systems. */
+export interface BrigadeMovementOrder {
+    /** Destination settlement(s), normally 1-4 contiguous faction-controlled settlements. */
+    destination_sids: SettlementId[];
+    /** Movement posture. Column orders are undeployed operational marches. */
+    stance?: 'combat' | 'column';
+}
+
 /** Corps standing stance (always active, modifies subordinate brigades). */
 export type CorpsStance = 'defensive' | 'balanced' | 'offensive' | 'reorganize';
 
@@ -332,7 +340,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** True when this operation was launched from the pre-planned operations catalog
@@ -1842,7 +1850,7 @@ militia_garrison?: Record<SettlementId, number>;
 /** War phase (Brigade AoR Redesign Phase C): Per-brigade movement state (packing / in_transit / unpacking). When in_transit, brigade has no AoR. */
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
-brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
+brigade_movement_orders?: Record<FormationId, BrigadeMovementOrder>;
 /** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. */
 brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
@@ -2214,6 +2222,8 @@ rbih_hrhb_state?: RbihHrhbState;
 coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
 /** Supply pressure per faction [0, 100]; higher = worse. Constrains effectiveness; no free replenishment. */
 war_supply_pressure?: Record<FactionId, number>;
+/** Live faction supply condition [0, 100] derived from current OSID supply state; higher = better. */
+war_supply_condition?: Record<FactionId, number>;
 /** Faction-level exhaustion (monotonic, irreversible). Engine Invariants §8. */
 war_exhaustion?: Record<FactionId, number>;
 /** Optional local (per-settlement) exhaustion accumulator; monotonic when present. */

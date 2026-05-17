@@ -335,7 +335,7 @@ export function ChronicleOverlay() {
                     <span className="text-[9px] font-mono text-stone-500 shrink-0">
                         {filteredEntries.length}/{allEntries.length} events — {turnToFullDate(minTurn)} – {turnToFullDate(maxTurn)}
                     </span>
-                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5" data-coachmark-id="chronicle-filter">
                         {CHRONICLE_FILTERS.map(filter => {
                             const active = filter.id === activeFilter;
                             const count = entryCounts[filter.id];

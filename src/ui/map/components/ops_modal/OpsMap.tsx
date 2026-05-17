@@ -38,6 +38,7 @@ interface OpsMapProps {
     objectives: string[];
     validTargetOsids: Set<string>;
     selectableOsids: Set<string>;
+    availableObjectiveOsids?: string[];
     stagingOsid: string | undefined;
     schwerpunktOsid: string;
     axes: AxisState[];
@@ -52,6 +53,7 @@ export function OpsMap({
     objectives,
     validTargetOsids,
     selectableOsids,
+    availableObjectiveOsids = [],
     stagingOsid,
     schwerpunktOsid,
     axes,
@@ -70,6 +72,7 @@ export function OpsMap({
     // ModalMapSource refs — safe remove+re-add pattern for modal map sources
     const objectivesSourceRef = useRef<ModalMapSource | null>(null);
     const stagingSourceRef = useRef<ModalMapSource | null>(null);
+    const availableTargetsSourceRef = useRef<ModalMapSource | null>(null);
     const dimmedSourceRef = useRef<ModalMapSource | null>(null);
 
     // Deck.gl overlay for animated arrows
@@ -270,6 +273,15 @@ export function OpsMap({
                 ]);
                 stagingSourceRef.current.init();
 
+                // Available enemy objectives â€” high-contrast discovery halo for first-time planning
+                availableTargetsSourceRef.current = new ModalMapSource(map, 'ops-available-targets', [
+                    { id: 'ops-available-targets-fill', type: 'fill',
+                        paint: { 'fill-color': '#ffdc3c', 'fill-opacity': 0.18 } },
+                    { id: 'ops-available-targets-border', type: 'line',
+                        paint: { 'line-color': '#ffdc3c', 'line-width': 2.5, 'line-blur': 1 } },
+                ]);
+                availableTargetsSourceRef.current.init();
+
                 // Dimmed overlay for non-selectable OSIDs
                 dimmedSourceRef.current = new ModalMapSource(map, 'ops-dimmed-osids', [
                     { id: 'ops-dimmed-fill', type: 'fill',
@@ -385,10 +397,12 @@ export function OpsMap({
             popupRef.current?.remove();
             objectivesSourceRef.current?.destroy();
             stagingSourceRef.current?.destroy();
+            availableTargetsSourceRef.current?.destroy();
             dimmedSourceRef.current?.destroy();
             popupRef.current = null;
             objectivesSourceRef.current = null;
             stagingSourceRef.current = null;
+            availableTargetsSourceRef.current = null;
             dimmedSourceRef.current = null;
             deckOverlayRef.current = null;
             mapRef.current = null;
@@ -417,6 +431,15 @@ export function OpsMap({
             : [];
         stagingSourceRef.current?.setData({ type: 'FeatureCollection', features: stgFeatures });
 
+        // Available target halo â€” only currently selectable enemy objective candidates.
+        const availableTargetSet = new Set(availableObjectiveOsids);
+        const availableFeatures = enabled
+            ? geoJsonRef.current.features.filter((f) =>
+                availableTargetSet.has((f.properties as Record<string, unknown>)?.osid as string ?? '')
+            )
+            : [];
+        availableTargetsSourceRef.current?.setData({ type: 'FeatureCollection', features: availableFeatures });
+
         // Dim non-selectable OSIDs — dark overlay on everything NOT in selectableOsids
         if (enabled && selectableOsids.size > 0) {
             const dimmedFeatures = geoJsonRef.current.features.filter((f) => {
@@ -443,7 +466,7 @@ export function OpsMap({
             animFrameRef.current = requestAnimationFrame(animate);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [objectives, stagingOsid, axes, faction, mapReady, selectableOsids, enabled]);
+    }, [objectives, stagingOsid, axes, faction, mapReady, selectableOsids, enabled, availableObjectiveOsids]);
 
     // WP4a FIX: When map interaction is disabled (non-plan phases), set pointer-events-none
     // on the entire map container. This prevents MapLibre canvas from intercepting clicks

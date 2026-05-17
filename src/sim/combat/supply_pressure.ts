@@ -10,6 +10,7 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateDerivationReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
+import { deriveFactionSupplyConditionFromOsidReport } from './supply_condition.js';
 
 /** Pressure per front edge (overextension). */
 const PRESSURE_PER_FRONT_EDGE = 3;
@@ -105,6 +106,10 @@ export function updateSupplyPressure(
         (state as GameState & { war_supply_pressure: Record<FactionId, number> }).political.war_supply_pressure = {};
     }
     const pressure = state.political.war_supply_pressure!;
+
+    const liveCondition = deriveFactionSupplyConditionFromOsidReport(supplyStateByOsid);
+    if (liveCondition) state.political.war_supply_condition = liveCondition;
+    else delete state.political.war_supply_condition;
 
     for (const fid of factionIds) {
         const overextension = (frontEdgeCountByFaction.get(fid) ?? 0) * PRESSURE_PER_FRONT_EDGE;

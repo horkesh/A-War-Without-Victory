@@ -13,7 +13,7 @@ import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -22,8 +22,12 @@ export interface InboxItem {
     severity: InboxSeverity;
     title: string;
     subtitle: string;
+    /** Number of source records represented by this card. Undefined means 1. */
+    updateCount?: number;
+    /** Source record ids represented by this card, source order preserved. */
+    sourceIds?: string[];
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'autonomy_panel' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_opportunity' | 'army_hq_briefing' | 'autonomy_panel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -44,6 +48,25 @@ function splitOpportunityDescription(description: string): { title: string; deta
         title: trimmed.slice(0, splitAt).trim() || 'Operation Opportunity',
         detail: trimmed.slice(splitAt + delimiterLength).trim() || 'ops proposal requires your review.',
     };
+}
+
+function normalizeDedupeSubject(value: string | null | undefined): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed) return null;
+    return trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || null;
+}
+
+type OfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
+
+function officerEventDedupeKey(evt: OfficerEvent): string {
+    const subjectKey =
+        normalizeDedupeSubject(evt.officer_id)
+        ?? normalizeDedupeSubject(evt.current_commander_id)
+        ?? normalizeDedupeSubject(evt.officer_name)
+        ?? normalizeDedupeSubject(evt.current_commander_name)
+        ?? normalizeDedupeSubject(evt.event_id)
+        ?? 'unknown';
+    return `${evt.type}:${subjectKey}`;
 }
 
 /**
@@ -91,6 +114,19 @@ export function deriveInboxItems(
     }
 
     // 3. Autonomy proposals (Level 1 Assisted — requires player accept/reject)
+    const dayton = state.pendingDayton;
+    if (dayton && !state.gameOver) {
+        items.push({
+            id: `dayton:${state.turn ?? 0}`,
+            type: 'dayton_negotiation',
+            severity: 'blocking',
+            title: 'Dayton Negotiation',
+            subtitle: 'A final peace framework requires your territorial and institutional proposal.',
+            action: 'dayton_modal',
+            priority: 22,
+        });
+    }
+
     const proposals = state.pendingProposalReviews;
     if (proposals && proposals.length > 0) {
         for (const prop of proposals) {
@@ -120,7 +156,36 @@ export function deriveInboxItems(
         }
     }
 
-    // 4. Reserve requests
+    // 4. Paramilitary requests
+    const paramilitaryRequests = state.pendingParamilitaryRequests ?? [];
+    if (paramilitaryRequests.length > 0) {
+        const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
+        const samplePlace = getOsidDisplayName(paramilitaryRequests[0]?.target_osid ?? '', osidNameMap);
+        items.push({
+            id: `paramilitary:${state.turn ?? 0}`,
+            type: 'paramilitary_request',
+            severity: 'blocking',
+            title: 'Paramilitary Authorization',
+            subtitle: `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; approval risks war crimes and civilian casualties. Estimated strength ${totalStrength}.`,
+            action: 'paramilitary_review',
+            priority: 25,
+        });
+    }
+
+    const convoyDecisions = state.pendingConvoyDecisions ?? [];
+    for (const convoy of convoyDecisions) {
+        items.push({
+            id: `convoy:${convoy.id}`,
+            type: 'convoy_decision',
+            severity: 'normal',
+            title: 'Humanitarian Convoy',
+            subtitle: `${convoy.route_faction} route to ${convoy.target_enclave}; ${convoy.supply_amount} supply awaits allow, block, or divert orders.`,
+            action: 'convoy_decision_modal',
+            priority: 38,
+        });
+    }
+
+    // 5. Reserve requests
     const reserveRequests = state.pendingReserveRequests;
     if (reserveRequests) {
         for (const req of reserveRequests) {
@@ -138,24 +203,35 @@ export function deriveInboxItems(
         }
     }
 
-    // 5. Officer events
+    // 6. Officer events
     const officerEvents = state.pendingOfficerEvents;
     if (officerEvents) {
+        const officerGroups = new Map<string, OfficerEvent[]>();
         for (const evt of officerEvents) {
             if (!matchesPlayerFaction(evt.faction, playerFaction)) continue;
+            const key = officerEventDedupeKey(evt);
+            const existing = officerGroups.get(key);
+            if (existing) existing.push(evt);
+            else officerGroups.set(key, [evt]);
+        }
+        for (const [key, events] of officerGroups) {
+            const evt = events[0];
+            if (!evt) continue;
             items.push({
-                id: `officer:${evt.event_id}`,
+                id: `officer:${key}`,
                 type: 'officer_event',
                 severity: 'normal',
                 title: evt.type === 'replacement_suggested' ? 'Commander Replacement' : 'Personnel Matter',
                 subtitle: evt.officer_name ? `Regarding ${evt.officer_name}.` : 'A personnel decision requires attention.',
+                updateCount: events.length,
+                sourceIds: events.map(event => event.event_id),
                 action: 'army_hq_personnel',
                 priority: 50,
             });
         }
     }
 
-    // 6. Situation highlights (informational, from turn summary + state)
+    // 7. Situation highlights (informational, from turn summary + state)
     const turn = state.turn ?? 0;
     const dateStr = turnToDateString(turn);
 

@@ -31,9 +31,9 @@ function reserveToClass(reserve: number): OsidSupplyClass {
 }
 
 function legacyPressureToClass(pressure: number): OsidSupplyClass {
-  if (pressure >= 80) return 'adequate';
+  if (pressure >= 80) return 'critical';
   if (pressure >= 50) return 'strained';
-  return 'critical';
+  return 'adequate';
 }
 
 /**
@@ -42,12 +42,14 @@ function legacyPressureToClass(pressure: number): OsidSupplyClass {
  * @param controlBySettlement   OSID → faction controller map
  * @param factionReserves       Phase A-E per-faction reserve levels (preferred)
  * @param warPhaseSupplyPressure Legacy faction → pressure fallback
+ * @param warPhaseSupplyCondition Live faction → condition fallback (higher is better)
  */
 export function buildSupplyGeoJSON(
   controlGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
   factionReserves: Record<string, { generalSupply: number; heavyMunitions: number }> | undefined,
-  warPhaseSupplyPressure?: Record<string, number>
+  warPhaseSupplyPressure?: Record<string, number>,
+  warPhaseSupplyCondition?: Record<string, number>
 ): FeatureCollection<Polygon | MultiPolygon, SupplyProperties> {
   const features: Feature<Polygon | MultiPolygon, SupplyProperties>[] = [];
 
@@ -64,6 +66,18 @@ export function buildSupplyGeoJSON(
       if (res != null && isFinite(res.generalSupply)) {
         supply_pressure = res.generalSupply;
         supply_class = reserveToClass(res.generalSupply);
+      } else if (warPhaseSupplyCondition) {
+        const c = warPhaseSupplyCondition[controller];
+        if (typeof c === 'number' && isFinite(c)) {
+          supply_pressure = c;
+          supply_class = reserveToClass(c);
+        } else if (warPhaseSupplyPressure) {
+          const p = warPhaseSupplyPressure[controller];
+          if (typeof p === 'number' && isFinite(p)) {
+            supply_pressure = p;
+            supply_class = legacyPressureToClass(p);
+          }
+        }
       } else if (warPhaseSupplyPressure) {
         const p = warPhaseSupplyPressure[controller];
         if (typeof p === 'number' && isFinite(p)) {

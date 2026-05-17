@@ -69,10 +69,10 @@ function ParamGroup({ label, description, children }: { label: string; descripti
         <div className="flex flex-col gap-1.5 rounded-md border border-[rgba(180,160,130,0.12)]
                         bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
             <div className="flex items-baseline gap-2">
-                <span className="text-[7px] font-bold uppercase tracking-[0.25em] text-text-secondary/50">
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-secondary/60">
                     {label}
                 </span>
-                <span className="text-[7px] text-text-secondary/30 italic">
+                <span className="text-[9px] text-text-secondary/45 italic">
                     {description}
                 </span>
             </div>
@@ -103,7 +103,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
                 <label
                     htmlFor="plan-params-op-name"
-                    className="text-[7px] font-bold uppercase tracking-[0.25em] text-text-secondary/50"
+                    className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-secondary/60"
                 >
                     Name
                 </label>
@@ -130,7 +130,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             ${pillClass(plan.opType === t)}`}
                     >
                         <span>{OP_TYPE_LABELS[t]}</span>
-                        <span className="text-[7px] font-normal normal-case tracking-normal text-text-secondary/50">
+                        <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
                             {PILL_SUBTITLES[t]}
                         </span>
                     </button>
@@ -149,7 +149,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             ${pillClass(plan.tempo === t)}`}
                     >
                         <span>{TEMPO_LABELS[t]}</span>
-                        <span className="text-[7px] font-normal normal-case tracking-normal text-text-secondary/50">
+                        <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
                             {PILL_SUBTITLES[t]}
                         </span>
                     </button>
@@ -171,7 +171,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                                 ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
                         >
                             <span>{TOLERANCE_LABELS[t]}</span>
-                            <span className={`text-[7px] font-normal normal-case tracking-normal ${
+                            <span className={`text-[9px] font-normal normal-case tracking-normal ${
                                 isDanger ? 'text-red-400/70' : 'text-text-secondary/50'
                             }`}>
                                 {PILL_SUBTITLES[t]}
@@ -199,7 +199,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         {plan.artilleryPreparation ? '\u25C6 ARTY PREP' : '\u25C7 ARTY PREP'}
                     </button>
                     {/* WP1e: Artillery prep info text */}
-                    <span className={`text-[7px] mt-0.5 ${
+                    <span className={`text-[9px] mt-0.5 ${
                         plan.artilleryPreparation ? 'text-red-400/60' : 'text-text-secondary/40'
                     }`}>
                         {plan.artilleryPreparation ? '~200 rounds \u00B7 +15% attack' : 'No bombardment'}

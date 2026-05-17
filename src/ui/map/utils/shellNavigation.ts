@@ -27,6 +27,14 @@ export interface ShellNavigationState {
   setStrategicDashboardOpen?: (open: boolean) => void;
   /** Optional: opens EventLogPanel without leaving warroom. */
   setEventLogOpen?: (open: boolean) => void;
+  /** Optional: clear tactical selections to return to Presidential Inbox. */
+  setSelectedOsid?: (id: string | null) => void;
+  setSelectedFormationId?: (id: string | null) => void;
+  setSelectedCorpsId?: (id: string | null) => void;
+  setSelectedCorpsFrontSectorId?: (id: string | null) => void;
+  setSelectedArmyHqId?: (id: string | null) => void;
+  setSelectedOperationKey?: (key: string | null) => void;
+  setSelectedOrbatCorpsId?: (id: string | null) => void;
 }
 
 function getPlayerFaction(state: ShellNavigationState): string | null {

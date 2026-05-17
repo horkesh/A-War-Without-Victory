@@ -15,6 +15,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "HRHB",
     "bot_response_logic": "capital_based",
     "pressure": {
       "base_rate": 2,
@@ -164,6 +165,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",
     "pressure": {
       "base_rate": 3,
@@ -1106,6 +1108,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "strategic_weighted",
     "effect": {
       "kind": "narrative",
@@ -1352,6 +1355,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "effect": {
       "kind": "narrative",
@@ -1779,6 +1783,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "effect": {
       "kind": "narrative",
@@ -2145,6 +2150,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "capital_based",
     "effect": {
       "kind": "narrative",
@@ -2512,6 +2518,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,
@@ -2727,6 +2734,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,
@@ -2946,6 +2954,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "HRHB",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,
@@ -3161,6 +3170,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,
@@ -3391,6 +3401,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,
@@ -3616,6 +3627,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "HRHB",
     "bot_response_logic": "strategic_weighted",
     "pressure": {
       "base_rate": 1,

@@ -4,8 +4,7 @@
  * Pure projection — produces the payload for the one-time onboarding overlay
  * that points a fresh player at four EXISTING surfaces (Inbox, Advance Turn,
  * Chronicle, Codex). The read-model NEVER mutates state; the dismiss flag
- * lives in localStorage under `awwv_seen_first_turn_intro` and is passed in
- * as `hasSeenIntro` by the component.
+ * is passed in as `hasSeenIntro` by the App shell's current-session state.
  *
  * Returns null when:
  *   - state is null (no save loaded)
@@ -84,7 +83,7 @@ export function buildFirstTurnOrientation(
     if (hasSeenIntro) return null;
     const turn = typeof state.turn === 'number' ? state.turn : 0;
     // First turn = turn 0 or 1. The instant the player advances past 1 we stop
-    // showing the card; the localStorage flag prevents re-show in later sessions.
+    // showing the card; caller-owned session state prevents repeat display.
     if (turn > 1) return null;
 
     return {

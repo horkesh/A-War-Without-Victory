@@ -63,6 +63,8 @@ function predicateTag(predicate) {
         case 'target_already_friendly': return 'PRE-FRIENDLY';
         case 'contacted_but_underdelivered': return 'UNDERDELIV';
         case 'no_contact_pathing': return 'NO-CONTACT-PATH';
+        case 'no_launch_readiness': return 'NO-LAUNCH-READINESS';
+        case 'defender_power_too_high': return 'DEFENDER-POWER-HIGH';
         case 'no_contact_other': return 'NO-CONTACT-OTHER';
         case 'partial_delivery': return 'PARTIAL';
         case 'contacted_no_capture': return 'STALEMATE';
@@ -214,6 +216,8 @@ function buildOpportunityRows(runDir, state, deliveryRun) {
         const blockerParts = [];
         if (diag.required_blockers !== 'n/a') blockerParts.push(diag.required_blockers);
         if (diag.optional_blockers !== 'n/a') blockerParts.push(diag.optional_blockers);
+        const aarBlockers = uniq(oRows.map(o => o.blocker));
+        if (aarBlockers.length > 0) blockerParts.push(`aar:${aarBlockers.join(',')}`);
 
         rows.push({
             opportunity_id: id,

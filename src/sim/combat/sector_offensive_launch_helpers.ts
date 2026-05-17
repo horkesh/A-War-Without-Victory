@@ -11,14 +11,30 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
-import { getDefensiveFireMult, getForestMult, getUrbanMult, ENTRENCHMENT_PER_TURN, MAX_ENTRENCHMENT, VICTORY_THRESHOLD_COSTLY, basePower } from './combat_math.js';
+import {
+    computeAttackerPower,
+    getArtillerySuppression,
+    rankDefendersByPower,
+    VICTORY_THRESHOLD_COSTLY,
+} from './combat_math.js';
 import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
 import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
 
-const FEASIBILITY_ATTACK_POSTURE_MULT = 0.8;
+export type LaunchFeasibilityBlocker =
+    | 'no_enemy_objective'
+    | 'no_attacker_power'
+    | 'defender_power_too_high';
+
+export interface LaunchFeasibilityResult {
+    feasible: boolean;
+    ratio: number;
+    attackerPower: number;
+    defenderPower: number;
+    blocker?: LaunchFeasibilityBlocker;
+}
 
 export function getEquipmentOffensivePriority(equipmentClass: string | undefined): number {
     switch (equipmentClass) {
@@ -35,61 +51,161 @@ export function resolveEquipmentClass(f: { equipment_class?: string; tags?: stri
     return tag ? tag.slice(6) : undefined;
 }
 
+export function evaluateLaunchFeasibility(
+    state: GameState,
+    attackerBrigadeIds: FormationId[],
+    objectives: string[],
+    faction: FactionId,
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    terrainMultByOsid?: Record<string, number>,
+): LaunchFeasibilityResult {
+    const formations = state.military.formations ?? {};
+    const attackerIds = [...attackerBrigadeIds].sort(strictCompare);
+    const attackers: FormationState[] = [];
+    for (const bid of attackerIds) {
+        const formation = formations[bid];
+        if (!formation || formation.status !== 'active') continue;
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((formation.disrupted_turns ?? 0) > 0) continue;
+        attackers.push(formation);
+    }
+
+    if (attackers.length === 0) {
+        return {
+            feasible: false,
+            ratio: 0,
+            attackerPower: 0,
+            defenderPower: 0,
+            blocker: 'no_attacker_power',
+        };
+    }
+
+    const terrainCache = terrainMultByOsid ?? {};
+    const sortedObjectives = [...objectives].sort(strictCompare);
+    let sawEnemyObjective = false;
+    let best: LaunchFeasibilityResult | null = null;
+
+    for (const obj of sortedObjectives) {
+        const pc = state.political?.political_controllers ?? {};
+        const defenderFaction = pc[obj];
+        if (!defenderFaction || defenderFaction === faction) continue;
+        sawEnemyObjective = true;
+
+        const sector = findSectorForEnemyOsid(state, obj, defenderFaction);
+        const targetTerrainMult = terrainCache[obj] ?? 1.0;
+        let attackerPower = 0;
+        for (const attacker of attackers) {
+            attackerPower += computeAttackerPower(
+                state,
+                attacker,
+                supplyByOsid,
+                'attack',
+                targetTerrainMult,
+                obj,
+            );
+        }
+
+        if (attackerPower <= 0) {
+            const candidate: LaunchFeasibilityResult = {
+                feasible: false,
+                ratio: 0,
+                attackerPower,
+                defenderPower: 0,
+                blocker: 'no_attacker_power',
+            };
+            if (!best || candidate.ratio > best.ratio) best = candidate;
+            continue;
+        }
+
+        if (!sector) {
+            return {
+                feasible: true,
+                ratio: Number.POSITIVE_INFINITY,
+                attackerPower,
+                defenderPower: 0,
+            };
+        }
+
+        const defenders: FormationState[] = [];
+        for (const defBid of [...(sector.assigned_brigade_ids ?? [])].sort(strictCompare)) {
+            const defender = formations[defBid];
+            if (!defender || defender.status !== 'active') continue;
+            defenders.push(defender);
+        }
+
+        if (defenders.length === 0) {
+            return {
+                feasible: true,
+                ratio: Number.POSITIVE_INFINITY,
+                attackerPower,
+                defenderPower: 0,
+            };
+        }
+
+        const artSuppression = getArtillerySuppression(attackers, faction, state);
+        const noEthnicBonus = (_defender: FormationState) => 0;
+        const { totalPower: defenderPower } = rankDefendersByPower(
+            defenders,
+            state,
+            obj,
+            terrainCache,
+            artSuppression,
+            supplyByOsid,
+            noEthnicBonus,
+        );
+
+        if (defenderPower <= 0) {
+            return {
+                feasible: true,
+                ratio: Number.POSITIVE_INFINITY,
+                attackerPower,
+                defenderPower,
+            };
+        }
+
+        const ratio = attackerPower / defenderPower;
+        const candidate: LaunchFeasibilityResult = ratio >= VICTORY_THRESHOLD_COSTLY
+            ? { feasible: true, ratio, attackerPower, defenderPower }
+            : { feasible: false, ratio, attackerPower, defenderPower, blocker: 'defender_power_too_high' };
+        if (!best || candidate.ratio > best.ratio) best = candidate;
+        if (candidate.feasible) return candidate;
+    }
+
+    if (!sawEnemyObjective) {
+        return {
+            feasible: false,
+            ratio: 0,
+            attackerPower: 0,
+            defenderPower: 0,
+            blocker: 'no_enemy_objective',
+        };
+    }
+
+    return best ?? {
+        feasible: false,
+        ratio: 0,
+        attackerPower: 0,
+        defenderPower: 0,
+        blocker: 'defender_power_too_high',
+    };
+}
+
 export function checkLaunchFeasibility(
     state: GameState,
     attackerBrigadeIds: FormationId[],
     objectives: string[],
     faction: FactionId,
+    supplyByOsid?: SupplyStateByOsidReport | null,
+    terrainMultByOsid?: Record<string, number>,
 ): boolean {
-    const formations = state.military.formations ?? {};
-
-    let totalAttackerPower = 0;
-    for (const bid of attackerBrigadeIds) {
-        const f = formations[bid];
-        if (!f || f.status !== 'active') continue;
-        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((f.disrupted_turns ?? 0) > 0) continue;
-        totalAttackerPower += basePower(f) * FEASIBILITY_ATTACK_POSTURE_MULT;
-    }
-
-    if (totalAttackerPower <= 0) return false;
-
-    for (const obj of objectives) {
-        const pc = state.political?.political_controllers ?? {};
-        const defenderFaction = pc[obj];
-        if (!defenderFaction || defenderFaction === faction) continue;
-
-        const sector = findSectorForEnemyOsid(state, obj, defenderFaction);
-        if (!sector) return true;
-
-        let sectorDefenderPower = 0;
-        const defenders: FormationState[] = [];
-        for (const defBid of sector.assigned_brigade_ids) {
-            const df = formations[defBid];
-            if (!df || df.status !== 'active') continue;
-            sectorDefenderPower += basePower(df);
-            defenders.push(df);
-        }
-
-        if (sectorDefenderPower <= 0) return true;
-
-        const defensiveFireMult = getDefensiveFireMult(defenders, defenderFaction, state);
-        const entrenchmentMult = defenders.reduce((best, defender) => {
-            const entrenchmentTurns = Math.min(
-                MAX_ENTRENCHMENT,
-                (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0,
-            );
-            const mult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2;
-            return Math.max(best, mult);
-        }, 1.0);
-        const terrainMult = Math.max(getUrbanMult(obj), getForestMult(obj));
-        const adjustedDefenderPower = sectorDefenderPower * defensiveFireMult * entrenchmentMult * terrainMult;
-
-        const ratio = totalAttackerPower / adjustedDefenderPower;
-        if (ratio >= VICTORY_THRESHOLD_COSTLY) return true;
-    }
-
-    return false;
+    return evaluateLaunchFeasibility(
+        state,
+        attackerBrigadeIds,
+        objectives,
+        faction,
+        supplyByOsid,
+        terrainMultByOsid,
+    ).feasible;
 }
 
 export function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, string[]> {

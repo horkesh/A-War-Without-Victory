@@ -23,6 +23,7 @@
  */
 
 import type {
+    BrigadeMovementOrder,
     BrigadePosture,
     CorpsFrontSector,
     CorpsOperation,
@@ -828,17 +829,17 @@ export function generateAllBotOrdersOsid(
     }
 
     // Movement orders: merge regular moves + column march destinations
-    const mergedMovement: Record<string, { destination_sids: string[]; stance?: string }> = {};
+    const mergedMovement: Record<FormationId, BrigadeMovementOrder> = {};
     for (const [bid, dest] of Object.entries(allMovementOrders)) {
-        mergedMovement[bid] = { destination_sids: [dest] };
+        mergedMovement[bid as FormationId] = { destination_sids: [dest] };
     }
     for (const [bid, dest] of Object.entries(allColumnMarchOrders)) {
         // Column march: write to movement orders with stance:'column' so the
         // column movement processor (processOsidColumnMovement) picks them up.
-        mergedMovement[bid] = { destination_sids: [dest], stance: 'column' };
+        mergedMovement[bid as FormationId] = { destination_sids: [dest], stance: 'column' };
     }
     if (Object.keys(mergedMovement).length > 0) {
-        state.military.brigade_movement_orders = mergedMovement as Record<FormationId, { destination_sids: string[]; stance?: string }>;
+        state.military.brigade_movement_orders = mergedMovement;
     }
 
     return {

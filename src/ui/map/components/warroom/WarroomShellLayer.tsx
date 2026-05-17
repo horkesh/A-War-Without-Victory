@@ -419,37 +419,75 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
   const height = `${(bounds.height / CANVAS_H) * 100}%`;
 
   return (
-    <button
-      type="button"
+    <div
       style={{
         position: 'absolute',
         left,
         top,
         width,
         height,
-        cursor: 'pointer',
-        boxSizing: 'border-box',
-        outline: hovered ? '2px solid rgba(255,220,100,0.7)' : 'none',
-        background: hovered ? 'rgba(255,220,100,0.08)' : 'transparent',
-        transition: 'outline 0.1s, background 0.1s',
-        clipPath: getWarroomRegionClipPath(region),
-        border: 'none',
-        padding: 0,
+        overflow: 'visible',
+        pointerEvents: 'none',
+        zIndex: hovered ? 4 : 2,
       }}
-      aria-label={accessibleLabel}
-      title={tooltip ?? id}
-      onClick={onClick}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onClick();
-        }
-      }}
-    />
+    >
+      {hovered ? (
+        <span
+          style={{
+            position: 'absolute',
+            left: 0,
+            bottom: 'calc(100% + 4px)',
+            pointerEvents: 'none',
+            border: '1px solid rgba(214,174,76,0.48)',
+            background: 'rgba(15,18,22,0.96)',
+            color: 'rgba(245,197,90,0.98)',
+            padding: '4px 7px',
+            fontFamily: '"Courier New", Courier, monospace',
+            fontSize: '9px',
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            lineHeight: 1,
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
+            zIndex: 5,
+          }}
+        >
+          {accessibleLabel}
+        </span>
+      ) : null}
+      <button
+        type="button"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          cursor: 'pointer',
+          boxSizing: 'border-box',
+          outline: hovered ? '2px solid rgba(255,220,100,0.7)' : 'none',
+          background: hovered ? 'rgba(255,220,100,0.08)' : 'transparent',
+          transition: 'outline 0.1s, background 0.1s',
+          clipPath: getWarroomRegionClipPath(region),
+          border: 'none',
+          padding: 0,
+          pointerEvents: 'auto',
+        }}
+        aria-label={accessibleLabel}
+        title={tooltip ?? id}
+        onClick={onClick}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        }}
+      />
+    </div>
   );
 }
 
@@ -487,9 +525,11 @@ function regionsFromPayload(payload: unknown): WarroomRegion[] {
 export interface WarroomShellLayerProps {
   /** Called when the player clicks a hotspot. command is undefined for unmapped regions. */
   onNavigate: (command?: WarroomNavigationCommand) => void;
+  /** Opens the existing campaign side picker when the Warroom has no loaded side. */
+  onOpenSidePicker?: () => void;
 }
 
-export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
+export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShellLayerProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
 
@@ -575,6 +615,8 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          flexDirection: 'column',
+          gap: '14px',
         }}
       >
         <div
@@ -590,6 +632,25 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
         >
           Warroom unavailable until a campaign side is selected.
         </div>
+        <button
+          type="button"
+          onClick={() => onOpenSidePicker?.()}
+          style={{
+            cursor: 'pointer',
+            border: '1px solid rgba(214,174,76,0.55)',
+            background: 'rgba(18,22,28,0.92)',
+            color: 'rgba(245,197,90,0.98)',
+            padding: '10px 14px',
+            fontFamily: '"Courier New", Courier, monospace',
+            fontSize: '11px',
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            boxShadow: '0 8px 22px rgba(0,0,0,0.38)',
+          }}
+        >
+          Open Side Picker
+        </button>
       </div>
     );
   }

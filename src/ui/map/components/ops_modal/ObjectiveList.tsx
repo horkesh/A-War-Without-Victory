@@ -10,9 +10,18 @@ interface ObjectiveListProps {
     onUpdate: (partial: Partial<OpsPlanState>) => void;
     osidDisplayNames: Record<string, string> | null;
     onAdvance?: () => void;
+    availableObjectiveCount?: number;
+    canAdvanceToG2?: boolean;
 }
 
-export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: ObjectiveListProps) {
+export function ObjectiveList({
+    plan,
+    onUpdate,
+    osidDisplayNames,
+    onAdvance,
+    availableObjectiveCount = 0,
+    canAdvanceToG2 = false,
+}: ObjectiveListProps) {
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
     if (!activeAxis) return null;
 
@@ -62,18 +71,24 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="grid grid-cols-4 gap-2 mb-3">
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Axis</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Axis</div>
                     <div className="text-[10px] font-bold text-white truncate">{activeAxis.name}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Objectives</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Objectives</div>
                     <div className="text-[10px] font-bold text-white">{selectedAxisObjectiveCount}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Brigades</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Brigades</div>
                     <div className="text-[10px] font-bold text-white">{selectedAxisBrigadeCount}</div>
+                </div>
+                <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Available</div>
+                    <div className={`text-[10px] font-bold ${availableObjectiveCount > 0 ? 'text-accent-gold' : 'text-red-300'}`}>
+                        {availableObjectiveCount}
+                    </div>
                 </div>
             </div>
 
@@ -138,7 +153,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
             )}
 
             <div className="mt-2 rounded border border-[rgba(180,160,130,0.12)] bg-[rgba(180,160,130,0.05)] px-2 py-1.5">
-                <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Staging Area</div>
+                <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Staging Area</div>
                 <div className="text-[10px] text-white truncate">
                     {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : 'Not set'}
                 </div>
@@ -167,9 +182,10 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                 <button
                     type="button"
                     onClick={onAdvance}
+                    disabled={!canAdvanceToG2}
                     className="mt-3 w-full py-2 rounded-md text-[10px] font-bold uppercase tracking-wider
                                bg-accent-gold/15 text-accent-gold border border-accent-gold/25
-                               hover:bg-accent-gold/25 transition-all"
+                               hover:bg-accent-gold/25 transition-all disabled:cursor-not-allowed disabled:opacity-30"
                 >
                     {'Request G2 Assessment ->'}
                 </button>

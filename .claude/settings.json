@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_response // \"\"' | grep -qiE '(area-weighted match|compare_painted_vs_sim|final_state_hash|run_summary\\.json|anchor_checks)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This Bash output contains scenario run results. You MUST dispatch /war-or-game and /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "command": "jq -r '.tool_response // \"\"' | grep -qiE '(area-weighted match|compare_painted_vs_sim|final_state_hash|run_summary\\.json|anchor_checks)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This Bash output contains scenario run results. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
             "timeout": 5,
             "statusMessage": "Checking orchestrator enforcement..."
           },

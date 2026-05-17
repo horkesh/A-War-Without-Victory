@@ -180,6 +180,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "historical",
     "pressure": {
       "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
@@ -727,6 +728,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RS",
     "bot_response_logic": "personality_weighted",
     "effect": {
       "kind": "cohesion_change",
@@ -1160,6 +1162,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "accept_first",
     "effect": {
       "kind": "narrative",
@@ -1353,6 +1356,7 @@
     },
     "once": true,
     "requires_player_response": true,
+    "responding_faction": "RBiH",
     "bot_response_logic": "accept_first",
     "effect": {
       "kind": "narrative",

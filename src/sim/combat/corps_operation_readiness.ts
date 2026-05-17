@@ -24,7 +24,7 @@
  *
  * READS:     state.military.formations, state.military.faction_officer_maturity,
  *            state.factions[*].capability_profile, state.military.corps_command,
- *            state.political.war_exhaustion, state.political.war_supply_pressure
+ *            state.political.war_exhaustion, state.political.war_supply_condition/pressure
  * WRITES:    Nothing — pure helper, mutates nothing.
  * MUST NOT:  Touch combat math, attack share, or any combat multiplier.
  *
@@ -49,6 +49,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -130,8 +131,7 @@ const FACTION_MATURITY_MAX = 5.0;
  *  still saturate cleanly. */
 const CORPS_EXHAUSTION_CAP = 100;
 
-/** Faction pool pressure: war_supply_pressure is reported on a 0-100 scale,
- *  higher = worse. Normalize to [0, 1]. */
+/** Faction pool pressure is normalized to [0, 1]. */
 const FACTION_POOL_PRESSURE_CAP = 100;
 
 /** Cohesion and morale are stored on a 0-100 scale; normalize to [0, 1]. */
@@ -296,13 +296,9 @@ function corpsExhaustionNormalized(state: GameState, corpsId: FormationId): numb
     return clamp01(raw / CORPS_EXHAUSTION_CAP);
 }
 
-/** Faction pool pressure: war_supply_pressure is on [0, 100], higher = worse.
- *  Returns [0, 1] with 0 = no pressure, 1 = saturated. */
+/** Faction pool pressure returns [0, 1] with 0 = no pressure, 1 = saturated. */
 function factionPoolPressure(state: GameState, faction: FactionId): number {
-    const map = state.political?.war_supply_pressure;
-    const raw = map?.[faction];
-    if (typeof raw !== 'number' || !Number.isFinite(raw)) return 0;
-    return clamp01(raw / FACTION_POOL_PRESSURE_CAP);
+    return clamp01(getFactionLiveSupplyPressure(state, faction) / FACTION_POOL_PRESSURE_CAP);
 }
 
 /** Corps consecutive failures from CommanderState. Returns 0 if not present. */

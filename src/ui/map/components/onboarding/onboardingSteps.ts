@@ -57,7 +57,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     {
         id: '01_welcome',
         title: 'You Are the President',
-        body: 'You are the unnamed political leader of your faction in the 1992–1995 Bosnian War. This is a negative-sum war: you cannot win by conquest. You command through institutions, not in spite of them. Each turn is one week. Your job is to choose how to lose less.',
+        body: 'The opening presidential brief gives your starting position in three scan points. Read it, then use the toolbar and Decision Room to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.',
         target_ui_element: null,
     },
     {
@@ -69,7 +69,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     {
         id: '03_brief',
         title: 'The Brief',
-        body: 'Each turn opens with your staff brief. Strategic priorities, command authority, and the morning report sit on the toolbar. RECORDS opens Army HQ. SUMMARY gives you the field situation. Read first; decide second.',
+        body: 'The toolbar is your staff desk. SUMMARY gives the field situation, RECORDS opens the Army HQ records view, CHRONICLE replays the campaign, and CODEX keeps historical context close. Read the brief first; the Decision Room is where inspection becomes action.',
         target_ui_element: 'presidential-toolbar',
     },
     {
@@ -81,13 +81,13 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
     {
         id: '05_decide',
         title: 'The Decision Room',
-        body: 'Before you advance the turn, the Decision Room surfaces every pending choice: command friction, peace plans, opportunity dossiers. Source handoffs route you back to the originating panel. Resolve what you can; defer what you must.',
+        body: 'Before you advance the turn, the Decision Room surfaces every pending choice. Each row links back to the panel it came from -- open it, decide, return. Resolve what you can; defer what you must.',
         target_ui_element: 'decision-room',
     },
     {
         id: '06_execute',
         title: 'Operations',
-        body: 'Your corps commanders propose operations. Approve to authorize, decline to refuse, or force-launch to spend command authority and override their judgment. Brigades never attack alone — every assault flows through a corps operation.',
+        body: 'Your corps commanders propose operations and present them for your decision when they\'re ready to launch. Approve to authorize, decline to refuse, or force-launch to override their judgment at the cost of command authority. Brigades never attack alone -- every assault flows through a corps operation.',
         target_ui_element: 'army-hq-tab-briefing',
     },
     {

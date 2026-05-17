@@ -356,6 +356,7 @@ export function PresidentialDecisionRoomPanel() {
   const osidNameMap = useGameStore((s) => s.osidDisplayNames);
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const view = useMemo(
     () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId: activeCardId }),
@@ -381,7 +382,7 @@ export function PresidentialDecisionRoomPanel() {
   const filteredCards = effectiveLens === 'all'
     ? view.cards
     : view.cards.filter((card) => card.category === effectiveLens);
-  const mainCards = filteredCards.slice(0, 7);
+  const mainCards = filteredCards.slice(0, showAdvanced ? 7 : 4);
   const inspectNext = (effectiveLens === 'all'
     ? view.inspectNext
     : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
@@ -393,33 +394,52 @@ export function PresidentialDecisionRoomPanel() {
   };
 
   return (
-    <section className="mb-2" data-testid="presidential-decision-room" data-tutorial-step="decision-room">
+    <section
+      className="mb-2"
+      data-testid="presidential-decision-room"
+      data-tutorial-step="decision-room"
+      data-coachmark-id="decision-room"
+    >
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 border-b border-panel-border pb-1">
         <div>
           <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">Presidential Decision Room</div>
           <div className="text-[13px] font-bold uppercase tracking-[0.05em] text-text-primary">Strategic Priorities</div>
         </div>
-        <div className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${view.advanceReadiness.blockedByExistingSystems ? 'border-red-400/35 bg-red-500/10 text-red-300' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'}`}>
-          {view.advanceReadiness.headline}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((value) => !value)}
+            className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"
+            aria-pressed={showAdvanced}
+          >
+            {showAdvanced ? 'Hide Advanced' : 'View Advanced'}
+          </button>
+          <div className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${view.advanceReadiness.blockedByExistingSystems ? 'border-red-400/35 bg-red-500/10 text-red-300' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'}`}>
+            {view.advanceReadiness.headline}
+          </div>
         </div>
       </div>
 
-      <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
-        <MetricCell label="Urgent" value={view.metrics.urgentCount} tone={view.metrics.urgentCount > 0 ? 'urgent' : 'neutral'} />
-        <MetricCell label="Pending" value={view.metrics.pendingReviews} tone={view.metrics.pendingReviews > 0 ? 'urgent' : 'neutral'} />
-        <MetricCell label="Ops" value={view.metrics.opportunities} />
-        <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
-        <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
-      </div>
-
-      {view.loopSteps.length > 0 && (
-        <div className="mb-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Product Loop</div>
-          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
-            {view.loopSteps.map((step) => (
-              <ProductLoopStep key={step.id} step={step} />
-            ))}
+      {showAdvanced && (
+        <div className="mb-2 rounded border border-panel-border/55 bg-panel-bg/35 p-2" data-testid="decision-room-advanced">
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Advanced Desk</div>
+          <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <MetricCell label="Urgent" value={view.metrics.urgentCount} tone={view.metrics.urgentCount > 0 ? 'urgent' : 'neutral'} />
+            <MetricCell label="Pending" value={view.metrics.pendingReviews} tone={view.metrics.pendingReviews > 0 ? 'urgent' : 'neutral'} />
+            <MetricCell label="Ops" value={view.metrics.opportunities} />
+            <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
+            <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
           </div>
+          {view.loopSteps.length > 0 && (
+            <div>
+              <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Product Loop</div>
+              <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
+                {view.loopSteps.map((step) => (
+                  <ProductLoopStep key={step.id} step={step} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -434,7 +454,7 @@ export function PresidentialDecisionRoomPanel() {
         </div>
       )}
 
-      {view.lenses.length > 0 && (
+      {showAdvanced && view.lenses.length > 0 && (
         <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
           {view.lenses.map((lens) => (
             <LensButton
@@ -472,6 +492,7 @@ export function PresidentialDecisionRoomPanel() {
             />
           </div>
 
+          {showAdvanced && (
           <div>
             <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Inspect Next</div>
             <div className="space-y-1.5">
@@ -484,7 +505,9 @@ export function PresidentialDecisionRoomPanel() {
               ))}
             </div>
           </div>
+          )}
 
+          {showAdvanced && (
           <div>
             <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Source Handoffs</div>
             <div className="space-y-1.5">
@@ -497,6 +520,7 @@ export function PresidentialDecisionRoomPanel() {
               ))}
             </div>
           </div>
+          )}
 
           <div>
             <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Review Before Advance</div>

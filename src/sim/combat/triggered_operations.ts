@@ -37,6 +37,7 @@ import {
     hasActiveOperation,
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
+import { evaluateLaunchFeasibility } from './sector_offensive_launch_helpers.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -646,6 +647,13 @@ function buildOperation(
     // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.
     // Sector anchoring now derives from the primary corps brigade set.
     const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false, primarySectorId);
+    const feasibility = evaluateLaunchFeasibility(
+        state,
+        op.participating_brigades,
+        op.objectives ?? [],
+        def.faction,
+    );
+    if (!feasibility.feasible) return null;
 
     return { op, corpsAxes };
 }

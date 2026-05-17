@@ -35,21 +35,33 @@ function ReserveBar({ label, value, color }: { label: string; value: number; col
 }
 
 function pressureClass(pressure: number): 'open' | 'strained' | 'cut' {
-  if (pressure >= 80) return 'open';
+  if (pressure >= 80) return 'cut';
   if (pressure >= 50) return 'strained';
+  return 'open';
+}
+
+function conditionClass(condition: number): 'open' | 'strained' | 'cut' {
+  if (condition >= 80) return 'open';
+  if (condition >= 50) return 'strained';
   return 'cut';
 }
 
 export function SupplyPanel({ state }: SupplyPanelProps) {
   const reserves = state.factionReserves;
   const pressure = state.warPhaseSupplyPressure ?? {};
+  const condition = state.warPhaseSupplyCondition ?? {};
   const playerFaction = state.player_faction;
   const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
 
   // Corridor summary: count factions by pressure class
   let open = 0, strained = 0, cut = 0;
-  for (const val of Object.values(pressure)) {
-    const cls = pressureClass(val);
+  const factionIds = Array.from(new Set([...Object.keys(pressure), ...Object.keys(condition)])).sort();
+  for (const factionId of factionIds) {
+    const conditionValue = condition[factionId];
+    const pressureValue = pressure[factionId];
+    const cls = typeof conditionValue === 'number' && Number.isFinite(conditionValue)
+      ? conditionClass(conditionValue)
+      : pressureClass(typeof pressureValue === 'number' && Number.isFinite(pressureValue) ? pressureValue : 0);
     if (cls === 'open') open++;
     else if (cls === 'strained') strained++;
     else cut++;

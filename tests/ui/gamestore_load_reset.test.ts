@@ -170,8 +170,9 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.isOperationsPanelOpen).toBe(false);
         // Order state reset
         expect(s.stagedOrders).toEqual([]);
-        // Transition state
-        expect(s.peaceWarTransitionSeen).toBe(false);
+        // Transition state: loading directly into a war save is not a live
+        // peace->war handoff, so the transition overlay stays suppressed.
+        expect(s.peaceWarTransitionSeen).toBe(true);
         // Visual state
         expect(s.operationTargetOsids).toEqual([]);
         expect(s.ghostLinePoint).toBeNull();

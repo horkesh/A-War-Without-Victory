@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { TopToolbar } from '../components/TopToolbar';
+import { TopToolbar } from '../components/_retired_chrome/TopToolbar';
 import { makeMockLoadedGameState } from '../__mocks__/loadedGameState';
 import { useGameStore } from '../store/gameStore';
 

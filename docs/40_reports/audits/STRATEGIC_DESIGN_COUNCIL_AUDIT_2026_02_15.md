@@ -9,6 +9,19 @@
 
 ---
 
+## 0. 2026-05-16 Implementation Status
+
+The tactical-map portions of findings 1, 2, and the authority/legitimacy part of finding 3 are now addressed by `docs/40_reports/implemented/20260516_TACTICAL_MAP_INFORMATION_DESIGN_TRACK_C.md`.
+
+- Control clarity: contested/disputed OSID bands render over political and ethnic modes from recent control flips and adjacent hostile pressure.
+- Front solidity: front-line features now carry stability classes and render differentiated stripe styling.
+- Supply reach: supply mode now has per-OSID supply reach and critical isolation overlays from current player-visible supply state.
+- Authority/legitimacy collapse: Authority and Legitimacy are separate map modes sourced from adapter-owned `politicalMetricsByOsid`.
+
+Residual from this audit remains outside Track C: command-friction/degraded-intent presentation, exhaustion irreversibility copy, and any richer non-map faction-dashboard rewrite.
+
+---
+
 ## 1. Executive Summary
 
 The council compared AWWV’s current architecture and representation to modern grand-strategy and operational wargames (Paradox, AGEOD) through the lens of information design, friction modeling, and negative-sum integrity. Findings:

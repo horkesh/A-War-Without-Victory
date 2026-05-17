@@ -16,18 +16,30 @@ import type { InboxItem, InboxSeverity } from '../data/inboxItems';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 
-const OPENING_BRIEFS: Record<string, { title: string; body: string }> = {
+const OPENING_BRIEFS: Record<string, { title: string; bullets: string[] }> = {
     RBiH: {
         title: 'Republic of Bosnia and Herzegovina',
-        body: 'You are the president of Bosnia and Herzegovina. Your nation declared independence in March 1992, and the war has begun. The JNA and Bosnian Serb paramilitaries are seizing territory across the country. Your army is poorly armed \u2014 mostly rifles against tanks and artillery. Hold the major cities. Keep the international community engaged. Survive long enough to negotiate from strength. You command through Army HQ and your corps commanders. You set strategic direction and approve operations \u2014 you do not move brigades.',
+        bullets: [
+            'Hold Sarajevo, Tuzla, Zenica, Bihac, and other urban anchors while the army forms under fire.',
+            'Keep the international record visible: diplomacy, civilian harm, and military survival are linked.',
+            'Use Army HQ and the Decision Room to set priorities and approve operations through commanders.',
+        ],
     },
     RS: {
         title: 'Republika Srpska',
-        body: 'You lead Republika Srpska. Your forces control the JNA\u2019s heavy equipment \u2014 tanks, artillery, logistics. Secure a contiguous territory connecting all Serb-majority areas. Control the Posavina corridor linking east and west. Force international recognition. Your military advantage is overwhelming but temporary \u2014 international pressure and war exhaustion will erode your position. Every month of war costs you diplomatic capital.',
+        bullets: [
+            'Exploit inherited JNA armor, artillery, and logistics before international pressure narrows the window.',
+            'Secure connected territory and protect the Posavina corridor linking eastern and western holdings.',
+            'Use Army HQ and the Decision Room to balance offensive pressure against exhaustion and legitimacy cost.',
+        ],
     },
     HRHB: {
         title: 'Herzeg-Bosna',
-        body: 'You lead Herzeg-Bosna, the Croatian community\u2019s wartime entity. Zagreb provides your political direction and military support. Secure Herzegovina as a Croat-majority region. Protect Croat communities in central Bosnia. Maintain the alliance with Sarajevo as long as it serves Croatian interests. You are caught between two larger forces. Your patron in Zagreb may order you to fight, negotiate, or stand down \u2014 and you may not always agree.',
+        bullets: [
+            'Protect Herzegovina and exposed Croat communities in central Bosnia while avoiding overextension.',
+            'Manage the Sarajevo alliance and Zagreb patron pressure; either can shift faster than the front.',
+            'Use Army HQ and the Decision Room to choose when to cooperate, resist, negotiate, or stand down.',
+        ],
     },
 };
 
@@ -41,6 +53,9 @@ const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; la
 const TYPE_LABELS: Record<string, string> = {
     event_decision: 'DECISION',
     peace_plan: 'PEACE PLAN',
+    dayton_negotiation: 'DAYTON',
+    convoy_decision: 'CONVOY',
+    paramilitary_request: 'PARAMILITARY',
     reserve_request: 'RESERVE',
     officer_event: 'PERSONNEL',
     operation_opportunity: 'OPPORTUNITY',
@@ -73,6 +88,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
                         {typeLabel}
                     </span>
                 )}
+                {(item.updateCount ?? 1) > 1 && (
+                    <span className="ml-auto text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
+                        +{(item.updateCount ?? 1) - 1} updates
+                    </span>
+                )}
             </div>
             <div className="text-[11px] font-bold text-text-primary leading-tight">{item.title}</div>
             <div className="text-[10px] text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
@@ -90,14 +110,73 @@ function OpeningBrief({ faction, onDismiss }: { faction: string; onDismiss: () =
                 Presidential Brief
             </div>
             <div className="text-[12px] font-bold text-text-primary mb-1">{brief.title}</div>
-            <div className="text-[10px] text-text-secondary leading-relaxed whitespace-pre-wrap">{brief.body}</div>
-            <button
-                type="button"
-                onClick={onDismiss}
-                className="mt-2.5 text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
-            >
-                Understood \u2014 Begin
-            </button>
+            <ul className="space-y-1 text-[10px] text-text-secondary leading-relaxed">
+                {brief.bullets.map((bullet) => (
+                    <li key={bullet} className="flex gap-2">
+                        <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-accent-gold/70" />
+                        <span>{bullet}</span>
+                    </li>
+                ))}
+            </ul>
+            <div className="mt-2.5 flex items-center justify-between gap-3">
+                <button
+                    type="button"
+                    onClick={onDismiss}
+                    className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
+                >
+                    Begin
+                </button>
+                <button
+                    type="button"
+                    onClick={onDismiss}
+                    className="text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                >
+                    Read later
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function QuietInboxCapsule({ onOpenDecisionRoom }: { onOpenDecisionRoom: () => void }) {
+    return (
+        <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                        Command Watch
+                    </div>
+                    <div className="mt-1 text-[12px] font-bold text-text-primary">
+                        No orders are waiting on your desk.
+                    </div>
+                    <div className="mt-1 text-[10px] leading-snug text-text-secondary">
+                        Use the quiet turn to review priorities, recent records, and staff context before advancing.
+                    </div>
+                </div>
+                <div className="h-2 w-2 shrink-0 rounded-full bg-green-400/80 shadow-[0_0_10px_rgba(74,222,128,0.45)]" />
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+                <button
+                    type="button"
+                    onClick={onOpenDecisionRoom}
+                    className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
+                >
+                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent-gold">
+                        Decision Room
+                    </div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
+                        Open decision room
+                    </div>
+                </button>
+                <div className="rounded border border-panel-border/80 bg-black/10 px-2 py-2">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-primary">
+                        Chronicle
+                    </div>
+                    <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
+                        Latest turn record is filed below.
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
@@ -166,14 +245,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
 
                 {/* Empty state */}
                 {actionableItems.length === 0 && briefDismissed && (
-                    <div className="py-6 text-center">
-                        <div className="text-[11px] text-text-secondary italic">
-                            No pending decisions.
-                        </div>
-                        <div className="text-[10px] text-text-tertiary mt-1">
-                            Advance the turn to continue.
-                        </div>
-                    </div>
+                    <QuietInboxCapsule onOpenDecisionRoom={() => onAction('army_hq_briefing', 'empty:decision-room')} />
                 )}
 
                 {/* Situation divider + items */}

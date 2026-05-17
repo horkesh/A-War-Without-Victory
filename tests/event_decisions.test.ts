@@ -37,6 +37,7 @@ const DECISION_EVENT: EventDefinition = {
     trigger: { turn_min: 5, turn_max: 5, phase: 'war' },
     effect: { kind: 'narrative', text: 'A diplomatic proposal arrives.' },
     once: true,
+    responding_faction: 'RBiH',
     requires_player_response: true,
     bot_response_logic: 'accept_first',
     response_options: [
@@ -70,6 +71,28 @@ const REJECT_ALL_EVENT: EventDefinition = {
         {
             id: 'reject',
             label: 'Reject ceasefire',
+            effects: [{ kind: 'supply_delta', faction: 'RS', delta: -5 }],
+        },
+    ],
+};
+
+const RS_REQUIRED_EVENT: EventDefinition = {
+    id: 'test_rs_required_event',
+    trigger: { turn_min: 5, turn_max: 5, phase: 'war' },
+    effect: { kind: 'narrative', text: 'Pale receives an ultimatum.' },
+    once: true,
+    responding_faction: 'RS',
+    requires_player_response: true,
+    bot_response_logic: 'accept_first',
+    response_options: [
+        {
+            id: 'comply',
+            label: 'Comply',
+            effects: [{ kind: 'supply_delta', faction: 'RS', delta: 5 }],
+        },
+        {
+            id: 'defy',
+            label: 'Defy',
             effects: [{ kind: 'supply_delta', faction: 'RS', delta: -5 }],
         },
     ],
@@ -114,6 +137,23 @@ describe('Event Decisions', () => {
 
         // Bot responds once → -5 supply to RS (not ×3)
         expect(state.military.general_supply_reserve!['RS']).toBe(initialSupply - 5);
+    });
+
+    it('queues required decisions only for the responding faction', () => {
+        const rbihState = makeMinimalState('RBiH');
+        const rsState = makeMinimalState('RS');
+        const rng = () => 0.5;
+
+        evaluateEvents(rbihState, rng, 5, [RS_REQUIRED_EVENT]);
+        evaluateEvents(rsState, rng, 5, [RS_REQUIRED_EVENT]);
+
+        expect(rbihState.military.pending_event_decisions ?? []).toHaveLength(0);
+        expect(rsState.military.pending_event_decisions).toHaveLength(1);
+        expect(rsState.military.pending_event_decisions![0]).toMatchObject({
+            event_id: 'test_rs_required_event',
+            faction: 'RS',
+            requires_player_response: true,
+        });
     });
 
     it('resolveEventDecision applies effects and removes pending', () => {

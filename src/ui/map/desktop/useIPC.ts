@@ -42,6 +42,113 @@ export interface OperationOpportunityDecisionPayload {
     commitmentProfile?: 'minimum' | 'standard' | 'reinforced';
 }
 
+interface IpcAdvisorRecommendation {
+    commander_name: string;
+    faction: string;
+    assessment: string;
+    recommendations: Array<{
+        priority: number;
+        action: string;
+        reasoning: string;
+    }>;
+    context_type: 'situation_analysis' | 'operation_planning' | 'peace_plan';
+}
+
+type IpcAdvisorRecommendationResult =
+    | (IpcAdvisorRecommendation & { ok?: true; error?: undefined })
+    | { ok: false; error: string };
+
+interface IpcMovementRangeResult {
+    ok: boolean;
+    error?: string;
+    start_sid?: string | null;
+    reachable_deployed?: string[];
+    reachable_column?: string[];
+}
+
+interface IpcMovementPathResult {
+    ok: boolean;
+    error?: string;
+    path?: string[];
+    eta_turns?: number;
+    terrain_costs?: number[];
+}
+
+interface IpcSupplyReachabilityFaction {
+    faction_id: string;
+    sources: string[];
+    controlled: string[];
+    reachable_controlled: string[];
+    isolated_controlled: string[];
+    rights_edges_used_count?: number;
+    rights_nodes_used_count?: number;
+    corridors_active_count?: number;
+    edges_used: string[];
+}
+
+interface IpcSupplyPathsReport {
+    schema: 1;
+    turn: number;
+    factions: IpcSupplyReachabilityFaction[];
+    supply_state?: {
+        schema: 1;
+        turn: number;
+        factions: Array<{
+            faction_id: string;
+            by_settlement: Array<{ sid: string; state: 'adequate' | 'strained' | 'critical' }>;
+            adequate_count: number;
+            strained_count: number;
+            critical_count: number;
+        }>;
+    };
+    corridors?: {
+        schema: 1;
+        turn: number;
+        corridors: Array<{
+            edge_id: string;
+            faction_id: string;
+            state: 'open' | 'brittle' | 'cut';
+        }>;
+    };
+}
+
+interface IpcSupplyPathsResult {
+    ok: boolean;
+    error?: string;
+    report?: IpcSupplyPathsReport;
+}
+
+interface IpcCorpsSectorEntry {
+    corps_id: string;
+    faction: string;
+    brigade_ids: string[];
+    settlement_ids: string[];
+    front_width_score: number;
+    overextended: boolean;
+}
+
+interface IpcCorpsSectorsResult {
+    ok: boolean;
+    error?: string;
+    sectors?: IpcCorpsSectorEntry[];
+}
+
+interface IpcBattleEventEntry {
+    turn: number;
+    settlement_id: string;
+    from: string | null;
+    to: string | null;
+    mechanism: string;
+    mun_id: string | null;
+}
+
+interface IpcBattleEventsResult {
+    ok: boolean;
+    error?: string;
+    turn?: number;
+    events?: IpcBattleEventEntry[];
+}
+
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -63,7 +170,7 @@ interface WindowAwwv {
     saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
     setAiCommanderConfig: (payload: { mode: string; anthropic_api_key?: string }) => Promise<{ ok: boolean; error?: string }>;
-    getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<unknown>;
+    getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<IpcAdvisorRecommendationResult>;
     stageAttackOrder: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
     stagePostureOrder: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
     stageMoveOrder: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -89,12 +196,12 @@ interface WindowAwwv {
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
-    queryMovementRange: (brigadeId: string) => Promise<unknown>;
-    queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<unknown>;
+    queryMovementRange: (brigadeId: string) => Promise<IpcMovementRangeResult>;
+    queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<IpcMovementPathResult>;
     queryCombatEstimate: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; win_probability?: number; error?: string }>;
-    querySupplyPaths: () => Promise<unknown>;
-    queryCorpsSectors: () => Promise<unknown>;
-    queryBattleEvents: () => Promise<unknown>;
+    querySupplyPaths: () => Promise<IpcSupplyPathsResult>;
+    queryCorpsSectors: () => Promise<IpcCorpsSectorsResult>;
+    queryBattleEvents: () => Promise<IpcBattleEventsResult>;
     getMapServerUrl: () => Promise<string | null>;
     focusWarroom: () => Promise<void>;
     loadScenarioDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
@@ -109,6 +216,7 @@ interface WindowAwwv {
     acknowledgeOfficerEvent: (eventId: string) => Promise<{ ok: boolean; error?: string }>;
     acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
     resolvePeacePlan: (planId: string, response: 'accepted' | 'rejected') => Promise<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>;
+    resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
     /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
@@ -205,7 +313,7 @@ export function useIPC() {
 
             getAdvisorRecommendation: awwv
                 ? (payload: { faction?: string; context_type?: string }) => awwv.getAdvisorRecommendation(payload)
-                : (payload: { faction?: string; context_type?: string }) => Promise.resolve({ error: 'Desktop IPC not available' }),
+                : (_payload: { faction?: string; context_type?: string }) => Promise.resolve({ ok: false, error: 'Desktop IPC not available' }),
 
             stageAttackOrder: awwv
                 ? (brigadeId: string, targetSettlementId: string) => awwv.stageAttackOrder(brigadeId, targetSettlementId)
@@ -306,23 +414,23 @@ export function useIPC() {
 
             queryMovementRange: awwv
                 ? (brigadeId: string) => awwv.queryMovementRange(brigadeId)
-                : makeNoop<unknown>(),
+                : makeNoop<IpcMovementRangeResult>(),
 
             queryMovementPath: awwv
                 ? (brigadeId: string, destinationSid: string) => awwv.queryMovementPath(brigadeId, destinationSid)
-                : makeNoop<unknown>(),
+                : makeNoop<IpcMovementPathResult>(),
 
             querySupplyPaths: awwv
                 ? () => awwv.querySupplyPaths()
-                : makeNoop<unknown>(),
+                : makeNoop<IpcSupplyPathsResult>(),
 
             queryCorpsSectors: awwv
                 ? () => awwv.queryCorpsSectors()
-                : makeNoop<unknown>(),
+                : makeNoop<IpcCorpsSectorsResult>(),
 
             queryBattleEvents: awwv
                 ? () => awwv.queryBattleEvents()
-                : makeNoop<unknown>(),
+                : makeNoop<IpcBattleEventsResult>(),
 
             getMapServerUrl: awwv
                 ? () => awwv.getMapServerUrl()
@@ -387,6 +495,10 @@ export function useIPC() {
             resolvePeacePlan: awwv
                 ? (planId: string, response: 'accepted' | 'rejected') => awwv.resolvePeacePlan(planId, response)
                 : makeNoop<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>(),
+
+            resolveParamilitaryRequests: awwv
+                ? (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>) => awwv.resolveParamilitaryRequests(decisions)
+                : makeNoop<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>(),
 
             resolveDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)

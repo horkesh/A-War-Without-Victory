@@ -58,6 +58,19 @@ describe('exhaustion accumulation', () => {
         expect((state.political.war_exhaustion?.HRHB ?? 0) > 0).toBe(true);
     });
 
+    it('uses live supply condition instead of saturated cumulative pressure', () => {
+        const state = minimalPhaseIIState();
+        state.political.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
+        state.political.war_supply_pressure = { RBiH: 100, RS: 100, HRHB: 100 };
+        state.political.war_supply_condition = { RBiH: 100, RS: 50, HRHB: 0 };
+
+        updateExhaustion(state, []);
+
+        expect(state.political.war_exhaustion?.RBiH).toBe(0);
+        expect(state.political.war_exhaustion?.RS).toBeGreaterThan(0);
+        expect(state.political.war_exhaustion?.HRHB).toBeGreaterThan(state.political.war_exhaustion?.RS ?? 0);
+    });
+
     it('does not flip control directly', () => {
         const state = minimalPhaseIIState();
         const controllersBefore = state.political.political_controllers ? { ...state.political.political_controllers } : {};

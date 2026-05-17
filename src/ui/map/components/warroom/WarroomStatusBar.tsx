@@ -18,6 +18,7 @@ import {
   type WarroomPriorityDocketItem,
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
+import { formatPreAdvanceGateBlockTitle } from '../../data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import { Z } from '../../../shared/zIndex';
 
@@ -170,6 +171,10 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const hasPendingReviews = pendingReviewCount > 0;
   const { advanceReviewCount, urgentCount } = docket.metrics;
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
+  const advanceBlocked = docket.status === 'blocked';
+  const advanceGateTitle = advanceBlocked
+    ? formatPreAdvanceGateBlockTitle(docket)
+    : 'Advance turn';
 
   const handleOpenBoard = () => {
     setPriorityDocketOpen(false);
@@ -184,6 +189,15 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const handleReviewTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     setPriorityDocketOpen(false);
     onReviewTarget?.(target);
+  };
+
+  const handleAdvance = () => {
+    if (advanceBlocked && onReviewPriorities) {
+      setPriorityDocketOpen(false);
+      onReviewPriorities();
+      return;
+    }
+    setAdvanceTurnPending(true);
   };
 
   return (
@@ -234,9 +248,14 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
       {/* Advance-turn affordance */}
       <button
         type="button"
-        className="ml-1 rounded border border-amber-700/60 px-2 py-0.5 text-[9px] font-bold tracking-widest text-amber-500 transition-colors hover:bg-amber-900/30 hover:text-amber-300 cursor-pointer"
-        onClick={() => setAdvanceTurnPending(true)}
-        title="Advance turn"
+        className={`ml-1 rounded border px-2 py-0.5 text-[9px] font-bold tracking-widest transition-colors cursor-pointer ${
+          advanceBlocked
+            ? 'border-red-700/70 bg-red-950/35 text-red-300 hover:bg-red-900/40'
+            : 'border-amber-700/60 text-amber-500 hover:bg-amber-900/30 hover:text-amber-300'
+        }`}
+        onClick={handleAdvance}
+        title={advanceGateTitle}
+        aria-label={advanceBlocked ? advanceGateTitle : undefined}
       >
         ADVANCE
       </button>

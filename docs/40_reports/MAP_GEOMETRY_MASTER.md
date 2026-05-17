@@ -1,7 +1,7 @@
 # Map Geometry Master Reference
 
 **Purpose:** Living reference for OSID polygon geometry, front edge rendering, and map data pipeline issues.
-**Updated:** 2026-05-15 (front-edge strict ordering)
+**Updated:** 2026-05-16 (Track C map information design)
 
 ## Pipeline Overview
 
@@ -64,6 +64,17 @@ data/derived/operational/operational_contact_graph.json   (2,047 adjacency edges
 **Note:** `buildOrderArrowsGeoJSON.ts` was using `frontEdges` (SID) for edge snapping — fixed 2026-03-18 to use `frontEdgesOsid`.
 
 ## Front Line Rendering Algorithms
+
+## Tactical Map Information Layers (Track C, 2026-05-16)
+
+Track C adds player-facing information-design overlays without changing simulation state or geometry generation:
+
+- **Contested bands:** `buildContestedBandsGeoJSON(...)` emits OSID polygons where control flipped recently or adjacent hostile formation pressure is material. Rendered in political and ethnic modes as secondary fill/outline over controller color.
+- **Front stability:** `buildFrontStabilityGeoJSON(...)` adds `stability_class` and `stability_score` to front-line features. The tactical map uses those properties to vary stripe dash styling for static/fluid/oscillating/support lines.
+- **Supply reach:** `buildSupplyReachGeoJSON(...)` consumes adapter-owned `supplyStateByOsid` and renders adequate/strained/critical supply reach in supply mode, with critical pockets marked as isolated.
+- **Authority and legitimacy:** `buildPoliticalMetricGeoJSON(...)` consumes adapter-owned `politicalMetricsByOsid` and powers separate Authority and Legitimacy map modes. Values are normalized to 0-100 and emitted in strict OSID order.
+
+All four builders are pure UI read models. They sort emitted features with `strictCompare` and do not mutate game state, save data, or map geometry artifacts.
 
 ### Game (buildCorpsFrontLinesGeoJSON.ts) — UPDATED 2026-03-19
 Three-step algorithm (same as edges viewer):

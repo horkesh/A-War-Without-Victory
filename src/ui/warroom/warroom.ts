@@ -568,8 +568,8 @@ class WarroomApp {
                 ? `?shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
                 : '';
             const devUrl = mode === 'sandbox'
-                ? `http://localhost:3002/tactical_sandbox.html${handoffQuery}`
-                : `http://localhost:3002/${handoffQuery}`;
+                ? `http://127.0.0.1:3002/tactical_sandbox.html${handoffQuery}`
+                : `http://127.0.0.1:3002/${handoffQuery}`;
             window.open(devUrl, '_blank');
             this.pendingShellHandoff = null;
             return;

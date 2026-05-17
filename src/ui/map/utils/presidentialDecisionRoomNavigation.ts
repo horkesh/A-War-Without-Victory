@@ -25,6 +25,18 @@ export function openPresidentialDecisionRoomNavigationTarget(
   if (target.kind === 'army-hq-corps-briefing') {
     return openArmyHQBriefingForCorps(state, target.corpsId);
   }
+  if (target.kind === 'inbox') {
+    state.setSelectedOsid?.(null);
+    state.setSelectedFormationId?.(null);
+    state.setSelectedCorpsId?.(null);
+    state.setSelectedCorpsFrontSectorId?.(null);
+    state.setSelectedArmyId(null);
+    state.setArmyHQOpen(false);
+    state.setSelectedArmyHqId?.(null);
+    state.setSelectedOperationKey?.(null);
+    state.setSelectedOrbatCorpsId?.(null);
+    return true;
+  }
   if (target.kind === 'chronicle') {
     return openChronicle(state);
   }

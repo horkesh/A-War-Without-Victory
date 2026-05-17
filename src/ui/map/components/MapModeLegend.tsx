@@ -37,6 +37,16 @@ const LEGENDS: Record<string, { title: string; stops: LegendStop[] } | null> = {
     { color: '#ddaa33', label: 'Moderate', value: '0.5-1.0' },
     { color: '#aa2222', label: 'Thin', value: '<0.5' },
   ]},
+  authority: { title: 'Authority', stops: [
+    { color: '#7f1d1d', label: 'Weak', value: '<35' },
+    { color: '#a16207', label: 'Contested', value: '35-69' },
+    { color: '#166534', label: 'Firm', value: '70+' },
+  ]},
+  legitimacy: { title: 'Legitimacy', stops: [
+    { color: '#7f1d1d', label: 'Coerced', value: '<35' },
+    { color: '#a16207', label: 'Uneasy', value: '35-69' },
+    { color: '#166534', label: 'Accepted', value: '70+' },
+  ]},
 };
 
 export function MapModeLegend() {

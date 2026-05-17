@@ -151,7 +151,7 @@ export function BottomStatusStrip() {
               : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
           }`}
         >
-          {secondaryModes.find(m => m.id === mapMode)?.label ?? (moreExpanded ? 'LESS' : '+MORE')}
+          {moreExpanded ? 'LESS' : secondaryModes.find(m => m.id === mapMode)?.label ?? '+MORE'}
         </button>
 
         {/* R8: Secondary modes — persistent inline extension */}

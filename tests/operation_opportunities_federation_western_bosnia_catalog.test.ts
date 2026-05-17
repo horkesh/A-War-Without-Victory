@@ -81,6 +81,7 @@ function buildMistralState(opts: {
     objectivesHeldByRs?: boolean;
     addCommanderState?: boolean;
     supplyPressure?: number;
+    supplyCondition?: number;
     axisCoordinationLow?: boolean;
 }): GameState {
     const controllers: Record<string, FactionId> = {};
@@ -160,6 +161,7 @@ function buildMistralState(opts: {
             political_controllers: controllers,
             war_alliance_rbih_hrhb: opts.alliance ?? 0.7,
             war_supply_pressure: { HRHB: opts.supplyPressure ?? 55 },
+            ...(typeof opts.supplyCondition === 'number' ? { war_supply_condition: { HRHB: opts.supplyCondition } } : {}),
             rbih_hrhb_state: { washington_signed: true, washington_turn: 85 },
         } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
@@ -196,6 +198,20 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
             MISTRAL_2_95_OPPORTUNITY,
             evaluateAxes(state, 180, MISTRAL_2_95_OPPORTUNITY),
         )).toBe(true);
+    });
+
+    it('uses live supply condition instead of saturated cumulative pressure for logistics gates', () => {
+        const state = buildMistralState({ turn: 180, supplyPressure: 100, supplyCondition: 100 });
+        runOpportunityEvaluationStep(state, 180);
+
+        const proposal = state.military.operation_opportunities
+            ?.find(p => p.opportunity_id === 'mistral_2_95');
+        const logistics = proposal?.last_axis_evaluation.find(axis => axis.axis === 'logistics');
+
+        expect(logistics).toMatchObject({
+            axis: 'logistics',
+            green: true,
+        });
     });
 
     it('blocks Mistral 2 before/after window, before Storm, without Cincar dependency, or without enemy targets', () => {

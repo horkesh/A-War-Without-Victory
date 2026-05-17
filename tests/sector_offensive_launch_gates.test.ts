@@ -84,13 +84,13 @@ describe('LANE-NIGHTSHIFT-A2 minimum launch force-ratio floor', () => {
         } as unknown as GameState;
     }
 
-    it('T1 — op with force_ratio_estimate=0.09 (below floor=0.3) goes to planning_invalidated', () => {
+    it('T1 — op with force_ratio_estimate=0.09 (below floor=0.3) records defender_power_too_high', () => {
         const op = makeA2Op({ force_ratio_estimate: 0.09 });
         const state = makeA2State(10, op);
         advanceSectorOffensives(state, null);
         const result = state.military.corps_command?.rs_corps?.active_operations?.[0];
         expect(result?.phase).toBe('recovery');
-        expect(result?.recovery_reason).toBe('planning_invalidated');
+        expect(result?.recovery_reason).toBe('defender_power_too_high');
     });
 
     it('T2 — forced-launch (force_launch=true) overrides the floor', () => {

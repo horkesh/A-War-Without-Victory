@@ -8,9 +8,10 @@
  *
  * See: docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md
  */
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
+import { Modal } from '../../../shared/Modal';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warroomReturn';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
@@ -46,6 +47,13 @@ const FACTION_DISPLAY: Record<string, string> = {
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
 
+const EMERGENCY_POSTURE_LABELS: Record<string, string> = {
+    defensive: 'All Defensive',
+    balanced: 'All Balanced',
+    offensive: 'All Offensive',
+    reorganize: 'All Reorganize',
+};
+
 export function ArmyHQModal() {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
@@ -56,6 +64,7 @@ export function ArmyHQModal() {
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
+    const [pendingEmergencyPosture, setPendingEmergencyPosture] = useState<string | null>(null);
     // These remain available for future use but briefing navigation now stays inside HQ
 
     useEffect(() => {
@@ -273,7 +282,7 @@ export function ArmyHQModal() {
                                 defaultValue=""
                                 onChange={(e) => {
                                     if (e.target.value) {
-                                        void handleEmergencyPosture(e.target.value);
+                                        setPendingEmergencyPosture(e.target.value);
                                         e.target.value = '';
                                     }
                                 }}
@@ -303,6 +312,46 @@ export function ArmyHQModal() {
                         </button>
                     </div>
                 </div>
+
+                <Modal
+                    isOpen={pendingEmergencyPosture != null}
+                    onClose={() => setPendingEmergencyPosture(null)}
+                    ariaLabel="Confirm emergency posture order"
+                    panelClassName="w-[min(92vw,28rem)] rounded-lg border border-amber-400/35 bg-panel-card p-4 text-text-primary shadow-2xl"
+                    backdropClassName="bg-black/55"
+                >
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-300">
+                        Confirm Bulk Order
+                    </div>
+                    <div className="mt-2 text-[16px] font-bold uppercase tracking-[0.04em] text-text-primary">
+                        {pendingEmergencyPosture ? EMERGENCY_POSTURE_LABELS[pendingEmergencyPosture] : 'Emergency Posture'}
+                    </div>
+                    <p className="mt-2 text-[12px] leading-relaxed text-text-secondary">
+                        This will stage the same posture order for all {data.corpsFormations.length} corps in this army.
+                        Corps commanders will interpret the directive through their existing command chain.
+                    </p>
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setPendingEmergencyPosture(null)}
+                            className="rounded border border-panel-border bg-panel-bg px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:bg-panel-hover hover:text-text-primary"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (pendingEmergencyPosture) {
+                                    void handleEmergencyPosture(pendingEmergencyPosture);
+                                }
+                                setPendingEmergencyPosture(null);
+                            }}
+                            className="rounded border border-amber-400/45 bg-amber-400/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:bg-amber-400/25"
+                        >
+                            Stage Orders
+                        </button>
+                    </div>
+                </Modal>
 
                 {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: tablist semantics + arrow-key navigation. */}
                 <div

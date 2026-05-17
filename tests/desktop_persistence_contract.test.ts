@@ -30,4 +30,44 @@ describe('desktop persistence contract', () => {
     expect(autonomyHandler).toContain('const state = readCanonicalCurrentState(sim);');
     expect(autonomyHandler).not.toContain('JSON.parse(currentGameStateJson)');
   });
+
+  it('paramilitary review IPC records decisions and uses the canonical resolver', () => {
+    const electronMain = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+    const preload = readFileSync(
+      resolve(process.cwd(), 'src/desktop/preload.cjs'),
+      'utf8',
+    );
+    const useIpc = readFileSync(
+      resolve(process.cwd(), 'src/ui/map/desktop/useIPC.ts'),
+      'utf8',
+    );
+
+    expect(preload).toContain("resolveParamilitaryRequests: (decisions) => ipcRenderer.invoke('resolve-paramilitary-requests'");
+    expect(useIpc).toContain('resolveParamilitaryRequests');
+    const handlerStart = electronMain.indexOf("ipcMain.handle('resolve-paramilitary-requests'");
+    const handlerEnd = electronMain.indexOf("ipcMain.handle('resolve-dayton'");
+    const handler = electronMain.slice(handlerStart, handlerEnd);
+
+    expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
+    expect(handler).toContain('sim.resolvePlayerParamilitaryDecisions(state)');
+    expect(handler).toContain('writeCanonicalCurrentState(sim, state)');
+  });
+
+  it('advance-turn gate uses the shared player decision manifest', () => {
+    const electronMain = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+
+    const handlerStart = electronMain.indexOf("ipcMain.handle('advance-turn'");
+    const handlerEnd = electronMain.indexOf("ipcMain.handle('save-game'");
+    const handler = electronMain.slice(handlerStart, handlerEnd);
+
+    expect(handler).toContain('sim.listBlockingPlayerDecisions');
+    expect(handler).toContain("error: 'pending_required_decisions'");
+    expect(handler).not.toContain('state.military.pending_event_decisions ?? []');
+  });
 });

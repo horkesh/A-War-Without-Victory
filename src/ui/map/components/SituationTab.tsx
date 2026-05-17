@@ -30,6 +30,7 @@ import {
     ivpComponentLabel,
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
+import { EmptyState } from './EmptyState';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
 
@@ -140,7 +141,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   useEffect(() => {
     if (!focusedMode || !focusSection) return;
     const section = document.querySelector<HTMLElement>(`[data-summary-section="${focusSection}"]`);
-    section?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (typeof section?.scrollIntoView === 'function') {
+      section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   }, [focusedMode, focusSection]);
 
   const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
@@ -253,52 +256,62 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       </section>
       )}
 
-      {showSection('convoys') && (state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0) && (
+      {showSection('convoys') && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
-          {state.pendingConvoyDecisions.map((convoy) => (
-            <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
-              <div className="text-text-secondary">
-                {getPlayerSafeEnclaveName(convoy.target_enclave)} via {getPlayerSafeCorridorLabel(convoy.route_faction)}, {convoy.supply_amount.toFixed(2)} supply
+          {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 ? (
+            state.pendingConvoyDecisions.map((convoy) => (
+              <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
+                <div className="text-text-secondary">
+                  {getPlayerSafeEnclaveName(convoy.target_enclave)} via {getPlayerSafeCorridorLabel(convoy.route_faction)}, {convoy.supply_amount.toFixed(2)} supply
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
+                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                  >
+                    Allow
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleConvoyDecision(convoy.id, 'block')}
+                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                  >
+                    Block
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
+                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                  >
+                    Divert
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-1">
-                <button
-                  type="button"
-                  onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
-                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                >
-                  Allow
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleConvoyDecision(convoy.id, 'block')}
-                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                >
-                  Block
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
-                  className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                >
-                  Divert
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <EmptyState message="No convoy decisions are pending." />
+          )}
           {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
         </section>
       )}
 
-      {showSection('support') && activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
+      {showSection('support') && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
-          <div className="text-text-secondary">
-            {activeMunicipalitySupport.label.replace(/\bRBiH\b/g, playerPoliticalLabel ?? 'friendly authorities')}
-          </div>
-          <div className="text-text-secondary">
-            Target municipality: {getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id)}
-          </div>
+          {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn ? (
+            <>
+              <div className="text-text-secondary">
+                {activeMunicipalitySupport.label.replace(/\bRBiH\b/g, playerPoliticalLabel ?? 'friendly authorities')}
+              </div>
+              <div className="text-text-secondary">
+                Target municipality: {getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id)}
+              </div>
+            </>
+          ) : (
+            <EmptyState message="No local support order is staged this turn." />
+          )}
         </section>
       )}
 
@@ -321,11 +334,13 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             ))}
           </div>
         ) : (
-          <div className="text-text-secondary">No sectors are currently running OPSEC.</div>
+          <EmptyState message="No sectors are currently running OPSEC." />
         )}
         {fragileOperations.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-panel-border">
-            <div className="text-[10px] uppercase tracking-wide text-text-secondary">Operation health</div>
+            <div className="text-[10px] uppercase tracking-wide text-text-secondary">
+              Flagged operation health ({fragileOperations.length} of {playerOperations.length} active operations)
+            </div>
             {fragileOperations.map((operation) => (
               <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
                 <span>{operation.name}</span>
@@ -340,15 +355,19 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       )}
 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
-      {showSection('capital') && (state.strategicDimensions || state.patronOverrideAuthority) && (
+      {showSection('capital') && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
-          <DiplomacyOverview
-            strategicDimensions={state.strategicDimensions}
-            negotiatingCapital={state.negotiatingCapital}
-            patronOverride={state.patronOverrideAuthority}
-            playerFaction={playerFaction ?? undefined}
-          />
+          {state.strategicDimensions || state.patronOverrideAuthority ? (
+            <DiplomacyOverview
+              strategicDimensions={state.strategicDimensions}
+              negotiatingCapital={state.negotiatingCapital}
+              patronOverride={state.patronOverrideAuthority}
+              playerFaction={playerFaction ?? undefined}
+            />
+          ) : (
+            <EmptyState message="Diplomacy capital is not available in this view." />
+          )}
         </section>
       )}
 

@@ -113,6 +113,7 @@ describe('derivePendingOfficerEvents', () => {
 
     it('maps order_modified event — reason and overridable=false', () => {
         const raw = makeRawState({
+            meta: { turn: 10, phase: 'war', player_faction: 'RS' },
             military: {
                 formations: {
                     vrs_drina_corps: { faction: 'RS', kind: 'corps_asset', name: 'Drina Corps', status: 'active' },
@@ -150,6 +151,50 @@ describe('derivePendingOfficerEvents', () => {
         expect(evt.reason).toBe('Extended planning duration by 2 turns due to cautious temperament.');
         expect(evt.overridable).toBe(false);
         expect(evt.override_action).toBeUndefined();
+    });
+
+    it('filters pending officer events to the player faction when present', () => {
+        const raw = makeRawState({
+            meta: { turn: 10, phase: 'war', player_faction: 'RS' },
+            military: {
+                formations: {},
+                named_officer_data: [
+                    { id: 'rs_officer', name: 'RS Officer', faction: 'RS', rank: 'corps_commander',
+                      competence: 3, aggressiveness: 3, defensive_skill: 3, political_reliability: 3 },
+                    { id: 'rbih_officer', name: 'RBiH Officer', faction: 'RBiH', rank: 'corps_commander',
+                      competence: 3, aggressiveness: 3, defensive_skill: 3, political_reliability: 3 },
+                ],
+                named_officers: {
+                    rs_officer: { status: 'active', assigned_corps_id: null, acting_commander: false,
+                                  turns_in_command: 0, battles: 0, victories: 0 },
+                    rbih_officer: { status: 'active', assigned_corps_id: null, acting_commander: false,
+                                    turns_in_command: 0, battles: 0, victories: 0 },
+                },
+                brigade_movement_state: {},
+                pending_officer_events: [
+                    {
+                        event_id: 'evt-rs-1',
+                        type: 'order_pushback',
+                        faction: 'RS',
+                        turn: 10,
+                        officer_id: 'rs_officer',
+                        acknowledged: false,
+                    },
+                    {
+                        event_id: 'evt-rbih-1',
+                        type: 'order_pushback',
+                        faction: 'RBiH',
+                        turn: 10,
+                        officer_id: 'rbih_officer',
+                        acknowledged: false,
+                    },
+                ],
+            },
+        });
+
+        const parsed = parseGameState(raw);
+
+        expect(parsed.pendingOfficerEvents?.map((event) => event.faction)).toEqual(['RS']);
     });
 
     it('does NOT include acknowledged events', () => {

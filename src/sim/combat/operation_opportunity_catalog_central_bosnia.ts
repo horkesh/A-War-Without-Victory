@@ -17,6 +17,7 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_3rd_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
@@ -237,7 +238,7 @@ const corpsReadinessVlasic: AxisPredicate = (state) => {
 };
 
 const logisticsVlasic: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['RBiH'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= VLASIC_SUPPLY_PRESSURE_CEILING) {
         return { green: false, reason: 'RBiH supply pressure too high for sustained ridge operation' };
     }
@@ -316,7 +317,7 @@ const corpsReadinessKupresCincar: AxisPredicate = (state) => {
 };
 
 const logisticsKupresCincar: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['HRHB'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'HRHB');
     if (pressure >= KUPRES_CINCAR_SUPPLY_PRESSURE_CEILING) {
         return { green: false, reason: 'HRHB supply pressure too high for sustained Kupres/Cincar operation' };
     }

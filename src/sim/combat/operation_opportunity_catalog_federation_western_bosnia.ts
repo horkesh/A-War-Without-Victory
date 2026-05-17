@@ -18,6 +18,7 @@ import type {
 } from './operation_opportunities.js';
 import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'hvo_main_staff';
 const SECONDARY_CORPS = 'hvo_tomislavgrad';
@@ -160,7 +161,7 @@ const corpsReadinessMistral: AxisPredicate = (state) => {
 };
 
 const logisticsMistral: AxisPredicate = (state) => {
-    const pressure = state.political?.war_supply_pressure?.['HRHB'] ?? 0;
+    const pressure = getFactionLiveSupplyPressure(state, 'HRHB');
     if (pressure >= MISTRAL_SUPPLY_PRESSURE_CEILING) {
         return { green: false, reason: 'HRHB supply pressure too high for Mistral 2' };
     }

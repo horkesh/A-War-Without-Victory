@@ -130,7 +130,6 @@ export function OperationsPanel() {
         className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain"
         style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
       >
-        <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
         <div className="flex-1 grid grid-cols-12">
           <div className="col-span-5 border-r border-panel-border p-2 space-y-2">
@@ -230,8 +229,6 @@ export function OperationsPanel() {
       className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain relative"
       style={{ ...DETAIL_PANEL_STYLE, width: '24rem' }}
     >
-      <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
-
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
         <div className="flex flex-col">
           <span>Field Ops Snapshot</span>

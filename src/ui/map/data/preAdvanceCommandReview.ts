@@ -32,6 +32,7 @@ export interface PreAdvanceCommandReviewView {
   status: PreAdvanceCommandReviewStatus;
   headline: string;
   canReviewPriorities: boolean;
+  blockingDecisionCount: number;
   items: PreAdvanceCommandReviewItem[];
   sourceHandoffs: PreAdvanceCommandReviewSourceHandoff[];
   metrics: PreAdvanceCommandReviewMetrics;
@@ -68,10 +69,27 @@ function statusFor(
   return 'clear';
 }
 
+function countBlockingDecisions(state: LoadedGameState | null): number {
+  if (!state) return 0;
+  if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount;
+  const eventDecisionCount = Math.max(
+    state.presidentialReviewQueue?.eventDecisionCount ?? 0,
+    state.pendingEventDecisions?.length ?? 0,
+  );
+  return eventDecisionCount + (state.pendingParamilitaryRequests?.length ?? 0);
+}
+
+export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
+  const count = view.blockingDecisionCount;
+  const noun = count === 1 ? 'decision' : 'decisions';
+  return `Resolve ${count} pending ${noun} to continue. Opens Decision Room review.`;
+}
+
 export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewInput): PreAdvanceCommandReviewView {
   const decisionRoom = buildPresidentialDecisionRoomView(input);
   const items = decisionRoom.advanceReadiness.items.map(mapReadinessItem);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(decisionRoom.advanceReadiness.items);
+  const blockingDecisionCount = countBlockingDecisions(input.state);
 
   return {
     status: statusFor(
@@ -81,6 +99,7 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
     ),
     headline: decisionRoom.advanceReadiness.headline,
     canReviewPriorities: decisionRoom.hasPlayerFaction,
+    blockingDecisionCount,
     items,
     sourceHandoffs,
     metrics: decisionRoom.metrics,

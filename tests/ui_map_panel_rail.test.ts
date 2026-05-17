@@ -75,3 +75,13 @@ it('derivePanelRailState falls back to inbox when operation selection has no pan
 
     expect(rail).toEqual({ primary: 'inbox', secondary: null });
 });
+
+it('suppresses the Presidential Inbox while the map-local Operations panel owns the right rail', () => {
+    const shouldRenderInboxPanel = (panelRail as typeof panelRail & {
+        shouldRenderInboxPanel?: (primary: string | null, operationsPanelOpen: boolean) => boolean;
+    }).shouldRenderInboxPanel;
+
+    expect(shouldRenderInboxPanel?.('inbox', false)).toBe(true);
+    expect(shouldRenderInboxPanel?.('inbox', true)).toBe(false);
+    expect(shouldRenderInboxPanel?.('settlement', false)).toBe(false);
+});
