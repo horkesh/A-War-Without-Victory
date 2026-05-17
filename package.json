@@ -250,6 +250,7 @@
     "audit:settlements:muni": "tsx tools/map/audit_settlement_muni_alignment.ts",
     "context": "tsx tools/assistant/print_context.ts",
     "repo:cleanup:audit": "tsx scripts/repo/cleanup_audit.ts",
+    "repo:eol:check": "node tools/repo/check_eol_policy.cjs",
     "repo:equivalence:r1.3": "tsx scripts/repo/phase_r1_3_equivalence_harness.ts",
     "audit:state": "tsx tools/audit/generate_state_of_game.ts",
     "canon:check": "tsx tools/engineering/canon_check.ts",

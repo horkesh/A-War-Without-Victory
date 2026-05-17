@@ -135,7 +135,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
     const frontEdges = snapshot.engagedFrontEdges
         .map((edge) => ({
             id: edge.edgeId,
-            label: `${formatLocationLabel(edge.settlementA)} ↔ ${formatLocationLabel(edge.settlementB)}`,
+            label: `${formatLocationLabel(edge.settlementA)} - ${formatLocationLabel(edge.settlementB)}`,
             tier: edge.tier,
             pressure: edge.pressure,
             friction: edge.friction,

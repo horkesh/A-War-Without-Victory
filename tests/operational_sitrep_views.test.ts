@@ -110,4 +110,55 @@ describe('operational SITREP views', () => {
     expect(view.readiness.encircledCount).toBe(1);
     expect(view.operations.activeCount).toBe(1);
   });
+
+  it('filters front contacts to the player-controlled side of the edge', () => {
+    const rawState = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'HRHB', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        war_front_edges_osid: [
+          { edge_id: 'banja_wrong', a: 'op:banja_luka:north', b: 'op:banja_luka:south', side_a: 'HRHB', side_b: 'RS' },
+          { edge_id: 'livno_real', a: 'op:livno:west', b: 'op:glamoc:east', side_a: 'HRHB', side_b: 'RS' },
+        ],
+        front_pressure: {
+          banja_wrong: { value: 1, max_abs: 1, last_updated_turn: 9 },
+          livno_real: { value: 0.5, max_abs: 1, last_updated_turn: 9 },
+        },
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        political_controllers: {
+          'op:banja_luka:north': 'RS',
+          'op:banja_luka:south': 'RS',
+          'op:livno:west': 'HRHB',
+          'op:glamoc:east': 'RS',
+        },
+        war_exhaustion: { HRHB: 0.1 },
+        loss_of_control_trends: { by_faction: { HRHB: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as any;
+
+    const view = getOperationalSitrepView(rawState, 'HRHB');
+
+    expect(view.front.edges.map((edge) => edge.id)).toEqual(['livno_real']);
+    expect(view.front.edges[0]?.label).toBe('Livno West - Glamoc East');
+    expect(view.front.edges[0]?.label).not.toContain('op:');
+    expect(view.front.edges[0]?.label).not.toContain('_');
+  });
 });

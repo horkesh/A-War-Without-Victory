@@ -100,7 +100,15 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
     );
 }
 
-function OpeningBrief({ faction, onDismiss }: { faction: string; onDismiss: () => void }) {
+function OpeningBrief({
+    faction,
+    onDismiss,
+    onOpenDecisionRoom,
+}: {
+    faction: string;
+    onDismiss: () => void;
+    onOpenDecisionRoom: () => void;
+}) {
     const brief = OPENING_BRIEFS[faction];
     if (!brief) return null;
 
@@ -121,10 +129,13 @@ function OpeningBrief({ faction, onDismiss }: { faction: string; onDismiss: () =
             <div className="mt-2.5 flex items-center justify-between gap-3">
                 <button
                     type="button"
-                    onClick={onDismiss}
+                    onClick={() => {
+                        onOpenDecisionRoom();
+                        onDismiss();
+                    }}
                     className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
                 >
-                    Begin
+                    Open Decision Room
                 </button>
                 <button
                     type="button"
@@ -227,6 +238,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}
+                        onOpenDecisionRoom={() => onAction('army_hq_briefing', 'opening-brief:decision-room')}
                     />
                 )}
 

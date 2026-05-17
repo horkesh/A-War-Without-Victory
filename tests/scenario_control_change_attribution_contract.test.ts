@@ -89,7 +89,7 @@ describe('scenario control change attribution contract', () => {
       expect(summary.historical_fit).toBeTruthy();
       expect(summary.historical_fit?.bot_benchmark_status?.contract_valid).toBe(true);
       expect(Array.isArray(summary.historical_fit?.override_inventory)).toBe(true);
-      expect(summary.historical_fit?.override_inventory).toHaveLength(3);
+      expect(summary.historical_fit?.override_inventory).toHaveLength(2);
       expect(summary.recovery_status?.state_protected).toBe(true);
       expect(summary.recovery_status?.reporting_split_complete).toBe(true);
       expect(summary.recovery_status?.calibration_resumed_under_gate).toBe(

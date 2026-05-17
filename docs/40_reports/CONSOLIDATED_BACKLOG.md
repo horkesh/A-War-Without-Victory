@@ -18,9 +18,9 @@ The loose 2026-05-16 root audit artifacts are now promoted into `docs/40_reports
 
 | Audit Source | Follow-Up Plan |
 |---|---|
-| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 1/2/4/5/6 | [2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md](../plans/2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md) |
-| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 7-12 | [2026-05-17-code-audit-round2-residuals-plan.md](../plans/2026-05-17-code-audit-round2-residuals-plan.md) |
-| [20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md](audits/20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md) | [2026-05-17-code-audit-round3-aaa-polish-followups-plan.md](../plans/2026-05-17-code-audit-round3-aaa-polish-followups-plan.md) |
+| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 1/2/4/5/6 | IMPLEMENTED 2026-05-17: [20260517_CODE_AUDIT_EOL_SCENARIO_GUARDRAILS.md](implemented/20260517_CODE_AUDIT_EOL_SCENARIO_GUARDRAILS.md). Plan: [2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md](../plans/2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md). |
+| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 7-12 | IMPLEMENTED/VERIFIED 2026-05-17: [20260517_CODEX_SOURCE_QUALITY_LANE_B.md](audits/20260517_CODEX_SOURCE_QUALITY_LANE_B.md), [20260517_SCENARIO_INTEGRITY_WALK_LANE_B.md](audits/20260517_SCENARIO_INTEGRITY_WALK_LANE_B.md), [20260517_DECISION_ROOM_WALKTHROUGH_LANE_B.md](audits/20260517_DECISION_ROOM_WALKTHROUGH_LANE_B.md). Plan: [2026-05-17-code-audit-round2-residuals-plan.md](../plans/2026-05-17-code-audit-round2-residuals-plan.md). |
+| [20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md](audits/20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md) | IMPLEMENTED 2026-05-17: [20260517_CODE_AUDIT_ROUND3_AAA_POLISH_FOLLOWUPS.md](implemented/20260517_CODE_AUDIT_ROUND3_AAA_POLISH_FOLLOWUPS.md). Plan: [2026-05-17-code-audit-round3-aaa-polish-followups-plan.md](../plans/2026-05-17-code-audit-round3-aaa-polish-followups-plan.md). |
 
 Player-facing guide artifact: [NEW_PLAYER_GUIDE.md](../00_start_here/NEW_PLAYER_GUIDE.md).
 

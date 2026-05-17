@@ -28,6 +28,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
+import { RootErrorBoundary } from '../RootErrorBoundary';
 import { PersonnelContent } from './PersonnelContent';
 import { Z } from '../../../shared/zIndex';
 import type { NamedOfficerView } from '../../data/types';
@@ -509,15 +510,19 @@ export function ArmyHQModal() {
                             )}
 
                             {!expandedCorpsId && (
-                                <PresidentialDecisionRoomPanel />
+                                <RootErrorBoundary zone="decision room">
+                                    <PresidentialDecisionRoomPanel />
+                                </RootErrorBoundary>
                             )}
 
                             {!expandedCorpsId && (
-                                <PresidentialAttentionPanel
-                                    gameState={state}
-                                    playerFaction={faction}
-                                    onOpenArmyReserve={handleOpenArmyReserve}
-                                />
+                                <RootErrorBoundary zone="presidential decisions">
+                                    <PresidentialAttentionPanel
+                                        gameState={state}
+                                        playerFaction={faction}
+                                        onOpenArmyReserve={handleOpenArmyReserve}
+                                    />
+                                </RootErrorBoundary>
                             )}
 
                             {/* Situation Briefing */}

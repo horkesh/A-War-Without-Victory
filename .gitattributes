@@ -1,5 +1,23 @@
-# Auto detect text files and perform LF normalization
+# Auto detect text files and perform LF normalization.
 * text=auto
+
+# Source, docs, data, and web assets use LF across platforms.
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
 data/derived/startup/*.json text eol=lf
 *.pmtiles filter=lfs diff=lfs merge=lfs -text
 *.osm.pbf filter=lfs diff=lfs merge=lfs -text

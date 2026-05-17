@@ -895,12 +895,16 @@ function App() {
           openCodex(useGameStore.getState());
         }}
       />
-      <ArmyHQModal />
+      <RootErrorBoundary zone="army hq">
+        <ArmyHQModal />
+      </RootErrorBoundary>
       <ChronicleOverlay />
       <WrappedOverlay />
       <CodexPanelWrapper />
       <StrategicDashboardWrapper />
-      <OpsPlanningModal />
+      <RootErrorBoundary zone="ops planning">
+        <OpsPlanningModal />
+      </RootErrorBoundary>
       <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />
       {loadedGameState && (

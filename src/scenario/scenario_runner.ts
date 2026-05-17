@@ -557,8 +557,8 @@ interface HistoricalAnchorCheck {
 }
 
 interface OverrideInventoryEntry {
-    mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction' | 'engine_ceiling_workarounds';
-    classification: 'initial_state_correction' | 'bot_compensation' | 'permanent_engine_ceiling_workaround';
+    mechanism: 'osid_control_overrides' | 'avoided_osids_by_faction';
+    classification: 'initial_state_correction' | 'bot_compensation';
     active_entries: number;
     rationale: string;
 }
@@ -634,12 +634,6 @@ function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {
             classification: 'bot_compensation',
             active_entries: avoidedOsidCount,
             rationale: 'Biases faction targeting away from known ahistorical pressure paths without changing who starts in control.'
-        },
-        {
-            mechanism: 'engine_ceiling_workarounds',
-            classification: 'permanent_engine_ceiling_workaround',
-            active_entries: 0,
-            rationale: 'Reserved for acknowledged engine-limit workarounds that must remain visible as scenario-shaping debt rather than being mistaken for healthy AI behavior.'
         }
     ];
 }

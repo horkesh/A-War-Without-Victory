@@ -115,6 +115,28 @@ export function BottomStatusStrip() {
   // Faction-contextual indicator
   const alliance = loadedGameState?.war_alliance_rbih_hrhb;
   const showAlliance = playerFaction === 'RBiH' || playerFaction === 'HRHB';
+  const patronStatus = useMemo(() => {
+    if (!playerFaction || (playerFaction !== 'RS' && playerFaction !== 'HRHB')) return null;
+    const dims = loadedGameState?.strategicDimensions?.[playerFaction];
+    const patronValue = dims?.patron_confidence?.effective_value ?? 50;
+    const status = patronValue >= 70 ? 'SUPPORTIVE' : patronValue >= 40 ? 'CAUTIOUS' : 'WAVERING';
+    const color = status === 'SUPPORTIVE' ? '#50b850' : status === 'CAUTIOUS' ? '#d4d455' : '#e05050';
+    return {
+      label: playerFaction === 'HRHB' ? 'Zagreb:' : 'Belgrade:',
+      status,
+      color,
+    };
+  }, [loadedGameState?.strategicDimensions, playerFaction]);
+  const internationalStatus = useMemo(() => {
+    if (playerFaction !== 'RBiH') return null;
+    const pressure = loadedGameState?.internationalVisibilityPressure?.composite_ivp
+      ?? loadedGameState?.internationalVisibilityPressure?.negotiation_momentum
+      ?? null;
+    if (pressure == null) return null;
+    const status = pressure >= 0.66 ? 'HIGH' : pressure >= 0.33 ? 'ACTIVE' : 'QUIET';
+    const color = status === 'HIGH' ? '#d4a055' : status === 'ACTIVE' ? '#d4d455' : '#50b850';
+    return { status, color };
+  }, [loadedGameState?.internationalVisibilityPressure, playerFaction]);
 
   return (
     <div
@@ -240,19 +262,24 @@ export function BottomStatusStrip() {
             </span>
           );
         })()}
-        {!showAlliance && loadedGameState && (() => {
-          // RS: show patron confidence from dimensions
-            const dims = playerFaction ? loadedGameState.strategicDimensions?.[playerFaction] : undefined;
-          const patronValue = dims?.patron_confidence?.effective_value ?? 50;
-          const status = patronValue >= 70 ? 'SUPPORTIVE' : patronValue >= 40 ? 'CAUTIOUS' : 'WAVERING';
-          const color = status === 'SUPPORTIVE' ? '#50b850' : status === 'CAUTIOUS' ? '#d4d455' : '#e05050';
-          return (
+        {patronStatus && (
+          <>
+            {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
-              <span className="text-[9px] text-white/50 uppercase font-semibold">Belgrade:</span>
-              <span style={{ color }} className="font-bold uppercase text-[10px] tracking-wider">{status}</span>
+              <span className="text-[9px] text-white/50 uppercase font-semibold">{patronStatus.label}</span>
+              <span style={{ color: patronStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{patronStatus.status}</span>
             </span>
-          );
-        })()}
+          </>
+        )}
+        {internationalStatus && (
+          <>
+            {showAlliance && <span className="text-white/10">|</span>}
+            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
+              <span className="text-[9px] text-white/50 uppercase font-semibold">International:</span>
+              <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{internationalStatus.status}</span>
+            </span>
+          </>
+        )}
 
         {/* Active operations count */}
         {playerOperations.length > 0 && (

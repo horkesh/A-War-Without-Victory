@@ -52,4 +52,14 @@ describe('RootErrorBoundary panel isolation', () => {
     expect(appSource).toMatch(/<RootErrorBoundary zone="toolbar">[\s\S]*<PresidentialToolbar/);
     expect(appSource).toMatch(/<RootErrorBoundary zone="sidebar">[\s\S]*<OOBSidebar \/>[\s\S]*<\/RootErrorBoundary>/);
   });
+
+  it('App wraps heavyweight modal panels in localized boundaries', () => {
+    const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+    const armyHqSource = readFileSync('src/ui/map/components/army_hq/ArmyHQModal.tsx', 'utf8');
+
+    expect(appSource).toMatch(/<RootErrorBoundary zone="army hq">[\s\S]*<ArmyHQModal \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(appSource).toMatch(/<RootErrorBoundary zone="ops planning">[\s\S]*<OpsPlanningModal \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(armyHqSource).toMatch(/<RootErrorBoundary zone="decision room">[\s\S]*<PresidentialDecisionRoomPanel \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(armyHqSource).toMatch(/<RootErrorBoundary zone="presidential decisions">[\s\S]*<PresidentialAttentionPanel[\s\S]*<\/RootErrorBoundary>/);
+  });
 });

@@ -351,16 +351,24 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? o.war_force_transition_after_turns
             : undefined;
 
-    // Per-faction OSID avoidance: prevent specific factions from attacking specific OSIDs (e.g. Vozuca pocket).
+    // Deprecated per-faction OSID avoidance guardrail. Non-empty values mask bot targeting/OOB/painted-target defects.
     const avoided_osids_by_faction: Record<string, string[]> | undefined = (() => {
         const raw = o.avoided_osids_by_faction;
         if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
         const result: Record<string, string[]> = {};
-        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>).sort(([a], [b]) => strictCompare(a, b))) {
             if (typeof k === 'string' && Array.isArray(v)) {
-                const osids = (v as unknown[]).filter((x): x is string => typeof x === 'string').sort();
+                const osids = (v as unknown[])
+                    .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+                    .map((x) => x.trim())
+                    .sort(strictCompare);
                 if (osids.length > 0) result[k] = osids;
             }
+        }
+        if (Object.keys(result).length > 0) {
+            throw new Error(
+                'avoided_osids_by_faction is deprecated and must be absent or empty; fix bot targeting, OOB stats, or painted targets instead.',
+            );
         }
         return Object.keys(result).length > 0 ? result : undefined;
     })();

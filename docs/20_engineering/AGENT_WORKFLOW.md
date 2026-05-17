@@ -26,6 +26,17 @@ The collective identity for subagents in this repo is **Pyrrhic**. For **big-pic
 
 **Process QA changes everything.** Invoke **Process QA** (quality-assurance-process) to validate that *other* Pyrrhic roles followed established process (context.md, ledger, preferences check, commit discipline). Process QA is the single process checkpoint: it does not do the work for others; it verifies they followed the rules. Invoke Process QA **after significant handoffs**, **after Orchestrator or Product Manager execution**, or **before merge**. This virtually eliminates micromanagement—others follow process, Process QA verifies.
 
+## Windows EOL Guard
+
+The repository pins source/docs/data text files to LF through `.gitattributes` and `.editorconfig`. Use `npm run repo:eol:check` to detect tracked text files whose working-tree copy has mixed CRLF/LF endings.
+
+If the guard fails, treat it as a local checkout hygiene issue unless a content diff proves otherwise:
+
+1. Commit or stash unrelated work first.
+2. Apply the scoped fix only after the tree is clean enough to review: `git add --renormalize <scoped paths>`.
+3. Re-run `npm run repo:eol:check`, the relevant focused tests, and `git diff --check`.
+4. Do not use `git reset --hard` as an EOL heal unless the operator explicitly requests it and the target paths are known safe.
+
 ## See Also
 
 - `.cursor/AGENT_TEAM_ROSTER.md` - Pyrrhic roster and handoffs

@@ -1281,8 +1281,11 @@ export interface StateMeta {
     /** Peace-phase Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment
      *  lifecycle is active ("bottom_up") or legacy brigade spawn is used ("auto_oob" / "player_choice"). */
     recruitment_mode?: 'player_choice' | 'auto_oob' | 'bottom_up';
-    /** Per-faction OSID-level avoidance: brigade AI will not attack these OSIDs for the listed faction.
-     *  Used to lock historically-specific OSIDs (e.g. Vozuća pocket) without broad municipality targeting. */
+    /**
+     * @deprecated Non-empty values are banned calibration escapes. Fix bot targeting,
+     * OOB stats, or painted targets instead; use osid_control_overrides only for
+     * factual initial-control corrections.
+     */
     avoided_osids_by_faction?: Record<string, string[]>;
     /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
     supply_reserves_enabled?: boolean;

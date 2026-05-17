@@ -4,6 +4,7 @@ import { test } from 'vitest';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
+import { readFileSync } from 'node:fs';
 
 test('parseGameState extracts deterministic order lists and events', () => {
     const parsed = parseGameState({
@@ -1153,6 +1154,15 @@ test('parseGameState maps sim-owned command briefing without rebuilding it in th
             'hum-1:humanitarian:warning:enclaves',
         ]
     );
+});
+
+test('GameStateAdapter known-shape casts stay below the Round 3 baseline', () => {
+    const source = readFileSync('src/ui/map/data/GameStateAdapter.ts', 'utf8');
+    const castCount = source.match(/\bas any\b/g)?.length ?? 0;
+
+    assert.ok(castCount <= 48, `expected at most 48 casts, found ${castCount}`);
+    assert.ok(!source.includes('Array.isArray((state as any).factions)'));
+    assert.ok(!source.includes('getOperationalSitrepView(state as GameState, playerFaction as any)'));
 });
 
 test('parseGameState maps the canonical operational SITREP packet from extractWarData', () => {

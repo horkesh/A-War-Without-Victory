@@ -113,6 +113,10 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function hasFactionArray(state: GameState): boolean {
+    return Array.isArray(state.factions);
+}
+
 function normalizePercent(value: unknown): number | null {
     if (typeof value !== 'number' || !Number.isFinite(value)) return null;
     const percent = value >= 0 && value <= 1 ? value * 100 : value;
@@ -160,7 +164,7 @@ function humanizeMunicipalitySlug(slug: string): string {
         ?? slug.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-function getAirdropAllocationValue(state: any, enclaveId: string): number {
+function getAirdropAllocationValue(state: GameState, enclaveId: string): number {
     return finiteNumber((state.military.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
 }
 
@@ -1599,7 +1603,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const departedByMun: LoadedGameState['departedByMun'] = {};
     const displacementByOsid: LoadedGameState['displacementByOsid'] = {};
     const displacementEventLogRaw: LoadedGameState['displacementEventLog'] = [];
-    const rawEventLog = (state as any).displacement?.displacement_event_log;
+    const rawEventLog = state.displacement?.displacement_event_log;
     if (Array.isArray(rawEventLog)) {
         for (const evt of rawEventLog as Array<Record<string, unknown>>) {
             const displaced = finiteNumber(evt.displaced);
@@ -1834,7 +1838,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     hardening_active: false,
                     supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, 0, false, entry),
                     airdrop_status: enclaveDef?.faction === 'RBiH' ? 'not_isolated_long_enough' : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(state as any, key),
+                    airdrop_allocation: getAirdropAllocationValue(state, key),
                     faction: (enclaveDef?.faction as FactionId | undefined) ?? undefined,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
@@ -1855,7 +1859,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         : isolationTurns > 0
                             ? 'not_isolated_long_enough'
                             : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(state as any, key),
+                    airdrop_allocation: getAirdropAllocationValue(state, key),
                     faction: (enclaveDef?.faction as FactionId | undefined) ?? undefined,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
@@ -1870,9 +1874,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         ? toCommandBriefingView(rawCommandBriefing)
         : undefined;
     const operationalSitrep = (phase === 'war' || phase === 'phase_ii')
+        && playerFaction
         && state.displacement && typeof state.displacement === 'object'
-        && Array.isArray((state as any).factions)
-        ? getOperationalSitrepView(state as GameState, playerFaction as any)
+        && hasFactionArray(state)
+        ? getOperationalSitrepView(state, playerFaction)
         : undefined;
     const pendingOfficerEvents = derivePendingOfficerEvents(state, playerFaction);
     const pendingEventDecisions = derivePendingEventDecisions(state);

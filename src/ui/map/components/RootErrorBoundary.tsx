@@ -13,6 +13,13 @@ function formatZoneLabel(zone: string): string {
   return zone.charAt(0).toUpperCase() + zone.slice(1);
 }
 
+function boundaryClass(zone: string): string {
+  if (zone === 'decision room' || zone === 'presidential decisions') {
+    return 'pointer-events-auto w-full rounded border border-red-500/50 bg-panel-card px-3 py-2 text-xs text-gray-100';
+  }
+  return 'pointer-events-auto fixed right-4 top-28 z-[7600] max-w-[18rem] rounded border border-red-500 bg-panel-bg/95 px-3 py-2 text-xs text-gray-100 shadow-lg';
+}
+
 export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
   state: RootErrorBoundaryState = { error: null };
 
@@ -34,7 +41,7 @@ export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErr
         role="status"
         aria-label={`${this.props.zone} unavailable`}
         data-testid={`root-error-boundary-${this.props.zone.replace(/\s+/g, '-')}`}
-        className="pointer-events-auto fixed right-4 top-28 z-[7600] max-w-[18rem] rounded border border-red-500 bg-panel-bg/95 px-3 py-2 text-xs text-gray-100 shadow-lg"
+        className={boundaryClass(this.props.zone)}
       >
         <div className="font-semibold text-red-300">{zoneLabel} unavailable</div>
         <div className="mt-1 text-gray-300">Open another panel or reload the map.</div>

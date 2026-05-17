@@ -42,6 +42,8 @@
 
 **2026-05-17 audit artifact wiring:** New-player guidance now lives at `docs/00_start_here/NEW_PLAYER_GUIDE.md`; code audits live under `docs/40_reports/audits/20260516_CODE_AUDIT*.md`; follow-up work is split into three plans under `docs/plans/2026-05-17-code-audit-*.md`. Do instead: do not leave root-level audit/player-guide docs as loose truth; promote them into docs/audits and plans, then link from docs index, 40_reports README, backlog, roadmap, ledger, and knowledge.
 
+**2026-05-17 code-audit execution closure:** Audit follow-up lanes are implemented. `npm run repo:eol:check` is the mixed-EOL guard; non-empty `avoided_osids_by_faction` now fails scenario normalization; Round 2 residual QA has Codex source and scenario-integrity diagnostics; Round 3 polish closes opening-brief, status-strip, priority-front, adapter, and panel-boundary issues. Do instead: after running scenario commands, decide intentionally whether `data/derived/latest_run_final_save.json` is a committed fixture refresh or transient run output.
+
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
 **Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.

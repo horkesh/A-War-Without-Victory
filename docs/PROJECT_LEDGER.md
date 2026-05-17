@@ -4,6 +4,26 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] feat(audit): implement code-audit follow-up lanes
+
+**Scope:** Implementation of the three 2026-05-17 code-audit follow-up plans covering EOL/scenario guardrails, Round 2 residual QA, and Round 3 AAA polish.
+
+**Change:**
+- Added LF policy via `.gitattributes` / `.editorconfig`, `npm run repo:eol:check`, and Windows EOL heal guidance in `docs/20_engineering/AGENT_WORKFLOW.md`.
+- Deprecated and enforced `avoided_osids_by_faction` as absent/empty only, preserved `osid_control_overrides`, and removed the zero-count `engine_ceiling_workarounds` override inventory row.
+- Added Codex source-quality and scenario-integrity diagnostics plus reports; source audit found 32 editor-review warnings and 0 ICTY format errors.
+- Refreshed `data/derived/latest_run_final_save.json` from the 40w n1869 proof run.
+- Closed Round 3 polish follow-ups: CANON current-version wording, opening-brief action consistency, RBiH/HRHB status coverage, player-relevant priority fronts, humanized front labels, `GameStateAdapter` cast reduction, and localized panel error boundaries.
+- Propagated closure to `MASTER_ROADMAP.md`, `CONSOLIDATED_BACKLOG.md`, `GUI_MASTER.md`, `PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
+
+**Determinism / scenario evidence:** Fresh 40w n1869 (`583aaa2f33875d8c`) matched the active integrated-context hash, with 27/27 anchors and 6/6 benchmarks. Scenario-integrity walk reported 0 ERROR / 0 WARNING / 2 INFO.
+
+**Verification:** Focused Lane A, Lane B, and Lane C Vitest suites passed; `npm.cmd run typecheck` passed after Lane C; `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm run repo:eol:check` intentionally fails until the broader checkout is renormalized, reporting the existing mixed-EOL working-tree drift rather than a lane regression.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Live `CANON.md` version wording now points at the active `package.json` milestone. No scenario constants, historical event content, or calibration behavior were retuned.
+
+---
+
 ## [2026-05-17] docs(roadmap): activate code-audit follow-up lanes
 
 **Scope:** Documentation-only roadmap activation for the three code-audit follow-up plans created from the 2026-05-16 audit artifacts.

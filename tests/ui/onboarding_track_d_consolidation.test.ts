@@ -1,15 +1,21 @@
+// @vitest-environment jsdom
+
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createElement } from 'react';
 
 import {
   COACHMARKS,
   getCoachmarkStorageKey,
 } from '../../src/ui/map/components/CoachmarkLayer.js';
+import { PresidentialInbox } from '../../src/ui/map/components/PresidentialInbox.js';
 import {
   shouldMarkPeaceWarTransitionSeenOnLoad,
   shouldShowPeaceWarTransition,
 } from '../../src/ui/map/data/peaceWarTransitionGate.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function minimalState(overrides: Partial<LoadedGameState>): LoadedGameState {
   return {
@@ -36,6 +42,16 @@ function minimalState(overrides: Partial<LoadedGameState>): LoadedGameState {
 }
 
 describe('Track D onboarding consolidation', () => {
+  afterEach(() => {
+    cleanup();
+    useGameStore.setState({
+      loadedGameState: null,
+      openingBriefDismissed: false,
+      osidDisplayNames: {},
+    });
+    vi.restoreAllMocks();
+  });
+
   it('mounts onboarding through OnboardingOverlay only, without the legacy first-turn overlay', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
 
@@ -82,5 +98,35 @@ describe('Track D onboarding consolidation', () => {
     expect(source).toContain('bullets: [');
     expect(source).toContain('Read later');
     expect(source).not.toContain('You command through Army HQ and your corps commanders. You set strategic direction and approve operations');
+  });
+
+  it.each(['RBiH', 'RS', 'HRHB'] as const)('routes the %s opening brief primary action to the Decision Room', (faction) => {
+    const onAction = vi.fn();
+    useGameStore.setState({
+      loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: faction }),
+      openingBriefDismissed: false,
+      osidDisplayNames: {},
+    });
+
+    render(createElement(PresidentialInbox, { onAction }));
+    fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
+
+    expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'opening-brief:decision-room');
+    expect(useGameStore.getState().openingBriefDismissed).toBe(true);
+  });
+
+  it.each(['RBiH', 'RS', 'HRHB'] as const)('keeps the %s opening brief secondary action as read-later only', (faction) => {
+    const onAction = vi.fn();
+    useGameStore.setState({
+      loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: faction }),
+      openingBriefDismissed: false,
+      osidDisplayNames: {},
+    });
+
+    render(createElement(PresidentialInbox, { onAction }));
+    fireEvent.click(screen.getByRole('button', { name: /read later/i }));
+
+    expect(onAction).not.toHaveBeenCalled();
+    expect(useGameStore.getState().openingBriefDismissed).toBe(true);
   });
 });

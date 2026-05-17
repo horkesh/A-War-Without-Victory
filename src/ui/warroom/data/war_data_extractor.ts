@@ -325,6 +325,10 @@ function deriveMunicipalityControllerByOsid(state: GameState): Map<string, Facti
     return result;
 }
 
+function getSettlementController(state: GameState, settlementId: SettlementId): FactionId | null | undefined {
+    return state.political.political_controllers?.[settlementId];
+}
+
 // ---------------------------------------------------------------------------
 // Extraction
 // ---------------------------------------------------------------------------
@@ -757,6 +761,8 @@ function extractFrontEdges(state: GameState, pf: FactionId): FrontEdgeSnapshot[]
 
         const playerSide = edge.side_a === pf ? 'a' : 'b';
         const playerNode = playerSide === 'a' ? edge.a : edge.b;
+        const playerNodeController = getSettlementController(state, playerNode);
+        if (playerNodeController != null && playerNodeController !== pf) continue;
 
         const hasBrigade = osidToBrigade.has(playerNode);
         const hasGarrison = (garrison[playerNode] ?? 0) > 0;
