@@ -196,9 +196,9 @@ export function deriveCorridors(
     }
 
     corridors.sort((a, b) => {
-        const fc = a.faction_id.localeCompare(b.faction_id);
+        const fc = strictCompare(a.faction_id, b.faction_id);
         if (fc !== 0) return fc;
-        return a.edge_id.localeCompare(b.edge_id);
+        return strictCompare(a.edge_id, b.edge_id);
     });
 
     return { schema: 1, turn, corridors };
@@ -273,7 +273,7 @@ export function deriveSupplyState(
             }
             by_settlement.push({ sid, state: level });
         }
-        by_settlement.sort((a, b) => a.sid.localeCompare(b.sid));
+        by_settlement.sort((a, b) => strictCompare(a.sid, b.sid));
 
         factionEntries.push({
             faction_id: fac.faction_id,
@@ -284,7 +284,7 @@ export function deriveSupplyState(
         });
     }
 
-    factionEntries.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    factionEntries.sort((a, b) => strictCompare(a.faction_id, b.faction_id));
 
     return { schema: 1, turn, factions: factionEntries };
 }
@@ -636,9 +636,9 @@ export function deriveCorridorsOsid(
     }
 
     corridors.sort((a, b) => {
-        const fc = a.faction_id.localeCompare(b.faction_id);
+        const fc = strictCompare(a.faction_id, b.faction_id);
         if (fc !== 0) return fc;
-        return a.edge_id.localeCompare(b.edge_id);
+        return strictCompare(a.edge_id, b.edge_id);
     });
 
     return { schema: 1, turn, corridors };
@@ -657,7 +657,7 @@ function findHeartlandComponent(
     const visited = new Set<string>();
     let largest = new Set<string>();
 
-    const reachableSorted = [...reachableSet].sort((a, b) => a.localeCompare(b));
+    const reachableSorted = [...reachableSet].sort(strictCompare);
     for (const start of reachableSorted) {
         if (visited.has(start)) continue;
         const component = new Set<string>();
@@ -740,7 +740,7 @@ function computeFactionSupplyState(
         }
         by_osid.push({ osid, state: level });
     }
-    by_osid.sort((a, b) => a.osid.localeCompare(b.osid));
+    by_osid.sort((a, b) => strictCompare(a.osid, b.osid));
 
     return { faction_id: fac.faction_id, by_osid };
 }
@@ -775,7 +775,7 @@ export function deriveSupplyStateByOsid(
         factionEntries.push(perFaction);
     }
 
-    factionEntries.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    factionEntries.sort((a, b) => strictCompare(a.faction_id, b.faction_id));
     return { schema: 1, turn, factions: factionEntries };
 }
 

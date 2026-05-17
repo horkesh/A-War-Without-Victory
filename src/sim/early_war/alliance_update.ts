@@ -224,10 +224,17 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
             bilateral_flips_this_turn: 0,
             territorial_incidents_this_turn: 0,
             total_bilateral_flips: 0,
-            allied_mixed_municipalities: mixed
+            allied_mixed_municipalities: mixed,
+            bilateral_diverted_corps: {},
+            bilateral_corps_release_progress: {}
         } satisfies RbihHrhbState;
     } else if (typeof state.political.rbih_hrhb_state.territorial_incidents_this_turn !== 'number') {
         state.political.rbih_hrhb_state.territorial_incidents_this_turn = 0;
+    }
+    const rhs = state.political.rbih_hrhb_state;
+    if (rhs) {
+        rhs.bilateral_diverted_corps ??= {};
+        rhs.bilateral_corps_release_progress ??= {};
     }
 }
 

@@ -12,6 +12,10 @@ type DiagnosticRow = {
     anchor?: string;
 };
 
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function runDiagnostic(): DiagnosticRow[] {
     const runDir = mkdtempSync(join(tmpdir(), 'awwv-supply-diagnostic-'));
     writeFileSync(join(runDir, 'summary.json'), JSON.stringify({ hash: 'fixture' }));
@@ -32,8 +36,8 @@ describe('supply design completion diagnostic', () => {
         expect(first).toHaveLength(12);
 
         const sorted = [...first].sort((a, b) => {
-            const section = a.section.localeCompare(b.section);
-            return section !== 0 ? section : a.item.localeCompare(b.item);
+            const section = strictCompare(a.section, b.section);
+            return section !== 0 ? section : strictCompare(a.item, b.item);
         });
         expect(first).toEqual(sorted);
 
@@ -48,8 +52,8 @@ describe('supply design completion diagnostic', () => {
         }
 
         expect(first.map((row) => `${row.section} ${row.item}`)).toEqual([
-            '§3 by_osid in report sorted by osid',
             '§3 OSID supply trace per-OSID state',
+            '§3 by_osid in report sorted by osid',
             '§4 fallback to last_supplied_turn when by_osid missing',
             '§4 getSupplyMult reads supply state at formation.location_osid',
             '§5 corridor cascade dependency thresholds',
@@ -61,5 +65,6 @@ describe('supply design completion diagnostic', () => {
             '§9 Phase 1 OSID trace',
             '§9 Phase 2 cascade canon wording',
         ]);
+        expect(first.find((row) => row.item === 'propagation order by faction then node id')?.status).toBe('DONE');
     });
 });

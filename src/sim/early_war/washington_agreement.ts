@@ -29,7 +29,9 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
 
 // ── Tunable Washington precondition thresholds ──
 
@@ -91,6 +93,62 @@ export interface WashingtonCheckReport {
     trigger_path?: 'diplomatic' | 'patron_override' | null;
     fired: boolean;
     already_signed: boolean;
+}
+
+function munFromOsid(osid: string | undefined): string | null {
+    if (!osid) return null;
+    const parts = osid.split(':');
+    return parts.length >= 2 ? parts[1] : null;
+}
+
+function normalizeMun(mun: string): string {
+    return mun.trim().toLowerCase();
+}
+
+export function restoreAlliedMixedMunicipalities(state: GameState): string[] {
+    const byMun = new Map<string, Set<string>>();
+    const add = (mun: string | null, faction: string | undefined): void => {
+        if (!mun || (faction !== 'RBiH' && faction !== 'HRHB')) return;
+        const key = normalizeMun(mun);
+        const current = byMun.get(key) ?? new Set<string>();
+        current.add(faction);
+        byMun.set(key, current);
+    };
+
+    for (const formationId of Object.keys(state.military.formations ?? {}).sort(strictCompare)) {
+        const formation = state.military.formations?.[formationId];
+        if (!formation || formation.status !== 'active') continue;
+        add(munFromOsid((formation as { location_osid?: string }).location_osid), formation.faction);
+    }
+
+    for (const key of Object.keys(state.military.militia_pools ?? {}).sort(strictCompare)) {
+        const parsed = parseMilitiaPoolKey(key);
+        if (!parsed) continue;
+        const pool = state.military.militia_pools?.[key];
+        if (!pool || ((pool.available ?? 0) + (pool.committed ?? 0)) <= 0) continue;
+        add(parsed.mun_id, parsed.faction);
+    }
+
+    const restored = new Set<string>(DEFAULT_MIXED_MUNICIPALITIES.map(normalizeMun));
+    for (const [mun, factions] of [...byMun.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        if (factions.has('RBiH') && factions.has('HRHB')) restored.add(mun);
+    }
+    return [...restored].sort(strictCompare);
+}
+
+export function getPostWashingtonJointPressureMultiplier(
+    state: GameState,
+    defenderFaction: string | null | undefined,
+    attackerFaction: string | null | undefined,
+    targetOsid: string | null | undefined,
+): number {
+    if (state.political.rbih_hrhb_state?.washington_signed !== true) return 1;
+    if (attackerFaction !== 'RS') return 1;
+    if (defenderFaction !== 'RBiH' && defenderFaction !== 'HRHB') return 1;
+    const mun = targetOsid ? munFromOsid(targetOsid) : null;
+    if (!mun) return 1;
+    const mixed = new Set((state.political.rbih_hrhb_state.allied_mixed_municipalities ?? []).map(normalizeMun));
+    return mixed.has(normalizeMun(mun)) ? POST_WASH_JOINT_PRESSURE_BONUS : 1;
 }
 
 /**
@@ -232,6 +290,8 @@ function applyWashingtonEffects(state: GameState): void {
             f.doctrine_state.eligible['COORDINATED_STRIKE'] = true;
         }
     }
+
+    rhs.allied_mixed_municipalities = restoreAlliedMixedMunicipalities(state);
 }
 
 /**

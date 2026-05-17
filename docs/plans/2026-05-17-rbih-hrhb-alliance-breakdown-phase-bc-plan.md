@@ -345,3 +345,14 @@ Determinism statement required per task: identify whether the change is hash-aff
 - Stop before Phase C (Task 6) per Task 12 design review.
 - Stop for sensitive-history sign-off whenever Ahmici, Stupni Do, Grabovica, or Uzdol outcomes flip in a focused or scenario run.
 - Stage only the files owned by the active task plus its focused test, audit doc, and ledger entry. No bulk staging.
+
+## 2026-05-17 Codex Phase C Status
+
+Tasks 7-10 are implemented in the independent Phase C lane after `b26d7a82`.
+
+- Task 7 C2 formation diversion: closed by `reassignCorpsForBilateralWar(...)` in `src/sim/combat/bot_corps_ai.ts` and `tests/bilateral_formation_diversion.test.ts`.
+- Task 8 C3 bilateral displacement cascade: closed by bilateral takeover constants/routing in `src/state/displacement_takeover.ts` and `tests/bilateral_displacement_cascade.test.ts`.
+- Task 9 C4 ceasefire redeployment: closed by three-turn release/Washington permanent release behavior in `reassignCorpsForBilateralWar(...)` and `tests/bilateral_ceasefire_redeployment.test.ts`.
+- Task 10 C5 Washington joint pressure/restoration: closed by mixed-municipality restoration and post-Washington joint pressure helpers in `src/sim/early_war/washington_agreement.ts`, applied in both combat resolvers, and covered by `tests/washington_joint_pressure.test.ts`.
+
+Verification captured in `docs/40_reports/implemented/20260517_RBIH_HRHB_PHASE_C_CLOSURE.md`: focused Phase C tests pass and typecheck passes. Current integration-context scenario probes also completed: 40w hash `583aaa2f33875d8c` with 27/27 anchors and 188w hash `3700a34cd255c99c` with 25/27 anchors. Treat those as integration-context hashes because this worktree contains unrelated dirty supply, strict-null, latest-run, and audit edits outside this lane.

@@ -10,6 +10,12 @@ function anchor(relativePath, line) {
   return `${path.join(REPO_ROOT, relativePath)}:${line}`;
 }
 
+function strictCompare(a, b) {
+  const sa = String(a);
+  const sb = String(b);
+  return sa < sb ? -1 : sa > sb ? 1 : 0;
+}
+
 const ROWS = [
   {
     section: '§3',
@@ -49,7 +55,7 @@ const ROWS = [
   {
     section: '§5',
     item: 'propagation order by faction then node id',
-    status: 'PARTIAL',
+    status: 'DONE',
     owner: 'sim_mechanic',
     anchor: anchor('src/state/supply_state_derivation.ts', 748),
   },
@@ -99,16 +105,18 @@ const ROWS = [
 function main() {
   const runDir = process.argv[2];
   if (runDir) {
-    const summaryPath = path.join(path.resolve(runDir), 'summary.json');
-    if (!fs.existsSync(summaryPath)) {
-      console.error(`Missing run summary: ${summaryPath}`);
+    const resolvedRunDir = path.resolve(runDir);
+    const summaryPath = path.join(resolvedRunDir, 'summary.json');
+    const runSummaryPath = path.join(resolvedRunDir, 'run_summary.json');
+    if (!fs.existsSync(summaryPath) && !fs.existsSync(runSummaryPath)) {
+      console.error(`Missing run summary: ${summaryPath} or ${runSummaryPath}`);
       process.exit(2);
     }
   }
 
   const rows = [...ROWS].sort((a, b) => {
-    const section = a.section.localeCompare(b.section);
-    return section !== 0 ? section : a.item.localeCompare(b.item);
+    const section = strictCompare(a.section, b.section);
+    return section !== 0 ? section : strictCompare(a.item, b.item);
   });
 
   process.stdout.write(`${JSON.stringify(rows, null, 2)}\n`);

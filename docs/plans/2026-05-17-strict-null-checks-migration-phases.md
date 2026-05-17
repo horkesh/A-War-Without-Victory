@@ -43,7 +43,7 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 
 | Phase | Scope | Cast / assertion count | Optional field count | Downstream consumer count | Determinism risk | Status |
 |---|---|---:|---:|---:|---|---|
-| 1 | State schema | 42 | 458 | >5 for `GameState` and state namespaces | HIGH | Inventory only; source deferred |
+| 1 | State schema | 25 remaining after partial source pass | 458 | >5 for `GameState` and state namespaces | HIGH | In progress; validator `any` casts reduced |
 | 2 | Sim engine - combat | 116 | 0 | >5 for combat helpers and command state | HIGH | Inventory only; source deferred |
 | 3 | Sim engine - early war + bot | 35 | 0 | >5 for turn pipeline / bot flow | MEDIUM | Inventory only; source deferred |
 | 4 | Scenario + IPC | 53 | 0 | 3-5 for loader/runner/desktop seams | MEDIUM | Inventory only; source deferred |
@@ -74,6 +74,8 @@ Counts:
 Stop-gate notes:
 - Do not promote `?:` fields to required unless existing saves and `validateGameState.ts` already prove presence without a migration.
 - `state.meta.player_faction` remains a behavioral-default issue and belongs to the Phase B player-faction plan, not this type-only migration.
+- 2026-05-17 partial pass: `src/state/validateGameState.ts` replaced save-shape `as any` reads with explicit `Record<string, unknown>` narrowing. Phase 1 escape hatches decreased from 42 to 25 without changing validation defaults or serialized state shape.
+- Blocker: the 458 optional `GameState` fields remain deferred. Promoting them would require save-migration/default decisions and is outside this behavior-stable Phase 1 pass.
 
 ### Phase 2: Sim Engine - Combat
 

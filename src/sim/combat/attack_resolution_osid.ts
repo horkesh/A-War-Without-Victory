@@ -61,6 +61,7 @@ import {
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
+import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
@@ -460,6 +461,7 @@ export function resolveAttackOrdersOsid(
             state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
         );
         defenderPower += garrisonPower;
+        defenderPower *= getPostWashingtonJointPressureMultiplier(state, controller, attackerFaction, targetOsid);
 
         const battleSnapEvents: AttackResolutionOsidSnapEvent[] = [];
 

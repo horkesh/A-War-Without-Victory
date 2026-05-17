@@ -1149,6 +1149,10 @@ export interface RbihHrhbState {
     total_bilateral_flips: number;
     /** Dynamic list of municipalities with both RBiH and HRHB formations/pools. Sorted deterministically. */
     allied_mixed_municipalities: string[];
+    /** Per-faction corps temporarily diverted to the RBiH-HRHB bilateral front. */
+    bilateral_diverted_corps?: Partial<Record<FactionId, FormationId>>;
+    /** Per-faction release progress after ceasefire/Washington, in turns. */
+    bilateral_corps_release_progress?: Partial<Record<FactionId, number>>;
 }
 
 export interface NegotiationStatus {

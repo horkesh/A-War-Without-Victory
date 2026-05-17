@@ -65,10 +65,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function getPathValue(root: unknown, path: string): unknown {
-    let current = root as any;
+    let current: unknown = root;
     for (const part of path.split('.')) {
         if (current == null || typeof current !== 'object') return undefined;
-        current = current[part];
+        current = (current as Record<string, unknown>)[part];
     }
     return current;
 }
@@ -116,8 +116,10 @@ export function validateGameStateShape(
         return { ok: false, errors: ['State must be an object'] };
     }
 
-    const s = state as any;
-    const stateVersion = Number.isInteger(s.schema_version) ? s.schema_version : 0;
+    const s = state as Record<string, unknown>;
+    const stateVersion = typeof s.schema_version === 'number' && Number.isInteger(s.schema_version)
+        ? s.schema_version
+        : 0;
 
     // Denylist: no derived-state keys at top level
     for (const key of DERIVED_STATE_DENYLIST) {
@@ -143,7 +145,7 @@ export function validateGameStateShape(
         if (meta == null || typeof meta !== 'object') {
             errors.push('meta must be an object');
         } else {
-            const m = meta as any;
+            const m = meta as Record<string, unknown>;
             if (!('turn' in m)) {
                 errors.push('meta.turn is required');
             } else {
@@ -237,7 +239,7 @@ export function validateGameStateShape(
     if (!Object.prototype.hasOwnProperty.call(s, 'political') || s.political == null || typeof s.political !== 'object' || Array.isArray(s.political)) {
         errors.push('state.political must be a non-null object');
     } else {
-        const pol = s.political as any;
+        const pol = s.political as Record<string, unknown>;
         if (!Object.prototype.hasOwnProperty.call(pol, 'political_controllers') || pol.political_controllers == null || typeof pol.political_controllers !== 'object' || Array.isArray(pol.political_controllers)) {
             errors.push('state.political.political_controllers must be a non-null object');
         }
@@ -250,11 +252,11 @@ export function validateGameStateShape(
     }
 
     // Peace phase: optional early-war fields live under state.military/state.political
-    const military = s.military as any;
+    const military = s.military as Record<string, unknown>;
     if (military && typeof military === 'object' && !Array.isArray(military) && 'war_jna' in military && military.war_jna !== undefined) {
         const jna = military.war_jna;
         if (jna !== null && typeof jna === 'object') {
-            const j = jna as any;
+            const j = jna as Record<string, unknown>;
             if (typeof j.transition_begun !== 'boolean') {
                 errors.push('military.war_jna.transition_begun must be boolean when present');
             }
@@ -270,7 +272,7 @@ export function validateGameStateShape(
     }
 
     // War phase: optional supply pressure and exhaustion live under state.political
-    const political = s.political as any;
+    const political = s.political as Record<string, unknown>;
     if (political && typeof political === 'object' && !Array.isArray(political)) {
         if ('war_alliance_rbih_hrhb' in political && political.war_alliance_rbih_hrhb !== undefined) {
             const v = political.war_alliance_rbih_hrhb;
@@ -377,7 +379,7 @@ export function validateGameStateShape(
                         errors.push(`displacement.hostile_takeover_timers.${munId} must be an object when present`);
                         continue;
                     }
-                    const rec = raw as any;
+                    const rec = raw as Record<string, unknown>;
                     if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
                         errors.push(`displacement.hostile_takeover_timers.${munId}.mun_id must be a non-empty string`);
                     }
@@ -408,7 +410,7 @@ export function validateGameStateShape(
                     errors.push(`displacement.displacement_camp_state.${munId} must be an object when present`);
                     continue;
                 }
-                const rec = raw as any;
+                const rec = raw as Record<string, unknown>;
                 if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
                     errors.push(`displacement.displacement_camp_state.${munId}.mun_id must be a non-empty string`);
                 }
@@ -427,7 +429,7 @@ export function validateGameStateShape(
                     if (byFaction == null || typeof byFaction !== 'object' || Array.isArray(byFaction)) {
                         errors.push(`displacement.displacement_camp_state.${munId}.by_faction must be an object when present`);
                     } else {
-                        for (const [fid, val] of Object.entries(byFaction as any)) {
+                        for (const [fid, val] of Object.entries(byFaction as Record<string, unknown>)) {
                             if (typeof val !== 'number' || !Number.isFinite(val) || val < 0) {
                                 errors.push(`displacement.displacement_camp_state.${munId}.by_faction.${fid} must be a non-negative number`);
                             }
@@ -443,7 +445,7 @@ export function validateGameStateShape(
     if ('recruitment_state' in s && s.recruitment_state !== undefined) {
         const recruitment = s.recruitment_state;
         if (recruitment !== null && typeof recruitment === 'object' && !Array.isArray(recruitment)) {
-            const r = recruitment as any;
+            const r = recruitment as Record<string, unknown>;
             const capital = r.recruitment_capital;
             const equipment = r.equipment_pools;
             const recruited = r.recruited_brigade_ids;
@@ -477,7 +479,7 @@ export function validateGameStateShape(
     }
 
     // Army HQ Gathering: campaign_plans and last_gathering_turn (nested under military)
-    const mil = s.military as any;
+    const mil = s.military as Record<string, unknown>;
     if (mil && typeof mil === 'object') {
         if ('campaign_plans' in mil && mil.campaign_plans !== undefined) {
             const cp = mil.campaign_plans;
@@ -490,7 +492,7 @@ export function validateGameStateShape(
                         errors.push(`military.campaign_plans.${fid} must be null or a CampaignPlan object`);
                         continue;
                     }
-                    const p = plan as any;
+                    const p = plan as Record<string, unknown>;
                     if (typeof p.issued_turn !== 'number' || !Number.isInteger(p.issued_turn) || p.issued_turn < 0) {
                         errors.push(`military.campaign_plans.${fid}.issued_turn must be a non-negative integer`);
                     }
@@ -548,7 +550,7 @@ export function validateGameStateShape(
                         continue;
                     }
                     for (let i = 0; i < (list as unknown[]).length; i++) {
-                        const entry = (list as unknown[])[i] as any;
+                        const entry = (list as unknown[])[i] as Record<string, unknown>;
                         if (entry == null || typeof entry !== 'object' || Array.isArray(entry)) {
                             errors.push(`military.army_co_decision_traces.${fid}[${i}] must be an object`);
                             continue;
@@ -650,7 +652,7 @@ export function validateGameStateShape(
             const data = mil.named_officer_data;
             if (Array.isArray(data)) {
                 for (let i = 0; i < data.length; i++) {
-                    const o = data[i] as any;
+                    const o = data[i] as Record<string, unknown>;
                     if (o == null || typeof o !== 'object') continue; // existing officer-shape validator owns this
                     if (o.stubbornness !== undefined) {
                         if (typeof o.stubbornness !== 'number' || !Number.isInteger(o.stubbornness) || o.stubbornness < 1 || o.stubbornness > 5) {
@@ -671,7 +673,7 @@ export function validateGameStateShape(
             const officers = mil.named_officers;
             if (officers !== null && typeof officers === 'object' && !Array.isArray(officers)) {
                 for (const [oid, st] of Object.entries(officers)) {
-                    const s2 = st as any;
+                    const s2 = st as Record<string, unknown>;
                     if (s2 == null || typeof s2 !== 'object') continue;
                     if (s2.last_autonomous_launch_turn !== undefined) {
                         if (typeof s2.last_autonomous_launch_turn !== 'number' || !Number.isInteger(s2.last_autonomous_launch_turn) || s2.last_autonomous_launch_turn < 0) {
@@ -704,7 +706,7 @@ export function validateGameStateShape(
 
     // political_controllers: every entry must have value defined (can be null)
     if (Object.prototype.hasOwnProperty.call(s, 'political_controllers')) {
-        const pc = (s as any).political.political_controllers;
+        const pc = isRecord(s.political) ? s.political.political_controllers : undefined;
         if (pc !== null && typeof pc === 'object' && !Array.isArray(pc)) {
             for (const [sid, val] of Object.entries(pc)) {
                 if (val !== null && typeof val !== 'string') {

@@ -51,6 +51,8 @@ const SARAJEVO_URBAN_MUN_IDS = new Set<MunicipalityId>([
 
 /** Posavina Croats: most flee to Croatia (canon: displacement redesign 2026-02-17). */
 const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
+export const BILATERAL_KILL_FRACTION = 0.03;
+export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 
 /**
  * Border-adjacent municipalities where displaced Bosniaks flee abroad (Croatia, Germany, Austria, Sweden).
@@ -195,7 +197,8 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
     return alliance <= RBIH_HRHB_ALLIED_THRESHOLD;
 }
 
-function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId): number {
+function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId, toFaction?: FactionId): number {
+    if (toFaction && isRbihHrhbPair(fromFaction, toFaction) && fromFaction === 'HRHB') return BILATERAL_HRHB_FLEE_ABROAD;
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && KRAJINA_BOSNIAK_CONVOY_MUN_IDS.has(sourceMun)) return KRAJINA_BOSNIAK_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && BOSNIAK_BORDER_ADJACENT_MUN_IDS.has(sourceMun)) return BOSNIAK_BORDER_FLEE_ABROAD;
@@ -268,6 +271,12 @@ function isEnclaveOverrun(munId: MunicipalityId, fromFaction: FactionId, toFacti
     return fromFaction === 'RBiH' && toFaction !== 'RBiH';
 }
 
+function getTakeoverKillFraction(munId: MunicipalityId, fromFaction: FactionId, toFaction: FactionId): number {
+    if (isRbihHrhbPair(fromFaction, toFaction)) return BILATERAL_KILL_FRACTION;
+    if (isEnclaveOverrun(munId, fromFaction, toFaction)) return ENCLAVE_OVERRUN_KILL_FRACTION;
+    return getDisplacementKillFraction(fromFaction, toFaction);
+}
+
 function buildFriendlyMunicipalitiesByFaction(
     state: GameState,
     _settlements: Map<string, SettlementRecord>
@@ -309,6 +318,13 @@ function getRoutingOrder(sourceMun: MunicipalityId, faction: FactionId): Municip
     return orderedUnique([...primary, ...fallback, ...LARGE_URBAN_MUN_IDS]);
 }
 
+function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId, toFaction?: FactionId): MunicipalityId[] {
+    if (!toFaction || !isRbihHrhbPair(faction, toFaction)) return getRoutingOrder(sourceMun, faction);
+    const fallback = FALLBACK_ROUTES_BY_FACTION[faction] ?? [];
+    if (faction === 'HRHB') return orderedUnique(['mostar', 'livno', ...fallback, ...LARGE_URBAN_MUN_IDS]);
+    return orderedUnique(['zenica', 'travnik', 'tuzla', ...fallback, ...LARGE_URBAN_MUN_IDS]);
+}
+
 /**
  * Shared routing helper for displaced cohorts. Routes population from sourceMunId
  * to friendly municipalities in routing order, respecting capacity constraints.
@@ -331,12 +347,13 @@ function routeDisplacedCohort(
         trackMilitiaPool?: boolean;
         requireBrigadePresence?: boolean;
         eventReason?: string;
+        causedByFaction?: FactionId;
     }
 ): { routed: number; remaining: number } {
     const currentTurn = state.meta.turn;
     let remaining = amount;
     let totalRouted = 0;
-    const routeOrder = getRoutingOrder(sourceMunId, faction);
+    const routeOrder = getBilateralRoutingOrder(sourceMunId, faction, options.causedByFaction);
     for (const targetMunId of routeOrder) {
         if (remaining <= 0) break;
         if (!friendlyMuns?.has(targetMunId)) continue;
@@ -674,12 +691,10 @@ export function processDisplacementTakeover(
             );
 
             if (displacementAmount > 0) {
-                const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
-                    ? ENCLAVE_OVERRUN_KILL_FRACTION
-                    : getDisplacementKillFraction(timer.from_faction, timer.to_faction);
+                const killFraction = getTakeoverKillFraction(munId, timer.from_faction, timer.to_faction);
                 const killed = Math.floor(displacementAmount * killFraction);
                 const survivors = Math.max(0, displacementAmount - killed);
-                const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));
+                const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
                 const routedToCamp = Math.max(0, survivors - fledAbroad);
                 const lost = killed + fledAbroad;
 
@@ -750,7 +765,7 @@ export function processDisplacementTakeover(
                         state, munId, fid as FactionId, rem,
                         friendlyMunsByFaction[fid as FactionId],
                         settlements, routedByPoolKey, report,
-                        {}
+                        { causedByFaction: timer.to_faction }
                     );
                     byFaction[fid] = result.remaining;
                 }
@@ -808,12 +823,10 @@ export function processDisplacementTakeover(
             );
             if (sustainedAmount <= 0) continue;
 
-            const killFraction = isEnclaveOverrun(munId, timer.from_faction, timer.to_faction)
-                ? ENCLAVE_OVERRUN_KILL_FRACTION
-                : getDisplacementKillFraction(timer.from_faction, timer.to_faction);
+            const killFraction = getTakeoverKillFraction(munId, timer.from_faction, timer.to_faction);
             const killed = Math.floor(sustainedAmount * killFraction);
             const survivors = Math.max(0, sustainedAmount - killed);
-            const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction));
+            const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
             const directRouted = Math.max(0, survivors - fledAbroad);
             const lost = killed + fledAbroad;
 
@@ -842,7 +855,7 @@ export function processDisplacementTakeover(
                     state, munId, timer.from_faction, directRouted,
                     friendlyMunsByFaction[timer.from_faction],
                     settlements, routedByPoolKey, report,
-                    { trackMilitiaPool: true, eventReason: 'sustained_displacement' }
+                    { trackMilitiaPool: true, eventReason: 'sustained_displacement', causedByFaction: timer.to_faction }
                 );
             }
 

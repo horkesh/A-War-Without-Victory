@@ -4,6 +4,23 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] feat(sim): complete RBiH-HRHB Phase C and supply design closure lanes
+
+**Scope:** Final integration wave from the 2026-05-17 14-plan batch execution. Covers RBiH-HRHB Phase C2-C5, supply-design completion Tasks 5-6, and strict-null Phase 1 validator narrowing. Builds on `b26d7a82`.
+
+**Change:**
+- RBiH-HRHB: adds deterministic corps diversion/release for bilateral war, bilateral takeover displacement kill/flee/routing behavior, Washington mixed-municipality restoration, and post-Washington joint defense pressure against RS in both OSID and legacy SID combat resolvers.
+- Supply: completes deterministic cascade-order coverage, sensitive-history supply smoke for Srebrenica/Zepa/Gorazde/Bihac, final supply closeout report, and a canon review queue entry for Engine Invariants supply-cascade wording.
+- Strict-null: narrows `validateGameState.ts` save-shape reads from `as any` to explicit `Record<string, unknown>` guards and updates the strict-null phase ledger; optional `GameState` promotion remains blocked on save-migration/default decisions.
+
+**Determinism / scenario evidence:** Integrated-context 40w n1867 (`583aaa2f33875d8c`) has 27/27 anchors and 6/6 benchmarks. Integrated-context 188w n1868 (`3700a34cd255c99c`) has 25/27 anchors and 6/6 benchmarks, with the inherited `op:ugljevik:teocak_krstac_2` and `op:brcko:brcko` failures. Supply lane fresh 40w n1866 (`e273e307534d23db`) had 27/27 anchors and 6/6 benchmarks before Phase C integration.
+
+**Verification:** RBiH-HRHB Phase C focused tests passed 10/10 in-lane and typecheck passed. Supply closeout focused suite passed 6 files / 8 tests in-lane. Strict-null inventory/progress tests passed 3/3 in-lane. Parent integration reran typecheck and focused integrated tests before commit.
+
+**Canon posture:** No new sensitive-history event content was introduced. Ahmici, Grabovica/Uzdol, and Stupni Do watched text events still fire in the 188w probe; the generic enclave diagnostic remains the known late-war follow-up class, outside this Phase C gate. Supply canon wording is queued for manual review rather than silently changing canon prose.
+
+---
+
 ## [2026-05-17] feat(sim): close supply, paramilitary, fatigue, strict-null, and RBiH-HRHB follow-up lanes
 
 **Scope:** Third implementation wave from the 2026-05-17 14-plan batch. Covers RBiH-HRHB Phase B/C1, supply-design completion Tasks 1-4 partial, paramilitary flavor/consequence phases, fatigue recovery rebalance, and strict-null inventory/phase-ledger baseline.

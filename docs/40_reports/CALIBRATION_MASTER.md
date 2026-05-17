@@ -1,5 +1,15 @@
 # AWWV Calibration Master Reference
 
+## n1867/n1868 RBiH-HRHB Phase C + supply closure integration probe (2026-05-17)
+
+- **40w integrated-context run. Hash: `583aaa2f33875d8c`. Anchors: 27/27. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1867`.
+- Scope: RBiH-HRHB Phase C2-C5 formation diversion, bilateral displacement cascade, ceasefire redeployment, Washington mixed-municipality restoration/joint pressure, supply-design completion Tasks 5-6, and strict-null Phase 1 validator narrowing on top of the n1864 implementation wave.
+- **188w integrated-context run. Hash: `3700a34cd255c99c`. Anchors: 25/27. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1868`.
+- Late-war caveat: failed anchors remain `op:ugljevik:teocak_krstac_2` and `op:brcko:brcko`; this is still the inherited late-war drift class, not a clean accepted endgame replacement for n1844.
+- Strict-null caveat: Phase 1 reduced state-validator escape hatches without save-shape/default changes. Optional `GameState` field promotion remains blocked on explicit save migration/default decisions.
+
 ## n1864/n1863 integrated supply/paramilitary/fatigue/RBiH-HRHB wave (2026-05-17)
 
 - **40w integrated run. Hash: `c0d8212847398b8f`. Anchors: 27/27. Benchmarks: 6/6.**

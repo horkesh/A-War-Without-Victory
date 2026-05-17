@@ -38,6 +38,7 @@ import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { clamp } from '../../utils/math.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
+import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
@@ -1002,6 +1003,14 @@ export function resolveBattleOrders(
                 front_hardening_mult: 1,
                 total_combat_power: power
             };
+        }
+        if (defenderPower) {
+            defenderPower.total_combat_power *= getPostWashingtonJointPressureMultiplier(
+                state,
+                defenderFaction,
+                attackerFaction,
+                targetSid,
+            );
         }
 
         // --- Power ratio & outcome (Peace phase: battle damage modifies power) ---
