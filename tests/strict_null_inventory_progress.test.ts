@@ -10,6 +10,12 @@ const PHASE_1_FILES = [
     'src/state/supply_reserves.ts',
 ];
 
+const PHASE_2_COMBAT_BATCH_4_FILES = [
+    'src/sim/combat/army_co_roster_loader.ts',
+    'src/sim/combat/attack_casualty_distribution.ts',
+    'src/sim/combat/combat_estimate.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -54,5 +60,20 @@ describe('strict null inventory progress', () => {
         );
 
         expect(currentTotal).toBeLessThan(baselineTotal);
+    });
+
+    it('cleans the Batch 4 Phase 2 combat leaf slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_4_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
     });
 });

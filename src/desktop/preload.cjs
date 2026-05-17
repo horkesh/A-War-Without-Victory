@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld('awwv', {
   stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
   assignCommander: (officerId, corpsId) => ipcRenderer.invoke('assign-commander', { officerId, corpsId }),
   dismissOfficer: (officerId) => ipcRenderer.invoke('dismiss-officer', { officerId }),
+  dismissEventNotification: (notificationId) => ipcRenderer.invoke('dismiss-event-notification', { notificationId }),
   respondToEventDecision: (eventId, responseId) => ipcRenderer.invoke('respond-to-event-decision', { eventId, responseId }),
   approveReserveRequest: (requestId, brigadeId, reason) => ipcRenderer.invoke('approve-reserve-request', { requestId, brigadeId, reason }),
   declineReserveRequest: (requestId, reason) => ipcRenderer.invoke('decline-reserve-request', { requestId, reason }),

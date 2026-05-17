@@ -52,6 +52,10 @@
 
 **2026-05-18 two-level event notifications Phase C:** `military.pending_event_notifications` is optional, informational, and feature-flagged behind `AWWV_TWO_LEVEL_NOTIFICATIONS=true`; emissions sort by `notification_id` with `strictCompare`, carry authored per-response/per-recipient text, and Inbox projects only `target_faction === player_faction`, `surfaced_on_turn <= turn`, `!consumed`. Do instead: keep notifications out of `player_decision_manifest.ts`; wire dismissal by setting `consumed`, and put broader text backfill in Phase D rather than inventing fallback prose.
 
+**2026-05-18 Washington timing reconciliation:** `rbih_hrhb_state.washington_signed` / `washington_turn` is an emergent live RBiH-HRHB framework predicate, while `washington_agreement_1994` is the authored week-102 calendar/narrative event. Do instead: describe live predicate outputs as framework/coordination activation (`rbih_hrhb_framework_activated`) and keep formal historical milestones in `events_fired`; do not retune exhaustion thresholds for this naming/projection split.
+
+**Event JSON edits:** after touching `data/scenarios/events/war_*.json`, run `tests/event_timeline_integrity.test.ts`; keep each year sorted by `trigger.turn_min`, and update explicit corpus counts only when the actual event corpus changes.
+
 ## Current State (2026-05-15, autonomous commander CPU follow-up)
 
 **Latest baselines:** n1740 40w hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); n1741 188w hash `a4bf8b8095050881` (26/27 anchors, 6/6 benchmarks, §6 floors PASS; final_save 6.84 MB). Baseline Regression + Desktop Release Guard green at `750e1c14`.

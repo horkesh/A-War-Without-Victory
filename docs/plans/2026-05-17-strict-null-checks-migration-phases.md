@@ -44,7 +44,7 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 | Phase | Scope | Cast / assertion count | Optional field count | Downstream consumer count | Determinism risk | Status |
 |---|---|---:|---:|---:|---|---|
 | 1 | State schema | 25 remaining after partial source pass | 458 | >5 for `GameState` and state namespaces | HIGH | In progress; validator `any` casts reduced |
-| 2 | Sim engine - combat | 116 | 0 | >5 for combat helpers and command state | HIGH | Inventory only; source deferred |
+| 2 | Sim engine - combat | 116 | 0 | >5 for combat helpers and command state | HIGH | In progress; Batch 4 combat leaf slice cleaned |
 | 3 | Sim engine - early war + bot | 35 | 0 | >5 for turn pipeline / bot flow | MEDIUM | Inventory only; source deferred |
 | 4 | Scenario + IPC | 53 | 0 | 3-5 for loader/runner/desktop seams | MEDIUM | Inventory only; source deferred |
 | 5 | UI adapter | 68 | 0 | >5 renderer consumers | MEDIUM | Inventory only; source deferred |
@@ -137,6 +137,7 @@ Counts:
 
 Stop-gate notes:
 - `src/sim/combat/paramilitary_sweep.ts`, supply-related combat code, and fatigue-related combat code are conflict-prone in the current multi-agent lane. Leave them as ledger entries until the parent lane confirms they are free.
+- 2026-05-18 Batch 4 narrow pass: cleaned the strict-null inventory escapes in `army_co_roster_loader.ts`, `attack_casualty_distribution.ts`, and `combat_estimate.ts`. This removes 3 Phase 2 leaf escapes (`as_factionid_casts`: 1, `as_any_casts`: 1, `non_null_assertions_dot`: 1) and adds a focused progress assertion in `tests/strict_null_inventory_progress.test.ts`. No defaults, schema changes, ordering changes, or serialized output changes were introduced.
 
 ### Phase 3: Sim Engine - Early War + Bot
 

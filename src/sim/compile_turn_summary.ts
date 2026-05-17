@@ -423,12 +423,13 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
         }
     }
 
-    // Washington Agreement signed this turn
+    // Emergent RBiH-HRHB framework predicate cleared this turn.
+    // The formal calendar/narrative Washington Agreement event is recorded in events_fired.
     const washingtonTurn = state.political.rbih_hrhb_state?.washington_turn;
     if (washingtonTurn === turn) {
         events.push({
-            kind: 'washington_agreement',
-            description: 'Washington Agreement signed — RBiH–HRHB ceasefire.',
+            kind: 'rbih_hrhb_framework_activated',
+            description: 'RBiH-HRHB federation framework activated - bilateral ceasefire and joint anti-RS coordination are live.',
         });
     }
 

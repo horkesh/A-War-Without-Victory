@@ -222,7 +222,7 @@ export function applyRosterToOfficers(
     const tolerances = roster.political_leader_tolerance ?? {};
     const tolFactions = Object.keys(tolerances).sort();
     for (const faction of tolFactions) {
-        const v = tolerances[faction as FactionId];
+        const v = tolerances[faction];
         if (typeof v === 'number') {
             mil.army_co_political_tolerance[faction] = v;
         }

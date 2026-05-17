@@ -60,6 +60,7 @@ const TYPE_LABELS: Record<string, string> = {
     officer_event: 'PERSONNEL',
     operation_opportunity: 'OPPORTUNITY',
     autonomy_proposal: 'PROPOSAL',
+    intelligence_notification: 'INTEL',
     situation: 'SITUATION',
 };
 
@@ -67,6 +68,28 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
     const style = SEVERITY_STYLES[item.severity];
     const typeLabel = TYPE_LABELS[item.type] ?? item.type.toUpperCase();
     const isActionable = item.action !== 'none';
+
+    if (item.type === 'intelligence_notification') {
+        return (
+            <div className={`w-full text-left p-2.5 rounded border ${style.border} bg-panel-card`}>
+                <div className="flex items-center gap-1.5 mb-1">
+                    <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+                        {typeLabel}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={onClick}
+                        className="ml-auto text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                        aria-label="Dismiss intelligence notification"
+                    >
+                        Dismiss
+                    </button>
+                </div>
+                <div className="text-[11px] font-bold text-text-primary leading-tight">{item.title}</div>
+                <div className="text-[10px] text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
+            </div>
+        );
+    }
 
     return (
         <button

@@ -32,14 +32,22 @@
 | IVP breakdown modal stale row | Verified closed | `docs/40_reports/implemented/20260518_IVP_BREAKDOWN_MODAL_STALE_ROW_VERIFICATION.md` |
 | Two-level event surfacing Phase C | Implemented behind flag | `docs/40_reports/implemented/20260518_TWO_LEVEL_EVENT_SURFACING_PHASE_C.md`; default 40w n1875 hash `42607f83870e01d5`. |
 
+## Completed Batch 4
+
+| Lane | Status | Source |
+|---|---|---|
+| Strict-null Phase 2 combat leaf slice | Partial implemented | `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`; integrated 40w n1878 stayed hash-stable at `42607f83870e01d5`. |
+| Notification dismiss command path + first Phase D content backfill | Implemented / content partial | `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`; dismissal tests and notification projection tests pass. |
+| Washington live-state vs narrative milestone reconciliation | Implemented | `docs/40_reports/audits/20260518_WASHINGTON_TIMING_RECONCILIATION.md`; live predicate AAR now uses `rbih_hrhb_framework_activated`, while `washington_agreement_1994` remains the week-102 calendar event. |
+| Gold/operator templates, clean-VM evidence templates, external playtest dry-run artifacts | Repo-side implemented | `tools/release/prepare_launch_artifacts.cjs`, `docs/50_launch/release/launch_day_automation_template.md`, `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md`, `docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md`. |
+
 ## Next Implementable Batches
 
 | Batch | Candidate lanes | Notes |
 |---|---|---|
-| Batch 4 strictness | Strict-null Phase 2 combat migration | Must remain type-only and 40w hash-stable. |
-| Batch 4 notifications/content | Notification dismiss command path, Phase D notification content backfill | Phase D content still needs historian/narrative review; sparse coverage remains tolerated until backfill closes. |
-| Batch 4 design/data follow-up | Washington live-state vs narrative milestone reconciliation | Do not retune exhaustion thresholds alone; current drift is duration/milestone bound. |
-| Batch 4 launch/operator support | Gold gate/launch-day automation, clean-VM evidence templates, external playtest artifact dry-run support | Operator-only validation remains outside autonomous repo execution; repo can improve scripts/templates. |
+| Batch 5 strictness | Continue strict-null Phase 2 beyond the cleaned combat leaf slice | Must remain type-only and 40w hash-stable. |
+| Batch 5 notifications/content | Continue Phase D notification content backfill | Remaining sensitive-history and late-war diplomacy rows still need historian/narrative review; sparse coverage remains tolerated until backfill closes. |
+| Batch 5 operator evidence | Execute clean-VM and external playtest evidence outside the repo when an operator has target machines/artifacts | Repo now has templates/scripts; actual SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, outreach, and response triage remain operator-only. |
 
 ## Stale Or Already Closed Rows To Reconcile
 

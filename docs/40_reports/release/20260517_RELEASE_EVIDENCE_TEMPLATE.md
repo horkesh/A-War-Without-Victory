@@ -25,7 +25,15 @@ Automated release evidence and clean-VM evidence are separate. Do not mark this 
 
 Automated evidence should include typecheck, fast tests, scenario tests, desktop release guard, packaged runtime probe, NSIS build/smoke, installer size, and SHA-256.
 
-Clean-VM evidence should include Windows version, VM snapshot identity, SmartScreen wording, Settings -> Apps entry, Start Menu/shortcut launch, new campaign, one-turn advance, save/relaunch/load/advance, `%APPDATA%` persistence, uninstall cleanup, and registry cleanup.
+Clean-VM evidence should be recorded in `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md` and should include Windows version, VM snapshot identity, SmartScreen wording, Settings -> Apps entry, Start Menu/shortcut launch, new campaign, one-turn advance, save/relaunch/load/advance, `%APPDATA%` persistence, uninstall cleanup, and registry cleanup.
+
+Artifact dry-run support:
+
+```powershell
+npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged\<artifact-name>
+```
+
+The dry-run manifest must keep `distributionApproved: false` until the operator evidence is filled.
 
 ## Scenario / Save Evidence
 

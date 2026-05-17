@@ -2492,6 +2492,25 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('dismiss-event-notification', async (_event, payload) => {
+    const { notificationId } = payload || {};
+    if (!currentGameStateJson || typeof notificationId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const { dismissEventNotification } = await import('../sim/events/dismiss_notifications.js');
+      const result = dismissEventNotification(state, notificationId);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('get-settings', async () => {
     try {
       const { loadSettings } = require('./settings_store.cjs');

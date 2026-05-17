@@ -71,7 +71,7 @@ export function estimateAttackCost(
     const postureMult = POSTURE_PRESSURE_MULT[posture];
     const readinessMult = READINESS_MULT[brigade.readiness ?? 'active'] ?? 1.0;
     const equipMult = computeEquipmentMultiplier(brigade, posture);
-    const resilienceMult = computeResilienceModifier(state, brigade.faction as any, brigade);
+    const resilienceMult = computeResilienceModifier(state, brigade.faction, brigade);
 
     const attackerPower = brigadePersonnel * experienceMult * cohesionMult * postureMult
         * readinessMult * equipMult * resilienceMult;

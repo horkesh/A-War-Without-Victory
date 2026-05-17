@@ -43,6 +43,14 @@
 4. Publish binaries, release notes, store page, and announcement in that order.
 5. Monitor the first launch window for install failures, launch failures, save corruption, crashes, and sensitive-history issues.
 
+Operator automation template: `docs/50_launch/release/launch_day_automation_template.md`.
+
+Dry-run command:
+
+```powershell
+npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged\<artifact-name> --format markdown
+```
+
 ## Rollback / Unpublish Criteria
 
 - installer does not launch or install for a supported target

@@ -797,6 +797,30 @@ function App() {
           if (action === 'autonomy_panel') {
             setAutonomyPanelOpen(true);
           }
+          if (action === 'dismiss_intelligence_notification') {
+            const notificationId = itemId.startsWith('intel:') ? itemId.slice('intel:'.length) : itemId;
+            if (!ipc.isAvailable) {
+              const current = useGameStore.getState().loadedGameState;
+              if (current?.pendingEventNotifications) {
+                useGameStore.setState({
+                  loadedGameState: {
+                    ...current,
+                    pendingEventNotifications: current.pendingEventNotifications.map((notification) => (
+                      notification.notification_id === notificationId
+                        ? { ...notification, consumed: true }
+                        : notification
+                    )),
+                  },
+                });
+              }
+              return;
+            }
+            void ipc.dismissEventNotification(notificationId).then((result) => {
+              if (!result.ok) {
+                setLoadError(result.error ?? 'Failed to dismiss intelligence notification.');
+              }
+            });
+          }
         }} />}
         {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
         {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}

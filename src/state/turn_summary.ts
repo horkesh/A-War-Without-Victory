@@ -85,6 +85,7 @@ export interface TurnNotableEvent {
         | 'graz_accords_activated'
         | 'truce_broken'
         | 'washington_agreement'
+        | 'rbih_hrhb_framework_activated'
         | 'operation_storm'
         | 'ceasefire_activated'
         | 'siege_formed'

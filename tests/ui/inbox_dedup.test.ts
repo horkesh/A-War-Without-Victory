@@ -126,4 +126,38 @@ describe('Presidential Inbox officer event dedupe', () => {
         fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
         expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:decision-room');
     });
+
+    it('renders intelligence notifications with an explicit dismiss command', () => {
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({
+                player_faction: 'RBiH',
+                pendingEventNotifications: [
+                    {
+                        notification_id: 'rs_strategic_goals:RS:RBiH',
+                        event_id: 'rs_strategic_goals',
+                        source_faction: 'RS',
+                        target_faction: 'RBiH',
+                        response_id: 'all_six',
+                        surfaced_on_turn: 12,
+                        headline: 'RS Assembly endorses Six Strategic Goals',
+                        body: 'Sarajevo intelligence reads the platform as a hardening of territorial war aims.',
+                        consumed: false,
+                    },
+                ],
+            }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByText('INTEL')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: /dismiss intelligence notification/i }));
+
+        expect(onAction).toHaveBeenCalledWith(
+            'dismiss_intelligence_notification',
+            'intel:rs_strategic_goals:RS:RBiH',
+        );
+    });
 });

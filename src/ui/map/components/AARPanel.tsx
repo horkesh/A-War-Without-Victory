@@ -54,6 +54,7 @@ const NOTABLE_LABEL: Record<TurnNotableEvent['kind'], string> = {
     graz_accords_activated: 'Graz Accords',
     truce_broken: 'Truce Broken',
     washington_agreement: 'Washington Agreement',
+    rbih_hrhb_framework_activated: 'RBiH-HRHB Framework',
     operation_storm: 'Operation Storm',
     ceasefire_activated: 'Ceasefire',
     siege_formed: 'Siege Formed',

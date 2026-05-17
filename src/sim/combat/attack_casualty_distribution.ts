@@ -139,10 +139,11 @@ export function distributeDefenderCasualties(params: {
         ? sectorDefenseBrigades : [defenderFormation];
 
     if (sectorBrigadeWeights && defBrigades.length > 1) {
+        const weights = sectorBrigadeWeights;
         // Distance-weighted distribution
-        const totalWeight = defBrigades.reduce((s, b) => s + (sectorBrigadeWeights!.get(b.id) ?? 0), 0);
+        const totalWeight = defBrigades.reduce((s, b) => s + (weights.get(b.id) ?? 0), 0);
         for (const b of defBrigades) {
-            const w = sectorBrigadeWeights.get(b.id) ?? 0;
+            const w = weights.get(b.id) ?? 0;
             const frac = totalWeight > 0 ? w / totalWeight : 1 / defBrigades.length;
             const cas = Math.round(finalDefenderCas * frac);
             if (cas > 0) {

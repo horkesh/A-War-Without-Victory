@@ -437,6 +437,38 @@
         "risk_level": 0.5
       }
     ],
+    "notifications_to_other_factions": {
+      "croat_republic": {
+        "RBiH": {
+          "headline": "Herceg-Bosna follows Zagreb line",
+          "body": "Mostar signals that Herceg-Bosna will organize as a Croat political entity with Zagreb's support. Sarajevo staff read the choice as a direct strain on the anti-VRS front."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna sharpens Croat territorial claim",
+          "body": "Croat leaders align their project with Zagreb and local territorial control. Pale analysts see the Bosniak-Croat alliance weakening even while HVO units still face VRS lines."
+        }
+      },
+      "united_front": {
+        "RBiH": {
+          "headline": "HVO reaffirms united anti-VRS front",
+          "body": "Herceg-Bosna publicly prioritizes cooperation with ARBiH against Greater Serbia. Sarajevo reads the move as a chance to hold the shared front, while watching Zagreb's reaction."
+        },
+        "RS": {
+          "headline": "Croat and Bosnian forces hold common line",
+          "body": "Herceg-Bosna chooses open cooperation with Sarajevo. Pale staff assess a stronger anti-VRS alignment if the pledge survives pressure from Zagreb and local commanders."
+        }
+      },
+      "strategic_ambiguity": {
+        "RBiH": {
+          "headline": "Herceg-Bosna keeps alliance language",
+          "body": "Mostar continues public cooperation while building Croat institutions in parallel. Sarajevo can work with the pledge for now, but the gap between words and structure is visible."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna delays a clear break",
+          "body": "HVO leaders keep fighting alongside Sarajevo while preserving room for a separate Croat project. Pale sees an alliance that holds tactically but may fracture under pressure."
+        }
+      }
+    },
     "historical_source": "ICTY Kordic Trial Judgment para. 491. Prlic et al. Trial Judgment, JCE findings. Tudjman-Boban Zagreb meeting Dec 1991. Kljuic removal Feb 1992."
   },
   {
@@ -481,39 +513,6 @@
     "sets_flags": {
       "arms_embargo_active": true
     }
-  },
-  {
-    "id": "embargo_croatia_transit_1992",
-    "title": "Croatia Transit Opens a Narrow Supply Trickle",
-    "narrative": "By mid-1992, Bosnian government units are still trapped under the UN arms embargo, but limited procurement through Croatia begins to create a narrow and contested supply trickle. The flow remains far short of parity with the VRS inheritance of JNA stocks.",
-    "category": "military",
-    "trigger": {
-      "turn_min": 13,
-      "turn_max": 15,
-      "phase": "war",
-      "condition": {
-        "type": "flag_equals",
-        "flag": "arms_embargo_active",
-        "value": true
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
-    },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
-      }
-    ],
-    "sets_flags": {
-      "embargo_croatia_transit": true
-    },
-    "historian_audit_row": "H4",
-    "source": "BB1 p.167; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
-    "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4."
   },
   {
     "id": "battle_of_the_barracks_sarajevo",
@@ -1273,6 +1272,39 @@
     "sets_flags": {
       "corridor_secured": true
     }
+  },
+  {
+    "id": "embargo_croatia_transit_1992",
+    "title": "Croatia Transit Opens a Narrow Supply Trickle",
+    "narrative": "By mid-1992, Bosnian government units are still trapped under the UN arms embargo, but limited procurement through Croatia begins to create a narrow and contested supply trickle. The flow remains far short of parity with the VRS inheritance of JNA stocks.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 13,
+      "turn_max": 15,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "arms_embargo_active",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
+      }
+    ],
+    "sets_flags": {
+      "embargo_croatia_transit": true
+    },
+    "historian_audit_row": "H4",
+    "source": "BB1 p.167; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
+    "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4."
   },
   {
     "id": "concentration_camps_revealed_1992",

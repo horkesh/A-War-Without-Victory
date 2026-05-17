@@ -87,7 +87,7 @@ describe('deriveInboxItems event notifications', () => {
                 severity: 'info',
                 title: 'RS Assembly endorses Six Strategic Goals',
                 subtitle: 'Sarajevo intelligence reads the platform as a hardening of territorial war aims.',
-                action: 'none',
+                action: 'dismiss_intelligence_notification',
                 priority: 55,
             },
         ]);

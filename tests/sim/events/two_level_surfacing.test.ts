@@ -74,6 +74,17 @@ const RS_STRATEGIC_GOALS: EventDefinition = {
 };
 
 describe('two-level event surfacing', () => {
+    it('does not carry authored notification text or emit notifications when the flag is off', () => {
+        delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+        const s = state('RS', 1);
+
+        evaluateEvents(s, () => 0, 1, [RS_STRATEGIC_GOALS]);
+        resolveEventDecision(s, 'rs_strategic_goals', 'all_six');
+
+        expect(s.military.pending_event_notifications).toBeUndefined();
+        expect(s.military.pending_event_decisions ?? []).toHaveLength(0);
+    });
+
     it('emits one deterministic notification per authored non-source faction after a player response', () => {
         enableNotifications();
         const s = state('RS', 1);
