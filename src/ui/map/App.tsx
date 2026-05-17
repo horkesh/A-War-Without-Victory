@@ -695,30 +695,6 @@ function App() {
     }
   }, []);
 
-  const selectPrimaryArmy = () => {
-      if (!loadedGameState || !playerFaction) return;
-      const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
-      if (army) {
-        useGameStore.getState().setSelectedArmyHqId(army.id);
-      useGameStore.getState().setSelectedFormationId(null);
-      // Pan to it if possible
-      const pan = useGameStore.getState().panToOsid;
-      if (pan && army.home_osid) pan(army.home_osid);
-    }
-  };
-
-  const selectPrimaryCorps = () => {
-      if (!loadedGameState || !playerFaction) return;
-      const corps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
-      if (corps) {
-        useGameStore.getState().setSelectedCorpsId(corps.id);
-      useGameStore.getState().setSelectedFormationId(null);
-      // Pan to it if possible
-      const pan = useGameStore.getState().panToOsid;
-      if (pan && corps.home_osid) pan(corps.home_osid);
-    }
-  };
-
   return (
     <div
       className="h-screen w-screen relative"

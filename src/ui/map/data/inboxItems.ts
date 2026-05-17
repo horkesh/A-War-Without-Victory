@@ -11,10 +11,11 @@
 import type { LoadedGameState } from './types';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { playerFactionMatch } from './playerFactionMatch';
+import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -244,6 +245,22 @@ export function deriveInboxItems(
                 priority: 50,
             });
         }
+    }
+
+    const notifications = state.pendingEventNotifications ?? [];
+    for (const notification of [...notifications].sort((a, b) => strictCompare(a.notification_id, b.notification_id))) {
+        if (!playerFactionMatch(notification.target_faction, playerFaction)) continue;
+        if (notification.consumed) continue;
+        if (notification.surfaced_on_turn > (state.turn ?? 0)) continue;
+        items.push({
+            id: `intel:${notification.notification_id}`,
+            type: 'intelligence_notification',
+            severity: 'info',
+            title: notification.headline,
+            subtitle: notification.body,
+            action: 'none',
+            priority: 55,
+        });
     }
 
     // 7. Situation highlights (informational, from turn summary + state)

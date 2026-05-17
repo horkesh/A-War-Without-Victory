@@ -24,6 +24,7 @@ function makeStub(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
         label: 'test',
         turn: 5,
         phase: 'war',
+        player_faction: 'RBiH',
         formations: [],
         militiaPools: [],
         controlBySettlement: {},
@@ -306,6 +307,7 @@ describe('deriveInboxItems — officer events', () => {
 
     it('uses generic title for non-replacement officer events', () => {
         const state = makeStub({
+            player_faction: 'RS',
             pendingOfficerEvents: [
                 {
                     event_id: 'off_2',
@@ -391,6 +393,7 @@ describe('deriveInboxItems — autonomy proposals', () => {
 
     it('uses fallback subtitle when description is empty', () => {
         const state = makeStub({
+            player_faction: 'RS',
             pendingProposalReviews: [
                 { id: 'PROP_3_military_0', turn: 3, faction: 'RS', domain: 'military', description: '' },
             ],

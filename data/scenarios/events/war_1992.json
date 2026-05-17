@@ -143,6 +143,18 @@
         "risk_level": 0.9
       }
     ],
+    "notifications_to_other_factions": {
+      "all_six": {
+        "RBiH": {
+          "headline": "RS Assembly endorses Six Strategic Goals",
+          "body": "Belgrade-aligned deputies adopt Karadzic's territorial maximalist platform. Sarajevo intelligence reads this as a hardening of war aims; federal options narrow."
+        },
+        "HRHB": {
+          "headline": "Karadzic Assembly clarifies territorial reach",
+          "body": "RS adoption of the Six Goals sharpens corridor and ethnic-separation claims that bear on western Herzegovina; Mostar leadership weighs patron consultation."
+        }
+      }
+    },
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016), Six Strategic Goals and JCE findings. ICJ Bosnia v. Serbia (2007)."
   },
   {
@@ -271,6 +283,18 @@
         "risk_level": 0.4
       }
     ],
+    "notifications_to_other_factions": {
+      "civic": {
+        "RS": {
+          "headline": "Sarajevo affirms civic republic platform",
+          "body": "The Presidency publicly frames Bosnia as a multi-ethnic republic. Pale reads the statement as an effort to preserve international legitimacy and complicate partition claims."
+        },
+        "HRHB": {
+          "headline": "RBiH platform stresses equal citizenship",
+          "body": "Sarajevo's civic line keeps a shared-state option alive on paper. Croat leaders weigh whether the pledge protects local autonomy or masks wartime centralization."
+        }
+      }
+    },
     "historical_source": "ICTY Karadzic Trial Judgment paras. 32, 48, 50. ARBiH ethnic composition: 70% Bosniak, 18% Croat, 12% Serb (June 1992). Divjak 'flower arrangement' quote."
   },
   {

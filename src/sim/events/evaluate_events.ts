@@ -14,6 +14,8 @@ import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, 
 import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
+import { applyAIDefaultResponse } from './ai_default_response.js';
+import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse } from '../political/political_event_decision.js';
@@ -235,22 +237,40 @@ export function evaluateEvents(
                     response_options: def.response_options,
                     faction: respondingFaction,
                     requires_player_response: def.requires_player_response,
+                    ...(isTwoLevelNotificationsEnabled()
+                        ? { notifications_to_other_factions: def.notifications_to_other_factions }
+                        : {}),
                 });
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Political personality path for dimension-weighted logic types.
                 let chosen: EventResponseOption;
-                if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
+                if (isTwoLevelNotificationsEnabled()) {
+                    chosen = applyAIDefaultResponse(state, def);
+                } else if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
                     const personality = getPoliticalPersonality(respondingFaction);
                     const assessment = computePoliticalAssessment(state, respondingFaction, personality);
                     chosen = pickPoliticalResponse(def.response_options, respondingFaction, assessment, personality);
+                    applyEventEffects(state, chosen.effects ?? []);
+                    // Apply flags and dimension shifts from the chosen response option
+                    applyDefinitionFlags(state, chosen.sets_flags);
+                    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
                 } else {
                     chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
+                    applyEventEffects(state, chosen.effects ?? []);
+                    // Apply flags and dimension shifts from the chosen response option
+                    applyDefinitionFlags(state, chosen.sets_flags);
+                    applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
                 }
-                applyEventEffects(state, chosen.effects ?? []);
-                // Apply flags and dimension shifts from the chosen response option
-                applyDefinitionFlags(state, chosen.sets_flags);
-                applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+                if (isTwoLevelNotificationsEnabled() && respondingFaction !== null) {
+                    emitEventNotifications(
+                        state,
+                        { event_id: def.id, notifications_to_other_factions: def.notifications_to_other_factions },
+                        chosen.id,
+                        respondingFaction,
+                        currentTurn,
+                    );
+                }
             }
         }
 

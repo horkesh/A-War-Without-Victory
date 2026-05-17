@@ -20,14 +20,25 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 3
+
+| Lane | Status | Source |
+|---|---|---|
+| Morale floor + exhaustion/Washington drift audit | Verified / follow-up identified | `docs/40_reports/audits/20260518_BATCH3_MORALE_AND_EXHAUSTION_DRIFT_AUDIT.md` |
+| Chronicle hybrid chapters | Implemented | `docs/40_reports/implemented/20260518_CHRONICLE_HYBRID_CHAPTERS.md` |
+| Telemetry local-first crash diagnostics | Implemented | `docs/40_reports/implemented/20260518_TELEMETRY_LOCAL_FIRST_CRASH_DIAGNOSTICS.md` |
+| Primary Army / Corps quick-select cleanup | Implemented | `docs/40_reports/implemented/20260518_PRIMARY_COMMAND_QUICK_SELECT_CLEANUP.md` |
+| Wall-clock target-truth report | Implemented | `docs/40_reports/implemented/20260518_PERFORMANCE_WALL_CLOCK_TARGET_TRUTH_REPORT.md` |
+| IVP breakdown modal stale row | Verified closed | `docs/40_reports/implemented/20260518_IVP_BREAKDOWN_MODAL_STALE_ROW_VERIFICATION.md` |
+| Two-level event surfacing Phase C | Implemented behind flag | `docs/40_reports/implemented/20260518_TWO_LEVEL_EVENT_SURFACING_PHASE_C.md`; default 40w n1875 hash `42607f83870e01d5`. |
+
 ## Next Implementable Batches
 
 | Batch | Candidate lanes | Notes |
 |---|---|---|
-| Batch 3 design/data cleanup | Morale-resist-floor documentation/data decision, ceasefire/Washington threshold drift check | Keep canon/doc decisions separate from behavior changes unless evidence requires data promotion. |
-| Batch 3 product/UI | Chronicle hybrid chapter implementation, telemetry local-first implementation, primary Army/Corps quick-select cleanup | `App.tsx` is available again after Batch 1 integration; keep UI-only lanes disjoint. |
-| Batch 3 diagnostics/perf | Wall-clock performance follow-up, strict-null Phase 2 | Tooling/quality lanes can proceed in parallel with product/UI. |
-| Batch 4 notifications/content | Phase C two-level event surfacing, Phase D notification content backfill | Phase C is implementable behind flag; Phase D content still needs historian/narrative review before broad copy lands. |
+| Batch 4 strictness | Strict-null Phase 2 combat migration | Must remain type-only and 40w hash-stable. |
+| Batch 4 notifications/content | Notification dismiss command path, Phase D notification content backfill | Phase D content still needs historian/narrative review; sparse coverage remains tolerated until backfill closes. |
+| Batch 4 design/data follow-up | Washington live-state vs narrative milestone reconciliation | Do not retune exhaustion thresholds alone; current drift is duration/milestone bound. |
 | Batch 4 launch/operator support | Gold gate/launch-day automation, clean-VM evidence templates, external playtest artifact dry-run support | Operator-only validation remains outside autonomous repo execution; repo can improve scripts/templates. |
 
 ## Stale Or Already Closed Rows To Reconcile

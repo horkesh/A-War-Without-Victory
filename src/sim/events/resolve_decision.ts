@@ -6,6 +6,7 @@
 import type { GameState } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
 import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate_events.js';
+import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
 
 /**
  * Resolve a pending event decision.
@@ -37,6 +38,19 @@ export function resolveEventDecision(state: GameState, eventId: string, response
     // Apply flags and dimension shifts from the chosen response option
     applyDefinitionFlags(state, chosen.sets_flags);
     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+
+    if (isTwoLevelNotificationsEnabled()) {
+        emitEventNotifications(
+            state,
+            {
+                event_id: decision.event_id,
+                notifications_to_other_factions: decision.notifications_to_other_factions,
+            },
+            chosen.id,
+            decision.faction,
+            state.meta.turn ?? decision.turn_fired,
+        );
+    }
 
     // Remove from pending list
     pending.splice(idx, 1);

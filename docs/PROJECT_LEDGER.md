@@ -4,6 +4,26 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-18] feat(roadmap): close third backlog execution batch
+
+**Scope:** Third autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue.
+
+**Change:**
+- Verified and documented morale floor doctrine; corrected stale Engine Invariants wording from RS=70 to RS=55, matching code, tests, and Systems Manual.
+- Verified ceasefire/Washington exhaustion thresholds and recorded the real remaining drift: live Washington state at turn 85 vs narrative event week 102, not an exhaustion-threshold binding issue.
+- Implemented Chronicle hybrid player-faction campaign-phase chapters with month sublabels.
+- Implemented default-off local-first crash diagnostics with redaction, local queue/export, Settings diagnostics controls, and no upload provider.
+- Removed dead primary army/corps quick-select handlers, verified the IVP breakdown modal row as stale/already closed, and added a wall-clock target-truth reporting tool over timing sidecars.
+- Implemented two-level event surfacing Phase C behind `AWWV_TWO_LEVEL_NOTIFICATIONS=true`: optional event notification state, deterministic emission helpers, sparse authored `war_1992` notification text, and nonblocking Inbox projection. Parent integration corrected an initial default-hash drift by keeping notification authored text out of pending player decisions when the flag is off.
+
+**Determinism / scenario evidence:** Default 40w n1875 completed with final hash `42607f83870e01d5`, 27/27 anchors, and 6/6 benchmarks, hash-identical to n1872/n1873 after the feature-flag-off notification fix. Telemetry artifacts are local-only and contain no wall-clock timestamp fields. Performance target reporting reads sidecar timing JSON only and does not write deterministic saves/artifacts.
+
+**Verification:** Parent-side focused suites passed across event notifications (8 files / 76 tests, then 6 files / 62 tests after the hash fix), telemetry/settings (7 files / 19 tests), Chronicle/UI/perf/IVP (11 files / 34 tests), and morale/alliance (4 files / 71 tests). `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, `npm.cmd run sim:scenario:run:40w`, and `git diff --check` passed; build emitted only existing Vite warnings.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. The only canon-doc change is the Engine Invariants morale-floor correction to align with existing code/tests/Systems Manual. New notification content is sparse and feature-flagged; broader Phase D content remains historian/narrative-gated.
+
+---
+
 ## [2026-05-18] feat(roadmap): close catastrophic, settings, and pipeline backlog lanes
 
 **Scope:** Second execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` backlog, following the player-faction and operation-stall batch.
@@ -5616,3 +5636,5 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/implemented/20260517_LOGISTICS_PRIORITY_WIRED.md`; `docs/40_reports/implemented/20260517_SAVE_MIGRATION_HARDENING.md`; `docs/40_reports/audits/20260517_ENDGAME_188W_VERIFICATION.md`; `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md`; `tools/diagnostics/save_migration_drift_audit.cjs`; `tools/diagnostics/p0_latent_recheck.cjs`; `tools/diagnostics/patron_pressure_probe.cjs`; `tools/diagnostics/sarajevo_casualty_railroad.cjs`.
 
 **Verification:** Parent-side focused integration passed: `npx.cmd vitest run tests\save_migration.test.ts tests\migration_nested_ownership.test.ts tests\save_migration_versioned_steps.test.ts tests\save_migration_validator_rejection.test.ts tests\save_migration_drift_audit.test.ts tests\save_migration_round_trip_contract.test.ts tests\startup_snapshot_contract.test.ts tests\logistics_priority_wiring_red.test.ts tests\logistics_priority_ipc_path.test.ts tests\endgame_188w_diagnostics.test.ts` (10 files / 43 tests). `node tools\diagnostics\save_migration_drift_audit.cjs` reports 0 anonymous defaults. `npx.cmd tsc --noEmit --pretty false` passed. `npm.cmd run sim:scenario:run:40w` produced n1848 `c09a498b7dc9ccae`; `node tools\diagnose_run.cjs ...n1848` reported 0 errors / 28 warnings; `node tools\validate_run_consistency.cjs ...n1848` passed. `npx.cmd vitest run tests\determinism_static_scan_r1_5.test.ts` passed. Full `npm.cmd run canon:check` now reaches baseline regression after the wrapper fix and fails on the existing `apr1992_52w` `activity_summary.json` baseline hash (`expected c29e296b27d04e2dc3ed6b159d1ccc40e9d9538e8c16878e0f3cda71f055e0b1`, `actual 6e046628d02a0759bbc1e532e1b43ceba7d2e670e643199de7dc885d9ee8b11c`); the baseline-refresh decision remains a follow-up calibration task.
+
+---

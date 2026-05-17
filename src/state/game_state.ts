@@ -2088,6 +2088,8 @@ negotiation?: import('./negotiation_types.js').NegotiationState;
 fired_event_ids?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
+/** Informational event notifications for non-source factions. Never blocks turn advance. */
+pending_event_notifications?: import('../sim/events/event_types.js').EventNotification[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
 event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
 // ─── v0.9.0 Consequence System state (Phase 1 Session 1) ─────────────────

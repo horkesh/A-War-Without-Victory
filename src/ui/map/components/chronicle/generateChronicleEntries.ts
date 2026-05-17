@@ -1,6 +1,7 @@
 export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost';
 
 export interface ChronicleEntry {
+    id?: string;
     turn: number;
     type: ChronicleCardType;
     headline: boolean;
@@ -17,6 +18,10 @@ export interface ChronicleEntry {
         costSeverity?: 'severe' | 'critical';
         netFriendlyTerritory?: number;
         ownFormationsDestroyed?: number;
+        aftermathId?: string;
+        costLedgerRef?: string;
+        codexRef?: string;
+        sensitiveSignals?: Array<'atrocity' | 'rupture'>;
     };
 }
 

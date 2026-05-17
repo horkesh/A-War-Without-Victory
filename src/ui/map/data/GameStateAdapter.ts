@@ -1881,6 +1881,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         : undefined;
     const pendingOfficerEvents = derivePendingOfficerEvents(state, playerFaction);
     const pendingEventDecisions = derivePendingEventDecisions(state);
+    const pendingEventNotifications = derivePendingEventNotifications(state);
     const pendingProposalReviews = derivePendingProposalReviews(state, playerFaction);
     const operationOpportunityProposals = deriveOperationOpportunityProposals(state, playerFaction);
     const presidentialReviewQueue = derivePresidentialReviewQueue({
@@ -2008,6 +2009,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         // Event system (v0.4.1 Phase 5)
         firedEvents: deriveFiredEvents(state),
         pendingEventDecisions,
+        pendingEventNotifications,
         presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingCounterOffers: derivePendingCounterOffers(state),
@@ -2532,6 +2534,13 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
 function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventDecisions'] {
     const pending = state.military?.pending_event_decisions as
         LoadedGameState['pendingEventDecisions'];
+    if (!pending || pending.length === 0) return undefined;
+    return pending;
+}
+
+function derivePendingEventNotifications(state: any): LoadedGameState['pendingEventNotifications'] {
+    const pending = state.military?.pending_event_notifications as
+        LoadedGameState['pendingEventNotifications'];
     if (!pending || pending.length === 0) return undefined;
     return pending;
 }

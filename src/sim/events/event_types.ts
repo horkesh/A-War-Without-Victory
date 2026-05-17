@@ -323,6 +323,28 @@ export interface EventResponseOption {
 /** Event category for UI display and filtering. */
 export type EventCategory = 'military' | 'political' | 'humanitarian' | 'diplomatic' | 'economic' | 'command' | 'territorial';
 
+export interface EventNotificationText {
+    headline: string;
+    body: string;
+}
+
+export type EventNotificationTextByResponse = Record<
+    string,
+    Partial<Record<FactionId, EventNotificationText>>
+>;
+
+export interface EventNotification {
+    notification_id: string;
+    event_id: string;
+    source_faction: FactionId;
+    target_faction: FactionId;
+    response_id: string;
+    surfaced_on_turn: number;
+    headline: string;
+    body: string;
+    consumed: boolean;
+}
+
 export interface EventDefinition {
     id: string;
     /** Display title for event UI headline. */
@@ -355,6 +377,8 @@ export interface EventDefinition {
     requires_player_response?: boolean;
     /** How bot factions auto-respond. */
     bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted' | 'historical' | 'personality_weighted' | 'strategic_weighted';
+    /** Authored informational notifications shown to non-source factions after a response resolves. */
+    notifications_to_other_factions?: EventNotificationTextByResponse;
     // v0.6.0 metagame fields (all optional for backward compat)
     /** Pressure system config: readiness counter with increment/decay. */
     pressure?: PressureConfig;
@@ -393,6 +417,8 @@ export interface PendingEventDecision {
     faction: FactionId;
     /** If true, the player must resolve this decision before advancing the turn. */
     requires_player_response?: boolean;
+    /** Sparse authored notification text carried until the player resolves this decision. */
+    notifications_to_other_factions?: EventNotificationTextByResponse;
 }
 
 export interface FiredEvent {

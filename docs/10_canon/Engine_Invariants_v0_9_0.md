@@ -320,7 +320,7 @@ Formation cohesion must remain in [0, 100] after all updates.
 - Encirclement of own-population defenders (affinity > 0.50) causes morale to drift UP ("cornered rat"); low-affinity encirclement drifts DOWN.
 - Morale gates retreat: high morale + costly_victory -> defender absorbs and holds. Decisive victory always causes retreat.
 - Default morale for new formations: 60.
-- Faction-specific morale retreat resistance floors: RBiH=50, RS=70, HRHB=60.
+- Faction-specific morale retreat resistance floors: RBiH=50, RS=55, HRHB=60.
 
 ### 14.4 Brigade location (OSID)
 

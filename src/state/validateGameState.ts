@@ -262,6 +262,43 @@ export function validateGameStateShape(
 
     // Peace phase: optional early-war fields live under state.military/state.political
     const military = s.military as Record<string, unknown>;
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_event_notifications' in military && military.pending_event_notifications !== undefined) {
+        const notifications = military.pending_event_notifications;
+        if (!Array.isArray(notifications)) {
+            errors.push('military.pending_event_notifications must be an array when present');
+        } else {
+            for (let i = 0; i < notifications.length; i++) {
+                const notification = notifications[i];
+                if (notification == null || typeof notification !== 'object' || Array.isArray(notification)) {
+                    errors.push(`military.pending_event_notifications[${i}] must be an object`);
+                    continue;
+                }
+                const n = notification as Record<string, unknown>;
+                for (const key of ['notification_id', 'event_id', 'source_faction', 'target_faction', 'response_id', 'headline', 'body']) {
+                    if (typeof n[key] !== 'string' || (n[key] as string).length === 0) {
+                        errors.push(`military.pending_event_notifications[${i}].${key} must be a non-empty string`);
+                    }
+                }
+                if (!isCanonicalPlayerFaction(n.source_faction)) {
+                    errors.push(`military.pending_event_notifications[${i}].source_faction must be one of: RBiH, RS, HRHB`);
+                }
+                if (!isCanonicalPlayerFaction(n.target_faction)) {
+                    errors.push(`military.pending_event_notifications[${i}].target_faction must be one of: RBiH, RS, HRHB`);
+                }
+                if (
+                    typeof n.surfaced_on_turn !== 'number' ||
+                    !Number.isInteger(n.surfaced_on_turn) ||
+                    n.surfaced_on_turn < 0
+                ) {
+                    errors.push(`military.pending_event_notifications[${i}].surfaced_on_turn must be a non-negative integer`);
+                }
+                if (typeof n.consumed !== 'boolean') {
+                    errors.push(`military.pending_event_notifications[${i}].consumed must be boolean`);
+                }
+            }
+        }
+    }
+
     if (military && typeof military === 'object' && !Array.isArray(military) && 'war_jna' in military && military.war_jna !== undefined) {
         const jna = military.war_jna;
         if (jna !== null && typeof jna === 'object') {

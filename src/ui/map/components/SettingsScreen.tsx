@@ -30,6 +30,7 @@ import {
     saveAudioPreferences,
     type AudioPreferences,
 } from '../audio/audio_preferences';
+import { createCrashDiagnosticsQueue } from '../services/telemetry/telemetryQueue';
 import {
     COLORBLIND_PRESETS,
     COLORBLIND_PRESET_STORAGE_KEY,
@@ -63,6 +64,10 @@ interface SettingsScreenProps {
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
     const [activeSection, setActiveSection] = useState('audio');
     const [locale, setLocale] = useLocale();
+    const [crashQueue] = useState(() => createCrashDiagnosticsQueue());
+    const [crashConsentEnabled, setCrashConsentEnabled] = useState(() => crashQueue.isConsentEnabled());
+    const [crashReportCount, setCrashReportCount] = useState(() => crashQueue.listReports().length);
+    const [crashExportJson, setCrashExportJson] = useState('');
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: tutorial restart affordance.
     // Read tutorial_state from the canonical UI store (mirrored from
@@ -148,11 +153,39 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         }));
     };
 
+    const refreshCrashDiagnosticsStatus = () => {
+        setCrashConsentEnabled(crashQueue.isConsentEnabled());
+        setCrashReportCount(crashQueue.listReports().length);
+    };
+
+    const setActiveSectionAndRefresh = (sectionId: string) => {
+        setActiveSection(sectionId);
+        if (sectionId === 'diagnostics') refreshCrashDiagnosticsStatus();
+    };
+
+    const setCrashDiagnosticsEnabled = (enabled: boolean) => {
+        crashQueue.setConsentEnabled(enabled);
+        setCrashExportJson('');
+        refreshCrashDiagnosticsStatus();
+    };
+
+    const exportCrashReports = () => {
+        setCrashExportJson(crashQueue.exportReportsJson());
+        refreshCrashDiagnosticsStatus();
+    };
+
+    const clearCrashReports = () => {
+        crashQueue.clearReports();
+        setCrashExportJson('');
+        refreshCrashDiagnosticsStatus();
+    };
+
     const allSections: Array<{ id: string; title: string }> = [
         ...(tutorialDismissed ? [{ id: 'gameplay', title: t('settings.tab.gameplay') }] : []),
         { id: 'audio', title: 'Audio' },
         { id: 'a11y', title: t('settings.tab.a11y') },
         { id: 'language', title: t('settings.tab.language') },
+        { id: 'diagnostics', title: t('settings.tab.diagnostics') },
         ...settingsSections.map(s => ({ id: s.id, title: s.title })),
     ];
 
@@ -178,7 +211,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <div className="flex gap-2 mb-4 justify-center">
                     {allSections.map(sec => (
                         <button key={sec.id} type="button"
-                            onClick={() => setActiveSection(sec.id)}
+                            onClick={() => setActiveSectionAndRefresh(sec.id)}
                             className={`text-[10px] uppercase tracking-wider px-3 py-1.5 rounded border transition-colors ${
                                 activeSection === sec.id
                                     ? 'text-[#c4a35a] border-[#c4a35a]/40 bg-[#c4a35a]/10'
@@ -274,6 +307,54 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                 ))}
                             </select>
                         </SettingRow>
+                    )}
+                    {activeSection === 'diagnostics' && (
+                        <>
+                            <SettingRow
+                                label={t('settings.crashDiagnostics.label')}
+                                description={t('settings.crashDiagnostics.description')}
+                            >
+                                <BoundToggleSwitch
+                                    checked={crashConsentEnabled}
+                                    onChange={setCrashDiagnosticsEnabled}
+                                    ariaLabel={t('settings.crashDiagnostics.ariaLabel')}
+                                />
+                            </SettingRow>
+                            <div className="rounded border border-[#8a7a60]/10 bg-[#2a2720]/50 p-2">
+                                <p className="m-0 text-[10px] leading-relaxed text-[#8a7a60]">
+                                    {t('settings.crashDiagnostics.privacy')}
+                                </p>
+                                <p className="mb-0 mt-2 text-[10px] text-[#d5c9bc]">
+                                    {t('settings.crashDiagnostics.status', { count: String(crashReportCount) })}
+                                </p>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={exportCrashReports}
+                                        className="text-[10px] uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
+                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                    >
+                                        {t('settings.crashDiagnostics.export')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={clearCrashReports}
+                                        className="text-[10px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
+                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                    >
+                                        {t('settings.crashDiagnostics.clear')}
+                                    </button>
+                                </div>
+                                {crashExportJson && (
+                                    <textarea
+                                        readOnly
+                                        aria-label={t('settings.crashDiagnostics.exportedAriaLabel')}
+                                        value={crashExportJson}
+                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-[10px] text-[#d5c9bc]"
+                                    />
+                                )}
+                            </div>
+                        </>
                     )}
                     {/* Registered sections */}
                     {settingsSections.filter(s => s.id === activeSection).map(s => {

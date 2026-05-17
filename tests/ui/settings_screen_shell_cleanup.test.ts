@@ -28,5 +28,6 @@ describe('SettingsScreen shell cleanup', () => {
         expect(screen.getByRole('button', { name: 'Audio' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Accessibility' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Language' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Diagnostics' })).toBeTruthy();
     });
 });

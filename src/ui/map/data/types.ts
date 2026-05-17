@@ -1165,6 +1165,9 @@ export interface LoadedGameState {
         }>;
     }>;
 
+    /** Informational event notifications for non-source factions. */
+    pendingEventNotifications?: import('../../../sim/events/event_types.js').EventNotification[];
+
     /** Per-faction composite negotiating capital score (weighted 0-100). Derived from strategicDimensions. */
     negotiatingCapital?: Record<string, number>;
 

@@ -6,8 +6,10 @@ import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord } from '../../utils/shellNavigation.js';
+import { buildChronicleChapters } from '../../data/chronicleChapters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
+import type { ChronicleChapter } from '../../data/chronicleChapters.js';
 import { EmptyState } from '../EmptyState.js';
 import { Z } from '../../../shared/zIndex.js';
 
@@ -47,6 +49,142 @@ const DOT_COLORS: Record<ChronicleCardType, string> = {
     cost: '#d28a3a',
 };
 
+export type ChronicleViewMode = 'entries' | 'chapters';
+
+interface ChronicleViewModeToggleProps {
+    mode: ChronicleViewMode;
+    activeFilterLabel: string;
+    chapterCount: number;
+    onModeChange: (mode: ChronicleViewMode) => void;
+}
+
+export function ChronicleViewModeToggle({
+    mode,
+    activeFilterLabel,
+    chapterCount,
+    onModeChange,
+}: ChronicleViewModeToggleProps) {
+    return (
+        <div className="flex items-center gap-2">
+            <div className="flex rounded-sm border border-white/10 bg-black/25 p-0.5">
+                {(['entries', 'chapters'] as const).map(option => {
+                    const active = option === mode;
+                    const label = option === 'entries' ? 'Entries' : 'Chapters';
+                    return (
+                        <button
+                            key={option}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => onModeChange(option)}
+                            className={[
+                                'h-6 min-w-[70px] rounded-sm px-2 font-mono text-[8px] uppercase transition-colors',
+                                active
+                                    ? 'bg-stone-200/15 text-stone-100'
+                                    : 'text-stone-500 hover:text-stone-300',
+                            ].join(' ')}
+                        >
+                            {label}
+                        </button>
+                    );
+                })}
+            </div>
+            <span className="text-[9px] font-mono text-stone-500">
+                Lens: {activeFilterLabel}
+            </span>
+            <span className="text-[9px] font-mono text-stone-600">
+                {chapterCount} chapters
+            </span>
+        </div>
+    );
+}
+
+function ChronicleChapterView({
+    chapters,
+    onSelectTurn,
+    onOpenTurnRecord,
+}: {
+    chapters: ChronicleChapter[];
+    onSelectTurn: (turn: number) => void;
+    onOpenTurnRecord: (turn: number) => void;
+}) {
+    if (chapters.length === 0) {
+        return (
+            <div className="flex h-full items-center justify-center">
+                <p className="text-xs font-mono text-stone-600">No Chronicle chapters match this filter.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 py-5">
+            {chapters.map(chapter => (
+                <section
+                    key={chapter.id}
+                    className="border-b border-white/8 pb-4"
+                    aria-label={chapter.title}
+                >
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                            <div className="text-[9px] font-mono uppercase tracking-[0.16em] text-stone-500">
+                                {chapter.monthLabels.join(' / ')}
+                            </div>
+                            <h2
+                                className="mt-1 text-base font-semibold text-amber-200"
+                                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+                            >
+                                {chapter.title}
+                            </h2>
+                            <p className="mt-1 text-[11px] font-mono text-stone-400">
+                                {chapter.summary} | Turns {chapter.startTurn}-{chapter.endTurn}
+                            </p>
+                        </div>
+                        <div className="shrink-0 text-right text-[9px] font-mono uppercase text-stone-500">
+                            {chapter.boundaryKind.replace(/_/g, ' ')}
+                        </div>
+                    </div>
+
+                    <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                        {chapter.entries.map(ref => (
+                            <div
+                                key={ref.sourceEntryId}
+                                className="rounded-sm border border-panel-border/30 bg-black/20 p-2 text-left"
+                            >
+                                <div className="flex items-center justify-between gap-2">
+                                    <span className="text-[8px] font-mono uppercase text-stone-500">
+                                        Turn {ref.turn} | {ref.type}
+                                    </span>
+                                    {ref.headline && (
+                                        <span className="text-[8px] font-mono uppercase text-amber-300">Headline</span>
+                                    )}
+                                </div>
+                                <div className="mt-1 text-[11px] leading-snug text-stone-200">
+                                    {ref.title}
+                                </div>
+                                <div className="mt-2 flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelectTurn(ref.turn)}
+                                        className="h-6 rounded-sm border border-white/10 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-stone-300 hover:border-stone-400/60"
+                                    >
+                                        Select
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => onOpenTurnRecord(ref.turn)}
+                                        className="h-6 rounded-sm border border-amber-400/25 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
+                                    >
+                                        Open Turn Record
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            ))}
+        </div>
+    );
+}
+
 export function ChronicleOverlay() {
     const open = useGameStore(s => s.chronicleOpen);
     const setOpen = useGameStore(s => s.setChronicleOpen);
@@ -58,6 +196,7 @@ export function ChronicleOverlay() {
     const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
     const [selectedTurn, setSelectedTurn] = useState<number | null>(null);
     const [activeFilter, setActiveFilter] = useState<ChronicleFilterId>('all');
+    const [viewMode, setViewMode] = useState<ChronicleViewMode>('entries');
 
     const turnSummaries = state?.turnSummaries ?? [];
 
@@ -71,6 +210,8 @@ export function ChronicleOverlay() {
     const filteredEntries = useMemo(() => filterChronicleEntries(allEntries, activeFilter), [activeFilter, allEntries]);
 
     const activeFilterLabel = CHRONICLE_FILTERS.find(filter => filter.id === activeFilter)?.label ?? 'All';
+
+    const chapters = useMemo(() => buildChronicleChapters(filteredEntries, state), [filteredEntries, state]);
 
     // Group filtered entries by turn
     const turnGroups = useMemo(() => {
@@ -359,6 +500,12 @@ export function ChronicleOverlay() {
                             );
                         })}
                     </div>
+                    <ChronicleViewModeToggle
+                        mode={viewMode}
+                        activeFilterLabel={activeFilterLabel}
+                        chapterCount={chapters.length}
+                        onModeChange={setViewMode}
+                    />
                 </div>
                 <button
                     onClick={handleClose}
@@ -382,6 +529,12 @@ export function ChronicleOverlay() {
                                 helpText="Advance turns to record the campaign chronicle."
                             />
                         </div>
+                    ) : viewMode === 'chapters' ? (
+                        <ChronicleChapterView
+                            chapters={chapters}
+                            onSelectTurn={setSelectedTurn}
+                            onOpenTurnRecord={handleOpenTurnRecord}
+                        />
                     ) : (
                         <div style={{ width: `${totalWidth}px`, minHeight: '100%' }}>
                             {/* Territory ribbon */}
