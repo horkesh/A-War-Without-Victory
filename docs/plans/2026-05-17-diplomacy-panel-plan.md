@@ -15,6 +15,8 @@
 **Files:**
 - Create: `src/ui/map/data/diplomacyView.ts`
 - Modify: `src/ui/map/data/types.ts`
+- Inspect: `src/ui/map/data/GameStateAdapter.ts`
+- Inspect: existing negotiation, patron-pressure, and peace-plan data owners before adding new data fields.
 - Test: `tests/ui/diplomacy_view.test.ts`
 
 **Steps:**
@@ -34,7 +36,7 @@
 **Steps:**
 1. Add failing render test for non-empty and empty diplomacy states.
 2. Implement panel with compact operational layout, not marketing copy.
-3. Wire existing toolbar/shell route to open it.
+3. Wire existing toolbar/shell route to open it, naming the route/button owner in the implemented report.
 
 **Acceptance:** Warroom/toolbar diplomacy action opens this panel, not a placeholder.
 
@@ -47,6 +49,7 @@
 **Steps:**
 1. Add tests that raw hidden thresholds are not printed.
 2. Present "likely", "uncertain", and "known" copy from existing confidence fields where available.
+3. If confidence fields do not exist, use neutral qualitative labels and record the missing field as follow-up rather than inventing thresholds.
 
 **Acceptance:** Panel does not leak debug-only exact formulas unless existing player-visible policy allows it.
 
@@ -66,3 +69,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism: read-only UI projection; no simulation behavior or save schema mutation.
+
+## Browser Smoke And Closeout
+
+- Browser-check that the diplomacy action opens this panel from the live shell and that empty-state copy does not overlap at mobile width.
+- Stop if implementing the panel requires a new diplomacy simulation loop or save-schema mutation.
+- Stage only diplomacy read-model/UI, focused tests, browser evidence/report, roadmap, and ledger files owned by this plan.

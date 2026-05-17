@@ -79,10 +79,21 @@ export function WrappedOverlay() {
 
     return (
         <div
-            className="fixed inset-0 cursor-pointer"
+            className="fixed inset-0"
             style={{ zIndex: Z.MODAL_RAISED }}
-            onClick={handleClick}
         >
+            <button
+                type="button"
+                className="absolute left-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
+                onClick={handleClick}
+                aria-label="Previous campaign wrapped slide"
+            />
+            <button
+                type="button"
+                className="absolute right-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
+                onClick={handleClick}
+                aria-label="Next campaign wrapped slide"
+            />
             <WrappedSlideComponent
                 slide={slides[currentSlide]}
                 index={currentSlide}
@@ -92,7 +103,7 @@ export function WrappedOverlay() {
 
             {/* "VIEW CHRONICLE" button on final slide */}
             {isLastSlide && (
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-4">
+                <div className="absolute bottom-20 left-1/2 z-20 -translate-x-1/2 flex gap-4">
                     <button
                         onClick={(e) => {
                             e.stopPropagation();

@@ -9,6 +9,7 @@ import { resolve } from 'node:path';
 import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 import type { Scenario, ScenarioAction, ScenarioTurn } from './scenario_types.js';
+import type { FactionId } from '../state/game_state.js';
 
 /**
  * Resolve init_control to an absolute path. Key (e.g. apr1992) -> data/source/municipalities_1990_initial_political_controllers_<key>.json; path-like -> resolve against baseDir.
@@ -168,6 +169,13 @@ export function normalizeScenario(raw: unknown): Scenario {
     const scenario_id = typeof o.scenario_id === 'string' ? o.scenario_id.trim() : undefined;
     if (!scenario_id) {
         throw new Error('Scenario must have scenario_id (non-empty string)');
+    }
+    let player_faction: FactionId | undefined;
+    if (o.player_faction !== undefined && o.player_faction !== null) {
+        if (o.player_faction !== 'RBiH' && o.player_faction !== 'RS' && o.player_faction !== 'HRHB') {
+            throw new Error(`player_faction must be "RBiH", "RS", or "HRHB", got: ${String(o.player_faction)}`);
+        }
+        player_faction = o.player_faction;
     }
     const weeks = typeof o.weeks === 'number' ? Math.floor(o.weeks) : undefined;
     const scenario_start_week =
@@ -409,6 +417,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         normalizedTurns.sort((a, b) => a.week_index - b.week_index);
         return {
             scenario_id,
+            ...(player_faction !== undefined ? { player_faction } : {}),
             scenario_start_week,
             start_lifecycle_phase,
             peace_referendum_held_at_start,
@@ -457,6 +466,7 @@ export function normalizeScenario(raw: unknown): Scenario {
 
     return {
         scenario_id,
+        ...(player_faction !== undefined ? { player_faction } : {}),
         scenario_start_week,
         start_lifecycle_phase,
         peace_referendum_held_at_start,

@@ -5357,3 +5357,63 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Determinism:** No runtime simulation behavior changed. Edits are package inclusion metadata, regression fixtures, and documentation/runbook propagation only.
 
 **Verification:** GitHub Baseline Regression run `25984397666` failed in the `test` job's fast Vitest step on these exact files before the fix. Local verification after the repair: `npx.cmd vitest run tests\brigade_territory_reconciliation.test.ts tests\desktop_packaging_contract.test.ts tests\ui_player_visibility.test.ts tests\sim\autonomy\autonomy_event_routing.test.ts` passed 44/44 tests; `npm.cmd run typecheck` passed; `npm.cmd run test:vitest:fast` passed; `npm.cmd run desktop:release:check` passed with existing Vite/browser-external/import-meta warnings only.
+
+---
+
+## [2026-05-17] feat(ui): close accessibility, diplomacy, officer, and soundscape kickoff packets
+
+**Type:** Tactical-map UI/read-model/audio-stub implementation batch. No simulation rule, combat math, scenario output, save schema, random source, or scenario artifact contract changed.
+
+**Change:** Implemented the Accessibility P0 closeout with semantic clickable-control fixes, form labels, reduced-motion/contrast regression tests, and component patches across the tactical map shell. Added a read-only Diplomacy panel and deterministic `buildDiplomacyView(...)` projection, route-openable through `?panel=diplomacy` / `?diplomacy=1`. Added first-pass officer mini-bio metadata for opening commanders and projected it through Army HQ/OOB UI surfaces. Implemented the soundscape kickoff stub: composer brief, deterministic cue manifest, disabled/silent audio bus, and no-op hook points for peace-plan and turn-review UI events.
+
+**Determinism:** UI/read-model/audio-stub only. The audio bus is disabled by default and performs no fetch, Web Audio initialization, timestamps, or random work. Officer mini-bios are read-only authored metadata projected into UI; they do not affect commander behavior.
+
+**Verification:** `npm.cmd run typecheck` passed. Combined focused regression run passed 49/49 across accessibility, audio, diplomacy, officer mini-bio, map adapter, and scenario player-faction contract tests. `git diff --check` passed with CRLF warnings only.
+
+---
+
+## [2026-05-17] test(scenario): separate player-faction test fixtures from gameplay scenario data
+
+**Type:** Scenario loader contract and test-policy correction. Gameplay scenario JSON remains faction-neutral; no `apr1992*.json` gameplay scenario data is modified by this entry.
+
+**Change:** Updated `normalizeScenario(...)` to validate authored `player_faction` values when present while preserving missing/null as absent. Added `tests/scenario_player_faction_contract.test.ts` to pin that gameplay scenario normalization remains faction-neutral by default and that RS can be selected explicitly in tests for richer event coverage. Updated the two-level event surfacing plan and roadmap to state that RS-first coverage belongs in explicit test fixtures/state builders, not gameplay scenario JSON.
+
+**Determinism:** Scenario loader validation only. The legacy harness/startup fallback remains isolated in startup state; gameplay scenario files are not rewritten, so run-id/hash churn from test defaults is avoided.
+
+**Verification:** `npx.cmd vitest run tests\scenario_player_faction_contract.test.ts tests\startup_snapshot_contract.test.ts` passed 8/8 tests.
+
+---
+
+## [2026-05-17] test(engine): add watched-operation, formation-life, and timing diagnostics
+
+**Type:** Diagnostics and benchmark instrumentation. No runtime optimization, balance tuning, sensitive-history condition relaxation, or scenario data edit.
+
+**Change:** `tools/diagnostics/sensitive_history_status.cjs` now emits watched-operation visibility rows that distinguish `missing`, `blocked`, `delivered`, and `aar_not_visible`, with a compact reusable fixture. Added `tools/diagnostics/formation_life_packet_inventory.cjs` to classify formation-life anomalies into `loan`, `operation_participant`, `sector_front`, `sector_reserve`, `sector_rear`, `sector_owned`, and `doctrine`; the retained 40w baseline inventory is 98 rows: loan=3, operation_participant=4, sector_front=61, sector_reserve=3, sector_rear=7, sector_owned=0, doctrine=20. Added opt-in scenario timing JSON via `emitTimingJson`, `--timing-json`, and `sim:scenario:run:40w:timed`.
+
+**Determinism:** Timing output is opt-in and not part of deterministic scenario artifacts. Focused tests compare timed-vs-untimed artifacts to pin deterministic equivalence. Diagnostic inventory/report files are read-only over existing run artifacts.
+
+**Verification:** `npm.cmd run typecheck` passed. `npx.cmd vitest run tests\scenario_timing_instrumentation.test.ts tests\formation_life_packet_inventory.test.ts tests\sensitive_history_status_diagnostic.test.ts` passed 5/5. `node --check tools\diagnostics\formation_life_packet_inventory.cjs` and `node --check tools\diagnostics\sensitive_history_status.cjs` passed. Timed 40w run `apr1992_definitive_40w__3649b3861a87e6ea__w40_n1846` emitted `timing.json` with simulation=76854.151ms, serialization/artifacts=9905.711ms, setup=2477.740ms, diagnostics/reporting=138.142ms, total=93798.472ms.
+
+---
+
+## [2026-05-17] docs(release): add gated launch, telemetry, Chronicle, and HRHB decision packets
+
+**Type:** Release/product documentation and design-gate evidence. No runtime behavior, UI rendering, simulation output, scenario data, save schema, or packaging metadata changed.
+
+**Change:** Added decision memos for HRHB patron-directive scope, Chronicle chapter boundary, and telemetry consent/privacy wording. Added traceable marketing launch drafts under `docs/50_launch/marketing/`, gold-gate checklist and known-issues drafts under `docs/50_launch/release/`, plus release evidence and external playtest dry-run templates under `docs/40_reports/release/` and `docs/40_reports/playtest/`.
+
+**Determinism:** Documentation only.
+
+**Verification:** Path creation and focused docs edits completed; final docs/link/diff verification remains part of the closeout pass before commit.
+
+---
+
+## [2026-05-17] feat(ui): add BCS settings i18n, verdict read models, and audio controls
+
+**Type:** UI localization substrate, verdict read-model substrate, and soundscape preference controls. No simulation rule, victory scoring, Cost Ledger calculation, historical comparison builder, scenario data, save schema, or generated scenario artifact changed.
+
+**Change:** Added a first-pass `src/ui/map/i18n/` substrate with English and BCS dictionaries, fallback/interpolation tests, and narrow Settings-screen integration. Added pure `verdictScene` and `verdictShareSummary` read models for future cinematic verdict UI work without wiring or scoring changes. Added browser-local soundscape mute/master-volume preferences and an Audio settings tab over the existing silent audio stub.
+
+**Determinism:** UI/browser-local preference and pure read-model work only. Audio controls do not introduce playback assets, simulation events, timestamps, randomness, or save mutations. Verdict scene/share builders consume existing packets and do not alter scoring.
+
+**Verification:** Focused worker tests passed for i18n/settings, verdict scene/share summary, and audio preferences/settings. Integrated closeout verification is recorded in the final session notes.

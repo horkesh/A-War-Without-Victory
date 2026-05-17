@@ -23,7 +23,7 @@
 ## Task 2: Cinematic Verdict Component
 
 **Files:**
-- Modify: existing `VerdictScreen` owner.
+- Modify: `src/ui/map/components/VerdictScreen.tsx`
 - Create/modify: `src/ui/map/components/verdict/CinematicVerdict.tsx`
 - Test: `tests/ui/cinematic_verdict.test.ts`
 
@@ -46,6 +46,8 @@
 
 **Acceptance:** Desktop and mobile screenshots show no text overlap and no blank state.
 
+**Required viewports:** capture at least `390x844`, `768x1024`, and `1440x900` against the local map shell. Save the command, URL, and screenshot filenames in the visual-validation README.
+
 ## Verification
 
 Run:
@@ -61,3 +63,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism: presentation-only over existing verdict data.
+
+## Stop Gates And Closeout
+
+- Stop if any change touches victory scoring, Pyrrhic classification, cost ledger calculation, or historical comparison data contracts.
+- Stop if screenshots show clipped verdict copy, overlapping controls, blank state, or nested-card presentation.
+- Stage only verdict presentation/read-model, focused tests, screenshots/report, roadmap, and ledger files owned by this plan.

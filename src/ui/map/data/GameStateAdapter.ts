@@ -61,6 +61,7 @@ import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
 import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { deriveOperationOpportunityRecords, deriveOperationOpportunitySummary } from './operationOpportunityLedger.js';
 import { deriveOperationOpportunityProposals } from './operationOpportunityDossiers.js';
+import { buildDiplomacyView } from './diplomacyView.js';
 import {
     deriveFactionSupplyConditionFromFlatOsidState,
     deriveFactionSupplyConditionFromOsidReport,
@@ -1382,6 +1383,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 political_reliability: finiteNumber(data.political_reliability, 0),
                 home_corps_id: typeof data.home_corps_id === 'string' ? data.home_corps_id : undefined,
                 origin: typeof data.origin === 'string' ? data.origin : 'military',
+                bio_short: typeof data.bio_short === 'string' ? data.bio_short : undefined,
+                command_style: typeof data.command_style === 'string' ? data.command_style : undefined,
+                known_for: typeof data.known_for === 'string' ? data.known_for : undefined,
+                political_alignment_note: typeof data.political_alignment_note === 'string' ? data.political_alignment_note : undefined,
+                sensitive_history_note: typeof data.sensitive_history_note === 'string' ? data.sensitive_history_note : undefined,
                 status: typeof os?.status === 'string' ? os.status : 'active',
                 assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
                 acting_commander: Boolean(os?.acting_commander),
@@ -1954,6 +1960,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         eventFlags: state.military?.event_flags ?? undefined,
         pressureWarning: derivePressureWarning(state),
         patronOverrideAuthority: derivePatronOverrideAuthority(state),
+        diplomacyView: buildDiplomacyView(state, playerFaction),
         // Peace phase (Phase 0)
         ...derivePeacePhaseData(state, phase),
         // Game over (LANE-NIGHTSHIFT-N3 — see snapshot-prefer block above).

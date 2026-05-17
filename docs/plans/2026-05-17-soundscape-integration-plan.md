@@ -9,6 +9,8 @@ Turn the audio stub from the AAA closeout track into a functional, optional soun
 
 The simulation remains authoritative and silent. Audio derives only from already-emitted UI/event state. A small UI adapter maps event categories to named cues, and a browser-safe audio service owns loading, volume, mute state, and fallback behavior.
 
+Prerequisite: `docs/plans/2026-05-17-soundscape-kickoff-audio-stub-plan.md` must be implemented or explicitly superseded before this plan starts.
+
 ## Tech Stack
 
 - React tactical map shell
@@ -49,8 +51,10 @@ The simulation remains authoritative and silent. Audio derives only from already
 
 ## Files To Touch
 
-- `src/ui/map/services/audio/*` or nearest existing service folder
-- `src/ui/map/components/settings/*` or existing options panel
+- `src/ui/map/audio/sound_manifest.ts`
+- `src/ui/map/audio/audio_engine.ts`
+- `src/ui/map/audio/*` for cue adapters/loaders
+- `src/ui/map/components/SettingsScreen.tsx` or the discovered settings/options owner
 - `src/ui/map/store/gameStore.ts` only for UI preference state if no better local settings store exists
 - `tests/ui_audio_soundscape*.test.ts`
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
@@ -59,9 +63,10 @@ The simulation remains authoritative and silent. Audio derives only from already
 
 ## Verification
 
-- Run focused audio service and adapter tests.
+- Run `npx.cmd vitest run tests\ui_audio_soundscape*.test.ts`.
 - Run tactical map UI tests that cover settings persistence.
 - Run `npm.cmd run typecheck`.
+- Run `npm.cmd run desktop:map:build`.
 - Manually open the map, enable audio, trigger at least one event category, and confirm mute works.
 
 ## Documentation And Ledger
@@ -75,3 +80,9 @@ The simulation remains authoritative and silent. Audio derives only from already
 - Stop if browser autoplay constraints require an unexpected UX change.
 - Stop if event sources are not stable enough to avoid duplicate cue spam.
 - Stop if any audio wiring would need simulation-side behavior changes.
+
+## Commit And Closeout
+
+- Record which event categories have cues and which remain silent fallbacks.
+- Record packaged asset paths and missing-asset behavior.
+- Stage only audio service/manifest, settings UI, focused tests, docs, roadmap, and ledger files owned by this plan.

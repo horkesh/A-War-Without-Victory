@@ -10,14 +10,19 @@ interface CreditsScreenProps {
 export function CreditsScreen({ onClose }: CreditsScreenProps) {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.MODAL_HARD }}
-             onClick={onClose}>
+             style={{ zIndex: Z.MODAL_HARD }}>
+            <button
+                type="button"
+                className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+                onClick={onClose}
+                aria-label="Close credits"
+            />
             <div className="w-[90%] max-w-[480px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{
                      background: 'rgba(26, 24, 21, 0.97)',
                      fontFamily: 'Georgia, "Times New Roman", serif',
                  }}
-                 onClick={(e) => e.stopPropagation()}>
+            >
 
                 <h2 className="text-[18px] text-[#c4a35a] font-bold tracking-wider text-center mb-6">
                     Credits

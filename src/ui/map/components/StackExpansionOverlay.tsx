@@ -72,19 +72,17 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
         }
     }, [total, isMounted, onClose]);
 
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) onClose();
-    };
-
     return (
         <div
             className="fixed inset-0 flex items-center justify-center pointer-events-auto"
-            onClick={handleBackdropClick}
             style={{ perspective: '1000px', zIndex: Z.MODAL }}
         >
             {/* Backdrop with blur & darken */}
-            <div
-                className={`absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity duration-500 ease-out pointer-events-none ${isMounted ? 'opacity-100' : 'opacity-0'}`}
+            <button
+                type="button"
+                className={`absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md transition-opacity duration-500 ease-out ${isMounted ? 'opacity-100' : 'opacity-0'}`}
+                onClick={onClose}
+                aria-label="Close formation stack"
             />
 
             {/* Orbital content */}
@@ -123,12 +121,14 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 opacity: isMounted ? 1 : 0,
                             }}
                         >
-                            <div
-                                className="group relative flex flex-col items-center gap-2 cursor-pointer"
+                            <button
+                                type="button"
+                                className="group relative flex flex-col items-center gap-2 cursor-pointer border-0 bg-transparent p-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onSelect(f.id);
                                 }}
+                                aria-label={`Select ${f.name}`}
                             >
                                 {/* Shield Glow */}
                                 <div
@@ -144,26 +144,28 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 <div className="bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono text-white whitespace-nowrap shadow-xl group-hover:bg-accent-gold group-hover:text-black transition-colors">
                                     {f.name}
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     );
                 })}
 
                 {/* Close Button UI */}
                 {total > 0 && (
-                    <div
-                        className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto group mt-4 flex"
+                    <button
+                        type="button"
+                        className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto group mt-4 flex border-0 bg-transparent p-0"
                         style={{
                             top: total === 1 ? 60 : 24, // Position relative to origin
                             opacity: isMounted ? 1 : 0,
                             transition: 'opacity 0.3s 0.5s'
                         }}
                         onClick={onClose}
+                        aria-label="Dismiss formation stack expansion"
                     >
                         <div className="bg-black/80 border border-white/20 hover:border-accent-gold/50 px-3 py-1 rounded-full text-[9px] text-white/60 tracking-widest font-bold uppercase transition-all hover:scale-105 active:scale-95 whitespace-nowrap shadow-2xl">
                             Dismiss Expansion
                         </div>
-                    </div>
+                    </button>
                 )}
             </div>
         </div>

@@ -142,9 +142,14 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
     <div
       className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       style={{ zIndex: Z.PANEL }}
-      onClick={(e) => { if (e.target === e.currentTarget) setStrategicDashboardOpen(false); }}
     >
-      <div className="bg-panel-bg border border-panel-border rounded-lg shadow-2xl w-[640px] max-h-[80vh] overflow-auto">
+      <button
+        type="button"
+        className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+        onClick={() => setStrategicDashboardOpen(false)}
+        aria-label="Close Strategic Dashboard"
+      />
+      <div className="relative bg-panel-bg border border-panel-border rounded-lg shadow-2xl w-[640px] max-h-[80vh] overflow-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-panel-border">
           <div>

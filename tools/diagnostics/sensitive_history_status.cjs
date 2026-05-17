@@ -236,6 +236,90 @@ function summarizeOperationAars(runDir, state) {
     });
 }
 
+function watchedOperationTraceSource(runDir, state) {
+    const fileRows = readJsonIfExists(path.join(runDir, 'watched_operations.json'), null);
+    if (Array.isArray(fileRows)) return fileRows;
+    return asArray(state.military && state.military.watched_operations);
+}
+
+function operationNameOf(row) {
+    return String(row && (row.operation_name || row.name) || '');
+}
+
+function operationIdOf(row) {
+    return String(row && row.operation_id || '');
+}
+
+function formatCanonicalWindow(value) {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value) && value.length >= 2) {
+        return `${value[0]}-${value[1]}`;
+    }
+    if (typeof value === 'object') {
+        const start = value.start_turn ?? value.start ?? value.from_turn ?? value.from;
+        const end = value.end_turn ?? value.end ?? value.to_turn ?? value.to;
+        if (start !== undefined && end !== undefined) return `${start}-${end}`;
+        if (start !== undefined) return String(start);
+    }
+    return '';
+}
+
+function normalizedDeliveryStatus(value) {
+    const status = String(value || '').trim();
+    if (status === 'blocked' || status === 'delivered' || status === 'missing') return status;
+    if (status === 'aar_not_visible') return 'missing';
+    return '';
+}
+
+function deliveryStatusFromAar(aar) {
+    if (!aar) return 'missing';
+    const captured = asArray(aar.objectives_captured).length;
+    if (captured > 0) return 'delivered';
+    const blocker = String(aar.blocker || aar.recovery_reason || '').trim();
+    if (blocker) return 'blocked';
+    return 'missing';
+}
+
+function latestByTurnThenId(rows) {
+    const sorted = rows.slice().sort((a, b) => {
+        const ta = numeric(a.started_turn ?? a.turn ?? a.canonical_window?.start_turn, 0);
+        const tb = numeric(b.started_turn ?? b.turn ?? b.canonical_window?.start_turn, 0);
+        if (ta !== tb) return ta - tb;
+        return strictCompare(operationIdOf(a), operationIdOf(b));
+    });
+    return sorted[sorted.length - 1] || null;
+}
+
+function summarizeWatchedOperations(runDir, state) {
+    const traces = watchedOperationTraceSource(runDir, state);
+    const aars = aarSource(runDir, state);
+
+    return WATCH_OPS.map(name => {
+        const trace = latestByTurnThenId(traces.filter(row => operationNameOf(row) === name));
+        const traceId = operationIdOf(trace);
+        const aar = latestByTurnThenId(aars.filter(row => {
+            if (operationNameOf(row) !== name) return false;
+            return traceId ? operationIdOf(row) === traceId : true;
+        }));
+        const aarVisible = Boolean(aar);
+        const deliveryStatus = normalizedDeliveryStatus(trace && trace.delivery_status)
+            || deliveryStatusFromAar(aar);
+        const presenceStatus = trace || aar
+            ? (aarVisible ? 'aar_visible' : 'aar_not_visible')
+            : 'missing';
+        return {
+            operation_name: name,
+            operation_id: traceId || operationIdOf(aar),
+            canonical_window: formatCanonicalWindow(trace && trace.canonical_window),
+            presence_status: presenceStatus,
+            delivery_status: deliveryStatus,
+            typed_blocker: String((trace && (trace.typed_blocker || trace.blocker)) || (aar && (aar.blocker || aar.recovery_reason)) || ''),
+            aar_visible: aarVisible,
+        };
+    });
+}
+
 function collectWatchedBrigadeIds(opRows) {
     const ids = new Set(WATCH_BRIGADES);
     for (const op of opRows) {
@@ -285,6 +369,7 @@ function buildSensitiveHistoryStatus(runDir) {
     ];
     const events = eventStatus(state);
     const operations = summarizeOperationAars(runDir, state);
+    const watchedOperations = summarizeWatchedOperations(runDir, state);
     const brigades = summarizeBrigades(state, operations);
     return {
         run_dir: runDir,
@@ -293,6 +378,7 @@ function buildSensitiveHistoryStatus(runDir) {
         verdict: verdict(enclaves, events),
         enclaves,
         events,
+        watched_operations: watchedOperations,
         operations,
         brigades,
     };
@@ -329,6 +415,15 @@ function formatMarkdown(results) {
         out.push('|---|---|---:|---:|---|');
         for (const e of result.events) {
             out.push(`| ${e.event_id} | ${e.fired ? 'yes' : 'no'} | ${e.count} | ${e.last_turn ?? '-'} | ${e.rupture_paths.length > 0 ? e.rupture_paths.join(', ') : '-'} |`);
+        }
+        out.push('');
+
+        out.push('### Watched Operation Visibility');
+        out.push('');
+        out.push('| Operation | Operation ID | Canonical window | Presence | Delivery | Typed blocker | AAR visible? |');
+        out.push('|---|---|---|---|---|---|---|');
+        for (const op of result.watched_operations) {
+            out.push(`| ${op.operation_name} | ${op.operation_id || '-'} | ${op.canonical_window || '-'} | ${op.presence_status} | ${op.delivery_status} | ${op.typed_blocker || '-'} | ${op.aar_visible ? 'yes' : 'no'} |`);
         }
         out.push('');
 

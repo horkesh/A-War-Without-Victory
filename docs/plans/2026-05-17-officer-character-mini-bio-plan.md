@@ -14,7 +14,7 @@
 
 **Files:**
 - Modify: `data/scenarios/officers/apr1992_officers.json`
-- Modify: `src/state/game_state.ts` if officer type is defined there.
+- Modify: `src/state/game_state.ts` only if the officer type is actually defined there after inspection.
 - Test: `tests/officer_mini_bio_schema.test.ts`
 
 **Fields:**
@@ -26,6 +26,8 @@
 
 **Acceptance:** Every displayed officer has a short bio or a safe fallback.
 
+**First-pass officer set:** Start with officers already visible in Army HQ/OOB fixtures. The audit must name each included officer before prose is authored; do not add invisible/offscreen officers just to fill the data file.
+
 ## Task 2: Historical/Canon Review
 
 **Files:**
@@ -34,7 +36,8 @@
 **Steps:**
 1. List officers included in the first pass.
 2. Mark each note as source-backed, conservative inference, or generic fallback.
-3. Stop for historian review on sensitive-history-adjacent copy.
+3. Record source/citation notes or explicit fallback rationale for each officer in the review report.
+4. Stop for historian review on sensitive-history-adjacent copy.
 
 ## Task 3: Adapter Projection
 
@@ -72,3 +75,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism: data/read-model/UI only; no commander decision behavior.
+
+## Stop Gates And Closeout
+
+- Stop if any mini-bio implies criminal culpability, atrocity participation, or disputed intent without historian sign-off.
+- Stop if the UI patch requires save-schema mutation or changes commander decision behavior.
+- Before commit, run `git status --short` and stage only officer data, UI adapter/component, focused tests, implemented report, roadmap, and ledger files owned by this plan.

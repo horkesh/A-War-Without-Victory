@@ -165,7 +165,12 @@ export function CorpsCard({
         role="button"
         tabIndex={0}
         onClick={handleBodyClick}
-        onKeyDown={(e) => e.key === 'Enter' && handleBodyClick()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleBodyClick();
+          }
+        }}
         className="cursor-pointer hover:bg-panel-hover/40 transition-colors"
       >
         {commanderName && (

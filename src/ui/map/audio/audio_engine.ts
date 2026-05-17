@@ -1,148 +1,141 @@
 /**
- * Audio engine — manages SFX playback and music state machine.
+ * Deterministic audio bus stub.
  *
- * Uses Web Audio API directly (no Howler dependency required).
- * All operations are no-ops if audio files are missing or audio context
- * is unavailable. Gracefully degrades in all environments.
+ * Audio is disabled by default and this module performs no network, Web Audio,
+ * timestamp, or random work. It exposes the bus shape that later asset-backed
+ * audio can implement without changing call sites.
  *
- * DECISION FLAG: Howler.js installation deferred to avoid npm install
- * in inner workspace (napkin item 7). Web Audio API used instead.
- * If Howler is later installed, swap the playback implementation
- * without changing the public API.
+ * Howler.js is intentionally not added for this kickoff pass: there are no
+ * real assets to load yet, and adding a runtime dependency would increase
+ * packaging scope before playback requirements are proven.
  */
 
-import { getSfxConfig, getMusicConfig } from './sound_manifest.js';
+import { getCueConfig, getMusicConfig, getSfxConfig, type AudioCueCategory } from './sound_manifest.js';
 
-let audioContext: AudioContext | null = null;
-let masterGain: GainNode | null = null;
-let sfxGain: GainNode | null = null;
-let musicGain: GainNode | null = null;
-let currentMusicSource: AudioBufferSourceNode | null = null;
-let currentMusicId: string | null = null;
+export type AudioVolumeKind = 'master' | AudioCueCategory;
 
-let masterVolume = 0.8;
-let sfxVolume = 0.7;
-let musicVolume = 0.5;
-let muted = false;
-
-const audioBufferCache = new Map<string, AudioBuffer>();
-
-function getContext(): AudioContext | null {
-    if (!audioContext && typeof AudioContext !== 'undefined') {
-        try {
-            audioContext = new AudioContext();
-            masterGain = audioContext.createGain();
-            masterGain.connect(audioContext.destination);
-            sfxGain = audioContext.createGain();
-            sfxGain.connect(masterGain);
-            musicGain = audioContext.createGain();
-            musicGain.connect(masterGain);
-            applyVolumes();
-        } catch {
-            return null;
-        }
-    }
-    return audioContext;
+interface AudioBusState {
+    enabled: boolean;
+    muted: boolean;
+    lastCueId: string | null;
+    currentMusicId: string | null;
+    volumes: Record<AudioVolumeKind, number>;
 }
 
-function applyVolumes(): void {
-    const effective = muted ? 0 : masterVolume;
-    if (masterGain) masterGain.gain.value = effective;
-    if (sfxGain) sfxGain.gain.value = sfxVolume;
-    if (musicGain) musicGain.gain.value = musicVolume;
+const DEFAULT_VOLUMES: Record<AudioVolumeKind, number> = {
+    master: 0,
+    ui: 0,
+    ambient: 0,
+    music: 0,
+    stinger: 0,
+};
+
+let state: AudioBusState = {
+    enabled: false,
+    muted: true,
+    lastCueId: null,
+    currentMusicId: null,
+    volumes: { ...DEFAULT_VOLUMES },
+};
+
+function clampVolume(value: number): number {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(1, value));
 }
 
-async function loadBuffer(src: string): Promise<AudioBuffer | null> {
-    const cached = audioBufferCache.get(src);
-    if (cached) return cached;
-
-    const ctx = getContext();
-    if (!ctx) return null;
-
-    try {
-        const response = await fetch(src);
-        if (!response.ok) return null;
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = await ctx.decodeAudioData(arrayBuffer);
-        audioBufferCache.set(src, buffer);
-        return buffer;
-    } catch {
-        return null;
-    }
-}
-
-/** Initialize audio context (call on first user interaction). */
 export function initAudio(): void {
-    getContext();
+    // Stub: intentionally no browser audio initialization.
 }
 
-/** Play a one-shot sound effect. No-op if missing. */
+export function setEnabled(enabled: boolean): void {
+    state = {
+        ...state,
+        enabled,
+        muted: !enabled,
+        volumes: enabled
+            ? { master: 1, ui: 1, ambient: 1, music: 1, stinger: 1 }
+            : { ...DEFAULT_VOLUMES },
+    };
+}
+
+export function isAudioEnabled(): boolean {
+    return state.enabled;
+}
+
+export function setVolume(kind: AudioVolumeKind, value: number): void {
+    state = {
+        ...state,
+        volumes: {
+            ...state.volumes,
+            [kind]: clampVolume(value),
+        },
+    };
+}
+
+export async function playCue(id: string): Promise<void> {
+    if (!state.enabled || state.muted) return;
+    const cue = getCueConfig(id);
+    if (!cue) return;
+    state = { ...state, lastCueId: cue.id };
+}
+
 export async function playSFX(id: string): Promise<void> {
-    const config = getSfxConfig(id);
-    if (!config) return;
-
-    const ctx = getContext();
-    if (!ctx || !sfxGain) return;
-
-    const buffer = await loadBuffer(config.src);
-    if (!buffer) return;
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-
-    const gain = ctx.createGain();
-    gain.gain.value = config.volume ?? 1.0;
-    source.connect(gain);
-    gain.connect(sfxGain);
-    source.start(0);
+    if (!getSfxConfig(id)) return;
+    await playCue(id);
 }
 
-/** Play background music with optional crossfade. */
-export async function playMusic(id: string, fadeDuration = 1.0): Promise<void> {
-    if (currentMusicId === id) return;
-
-    const config = getMusicConfig(id);
-    if (!config) return;
-
-    const ctx = getContext();
-    if (!ctx || !musicGain) return;
-
-    // Fade out current
-    if (currentMusicSource) {
-        try { currentMusicSource.stop(ctx.currentTime + fadeDuration); } catch { /* already stopped */ }
-        currentMusicSource = null;
-    }
-
-    const buffer = await loadBuffer(config.src);
-    if (!buffer) return;
-
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = config.loop ?? false;
-
-    const gain = ctx.createGain();
-    gain.gain.value = config.volume ?? 0.5;
-    source.connect(gain);
-    gain.connect(musicGain);
-    source.start(0);
-
-    currentMusicSource = source;
-    currentMusicId = id;
+export async function playMusic(id: string): Promise<void> {
+    if (!state.enabled || state.muted) return;
+    if (!getMusicConfig(id)) return;
+    await playCue(id);
+    state = { ...state, currentMusicId: id };
 }
 
-/** Stop current music with fade. */
-export function stopMusic(fadeDuration = 1.0): void {
-    const ctx = getContext();
-    if (!ctx || !currentMusicSource) return;
-    try { currentMusicSource.stop(ctx.currentTime + fadeDuration); } catch { /* already stopped */ }
-    currentMusicSource = null;
-    currentMusicId = null;
+export function stopMusic(): void {
+    state = { ...state, currentMusicId: null };
 }
 
-export function setMasterVolume(v: number): void { masterVolume = Math.max(0, Math.min(1, v)); applyVolumes(); }
-export function setMusicVolume(v: number): void { musicVolume = Math.max(0, Math.min(1, v)); applyVolumes(); }
-export function setSFXVolume(v: number): void { sfxVolume = Math.max(0, Math.min(1, v)); applyVolumes(); }
-export function muteAudio(): void { muted = true; applyVolumes(); }
-export function unmuteAudio(): void { muted = false; applyVolumes(); }
-export function isMuted(): boolean { return muted; }
-export function getCurrentMusicId(): string | null { return currentMusicId; }
+export function setMasterVolume(value: number): void {
+    setVolume('master', value);
+}
+
+export function setMusicVolume(value: number): void {
+    setVolume('music', value);
+}
+
+export function setSFXVolume(value: number): void {
+    setVolume('ui', value);
+}
+
+export function muteAudio(): void {
+    state = { ...state, muted: true };
+}
+
+export function unmuteAudio(): void {
+    state = { ...state, muted: false };
+}
+
+export function isMuted(): boolean {
+    return state.muted;
+}
+
+export function getCurrentMusicId(): string | null {
+    return state.currentMusicId;
+}
+
+export function getAudioState(): AudioBusState {
+    return {
+        ...state,
+        volumes: { ...state.volumes },
+    };
+}
+
+export function resetAudioForTests(): void {
+    state = {
+        enabled: false,
+        muted: true,
+        lastCueId: null,
+        currentMusicId: null,
+        volumes: { ...DEFAULT_VOLUMES },
+    };
+}

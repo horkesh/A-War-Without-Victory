@@ -429,7 +429,17 @@ test('parseGameState derives presidential review queue counts from pending milit
                 arbih_3rd_corps: { id: 'arbih_3rd_corps', faction: 'RBiH', kind: 'corps', status: 'active', name: '3rd Corps', personnel: 0 },
             },
             named_officer_data: [
-                { id: 'officer_new', name: 'New Officer', competence: 3, aggressiveness: 2, defensive_skill: 4 },
+                {
+                    id: 'officer_new',
+                    name: 'New Officer',
+                    competence: 3,
+                    aggressiveness: 2,
+                    defensive_skill: 4,
+                    bio_short: 'A newly available commander with a compact service sketch.',
+                    command_style: 'Careful staff planner',
+                    known_for: 'Fresh command appointment',
+                    political_alignment_note: 'Aligned through the regular command chain.',
+                },
                 { id: 'officer_current', name: 'Current Commander', competence: 2, aggressiveness: 3, defensive_skill: 2 },
             ],
             pending_officer_events: [
@@ -477,6 +487,54 @@ test('parseGameState derives presidential review queue counts from pending milit
         personnelDirectiveCount: 1,
         operationOpportunityCount: 0,
     });
+});
+
+test('parseGameState projects authored officer mini-bio fields without mutating officer state', () => {
+    const parsed = parseGameState({
+        meta: { turn: 2, phase: 'war', player_faction: 'RS' },
+        military: {
+            formations: {},
+            named_officer_data: [
+                {
+                    id: 'officer_bio',
+                    name: 'Bio Commander',
+                    faction: 'RS',
+                    rank: 'corps_commander',
+                    competence: 4,
+                    aggressiveness: 3,
+                    defensive_skill: 4,
+                    political_reliability: 4,
+                    origin: 'jna',
+                    bio_short: 'JNA-trained officer assigned to an opening corps command.',
+                    command_style: 'Methodical corps staff work',
+                    known_for: 'Opening corps command',
+                    political_alignment_note: 'Works inside the regular military hierarchy.',
+                },
+            ],
+            named_officers: {
+                officer_bio: {
+                    officer_id: 'officer_bio',
+                    status: 'active',
+                    assigned_corps_id: 'vrs_1st_krajina',
+                    acting_commander: false,
+                    turns_in_command: 2,
+                    battles: 0,
+                    victories: 0,
+                },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const officer = parsed.namedOfficerData?.find((entry) => entry.id === 'officer_bio');
+    assert.strictEqual(officer?.bio_short, 'JNA-trained officer assigned to an opening corps command.');
+    assert.strictEqual(officer?.command_style, 'Methodical corps staff work');
+    assert.strictEqual(officer?.known_for, 'Opening corps command');
+    assert.strictEqual(officer?.political_alignment_note, 'Works inside the regular military hierarchy.');
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(parsed.namedOfficerStateById?.officer_bio ?? {}, 'bio_short'), false);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(parsed.namedOfficerStateById?.officer_bio ?? {}, 'command_style'), false);
 });
 
 test('parseGameState derives an army-owned reserve queue summary without folding it into presidential review', () => {

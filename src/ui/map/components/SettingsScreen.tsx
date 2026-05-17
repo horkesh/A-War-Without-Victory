@@ -25,11 +25,18 @@ import { OnboardingRestartButton } from './onboarding/OnboardingOverlay';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import {
+    applyAudioPreferences,
+    loadAudioPreferences,
+    saveAudioPreferences,
+    type AudioPreferences,
+} from '../audio/audio_preferences';
+import {
     COLORBLIND_PRESETS,
     COLORBLIND_PRESET_STORAGE_KEY,
     REDUCE_MOTION_STORAGE_KEY,
     type ColorblindPreset,
 } from '../../shared/factionPalette';
+import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 
 interface SettingsSection {
     id: string;
@@ -55,6 +62,7 @@ interface SettingsScreenProps {
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
     const [activeSection, setActiveSection] = useState('gameplay');
+    const [locale, setLocale] = useLocale();
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: tutorial restart affordance.
     // Read tutorial_state from the canonical UI store (mirrored from
@@ -121,24 +129,50 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         } catch { /* localStorage denied; attribute on <html> is still applied */ }
     }, [colorblindPreset]);
 
+    const [audioPreferences, setAudioPreferences] = useState<AudioPreferences>(() => loadAudioPreferences());
+
+    useEffect(() => {
+        const saved = saveAudioPreferences(audioPreferences);
+        applyAudioPreferences(saved);
+    }, [audioPreferences]);
+
+    const setSoundscapeEnabled = (enabled: boolean) => {
+        setAudioPreferences((current) => ({ ...current, muted: !enabled }));
+    };
+
+    const setMasterVolumePercent = (value: string) => {
+        const parsed = Number(value);
+        setAudioPreferences((current) => ({
+            ...current,
+            masterVolume: Number.isFinite(parsed) ? parsed / 100 : current.masterVolume,
+        }));
+    };
+
     const allSections: Array<{ id: string; title: string }> = [
-        { id: 'gameplay', title: 'Gameplay' },
-        { id: 'display', title: 'Display' },
-        { id: 'a11y', title: 'Accessibility' },
+        { id: 'gameplay', title: t('settings.tab.gameplay') },
+        { id: 'display', title: t('settings.tab.display') },
+        { id: 'audio', title: 'Audio' },
+        { id: 'a11y', title: t('settings.tab.a11y') },
+        { id: 'language', title: t('settings.tab.language') },
         ...settingsSections.map(s => ({ id: s.id, title: s.title })),
     ];
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.MODAL_HARD }}
-             onClick={onClose}>
+             style={{ zIndex: Z.MODAL_HARD }}>
+            <button
+                type="button"
+                className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+                onClick={onClose}
+                aria-label={t('settings.close.ariaLabel')}
+            />
             <div className="w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
                  style={{ background: 'rgba(26, 24, 21, 0.97)' }}
-                 onClick={(e) => e.stopPropagation()}>
+            >
 
                 <h2 className="text-[16px] text-[#c4a35a] font-bold tracking-wider text-center mb-4"
                     style={{ fontFamily: 'Georgia, serif' }}>
-                    Settings
+                    {t('settings.title')}
                 </h2>
 
                 {/* Section tabs */}
@@ -161,10 +195,10 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <div className="space-y-3 mb-6">
                     {activeSection === 'gameplay' && (
                         <>
-                            <SettingRow label="Turn Confirmation" description="Require confirmation before advancing turn">
+                            <SettingRow label={t('settings.turnConfirmation.label')} description={t('settings.turnConfirmation.description')}>
                                 <ToggleSwitch />
                             </SettingRow>
-                            <SettingRow label="Fog of War" description="Enable fog of war by default">
+                            <SettingRow label={t('settings.fogOfWar.label')} description={t('settings.fogOfWar.description')}>
                                 <ToggleSwitch />
                             </SettingRow>
                             {/*
@@ -175,8 +209,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             */}
                             {tutorialDismissed && (
                                 <SettingRow
-                                    label="Tutorial"
-                                    description="Restart the first-session onboarding walkthrough"
+                                    label={t('settings.tutorial.label')}
+                                    description={t('settings.tutorial.description')}
                                 >
                                     <div data-testid="settings-tutorial-restart-host">
                                         <OnboardingRestartButton ipc={onboardingBridge} />
@@ -187,38 +221,79 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     )}
                     {activeSection === 'display' && (
                         <>
-                            <SettingRow label="Map Quality" description="Rendering quality (affects performance)">
+                            <SettingRow label={t('settings.mapQuality.label')} description={t('settings.mapQuality.description')}>
                                 <select className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
+                                    aria-label={t('settings.mapQuality.ariaLabel')}
                                     defaultValue="medium">
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
+                                    <option value="low">{t('settings.mapQuality.low')}</option>
+                                    <option value="medium">{t('settings.mapQuality.medium')}</option>
+                                    <option value="high">{t('settings.mapQuality.high')}</option>
                                 </select>
+                            </SettingRow>
+                        </>
+                    )}
+                    {activeSection === 'audio' && (
+                        <>
+                            <SettingRow label="Soundscape" description="Allow tactical-map audio cues">
+                                <BoundToggleSwitch
+                                    checked={!audioPreferences.muted}
+                                    onChange={setSoundscapeEnabled}
+                                    ariaLabel="Toggle soundscape audio"
+                                />
+                            </SettingRow>
+                            <SettingRow label="Master Volume" description="Overall level for optional audio">
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    step="5"
+                                    value={Math.round(audioPreferences.masterVolume * 100)}
+                                    onChange={(event) => setMasterVolumePercent(event.target.value)}
+                                    aria-label="Master volume"
+                                    className="w-28 accent-[#c4a35a]"
+                                />
                             </SettingRow>
                         </>
                     )}
                     {activeSection === 'a11y' && (
                         <>
-                            <SettingRow label="Reduce Motion" description="Mute animations and transitions (vestibular-safe)">
+                            <SettingRow label={t('settings.reduceMotion.label')} description={t('settings.reduceMotion.description')}>
                                 <BoundToggleSwitch
                                     checked={reduceMotion}
                                     onChange={setReduceMotion}
-                                    ariaLabel="Toggle reduce motion"
+                                    ariaLabel={t('settings.reduceMotion.ariaLabel')}
                                 />
                             </SettingRow>
-                            <SettingRow label="Colorblind Mode" description="Faction palette preset for color-vision deficiency">
+                            <SettingRow label={t('settings.colorblindMode.label')} description={t('settings.colorblindMode.description')}>
                                 <select
                                     className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
-                                    aria-label="Colorblind palette preset"
+                                    aria-label={t('settings.colorblindMode.ariaLabel')}
                                     value={colorblindPreset}
                                     onChange={(e) => setColorblindPreset(e.target.value as ColorblindPreset)}>
-                                    <option value="default">Default</option>
-                                    <option value="deuteranopia">Deuteranopia (green-blind)</option>
-                                    <option value="protanopia">Protanopia (red-blind)</option>
-                                    <option value="tritanopia">Tritanopia (blue-blind)</option>
+                                    <option value="default">{t('settings.colorblindMode.default')}</option>
+                                    <option value="deuteranopia">{t('settings.colorblindMode.deuteranopia')}</option>
+                                    <option value="protanopia">{t('settings.colorblindMode.protanopia')}</option>
+                                    <option value="tritanopia">{t('settings.colorblindMode.tritanopia')}</option>
                                 </select>
                             </SettingRow>
                         </>
+                    )}
+                    {activeSection === 'language' && (
+                        <SettingRow label={t('settings.language.label')} description={t('settings.language.description')}>
+                            <select
+                                className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
+                                aria-label={t('settings.language.ariaLabel')}
+                                value={locale}
+                                onChange={(e) => setLocale(e.target.value as Locale)}>
+                                {SUPPORTED_LOCALES.map((option) => (
+                                    <option key={option} value={option}>
+                                        {option === 'en'
+                                            ? t('settings.language.option.en')
+                                            : t('settings.language.option.bcs')}
+                                    </option>
+                                ))}
+                            </select>
+                        </SettingRow>
                     )}
                     {/* Registered sections */}
                     {settingsSections.filter(s => s.id === activeSection).map(s => {
@@ -231,7 +306,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     <button type="button" onClick={onClose}
                         className="text-[11px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
                         style={{ fontFamily: 'Courier New, monospace' }}>
-                        Close
+                        {t('settings.close')}
                     </button>
                 </div>
             </div>

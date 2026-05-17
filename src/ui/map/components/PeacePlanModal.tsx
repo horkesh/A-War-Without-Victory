@@ -15,12 +15,14 @@
  * `onDismiss` prop is preserved on the panel content (NOT passed to Modal
  * as `onClose`) since Modal's master switch is `dismissible={false}`.
  */
+import { useEffect } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { playCue } from '../audio/audio_engine';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -64,6 +66,10 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
         RS: getPlayerSafePoliticalFactionName('RS'),
         HRHB: getPlayerSafePoliticalFactionName('HRHB'),
     };
+
+    useEffect(() => {
+        void playCue('peace_plan_offered');
+    }, [plan.planId]);
 
     const handleRespond = (response: 'accepted' | 'rejected') => {
         // Dismiss immediately — don't wait for IPC

@@ -19,6 +19,8 @@ Before implementation, user chooses:
 
 Default recommendation: end-of-phase chapters for v1.0, user bookmarks later.
 
+Record the chosen boundary in `docs/40_reports/audits/YYYYMMDD_CHRONICLE_CHAPTER_BOUNDARY_DECISION.md` before writing implementation code.
+
 ## Task 1: Chapter Builder
 
 **Files:**
@@ -29,6 +31,7 @@ Default recommendation: end-of-phase chapters for v1.0, user bookmarks later.
 1. Add fixture entries across multiple months/phases.
 2. Build deterministic grouping and title generation.
 3. Sort entries by turn then stable id.
+4. Preserve source entry ids, Turn Aftermath ids, Cost Ledger references, and Codex references in the chapter model.
 
 ## Task 2: Chapter UI
 
@@ -37,6 +40,8 @@ Default recommendation: end-of-phase chapters for v1.0, user bookmarks later.
 - Test: `tests/ui/chronicle_chapter_ui.test.ts`
 
 **Acceptance:** Player can switch between entry list and chapter view without losing filters.
+
+The chapter view must preserve existing Chronicle filters, selected entry state, and deterministic title ordering.
 
 ## Task 3: Narrative Guardrails
 
@@ -62,3 +67,8 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Stop gate: user must select chapter boundary before implementation.
+
+## Commit And Closeout
+
+- Stop if any chapter title/body invents an unsupported event, atrocity, rupture, or outcome not present in source entries.
+- Stage only Chronicle read-model/UI, focused tests, boundary decision report, implemented report, roadmap, and ledger files owned by this plan.

@@ -365,6 +365,7 @@ export function ArmyHQCorpsCard({
                             value={pendingStance ?? data.stance}
                             onChange={(e) => { handleStanceChange(e.target.value); }}
                             onClick={(e) => e.stopPropagation()}
+                            aria-label={`${displayName} corps stance`}
                             className="text-[11px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                         >
                             <option

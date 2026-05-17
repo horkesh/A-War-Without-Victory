@@ -323,6 +323,8 @@ export interface RunScenarioOptions {
     resumeFromWeekIndex?: number;
     /** Emit routine init/sector console diagnostics during scenario runs. Defaults off under Vitest, on elsewhere. */
     consoleDiagnostics?: boolean;
+    /** Optional wall-clock bucket report for benchmark instrumentation. Not part of deterministic scenario artifacts. */
+    emitTimingJson?: boolean;
 }
 
 export interface RunScenarioResult {
@@ -359,6 +361,8 @@ export interface RunScenarioResult {
         replay_timeline?: string;
         /** Optional per-week smart-bot diagnostics. */
         bot_diagnostics?: string;
+        /** Optional wall-clock timing bucket report. Durations are intentionally non-deterministic measurements. */
+        timing_json?: string;
     };
 }
 
@@ -692,6 +696,96 @@ async function writeFailureReport(
 
 async function ensureRunOutputDir(outDir: string): Promise<void> {
     await mkdir(outDir, { recursive: true });
+}
+
+type ScenarioTimingBucket =
+    | 'setup'
+    | 'simulation'
+    | 'diagnostics_reporting'
+    | 'serialization_artifacts';
+
+type ScenarioTimingTotals = Record<ScenarioTimingBucket, bigint>;
+
+const SCENARIO_TIMING_NOTES: Record<ScenarioTimingBucket, string> = {
+    setup: 'Scenario load, run folder preparation, startup state construction, and resume-save hydration.',
+    simulation: 'Turn pipeline and scenario-state mutation boundaries; some in-loop aggregation remains here where current code interleaves it with state updates.',
+    diagnostics_reporting: 'Weekly report projection and end-of-run diagnostics/report model construction.',
+    serialization_artifacts: 'Stable JSON serialization, stream/file writes, final save hashing, replay finalization, and artifact-path handoff work.',
+};
+
+function createScenarioTimingTotals(): ScenarioTimingTotals {
+    return {
+        setup: 0n,
+        simulation: 0n,
+        diagnostics_reporting: 0n,
+        serialization_artifacts: 0n,
+    };
+}
+
+function timingStart(enabled: boolean): bigint {
+    return enabled ? process.hrtime.bigint() : 0n;
+}
+
+function timingAdd(totals: ScenarioTimingTotals, bucket: ScenarioTimingBucket, start: bigint): void {
+    if (start === 0n) return;
+    totals[bucket] += process.hrtime.bigint() - start;
+}
+
+async function timedAsync<T>(
+    enabled: boolean,
+    totals: ScenarioTimingTotals,
+    bucket: ScenarioTimingBucket,
+    fn: () => Promise<T>,
+): Promise<T> {
+    const start = timingStart(enabled);
+    try {
+        return await fn();
+    } finally {
+        timingAdd(totals, bucket, start);
+    }
+}
+
+function timedSync<T>(
+    enabled: boolean,
+    totals: ScenarioTimingTotals,
+    bucket: ScenarioTimingBucket,
+    fn: () => T,
+): T {
+    const start = timingStart(enabled);
+    try {
+        return fn();
+    } finally {
+        timingAdd(totals, bucket, start);
+    }
+}
+
+function nsToMs(value: bigint): number {
+    return Math.round((Number(value) / 1_000_000) * 1000) / 1000;
+}
+
+function buildScenarioTimingJson(args: {
+    run_id: string;
+    scenario_id: string;
+    weeks: number;
+    final_state_hash: string;
+    totals: ScenarioTimingTotals;
+    totalNs: bigint;
+}): Record<string, unknown> {
+    return {
+        schema_version: 1,
+        run_id: args.run_id,
+        scenario_id: args.scenario_id,
+        weeks: args.weeks,
+        final_state_hash: args.final_state_hash,
+        buckets_ms: {
+            diagnostics_reporting: nsToMs(args.totals.diagnostics_reporting),
+            serialization_artifacts: nsToMs(args.totals.serialization_artifacts),
+            setup: nsToMs(args.totals.setup),
+            simulation: nsToMs(args.totals.simulation),
+            total: nsToMs(args.totalNs),
+        },
+        notes: SCENARIO_TIMING_NOTES,
+    };
 }
 
 /**
@@ -1079,16 +1173,13 @@ export async function buildScenarioStartupState(
         settlementGraph: graph,
         operationalData: operationalData ?? undefined
     });
-    // Harness-path player_faction default. The inner `createInitialGameState` call above
+    // Harness-path player_faction fallback. The inner `createInitialGameState` call above
     // intentionally leaves player_faction undefined as the canonical faction-neutral state.
-    // This `buildScenarioStartupState` function — which produces both headless calibration
-    // runs AND the baked desktop startup artifact (regenerated via
-    // `npm run desktop:startup-snapshot:build`) — applies the RBiH default here. Desktop
-    // startNewCampaign then overlays the user's chosen faction on top of the loaded
-    // baked artifact. Without this default, every `playerFaction === X` gate in the
-    // engine returns false, silently disabling event decisions, autonomy-1 proposals,
-    // Decision Room, etc.
-    state.meta.player_faction = state.meta.player_faction ?? 'RBiH';
+    // Scenario JSON may author a player_faction, but default historical scenario
+    // data remains faction-neutral. The legacy startup artifact still carries
+    // RBiH for the desktop default; tests that need event-rich coverage should
+    // use explicit RS state/harness fixtures rather than editing gameplay JSON.
+    state.meta.player_faction = state.meta.player_faction ?? scenario.player_faction ?? 'RBiH';
 
     // After state creation, political_controllers may have been promoted to OSID keys
     // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
@@ -1470,7 +1561,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         resumeFromSavePath,
         resumeFromWeekIndex,
         consoleDiagnostics = process.env.VITEST !== 'true',
+        emitTimingJson = false,
     } = options;
+    const timingTotals = createScenarioTimingTotals();
+    const totalTimingStart = timingStart(emitTimingJson);
     if (!consoleDiagnostics) {
         pushRoutineConsoleDiagnosticsSuppressed();
     }
@@ -1478,7 +1572,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         throw new Error('initialStateOnly cannot be combined with resumeFromSavePath');
     }
     const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
-    let scenario = await loadScenario(scenarioPath);
+    let scenario = await timedAsync(emitTimingJson, timingTotals, 'setup', () => loadScenario(scenarioPath));
     if (filterProbeIntent) {
         scenario = scenarioWithoutProbeIntent(scenario);
     }
@@ -1510,8 +1604,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         ...(resumeFromWeekIndex != null ? { resume_from_week_index: resumeFromWeekIndex } : {})
     };
     const runMetaPath = join(outDir, 'run_meta.json');
-    await ensureRunOutputDir(outDir);
-    await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
+    await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+        await ensureRunOutputDir(outDir);
+        await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
+    });
 
     const baseDir = optionsBaseDir ?? process.cwd();
 
@@ -1519,7 +1615,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (injectFailureAfterRunMeta) {
             injectFailureAfterRunMeta();
         }
-        const startup = await buildScenarioStartupState(scenario, baseDir);
+        const startup = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
+            buildScenarioStartupState(scenario, baseDir)
+        );
         let {
             state,
             graph,
@@ -1537,8 +1635,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         } = startup;
         let startWeekIndex = 0;
         if (resumeFromSavePath) {
-            const resumedSerialized = await readFile(resumeFromSavePath, 'utf8');
-            state = deserializeState(resumedSerialized);
+            const resumedSerialized = await timedAsync(emitTimingJson, timingTotals, 'setup', () =>
+                readFile(resumeFromSavePath, 'utf8')
+            );
+            state = timedSync(emitTimingJson, timingTotals, 'setup', () => deserializeState(resumedSerialized));
             const impliedResumeWeek = state.meta.turn;
             if (!Number.isInteger(impliedResumeWeek) || impliedResumeWeek < 0) {
                 throw new Error(`resume save has invalid meta.turn: ${String(impliedResumeWeek)}`);
@@ -1558,16 +1658,41 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let oobCreated = resumeFromSavePath
             ? state.meta.phase === 'war' || Object.keys(state.military.formations ?? {}).length > 0
             : !scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice';
-        const serializedState = serializeState(state);
+        const serializedState = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            serializeState(state)
+        );
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
         const initialSavePath = join(outDir, 'initial_save.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(initialSavePath, serializedState, 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(initialSavePath, serializedState, 'utf8');
+        });
         const initialControlSnapshot = extractSettlementControlSnapshot(state, graph);
 
         if (initialStateOnly) {
-            const emptyHash = createHash('sha256').update(serializedState, 'utf8').digest('hex').slice(0, 16);
+            const emptyHash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                createHash('sha256').update(serializedState, 'utf8').digest('hex').slice(0, 16)
+            );
+            const timingJsonPath = emitTimingJson ? join(outDir, 'timing.json') : undefined;
+            if (timingJsonPath) {
+                const totalNs = process.hrtime.bigint() - totalTimingStart;
+                await writeFile(
+                    timingJsonPath,
+                    stableStringify(
+                        buildScenarioTimingJson({
+                            run_id,
+                            scenario_id: scenario.scenario_id,
+                            weeks,
+                            final_state_hash: emptyHash,
+                            totals: timingTotals,
+                            totalNs,
+                        }),
+                        2,
+                    ),
+                    'utf8',
+                );
+            }
             return {
                 outDir,
                 run_id,
@@ -1591,7 +1716,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     destroyed_brigades: join(outDir, 'destroyed_brigades.json'),
                     operation_aars: join(outDir, 'operation_aars.json'),
                     // LANE D-CONTENT (Path A): not produced in initialStateOnly mode.
-                    displacement_event_log: ''
+                    displacement_event_log: '',
+                    ...(timingJsonPath ? { timing_json: timingJsonPath } : {})
                 }
             };
         }
@@ -1621,14 +1747,26 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // truncating the per-turn buffer. Mirrors brigade_temporal_log.jsonl /
         // weekly_report.jsonl. No engine state mutation; pure observability.
         const displacementEventLogPath = join(outDir, 'displacement_event_log.jsonl');
-        await ensureRunOutputDir(outDir);
-        const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => ensureRunOutputDir(outDir));
+        const reportStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            createWriteStream(weeklyReportPath, { flags: 'w' })
+        );
         // LANE-2026-05-02-A1: per-turn brigade-keyed snapshot stream. Pure observability,
         // mirrors weekly_report.jsonl pattern; no engine state mutation, no save scope.
-        const brigadeTemporalStream = createWriteStream(brigadeTemporalLogPath, { flags: 'w' });
-        const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
-        const replaySequenceStream = createWriteStream(replaySequencePath, { flags: 'w' });
-        const displacementEventStream = createWriteStream(displacementEventLogPath, { flags: 'w' });
+        const brigadeTemporalStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            createWriteStream(brigadeTemporalLogPath, { flags: 'w' })
+        );
+        const replayStream = replayPath
+            ? timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                  createWriteStream(replayPath, { flags: 'w' })
+              )
+            : null;
+        const replaySequenceStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            createWriteStream(replaySequencePath, { flags: 'w' })
+        );
+        const displacementEventStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            createWriteStream(displacementEventLogPath, { flags: 'w' })
+        );
         // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING: NO in-memory frame accumulator.
         // The per-turn JSONL stream is the single source of truth; the consolidated
         // `replay_save_sequence.json` is finalized at end-of-run by stream-reading
@@ -1645,10 +1783,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let replayTimelineFirstFrame = true;
         if (emitWeeklySavesForVideo) {
             replayTimelinePath = join(outDir, 'replay_timeline.json');
-            await ensureRunOutputDir(outDir);
-            replayTimelineStream = createWriteStream(replayTimelinePath, { flags: 'w' });
+            await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => ensureRunOutputDir(outDir));
+            replayTimelineStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                createWriteStream(replayTimelinePath!, { flags: 'w' })
+            );
             const meta = { run_id, scenario_id: scenario.scenario_id, weeks };
-            replayTimelineStream.write('{"meta":' + stableStringify(meta) + ',"frames":[');
+            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                replayTimelineStream!.write('{"meta":' + stableStringify(meta) + ',"frames":[');
+            });
         }
         let baseline_ops_enabled = false;
         let baseline_ops_intensity = 1;
@@ -1719,6 +1861,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const eventDefinitions = loadEventDefinitions(scenario.scenario_start_week ?? 0);
 
         for (let week_index = startWeekIndex; week_index < weeks; week_index++) {
+            const weekSimulationStart = timingStart(emitTimingJson);
             const turnActions = scenario.turns?.find((t) => t.week_index === week_index)?.actions ?? [];
             const actions = normalizeActions(turnActions);
             const baselineOpsAction = actions.find((a) => a.type === 'baseline_ops');
@@ -2058,7 +2201,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 operationalData?.operationalToCanonical ?? null,
                 operationalCentroids,
             );
+            timingAdd(timingTotals, 'simulation', weekSimulationStart);
 
+            const weeklyDiagnosticsStart = timingStart(emitTimingJson);
             // Capture corps AI snapshots at key turns for the end report
             const currentTurn = state.meta.turn;
             if (CORPS_AI_SNAPSHOT_TURNS.has(currentTurn) && turnReport.corps_ai_report) {
@@ -2162,15 +2307,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             if (firstReportRow === null) firstReportRow = reportRow;
             lastReportRow = reportRow;
-            reportStream.write(stableStringify(reportRow) + '\n');
+            timingAdd(timingTotals, 'diagnostics_reporting', weeklyDiagnosticsStart);
+            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                reportStream.write(stableStringify(reportRow) + '\n');
+            });
 
             // LANE-2026-05-02-A1: brigade temporal snapshot — per-turn × per-brigade row.
             // Pure read-only projection over state.military.formations after all turn
             // reconciliation. strictCompare-sorted by brigade_id for byte-stability.
             const brigadeTemporalRows = buildBrigadeTemporalRows(state, week_index);
-            for (const row of brigadeTemporalRows) {
-                brigadeTemporalStream.write(stableStringify(row) + '\n');
-            }
+            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                for (const row of brigadeTemporalRows) {
+                    brigadeTemporalStream.write(stableStringify(row) + '\n');
+                }
+            });
 
             // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn replay frame.
             // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING (2026-05-05): JSONL append-only
@@ -2179,11 +2329,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // `serializeState(state)` is the canonical writer (also produces
             // final_save.json). State is NOT mutated.
             const replayFrameRow = buildReplayFrameRow(state, week_index);
-            replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
+            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
+            });
 
             if (week_index === weeks - 1) {
-                const serialized = serializeState(state);
-                final_state_hash = createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16);
+                const serialized = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                    serializeState(state)
+                );
+                final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                    createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16)
+                );
             }
             if (replayStream) {
                 const replayLine: { week_index: number; actions: ScenarioAction[]; state_hash?: string } = {
@@ -2191,54 +2347,68 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     actions
                 };
                 if (final_state_hash) replayLine.state_hash = final_state_hash;
-                replayStream.write(stableStringify(replayLine) + '\n');
+                timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                    replayStream.write(stableStringify(replayLine) + '\n');
+                });
             }
 
             if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
                 const midPath = join(outDir, `save_w${week_index + 1}.json`);
-                const serializedMid = serializeState(state);
-                await ensureRunOutputDir(outDir);
-                await writeFile(midPath, serializedMid, 'utf8');
+                const serializedMid = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                    serializeState(state)
+                );
+                await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+                    await ensureRunOutputDir(outDir);
+                    await writeFile(midPath, serializedMid, 'utf8');
+                });
                 weeklySavePaths.push(midPath);
                 if (emitWeeklySavesForVideo && replayTimelineStream) {
                     const frameJson = '{"week_index":' + week_index + ',"game_state":' + serializedMid + '}';
-                    replayTimelineStream.write((replayTimelineFirstFrame ? '' : ',') + frameJson);
+                    timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                        replayTimelineStream!.write((replayTimelineFirstFrame ? '' : ',') + frameJson);
+                    });
                     replayTimelineFirstFrame = false;
                 }
             }
         }
 
         if (!final_state_hash) {
-            final_state_hash = createHash('sha256')
-                .update(serializeState(state), 'utf8')
-                .digest('hex')
-                .slice(0, 16);
+            final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                createHash('sha256')
+                    .update(serializeState(state), 'utf8')
+                    .digest('hex')
+                    .slice(0, 16)
+            );
         }
 
-        reportStream.end();
-        brigadeTemporalStream.end();
-        if (replayStream) replayStream.end();
-        replaySequenceStream.end();
-        displacementEventStream.end();
-        await new Promise<void>((resolve, reject) => {
+        timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+            reportStream.end();
+            brigadeTemporalStream.end();
+            if (replayStream) replayStream.end();
+            replaySequenceStream.end();
+            displacementEventStream.end();
+        });
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
             if (replayStream) {
                 reportStream.on('finish', () => replayStream.on('finish', resolve).on('error', reject));
             } else {
                 reportStream.on('finish', resolve);
             }
             reportStream.on('error', reject);
-        });
+        }));
         // LANE-NIGHTSHIFT-REPLAY-BUFFER-STREAMING: the consolidated finalize step
         // stream-reads `replay_sequence.jsonl` from disk, so we MUST wait for the
         // JSONL `finish` event before invoking the finalizer. Without this, the
         // finalizer can race against still-buffered writes on slow disks.
-        await new Promise<void>((resolve, reject) => {
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
             replaySequenceStream.on('finish', resolve).on('error', reject);
-        });
+        }));
 
         const finalSavePath = join(outDir, 'final_save.json');
         if (state.meta.phase === 'war' && operationalData) {
-            const finalOperationalEdges = await loadOperationalEdges(baseDir);
+            const finalOperationalEdges = await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                loadOperationalEdges(baseDir)
+            );
             state.military.war_front_edges_osid = computeFrontEdgesOsid(
                 state,
                 finalOperationalEdges,
@@ -2251,10 +2421,16 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 operationalCentroids,
             );
         }
-        const finalSerialized = serializeState(state);
-        final_state_hash = createHash('sha256').update(finalSerialized, 'utf8').digest('hex').slice(0, 16);
-        await ensureRunOutputDir(outDir);
-        await writeFile(finalSavePath, finalSerialized, 'utf8');
+        const finalSerialized = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            serializeState(state)
+        );
+        final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            createHash('sha256').update(finalSerialized, 'utf8').digest('hex').slice(0, 16)
+        );
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(finalSavePath, finalSerialized, 'utf8');
+        });
 
         // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: consolidated end-of-run
         // artifact. Separate file (NOT embedded in final_save.json) so canonical
@@ -2265,11 +2441,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // stream-reading `replay_sequence.jsonl` line-by-line — peak heap is
         // bounded by one frame's serialized state, never the whole sequence.
         // This unblocks 188w hash-identity gates that previously OOM'd here.
-        const replaySaveSequencePath = await streamFinalizeReplaySaveSequenceFromJsonl(
-            outDir,
-            replaySequencePath,
+        const replaySaveSequencePath = await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            streamFinalizeReplaySaveSequenceFromJsonl(
+                outDir,
+                replaySequencePath,
+            )
         );
 
+        let endDiagnosticsStart = timingStart(emitTimingJson);
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
 
         let breachDiagnostic: { max_abs_pressure: number; breach_count_last_turn: number } | undefined;
@@ -2475,50 +2654,75 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);
-        await ensureRunOutputDir(outDir);
-        await writeFile(runSummaryPath, stableStringify(runSummaryForWrite, 2), 'utf8');
-        const controlDelta = computeControlDelta(initialControlSnapshot, finalControlSnapshot);
+        timingAdd(timingTotals, 'diagnostics_reporting', endDiagnosticsStart);
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(runSummaryPath, stableStringify(runSummaryForWrite, 2), 'utf8');
+        });
+        const controlDelta = timedSync(emitTimingJson, timingTotals, 'diagnostics_reporting', () =>
+            computeControlDelta(initialControlSnapshot, finalControlSnapshot)
+        );
         const controlDeltaPath = join(outDir, 'control_delta.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(controlDeltaPath, stableStringify(controlDelta, 2), 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(controlDeltaPath, stableStringify(controlDelta, 2), 'utf8');
+        });
 
-        const activitySummary = computeActivitySummary(activityCountsPerWeek);
+        const activitySummary = timedSync(emitTimingJson, timingTotals, 'diagnostics_reporting', () =>
+            computeActivitySummary(activityCountsPerWeek)
+        );
         const activitySummaryPath = join(outDir, 'activity_summary.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(activitySummaryPath, stableStringify(activitySummary, 2), 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(activitySummaryPath, stableStringify(activitySummary, 2), 'utf8');
+        });
 
         let botDiagnosticsPath: string | undefined;
         if (enableBotDiagnostics) {
-            botDiagnosticsPath = join(outDir, 'bot_diagnostics.json');
-            await ensureRunOutputDir(outDir);
-            await writeFile(botDiagnosticsPath, stableStringify(botWeeklyDiagnostics, 2), 'utf8');
+            const pathForWrite = join(outDir, 'bot_diagnostics.json');
+            botDiagnosticsPath = pathForWrite;
+            await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+                await ensureRunOutputDir(outDir);
+                await writeFile(pathForWrite, stableStringify(botWeeklyDiagnostics, 2), 'utf8');
+            });
         }
 
         if (emitWeeklySavesForVideo && replayTimelineStream) {
-            replayTimelineStream.write(']}');
-            replayTimelineStream.end();
-            await new Promise<void>((resolve, reject) => {
-                replayTimelineStream!.on('finish', resolve).on('error', reject);
+            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+                replayTimelineStream!.write(']}');
+                replayTimelineStream!.end();
             });
+            await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
+                replayTimelineStream!.on('finish', resolve).on('error', reject);
+            }));
         }
 
         // Phase H2.2: formation delta (initial vs final formations).
         // finalFormations and destroyedBrigades are hoisted above runSummary.
-        const formationDelta = computeFormationDelta(initialFormationsSnapshot, finalFormations);
+        const formationDelta = timedSync(emitTimingJson, timingTotals, 'diagnostics_reporting', () =>
+            computeFormationDelta(initialFormationsSnapshot, finalFormations)
+        );
         const formationDeltaPath = join(outDir, 'formation_delta.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
+        });
 
         const destroyedBrigadesPath = join(outDir, 'destroyed_brigades.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(destroyedBrigadesPath, stableStringify(destroyedBrigades, 2), 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(destroyedBrigadesPath, stableStringify(destroyedBrigades, 2), 'utf8');
+        });
 
         // Operation AARs artifact
         const operationAars = state.operation_history ?? [];
         const operationAarsPath = join(outDir, 'operation_aars.json');
-        await ensureRunOutputDir(outDir);
-        await writeFile(operationAarsPath, stableStringify(operationAars, 2), 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(operationAarsPath, stableStringify(operationAars, 2), 'utf8');
+        });
 
+        endDiagnosticsStart = timingStart(emitTimingJson);
         let formationFatigueSummary: FormationFatigueSummary | null = null;
         const formationIds = Object.keys(finalFormations).sort(strictCompare);
         if (formationIds.length > 0) {
@@ -2594,9 +2798,32 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             activeOperations: collectActiveOperations(state),
             anomalyReports: anomalyReports.length > 0 ? anomalyReports : null
         });
+        timingAdd(timingTotals, 'diagnostics_reporting', endDiagnosticsStart);
         const endReportPath = join(outDir, 'end_report.md');
-        await ensureRunOutputDir(outDir);
-        await writeFile(endReportPath, endReportMd, 'utf8');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(endReportPath, endReportMd, 'utf8');
+        });
+
+        const timingJsonPath = emitTimingJson ? join(outDir, 'timing.json') : undefined;
+        if (timingJsonPath) {
+            const totalNs = process.hrtime.bigint() - totalTimingStart;
+            await writeFile(
+                timingJsonPath,
+                stableStringify(
+                    buildScenarioTimingJson({
+                        run_id,
+                        scenario_id: scenario.scenario_id,
+                        weeks,
+                        final_state_hash,
+                        totals: timingTotals,
+                        totalNs,
+                    }),
+                    2,
+                ),
+                'utf8',
+            );
+        }
 
         return {
             outDir,
@@ -2620,7 +2847,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 displacement_event_log: displacementEventLogPath,
             ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
             ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),
-                ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {})
+                ...(botDiagnosticsPath ? { bot_diagnostics: botDiagnosticsPath } : {}),
+                ...(timingJsonPath ? { timing_json: timingJsonPath } : {})
             }
         };
     } catch (err) {

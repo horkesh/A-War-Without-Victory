@@ -119,13 +119,15 @@ export const ChronicleRibbonScrubber = React.memo(function ChronicleRibbonScrubb
                         if (pct > maxPct) { maxPct = pct; color = FACTION_HEX_COLORS[f]; }
                     }
                     return (
-                        <div
-                            key={turn}
-                            className="flex-1 cursor-pointer hover:opacity-100 transition-opacity"
-                            style={{ backgroundColor: color, opacity: 0.5 }}
-                            onClick={() => onClickTurn(turn)}
-                            title={`${turnToDateString(turn)} (Week ${turn})`}
-                        />
+                            <button
+                                type="button"
+                                key={turn}
+                                className="flex-1 cursor-pointer hover:opacity-100 transition-opacity border-0 p-0"
+                                style={{ backgroundColor: color, opacity: 0.5 }}
+                                onClick={() => onClickTurn(turn)}
+                                aria-label={`Jump to ${turnToDateString(turn)} (Week ${turn})`}
+                                title={`${turnToDateString(turn)} (Week ${turn})`}
+                            />
                     );
                 })}
             </div>

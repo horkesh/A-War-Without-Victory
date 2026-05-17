@@ -75,6 +75,7 @@ export function RecruitmentModal({
               <label className="block text-xs text-text-secondary">
                 Brigade
                 <select
+                  aria-label="Recruitment brigade"
                   value={selectedBrigadeId}
                   onChange={(e) => {
                     const id = e.target.value;
@@ -94,6 +95,7 @@ export function RecruitmentModal({
               <label className="block text-xs text-text-secondary">
                 Equipment class
                 <input
+                  aria-label="Recruitment equipment class"
                   value={equipmentClass}
                   onChange={(e) => setEquipmentClass(e.target.value)}
                   className="mt-1 w-full px-2 py-1 bg-panel-bg border border-panel-border rounded text-text-primary"

@@ -19,12 +19,14 @@ External playtest readiness is a release-ops and product-validation lane. It pac
 ## Implementation Tasks
 
 1. Define playtest objective
+   - Start from existing playtest material under `docs/playtesting/v092/` if present; do not fork a second instructions style without a reason.
    - Choose target audience: strategy players, historical-wargame players, internal friends-and-family, or domain reviewers.
    - Define the tested loop: first 30 minutes, one full turn cycle, RS/RBiH/HRHB campaign slice, or endgame/verdict review.
    - Define success metrics and stop conditions.
 
 2. Select build and scenario state
    - Pick exact commit SHA and package artifact.
+   - Record `git rev-parse HEAD`, package path, package size, and SHA-256 hash.
    - Choose default faction and save/scenario setup.
    - Record expected first-session path and known blockers.
 
@@ -47,20 +49,36 @@ External playtest readiness is a release-ops and product-validation lane. It pac
    - Have an internal operator follow only the tester instructions.
    - Confirm install, first launch, first objective, save/load, and feedback submission path.
    - Revise docs until no internal context is required.
+   - Save dry-run evidence to `docs/40_reports/playtest/YYYYMMDD_EXTERNAL_PLAYTEST_DRY_RUN.md`.
+
+## Blocker Classification
+
+- **P0:** install failure, launch failure, crash during first objective, save/load corruption, sensitive-history misrepresentation, or feedback intake privacy failure.
+- **P1:** confusing but recoverable instruction, missing screenshot/log guidance, non-blocking UI friction, or known issue without linked owner.
+- **P2:** copy polish, optional hardware metadata, or nonessential packet presentation.
+
+Do not release a tester packet with any open P0.
 
 ## Files To Touch
 
-- `docs/50_launch/playtest/*` or nearest existing launch/playtest docs folder
+- Existing `docs/playtesting/v092/*` if it remains the active packet source
+- `docs/50_launch/playtest/*` only if launch packet material is being split out for external distribution
+- `docs/40_reports/playtest/YYYYMMDD_EXTERNAL_PLAYTEST_DRY_RUN.md`
 - `docs/40_reports/PLATFORM_TEST_MATRIX.md` if artifact status changes
 - `docs/plans/MASTER_ROADMAP.md`
 - `docs/PROJECT_LEDGER.md`
 
 ## Verification
 
-- Verify package artifact hash and commit SHA.
-- Run the relevant package smoke test.
+- Verify package artifact hash and commit SHA:
+  - `git rev-parse HEAD`
+  - `Get-FileHash <artifact-path> -Algorithm SHA256`
+- Run the relevant package smoke test:
+  - `npm.cmd run desktop:package:win:nsis`
+  - `npm.cmd run desktop:package:win:nsis:smoke -- --report-only`
 - Run one instruction-only dry-run.
 - Verify every known issue links to a plan, report, or explicit owner decision.
+ - Run `git diff --check -- docs/playtesting docs/50_launch docs/40_reports/playtest docs/40_reports/PLATFORM_TEST_MATRIX.md docs/plans/MASTER_ROADMAP.md docs/PROJECT_LEDGER.md`.
 
 ## Documentation And Ledger
 
@@ -73,3 +91,9 @@ External playtest readiness is a release-ops and product-validation lane. It pac
 - Stop if installer/package validation is not current enough for external testers.
 - Stop if a P0 launch/playtest blocker remains unresolved.
 - Stop if feedback intake cannot protect sensitive tester information.
+
+## Commit And Closeout
+
+- Before staging, run `git status --short` and stage only playtest packet, evidence, roadmap, and ledger files owned by this plan.
+- Commit only after the operator approves external distribution scope.
+- Closeout note must include commit SHA, artifact hash, dry-run evidence path, and the P0/P1/P2 blocker count.

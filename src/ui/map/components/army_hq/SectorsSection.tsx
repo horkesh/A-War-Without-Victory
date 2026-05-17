@@ -258,6 +258,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                             value={sector.sector_stance ?? 'defend'}
                                             onChange={(e) => { void handleSectorStance(sector.sector_id, e.target.value); }}
                                             onClick={(e) => e.stopPropagation()}
+                                            aria-label={`${sector.display_name} sector stance`}
                                             className="text-[10px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                                         >
                                             <option value="fortify">FORTIFY</option>

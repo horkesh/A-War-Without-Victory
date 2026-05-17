@@ -319,7 +319,12 @@ export function OOBSidebar() {
                         role="button"
                         tabIndex={0}
                         onClick={() => toggle(faction)}
-                        onKeyDown={(e) => e.key === 'Enter' && toggle(faction)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggle(faction);
+                          }
+                        }}
                         className="w-full flex items-center justify-between px-2 py-1 rounded font-mono text-[11px] font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors cursor-pointer group/faction"
                       >
                         <div className="flex flex-col gap-0.5 min-w-0">
@@ -343,6 +348,14 @@ export function OOBSidebar() {
                                 <div className="text-[9px] text-text-secondary pl-6">
                                   <div>CO:</div>
                                   <div className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</div>
+                                  <div className="mt-0.5 leading-snug text-text-secondary">
+                                    {commander.bio_short ?? 'Service record pending staff review.'}
+                                  </div>
+                                  {commander.command_style && (
+                                    <div className="mt-0.5 text-[8px] uppercase tracking-wide text-text-secondary/80">
+                                      Style: <span className="normal-case tracking-normal text-text-secondary">{commander.command_style}</span>
+                                    </div>
+                                  )}
                                 </div>
                               );
                             }

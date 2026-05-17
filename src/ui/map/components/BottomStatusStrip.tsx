@@ -175,9 +175,11 @@ export function BottomStatusStrip() {
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
       {/* R6: Territory — stacked horizontal progress bar. R14: Click opens Strategic Dashboard. */}
-      <div
+      <button
+        type="button"
         className="hidden md:flex items-center gap-2 px-2 shrink-0 cursor-pointer hover:bg-white/5 rounded transition-colors"
         onClick={() => setStrategicDashboardOpen(true)}
+        aria-label="Open Strategic Dashboard"
         title="Open Strategic Dashboard"
       >
         {/* Player-safe bar */}
@@ -221,7 +223,7 @@ export function BottomStatusStrip() {
             <span className="text-[9px]">Hostile-held {hostileHeldPct.toFixed(1)}%</span>
           </span>
         </div>
-      </div>
+      </button>
 
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 

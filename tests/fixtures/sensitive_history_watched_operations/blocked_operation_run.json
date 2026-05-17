@@ -1,0 +1,78 @@
+{
+  "files": {
+    "run_summary.json": {
+      "weeks": 188,
+      "final_state_hash": "watched-op-fixture"
+    },
+    "final_save.json": {
+      "meta": {
+        "turn": 188
+      },
+      "political": {
+        "political_controllers": {}
+      },
+      "military": {
+        "event_fire_counts": {},
+        "event_last_fired_turn": {},
+        "fired_event_ids": [],
+        "formations": {}
+      }
+    },
+    "watched_operations.json": [
+      {
+        "operation_id": "vrs_drina:Operation Krivaja-95:t168",
+        "operation_name": "Operation Krivaja-95",
+        "canonical_window": {
+          "start_turn": 168,
+          "end_turn": 176
+        },
+        "delivery_status": "blocked",
+        "typed_blocker": "defender_power_too_high"
+      },
+      {
+        "operation_id": "vrs_drina:Operation Stupcanica-95:t172",
+        "operation_name": "Operation Stupčanica-95",
+        "canonical_window": {
+          "start_turn": 172,
+          "end_turn": 180
+        },
+        "delivery_status": "delivered",
+        "typed_blocker": ""
+      }
+    ],
+    "operation_aars.json": [
+      {
+        "operation_id": "vrs_drina:Operation Stupcanica-95:t172",
+        "operation_name": "Operation Stupčanica-95",
+        "started_turn": 172,
+        "outcome": "success",
+        "recovery_reason": "",
+        "blocker": "",
+        "total_attacks": 3,
+        "objectives_targeted": [
+          "op:vlasenica:stupcanica_2"
+        ],
+        "objectives_captured": [
+          "op:vlasenica:stupcanica_2"
+        ],
+        "force_ratio_estimate": 1.2,
+        "axis_summaries": [
+          {
+            "axis_id": "stupcanica_enclave",
+            "staging_osid": "op:vlasenica:vlasenica_2",
+            "total_attacks": 3,
+            "objectives_targeted": [
+              "op:vlasenica:stupcanica_2"
+            ],
+            "objectives_captured": [
+              "op:vlasenica:stupcanica_2"
+            ],
+            "brigades": [
+              "rs_1st_birac"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -37,6 +37,7 @@ This is a planning-control document. It does not implement features. It maps roa
 | Gold gate and launch day | `docs/plans/2026-05-17-gold-gate-launch-day-plan.md` |
 | Wall-clock performance residual | `docs/plans/2026-05-17-performance-wall-clock-followup-plan.md` |
 | External playtest readiness | `docs/plans/2026-05-17-external-playtest-readiness-plan.md` |
+| CI/test feedback loop | `docs/plans/2026-05-17-ci-test-feedback-loop-plan.md` |
 | Historical essays | `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md` |
 | Clean VM validation | `docs/plans/2026-05-17-clean-vm-cosmetic-finalization-plan.md` |
 | EOL normalization | `docs/plans/2026-05-16-working-tree-eol-normalization-plan.md` |
@@ -49,6 +50,7 @@ This is a planning-control document. It does not implement features. It maps roa
 2. Confirm every linked plan has implementation tasks, files to touch, verification, docs/ledger notes, and stop gates.
 3. When a plan is implemented, update the matrix status or replace the plan link with the implemented report link.
 4. If a roadmap point is intentionally deferred, add a deferral rationale and owner instead of leaving it unplanned.
+5. Treat a plan as implementation-ready only when it names concrete owner files, focused tests or commands, docs/ledger propagation, stop gates, and commit/closeout scope.
 
 ## Verification
 

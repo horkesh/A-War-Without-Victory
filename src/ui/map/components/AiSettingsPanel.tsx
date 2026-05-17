@@ -74,6 +74,7 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
                                 type="radio"
                                 name="ai-mode"
                                 value={m.id}
+                                aria-label={`AI mode: ${m.label}`}
                                 checked={mode === m.id}
                                 onChange={() => setMode(m.id)}
                                 className="mt-0.5 accent-[#c4a04a]"

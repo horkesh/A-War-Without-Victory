@@ -29,7 +29,7 @@ Out of scope:
 **Files:**
 - Modify: `tools/diagnostics/sensitive_history_status.cjs`
 - Modify: `tests/sensitive_history_status_diagnostic.test.ts`
-- Create: `tests/fixtures/sensitive_history_watched_operations/*.json` if no compact fixture exists.
+- Create: `tests/fixtures/sensitive_history_watched_operations/blocked_operation_run.json` if no compact fixture exists.
 
 **Steps:**
 1. Write a failing test where a compact run artifact includes one watched operation with `delivery_status: "blocked"` and a typed blocker.
@@ -38,6 +38,8 @@ Out of scope:
 4. Rerun the focused test.
 
 **Acceptance:** Diagnostic output distinguishes `missing`, `blocked`, `delivered`, and `aar_not_visible`.
+
+The fixture must include at least `operation_id`, canonical window, `delivery_status`, and typed blocker so it can be reused by report-contract tests.
 
 ## Task 2: Trace Catalog Injection
 
@@ -49,6 +51,7 @@ Out of scope:
 
 **Steps:**
 1. Add a red test proving each watched operation reaches either spawn, blocker, or explicit not-eligible status for its canonical window.
+   - Include a table in the test/report: `operation_id | canonical window | expected statuses | source catalog file`.
 2. Run the two focused suites.
 3. Patch only the missing catalog/injection edge if a watched op silently disappears.
 4. Rerun focused suites.
@@ -60,7 +63,7 @@ Out of scope:
 **Files:**
 - Modify: `src/scenario/scenario_end_report.ts`
 - Modify: `src/scenario/scenario_reporting.ts`
-- Test: add/extend `tests/scenario_reporting_contracts.test.ts` if needed.
+- Test: add/extend `tests/scenario_reporting_contracts.test.ts`.
 
 **Steps:**
 1. Add a failing report-contract test: a watched blocked operation must appear in end-report text/data with its blocker.
@@ -82,6 +85,8 @@ Out of scope:
 - If all watched operations are blocked, blockers must be typed and reported.
 - If operations remain missing, record the exact missing owner before any balance change.
 
+To locate the new run directory, use the scenario command output first. If needed, list the newest matching run directory with PowerShell and paste the exact path into the implemented report.
+
 ## Docs and Ledger
 
 Update:
@@ -91,3 +96,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism statement required: this lane may change scenario outcomes only if catalog/injection behavior changes; otherwise diagnostics/reporting-only work must preserve hashes except report artifacts.
+
+## Stop Gates And Closeout
+
+- Stop after Task 2 if any watched operation still has no owner classification; do not jump to balance changes.
+- Stop for user sensitive-history sign-off before accepting any newly delivered capture outcome.
+- Stage only diagnostic/reporting/catalog-owner code, focused tests, implemented report, roadmap, and ledger files owned by this plan.

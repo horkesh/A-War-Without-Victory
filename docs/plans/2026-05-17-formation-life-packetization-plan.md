@@ -28,8 +28,11 @@
 1. Write a test fixture that classifies formations into `loan`, `operation_participant`, `sector_front`, `sector_reserve`, `sector_rear`, `sector_owned`, `doctrine`.
 2. Implement deterministic sorting by formation id.
 3. Run focused test.
+4. Record baseline counts before any runtime packet starts.
 
 **Acceptance:** Inventory emits counts and a stable JSON list for each subtype.
+
+No runtime packet starts until subtype counts are stable and the inventory output path is recorded in the packet report.
 
 ## Task 2: FL-A Sector-Front Inertness Packet
 
@@ -45,6 +48,8 @@
 
 **Acceptance:** `sector_front` active-never-fights count drops without increasing invalid operations.
 
+Acceptance table: `bucket | before count | after count | output hash/status | evidence path`.
+
 ## Task 3: FL-B Far-From-Home Ownership Truth Packet
 
 **Files:**
@@ -58,6 +63,8 @@
 3. Rerun diagnostics.
 
 **Acceptance:** No formation is labeled a bug when it has a live owner; ownerless cases remain visible.
+
+FL-C and FL-E stay report-only until a separate doctrine/design ruling authorizes runtime behavior changes.
 
 ## Task 4: FL-D HRHB/HVO Offensive Emergence Packet
 
@@ -77,7 +84,7 @@
 
 Run:
 - `npm.cmd run typecheck`
-- focused packet tests
+- `npx.cmd vitest run tests\formation_life_packet_inventory.test.ts tests\formation_life_sector_front_inertness.test.ts tests\formation_life_far_from_home_truth.test.ts tests\hrhb_offensive_emergence.test.ts`
 - `npm.cmd run sim:scenario:run:40w`
 - `node tools\diagnostics\formation_life_packet_inventory.cjs <run-dir>`
 
@@ -90,3 +97,8 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism statement required for every runtime packet. Report-only packetization must not claim scenario improvement.
+
+## Commit And Closeout
+
+- Commit packet inventory separately from any runtime packet.
+- Stage only diagnostic, packet-specific runtime owner files, focused tests, implemented report, roadmap, and ledger files owned by the active packet.

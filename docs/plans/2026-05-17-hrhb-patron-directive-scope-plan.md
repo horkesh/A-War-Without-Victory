@@ -24,11 +24,15 @@
 
 **Acceptance:** User selects one option before code changes.
 
+The decision memo must include a single line exactly in this form: `Selected scope: faction-wide | per-corps | hybrid`.
+
 ## Task 2: Red Tests for Selected Scope
 
 **Files:**
 - Test: `tests/hrhb_patron_directive_scope.test.ts`
-- Inspect: `src/sim/combat/army_order_interpretation.ts`
+- Inspect: `src/sim/combat/order_interpretation.ts`
+- Inspect: `src/state/game_state.ts`
+- Inspect: timeline/patron directive data that feeds HRHB/HVO pressure
 - Inspect: `src/sim/combat/bot_corps_directives.ts`
 
 **Steps:**
@@ -67,3 +71,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Stop gate: no code before user design selection.
+
+## Stop Gates And Closeout
+
+- Tests must encode only the selected option; rejected options belong in the decision memo, not in active assertions.
+- Stop if any anchor/benchmark regression appears that cannot be tied to the selected patron-directive scope.
+- Stage only the decision memo, selected-scope code/data, focused tests, calibration evidence, roadmap, and ledger files owned by this plan.

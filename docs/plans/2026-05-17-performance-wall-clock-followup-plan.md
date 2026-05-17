@@ -20,6 +20,7 @@ Performance work proceeds from measured evidence. Benchmarks must separate pure 
 
 1. Reproduce baseline
    - Run the current benchmark that reported the wall-clock residual.
+   - If no single canonical benchmark exists, start with `npm.cmd run sim:scenario:run:40w` and record that limitation before adding new instrumentation.
    - Record machine, Node version, command, scenario, turn count, and output paths.
    - Confirm whether timing includes diagnostics, logging, serialization, or UI work.
 
@@ -30,6 +31,7 @@ Performance work proceeds from measured evidence. Benchmarks must separate pure 
 
 3. Identify hotspots
    - Profile the highest-cost bucket first.
+   - Do not optimize before one bucket is shown to dominate the residual.
    - Inspect loops for repeated sorting, geometry scans, object churn, or redundant recomputation.
    - Document any suspected bottleneck before editing.
 
@@ -51,6 +53,7 @@ Performance work proceeds from measured evidence. Benchmarks must separate pure 
 ## Files To Touch
 
 - Existing benchmark scripts under `scripts/`, `tools/`, or `tests/bench*`
+- Likely profiling/diagnostic owners discovered from `package.json` benchmark scripts
 - Hotspot modules only after measurement
 - `docs/20_engineering/DETERMINISM_TEST_MATRIX.md` if benchmark coverage changes
 - `docs/plans/MASTER_ROADMAP.md`
@@ -63,6 +66,8 @@ Performance work proceeds from measured evidence. Benchmarks must separate pure 
 - Run focused tests for optimized modules.
 - Run `npm.cmd run typecheck` if TypeScript changes are made.
 
+Required evidence table: `bucket | before ms | after ms | output hash/status | evidence path`.
+
 ## Documentation And Ledger
 
 - Record baseline, optimized result, and benchmark mode definitions.
@@ -74,3 +79,8 @@ Performance work proceeds from measured evidence. Benchmarks must separate pure 
 - Stop if profiling cannot reproduce the residual.
 - Stop if an optimization changes deterministic output without explicit design approval.
 - Stop if benchmark instrumentation dominates the timing being measured.
+
+## Commit And Closeout
+
+- Commit instrumentation separately from optimization.
+- Stage only benchmark/profiling scripts, measured hotspot code, focused tests, determinism docs, implemented report, roadmap, and ledger files owned by this plan.

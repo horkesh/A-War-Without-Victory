@@ -1,3 +1,5 @@
+import type { FactionId } from '../state/game_state.js';
+
 /**
  * Phase H1.1: Scenario input types (inputs only; no derived fields).
  * Actions are order-normalized (stable sort) before application and logging.
@@ -29,6 +31,12 @@ export interface ScenarioVictoryConditions {
 
 export interface Scenario {
     scenario_id: string;
+    /**
+     * Optional gameplay-authored player faction. Most historical scenario JSON
+     * files leave this unset; desktop/player selection or harness test overrides
+     * supply the active player faction instead.
+     */
+    player_faction?: FactionId;
     /** Optional absolute week index anchor (weeks since Jan 1992). Enables time-adaptive bot doctrine profiles. */
     scenario_start_week?: number;
     /** Scenario lifecycle start phase. */

@@ -30,6 +30,7 @@
     "sim:scenario:run": "tsx tools/scenario_runner/run_scenario_with_preflight.ts",
     "sim:scenario:run:default": "tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_52w.json --unique --map --out runs",
     "sim:scenario:run:40w": "tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --unique --map --out runs",
+    "sim:scenario:run:40w:timed": "tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --unique --map --timing-json --out runs",
     "calibrate:40w": "node tools/calibrate_40w.cjs",
     "calibrate:freeze": "node tools/freeze_baseline.cjs",
     "paint:control": "node tools/paint_control_targets.cjs",

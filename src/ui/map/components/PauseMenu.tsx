@@ -14,14 +14,18 @@ interface PauseMenuProps {
 export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: PauseMenuProps) {
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/45"
-             style={{ zIndex: Z.PAUSE_MENU }}
-             onClick={onResume}>
+             style={{ zIndex: Z.PAUSE_MENU }}>
+            <button
+                type="button"
+                className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+                onClick={onResume}
+                aria-label="Resume game"
+            />
             <div className="w-[320px] rounded-lg border border-[#8a7a60]/35 shadow-2xl p-4 flex flex-col gap-2"
                  style={{
                      background: 'rgba(26, 24, 21, 0.97)',
                      backdropFilter: 'blur(8px)',
-                 }}
-                 onClick={(e) => e.stopPropagation()}>
+                 }}>
                 <div className="flex items-center justify-between border-b border-[#8a7a60]/20 pb-2 mb-1">
                     <div className="text-[11px] uppercase tracking-[0.2em] text-[#c4a35a] font-bold">
                         Paused

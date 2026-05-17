@@ -39,6 +39,7 @@ import { PeacePlanModal } from './components/PeacePlanModal';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+import { DiplomacyPanel } from './components/DiplomacyPanel';
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
 import { SettingsScreen } from './components/SettingsScreen';
@@ -258,6 +259,7 @@ function App() {
   const [economyOpen, setEconomyOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [autonomyPanelOpen, setAutonomyPanelOpen] = useState(false);
+  const [diplomacyOpen, setDiplomacyOpen] = useState(false);
   const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
   const [aiAdvisorResponse, setAiAdvisorResponse] = useState<any>(null);
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
@@ -279,6 +281,14 @@ function App() {
     setPeacePlanDismissed(false);
     setAcknowledgedEventIds(new Set());
   }, [stateFingerprint]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('panel') === 'diplomacy' || params.get('diplomacy') === '1') {
+      setDiplomacyOpen(true);
+    }
+  }, []);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
@@ -914,6 +924,12 @@ function App() {
         <AutonomyPanel
           onClose={() => setAutonomyPanelOpen(false)}
           playerFaction={playerFaction}
+        />
+      )}
+      {diplomacyOpen && loadedGameState?.diplomacyView && (
+        <DiplomacyPanel
+          view={loadedGameState.diplomacyView}
+          onClose={() => setDiplomacyOpen(false)}
         />
       )}
       {aiAdvisorOpen && (

@@ -45,6 +45,16 @@ export interface NamedOfficerView {
     political_reliability: number;
     home_corps_id?: string;
     origin: string;
+    /** Short authored service sketch for UI display only. */
+    bio_short?: string;
+    /** Authored command style note for UI display only. */
+    command_style?: string;
+    /** Authored notable command context for UI display only. */
+    known_for?: string;
+    /** Authored political-command context for UI display only. */
+    political_alignment_note?: string;
+    /** Optional neutral note for sensitive-history-adjacent context. */
+    sensitive_history_note?: string;
     status: string;
     assigned_corps_id: string | null;
     acting_commander: boolean;
@@ -337,6 +347,47 @@ export interface InternationalVisibilityPressureView {
     negotiation_momentum: number;
     composite_ivp?: number;
     last_major_shift: number;
+}
+
+export type PlayerKnowledgeConfidence = 'known' | 'likely' | 'uncertain';
+
+export interface DiplomacyActorView {
+    faction: string;
+    patronId: string;
+    patronLabel: string;
+    supportBand: 'strong' | 'steady' | 'strained' | 'limited';
+    constraintBand: 'high' | 'elevated' | 'limited' | 'quiet';
+    commitmentBand: 'likely' | 'uncertain' | 'limited' | 'unknown';
+    isolationBand: 'high' | 'elevated' | 'limited' | 'quiet';
+    sanctionsActive: boolean;
+    events: string[];
+}
+
+export interface DiplomacyProposalView {
+    id: string;
+    kind: 'peace_plan' | 'dayton' | 'proposal_review';
+    name: string;
+    statusLabel: string;
+    detail: string;
+    turnOffered?: number;
+    confidence: PlayerKnowledgeConfidence;
+}
+
+export interface DiplomacyPressureReasonView {
+    key: string;
+    label: string;
+    band: 'high' | 'medium' | 'low' | 'quiet';
+    confidence: PlayerKnowledgeConfidence;
+}
+
+export interface DiplomacyView {
+    playerFaction: string | null;
+    hasSignals: boolean;
+    patronStance?: DiplomacyActorView;
+    activeProposals: DiplomacyProposalView[];
+    externalActors: DiplomacyActorView[];
+    pressureReasons: DiplomacyPressureReasonView[];
+    activeConsequences: Array<{ id: string; label: string }>;
 }
 
 export interface PendingConvoyDecisionView {
@@ -1120,6 +1171,8 @@ export interface LoadedGameState {
 
     /** Per-faction patron override authority (0-100). */
     patronOverrideAuthority?: Record<string, number>;
+    /** Compact read-only diplomacy packet projected from negotiation, patron, and IVP state. */
+    diplomacyView?: DiplomacyView;
 
     /** Pending Dayton negotiation — shown when shouldInitiateDayton fires. */
     pendingDayton?: {

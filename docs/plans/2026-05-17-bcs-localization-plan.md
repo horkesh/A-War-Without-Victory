@@ -19,6 +19,7 @@ Introduce a lightweight localization layer at the UI boundary. Internal IDs, dia
 
 1. Scope translatable surfaces
    - Inventory UI strings in the tactical map shell, Chronicle overlay, Army HQ, War Room, reports panels, verdict screens, and settings.
+   - First-pass batch should inspect `src/ui/map/components/SettingsScreen.tsx`, `src/ui/map/components/chronicle/ChronicleOverlay.tsx`, `src/ui/map/components/army_hq/ArmyHQModal.tsx`, and `src/ui/map/components/VerdictScreen.tsx`.
    - Classify strings as user-facing, diagnostic/developer-facing, canon quotation, or internal ID.
    - Exclude diagnostics and persisted identifiers from translation.
 
@@ -49,7 +50,9 @@ Introduce a lightweight localization layer at the UI boundary. Internal IDs, dia
 
 ## Files To Touch
 
-- `src/ui/map/i18n/*`
+- `src/ui/map/i18n/messages.en.ts`
+- `src/ui/map/i18n/messages.bcs.ts`
+- `src/ui/map/i18n/index.ts`
 - Selected `src/ui/map/components/**` files in small batches
 - `tests/ui_i18n*.test.ts`
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
@@ -58,10 +61,10 @@ Introduce a lightweight localization layer at the UI boundary. Internal IDs, dia
 
 ## Verification
 
-- Run focused i18n tests.
+- Run `npx.cmd vitest run tests\ui_i18n*.test.ts`.
 - Run affected UI tests.
 - Run `npm.cmd run typecheck`.
-- Browser-check representative desktop and mobile widths for overflow.
+- Browser-check representative desktop and mobile widths for overflow at `390x844`, `768x1024`, and `1440x900`.
 
 ## Documentation And Ledger
 
@@ -74,3 +77,8 @@ Introduce a lightweight localization layer at the UI boundary. Internal IDs, dia
 - Stop if translation changes would alter scenario data, diagnostics, save compatibility, or canon meaning.
 - Stop if BCS copy needs domain expert review before merge.
 - Stop if extracted strings create broad UI churn beyond the planned batch.
+
+## Terminology Review And Closeout
+
+- Create `docs/40_reports/audits/YYYYMMDD_BCS_TERMINOLOGY_REVIEW.md` listing uncertain terms, preserved proper nouns, and any reviewer-required follow-up.
+- Before commit, run `git status --short` and stage only i18n dictionaries/helpers, first-batch UI files, tests, terminology report, roadmap, and ledger files owned by this plan.

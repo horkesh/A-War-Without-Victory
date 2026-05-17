@@ -683,7 +683,12 @@ export function SettlementDetailContent({
                   role={onFormationClick ? 'button' : undefined}
                   tabIndex={onFormationClick ? 0 : undefined}
                   onClick={onFormationClick ? () => onFormationClick(f.id) : undefined}
-                  onKeyDown={onFormationClick ? (e) => e.key === 'Enter' && onFormationClick(f.id) : undefined}
+                  onKeyDown={onFormationClick ? (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onFormationClick(f.id);
+                    }
+                  } : undefined}
                   className={`flex items-center gap-2 py-1 px-1.5 bg-black/10 rounded border border-white/5 transition-colors ${onFormationClick ? 'hover:border-white/20 hover:bg-black/20 cursor-pointer' : 'hover:border-white/10'}`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />

@@ -1,12 +1,23 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const TMP_ROOT = join(process.cwd(), '.tmp_sensitive_history_status');
 
 function writeJson(path: string, value: unknown): void {
     writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+function writeFixtureRun(fixtureName: string, runName: string): string {
+    const fixturePath = join(process.cwd(), 'tests', 'fixtures', 'sensitive_history_watched_operations', fixtureName);
+    const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as { files: Record<string, unknown> };
+    const runDir = join(TMP_ROOT, runName);
+    mkdirSync(runDir, { recursive: true });
+    for (const [name, value] of Object.entries(fixture.files)) {
+        writeJson(join(runDir, name), value);
+    }
+    return runDir;
 }
 
 describe('sensitive_history_status diagnostic script', () => {
@@ -128,5 +139,66 @@ describe('sensitive_history_status diagnostic script', () => {
 
         expect(summary.controller_summary).toBe('RBiH:1, RS:1');
         expect(summary.all_rs).toBe(false);
+    });
+
+    it('reports watched-operation visibility separately from capture delivery', () => {
+        const runDir = writeFixtureRun('blocked_operation_run.json', 'watched_operation_trace');
+
+        const jsonOutput = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', '--json', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+        const [summary] = JSON.parse(jsonOutput) as Array<{
+            watched_operations: Array<{
+                operation_name: string;
+                operation_id: string;
+                canonical_window: string;
+                presence_status: string;
+                delivery_status: string;
+                typed_blocker: string;
+                aar_visible: boolean;
+            }>;
+        }>;
+
+        expect(summary.watched_operations).toEqual([
+            {
+                operation_name: 'Operation Cerska-Kamenica',
+                operation_id: '',
+                canonical_window: '',
+                presence_status: 'missing',
+                delivery_status: 'missing',
+                typed_blocker: '',
+                aar_visible: false,
+            },
+            {
+                operation_name: 'Operation Krivaja-95',
+                operation_id: 'vrs_drina:Operation Krivaja-95:t168',
+                canonical_window: '168-176',
+                presence_status: 'aar_not_visible',
+                delivery_status: 'blocked',
+                typed_blocker: 'defender_power_too_high',
+                aar_visible: false,
+            },
+            {
+                operation_name: 'Operation Stupčanica-95',
+                operation_id: 'vrs_drina:Operation Stupcanica-95:t172',
+                canonical_window: '172-180',
+                presence_status: 'aar_visible',
+                delivery_status: 'delivered',
+                typed_blocker: '',
+                aar_visible: true,
+            },
+        ]);
+
+        const markdown = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+
+        expect(markdown).toContain('| Operation Krivaja-95 | vrs_drina:Operation Krivaja-95:t168 | 168-176 | aar_not_visible | blocked | defender_power_too_high | no |');
+        expect(markdown).toContain('| Operation Cerska-Kamenica | - | - | missing | missing | - | no |');
+        expect(markdown).toContain('| Operation Stupčanica-95 | vrs_drina:Operation Stupcanica-95:t172 | 172-180 | aar_visible | delivered | - | yes |');
     });
 });

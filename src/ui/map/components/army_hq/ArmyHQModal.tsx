@@ -30,6 +30,7 @@ import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
 import { Z } from '../../../shared/zIndex';
+import type { NamedOfficerView } from '../../data/types';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -53,6 +54,30 @@ const EMERGENCY_POSTURE_LABELS: Record<string, string> = {
     offensive: 'All Offensive',
     reorganize: 'All Reorganize',
 };
+
+function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
+    return (
+        <div className="mt-1.5 space-y-1 border-t border-panel-border/30 pt-1.5 text-[9px] leading-snug">
+            <div className="text-text-primary">{officer.bio_short ?? 'Service record pending staff review.'}</div>
+            {(officer.command_style || officer.known_for || officer.political_alignment_note || officer.sensitive_history_note) && (
+                <div className="grid grid-cols-1 gap-0.5">
+                    {officer.command_style && (
+                        <div><span className="text-text-secondary uppercase tracking-wide">Style: </span><span className="text-text-primary">{officer.command_style}</span></div>
+                    )}
+                    {officer.known_for && (
+                        <div><span className="text-text-secondary uppercase tracking-wide">Known: </span><span className="text-text-primary">{officer.known_for}</span></div>
+                    )}
+                    {officer.political_alignment_note && (
+                        <div><span className="text-text-secondary uppercase tracking-wide">Command: </span><span className="text-text-primary">{officer.political_alignment_note}</span></div>
+                    )}
+                    {officer.sensitive_history_note && (
+                        <div><span className="text-text-secondary uppercase tracking-wide">Note: </span><span className="text-text-primary">{officer.sensitive_history_note}</span></div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export function ArmyHQModal() {
     const open = useGameStore((s) => s.armyHQOpen);
@@ -280,6 +305,7 @@ export function ArmyHQModal() {
                         {!expandedCorpsId && ipc.isAvailable && (
                             <select
                                 defaultValue=""
+                                aria-label="Emergency posture order"
                                 onChange={(e) => {
                                     if (e.target.value) {
                                         setPendingEmergencyPosture(e.target.value);
@@ -306,6 +332,7 @@ export function ArmyHQModal() {
                         <button
                             type="button"
                             onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
+                            aria-label="Close Army Headquarters"
                             className="text-text-secondary hover:text-text-primary text-[18px] leading-none transition-colors px-1"
                         >
                             &times;
@@ -416,7 +443,10 @@ export function ArmyHQModal() {
                                             COMMANDER
                                         </div>
                                         {data.commander ? (
-                                            <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" />
+                                            <>
+                                                <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" />
+                                                <OfficerMiniBio officer={data.commander} />
+                                            </>
                                         ) : (
                                             <div className="text-text-secondary text-[12px] py-4 text-center italic">
                                                 No commander data available

@@ -20,7 +20,7 @@
  * confirmation flow cannot be ducked mid-advance. No tutorial
  * `data-tutorial-step` anchors inside this modal.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
 import { advanceTurnAndSync } from '../../desktop/orderActions';
@@ -33,6 +33,7 @@ import {
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { Z } from '../../../shared/zIndex';
 import { Modal } from '../../../shared/Modal';
+import { playCue } from '../../audio/audio_engine';
 // LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of Army HQ
 // pushback (CO objections + Mladić-class autonomous-launch warnings).
 // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
@@ -135,6 +136,11 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
     () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
     [loadedGameState, osidDisplayNames],
   );
+
+  useEffect(() => {
+    if (!pending) return;
+    void playCue('turn_review_open');
+  }, [pending]);
 
   // LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: extract substrate fields from
   // loadedGameState. A2 fields (stubbornness / override_tolerance /

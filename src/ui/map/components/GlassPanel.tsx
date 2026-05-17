@@ -57,10 +57,13 @@ export function GlassPanel({
             <div
                 className={`${POSITION_CLASSES.overlay} animate-fadeIn`}
                 style={{ zIndex }}
-                onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose(); }}
             >
-                {/* Backdrop */}
-                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                <button
+                    type="button"
+                    className="absolute inset-0 border-0 bg-black/50 p-0 backdrop-blur-sm"
+                    onClick={onClose}
+                    aria-label={`Close ${title}`}
+                />
                 {/* Panel */}
                 <div
                     ref={panelRef}

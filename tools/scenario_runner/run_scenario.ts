@@ -6,6 +6,7 @@
  * --map: copy final_save.json to data/derived/latest_run_final_save.json and print tactical map instructions.
  * --video: emit weekly save artifacts and replay_timeline.json for tactical map replay/export.
  * --unique: append timestamp to run directory so each run creates a new folder (no overwrite).
+ * --timing-json: emit timing.json with wall-clock benchmark buckets.
  */
 
 import { copyFile, mkdir } from 'node:fs/promises';
@@ -28,6 +29,7 @@ function parseArgs(): {
   map: boolean;
   video: boolean;
   unique: boolean;
+  timingJson: boolean;
 } {
   const args = process.argv.slice(2);
   let scenario = '';
@@ -39,6 +41,7 @@ function parseArgs(): {
   let map = false;
   let video = false;
   let unique = false;
+  let timingJson = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--scenario' && args[i + 1]) {
       scenario = args[++i];
@@ -58,12 +61,14 @@ function parseArgs(): {
       video = true;
     } else if (args[i] === '--unique') {
       unique = true;
+    } else if (args[i] === '--timing-json') {
+      timingJson = true;
     }
   }
   if (!scenario) {
     scenario = DEFAULT_SCENARIO;
   }
-  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, unique };
+  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, unique, timingJson };
 }
 
 async function main(): Promise<void> {
@@ -77,6 +82,7 @@ async function main(): Promise<void> {
     map: enableMap,
     video,
     unique,
+    timingJson,
   } = parseArgs();
 
   const prereqResult = checkDataPrereqs();
@@ -94,7 +100,8 @@ async function main(): Promise<void> {
     resumeFromWeekIndex: continueWeek,
     postureAllPushAndApplyBreaches,
     emitWeeklySavesForVideo: video,
-    uniqueRunFolder: unique
+    uniqueRunFolder: unique,
+    emitTimingJson: timingJson
   });
   process.stdout.write(`outDir: ${result.outDir}\n`);
   process.stdout.write(`paths: ${result.paths.initial_save}\n`);
@@ -106,6 +113,9 @@ async function main(): Promise<void> {
   process.stdout.write(`       ${result.paths.end_report}\n`);
   process.stdout.write(`       ${result.paths.activity_summary}\n`);
   process.stdout.write(`       ${result.paths.formation_delta}\n`);
+  if (result.paths.timing_json) {
+    process.stdout.write(`       ${result.paths.timing_json}\n`);
+  }
   if (result.paths.replay_timeline) {
     process.stdout.write(`       ${result.paths.replay_timeline}\n`);
   }

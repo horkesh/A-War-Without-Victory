@@ -10,6 +10,15 @@
 
 ---
 
+## Task 0: Inspect Existing Audio Surface
+
+**Files:**
+- Inspect: `src/ui/map/audio/sound_manifest.ts`
+- Inspect: `src/ui/map/audio/audio_engine.ts`
+- Inspect: `src/ui/map/components/SettingsScreen.tsx`
+
+**Acceptance:** The plan executor records whether the repo already has a manifest/engine shape and chooses to extend it rather than create a parallel `src/ui/audio` tree.
+
 ## Task 1: Composer Brief
 
 **Files:**
@@ -27,7 +36,7 @@
 ## Task 2: Audio Manifest Schema
 
 **Files:**
-- Create: `src/ui/audio/audioManifest.ts`
+- Modify/create: `src/ui/map/audio/sound_manifest.ts`
 - Test: `tests/ui/audio_manifest.test.ts`
 
 **Steps:**
@@ -37,7 +46,7 @@
 ## Task 3: Stub Audio Bus
 
 **Files:**
-- Create: `src/ui/audio/AudioBus.ts`
+- Modify/create: `src/ui/map/audio/audio_engine.ts`
 - Test: `tests/ui/audio_bus.test.ts`
 
 **Steps:**
@@ -55,6 +64,13 @@
 
 **Acceptance:** Calls are no-op when disabled and do not break SSR/test render.
 
+## Implementation Decision
+
+- Prefer the existing browser-safe audio service shape if present.
+- If choosing Web Audio directly, document why Howler.js was not added.
+- If choosing Howler.js, update package metadata and desktop packaging evidence in the same task.
+- No real audio assets are required for this stub pass; placeholder paths must fail silently.
+
 ## Verification
 
 Run:
@@ -70,3 +86,9 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism: UI no-op/stub only; no sim state or save schema.
+
+## Stop Gates And Closeout
+
+- Stop if adding audio requires network access, runtime timestamps, randomness, or sim-state mutation.
+- Stop if packaged asset paths cannot be validated in Electron.
+- Before commit, run `git status --short` and stage only composer brief, audio stub, hook tests, docs, roadmap, and ledger files owned by this plan.

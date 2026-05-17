@@ -10,11 +10,16 @@
 
 **Tech Stack:** TypeScript simulation/event code, React Codex + Inbox read models, Vitest, JSON scenario event catalogs.
 
-**Status:** AUTHORED 2026-05-17. Phase 0 design decisions DECIDED 2026-05-17 (see Phase 0 table). Ready for Phase A dispatch.
+**Status:** AUTHORED 2026-05-17. Phase 0 design decisions DECIDED 2026-05-17 (see Phase 0 table). Phase B scope corrected 2026-05-17: test player-faction selection must be explicit and separate from gameplay scenario data.
 
 **Source investigation (read-only, in-session 2026-05-17):**
 - Codex visibility bug: `src/ui/map/components/CodexPanel.tsx:140-175` renders every essay in `essaysByYear` regardless of resolver verdict; `codexEssayResolver.ts:474-480` already returns the right `isUnlocked`/`isGhost` truth and is not the bug.
-- Initial event-offer non-surfacing: `src/sim/events/evaluate_events.ts:224-225` gates queuing on `isPlayerRespondent = playerFaction != null && respondingFaction === playerFaction`. Default scenarios ship `player_faction: null`, so the predicate is always false and *no* `requires_player_response` event ever queues to `pending_event_decisions`. Inbox filter at `src/ui/map/data/inboxItems.ts:88-89` is correct and is not the bug.
+- Initial event-offer non-surfacing: `src/sim/events/evaluate_events.ts:224-225` gates queuing on `isPlayerRespondent = playerFaction != null && respondingFaction === playerFaction`. Gameplay scenario JSONs are intentionally faction-neutral unless a scenario is explicitly authored around one player faction, so tests must not "fix" this by writing `player_faction` into every `apr1992_*.json`. Inbox filter at `src/ui/map/data/inboxItems.ts:88-89` is correct and is not the bug.
+
+**Testing policy correction 2026-05-17:**
+- Event-surfacing tests should prefer **RS** fixtures where possible because RS has denser early political/military event coverage.
+- Test faction selection belongs in explicit test harness state, test-only scenario fixtures, or direct state builders. It must not be propagated into gameplay scenario JSON just to make tests richer.
+- Gameplay/default desktop faction selection remains a shell/start-campaign concern, not a scenario-data rewrite.
 
 ---
 
@@ -43,7 +48,7 @@
 - `src/sim/turn_phases/war_phases.ts`
 - `src/sim/turn_phases/peace_phases.ts`
 - `src/ui/map/data/inboxItems.ts`
-- `data/scenarios/apr1992_4w.json` (and any other default scenario JSONs)
+- Dedicated test fixture scenarios or direct test state builders for explicit RS/RBiH/HRHB coverage; do not mass-edit `data/scenarios/apr1992_*.json`
 - `data/scenarios/events/war_1992.json` (events `rs_strategic_goals`, `rbih_state_identity`)
 - `docs/40_reports/implemented/20260516_PRESIDENTIAL_DECISION_SURFACE_CORRECTNESS.md` (precedent for `responding_faction` ownership)
 
@@ -52,7 +57,7 @@
 ## Parallelization
 
 - **Phase A (Codex filter) is independent.** Renderer-only, no state, no sim. Ship first as a quick win.
-- **Phase B (player_faction default) is independent.** Restores existing event surfacing without yet building the two-level system.
+- **Phase B (player_faction boundary) is independent.** Separates gameplay faction selection from RS-first event-surfacing test fixtures without yet building the two-level system.
 - **Phases C.1 → C.5 are serial.** Schema → emission → UI → tests. Behind a feature flag (`AWWV_TWO_LEVEL_NOTIFICATIONS=true`) until calibration is brought back to green.
 - **Phase D (content backfill) is parallel and ongoing.** Each event is an independent revertable edit.
 
@@ -86,22 +91,23 @@
 
 ---
 
-## Phase B — Default `player_faction`
+## Phase B — Player-Faction Boundary And RS-First Test Fixtures
 
-**Goal:** Restore existing player-faction event surfacing without yet building the two-level system. Proves the rest of the pipeline works.
+**Goal:** Restore/prove player-faction event surfacing without mutating gameplay scenario data for test convenience. Gameplay scenario JSON stays faction-neutral unless deliberately authored; tests use explicit RS fixtures for denser event coverage.
 
 **Files:**
-- `src/scenario/scenario_loader.ts` (modify — default `player_faction` to `"RBiH"` when scenario file leaves it `null`, mirroring `start_lifecycle_phase ?? 'war'` at line ~188)
-- `data/scenarios/apr1992_*.json` (set `player_faction: "RBiH"` explicitly so loading is self-documenting)
-- `src/state/validateGameState.ts` (assert `player_faction` ∈ `{RBiH, RS, HRHB}` after scenario load)
+- `src/scenario/scenario_loader.ts` (validate an authored `player_faction` when present; missing/null remains absent)
+- `src/scenario/scenario_runner.ts` (keep the legacy desktop/startup fallback isolated to harness/startup state, not JSON data)
+- `tests/scenario_player_faction_contract.test.ts` (new/updated — missing/null remains faction-neutral; authored RS/HRHB/RBiH are preserved; invalid values reject)
+- RS-first event-surfacing integration tests should use explicit test fixtures/state builders, not `data/scenarios/apr1992_*.json`
 
 **Tests:**
 - Existing scenario-loader tests.
-- `tests/state/validateGameState.test.ts` — assert non-null.
-- Turn-1 integration: run apr1992 one turn, assert `state.military.pending_event_decisions` contains `rbih_state_identity` by turn 2 (after Phase C lands; prior to Phase C the assertion is `rs_strategic_goals` is NOT queued for an RBiH player, and `rbih_state_identity` IS queued at turn 2).
+- `tests/scenario_player_faction_contract.test.ts` — assert gameplay scenario normalization stays faction-neutral by default and RS can be selected explicitly in tests.
+- Turn-1 integration: use an explicit RS test fixture/state builder to assert RS-owned military/political decision surfacing; use explicit RBiH fixtures only for RBiH-specific event ownership.
 - Smoke triad: `tsc --noEmit` + `vitest run` + `desktop:map:build`.
 
-**Calibration impact:** 40w hash WILL drift IF any `requires_player_response` event has downstream gameplay effects (most current ones are flavor). Bracket with 40w scenario run + before/after diff. If anchors/benchmarks shift, re-anchor in CALIBRATION_MASTER.md.
+**Calibration impact:** No gameplay scenario JSON changes in Phase B. If a later phase changes runtime faction defaults or event resolution, bracket with 40w scenario run + before/after diff and re-anchor in CALIBRATION_MASTER.md as needed.
 
 **Consult:** `/canon-compliance-reviewer` (scenario schema), `/scenario-creator-runner-tester` (scenario data).
 
@@ -109,18 +115,18 @@
 
 ## Phase B+ — `player_faction` Contract Hardening + Null-Defect Audit
 
-**Goal:** Phase B sets the default. Phase B+ removes the masking fallbacks and inconsistent null-handling that hid the defect class for as long as it existed. After B+, `player_faction` is guaranteed non-null at run time and every read site obeys one canonical convention.
+**Goal:** Phase B establishes the boundary between gameplay faction selection and test fixtures. Phase B+ removes masking fallbacks and inconsistent null-handling only after the product owner approves the runtime contract. After B+, active gameplay state has a selected `player_faction`; scenario JSON remains allowed to be faction-neutral.
 
 **Source:** In-session 2026-05-17 sweep dispatched two parallel `Explore` agents across `src/sim`, `src/state`, `src/scenario`, `src/ui`, `src/desktop`. Findings: ~25 read sites with three different null-handling conventions — SKIP-WHEN-NULL (hides feature), OVERSHOW-WHEN-NULL (forgiving filter shows enemy content), NULL-MASKED-AS-RBIH (silent default in warroom suite). The OVERSHOW pattern silently leaks enemy-faction content into Presidential Inbox, Supply ledger, Operation Opportunity dossier, and Autonomy panel. The NULL-MASKED-AS-RBIH pattern in `warroom_utils.getPlayerFaction()` is reused by 11+ warroom files (Newspaper, Magazine, Diplomacy, Reports, IVP, Command Briefing, FactionOverview, Settings, WarPlanningMap), silently rendering everyone as RBiH regardless of intent.
 
 ### B+.1 — Tighten the type contract
 
 **Files:**
-- `src/state/game_state.ts` (modify — `player_faction?: FactionId` → `player_faction: FactionId`)
+- `src/state/game_state.ts` (active loaded gameplay state should carry `player_faction`; do not require all scenario JSON to author it)
 - `src/state/validateGameState.ts` (already added in Phase B — confirm it asserts on the non-optional type)
-- `src/state/migration.ts` (new migration step — set `player_faction = 'RBiH'` for any legacy save lacking the field, log a one-line warning)
+- `src/state/migration.ts` (new migration step — route legacy saves without `player_faction` through the same gameplay selection/default policy used by desktop startup; do not encode this in scenario JSON)
 
-**Outcome:** Every read site now sees `FactionId`, not `FactionId | undefined`. TypeScript will flag existing `if (!playerFaction)` guards as unreachable — that surfaces every audit site for free.
+**Outcome:** Runtime gameplay surfaces receive an explicit selected faction, while scenario definitions can remain faction-neutral. TypeScript hardening should target loaded gameplay/read-model boundaries, not raw scenario JSON.
 
 ### B+.2 — Consolidate the matchesPlayerFaction helpers
 
@@ -326,7 +332,7 @@ After C.5 lands, sweep `data/scenarios/events/war_*.json` to add `notifications_
 
 ## Recommended Sequence
 
-1. **Today:** Phase A + Phase B (small, immediate value; restores existing surfacing but leaves masking fallbacks in place).
+1. **Today:** Phase A + corrected Phase B (small, immediate value; proves surfacing with explicit RS-first test fixtures and leaves gameplay scenario JSON faction-neutral).
 2. **Next:** Phase B+ (contract hardening + null-defect audit; expect calibration drift, re-anchor). Must land before Phase C.3 emission logic so the AI-default-response policy runs against a clean contract.
 3. **Then:** Phase C.1 — C.3 behind `AWWV_TWO_LEVEL_NOTIFICATIONS` feature flag.
 4. **Following:** Phase C.4 — C.5, flip flag on.
@@ -340,7 +346,8 @@ After C.5 lands, sweep `data/scenarios/events/war_*.json` to add `notifications_
 src/ui/map/components/CodexPanel.tsx                                 [A]
 src/scenario/scenario_loader.ts                                      [B]
 src/state/validateGameState.ts                                       [B, B+.1, C.1]
-data/scenarios/apr1992_*.json                                        [B]
+tests/scenario_player_faction_contract.test.ts                       [B]
+RS-first event-surfacing test fixtures/state builders                 [B, C.5]
 src/state/game_state.ts                                              [B+.1, C.1]
 src/state/migration.ts                                               [B+.1]
 src/ui/map/data/playerFactionMatch.ts (new)                          [B+.2]
@@ -388,7 +395,7 @@ docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md (new)                 [D]
 | 40w hash drift from new state field (C.1) | Behind feature flag; re-anchor calibration in dedicated commit. |
 | AI default response picks an ahistorical option that locks bad consequences | v1 policy = `response_options[0]`; add per-event canonical-default override map for the few decisions where default matters (consult `/historian`). |
 | Notification text accuracy for sensitive-history events | Route all notification bodies through `/historian` review before merge. Treat as Ring-2 per `/game-designer §3.4` if any sensitive-history OSID is referenced. |
-| `player_faction` default (B) silently changes scenario load behavior for any save lacking the field | Add migration in `src/state/migration.ts`; load-time assertion warns if older save has no `player_faction`. |
+| Test coverage accidentally changes gameplay faction defaults | Keep RS-first coverage in explicit fixtures/state builders; do not mass-edit gameplay scenario JSON. |
 | Notification spam if every event fires for all 3 factions | C.4 inbox projection should cap visible notifications per turn at 5 with "+N more" overflow; surplus stays in queue. |
 
 ---

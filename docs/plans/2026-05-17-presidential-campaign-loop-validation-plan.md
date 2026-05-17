@@ -23,6 +23,8 @@
 
 **Acceptance:** The audit has a table of all loop steps, owner files, and entry/exit actions.
 
+Stop after Task 1 if any loop step lacks a live owner; add the missing owner decision to the audit before writing route patches.
+
 ## Task 2: Add Route-Level Regression Coverage
 
 **Files:**
@@ -46,12 +48,14 @@
 - Create: `docs/40_reports/implemented/visual_validation/YYYYMMDD_presidential_loop/`.
 
 **Steps:**
-1. Load a known save with pending decisions.
+1. Load a known save with pending decisions; record its fixture/save path in the audit.
 2. Capture screenshots for each loop step.
 3. Assert no blocking overlay stack, empty rail, or unclickable primary action.
 4. Save screenshots under the curated visual-validation folder.
 
 **Acceptance:** Script emits a deterministic summary JSON with pass/fail per loop step.
+
+Expected manual/browser startup: `npm.cmd run dev:map`, then validate the smoke against `http://127.0.0.1:3002` unless the script discovers another local port.
 
 ## Task 4: Patch Only Broken Handoffs
 
@@ -63,6 +67,7 @@
 
 **Steps:**
 1. For each failing handoff, write a focused failing test.
+   - Each finding must name `source route/button -> owner surface -> regression test`.
 2. Patch the single route owner.
 3. Rerun the focused tests.
 
@@ -85,3 +90,8 @@ Update:
 - `docs/PROJECT_LEDGER.md`
 
 Determinism statement: UI route validation only unless a route patch mutates persisted state.
+
+## Commit And Closeout
+
+- Stop if a patch adds a new queue, modal owner, or duplicate navigation state instead of repairing the existing handoff.
+- Stage only loop audit/report, route-owner patches, focused tests, visual evidence, roadmap, and ledger files owned by this plan.

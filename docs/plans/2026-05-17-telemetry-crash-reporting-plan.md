@@ -22,6 +22,7 @@ Telemetry is a UI/platform-side service. It records only explicitly approved eve
    - Decide default state: off unless explicitly enabled.
    - Define settings copy and privacy summary.
    - Define data retention and local deletion behavior.
+   - Stop here until the product owner approves the consent and privacy wording.
 
 2. Define event schema
    - Include app version, platform, UI surface, error category, and anonymized session ID.
@@ -49,21 +50,39 @@ Telemetry is a UI/platform-side service. It records only explicitly approved eve
    - Test queue bounds.
    - Test upload stub failure behavior.
 
+## Discovery Commands
+
+- Run `rg -n "Settings|settings|diagnostics|localStorage|preload" src/ui/map src/desktop tests`.
+- Run `rg -n "crash|telemetry|diagnostic|consent" src docs tests`.
+- Record the settings component and persistence owner before writing implementation code.
+
 ## Files To Touch
 
-- `src/ui/map/services/telemetry/*` or platform service equivalent
-- `src/ui/map/components/settings/*`
-- `tests/telemetry*.test.ts`
+- `src/ui/map/services/telemetry/telemetryQueue.ts`
+- `src/ui/map/services/telemetry/telemetryRedaction.ts`
+- `src/ui/map/services/telemetry/telemetryUploadAdapter.ts`
+- `src/ui/map/components/SettingsScreen.tsx` or the settings component found by discovery
+- `tests/telemetry_redaction.test.ts`
+- `tests/telemetry_queue.test.ts`
+- `tests/ui_settings_telemetry_controls.test.ts`
 - `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - `docs/40_reports/GUI_MASTER.md`
 - `docs/PROJECT_LEDGER.md`
 
 ## Verification
 
-- Run telemetry unit tests.
+- Run `npx.cmd vitest run tests\telemetry_redaction.test.ts tests\telemetry_queue.test.ts tests\ui_settings_telemetry_controls.test.ts`.
 - Run affected settings UI tests.
 - Run `npm.cmd run typecheck`.
+- Browser-check settings controls in the tactical map shell if UI controls change.
 - Manually verify opt-in, export, clear, and offline failure behavior.
+- Run `git diff --check` on touched files.
+
+## Upload Adapter Contract
+
+- Default adapter is offline/no-network and returns typed `{ ok: false, reason: "disabled" | "offline" | "not_configured" }`.
+- Provider-backed upload is a later implementation detail behind the same typed adapter.
+- Gameplay and save/load must never depend on successful upload.
 
 ## Documentation And Ledger
 
@@ -76,3 +95,9 @@ Telemetry is a UI/platform-side service. It records only explicitly approved eve
 - Stop if no privacy policy/consent language is approved.
 - Stop if a provider requires collecting data outside the approved schema.
 - Stop if crash capture risks leaking raw save data or local usernames.
+
+## Commit And Closeout
+
+- Commit if this session is authorized to commit; otherwise report the staged file list and suggested commit message.
+- Suggested commit: `feat(telemetry): add opt-in crash diagnostics substrate`.
+- Stage only telemetry source/tests/docs named by this plan.
