@@ -12,6 +12,18 @@
 
 The active roadmap/general backlog points below now have separate actionable plans. Use these as the implementation entry points before changing code or scenario data.
 
+### 2026-05-17 Code Audit Follow-Up Coverage
+
+The loose 2026-05-16 root audit artifacts are now promoted into `docs/40_reports/audits/` and converted into implementation entry points:
+
+| Audit Source | Follow-Up Plan |
+|---|---|
+| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 1/2/4/5/6 | [2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md](../plans/2026-05-17-code-audit-eol-and-scenario-guardrails-plan.md) |
+| [20260516_CODE_AUDIT.md](audits/20260516_CODE_AUDIT.md) findings 7-12 | [2026-05-17-code-audit-round2-residuals-plan.md](../plans/2026-05-17-code-audit-round2-residuals-plan.md) |
+| [20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md](audits/20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md) | [2026-05-17-code-audit-round3-aaa-polish-followups-plan.md](../plans/2026-05-17-code-audit-round3-aaa-polish-followups-plan.md) |
+
+Player-facing guide artifact: [NEW_PLAYER_GUIDE.md](../00_start_here/NEW_PLAYER_GUIDE.md).
+
 | Backlog Point | Plan |
 |---|---|
 | Logistics Priority lever sim wiring | IMPLEMENTED 2026-05-17: [20260517_LOGISTICS_PRIORITY_WIRED.md](implemented/20260517_LOGISTICS_PRIORITY_WIRED.md). Plan: [2026-05-17-logistics-priority-wire-or-remove-plan.md](../plans/2026-05-17-logistics-priority-wire-or-remove-plan.md). |

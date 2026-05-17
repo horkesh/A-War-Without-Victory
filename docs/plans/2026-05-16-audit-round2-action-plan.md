@@ -3,7 +3,7 @@
 **Date:** 2026-05-16
 **Lane:** Studio Health / Repo Truth + UI/product polish (mixed)
 **Status:** O7-O9 implemented 2026-05-16; O10 deferred; O11 operator-only
-**Source:** `CODE_AUDIT_2026-05-16.md` Round 2 (Findings 7–12)
+**Source:** `docs/40_reports/audits/20260516_CODE_AUDIT.md` Round 2 (Findings 7–12)
 **Sister plans:**
 - `docs/plans/2026-05-16-working-tree-eol-normalization-plan.md` (Findings 1+4)
 - `docs/plans/2026-05-16-ops-planning-modal-target-discovery-plan.md` (the same playtest's UX gap)
@@ -39,7 +39,7 @@ Six findings from the second-pass audit. Four are real defects requiring code/da
 **Regression test:** `tests/canon_officer_corps_refs.test.ts` — for every officer in `apr1992_officers.json`, assert (a) `home_corps_id === null` or exists in `oob_corps.json`, and (b) every `compatible_corps_ids[i]` exists in `oob_corps.json`. Snapshot test guards against recurrence.
 
 **Acceptance:**
-- AC-O7-1: `python3 -c "..."` cross-reference script (see Finding 7 in `CODE_AUDIT_2026-05-16.md`) reports `count: 0` for all four orphan-check buckets.
+- AC-O7-1: `python3 -c "..."` cross-reference script (see Finding 7 in `docs/40_reports/audits/20260516_CODE_AUDIT.md`) reports `count: 0` for all four orphan-check buckets.
 - AC-O7-2: At Turn 0, the OpsPlanningModal Commander phase for `vrs_east_bosnian` shows the corps's commander officers (Simić, Gavrić, etc.) in the HOME CORPS list, not in OUT OF REGION.
 - AC-O7-3: `npm run sim:scenario:run:40w` keeps the napkin hash anchor `n1740 = 86ebf26ae0271465`. (Data-only changes to officer corps_id should not alter the sim because affected officers were already loaded as reserve.)
 

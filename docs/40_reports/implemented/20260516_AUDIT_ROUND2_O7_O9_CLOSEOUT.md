@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-16
 **Plan:** `docs/plans/2026-05-16-audit-round2-action-plan.md`
-**Source audit:** `CODE_AUDIT_2026-05-16.md` Round 2 Findings 7-9
+**Source audit:** `docs/40_reports/audits/20260516_CODE_AUDIT.md` Round 2 Findings 7-9
 
 ## Summary
 

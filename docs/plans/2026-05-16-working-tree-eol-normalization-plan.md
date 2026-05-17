@@ -3,7 +3,7 @@
 **Date:** 2026-05-16
 **Lane:** Studio Health / Repo Truth (Permanent Side Lane)
 **Status:** Proposed
-**Source:** `CODE_AUDIT_2026-05-16.md` — Findings 1 + 4
+**Source:** `docs/40_reports/audits/20260516_CODE_AUDIT.md` — Findings 1 + 4
 **Companion docs:** `GUI_PLAYTEST_2026-05-16.md` (downstream symptom: HMR cascade)
 
 ---

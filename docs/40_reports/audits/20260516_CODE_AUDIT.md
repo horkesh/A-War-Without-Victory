@@ -438,6 +438,20 @@ Single largest-leverage real defect: **Finding 1+4** — the `.gitattributes` up
 
 ---
 
+## Implementation closeout (2026-05-16, end of day)
+
+Findings 7, 8, 9 implemented same day. Closeout report: `docs/40_reports/implemented/20260516_AUDIT_ROUND2_O7_O9_CLOSEOUT.md`. Companion Ops Planning Modal plan also implemented; closeout: `docs/40_reports/implemented/20260516_OPS_PLANNING_TARGET_DISCOVERY.md`.
+
+**Notable correction to Finding 9 step 08**: I claimed the `cost-ledger` spotlight target was unreachable. Wrong — the team verified `WarCostSummary` already renders that anchor (`data-tutorial-step="cost-ledger"`). My audit missed it because I never opened the verdict/endgame surface during the playthrough. The team kept the target as-is and only fixed copy/jargon in steps 03/05/06. The new `tests/onboarding_spotlight_targets.test.ts` regression now guards every non-null token against the live tree, so any future drift will fail loudly.
+
+**40w hash residual (AC-O7-3)**: post-O7-O9 run came back as `n1845 = d6d1e1c9decf6b00` with 26/26 anchors + 6/6 benchmarks passing, but does NOT match the older napkin anchor `n1740 = 86ebf26ae0271465`. The closeout explicitly notes the workspace already contained broad engine/data changes before O7-O9, so this is current dirty-workspace evidence rather than an O7-only attribution. A clean-baseline O7-only comparison is still needed if the team wants to prove the AC-O7-3 ordering-safety claim in isolation. The risk I flagged ("if runtime sorts officer roster by `home_corps_id`, rename changes ordering and changes the hash") remains hypothesis, not falsified or confirmed.
+
+Findings 11 (CLI scenario integrity walk) and 12 (Decision Room walkthrough) remain operator-only — the closeout doesn't address them because they're Windows-host / fresh-Chrome-session tasks, not code lanes.
+
+Round 2 status: **Findings 7-9 closed; 10 deferred (optional); 11-12 deferred to operator/fresh-session.**
+
+---
+
 ## Round 2 audit (2026-05-16, "do all of them" pass)
 
 Following the audit-pass user instruction. Each finding below is independent of the round-1 list; all reachable via file-grep + sample Chrome work. Two paths (CLI scenario run, Chrome Decision Room walkthrough) were blocked by sandbox limitations and are recorded as such.

@@ -4,6 +4,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(audit): wire new player guide and code-audit follow-up plans
+
+**Scope:** Documentation-only integration of the remaining root artifacts from the 2026-05-16 audit/playtest work.
+
+**Change:**
+- Promoted `NEW_PLAYER_GUIDE.md` to `docs/00_start_here/NEW_PLAYER_GUIDE.md` and linked it from `docs/00_start_here/docs_index.md`.
+- Promoted the loose code audit artifacts to `docs/40_reports/audits/20260516_CODE_AUDIT.md` and `docs/40_reports/audits/20260516_CODE_AUDIT_ROUND3_AAA_POLISH.md`.
+- Added three actionable follow-up plans: EOL/scenario guardrails, Round 2 residual QA, and Round 3 AAA polish follow-ups.
+- Linked the audits/plans from `docs/40_reports/README.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, and `docs/plans/MASTER_ROADMAP.md`.
+
+**Determinism:** Documentation only. No runtime code, scenario data, generated artifacts, save schema, package scripts, or calibration baselines changed.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. The Round 3 plan includes a future canon-doc hygiene task for the stale `CANON.md` current-version line, but this integration pass does not change canon prose.
+
+---
+
 ## [2026-05-17] feat(sim): complete RBiH-HRHB Phase C and supply design closure lanes
 
 **Scope:** Final integration wave from the 2026-05-17 14-plan batch execution. Covers RBiH-HRHB Phase C2-C5, supply-design completion Tasks 5-6, and strict-null Phase 1 validator narrowing. Builds on `b26d7a82`.

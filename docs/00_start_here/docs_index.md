@@ -4,6 +4,8 @@
 
 ## Where to start
 
+- **New player guide:** [NEW_PLAYER_GUIDE.md](NEW_PLAYER_GUIDE.md) - player-facing walkthrough for the gap between finishing the in-game tutorial and understanding the weekly turn loop.
+
 - **Process and workflow:** [docs/10_canon/context.md](../10_canon/context.md) — mandatory first read for agents and contributors (ledger, mistake guard, determinism).
 - **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_9_0.md § System 11](../10_canon/Systems_Manual_v0_9_0.md).
 - **Pyrrhic roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Pyrrhic Games (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
@@ -76,6 +78,10 @@
 
 - [awwv_gap_analysis_vs_best_practices.md](../50_research/awwv_gap_analysis_vs_best_practices.md), [war_sims_best_practices.md](../50_research/war_sims_best_practices.md), [gui_improvements_backlog.md](../50_research/gui_improvements_backlog.md)
 - [knowledge/](../knowledge/) — knowledge base and AWWV project notes (at docs root for tooling)
+
+## Player-Facing Guides
+
+- [NEW_PLAYER_GUIDE.md](NEW_PLAYER_GUIDE.md) - practical first-session guide covering premise, weekly loop, faction advice, toolbar, OpsPlanningModal, Decision Room, common mistakes, and glossary-style tips.
 
 ## Versioning
 
