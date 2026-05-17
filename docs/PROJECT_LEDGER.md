@@ -5274,3 +5274,15 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Determinism:** Plans and roadmap index only. No runtime code, data pipeline, persisted save data, scenario artifact, or simulation ordering is affected.
 
 **Verification:** `git diff --check` exited 0 with CRLF normalization warnings only. Coverage-matrix path scan returned `All plan paths exist`. Header scan confirmed the 2026-05-17 plan files include the required executing-plans handoff line. `git status --short` showed only the roadmap/ledger edits plus the new plan files as uncommitted docs changes.
+
+---
+
+## [2026-05-17] fix(ci): repair Baseline Regression fast-suite failures
+
+**Type:** CI/test/package contract repair over the AAA phase push. Package metadata and test fixture alignment only; no simulation rule, combat math, scenario data, save schema, serialization format, random source, or generated scenario output changed.
+
+**Change:** Added `src/desktop/convoy_ipc_contract.cjs` to the Electron Builder `build.files` contract and the matching desktop packaging regression expectation, closing the packaged-runtime helper omission reported by Baseline Regression. Updated stale tests for current contracts: return-to-corps movement-owned fixtures now declare `stance: 'column'`; the player-visibility fixture explicitly sets `meta.player_faction: 'RBiH'`; and the autonomy synthetic decision event declares `responding_faction: 'RBiH'`.
+
+**Determinism:** No runtime simulation behavior changed. Edits are package inclusion metadata, regression fixtures, and documentation/runbook propagation only.
+
+**Verification:** GitHub Baseline Regression run `25984397666` failed in the `test` job's fast Vitest step on these exact files before the fix. Local verification after the repair: `npx.cmd vitest run tests\brigade_territory_reconciliation.test.ts tests\desktop_packaging_contract.test.ts tests\ui_player_visibility.test.ts tests\sim\autonomy\autonomy_event_routing.test.ts` passed 44/44 tests; `npm.cmd run typecheck` passed; `npm.cmd run test:vitest:fast` passed; `npm.cmd run desktop:release:check` passed with existing Vite/browser-external/import-meta warnings only.

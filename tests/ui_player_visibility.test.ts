@@ -260,7 +260,7 @@ describe('player visibility helpers', () => {
 
   it('keeps pending officer event labels player-safe when names are missing', () => {
     const state = {
-      meta: { turn: 10, phase: 'war' },
+      meta: { turn: 10, phase: 'war', player_faction: 'RBiH' },
       factions: [
         { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
       ],

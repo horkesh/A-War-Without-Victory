@@ -58,6 +58,7 @@ const SYNTHETIC_DECISION_EVENT: EventDefinition = {
     priority: 1,
     effect: { kind: 'narrative', text: 'A test decision has arisen.' },
     trigger: { type: 'turn_gte', value: 1 },
+    responding_faction: 'RBiH',
     response_options: [
         {
             id: 'opt_a',

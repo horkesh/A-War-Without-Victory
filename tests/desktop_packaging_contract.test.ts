@@ -62,6 +62,7 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/preload.cjs',
             'src/desktop/autonomy_ipc_contract.cjs',
             'src/desktop/command_strain.cjs',
+            'src/desktop/convoy_ipc_contract.cjs',
             'src/desktop/settings_store.cjs',
         ],
         'packaged desktop should ship the Electron entrypoints and any local main-process CJS helpers that electron-main.cjs requires from app.asar',

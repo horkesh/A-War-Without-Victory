@@ -1361,6 +1361,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
                 military: {
                     brigade_movement_orders: {
                         hrhb_herceg_stjepan_brigade: {
+                            stance: 'column',
                             destination_sids: ['op:posusje:posusje_2'],
                         },
                     },
@@ -1407,6 +1408,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
                 military: {
                     brigade_movement_orders: {
                         hrhb_herceg_stjepan_brigade: {
+                            stance: 'column',
                             destination_sids: ['op:posusje:posusje_2'],
                         },
                     },
