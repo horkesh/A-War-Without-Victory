@@ -4,6 +4,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(roadmap): activate code-audit follow-up lanes
+
+**Scope:** Documentation-only roadmap activation for the three code-audit follow-up plans created from the 2026-05-16 audit artifacts.
+
+**Change:**
+- Added a `MASTER_ROADMAP.md` execution-lane addendum naming Lane A EOL/scenario guardrails, Lane B Round 2 residual QA, and Lane C Round 3 AAA polish follow-ups.
+- Made the implementation ownership explicit before dispatching parallel agents.
+
+**Determinism:** Documentation only. No runtime code, scenario data, generated artifacts, save schema, package scripts, or calibration baselines changed.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. The roadmap points at future canon-doc hygiene work but does not change canon semantics.
+
+---
+
 ## [2026-05-17] docs(audit): wire new player guide and code-audit follow-up plans
 
 **Scope:** Documentation-only integration of the remaining root artifacts from the 2026-05-16 audit/playtest work.
