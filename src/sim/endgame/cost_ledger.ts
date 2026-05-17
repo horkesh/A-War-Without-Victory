@@ -383,7 +383,38 @@ function buildProsecutorialFindings(
         });
     }
 
+    const paramilitaryAnnotations = [...(state.military?.cost_ledger_annotations ?? [])]
+        .filter((entry) => entry.event_id.startsWith('cost_war_crimes_findings_'))
+        .sort((a, b) => {
+            if ((a.faction ?? '') !== (b.faction ?? '')) return strictCompare(a.faction ?? '', b.faction ?? '');
+            if (a.turn !== b.turn) return a.turn - b.turn;
+            return strictCompare(a.event_id, b.event_id);
+        });
+
+    for (const annotation of paramilitaryAnnotations) {
+        const faction = annotation.faction ?? annotation.event_id.replace('cost_war_crimes_findings_', '');
+        const band = annotation.tag.replace('paramilitary_war_crimes_', '');
+        const deploymentCount = parseDeploymentCount(annotation.text);
+        findings.push({
+            id: `paramilitary_war_crimes_findings_${faction}`,
+            category: 'war_crimes',
+            severity: band === 'minor' ? 'record' : 'grave',
+            faction,
+            title: `${faction} paramilitary war-crimes findings`,
+            text:
+                `${faction} records contain ${formatInteger(deploymentCount)} paramilitary ` +
+                `${plural(deploymentCount, 'deployment')} in the ${band} severity band. ` +
+                'The ledger records these deployments as war-crimes findings without mitigation or reward language.',
+            sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+        });
+    }
+
     return findings;
+}
+
+function parseDeploymentCount(text?: string): number {
+    const match = text?.match(/\bdeployment_count=(\d+)\b/);
+    return match ? Number.parseInt(match[1]!, 10) : 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

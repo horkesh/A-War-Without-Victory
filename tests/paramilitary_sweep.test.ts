@@ -91,7 +91,7 @@ describe('paramilitary_sweep', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:d'], ['op:b', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d']);
             const state = makeBaseState({
-  meta: { turn: 25, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
+  meta: { turn: 29, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
   political: {
     political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH' },
   } as any,
@@ -422,6 +422,18 @@ describe('paramilitary_sweep', () => {
 
             resolvePlayerParamilitaryDecisions(state);
             expect(state.paramilitary_deployment_count?.['RS']).toBe(1);
+        });
+
+        it('converts legacy scalar deployment count to faction map before incrementing', () => {
+            const state = makeBaseState({
+                paramilitary_deployment_count: 0 as any,
+                pending_paramilitary_requests: [
+                    { target_osid: 'D', faction: 'RS', strength: 150, decision: 'allow' },
+                ],
+            });
+
+            resolvePlayerParamilitaryDecisions(state);
+            expect(state.paramilitary_deployment_count).toEqual({ RS: 1 });
         });
     });
 

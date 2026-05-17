@@ -91,7 +91,7 @@ import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
-import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips } from '../early_war/alliance_update.js';
+import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips, countTerritorialIncidents } from '../early_war/alliance_update.js';
 import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
 import { buildSettlementsByMun } from '../early_war/control_strain.js';
 import { applyCasualtyPoolExhaustion } from '../early_war/pool_population.js';
@@ -1983,17 +1983,16 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const turn = context.state.meta.turn;
             const events = context.state.political.control_events ?? [];
-            const flips: Array<{ mun_id: string; from_faction: 'RBiH' | 'HRHB'; to_faction: 'RBiH' | 'HRHB' }> = [];
+            const flips: Array<{ mun_id: string; from_faction: FactionId | null; to_faction: FactionId }> = [];
             for (const e of events) {
                 if (e.turn !== turn) continue;
                 if (!e.mun_id) continue;
-                if (e.from === 'RBiH' && e.to === 'HRHB') {
-                    flips.push({ mun_id: e.mun_id, from_faction: 'RBiH', to_faction: 'HRHB' });
-                } else if (e.from === 'HRHB' && e.to === 'RBiH') {
-                    flips.push({ mun_id: e.mun_id, from_faction: 'HRHB', to_faction: 'RBiH' });
-                }
+                if (e.to !== 'RBiH' && e.to !== 'HRHB' && e.to !== 'RS') continue;
+                if (e.from !== null && e.from !== 'RBiH' && e.from !== 'HRHB' && e.from !== 'RS') continue;
+                flips.push({ mun_id: e.mun_id, from_faction: e.from, to_faction: e.to });
             }
-            countBilateralFlips(context.state, flips);
+            context.report.bilateral_flip_count = countBilateralFlips(context.state, flips);
+            context.report.territorial_incident_count = countTerritorialIncidents(context.state, flips);
         }
     },
     {

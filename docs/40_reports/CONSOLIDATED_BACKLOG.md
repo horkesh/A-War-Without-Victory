@@ -14,24 +14,24 @@ The active roadmap/general backlog points below now have separate actionable pla
 
 | Backlog Point | Plan |
 |---|---|
-| Logistics Priority lever sim wiring | [2026-05-17-logistics-priority-wire-or-remove-plan.md](../plans/2026-05-17-logistics-priority-wire-or-remove-plan.md) |
-| 188w endgame verification | [2026-05-17-endgame-188w-verification-plan.md](../plans/2026-05-17-endgame-188w-verification-plan.md) |
-| Sarajevo railroad/special-case canon decision | [2026-05-17-sarajevo-special-casing-canon-plan.md](../plans/2026-05-17-sarajevo-special-casing-canon-plan.md) |
-| B3 negotiation counter-offers | [2026-05-17-b3-negotiation-counter-offers-plan.md](../plans/2026-05-17-b3-negotiation-counter-offers-plan.md) |
-| RBiH-HRHB alliance breakdown Phases B/C | [2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md](../plans/2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md) |
-| Paramilitary consequence scaling, batch UI, and named units | [2026-05-17-paramilitary-flavor-and-consequences-plan.md](../plans/2026-05-17-paramilitary-flavor-and-consequences-plan.md) |
+| Logistics Priority lever sim wiring | IMPLEMENTED 2026-05-17: [20260517_LOGISTICS_PRIORITY_WIRED.md](implemented/20260517_LOGISTICS_PRIORITY_WIRED.md). Plan: [2026-05-17-logistics-priority-wire-or-remove-plan.md](../plans/2026-05-17-logistics-priority-wire-or-remove-plan.md). |
+| 188w endgame verification | ACCEPTED-WITH-SIGNALS 2026-05-17: [20260517_ENDGAME_188W_VERIFICATION.md](audits/20260517_ENDGAME_188W_VERIFICATION.md). Plan: [2026-05-17-endgame-188w-verification-plan.md](../plans/2026-05-17-endgame-188w-verification-plan.md). |
+| Sarajevo railroad/special-case canon decision | IMPLEMENTED 2026-05-17: [20260517_SARAJEVO_SPECIAL_CASING_BRANCH_B.md](implemented/20260517_SARAJEVO_SPECIAL_CASING_BRANCH_B.md). Plan: [2026-05-17-sarajevo-special-casing-canon-plan.md](../plans/2026-05-17-sarajevo-special-casing-canon-plan.md). |
+| B3 negotiation counter-offers | IMPLEMENTED 2026-05-17: [20260517_B3_NEGOTIATION_COUNTER_OFFERS.md](implemented/20260517_B3_NEGOTIATION_COUNTER_OFFERS.md). Plan: [2026-05-17-b3-negotiation-counter-offers-plan.md](../plans/2026-05-17-b3-negotiation-counter-offers-plan.md). |
+| RBiH-HRHB alliance breakdown Phases B/C | PARTIAL 2026-05-17: Phase B + C1 coverage implemented in [20260517_RBIH_HRHB_PHASE_B_CLOSURE.md](implemented/20260517_RBIH_HRHB_PHASE_B_CLOSURE.md); Phase C2-C5 remain. Plan: [2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md](../plans/2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md). |
+| Paramilitary consequence scaling, batch UI, and named units | IMPLEMENTED 2026-05-17: [20260517_PARAMILITARY_FLAVOR_AND_CONSEQUENCES.md](implemented/20260517_PARAMILITARY_FLAVOR_AND_CONSEQUENCES.md). Plan: [2026-05-17-paramilitary-flavor-and-consequences-plan.md](../plans/2026-05-17-paramilitary-flavor-and-consequences-plan.md). |
 | Intel extensions | [2026-05-17-intel-extensions-plan.md](../plans/2026-05-17-intel-extensions-plan.md) |
 | VRS 1KK Corridor 92 | [2026-05-17-vrs-corridor-92-plan.md](../plans/2026-05-17-vrs-corridor-92-plan.md) |
 | ARBiH 2nd/3rd/4th Corps zero-attack operation stalls | [2026-05-17-arbih-zero-attack-stalls-plan.md](../plans/2026-05-17-arbih-zero-attack-stalls-plan.md) |
 | ARBiH catastrophic attack stalls | [2026-05-17-catastrophic-attack-stall-plan.md](../plans/2026-05-17-catastrophic-attack-stall-plan.md) |
 | Brigade dissolution threshold | [2026-05-17-brigade-dissolution-threshold-plan.md](../plans/2026-05-17-brigade-dissolution-threshold-plan.md) |
-| RBiH supply constraint | [2026-05-17-rbih-supply-constraint-arms-embargo-plan.md](../plans/2026-05-17-rbih-supply-constraint-arms-embargo-plan.md) |
-| Fatigue recovery/rebalance | [2026-05-17-fatigue-recovery-rebalance-plan.md](../plans/2026-05-17-fatigue-recovery-rebalance-plan.md) |
-| Save migration hardening | [2026-05-17-save-migration-hardening-plan.md](../plans/2026-05-17-save-migration-hardening-plan.md) |
-| Strict null contract cleanup | [2026-05-17-strict-null-checks-migration-plan.md](../plans/2026-05-17-strict-null-checks-migration-plan.md) |
-| War termination minimal spec | [2026-05-17-war-termination-minimal-spec-plan.md](../plans/2026-05-17-war-termination-minimal-spec-plan.md) |
-| Player Turn Guide | [2026-05-17-player-turn-guide-plan.md](../plans/2026-05-17-player-turn-guide-plan.md) |
-| Full supply spec | [2026-05-17-supply-design-completion-plan.md](../plans/2026-05-17-supply-design-completion-plan.md) |
+| RBiH supply constraint | IMPLEMENTED 2026-05-17: [20260517_RBIH_SUPPLY_CONSTRAINT_ARMS_EMBARGO.md](implemented/20260517_RBIH_SUPPLY_CONSTRAINT_ARMS_EMBARGO.md). Plan: [2026-05-17-rbih-supply-constraint-arms-embargo-plan.md](../plans/2026-05-17-rbih-supply-constraint-arms-embargo-plan.md). |
+| Fatigue recovery/rebalance | IMPLEMENTED 2026-05-17: [20260517_FATIGUE_RECOVERY_REBALANCE.md](implemented/20260517_FATIGUE_RECOVERY_REBALANCE.md). Plan: [2026-05-17-fatigue-recovery-rebalance-plan.md](../plans/2026-05-17-fatigue-recovery-rebalance-plan.md). |
+| Save migration hardening | IMPLEMENTED 2026-05-17: [20260517_SAVE_MIGRATION_HARDENING.md](implemented/20260517_SAVE_MIGRATION_HARDENING.md). Plan: [2026-05-17-save-migration-hardening-plan.md](../plans/2026-05-17-save-migration-hardening-plan.md). |
+| Strict null contract cleanup | OPENED 2026-05-17: inventory baseline + six-phase ledger created; source migration remains. Plan: [2026-05-17-strict-null-checks-migration-plan.md](../plans/2026-05-17-strict-null-checks-migration-plan.md), phase ledger [2026-05-17-strict-null-checks-migration-phases.md](../plans/2026-05-17-strict-null-checks-migration-phases.md). |
+| War termination minimal spec | IMPLEMENTED 2026-05-17: [20260517_PLAYER_TURN_GUIDE_AND_WAR_TERMINATION_SPEC.md](implemented/20260517_PLAYER_TURN_GUIDE_AND_WAR_TERMINATION_SPEC.md). Plan: [2026-05-17-war-termination-minimal-spec-plan.md](../plans/2026-05-17-war-termination-minimal-spec-plan.md). |
+| Player Turn Guide | IMPLEMENTED 2026-05-17: [20260517_PLAYER_TURN_GUIDE_AND_WAR_TERMINATION_SPEC.md](implemented/20260517_PLAYER_TURN_GUIDE_AND_WAR_TERMINATION_SPEC.md). Plan: [2026-05-17-player-turn-guide-plan.md](../plans/2026-05-17-player-turn-guide-plan.md). |
+| Full supply spec | PARTIAL 2026-05-17: diagnostic, live/cumulative reconciliation guard, bot supply scoring, and panel contract implemented; remaining tasks stay open. Report: [20260517_SUPPLY_DESIGN_COMPLETION_PARTIAL.md](implemented/20260517_SUPPLY_DESIGN_COMPLETION_PARTIAL.md). Plan: [2026-05-17-supply-design-completion-plan.md](../plans/2026-05-17-supply-design-completion-plan.md). |
 
 ---
 
@@ -212,7 +212,7 @@ Two new realism issues surfaced in the n58 audit. Both share the same root cause
 | ~~Equipment attrition mechanic (0 lost in 168 battles)~~ | ~~**P0**~~ | — | **FIXED** — `attack_resolution_osid.ts` added per-battle loss after n292. At w40: RS 132 tanks/152 arty, RBiH 45/77, HRHB 6/14. |
 | Brigade dissolution at combat-ineffective threshold | **P0** | Low | Gameplay Programmer |
 | RBiH supply constraint (100% under arms embargo) | **P0** | Medium | Gameplay Programmer / Game Designer |
-| Fatigue accumulation/recovery rebalance (98% at zero) | **P1** | Low | Gameplay Programmer |
+| ~~Fatigue accumulation/recovery rebalance (98% at zero)~~ | ~~**P1**~~ | -- | **IMPLEMENTED 2026-05-17** - owner D late-war exhaustion/recent-combat residue floor; n1864 40w 27/27 anchors, n1863 188w sector-front pct_zero 58.416. See [20260517_FATIGUE_RECOVERY_REBALANCE.md](implemented/20260517_FATIGUE_RECOVERY_REBALANCE.md). |
 | ~~Siege/bombardment casualty mechanic (inverted KIA ratio)~~ | ~~**P1**~~ | — | **RESOLVED** — `frontline_attrition.ts` bombardment exposure added after n292 (BOMBARDMENT_EXPOSURE_RATE=0.008). Current w40: RBiH 17,235 KIA vs RS 7,775 KIA (2.2:1 defender:attacker — correct direction). REAL_WAR_MASTER H5 still open as fine-tuning. |
 | HRHB cohesion floor reduction (50 → 25-30) | **P2** | Trivial | Gameplay Programmer |
 | ~~Enclave resilience dynamism (static after init)~~ | ~~**P2**~~ | — | **RESOLVED** — `enclave_resilience.ts` per-enclave growth_mult + supply-driven growth/decay implemented after n292. At w40: Sarajevo 44/45, Gorazde 33/35, Srebrenica 17.5/25, Zepa 15/20, Bihac 11.5/40 (partially isolated). |
@@ -238,7 +238,7 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 | **Logistics Priority lever — wire-or-remove decision** | **P1** | IMPLEMENTED 2026-05-17: `stage-logistics-priority` now writes canonical `state.military.logistics_priority[faction][edgeId]`; combat supply math and formation fatigue consume the shared `[0.5, 1.5]` clamped helper; UI/IPC contract reconciled. Report: `docs/40_reports/implemented/20260517_LOGISTICS_PRIORITY_WIRED.md`. Full supply design remains separate. |
 | **Phase B+ — `player_faction` contract hardening** | P1 (hygiene) | Specced in plan. Tightens `?:` → required type, consolidates 3 `matchesPlayerFaction`-style helpers into `playerFactionMatch.ts`, removes warroom `?? 'RBiH'` fallback (11+ consumers), audits SKIP/OVERSHOW guards in sim + UI. Expect 40w + 188w calibration drift; re-anchor under `LANE-V09X-PLAYER-FACTION-CONTRACT`. |
 | **Endgame verification at 188w** | P1 | EVIDENCE: `docs/40_reports/audits/20260517_ENDGAME_188W_VERIFICATION.md`. Accepted current documented artifact is n1844 (`runs/apr1992_definitive_188w__210e69404d054959__w188_n1844`, hash `ccd3f9f770052614`, 26/27 anchors, 6/6 benchmarks); frozen n1741 is stale and dirty-worktree n1847 is rejected. Status **ACCEPTED-WITH-SIGNALS**: Sarajevo casualty ratio outlier, absent serialized `patron_pressure`, and late-war force-quality/reconstitution drift are follow-on work; four P0s remain LATENT. |
-| **Sarajevo railroad canon question** | P1 (design) | INCONCLUSIVE pending endgame verification. Constants live in code: `SARAJEVO_DEFENSE_BONUS=0.40`, `SARAJEVO_ATTACKER_CASUALTY_MULT=2.0`, RBiH exhaustion +3.0/RS +2.0 during siege. User design call: is Sarajevo *supposed* to be code-special-cased per canon, or should this become scenario-driven? |
+| **Sarajevo railroad canon question** | P1 (design) | IMPLEMENTED 2026-05-17 as Branch B: numeric siege parameters are optional `scenario.sarajevo_overrides`; ID-set geometry remains code-side canon. Report: `docs/40_reports/implemented/20260517_SARAJEVO_SPECIAL_CASING_BRANCH_B.md`. |
 | **Phase C — Two-level event surfacing** | P2 | Specced in plan; waiting on B+. Respondent gets full decision; other two factions get deterministic `intelligence_notification` inbox item on the next turn (EU4 news-pop pattern). Behind `AWWV_TWO_LEVEL_NOTIFICATIONS` flag. |
 | **Phase D — Notification content backfill** | P3 (content) | Per D1 per-recipient decision: ~6 authored blocks per event (3 options × 2 non-source recipients). `/historian` + `/narrative-designer` review. |
 | **`FACTION_MORALE_RESIST_FLOOR` faction-asymmetric hardcode** | P2 (design) | `combat_math.ts:231-235` hardcodes RBiH=50/RS=55/HRHB=60. No doctrine doc. Either document the asymmetry in canon or make it data-driven. |
@@ -246,11 +246,11 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 | **Phase pipeline silent-skip diagnostic wrapper** | P3 (hygiene) | 10+ war-phase steps early-return on missing data with no log. Wrap pipeline so every early-return emits `{phase, step, skip_reason}` into a turn diagnostic. Converts an invisible bug class into a visible one. |
 | **Primary Army / Primary Corps quick-select** | P3 (minor) | `App.tsx:688-710` handlers defined, no button wires to them. Either add buttons or delete handlers. |
 | **`IvpBreakdownModal` dead requirement** | P3 (cleanup) | Referenced in CLAUDE.md, never implemented. Remove from CLAUDE.md or build it. |
-| **`ParamilitaryReviewModal` dead entry** | P3 (cleanup) | Mounted in `App.tsx:39`; no opener exists. Add opener or remove mount. |
+| **`ParamilitaryReviewModal` dead entry** | P3 (cleanup) | IMPLEMENTED 2026-05-17: ask-mode paramilitary requests now project to Inbox/Decision Room with integer civilian-risk counts and route to the existing modal surface. Report: `docs/40_reports/implemented/20260517_PARAMILITARY_FLAVOR_AND_CONSEQUENCES.md`. |
 | **`SettingsScreen` shell** | P3 (cleanup) | Mounts when `settingsOpen`; no settings actually drive sim behavior. |
 | **Save migration gap** | P3 (hygiene) | IMPLEMENTED 2026-05-17: schema registry now versions migrated defaults through v12, strict required-as-of-version validation is opt-in at deserialize, startup artifact regenerated, drift audit reports 0 anonymous defaults, and `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md` documents future bumps. Report: `docs/40_reports/implemented/20260517_SAVE_MIGRATION_HARDENING.md`. |
 | **`try/catch` swallow in `pressure_system.ts:67-69`** | P4 | Non-strict mode silently eats errors. Either log unconditionally or remove non-strict branch. |
-| **`strictNullChecks` migration** | P4 (long) | ~30 `as FactionId` non-null assertions across codebase; 455 optional fields. Long-term hygiene milestone. Not v1.0 blocker. |
+| **`strictNullChecks` migration** | P4 (long) | OPENED 2026-05-17: inventory baseline reports 154 `as FactionId`, 395 `as any`, 97 `as unknown`, 50 dot non-null assertions, 59 index non-null assertions, and 458 optional `GameState` fields; phase ledger created. Source cleanup remains long-term hygiene. |
 | **`state.political` is the next iceberg** | DEFERRED | 636 guarded reads vs 1041 unguarded reads. Currently LATENT (state.political always populated). Worth monitoring; not actionable now. |
 
 **Latent findings (no action; documented for awareness):** NATO never-intervenes NaN path, multi-brigade pressure mult fallback, settlement-flip discard, casualty-faction cast. All confirmed not-firing in n1741 turn-40 sample; recheck at endgame.

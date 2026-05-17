@@ -56,6 +56,19 @@ function normalizeDedupeSubject(value: string | null | undefined): string | null
     return trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || null;
 }
 
+function classifyPendingParamilitaryBand(count: number): 'minor' | 'mid' | 'severe' {
+    if (count >= 10) return 'severe';
+    if (count >= 4) return 'mid';
+    return 'minor';
+}
+
+function estimateInternationalStandingImpact(count: number): number {
+    const band = classifyPendingParamilitaryBand(count);
+    if (band === 'severe') return -((count * 5) + 10);
+    if (band === 'mid') return -(count * 4);
+    return -(count * 2);
+}
+
 type OfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
 
 function officerEventDedupeKey(evt: OfficerEvent): string {
@@ -158,15 +171,20 @@ export function deriveInboxItems(
 
     // 4. Paramilitary requests
     const paramilitaryRequests = state.pendingParamilitaryRequests ?? [];
-    if (paramilitaryRequests.length > 0) {
+    if (paramilitaryRequests.length > 0 && state.paramilitaryPolicy === 'ask') {
         const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
+        const projectedCivilianRisk = paramilitaryRequests.reduce((sum, request) => sum + request.estimated_civilian_risk, 0);
+        const standingImpact = estimateInternationalStandingImpact(paramilitaryRequests.length);
         const samplePlace = getOsidDisplayName(paramilitaryRequests[0]?.target_osid ?? '', osidNameMap);
         items.push({
             id: `paramilitary:${state.turn ?? 0}`,
             type: 'paramilitary_request',
             severity: 'blocking',
             title: 'Paramilitary Authorization',
-            subtitle: `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; approval risks war crimes and civilian casualties. Estimated strength ${totalStrength}.`,
+            subtitle:
+                `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; ` +
+                `${projectedCivilianRisk} projected civilian casualties; +${paramilitaryRequests.length} war crimes event${paramilitaryRequests.length === 1 ? '' : 's'}; ` +
+                `${standingImpact} international standing; historical context: Sensitive History Design Gate. Estimated strength ${totalStrength}.`,
             action: 'paramilitary_review',
             priority: 25,
         });

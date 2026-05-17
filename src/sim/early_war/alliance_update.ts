@@ -24,6 +24,10 @@ export const PATRON_PRESSURE_COEFF = 0.018;
 export const INCIDENT_PENALTY_PER_FLIP = 0.04;
 /** Positive recovery per turn when ceasefire is active. */
 export const CEASEFIRE_RECOVERY_RATE = 0.015;
+/** Penalty per weighted territorial competition incident from the previous turn. */
+export const TERRITORIAL_INCIDENT_PENALTY = 0.02;
+/** RS recapture by one ally in a mixed municipality is a partial RBiH-HRHB competition signal. */
+export const MIXED_MUN_RS_RECAPTURE_PARTIAL = 0.5;
 
 // ── Phase B1: Refugee pressure constants ──
 
@@ -186,6 +190,7 @@ export interface AllianceUpdateReport {
         appeasement: number;
         patron_drag: number;
         incident_penalty: number;
+        territorial_penalty: number;
         ceasefire_boost: number;
         refugee_pressure: number;
     };
@@ -200,7 +205,9 @@ export interface AllianceUpdateReport {
  */
 export function ensureRbihHrhbState(state: GameState, initValue?: number, initMixedMunicipalities?: string[]): void {
     if (state.political.war_alliance_rbih_hrhb === undefined || state.political.war_alliance_rbih_hrhb === null) {
-        state.political.war_alliance_rbih_hrhb = initValue ?? DEFAULT_INIT_ALLIANCE;
+        const phase0Value = state.political.phase0_relationships?.rbih_hrhb;
+        state.political.war_alliance_rbih_hrhb = initValue
+            ?? (typeof phase0Value === 'number' ? mapPhase0RelationshipToAlliance(phase0Value) : DEFAULT_INIT_ALLIANCE);
     }
     if (!state.political.rbih_hrhb_state) {
         const mixed = initMixedMunicipalities
@@ -215,10 +222,20 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
             washington_turn: null,
             stalemate_turns: 0,
             bilateral_flips_this_turn: 0,
+            territorial_incidents_this_turn: 0,
             total_bilateral_flips: 0,
             allied_mixed_municipalities: mixed
         } satisfies RbihHrhbState;
+    } else if (typeof state.political.rbih_hrhb_state.territorial_incidents_this_turn !== 'number') {
+        state.political.rbih_hrhb_state.territorial_incidents_this_turn = 0;
     }
+}
+
+export function mapPhase0RelationshipToAlliance(phase0Value: number): number {
+    const clampedPhase0 = Math.max(0, Math.min(1, phase0Value));
+    const degradation = 1 - clampedPhase0;
+    const raw = DEFAULT_INIT_ALLIANCE - degradation * 0.35;
+    return Math.max(ALLIANCE_FLOOR_BEFORE_WAR, Math.min(DEFAULT_INIT_ALLIANCE, raw));
 }
 
 /**
@@ -238,7 +255,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
             previous_value: previousValue,
             new_value: previousValue,
             delta: 0,
-            drivers: { appeasement: 0, patron_drag: 0, incident_penalty: 0, ceasefire_boost: 0, refugee_pressure: 0 },
+            drivers: { appeasement: 0, patron_drag: 0, incident_penalty: 0, territorial_penalty: 0, ceasefire_boost: 0, refugee_pressure: 0 },
             phase: getAlliancePhase(previousValue),
             war_started_this_turn: false,
             mobilizing: false,
@@ -252,18 +269,20 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
 
     // One-turn-delayed feedback: bilateral_flips_this_turn is from the PREVIOUS turn's control flip step.
     const bilateralFlipsLastTurn = rhs.bilateral_flips_this_turn;
+    const territorialIncidentsLastTurn = rhs.territorial_incidents_this_turn ?? 0;
     const noIncidents = bilateralFlipsLastTurn === 0;
 
     // Compute drivers
     const appeasement = APPEASEMENT_BASE_RATE * (noIncidents ? 1.0 : 0.3);
     const patronDrag = PATRON_PRESSURE_COEFF * patronCommitment;
     const incidentPenalty = INCIDENT_PENALTY_PER_FLIP * bilateralFlipsLastTurn;
+    const territorialPenalty = TERRITORIAL_INCIDENT_PENALTY * territorialIncidentsLastTurn;
     const ceasefireBoost = rhs.ceasefire_active ? CEASEFIRE_RECOVERY_RATE : 0;
 
     // Phase B1: Refugee pressure — displaced arrivals in mixed municipalities strain alliance
     const refugeePressure = computeRefugeePressure(state);
 
-    const delta = appeasement - patronDrag - incidentPenalty + ceasefireBoost - refugeePressure;
+    const delta = appeasement - patronDrag - incidentPenalty - territorialPenalty + ceasefireBoost - refugeePressure;
 
     // Apply delta, clamp to [-1, 1]
     let newValue = Math.max(-1, Math.min(1, previousValue + delta));
@@ -296,6 +315,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
 
     // Reset bilateral flips for this turn (will be populated by control flip step)
     rhs.bilateral_flips_this_turn = 0;
+    rhs.territorial_incidents_this_turn = 0;
 
     return {
         previous_value: previousValue,
@@ -305,6 +325,7 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
             appeasement,
             patron_drag: patronDrag,
             incident_penalty: incidentPenalty,
+            territorial_penalty: territorialPenalty,
             ceasefire_boost: ceasefireBoost,
             refugee_pressure: refugeePressure
         },
@@ -378,5 +399,64 @@ export function countBilateralFlips(
     }
 
     return count;
+}
+
+export interface TerritorialIncidentReport {
+    bilateral_incidents: number;
+    mixed_mun_rs_recapture_incidents: number;
+}
+
+export function countTerritorialIncidents(
+    state: GameState,
+    flips: Array<{ mun_id: string; from_faction: FactionId | null; to_faction: FactionId | null }>
+): TerritorialIncidentReport {
+    const rhs = state.political.rbih_hrhb_state;
+    if (!rhs) return { bilateral_incidents: 0, mixed_mun_rs_recapture_incidents: 0 };
+
+    const mixedMunicipalities = new Set([
+        ...REFUGEE_PRESSURE_MUNICIPALITIES,
+        ...(rhs.allied_mixed_municipalities ?? [])
+    ].map(normalizeMunicipalityId));
+
+    let bilateralIncidents = 0;
+    let mixedMunRsRecaptureIncidents = 0;
+    const orderedFlips = [...flips].sort((a, b) => {
+        const mun = strictCompare(normalizeMunicipalityId(a.mun_id), normalizeMunicipalityId(b.mun_id));
+        if (mun !== 0) return mun;
+        const from = strictCompare(a.from_faction ?? '', b.from_faction ?? '');
+        if (from !== 0) return from;
+        return strictCompare(a.to_faction ?? '', b.to_faction ?? '');
+    });
+
+    for (const flip of orderedFlips) {
+        const from = flip.from_faction;
+        const to = flip.to_faction;
+        if (
+            (from === 'RBiH' && to === 'HRHB') ||
+            (from === 'HRHB' && to === 'RBiH')
+        ) {
+            bilateralIncidents++;
+            continue;
+        }
+        if (
+            from === 'RS' &&
+            (to === 'RBiH' || to === 'HRHB') &&
+            mixedMunicipalities.has(normalizeMunicipalityId(flip.mun_id))
+        ) {
+            mixedMunRsRecaptureIncidents++;
+        }
+    }
+
+    rhs.territorial_incidents_this_turn =
+        bilateralIncidents + MIXED_MUN_RS_RECAPTURE_PARTIAL * mixedMunRsRecaptureIncidents;
+
+    return {
+        bilateral_incidents: bilateralIncidents,
+        mixed_mun_rs_recapture_incidents: mixedMunRsRecaptureIncidents
+    };
+}
+
+function normalizeMunicipalityId(munId: string): string {
+    return munId.trim().toLowerCase();
 }
 

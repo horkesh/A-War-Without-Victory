@@ -17,6 +17,7 @@ import {
 } from '../formation_spawn.js';
 import {
     countBilateralFlips,
+    countTerritorialIncidents,
     ensureRbihHrhbState,
     updateAllianceValue
 } from '../early_war/alliance_update.js';
@@ -265,6 +266,7 @@ export const earlyWarPhases: NamedPhase[] = [
             // Peace-phase §4.8: Count bilateral RBiH–HRHB flips (feeds next turn's alliance update)
             const flips = context.report.control_flip?.flips ?? [];
             context.report.bilateral_flip_count = countBilateralFlips(context.state, flips);
+            context.report.territorial_incident_count = countTerritorialIncidents(context.state, flips);
         }
     },
     {

@@ -218,8 +218,8 @@ describe('buildPreAdvanceCommandReviewView', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
         pendingParamilitaryRequests: [
-          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', mode: 'offensive' },
-          { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2' },
+          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+          { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 11 },
         ],
       }),
     });
@@ -240,7 +240,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
       state: makeState({
         playerDecisionSummary: makePlayerDecisionSummary(),
         pendingParamilitaryRequests: [
-          { faction: 'RBiH', strength: 300, target_osid: 'op:zvornik:zvornik_2', mode: 'offensive' },
+          { faction: 'RBiH', strength: 300, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 21, mode: 'offensive' },
         ],
         pendingConvoyDecisions: [
           { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RS', supply_amount: 20 },

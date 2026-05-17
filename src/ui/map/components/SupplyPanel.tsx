@@ -34,37 +34,34 @@ function ReserveBar({ label, value, color }: { label: string; value: number; col
   );
 }
 
-function pressureClass(pressure: number): 'open' | 'strained' | 'cut' {
-  if (pressure >= 80) return 'cut';
-  if (pressure >= 50) return 'strained';
-  return 'open';
-}
-
-function conditionClass(condition: number): 'open' | 'strained' | 'cut' {
-  if (condition >= 80) return 'open';
-  if (condition >= 50) return 'strained';
-  return 'cut';
-}
-
 export function SupplyPanel({ state }: SupplyPanelProps) {
   const reserves = state.factionReserves;
+  const supplySummary = state.supplySummaryByFaction ?? {};
   const pressure = state.warPhaseSupplyPressure ?? {};
   const condition = state.warPhaseSupplyCondition ?? {};
   const playerFaction = state.player_faction;
   const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
 
-  // Corridor summary: count factions by pressure class
-  let open = 0, strained = 0, cut = 0;
-  const factionIds = Array.from(new Set([...Object.keys(pressure), ...Object.keys(condition)])).sort();
-  for (const factionId of factionIds) {
-    const conditionValue = condition[factionId];
-    const pressureValue = pressure[factionId];
-    const cls = typeof conditionValue === 'number' && Number.isFinite(conditionValue)
-      ? conditionClass(conditionValue)
-      : pressureClass(typeof pressureValue === 'number' && Number.isFinite(pressureValue) ? pressureValue : 0);
-    if (cls === 'open') open++;
-    else if (cls === 'strained') strained++;
-    else cut++;
+  const visibleSummaries = Object.entries(supplySummary)
+    .filter(([factionId]) => !isPlayerFaction || factionId === playerFaction)
+    .sort(([a], [b]) => a.localeCompare(b));
+  let totals = visibleSummaries.reduce((acc, [, summary]) => ({
+    open: acc.open + summary.corridor_open_count,
+    brittle: acc.brittle + summary.corridor_brittle_count,
+    cut: acc.cut + summary.corridor_cut_count,
+  }), { open: 0, brittle: 0, cut: 0 });
+  if (visibleSummaries.length === 0) {
+    const legacyFactionIds = Array.from(new Set([...Object.keys(pressure), ...Object.keys(condition)]))
+      .sort();
+    totals = legacyFactionIds.reduce((acc, factionId) => {
+      const live = condition[factionId];
+      const legacy = pressure[factionId];
+      const score = typeof live === 'number' && Number.isFinite(live) ? live : 100 - (typeof legacy === 'number' && Number.isFinite(legacy) ? legacy : 0);
+      if (score >= 80) acc.open++;
+      else if (score >= 50) acc.brittle++;
+      else acc.cut++;
+      return acc;
+    }, { open: 0, brittle: 0, cut: 0 });
   }
 
   return (
@@ -97,9 +94,9 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
 
       {/* Corridor summary */}
       <div className="border-t border-panel-border/50 pt-1.5 text-[10px] text-text-secondary space-x-2">
-        <span className="text-green-400">{open} open</span>
-        <span className="text-yellow-400">{strained} strained</span>
-        <span className="text-red-400">{cut} cut</span>
+        <span className="text-green-400">{totals.open} open</span>
+        <span className="text-yellow-400">{totals.brittle} strained</span>
+        <span className="text-red-400">{totals.cut} cut</span>
       </div>
     </div>
   );

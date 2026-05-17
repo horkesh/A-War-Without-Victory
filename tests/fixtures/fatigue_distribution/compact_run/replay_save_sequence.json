@@ -1,0 +1,136 @@
+[
+  {
+    "meta": { "turn": 1, "phase": "war" },
+    "military": {
+      "formations": {
+        "a_front_zero": {
+          "id": "a_front_zero",
+          "name": "A Front Zero",
+          "faction": "RBiH",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "arbih_1st_corps",
+          "assignment": { "kind": "sector", "role": "front", "sector_id": "sector:front" },
+          "ops": { "fatigue": 0, "last_supplied_turn": 1 },
+          "brigade_history": { "battles_fought": 0, "engagements": [] }
+        },
+        "b_front_combat": {
+          "id": "b_front_combat",
+          "name": "B Front Combat",
+          "faction": "RBiH",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "arbih_1st_corps",
+          "assignment": { "kind": "sector", "role": "front", "sector_id": "sector:front" },
+          "ops": { "fatigue": 4, "last_supplied_turn": 1 },
+          "brigade_history": {
+            "battles_fought": 1,
+            "engagements": [{ "turn": 1, "role": "attacker", "enemy_faction": "RS" }]
+          }
+        },
+        "c_reserve": {
+          "id": "c_reserve",
+          "name": "C Reserve",
+          "faction": "RS",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "vrs_drina",
+          "assignment": { "kind": "sector", "role": "reserve", "sector_id": "sector:reserve" },
+          "ops": { "fatigue": 2, "last_supplied_turn": 1 },
+          "brigade_history": { "battles_fought": 0, "engagements": [] }
+        }
+      },
+      "corps_command": {
+        "arbih_1st_corps": {
+          "active_operations": [
+            { "name": "Test Operation", "participating_brigades": ["b_front_combat"] }
+          ]
+        }
+      },
+      "corps_front_sectors": {
+        "sector:front": {
+          "sector_id": "sector:front",
+          "corps_id": "arbih_1st_corps",
+          "faction": "RBiH",
+          "assigned_brigade_ids": ["a_front_zero", "b_front_combat"],
+          "reserve_brigade_ids": [],
+          "rear_brigade_ids": []
+        },
+        "sector:reserve": {
+          "sector_id": "sector:reserve",
+          "corps_id": "vrs_drina",
+          "faction": "RS",
+          "assigned_brigade_ids": [],
+          "reserve_brigade_ids": ["c_reserve"],
+          "rear_brigade_ids": []
+        }
+      }
+    }
+  },
+  {
+    "meta": { "turn": 2, "phase": "war" },
+    "military": {
+      "formations": {
+        "a_front_zero": {
+          "id": "a_front_zero",
+          "name": "A Front Zero",
+          "faction": "RBiH",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "arbih_1st_corps",
+          "assignment": { "kind": "sector", "role": "front", "sector_id": "sector:front" },
+          "ops": { "fatigue": 0.5, "last_supplied_turn": 2 },
+          "brigade_history": { "battles_fought": 0, "engagements": [] }
+        },
+        "b_front_combat": {
+          "id": "b_front_combat",
+          "name": "B Front Combat",
+          "faction": "RBiH",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "arbih_1st_corps",
+          "assignment": { "kind": "sector", "role": "front", "sector_id": "sector:front" },
+          "ops": { "fatigue": 3.5, "last_supplied_turn": 2 },
+          "brigade_history": {
+            "battles_fought": 1,
+            "engagements": [{ "turn": 1, "role": "attacker", "enemy_faction": "RS" }]
+          }
+        },
+        "c_reserve": {
+          "id": "c_reserve",
+          "name": "C Reserve",
+          "faction": "RS",
+          "kind": "brigade",
+          "status": "active",
+          "corps_id": "vrs_drina",
+          "assignment": { "kind": "sector", "role": "reserve", "sector_id": "sector:reserve" },
+          "ops": { "fatigue": 1, "last_supplied_turn": 2 },
+          "brigade_history": { "battles_fought": 0, "engagements": [] }
+        }
+      },
+      "corps_command": {
+        "arbih_1st_corps": {
+          "active_operations": []
+        }
+      },
+      "corps_front_sectors": {
+        "sector:front": {
+          "sector_id": "sector:front",
+          "corps_id": "arbih_1st_corps",
+          "faction": "RBiH",
+          "assigned_brigade_ids": ["a_front_zero", "b_front_combat"],
+          "reserve_brigade_ids": [],
+          "rear_brigade_ids": []
+        },
+        "sector:reserve": {
+          "sector_id": "sector:reserve",
+          "corps_id": "vrs_drina",
+          "faction": "RS",
+          "assigned_brigade_ids": [],
+          "reserve_brigade_ids": ["c_reserve"],
+          "rear_brigade_ids": []
+        }
+      }
+    }
+  }
+]

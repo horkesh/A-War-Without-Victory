@@ -144,6 +144,40 @@ export function computeSupplyAwareOpSize(
     return Math.min(surplusBrigadeCount, maxParticipatingBrigades);
 }
 
+function getSupplyStateForOsid(
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
+    faction: FactionId,
+    osid: string,
+): SupplyStateLevel {
+    const factionEntry = supplyByOsid?.factions?.find((entry) => entry.faction_id === faction);
+    const osidEntry = factionEntry?.by_osid?.find((entry) => entry.osid === osid);
+    return osidEntry?.state ?? 'adequate';
+}
+
+/** Supply-aware target scoring: enemy critical supply is an opportunity, bounded so it cannot dominate target logic. */
+export function computeEnemySupplyTargetScoreMultiplier(
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
+    enemyFaction: FactionId,
+    targetOsid: string,
+): number {
+    const state = getSupplyStateForOsid(supplyByOsid, enemyFaction, targetOsid);
+    if (state === 'critical') return 1.10;
+    if (state === 'strained') return 1.05;
+    return 1.00;
+}
+
+/** Supply-aware defense priority: own critical supply at home raises reserve attention without changing baseline adequate behavior. */
+export function computeOwnSupplyDefensePriorityMultiplier(
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
+    faction: FactionId,
+    homeOsid: string,
+): number {
+    const state = getSupplyStateForOsid(supplyByOsid, faction, homeOsid);
+    if (state === 'critical') return 1.15;
+    if (state === 'strained') return 1.07;
+    return 1.00;
+}
+
 /**
  * Compute surplus brigades across all corps sectors (brigades beyond garrison budget).
  * Budget per sector = ceil(length_edges / 6).

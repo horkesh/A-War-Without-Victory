@@ -874,6 +874,8 @@ export interface ParamilitaryRequest {
     faction: FactionId;
     /** Estimated paramilitary strength (personnel). */
     strength: number;
+    /** Projected civilian casualties as an integer count. Required for player-facing ask-mode review. */
+    estimated_civilian_risk?: number;
     /** Player decision: 'allow' deploys paramilitary, 'deny' skips, 'regular' flags for corps priority. */
     decision?: 'allow' | 'deny' | 'regular';
 }
@@ -1141,6 +1143,8 @@ export interface RbihHrhbState {
     stalemate_turns: number;
     /** Bilateral flips counted this turn (reset per turn; consumed by next turn's alliance update). */
     bilateral_flips_this_turn: number;
+    /** Weighted territorial competition incidents counted this turn; consumed by next turn's alliance update. */
+    territorial_incidents_this_turn: number;
     /** Cumulative bilateral flips since war started. */
     total_bilateral_flips: number;
     /** Dynamic list of municipalities with both RBiH and HRHB formations/pools. Sorted deterministically. */
@@ -2225,7 +2229,7 @@ war_alliance_rbih_hrhb?: number;
 rbih_hrhb_state?: RbihHrhbState;
 /** B4: Coercion pressure [0, 1] per municipality; reduces flip threshold (makes flip easier). Scenario/init can supply (e.g. Prijedor, Zvornik). */
 coercion_pressure_by_municipality?: Record<MunicipalityId, number>;
-/** Supply pressure per faction [0, 100]; higher = worse. Constrains effectiveness; no free replenishment. */
+/** Cumulative supply pressure per faction [0, 100]; higher = worse. Live current supply readers should prefer war_supply_condition via supply_condition.ts helpers. */
 war_supply_pressure?: Record<FactionId, number>;
 /** Live faction supply condition [0, 100] derived from current OSID supply state; higher = better. */
 war_supply_condition?: Record<FactionId, number>;

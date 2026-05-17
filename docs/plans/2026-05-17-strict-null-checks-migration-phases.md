@@ -1,0 +1,257 @@
+# `strictNullChecks` Migration Phase Ledger
+
+Date: 2026-05-17
+
+Source plan: `docs/plans/2026-05-17-strict-null-checks-migration-plan.md`
+
+Inventory artifacts:
+- `docs/40_reports/strict_null_inventory_baseline.json`
+- `docs/40_reports/strict_null_field_domains.json`
+- `tools/diagnostics/strict_null_inventory.cjs`
+- `tools/typed_strictness_waivers.json`
+
+## Baseline Counts
+
+Current-tree inventory counts:
+
+| Category | Count |
+|---|---:|
+| `as_any_casts` | 395 |
+| `as_factionid_casts` | 154 |
+| `as_unknown_casts` | 97 |
+| `non_null_assertions_dot` | 50 |
+| `non_null_assertions_index` | 59 |
+| `optional_fields_game_state` | 458 |
+
+Optional field domain classification:
+
+| Domain | Count |
+|---|---:|
+| `sim` | 280 |
+| `state` | 170 |
+| `derived` | 8 |
+| `scenario` | 0 |
+| `ipc` | 0 |
+| `ui_adapter` | 0 |
+| `unknown` | 0 |
+
+Inventory note: the plan's lower-bound estimates for non-null assertions (`>=120` dot and `>=125` index) do not match the current tree when applying the plan's regex-style inventory to non-archived `src/`. The baseline records current-tree truth rather than inflating counts.
+
+## Phase Order
+
+Phase 1 through Phase 6 remain mandatory order. No source migration phase may start before the prior phase is merged and 40w hash-stable.
+
+| Phase | Scope | Cast / assertion count | Optional field count | Downstream consumer count | Determinism risk | Status |
+|---|---|---:|---:|---:|---|---|
+| 1 | State schema | 42 | 458 | >5 for `GameState` and state namespaces | HIGH | Inventory only; source deferred |
+| 2 | Sim engine - combat | 116 | 0 | >5 for combat helpers and command state | HIGH | Inventory only; source deferred |
+| 3 | Sim engine - early war + bot | 35 | 0 | >5 for turn pipeline / bot flow | MEDIUM | Inventory only; source deferred |
+| 4 | Scenario + IPC | 53 | 0 | 3-5 for loader/runner/desktop seams | MEDIUM | Inventory only; source deferred |
+| 5 | UI adapter | 68 | 0 | >5 renderer consumers | MEDIUM | Inventory only; source deferred |
+| 6 | Renderer + warroom | 74 | 0 | UI-local repeated consumers | LOW | Inventory only; source deferred |
+
+## Phase File Assignment
+
+Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
+
+### Phase 1: State Schema
+
+Files:
+- `src/state/game_state.ts`
+- `src/state/serialize.ts`
+- `src/state/validateGameState.ts`
+- `src/state/displacement.ts`
+- `src/state/supply_reserves.ts`
+
+Counts:
+- `as_factionid_casts`: 10
+- `as_unknown_casts`: 5
+- `as_any_casts`: 19
+- `non_null_assertions_dot`: 0
+- `non_null_assertions_index`: 8
+- `optional_fields_game_state`: 458
+
+Stop-gate notes:
+- Do not promote `?:` fields to required unless existing saves and `validateGameState.ts` already prove presence without a migration.
+- `state.meta.player_faction` remains a behavioral-default issue and belongs to the Phase B player-faction plan, not this type-only migration.
+
+### Phase 2: Sim Engine - Combat
+
+Files:
+- `src/sim/combat/army_co_roster_loader.ts`
+- `src/sim/combat/army_order_interpretation.ts`
+- `src/sim/combat/army_reserve_system.ts`
+- `src/sim/combat/attack_casualty_distribution.ts`
+- `src/sim/combat/attack_history_recording.ts`
+- `src/sim/combat/attack_resolution_osid.ts`
+- `src/sim/combat/attack_retreat_displacement.ts`
+- `src/sim/combat/battle_resolution.ts`
+- `src/sim/combat/bot_brigade_ai_osid.ts`
+- `src/sim/combat/bot_brigade_eval_attack.ts`
+- `src/sim/combat/bot_brigade_eval_front.ts`
+- `src/sim/combat/brigade_front_distribution.ts`
+- `src/sim/combat/brigade_home_return.ts`
+- `src/sim/combat/brigade_movement.ts`
+- `src/sim/combat/brigade_movement_query.ts`
+- `src/sim/combat/combat_estimate.ts`
+- `src/sim/combat/combat_math.ts`
+- `src/sim/combat/combat_predictor.ts`
+- `src/sim/combat/commander/briefing.ts`
+- `src/sim/combat/commander/emit.ts`
+- `src/sim/combat/commander/force_eval.ts`
+- `src/sim/combat/commander/plan.ts`
+- `src/sim/combat/commander_march_correction.ts`
+- `src/sim/combat/corps_front_sectors.ts`
+- `src/sim/combat/corps_operation_readiness.ts`
+- `src/sim/combat/exhaustion.ts`
+- `src/sim/combat/faction_progression.ts`
+- `src/sim/combat/front_emergence.ts`
+- `src/sim/combat/hv_integration.ts`
+- `src/sim/combat/jna_phantom_brigades.ts`
+- `src/sim/combat/militia_garrison.ts`
+- `src/sim/combat/officer_system.ts`
+- `src/sim/combat/ongoing_mobilization.ts`
+- `src/sim/combat/operation_casualty_attribution.ts`
+- `src/sim/combat/operation_preparation.ts`
+- `src/sim/combat/osid_column_movement.ts`
+- `src/sim/combat/osid_graph_analysis.ts`
+- `src/sim/combat/paramilitary_sweep.ts`
+- `src/sim/combat/rear_pocket_consolidation.ts`
+- `src/sim/combat/sector_building.ts`
+- `src/sim/combat/sector_offensive.ts`
+- `src/sim/combat/sector_offensive_launch_helpers.ts`
+- `src/sim/combat/sector_rearrangement.ts`
+- `src/sim/combat/sector_splitting.ts`
+- `src/sim/combat/subsegment_assignment.ts`
+- `src/sim/combat/supply_condition.ts`
+- `src/sim/combat/warlord_friction.ts`
+
+Counts:
+- `as_factionid_casts`: 66
+- `as_unknown_casts`: 6
+- `as_any_casts`: 14
+- `non_null_assertions_dot`: 17
+- `non_null_assertions_index`: 13
+
+Stop-gate notes:
+- `src/sim/combat/paramilitary_sweep.ts`, supply-related combat code, and fatigue-related combat code are conflict-prone in the current multi-agent lane. Leave them as ledger entries until the parent lane confirms they are free.
+
+### Phase 3: Sim Engine - Early War + Bot
+
+Files:
+- `src/sim/bot/simple_general_bot.ts`
+- `src/sim/early_war/alliance_update.ts`
+- `src/sim/early_war/authority_degradation.ts`
+- `src/sim/early_war/control_flip.ts`
+- `src/sim/early_war/control_strain.ts`
+- `src/sim/early_war/militia_emergence.ts`
+- `src/sim/early_war/minority_erosion.ts`
+- `src/sim/early_war/minority_militia_decay.ts`
+- `src/sim/early_war/pool_population.ts`
+- `src/sim/turn_phases/war_phases.ts`
+
+Counts:
+- `as_factionid_casts`: 18
+- `as_unknown_casts`: 0
+- `as_any_casts`: 3
+- `non_null_assertions_dot`: 1
+- `non_null_assertions_index`: 13
+
+Stop-gate notes:
+- `src/sim/early_war/alliance_update.ts` and `src/sim/turn_phases/war_phases.ts` are currently high-conflict because RBiH-HRHB and phase-pipeline lanes may be active.
+
+### Phase 4: Scenario + IPC
+
+Files:
+- `src/desktop/desktop_sim.ts`
+- `src/scenario/anomaly_detector.ts`
+- `src/scenario/brigade_temporal_emit.ts`
+- `src/scenario/campaign_unlock.ts`
+- `src/scenario/combat_causality.ts`
+- `src/scenario/initial_formations_loader.ts`
+- `src/scenario/oob_early_war_entry.ts`
+- `src/scenario/oob_loader.ts`
+- `src/scenario/scenario_end_report.ts`
+- `src/scenario/scenario_loader.ts`
+- `src/scenario/scenario_runner.ts`
+
+Counts:
+- `as_factionid_casts`: 13
+- `as_unknown_casts`: 26
+- `as_any_casts`: 5
+- `non_null_assertions_dot`: 6
+- `non_null_assertions_index`: 3
+
+Stop-gate notes:
+- Any loader default or save-migration change is a behavior/save migration concern. Record and escalate instead of silently defaulting.
+
+### Phase 5: UI Adapter
+
+Files:
+- `src/ui/map/data/GameStateAdapter.ts`
+
+Counts:
+- `as_factionid_casts`: 2
+- `as_unknown_casts`: 13
+- `as_any_casts`: 53
+- `non_null_assertions_dot`: 0
+- `non_null_assertions_index`: 0
+
+Stop-gate notes:
+- Coordinate with the boundary cleanup lane before replacing adapter reads. This file is the renderer data chokepoint and should be touched once.
+
+### Phase 6: Renderer + Warroom
+
+Files:
+- `src/ui/map/components/AiSettingsPanel.tsx`
+- `src/ui/map/components/AutonomyPanel.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/DiplomacyOverview.tsx`
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+- `src/ui/map/components/SidePickerOverlay.tsx`
+- `src/ui/map/components/SituationTab.tsx`
+- `src/ui/map/components/VerdictScreen.tsx`
+- `src/ui/map/components/army_hq/CommandRelationshipSection.tsx`
+- `src/ui/map/components/army_hq/ForceReadiness.tsx`
+- `src/ui/map/components/army_hq/SectorsSection.tsx`
+- `src/ui/map/components/army_hq/SupplyIntelligence.tsx`
+- `src/ui/map/components/chronicle/generateWrappedSlides.ts`
+- `src/ui/map/components/icons/Icon.tsx`
+- `src/ui/map/components/ops_modal/OpsMap.tsx`
+- `src/ui/map/components/plan_ui/OpsMapRenderer.ts`
+- `src/ui/map/components/warroom/AdvanceTurnModal.tsx`
+- `src/ui/map/map/MapContainer.tsx`
+- `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts`
+- `src/ui/map/map/builders/buildEthnicGeoJSON.ts`
+- `src/ui/map/map/builders/buildPoliticalMetricGeoJSON.ts`
+- `src/ui/map/map/builders/buildSupplyReachGeoJSON.ts`
+- `src/ui/map/map/interactionLayerConfig.ts`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+- `src/ui/warroom/components/IvpBreakdownModal.ts`
+- `src/ui/warroom/components/NewspaperModal.ts`
+- `src/ui/warroom/components/ReportsModal.ts`
+- `src/ui/warroom/components/warroom_utils.ts`
+- `src/ui/warroom/data/war_data_extractor.ts`
+- `src/ui/warroom/map_viewer_app.ts`
+- `src/ui/warroom/warroom.ts`
+
+Counts:
+- `as_factionid_casts`: 10
+- `as_unknown_casts`: 9
+- `as_any_casts`: 34
+- `non_null_assertions_dot`: 14
+- `non_null_assertions_index`: 7
+
+Stop-gate notes:
+- UI files are intentionally last. Do not start while adapter and source contract phases remain open.
+
+## Deferred Inventory Expansion
+
+The baseline also finds strictness escapes in CLI, validation, map/data, additional state helpers, AI commander, negotiation, replay, event, and pressure modules. Those files are intentionally not migrated in this independent lane because the user requested inventory/baseline/phase-ledger work first and warned against broad source migrations during parallel agent activity.
+
+Before any later source cleanup touches those files, this ledger must be expanded to assign each remaining inventory file to exactly one phase or a new approved follow-up phase.
+
+## Source Migration Status
+
+No source phase was completed in this lane. Current worktree status shows unrelated active edits in protected source areas (`supply`, `paramilitary`, `RBiH-HRHB`, `fatigue`, and turn pipeline files), so type-only source migration is deferred to avoid conflicts.

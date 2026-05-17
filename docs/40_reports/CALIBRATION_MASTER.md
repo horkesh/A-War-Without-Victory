@@ -1,5 +1,15 @@
 # AWWV Calibration Master Reference
 
+## n1864/n1863 integrated supply/paramilitary/fatigue/RBiH-HRHB wave (2026-05-17)
+
+- **40w integrated run. Hash: `c0d8212847398b8f`. Anchors: 27/27. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1864`. Matches the lane-local n1862 hash.
+- Scope: RBiH-HRHB Phase B territorial incidents and Phase 0 handoff, supply-design diagnostic/live-truth/bot-awareness work, paramilitary consequence/flavor phases, fatigue Owner D late-war exhaustion residue, and strict-null inventory baseline.
+- **188w integrated run. Hash: `c757c82da8cd8b67`. Anchors: 25/27. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1863`.
+- Fatigue evidence: sector-front `pct_zero` improved from `100.000` to `58.416`, inside the selected 40-70% design band and above the 30% over-correction stop gate.
+- Late-war caveat: Teocak/Brcko remain the inherited current late-war drift profile from the dirty n1847/n1854 line, not a new 40w anchor regression. Srebrenica remains not all-RS at 188w, with residual review risk recorded in the fatigue report.
+
 ## n1853/n1854 integrated B3/Sarajevo/embargo wave (2026-05-17)
 
 - **40w integrated run. Hash: `c16ba5bc33b79277`. Anchors: 27/27. `diagnose_run.cjs`: 0 errors / 28 warnings. `validate_run_consistency.cjs`: PASS.**

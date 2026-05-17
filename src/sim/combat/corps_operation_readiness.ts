@@ -24,7 +24,7 @@
  *
  * READS:     state.military.formations, state.military.faction_officer_maturity,
  *            state.factions[*].capability_profile, state.military.corps_command,
- *            state.political.war_exhaustion, state.political.war_supply_condition/pressure
+ *            state.political.war_exhaustion, state.political.war_supply_condition
  * WRITES:    Nothing — pure helper, mutates nothing.
  * MUST NOT:  Touch combat math, attack share, or any combat multiplier.
  *
@@ -297,7 +297,7 @@ function corpsExhaustionNormalized(state: GameState, corpsId: FormationId): numb
 }
 
 /** Faction pool pressure returns [0, 1] with 0 = no pressure, 1 = saturated. */
-function factionPoolPressure(state: GameState, faction: FactionId): number {
+export function computeFactionPoolPressureFactor(state: GameState, faction: FactionId): number {
     return clamp01(getFactionLiveSupplyPressure(state, faction) / FACTION_POOL_PRESSURE_CAP);
 }
 
@@ -391,7 +391,7 @@ export function computeCorpsOperationReadiness(
     const cap = factionCapabilityProfile(state, faction);
     const cm = corpsCohesionMorale(state, corpsId);
     const exhaustion = corpsExhaustionNormalized(state, corpsId);
-    const poolPressure = factionPoolPressure(state, faction);
+    const poolPressure = computeFactionPoolPressureFactor(state, faction);
     const failures = corpsConsecutiveFailures(state, corpsId);
     const equipSupport = corpsEquipmentSupport(state, corpsId);
 
@@ -479,7 +479,7 @@ export function buildCorpsOperationReadinessInputSnapshot(
     const cap = factionCapabilityProfile(state, faction);
     const cm = corpsCohesionMorale(state, corpsId);
     const exhaustion = corpsExhaustionNormalized(state, corpsId);
-    const poolPressure = factionPoolPressure(state, faction);
+    const poolPressure = computeFactionPoolPressureFactor(state, faction);
     const failures = corpsConsecutiveFailures(state, corpsId);
     const equipSupport = corpsEquipmentSupport(state, corpsId);
     const turn = state.meta?.turn ?? 0;

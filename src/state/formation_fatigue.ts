@@ -249,6 +249,35 @@ const FATIGUE_RECOVERY_INTERVAL = 2;
  *  stabilizes around fatigue ~5-10 (manageable). A fighting brigade accumulates
  *  faster from combat bonuses. */
 const FRONTLINE_FATIGUE_PER_TURN = 0.5;
+const LATE_WAR_FATIGUE_STRAIN_TURN = 104;
+const EXHAUSTION_FATIGUE_STRAIN_THRESHOLD = 80;
+const RECENT_COMBAT_FATIGUE_STRAIN_TURNS = 80;
+const EXHAUSTED_RECENT_COMBAT_FATIGUE_FLOOR = 1;
+
+function getLastEngagementTurn(formation: FormationState): number | null {
+    const engagements = formation.brigade_history?.engagements;
+    if (!Array.isArray(engagements) || engagements.length === 0) return null;
+    let last: number | null = null;
+    for (const engagement of engagements) {
+        const turn = Number((engagement as { turn?: unknown }).turn);
+        if (!Number.isFinite(turn)) continue;
+        if (last == null || turn > last) last = turn;
+    }
+    return last;
+}
+
+function hasLateWarExhaustedRecentCombatStrain(
+    state: GameState,
+    formation: FormationState,
+    currentTurn: number,
+): boolean {
+    if (currentTurn < LATE_WAR_FATIGUE_STRAIN_TURN) return false;
+    const factionExhaustion = state.political?.war_exhaustion?.[formation.faction] ?? 0;
+    if (factionExhaustion < EXHAUSTION_FATIGUE_STRAIN_THRESHOLD) return false;
+    const lastEngagementTurn = getLastEngagementTurn(formation);
+    if (lastEngagementTurn == null) return false;
+    return currentTurn - lastEngagementTurn <= RECENT_COMBAT_FATIGUE_STRAIN_TURNS;
+}
 
 /**
  * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
@@ -269,7 +298,8 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
     const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
 
-    for (const [fid, formation] of Object.entries(formations)) {
+    for (const fid of Object.keys(formations).sort()) {
+        const formation = formations[fid]!;
         if (!formation || formation.status !== 'active') continue;
         if (!formation.ops || typeof formation.ops !== 'object') {
             formation.ops = { fatigue: 0, last_supplied_turn: null };
@@ -286,6 +316,10 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
         // Frontline duty fatigue: +0.5/turn for front-assigned brigades
         if (isFrontAssigned) {
             current = Math.min(FATIGUE_MAX, current + FRONTLINE_FATIGUE_PER_TURN);
+        }
+
+        if (hasLateWarExhaustedRecentCombatStrain(state, formation, currentTurn)) {
+            current = Math.max(current, EXHAUSTED_RECENT_COMBAT_FATIGUE_FLOOR);
         }
 
         formation.ops.fatigue = current;

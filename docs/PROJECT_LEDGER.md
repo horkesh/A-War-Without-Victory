@@ -4,6 +4,25 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] feat(sim): close supply, paramilitary, fatigue, strict-null, and RBiH-HRHB follow-up lanes
+
+**Scope:** Third implementation wave from the 2026-05-17 14-plan batch. Covers RBiH-HRHB Phase B/C1, supply-design completion Tasks 1-4 partial, paramilitary flavor/consequence phases, fatigue recovery rebalance, and strict-null inventory/phase-ledger baseline.
+
+**Change:**
+- RBiH-HRHB: adds deterministic territorial-incident penalties to alliance degradation, maps Phase 0 relationship state into initial war alliance on transition, and adds bilateral front-edge coverage.
+- Supply: adds the supply-design diagnostic, live-vs-cumulative supply-pressure guard tests, supply-aware bot scoring multipliers, and SupplyPanel summary contract coverage.
+- Paramilitary: adds severity-banded cost-ledger findings, capital penalties, ask-mode inbox projection with integer civilian-risk counts, cited named-unit catalog, static exclusion tests, and moves rear-pocket fade week to 28.
+- Fatigue: adds a deterministic fatigue-distribution diagnostic and Owner D late-war exhaustion residue floor for recently combat-engaged active formations.
+- Strict-null: adds deterministic inventory tooling, baseline/domain artifacts, waiver file, and the phase ledger; source migration remains sequenced work.
+
+**Determinism / scenario evidence:** Parent-verified integrated 40w n1864 (`c0d8212847398b8f`) has 27/27 anchors and 6/6 benchmarks, matching lane run n1862. Integrated 188w n1863 (`c757c82da8cd8b67`) has 25/27 anchors and 6/6 benchmarks; Teocak/Brcko remain the inherited late-war drift profile. Fatigue sector-front zero rate improved from 100.000% to 58.416%, inside the selected 40-70% band and above the 30% over-correction stop gate.
+
+**Verification:** Focused integrated suite passed 10 files / 74 tests; focused paramilitary suite passed 12 files / 55 tests; focused fatigue suite passed 4 files / 23 tests; `npx.cmd tsc --noEmit --pretty false` passed during integration. Full Vitest was attempted by the paramilitary lane but timed out after 304s without a final summary.
+
+**Canon posture:** No Scorpions/Skorpioni or Yellow Wasps/Zute Ose shipped. The paramilitary catalog names perpetrators only and keeps blocked names under static exclusion. Fatigue changes preserve global fatigue constants and combat-power math. Strict-null changes are diagnostic/planning only.
+
+---
+
 ## [2026-05-17] feat(sim): implement B3 counter-offers, Sarajevo Branch B, and RBiH embargo phase substrate
 
 **Scope:** Second implementation wave from the 2026-05-17 14-plan batch. Covers B3 negotiation counter-offers, Sarajevo Branch B numeric override substrate, and RBiH arms embargo timeline/caps. Builds on `143ce965` logistics-priority/save-migration/endgame batch.

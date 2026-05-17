@@ -49,6 +49,7 @@ import {
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
+import { lookupParamilitaryNamedUnit } from '../../../data/source/oob/paramilitary_named_units.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 
@@ -73,8 +74,16 @@ export interface ParamilitarySweepReport {
     pending_player_requests: number;
 }
 
+export type ParamilitarySeverityBand = 'minor' | 'mid' | 'severe';
+
 function emptyReport(): ParamilitarySweepReport {
     return { spawned: [], captured: [], dissolved: [], pending_player_requests: 0 };
+}
+
+export function classifyParamilitaryDeploymentBand(deploymentCount: number): ParamilitarySeverityBand {
+    if (deploymentCount >= 10) return 'severe';
+    if (deploymentCount >= 4) return 'mid';
+    return 'minor';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -225,7 +234,12 @@ export function detectParamilitaryTargets(
                 }
                 // 'ask' — add to pending
                 const requests = state.pending_paramilitary_requests ??= [];
-                requests.push({ target_osid: pocketOsid, faction, strength: PARAMILITARY_UNIT_SIZE });
+                requests.push({
+                    target_osid: pocketOsid,
+                    faction,
+                    strength: PARAMILITARY_UNIT_SIZE,
+                    estimated_civilian_risk: estimateParamilitaryCivilianRisk('rear_pocket'),
+                });
                 report.pending_player_requests++;
                 continue;
             }
@@ -266,12 +280,13 @@ function spawnParamilitary(
         ? `opara_${faction.toLowerCase()}_t${turn}_${index}`
         : makeParamilitaryId(faction, turn, index);
     const formations = state.military.formations ??= {};
+    const namedUnit = lookupParamilitaryNamedUnit(faction, mode, index, turn);
 
     formations[fid] = {
         id: fid,
         faction,
         force_label: defaultArmyLabelForSide(faction as PoliticalSideId),
-        name: isOffensive ? `Offensive Paramilitary (${faction})` : `Paramilitary Unit (${faction})`,
+        name: namedUnit?.name ?? (isOffensive ? `Offensive Paramilitary (${faction})` : `Paramilitary Unit (${faction})`),
         created_turn: turn,
         status: 'active',
         assignment: null,
@@ -288,10 +303,37 @@ function spawnParamilitary(
         ...(isOffensive ? { paramilitary_mode: 'offensive' as const } : {}),
     } satisfies FormationState;
 
-    const counts = state.paramilitary_deployment_count ??= {};
+    const counts = ensureParamilitaryDeploymentCountMap(state);
     counts[faction] = (counts[faction] ?? 0) + 1;
+    recordParamilitaryCostAnnotation(state, faction, counts[faction], turn);
 
     report.spawned.push({ faction, target_osid: targetOsid, formation_id: fid });
+}
+
+function ensureParamilitaryDeploymentCountMap(state: GameState): Record<FactionId, number> {
+    if (!state.paramilitary_deployment_count || typeof state.paramilitary_deployment_count !== 'object') {
+        state.paramilitary_deployment_count = {} as Record<FactionId, number>;
+    }
+    return state.paramilitary_deployment_count;
+}
+
+function recordParamilitaryCostAnnotation(
+    state: GameState,
+    faction: FactionId,
+    deploymentCount: number,
+    turn: number
+): void {
+    const annotations = state.military.cost_ledger_annotations ??= [];
+    const eventId = `cost_war_crimes_findings_${faction}`;
+    const tag = `paramilitary_war_crimes_${classifyParamilitaryDeploymentBand(deploymentCount)}`;
+    const text = `deployment_count=${deploymentCount}`;
+    const existing = annotations.find((entry) => entry.event_id === eventId && entry.turn === turn && entry.faction === faction);
+    if (existing) {
+        existing.tag = tag;
+        existing.text = text;
+        return;
+    }
+    annotations.push({ event_id: eventId, tag, text, turn, faction });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -408,7 +450,12 @@ export function detectOffensiveParamilitaryTargets(
                 }
                 // 'ask' — add to pending
                 const requests = state.pending_paramilitary_requests ??= [];
-                requests.push({ target_osid: osid, faction, strength: OFFENSIVE_PARA_UNIT_SIZE });
+                requests.push({
+                    target_osid: osid,
+                    faction,
+                    strength: OFFENSIVE_PARA_UNIT_SIZE,
+                    estimated_civilian_risk: estimateParamilitaryCivilianRisk('offensive'),
+                });
                 report.pending_player_requests++;
                 existingTargets.add(`${faction}:${osid}`);
                 continue;
@@ -443,6 +490,13 @@ function recordWarCrime(state: GameState, faction: FactionId): void {
     const neg = state.military.negotiation;
     if (!neg?.capital?.[faction]) return;
     neg.capital[faction].war_crimes_events = (neg.capital[faction].war_crimes_events ?? 0) + 1;
+}
+
+function estimateParamilitaryCivilianRisk(mode: 'rear_pocket' | 'offensive'): number {
+    const rate = mode === 'offensive'
+        ? OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE
+        : PARAMILITARY_CIVILIAN_CASUALTY_RATE;
+    return Math.ceil(PARAMILITARY_TARGET_AVG_POPULATION * rate);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

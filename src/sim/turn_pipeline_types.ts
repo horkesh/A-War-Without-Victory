@@ -162,6 +162,7 @@ export interface TurnReport {
     washington_check?: WashingtonCheckReport;
     operation_storm_check?: OperationStormCheckReport;
     bilateral_flip_count?: number;
+    territorial_incident_count?: { bilateral_incidents: number; mixed_mun_rs_recapture_incidents: number };
     minority_erosion_report?: MinorityErosionReport;
     war_termination?: {
         outcome: string | null;

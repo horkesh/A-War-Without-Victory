@@ -413,8 +413,8 @@ export const OFFENSIVE_PARA_MUNICIPALITY_SCOPE: Record<string, string[]> = {
 export const PARAMILITARY_UNIT_SIZE = 150;
 /** Turns to reach target and capture. 0 = capture same turn (rear pockets are already surrounded). */
 export const PARAMILITARY_MARCH_TURNS = 0;
-/** Week after which paramilitaries stop spawning (war professionalizes). */
-export const PARAMILITARY_FADE_WEEK = 20;
+/** Week after which rear-pocket paramilitaries stop spawning (BB1 p.166-168 ARBiH absorption midpoint). */
+export const PARAMILITARY_FADE_WEEK = 28;
 /** Paramilitary spawn probability by faction (keyed on OrganizationalPenetration field).
  *  RS had Arkan's Tigers, White Eagles, etc. — highest paramilitary activity.
  *  HRHB had HOS and some Croatian paramilitaries.

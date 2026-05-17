@@ -12,10 +12,27 @@ import type { NegotiationBreakdown, NegotiationState } from '../../state/negotia
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { initializeStrategicDimensions } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 import { getOsidAreas } from '../osid_areas.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+
+const PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT = 2;
+const PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT = 4;
+const PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT = 5;
+const PARAMILITARY_SEVERE_STANDING_CLIFF = 10;
+
+export function computeParamilitaryInternationalStandingPenalty(
+    band: ParamilitarySeverityBand,
+    deploymentCount: number
+): number {
+    const count = Math.max(0, Math.trunc(deploymentCount));
+    if (count === 0) return 0;
+    if (band === 'severe') return (count * PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT) + PARAMILITARY_SEVERE_STANDING_CLIFF;
+    if (band === 'mid') return count * PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT;
+    return count * PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main computation
@@ -46,6 +63,7 @@ export function computeNegotiationBreakdown(state: GameState): void {
         }
 
         updateFactionCapital(state, faction, neg.capital[faction]);
+        updateParamilitaryInternationalStanding(state, faction, neg);
     }
 }
 
@@ -64,6 +82,52 @@ function initializeNegotiationState(state: GameState): NegotiationState {
         peace_plan_history: [],
         strategic_dimensions: initializeStrategicDimensions(),
     };
+}
+
+function updateParamilitaryInternationalStanding(state: GameState, faction: FactionId, neg: NegotiationState): void {
+    const dimension = neg.strategic_dimensions?.[faction]?.international_standing;
+    if (!dimension) return;
+    const finding = getLatestParamilitaryFinding(state, faction);
+    const cap = neg.capital[faction];
+    const warCrimes = cap?.war_crimes_events ?? 0;
+    const civCas = cap?.civilian_casualties_caused ?? 0;
+    const plansAccepted = cap?.peace_plans_accepted?.length ?? 0;
+    const plansRejected = cap?.peace_plans_rejected?.length ?? 0;
+    const warCrimePenalty = finding
+        ? computeParamilitaryInternationalStandingPenalty(finding.band, finding.deploymentCount)
+        : warCrimes * 10;
+    const base = clamp(50 - warCrimePenalty - (civCas / 5000) + (plansAccepted * 10) - (plansRejected * 15), 0, 100);
+    dimension.base_value = base;
+    dimension.effective_value = clamp(dimension.base_value + dimension.event_modifier, 0, 100);
+}
+
+function getLatestParamilitaryFinding(
+    state: GameState,
+    faction: FactionId
+): { band: ParamilitarySeverityBand; deploymentCount: number } | null {
+    const entries = (state.military.cost_ledger_annotations ?? [])
+        .filter((entry) => entry.faction === faction && entry.event_id === `cost_war_crimes_findings_${faction}`)
+        .sort((a, b) => {
+            if (a.turn !== b.turn) return b.turn - a.turn;
+            return strictCompare(b.tag, a.tag);
+        });
+    const latest = entries[0];
+    if (!latest) return null;
+    const band = parseParamilitaryBand(latest.tag);
+    if (!band) return null;
+    return { band, deploymentCount: parseDeploymentCount(latest.text) };
+}
+
+function parseParamilitaryBand(tag: string): ParamilitarySeverityBand | null {
+    if (tag === 'paramilitary_war_crimes_minor') return 'minor';
+    if (tag === 'paramilitary_war_crimes_mid') return 'mid';
+    if (tag === 'paramilitary_war_crimes_severe') return 'severe';
+    return null;
+}
+
+function parseDeploymentCount(text?: string): number {
+    const match = text?.match(/\bdeployment_count=(\d+)\b/);
+    return match ? Number.parseInt(match[1]!, 10) : 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

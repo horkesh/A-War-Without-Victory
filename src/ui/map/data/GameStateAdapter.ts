@@ -290,6 +290,55 @@ function deriveSupplyStateByOsidView(
     return Object.keys(result).length > 0 ? result : undefined;
 }
 
+function emptySupplySummary() {
+    return {
+        adequate_count: 0,
+        strained_count: 0,
+        critical_count: 0,
+        corridor_open_count: 0,
+        corridor_brittle_count: 0,
+        corridor_cut_count: 0,
+    };
+}
+
+function deriveSupplySummaryByFaction(state: any): LoadedGameState['supplySummaryByFaction'] {
+    const result: NonNullable<LoadedGameState['supplySummaryByFaction']> = {};
+    const rawSupply = state.supply_state_by_osid;
+    const factions = Array.isArray(rawSupply?.factions) ? rawSupply.factions as Array<Record<string, unknown>> : [];
+    for (const factionEntry of [...factions].sort((a, b) => strictCompare(String(a.faction_id ?? ''), String(b.faction_id ?? '')))) {
+        const factionId = typeof factionEntry.faction_id === 'string' ? factionEntry.faction_id : '';
+        if (!factionId) continue;
+        const summary = result[factionId] ?? emptySupplySummary();
+        const byOsid = Array.isArray(factionEntry.by_osid) ? factionEntry.by_osid as Array<Record<string, unknown>> : [];
+        for (const entry of [...byOsid].sort((a, b) => strictCompare(String(a.osid ?? ''), String(b.osid ?? '')))) {
+            const supplyState = normalizeSupplyState(entry.state);
+            if (supplyState === 'adequate') summary.adequate_count++;
+            else if (supplyState === 'strained') summary.strained_count++;
+            else if (supplyState === 'critical') summary.critical_count++;
+        }
+        result[factionId] = summary;
+    }
+
+    const rawCorridors = state.supply_corridors_osid;
+    const corridors = Array.isArray(rawCorridors?.corridors) ? rawCorridors.corridors as Array<Record<string, unknown>> : [];
+    for (const corridor of [...corridors].sort((a, b) => {
+        const faction = strictCompare(String(a.faction_id ?? ''), String(b.faction_id ?? ''));
+        return faction !== 0 ? faction : strictCompare(String(a.edge_id ?? ''), String(b.edge_id ?? ''));
+    })) {
+        const factionId = typeof corridor.faction_id === 'string' ? corridor.faction_id : '';
+        if (!factionId) continue;
+        const summary = result[factionId] ?? emptySupplySummary();
+        if (corridor.state === 'open') summary.corridor_open_count++;
+        else if (corridor.state === 'brittle') summary.corridor_brittle_count++;
+        else if (corridor.state === 'cut') summary.corridor_cut_count++;
+        result[factionId] = summary;
+    }
+
+    return Object.keys(result).length > 0
+        ? Object.fromEntries(Object.entries(result).sort(([a], [b]) => strictCompare(a, b)))
+        : undefined;
+}
+
 function derivePoliticalMetricsByOsid(state: any): LoadedGameState['politicalMetricsByOsid'] {
     const controllers = state.political?.political_controllers as Record<string, string | null | undefined> | undefined;
     const settlements = state.political?.settlements as Record<string, Record<string, unknown>> | undefined;
@@ -1933,6 +1982,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             state.political.political_controllers as Record<string, string | null | undefined> | undefined,
             playerFaction,
         ),
+        supplySummaryByFaction: deriveSupplySummaryByFaction(state),
         politicalMetricsByOsid: derivePoliticalMetricsByOsid(state),
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
@@ -1942,6 +1992,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests,
         pendingParamilitaryRequests,
+        paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
+            ? state.paramilitary_policy
+            : undefined,
         armyReserveQueue,
         operationOpportunityRecords,
         operationOpportunitySummary,
@@ -2357,13 +2410,19 @@ function derivePendingParamilitaryRequests(
             && typeof request?.target_osid === 'string'
             && Number.isFinite(Number(request?.strength)),
         )
-        .map((request) => ({
-            faction: request.faction,
-            strength: Number(request.strength),
-            target_osid: request.target_osid,
-            ...(request.decision === 'allow' || request.decision === 'deny' ? { decision: request.decision } : {}),
-            ...(request.mode === 'rear_pocket' || request.mode === 'offensive' ? { mode: request.mode } : {}),
-        }));
+        .map((request) => {
+            if (!Number.isFinite(Number(request.estimated_civilian_risk))) {
+                throw new Error(`pending_paramilitary_requests entry for ${request.target_osid} is missing estimated_civilian_risk`);
+            }
+            return {
+                faction: request.faction,
+                strength: Number(request.strength),
+                target_osid: request.target_osid,
+                estimated_civilian_risk: Math.trunc(Number(request.estimated_civilian_risk)),
+                ...(request.decision === 'allow' || request.decision === 'deny' ? { decision: request.decision } : {}),
+                ...(request.mode === 'rear_pocket' || request.mode === 'offensive' ? { mode: request.mode } : {}),
+            };
+        });
 
     return parsed.length > 0 ? parsed : undefined;
 }

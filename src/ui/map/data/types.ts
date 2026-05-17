@@ -402,6 +402,7 @@ export interface LoadedParamilitaryRequest {
     faction: string;
     strength: number;
     target_osid: string;
+    estimated_civilian_risk: number;
     decision?: 'allow' | 'deny';
     mode?: 'rear_pocket' | 'offensive';
 }
@@ -828,6 +829,15 @@ export interface LoadedGameState {
     supplyTransitionsByOsid: Record<string, Array<{ turn: number; from: string; to: string }>>;
     /** Current player-visible per-OSID supply state. */
     supplyStateByOsid?: Record<string, 'adequate' | 'strained' | 'critical'>;
+    /** Per-faction supply and corridor counts for the SupplyPanel contract. */
+    supplySummaryByFaction?: Record<string, {
+      adequate_count: number;
+      strained_count: number;
+      critical_count: number;
+      corridor_open_count: number;
+      corridor_brittle_count: number;
+      corridor_cut_count: number;
+    }>;
     /** Current per-OSID political authority/legitimacy metrics, normalized to 0-100. */
     politicalMetricsByOsid?: Record<string, PoliticalMetricView>;
     /** Historical events fired per turn (from scenario event definitions). */
@@ -1002,6 +1012,7 @@ export interface LoadedGameState {
     }>;
     /** Pending paramilitary deployment requests awaiting player decision. */
     pendingParamilitaryRequests?: LoadedParamilitaryRequest[];
+    paramilitaryPolicy?: 'always_allow' | 'always_deny' | 'ask';
     /** Per-elite-brigade deployment history. */
     eliteBrigadeTracker?: Record<string, {
         total_loans: number;
