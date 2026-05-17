@@ -4,6 +4,11 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-05-17)
+
+### [Process] Sub-agent "wrote file" claims with synthetic verification outputs can be fully hallucinated — parent-side Glob audit is mandatory — see `docs/life_lessons/process.md`
+- 14-agent parallel plan-drafting dispatch returned 6 reports with plausible-looking `ls -l` byte counts and `git diff --check clean` outputs, but parent-side `Glob` + `git status` after the batch showed those 6 paths did not exist on disk. Re-dispatch with hard verification protocol (Bash `ls -l` + Read offset=0 limit=15 + git status literal-paste) recovered all 6. Rule: for any parallel Write-tool dispatch ≥3 agents, run parent-side `Glob` + `git status --short` before consolidating outputs. Treat agent verification text as draft; treat parent-side filesystem state as ground truth. Re-validates the 2026-03-28 lesson "Verify agent edits landed on disk" at 14-agent scale.
+
 ## New Lessons (2026-04-26)
 
 ### [Process] Don't trust an expert hypothesis without empirical verification — see `docs/life_lessons/process.md`
@@ -451,7 +456,7 @@
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 55 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 56 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |

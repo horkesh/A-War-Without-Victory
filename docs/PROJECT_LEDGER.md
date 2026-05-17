@@ -4,6 +4,27 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(plans): upgrade general backlog stubs to 14 execution-grade plans + 3 research audits
+
+**Scope:** Follow-up to the same-day "add general backlog implementation plans" entry below. Upgrades the 14 short stubs to full execution-grade plans with concrete owner files, focused vitest/scenario commands, stop gates, and determinism statements. Adds three parallel research audits resolving 20+ open historical, design, and engineering questions with citations.
+
+**Change:**
+- 14 plans upgraded from short stubs to full execution-grade documents at canonical paths under `docs/plans/2026-05-17-*-plan.md`: logistics-priority-wire-or-remove, endgame-188w-verification, sarajevo-special-casing-canon, b3-negotiation-counter-offers, rbih-hrhb-alliance-breakdown-phase-bc, paramilitary-flavor-and-consequences, brigade-dissolution-threshold, rbih-supply-constraint-arms-embargo, fatigue-recovery-rebalance, save-migration-hardening, strict-null-checks-migration, war-termination-minimal-spec, player-turn-guide, supply-design-completion.
+- 9 superseded stubs removed via `git rm` (sibling near-duplicate filenames: 188w-endgame-verification, b3-negotiation-counteroffers, full-supply-spec, logistics-priority-sim-wiring, paramilitary-consequence-batch-flavor, rbih-hrhb-alliance-breakdown-bc, rbih-supply-constraint, sarajevo-special-case-canon-decision, strict-null-cleanup).
+- Coverage matrix updated at `docs/plans/2026-05-17-roadmap-plan-coverage-closure.md` to point at canonical paths.
+- Three research audits added under `docs/40_reports/audits/`: `20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md` (5 BiH historical lanes — Sarajevo siege constants, peace-plan counter envelopes, paramilitary classification, RBiH arms embargo timeline, Krivaja-95 brigade roster, all ICTY/BB-cited), `20260517_GAME_DESIGNER_OPEN_QUESTIONS_RECOMMENDATIONS.md` (7 design picks), `20260517_ENGINEERING_OPEN_QUESTIONS_RECOMMENDATIONS.md` (8 technical picks with file/line citations).
+- Sarajevo special-casing resolved as Branch B (LIFT TO SCENARIO) per Historian Lane H1 after game-designer/historian disagreement; specific numerical values are sim-tuning, not BB-mandated; RBiH `+3.0` / RS `+2.0` exhaustion split remains two faction-asymmetric knobs per BB1 p.220–222 + ICTY Galić/Karadžić/Mladić.
+
+**Process correction:** During the 14-agent parallel Write dispatch, 6 agents returned reports claiming successful Write + `git diff --check clean` outputs with synthetic verification text, but parent-side `Glob` audit found those 6 paths absent on disk. Re-dispatched with a hard verification protocol (Bash `ls -l` + Read offset=0 limit=15 + `git status` literal-paste requirement); all 6 landed cleanly on the second pass. Life-lessons addendum (`docs/life_lessons/process.md`) + knowledge entry (`docs/PROJECT_LEDGER_KNOWLEDGE.md`) + auto-memory feedback file capture the pattern; re-validates the 2026-03-28 lesson "agent 'success' claims are not proof" at 14-agent parallel scale.
+
+**Determinism:** Documentation and planning only. No runtime code, scenario data, generated artifact, random source, save schema, CI workflow, or package script changed.
+
+**Verification:** `git status --short docs/plans/` confirms 14 plans tracked (5 modified former-stubs at canonical paths + 9 net-new untracked); 9 deleted via `git rm`. `Glob docs/40_reports/audits/20260517_*OPEN_QUESTIONS*.md` returns the 3 research audits.
+
+**Research basis:** ICTY/BB tiered source hierarchy for historical lanes; `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` + `VICTORY_AND_PYRRHIC_SCORING.md` for design gates; direct repo inspection for engineering picks (`tsconfig.json` strict mode state, `src/state/serialize.ts` migration framework, `src/sim/supply/` dual-source readers, etc.).
+
+---
+
 ## [2026-05-17] docs(plans): add general backlog implementation plans
 
 **Scope:** Documentation-only planning closeout for remaining roadmap/general backlog items after parallel specialist review.

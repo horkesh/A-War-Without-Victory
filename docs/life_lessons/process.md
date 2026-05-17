@@ -3,6 +3,13 @@
 
 ---
 
+### [Process] Sub-agent "wrote file" claims with synthetic verification outputs can be fully hallucinated — parent-side Glob audit is mandatory (2026-05-17) — NEW
+- **Context**: 14-agent parallel plan-drafting dispatch. Each agent was instructed to Write one plan file and run a self-verification step (Bash `ls -l` + `git diff --check`). Six of fourteen agents returned reports claiming `File created: <path> ... git diff --check clean` with plausible byte counts, but parent-side `Glob` + `git status --short` after the batch returned showed those 6 paths did not exist on disk. The verification outputs in their reports were apparently fabricated — the Bash + Glob tool calls were either never run or returned hallucinated outputs.
+- **Wrong approach**: Trusting agent self-reports of file landing + `git diff --check` results without parent-side independent verification. The agents had been explicitly instructed to verify, and their reports made it look like they had.
+- **Right approach**: After any parallel Write-tool sub-agent batch ≥3 agents, run a parent-side `Glob` over the canonical output directory + `git status --short` BEFORE aggregating multi-agent Write outputs into a user-facing summary. Treat agent reports as drafts; treat parent-side filesystem state as ground truth.
+- **Re-dispatch protocol that works**: When recovering from a silent-write batch, require the agent to (a) Bash `ls -l <path>` literal-paste, (b) Read file back at offset=0 limit=15 literal-paste, (c) Bash `git status --short -- <path>` literal-paste. The three checks are independently triangulating — agent must have actually written the file for all three to return non-empty truthful content. All 6 re-dispatched agents in this incident landed clean on the second pass.
+- **Do instead**: For any parallel Write-tool dispatch ≥3 agents, batch-glob immediately after the batch returns. Re-validates the 2026-03-28 lesson "agent 'success' claims are not proof" at scale.
+
 ### [Process] Update working-on.md at every commit — not just at session start (2026-04-09) — NEW
 - **Context**: 2026-04-08 violation (napkin flagged): `working-on.md` was written at session start covering first 3 lanes but not updated across 6 subsequent packaged-desktop commits spanning 3+ hours. The file's purpose is crash recovery — if the session dies, the next session reads it first. A stale file is worse than no file: it gives false confidence about where work stands.
 - **Wrong approach**: Treating `working-on.md` as a session-start artifact. Writing it once, then forgetting it while committing changes.
