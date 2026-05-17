@@ -5262,3 +5262,15 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Determinism:** Documentation, ignore policy, and generated startup artifact refresh only. The startup snapshot is the canonical desktop boot artifact and was rebuilt through `npm.cmd run desktop:startup-snapshot:build`; this entry makes no independent simulation tuning claim.
 
 **Verification:** `git diff --check` exited 0 with CRLF normalization warnings only. `npm.cmd run typecheck` passed. Focused regression suite passed 406/406 with 4 skips across 66 files. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run warroom:build` passed with existing Vite/browser-external warnings. First `npm.cmd run desktop:sim:build` failed on stale startup snapshot, then `npm.cmd run desktop:startup-snapshot:build` refreshed `data/derived/startup/apr_1992_initial_save.json`, and the rerun of `npm.cmd run desktop:sim:build` passed with the pre-existing `import.meta` CJS warning.
+
+---
+
+## [2026-05-17] docs(plans): add roadmap plan coverage pack
+
+**Type:** Documentation-only roadmap planning coverage. No gameplay rule, combat math, scenario data, save schema, serialization format, random source, UI runtime behavior, or generated scenario output changed.
+
+**Change:** Added standalone actionable plan files for the remaining unpacketed roadmap points: H1 watched-operation outcomes, presidential campaign-loop validation, formation-life packetization, HRHB patron directive scope, diplomacy panel, accessibility P0 closeout, officer mini-bios, soundscape kickoff, cinematic verdict, Chronicle chapters, soundscape integration, BCS localization, marketing/store launch materials, telemetry/crash reporting, gold gate/launch day, wall-clock performance follow-up, clean-VM cosmetic finalization, and external playtest readiness. Added `docs/plans/2026-05-17-roadmap-plan-coverage-closure.md` as the controlling matrix and updated `docs/plans/MASTER_ROADMAP.md` to reference the coverage pack.
+
+**Determinism:** Plans and roadmap index only. No runtime code, data pipeline, persisted save data, scenario artifact, or simulation ordering is affected.
+
+**Verification:** `git diff --check` exited 0 with CRLF normalization warnings only. Coverage-matrix path scan returned `All plan paths exist`. Header scan confirmed the 2026-05-17 plan files include the required executing-plans handoff line. `git status --short` showed only the roadmap/ledger edits plus the new plan files as uncommitted docs changes.
