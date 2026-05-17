@@ -4,6 +4,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] feat(sim): implement B3 counter-offers, Sarajevo Branch B, and RBiH embargo phase substrate
+
+**Scope:** Second implementation wave from the 2026-05-17 14-plan batch. Covers B3 negotiation counter-offers, Sarajevo Branch B numeric override substrate, and RBiH arms embargo timeline/caps. Builds on `143ce965` logistics-priority/save-migration/endgame batch.
+
+**Change:**
+- B3 counter-offers: adds persisted `pending_counter_offers`, `last_counter_turn`, citation-backed historical envelopes, deterministic bot/player counter generation, `resolve-counter-offers` negotiation phase, Decision Room projection/navigation, IPC/preload/electron submission plumbing, and save migration v13.
+- Sarajevo Branch B: adds optional `scenario.sarajevo_overrides`, `getSarajevoSiegeParams(state)`, migrated Sarajevo defense/casualty/exhaustion/integrity consumers, code-side canon annotations for ID-set geometry, deterministic inventory artifact, and a bounded override regression scenario.
+- RBiH embargo: replaces the hard-coded RBiH patron-aid throttle with `resolveActiveEmbargoPhase(state)` and `EMBARGO_PHASE_CAPS`; adds `embargo_croatia_transit_1992` and `embargo_lifted_non_enforcement_1994` events; keeps Phase 3 / Phase 5 independently gated pending historian follow-up.
+- Documentation propagated to `REAL_WAR_MASTER`, `CALIBRATION_MASTER`, `MASTER_ROADMAP`, and implemented reports for all three lanes.
+
+**Determinism / scenario evidence:** Integrated 40w n1853 (`c16ba5bc33b79277`) has 27/27 anchors, `diagnose_run.cjs` 0 errors / 28 warnings, and `validate_run_consistency.cjs` PASS. Integrated 188w n1854 (`1f81ab4263ace3e9`) has 25/27 anchors with the same `op:ugljevik:teocak_krstac_2` + `op:brcko:brcko` failures as the already-rejected dirty n1847 line. Local probes neutralizing new embargo caps (n1855) and disabling B3 counter-offers (n1856) produced the same n1854 hash, so the Teocak/Srebrenica late-war signal is inherited, not newly introduced by these lanes.
+
+**Verification:** Focused combined suite passed 22 files / 95 tests. `npx.cmd tsc --noEmit --pretty false` passed. `npm.cmd run desktop:map:build` passed. `node tools\diagnose_run.cjs` and `node tools\validate_run_consistency.cjs` run on n1853/n1854 with results above. `git diff --check` required before commit.
+
+**Canon posture:** Sarajevo ID-set membership remains engine geometry and non-tunable. Sarajevo numeric values are sim-tuning, not player-facing brutality levers. RBiH embargo caps are faction-asymmetric at the supply-reserve patron-aid chokepoint only; RS/HRHB trajectories are unchanged in focused tests.
+
+---
+
 ## [2026-05-17] docs(plans): upgrade general backlog stubs to 14 execution-grade plans + 3 research audits
 
 **Scope:** Follow-up to the same-day "add general backlog implementation plans" entry below. Upgrades the 14 short stubs to full execution-grade plans with concrete owner files, focused vitest/scenario commands, stop gates, and determinism statements. Adds three parallel research audits resolving 20+ open historical, design, and engineering questions with citations.

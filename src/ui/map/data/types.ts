@@ -1204,6 +1204,22 @@ export interface LoadedGameState {
         botResponses: Record<string, 'accepted' | 'rejected'>;
     };
 
+    /** Pending negotiation counter-offers awaiting presidential review. */
+    pendingCounterOffers?: Array<{
+        id: string;
+        author: 'RBiH' | 'RS' | 'HRHB' | 'PLAYER';
+        parentOfferId: string;
+        planId: string;
+        planName: string;
+        chainDepth: number;
+        createdTurn: number;
+        response: 'accept' | 'reject' | 'conditional_accept' | 'counter';
+        proposedSplit: { RBiH: number; RS: number; HRHB: number };
+        institutionalModel?: string;
+        sourceCitation: string;
+        rider?: string;
+    }>;
+
     /** Pending autonomy proposal reviews (Level 1 Assisted). Mapped from state.meta.pending_proposal_reviews. */
     pendingProposalReviews?: Array<{
         id: string;

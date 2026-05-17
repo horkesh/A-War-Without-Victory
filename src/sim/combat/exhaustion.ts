@@ -11,6 +11,7 @@ import { RESILIENCE_EFFECT_SCALE } from '../../state/supply_reserve_constants.js
 import { strictCompare } from '../../state/validateGameState.js';
 import { getMaxEnclaveResilienceForFaction } from './enclave_resilience.js';
 import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
+import { getSarajevoSiegeParams } from './sarajevo_siege_params.js';
 import { isSectorColdFront } from './sector_utils.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
@@ -80,12 +81,13 @@ export function updateExhaustion(
         const externalMod = getExhaustionExternalModifier(faction?.patron_state, state.political.international_visibility_pressure);
         const legitimacy = legitimacyByFaction[fid] ?? 0.5;
         const legitimacyMod = (1 - legitimacy) * EXHAUSTION_LEGITIMACY_MULTIPLIER;
+        const sarajevoParams = getSarajevoSiegeParams(state);
         const sarajevoExtra =
             sarajevo?.siege_status === 'BESIEGED'
                 ? fid === 'RBiH'
-                    ? 3.0
+                    ? sarajevoParams.rbih_exhaustion_per_turn
                     : fid === 'RS'
-                        ? 2.0
+                        ? sarajevoParams.rs_exhaustion_per_turn
                         : 0
                 : 0;
         const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);

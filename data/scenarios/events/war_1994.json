@@ -855,6 +855,39 @@
     ]
   },
   {
+    "id": "embargo_lifted_non_enforcement_1994",
+    "title": "UN Arms Embargo Enforcement Ebbs",
+    "narrative": "The UN General Assembly approves a nonbinding resolution calling for the Bosnian arms embargo to be lifted if the Bosnian Serbs reject the Contact Group plan. The embargo remains on paper, but Washington's enforcement posture has changed; Bosnian government supply channels begin to widen.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 136,
+      "turn_max": 136,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "arms_embargo_active",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The embargo is not formally gone, but enforcement against Bosnia is loosening."
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "The embargo is not formally gone, but enforcement against Bosnia is loosening."
+      }
+    ],
+    "sets_flags": {
+      "embargo_lifted": true
+    },
+    "historian_audit_row": "H4",
+    "source": "BB1 p.63; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
+    "historical_source": "BB1 p.63; 2026-05-17 Historian audit H4."
+  },
+  {
     "id": "carter_ceasefire_1994",
     "title": "Carter Brokers Winter Ceasefire",
     "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",

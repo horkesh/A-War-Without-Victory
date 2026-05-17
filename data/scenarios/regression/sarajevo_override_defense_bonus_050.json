@@ -1,0 +1,26 @@
+{
+  "scenario_id": "sarajevo_override_defense_bonus_050",
+  "start_lifecycle_phase": "war",
+  "weeks": 4,
+  "init_control": "apr1992",
+  "init_control_mode": "hybrid_1992",
+  "recruitment_mode": "player_choice",
+  "recruitment_capital": { "RS": 250, "RBiH": 150, "HRHB": 100 },
+  "equipment_points": { "RS": 300, "RBiH": 60, "HRHB": 120 },
+  "init_formations": "apr1992",
+  "init_formations_oob": true,
+  "formation_spawn_directive": { "kind": "both" },
+  "turns": [],
+  "use_harness_bots": true,
+  "use_smart_bots": true,
+  "init_alliance_rbih_hrhb": 0.75,
+  "rbih_hrhb_war_earliest_week": 26,
+  "sarajevo_overrides": {
+    "defense_bonus": 0.5
+  },
+  "coercion_pressure_by_municipality": {
+    "prijedor": 0.9,
+    "zvornik": 0.85,
+    "foca": 0.85
+  }
+}

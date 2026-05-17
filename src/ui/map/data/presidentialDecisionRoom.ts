@@ -9,6 +9,7 @@ import {
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
+  | 'counter_offer'
   | 'opportunity'
   | 'operational'
   | 'briefing'
@@ -22,6 +23,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'army-hq-tab'; tab: ArmyHQTab }
   | { kind: 'army-hq-records'; recordsSubTab: ArmyHQRecordsSubTab }
   | { kind: 'army-hq-aftermath-record'; turn: number }
+  | { kind: 'counter-offer'; counterOfferId: string }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
   | { kind: 'inbox' }
   | { kind: 'chronicle' }
@@ -173,16 +175,18 @@ const SEVERITY_RANK: Record<PresidentialDecisionRoomSeverity, number> = {
 
 const CATEGORY_RANK: Record<PresidentialDecisionRoomCategory, number> = {
   decision: 0,
-  opportunity: 1,
-  operational: 2,
-  briefing: 3,
-  turn: 4,
-  cost: 5,
-  memory: 6,
+  counter_offer: 1,
+  opportunity: 2,
+  operational: 3,
+  briefing: 4,
+  turn: 5,
+  cost: 6,
+  memory: 7,
 };
 
 const CATEGORY_LABEL: Record<PresidentialDecisionRoomCategory, string> = {
   decision: 'Decision',
+  counter_offer: 'Counter',
   opportunity: 'Opportunity',
   operational: 'SITREP',
   briefing: 'Briefing',
@@ -386,6 +390,36 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
       sourceSort: `manifest:${family.id}`,
     });
     existingIds.add(id);
+  }
+}
+
+function formatCounterOfferSplit(split: { RBiH: number; RS: number; HRHB: number }): string {
+  return `RBiH ${split.RBiH} / RS ${split.RS} / HRHB ${split.HRHB}`;
+}
+
+function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  const offers = [...(state.pendingCounterOffers ?? [])].sort((a, b) => strictCompare(a.id, b.id));
+  for (const offer of offers) {
+    const evidence = [
+      formatCounterOfferSplit(offer.proposedSplit),
+      offer.rider,
+      offer.sourceCitation ? `Source ${offer.sourceCitation}` : null,
+    ].filter((entry): entry is string => Boolean(entry));
+
+    cards.push({
+      id: `counter-offer:${offer.id}`,
+      category: 'counter_offer',
+      severity: 'blocking',
+      title: `Counter-offer from ${offer.author}`,
+      explanation: `${offer.planName} has a cited counter-proposal that needs presidential review before the docket is clean.`,
+      sourceOwner: 'Negotiation counter-offer docket',
+      sourceLabel: offer.planName,
+      actionLabel: 'Review Counter',
+      evidence,
+      navigationTarget: { kind: 'counter-offer', counterOfferId: offer.id },
+      urgencySort: offer.createdTurn,
+      sourceSort: offer.id,
+    });
   }
 }
 
@@ -617,6 +651,7 @@ function buildAdvanceReadiness(
 ): PresidentialDecisionRoomAdvanceReadiness {
   const eligible = cards.filter((card) =>
     (card.category === 'decision'
+      || card.category === 'counter_offer'
       || card.category === 'opportunity'
       || card.category === 'operational'
       || card.category === 'turn')
@@ -711,6 +746,13 @@ function describeSourceHandoffTarget(
       id: 'army-hq-corps-briefings',
       label: 'Corps Briefings',
       actionLabel: 'Inspect Corps',
+    };
+  }
+  if (target.kind === 'counter-offer') {
+    return {
+      id: 'counter-offer-docket',
+      label: 'Counter-offer docket',
+      actionLabel: 'Review Counter',
     };
   }
   if (target.kind === 'chronicle') {
@@ -842,7 +884,7 @@ function buildCommandQuestions(
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
 ): PresidentialDecisionRoomCommandQuestion[] {
   const urgentCards = cards.filter(isUrgentCard);
-  const pendingCards = cards.filter((card) => card.category === 'decision' || card.category === 'opportunity');
+  const pendingCards = cards.filter((card) => card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity');
   const frontCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
 
   return [
@@ -976,7 +1018,7 @@ function buildJudgeLoopStep(
 
 function buildNextLoopStep(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRoomLoopStep {
   const nextCards = cards.filter((card) =>
-    card.category === 'decision' || card.category === 'opportunity' || isUrgentCard(card),
+    card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity' || isUrgentCard(card),
   );
   return buildCardLoopStep('next', 'Next', nextCards.length > 0 ? nextCards : cards.slice(0, 1), {
     fallbackHeadline: 'Return to the briefing',
@@ -994,7 +1036,7 @@ function buildLoopSteps(
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
 ): PresidentialDecisionRoomLoopStep[] {
   const briefCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
-  const decideCards = cards.filter((card) => card.category === 'decision' || card.category === 'opportunity');
+  const decideCards = cards.filter((card) => card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity');
   const turnCards = cards.filter((card) => card.category === 'turn');
   const costCards = cards.filter((card) => card.category === 'cost');
   const memoryCards = cards.filter((card) => card.category === 'memory');
@@ -1133,6 +1175,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addReviewCard(state, candidates);
   addParamilitaryReviewCard(state, candidates);
   addManifestDecisionCards(state, candidates);
+  addCounterOfferCards(state, candidates);
   addOpportunityCards(state, candidates);
   addSitrepCards(state, candidates);
   addBriefingCards(state, candidates);

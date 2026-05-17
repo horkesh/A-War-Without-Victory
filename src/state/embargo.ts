@@ -3,6 +3,76 @@ import { clamp01 } from '../utils/math.js';
 
 export const SMUGGLING_EFFICIENCY_GROWTH = 0.0015;
 
+export const EMBARGO_PHASE_IDS = [
+    'phase_0_none',
+    'phase_1_full',
+    'phase_2_croatia',
+    'phase_3_black_flights',
+    'phase_4_unenforced',
+    'phase_5_lifted',
+] as const;
+
+export type EmbargoPhaseId = typeof EMBARGO_PHASE_IDS[number];
+
+export interface EmbargoCap {
+    general: number;
+    heavy: number;
+}
+
+export const EMBARGO_PHASE_CAPS: Record<EmbargoPhaseId, Record<FactionId, EmbargoCap>> = {
+    phase_0_none: {
+        RBiH: { general: 1.0, heavy: 1.0 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+    phase_1_full: {
+        RBiH: { general: 0.6, heavy: 0.6 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+    phase_2_croatia: {
+        RBiH: { general: 0.65, heavy: 0.65 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+    phase_3_black_flights: {
+        // PENDING /historian Lane H4 follow-up: keep equal to phase 2 until cited.
+        RBiH: { general: 0.65, heavy: 0.65 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+    phase_4_unenforced: {
+        RBiH: { general: 0.8, heavy: 0.8 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+    phase_5_lifted: {
+        // PENDING /historian Lane H4 follow-up: post-Dayton formal lift is narrative-only until cited.
+        RBiH: { general: 0.8, heavy: 0.8 },
+        RS: { general: 1.0, heavy: 1.0 },
+        HRHB: { general: 1.0, heavy: 1.0 },
+    },
+};
+
+const EMBARGO_PHASE_FLAGS: Array<{ flag: string; phase: EmbargoPhaseId }> = [
+    { flag: 'arms_embargo_active', phase: 'phase_1_full' },
+    { flag: 'embargo_croatia_transit', phase: 'phase_2_croatia' },
+    { flag: 'embargo_black_flights', phase: 'phase_3_black_flights' },
+    { flag: 'embargo_lifted', phase: 'phase_4_unenforced' },
+    { flag: 'embargo_formal_lift', phase: 'phase_5_lifted' },
+];
+
+export function resolveActiveEmbargoPhase(state: GameState): EmbargoPhaseId {
+    const flags = state.military.event_flags ?? {};
+    let activePhase: EmbargoPhaseId = 'phase_0_none';
+    for (const entry of EMBARGO_PHASE_FLAGS) {
+        if (flags[entry.flag] === true) {
+            activePhase = entry.phase;
+        }
+    }
+    return activePhase;
+}
+
 function defaultEmbargoProfile(factionId: FactionId): EmbargoProfile {
     if (factionId === 'RS') {
         return {

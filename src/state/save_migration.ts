@@ -58,7 +58,7 @@ function ensureArray(parent: Record<string, any> | undefined, key: string): any[
 
 function sanitizeNegotiationStatus(pol: Record<string, any>, turn: number): void {
     if (!pol.negotiation_status || typeof pol.negotiation_status !== 'object' || Array.isArray(pol.negotiation_status)) {
-        pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
+        pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null, last_counter_turn: {} };
         return;
     }
     const ns = pol.negotiation_status;
@@ -68,6 +68,18 @@ function sanitizeNegotiationStatus(pol: Record<string, any>, turn: number): void
     }
     if (ns.last_offer_turn !== null && (!Number.isInteger(ns.last_offer_turn) || ns.last_offer_turn > turn)) {
         ns.last_offer_turn = null;
+    }
+    if (!ns.last_counter_turn || typeof ns.last_counter_turn !== 'object' || Array.isArray(ns.last_counter_turn)) {
+        ns.last_counter_turn = {};
+    } else {
+        const next: Record<string, number> = {};
+        for (const faction of sortedKeys(ns.last_counter_turn)) {
+            const value = ns.last_counter_turn[faction];
+            if (Number.isInteger(value) && value >= 0 && value <= turn) {
+                next[faction] = value;
+            }
+        }
+        ns.last_counter_turn = next;
     }
 }
 
@@ -248,6 +260,26 @@ function defaultJna(mil: Record<string, any>): void {
     }
     if (typeof jna.asset_transfer_rs !== 'number' || jna.asset_transfer_rs < 0 || jna.asset_transfer_rs > 1) {
         jna.asset_transfer_rs = 0;
+    }
+}
+
+function ensureNegotiationCounterOfferDefaults(state: GameState): void {
+    const mil = asRecord((state as any).military);
+    if (mil) {
+        const negotiation = ensureRecord(mil, 'negotiation');
+        if (!asRecord(negotiation.capital)) negotiation.capital = {};
+        if (!asRecord(negotiation.patron_relationships)) negotiation.patron_relationships = {};
+        if (!Array.isArray(negotiation.peace_plan_history)) negotiation.peace_plan_history = [];
+        const offers = Array.isArray(negotiation.pending_counter_offers)
+            ? negotiation.pending_counter_offers.filter((offer: any) => offer && typeof offer === 'object' && typeof offer.id === 'string')
+            : [];
+        offers.sort((a: any, b: any) => strictCompare(a.id, b.id));
+        negotiation.pending_counter_offers = offers;
+    }
+
+    const pol = asRecord((state as any).political);
+    if (pol) {
+        sanitizeNegotiationStatus(pol, currentTurn(state));
     }
 }
 
@@ -480,5 +512,13 @@ registerMigration({
         if (!Number.isInteger(s.paramilitary_deployment_count) || s.paramilitary_deployment_count < 0) {
             s.paramilitary_deployment_count = 0;
         }
+    },
+});
+
+registerMigration({
+    version: 13,
+    description: 'Negotiation counter-offer docket and per-faction counter-turn defaults. Sensitive: no.',
+    migrate: (state) => {
+        ensureNegotiationCounterOfferDefaults(state);
     },
 });

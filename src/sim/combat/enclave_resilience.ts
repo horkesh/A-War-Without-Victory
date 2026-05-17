@@ -68,6 +68,15 @@ export const CAPITAL_GARRISON_MULT = 2.0;
 /**
  * Known enclaves — hard-coded OSID prefix sets.
  * These are areas that historically resisted siege despite supply isolation.
+ *
+ * SARAJEVO_ID_SET_ENGINE_GEOMETRY_CANON
+ *
+ * docs/plans/2026-05-17-sarajevo-special-casing-canon-plan.md;
+ * docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md Section 1.
+ *
+ * ID-set membership is engine geometry. Not scenario-author tunable.
+ * Numeric siege parameters are tunable via `scenario.sarajevo_overrides`;
+ * ID-sets are not.
  */
 export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {

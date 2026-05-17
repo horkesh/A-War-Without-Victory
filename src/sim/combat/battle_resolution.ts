@@ -42,6 +42,7 @@ import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition 
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { DEFAULT_SARAJEVO_SIEGE_PARAMS, getSarajevoSiegeParams } from './sarajevo_siege_params.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -96,7 +97,6 @@ const EXPERIENCE_MULT_SCALE = 0.8;
 const RIVER_DEFENSE_SCALE = 0.40;
 const SLOPE_DEFENSE_SCALE = 0.30;
 const URBAN_DEFENSE_BONUS = 0.25;
-const SARAJEVO_DEFENSE_BONUS = 0.40;
 const ENCLAVE_DEFENSE_BONUS = 0.20;
 const FRICTION_DEFENSE_SCALE = 0.20;
 const ROAD_ACCESS_BASE = 0.85;
@@ -104,7 +104,6 @@ const ROAD_ACCESS_SCALE = 0.15;
 
 // --- Urban casualty multipliers ---
 const URBAN_ATTACKER_CASUALTY_MULT = 1.5;
-const SARAJEVO_ATTACKER_CASUALTY_MULT = 2.0;
 
 // --- Equipment loss rates per unit of intensity ---
 const TANK_LOSS_RATE = 0.08;
@@ -368,7 +367,8 @@ function computeMilitiaDefenderPower(garrison: number, terrainMult: number): num
 export function computeTerrainModifier(
     terrainData: TerrainScalarsData,
     targetSid: SettlementId,
-    settlementToMun: Map<string, string>
+    settlementToMun: Map<string, string>,
+    state?: GameState
 ): TerrainModifiers {
     const t = getTerrainScalarsForSid(terrainData, targetSid);
     const mun = settlementToMun.get(targetSid);
@@ -379,7 +379,7 @@ export function computeTerrainModifier(
     let urban = 0;
     if (mun) {
         if (SARAJEVO_CORE_MUNS.has(mun)) {
-            urban = SARAJEVO_DEFENSE_BONUS;
+            urban = state ? getSarajevoSiegeParams(state).defense_bonus : DEFAULT_SARAJEVO_SIEGE_PARAMS.defense_bonus;
         } else if (isLargeUrbanSettlementMun(mun)) {
             urban = URBAN_DEFENSE_BONUS;
         }
@@ -403,10 +403,10 @@ export function computeTerrainModifier(
     };
 }
 
-function getUrbanCasualtyMult(settlementToMun: Map<string, string>, sid: SettlementId): number {
+function getUrbanCasualtyMult(state: GameState, settlementToMun: Map<string, string>, sid: SettlementId): number {
     const mun = settlementToMun.get(sid);
     if (!mun) return 1.0;
-    if (SARAJEVO_CORE_MUNS.has(mun)) return SARAJEVO_ATTACKER_CASUALTY_MULT;
+    if (SARAJEVO_CORE_MUNS.has(mun)) return getSarajevoSiegeParams(state).attacker_casualty_mult;
     if (isLargeUrbanSettlementMun(mun)) return URBAN_ATTACKER_CASUALTY_MULT;
     return 1.0;
 }
@@ -944,7 +944,7 @@ export function resolveBattleOrders(
         };
 
         // --- Terrain for defending settlement ---
-        const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun);
+        const terrain = computeTerrainModifier(terrainData, targetSid, settlementToMun, state);
 
         // --- Defender brigade or militia (legacy SID path: militia-only, no brigade_aor lookup) ---
         const defenderBrigadeId = undefined as FormationId | undefined;
@@ -1022,7 +1022,7 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
         }
 
         // --- Casualties ---
-        const urbanCasMult = getUrbanCasualtyMult(settlementToMun, targetSid);
+        const urbanCasMult = getUrbanCasualtyMult(state, settlementToMun, targetSid);
         const casualties = computeBattleCasualties(
             aPower, dPower, powerRatio, urbanCasMult, terrain.composite,
             preBattleSnaps, formation, defenderFormationOrNull,

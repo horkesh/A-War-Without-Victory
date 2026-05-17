@@ -29,6 +29,14 @@ export interface ScenarioVictoryConditions {
     by_faction: Record<string, FactionVictoryCondition>;
 }
 
+export interface SarajevoSiegeOverrides {
+    defense_bonus?: number;
+    attacker_casualty_mult?: number;
+    rbih_exhaustion_per_turn?: number;
+    rs_exhaustion_per_turn?: number;
+    integrity_floor?: number;
+}
+
 export interface Scenario {
     scenario_id: string;
     /**
@@ -77,6 +85,8 @@ export interface Scenario {
     bot_diagnostics?: boolean;
     /** Optional end-of-scenario victory evaluation contract. */
     victory_conditions?: ScenarioVictoryConditions;
+    /** Optional Sarajevo numeric siege tuning. ID-set geometry remains code-side canon. */
+    sarajevo_overrides?: SarajevoSiegeOverrides;
     /** Peace-phase §4.8: Initial RBiH–HRHB alliance value [-1, 1]. Default 0.35 (fragile alliance, Apr 1992). */
     init_alliance_rbih_hrhb?: number;
     /** Peace-phase §4.8: Override default mixed municipalities list. */

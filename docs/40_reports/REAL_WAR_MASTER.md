@@ -1,5 +1,15 @@
 # Real War Master
 
+## Latest Review: RBiH arms embargo is now a phase-keyed constraint (2026-05-17)
+
+**Change:** `LANE-V09X-EMBARGO` replaces the old single hard-coded RBiH patron-aid throttle with `resolveActiveEmbargoPhase(state)` and `EMBARGO_PHASE_CAPS`. The model now distinguishes full embargo, Croatia transit, US non-enforcement, and pending Black Flights/formal-lift phases while keeping RS and HRHB neutral under this specific mechanic. Current RBiH patron-aid multipliers are `0.60` (full embargo), `0.65` (Croatia transit / pending Black Flights), and `0.80` (US non-enforcement / pending formal lift).
+
+**Real-war rationale:** BB1 p.167 frames UNSCR 713 as locking in the Serb weapons advantage and closing off Bosnian parity; Historian H4 marks 3 Nov 1994 (BB1 p.63) as the de facto enforcement break. The sim now reflects that timeline at the supply-reserve chokepoint instead of treating all embargo years as one flat multiplier.
+
+**Boundaries:** Phase 3 Black Flights and Phase 5 UNSCR 1021 remain citation-gated; they do not receive new player-facing events or independent quantitative caps in this lane. Combat-side supply condition, pressure, and exhaustion consumers were audited for double counting and left untouched. Integrated 40w n1853 is clean (27/27 anchors); integrated 188w n1854 retains the already-dirty n1847 late-war Teocak/Srebrenica signal rather than creating a new embargo-specific regression.
+
+---
+
 > The gap between simulation and reality. Every entry here is something we found where the sim does something that would be inconceivable in real war — especially the Bosnian War (1992-1995), a chaotic, desperate, existential conflict.
 
 ## Guiding Principle

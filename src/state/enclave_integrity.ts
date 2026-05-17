@@ -1,4 +1,5 @@
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
+import { getSarajevoSiegeParams } from '../sim/combat/sarajevo_siege_params.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { EnclaveState, FactionId, GameState, MunicipalityId, SettlementId } from './game_state.js';
@@ -12,6 +13,16 @@ export const INTEGRITY_DECAY_RATE = 0.02;
 export const HUMANITARIAN_PRESSURE_MULTIPLIER = 1.0;
 export const CAPITAL_ENCLAVE_VISIBILITY = 3.0;
 export const INTEGRITY_COLLAPSE_THRESHOLD = 0.1;
+/**
+ * SARAJEVO_ID_SET_ENGINE_GEOMETRY_CANON
+ *
+ * docs/plans/2026-05-17-sarajevo-special-casing-canon-plan.md;
+ * docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md Section 1.
+ *
+ * ID-set membership is engine geometry. Not scenario-author tunable.
+ * Numeric siege parameters are tunable via `scenario.sarajevo_overrides`;
+ * ID-sets are not.
+ */
 export const SARAJEVO_CITY_CORE_MUN_IDS: MunicipalityId[] = [
     'centar_sarajevo',
     'novi_grad_sarajevo',
@@ -25,7 +36,6 @@ export const SARAJEVO_MUN_IDS: MunicipalityId[] = [
     'ilijas',
     'hadzici'
 ];
-export const SARAJEVO_INTEGRITY_FLOOR = 0.15;
 export const SARAJEVO_DEGRADATION_RATE = 0.5;
 export const SARAJEVO_PRESSURE_MULTIPLIER = 3.0;
 
@@ -192,7 +202,7 @@ export function updateEnclaveIntegrity(
             const siegeDuration = (prev?.siege_duration ?? 0) + 1;
             const decayed =
                 siegeDuration > 4 && baseIntegrity < 0.7 ? Math.max(0, prevIntegrity - decayRate) : baseIntegrity;
-            const integrity = isSarajevo ? Math.max(decayed, SARAJEVO_INTEGRITY_FLOOR) : decayed;
+            const integrity = isSarajevo ? Math.max(decayed, getSarajevoSiegeParams(state).integrity_floor) : decayed;
 
             const populationWeight = clamp01(populationAvg);
             const humanitarianPressure = clamp01((1 - integrity) * populationWeight * visibilityMult * pressureMult);

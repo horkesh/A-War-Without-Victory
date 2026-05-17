@@ -158,6 +158,26 @@ function normalizeVictoryConditions(raw: unknown): Scenario['victory_conditions'
     return Object.keys(out).length > 0 ? { by_faction: out } : undefined;
 }
 
+function normalizeSarajevoOverrides(raw: unknown): Scenario['sarajevo_overrides'] {
+    if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+    const o = raw as Record<string, unknown>;
+    const out: NonNullable<Scenario['sarajevo_overrides']> = {};
+    const fields = [
+        'defense_bonus',
+        'attacker_casualty_mult',
+        'rbih_exhaustion_per_turn',
+        'rs_exhaustion_per_turn',
+        'integrity_floor',
+    ] as const;
+    for (const field of fields) {
+        const value = o[field];
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            out[field] = value;
+        }
+    }
+    return Object.keys(out).length > 0 ? out : undefined;
+}
+
 /**
  * Normalize and validate scenario. Throws on invalid input.
  */
@@ -272,6 +292,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         : undefined;
     const bot_diagnostics = o.bot_diagnostics === true;
     const victory_conditions = normalizeVictoryConditions(o.victory_conditions);
+    const sarajevo_overrides = normalizeSarajevoOverrides(o.sarajevo_overrides);
 
     // Peace-phase §4.8: RBiH–HRHB alliance dynamics config
     const init_alliance_rbih_hrhb =
@@ -439,6 +460,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             bot_difficulty,
             bot_diagnostics: bot_diagnostics || undefined,
             victory_conditions,
+            sarajevo_overrides,
             init_alliance_rbih_hrhb,
             init_mixed_municipalities,
             enable_rbih_hrhb_dynamics,
@@ -488,6 +510,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         bot_difficulty,
         bot_diagnostics: bot_diagnostics || undefined,
         victory_conditions,
+        sarajevo_overrides,
         init_alliance_rbih_hrhb,
         init_mixed_municipalities,
         enable_rbih_hrhb_dynamics,

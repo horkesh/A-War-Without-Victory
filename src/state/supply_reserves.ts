@@ -15,6 +15,7 @@ import type { EdgeRecord } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 import { isGrazAccordsActive } from '../sim/local_truces.js';
+import { EMBARGO_PHASE_CAPS, resolveActiveEmbargoPhase } from './embargo.js';
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
     COMBAT_HEAVY_MUNITIONS_RATE,
@@ -341,17 +342,17 @@ export function updateSupplyReserves(
         const materialSupport = faction?.patron_state?.material_support_level ?? 0;
         const factionEfficiency = PATRON_AID_FACTION_EFFICIENCY[fid] ?? 1.0;
 
-        // Arms embargo throttles RBiH patron aid (v0.7.0 Phase 4)
-        const armsEmbargoActive = state.military.event_flags?.arms_embargo_active === true;
-        const embargoMult = (fid === 'RBiH' && armsEmbargoActive) ? 0.6 : 1.0;
+        // Arms embargo throttles RBiH patron aid through the phase-keyed H4 timeline.
+        const embargoPhase = resolveActiveEmbargoPhase(state);
+        const embargoCap = EMBARGO_PHASE_CAPS[embargoPhase][factionKey] ?? { general: 1.0, heavy: 1.0 };
 
         // Posavina corridor boosts RS supply (v0.7.0 Phase 4)
         const corridorSecured = state.military.event_flags?.corridor_secured === true;
         const corridorMult = (fid === 'RS' && corridorSecured) ? 1.3 : 1.0;
 
-        const rawPatronAid = materialSupport * PATRON_AID_SCALE * factionEfficiency * embargoMult * corridorMult;
-        const patronAidGeneral = rawPatronAid * PATRON_AID_GENERAL_FRACTION;
-        const patronAidHeavy = rawPatronAid * PATRON_AID_HEAVY_FRACTION;
+        const rawPatronAid = materialSupport * PATRON_AID_SCALE * factionEfficiency * corridorMult;
+        const patronAidGeneral = rawPatronAid * PATRON_AID_GENERAL_FRACTION * embargoCap.general;
+        const patronAidHeavy = rawPatronAid * PATRON_AID_HEAVY_FRACTION * embargoCap.heavy;
 
         // Phase B: Embargo reduction (multiplicative cap on income)
         const embargo = faction?.embargo_profile;
@@ -371,8 +372,8 @@ export function updateSupplyReserves(
         const prevGeneral = state.military.general_supply_reserve![factionKey] ?? INIT_GENERAL_SUPPLY_RESERVE;
         const prevHeavy = state.military.heavy_munitions_reserve![factionKey] ?? INIT_HEAVY_MUNITIONS_RESERVE;
 
-        const embargoCap = EMBARGO_SUPPLY_CAP[fid] ?? 100;
-        state.military.general_supply_reserve![factionKey] = Math.max(0, Math.min(embargoCap,
+        const reserveCap = EMBARGO_SUPPLY_CAP[fid] ?? 100;
+        state.military.general_supply_reserve![factionKey] = Math.max(0, Math.min(reserveCap,
             prevGeneral - maintenanceDrain - siegeDrain.general + totalIncomeGeneral
         ));
         const heavyCap = EMBARGO_HEAVY_CAP[fid] ?? 100;

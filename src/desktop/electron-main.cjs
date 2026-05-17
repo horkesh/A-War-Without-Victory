@@ -2529,6 +2529,34 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('submit-counter-offer', async (_event, payload) => {
+    const split = payload && payload.proposedSplit;
+    const validSplit = split
+      && Number.isFinite(split.RBiH)
+      && Number.isFinite(split.RS)
+      && Number.isFinite(split.HRHB);
+    if (
+      !currentGameStateJson
+      || typeof payload?.parentOfferId !== 'string'
+      || typeof payload?.planId !== 'string'
+      || (payload?.response !== 'conditional_accept' && payload?.response !== 'counter')
+      || !validSplit
+    ) {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const { submitPlayerCounterOffer } = require('../sim/negotiation/counter_offer_generator.js');
+      const offer = submitPlayerCounterOffer(state, payload);
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true, counter_offer_id: offer.id };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('resolve-paramilitary-requests', async (_event, payload) => {
     const decisions = Array.isArray(payload?.decisions) ? payload.decisions : null;
     if (!currentGameStateJson || !decisions) {

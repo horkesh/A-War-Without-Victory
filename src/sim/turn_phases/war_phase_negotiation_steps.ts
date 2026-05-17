@@ -2,6 +2,7 @@ import { applyWarTermination, checkWarTermination } from '../war_termination.js'
 import { initiateDaytonNegotiation, shouldInitiateDayton } from '../negotiation/dayton_negotiation.js';
 import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
+import { resolveCounterOffers } from '../negotiation/counter_offer_generator.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
 import { updatePatronPressure } from '../negotiation/patron_pressure.js';
 import { evaluateRuptureConsequences } from '../negotiation/rupture_consequences.js';
@@ -13,6 +14,16 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             evaluatePeacePlans(context.state);
+        }
+    },
+    {
+        name: 'resolve-counter-offers',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const result = resolveCounterOffers(context.state);
+            if (result.created_counter_offer_ids.length > 0) {
+                (context.report as any).counter_offers = result;
+            }
         }
     },
     {

@@ -22,6 +22,7 @@ function severityClass(severity: PresidentialDecisionRoomSeverity): string {
 
 function categoryLabel(category: PresidentialDecisionRoomCard['category']): string {
   if (category === 'decision') return 'Decision';
+  if (category === 'counter_offer') return 'Counter';
   if (category === 'opportunity') return 'Opportunity';
   if (category === 'operational') return 'SITREP';
   if (category === 'briefing') return 'Briefing';

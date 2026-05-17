@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 12 as const;
+export const CURRENT_SCHEMA_VERSION = 13 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1151,6 +1151,8 @@ export interface NegotiationStatus {
     ceasefire_active: boolean;
     ceasefire_since_turn: number | null;
     last_offer_turn: number | null;
+    /** Per-faction turn of last counter-offer emission; enforces one counter per turn. */
+    last_counter_turn?: Record<FactionId, number>;
 }
 
 export interface CeasefireFreezeEntry {
@@ -1280,6 +1282,8 @@ export interface StateMeta {
     max_turns?: number;
     /** Scenario victory conditions, stored at scenario load for pipeline evaluation. */
     victory_conditions?: import('../scenario/scenario_types.js').ScenarioVictoryConditions;
+    /** Scenario-authored Sarajevo numeric siege tuning. ID-set geometry remains code-side canon. */
+    sarajevo_overrides?: import('../scenario/scenario_types.js').SarajevoSiegeOverrides;
     /** AI Commander configuration (mode, API key, cost estimate). Desktop-only; not used by sim engine. */
     ai_commander_config?: import('../sim/ai_commander/ai_config.js').AiCommanderConfig;
     /** Calendar date string for current turn (set at runtime in saves, not always present). */

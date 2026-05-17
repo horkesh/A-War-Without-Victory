@@ -1,5 +1,14 @@
 # AWWV Calibration Master Reference
 
+## n1853/n1854 integrated B3/Sarajevo/embargo wave (2026-05-17)
+
+- **40w integrated run. Hash: `c16ba5bc33b79277`. Anchors: 27/27. `diagnose_run.cjs`: 0 errors / 28 warnings. `validate_run_consistency.cjs`: PASS.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1853`.
+- Scope: B3 negotiation counter-offer docket, Sarajevo Branch B numeric override substrate, and RBiH arms-embargo phase resolver/events/caps.
+- **188w integrated run. Hash: `1f81ab4263ace3e9`. Anchors: 25/27, failed `op:ugljevik:teocak_krstac_2` and `op:brcko:brcko`. `diagnose_run.cjs`: 0 errors / 29 warnings. `validate_run_consistency.cjs`: 52 failures.**
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1854`.
+- Attribution note: the 188w Teocak/Srebrenica drift matches the earlier rejected dirty n1847 line (`4d4bd75c1c6739de`, 25/27 anchors). Local probes with neutralized embargo caps (n1855) and disabled B3 counter-offer phase (n1856) produced the same hash as n1854, so this wave records the inherited late-war follow-up instead of reclassifying it as an embargo/B3 regression.
+
 ## n1848 integrated 40w logistics/save-migration proof (2026-05-17)
 
 - **40w integrated run. Hash: `c09a498b7dc9ccae`. Anchors: 27/27. Benchmarks: 6/6. `diagnose_run.cjs`: 0 errors / 28 warnings. `validate_run_consistency.cjs`: PASS.**

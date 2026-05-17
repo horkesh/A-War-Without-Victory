@@ -459,6 +459,39 @@
     }
   },
   {
+    "id": "embargo_croatia_transit_1992",
+    "title": "Croatia Transit Opens a Narrow Supply Trickle",
+    "narrative": "By mid-1992, Bosnian government units are still trapped under the UN arms embargo, but limited procurement through Croatia begins to create a narrow and contested supply trickle. The flow remains far short of parity with the VRS inheritance of JNA stocks.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 13,
+      "turn_max": 15,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "arms_embargo_active",
+        "value": true
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
+      }
+    ],
+    "sets_flags": {
+      "embargo_croatia_transit": true
+    },
+    "historian_audit_row": "H4",
+    "source": "BB1 p.167; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
+    "historical_source": "BB1 p.167; 2026-05-17 Historian audit H4."
+  },
+  {
     "id": "battle_of_the_barracks_sarajevo",
     "title": "Battle of the Barracks — Sarajevo",
     "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",

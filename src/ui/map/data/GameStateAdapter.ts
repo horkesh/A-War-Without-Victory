@@ -1953,6 +1953,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingEventDecisions,
         presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
+        pendingCounterOffers: derivePendingCounterOffers(state),
         pendingDayton: derivePendingDayton(state),
         pendingProposalReviews,
         strategicDimensions: deriveStrategicDimensions(state),
@@ -2737,6 +2738,57 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
             ? pp.bot_responses as Record<string, 'accepted' | 'rejected'>
             : {},
     };
+}
+
+function derivePendingCounterOffers(state: any): LoadedGameState['pendingCounterOffers'] {
+    const offers = state.military?.negotiation?.pending_counter_offers;
+    if (!Array.isArray(offers) || offers.length === 0) return undefined;
+
+    let planNames: Record<string, string> = {};
+    try {
+        const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
+        planNames = Object.fromEntries(
+            (PEACE_PLANS as Array<{ id: string; name: string }>).map((plan) => [
+                plan.id,
+                getPlayerSafeDisplayLabel(plan.name, 'Peace proposal'),
+            ]),
+        );
+    } catch { /* non-fatal - display with plan id */ }
+
+    const result: NonNullable<LoadedGameState['pendingCounterOffers']> = [];
+    for (const offer of [...offers].sort((a, b) => strictCompare(String(a?.id ?? ''), String(b?.id ?? '')))) {
+        if (!offer || typeof offer !== 'object') continue;
+        const delta = offer.delta;
+        if (!delta || typeof delta !== 'object') continue;
+        const split = delta.proposed_split ?? {};
+        const planId = String(delta.plan_id ?? '');
+        const id = String(offer.id ?? '');
+        if (!id || !planId) continue;
+        result.push({
+            id,
+            author: offer.author === 'PLAYER' || offer.author === 'RBiH' || offer.author === 'RS' || offer.author === 'HRHB'
+                ? offer.author
+                : 'PLAYER',
+            parentOfferId: String(offer.parent_offer_id ?? ''),
+            planId,
+            planName: planNames[planId] ?? getPlayerSafeDisplayLabel(planId, 'Peace proposal'),
+            chainDepth: Number.isInteger(offer.chain_depth) ? offer.chain_depth : 0,
+            createdTurn: Number.isInteger(offer.created_turn) ? offer.created_turn : 0,
+            response: delta.response === 'accept' || delta.response === 'reject' || delta.response === 'conditional_accept' || delta.response === 'counter'
+                ? delta.response
+                : 'counter',
+            proposedSplit: {
+                RBiH: finiteNumber(split.RBiH),
+                RS: finiteNumber(split.RS),
+                HRHB: finiteNumber(split.HRHB),
+            },
+            institutionalModel: typeof delta.institutional_model === 'string' ? delta.institutional_model : undefined,
+            sourceCitation: String(delta.source_citation ?? ''),
+            rider: typeof delta.rider === 'string' ? delta.rider : undefined,
+        });
+    }
+
+    return result.length > 0 ? result : undefined;
 }
 
 function derivePendingProposalReviews(

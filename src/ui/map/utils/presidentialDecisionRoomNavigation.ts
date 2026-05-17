@@ -25,6 +25,9 @@ export function openPresidentialDecisionRoomNavigationTarget(
   if (target.kind === 'army-hq-corps-briefing') {
     return openArmyHQBriefingForCorps(state, target.corpsId);
   }
+  if (target.kind === 'counter-offer') {
+    return true;
+  }
   if (target.kind === 'inbox') {
     state.setSelectedOsid?.(null);
     state.setSelectedFormationId?.(null);

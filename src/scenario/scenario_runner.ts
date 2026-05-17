@@ -1272,6 +1272,9 @@ export async function buildScenarioStartupState(
     if (scenario.victory_conditions) {
         state.meta.victory_conditions = scenario.victory_conditions;
     }
+    if (scenario.sarajevo_overrides) {
+        state.meta.sarajevo_overrides = scenario.sarajevo_overrides;
+    }
 
     if (scenario.supply_reserves_enabled) {
         state.meta.supply_reserves_enabled = true;

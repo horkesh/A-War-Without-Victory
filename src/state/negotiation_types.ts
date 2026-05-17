@@ -91,6 +91,28 @@ export interface PeacePlanResponse {
     resolved: boolean;
 }
 
+export type CounterOfferFaction = 'RBiH' | 'RS' | 'HRHB';
+export type CounterOfferAuthor = CounterOfferFaction | 'PLAYER';
+export type CounterOfferResponse = 'accept' | 'reject' | 'conditional_accept' | 'counter';
+
+export interface NegotiationDelta {
+    plan_id: string;
+    response: CounterOfferResponse;
+    proposed_split: Record<CounterOfferFaction, number>;
+    institutional_model?: string;
+    rider?: string;
+    source_citation: string;
+}
+
+export interface CounterOffer {
+    id: string;
+    author: CounterOfferAuthor;
+    parent_offer_id: string;
+    delta: NegotiationDelta;
+    chain_depth: number;
+    created_turn: number;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Rupture Consequences (Ring 2 — locked, non-reversible)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -126,6 +148,8 @@ export interface NegotiationState {
         turn_offered: number;
         bot_responses: Record<string, 'accepted' | 'rejected'>;
     };
+    /** Persisted counter-offer docket, sorted by id. */
+    pending_counter_offers?: CounterOffer[];
     /** Composite Pyrrhic Score per faction (computed at game end). */
     pyrrhic_scores?: Record<string, number>;
     /** Result of the Dayton negotiation (set when Dayton resolves). */
