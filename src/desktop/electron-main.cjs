@@ -2021,10 +2021,10 @@ app.whenReady().then(() => {
       if (!sector) {
         return { ok: false, error: `Unknown sector: ${sectorId}` };
       }
-      if (!state.logistics_priority) state.logistics_priority = {};
-      if (!state.logistics_priority[faction]) state.logistics_priority[faction] = {};
+      if (!state.military.logistics_priority) state.military.logistics_priority = {};
+      if (!state.military.logistics_priority[faction]) state.military.logistics_priority[faction] = {};
       for (const edgeId of sector.edge_ids ?? []) {
-        state.logistics_priority[faction][edgeId] = priority;
+        state.military.logistics_priority[faction][edgeId] = priority;
       }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);

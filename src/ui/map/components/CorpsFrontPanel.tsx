@@ -231,6 +231,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
   const currentStanceSource = sector.stance_source ?? 'bot';
   const sectorStanceLabel = STANCE_LABELS[currentSectorStance] ?? currentSectorStance.replace(/_/g, ' ');
+  const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
+  const logisticsPriorityTitle = 'Biases per-edge supply between 0.5x starvation and 1.5x saturation; default 1.0 neutral.';
 
   const issueSectorStance = async (stance: SectorStanceType) => {
     const result = await ipc.stageSectorStanceOrder(sector.sector_id, stance);
@@ -244,7 +246,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   const issueLogisticsPriority = async (priority: number) => {
     const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
-    setSectorActionMessage(result.ok ? `Priority staged: ${priority.toFixed(1)}x` : (result.error ?? 'Failed to stage logistics priority'));
+    const effectivePriority = Math.max(0.5, Math.min(1.5, priority));
+    setSectorActionMessage(result.ok ? `Priority staged: ${effectivePriority.toFixed(1)}x` : (result.error ?? 'Failed to stage logistics priority'));
   };
 
   const toggleOpsec = async () => {
@@ -464,8 +467,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Supply Priority</span>
-                    <span className="font-medium">{(sector.logistics_priority ?? 1).toFixed(1)}x</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>Supply Priority</span>
+                    <span className="font-medium" title={logisticsPriorityTitle}>
+                      {effectiveLogisticsPriority.toFixed(1)}x{effectiveLogisticsPriority === 1 ? ' (neutral)' : ''}
+                    </span>
                   </div>
                   <div className="flex flex-col col-span-2">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
@@ -510,13 +515,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     )}
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Reinforcement Priority</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1" title={logisticsPriorityTitle}>Reinforcement Priority</span>
                     <div className="flex gap-1">
-                      {[0.5, 1, 2].map((priority) => (
+                      {[0.5, 1, 1.5].map((priority) => (
                         <button
                           key={priority}
                           type="button"
                           onClick={() => void issueLogisticsPriority(priority)}
+                          title={priority === 1 ? `${logisticsPriorityTitle} Current order is neutral.` : logisticsPriorityTitle}
                           className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-[10px] font-bold"
                         >
                           {priority.toFixed(1)}x

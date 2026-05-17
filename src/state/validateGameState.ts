@@ -46,6 +46,59 @@ export type ValidateGameStateShapeResult =
     | { ok: true }
     | { ok: false; errors: string[] };
 
+export interface ValidateGameStateShapeOptions {
+    /**
+     * When supplied, fields introduced by migrations up through this version
+     * are required if state.schema_version is at least the introducing version.
+     */
+    requireVersion?: number;
+}
+
+interface VersionRequiredField {
+    version: number;
+    path: string;
+    check: (value: unknown) => boolean;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function getPathValue(root: unknown, path: string): unknown {
+    let current = root as any;
+    for (const part of path.split('.')) {
+        if (current == null || typeof current !== 'object') return undefined;
+        current = current[part];
+    }
+    return current;
+}
+
+const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
+    { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
+    { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.war_start_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.peace_scheduled_referendum_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.peace_scheduled_war_start_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string' },
+    { version: 3, path: 'meta.referendum_eligible_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.referendum_deadline_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.game_over', check: (v) => typeof v === 'boolean' },
+    { version: 4, path: 'political.negotiation_status', check: isRecord },
+    { version: 4, path: 'political.ceasefire', check: isRecord },
+    { version: 4, path: 'political.negotiation_ledger', check: Array.isArray },
+    { version: 4, path: 'political.supply_rights', check: isRecord },
+    { version: 5, path: 'military.front_segments', check: isRecord },
+    { version: 5, path: 'military.theatres', check: isRecord },
+    { version: 5, path: 'military.army_theatre_assignment', check: isRecord },
+    { version: 5, path: 'military.formations', check: isRecord },
+    { version: 5, path: 'military.front_posture', check: isRecord },
+    { version: 5, path: 'military.front_posture_regions', check: isRecord },
+    { version: 5, path: 'military.front_pressure', check: isRecord },
+    { version: 5, path: 'military.assignable_front_segments', check: Array.isArray },
+    { version: 5, path: 'military.brigade_front_assignment', check: isRecord },
+    { version: 5, path: 'military.militia_pools', check: isRecord },
+];
+
 /**
  * Validates Phase A1.1 canonical GameState shape (foundation-only).
  * - current_turn (meta.turn) is integer >= 0
@@ -53,7 +106,10 @@ export type ValidateGameStateShapeResult =
  * - Every settlement in political_controllers has political_controller defined (value may be null)
  * - No denylisted derived-state keys at top level
  */
-export function validateGameStateShape(state: unknown): ValidateGameStateShapeResult {
+export function validateGameStateShape(
+    state: unknown,
+    options: ValidateGameStateShapeOptions = {},
+): ValidateGameStateShapeResult {
     const errors: string[] = [];
 
     if (state == null || typeof state !== 'object') {
@@ -61,11 +117,22 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     }
 
     const s = state as any;
+    const stateVersion = Number.isInteger(s.schema_version) ? s.schema_version : 0;
 
     // Denylist: no derived-state keys at top level
     for (const key of DERIVED_STATE_DENYLIST) {
         if (Object.prototype.hasOwnProperty.call(s, key)) {
             errors.push(`Top-level key "${key}" is denylisted (derived state must not be stored; Engine Invariants §13.1)`);
+        }
+    }
+
+    if (options.requireVersion !== undefined) {
+        for (const field of VERSION_REQUIRED_FIELDS) {
+            if (stateVersion < field.version || field.version > options.requireVersion) continue;
+            const value = getPathValue(s, field.path);
+            if (value === undefined || !field.check(value)) {
+                errors.push(`v${field.version} required field missing or invalid: ${field.path}`);
+            }
         }
     }
 

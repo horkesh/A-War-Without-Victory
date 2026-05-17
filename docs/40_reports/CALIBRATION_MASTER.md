@@ -1,5 +1,20 @@
 # AWWV Calibration Master Reference
 
+## n1848 integrated 40w logistics/save-migration proof (2026-05-17)
+
+- **40w integrated run. Hash: `c09a498b7dc9ccae`. Anchors: 27/27. Benchmarks: 6/6. `diagnose_run.cjs`: 0 errors / 28 warnings. `validate_run_consistency.cjs`: PASS.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1848`.
+- Control alignment matches the preceding n1846 timing run counts: HRHB 87, RBiH 254, RS 371 against the Jan 1993 target universe. The final-save hash changes under the schema-v12 save/output contract; do not interpret the hash delta alone as a logistics-priority behavior drift.
+- Scope: integrated verification after Logistics Priority canonical path wiring and save migration hardening. No priority is staged in the default scenario, so the command lever is neutral (`1.0`) during this run.
+
+## n1844 accepted 188w endgame evidence (2026-05-17 verification)
+
+- **188w accepted artifact. Hash: `ccd3f9f770052614`. Anchors: 26/27, failed `op:brcko:brcko`. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1844`.
+- Verification report: `docs/40_reports/audits/20260517_ENDGAME_188W_VERIFICATION.md`.
+- Baseline correction: the older n1741 tuple `a4bf8b8095050881` is retained as historical evidence, but the 2026-05-17 endgame-verification lane accepts n1844 as the current documented 188w artifact. The dirty-worktree n1847 artifact (`4d4bd75c1c6739de`, 25/27 anchors) is rejected.
+- Signals to route into follow-up lanes: Sarajevo attacker:defender casualty outlier, absent serialized `patron_pressure` despite persisted patron relationship state, RS/HRHB late-war personnel growth, fatigue collapse, and HRHB morale/officer-quality inverse trends. The four checked P0s remain latent at t188.
+
 ## n1840 formation-life active-never-fights classification (2026-05-15)
 
 - **40w retained run. Hash: `0cb626c032204372`. `diagnose_run.cjs`: 0 errors / 29 warnings. `validate_run_consistency.cjs`: PASS.**

@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 2 as const;
+export const CURRENT_SCHEMA_VERSION = 12 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1863,6 +1863,7 @@ battle_damage?: Record<SettlementId, number>;
 formation_spawn_directive?: FormationSpawnDirective;
 /** Strategic production facilities (capturable local supply contributors). */
 production_facilities?: Record<string, ProductionFacilityState>;
+/** Decision Room `stage-logistics-priority` per-faction-per-edge supply bias. Range [0.5, 1.5], default 1.0. Read by formation fatigue and combat supply math. */
 logistics_priority?: Record<FactionId, Record<string, number>>;
 /** Sector-level defensive intent translated into brigade posture orders each turn. */
 sector_stance_orders?: SectorStanceOrder[];

@@ -973,6 +973,9 @@
         "to_faction": "RS"
       }
     },
+    "municipality_displacement": {},
+    "settlement_displacement": {},
+    "settlement_displacement_started_turn": {},
     "war_displacement_initiated": {}
   },
   "factions": [
@@ -1114,6 +1117,8 @@
     "war_start_turn": 0
   },
   "military": {
+    "army_co_decision_traces": {},
+    "army_corps_directives_by_faction": {},
     "army_theatre_assignment": {},
     "assignable_front_segments": [],
     "brigade_front_assignment": {},
@@ -30623,9 +30628,11 @@
         "is_historical_start": true,
         "name": "Ratko Mladić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 2,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Genocide, crimes against humanity, violations of laws of war",
           "court": "ICTY",
@@ -30647,9 +30654,11 @@
         "is_historical_start": true,
         "name": "Manojlo Milovanović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "deputy"
+        "rank": "deputy",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -30669,9 +30678,11 @@
         "is_historical_start": true,
         "name": "Momir Talić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution), violations of laws of war",
           "court": "ICTY",
@@ -30695,9 +30706,11 @@
         "is_historical_start": true,
         "name": "Radivoje Tomanić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -30713,9 +30726,11 @@
         "is_historical_start": false,
         "name": "Grujo Borić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -30732,9 +30747,11 @@
         "is_historical_start": true,
         "name": "Novica Simić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -30755,9 +30772,11 @@
         "is_historical_start": true,
         "name": "Tomislav Šipčić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -30777,9 +30796,11 @@
         "is_historical_start": false,
         "name": "Stanislav Galić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (murder, inhumane acts), terror against civilian population",
           "court": "ICTY",
@@ -30805,9 +30826,11 @@
         "is_historical_start": false,
         "name": "Dragomir Milošević",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (murder, inhumane acts), terror, unlawful attacks on civilians",
           "court": "ICTY",
@@ -30832,9 +30855,11 @@
         "is_historical_start": true,
         "name": "Milenko Živanović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Genocide, crimes against humanity",
           "court": "ICTY",
@@ -30856,9 +30881,11 @@
         "is_historical_start": false,
         "name": "Radislav Krstić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Aiding and abetting genocide, crimes against humanity (persecution, murder)",
           "court": "ICTY",
@@ -30882,9 +30909,11 @@
         "is_historical_start": true,
         "name": "Radovan Grubač",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -30903,9 +30932,11 @@
         "is_historical_start": false,
         "name": "Slavko Lisica",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -30920,9 +30951,11 @@
         "is_historical_start": false,
         "name": "Zdravko Tolimir",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "deputy",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Genocide, conspiracy to commit genocide, crimes against humanity",
           "court": "ICTY",
@@ -30944,9 +30977,11 @@
         "is_historical_start": false,
         "name": "Radivoje Miletić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
         "rank": "deputy",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, forcible transfer, murder)",
           "court": "ICTY",
@@ -30972,9 +31007,11 @@
         "is_historical_start": false,
         "name": "Boško Kelečević",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -30993,9 +31030,11 @@
         "is_historical_start": false,
         "name": "Čedomir Sladoje",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31011,9 +31050,11 @@
         "is_historical_start": false,
         "name": "Budimir Gavrić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -31029,9 +31070,11 @@
         "is_historical_start": false,
         "name": "Vinko Pandurević",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Aiding and abetting murder and persecution",
           "court": "ICTY",
@@ -31057,9 +31100,11 @@
         "is_historical_start": false,
         "name": "Svetozar Andrić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -31075,9 +31120,11 @@
         "is_historical_start": false,
         "name": "Radmilo Željaja",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31096,9 +31143,11 @@
         "is_historical_start": false,
         "name": "Drago Samardžija",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31114,9 +31163,11 @@
         "is_historical_start": false,
         "name": "Milorad Kutlešić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31132,9 +31183,11 @@
         "is_historical_start": false,
         "name": "Novica Gušić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31153,9 +31206,11 @@
         "is_historical_start": false,
         "name": "Pero Čolić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31171,9 +31226,11 @@
         "is_historical_start": false,
         "name": "Dragan Lalović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31192,9 +31249,11 @@
         "is_historical_start": false,
         "name": "Pero Despotović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31213,9 +31272,11 @@
         "is_historical_start": false,
         "name": "Vladimir Arsić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31231,9 +31292,11 @@
         "is_historical_start": false,
         "name": "Vidoje Blagojević",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, inhumane acts), aiding forcible transfer",
           "court": "ICTY",
@@ -31256,9 +31319,11 @@
         "is_historical_start": false,
         "name": "Dragan Obrenović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Persecution as crime against humanity",
           "court": "ICTY",
@@ -31280,9 +31345,11 @@
         "is_historical_start": false,
         "name": "Živomir Ninković",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31301,9 +31368,11 @@
         "is_historical_start": false,
         "name": "Vlado Lizdek",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31319,9 +31388,11 @@
         "is_historical_start": true,
         "name": "Sefer Halilović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 2,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (command responsibility for Grabovica and Uzdol massacres)",
           "court": "ICTY",
@@ -31342,9 +31413,11 @@
         "is_historical_start": false,
         "name": "Rasim Delić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (cruel treatment by mujahedin fighters)",
           "court": "ICTY",
@@ -31372,9 +31445,11 @@
         "is_historical_start": true,
         "name": "Mustafa Hajrulahović \"Talijan\"",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 2,
@@ -31393,9 +31468,11 @@
         "is_historical_start": false,
         "name": "Vahid Karavelić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 2,
@@ -31413,9 +31490,11 @@
         "is_historical_start": true,
         "name": "Željko Knez",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 2,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31432,9 +31511,11 @@
         "is_historical_start": false,
         "name": "Hazim Šadić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31450,9 +31531,11 @@
         "is_historical_start": false,
         "name": "Sead Delić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31473,9 +31556,11 @@
         "is_historical_start": true,
         "name": "Enver Hadžihasanović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (command responsibility)",
           "court": "ICTY",
@@ -31502,9 +31587,11 @@
         "is_historical_start": false,
         "name": "Mehmed Alagić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (murder, cruel treatment, wanton destruction)",
           "court": "ICTY",
@@ -31526,9 +31613,11 @@
         "is_historical_start": false,
         "name": "Sakib Mahmuljin",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "War crimes against prisoners of war",
           "court": "BiH State Court",
@@ -31552,9 +31641,11 @@
         "is_historical_start": false,
         "name": "Arif Pašalić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31571,9 +31662,11 @@
         "is_historical_start": false,
         "name": "Sulejman Budaković \"Tetak\"",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31594,9 +31687,11 @@
         "is_historical_start": true,
         "name": "Ramiz Dreković",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31616,9 +31711,11 @@
         "is_historical_start": false,
         "name": "Atif Dudaković",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (murder, persecution of Serb civilians)",
           "court": "BiH State Court",
@@ -31640,9 +31737,11 @@
         "is_historical_start": false,
         "name": "Mustafa Polutak",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31661,9 +31760,11 @@
         "is_historical_start": false,
         "name": "Nedžad Ajnadžić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31679,9 +31780,11 @@
         "is_historical_start": false,
         "name": "Selmo Cikotić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 2,
@@ -31697,9 +31800,11 @@
         "is_historical_start": false,
         "name": "Jovan Divjak",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "deputy"
+        "rank": "deputy",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 2,
@@ -31718,9 +31823,11 @@
         "is_historical_start": false,
         "name": "Stjepan Šiber",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "deputy"
+        "rank": "deputy",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31739,9 +31846,11 @@
         "is_historical_start": false,
         "name": "Fikret Čuškić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31760,9 +31869,11 @@
         "is_historical_start": false,
         "name": "Mirsad Šelmanović",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31781,9 +31892,11 @@
         "is_historical_start": false,
         "name": "Zaim Imamović",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31802,9 +31915,11 @@
         "is_historical_start": false,
         "name": "Avdo Palić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -31824,9 +31939,11 @@
         "is_historical_start": false,
         "name": "Naser Orić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Violations of laws of war (murder and cruel treatment of Serb prisoners)",
           "court": "ICTY",
@@ -31848,9 +31965,11 @@
         "is_historical_start": false,
         "name": "Refik Lendo",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31869,9 +31988,11 @@
         "is_historical_start": false,
         "name": "Ramiz Bećirović",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31889,9 +32010,11 @@
         "is_historical_start": false,
         "name": "Hamid Bahto",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -31907,9 +32030,11 @@
         "is_historical_start": false,
         "name": "Dževad Merdan",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -31925,9 +32050,11 @@
         "is_historical_start": false,
         "name": "Hajrudin Mešić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31946,9 +32073,11 @@
         "is_historical_start": false,
         "name": "Safet Zajko",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -31964,9 +32093,11 @@
         "is_historical_start": false,
         "name": "Nesib Malkić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -31985,9 +32116,11 @@
         "is_historical_start": false,
         "name": "Izet Nanić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32003,9 +32136,11 @@
         "is_historical_start": false,
         "name": "Midhad Hujdur \"Hujka\"",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32024,9 +32159,11 @@
         "is_historical_start": false,
         "name": "Enver Šehović",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32045,9 +32182,11 @@
         "is_historical_start": false,
         "name": "Ismet Hadžić \"Mutevelija\"",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32063,9 +32202,11 @@
         "is_historical_start": false,
         "name": "Mehdin Hodžić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32084,9 +32225,11 @@
         "is_historical_start": false,
         "name": "Safet Hadžić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32105,9 +32248,11 @@
         "is_historical_start": false,
         "name": "Adil Bešić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_c",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32123,9 +32268,11 @@
         "is_historical_start": true,
         "name": "Milivoj Petković",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
           "court": "ICTY",
@@ -32148,9 +32295,11 @@
         "is_historical_start": false,
         "name": "Slobodan Praljak",
         "origin": "political",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity, destruction of Stari Most (Old Bridge of Mostar)",
           "court": "ICTY",
@@ -32173,9 +32322,11 @@
         "is_historical_start": false,
         "name": "Ante Roso",
         "origin": "foreign",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "army_commander"
+        "rank": "army_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32191,9 +32342,11 @@
         "is_historical_start": false,
         "name": "Milivoj Petković (2nd tenure)",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
           "court": "ICTY",
@@ -32215,9 +32368,11 @@
         "is_historical_start": false,
         "name": "Tihomir Blaškić (army)",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "starter",
         "rank": "army_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution), violations of laws of war",
           "court": "ICTY",
@@ -32242,9 +32397,11 @@
         "is_historical_start": true,
         "name": "Tihomir Blaškić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "starter",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution), violations of laws of war",
           "court": "ICTY",
@@ -32269,9 +32426,11 @@
         "is_historical_start": true,
         "name": "Žarko Tole",
         "origin": "hv",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32288,9 +32447,11 @@
         "is_historical_start": false,
         "name": "Željko Šiljeg",
         "origin": "hv",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "War crimes against civilians",
           "court": "BiH State Court",
@@ -32314,9 +32475,11 @@
         "is_historical_start": false,
         "name": "Zvonimir Skender",
         "origin": "foreign",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32332,9 +32495,11 @@
         "is_historical_start": false,
         "name": "Željko Glasnović",
         "origin": "foreign",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32351,9 +32516,11 @@
         "is_historical_start": true,
         "name": "Miljenko Lasić",
         "origin": "militia",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 2,
@@ -32373,9 +32540,11 @@
         "is_historical_start": true,
         "name": "Đuro Matuzović",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "starter",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32391,9 +32560,11 @@
         "is_historical_start": false,
         "name": "Ivica Rajić",
         "origin": "jna",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Grave breaches of Geneva Conventions, violations of laws of war",
           "court": "ICTY",
@@ -32416,9 +32587,11 @@
         "is_historical_start": false,
         "name": "Franjo Nakić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32434,9 +32607,11 @@
         "is_historical_start": false,
         "name": "Nedjeljko Obradović",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32455,9 +32630,11 @@
         "is_historical_start": false,
         "name": "Vinko Štefanek",
         "origin": "hv",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32476,9 +32653,11 @@
         "is_historical_start": false,
         "name": "Josip Černi",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32494,9 +32673,11 @@
         "is_historical_start": false,
         "name": "Dario Kordić",
         "origin": "political",
+        "override_tolerance": 3,
         "political_reliability": 5,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, deportation), unlawful attacks on civilians, wanton destruction",
           "court": "ICTY",
@@ -32522,9 +32703,11 @@
         "is_historical_start": false,
         "name": "Ivo Oršolić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against Serbian civilians in Orašje area 1992-1993",
           "court": "BiH State Court",
@@ -32546,9 +32729,11 @@
         "is_historical_start": false,
         "name": "Živko Totić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32567,9 +32752,11 @@
         "is_historical_start": false,
         "name": "Ilija Nakić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32588,9 +32775,11 @@
         "is_historical_start": false,
         "name": "Stanko Sopta",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32609,9 +32798,11 @@
         "is_historical_start": false,
         "name": "Mato Bilonjić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_a",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 4,
@@ -32627,9 +32818,11 @@
         "is_historical_start": false,
         "name": "Mario Čerkez",
         "origin": "militia",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution), violations of laws of war",
           "court": "ICTY",
@@ -32652,9 +32845,11 @@
         "is_historical_start": false,
         "name": "Duško Grubešić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32670,9 +32865,11 @@
         "is_historical_start": false,
         "name": "Mario Bradara",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 3,
@@ -32691,9 +32888,11 @@
         "is_historical_start": false,
         "name": "Ivo Lozančić",
         "origin": "military",
+        "override_tolerance": 3,
         "political_reliability": 4,
         "pool_tier": "tier_b",
-        "rank": "corps_commander"
+        "rank": "corps_commander",
+        "stubbornness": 3
       },
       {
         "aggressiveness": 5,
@@ -32709,9 +32908,11 @@
         "is_historical_start": false,
         "name": "Mladen Naletilić \"Tuta\"",
         "origin": "militia",
+        "override_tolerance": 3,
         "political_reliability": 3,
         "pool_tier": "tier_b",
         "rank": "corps_commander",
+        "stubbornness": 3,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, rape), grave breaches of Geneva Conventions",
           "court": "ICTY",
@@ -32729,6 +32930,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_ajnadzic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32740,6 +32942,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_bahto",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32751,6 +32954,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_becirovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32762,6 +32966,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_besic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32773,6 +32978,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_cikotic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32784,6 +32990,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_cuskic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32795,6 +33002,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_divjak",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32806,6 +33014,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_drekovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -32817,6 +33026,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_dudakovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32828,6 +33038,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_hadzic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32839,6 +33050,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_halilovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -32850,6 +33062,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_hodzic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32861,6 +33074,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_hujdur",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32872,6 +33086,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_imamovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32883,6 +33098,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_knez",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -32894,6 +33110,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_malkic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32905,6 +33122,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_merdan",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32916,6 +33134,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_mesic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32927,6 +33146,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_nanic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32938,6 +33158,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_oric",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32949,6 +33170,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_palic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32960,6 +33182,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_s_hadzic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32971,6 +33194,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_sehovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32982,6 +33206,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_selmanovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -32993,6 +33218,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_siber",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33004,6 +33230,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_talijan",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33015,6 +33242,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "arbih_zajko",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33026,6 +33254,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_blaskic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33037,6 +33266,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_bradara",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33048,6 +33278,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_cerkez",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33059,6 +33290,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_grubesic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33070,6 +33302,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_kordic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33081,6 +33314,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_lasic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33092,6 +33326,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_lozancic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33103,6 +33338,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_matuzovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33114,6 +33350,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_nakic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33125,6 +33362,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_naletlic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33136,6 +33374,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_obradovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33147,6 +33386,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_orsolc",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33158,6 +33398,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_petkovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33169,6 +33410,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_rajic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33180,6 +33422,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_stefanek",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33191,6 +33434,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_tole",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33202,6 +33446,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "hvo_totic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33213,6 +33458,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_andric",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33224,6 +33470,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_arsic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33235,6 +33482,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_blagojevic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33246,6 +33494,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_colic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33258,6 +33507,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_despotovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33269,6 +33519,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_gavric",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33280,6 +33531,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_grubac",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33292,6 +33544,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_gusic_n",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33303,6 +33556,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_kelecevic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33314,6 +33568,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_kutlesic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33325,6 +33580,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lalovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33337,6 +33593,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lisica",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33349,6 +33606,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_lizdek",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33360,6 +33618,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_miletic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33371,6 +33630,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_milovanovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33382,6 +33642,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_mladic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33393,6 +33654,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_ninkovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33404,6 +33666,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_obrenovic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33416,6 +33679,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_pandurevic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33427,6 +33691,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_samardzija",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33438,6 +33703,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_simic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33449,6 +33715,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_sipcic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33460,6 +33727,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_sladoje",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33471,6 +33739,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_talic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33482,6 +33751,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_tolimir",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "reserve",
         "turns_in_command": 0,
         "victories": 0
@@ -33493,6 +33763,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_tomanic",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -33505,6 +33776,7 @@
         "effective_competence_penalty": 0,
         "officer_id": "vrs_zeljaja",
         "penalty_turns_remaining": 0,
+        "recent_overrides": [],
         "status": "active",
         "turns_in_command": 0,
         "victories": 0
@@ -43003,7 +43275,8 @@
     "war_control_strain": {},
     "war_exhaustion": {},
     "war_exhaustion_local": {},
+    "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 2
+  "schema_version": 12
 }

@@ -6,6 +6,7 @@
  * Deterministic: no randomness, no timestamps.
  */
 
+import type { FrontRegionsFile } from '../../map/front_regions.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getDecorationAtkMult, getDecorationDefBonus } from './decoration_evaluator.js';
 import { FATIGUE_MAX, getFormationTier } from '../../state/formation_constants.js';
@@ -36,6 +37,9 @@ import { getHomeDistanceMult } from './home_distance.js';
 import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
+
+export const LOGISTICS_PRIORITY_MIN = 0.5;
+export const LOGISTICS_PRIORITY_MAX = 1.5;
 
 function combatMathProfileTime<T>(
     profileTime: CombatMathProfileTimer | undefined,
@@ -853,6 +857,7 @@ export function getSupplyMult(
     const locationOsid = contextLocationOverride
         ?? (formation as { location_osid?: string }).location_osid;
     const factionId = formation.faction as string;
+    const applyPriority = (base: number): number => applyLogisticsPriorityClamp(base, state, formation);
     if (supplyStateByOsid?.factions && locationOsid) {
         const rawState = getSupplyStateForOsid(supplyStateByOsid, state.meta.turn, factionId, locationOsid);
         if (rawState) {
@@ -864,14 +869,68 @@ export function getSupplyMult(
                 effectiveState = getEffectiveSupplyState(rawState, reserveLevel);
             }
 
-            if (effectiveState === 'adequate') return 1.0;
-            if (effectiveState === 'strained') return 0.75;
-            return mode === 'attack' ? 0.45 : 0.5;
+            if (effectiveState === 'adequate') return applyPriority(1.0);
+            if (effectiveState === 'strained') return applyPriority(0.75);
+            return applyPriority(mode === 'attack' ? 0.45 : 0.5);
         }
     }
     const lastSupplied = formation.ops?.last_supplied_turn;
-    if (lastSupplied != null && state.meta.turn - lastSupplied <= 2) return 1.0;
-    return mode === 'attack' ? 0.4 : 0.5;
+    if (lastSupplied != null && state.meta.turn - lastSupplied <= 2) return applyPriority(1.0);
+    return applyPriority(mode === 'attack' ? 0.4 : 0.5);
+}
+
+function clampLogisticsPriority(value: unknown): number {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return 1.0;
+    return Math.max(LOGISTICS_PRIORITY_MIN, Math.min(LOGISTICS_PRIORITY_MAX, value));
+}
+
+export function lookupLogisticsPriority(
+    state: GameState,
+    formation: FormationState,
+    frontRegions?: FrontRegionsFile,
+): number {
+    const assignment = formation?.assignment;
+    if (!assignment || typeof assignment !== 'object') return 1.0;
+
+    const factionId = formation?.faction;
+    if (typeof factionId !== 'string') return 1.0;
+
+    const logisticsPriority = state.military.logistics_priority?.[factionId];
+    if (!logisticsPriority) return 1.0;
+
+    if (assignment.kind === 'edge' && typeof assignment.edge_id === 'string') {
+        return clampLogisticsPriority(logisticsPriority[assignment.edge_id]);
+    }
+
+    if (assignment.kind === 'region' && typeof assignment.region_id === 'string') {
+        const region = frontRegions?.regions.find((r) => r.region_id === assignment.region_id);
+        const priorities: number[] = [];
+        if (region) {
+            for (const edgeId of region.edge_ids) {
+                priorities.push(
+                    Object.prototype.hasOwnProperty.call(logisticsPriority, edgeId)
+                        ? clampLogisticsPriority(logisticsPriority[edgeId])
+                        : 1.0
+                );
+            }
+        }
+        if (Object.prototype.hasOwnProperty.call(logisticsPriority, assignment.region_id)) {
+            priorities.push(clampLogisticsPriority(logisticsPriority[assignment.region_id]));
+        }
+        if (priorities.length === 0) return 1.0;
+        return priorities.reduce((min, value) => Math.min(min, value), priorities[0]!);
+    }
+
+    return 1.0;
+}
+
+export function applyLogisticsPriorityClamp(
+    base: number,
+    state: GameState,
+    formation: FormationState,
+    frontRegions?: FrontRegionsFile,
+): number {
+    return base * lookupLogisticsPriority(state, formation, frontRegions);
 }
 
 interface SupplyStateLookupIndex {

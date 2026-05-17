@@ -6,6 +6,7 @@ import type { FactionId, FormationId, FormationState, GameState } from './game_s
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 import { buildFrontlineAssignedFormationSet } from '../sim/combat/front_assignment.js';
+import { lookupLogisticsPriority } from '../sim/combat/combat_math.js';
 
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEdgeCapacityMultiplier } from '../sim/collapse/capacity_modifiers.js';
@@ -194,12 +195,10 @@ function parseEdgeId(edgeId: string): [string, string] | null {
  * - Region assignment: use min over region edges (conservative)
  * - Unassigned: 1.0 (no logistics constraint)
  * 
- * Phase 5C: Apply logistics_priority as multiplicative weight:
- * - Edge assignment: priority for edge_id
- * - Region assignment: min priority over region edges (conservative)
- * - Default priority: 1.0 if not set
+ * Phase 5C: Apply canonical logistics priority as multiplicative weight.
+ * The priority lookup is shared with combat supply math.
  */
-function getFormationSupplyMultiplier(
+export function getFormationSupplyMultiplier(
     state: GameState,
     formation: FormationState,
     frontRegions: FrontRegionsFile,
@@ -208,17 +207,13 @@ function getFormationSupplyMultiplier(
     const assignment = formation?.assignment;
     if (!assignment || typeof assignment !== 'object') return 1;
 
-    const factionId = formation?.faction;
-    const logisticsPriority = state.military.logistics_priority?.[factionId];
+    const priorityMult = lookupLogisticsPriority(state, formation, frontRegions);
 
     if (assignment.kind === 'edge' && typeof assignment.edge_id === 'string') {
         const pair = parseEdgeId(assignment.edge_id);
         if (!pair) return 1;
         const [a, b] = pair;
         const supplyMult = getEdgeCapacityMultiplier(state, a, b, 'supply_mult');
-        // Phase 5C: Apply logistics priority for this edge
-        const priority = logisticsPriority?.[assignment.edge_id];
-        const priorityMult = priority && priority > 0 ? priority : 1.0;
         return supplyMult * priorityMult;
     }
 
@@ -226,25 +221,14 @@ function getFormationSupplyMultiplier(
         const region = frontRegions.regions.find((r) => r.region_id === assignment.region_id);
         if (!region) return 1;
         let minMult = 1;
-        let minPriority = 1.0;
         for (const edgeId of region.edge_ids) {
             const pair = parseEdgeId(edgeId);
             if (!pair) continue;
             const [a, b] = pair;
             const m = getEdgeCapacityMultiplier(state, a, b, 'supply_mult');
             if (m < minMult) minMult = m;
-            // Phase 5C: Get priority for this edge (conservative: use min)
-            const priority = logisticsPriority?.[edgeId];
-            if (priority && priority > 0 && priority < minPriority) {
-                minPriority = priority;
-            }
         }
-        // Also check if there's a priority set for the region itself
-        const regionPriority = logisticsPriority?.[assignment.region_id];
-        if (regionPriority && regionPriority > 0 && regionPriority < minPriority) {
-            minPriority = regionPriority;
-        }
-        return minMult * minPriority;
+        return minMult * priorityMult;
     }
 
     return 1;

@@ -1,0 +1,152 @@
+{
+  "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
+  "latest_schema_version": 12,
+  "registered_migration_count": 12,
+  "strict_required_field_count": 23,
+  "anonymous_default_count": 0,
+  "fields": [],
+  "migrations": [
+    {
+      "version": 1,
+      "description": "Add HRHB enclave resilience entries if missing. Sensitive: no."
+    },
+    {
+      "version": 2,
+      "description": "Migrate corps_command active_operation to active_operations array. Sensitive: no."
+    },
+    {
+      "version": 3,
+      "description": "2026-05-17 Phase 0 meta and faction declaration defaults. Sensitive: no."
+    },
+    {
+      "version": 4,
+      "description": "Political-domain defaults and negotiation substrate. Sensitive: no."
+    },
+    {
+      "version": 5,
+      "description": "Military-domain default skeleton and front segment counters. Sensitive: no."
+    },
+    {
+      "version": 6,
+      "description": "Peace-phase war substrate defaults. Sensitive: no."
+    },
+    {
+      "version": 7,
+      "description": "War-phase supply, exhaustion, and displacement substrate defaults. Sensitive: no."
+    },
+    {
+      "version": 8,
+      "description": "Phase E/F humanitarian aggregate defaults. Sensitive: no."
+    },
+    {
+      "version": 9,
+      "description": "Formation lifecycle and militia-pool fatigue defaults. Sensitive: no."
+    },
+    {
+      "version": 10,
+      "description": "A2/C1 command substrate default skeletons. Sensitive: no."
+    },
+    {
+      "version": 11,
+      "description": "2026-05-17 Phase B meta.player_faction schema advertisement. Sensitive: yes; migration sets no default."
+    },
+    {
+      "version": 12,
+      "description": "Top-level optional save arrays/policy counters when optional family is already present. Sensitive: no."
+    }
+  ],
+  "required_fields": [
+    {
+      "version": 3,
+      "path": "meta.game_over"
+    },
+    {
+      "version": 3,
+      "path": "meta.peace_scheduled_referendum_turn"
+    },
+    {
+      "version": 3,
+      "path": "meta.peace_scheduled_war_start_turn"
+    },
+    {
+      "version": 3,
+      "path": "meta.peace_war_start_control_path"
+    },
+    {
+      "version": 3,
+      "path": "meta.referendum_deadline_turn"
+    },
+    {
+      "version": 3,
+      "path": "meta.referendum_eligible_turn"
+    },
+    {
+      "version": 3,
+      "path": "meta.referendum_held"
+    },
+    {
+      "version": 3,
+      "path": "meta.referendum_turn"
+    },
+    {
+      "version": 3,
+      "path": "meta.war_start_turn"
+    },
+    {
+      "version": 4,
+      "path": "political.ceasefire"
+    },
+    {
+      "version": 4,
+      "path": "political.negotiation_ledger"
+    },
+    {
+      "version": 4,
+      "path": "political.negotiation_status"
+    },
+    {
+      "version": 4,
+      "path": "political.supply_rights"
+    },
+    {
+      "version": 5,
+      "path": "military.army_theatre_assignment"
+    },
+    {
+      "version": 5,
+      "path": "military.assignable_front_segments"
+    },
+    {
+      "version": 5,
+      "path": "military.brigade_front_assignment"
+    },
+    {
+      "version": 5,
+      "path": "military.formations"
+    },
+    {
+      "version": 5,
+      "path": "military.front_posture"
+    },
+    {
+      "version": 5,
+      "path": "military.front_posture_regions"
+    },
+    {
+      "version": 5,
+      "path": "military.front_pressure"
+    },
+    {
+      "version": 5,
+      "path": "military.front_segments"
+    },
+    {
+      "version": 5,
+      "path": "military.militia_pools"
+    },
+    {
+      "version": 5,
+      "path": "military.theatres"
+    }
+  ]
+}

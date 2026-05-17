@@ -94,9 +94,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Behavior: stages sector-level defensive intent in `state.sector_stance_orders`; the live sim translates that intent into brigade posture orders during the war pipeline rather than mutating brigades directly in IPC.
 
 - `stage-logistics-priority` (invoke)
-  - Payload: `{ corpsId: string, priority: 'balanced' | 'sustain_operations' | 'frontline_reserve' | 'emergency_recovery' }`
+  - Payload: `{ faction: FactionId, sectorId: string, priority: number }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: stages corps logistics priority in `state.corps_command[corpsId]`, reserializes, and broadcasts the updated state.
+  - Behavior: writes the numeric priority to `state.military.logistics_priority[faction][edgeId]` for every `edgeId` in `state.corps_front_sectors[sectorId].edge_ids`, reserializes, and broadcasts the updated state.
+  - Priority is clamped by simulation consumers to `[0.5, 1.5]`; `1.0` is the byte-stable neutral default.
 
 - `stage-airdrop-allocation` (invoke)
   - Payload: `{ enclaveId: string, allocation: number }`

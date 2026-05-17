@@ -14,24 +14,24 @@ The active roadmap/general backlog points below now have separate actionable pla
 
 | Backlog Point | Plan |
 |---|---|
-| Logistics Priority lever sim wiring | [2026-05-17-logistics-priority-sim-wiring-plan.md](../plans/2026-05-17-logistics-priority-sim-wiring-plan.md) |
-| 188w endgame verification | [2026-05-17-188w-endgame-verification-plan.md](../plans/2026-05-17-188w-endgame-verification-plan.md) |
-| Sarajevo railroad/special-case canon decision | [2026-05-17-sarajevo-special-case-canon-decision-plan.md](../plans/2026-05-17-sarajevo-special-case-canon-decision-plan.md) |
-| B3 negotiation counter-offers | [2026-05-17-b3-negotiation-counteroffers-plan.md](../plans/2026-05-17-b3-negotiation-counteroffers-plan.md) |
-| RBiH-HRHB alliance breakdown Phases B/C | [2026-05-17-rbih-hrhb-alliance-breakdown-bc-plan.md](../plans/2026-05-17-rbih-hrhb-alliance-breakdown-bc-plan.md) |
-| Paramilitary consequence scaling, batch UI, and named units | [2026-05-17-paramilitary-consequence-batch-flavor-plan.md](../plans/2026-05-17-paramilitary-consequence-batch-flavor-plan.md) |
+| Logistics Priority lever sim wiring | [2026-05-17-logistics-priority-wire-or-remove-plan.md](../plans/2026-05-17-logistics-priority-wire-or-remove-plan.md) |
+| 188w endgame verification | [2026-05-17-endgame-188w-verification-plan.md](../plans/2026-05-17-endgame-188w-verification-plan.md) |
+| Sarajevo railroad/special-case canon decision | [2026-05-17-sarajevo-special-casing-canon-plan.md](../plans/2026-05-17-sarajevo-special-casing-canon-plan.md) |
+| B3 negotiation counter-offers | [2026-05-17-b3-negotiation-counter-offers-plan.md](../plans/2026-05-17-b3-negotiation-counter-offers-plan.md) |
+| RBiH-HRHB alliance breakdown Phases B/C | [2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md](../plans/2026-05-17-rbih-hrhb-alliance-breakdown-phase-bc-plan.md) |
+| Paramilitary consequence scaling, batch UI, and named units | [2026-05-17-paramilitary-flavor-and-consequences-plan.md](../plans/2026-05-17-paramilitary-flavor-and-consequences-plan.md) |
 | Intel extensions | [2026-05-17-intel-extensions-plan.md](../plans/2026-05-17-intel-extensions-plan.md) |
 | VRS 1KK Corridor 92 | [2026-05-17-vrs-corridor-92-plan.md](../plans/2026-05-17-vrs-corridor-92-plan.md) |
 | ARBiH 2nd/3rd/4th Corps zero-attack operation stalls | [2026-05-17-arbih-zero-attack-stalls-plan.md](../plans/2026-05-17-arbih-zero-attack-stalls-plan.md) |
 | ARBiH catastrophic attack stalls | [2026-05-17-catastrophic-attack-stall-plan.md](../plans/2026-05-17-catastrophic-attack-stall-plan.md) |
 | Brigade dissolution threshold | [2026-05-17-brigade-dissolution-threshold-plan.md](../plans/2026-05-17-brigade-dissolution-threshold-plan.md) |
-| RBiH supply constraint | [2026-05-17-rbih-supply-constraint-plan.md](../plans/2026-05-17-rbih-supply-constraint-plan.md) |
+| RBiH supply constraint | [2026-05-17-rbih-supply-constraint-arms-embargo-plan.md](../plans/2026-05-17-rbih-supply-constraint-arms-embargo-plan.md) |
 | Fatigue recovery/rebalance | [2026-05-17-fatigue-recovery-rebalance-plan.md](../plans/2026-05-17-fatigue-recovery-rebalance-plan.md) |
 | Save migration hardening | [2026-05-17-save-migration-hardening-plan.md](../plans/2026-05-17-save-migration-hardening-plan.md) |
-| Strict null contract cleanup | [2026-05-17-strict-null-cleanup-plan.md](../plans/2026-05-17-strict-null-cleanup-plan.md) |
+| Strict null contract cleanup | [2026-05-17-strict-null-checks-migration-plan.md](../plans/2026-05-17-strict-null-checks-migration-plan.md) |
 | War termination minimal spec | [2026-05-17-war-termination-minimal-spec-plan.md](../plans/2026-05-17-war-termination-minimal-spec-plan.md) |
 | Player Turn Guide | [2026-05-17-player-turn-guide-plan.md](../plans/2026-05-17-player-turn-guide-plan.md) |
-| Full supply spec | [2026-05-17-full-supply-spec-plan.md](../plans/2026-05-17-full-supply-spec-plan.md) |
+| Full supply spec | [2026-05-17-supply-design-completion-plan.md](../plans/2026-05-17-supply-design-completion-plan.md) |
 
 ---
 
@@ -235,9 +235,9 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 | Backlog item | Priority | Owner / Disposition |
 |---|---|---|
 | **Phase B — `player_faction` default in `scenario_loader.ts`** | **P0** | Specced in plan; ready to dispatch. Restores ~20 features confirmed broken: Decision Room, Opening Brief, News Ticker, autonomy-1 stance/opportunity/op proposals, Codex ghost predicates against player faction, paramilitary policy enforcement, casualty relevance, territory flip direction, OpeningBrief, etc. |
-| **Logistics Priority lever — wire-or-remove decision** | **P1** | NEW. UI + IPC + stage write all work; `supply_reachability.ts` and `brigade_movement.ts` never consult the staged value. Player perception: "I prioritized 2x." Reality: zero supply-flow effect. Needs user call on wire-it (consume in supply allocation) or remove-it (delete misleading UI). |
+| **Logistics Priority lever — wire-or-remove decision** | **P1** | IMPLEMENTED 2026-05-17: `stage-logistics-priority` now writes canonical `state.military.logistics_priority[faction][edgeId]`; combat supply math and formation fatigue consume the shared `[0.5, 1.5]` clamped helper; UI/IPC contract reconciled. Report: `docs/40_reports/implemented/20260517_LOGISTICS_PRIORITY_WIRED.md`. Full supply design remains separate. |
 | **Phase B+ — `player_faction` contract hardening** | P1 (hygiene) | Specced in plan. Tightens `?:` → required type, consolidates 3 `matchesPlayerFaction`-style helpers into `playerFactionMatch.ts`, removes warroom `?? 'RBiH'` fallback (11+ consumers), audits SKIP/OVERSHOW guards in sim + UI. Expect 40w + 188w calibration drift; re-anchor under `LANE-V09X-PLAYER-FACTION-CONTRACT`. |
-| **Endgame verification at 188w** | P1 | NEW. **BLOCKED 2026-05-17:** no 188w final_save exists in `data/derived/` — all 188w runs were garbage-collected per disk-hygiene pass (napkin: "Freed ~70GB by deleting 34 stale 188w runs"). Re-dispatch requires re-running `npm run sim:scenario:run` against a 188w scenario first (~30+ min). Once a fresh 188w save exists: (a) Sarajevo casualty ratio vs Mostar/Banja Luka to confirm/refute railroad; (b) re-verify 4 P0s stay latent at endgame; (c) probe `patron_pressure` absent-from-state anomaly. |
+| **Endgame verification at 188w** | P1 | EVIDENCE: `docs/40_reports/audits/20260517_ENDGAME_188W_VERIFICATION.md`. Accepted current documented artifact is n1844 (`runs/apr1992_definitive_188w__210e69404d054959__w188_n1844`, hash `ccd3f9f770052614`, 26/27 anchors, 6/6 benchmarks); frozen n1741 is stale and dirty-worktree n1847 is rejected. Status **ACCEPTED-WITH-SIGNALS**: Sarajevo casualty ratio outlier, absent serialized `patron_pressure`, and late-war force-quality/reconstitution drift are follow-on work; four P0s remain LATENT. |
 | **Sarajevo railroad canon question** | P1 (design) | INCONCLUSIVE pending endgame verification. Constants live in code: `SARAJEVO_DEFENSE_BONUS=0.40`, `SARAJEVO_ATTACKER_CASUALTY_MULT=2.0`, RBiH exhaustion +3.0/RS +2.0 during siege. User design call: is Sarajevo *supposed* to be code-special-cased per canon, or should this become scenario-driven? |
 | **Phase C — Two-level event surfacing** | P2 | Specced in plan; waiting on B+. Respondent gets full decision; other two factions get deterministic `intelligence_notification` inbox item on the next turn (EU4 news-pop pattern). Behind `AWWV_TWO_LEVEL_NOTIFICATIONS` flag. |
 | **Phase D — Notification content backfill** | P3 (content) | Per D1 per-recipient decision: ~6 authored blocks per event (3 options × 2 non-source recipients). `/historian` + `/narrative-designer` review. |
@@ -248,7 +248,7 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 | **`IvpBreakdownModal` dead requirement** | P3 (cleanup) | Referenced in CLAUDE.md, never implemented. Remove from CLAUDE.md or build it. |
 | **`ParamilitaryReviewModal` dead entry** | P3 (cleanup) | Mounted in `App.tsx:39`; no opener exists. Add opener or remove mount. |
 | **`SettingsScreen` shell** | P3 (cleanup) | Mounts when `settingsOpen`; no settings actually drive sim behavior. |
-| **Save migration gap** | P3 (hygiene) | Only 2 migration steps in `save_migration.ts` for years of schema evolution. Saves predating recent additions load with undefined new fields. Pre-1.0 ship readiness item. |
+| **Save migration gap** | P3 (hygiene) | IMPLEMENTED 2026-05-17: schema registry now versions migrated defaults through v12, strict required-as-of-version validation is opt-in at deserialize, startup artifact regenerated, drift audit reports 0 anonymous defaults, and `docs/20_engineering/SAVE_SCHEMA_EVOLUTION.md` documents future bumps. Report: `docs/40_reports/implemented/20260517_SAVE_MIGRATION_HARDENING.md`. |
 | **`try/catch` swallow in `pressure_system.ts:67-69`** | P4 | Non-strict mode silently eats errors. Either log unconditionally or remove non-strict branch. |
 | **`strictNullChecks` migration** | P4 (long) | ~30 `as FactionId` non-null assertions across codebase; 455 optional fields. Long-term hygiene milestone. Not v1.0 blocker. |
 | **`state.political` is the next iceberg** | DEFERRED | 636 guarded reads vs 1041 unguarded reads. Currently LATENT (state.political always populated). Worth monitoring; not actionable now. |

@@ -4,6 +4,8 @@
 
 **Goal:** Close the pre-1.0 save migration gap (`CONSOLIDATED_BACKLOG.md` §16, P3 hygiene / v1.0-blocking) so that saves predating recent `GameState` schema evolution load with deterministic, version-stamped defaults instead of silently `undefined`-propagating into engine code. Today `save_migration.ts` registers only two steps (`version: 1` HRHB enclave fields and `version: 2` `corps_command.active_operations` array), while `src/state/serialize.ts:migrateState` carries 30+ version-anonymous defaults in its `case CURRENT_SCHEMA_VERSION` body. The 2026-05-17 Phase B `player_faction` ship is the latest instance of a field landing without a migration step.
 
+**Worker execution note (2026-05-17):** Runtime migration backfill, strict validation, diagnostic tooling, per-version fixture contract, startup artifact compatibility check, and engineering procedure docs are implemented in the save-migration worker lane. Parent integration still owns roadmap/ledger/knowledge-ledger updates and final 40w hash recording.
+
 **Architecture:** Treat the `save_migration` registry as the single source of truth for forward-compat shape evolution. Move version-anonymous defaults from `serialize.ts:migrateState` into versioned `registerMigration({version, migrate})` entries; tighten `validateGameState` so post-version-N saves missing a required field reject with a typed error; lock the contract with one round-trip fixture per schema version; document the bump procedure so future field additions cannot re-open the gap.
 
 **Tech Stack:** TypeScript state layer (`src/state/`), Vitest, scenario runner artifacts, deterministic JSON serializer (`src/state/serializeGameState.ts`).
@@ -16,6 +18,7 @@ This is a follow-up to:
 - `docs/40_reports/audits/20260517_STRUCTURAL_DEFECT_AUDIT_AND_VERIFICATION.md` — "Migration gap (only 2 migration steps for years of schema evolution) — LIVE (hygiene)".
 - `docs/PROJECT_LEDGER.md` 2026-05-17 entry **fix(sim): default player_faction in headless harness (Phase B)** — instructive case of a new field shipping without a migration step.
 - `CONSOLIDATED_BACKLOG.md` §16 row **Save migration gap**.
+- Incoming coordination from `2026-05-17-logistics-priority-wire-or-remove-plan.md`: migrate or discard orphan legacy top-level `state.logistics_priority` into canonical `state.military.logistics_priority` during save-migration hardening.
 
 In scope:
 - Deterministic audit of `GameState` shape drift between the last registered migration (`version: 2`) and the current `case CURRENT_SCHEMA_VERSION` defaulting body.
