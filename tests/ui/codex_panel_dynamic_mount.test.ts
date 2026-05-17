@@ -152,7 +152,11 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getAllByText(/Sources: RDC Sarajevo/).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('keeps unfired non-ghost essays locked', () => {
+    it('hides unfired non-ghost essays from the sidebar entirely', () => {
+        // Per the 2026-05-17 visibility spec: the Codex must not list essays that
+        // were never surfaced to the player. Locked entries used to render greyed-out
+        // and clickable; they no longer do. With no fired events and no ghost
+        // conditions met, every year section is empty and collapses.
         storeState = {
             loadedGameState: {
                 firedEvents: [],
@@ -161,11 +165,9 @@ describe('CodexPanel dynamic essay proof', () => {
         };
 
         renderPanel();
-        fireEvent.click(screen.getByText('1995'));
-        fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
 
-        expect(
-            screen.getByText('Experience this event during gameplay to unlock the full historical essay.'),
-        ).toBeTruthy();
+        expect(screen.queryByText('The Dayton Agreement: Ending the War, Freezing the Questions')).toBeNull();
+        expect(screen.queryByText('1995')).toBeNull();
+        expect(screen.queryByText('1992')).toBeNull();
     });
 });

@@ -71,17 +71,17 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
         return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context)]));
     }, [essays, firedEventIds, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
 
-    const essaysByYear = useMemo(() => {
+    const visibleEssaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();
         for (const year of YEARS) grouped.set(year, []);
         for (const essay of essays) {
+            if (!resolvedEssays.get(essay.id)?.isUnlocked) continue;
             const yearGroup = grouped.get(essay.year);
             if (yearGroup) yearGroup.push(essay);
         }
         return grouped;
-    }, [essays]);
+    }, [essays, resolvedEssays]);
 
-    const totalEssays = essays.length;
     const availableCount = useMemo(
         () => essays.filter((essay) => resolvedEssays.get(essay.id)?.isUnlocked).length,
         [essays, resolvedEssays],
@@ -104,7 +104,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                             Codex
                         </div>
                         <div className="text-[9px] text-neutral-500">
-                            {availableCount} / {totalEssays} essays available
+                            {availableCount === 1 ? '1 essay' : `${availableCount} essays`} available
                         </div>
                     </div>
                     <button
@@ -119,8 +119,8 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                 <div className="flex flex-1 min-h-0">
                     <div className="w-[220px] border-r border-neutral-700/30 overflow-y-auto bg-[#0d0f16]">
                         {YEARS.map((year) => {
-                            const yearEssays = essaysByYear.get(year) ?? [];
-                            const yearAvailable = yearEssays.filter((essay) => resolvedEssays.get(essay.id)?.isUnlocked).length;
+                            const yearEssays = visibleEssaysByYear.get(year) ?? [];
+                            if (yearEssays.length === 0) return null;
                             const isExpanded = expandedYear === year;
 
                             return (
@@ -134,13 +134,11 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                             {year}
                                         </span>
                                         <span className="text-[9px] text-neutral-500">
-                                            {yearAvailable}/{yearEssays.length}
+                                            {yearEssays.length}
                                         </span>
                                     </button>
                                     {isExpanded && yearEssays.map((essay) => {
-                                        const resolved = resolvedEssays.get(essay.id);
-                                        const unlocked = Boolean(resolved?.isUnlocked);
-                                        const ghost = Boolean(resolved?.isGhost);
+                                        const ghost = Boolean(resolvedEssays.get(essay.id)?.isGhost);
                                         const isSelected = selectedEssayId === essay.id;
 
                                         return (
@@ -148,26 +146,22 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                 key={essay.id}
                                                 type="button"
                                                 onClick={() => setSelectedEssayId(essay.id)}
-                                                data-awwv-codex-state={ghost ? 'ghost' : unlocked ? 'unlocked' : 'locked'}
+                                                data-awwv-codex-state={ghost ? 'ghost' : 'unlocked'}
                                                 className={`w-full text-left px-2.5 py-1.5 border-b border-neutral-800/30 transition-all ${
                                                     isSelected
                                                         ? 'bg-amber-400/10 border-l-2 border-l-amber-400'
                                                         : 'hover:bg-white/3 border-l-2 border-l-transparent'
-                                                } ${unlocked ? '' : 'opacity-40'}`}
+                                                }`}
                                             >
                                                 <div className="flex items-center gap-2 mb-0.5">
                                                     <CategoryBadge category={essay.category} />
-                                                    {ghost ? (
+                                                    {ghost && (
                                                         <span className="text-[7px] text-amber-500 uppercase tracking-wider">
                                                             Ghost
                                                         </span>
-                                                    ) : !unlocked ? (
-                                                        <span className="text-[7px] text-neutral-600 uppercase tracking-wider">
-                                                            Locked
-                                                        </span>
-                                                    ) : null}
+                                                    )}
                                                 </div>
-                                                <div className={`text-[10px] leading-snug ${unlocked ? 'text-neutral-200' : 'text-neutral-500'}`}>
+                                                <div className="text-[10px] leading-snug text-neutral-200">
                                                     {essay.title}
                                                 </div>
                                             </button>
