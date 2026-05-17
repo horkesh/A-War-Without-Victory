@@ -91,6 +91,14 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
                     errors.push(`meta.phase must be one of: ${KNOWN_PHASES.join(', ')}`);
                 }
             }
+            // player_faction (optional for back-compat with legacy saves; required for new state).
+            // Default is set in scenario_runner.ts buildScenarioStartupState; desktop overrides via desktop_sim.ts.
+            if ('player_faction' in m && m.player_faction !== undefined) {
+                const pf = m.player_faction;
+                if (typeof pf !== 'string' || (pf !== 'RBiH' && pf !== 'RS' && pf !== 'HRHB')) {
+                    errors.push('meta.player_faction must be one of: RBiH, RS, HRHB when present');
+                }
+            }
             // Phase 0: Referendum and war-start fields (optional; validate type when present)
             if ('referendum_held' in m && m.referendum_held !== undefined && typeof m.referendum_held !== 'boolean') {
                 errors.push('meta.referendum_held must be boolean when present');

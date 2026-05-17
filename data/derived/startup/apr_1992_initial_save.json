@@ -1096,6 +1096,7 @@
     "peace_scheduled_war_start_turn": null,
     "peace_war_start_control_path": null,
     "phase": "war",
+    "player_faction": "RBiH",
     "rbih_hrhb_war_earliest_turn": 26,
     "recruitment_mode": "player_choice",
     "referendum_deadline_turn": null,

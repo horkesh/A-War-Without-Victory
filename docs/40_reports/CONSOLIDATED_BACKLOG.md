@@ -199,4 +199,35 @@ All former single-topic backlog docs are archived to **docs/_old/40_reports/back
 
 ---
 
+## 16. Structural defect audit (2026-05-17)
+
+**Source:** [20260517_STRUCTURAL_DEFECT_AUDIT_AND_VERIFICATION.md](audits/20260517_STRUCTURAL_DEFECT_AUDIT_AND_VERIFICATION.md). Originated from a user-reported Codex/event surfacing defect; widened by four parallel investigators and one verification pass.
+
+**Companion plan:** [2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md](../plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md) (Phases A–D; Phase A SHIPPED 2026-05-17).
+
+| Backlog item | Priority | Owner / Disposition |
+|---|---|---|
+| **Phase B — `player_faction` default in `scenario_loader.ts`** | **P0** | Specced in plan; ready to dispatch. Restores ~20 features confirmed broken: Decision Room, Opening Brief, News Ticker, autonomy-1 stance/opportunity/op proposals, Codex ghost predicates against player faction, paramilitary policy enforcement, casualty relevance, territory flip direction, OpeningBrief, etc. |
+| **Logistics Priority lever — wire-or-remove decision** | **P1** | NEW. UI + IPC + stage write all work; `supply_reachability.ts` and `brigade_movement.ts` never consult the staged value. Player perception: "I prioritized 2x." Reality: zero supply-flow effect. Needs user call on wire-it (consume in supply allocation) or remove-it (delete misleading UI). |
+| **Phase B+ — `player_faction` contract hardening** | P1 (hygiene) | Specced in plan. Tightens `?:` → required type, consolidates 3 `matchesPlayerFaction`-style helpers into `playerFactionMatch.ts`, removes warroom `?? 'RBiH'` fallback (11+ consumers), audits SKIP/OVERSHOW guards in sim + UI. Expect 40w + 188w calibration drift; re-anchor under `LANE-V09X-PLAYER-FACTION-CONTRACT`. |
+| **Endgame verification at 188w** | P1 | NEW. **BLOCKED 2026-05-17:** no 188w final_save exists in `data/derived/` — all 188w runs were garbage-collected per disk-hygiene pass (napkin: "Freed ~70GB by deleting 34 stale 188w runs"). Re-dispatch requires re-running `npm run sim:scenario:run` against a 188w scenario first (~30+ min). Once a fresh 188w save exists: (a) Sarajevo casualty ratio vs Mostar/Banja Luka to confirm/refute railroad; (b) re-verify 4 P0s stay latent at endgame; (c) probe `patron_pressure` absent-from-state anomaly. |
+| **Sarajevo railroad canon question** | P1 (design) | INCONCLUSIVE pending endgame verification. Constants live in code: `SARAJEVO_DEFENSE_BONUS=0.40`, `SARAJEVO_ATTACKER_CASUALTY_MULT=2.0`, RBiH exhaustion +3.0/RS +2.0 during siege. User design call: is Sarajevo *supposed* to be code-special-cased per canon, or should this become scenario-driven? |
+| **Phase C — Two-level event surfacing** | P2 | Specced in plan; waiting on B+. Respondent gets full decision; other two factions get deterministic `intelligence_notification` inbox item on the next turn (EU4 news-pop pattern). Behind `AWWV_TWO_LEVEL_NOTIFICATIONS` flag. |
+| **Phase D — Notification content backfill** | P3 (content) | Per D1 per-recipient decision: ~6 authored blocks per event (3 options × 2 non-source recipients). `/historian` + `/narrative-designer` review. |
+| **`FACTION_MORALE_RESIST_FLOOR` faction-asymmetric hardcode** | P2 (design) | `combat_math.ts:231-235` hardcodes RBiH=50/RS=55/HRHB=60. No doctrine doc. Either document the asymmetry in canon or make it data-driven. |
+| **`CEASEFIRE_*_EXHAUSTION` + `WASH_COMBINED_EXHAUSTION` narrative gates** | P2 | `bilateral_ceasefire.ts:36,38` + `washington_agreement.ts:45`. Hardcoded thresholds (30/35/55). If exhaustion formula tuning changed since chosen, gates now fire at wrong times. Verify against historical week-of-event vs sim week-of-trigger; promote to data if drift confirmed. |
+| **Phase pipeline silent-skip diagnostic wrapper** | P3 (hygiene) | 10+ war-phase steps early-return on missing data with no log. Wrap pipeline so every early-return emits `{phase, step, skip_reason}` into a turn diagnostic. Converts an invisible bug class into a visible one. |
+| **Primary Army / Primary Corps quick-select** | P3 (minor) | `App.tsx:688-710` handlers defined, no button wires to them. Either add buttons or delete handlers. |
+| **`IvpBreakdownModal` dead requirement** | P3 (cleanup) | Referenced in CLAUDE.md, never implemented. Remove from CLAUDE.md or build it. |
+| **`ParamilitaryReviewModal` dead entry** | P3 (cleanup) | Mounted in `App.tsx:39`; no opener exists. Add opener or remove mount. |
+| **`SettingsScreen` shell** | P3 (cleanup) | Mounts when `settingsOpen`; no settings actually drive sim behavior. |
+| **Save migration gap** | P3 (hygiene) | Only 2 migration steps in `save_migration.ts` for years of schema evolution. Saves predating recent additions load with undefined new fields. Pre-1.0 ship readiness item. |
+| **`try/catch` swallow in `pressure_system.ts:67-69`** | P4 | Non-strict mode silently eats errors. Either log unconditionally or remove non-strict branch. |
+| **`strictNullChecks` migration** | P4 (long) | ~30 `as FactionId` non-null assertions across codebase; 455 optional fields. Long-term hygiene milestone. Not v1.0 blocker. |
+| **`state.political` is the next iceberg** | DEFERRED | 636 guarded reads vs 1041 unguarded reads. Currently LATENT (state.political always populated). Worth monitoring; not actionable now. |
+
+**Latent findings (no action; documented for awareness):** NATO never-intervenes NaN path, multi-brigade pressure mult fallback, settlement-flip discard, casualty-faction cast. All confirmed not-firing in n1741 turn-40 sample; recheck at endgame.
+
+---
+
 *For implemented work, see [CONSOLIDATED_IMPLEMENTED.md](CONSOLIDATED_IMPLEMENTED.md). For lessons learned, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md).*

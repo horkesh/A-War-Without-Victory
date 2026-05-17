@@ -396,7 +396,7 @@ docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md (new)                 [D]
 ## Out of Scope
 
 - AI faction multi-turn deliberation systems.
-- Per-recipient notification text (RBiH learns differently than HRHB).
+- Runtime localization of per-recipient notification text.
 - Notification text translation/localization (deferred to v1.1 "Mother Tongue").
 - Codex render-state for never-defined essays (not a real case; `essay_index.json` is the only source).
 - Reverting or modifying `ghost_when` semantics — they remain GAME_OVER-gated and correct.

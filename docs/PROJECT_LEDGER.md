@@ -4,6 +4,65 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] docs(plans): polish roadmap-linked implementation plans
+
+**Scope:** Documentation-only polish pass across the roadmap-linked 2026-05-17 plan set after parallel plan audits.
+
+**Change:** Tightened the roadmap coverage matrix and implementation plans with concrete owner files, focused commands/tests, stop gates, evidence requirements, design-gate wording, and commit/closeout scope. Added the CI/test feedback-loop plan to the coverage matrix and removed a stale contradiction in the two-level event-surfacing plan's out-of-scope list.
+
+**Determinism:** Documentation and planning only. No runtime code, scenario data, generated artifact, CI workflow, random source, or save schema changed.
+
+**Verification:** `git diff --check -- docs/plans/2026-05-17-*.md docs/plans/MASTER_ROADMAP.md docs/PROJECT_LEDGER.md` passed with CRLF normalization warnings only. Coverage-matrix path scan checked 26 plan references with no missing paths.
+
+---
+
+## [2026-05-17] docs(plans): add CI/test feedback-loop plan
+
+**Scope:** Documentation-only planning response to the 2026-05-17 GitHub failure repair path, where fast-suite failures masked a later scenario failure and duplicated Brka anchor expectations drifted between the scenario runner and deployment-health test.
+
+**Change:** Added `docs/plans/2026-05-17-ci-test-feedback-loop-plan.md` and wired it into `docs/plans/MASTER_ROADMAP.md`. The plan defines implementable tasks to audit CI cost/failure order, centralize historical scenario anchor truth, add a focused scenario-anchor npm script and GitHub Actions job, harden local scenario reproduction, and document GitHub Actions triage/log-access fallbacks.
+
+**Determinism:** Documentation and planning only. No runtime code, scenario data, generated artifact, random source, save schema, or CI workflow changed in this entry.
+
+**Verification:** `git diff --check -- docs/plans/2026-05-17-ci-test-feedback-loop-plan.md docs/plans/MASTER_ROADMAP.md docs/PROJECT_LEDGER.md` passed with CRLF normalization warnings only.
+
+---
+
+## [2026-05-17] fix(sim): default player_faction in headless harness + repair briefing import (Phase B)
+
+**Scope:** Phase B of `docs/plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md`. Closes the `state.meta.player_faction === undefined` defect class for headless scenario runs (tests, calibration, scenario_runner). Sister defects (~25 inconsistent null-handling sites) tracked in `docs/40_reports/audits/20260517_STRUCTURAL_DEFECT_AUDIT_AND_VERIFICATION.md` and the Phase B+ section of the plan.
+
+**Change:**
+- `src/scenario/scenario_runner.ts:1118-1126` — `buildScenarioStartupState` now defaults `state.meta.player_faction = state.meta.player_faction ?? 'RBiH'` immediately after the inner `createInitialGameState` call. `createInitialGameState` itself remains faction-neutral, preserving the canonical state factory's neutrality; the harness/artifact-producing function is where the default lands. Comment explains the three-tier overlay path: canonical builder neutral → `buildScenarioStartupState` default for headless and baked artifact → desktop overlay for player choice.
+- `src/state/validateGameState.ts:88` — added `meta.player_faction` shape assertion (allows undefined for legacy saves; rejects unknown values when present).
+- `data/derived/startup/apr_1992_initial_save.json` — regenerated via `npm run desktop:startup-snapshot:build` so the baked artifact reflects the new harness default. The artifact's prior faction-neutral semantics evolve to "RBiH default with desktop overlay still able to override," matching the existing electron startup-probe contract (`electron-main.cjs:798` expects RBiH).
+- `tests/startup_snapshot_contract.test.ts:62` — assertion updated from `undefined` to `'RBiH'` with a comment citing Phase B and the startup-probe contract.
+- **Coincident fix** `src/sim/turn_phases/war_phase_briefing_steps.ts:6-13` — the `assemble-command-briefing` step previously used `require('../briefing/collect_briefing.js')` (CommonJS for an ESM module). The `if (!playerFaction) return` SKIP-WHEN-NULL guard at line 9 silently hid this; Phase B unblocks the guard, so the broken `require` would surface as 9 cascading vitest failures in `scenario_harness_contracts.test.ts`. Repaired by switching to `await import(...)` and making the `run:` arrow `async`, matching the sibling steps' canonical pattern at lines 19-21. Exemplifies the audit's prediction that fixing SKIP-WHEN-NULL gates exposes downstream bugs the guards were hiding.
+
+**Validation:** `npx tsc --noEmit` clean. `npm run desktop:map:build` succeeded (`✓ built in 16.44s`). `npx vitest run tests/scenario_harness_contracts.test.ts` passed 20/20 with the briefing fix in place (was 9 failed / 11 passed without it). Full vitest sweep at 11:19:01 ran 6904 passed / 19 skipped / 0 failed (704 files) with both changes applied.
+
+**Engine behavior changes that now flip on for headless runs** (previously SKIP-WHEN-NULL silenced): Decision Room cards, Opening Brief, News Ticker, autonomy-level-1 stance/opportunity/op proposals, paramilitary policy enforcement, casualty relevance derivation, territory flip direction, command briefing assembly. These were intentionally exposed per the audit; calibration drift expected. **Re-anchor pending under `LANE-V09X-PLAYER-FACTION-CONTRACT`** if/when 40w hash shifts beyond noise (full 40w run not in this session's scope).
+
+**Canon posture:** State schema unchanged (only the runtime default). `player_faction` field remains `?: FactionId` in `game_state.ts` per the existing optional contract; Phase B+ will tighten to required. Desktop runtime path (`desktop_sim.ts:119`) unchanged — still overlays the player's chosen faction over the baked artifact. No scenario data, RNG source, or save schema touched.
+
+**Docs:** Phase B scope closed in `docs/plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md`. Audit findings + backlog: `docs/40_reports/audits/20260517_STRUCTURAL_DEFECT_AUDIT_AND_VERIFICATION.md` + `docs/40_reports/CONSOLIDATED_BACKLOG.md` §16. Phases B+, C, D remain pending under the plan.
+
+---
+
+## [2026-05-17] fix(ui): hide non-surfaced Codex essays from sidebar (Phase A)
+
+**Scope:** Phase A of `docs/plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md`. Closes the visibility defect at `src/ui/map/components/CodexPanel.tsx:140` where every essay in `essayIndex` rendered into the sidebar regardless of whether the player had ever surfaced it.
+
+**Change:** `CodexPanel` now derives a `visibleEssaysByYear` map filtered by the resolver's `isUnlocked` verdict (which catches both fired-event essays and `ghost_when`-qualifying ghost entries). Years with zero visible essays no longer render a header. Header essay count drops the "X / Y" denominator (which leaked the total of non-surfaced essays) in favor of a visible-only count. Per-essay sidebar render also cleaned up: `unlocked` variable removed (always true after the filter), `data-awwv-codex-state` simplified to `ghost ? 'ghost' : 'unlocked'` (no more `locked` branch), `opacity-40` and "Locked" badge branches removed. The right-pane locked-state branch (`!selectedResolvedEssay?.isUnlocked`) is retained as defensive cover for any future race between click and resolver verdict.
+
+**Validation:** `npx vitest run tests/ui/codex_panel_dynamic_mount.test.ts tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts tests/v091_endgame_milestone_closure.test.ts` passed 88/88. `npx tsc --noEmit` clean. `npm run desktop:map:build` succeeded (`✓ built in 16.58s`). The existing "keeps unfired non-ghost essays locked" test in `codex_panel_dynamic_mount.test.ts` was renamed to "hides unfired non-ghost essays from the sidebar entirely" to match the new spec; its assertions now verify the locked Dayton entry is absent and empty year headers collapse.
+
+**Canon posture:** Renderer-only change. No state schema, scenario data, sim contract, save format, or RNG source touched. 40w/188w hash byte-stable by construction.
+
+**Docs:** Phase A scope closed in `docs/plans/2026-05-17-two-level-event-surfacing-and-codex-visibility-plan.md`. Phases B, B+, C, D remain pending under that plan; see `docs/plans/MASTER_ROADMAP.md` lines 7 and 720.
+
+---
+
 ## [2026-05-16] feat(ui): add ops planning target discovery and convoy modal
 
 **Scope:** Renderer/player-decision roadmap continuation from `docs/plans/2026-05-16-ops-planning-modal-target-discovery-plan.md` and `docs/plans/2026-05-16-convoy-system-completion-plan.md`.

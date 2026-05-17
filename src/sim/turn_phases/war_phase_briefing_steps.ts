@@ -3,11 +3,11 @@ import type { NamedPhase } from '../turn_pipeline_types.js';
 export const warPhaseBriefingSteps: NamedPhase[] = [
     {
         name: 'assemble-command-briefing',
-        run: (context) => {
+        run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
-            const { assembleCommandBriefing } = require('../briefing/collect_briefing.js');
+            const { assembleCommandBriefing } = await import('../briefing/collect_briefing.js');
             const briefing = assembleCommandBriefing(context.state, playerFaction);
             context.state.military.last_briefing = briefing;
         }

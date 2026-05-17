@@ -1115,6 +1115,16 @@ export async function buildScenarioStartupState(
         settlementGraph: graph,
         operationalData: operationalData ?? undefined
     });
+    // Harness-path player_faction default. The inner `createInitialGameState` call above
+    // intentionally leaves player_faction undefined as the canonical faction-neutral state.
+    // This `buildScenarioStartupState` function — which produces both headless calibration
+    // runs AND the baked desktop startup artifact (regenerated via
+    // `npm run desktop:startup-snapshot:build`) — applies the RBiH default here. Desktop
+    // startNewCampaign then overlays the user's chosen faction on top of the loaded
+    // baked artifact. Without this default, every `playerFaction === X` gate in the
+    // engine returns false, silently disabling event decisions, autonomy-1 proposals,
+    // Decision Room, etc.
+    state.meta.player_faction = state.meta.player_faction ?? 'RBiH';
 
     // After state creation, political_controllers may have been promoted to OSID keys
     // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
