@@ -1,5 +1,7 @@
 # Pipeline Entry Points (AWWV)
 
+**CI triage:** See [CI_TRIAGE_PLAYBOOK.md](CI_TRIAGE_PLAYBOOK.md) for Baseline Regression, Desktop Release Guard, local Windows reproduction, and GitHub Actions auth fallback.
+
 **High-level map:** See [REPO_MAP.md](REPO_MAP.md) for pipelines, GUI locations, and the full "Change X → Go Here" table.
 
 **Quick change routing:** Scenario changes → `src/scenario/`, `data/scenarios/`. Early-war control flip (incl. B4 coercion) → `src/sim/early_war/control_flip.ts`. Authority derivation → `src/state/formation_lifecycle.ts`. Events (B1) → `src/sim/events/`. Map build → [MAP_BUILD_SYSTEM.md](MAP_BUILD_SYSTEM.md). Full routing: REPO_MAP.md §Change X → Go Here.

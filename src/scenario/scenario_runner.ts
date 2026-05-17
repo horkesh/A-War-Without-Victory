@@ -123,6 +123,10 @@ import {
     type CorpsAiSnapshot,
     type ActiveOperationSummary
 } from './scenario_end_report.js';
+import {
+    HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992 as CANONICAL_HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992,
+    HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992 as CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992,
+} from './historical_anchors.js';
 import { runAnomalyDetection } from './anomaly_detector.js';
 import type { AnomalyReport } from './anomaly_types.js';
 import type { OperationAAR } from '../sim/combat/operation_aar.js';
@@ -555,46 +559,6 @@ interface OverrideInventoryEntry {
     rationale: string;
 }
 
-const HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992: Array<{ settlement_id: string; expected_controller: string }> = [
-];
-// OSID-level anchors: each entry checks a specific painted OSID against simulated control.
-// No municipality plurality — pluralities are unstable (OSID count can flip on a single settlement).
-// Use the city-core or enclave-core OSID for each historically unambiguous location.
-const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected_controller: string }> = [
-    // City cores — unambiguous historical control
-    { osid: 'op:bijeljina:bijeljina_2', expected_controller: 'RS' },                         // Bijeljina city — VRS from April 1992
-    { osid: 'op:banja_luka:banja_luka_2', expected_controller: 'RS' },                       // Banja Luka city — VRS throughout
-    { osid: 'op:tuzla:tuzla_2', expected_controller: 'RBiH' },                               // Tuzla city — ARBiH throughout
-    { osid: 'op:bihac:bihac_2', expected_controller: 'RBiH' },                               // Bihac town — ARBiH 5th Corps pocket
-    { osid: 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo', expected_controller: 'RBiH' }, // Sarajevo centre — ARBiH throughout
-    // Specific contested/enclave OSIDs
-    { osid: 'op:zvornik:zvornik', expected_controller: 'RS' },             // Zvornik city — VRS captured May 1992
-    { osid: 'op:zvornik:sapna', expected_controller: 'RBiH' },        // Sapna — ARBiH stronghold
-    { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },  // Teocak — ARBiH stronghold
-    { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },              // Orasje pocket — HVO held throughout
-    { osid: 'op:brcko:brcko', expected_controller: 'RS' },                  // Brcko town — VRS captured May 1992, held throughout
-    { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },              // Brka (south Brcko) — ARBiH held
-    { osid: 'op:gorazde:gorazde_2', expected_controller: 'RBiH' },         // Gorazde enclave — ARBiH defended
-    { osid: 'op:srebrenica:srebrenica_2', expected_controller: 'RBiH' },   // Srebrenica enclave — ARBiH defended
-    { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },          // Vozuca — VRS Ozren salient
-    // Additional city-core & enclave anchors
-    { osid: 'op:gradacac:gradacac_2', expected_controller: 'RBiH' },      // Gradacac — ARBiH defended, never fell
-    { osid: 'op:rogatica:zepa_2', expected_controller: 'RBiH' },          // Zepa enclave — ARBiH defended (until 1995)
-    { osid: 'op:derventa:derventa_2', expected_controller: 'RS' },         // Derventa — VRS captured June 1992
-    { osid: 'op:prijedor:prijedor_2', expected_controller: 'RS' },         // Prijedor — VRS from April 1992
-    { osid: 'op:foca:foca_3', expected_controller: 'RS' },                // Foca — VRS from April 1992
-    { osid: 'op:visegrad:visegrad_2', expected_controller: 'RS' },         // Visegrad — VRS from April 1992
-    { osid: 'op:zenica:zenica_2', expected_controller: 'RBiH' },          // Zenica — ARBiH 3rd Corps HQ
-    { osid: 'op:travnik:travnik_2', expected_controller: 'RBiH' },        // Travnik — ARBiH held
-    { osid: 'op:mostar:mostar_zapad_2', expected_controller: 'HRHB' },    // Mostar west — HVO controlled
-    // NOTE: OSID names reflect clustering anchor settlement, not always the dominant city.
-    // boljanic_2 = Doboj city (27k pop); kopcic_2 = Bugojno city (22k pop)
-    { osid: 'op:doboj:boljanic_2', expected_controller: 'RS' },           // Doboj city (named boljanic_2) — VRS from May 1992
-    { osid: 'op:bugojno:kopcic_2', expected_controller: 'RBiH' },         // Bugojno city (named kopcic_2) — ARBiH/HVO held Apr 1992
-    { osid: 'op:gracanica:petrovo_2', expected_controller: 'RS' },        // Petrovo — VRS held (Ozren pocket), adjacent to Doboj
-    { osid: 'op:lukavac:brijesnica_donja_2', expected_controller: 'RS' }, // Brijesnica Donja — VRS held (Ozren pocket south flank)
-];
-
 function countControllers(snapshot: ControlKey[]): Map<string, number> {
     const counts = new Map<string, number>();
     for (const row of snapshot) {
@@ -627,7 +591,7 @@ function computeHistoricalControlAlignmentDiagnostics(
 
 function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorCheck[] {
     const bySid = new Map(final.map((row) => [row.settlement_id, row.controller ?? null]));
-    const settlementChecks = HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+    const settlementChecks = CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
         const actual = bySid.get(anchor.settlement_id) ?? null;
         return {
             anchor_type: 'settlement' as const,
@@ -637,7 +601,7 @@ function computeHistoricalAnchorChecks(final: ControlKey[]): HistoricalAnchorChe
             passed: actual === anchor.expected_controller
         };
     });
-    const osidChecks = HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+    const osidChecks = CANONICAL_HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
         const actual = bySid.get(anchor.osid) ?? null;
         return {
             anchor_type: 'osid' as const,

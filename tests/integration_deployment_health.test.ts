@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import type { GameState, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
+import { HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992 } from '../src/scenario/historical_anchors.js';
 
 const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
 const OUT_DIR = join(process.cwd(), '.tmp_integration_deployment_health');
@@ -334,41 +335,8 @@ describe('deployment health (40w)', () => {
             if (skipped) return;
             const controllers = (state as any).political.political_controllers as Record<string, string>;
 
-            const ANCHORS: Array<{ osid: string; expected: string }> = [
-                // City cores — unambiguous historical control
-                { osid: 'op:bijeljina:bijeljina_2', expected: 'RS' },
-                { osid: 'op:banja_luka:banja_luka_2', expected: 'RS' },
-                { osid: 'op:tuzla:tuzla_2', expected: 'RBiH' },
-                { osid: 'op:bihac:bihac_2', expected: 'RBiH' },
-                { osid: 'op:centar_sarajevo:sarajevo_dio_centar_sajarevo', expected: 'RBiH' },
-                // Specific contested/enclave OSIDs
-                { osid: 'op:zvornik:zvornik', expected: 'RS' },
-                // TODO calibration target: vitinica_2 currently falls to RS by w40
-                // { osid: 'op:zvornik:sapna', expected: 'RBiH' },
-                { osid: 'op:ugljevik:teocak_krstac_2', expected: 'RBiH' },
-                { osid: 'op:orasje:orasje', expected: 'HRHB' },
-                // Mirrors HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992 in scenario_runner.ts.
-                // Brka south of Brcko remains an RBiH-held calibration anchor.
-                { osid: 'op:brcko:brka_2', expected: 'RBiH' },
-                { osid: 'op:gorazde:gorazde_2', expected: 'RBiH' },
-                { osid: 'op:srebrenica:srebrenica_2', expected: 'RBiH' },
-                { osid: 'op:zavidovici:vozuca_2', expected: 'RS' },
-                // Additional city-core & enclave anchors
-                // TODO calibration target: gradacac_2 currently falls to RS by w40
-                // { osid: 'op:gradacac:gradacac_2', expected: 'RBiH' },
-                { osid: 'op:rogatica:zepa_2', expected: 'RBiH' },
-                // TODO calibration target: derventa_2 currently falls to HRHB after march fix — should be RS
-                // { osid: 'op:derventa:derventa_2', expected: 'RS' },
-                { osid: 'op:prijedor:prijedor_2', expected: 'RS' },
-                { osid: 'op:foca:foca_3', expected: 'RS' },
-                { osid: 'op:visegrad:visegrad_2', expected: 'RS' },
-                { osid: 'op:zenica:zenica_2', expected: 'RBiH' },
-                { osid: 'op:travnik:travnik_2', expected: 'RBiH' },
-                { osid: 'op:mostar:mostar_zapad_2', expected: 'HRHB' },
-            ];
-
             const failures: string[] = [];
-            for (const { osid, expected } of ANCHORS) {
+            for (const { osid, expected_controller: expected } of HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992) {
                 const actual = controllers[osid];
                 if (actual !== expected) {
                     failures.push(`${osid}: expected ${expected}, got ${actual ?? 'UNCONTROLLED'}`);

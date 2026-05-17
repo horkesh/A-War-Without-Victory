@@ -4,6 +4,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
 
+## [2026-05-17] test(ci): add focused scenario anchor feedback loop
+
+**Scope:** First implementation batch from `docs/plans/2026-05-17-ci-test-feedback-loop-plan.md`.
+
+**Change:** Centralized historical control anchor expectations in `src/scenario/historical_anchors.ts`; updated `src/scenario/scenario_runner.ts` and `tests/integration_deployment_health.test.ts` to consume the canonical OSID anchors; added `tests/scenario_anchor_contract.test.ts`; added `npm run test:vitest:scenario:anchors`; and added a Baseline Regression `scenario-anchors` job after `typecheck`. Added `docs/40_reports/audits/20260517_CI_TEST_FEEDBACK_LOOP_AUDIT.md` and `docs/20_engineering/CI_TRIAGE_PLAYBOOK.md`, linked from `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, with local Windows and GitHub Actions triage notes.
+
+**Validation:** `npm.cmd run test:vitest:scenario:anchors` passed 2 files / 3 tests with 10 skipped in 106.96s. `npx.cmd tsc --noEmit` passed. `git diff --check` on touched implementation/docs files passed with CRLF normalization warnings only. `npm.cmd run desktop:startup-snapshot:build` passed in 5.514s. `npm.cmd run test:vitest:fast` hit the local 600s command timeout and then Vitest emitted `EPIPE`; this is recorded as audit evidence and not treated as a regression from this patch.
+
+**Canon posture:** Test/process infrastructure only. No simulation rules, scenario data, random source, save schema, calibration target, generated startup artifact, or full scenario gate was weakened. The new CI job is additive early signal; full `test` and `scenarios` jobs remain.
+
+---
+
 ## [2026-05-17] docs(plans): polish roadmap-linked implementation plans
 
 **Scope:** Documentation-only polish pass across the roadmap-linked 2026-05-17 plan set after parallel plan audits.
