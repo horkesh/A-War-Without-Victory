@@ -382,8 +382,7 @@ export function computeCorpsOperationReadiness(
     corpsId: FormationId,
 ): CorpsOperationReadinessTraits {
     const officers = corpsBrigadeOfficerQuality(state, corpsId);
-    const factionId = (state.military?.formations?.[corpsId]?.faction
-        ?? state.military?.corps_command?.[corpsId]?.['faction' as never]) as FactionId | undefined;
+    const factionId: FactionId | undefined = state.military?.formations?.[corpsId]?.faction;
     // Resolve faction: if corps formation is present, use its faction; otherwise
     // fall back to scanning subordinate brigades (deterministic — sorted IDs).
     const faction = factionId ?? resolveFactionFromSubordinates(state, corpsId);
@@ -473,7 +472,7 @@ export function buildCorpsOperationReadinessInputSnapshot(
     corpsId: FormationId,
 ): CorpsOperationReadinessInputSnapshot {
     const officers = corpsBrigadeOfficerQuality(state, corpsId);
-    const factionId = state.military?.formations?.[corpsId]?.faction as FactionId | undefined;
+    const factionId: FactionId | undefined = state.military?.formations?.[corpsId]?.faction;
     const faction = factionId ?? resolveFactionFromSubordinates(state, corpsId);
     const maturity = factionOfficerMaturityNormalized(state, faction);
     const cap = factionCapabilityProfile(state, faction);
@@ -523,7 +522,7 @@ function resolveFactionFromSubordinates(state: GameState, corpsId: FormationId):
         const f = formations[id] as FormationState | undefined;
         if (!f || f.status !== 'active') continue;
         if (f.corps_id !== corpsId) continue;
-        if (typeof f.faction === 'string') return f.faction as FactionId;
+        if (typeof f.faction === 'string') return f.faction;
     }
     return 'RBiH';
 }

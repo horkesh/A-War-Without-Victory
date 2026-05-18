@@ -20,6 +20,16 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 19 — Autonomous multi-lane closeout
+
+| Lane | Status | Source |
+|---|---|---|
+| GUI Playtest D1 (advance-turn gate + RootErrorBoundary) | Verified-stale | Report: `docs/40_reports/implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md`. 23/23 focused tests pass; surfaces and tests already on disk. |
+| GUI Playtest D2 (osid-damage + force-quality coord validity) | Verified-stale | Report: `docs/40_reports/implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md`. Builder guards + coord-validity regressions already on disk. |
+| Strict-null Phase 2 Batch 18 | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md`. 11 escapes removed across `battle_resolution.ts`, `combat_predictor.ts`, `commander/force_eval.ts`, `corps_operation_readiness.ts`, `front_emergence.ts`; Phase 2 remaining 66 → 55. |
+| Sector reconstruction Batch 19 staffability-filter optimization | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md`. Byte-identical optimization in `corps_front_sectors.ts`; 40w n1895 hash `b14179d65639860c` matches Batch 17 baseline; new `:staffability-filter:unique-front-counts` sidecar label. |
+| `apr1992_52w` baseline drift | Pre-existing | Same actual hash reproduces on clean tree (stashed). Carried forward as a separate scenario-fixture lane. |
+
 ## Completed Batch 3
 
 | Lane | Status | Source |

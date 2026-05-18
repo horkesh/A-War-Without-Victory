@@ -28,8 +28,10 @@ export function deriveFrontStability(
     let hasOscillating = false;
     for (const eid of edgeIds) {
         const seg = segments[eid];
-        const streak = Number.isInteger(seg?.active_streak) ? seg!.active_streak! : 0;
-        const maxStreak = Number.isInteger(seg?.max_active_streak) ? seg!.max_active_streak! : 0;
+        const rawStreak = seg?.active_streak;
+        const rawMaxStreak = seg?.max_active_streak;
+        const streak = typeof rawStreak === 'number' && Number.isInteger(rawStreak) ? rawStreak : 0;
+        const maxStreak = typeof rawMaxStreak === 'number' && Number.isInteger(rawMaxStreak) ? rawMaxStreak : 0;
         minStreak = Math.min(minStreak, streak);
         if (streak === 1 && maxStreak > 1) hasOscillating = true;
     }

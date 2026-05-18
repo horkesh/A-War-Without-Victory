@@ -270,6 +270,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'buildFactionSectors:${faction}:corps-sector-construction',
             'buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build',
             'buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter',
+            'buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter:unique-front-counts',
             'buildFactionSectors:${faction}:final-invariant-and-coverage',
             'buildFactionSectors:${faction}:friendly-osid-setup',
             'buildFactionSectors:${faction}:front-edge-consolidation',

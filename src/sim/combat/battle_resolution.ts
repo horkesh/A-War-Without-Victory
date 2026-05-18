@@ -874,7 +874,7 @@ export function resolveBattleOrders(
     for (const [formationId, targetSid] of orderEntries) {
         const formation = formations[formationId];
         if (!formation || formation.faction == null) continue;
-        const defenderFaction = pc[targetSid] as FactionId | null | undefined;
+        const defenderFaction = pc[targetSid];
         if (!defenderFaction || defenderFaction === formation.faction) continue;
         const neighbors = adjacency.get(targetSid) ?? [];
         const fromSid = formation.hq_sid;
@@ -898,8 +898,8 @@ export function resolveBattleOrders(
         const formationId = attackerIds[0];
         const formation = formations[formationId];
         if (!formation || formation.faction == null) continue;
-        const attackerFaction = formation.faction as FactionId;
-        const defenderFaction = pc[targetSid] as FactionId | null | undefined;
+        const attackerFaction = formation.faction;
+        const defenderFaction = pc[targetSid];
         if (!defenderFaction || defenderFaction === attackerFaction) continue;
 
         // --- RBiH-HRHB combat gate: allied, mobilizing, ceasefire, or Washington ---

@@ -698,8 +698,13 @@ function canCorpsStaffSectorFront(
     componentOf: Map<string, number>,
     corpsBrigadeComponents: Set<number>,
     factionBrigadeComponents: Set<number>,
+    uniqueFrontOsidsOverride?: Set<string>,
 ): boolean {
-    const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, siblingSectors);
+    // The override path is invocation-local: the staffability filter rebuilds
+    // the same set in O(total OSIDs) once per corps rather than O(siblings *
+    // sub_segments * friendly_osids) per sector. Sibling-iteration order and the
+    // returned set's contents are identical to getSectorUniqueFrontOsids.
+    const uniqueFrontOsids = uniqueFrontOsidsOverride ?? getSectorUniqueFrontOsids(sector, siblingSectors);
     if (uniqueFrontOsids.size > 0) {
         if (canAnyBrigadeReachAny(
             corpsBrigadeLocations,
@@ -2578,38 +2583,66 @@ function buildFactionSectors(
         const corpsBrigadeLocations = activeCombatLocationsByCorps.get(corpsId) ?? [];
 
         _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter`, () => {
-        for (const sector of corpsMultiSectors) {
-            // FIX 1 (Option Y): Strengthened unstaffable-sector guard.
-            //
-            // Original check: if no corps brigade shares the same friendly connected
-            // component as the sector, skip it. Bug: getSectorComponent returns the
-            // component of the FIRST territory OSID found in componentOf, which may
-            // be a shared junction OSID (kijevo_2) that IS in the main component —
-            // causing a ghost sector (golubici_2 is unreachable) to pass the guard.
-            //
-            // New check: compute the sector's UNIQUE front OSIDs (front OSIDs not
-            // shared with any sibling sector for this corps). If unique OSIDs exist
-            // and NO corps brigade can reach any of them within
-            // TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS hops through friendly territory,
-            // the sector is an unstaffable ghost — skip it early.
-            //
-            // Falls back to the original component check when all front OSIDs are
-            // shared (no unique ones), so junction-only sectors are still handled.
-            if (!canCorpsStaffSectorFront(
-                sector,
-                corpsMultiSectors,
-                corpsBrigadeLocations,
-                factionBrigadeLocations,
-                adjacency,
-                friendlyOsids,
-                preComponentOf,
-                corpsBrigadeComponents,
-                factionBrigadeComponents,
-            )) {
-                continue;
+            // Pre-compute per-OSID distinct-sector counts across all of this
+            // corps' multi-sectors. An OSID is "unique to a single sector"
+            // (per getSectorUniqueFrontOsids semantics) iff exactly one sector
+            // contains it in any sub_segments.friendly_osids. Building this map
+            // once and querying per-sector replaces an O(N^2) sharedPool rebuild
+            // with O(N) linear work. Reuse is invocation-local — the map dies
+            // when this perfTime wrapper returns.
+            const osidSectorCount = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter:unique-front-counts`, () => {
+                const counts = new Map<string, number>();
+                for (const sectorEntry of corpsMultiSectors) {
+                    const seenInSector = new Set<string>();
+                    for (const ss of sectorEntry.sub_segments) {
+                        for (const o of ss.friendly_osids) {
+                            if (seenInSector.has(o)) continue;
+                            seenInSector.add(o);
+                            counts.set(o, (counts.get(o) ?? 0) + 1);
+                        }
+                    }
+                }
+                return counts;
+            });
+            for (const sector of corpsMultiSectors) {
+                // FIX 1 (Option Y): Strengthened unstaffable-sector guard.
+                //
+                // Original check: if no corps brigade shares the same friendly connected
+                // component as the sector, skip it. Bug: getSectorComponent returns the
+                // component of the FIRST territory OSID found in componentOf, which may
+                // be a shared junction OSID (kijevo_2) that IS in the main component —
+                // causing a ghost sector (golubici_2 is unreachable) to pass the guard.
+                //
+                // New check: compute the sector's UNIQUE front OSIDs (front OSIDs not
+                // shared with any sibling sector for this corps). If unique OSIDs exist
+                // and NO corps brigade can reach any of them within
+                // TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS hops through friendly territory,
+                // the sector is an unstaffable ghost — skip it early.
+                //
+                // Falls back to the original component check when all front OSIDs are
+                // shared (no unique ones), so junction-only sectors are still handled.
+                const uniqueFrontOsids = new Set<string>();
+                for (const ss of sector.sub_segments) {
+                    for (const o of ss.friendly_osids) {
+                        if (osidSectorCount.get(o) === 1) uniqueFrontOsids.add(o);
+                    }
+                }
+                if (!canCorpsStaffSectorFront(
+                    sector,
+                    corpsMultiSectors,
+                    corpsBrigadeLocations,
+                    factionBrigadeLocations,
+                    adjacency,
+                    friendlyOsids,
+                    preComponentOf,
+                    corpsBrigadeComponents,
+                    factionBrigadeComponents,
+                    uniqueFrontOsids,
+                )) {
+                    continue;
+                }
+                sectors.push(sector);
             }
-            sectors.push(sector);
-        }
         });
     }
     });

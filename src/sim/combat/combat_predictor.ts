@@ -267,7 +267,7 @@ export function predictCombatOutcome(
     const neighbors = getTacticalAdjacentOsids(state, attackerLoc as Osid, adjacency);
     if (!neighbors.includes(targetOsid)) return null;
 
-    const attackerFaction = attacker.faction as FactionId;
+    const attackerFaction = attacker.faction;
 
     const allAttackerIds = [attackerId, ...(additionalAttackers ?? [])];
     const attackerFormations = allAttackerIds
@@ -560,7 +560,7 @@ export function predictAllAdjacentTargets(
     if (!attacker || attacker.status !== 'active') return [];
     const loc = attacker.location_osid;
     if (!loc) return [];
-    const factionId = attacker.faction as FactionId;
+    const factionId = attacker.faction;
 
     const results: Array<{ osid: Osid; prediction: CombatPrediction }> = [];
 

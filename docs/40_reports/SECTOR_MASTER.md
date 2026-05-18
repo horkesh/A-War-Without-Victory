@@ -1,10 +1,24 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 17 corps-sector construction attribution)
+**Updated:** 2026-05-18 (Batch 19 staffability-filter optimization)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 19 staffability-filter optimization (byte-identical)
+
+**Change:** The staffability-filter loop inside `buildFactionSectors(...)` now precomputes per-OSID distinct-sector counts (`osidSectorCount: Map<string, number>`) once per corps under a new `:staffability-filter:unique-front-counts` sidecar label, and passes each sector's resulting unique-front-OSID set to `canCorpsStaffSectorFront(...)` via a new optional `uniqueFrontOsidsOverride` parameter. The override replaces the per-sector `getSectorUniqueFrontOsids(...)` shared-pool rebuild that was O(sectors × Σ sub_segments × friendly_osids) per corps.
+
+**Why:** Batch 17 evidence flagged `:staffability-filter` as one of the per-corps construction children worth inspecting. The shared-pool rebuild does the same total work as a single distinct-sector count followed by per-sector queries against that map; switching to the precompute is provably byte-identical and shifts the algorithm to O(N) where N is the total OSID-occurrences across the corps.
+
+**Equivalence proof:** An OSID is "unique to S" iff it appears in S's `sub_segments.friendly_osids` and not in any other sector's. Equivalently, only one sector in the corps contains that OSID. The new path queries `osidSectorCount.get(osid) === 1` and produces the same Set with the same insertion order; downstream `canAnyBrigadeReachAny(...)` only reads via `.has(...)`. The recovery caller `recoverDroppedFrontEdges` keeps the legacy path (no override).
+
+**Run evidence:** 40w n1895 final hash `b14179d65639860c` matches Batch 17 baseline literally. 27/27 anchors PASS; 6/6 bot benchmarks PASS; `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1895` PASS. `tests/sector_partition_instrumentation.test.ts` updated to require the new `:unique-front-counts` label and passes 12/12.
+
+**Wall-clock measurement note:** A paired pre/post wall-clock delta was not captured in this batch because the same-machine n1894 timing was not preserved. The next sector-perf batch should pair flag-on `PERF_PROFILE_SECTOR_PARTITION=true` runs against an n1894-equivalent rebuild to quantify the staffability-filter delta.
+
+**Report:** [implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md](implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md)
 
 ## 2026-05-18: Batch 17 corps-sector construction attribution
 

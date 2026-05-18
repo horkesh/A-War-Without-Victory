@@ -47,8 +47,8 @@ const FATIGUE_DEFEND_FLOOR = 0.75;
 
 /**
  * Convert supply status string to combat multiplier.
- * The briefing supply_by_osid is typed as unknown for now; brigades don't carry
- * supply_status directly. Use a conservative default.
+ * The briefing supply_by_osid does not carry per-brigade narrowing yet;
+ * brigades don't expose supply_status directly. Use a conservative default.
  */
 function supplyMult(supplyStatus: string | undefined): number {
     switch (supplyStatus) {
