@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] perf(sector): Batch 37 split-pieces redundant normalize skip (byte-identical)
+
+**Type:** Pure compute-elision perf optimization inside `enforceFinalSectorGeometryInvariants:split-pieces`.
+
+**Change:** `src/sim/combat/corps_front_sectors.ts` `enforceFinalSectorGeometryInvariants:split-pieces` inner loop now guards the per-piece `normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta)` call on `contiguousPiece !== sector`. In the common 1-contiguous-piece pass-through case (the seven pass-through paths inside `splitNonContiguousSectors` all `result.push(sector)`), the function returns the SAME object reference and only mutates `sector_id` — never `edge_ids` or `sub_segments`. The line-960 normalize (BEFORE `splitNonContiguousSectors`) already canonicalized the sector, so the post-split normalize is redundant compute that produces byte-identical state. The multi-piece path (`contiguousPiece !== sector`) still runs normalize on the freshly-built piece objects.
+
+**Determinism:** 40w n1913 hash `b14179d65639860c` matches Batch 17 / Batch 32 / Batch 35 baseline literally. validate_run_consistency PASS (0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 below-floor missed legal donors). Sector geometry, role-bucket truth, war-front faction-side coverage, reserve cap all PASS. The four "below floor with no legal donor" tildes are informational and identical to prior runs. Per scenario-creator-runner-tester verdict: VERDICT: GO — hash byte-identical, validator PASS, pass-through invariant proven, zero behavioral change.
+
+**Verification:** `npx tsc --noEmit` PASS; `vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts` 53/53 PASS (including G1.5 cache ON vs OFF byte-equality across ≥100 deterministic state variants, pristine and final-pass real-save fixtures, back-to-back invocation stability, and war-pass + final-pass split). 40w byte-identity proof n1913 + consistency validator PASS.
+
+**Next-step candidates carried:** BFS reuse across same-corps sectors inside `splitNonContiguousSectors`, `buildSectorSliceFromSubSegment` sort-fold, in-`splitNonContiguousSectors` trailing renumber elision in pass-through. After split-pieces hypotheses exhausted, `:voronoi-repair` (568 ms / 26%) is the runner-up perf target.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH37_SECTOR_SPLIT_PIECES_PERF.md`.
+
+---
+
 ## [2026-05-18] test(merge-gate): Batch 36 full fast-suite repair
 
 **Type:** Test/fixture/generated-artifact merge-gate repair.

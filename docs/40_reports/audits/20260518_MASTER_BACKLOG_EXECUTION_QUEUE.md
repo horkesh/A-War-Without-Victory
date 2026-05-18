@@ -3,6 +3,12 @@
 **Date:** 2026-05-18
 **Scope:** Parent-side execution queue for the user request to continue implementing the live `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` backlog without stopping for manual prioritization.
 
+## Completed Batch 37 — Sector `:split-pieces` redundant normalize skip
+
+| Lane | Status | Source |
+|---|---|---|
+| Skip redundant `normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta)` when `contiguousPiece === sector` (pass-through case from `splitNonContiguousSectors`) | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH37_SECTOR_SPLIT_PIECES_PERF.md`. Targets Batch 32 next-step hypothesis #2 (normalize double-call on single-piece sectors). 1-line `if`-guard in `enforceFinalSectorGeometryInvariants:split-pieces` inner loop. 40w n1913 hash `b14179d65639860c` matches baseline; consistency validator PASS; 53/53 focused sector tests PASS (incl. G1.5 cache ON/OFF byte-equality across ≥100 deterministic state variants). Carried next-step candidates: `splitNonContiguousSectors` BFS reuse across same-corps sectors; `buildSectorSliceFromSubSegment` sort-fold; in-`splitNonContiguousSectors` trailing renumber elision. `:voronoi-repair` (568 ms / 26%) runner-up. |
+
 ## Completed Batch 36 - Fast-suite merge gate repair
 
 | Lane | Status | Source |

@@ -974,7 +974,15 @@ function enforceFinalSectorGeometryInvariants(
                 );
 
                 for (const contiguousPiece of contiguousPieces) {
-                    normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta);
+                    // Skip redundant normalize when the piece is the same object
+                    // as the input sector (common pass-through case: 1 contiguous
+                    // piece returned by splitNonContiguousSectors). The line 960
+                    // normalize already canonicalized this sector, and the
+                    // pass-through paths only mutate sector_id, never edge_ids
+                    // or sub_segments — so re-normalizing is byte-identical work.
+                    if (contiguousPiece !== sector) {
+                        normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta);
+                    }
                     const splitPieces = contiguousPiece.edge_ids.length > MAX_SECTOR_EDGES
                         ? splitOversizedSubSegments(contiguousPiece.corps_id, contiguousPiece.sub_segments, edgeMeta)
                         : contiguousPiece.sub_segments;

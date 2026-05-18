@@ -1,8 +1,22 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 32 enforceFinalSectorGeometryInvariants 5-phase sub-attribution)
+**Updated:** 2026-05-18 (Batch 37 :split-pieces redundant normalize skip)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-18: Batch 37 `:split-pieces` redundant normalize skip (byte-identical)
+
+**Change:** `src/sim/combat/corps_front_sectors.ts` `enforceFinalSectorGeometryInvariants:split-pieces` inner loop now guards the per-piece `normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta)` call on `contiguousPiece !== sector`. The seven pass-through paths inside `splitNonContiguousSectors` all `result.push(sector); continue;` — same object reference. The function's only mutation on pass-through is the trailing `result[i]!.sector_id = sector:${corpsId}:${i}` renumbering; `edge_ids` and `sub_segments` are untouched. The line-960 normalize (BEFORE `splitNonContiguousSectors`) already canonicalized the sector, and `normalizeSectorSubSegmentsFromEdges` is idempotent on already-normalized input — re-normalizing the pass-through reference is byte-identical compute that produces no observable state change (lines 992-995 then unconditionally overwrite `sub_segment_id`).
+
+**Why byte-identical:** seven enumerated pass-through paths in `sector_splitting.ts` (lines 53, 81-84, 95-97, 103-106, 129-130, 206-209, 264-266) all `result.push(sector)` with the input reference. `normalizeSectorSubSegmentsFromEdges` reads `sector.edge_ids`, `sector.faction`, and `sector.sub_segments[0]`; none of these are mutated by pass-through `splitNonContiguousSectors`. The downstream `splitOversizedSubSegments` and `buildSectorSliceFromSubSegment` calls operate on the line-960-normalized `sub_segments` either way.
+
+**Byte-identity:** 40w n1913 (default) hash `b14179d65639860c` matches baseline literally; consistency validator PASS (0 false owners / 0 disconnected sectors / 0 empty contested / 0 below-floor missed legal donors); per scenario-creator-runner-tester verdict: VERDICT: GO.
+
+**Next target (carried):** `splitNonContiguousSectors` BFS reuse across same-corps sectors; `buildSectorSliceFromSubSegment` sort-fold; `splitNonContiguousSectors` trailing renumber elision in pass-through. After split-pieces hypotheses exhausted, `:voronoi-repair` (568 ms / 26%) is the runner-up perf target.
+
+**Report:** [implemented/20260518_BATCH37_SECTOR_SPLIT_PIECES_PERF.md](implemented/20260518_BATCH37_SECTOR_SPLIT_PIECES_PERF.md)
 
 ---
 
