@@ -17,6 +17,7 @@
 - Keep runtime text deterministic and source-grounded.
 - Do not put sensitive-history prose into event notifications without historian/narrative approval.
 - Tests should pin unlock conditions, faction visibility, stable ordering, and fallback behavior.
+- Follow `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md`: sensitive prose needs source-backed facts, historian verdict, narrative/tone verdict, and user final approval before implementation.
 
 ## CCA-1 - Notification Residual Review Prep
 

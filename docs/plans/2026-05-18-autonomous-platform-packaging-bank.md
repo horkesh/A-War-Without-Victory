@@ -17,6 +17,7 @@
 - Any generated manifest must use sorted fields and stable hashes only.
 - Keep operator-only evidence labeled as pending.
 - Never claim clean-VM, store, signing, or public launch completion from dev-host runs.
+- Follow `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md`: prefer Microsoft Store MSIX for Windows trust/install UX when feasible; use Azure Artifact Signing / Trusted Signing for direct Windows distribution if eligible; do not buy or recommend EV solely for SmartScreen.
 
 ## PPB-1 - Reproducible Build Evidence Support
 
@@ -63,9 +64,10 @@
 **Tasks:**
 
 1. Inventory existing electron-builder config and packaging scripts.
-2. List required secrets/certificates/accounts and where they would enter config.
-3. Identify repo changes that can be done before secrets exist.
-4. Do not commit placeholder secrets, endpoints, or fake signing claims.
+2. Compare Microsoft Store MSIX, signed NSIS/direct download, Steam, and GOG needs against the adopted research baseline.
+3. List required secrets/certificates/accounts and where they would enter config.
+4. Identify repo changes that can be done before secrets exist.
+5. Do not commit placeholder secrets, endpoints, or fake signing claims.
 
 **Validation:**
 

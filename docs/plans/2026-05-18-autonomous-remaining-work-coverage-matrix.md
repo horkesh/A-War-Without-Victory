@@ -18,6 +18,18 @@
 4. When a lane closes, update this matrix, the dispatch index, the relevant master doc, and `docs/PROJECT_LEDGER.md`.
 5. If a row says gated or operator-only, Claude may prepare evidence, inventories, packet drafts, and tests, but must not claim the gate closed.
 
+## Gated Decision Research Baseline
+
+`docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md` is the controlling research note for the gated rows below. It adopts these planning decisions:
+
+- Windows release strategy: Microsoft Store MSIX is the preferred trust/install path when feasible; signed NSIS/direct download is secondary.
+- Windows direct signing: Azure Artifact Signing / Trusted Signing is preferred if identity eligibility is met; do not buy EV solely for SmartScreen.
+- SmartScreen: direct-download reputation cannot be claimed until it accumulates externally.
+- Store/trailer/press: public claims must be backed by implemented evidence and platform review.
+- BCS localization: no supported-language claim without native translation plus independent revision/LQA.
+- Sensitive-history prose: historian review, narrative/tone review, and user approval are required before final wording.
+- FORAWWV and Open Design Questions: Claude prepares decision packets only; user/canon owner decides.
+
 ## Remaining Work Matrix
 
 | Remaining Work Category | Autonomous Owner Plan | Claude May Execute? | Stop Gate |

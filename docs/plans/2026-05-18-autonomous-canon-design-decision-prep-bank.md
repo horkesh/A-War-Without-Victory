@@ -17,6 +17,7 @@
 - Separate facts from recommendations.
 - Every packet must end with "Decision needed" and concrete options.
 - If current code already closed a supposed gap, mark it verified-stale with evidence instead of inventing work.
+- Follow `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md` for FORAWWV, Open Design Question, sensitive-history, historian-approval, and localization gates.
 
 ## CDP-1 - Open Design Question Ratification Packet
 

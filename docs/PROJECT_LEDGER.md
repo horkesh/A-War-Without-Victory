@@ -6163,3 +6163,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`; `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`; `docs/plans/2026-05-18-autonomous-canon-design-decision-prep-bank.md`; `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`; `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`; `docs/plans/2026-05-18-autonomous-product-polish-and-assets-bank.md`; updates to `docs/plans/2026-05-18-autonomous-dispatch-index.md`, `docs/plans/2026-05-17-roadmap-plan-coverage-closure.md`, and `docs/plans/MASTER_ROADMAP.md`.
 
 ---
+
+## [2026-05-18] docs(release): document gated release and canon decision research
+
+**Type:** Research-backed planning/governance documentation only. No runtime behavior, UI rendering, simulation output, scenario data, save schema, packaging metadata, signing config, generated artifact, or FORAWWV text changed.
+
+**Change:** Added a source-backed decision report for gates that remain outside autonomous implementation: clean-VM proof, Windows/macOS signing, SmartScreen reputation, store/press/trailer publication, BCS localization quality, sensitive-history prose approval, FORAWWV edits, Open Design Question decisions, and historian approval for remaining notification/Codex content. Wired the report into the autonomous remaining-work matrix and the platform/canon/content lane banks so future Claude prompts use the adopted release/canon gate policy.
+
+**Determinism:** Documentation only.
+
+**Verification:** `git diff --check` performed during docs closeout.
+
+**Artifacts:** `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md`; updates to `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`, `docs/plans/2026-05-18-autonomous-canon-design-decision-prep-bank.md`, and `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`.
+
+---
