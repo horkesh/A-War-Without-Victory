@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sim): Batch 35 HRHB patron directive scope helper + per-corps divergence test + verify-stale cleanup (byte-identical)
+
+**Type:** Helper extraction + integration test + verify-stale doc propagation.
+
+**Change:** Extracted the duplicated inline `patron_directives` lookup from `src/sim/combat/bot_corps_stance.ts` (12 lines) and `src/sim/combat/order_interpretation.ts` (11 lines) into a single typed helper `getActivePatronDirective(faction, turn, state, corpsId?)` at the new module `src/sim/combat/patron_directive_scope.ts`. When `corpsId` is supplied, the lookup respects the hybrid scope per the 2026-05-17 decision (filters by optional `corps_ids?` array — Posavina-exempt default + Mostar/Central-Bosnia/Tomislavgrad-divergent post-w40). When `corpsId` is omitted, returns the first directive whose turn window matches — preserves the faction-wide officer-level behavior literally. Added `tests/hrhb_patron_directive_scope.test.ts` (13 tests, 5 describe blocks) asserting per-corps divergence (Herzegovina Offensive vs Central Bosnia Restraint at week 45), full HRHB convergence at week 55, Posavina exemption at weeks 5 and 100, non-HRHB no-op for RBiH/RS, faction-wide variant preserving first-active-directive semantics, and edge cases (empty timeline, missing war_timeline, inclusive start_week / exclusive end_week boundaries).
+
+**Determinism:** 40w n1912 hash `b14179d65639860c` matches Batch 17 baseline literally. Pure helper extraction; both call sites preserve their original lookup semantics byte-for-byte. validate_run_consistency PASS; anchors 27/27; benchmarks 6/6 (HRHB 0.122 / RBiH 0.358 / RS 0.520 within tolerance at t20/t40).
+
+**Verification:** `npx tsc --noEmit` PASS; `vitest run tests/hrhb_patron_directive_scope.test.ts tests/patron_directives.test.ts` 16/16 PASS (13 new + 3 existing).
+
+**Verify-stale cleanup (per user follow-up "make sure stale items are cleaned so they don't resurface"):** propagated VERIFIED-STALE markers / pointer updates for 8 lanes already shipped per the 2026-05-17 / Batch 6 / Batch 18 implementation waves but still being surfaced by broad-grep triage as "open": RS Six Strategic Goals event (impl at `data/scenarios/events/war_1992.json:1-159`; *open audit-question*: retroactive §6 Ring-3 sign-off for "aggressive" branch), Cinematic verdict (Batch 6), Presidential campaign-loop validation (Batch 6), Formation-life FL-A/FL-B (Batch 6), Soundscape kickoff/audio stub (2026-05-17), Officer mini-bios first-pass (2026-05-17), Diplomacy panel (2026-05-17), Accessibility P0 closeout (2026-05-17 impl + 2026-05-18 verify-stale audit). MEMORY.md `rs_strategic_goals.md` description updated to mark VERIFIED + flag the §6 question. Authored durable feedback memory `feedback_triage_must_cross_check_closure.md` capturing the lesson: future broad-grep audits MUST cross-check candidate lanes against the canonical milestone-closure log lines in MASTER_ROADMAP.md before classifying as "open".
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH35_HRHB_PATRON_DIRECTIVE_SCOPE.md`; new test file `tests/hrhb_patron_directive_scope.test.ts`; new helper module `src/sim/combat/patron_directive_scope.ts`; new durable feedback memory.
+
+---
+
 ## [2026-05-18] feat(serialization): Batch 33 serialization sub-attribution + replay-frame consumer audit (byte-identical)
 
 **Type:** Serialization sidecar-only sub-attribution scaffolding + consumer audit on the per-turn replay-frame downgrade option.

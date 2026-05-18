@@ -48,6 +48,7 @@ import {
     THREAT_OFFENSIVE_THRESHOLD,
 } from './bot_constants.js';
 import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
+import { getActivePatronDirective } from './patron_directive_scope.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import {
     averageCohesion,
@@ -274,20 +275,12 @@ export function generateCorpsStanceOrders(
         }
 
         // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances.
-        // Directives may scope to specific corps via optional corps_ids[]. If absent, applies to all.
-        // Posavina (hvo_northwest_bosnia) is historically exempt — fighting for survival from day one.
+        // Hybrid scope per 2026-05-17 decision — see patron_directive_scope.ts.
+        // Posavina (hvo_northwest_bosnia) is historically exempt via timeline data.
         if (faction === 'HRHB') {
-            type PatronDirective = { start_week: number; end_week: number; stance_ceiling: string; corps_ids?: string[] };
-            const timeline = state.military.war_timeline as (typeof state.military.war_timeline & { patron_directives?: Record<string, PatronDirective[]> }) | undefined;
-            const directives = timeline?.patron_directives?.['HRHB'];
-            if (directives) {
-                const activeDirective = directives.find(d =>
-                    turn >= d.start_week && turn < d.end_week
-                    && (!d.corps_ids || d.corps_ids.includes(corps.id))
-                );
-                if (activeDirective && STANCE_RANK[stance] > STANCE_RANK[activeDirective.stance_ceiling as CorpsStance]) {
-                    stance = activeDirective.stance_ceiling as CorpsStance;
-                }
+            const activeDirective = getActivePatronDirective(faction, turn, state, corps.id);
+            if (activeDirective && STANCE_RANK[stance] > STANCE_RANK[activeDirective.stance_ceiling as CorpsStance]) {
+                stance = activeDirective.stance_ceiling as CorpsStance;
             }
         }
 

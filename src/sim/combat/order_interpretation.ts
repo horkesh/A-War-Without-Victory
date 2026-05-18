@@ -25,6 +25,7 @@ import type {
     OfficerEventType,
 } from '../../state/officer_types.js';
 import { getCorpsCommander } from './officer_system.js';
+import { getActivePatronDirective } from './patron_directive_scope.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -324,21 +325,13 @@ function computeInterpretation(
     const isWarlordModifierActive = reliabilityModifier !== baseReliabilityModifier;
     let score = computeComplianceScore(competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
 
-    // Check PatronDirective stance_ceiling (cap effective stance if needed)
-    // patron_directives lives on war_timeline as Record<string, PatronDirective[]>
-    type PatronDirectiveRaw = { start_week: number; end_week: number; stance_ceiling: string };
-    const timeline = state.military.war_timeline as (typeof state.military.war_timeline & {
-        patron_directives?: Record<string, PatronDirectiveRaw[]>;
-    }) | undefined;
+    // Check PatronDirective stance_ceiling (cap effective stance if needed).
+    // Officer-level interpretation has no corps context, so this consumer uses
+    // the faction-wide variant (no corpsId argument) — matching legacy behavior
+    // before the 2026-05-17 hybrid-scope helper extraction. See patron_directive_scope.ts.
     const turn = state.meta.turn;
-    const factionDirectives = timeline?.patron_directives?.[data.faction];
-    let stanceCeiling: string | null = null;
-    if (factionDirectives) {
-        const activeDirective = factionDirectives.find(d => turn >= d.start_week && turn < d.end_week);
-        if (activeDirective) {
-            stanceCeiling = activeDirective.stance_ceiling;
-        }
-    }
+    const activeDirective = getActivePatronDirective(data.faction, turn, state);
+    const stanceCeiling: string | null = activeDirective?.stance_ceiling ?? null;
 
     let effectiveStance = determineEffectiveStance(orderedStance, preferredStance, score);
 
