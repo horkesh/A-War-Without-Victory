@@ -14,11 +14,12 @@
 | Branch | `codex/execute-2026-05-17-plans` |
 | Merge base with `origin/main` | `4fa16b13417437d4dafa29aa0bd82cc367ddd6f9` |
 | Batch 47 packet commit | `d70f55160d59ec4b4dda27e7ef552b3835c83cde` |
-| Commits ahead of `origin/main` at Codex review | **70** |
-| `git status` | clean at packet authoring; re-check before push |
-| `git diff --shortstat origin/main..HEAD` | Recompute live before push / PR creation |
+| Pre-push merge-gate tip (live HEAD when §8 ran) | `6a56e36d2c795dabb8e64a9283a31dde4d98837c` |
+| Commits ahead of `origin/main` at fresh-gate run | **70** |
+| `git status` | clean at packet authoring; clean at fresh-gate run |
+| `git diff --shortstat origin/main..HEAD` (fresh-gate run) | `598 files changed, 73914 insertions(+), 41321 deletions(-)` |
 
-> A committed Markdown packet cannot self-describe the final branch tip hash without becoming stale on commit. Use `git rev-parse HEAD` for the live tip before push / PR creation.
+> A committed Markdown packet cannot self-describe the final branch tip hash without becoming stale on commit. The §8 fresh merge-gate block below records the live HEAD at the moment those gates executed. Use `git rev-parse HEAD` for the live tip before push / PR creation; if HEAD has advanced past the §8 commit, re-run the gates.
 
 ---
 
@@ -114,16 +115,16 @@ Each row records the strongest **locally verifiable** signal for a claim. Stale 
 
 | Area | Evidence | Command / report | Risk |
 |---|---|---|---|
-| 40w determinism (sim batches) | `40w n1915 hash b14179d65639860c` byte-identical | per-batch ledger entry; e.g. Batch 39 `5ef10e38` ledger | Hash is locked at Batch 39 commit; later UI batches (40-46) do not touch sim and cannot alter it. **Not stale.** |
-| 52w baseline regression | Refreshed Batch 20 (`2d66de92`) | ledger entry for Batch 20 | Later sector batches 21-32 reuse the same baseline; UI batches do not touch it. **Not stale.** |
-| Typecheck | `npx.cmd tsc --noEmit` clean | per-batch ledger entry, latest at Batch 46 (`7e05b967`) | Re-ran in every UI batch on this branch. **Current at tip.** |
-| Map build | `npm.cmd run desktop:map:build` clean | per-batch ledger entry, latest 16.76s at Batch 46 | Re-ran in every UI batch. **Current at tip.** |
+| 40w determinism (sim batches) | `40w n1915 hash b14179d65639860c` byte-identical | per-batch ledger entry; e.g. Batch 39 `5ef10e38` ledger | Hash is locked at Batch 39 commit; later UI batches (40-46) do not touch sim and cannot alter it. **Not stale** — re-confirmed by §8 `test:baselines` PASS at tip `6a56e36d`. |
+| Baseline regression sweep | PASS — "Baseline regression: all scenarios match" | `npm.cmd run test:baselines` (§8, tip `6a56e36d`) | **Current at tip.** |
+| Typecheck | `npx.cmd tsc --noEmit` clean | §8 fresh gate, tip `6a56e36d` | **Current at tip.** |
+| Map build | `npm.cmd run desktop:map:build` `built in 17.91s` | §8 fresh gate, tip `6a56e36d` | **Current at tip.** |
 | Targeted Vitest sweeps | UI-1: 40/40 / UI-2: 52/52 / UI-3: 46/46 / UI-4: 67/67 / UI-5: 114/114 / UI-6: 30/30 / UI-7: 33/33 | per-batch ledger entries (40-46) | Each sweep includes the regression layer plus the new focused test. **Current at tip.** |
+| Whole-suite Vitest run | **PASS: 785 files / 7159 tests pass; 2 file-level skipped, 18 test-level skipped; 797.76s** | `npm.cmd test` (§8, tip `6a56e36d`) | **Current at tip.** |
 | Full a11y matrix | 33/33 pass | `docs/40_reports/audits/20260518_A11Y_RC_BROWSER_EVIDENCE_VERIFICATION.md` | Static gate only. Live screen-reader / Playwright capture is operator-owned. |
-| Whole-suite Vitest run | NOT executed in this packet | n/a | If a merge-ready signal is required, run `npm.cmd test` and `npm.cmd run test:baselines` (see §5). |
-| Whitespace gate | `git diff --check` clean per batch | per-batch ledger | **Current.** |
-| Generated artifacts | `dist/tactical-map/` rebuilt 7× during UI batches | per-batch ledger | Reproducible from source; do not block merge. |
-| 40w run for UI batches | Skipped intentionally | per-batch ledger ("No 40w run — UI read-model only") | UI lanes touched only consumer-side projections; no sim path. |
+| Whitespace gate | `git diff --check` clean | §8 fresh gate, tip `6a56e36d` | **Current at tip.** |
+| Generated artifacts | `dist/tactical-map/` rebuilt at §8 fresh gate | §8 fresh gate, tip `6a56e36d` | Reproducible from source; do not block merge. |
+| 40w run for UI batches | Skipped intentionally | per-batch ledger ("No 40w run — UI read-model only") | UI lanes touched only consumer-side projections; no sim path. Baselines sweep above re-proves determinism at tip. |
 
 ---
 
@@ -163,9 +164,14 @@ verification).
 
 ## Test / build proof
 
-- Typecheck (`npx tsc --noEmit`) clean at every batch.
-- `desktop:map:build` clean at every UI batch.
-- Targeted Vitest sweeps: per-batch ledger, latest UI-7 33/33.
+- Fresh pre-push merge gate executed at tip `6a56e36d`:
+  - `tsc --noEmit`: clean.
+  - `npm test` (full Vitest sweep): 785 files / 7159 tests pass; 2
+    file-level skipped, 18 test-level skipped; 797.76s.
+  - `npm run test:baselines`: "Baseline regression: all scenarios match".
+  - `desktop:map:build`: built in 17.91s.
+  - `git diff --check`: clean.
+- Per-batch focused Vitest sweeps remain green (see ledger entries).
 - Full a11y matrix 33/33 pass — see
   `docs/40_reports/audits/20260518_A11Y_RC_BROWSER_EVIDENCE_VERIFICATION.md`.
 
@@ -192,10 +198,10 @@ verification).
 - Live browser/Playwright a11y capture is deferred to operator-owned
   follow-up (no engineering blocker — see §3 of the merge evidence
   packet).
-- Full `npm test` + `npm run test:baselines` were NOT re-executed at
-  branch tip in the autonomous session; per-batch focused sweeps and
-  CI history are the merge signal. The user may want to run the merge
-  gate locally before pushing.
+- All five engineering merge gates (`tsc --noEmit`, `npm test`,
+  `npm run test:baselines`, `desktop:map:build`, `git diff --check`)
+  were re-executed at tip `6a56e36d` and recorded under §8. If HEAD
+  advances past that commit before push, re-run the gate.
 
 ## Operator-only gates (not blocking engineering merge)
 
@@ -210,17 +216,9 @@ historian approval — per
 
 ---
 
-## 5. Optional fresh merge gate (NOT run in this batch)
+## 5. Fresh merge gate — executed
 
-The plan's Task 4 says fresh gates run only "if the user asks for a merge-ready packet". The user prompt for this autonomous run asked for the packet, not the merge-ready gates, so the following were intentionally **NOT executed at branch tip** in Batch 47:
-
-- `npm.cmd run typecheck` (last run at Batch 46 tip — clean)
-- `npm.cmd test` (full Vitest sweep — not executed at tip)
-- `npm.cmd run test:baselines` (40w + 52w baselines — not re-executed at tip; per-batch byte-identical proof recorded in ledger)
-- `npm.cmd run desktop:map:build` (last run at Batch 46 tip — clean)
-- `git diff --check` (clean per batch)
-
-If the user wants the full merge gate, request a follow-up batch to run those four commands and record results in this packet.
+The plan's Task 4 fresh-gate set was executed at user request after Batch 47. **Live results recorded in §8 below** (tip `6a56e36d`). All five engineering gates PASS. Re-run the gates if HEAD advances past `6a56e36d` before push.
 
 ---
 
@@ -242,6 +240,52 @@ If the user wants the full merge gate, request a follow-up batch to run those fo
 - No squash / rebase.
 - No FORAWWV edit.
 - No operator-only gate claimed closed.
-- No simulation, scenario, save schema, or canon text touched in this batch (Batch 47 is documentation-only).
+- No simulation, scenario, save schema, or canon text touched in this batch (Batch 47 + fresh-gate run are documentation-only; no code or fixtures edited).
 
 If the user reads this packet and decides to push / open a PR, that is a separate, explicit ask.
+
+---
+
+## 8. Fresh merge gate — live results (2026-05-18)
+
+Executed at user request after Batch 47. Single uninterrupted pre-push gate run on the branch tip listed below. No code changes performed before, during, or after this run (no gate failure required a repair).
+
+### Live fingerprint at gate time
+
+| Field | Value |
+|---|---|
+| `git rev-parse HEAD` | `6a56e36d2c795dabb8e64a9283a31dde4d98837c` |
+| `git rev-list --count origin/main..HEAD` | `70` |
+| `git diff --shortstat origin/main..HEAD` | `598 files changed, 73914 insertions(+), 41321 deletions(-)` |
+| `git status --short --branch` | `## codex/execute-2026-05-17-plans` (clean) |
+
+### Gate results
+
+| Gate | Command | Result |
+|---|---|---|
+| Status | `git status --short --branch` | **CLEAN** — branch on `codex/execute-2026-05-17-plans`, no working-tree changes. |
+| Typecheck | `npx.cmd tsc --noEmit` | **PASS** — no output (clean). |
+| Whole-suite Vitest | `npm.cmd test` | **PASS** — 785 test files / 7,159 tests pass; 2 file-level skipped, 18 test-level skipped; **797.76 s** runtime. |
+| Baseline regression | `npm.cmd run test:baselines` | **PASS** — terminating line `Baseline regression: all scenarios match`. |
+| Desktop map build | `npm.cmd run desktop:map:build` | **PASS** — `built in 17.91s`. (Standard rollup chunk-size advisory only — pre-existing, not a regression.) |
+| Whitespace | `git diff --check` | **CLEAN** — no whitespace errors. |
+
+### Verdict
+
+All five engineering merge gates PASS at tip `6a56e36d`. **No engineering blockers remain.** Push / PR is unblocked from the engineering side; operator-owned gates (clean-VM proof, code signing, SmartScreen reputation, store/trailer publication, BCS localization quality, sensitive-history prose approval, historian approval) remain out of scope per `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md`.
+
+### Re-run trigger
+
+If HEAD advances past `6a56e36d` before push:
+
+```sh
+git rev-parse HEAD              # confirm new tip
+git status --short --branch     # clean?
+npx.cmd tsc --noEmit
+npm.cmd test
+npm.cmd run test:baselines
+npm.cmd run desktop:map:build
+git diff --check
+```
+
+Record the new tip and any new aggregate counts in a follow-up §9 block; do not edit §8 in place.
