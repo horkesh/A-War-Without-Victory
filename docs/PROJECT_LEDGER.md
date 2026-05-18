@@ -5885,3 +5885,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH17.md`; `docs/40_reports/implemented/20260518_INTEL_SURPRISE_BATCH17.md`; `docs/40_reports/implemented/20260518_SECTOR_RECONSTRUCTION_BATCH17.md`; `docs/40_reports/implemented/20260518_OPERATION_AAR_BATCH17.md`.
 
 ---
+
+## [2026-05-18] feat(a11y): Accessibility P0 closeout Batch 18 verification and propagation
+
+**Type:** Documentation propagation and re-verification of an already-implemented launch-readiness lane (no source changes).
+
+**Change:** Batch 18 closes the doc-side follow-up flagged in the 2026-05-17 Accessibility P0 closeout (commit `07163a48`, report `docs/40_reports/implemented/20260517_ACCESSIBILITY_P0_CLOSEOUT.md`). That predecessor implementation patched 12 component offenders to eliminate `onClick` on non-interactive JSX (`BottomStatusStrip`, `CorpsCard`, `CreditsScreen`, `GlassPanel`, `OOBSidebar`, `PauseMenu`, `SettlementDetailContent`, `SettingsScreen`, `StackExpansionOverlay`, `StrategicDashboard`, `chronicle/ChronicleSpine`, `chronicle/WrappedOverlay`), added Space-key activation on remaining `role="button"` fallbacks, attached programmatic labels to form controls in `SettingsScreen`, `ArmyHQCorpsCard`, `ArmyHQModal`, `SectorsSection`, `AiSettingsPanel`, and `RecruitmentModal`, and added four static regression tests under `tests/ui/accessibility_*`. The canonical Tailwind tokens in `src/ui/map/tailwind.config.ts` and the OS + in-game reduced-motion gates in `src/ui/map/styles/globals.css` already satisfied the pinned WCAG AA pairs and the motion-reduction contract, so no CSS/token churn was required then or now. Batch 18 adds the missing GUI master entries, reconciles stale roadmap/rating/queue truth that still advertised open accessibility P0 blockers, records the durable verified-stale closeout rule, and adds the verification-only closeout report.
+
+**Determinism:** UI semantics, CSS, and documentation only. No sim, scenario, IPC, persisted-output, or ordering changes.
+
+**Verification:** `npm.cmd run typecheck` passed. `npx.cmd vitest run tests/ui/accessibility_clickable_controls.test.ts tests/ui/accessibility_contrast_tokens.test.ts tests/ui/accessibility_reduced_motion.test.ts tests/ui/accessibility_form_labels.test.ts tests/v093_a11y_lane_e_forms_live_regions.test.ts tests/ui_shell_navigation.test.ts --reporter=dot` passed 6 files / 33 tests (clickable 2, form labels 1, contrast 2, reduced motion 1, lane-E forms/live-regions 12, ui shell navigation 15). `npm.cmd run desktop:map:build` completed with pre-existing chunk-size warnings only. `git diff --check` clean (CRLF normalization warnings only on touched docs). Browser/axe spot-check not performed; static regressions remain the gate of record for v1.0 P0.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_ACCESSIBILITY_P0_BATCH18.md`; updates to `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`; predecessor implementation report `docs/40_reports/implemented/20260517_ACCESSIBILITY_P0_CLOSEOUT.md` and audit `docs/40_reports/audits/20260517_ACCESSIBILITY_P0_DISCOVERY.md` remain authoritative for the source-level patches.
+
+---

@@ -60,7 +60,7 @@ AWWV is a **deterministic strategic-level simulation of the 1992–1995 Bosnian 
 - **First-session player experience.** Tutorial onboarding is present but spread across 4–5 sequential overlays; opening brief is a paragraph block; no in-context glossary; the player cannot tell what the game is for inside the first 10 minutes.
 - **No audio system.** Zero ambience, zero stingers, zero UI feedback sounds, no music. For a sober historical wargame this is survivable; for AAA+++ it is not.
 - **No localization.** Roadmap defers to v1.1.0 ("Mother Tongue"). Bosnian/Serbian/Croatian localization is a credibility requirement for a Bosnian War game.
-- **Accessibility:** 4 P0 v1.0-ship blockers tracked in a11y lane (clickable-div anti-pattern, contrast, prefers-reduced-motion, form labels).
+- **Accessibility:** v1.0 P0 blockers are closed and statically guarded: clickable-div elimination, WCAG AA contrast tokens, OS + in-game reduced motion, and programmatic form labels were implemented in `07163a48` and re-verified in Batch 18.
 - **No marketing / store presence / soundscape / trailer.** Per roadmap "v0.9.1 store marketing" was absorbed into v0.9.5; outreach is operator-owned, not roadmap debt — but for AAA+++ release, the gap is large.
 
 **Verdict against the AAA+++ bar:** **A- as a simulation engine. C+ as a product. B- average overall, weighted by the product gap.** A solid Paradox-tier flagship needs both halves at A+ minimum.
@@ -134,7 +134,7 @@ AWWV is a **deterministic strategic-level simulation of the 1992–1995 Bosnian 
 
 | # | System | Grade | What's true today | Gap to AAA+++ | What it takes |
 |---|--------|------:|---|---|---|
-| 40 | **Accessibility** | **C-** | v0.9.3 a11y lane shipped semantic landmarks, tablist arrow keys. **4 P0 v1.0-ship blockers** still tracked (clickable-div anti-pattern in 4 files, WCAG-AA contrast borderline, zero `prefers-reduced-motion`, zero form-label `htmlFor=`). | a11y is not optional at AAA+++; Vic3 / CK3 / HOI4 all carry a11y badges. | Close the 4 P0 blockers. ~14 days per the lane plan. |
+| 40 | **Accessibility** | **B** | v0.9.3 a11y lane shipped semantic landmarks and tablist arrow keys. Commit `07163a48` closed the four v1.0 P0 blockers: clickable controls, WCAG AA contrast tokens, reduced-motion gates, and form labels. Batch 18 re-verified the static gate suite (33 tests) on current HEAD. | Browser/axe spot-check evidence and broader visual/assistive-technology QA remain useful before a release-candidate claim. | Keep static guards as the P0 gate of record; add browser/axe spot-check evidence during RC validation rather than rebuilding the closed lane. |
 | 41 | **Localization** | **F** | Deferred to v1.1.0 ("Mother Tongue"). Currently English-only. | For a Bosnian War game, Bosnian / Serbian / Croatian translation is a **credibility requirement** in-market, not a nice-to-have. | Translation memory + i18n wiring + BCS translation pass. ~60 days first language; ~20 days per additional. |
 | 42 | **Packaging / installer / clean-VM verification** | **B** | NSIS + AppImage smoke + dev-host approximation pass (2026-05-09). Clean-VM cosmetic items remain operator-only (SmartScreen UX, Settings→Apps, %APPDATA% persistence, uninstaller registry). | Signed installer, code-signing certs, macOS .dmg, auto-update channel. | Per v0.9.5 audit §6 R7 + commercial certs. ~14 days work + cert lead time. |
 | 43 | **Store presence (Steam / GOG / itch)** | **F** | None. v0.9.1 store marketing folded into v0.9.5 and then absorbed; outreach is operator-owned. | At AAA+++, Steam page + store assets + trailer + Press Kit is part of launch. | ~30 days of marketing + asset production. **Operator-owned, not engineering.** |
@@ -181,7 +181,7 @@ Ordered by **(impact / effort)**. These are the work items where one unit of inv
 | 6 | **Cinematic Verdict + Chronicle Chapter (#15, #31)** — endgame feels like CK3 dynasty close, not a stat dump | Lifts narrative + endgame; produces shareable moments | ~24d | Endgame moments drive word-of-mouth more than any other surface. |
 | 7 | **Localization to BCS (#41)** | Lifts credibility ceiling; opens the actual market for the game | ~60d | The Bosnian War without Bosnian translation is a credibility cap. |
 | 8 | **Diplomacy panel (#11)** | Lifts diplomacy from B- to B+; closes the biggest visible-system gap | ~10d | Per-event reactive → per-turn proactive flip. |
-| 9 | **Accessibility 4 P0 close (#40)** | Required for v1.0 ship | ~14d | Non-negotiable for AAA bar. |
+| 9 | **Accessibility RC spot-check (#40)** | P0 closed; release-candidate evidence polish | ~2d | Static P0 gates are closed, but browser/axe spot-check evidence is still useful before an RC claim. |
 | 10 | **Officer character / mini-bio (#10)** | Lifts personnel B → B+; player remembers names | ~14d | Cheap dramatic-density boost. |
 | 11 | **High Concept one-pager + press kit (#38, #45)** | Required for review pipeline; current docs are dense | ~7d eng + 30d marketing | Reviewer / streamer onboarding currently impossible. |
 
