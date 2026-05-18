@@ -140,4 +140,18 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(screen.getByText('No completed operations yet.')).toBeTruthy();
     });
+
+    it('opens the focused completed operation row when routed from Chronicle', () => {
+        useGameStore.setState({
+            armyHQRecordsSubTab: 'ops',
+            focusedOperationHistoryId: 'op-aar-1',
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('button', { name: /^History/i }).className).toContain('text-accent-gold');
+        expect(screen.getByText('Operational Deep Review')).toBeTruthy();
+        expect(screen.getByText('Result: Partial')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Operation Iron Corridor/i }).getAttribute('aria-current')).toBe('true');
+    });
 });

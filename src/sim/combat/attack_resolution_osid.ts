@@ -102,6 +102,7 @@ import {
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
     getIntelAmbushAttackerCasualtyMult,
+    getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
@@ -581,6 +582,10 @@ export function resolveAttackOrdersOsid(
             attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
         );
+        const intelAmbushDefenderCasualtyMult = getIntelAmbushDefenderCasualtyMult(
+            attackerIntelConfidence,
+            defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
+        );
         const effectiveAttackerPower = attackerPower * intelFriction.attackerPowerMult;
         defenderPower *= intelFriction.defenderPowerMult;
         const executionFriction = buildPublicIntelFrictionAnnotation(
@@ -646,7 +651,7 @@ export function resolveAttackOrdersOsid(
             lastStandCasMult,
             militiaOnlyMult,
             attCasMult: attCasMult * intelAmbushAttackerCasualtyMult,
-            defCasMult,
+            defCasMult: defCasMult * intelAmbushDefenderCasualtyMult,
             defensiveFireMult,
             bombardmentMult,
             attackerCount: attackerFormations.length,

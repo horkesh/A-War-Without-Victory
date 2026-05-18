@@ -61206,7 +61206,7 @@
           "engagements": [
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 19,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -61232,7 +61232,7 @@
           "nadir_personnel": 950,
           "peak_personnel": 2200,
           "stalemates": 0,
-          "total_casualties_inflicted": 20,
+          "total_casualties_inflicted": 19,
           "total_casualties_taken": 177,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -61346,7 +61346,7 @@
             "final_personnel": 2200,
             "nadir_personnel": 950,
             "peak_personnel": 2200,
-            "total_casualties_inflicted": 20,
+            "total_casualties_inflicted": 19,
             "total_casualties_taken": 177,
             "victories": 1
           }
@@ -61384,7 +61384,7 @@
             },
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 19,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -61434,7 +61434,7 @@
           "nadir_personnel": 900,
           "peak_personnel": 1800,
           "stalemates": 3,
-          "total_casualties_inflicted": 33,
+          "total_casualties_inflicted": 32,
           "total_casualties_taken": 240,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -61557,7 +61557,7 @@
             "final_personnel": 1800,
             "nadir_personnel": 900,
             "peak_personnel": 1800,
-            "total_casualties_inflicted": 33,
+            "total_casualties_inflicted": 32,
             "total_casualties_taken": 240,
             "victories": 1
           }
@@ -62140,7 +62140,7 @@
           "engagements": [
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 19,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -62214,7 +62214,7 @@
           "nadir_personnel": 900,
           "peak_personnel": 1800,
           "stalemates": 4,
-          "total_casualties_inflicted": 47,
+          "total_casualties_inflicted": 46,
           "total_casualties_taken": 266,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -62338,7 +62338,7 @@
             "final_personnel": 1800,
             "nadir_personnel": 900,
             "peak_personnel": 1800,
-            "total_casualties_inflicted": 47,
+            "total_casualties_inflicted": 46,
             "total_casualties_taken": 266,
             "victories": 1
           }
@@ -62497,7 +62497,7 @@
           "engagements": [
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 19,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -62523,7 +62523,7 @@
           "nadir_personnel": 900,
           "peak_personnel": 1800,
           "stalemates": 0,
-          "total_casualties_inflicted": 20,
+          "total_casualties_inflicted": 19,
           "total_casualties_taken": 148,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -62633,7 +62633,7 @@
             "final_personnel": 1800,
             "nadir_personnel": 900,
             "peak_personnel": 1800,
-            "total_casualties_inflicted": 20,
+            "total_casualties_inflicted": 19,
             "total_casualties_taken": 148,
             "victories": 1
           }
@@ -62956,7 +62956,7 @@
           "engagements": [
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 19,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -62982,7 +62982,7 @@
           "nadir_personnel": 900,
           "peak_personnel": 1800,
           "stalemates": 0,
-          "total_casualties_inflicted": 20,
+          "total_casualties_inflicted": 19,
           "total_casualties_taken": 56,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -63091,7 +63091,7 @@
             "final_personnel": 1800,
             "nadir_personnel": 900,
             "peak_personnel": 1800,
-            "total_casualties_inflicted": 20,
+            "total_casualties_inflicted": 19,
             "total_casualties_taken": 56,
             "victories": 1
           }
@@ -64339,7 +64339,7 @@
           "engagements": [
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
-              "casualties_inflicted": 20,
+              "casualties_inflicted": 18,
               "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -64365,7 +64365,7 @@
           "nadir_personnel": 900,
           "peak_personnel": 1406,
           "stalemates": 0,
-          "total_casualties_inflicted": 20,
+          "total_casualties_inflicted": 18,
           "total_casualties_taken": 182,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -64475,7 +64475,7 @@
             "final_personnel": 1406,
             "nadir_personnel": 900,
             "peak_personnel": 1406,
-            "total_casualties_inflicted": 20,
+            "total_casualties_inflicted": 18,
             "total_casualties_taken": 182,
             "victories": 1
           }
@@ -65246,7 +65246,7 @@
           "battles_as_defender": 17,
           "battles_fought": 26,
           "brigade_count": 33,
-          "casualty_exchange_ratio": 0.2183558068725533,
+          "casualty_exchange_ratio": 0.21683340582862115,
           "current_personnel": 50830,
           "defeats": 2,
           "most_casualties_brigade_id": "hrhb_106th_bosanska_posavina_brigade",
@@ -65254,7 +65254,7 @@
           "nadir_aggregate_personnel": 27500,
           "peak_aggregate_personnel": 51856,
           "stalemates": 15,
-          "total_casualties_inflicted": 1004,
+          "total_casualties_inflicted": 997,
           "total_casualties_taken": 4598,
           "total_osids_captured": 6,
           "total_osids_lost": 0,
@@ -65815,7 +65815,7 @@
           "battles_as_defender": 11,
           "battles_fought": 18,
           "brigade_count": 14,
-          "casualty_exchange_ratio": 0.12115732368896925,
+          "casualty_exchange_ratio": 0.11693791440626884,
           "current_personnel": 25097,
           "defeats": 0,
           "most_casualties_brigade_id": "hrhb_apljina_brigade",
@@ -65823,7 +65823,7 @@
           "nadir_aggregate_personnel": 12850,
           "peak_aggregate_personnel": 25119,
           "stalemates": 11,
-          "total_casualties_inflicted": 201,
+          "total_casualties_inflicted": 194,
           "total_casualties_taken": 1659,
           "total_osids_captured": 6,
           "total_osids_lost": 0,
@@ -89133,7 +89133,7 @@
           "attackerCasualties": 279,
           "corpsId": "hvo_southeast_herzegovina",
           "defenderBrigades": [],
-          "defenderCasualties": 178,
+          "defenderCasualties": 167,
           "faction": "HRHB",
           "officerName": "Corps Commander",
           "outcome": "decisive_victory",
@@ -90207,7 +90207,7 @@
             "zepce"
           ],
           "enclaves_lost": [],
-          "military_casualties_inflicted": 1004,
+          "military_casualties_inflicted": 997,
           "military_casualties_taken": 4598,
           "operations_launched": 9,
           "operations_successful": 9,
@@ -90309,13 +90309,13 @@
             "event_modifier": -10
           },
           "military_credibility": {
-            "base_value": 51.8299795858851,
-            "effective_value": 56.8299795858851,
+            "base_value": 51.81722076407116,
+            "effective_value": 56.81722076407116,
             "event_modifier": 5
           },
           "negotiating_leverage": {
-            "base_value": 52.4205731801197,
-            "effective_value": 52.4205731801197,
+            "base_value": 52.41632023951505,
+            "effective_value": 52.41632023951505,
             "event_modifier": 0
           },
           "patron_confidence": {

@@ -32,7 +32,7 @@
 6. Feed per-OSID confidence into commander beliefs and operation preparation estimates.
 7. Apply stale-intel and surprise modifiers in launch/execution as readiness/friction, not omniscient truth changes.
 
-**2026-05-18 progress:** Tasks 1-3 and 5-6 are live through Batches 10-13. Batch 15 implements the first bounded Task 4/7 surprise slice: low-confidence attacks into OPSEC-defended sectors apply deterministic attacker casualty friction and emit only the public `ambush_risk` label. Broader surprise/ambush modeling remains follow-up and must keep the same no-random/no-hidden-truth boundary.
+**2026-05-18 progress:** Tasks 1-3 and 5-6 are live through Batches 10-13. Batch 15 implements the first bounded Task 4/7 surprise slice: low-confidence attacks into OPSEC-defended sectors apply deterministic attacker casualty friction and emit only the public `ambush_risk` label. Batch 16 extends that same bounded hook with a small defender-casualty reduction, still keyed only on attacker-side observed confidence plus defender OPSEC. Broader surprise/ambush modeling remains follow-up and must keep the same no-random/no-hidden-truth boundary.
 
 ## Verification
 

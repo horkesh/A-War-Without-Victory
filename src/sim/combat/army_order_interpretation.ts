@@ -318,8 +318,7 @@ function flushC2TurnTelemetry(): void {
 
     // 2. corps_role_overlay_count — weekly aggregate per faction. Iterate
     //    factions in alphabetical order for deterministic output.
-    const orderedFactions: FactionId[] = (Array.from(buffer.perFactionRoleCounts.keys()) as FactionId[])
-        .sort();
+    const orderedFactions = Array.from(buffer.perFactionRoleCounts.keys()).sort();
     for (const faction of orderedFactions) {
         const counts = buffer.perFactionRoleCounts.get(faction)!;
         const total = counts.primary + counts.secondary + counts.contain + counts.economy;
@@ -343,8 +342,7 @@ function flushC2TurnTelemetry(): void {
     //    when at least one faction had both producer fired AND ≥1 persisted
     //    directive.
     if (buffer.factionsWithActiveChain.size > 0) {
-        const factionsArr: FactionId[] = (Array.from(buffer.factionsWithActiveChain) as FactionId[])
-            .sort();
+        const factionsArr = Array.from(buffer.factionsWithActiveChain).sort();
         lines.push(JSON.stringify({
             schema_version: C2_TELEMETRY_SCHEMA_VERSION,
             event_type: 'political_directive_chain_active',

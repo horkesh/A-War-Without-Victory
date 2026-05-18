@@ -2,7 +2,7 @@
  * Operation History Panel — shows completed operation AARs and active ops.
  * Two tabs: Active (in-progress) and History (completed with star grades).
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import type { LoadedGameState } from '../data/types';
@@ -255,21 +255,33 @@ function CompletedOpCard({
     op,
     corpsName,
     osidDisplayNames,
+    focused,
 }: {
     op: CompletedOp;
     corpsName: string;
     osidDisplayNames: Record<string, string> | null;
+    focused: boolean;
 }) {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(focused);
     const objRate = op.objectives_targeted.length > 0
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
         : '0/0';
     const captureProvenanceNotice = CAPTURE_PROVENANCE_LABEL[op.capture_provenance ?? 'no_objectives_held'];
 
+    useEffect(() => {
+        if (focused) setExpanded(true);
+    }, [focused]);
+
     return (
-        <div className="border border-panel-border/50 rounded bg-panel-card/50 mb-2">
+        <div
+            className={`border rounded bg-panel-card/50 mb-2 ${
+                focused ? 'border-accent-gold/70 shadow-[0_0_0_1px_rgba(212,166,68,0.25)]' : 'border-panel-border/50'
+            }`}
+            data-operation-history-id={op.operation_id}
+        >
             <button
                 type="button"
+                aria-current={focused ? 'true' : undefined}
                 className="w-full text-left px-3 py-2 hover:bg-panel-hover/30 transition-colors"
                 onClick={() => setExpanded(v => !v)}
             >
@@ -525,6 +537,7 @@ interface OperationHistoryPanelProps {
 export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHistoryPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+    const focusedOperationHistoryId = useGameStore((s) => s.focusedOperationHistoryId);
     const [tab, setTab] = useState<Tab>('active');
     const corpsNameById = useMemo(
         () =>
@@ -535,6 +548,10 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
             ),
         [loadedGameState?.formations],
     );
+
+    useEffect(() => {
+        if (focusedOperationHistoryId) setTab('history');
+    }, [focusedOperationHistoryId]);
 
     if (!isOpen || !loadedGameState) return null;
 
@@ -592,6 +609,7 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                                     op={op}
                                     corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
                                     osidDisplayNames={osidDisplayNames}
+                                    focused={op.operation_id === focusedOperationHistoryId}
                                 />
                             ))}
                         </>

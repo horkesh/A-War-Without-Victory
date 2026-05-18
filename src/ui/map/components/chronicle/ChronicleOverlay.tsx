@@ -357,7 +357,7 @@ export function ChronicleOverlay() {
 
     const handleOpenEntryRecord = useCallback((entry: ChronicleEntry) => {
         if (entry.metadata?.operationAarId) {
-            openArmyHQOperationHistory(useGameStore.getState());
+            openArmyHQOperationHistory(useGameStore.getState(), entry.metadata.operationAarId);
             return;
         }
         handleOpenTurnRecord(entry.turn);

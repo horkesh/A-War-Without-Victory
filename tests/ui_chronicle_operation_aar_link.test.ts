@@ -20,6 +20,7 @@ function createState(playerFaction: string | null = 'RS'): ShellNavigationState 
     setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
     setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
     setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setFocusedOperationHistoryId: (id) => { calls.push(['setFocusedOperationHistoryId', id]); },
     setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
     setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
   };
@@ -91,14 +92,15 @@ describe('Chronicle completed-operation AAR visibility', () => {
     expect(entries.some(entry => entry.title.includes('Enemy Hidden Truth'))).toBe(false);
   });
 
-  it('routes a Chronicle operation card to Army HQ operation history', () => {
+  it('routes a Chronicle operation card to the matching Army HQ operation history row', () => {
     const state = createState('RS');
 
-    expect(openArmyHQOperationHistory(state)).toBe(true);
+    expect(openArmyHQOperationHistory(state, 'rs-op-1')).toBe(true);
     expect(state.calls).toEqual([
       ['setSelectedArmyId', 'RS'],
       ['setArmyHQOpen', true],
       ['setArmyHQRecordsSubTab', 'ops'],
+      ['setFocusedOperationHistoryId', 'rs-op-1'],
       ['setChronicleOpen', false],
     ]);
   });
@@ -151,6 +153,7 @@ describe('Chronicle completed-operation AAR visibility', () => {
       expect(state.chronicleOpen).toBe(false);
       expect(state.armyHQOpen).toBe(true);
       expect(state.armyHQRecordsSubTab).toBe('ops');
+      expect(state.focusedOperationHistoryId).toBe('rs-op-1');
     });
   });
 });

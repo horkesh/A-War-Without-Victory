@@ -1,10 +1,22 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 15 faction active-combat index)
+**Updated:** 2026-05-18 (Batch 16 buildFactionSectors attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 16 buildFactionSectors brigade-classification attribution
+
+**Change:** `PERF_PROFILE_SECTOR_PARTITION=true` now records deeper attribution inside `buildFactionSectors:*:brigade-classification` for commander-profile build, territory assignment, cross-corps enclave defense, and minimum-sector coverage.
+
+**Why:** Batch 15 left `buildFactionSectors:RS/RBiH` and brigade-classification labels as remaining measured owners. Batch 16 is attribution-only, so the next sector cut can target the real child owner instead of speculating from the parent label.
+
+**Run evidence:** Timed 40w n1892 kept the then-current hash `0d8d9ccdc477d77a`; parent integrated 40w n1893 moved to `b14179d65639860c` because of the concurrent intel casualty hook, not the sidecar-only sector labels. Both runs kept 27/27 anchors and 6/6 bot benchmarks.
+
+**Next measured targets:** Do not optimize `commander-profile-build` or `cross-corps-enclave-defense` from Batch 16 evidence; they are small attribution children. The next sector-performance lane should inspect larger `territory-assignment`, `minimum-sector-coverage`, or broader `corps-sector-construction` owners and still require byte-identical 40w proof for read-only performance changes.
+
+**Report:** [implemented/20260518_SECTOR_RECONSTRUCTION_BATCH16.md](implemented/20260518_SECTOR_RECONSTRUCTION_BATCH16.md)
 
 ## 2026-05-18: Batch 15 faction active-combat index
 

@@ -2706,15 +2706,23 @@ function buildFactionSectors(
 
     // Step 6: Classify brigades — corps-driven assignment.
     const commanderProfiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification`, () => {
-        const profiles = buildCorpsCommanderProfiles(state, sectors);
+        const profiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification:commander-profile-build`,
+            () => buildCorpsCommanderProfiles(state, sectors),
+        );
         const playerOverrides = state.military.brigade_sector_override;
-        classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, profiles, playerOverrides, state);
+        _perfTime(`buildFactionSectors:${faction}:brigade-classification:territory-assignment`,
+            () => classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, profiles, playerOverrides, state),
+        );
 
         // Step 6b: Cross-corps enclave defense
-        assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);
+        _perfTime(`buildFactionSectors:${faction}:brigade-classification:cross-corps-enclave-defense`,
+            () => assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf),
+        );
 
         // Step 7: Ensure every sector with front edges has at least one assigned brigade.
-        ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf, state);
+        _perfTime(`buildFactionSectors:${faction}:brigade-classification:minimum-sector-coverage`,
+            () => ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf, state),
+        );
         return profiles;
     });
 

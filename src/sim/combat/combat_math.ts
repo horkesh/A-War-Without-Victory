@@ -44,6 +44,7 @@ export const INTEL_EXECUTION_ATTACK_POWER_MIN = 0.85;
 export const INTEL_EXECUTION_OPSEC_DEFENDER_POWER_MULT = 1.08;
 export const INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD = 1 / 3;
 export const INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT = 1.12;
+export const INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT = 0.94;
 
 function combatMathProfileTime<T>(
     profileTime: CombatMathProfileTimer | undefined,
@@ -375,6 +376,18 @@ export function getIntelAmbushAttackerCasualtyMult(
         : 0;
     return defenderOpsecActive && clampedConfidence < INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD
         ? INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT
+        : 1;
+}
+
+export function getIntelAmbushDefenderCasualtyMult(
+    confidence: number | null | undefined,
+    defenderOpsecActive: boolean,
+): number {
+    const clampedConfidence = Number.isFinite(confidence)
+        ? Math.max(0, Math.min(1, confidence as number))
+        : 0;
+    return defenderOpsecActive && clampedConfidence < INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD
+        ? INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT
         : 1;
 }
 

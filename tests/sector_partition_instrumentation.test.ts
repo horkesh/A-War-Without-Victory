@@ -262,6 +262,10 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         const labels = [
             'buildFactionSectors:${faction}:active-combat-formation-index',
             'buildFactionSectors:${faction}:brigade-classification',
+            'buildFactionSectors:${faction}:brigade-classification:commander-profile-build',
+            'buildFactionSectors:${faction}:brigade-classification:cross-corps-enclave-defense',
+            'buildFactionSectors:${faction}:brigade-classification:minimum-sector-coverage',
+            'buildFactionSectors:${faction}:brigade-classification:territory-assignment',
             'buildFactionSectors:${faction}:commander-review',
             'buildFactionSectors:${faction}:corps-sector-construction',
             'buildFactionSectors:${faction}:final-invariant-and-coverage',
