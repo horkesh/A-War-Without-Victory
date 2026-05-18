@@ -154,7 +154,7 @@ export function updateMilitiaEmergence(state: GameState): MilitiaEmergenceReport
     const factionIds: FactionId[] = (state.factions ?? [])
         .map((f) => f.id)
         .slice()
-        .sort(strictCompare) as FactionId[];
+        .sort(strictCompare);
 
     if (!state.military.war_militia_strength) {
         (state as GameState & { war_militia_strength: Record<string, Record<string, number>> }).military.war_militia_strength = {};

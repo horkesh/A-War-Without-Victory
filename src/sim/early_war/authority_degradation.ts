@@ -102,7 +102,7 @@ export function runAuthorityDegradation(state: GameState): AuthorityDegradationR
         after = Math.max(0, Math.min(cap, after));
         faction.profile.authority = Math.round(after * 10) / 10;
         report.changes.push({
-            faction_id: faction.id as FactionId,
+            faction_id: faction.id,
             authority_before: before,
             authority_after: faction.profile.authority,
             delta: after - before

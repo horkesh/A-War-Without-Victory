@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] refactor(strict-null): Batch 39 Phase 3 safe early-war + bot slice (byte-identical)
+
+**Type:** Type-erasure-only strict-null cleanup. Opens Phase 3 of the strict-null migration plan with the safe-scope first slice.
+
+**Change:** Cleaned 8 inventory-counted Phase 3 escapes across 4 files: (a) `src/sim/bot/simple_general_bot.ts` — hoisted `postureAssignments` and `formationAssignments` empty-record initializers into named `const` locals before the `BotDecisions` literal, then replaced 5 `decisions.posture_assignments![...] = ...` / `decisions.formation_assignments![...] = ...` non-null assertion writes with direct local writes (locals and sub-records share the same object identity); (b) `src/sim/early_war/authority_degradation.ts:105` — dropped redundant `as FactionId` cast on `faction.id` where `faction: FactionState` and `FactionState.id: FactionId` already; (c) `src/sim/early_war/control_strain.ts:132` — dropped redundant `as FactionId[]` cast on `(state.factions ?? []).map((f) => f.id).sort(strictCompare)` (chained types already resolve to `FactionId[]`); (d) `src/sim/early_war/militia_emergence.ts:157` — same redundant-cast pattern on `(state.factions ?? []).map((f) => f.id).slice().sort(strictCompare)`. Three files now fully CLEAN: `simple_general_bot.ts`, `authority_degradation.ts`, `militia_emergence.ts`. `control_strain.ts` partial (1 line-75 load-bearing return cast retained — `Object.entries` narrowing pattern, deferred). Added `PHASE_3_EARLY_WAR_BATCH_39_FILES` slice constant and "cleans the Batch 39 Phase 3 early-war + bot safe slice" assertion to `tests/strict_null_inventory_progress.test.ts`.
+
+**Deliberately avoided per lane bank:** `src/sim/early_war/alliance_update.ts` and `src/sim/turn_phases/war_phases.ts` (high-conflict, lane-bank forbidden initially). Deferred 5+ load-bearing patterns: Object.entries / Object.keys narrowing in `control_flip.ts:171`, `control_strain.ts:75`, `minority_erosion.ts:62`, `pool_population.ts:217`; `(state as any).war_militia_strength` save-shape init at `minority_erosion.ts:121` + coupled `war_militia_strength![...]` accesses 123-126; `state.political.war_consolidation_until![munId]` save-shape init at `control_flip.ts:422`; `parseMilitiaPoolKey` return-type cross-file refactor at `minority_militia_decay.ts:87`.
+
+**Determinism:** 40w n1915 hash `b14179d65639860c` matches baseline literally. TypeScript erases all four casts/assertions; emitted JavaScript is character-equivalent. validate_run_consistency PASS (0 false owners, 0 disconnected sectors, 0 empty contested, 0 below-floor missed legal donors). Four "below floor with no legal donor" tildes identical to prior runs. Per scenario-creator-runner-tester verdict: VERDICT: GO — 8 escapes eliminated, tsc clean, 36/36 targeted tests pass, hash byte-identical.
+
+**Verification:** `npx tsc --noEmit` PASS; `vitest run tests/strict_null_inventory_progress.test.ts` 18/18 PASS (incl. new Batch 39 slice + all 17 prior batch slices still at 0); `vitest run tests/early_war_authority_degradation.test.ts tests/early_war_militia_emergence.test.ts tests/early_war_control_strain.test.ts` 18/18 PASS; 40w byte-identity proof n1915 + consistency validator PASS.
+
+**Phase 3 inventory remaining after Batch 39:** 27 escapes (down from 35) across `control_strain.ts` (1), `control_flip.ts` (2), `minority_erosion.ts` (5), `minority_militia_decay.ts` (1), `pool_population.ts` (1), plus unsurveyed forbidden files (`alliance_update.ts`, `war_phases.ts`).
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH39_STRICT_NULL_PHASE3_SAFE_SLICE.md`.
+
+---
+
 ## [2026-05-18] perf(serialization): Batch 38 scenario_runner redundant week-39 serialize/hash cleanup (byte-identical)
 
 **Type:** Dead-code removal in serialization path. Single canonical producer for `final_state_hash`.

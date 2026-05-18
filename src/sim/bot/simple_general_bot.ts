@@ -17,9 +17,11 @@ export class SimpleGeneralBot implements Bot {
     }
 
     makeDecisions(state: GameState, frontEdges: FrontEdge[], context: BotDecisionContext): BotDecisions {
+        const postureAssignments: Record<string, 'push' | 'hold' | 'probe'> = {};
+        const formationAssignments: Record<string, string> = {};
         const decisions: BotDecisions = {
-            posture_assignments: {},
-            formation_assignments: {}
+            posture_assignments: postureAssignments,
+            formation_assignments: formationAssignments
         };
 
         // Peace-phase §4.8: Alliance-aware edge filtering
@@ -126,13 +128,13 @@ export class SimpleGeneralBot implements Bot {
         for (const item of scoredEdges) {
             const edgeId = item.edge.edge_id;
             if (pushSet.has(edgeId)) {
-                decisions.posture_assignments![edgeId] = 'push';
+                postureAssignments[edgeId] = 'push';
             } else if (item.isObjective && item.score > 0 && plannedOpsAggression >= 0.45) {
-                decisions.posture_assignments![edgeId] = 'probe';
+                postureAssignments[edgeId] = 'probe';
             } else if (item.score > 0 && broadAggression >= 0.5) {
-                decisions.posture_assignments![edgeId] = 'probe';
+                postureAssignments[edgeId] = 'probe';
             } else {
-                decisions.posture_assignments![edgeId] = 'hold';
+                postureAssignments[edgeId] = 'hold';
             }
         }
 
@@ -151,7 +153,7 @@ export class SimpleGeneralBot implements Bot {
 
                 if (shouldReassign && rankedEdgeIds.length > 0) {
                     const targetEdgeId = rankedEdgeIds[i % rankedEdgeIds.length];
-                    decisions.formation_assignments![formation.id] = targetEdgeId;
+                    formationAssignments[formation.id] = targetEdgeId;
                 }
             }
         }

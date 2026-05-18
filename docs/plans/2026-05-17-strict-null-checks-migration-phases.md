@@ -176,6 +176,7 @@ Counts:
 
 Stop-gate notes:
 - `src/sim/early_war/alliance_update.ts` and `src/sim/turn_phases/war_phases.ts` are currently high-conflict because RBiH-HRHB and phase-pipeline lanes may be active.
+- 2026-05-18 Batch 39 (first Phase 3 safe slice): cleaned 8 inventory-counted Phase 3 escapes by pure type-erasure/local-binding refactor across `src/sim/bot/simple_general_bot.ts` (5 `non_null_assertions_index` removed via local-const hoist; sub-records share object identity with the locals), `src/sim/early_war/authority_degradation.ts` (line 105: redundant `as FactionId` on `faction.id` where `FactionState.id: FactionId` already), `src/sim/early_war/control_strain.ts` (line 132: redundant `as FactionId[]` on already-typed `.map((f) => f.id).sort(strictCompare)`), and `src/sim/early_war/militia_emergence.ts` (line 157: same redundant-cast pattern). Three files now fully CLEAN; `control_strain.ts` partial (line 75 `Object.entries` return cast retained — load-bearing). Phase 3 remaining inventory: 27 escapes (was 35), concentrated in `Object.entries` / `Object.keys` narrowing patterns (`control_flip.ts:171,422`, `control_strain.ts:75`, `minority_erosion.ts:62,121,123-126`, `minority_militia_decay.ts:87` via `parseMilitiaPoolKey`, `pool_population.ts:217`) plus the still-forbidden `alliance_update.ts` + `war_phases.ts`. 40w n1915 hash `b14179d65639860c` matches baseline literally; `strict_null_inventory_progress.test.ts` 18/18 PASS incl. new Batch 39 slice assertion.
 
 ### Phase 4: Scenario + IPC
 

@@ -3,6 +3,12 @@
 **Date:** 2026-05-18
 **Scope:** Parent-side execution queue for the user request to continue implementing the live `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` backlog without stopping for manual prioritization.
 
+## Completed Batch 39 — Strict-null Phase 3 safe early-war + bot slice
+
+| Lane | Status | Source |
+|---|---|---|
+| Open Phase 3 of strict-null migration with safe-scope early-war + bot slice | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH39_STRICT_NULL_PHASE3_SAFE_SLICE.md`. 8 inventory-counted Phase 3 escapes eliminated across 4 files: `simple_general_bot.ts` (5 non-null-assertion writes → local-const hoist with shared object identity), `authority_degradation.ts` (redundant `as FactionId` on already-typed `faction.id`), `control_strain.ts:132` + `militia_emergence.ts:157` (redundant `as FactionId[]` on already-typed `.map((f) => f.id).sort()`). 3 files fully CLEAN; `control_strain.ts` partial (1 load-bearing `Object.entries` return cast retained). 40w n1915 hash `b14179d65639860c` byte-identical (type-erasure-only); 18/18 strict-null inventory progress + 18/18 focused early-war tests PASS. Phase 3 remaining: 27 escapes (was 35); concentrated in `Object.entries`/`Object.keys` narrowing patterns + save-shape state inits. `alliance_update.ts` and `war_phases.ts` deliberately untouched per lane bank stop-gate. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |

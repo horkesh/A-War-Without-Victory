@@ -129,7 +129,7 @@ export function runControlStrain(
 
     report.municipalities_updated = munIds.length;
 
-    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare) as FactionId[];
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     for (const factionId of factionIds) {
         const total = factionTotals.get(factionId) ?? 0;
         const exhaustionDelta = total * EXHAUSTION_COUPLING_FACTOR;

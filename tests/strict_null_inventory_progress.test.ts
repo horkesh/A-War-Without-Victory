@@ -98,6 +98,12 @@ const PHASE_2_COMBAT_BATCH_18_FILES = [
     'src/sim/combat/front_emergence.ts',
 ];
 
+const PHASE_3_EARLY_WAR_BATCH_39_FILES = [
+    'src/sim/bot/simple_general_bot.ts',
+    'src/sim/early_war/authority_degradation.ts',
+    'src/sim/early_war/militia_emergence.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -378,6 +384,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_20_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 39 Phase 3 early-war + bot safe slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_3_EARLY_WAR_BATCH_39_FILES),
             0,
         );
 
