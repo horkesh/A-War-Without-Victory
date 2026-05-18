@@ -1,10 +1,33 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 22 normalizeFinalSectorBuckets friendlyUniverse hoist)
+**Updated:** 2026-05-18 (Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution (byte-identical)
+
+**Change:** `ensureMinimumSectorCoverage(...)` in `src/sim/combat/brigade_assignment.ts` now records sidecar attribution for its five phases under labels `ensureMinimumSectorCoverage:{territory-claim-rescue, density-floor, idle-equalization, moderate-reinforcement, severe-rescue}`. The Batch 22 attempt blocked on closure scope (`needed` declared in Phase B was referenced from Phase E); Batch 23 resolves it by hoisting `needed` plus `DENSITY_FLOOR_EDGES_PER_BRIGADE` / `DENSITY_FLOOR_THREAT_GATE` to function-body scope BEFORE the phase wrappers begin. Function signature gains an optional `perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn()` parameter with no-op default; two call sites in `sealMergedSectorTruth` pass module-local `_perfTime`.
+
+**Run evidence (n1900):**
+
+| Label | Aggregate ms / 40w | Calls | % of parent |
+|---|---:|---:|---:|
+| `ensureMinimumSectorCoverage:territory-claim-rescue` | **1505.50** | 1502 | 56.3% |
+| `ensureMinimumSectorCoverage:severe-rescue` | **1054.46** | 1502 | 39.4% |
+| `ensureMinimumSectorCoverage:idle-equalization` | 31.14 | 1502 | 1.2% |
+| `ensureMinimumSectorCoverage:moderate-reinforcement` | 16.77 | 1502 | 0.6% |
+| `ensureMinimumSectorCoverage:density-floor` | 15.43 | 1502 | 0.6% |
+| Parent `sealMergedSectorTruth:ensure-coverage` | 2675.67 | 1502 | 100% |
+
+`territory-claim-rescue` + `severe-rescue` together = 2560 ms (95.7%). Attribution overhead 52 ms (~2%). Parent total +10 ms vs Batch 21 baseline 2665.5 ms — within run-to-run noise.
+
+**Byte-identity proof:** 40w n1900 final hash `b14179d65639860c` matches Batch 17 baseline literally. `node tools/validate_run_consistency.cjs runs/.../n1900` PASS (0 violations). Anchors 27/27, benchmarks 6/6. `tests/sector_partition_instrumentation.test.ts` includes new `static contract: ensureMinimumSectorCoverage` test enforcing the 5-label set.
+
+**Next targets:** Drill into `:territory-claim-rescue` (1505 ms) or `:severe-rescue` (1054 ms) for one more level of sub-attribution or a byte-identical optimization. The remaining three phases (~63 ms combined) are not worth optimizing.
+
+**Report:** [implemented/20260518_BATCH23_ENSURE_COVERAGE_ATTRIBUTION.md](implemented/20260518_BATCH23_ENSURE_COVERAGE_ATTRIBUTION.md)
 
 ## 2026-05-18: Batch 22 normalizeFinalSectorBuckets friendlyUniverse hoist (byte-identical optimization)
 

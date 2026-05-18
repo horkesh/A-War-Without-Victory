@@ -1935,7 +1935,7 @@ function sealMergedSectorTruth(
         _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids));
         _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids));
         _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
-        _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state));
+        _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state, _perfTime));
         _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids));
         const absorbed = _perfTime('sealMergedSectorTruth:absorb-unstaffed', () =>
             absorbUnstaffedSiblingFrontSectors(sectors, factionSectors, adjacency, edgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids));
@@ -1945,7 +1945,7 @@ function sealMergedSectorTruth(
             _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(refreshedFactionSectors, formations, adjacency, friendlyOsids));
             _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(refreshedFactionSectors, formations, faction, adjacency, friendlyOsids));
             _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
-            _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state));
+            _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state, _perfTime));
             _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(refreshedFactionSectors, formations, adjacency, friendlyOsids));
         }
     }

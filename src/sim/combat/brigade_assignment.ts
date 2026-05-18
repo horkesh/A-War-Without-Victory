@@ -1303,6 +1303,8 @@ export function warnUnresolvedSectorAssignments(
 /**
  * Ensure every sector has at least one assigned brigade.
  */
+type EnsureMinimumSectorCoveragePerfTimer = <T>(label: string, fn: () => T) => T;
+
 export function ensureMinimumSectorCoverage(
     allSectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
@@ -1310,6 +1312,7 @@ export function ensureMinimumSectorCoverage(
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
     state?: GameState,
+    perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn(),
 ): void {
     const opParticipants = buildOperationParticipantSet(state);
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
@@ -1386,6 +1389,17 @@ export function ensureMinimumSectorCoverage(
         sectorsByCorps.set(s.corps_id, list);
     }
 
+    // ── Hoisted shared closures ──
+    // `needed` and the density-floor constants are declared at function-body scope
+    // because Phase E (severe-rescue) references `needed` at 10+ sites and the
+    // _perfTime phase wrappers below would otherwise hide Phase B's local
+    // declarations from later phases.
+    const DENSITY_FLOOR_EDGES_PER_BRIGADE = 8;
+    const DENSITY_FLOOR_THREAT_GATE = 300;
+    const needed = (s: CorpsFrontSector): number =>
+        Math.max(1, Math.ceil(s.length_edges / DENSITY_FLOOR_EDGES_PER_BRIGADE));
+
+    perfTime('ensureMinimumSectorCoverage:territory-claim-rescue', () => {
     // ── Pre-pass: territory-claim rescue for zero-brigade split children ──────────
     // splitNonContiguousSectors intentionally emits non-largest children with empty
     // brigade lists, relying on classifyBrigadesByTerritory to fill them. That fill
@@ -1593,11 +1607,12 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:density-floor', () => {
     // ── Density floor pass (n701→n750) ──
-    const DENSITY_FLOOR_EDGES_PER_BRIGADE = 8;
-    const DENSITY_FLOOR_THREAT_GATE = 300;
-    const needed = (s: CorpsFrontSector): number =>
-        Math.max(1, Math.ceil(s.length_edges / DENSITY_FLOOR_EDGES_PER_BRIGADE));
+    // DENSITY_FLOOR_EDGES_PER_BRIGADE / DENSITY_FLOOR_THREAT_GATE / `needed`
+    // are hoisted to function-body scope above so Phase E can reference them.
 
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         const underStaffed = corpsSectors
@@ -1652,6 +1667,9 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:idle-equalization', () => {
     // ── Idle equalization pass (Step 7c) ──
     const EQUALIZATION_DONOR_MAX_THREAT = 25;
     const EQUALIZATION_MIN_DONOR_DENSITY = 0.90;
@@ -1713,6 +1731,9 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:moderate-reinforcement', () => {
     // ── Moderate-pressure reinforcement pass (Step 7d) ──
     const PASS_7D_RECIPIENT_MAX_DENSITY = 0.25;
     const PASS_7D_RECIPIENT_MIN_THREAT = 50;
@@ -1774,6 +1795,9 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:severe-rescue', () => {
     // ── Severe undercoverage rescue pass ──
     // Late same-corps rebalance for sectors that remain critically thin even after the
     // ordinary density/equalization passes. Keep this physically truthful: only nearby
@@ -2061,6 +2085,8 @@ export function ensureMinimumSectorCoverage(
             }
         }
     }
+
+    });
 
     // Sort for determinism
     for (const s of allSectors) s.assigned_brigade_ids.sort(strictCompare);

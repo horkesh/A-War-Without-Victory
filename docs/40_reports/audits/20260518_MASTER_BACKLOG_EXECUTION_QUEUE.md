@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 23 — ensureMinimumSectorCoverage closure-hoist + 5-phase attribution
+
+| Lane | Status | Source |
+|---|---|---|
+| `ensureMinimumSectorCoverage` closure-hoist + 5-phase attribution | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH23_ENSURE_COVERAGE_ATTRIBUTION.md`. Hoisted `needed`/`DENSITY_FLOOR_*` from Phase B to function-body scope, then wrapped all 5 phases in `_perfTime` callbacks via injected `perfTime` parameter. 40w n1900 hash `b14179d65639860c` matches Batch 17 baseline. `:territory-claim-rescue` (1505 ms / 56%) + `:severe-rescue` (1054 ms / 39%) are the two dominant children — clear next-target candidates. |
+
 ## Completed Batch 22 — Autonomous multi-lane closeout (single-lane + held lane)
 
 | Lane | Status | Source |

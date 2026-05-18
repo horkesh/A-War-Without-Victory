@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sector): Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution
+
+**Type:** Sector reconstruction sidecar-only attribution (byte-identical) + parent doc propagation.
+
+**Change:** Resolved the Batch 22 held-lane blocker by hoisting `needed` + `DENSITY_FLOOR_EDGES_PER_BRIGADE` + `DENSITY_FLOOR_THREAT_GATE` from Phase B (density-floor) up to function-body scope in `ensureMinimumSectorCoverage(...)` (src/sim/combat/brigade_assignment.ts), then wrapping each of the 5 phases (territory-claim-rescue, density-floor, idle-equalization, moderate-reinforcement, severe-rescue) in `_perfTime` callbacks via an injected `perfTime: EnsureMinimumSectorCoveragePerfTimer = (_label, fn) => fn()` parameter with no-op default. The two call sites in `sealMergedSectorTruth` (corps_front_sectors.ts) pass module-local `_perfTime` as the 7th argument. n1900 evidence reveals two dominant phases: `:territory-claim-rescue` at 1505.50 ms / 1502 calls (56.3% of the 2675.67 ms ensure-coverage parent) and `:severe-rescue` at 1054.46 ms / 1502 calls (39.4%); the remaining three phases combined are 63.34 ms (2.4%). Attribution overhead = ~52 ms (~2%) between parent total and children sum.
+
+**Determinism / output impact:** Closure hoist preserves byte-identity — `DENSITY_FLOOR_*` constants and the `needed` helper are pure values/functions whose new scope location does not change any read order or value semantics. Phase wrappers use the no-op default perfTime when called from any caller that does not pass the 7th arg (only sealMergedSectorTruth call sites pass it). 40w n1900 final hash `b14179d65639860c` matches Batch 17 baseline literally; anchors 27/27, benchmarks 6/6, `validate_run_consistency` PASS (0 violations; 4 pre-existing informational below-floor advisories unchanged).
+
+**Verification:** `npm.cmd run typecheck` PASS. `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_truth_reconciliation.test.ts tests/war_phase_step_order.test.ts --reporter=dot` 65/65 PASS (including new `static contract: ensureMinimumSectorCoverage` test enforcing the 5 label literals). `PERF_PROFILE_SECTOR_PARTITION=true npm.cmd run sim:scenario:run:40w:timed` produced n1900 hash `b14179d65639860c`; expert verified GO for byte-identity.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH23_ENSURE_COVERAGE_ATTRIBUTION.md`; updates to `docs/40_reports/SECTOR_MASTER.md` (Batch 23 entry with full per-phase evidence table), `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md` (Batch 23 row), `docs/PROJECT_LEDGER_KNOWLEDGE.md` (new durable rule), `.claude/napkin.md`.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` not edited. Sector docs record the two dominant children with clear next-target identification.
+
+---
+
 ## [2026-05-18] feat(roadmap): Batch 22 autonomous closeout (normalizeFinalSectorBuckets friendlyUniverse hoist; ensureMinimumSectorCoverage attribution held)
 
 **Type:** Sector reconstruction byte-identical optimization + held attribution lane + parent doc propagation.

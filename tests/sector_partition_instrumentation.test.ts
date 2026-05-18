@@ -351,6 +351,33 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: ensureMinimumSectorCoverage has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function ensureMinimumSectorCoverage(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'ensureMinimumSectorCoverage:density-floor',
+            'ensureMinimumSectorCoverage:idle-equalization',
+            'ensureMinimumSectorCoverage:moderate-reinforcement',
+            'ensureMinimumSectorCoverage:severe-rescue',
+            'ensureMinimumSectorCoverage:territory-claim-rescue',
+        ];
+
+        for (const label of labels) {
+            // Uses injected `perfTime` parameter (no underscore prefix), matching
+            // the `buildMultiSectorsForCorps` pattern in `sector_building.ts`.
+            expect(region).toContain(`perfTime('${label}'`);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: normalizeFinalSectorBuckets has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('function normalizeFinalSectorBuckets(');
