@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-17
+**Updated:** 2026-05-18
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Presidential campaign-loop validation** | [implemented/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md](implemented/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md), [audits/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md](audits/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md), [implemented/visual_validation/20260518_presidential_loop/](implemented/visual_validation/20260518_presidential_loop/), `tools/ui/presidential_loop_smoke.cjs` - Batch 6 validates the existing `Brief -> Inspect -> Decide -> Execute -> Report -> Cost -> Judge -> Next` loop across Warroom docket, Decision Room, preserved pre-advance rows, Turn Aftermath, Army HQ Records, Chronicle, and next-turn return without adding a new queue or owner. |
 | **GUI Phase 0 decision surface + polish closeout** | [implemented/20260516_GUI_PHASE0_DECISION_SURFACE_AND_POLISH.md](implemented/20260516_GUI_PHASE0_DECISION_SURFACE_AND_POLISH.md), [implemented/20260516_PRESIDENTIAL_DECISION_SURFACE_CORRECTNESS.md](implemented/20260516_PRESIDENTIAL_DECISION_SURFACE_CORRECTNESS.md), [audits/20260516_PRESIDENTIAL_INBOX_DECISION_SURFACE_AUDIT.md](audits/20260516_PRESIDENTIAL_INBOX_DECISION_SURFACE_AUDIT.md), [audits/20260516_PRESIDENTIAL_DECISION_SURFACE_SECOND_PASS_AUDIT.md](audits/20260516_PRESIDENTIAL_DECISION_SURFACE_SECOND_PASS_AUDIT.md), [../plans/2026-05-16-presidential-decision-surface-correctness-plan.md](../plans/2026-05-16-presidential-decision-surface-correctness-plan.md), [GUI_POLISH_MASTER.md](GUI_POLISH_MASTER.md) - Phase 0 closes broad Inbox coverage across paramilitary, Dayton, convoy, event, peace-plan, autonomy, opportunity, reserve, and player-scoped officer/personnel families. Phase 0.1 closes second-pass correctness: convoy resolution uses the canonical military queue, required event decisions respect `responding_faction`, and Inbox/Decision Room/pre-advance/desktop gates share the player-decision manifest. |
 | **Code Audit Round 3 AAA polish follow-ups** | [implemented/20260517_CODE_AUDIT_ROUND3_AAA_POLISH_FOLLOWUPS.md](implemented/20260517_CODE_AUDIT_ROUND3_AAA_POLISH_FOLLOWUPS.md), [../plans/2026-05-17-code-audit-round3-aaa-polish-followups-plan.md](../plans/2026-05-17-code-audit-round3-aaa-polish-followups-plan.md) - Lane C closes current-version hygiene, opening-brief action consistency, RBiH/HRHB bottom-status diplomacy coverage, player-relevant priority-front filtering and labels, adapter cast reduction, and localized panel boundaries. |
 | **Audit Round 2 O7-O9 closeout** | [implemented/20260516_AUDIT_ROUND2_O7_O9_CLOSEOUT.md](implemented/20260516_AUDIT_ROUND2_O7_O9_CLOSEOUT.md), [../plans/2026-05-16-audit-round2-action-plan.md](../plans/2026-05-16-audit-round2-action-plan.md) - officer/OOB refs now resolve, `useIPC.ts` query contracts are typed with explicit failed advisor fallback, and tutorial copy/spotlight targets are regression-covered. |
@@ -501,4 +502,3 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.
 - Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
 - See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
-

@@ -29,6 +29,7 @@ import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dyna
 // round-trip; does NOT advance turns or mutate engine state.
 import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
+import { CinematicVerdict } from './verdict/CinematicVerdict.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -344,19 +345,15 @@ export function VerdictScreen() {
              style={{ zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
              data-awwv-endgame-outcome={verdict.outcome_label}>
-            <div className="w-[780px] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
-                {/* Header */}
-                <div className="px-8 py-5 border-b border-panel-border bg-panel-card/50 text-center">
-                    <div className="text-[9px] font-mono uppercase tracking-[0.5em] text-accent-gold/50 mb-1">
-                        A War Without Victory
-                    </div>
-                    <div className="text-lg font-bold text-text-primary uppercase tracking-wide mb-1">
-                        {verdict.outcome_label}
-                    </div>
-                    <div className="text-[10px] text-text-secondary">
-                        {date} &mdash; {years > 0 ? `${years}y ${weeks}w` : `${weeks} weeks`} of war
-                    </div>
-                </div>
+            <div className="w-[min(980px,calc(100vw-24px))] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
+                <CinematicVerdict
+                    verdict={verdict}
+                    costLedger={loadedGameState.costLedger}
+                    historicalComparison={loadedGameState.historicalComparison}
+                    focusFaction={selectedFaction}
+                    dateLabel={date}
+                    durationLabel={years > 0 ? `${years}y ${weeks}w` : `${weeks} weeks`}
+                />
 
                 {/* Faction Selector Tabs */}
                 <div className="flex border-b border-panel-border">

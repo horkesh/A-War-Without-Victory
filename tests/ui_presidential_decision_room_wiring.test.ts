@@ -1,8 +1,109 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { buildPresidentialDecisionRoomView } from '../src/ui/map/data/presidentialDecisionRoom.js';
+import { openPresidentialDecisionRoomNavigationTarget } from '../src/ui/map/utils/presidentialDecisionRoomNavigation.js';
+import type { LoadedGameState } from '../src/ui/map/data/types.js';
+import type { TurnSummary } from '../src/state/turn_summary.js';
+import type { ShellNavigationState } from '../src/ui/map/utils/shellNavigation.js';
 
 function read(path: string): string {
   return readFileSync(new URL(path, import.meta.url), 'utf8');
+}
+
+function makeTurnSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
+  return {
+    turn: 24,
+    battles: [],
+    territory_net: {},
+    notable_flips: [],
+    displacement_total: 0,
+    displacement_by_ethnicity: {},
+    decoration_awards: [],
+    arc_transitions: [],
+    formation_spawns: [],
+    formation_destructions: [],
+    supply_deltas: {},
+    heavy_munitions_deltas: {},
+    movements: [],
+    supply_transitions: [],
+    events_fired: [],
+    notable_events: [],
+    ...overrides,
+  };
+}
+
+function makeLoadedState(): LoadedGameState {
+  const latestTurnSummary = makeTurnSummary({
+    turn: 24,
+    territory_net: { RBiH: -1 },
+    displacement_total: 1800,
+    formation_destructions: [
+      { formation_id: 'arbih_lost', formation_name: 'Lost Brigade', faction: 'RBiH' },
+    ],
+  });
+  return {
+    label: 'Turn 24',
+    turn: 24,
+    phase: 'war',
+    formations: [],
+    militiaPools: [],
+    controlBySettlement: {},
+    statusBySettlement: {},
+    brigadeAorByFormationId: {},
+    attackOrders: [],
+    aorOrders: [],
+    recentControlEvents: [],
+    allControlEvents: [],
+    displacementEventLog: [],
+    battlesByOsid: {},
+    movementsByOsid: {},
+    supplyTransitionsByOsid: {},
+    historicalEventsByTurn: [],
+    pressureWarning: false,
+    latestTurnSummary,
+    turnSummaries: [latestTurnSummary],
+    player_faction: 'RBiH',
+    presidentialReviewQueue: {
+      pendingCount: 1,
+      criticalCount: 1,
+      eventDecisionCount: 1,
+      commandInterpretationCount: 0,
+      personnelDirectiveCount: 0,
+      operationOpportunityCount: 0,
+    },
+    operationalSitrep: {
+      headline: 'Front alert.',
+      territory: { territoryPercent: 44, settlementsControlled: 110, settlementsTotal: 250 },
+      front: { engagedCount: 5, exposedCount: 2, edges: [] },
+      readiness: { weakestBrigades: [], encircledCount: 0 },
+      sustainment: {
+        adequateCount: 8,
+        strainedCount: 3,
+        criticalCount: 1,
+        collapsedMunicipalities: [],
+        activeHostileTakeoverTimers: 0,
+        activeCamps: 0,
+      },
+      operations: { activeCount: 1, corps: [] },
+      alerts: [{ id: 'front-critical', severity: 'critical', text: 'Two exposed fronts require command review.' }],
+    },
+  } as LoadedGameState;
+}
+
+function createNavigationState(): ShellNavigationState & { calls: Array<[string, unknown]> } {
+  const calls: Array<[string, unknown]> = [];
+  return {
+    loadedGameState: { player_faction: 'RBiH' },
+    calls,
+    setSelectedArmyId: (id) => { calls.push(['setSelectedArmyId', id]); },
+    setArmyHQOpen: (open) => { calls.push(['setArmyHQOpen', open]); },
+    setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
+    setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
+    setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setFocusedAftermathTurn: (turn) => { calls.push(['setFocusedAftermathTurn', turn]); },
+    setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
+    setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
+  };
 }
 
 describe('Presidential Decision Room wiring', () => {
@@ -144,5 +245,32 @@ describe('Presidential Decision Room wiring', () => {
     expect(combined).not.toMatch(/src\/sim\/combat|sim\\combat|pre_planned_operations|triggered|rupture|drina|srebrenica/i);
     expect(combined).not.toContain('OPPORTUNITY_CATALOG');
     expect(combined).not.toContain('late_war');
+  });
+
+  it('opens Decision Room source handoff targets on their existing owner surfaces', () => {
+    const view = buildPresidentialDecisionRoomView({ state: makeLoadedState() });
+    const handoffs = Object.fromEntries(view.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+
+    const summaryState = createNavigationState();
+    expect(openPresidentialDecisionRoomNavigationTarget(handoffs['army-hq-summary'].navigationTarget, summaryState)).toBe(true);
+    expect(summaryState.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'summary'],
+    ]);
+
+    const turnRecordState = createNavigationState();
+    expect(openPresidentialDecisionRoomNavigationTarget(handoffs['turn-aftermath-records'].navigationTarget, turnRecordState)).toBe(true);
+    expect(turnRecordState.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'aftermath'],
+      ['setFocusedAftermathTurn', 24],
+      ['setChronicleOpen', false],
+    ]);
+
+    const chronicleState = createNavigationState();
+    expect(openPresidentialDecisionRoomNavigationTarget(handoffs.chronicle.navigationTarget, chronicleState)).toBe(true);
+    expect(chronicleState.calls).toEqual([['setChronicleOpen', true]]);
   });
 });

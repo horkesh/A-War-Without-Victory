@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildPreAdvanceCommandReviewView } from '../../src/ui/map/data/preAdvanceCommandReview.js';
+import { buildPresidentialDecisionRoomView } from '../../src/ui/map/data/presidentialDecisionRoom.js';
 import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionSummaryView } from '../../src/ui/map/data/types.js';
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
@@ -293,6 +294,40 @@ describe('buildPreAdvanceCommandReviewView', () => {
 
     expect(view.status).toBe('blocked');
     expect(view.blockingDecisionCount).toBe(4);
+  });
+
+  it('preserves Decision Room source targets in pre-advance review rows', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 1,
+      },
+      operationOpportunityProposals: [makeOpportunity()],
+      operationalSitrep: makeSitrep(),
+      latestTurnSummary: makeSummary({
+        turn: 31,
+        displacement_total: 1600,
+      }),
+    });
+
+    const decisionRoom = buildPresidentialDecisionRoomView({ state });
+    const review = buildPreAdvanceCommandReviewView({ state });
+    const sourceTargetsById = Object.fromEntries(
+      decisionRoom.advanceReadiness.items.map((item) => [item.id, item.navigationTarget]),
+    );
+
+    expect(review.items.map((item) => [item.id, item.navigationTarget])).toEqual(
+      review.items.map((item) => [item.id, sourceTargetsById[item.id]]),
+    );
+    expect(review.sourceHandoffs.map((handoff) => [handoff.id, handoff.navigationTarget])).toEqual([
+      ['army-hq-briefing', { kind: 'army-hq-tab', tab: 'briefing' }],
+      ['army-hq-summary', { kind: 'army-hq-tab', tab: 'summary' }],
+      ['turn-aftermath-records', { kind: 'army-hq-aftermath-record', turn: 31 }],
+    ]);
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {

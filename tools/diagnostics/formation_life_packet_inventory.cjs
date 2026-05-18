@@ -267,6 +267,136 @@ function makeFormationRow(formation, sectorContext, subtype, reason) {
     };
 }
 
+function getLocalSectorEnemyOsids(sector, loc) {
+    const enemies = new Set();
+    for (const subSegment of asArray(sector?.sub_segments)) {
+        if (!asArray(subSegment?.friendly_osids).includes(loc)) continue;
+        for (const enemyOsid of asArray(subSegment?.enemy_osids)) {
+            if (typeof enemyOsid === 'string' && enemyOsid.length > 0) enemies.add(enemyOsid);
+        }
+    }
+    return [...enemies].sort(strictCompare);
+}
+
+function hasLegalCorpsAuthority(formation, sector) {
+    const sectorCorpsId = sector?.corps_id;
+    if (typeof sectorCorpsId !== 'string' || sectorCorpsId.length === 0) return false;
+    if (formation?.corps_id === sectorCorpsId) return true;
+    const loanedTo = formation?.elite_loan_state?.on_loan === true
+        ? formation?.elite_loan_state?.loaned_to_corps
+        : null;
+    return loanedTo === sectorCorpsId;
+}
+
+function classifySectorFrontInertness(state, formation, membership) {
+    const sectorContext = getSectorContext(state, formation, membership);
+    if (sectorContext.role !== 'front' || !sectorContext.sector) return null;
+    if (isSectorColdFront(state, sectorContext.sector)) return null;
+
+    const localEnemyOsids = getLocalSectorEnemyOsids(sectorContext.sector, formation.location_osid);
+    const hasLocalEnemyContact = localEnemyOsids.length > 0;
+    const legalCorpsAuthority = hasLegalCorpsAuthority(formation, sectorContext.sector);
+    let reason = 'sector_front_contact_no_battle';
+    if (!legalCorpsAuthority) {
+        reason = 'sector_front_foreign_corps_authority';
+    } else if (!hasLocalEnemyContact) {
+        reason = 'sector_front_without_local_contact';
+    }
+
+    return {
+        packet: 'FL-A',
+        formation_id: String(formation.id),
+        reason,
+        name: String(formation.name || formation.id),
+        faction: String(formation.faction || ''),
+        corps_id: formation.corps_id == null ? null : String(formation.corps_id),
+        sector_id: sectorContext.sector_id,
+        location_osid: formation.location_osid == null ? null : String(formation.location_osid),
+        home_osid: formation.home_osid == null ? null : String(formation.home_osid),
+        has_local_enemy_contact: hasLocalEnemyContact,
+        legal_corps_authority: legalCorpsAuthority,
+        local_enemy_osids: localEnemyOsids,
+    };
+}
+
+function emptyFlACounts() {
+    return {
+        front_contact_legal_authority: 0,
+        front_without_local_contact: 0,
+        no_legal_corps_authority: 0,
+    };
+}
+
+function summarizeSectorFrontInertness(rows) {
+    const counts = emptyFlACounts();
+    for (const row of rows) {
+        if (!row.legal_corps_authority) counts.no_legal_corps_authority += 1;
+        else if (row.has_local_enemy_contact) counts.front_contact_legal_authority += 1;
+        else counts.front_without_local_contact += 1;
+    }
+    rows.sort((a, b) => strictCompare(a.formation_id, b.formation_id));
+    return { counts, formations: rows };
+}
+
+function getHomeDistance(state, formation) {
+    const cached = state?.military?.home_distance_cache?.[formation.id];
+    if (Number.isFinite(+cached)) return +cached;
+    if (!formation?.home_osid || !formation?.location_osid) return null;
+    if (formation.home_osid === formation.location_osid) return 0;
+    return null;
+}
+
+function classifyFarFromHomeOwnerKind(state, formation, activeOperationParticipants) {
+    if (isLoaned(formation)) return 'loan';
+    if (activeOperationParticipants.has(formation.id)) return 'operation';
+
+    const movementOrder = state?.military?.brigade_movement_orders?.[formation.id];
+    if (movementOrder?.destination_sids?.[0] === formation.home_osid) return 'home_recall';
+
+    const assignment = formation?.assignment;
+    const hasLiveSectorOwner = assignment?.kind === 'sector'
+        && typeof assignment.sector_id === 'string'
+        && ['front', 'reserve', 'rear'].includes(assignment.role);
+    return hasLiveSectorOwner ? 'redeployed' : 'unassigned';
+}
+
+function emptyFlBCounts() {
+    return {
+        redeployed: 0,
+        loan: 0,
+        operation: 0,
+        home_recall: 0,
+        unassigned: 0,
+    };
+}
+
+function classifyFarFromHomeOwnerTruth(state, formation, activeOperationParticipants) {
+    if (!formation?.home_osid || !formation?.location_osid) return null;
+    const distance = getHomeDistance(state, formation);
+    if (distance == null || distance <= 6) return null;
+    const ownerKind = classifyFarFromHomeOwnerKind(state, formation, activeOperationParticipants);
+    return {
+        packet: 'FL-B',
+        formation_id: String(formation.id),
+        owner_kind: ownerKind,
+        name: String(formation.name || formation.id),
+        faction: String(formation.faction || ''),
+        corps_id: formation.corps_id == null ? null : String(formation.corps_id),
+        location_osid: String(formation.location_osid),
+        home_osid: String(formation.home_osid),
+        distance,
+    };
+}
+
+function summarizeFarFromHomeOwnerTruth(rows) {
+    const counts = emptyFlBCounts();
+    for (const row of rows) {
+        counts[row.owner_kind] = (counts[row.owner_kind] ?? 0) + 1;
+    }
+    rows.sort((a, b) => strictCompare(a.formation_id, b.formation_id));
+    return { counts, formations: rows };
+}
+
 function emptyBuckets() {
     const buckets = {};
     for (const subtype of SUBTYPES) buckets[subtype] = [];
@@ -284,11 +414,15 @@ function classifyFormationLifeInventory(state) {
     const activeOperationParticipants = buildActiveOperationParticipantSet(state);
     const membership = buildSectorMembership(state);
     const formationsBySubtype = emptyBuckets();
+    const sectorFrontInertnessRows = [];
+    const farFromHomeRows = [];
 
     for (const formationId of sortedKeys(formations)) {
         const formation = formations[formationId];
         if (!formation || formation.status !== 'active') continue;
         if (!isBrigadeKind(formation.kind)) continue;
+        const farFromHomeRow = classifyFarFromHomeOwnerTruth(state, formation, activeOperationParticipants);
+        if (farFromHomeRow) farFromHomeRows.push(farFromHomeRow);
         if (battleCount(formation) > 0) continue;
 
         const classification = classifyFormation(state, formation, activeOperationParticipants, membership);
@@ -296,6 +430,10 @@ function classifyFormationLifeInventory(state) {
         formationsBySubtype[classification.subtype].push(
             makeFormationRow(formation, sectorContext, classification.subtype, classification.reason),
         );
+        if (classification.subtype === 'sector_front') {
+            const sectorFrontRow = classifySectorFrontInertness(state, formation, membership);
+            if (sectorFrontRow) sectorFrontInertnessRows.push(sectorFrontRow);
+        }
     }
 
     const counts = emptyCounts();
@@ -308,11 +446,15 @@ function classifyFormationLifeInventory(state) {
 
     return {
         diagnostic: 'formation_life_packet_inventory',
-        schema_version: 1,
+        schema_version: 2,
         source_turn: Number.isFinite(+state?.meta?.turn) ? +state.meta.turn : null,
         total,
         counts,
         formations_by_subtype: formationsBySubtype,
+        packet_summaries: {
+            fl_a_sector_front_inertness: summarizeSectorFrontInertness(sectorFrontInertnessRows),
+            fl_b_far_from_home_owner_truth: summarizeFarFromHomeOwnerTruth(farFromHomeRows),
+        },
     };
 }
 
@@ -355,5 +497,7 @@ module.exports = {
     SUBTYPES,
     classifyFormation,
     classifyFormationLifeInventory,
+    classifyFarFromHomeOwnerTruth,
+    classifySectorFrontInertness,
     strictCompare,
 };

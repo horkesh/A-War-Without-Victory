@@ -87,4 +87,18 @@ describe('tactical shell frame contract', () => {
     expect(oob).toContain('situation: true');
     expect(oob).toContain('army: true');
   });
+
+  it('keeps Warroom and pre-advance priority handoffs delegated to the shared Decision Room router', () => {
+    const warroomStatusBar = read('src/ui/map/components/warroom/WarroomStatusBar.tsx');
+    const advanceTurnModal = read('src/ui/map/components/warroom/AdvanceTurnModal.tsx');
+    const app = read('src/ui/map/App.tsx');
+
+    expect(warroomStatusBar).toContain('onReviewTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void');
+    expect(warroomStatusBar).toContain('onReviewTarget?.(target)');
+    expect(warroomStatusBar).not.toContain('openArmyHQTab(');
+    expect(warroomStatusBar).not.toContain('setArmyHQTab');
+
+    expect(advanceTurnModal).toContain('openPresidentialDecisionRoomNavigationTarget(item.navigationTarget)');
+    expect(app).toContain('openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState())');
+  });
 });

@@ -4,9 +4,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
+import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { openArmyHQRecordsSubTab } from '../../src/ui/map/utils/shellNavigation.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 
 function makeLoadedState(): LoadedGameState {
     return {
@@ -32,6 +34,55 @@ function makeLoadedState(): LoadedGameState {
         turnSummaries: [],
         player_faction: 'RS',
     } as LoadedGameState;
+}
+
+function makeAftermathView(): TurnAftermathView {
+    return {
+        turn: 12,
+        dateLabel: 'Turn 12',
+        playerFaction: 'RS',
+        headline: 'After-action report available.',
+        tone: 'mixed',
+        territory: { friendlyNet: -1, gains: 1, losses: 2, notable: [] },
+        combat: {
+            battleCount: 2,
+            friendlyBattleCount: 1,
+            friendlyCasualties: 42,
+            opposingCasualties: 31,
+            territoryFlipsFromBattles: 1,
+        },
+        humanitarian: { displacedThisTurn: 500, hotspotLabel: 'Central Bosnia' },
+        cost: {
+            severity: 'severe',
+            friendlyMilitaryCasualties: 42,
+            theaterMilitaryCasualties: 73,
+            displacedThisTurn: 500,
+            ownFormationsDestroyed: 0,
+            ownSupplySpent: 8,
+            ownHeavyMunitionsSpent: 2,
+            reasons: ['cost signal'],
+        },
+        signals: [],
+        judgment: {
+            headline: 'Review the cost.',
+            detail: 'Chronicle memory is available for this turn.',
+            memoryTone: 'cost',
+            primarySurface: 'chronicle',
+            secondarySurface: 'records',
+        },
+        nextActions: {
+            actionableCount: 1,
+            blockingCount: 0,
+            opportunityCount: 0,
+            reserveCount: 0,
+            officerCount: 0,
+            eventDecisionCount: 0,
+            peaceCount: 0,
+            topItems: [],
+        },
+        formations: { ownSpawned: 0, ownDestroyed: 0, spawned: 0, destroyed: 0 },
+        supply: { ownSupplyDelta: -8, ownHeavyMunitionsDelta: -2 },
+    } as TurnAftermathView;
 }
 
 describe('PresidentialToolbar RECORDS button', () => {
@@ -65,5 +116,24 @@ describe('PresidentialToolbar RECORDS button', () => {
             armyHQTab: 'records',
             armyHQRecordsSubTab: 'aar',
         });
+    });
+
+    it('routes Turn Aftermath record links to records and Chronicle callbacks without closing shell context first', () => {
+        const calls: string[] = [];
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view: makeAftermathView(),
+            onClose: () => calls.push('close'),
+            onOpenInbox: () => calls.push('inbox'),
+            onOpenSummary: () => calls.push('summary'),
+            onOpenRecords: () => calls.push('records'),
+            onOpenChronicle: () => calls.push('chronicle'),
+            onOpenCodex: () => calls.push('codex'),
+        }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Turn Records' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Chronicle' }));
+
+        expect(calls).toEqual(['records', 'chronicle']);
     });
 });

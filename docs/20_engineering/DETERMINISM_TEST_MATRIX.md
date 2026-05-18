@@ -6,6 +6,7 @@
 - Gate: `tests/scenario_determinism_h1_1.test.ts`
 - Gate: `tests/scenario_bots_determinism_h2_4.test.ts`
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
+- Perf sidecars: `tests/scenario_timing_instrumentation.test.ts`, `tests/wall_clock_target_report.test.ts`, and `tests/profile_hotspot_report.test.ts` cover opt-in wall-clock/profile reports that stay outside deterministic saves and scenario truth artifacts.
 
 ### Stable ordering (collections, records, outputs)
 - Gate: `tests/turn_pipeline_order.test.ts`

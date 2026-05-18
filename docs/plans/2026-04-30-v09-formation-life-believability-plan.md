@@ -104,6 +104,8 @@
 4. Update detector wording only after owner behavior is understood.
 5. Verification: report no longer treats quiet-but-valid formations as equivalent to live-front inert formations.
 
+**Status 2026-05-18:** Batch 6 FL-A/FL-B diagnostic packetization is implemented in `tools/diagnostics/formation_life_packet_inventory.cjs` and documented in `docs/40_reports/implemented/20260518_FORMATION_LIFE_PACKETIZATION_FL_A_FL_B.md`. FL-A is now a pure `sector_front` packet and the latest complete 40w baseline n1880 reports 67/67 sector-front zero-battle rows as local-contact/legal-authority cases. FL-B reports far-from-home owner truth as `redeployed=9`, `loan=0`, `operation=0`, `home_recall=0`, `unassigned=1`. No runtime behavior changed; FL-C/FL-E and sensitive doctrine/OOB lanes remain gated.
+
 ## Done Means
 
 - Every warning family has an owner classification.

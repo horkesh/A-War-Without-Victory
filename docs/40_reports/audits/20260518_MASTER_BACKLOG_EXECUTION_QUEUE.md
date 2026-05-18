@@ -48,13 +48,23 @@
 | Strict-null Phase 2 combat continuation | Partial implemented | `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH5.md`; integrated 40w n1880 stayed hash-stable at `42607f83870e01d5`; 110 combat inventory escapes remain. |
 | Phase D London Conference notification content | Implemented / content partial | `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`; `london_conference_1992` moved from 0/4 to 4/4 safe recipient coverage. |
 
+## Completed Batch 6
+
+| Lane | Status | Source |
+|---|---|---|
+| Presidential campaign-loop validation | Implemented / validated | `docs/40_reports/implemented/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md`; browser evidence in `docs/40_reports/implemented/visual_validation/20260518_presidential_loop/`. |
+| Formation-life packetization FL-A/FL-B | Diagnostic-closed | `docs/40_reports/implemented/20260518_FORMATION_LIFE_PACKETIZATION_FL_A_FL_B.md`; no runtime behavior changed. |
+| Wall-clock measured follow-up | Truth-report closed | `docs/40_reports/implemented/20260518_PERFORMANCE_WALL_CLOCK_BATCH6_MEASURED_FOLLOWUP.md`; n1881 kept hash `42607f83870e01d5`, no optimization shipped. |
+| Cinematic verdict UI completion | Implemented / visually validated | `docs/40_reports/implemented/20260518_CINEMATIC_VERDICT.md`; screenshots and metrics in `docs/40_reports/implemented/visual_validation/20260518_cinematic_verdict/`. |
+
 ## Next Implementable Batches
 
 | Batch | Candidate lanes | Notes |
 |---|---|---|
-| Batch 6 product validation | Presidential campaign-loop validation | Repo-owned validation/cohesion lane over existing Decision Room/Warroom/AAR/Chronicle surfaces. |
-| Batch 6 formation-life | Formation-life packetization FL-A/FL-B | Start with diagnostics and non-sensitive inertness/owner-truth packets; sensitive-history successor lanes remain gated. |
-| Batch 6 performance/UI | Wall-clock measured optimization and/or cinematic verdict UI completion | Use measurement-first perf batches and visual validation for UI. |
+| Sector performance plan | Sector reconstruction/reconciliation optimization | Fresh Batch 6 profile points at `buildFactionSectors:*`, `recoverDroppedFrontEdges:*`, and repeated final-sector truth passes. Requires a sector-owned plan and byte-identical 40w proof. |
+| Strict-null continuation | Continue Phase 2 beyond Batch 5 combat leaves | Batch 5 left 110 combat inventory escapes; continue with small verified slices. |
+| Notification content continuation | Safe historian-reviewed Phase D content | London Conference is complete; sensitive-history / late-war diplomacy rows remain gated by historian/narrative review. |
+| Endgame small-screen polish | Lower verdict report sequencing | Cinematic front door is done; lower legacy war-reckoning sections still need a mobile-friendly sequence or tabbed flow. |
 | Operator evidence | Execute clean-VM and external playtest evidence outside the repo when an operator has target machines/artifacts | Repo now has templates/scripts; actual SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, outreach, and response triage remain operator-only. |
 
 ## Stale Or Already Closed Rows To Reconcile

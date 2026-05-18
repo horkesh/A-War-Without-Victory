@@ -3,6 +3,64 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(ui): complete cinematic verdict presentation
+
+**Type:** Endgame verdict UI presentation, deterministic share-summary presentation, visual validation, and documentation. No victory scoring, Pyrrhic classification, Cost Ledger calculation, historical comparison builder, simulation rule, combat math, scenario data, save schema, serialization format, formation-life behavior, presidential loop validation surface, performance hot path, event notification content, or generated scenario output changed.
+
+**Change:** Added `CinematicVerdict` and wired it into the canonical `VerdictScreen` above the existing faction tabs. The band consumes the existing `verdictScene` and `verdictShareSummary` read models, preserves source-order comparison copy in the rendered UI, and exposes a Copy action for deterministic plain-text sharing. The verdict modal now uses a viewport-capped width, and the cinematic band is `shrink-0` so it remains visible on mobile. Mobile hides the long share-summary preview while retaining the copy action to prevent the band from crowding the viewport.
+
+**Determinism:** Presentation-only over already-built verdict, Cost Ledger, and historical comparison packets. No scoring, ledger, comparison, or sim-owned data contracts changed. The visual probe injects an in-memory game-over UI state into the local map shell and does not write scenario artifacts.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_CINEMATIC_VERDICT.md`; `docs/40_reports/implemented/visual_validation/20260518_cinematic_verdict/`; `tests/ui/cinematic_verdict.test.ts`.
+
+**Verification:** Red test first failed on the missing `CinematicVerdict` module. Green focused suite passed: `npx.cmd vitest run tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts tests\ui\verdict_share_summary.test.ts --reporter=dot` (6/6). Integration UI suite passed: `npx.cmd vitest run tests\ui\endgame_verdict_screen_mount.test.ts tests\ui\verdict_visibility.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` (64/64). `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `node docs\40_reports\implemented\visual_validation\20260518_cinematic_verdict\capture.cjs` captured 390x844, 768x1024, and 1440x900 screenshots plus metrics.
+
+---
+
+## [2026-05-18] test(ui): validate presidential campaign loop handoffs
+
+**Type:** UI route validation, focused regression coverage, and browser-smoke tooling. No simulation rule, combat math, scenario data, save schema, serialization format, random source, formation-life behavior, performance hot path, cinematic verdict UI, event notification content, or generated scenario output changed.
+
+**Change:** Added the Batch 6 presidential campaign-loop audit and implementation report for the existing `Brief -> Inspect -> Decide -> Execute -> Report -> Cost -> Judge -> Next` loop. Added route-level tests for Decision Room source handoff owners, pre-advance preserved targets, Turn Aftermath records/Chronicle callbacks, and Warroom/App delegation through the shared Decision Room router. Added `tools/ui/presidential_loop_smoke.cjs` plus the curated visual-validation folder for browser screenshots and per-step summary JSON.
+
+**Determinism:** UI route validation and documentation only. The smoke script loads a known save in browser memory and does not mutate canonical scenario artifacts or execute the desktop turn-advance IPC path.
+
+**Artifacts:** `docs/40_reports/audits/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md`; `docs/40_reports/implemented/20260518_PRESIDENTIAL_CAMPAIGN_LOOP_VALIDATION.md`; `docs/40_reports/implemented/visual_validation/20260518_presidential_loop/`; `tools/ui/presidential_loop_smoke.cjs`.
+
+**Verification:** Focused route regression suite passed 28/28. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/dynamic-import/chunk-size warnings. `node --check tools\ui\presidential_loop_smoke.cjs` passed. Browser smoke passed 8/8 loop steps against `http://127.0.0.1:3002` using installed Chrome via `PUPPETEER_EXECUTABLE_PATH`.
+
+---
+
+## [2026-05-18] test(diagnostics): packetize formation-life FL-A and FL-B
+
+**Type:** Formation-life diagnostics and documentation. No simulation behavior, combat math, scenario data, save schema, random source, sensitive-history successor/OOB lane, or generated scenario state changed.
+
+**Change:** Extended `tools/diagnostics/formation_life_packet_inventory.cjs` to schema version 2 with `packet_summaries.fl_a_sector_front_inertness` and `packet_summaries.fl_b_far_from_home_owner_truth`. Added focused packet tests for sector-front inertness and far-from-home live owner truth. Documented Batch 6 FL-A/FL-B in `docs/40_reports/implemented/20260518_FORMATION_LIFE_PACKETIZATION_FL_A_FL_B.md` and updated the formation-life plan plus roadmap.
+
+**Outcome:** Latest complete integrated-context 40w baseline n1880 (`42607f83870e01d5`) reports inventory counts `loan=1`, `operation_participant=4`, `sector_front=67`, `sector_reserve=4`, `sector_rear=11`, `sector_owned=0`, `doctrine=24`. FL-A reports `front_contact_legal_authority=67`, `front_without_local_contact=0`, `no_legal_corps_authority=0`; this exposes a commander/doctrine question rather than a safe runtime owner fix. FL-B reports `redeployed=9`, `loan=0`, `operation=0`, `home_recall=0`, `unassigned=1`; live-owner redeployments are no longer blended with the remaining ownerless row.
+
+**Determinism:** Read-only diagnostic over existing final-save state. Iteration and emitted rows are sorted with `strictCompare`; no timestamps, randomness, filesystem traversal, state mutation, or scenario artifact mutation was introduced.
+
+**Verification:** Red tests first failed because `packet_summaries` did not exist. Green focused run passed: `npx.cmd vitest run tests\formation_life_sector_front_inertness.test.ts tests\formation_life_far_from_home_truth.test.ts tests\formation_life_packet_inventory.test.ts` (3/3 files, 3/3 tests). Packet baseline command against n1880 emitted the counts above. `npm.cmd run typecheck` was attempted but blocked by unrelated dirty UI work in `tests/ui/records_button_behavior.test.ts` (`TurnAftermathView` fixture missing `playerFaction`); that file is outside this packet ownership and was not touched. No 40w rerun was required because the packet is diagnostic/report-only.
+
+---
+
+## [2026-05-18] perf(diagnostics): Batch 6 measured wall-clock follow-up truth report
+
+**Type:** Performance diagnostics/report tooling and measured follow-up. No simulation behavior, combat math, sector assignment rule, scenario data, save schema, deterministic artifact schema, random source, formation-life behavior, presidential/cinematic UI, or notification content changed.
+
+**Change:** Added `tools/perf/profile_hotspot_report.ts` plus `npm run perf:profile-hotspot:report` to summarize `tools/perf/profile_scenario.ts` JSON and optional sector-partition JSONL into deterministic JSON/Markdown hotspot evidence. Added focused tests for report shape, risk-decision handling, sector-partition percentage math, and timestamp-shaped output absence. Documented the Batch 6 follow-up in `docs/40_reports/implemented/20260518_PERFORMANCE_WALL_CLOCK_BATCH6_MEASURED_FOLLOWUP.md`, updated the roadmap, and recorded perf-sidecar coverage in the determinism matrix.
+
+**Measurement:** Fresh timed 40w n1881 (`npm.cmd run sim:scenario:run:40w:timed`) kept final hash `42607f83870e01d5` and measured total `102962.338ms` / `2574.058ms per turn`, `25.741x` over the 100ms/turn target. Buckets: simulation `84483.876ms`, serialization/artifacts `10581.278ms`, setup `2907.923ms`, diagnostics/reporting `152.823ms`. Quiet routine-diagnostics probe kept the same hash but did not produce a reliable win (`109265.432ms` total, simulation `83865.698ms`). Per-step profile identified `partition-corps-front-sectors` `11089.454ms`, `reconcile-final-sector-truth` `10972.853ms`, `update-displacement` `5520.183ms`, `update-sustainability` `5247.288ms`, `generate-bot-corps-orders` `4388.094ms`, and `reconcile-final-sector-truth-after-ops` `4223.628ms`. Sector-partition subprofile leaders were `buildFactionSectors:RS` `3842.799ms`, `buildFactionSectors:RBiH` `3655.124ms`, and `recoverDroppedFrontEdges:1` `1735.119ms`.
+
+**Decision:** Truth report only. No optimization shipped. The fresh/profiled target is deterministic sector reconstruction/reconciliation behavior, not speculative cache/reporting overhead; a future sector-owned plan should target `buildFactionSectors:*`, `recoverDroppedFrontEdges:*`, and repeated final-sector truth passes with byte-identical 40w proof.
+
+**Determinism:** Profile and timing values remain sidecar-only and are not written into saves, `weekly_report.jsonl`, `run_summary.json`, replay artifacts, or GameState. The new report builder sorts by measured numeric value and stable label fallback, emits no timestamps, and does not read environment values except through explicit CLI inputs.
+
+**Verification:** Red first: `npx.cmd vitest run tests\profile_hotspot_report.test.ts --reporter=dot` failed because the tool did not exist. Focused green: `npx.cmd vitest run tests\profile_hotspot_report.test.ts tests\wall_clock_target_report.test.ts tests\scenario_timing_instrumentation.test.ts tests\sector_partition_instrumentation.test.ts --reporter=dot` passed 12/12. Scenario/profile evidence commands completed and wrote `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1881/timing.json`, `data/derived/_debug/batch6_profile_40w_n1881.json`, `data/derived/_debug/batch6_profile_40w_sector_partition.json`, and `data/derived/_debug/batch6_profile_hotspot_report.{json,md}`.
+
+---
+
 ## [2026-05-18] feat(roadmap): close fifth backlog execution batch
 
 **Scope:** Fifth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation and a safe Phase D event-notification content backfill. No clean-VM run, external distribution, sensitive-history content backfill, save schema change, or combat retune was performed.

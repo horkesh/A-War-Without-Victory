@@ -1,0 +1,104 @@
+{
+  "url": "http://127.0.0.1:3002",
+  "savePath": "data/derived/latest_run_final_save.json",
+  "outDir": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop",
+  "steps": [
+    {
+      "id": "brief",
+      "label": "Brief",
+      "expectedText": "Strategic Priorities",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/01_brief.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 143
+      }
+    },
+    {
+      "id": "inspect",
+      "label": "Inspect",
+      "expectedText": "War Summary",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/02_inspect.png",
+      "probe": {
+        "visibleDialogCount": 1,
+        "emptyRail": false,
+        "visibleButtons": 60
+      }
+    },
+    {
+      "id": "decide",
+      "label": "Decide",
+      "expectedText": "Strategic Priorities",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/03_decide.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 143
+      }
+    },
+    {
+      "id": "execute",
+      "label": "Execute",
+      "expectedText": "Review Before Advance",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/04_execute.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 143
+      }
+    },
+    {
+      "id": "report",
+      "label": "Report",
+      "expectedText": "RECORDS",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/05_report.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 68
+      }
+    },
+    {
+      "id": "cost",
+      "label": "Cost",
+      "expectedText": "Turn",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/06_cost.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 70
+      }
+    },
+    {
+      "id": "judge",
+      "label": "Judge",
+      "expectedText": "Chronicle",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/07_judge.png",
+      "probe": {
+        "visibleDialogCount": 1,
+        "emptyRail": false,
+        "visibleButtons": 149
+      }
+    },
+    {
+      "id": "next",
+      "label": "Next",
+      "expectedText": "Strategic Priorities",
+      "passed": true,
+      "screenshot": "docs/40_reports/implemented/visual_validation/20260518_presidential_loop/08_next.png",
+      "probe": {
+        "visibleDialogCount": 2,
+        "emptyRail": false,
+        "visibleButtons": 239
+      }
+    }
+  ],
+  "passed": true
+}
