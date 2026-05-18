@@ -1496,16 +1496,22 @@ export function ensureMinimumSectorCoverage(
 
             // Step 1b: pull the nearest reachable same-corps rear brigade.
             {
+                // Hoisted from inside the flatMap callback: formations is read-only
+                // across donor iterations within this step, so the per-donor rebuild
+                // produced identical activeCounts maps. Byte-identical because
+                // pickVacantLocalFrontTarget(...) consumes activeCounts read-only;
+                // the post-pick moveBrigadeToFrontTarget below uses its own fresh
+                // activeCounts at line ~1519.
+                const stepActiveCounts = countActiveBrigadesByOsid(formations);
                 const rearCandidates = corpsSectors
                     .filter(s =>
                         s.sector_id !== sector.sector_id
                         && getSectorComponent(s, componentOf) === sectorComp)
                     .flatMap((donor) => {
-                        const activeCounts = countActiveBrigadesByOsid(formations);
                         return [...(donor.rear_brigade_ids ?? [])]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTarget(bid, sector, activeCounts);
+                                const target = pickVacantLocalFrontTarget(bid, sector, stepActiveCounts);
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })
@@ -1527,16 +1533,17 @@ export function ensureMinimumSectorCoverage(
 
             // Step 1c: if no rear brigade exists, pull the nearest reachable same-corps reserve.
             {
+                // Hoisted from inside the flatMap callback (same justification as Step 1b).
+                const stepActiveCounts = countActiveBrigadesByOsid(formations);
                 const reserveCandidates = corpsSectors
                     .filter(s =>
                         s.sector_id !== sector.sector_id
                         && getSectorComponent(s, componentOf) === sectorComp)
                     .flatMap((donor) => {
-                        const activeCounts = countActiveBrigadesByOsid(formations);
                         return [...donor.reserve_brigade_ids]
                             .sort(strictCompare)
                             .map((bid) => {
-                                const target = pickVacantLocalFrontTarget(bid, sector, activeCounts);
+                                const target = pickVacantLocalFrontTarget(bid, sector, stepActiveCounts);
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })

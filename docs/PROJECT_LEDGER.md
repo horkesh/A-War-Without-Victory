@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sector): Batch 25 :zero-assigned activeCounts hoist (byte-identical optimization)
+
+**Type:** Sector reconstruction byte-identical optimization.
+
+**Change:** Hoisted `countActiveBrigadesByOsid(formations)` out of the `.flatMap` callbacks in `ensureMinimumSectorCoverage` Steps 1b (rear-brigade rescue) and 1c (reserve-brigade rescue). The per-donor rebuild produced identical Maps because `formations` is read-only across donor iterations within the step — `pickVacantLocalFrontTarget(...)` reads activeCounts without mutation, and the post-pick `moveBrigadeToFrontTarget(...)` site at lines 1519 / 1550 builds its own fresh activeCounts independent of the hoisted local. n1902 evidence: `:zero-assigned` dropped from 1466.9 ms (Batch 24 baseline) to 805.0 ms (-661.9 ms / -45.1%); same call count (1502) confirms identical control flow.
+
+**Determinism:** Pure byte-identical optimization. 40w n1902 final hash `b14179d65639860c` matches Batch 17 baseline literally. validate_run_consistency PASS (0 violations; 4 pre-existing informational below-floor advisories unchanged). Anchors 27/27, benchmarks 6/6.
+
+**Cumulative sector-perf wins this session:** Batch 22 (normalizeFinalSectorBuckets friendlyUniverse hoist: -1808 ms / -85% on `:normalize-buckets`) + Batch 25 (territory-claim-rescue Step 1b/1c activeCounts hoist: -662 ms / -45% on `:zero-assigned`) = approximately 2.5 s saved on the 40w simulation bucket — all byte-identical against `b14179d65639860c`.
+
+**Verification:** typecheck PASS. tests/sector_partition_*.test.ts + final_sector_truth_* + war_phase_step_order 65/65 PASS. PERF_PROFILE_SECTOR_PARTITION=true npm.cmd run sim:scenario:run:40w:timed n1902 hash `b14179d65639860c`. Scenario expert: GO.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH25_ZERO_ASSIGNED_ACTIVECOUNTS_HOIST.md`; updates to SECTOR_MASTER, MASTER_BACKLOG_EXECUTION_QUEUE, napkin.
+
+**Next target:** Sub-attribute `:zero-assigned` 805 ms into its 4 internal steps (Step 1 promote / 1b rear / 1c reserve / 2 surplus), or drill `:severe-rescue` 1054 ms.
+
+---
+
 ## [2026-05-18] feat(sector): Batch 24 territory-claim-rescue sub-attribution (byte-identical)
 
 **Type:** Sector reconstruction sidecar-only nested sub-attribution.

@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 25 — :zero-assigned activeCounts hoist
+
+| Lane | Status | Source |
+|---|---|---|
+| Hoist `countActiveBrigadesByOsid` out of `.flatMap` in Steps 1b/1c | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH25_ZERO_ASSIGNED_ACTIVECOUNTS_HOIST.md`. `:zero-assigned` 1466.9 ms → 805.0 ms (-45.1%). 40w n1902 hash `b14179d65639860c` matches Batch 17 baseline. Cumulative session wins: Batch 22 + Batch 25 = ~2.5 s saved. |
+
 ## Completed Batch 24 — territory-claim-rescue sub-attribution
 
 | Lane | Status | Source |

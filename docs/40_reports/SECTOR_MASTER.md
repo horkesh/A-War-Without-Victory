@@ -1,10 +1,29 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 24 territory-claim-rescue sub-attribution)
+**Updated:** 2026-05-18 (Batch 25 :zero-assigned activeCounts hoist)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 25 :zero-assigned activeCounts hoist (byte-identical optimization)
+
+**Change:** Hoisted `countActiveBrigadesByOsid(formations)` out of the `.flatMap` callbacks in `ensureMinimumSectorCoverage` Step 1b (rear-brigade rescue) and Step 1c (reserve-brigade rescue). The per-donor rebuild was pure waste because `formations` is read-only across donor iterations within the step.
+
+**Run evidence:**
+
+| Label | Batch 24 (n1901) | Batch 25 (n1902) | Delta |
+|---|---:|---:|---:|
+| `:territory-claim-rescue:zero-assigned` | 1466.9 ms | **805.0 ms** | **-661.9 (-45.1%)** |
+| `:territory-claim-rescue` (parent) | 1505.7 ms | ~842 ms | -664 ms |
+
+**Byte-identity proof:** 40w n1902 hash `b14179d65639860c` matches Batch 17 baseline literally. validate_run_consistency PASS (0 violations); anchors 27/27; benchmarks 6/6; same call count (1502) confirms identical control flow.
+
+**Cumulative sector-perf wins this session:** Batch 22 friendlyUniverse hoist (-1808 ms / -85%) + Batch 25 activeCounts hoist (-662 ms / -45%) = ~2.5 s saved on the 40w simulation bucket.
+
+**Next target:** Sub-attribute `:zero-assigned` 805 ms into its 4 internal steps (Step 1/1b/1c/2) to identify the new dominant step, or drill `:severe-rescue` 1054 ms.
+
+**Report:** [implemented/20260518_BATCH25_ZERO_ASSIGNED_ACTIVECOUNTS_HOIST.md](implemented/20260518_BATCH25_ZERO_ASSIGNED_ACTIVECOUNTS_HOIST.md)
 
 ## 2026-05-18: Batch 24 territory-claim-rescue sub-attribution (byte-identical)
 
