@@ -6377,3 +6377,21 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `tests/scenario_continue_from_save_equivalence.test.ts` (extended), `docs/40_reports/implemented/20260519_SAVE_REPLAY_DETERMINISM_PROOF.md` (new).
 
 ---
+
+## [2026-05-19] docs(visual): visual QA evidence inventory + capture matrix — Batch C of RC hardening wave
+
+**Type:** Documentation only. No UI components, mechanics, simulation output, scenario data, save schema, generated artifact, packaging metadata, or FORAWWV text changed.
+
+**Change:** Closed `docs/plans/2026-05-18-autonomous-visual-qa-evidence-plan.md` Tasks 1 (inventory) and 2 (capture matrix). Task 3 fresh captures and Task 4 implemented-report doc-only closure are deferred to operator presence with a local Vite dev server up; the inventory names exact `capture.cjs` invocations for each pending row so operators can run them without interpretation.
+- Inventory of all five committed `docs/40_reports/implemented/visual_validation/` artifact sets (`20260518_cinematic_verdict`, `20260518_endgame_small_screen_verdict_flow`, `20260518_presidential_loop`, `20260517_track_c_*_unblocked.jpg`, `20260517_track_d_*_anchor.jpg`).
+- Stale-evidence audit: no committed visual evidence is stale on current HEAD.
+- Capture matrix with surface · route/save/setup · viewport · required assertions · screenshot path · console-error policy for five pending rows: pre-advance review modal, opening brief, first-session coachmarks, Army HQ Records → Operation History, force-quality + OSID damage map modes, reduced-motion + focus spot-check.
+- `docs/40_reports/GUI_MASTER.md`: new row at top of the "Need / Go to" table linking to the new inventory.
+
+**Determinism:** Documentation only.
+
+**Verification:** `git diff --check` clean after docs edits.
+
+**Artifacts:** `docs/40_reports/audits/20260519_VISUAL_QA_EVIDENCE_INVENTORY.md` (new), `docs/40_reports/GUI_MASTER.md` (one row added).
+
+---
