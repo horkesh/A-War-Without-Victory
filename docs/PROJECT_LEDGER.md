@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] docs(a11y): Batch 46 RC browser evidence verification report (UI-7)
+
+**Type:** Verification documentation only. No code, simulation authority, scenario state, save schema, IPC surface, or canon text changed.
+
+**Change:** Authored `docs/40_reports/audits/20260518_A11Y_RC_BROWSER_EVIDENCE_VERIFICATION.md`. Ran the UI-7 validation matrix from `docs/plans/2026-05-18-autonomous-ui-product-lane-bank.md` (`tests/ui/accessibility_clickable_controls.test.ts`, `tests/ui/accessibility_contrast_tokens.test.ts`, `tests/ui/accessibility_reduced_motion.test.ts`, `tests/ui/accessibility_form_labels.test.ts`, `tests/v093_a11y_lane_e_forms_live_regions.test.ts`, `tests/ui_shell_navigation.test.ts`) — 33/33 PASS. `tsc --noEmit` and `desktop:map:build` clean. No P0 a11y regression surfaced after Batches 41-45 (UI-2..UI-6) landed. Report records: (a) static gate matrix result, (b) what the static gate proves, (c) what it does not (live keyboard tab order, reduced-motion, focus restoration, screen-reader, color-contrast pixel-level) — those remain operator-owned, not engineering blockers. No engineering follow-up required in this batch.
+
+**Determinism:** Documentation only.
+
+**Verification:** `npx.cmd vitest run [UI-7 matrix] --reporter=dot` 33/33 PASS; `npx.cmd tsc --noEmit` clean; `npm.cmd run desktop:map:build` 16.76s clean.
+
+**Artifacts:** `docs/40_reports/audits/20260518_A11Y_RC_BROWSER_EVIDENCE_VERIFICATION.md`.
+
+---
+
 ## [2026-05-18] refactor(ui): Batch 45 onboarding legacy cleanup + persistence coverage migration (UI-6)
 
 **Type:** UI / dead-code removal + test migration. No simulation authority, scenario state, save schema, IPC handler, generated artifact, or canon text changed. The legacy first-turn orientation surface was already dormant (not mounted by `src/ui/map/App.tsx`); existing `tests/ui/onboarding_track_d_consolidation.test.ts` already asserts the App shell never imports it.
