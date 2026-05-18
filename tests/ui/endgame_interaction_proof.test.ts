@@ -209,9 +209,23 @@ describe('VerdictScreen interaction — faction tab switching', () => {
 
     it('divergence notes remain stable across tab switches', () => {
         renderVS();
-        expect(screen.getByText(/Srebrenica genocide occurred/)).toBeDefined();
+        expect(screen.getAllByText(/Srebrenica genocide occurred/).length).toBeGreaterThanOrEqual(1);
         fireEvent.click(screen.getByText('VRS'));
-        expect(screen.getByText(/Srebrenica genocide occurred/)).toBeDefined();
+        expect(screen.getAllByText(/Srebrenica genocide occurred/).length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('mobile verdict section controls switch the lower report flow without changing faction scoring', () => {
+        const { container } = renderVS();
+        const lowerFlow = container.querySelector('[data-awwv-mobile-verdict-flow]');
+        expect(lowerFlow?.getAttribute('data-awwv-mobile-section-active')).toBe('report');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Reckoning' }));
+
+        expect(lowerFlow?.getAttribute('data-awwv-mobile-section-active')).toBe('reckoning');
+        expect(container.querySelector('[data-awwv-mobile-section="report"]')).toBeDefined();
+        expect(container.querySelector('[data-awwv-mobile-section="reckoning"]')).toBeDefined();
+        expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
+        expect(screen.getByText(/War Cost/)).toBeDefined();
     });
 });
 
@@ -234,9 +248,10 @@ describe('VerdictScreen route — endgame reachability', () => {
 
     it('renders full endgame surface when gameOver is true', () => {
         storeState = { loadedGameState: endgame() };
-        renderVS();
-        expect(screen.getByText('A War Without Victory')).toBeDefined();
-        expect(screen.getByText('Stalemate')).toBeDefined();
+        const { container } = renderVS();
+        const surface = container.querySelector('[data-awwv-endgame-surface="verdict"]');
+        expect(surface).toBeDefined();
+        expect(surface?.getAttribute('data-awwv-endgame-outcome')).toBe('Stalemate');
     });
 
     it('renders FallbackGameOver when verdict absent but gameOver true', () => {

@@ -766,7 +766,7 @@ export function analyzeAllFactions(
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
 ): Map<FactionId, FactionGraphAnalysis> {
-    const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
+    const factions: FactionId[] = (state.factions ?? []).map(f => f.id).sort(strictCompare);
     const result = new Map<FactionId, FactionGraphAnalysis>();
     for (const faction of factions) {
         result.set(faction, analyzeFactionGraphCached(state, faction, adjacency, reverseMap));

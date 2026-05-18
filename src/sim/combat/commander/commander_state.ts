@@ -533,6 +533,8 @@ export interface CommanderBriefing {
     readonly campaign_sync_role: SyncOpParticipant['role'] | null;
     /** Target OSIDs from the synchronized operation participant slice, if present. */
     readonly campaign_sync_targets: readonly string[];
+    /** Canonical A3/C1 directive deviation reason when this corps received a deviated campaign role. */
+    readonly campaign_role_deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
 }
 
 // ---------------------------------------------------------------------------

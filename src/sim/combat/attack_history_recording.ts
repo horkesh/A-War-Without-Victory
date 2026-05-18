@@ -81,7 +81,7 @@ export function recordBattleHistory(params: {
         battleEquipCapturedArt,
     } = params;
 
-    const defFaction = (controller ?? attackerFaction) as FactionId;
+    const defFaction: FactionId = controller ?? attackerFaction;
     const isConcentrated = attackerFormations.length > 1;
     // Attacker: destroyed defender equipment, captured from defender
     const attackerEquipData = buildAttackerEquipmentRecord(

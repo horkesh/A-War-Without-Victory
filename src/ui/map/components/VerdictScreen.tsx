@@ -263,6 +263,15 @@ const GRADE_COLORS: Record<string, string> = {
     'F':  '#c24040',
 };
 
+type VerdictLowerSection = 'report' | 'reckoning' | 'codex' | 'replay';
+
+const LOWER_SECTION_LABELS: Record<VerdictLowerSection, string> = {
+    report: 'Report',
+    reckoning: 'Reckoning',
+    codex: 'Codex',
+    replay: 'Replay',
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Main Component
 // ═══════════════════════════════════════════════════════════════════════════
@@ -272,6 +281,7 @@ export function VerdictScreen() {
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
+    const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
 
     // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: build ghost entries via useMemo.
     // CRITICAL: useMemo MUST be called before any early return to satisfy
@@ -339,6 +349,19 @@ export function VerdictScreen() {
         loadedGameState.costLedger,
         loadedGameState.historicalComparison,
     );
+    const hasReckoning = Boolean(loadedGameState?.costLedger && loadedGameState?.historicalComparison);
+    const hasCodex = codexGhosts.length > 0;
+    const hasReplay = Boolean((loadedGameState.replaySaveSequence && loadedGameState.replaySaveSequence.length > 0)
+        || (loadedGameState.replaySaveManifest && loadedGameState.replaySaveManifest.frame_count > 0));
+    const lowerSections: VerdictLowerSection[] = [
+        'report',
+        ...(hasReckoning ? ['reckoning' as const] : []),
+        ...(hasCodex ? ['codex' as const] : []),
+        ...(hasReplay ? ['replay' as const] : []),
+    ];
+    const mobileSectionClass = (section: VerdictLowerSection) => (
+        activeLowerSection === section ? 'block' : 'hidden sm:block'
+    );
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
@@ -355,6 +378,38 @@ export function VerdictScreen() {
                     durationLabel={years > 0 ? `${years}y ${weeks}w` : `${weeks} weeks`}
                 />
 
+                <div className="flex min-h-0 flex-1 flex-col"
+                     data-awwv-mobile-verdict-flow
+                     data-awwv-mobile-section-active={activeLowerSection}>
+                    {lowerSections.length > 1 && (
+                        <div className="shrink-0 border-b border-panel-border bg-panel-card/25 px-3 py-2 sm:hidden">
+                            <div className="grid grid-cols-2 gap-2">
+                                {lowerSections.map(section => {
+                                    const active = activeLowerSection === section;
+                                    return (
+                                        <button
+                                            key={section}
+                                            type="button"
+                                            onClick={() => setActiveLowerSection(section)}
+                                            data-awwv-mobile-flow-tab={section}
+                                            className={`min-h-9 border px-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                                                active
+                                                    ? 'border-accent-gold/60 bg-accent-gold/15 text-accent-gold'
+                                                    : 'border-panel-border bg-black/20 text-text-secondary hover:bg-white/5'
+                                            }`}
+                                            aria-pressed={active}
+                                        >
+                                            {LOWER_SECTION_LABELS[section]}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="min-h-0 flex-1 overflow-auto">
+                        <section className={mobileSectionClass('report')}
+                                 data-awwv-mobile-section="report">
                 {/* Faction Selector Tabs */}
                 <div className="flex border-b border-panel-border">
                     {factionIds.map((fid) => {
@@ -364,7 +419,7 @@ export function VerdictScreen() {
                             <button
                                 key={fid}
                                 onClick={() => setSelectedFaction(fid)}
-                                className={`flex-1 px-4 py-3 text-center transition-colors ${
+                                className={`flex-1 px-2 py-2 text-center transition-colors sm:px-4 sm:py-3 ${
                                     active
                                         ? 'bg-panel-card border-b-2'
                                         : 'bg-transparent hover:bg-panel-card/30'
@@ -377,16 +432,16 @@ export function VerdictScreen() {
                                 </div>
                                 {v && (
                                     <>
-                                        <div className="flex items-center justify-center gap-2 mt-1">
-                                            <span className="text-[18px] font-bold text-text-primary tabular-nums">
+                                        <div className="flex items-center justify-center gap-1.5 mt-1 sm:gap-2">
+                                            <span className="text-[16px] font-bold text-text-primary tabular-nums sm:text-[18px]">
                                                 {v.pyrrhic_score.toFixed(1)}
                                             </span>
-                                            <span className="text-[14px] font-bold"
+                                            <span className="text-[13px] font-bold sm:text-[14px]"
                                                   style={{ color: GRADE_COLORS[v.grade] ?? '#9a9080' }}>
                                                 {v.grade}
                                             </span>
                                         </div>
-                                        <div className={`mt-1 inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${getOutcomeClassStyle(v.outcome_class)}`}>
+                                        <div className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}>
                                             {formatOutcomeClass(v.outcome_class)}
                                         </div>
                                     </>
@@ -397,7 +452,7 @@ export function VerdictScreen() {
                 </div>
 
                 {/* Selected Faction Report */}
-                <div className="flex-1 overflow-auto">
+                <div>
                     {currentVerdict ? (
                         <FactionReport
                             verdict={currentVerdict}
@@ -413,25 +468,28 @@ export function VerdictScreen() {
                         </div>
                     )}
                 </div>
+                        </section>
 
                 {/* War Reckoning — per-war cost ledger and historical comparison */}
-                {loadedGameState?.costLedger && loadedGameState?.historicalComparison && (
-                    <div className="border-t border-panel-border">
+                {hasReckoning && (
+                    <section className={`border-t border-panel-border sm:block ${mobileSectionClass('reckoning')}`}
+                             data-awwv-mobile-section="reckoning">
                         <WarCostSummary
-                            costLedger={loadedGameState.costLedger}
-                            comparison={loadedGameState.historicalComparison}
+                            costLedger={loadedGameState.costLedger!}
+                            comparison={loadedGameState.historicalComparison!}
                         />
                         {milestoneRows.length > 0 && (
                             <EndgameMilestoneComparison rows={milestoneRows} />
                         )}
-                    </div>
+                    </section>
                 )}
 
                 {/* Codex — paths not taken (LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE).
                     Ring 2 narrative observations only. Hidden when no ghosts emit. */}
-                {codexGhosts.length > 0 && (
-                    <div className="border-t border-panel-border px-6 py-4 bg-panel-card/20"
-                         data-awwv-codex-ghosts={codexGhosts.length}>
+                {hasCodex && (
+                    <section className={`border-t border-panel-border px-6 py-4 bg-panel-card/20 sm:block ${mobileSectionClass('codex')}`}
+                             data-awwv-mobile-section="codex"
+                             data-awwv-codex-ghosts={codexGhosts.length}>
                         <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
                             Codex &mdash; Paths Not Taken
                         </div>
@@ -446,7 +504,7 @@ export function VerdictScreen() {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </section>
                 )}
 
                 {/* Replay — turn-by-turn scrub (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER).
@@ -454,40 +512,42 @@ export function VerdictScreen() {
                     gameOver === true (already gated above) AND a save sequence
                     has been plumbed into the loaded adapter. Read-only; does
                     NOT advance turns or mutate engine state. */}
-                {((loadedGameState.replaySaveSequence && loadedGameState.replaySaveSequence.length > 0)
-                    || (loadedGameState.replaySaveManifest && loadedGameState.replaySaveManifest.frame_count > 0)) && (
-                    <div className="border-t border-panel-border"
-                         data-awwv-endgame-section="replay">
+                {hasReplay && (
+                    <section className={`border-t border-panel-border sm:block ${mobileSectionClass('replay')}`}
+                             data-awwv-mobile-section="replay"
+                             data-awwv-endgame-section="replay">
                         <ReplayScrubber
                             saveSequence={loadedGameState.replaySaveSequence}
                             saveManifest={loadedGameState.replaySaveManifest}
                             onInspectFrame={startReplayInspection}
                         />
-                    </div>
+                    </section>
                 )}
+                    </div>
+                </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30">
-                    <div className="text-[9px] text-text-secondary/60 text-center italic mb-3">
+                <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
+                    <div className="mb-2 text-center text-[9px] italic text-text-secondary/60 sm:mb-3">
                         The least bad version of a tragedy
                     </div>
-                    <div className="flex justify-center gap-3">
+                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <button
                             onClick={() => useGameStore.getState().setWrappedOpen(true)}
-                            className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
+                            className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
                             View Your War
                         </button>
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
+                            className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
                             New Game
                         </button>
                         {ipc.isAvailable && (
                             <button
                                 onClick={() => ipc.loadStateDialog?.()}
-                                className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
+                                className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                             >
                                 Load Save
                             </button>

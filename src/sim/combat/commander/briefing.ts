@@ -750,12 +750,9 @@ export function buildBriefing(
         campaign_stance_ceiling: campaignIntent.stanceCeiling,
         campaign_sync_role: campaignIntent.syncRole,
         campaign_sync_targets: campaignIntent.syncTargets,
+        ...(campaignIntent.deviationReason !== null
+            ? { campaign_role_deviation_reason: campaignIntent.deviationReason }
+            : {}),
     };
-    if (campaignIntent.deviationReason !== null) {
-        // Structural addition; tests read via property access, downstream
-        // consumers read via the same path (commander loop / api_commander).
-        (briefing as unknown as { campaign_role_deviation_reason?: string })
-            .campaign_role_deviation_reason = campaignIntent.deviationReason;
-    }
     return briefing;
 }

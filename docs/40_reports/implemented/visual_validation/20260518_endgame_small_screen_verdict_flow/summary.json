@@ -1,0 +1,146 @@
+[
+  {
+    "name": "mobile_390x844_report",
+    "metrics": {
+      "hasSurface": true,
+      "hasBand": true,
+      "hasFlow": true,
+      "activeSection": "report",
+      "sectionButtons": [
+        "Report",
+        "Reckoning"
+      ],
+      "band": {
+        "width": 364,
+        "height": 343,
+        "top": 35,
+        "bottom": 378
+      },
+      "flow": {
+        "width": 364,
+        "height": 361,
+        "top": 378,
+        "bottom": 739
+      },
+      "report": {
+        "width": 364,
+        "height": 694,
+        "top": 431,
+        "bottom": 1125
+      },
+      "reckoning": {
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "footer": {
+        "width": 364,
+        "height": 71,
+        "top": 739,
+        "bottom": 809
+      },
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyText": "CHRONICLE\nSMALL-SCREEN-VERDICT-FLOW-VISUAL-PROBE\nSUMMARY\nRECORDS\nOPS\nEVENTS\nCODEX\nINBOX\nADVANCE TURN →\nCOMMAND\nSITUATION\n▼\nTERRITORY\nTerritory summary unavailable.\nCASUALTIES\nCasualty summary unavailable.\nALLIANCE GAUGE (BOSNIAK-CROAT)\n0.00\nINTERNATIONAL PRESSURE (IVP)\nComposite IVP: 0\nThresholds: 30% Drina · 60% sanctions · 80% NATO threat\nConsequences: none\nHUMANITARIAN CONVOYS\nNO CONVOY DECISIONS ARE PENDING.\nPHASE E LOCAL SUPPORT\nNO LOCAL SUPPORT ORDER IS STAGED THIS TURN.\nOPERATIONAL POSTURE\nNO SECTORS ARE CURRENTLY RUNNING OPSEC.\nDIPLOMACY\nDIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.\nALERTS\nNo active alerts.\nARMY\n0\n▼\nNo formations.\nMOBILIZATION\n▶\nOPERATIONS\n▶\nSECTORS\n▶\nPRESIDENTIAL INBOX\nSITUATION\nSITUATION\n8 Nov 1995\nSituation as of 8 Nov 1995.\n1995-10-01 / 3y 32w / Dayton reckoning\nVerdict under condemnation\n\nThe verdict is shaped by collapse, rupture, or condemnation before any score can redeem it.\n\nFocus\nRBiH\nOutcome\nPyrrhic Success\nCost Signal\ngrave\nCivilian displacement record\n\nThe negotiation capital record attributes 1,950,000 refugees created to the war path.\n\nWar lasted 12 weeks shorter than the historical 188 weeks\nTotal military casualties were 72% of historical levels\nShare Summary\nCopy\nREPORT\nRECKONING\nARBIH\n49.0\nC\nPYRRHIC SUCCESS\nVRS\n38.0\nD\nFAILURE\nHVO\n55.0\nB\nNEGOTIATED ESCAPE\nPYRRHIC SCORE\n49.0\nC\nPYRRHIC SUCCESS\nThe state survives, but the ledger defines the memory.\nCAPITAL DIMENSIONS\nMilitary Credibility\n50\nC\nTerritorial Legitimacy\n52\nC\nInternational Standing\n60\nB\nPatron Confidence\n44\nC\nInternal Cohesion\n55\nB\nNegotiating Leverage\n48\nC\nFINAL STATISTICS\nTerritory\n33.3% (1 OSIDs)\nTerritory (km2)\n15,000 km²\nActive Brigades\n0\nPersonnel\n0\nCasualties Inflicted\n10,000\nCasualties Taken\n15,000\nCivilians Protected\n100,000\nRefugees Created\n100,000\nRefugees Received\n10,000\nOperations Launched\n20\nOperations Successful\n8\nThe least bad version of a tragedy\nVIEW YOUR WAR\nNEW GAME\nPOLITICAL\nETHNIC\nSUPPLY\nOPERATIONS\n+MORE\nLAYERS\nYou Are the President\nSTEP 1 OF 8\nYou Are the President\n\nThe opening presidential brief gives your starting position in three scan points. Read it, then use the toolbar and Decision Room to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences.\n\nSkip Tutorial\nNext"
+    }
+  },
+  {
+    "name": "mobile_390x844_reckoning",
+    "metrics": {
+      "hasSurface": true,
+      "hasBand": true,
+      "hasFlow": true,
+      "activeSection": "reckoning",
+      "sectionButtons": [
+        "Report",
+        "Reckoning"
+      ],
+      "band": {
+        "width": 364,
+        "height": 343,
+        "top": 35,
+        "bottom": 378
+      },
+      "flow": {
+        "width": 364,
+        "height": 361,
+        "top": 378,
+        "bottom": 739
+      },
+      "report": {
+        "width": 0,
+        "height": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "reckoning": {
+        "width": 364,
+        "height": 569,
+        "top": 431,
+        "bottom": 999
+      },
+      "footer": {
+        "width": 364,
+        "height": 71,
+        "top": 739,
+        "bottom": 809
+      },
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "bodyText": "CHRONICLE\nSMALL-SCREEN-VERDICT-FLOW-VISUAL-PROBE\nSUMMARY\nRECORDS\nOPS\nEVENTS\nCODEX\nINBOX\nADVANCE TURN →\nCOMMAND\nSITUATION\n▼\nTERRITORY\nTerritory summary unavailable.\nCASUALTIES\nCasualty summary unavailable.\nALLIANCE GAUGE (BOSNIAK-CROAT)\n0.00\nINTERNATIONAL PRESSURE (IVP)\nComposite IVP: 0\nThresholds: 30% Drina · 60% sanctions · 80% NATO threat\nConsequences: none\nHUMANITARIAN CONVOYS\nNO CONVOY DECISIONS ARE PENDING.\nPHASE E LOCAL SUPPORT\nNO LOCAL SUPPORT ORDER IS STAGED THIS TURN.\nOPERATIONAL POSTURE\nNO SECTORS ARE CURRENTLY RUNNING OPSEC.\nDIPLOMACY\nDIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.\nALERTS\nNo active alerts.\nARMY\n0\n▼\nNo formations.\nMOBILIZATION\n▶\nOPERATIONS\n▶\nSECTORS\n▶\nPRESIDENTIAL INBOX\nSITUATION\nSITUATION\n8 Nov 1995\nSituation as of 8 Nov 1995.\n1995-10-01 / 3y 32w / Dayton reckoning\nVerdict under condemnation\n\nThe verdict is shaped by collapse, rupture, or condemnation before any score can redeem it.\n\nFocus\nRBiH\nOutcome\nPyrrhic Success\nCost Signal\ngrave\nCivilian displacement record\n\nThe negotiation capital record attributes 1,950,000 refugees created to the war path.\n\nWar lasted 12 weeks shorter than the historical 188 weeks\nTotal military casualties were 72% of historical levels\nShare Summary\nCopy\nREPORT\nRECKONING\nWAR COST & HISTORICAL COMPARISON\nTotal Military Killed\n46,500\nTotal Civilian Killed\n38,000\nWar Duration\n188 weeks\nvs Historical Duration\n12 weeks shorter than the historical 200 weeks\nMilitary Casualties vs History\nMilitary casualty index 72 (historical reference = 100)\nPROSECUTORIAL FINDINGS\nCivilian displacement record\nGRAVE\nThe negotiation capital record attributes 1,950,000 refugees created to the war path.\nSources: visual probe\nTERRITORY VS DAYTON 49/51\nRS: 2.0% more than Dayton baseline\nFederation: 2.0% less than Dayton baseline\nHISTORICAL DIVERGENCE\nWar lasted 12 weeks shorter than the historical 188 weeks\nTotal military casualties were 72% of historical levels\nMILESTONE COMPARISON\nWar Duration\nThe campaign ended before the historical reference week.\nHISTORY\nW188\nYOU\nW176\nDELTA\n12w early\nSTATUS\nEarly\nThe least bad version of a tragedy\nVIEW YOUR WAR\nNEW GAME\nPOLITICAL\nETHNIC\nSUPPLY\nOPERATIONS\n+MORE\nLAYERS\nYou Are the President\nSTEP 1 OF 8\nYou Are the President\n\nThe opening presidential brief gives your starting position in three scan points. Read it, then use the toolbar and Decision Room to inspect what needs attention. This tutorial covers the loop: brief, inspect, decide, execute, report, judge, then advance into consequences"
+    }
+  },
+  {
+    "name": "desktop_1440x900_overview",
+    "metrics": {
+      "hasSurface": true,
+      "hasBand": true,
+      "hasFlow": true,
+      "activeSection": "report",
+      "sectionButtons": [
+        "Report",
+        "Reckoning"
+      ],
+      "band": {
+        "width": 978,
+        "height": 336,
+        "top": 37,
+        "bottom": 373
+      },
+      "flow": {
+        "width": 978,
+        "height": 396,
+        "top": 373,
+        "bottom": 769
+      },
+      "report": {
+        "width": 978,
+        "height": 705,
+        "top": 373,
+        "bottom": 1078
+      },
+      "reckoning": {
+        "width": 978,
+        "height": 463,
+        "top": 1078,
+        "bottom": 1541
+      },
+      "footer": {
+        "width": 978,
+        "height": 95,
+        "top": 769,
+        "bottom": 863
+      },
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "bodyText": "CHRONICLE\nSMALL-SCREEN-VERDICT-FLOW-VISUAL-PROBE\nSUMMARY\nRECORDS\nOPS\nEVENTS\nCODEX\nINBOX\nADVANCE TURN →\nCOMMAND\nSITUATION\n▼\nTERRITORY\nTerritory summary unavailable.\nCASUALTIES\nCasualty summary unavailable.\nALLIANCE GAUGE (BOSNIAK-CROAT)\n0.00\nINTERNATIONAL PRESSURE (IVP)\nComposite IVP: 0\nThresholds: 30% Drina · 60% sanctions · 80% NATO threat\nConsequences: none\nHUMANITARIAN CONVOYS\nNO CONVOY DECISIONS ARE PENDING.\nPHASE E LOCAL SUPPORT\nNO LOCAL SUPPORT ORDER IS STAGED THIS TURN.\nOPERATIONAL POSTURE\nNO SECTORS ARE CURRENTLY RUNNING OPSEC.\nDIPLOMACY\nDIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.\nALERTS\nNo active alerts.\nARMY\n0\n▼\nNo formations.\nMOBILIZATION\n▶\nOPERATIONS\n▶\nSECTORS\n▶\nPRESIDENTIAL INBOX\nSITUATION\nSITUATION\n8 Nov 1995\nSituation as of 8 Nov 1995.\n1995-10-01 / 3y 32w / Dayton reckoning\nVerdict under condemnation\n\nThe verdict is shaped by collapse, rupture, or condemnation before any score can redeem it.\n\nFocus\nRBiH\nOutcome\nPyrrhic Success\nCost Signal\ngrave\nCivilian displacement record\n\nThe negotiation capital record attributes 1,950,000 refugees created to the war path.\n\nWar lasted 12 weeks shorter than the historical 188 weeks\nTotal military casualties were 72% of historical levels\nShare Summary\nCopy\nA War Without Victory - Verdict\nOutcome: RBiH - Pyrrhic Success (Grade C, Pyrrhic Score 49.0)\nWar ended: Dayton reckoning, week 188\nCost Ledger: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.\nHistorical comparison: War lasted 12 weeks shorter than the historical 188 weeks\nFaction outcomes: RBiH Pyrrhic Success; RS Failure; HRHB Negotiated Escape\nARBIH\n49.0\nC\nPYRRHIC SUCCESS\nVRS\n38.0\nD\nFAILURE\nHVO\n55.0\nB\nNEGOTIATED ESCAPE\nPYRRHIC SCORE\n49.0\nC\nPYRRHIC SUCCESS\nThe state survives, but the ledger defines the memory.\nCAPITAL DIMENSIONS\nMilitary Credibility\n50\nC\nTerritorial Legitimacy\n52\nC\nInternational Standing\n60\nB\nPatron Confidence\n44\nC\nInternal Cohesion\n55\nB\nNegotiating Leverage\n48\nC\nFINAL STATISTICS\nTerritory\n33.3% (1 OSIDs)\nTerritory (km2)\n15,000 km²\nActive Brigades\n0\nPersonnel\n0\nCasualties Inflicted\n10,000\nCasualties Taken\n15,000\nCivilians Protected\n100,000\nRefugees Created\n100,000\nRefugees Received\n10,000\nOperations Launched\n20\nOperations Successful\n8\nWAR COST & HISTORICAL COMPARISON\nTotal Military Killed\n46,500\nTotal Civilian Killed\n38,000\nWar Duration\n188 weeks\nvs Historical Duration\n12 weeks shorter than the historical 200 weeks\nMilitary Casualties vs History\nMilitary casualty i"
+    }
+  }
+]

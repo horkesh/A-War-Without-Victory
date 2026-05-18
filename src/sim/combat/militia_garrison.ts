@@ -66,7 +66,7 @@ export function computeMilitiaGarrisons(
 
     const sids = Object.keys(pc).filter((sid): sid is SettlementId => pc[sid] != null).sort(strictCompare);
     for (const sid of sids) {
-        const controller = pc[sid] as FactionId | null;
+        const controller = pc[sid];
         if (!controller) continue;
         const mun = sidToMun[sid];
         if (!mun) continue;

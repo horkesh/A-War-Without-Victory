@@ -92,7 +92,7 @@ export function updateExhaustion(
                 : 0;
         const effectiveDelta = Math.min(MAX_DELTA_PER_TURN, delta * multiplier * (1 + externalMod + legitimacyMod) + sarajevoExtra);
         // Phase C: enclave resilience reduces exhaustion growth (only RBiH has enclaves)
-        const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid as FactionId);
+        const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid);
         const enclaveReduction = enclaveResilience * RESILIENCE_EFFECT_SCALE;
         const finalDelta = effectiveDelta * Math.max(0, 1.0 - enclaveReduction);
         // Phase 1 / #29 sub-issue 5: clamp at 100. The accumulator was previously

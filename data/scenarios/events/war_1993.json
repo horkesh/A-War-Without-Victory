@@ -2721,7 +2721,49 @@
         "aggression_affinity": -1,
         "risk_level": 0.5
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "press_offensive": {
+        "HRHB": {
+          "headline": "Sarajevo orders a more aggressive posture",
+          "body": "RBiH commanders are directed to seek forward momentum wherever supply allows. HVO staff see higher Bosnian morale, but also heavier pressure on shared logistics and coordination."
+        },
+        "RS": {
+          "headline": "Sarajevo signals offensive intent",
+          "body": "RBiH leadership pushes its corps commanders toward renewed attacks. Pale reads the posture as a morale play that may raise pressure along exposed fronts."
+        }
+      },
+      "consolidate_defend": {
+        "HRHB": {
+          "headline": "Sarajevo shifts to consolidation",
+          "body": "RBiH halts costly attacks to restore cohesion and build reserves. HVO planners see a more defensive Bosnian posture while the army prepares for later operations."
+        },
+        "RS": {
+          "headline": "RBiH digs in on current lines",
+          "body": "Sarajevo orders its forces to defend, rebuild, and preserve supply. Pale expects fewer immediate attacks but stronger prepared positions over time."
+        }
+      },
+      "seek_negotiation": {
+        "HRHB": {
+          "headline": "Sarajevo opens a diplomatic posture",
+          "body": "RBiH signals willingness to engage mediators. HVO leaders see improved international standing for Sarajevo, alongside visible strain among Bosnian hardliners."
+        },
+        "RS": {
+          "headline": "Sarajevo signals negotiation readiness",
+          "body": "RBiH turns toward international engagement to ease pressure and improve standing. Pale weighs whether the move creates leverage or simply buys Sarajevo time."
+        }
+      },
+      "accept_ceasefire_terms": {
+        "HRHB": {
+          "headline": "Sarajevo accepts a ceasefire pause",
+          "body": "RBiH accepts mediation terms to rest and rearm. HVO staff note the logistical benefit for Sarajevo, even as internal critics frame the pause as weakness."
+        },
+        "RS": {
+          "headline": "RBiH accepts ceasefire terms",
+          "body": "Sarajevo chooses a temporary pause to recover supply and cohesion. Pale reads the lower aggression as useful, but not as a final settlement."
+        }
+      }
+    }
   },
   {
     "id": "strategic_posture_review_rs",
@@ -2941,7 +2983,49 @@
         "aggression_affinity": -1,
         "risk_level": 0.6
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "press_gains": {
+        "HRHB": {
+          "headline": "Pale orders continued territorial pressure",
+          "body": "RS leadership pushes for further gains and consolidation of key corridors. HVO staff expect higher VRS tempo and greater pressure on contested lines."
+        },
+        "RBiH": {
+          "headline": "RS presses for more territory",
+          "body": "Pale signals that current holdings are not enough for the final map. Sarajevo reads the posture as a renewed push against corridors, enclaves, and buffer zones."
+        }
+      },
+      "consolidate_holdings": {
+        "HRHB": {
+          "headline": "RS shifts to holding current gains",
+          "body": "Pale orders VRS formations to fortify existing positions and rebuild supply. HVO planners expect fewer new thrusts, but stronger prepared defenses."
+        },
+        "RBiH": {
+          "headline": "Pale consolidates its holdings",
+          "body": "RS leadership favors digging in over costly advances. Sarajevo sees a defensive posture built around corridors, the Drina, and approaches to the capital."
+        }
+      },
+      "negotiate_strength": {
+        "HRHB": {
+          "headline": "Pale offers talks from a hard position",
+          "body": "RS leadership engages mediators while holding its military gains. HVO staff see Belgrade pressure easing if Pale can appear cooperative."
+        },
+        "RBiH": {
+          "headline": "RS signals negotiation from strength",
+          "body": "Pale moves toward talks without giving up its map position. Sarajevo reads the posture as diplomatic pressure backed by current territorial control."
+        }
+      },
+      "accept_partition_framework": {
+        "HRHB": {
+          "headline": "RS signals openness to partition terms",
+          "body": "Pale indicates willingness to accept a territorial settlement for recognition. HVO leaders see lower RS isolation, with a visible risk of hardline backlash."
+        },
+        "RBiH": {
+          "headline": "Pale considers a partition framework",
+          "body": "RS leadership signals that a territorial settlement may be acceptable. Sarajevo sees potential diplomatic movement, but also a bid to legitimize wartime control."
+        }
+      }
+    }
   },
   {
     "id": "strategic_posture_review_hrhb",
@@ -3157,7 +3241,49 @@
         "aggression_affinity": -1,
         "risk_level": 0.5
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "press_croat_objectives": {
+        "RBiH": {
+          "headline": "Herceg-Bosna presses Croat objectives",
+          "body": "Mostar orders HVO leaders to secure current holdings and push for more. Sarajevo reads the posture as another strain on any remaining Bosniak-Croat coordination."
+        },
+        "RS": {
+          "headline": "HVO posture turns more assertive",
+          "body": "Herceg-Bosna prioritizes Croat territorial objectives and accepts greater international pressure. Pale sees the Bosniak-Croat line weakening under competing aims."
+        }
+      },
+      "coordinate_rbih": {
+        "RBiH": {
+          "headline": "Herceg-Bosna seeks tactical coordination",
+          "body": "Mostar signals renewed cooperation with ARBiH against the VRS. Sarajevo sees a stronger combined front, while Zagreb's reaction remains a constraint."
+        },
+        "RS": {
+          "headline": "HVO and ARBiH coordination improves",
+          "body": "Herceg-Bosna moves toward tactical cooperation with Sarajevo. Pale planners see a more coherent anti-VRS alignment if the arrangement holds."
+        }
+      },
+      "consolidate_supply": {
+        "RBiH": {
+          "headline": "Herceg-Bosna pauses to resupply",
+          "body": "Mostar slows offensive operations to secure Croatian supply routes and rebuild cohesion. Sarajevo sees a steadier HVO posture, but not a political settlement."
+        },
+        "RS": {
+          "headline": "HVO consolidates and rebuilds supply",
+          "body": "Herceg-Bosna focuses on holding territory and preparing reserves. Pale expects fewer immediate HVO attacks, with stronger logistics later."
+        }
+      },
+      "sue_for_peace_hrhb": {
+        "RBiH": {
+          "headline": "Herceg-Bosna accepts the Federation path",
+          "body": "Mostar signals acceptance of a Federation framework with Sarajevo. RBiH leaders see a major alliance opening, despite hardline resistance inside Herceg-Bosna."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna turns toward Federation",
+          "body": "HVO leadership accepts a framework for coexistence with Sarajevo and closer Western standing. Pale sees the risk of a stronger unified front."
+        }
+      }
+    }
   },
   {
     "id": "visit_to_front_rbih",

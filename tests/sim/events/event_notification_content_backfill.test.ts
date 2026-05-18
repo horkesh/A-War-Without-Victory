@@ -6,6 +6,10 @@ function loadWar1992Events(): any[] {
     return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1992.json'), 'utf-8'));
 }
 
+function loadWar1993Events(): any[] {
+    return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1993.json'), 'utf-8'));
+}
+
 describe('event notification content backfill', () => {
     it('covers London Conference responses for non-RBiH recipients', () => {
         const events = loadWar1992Events();
@@ -40,6 +44,32 @@ describe('event notification content backfill', () => {
             for (const text of Object.values(byRecipient)) {
                 expect(text.headline.trim().length).toBeGreaterThan(0);
                 expect(text.body.trim().length).toBeGreaterThan(0);
+            }
+        }
+    });
+
+    it('covers strategic posture review responses for non-source recipients', () => {
+        const events = loadWar1993Events();
+        const cases = [
+            { eventId: 'strategic_posture_review_rbih', source: 'RBiH', recipients: ['HRHB', 'RS'] },
+            { eventId: 'strategic_posture_review_rs', source: 'RS', recipients: ['HRHB', 'RBiH'] },
+            { eventId: 'strategic_posture_review_hrhb', source: 'HRHB', recipients: ['RBiH', 'RS'] },
+        ];
+
+        for (const { eventId, source, recipients } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+
+            expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const response of event.response_options) {
+                const byRecipient = event.notifications_to_other_factions[response.id];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
             }
         }
     });

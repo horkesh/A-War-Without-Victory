@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close seventh backlog execution batch
+
+**Scope:** Seventh autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, safe Phase D notification content, sector-performance planning, and endgame small-screen verdict polish. No victory scoring, combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.
+
+**Change:**
+- Cleaned five more strict-null combat-adjacent escapes in `attack_history_recording.ts`, `commander/briefing.ts`, `commander/commander_state.ts`, `exhaustion.ts`, `militia_garrison.ts`, and `osid_graph_analysis.ts`; Phase 2 remaining inventory drops from 110 to 105.
+- Added safe `notifications_to_other_factions` content for the three recurring 1993 strategic posture review events, moving those rows from 0/24 to 24/24 recipient coverage while keeping atrocity/enclave/Croat-Bosniak conflict/late-war diplomacy rows gated.
+- Created the sector reconstruction performance plan that makes deeper `recoverDroppedFrontEdges(...)` attribution the next implementable performance task before any optimization.
+- Added mobile lower-section controls to the verdict modal (`Report`, `Reckoning`, plus conditional `Codex`/`Replay`) and visual evidence for 390px/desktop while preserving scoring, share-summary, Cost Ledger, comparison, Codex, and replay behavior.
+
+**Determinism / output impact:** Strict-null changes are type-shape/construction-only and preserve sorted iteration. Event notification content is static authored text consumed only by the existing feature-flagged notification surface; event triggers, effects, response IDs, ordering, and default flag-off emission behavior did not change. Sector-performance work is plan/report-only. Verdict changes are UI presentation-only over existing read models.
+
+**Verification:** Parent integration passed `npm.cmd run typecheck`; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/commander/briefing_campaign_intent.test.ts tests/combat_exhaustion.test.ts tests/exhaustion_accumulate.test.ts` (4 files / 27 tests); `npx.cmd vitest run tests/sim/events/event_notification_content_backfill.test.ts tests/sim/events/two_level_surfacing.test.ts tests/sim/events/dismiss_notifications.test.ts tests/event_timeline_integrity.test.ts` (4 files / 25 tests); `npx.cmd vitest run tests/ui/cinematic_verdict.test.ts tests/ui/endgame_verdict_screen_mount.test.ts tests/ui/endgame_interaction_proof.test.ts tests/ui/endgame_presentation_proof.test.ts tests/ui/endgame_live_store_proof.test.ts tests/ui/verdict_visibility.test.ts tests/ui/verdict_scene.test.ts tests/ui/verdict_share_summary.test.ts` (8 files / 124 tests); `npx.cmd vitest run tests/profile_hotspot_report.test.ts tests/wall_clock_target_report.test.ts tests/sector_partition_instrumentation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts` (4 files / 17 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w` produced n1883 hash `42607f83870e01d5`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1883` passed; and `git diff --check` passed with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Notification content avoids sensitive-history rows; remaining rows stay historian/narrative-gated in `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+---
+
 ## [2026-05-18] feat(ui): complete cinematic verdict presentation
 
 **Type:** Endgame verdict UI presentation, deterministic share-summary presentation, visual validation, and documentation. No victory scoring, Pyrrhic classification, Cost Ledger calculation, historical comparison builder, simulation rule, combat math, scenario data, save schema, serialization format, formation-life behavior, presidential loop validation surface, performance hot path, event notification content, or generated scenario output changed.
