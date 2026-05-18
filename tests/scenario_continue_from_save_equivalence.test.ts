@@ -65,6 +65,22 @@ describe('scenario continue-from-save equivalence', () => {
       expect(resumedInitial).toBe(checkpoint);
       expect(resumedRun.final_state_hash).toBe(fullRun.final_state_hash);
       expect(resumedFinal).toBe(fullFinal);
+
+      // SRD-2: replay artifact equivalence. The consolidated
+      // `replay_save_sequence.json` is a top-level JSON array of per-turn
+      // GameState objects (see src/scenario/replay_save_emit.ts). The
+      // resumed run's frame list must equal the corresponding tail slice
+      // of the full uninterrupted run.
+      const fullReplayRaw = await readFile(fullRun.paths.replay_save_sequence, 'utf8');
+      const resumedReplayRaw = await readFile(resumedRun.paths.replay_save_sequence, 'utf8');
+      const fullFrames = JSON.parse(fullReplayRaw) as unknown[];
+      const resumedFrames = JSON.parse(resumedReplayRaw) as unknown[];
+      expect(Array.isArray(fullFrames)).toBe(true);
+      expect(Array.isArray(resumedFrames)).toBe(true);
+      expect(resumedFrames.length).toBeGreaterThan(0);
+      expect(fullFrames.length).toBeGreaterThanOrEqual(resumedFrames.length);
+      const fullTailSlice = fullFrames.slice(fullFrames.length - resumedFrames.length);
+      expect(JSON.stringify(resumedFrames)).toBe(JSON.stringify(fullTailSlice));
     } finally {
       await ensureRemoved(FULL_OUT);
       await ensureRemoved(SPLIT_OUT);

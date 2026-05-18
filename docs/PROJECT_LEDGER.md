@@ -6356,3 +6356,24 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `tests/docs_truth_no_skip_guard.test.ts`, `docs/40_reports/audits/20260519_FAST_SUITE_DRIFT_TAXONOMY.md`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/20_engineering/PRE_MERGE_GATE.md`.
 
 ---
+
+## [2026-05-19] test+docs(determinism): save/replay determinism proof — Batch B of RC hardening wave
+
+**Type:** Test extension + evidence report. No simulation behavior, no scenario data, no save schema, no generated artifact, no FORAWWV text changed.
+
+**Change:** Closed `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md` SRD-1 (save-continue hash chain) and SRD-2 (replay artifact equivalence).
+- SRD-1 was already implemented in `tests/scenario_continue_from_save_equivalence.test.ts` (uninterrupted vs resumed `final_state_hash` and `final_save` byte equality against `data/scenarios/noop_13w.json`).
+- SRD-2 extension adds replay-frame equivalence to the same test: the resumed run's `replay_save_sequence.json` (top-level JSON array of per-turn `GameState` objects) must equal the tail slice of the full run's `replay_save_sequence.json` over the matching week range, asserted byte-identically via `JSON.stringify` over the array slice. Reuses the existing two `runScenario(...)` calls so wall-cost is unchanged.
+- Evidence report `docs/40_reports/implemented/20260519_SAVE_REPLAY_DETERMINISM_PROOF.md` records scope, what is and is not proved (cross-platform reproducibility explicitly not claimed; SRD-3 packaging-build determinism remains operator-only).
+
+**Determinism:** Test-only addition. Asserts byte-identity on JSON slice. The scenario runs themselves are deterministic by existing contract.
+
+**Verification:**
+- `npx.cmd vitest run tests/scenario_continue_from_save_equivalence.test.ts --reporter=verbose` — PASS, 1 file / 2 tests, ~22 s wall.
+- `npm.cmd run typecheck` — PASS.
+- `git diff --check` — clean.
+- `npm.cmd run test:baselines` not run; no scenario data, save schema, or generated artifact changed.
+
+**Artifacts:** `tests/scenario_continue_from_save_equivalence.test.ts` (extended), `docs/40_reports/implemented/20260519_SAVE_REPLAY_DETERMINISM_PROOF.md` (new).
+
+---
