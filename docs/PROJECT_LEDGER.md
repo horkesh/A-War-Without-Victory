@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close fifteenth backlog execution batch
+
+**Scope:** Fifteenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, sector reconstruction active-combat indexing, Chronicle operation-AAR routing, and deterministic intel ambush friction. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or new operation save fields changed.
+
+**Change:** Cleaned four redundant `as FactionId` escapes in `army_reserve_system.ts`, lowering Phase 2 combat inventory from 75 to 71. `buildFactionSectors(...)` now builds one invocation-local active-combat formation index and reuses its count/location/component maps across per-corps sector construction and classification setup. Chronicle now files player-scoped completed-operation AAR entries from existing `operationHistory` fields and routes their dossier action to Army HQ Records -> Operation History. Attack resolution now adds a bounded deterministic `ambush_risk` casualty hook when a low-confidence attacker hits an OPSEC-defended sector, with only coarse public labels exposed.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. Sector indexing is read-only, sorted/invocation-local, and does not persist across modules, turns, saves, or scenario artifacts. Chronicle work is renderer/read-model only and uses existing loaded-state AAR fields. Intel ambush friction is simulation-affecting by design, uses the same attacker-side observed confidence and OPSEC sector membership as earlier intel-friction work, and re-anchors the active 40w proof from n1890 `248202ee4fd13027` to n1891 `0d8d9ccdc477d77a`.
+
+**Verification:** Parent integration passed `npm.cmd run typecheck`; `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts --reporter=dot` (3 files / 48 tests); `npx.cmd vitest run tests/ui_chronicle_operation_aar_link.test.ts tests/ui_chronicle_turn_record_link.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/chronicle_chapters.test.ts tests/ui/chronicle_chapter_ui.test.ts --reporter=dot` (5 files / 14 tests); `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/army_reserve_system.test.ts tests/elite_loan_recall.test.ts tests/attack_resolution_osid_intel_friction.test.ts --reporter=dot` (4 files / 61 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w` producing n1891 hash `0d8d9ccdc477d77a`, 27/27 anchors, and 6/6 bot benchmarks; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1891`; and `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts tests/adapter_field_completeness.test.ts tests/real_save_sector_truth_contracts.test.ts --reporter=dot` (3 files / 38 tests).
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Canon/system/player-visible docs now describe `ambush_risk` as a public-safe staff abstraction rather than hidden confidence truth. Sector docs record the new active-combat index boundary and fresh profile targets. Operation AAR docs now classify Chronicle as a route into the existing Records owner, not a second operation-history surface.
+
+---
+
 ## [2026-05-18] feat(roadmap): close fourteenth backlog execution batch
 
 **Scope:** Fourteenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, sector reconstruction scan-list reuse, and Army HQ operation AAR record visibility. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or new operation save fields changed.

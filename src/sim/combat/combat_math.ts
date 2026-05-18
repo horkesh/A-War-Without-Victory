@@ -42,6 +42,8 @@ export const LOGISTICS_PRIORITY_MIN = 0.5;
 export const LOGISTICS_PRIORITY_MAX = 1.5;
 export const INTEL_EXECUTION_ATTACK_POWER_MIN = 0.85;
 export const INTEL_EXECUTION_OPSEC_DEFENDER_POWER_MULT = 1.08;
+export const INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD = 1 / 3;
+export const INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT = 1.12;
 
 function combatMathProfileTime<T>(
     profileTime: CombatMathProfileTimer | undefined,
@@ -362,6 +364,18 @@ export function getIntelExecutionFrictionMultipliers(
             + (1 - INTEL_EXECUTION_ATTACK_POWER_MIN) * clampedConfidence,
         defenderPowerMult: defenderOpsecActive ? INTEL_EXECUTION_OPSEC_DEFENDER_POWER_MULT : 1,
     };
+}
+
+export function getIntelAmbushAttackerCasualtyMult(
+    confidence: number | null | undefined,
+    defenderOpsecActive: boolean,
+): number {
+    const clampedConfidence = Number.isFinite(confidence)
+        ? Math.max(0, Math.min(1, confidence as number))
+        : 0;
+    return defenderOpsecActive && clampedConfidence < INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD
+        ? INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT
+        : 1;
 }
 
 // Cohesion deltas (§4.5)

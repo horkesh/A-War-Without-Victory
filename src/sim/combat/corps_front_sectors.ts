@@ -2503,23 +2503,55 @@ function buildFactionSectors(
     // A sector is "unstaffable" if no brigade from its corps exists in the same
     // friendly connected component — meaning no unit can physically reach it.
     // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
-    const { preComponentOf, factionBrigadeLocations, factionBrigadeComponents } = _perfTime(`buildFactionSectors:${faction}:pre-component-setup`, () => {
-        const componentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
-        const brigadeLocations: string[] = [];
-        const brigadeComponents = new Set<number>();
+    const preComponentOf = _perfTime(`buildFactionSectors:${faction}:pre-component-setup`, () => (
+        ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>
+    ));
+
+    const {
+        activeCombatCountByCorps,
+        activeCombatLocationsByCorps,
+        activeCombatComponentsByCorps,
+        factionBrigadeLocations,
+        factionBrigadeComponents,
+    } = _perfTime(`buildFactionSectors:${faction}:active-combat-formation-index`, () => {
+        const countByCorps = new Map<FormationId, number>();
+        const locationsByCorps = new Map<FormationId, string[]>();
+        const componentsByCorps = new Map<FormationId, Set<number>>();
+        const allFactionLocations: string[] = [];
+        const allFactionComponents = new Set<number>();
         for (const fid of Object.keys(formations).sort(strictCompare)) {
             const f = formations[fid];
             if (!f || f.faction !== faction || f.status !== 'active') continue;
             if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            const corpsId = getFormationCorpsId(f);
+            if (corpsId) countByCorps.set(corpsId, (countByCorps.get(corpsId) ?? 0) + 1);
             if (!f.location_osid) continue;
-            brigadeLocations.push(f.location_osid);
-            const comp = componentOf.get(f.location_osid);
-            if (comp !== undefined) brigadeComponents.add(comp);
+
+            allFactionLocations.push(f.location_osid);
+
+            const comp = preComponentOf.get(f.location_osid);
+            if (comp !== undefined) allFactionComponents.add(comp);
+
+            if (corpsId) {
+                const corpsLocations = locationsByCorps.get(corpsId) ?? [];
+                corpsLocations.push(f.location_osid);
+                locationsByCorps.set(corpsId, corpsLocations);
+
+                if (comp === undefined) continue;
+                let corpsComponents = componentsByCorps.get(corpsId);
+                if (!corpsComponents) {
+                    corpsComponents = new Set<number>();
+                    componentsByCorps.set(corpsId, corpsComponents);
+                }
+                corpsComponents.add(comp);
+            }
         }
         return {
-            preComponentOf: componentOf,
-            factionBrigadeLocations: brigadeLocations,
-            factionBrigadeComponents: brigadeComponents,
+            activeCombatCountByCorps: countByCorps,
+            activeCombatLocationsByCorps: locationsByCorps,
+            activeCombatComponentsByCorps: componentsByCorps,
+            factionBrigadeLocations: allFactionLocations,
+            factionBrigadeComponents: allFactionComponents,
         };
     });
 
@@ -2531,17 +2563,8 @@ function buildFactionSectors(
         const edgeIds = corpsEdges.get(corpsId);
         if (!edgeIds || edgeIds.length === 0) continue;
 
-        // Collect component IDs where this corps has at least one brigade.
-        const corpsBrigadeComponents = new Set<number>();
-        for (const fid of Object.keys(formations).sort(strictCompare)) {
-            const f = formations[fid];
-            if (!f || f.faction !== faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            if (getFormationCorpsId(f) !== corpsId) continue;
-            if (!f.location_osid) continue;
-            const comp = preComponentOf.get(f.location_osid);
-            if (comp !== undefined) corpsBrigadeComponents.add(comp);
-        }
+        // Reuse the per-faction active-combat index built for this invocation.
+        const corpsBrigadeComponents = activeCombatComponentsByCorps.get(corpsId) ?? new Set<number>();
 
         const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () => buildMultiSectorsForCorps(
             state, corpsId, faction, edgeIds, osidFrontEdges,
@@ -2549,15 +2572,8 @@ function buildFactionSectors(
             _perfTime,
         ));
 
-        // Collect sorted brigade locations for reachability BFS (deterministic: sorted by formation ID).
-        const corpsBrigadeLocations: string[] = [];
-        for (const fid of Object.keys(formations).sort(strictCompare)) {
-            const f = formations[fid];
-            if (!f || f.faction !== faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            if (getFormationCorpsId(f) !== corpsId) continue;
-            if (f.location_osid) corpsBrigadeLocations.push(f.location_osid);
-        }
+        // Locations remain sorted by formation ID because the index iterates sorted IDs.
+        const corpsBrigadeLocations = activeCombatLocationsByCorps.get(corpsId) ?? [];
 
         for (const sector of corpsMultiSectors) {
             // FIX 1 (Option Y): Strengthened unstaffable-sector guard.
@@ -2606,15 +2622,8 @@ function buildFactionSectors(
     {
         const corpsIdSet = new Set(sectors.map(s => s.corps_id));
         for (const cid of [...corpsIdSet].sort(strictCompare)) {
-            // Count active brigades for this corps
-            let corpsBrigadeCount = 0;
-            for (const fid of Object.keys(formations).sort(strictCompare)) {
-                const f = formations[fid];
-                if (!f || f.faction !== faction || f.status !== 'active') continue;
-                if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-                if (getFormationCorpsId(f) !== cid) continue;
-                corpsBrigadeCount++;
-            }
+            // Count active combat formations for this corps from the invocation-local index.
+            const corpsBrigadeCount = activeCombatCountByCorps.get(cid) ?? 0;
 
             // Iteratively merge the smallest adjacent sector pair until ratio is met
             let changed = true;

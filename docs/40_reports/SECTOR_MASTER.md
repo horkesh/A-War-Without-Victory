@@ -1,10 +1,22 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 14 sector-object scan-list reuse)
+**Updated:** 2026-05-18 (Batch 15 faction active-combat index)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 15 faction active-combat index
+
+**Change:** `buildFactionSectors(...)` now builds one invocation-local active-combat formation index before per-corps sector construction and classification setup.
+
+**Why:** Fresh Batch 15 profiling still showed `buildFactionSectors:RS/RBiH` as the top sector reconstruction owner. This cut removes repeated active-combat formation scans for per-corps counts, location/component collections, and faction-wide brigade location/component sets without adding cross-turn or persisted cache state.
+
+**Run evidence:** 40w n1891 produced `0d8d9ccdc477d77a`; 27/27 anchors, 6/6 bot benchmarks, run consistency PASS. The hash move is attributed to the concurrent intel ambush lane; the sector index itself is read-only and invocation-local.
+
+**Next measured targets:** Fresh sidecar aggregation still names `buildFactionSectors:RS` (3268.501ms), `buildFactionSectors:RBiH` (3183.130ms), `recoverDroppedFrontEdges:1` (1639.243ms), `buildFactionSectors:RBiH:corps-sector-construction` (1367.905ms), and `recoverDroppedFrontEdges:faction-front-claim-setup` (1308.836ms) as remaining owners.
+
+**Report:** [implemented/20260518_SECTOR_RECONSTRUCTION_BATCH15.md](implemented/20260518_SECTOR_RECONSTRUCTION_BATCH15.md)
 
 ## 2026-05-18: Batch 14 sector-object scan-list reuse
 

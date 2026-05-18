@@ -46,6 +46,14 @@ Examples:
 
 The raw underlying simulation truth must not be sent just because a summary is needed.
 
+Current public intel-friction labels are staff abstractions:
+
+- `stale_intel`
+- `defender_opsec`
+- `ambush_risk`
+
+These labels may explain battle/AAR outcomes at a coarse level. Exact confidence values, hidden defender positions, and raw enemy strength remain debug-only unless a later canon-reviewed surface explicitly promotes them.
+
 ### `debug-only`
 
 This is not normal player information.

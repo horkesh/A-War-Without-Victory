@@ -13401,8 +13401,8 @@
           "artillery": 13,
           "tanks": 2
         },
-        "killed": 1266,
-        "missing_captured": 973,
+        "killed": 1275,
+        "missing_captured": 977,
         "per_formation": {
           "hrhb_101st_oraje_brigade": {
             "killed": 249,
@@ -13425,14 +13425,14 @@
             "wounded": 274
           },
           "hrhb_1st_brigade_mostar": {
-            "killed": 45,
+            "killed": 46,
             "missing_captured": 38,
-            "wounded": 90
+            "wounded": 92
           },
           "hrhb_1st_herzegovina_brigade_knez_domagoj": {
-            "killed": 62,
-            "missing_captured": 52,
-            "wounded": 121
+            "killed": 63,
+            "missing_captured": 53,
+            "wounded": 122
           },
           "hrhb_2nd_brigade_mostar": {
             "killed": 55,
@@ -13450,9 +13450,9 @@
             "wounded": 16
           },
           "hrhb_apljina_brigade": {
-            "killed": 72,
-            "missing_captured": 51,
-            "wounded": 138
+            "killed": 73,
+            "missing_captured": 52,
+            "wounded": 139
           },
           "hrhb_ban_jelai_brigade": {
             "killed": 13,
@@ -13460,9 +13460,9 @@
             "wounded": 35
           },
           "hrhb_grude_brigade": {
-            "killed": 35,
+            "killed": 36,
             "missing_captured": 30,
-            "wounded": 71
+            "wounded": 72
           },
           "hrhb_herceg_stjepan_brigade": {
             "killed": 14,
@@ -13475,9 +13475,9 @@
             "wounded": 71
           },
           "hrhb_itluk_brigade": {
-            "killed": 13,
+            "killed": 14,
             "missing_captured": 9,
-            "wounded": 24
+            "wounded": 26
           },
           "hrhb_jure_franceti_brigade": {
             "killed": 5,
@@ -13502,7 +13502,7 @@
           "hrhb_mostar_brigade": {
             "killed": 50,
             "missing_captured": 38,
-            "wounded": 96
+            "wounded": 95
           },
           "hrhb_stjepan_tomaevi_brigade": {
             "killed": 7,
@@ -13510,9 +13510,9 @@
             "wounded": 22
           },
           "hrhb_stolac_units": {
-            "killed": 45,
-            "missing_captured": 36,
-            "wounded": 88
+            "killed": 46,
+            "missing_captured": 35,
+            "wounded": 90
           },
           "hrhb_vitezovi_brigade_vitez": {
             "killed": 6,
@@ -13520,19 +13520,19 @@
             "wounded": 22
           },
           "hv_113th_brigade_tg": {
-            "killed": 11,
-            "missing_captured": 6,
-            "wounded": 20
+            "killed": 12,
+            "missing_captured": 7,
+            "wounded": 23
           },
           "hv_1st_guards_tg": {
-            "killed": 11,
-            "missing_captured": 6,
-            "wounded": 20
+            "killed": 12,
+            "missing_captured": 7,
+            "wounded": 23
           },
           "hv_4th_guards_tg": {
-            "killed": 11,
-            "missing_captured": 6,
-            "wounded": 20
+            "killed": 12,
+            "missing_captured": 7,
+            "wounded": 23
           },
           "hvo_ante_starcevic_brigade": {
             "killed": 6,
@@ -13575,7 +13575,7 @@
             "wounded": 26
           }
         },
-        "wounded": 2614
+        "wounded": 2631
       },
       "RBiH": {
         "equipment_lost": {
@@ -13584,7 +13584,7 @@
           "tanks": 0
         },
         "killed": 13217,
-        "missing_captured": 11338,
+        "missing_captured": 11341,
         "per_formation": {
           "arbih_101st_mountain": {
             "killed": 180,
@@ -13723,12 +13723,12 @@
           },
           "arbih_211th_liberation": {
             "killed": 215,
-            "missing_captured": 143,
-            "wounded": 401
+            "missing_captured": 144,
+            "wounded": 402
           },
           "arbih_212th_mountain": {
             "killed": 110,
-            "missing_captured": 90,
+            "missing_captured": 91,
             "wounded": 204
           },
           "arbih_213th_vitezka_mountain": {
@@ -13747,9 +13747,9 @@
             "wounded": 354
           },
           "arbih_221st_mountain": {
-            "killed": 398,
-            "missing_captured": 262,
-            "wounded": 743
+            "killed": 400,
+            "missing_captured": 261,
+            "wounded": 745
           },
           "arbih_222nd_liberation": {
             "killed": 125,
@@ -13758,13 +13758,13 @@
           },
           "arbih_223rd_mountain": {
             "killed": 152,
-            "missing_captured": 105,
-            "wounded": 280
+            "missing_captured": 107,
+            "wounded": 279
           },
           "arbih_225th_muslim_mountain": {
-            "killed": 457,
+            "killed": 458,
             "missing_captured": 265,
-            "wounded": 848
+            "wounded": 850
           },
           "arbih_240th_muslim_mountain": {
             "killed": 56,
@@ -14078,7 +14078,7 @@
           },
           "arbih_9th_muslim_liberation": {
             "killed": 127,
-            "missing_captured": 87,
+            "missing_captured": 88,
             "wounded": 236
           },
           "arbih_hvo_kralj_tvrtko": {
@@ -14087,9 +14087,9 @@
             "wounded": 208
           },
           "hrhb_107th_gradaac_brigade": {
-            "killed": 489,
-            "missing_captured": 297,
-            "wounded": 913
+            "killed": 486,
+            "missing_captured": 296,
+            "wounded": 909
           },
           "hrhb_108th_brko_brigade": {
             "killed": 162,
@@ -14451,7 +14451,7 @@
           "rs_2nd_armored": {
             "killed": 140,
             "missing_captured": 127,
-            "wounded": 278
+            "wounded": 277
           },
           "rs_2nd_banja_luka_light_infantry": {
             "killed": 21,
@@ -14471,7 +14471,7 @@
           "rs_2nd_ozren_light_infantry": {
             "killed": 139,
             "missing_captured": 132,
-            "wounded": 277
+            "wounded": 276
           },
           "rs_2nd_posavina_light_infantry": {
             "killed": 10,
@@ -14551,7 +14551,7 @@
           "rs_4th_ozren_light_infantry": {
             "killed": 139,
             "missing_captured": 132,
-            "wounded": 277
+            "wounded": 276
           },
           "rs_4th_sarajevo_light_infantry": {
             "killed": 121,
@@ -14654,7 +14654,7 @@
             "wounded": 69
           }
         },
-        "wounded": 10511
+        "wounded": 10508
       }
     },
     "command_authority": {
@@ -14754,8 +14754,8 @@
               "hrhb_95th_brigade": 0.42418464610370776,
               "hrhb_ban_jelai_brigade": 0.41742976386913755,
               "hrhb_jure_franceti_brigade": 0.4241846438262824,
-              "hrhb_kiseljak_brigade": 0.4241846275110679,
-              "hrhb_kreevo_brigade": 0.42408708001782347,
+              "hrhb_kiseljak_brigade": 0.4241846265494651,
+              "hrhb_kreevo_brigade": 0.4240838277359158,
               "hrhb_stjepan_tomaevi_brigade": 0.4391872341881675,
               "hrhb_vitezovi_brigade_vitez": 0.48584238141640956,
               "hvo_ante_starcevic_brigade": 0.4222001190467317,
@@ -16484,14 +16484,14 @@
               "hrhb_2nd_brigade_mostar": 0.8313257380569434,
               "hrhb_6th_brigade_ranko_boban": 0.6478872716444795,
               "hrhb_apljina_brigade": 0.6728736057383162,
-              "hrhb_grude_brigade": 0.7649295436532799,
+              "hrhb_grude_brigade": 0.7649295436469724,
               "hrhb_herceg_stjepan_brigade": 0.6607872715811677,
               "hrhb_iroki_brijeg_brigade": 0.7286729858499679,
-              "hrhb_itluk_brigade": 0.654187270784051,
-              "hrhb_ljubuki_brigade": 0.6475970342465184,
+              "hrhb_itluk_brigade": 0.6541872707578502,
+              "hrhb_ljubuki_brigade": 0.6475829510223668,
               "hrhb_mario_hrka_ikota_brigade": 0.5965096223392952,
-              "hrhb_mostar_brigade": 0.7033576276922031,
-              "hrhb_stolac_units": 0.5788658588528064,
+              "hrhb_mostar_brigade": 0.703357627692203,
+              "hrhb_stolac_units": 0.5784885918834675,
               "hvo_posusje_brigade": 0.4613297487429986
             },
             "supply_continuity_confidence": 1,
@@ -16704,9 +16704,9 @@
                   "current_zone": "zone:hvo_southeast_herzegovina:op:capljina:capljina_2",
                   "equipment_class": "mountain",
                   "equipment_priority": 1,
-                  "fitness_defense": 0.33343661999999996,
-                  "fitness_garrison": 0.2666,
-                  "fitness_offense": 0.37890524999999997,
+                  "fitness_defense": 0.33293633999999994,
+                  "fitness_garrison": 0.2662,
+                  "fitness_offense": 0.3783367499999999,
                   "is_combat_effective": true,
                   "is_disrupted": false,
                   "is_home_defense": false,
@@ -16918,9 +16918,9 @@
                 "current_zone": "zone:hvo_southeast_herzegovina:op:capljina:capljina_2",
                 "equipment_class": "mountain",
                 "equipment_priority": 1,
-                "fitness_defense": 0.33343661999999996,
-                "fitness_garrison": 0.2666,
-                "fitness_offense": 0.37890524999999997,
+                "fitness_defense": 0.33293633999999994,
+                "fitness_garrison": 0.2662,
+                "fitness_offense": 0.3783367499999999,
                 "is_combat_effective": true,
                 "is_disrupted": false,
                 "is_home_defense": false,
@@ -17444,8 +17444,8 @@
           "current_objective_index": 0,
           "failure_count": 0,
           "force_launch": false,
-          "force_ratio_estimate": 4.466962575824085,
-          "initial_strength": 16447,
+          "force_ratio_estimate": 4.458981711156508,
+          "initial_strength": 16421,
           "intel_confidence_at_assessment": 0.5800000000000001,
           "is_pre_planned": true,
           "min_attack_outcome": "repulsed",
@@ -18659,17 +18659,17 @@
               "rs_1st_vujak_light_infantry": 0.43415369646233376,
               "rs_22nd_krajina_infantry": 0.45641378258037074,
               "rs_27th_derventa_motorized": 0.5585717781708538,
-              "rs_2nd_armored": 0.3950485063918939,
+              "rs_2nd_armored": 0.39516393457873195,
               "rs_2nd_banja_luka_light_infantry": 0.6246667228371533,
               "rs_2nd_krajina_infantry": 0.537380045468484,
-              "rs_2nd_ozren_light_infantry": 0.37083480466892366,
+              "rs_2nd_ozren_light_infantry": 0.37091725337665626,
               "rs_2nd_tesli_light_infantry": 0.468948881535087,
               "rs_31st_light_infantry": 0.4275833333269654,
               "rs_3rd_banja_luka_light_infantry": 0.6213331901065269,
               "rs_3rd_ozren_light_infantry": 0.36862649425379374,
               "rs_43rd_prijedor_motorized": 0.7618933999599218,
               "rs_4th_banja_luka_light_infantry": 0.566894013274407,
-              "rs_4th_ozren_light_infantry": 0.37083480466892366,
+              "rs_4th_ozren_light_infantry": 0.37091725337665626,
               "rs_5th_kozara_light_infantry": 0.5445635598557726,
               "rs_6th_sanske_infantry": 0.47987813410446123,
               "vrs_1st_laktasi": 0.47940333768227417
@@ -18705,17 +18705,17 @@
                 "faction_pool_pressure": 0.23,
                 "mean_cohesion_normalized": 0.3926527777777775,
                 "mean_morale_normalized": 0.6477777777777777,
-                "mean_officer_quality": 0.5143856589747405,
+                "mean_officer_quality": 0.5144451267016515,
                 "p25_officer_quality": 0.5129350590316583,
                 "turn": 28
               },
               "traits": {
-                "axis_coordination": 0.6565868540171704,
-                "collapse_susceptibility": 0.3716544896580816,
-                "failure_recovery": 0.6338491925214628,
-                "operation_readiness": 0.5916240310257554,
+                "axis_coordination": 0.6565987475625525,
+                "collapse_susceptibility": 0.3716485428853905,
+                "failure_recovery": 0.6338640594531906,
+                "operation_readiness": 0.5916418713438287,
                 "reserve_response": 0.7304444444444445,
-                "staging_reliability": 0.7583771317949481,
+                "staging_reliability": 0.7583890253403303,
                 "support_delivery": 0.87255469947466
               }
             },
@@ -19065,9 +19065,9 @@
                   "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                   "equipment_class": "mechanized",
                   "equipment_priority": 3,
-                  "fitness_defense": 0.05962110000000001,
+                  "fitness_defense": 0.05973275,
                   "fitness_garrison": 0.2,
-                  "fitness_offense": 0.0928893,
+                  "fitness_offense": 0.09306325,
                   "is_combat_effective": true,
                   "is_disrupted": false,
                   "is_home_defense": false,
@@ -19110,9 +19110,9 @@
                   "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                   "equipment_class": "mountain",
                   "equipment_priority": 1,
-                  "fitness_defense": 0.050689100000000015,
+                  "fitness_defense": 0.050800750000000006,
                   "fitness_garrison": 0.2,
-                  "fitness_offense": 0.0564095,
+                  "fitness_offense": 0.05653375,
                   "is_combat_effective": true,
                   "is_disrupted": false,
                   "is_home_defense": true,
@@ -19215,9 +19215,9 @@
                   "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                   "equipment_class": "mountain",
                   "equipment_priority": 1,
-                  "fitness_defense": 0.050689100000000015,
+                  "fitness_defense": 0.050800750000000006,
                   "fitness_garrison": 0.2,
-                  "fitness_offense": 0.0564095,
+                  "fitness_offense": 0.05653375,
                   "is_combat_effective": true,
                   "is_disrupted": false,
                   "is_home_defense": true,
@@ -19609,9 +19609,9 @@
                 "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                 "equipment_class": "mechanized",
                 "equipment_priority": 3,
-                "fitness_defense": 0.05962110000000001,
+                "fitness_defense": 0.05973275,
                 "fitness_garrison": 0.2,
-                "fitness_offense": 0.0928893,
+                "fitness_offense": 0.09306325,
                 "is_combat_effective": true,
                 "is_disrupted": false,
                 "is_home_defense": false,
@@ -19654,9 +19654,9 @@
                 "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                 "equipment_class": "mountain",
                 "equipment_priority": 1,
-                "fitness_defense": 0.050689100000000015,
+                "fitness_defense": 0.050800750000000006,
                 "fitness_garrison": 0.2,
-                "fitness_offense": 0.0564095,
+                "fitness_offense": 0.05653375,
                 "is_combat_effective": true,
                 "is_disrupted": false,
                 "is_home_defense": true,
@@ -19759,9 +19759,9 @@
                 "current_zone": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2",
                 "equipment_class": "mountain",
                 "equipment_priority": 1,
-                "fitness_defense": 0.050689100000000015,
+                "fitness_defense": 0.050800750000000006,
                 "fitness_garrison": 0.2,
-                "fitness_offense": 0.0564095,
+                "fitness_offense": 0.05653375,
                 "is_combat_effective": true,
                 "is_disrupted": false,
                 "is_home_defense": true,
@@ -21727,21 +21727,21 @@
               "faction_pool_pressure": 0.23,
               "mean_cohesion_normalized": 0.3926527777777775,
               "mean_morale_normalized": 0.6477777777777777,
-              "mean_officer_quality": 0.5143856589747405,
+              "mean_officer_quality": 0.5144451267016515,
               "p25_officer_quality": 0.5129350590316583,
               "turn": 28
             },
             "traits": {
-              "axis_coordination": 0.6565868540171704,
-              "collapse_susceptibility": 0.3716544896580816,
-              "failure_recovery": 0.6338491925214628,
-              "operation_readiness": 0.5916240310257554,
+              "axis_coordination": 0.6565987475625525,
+              "collapse_susceptibility": 0.3716485428853905,
+              "failure_recovery": 0.6338640594531906,
+              "operation_readiness": 0.5916418713438287,
               "reserve_response": 0.7304444444444445,
-              "staging_reliability": 0.7583771317949481,
+              "staging_reliability": 0.7583890253403303,
               "support_delivery": 0.87255469947466
             }
           },
-          "force_ratio_estimate": 0.4323401615632521,
+          "force_ratio_estimate": 0.4328179527939958,
           "idle_execution_turn_streak": 0,
           "initial_strength": 1876,
           "intel_confidence_at_assessment": 0.7199999999999999,
@@ -31111,7 +31111,7 @@
           "hrhb_107th_gradaac_brigade"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 243.7549596964286,
+        "defensive_power": 243.5026506696429,
         "density": 0.5714285714285714,
         "edge_ids": [
           "op:banovici:seona__op:lukavac:brijesnica_donja_2",
@@ -31215,7 +31215,7 @@
           "op:zavidovici:ribnica_dio",
           "op:zivinice:zivinice_gornje_2"
         ],
-        "threat_ratio": 12.356671649886147
+        "threat_ratio": 12.381795400208658
       },
       "sector:arbih_2nd_corps:1": {
         "assigned_brigade_ids": [
@@ -32199,7 +32199,7 @@
           "op:zenica:gornja_vraca",
           "op:zenica:janjici"
         ],
-        "threat_ratio": 0.9371023923270388
+        "threat_ratio": 0.9391756277082933
       },
       "sector:arbih_3rd_corps:4": {
         "assigned_brigade_ids": [
@@ -32468,7 +32468,7 @@
           "hvo_101st_bihac"
         ],
         "corps_id": "arbih_5th_corps",
-        "defensive_power": 759.3280000000001,
+        "defensive_power": 758.5175,
         "density": 1,
         "edge_ids": [
           "op:bihac:bihac_2__op:bihac:ripac",
@@ -32530,7 +32530,7 @@
           "op:velika_kladusa:vejinac_2",
           "op:velika_kladusa:velika_kladusa_2"
         ],
-        "threat_ratio": 3.39247334485229
+        "threat_ratio": 3.396098310190602
       },
       "sector:arbih_5th_corps:1": {
         "assigned_brigade_ids": [
@@ -32924,7 +32924,7 @@
           "hrhb_stolac_units"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 315.2519937422222,
+        "defensive_power": 315.20576819555555,
         "density": 0.4666666666666667,
         "edge_ids": [
           "op:bileca:vranjska__op:stolac:hatelji_2",
@@ -33044,7 +33044,7 @@
           "op:stolac:prenj",
           "op:stolac:stolac_2"
         ],
-        "threat_ratio": 8.358392816873375
+        "threat_ratio": 8.359618591640842
       },
       "sector:hvo_southeast_herzegovina:1": {
         "assigned_brigade_ids": [
@@ -33244,7 +33244,7 @@
           "rs_4th_ozren_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 26.934101189374815,
+        "defensive_power": 26.961034499449816,
         "density": 0.25,
         "edge_ids": [
           "op:banovici:seona__op:lukavac:brijesnica_donja_2",
@@ -33358,7 +33358,7 @@
           "op:odzak:gornji_svilaj",
           "op:zavidovici:vozuca_2"
         ],
-        "threat_ratio": 532.4105638118327
+        "threat_ratio": 531.5819762143202
       },
       "sector:vrs_1st_krajina:1": {
         "assigned_brigade_ids": [
@@ -34216,7 +34216,7 @@
           "op:bosanski_petrovac:vrtoce",
           "op:titov_drvar:drvar_2"
         ],
-        "threat_ratio": 19.223342630336838
+        "threat_ratio": 19.20188800686548
       },
       "sector:vrs_2nd_krajina:2": {
         "assigned_brigade_ids": [
@@ -35338,7 +35338,7 @@
           "op:mostar:vranjevici_2",
           "op:nevesinje:hrusta_2"
         ],
-        "threat_ratio": 515.6342286880891
+        "threat_ratio": 515.5598064857816
       },
       "sector:vrs_herzegovina:3": {
         "assigned_brigade_ids": [
@@ -35439,7 +35439,7 @@
           "op:trebinje:velicani",
           "op:trebinje:zakovo_2"
         ],
-        "threat_ratio": 410.6089135907123
+        "threat_ratio": 410.54578183893017
       },
       "sector:vrs_herzegovina:4": {
         "assigned_brigade_ids": [
@@ -42010,7 +42010,7 @@
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
               "casualties_inflicted": 40,
-              "casualties_taken": 181,
+              "casualties_taken": 182,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -42112,11 +42112,11 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 610,
-          "peak_personnel": 1693,
+          "nadir_personnel": 608,
+          "peak_personnel": 1691,
           "stalemates": 1,
           "total_casualties_inflicted": 312,
-          "total_casualties_taken": 759,
+          "total_casualties_taken": 760,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -42202,7 +42202,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "srebrenik",
-        "personnel": 1693,
+        "personnel": 1691,
         "posture": "hold",
         "readiness": "active",
         "scavenge_accumulator": {
@@ -42222,7 +42222,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_211th_liberation",
           "formation_name": "211th Liberation",
-          "narrative": "The 211th Liberation has been tested in 6 engagements, suffering 759 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1693 to a low of 610, rebuilding to 1693.",
+          "narrative": "The 211th Liberation has been tested in 6 engagements, suffering 760 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1691 to a low of 608, rebuilding to 1691.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -42240,11 +42240,11 @@
           "stats": {
             "battles_fought": 6,
             "defeats": 3,
-            "final_personnel": 1693,
-            "nadir_personnel": 610,
-            "peak_personnel": 1693,
+            "final_personnel": 1691,
+            "nadir_personnel": 608,
+            "peak_personnel": 1691,
             "total_casualties_inflicted": 312,
-            "total_casualties_taken": 759,
+            "total_casualties_taken": 760,
             "victories": 2
           }
         }
@@ -42268,7 +42268,7 @@
           "engagements": [
             {
               "battle_id": "25:op:banovici:seona:rs_2nd_armored:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 14,
+              "casualties_inflicted": 15,
               "casualties_taken": 28,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -42391,10 +42391,10 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 576,
-          "peak_personnel": 1081,
+          "nadir_personnel": 575,
+          "peak_personnel": 1080,
           "stalemates": 1,
-          "total_casualties_inflicted": 135,
+          "total_casualties_inflicted": 136,
           "total_casualties_taken": 404,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -42479,7 +42479,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "srebrenik",
-        "personnel": 1081,
+        "personnel": 1080,
         "posture": "hold",
         "readiness": "active",
         "status": "active",
@@ -42495,7 +42495,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_212th_mountain",
           "formation_name": "212th Mountain",
-          "narrative": "The 212th Mountain has been tested in 6 engagements, suffering 404 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1081 to a low of 576, rebuilding to 1081.",
+          "narrative": "The 212th Mountain has been tested in 6 engagements, suffering 404 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1080 to a low of 575, rebuilding to 1080.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -42513,10 +42513,10 @@
           "stats": {
             "battles_fought": 6,
             "defeats": 3,
-            "final_personnel": 1081,
-            "nadir_personnel": 576,
-            "peak_personnel": 1081,
-            "total_casualties_inflicted": 135,
+            "final_personnel": 1080,
+            "nadir_personnel": 575,
+            "peak_personnel": 1080,
+            "total_casualties_inflicted": 136,
             "total_casualties_taken": 404,
             "victories": 2
           }
@@ -43453,7 +43453,7 @@
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 7,
-              "casualties_taken": 35,
+              "casualties_taken": 34,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -43492,7 +43492,7 @@
             },
             {
               "battle_id": "35:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_211th_liberation",
-              "casualties_inflicted": 23,
+              "casualties_inflicted": 22,
               "casualties_taken": 3,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -43535,11 +43535,11 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 173,
+          "nadir_personnel": 170,
           "peak_personnel": 1185,
           "stalemates": 1,
-          "total_casualties_inflicted": 109,
-          "total_casualties_taken": 522,
+          "total_casualties_inflicted": 108,
+          "total_casualties_taken": 521,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -43625,7 +43625,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "gracanica",
-        "personnel": 1061,
+        "personnel": 1058,
         "posture": "hold",
         "readiness": "active",
         "scavenge_accumulator": {
@@ -43645,7 +43645,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_221st_mountain",
           "formation_name": "221st Mountain",
-          "narrative": "The 221st Mountain has been tested in 6 engagements, suffering 522 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1185 to a low of 173, rebuilding to 1061.",
+          "narrative": "The 221st Mountain has been tested in 6 engagements, suffering 521 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1185 to a low of 170, rebuilding to 1058.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -43663,11 +43663,11 @@
           "stats": {
             "battles_fought": 6,
             "defeats": 3,
-            "final_personnel": 1061,
-            "nadir_personnel": 173,
+            "final_personnel": 1058,
+            "nadir_personnel": 170,
             "peak_personnel": 1185,
-            "total_casualties_inflicted": 109,
-            "total_casualties_taken": 522,
+            "total_casualties_inflicted": 108,
+            "total_casualties_taken": 521,
             "victories": 2
           }
         }
@@ -43733,7 +43733,7 @@
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 22,
-              "casualties_taken": 108,
+              "casualties_taken": 109,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -43772,7 +43772,7 @@
             },
             {
               "battle_id": "35:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_211th_liberation",
-              "casualties_inflicted": 30,
+              "casualties_inflicted": 31,
               "casualties_taken": 5,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -43815,10 +43815,10 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 533,
+          "nadir_personnel": 532,
           "peak_personnel": 1048,
           "stalemates": 1,
-          "total_casualties_inflicted": 117,
+          "total_casualties_inflicted": 118,
           "total_casualties_taken": 481,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -43834,7 +43834,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 2,
-          "worst_single_battle_casualties": 108,
+          "worst_single_battle_casualties": 109,
           "worst_single_battle_turn": 27
         },
         "cohesion": 83.85000000000001,
@@ -43925,7 +43925,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_222nd_liberation",
           "formation_name": "222nd Liberation",
-          "narrative": "The 222nd Liberation has been tested in 6 engagements, suffering 481 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1048 to a low of 533, rebuilding to 1048.",
+          "narrative": "The 222nd Liberation has been tested in 6 engagements, suffering 481 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1048 to a low of 532, rebuilding to 1048.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -43936,7 +43936,7 @@
               "turn": 25
             },
             {
-              "description": "Lost 108 in a single battle",
+              "description": "Lost 109 in a single battle",
               "turn": 27
             }
           ],
@@ -43944,9 +43944,9 @@
             "battles_fought": 6,
             "defeats": 3,
             "final_personnel": 1048,
-            "nadir_personnel": 533,
+            "nadir_personnel": 532,
             "peak_personnel": 1048,
-            "total_casualties_inflicted": 117,
+            "total_casualties_inflicted": 118,
             "total_casualties_taken": 481,
             "victories": 2
           }
@@ -44012,7 +44012,7 @@
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 39,
-              "casualties_taken": 191,
+              "casualties_taken": 192,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -44094,8 +44094,8 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 458,
-          "peak_personnel": 1131,
+          "nadir_personnel": 457,
+          "peak_personnel": 1130,
           "stalemates": 1,
           "total_casualties_inflicted": 226,
           "total_casualties_taken": 538,
@@ -44113,7 +44113,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 2,
-          "worst_single_battle_casualties": 191,
+          "worst_single_battle_casualties": 192,
           "worst_single_battle_turn": 27
         },
         "cohesion": 67.25,
@@ -44182,7 +44182,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "lukavac",
-        "personnel": 1131,
+        "personnel": 1130,
         "posture": "hold",
         "readiness": "active",
         "status": "active",
@@ -44198,7 +44198,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_223rd_mountain",
           "formation_name": "223rd Mountain",
-          "narrative": "The 223rd Mountain has been tested in 6 engagements, suffering 538 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1131 to a low of 458, rebuilding to 1131.",
+          "narrative": "The 223rd Mountain has been tested in 6 engagements, suffering 538 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1130 to a low of 457, rebuilding to 1130.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -44209,16 +44209,16 @@
               "turn": 25
             },
             {
-              "description": "Lost 191 in a single battle",
+              "description": "Lost 192 in a single battle",
               "turn": 27
             }
           ],
           "stats": {
             "battles_fought": 6,
             "defeats": 3,
-            "final_personnel": 1131,
-            "nadir_personnel": 458,
-            "peak_personnel": 1131,
+            "final_personnel": 1130,
+            "nadir_personnel": 457,
+            "peak_personnel": 1130,
             "total_casualties_inflicted": 226,
             "total_casualties_taken": 538,
             "victories": 2
@@ -44244,8 +44244,8 @@
           "engagements": [
             {
               "battle_id": "25:op:banovici:seona:rs_2nd_armored:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 196,
-              "casualties_taken": 377,
+              "casualties_inflicted": 195,
+              "casualties_taken": 378,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -44265,7 +44265,7 @@
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
               "casualties_inflicted": 137,
-              "casualties_taken": 619,
+              "casualties_taken": 620,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -44285,7 +44285,7 @@
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 62,
-              "casualties_taken": 307,
+              "casualties_taken": 308,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -44370,8 +44370,8 @@
           "nadir_personnel": 100,
           "peak_personnel": 827,
           "stalemates": 1,
-          "total_casualties_inflicted": 787,
-          "total_casualties_taken": 1570,
+          "total_casualties_inflicted": 786,
+          "total_casualties_taken": 1573,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -44386,7 +44386,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 2,
-          "worst_single_battle_casualties": 619,
+          "worst_single_battle_casualties": 620,
           "worst_single_battle_turn": 26
         },
         "cohesion": 67.25,
@@ -44471,7 +44471,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_225th_muslim_mountain",
           "formation_name": "225th Muslim Mountain",
-          "narrative": "The 225th Muslim Mountain has been nearly destroyed and rebuilt. Over 6 battles, it has suffered 1570 total casualties — far exceeding its peak strength of 827. But it rises each time. It currently stands at 624 men, a testament to the will to fight on.",
+          "narrative": "The 225th Muslim Mountain has been nearly destroyed and rebuilt. Over 6 battles, it has suffered 1573 total casualties — far exceeding its peak strength of 827. But it rises each time. It currently stands at 624 men, a testament to the will to fight on.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -44482,7 +44482,7 @@
               "turn": 25
             },
             {
-              "description": "Lost 619 in a single battle",
+              "description": "Lost 620 in a single battle",
               "turn": 26
             }
           ],
@@ -44492,8 +44492,8 @@
             "final_personnel": 624,
             "nadir_personnel": 100,
             "peak_personnel": 827,
-            "total_casualties_inflicted": 787,
-            "total_casualties_taken": 1570,
+            "total_casualties_inflicted": 786,
+            "total_casualties_taken": 1573,
             "victories": 2
           }
         }
@@ -48506,16 +48506,16 @@
           "battles_as_defender": 202,
           "battles_fought": 202,
           "brigade_count": 36,
-          "casualty_exchange_ratio": 0.15538500895369659,
-          "current_personnel": 49509,
+          "casualty_exchange_ratio": 0.15530206148652104,
+          "current_personnel": 49501,
           "defeats": 27,
           "most_casualties_brigade_id": "arbih_225th_muslim_mountain",
           "most_victories_brigade_id": "arbih_211th_liberation",
-          "nadir_aggregate_personnel": 21644,
-          "peak_aggregate_personnel": 52609,
+          "nadir_aggregate_personnel": 21635,
+          "peak_aggregate_personnel": 52598,
           "stalemates": 155,
-          "total_casualties_inflicted": 3037,
-          "total_casualties_taken": 19545,
+          "total_casualties_inflicted": 3036,
+          "total_casualties_taken": 19549,
           "total_osids_captured": 0,
           "total_osids_lost": 0,
           "victories": 20,
@@ -55521,12 +55521,12 @@
           "battles_fought": 36,
           "brigade_count": 10,
           "casualty_exchange_ratio": 0.3160068846815835,
-          "current_personnel": 16246,
+          "current_personnel": 16241,
           "defeats": 9,
           "most_casualties_brigade_id": "arbih_505th_vitezka_mountain",
           "most_victories_brigade_id": "arbih_505th_vitezka_mountain",
           "nadir_aggregate_personnel": 6896,
-          "peak_aggregate_personnel": 16246,
+          "peak_aggregate_personnel": 16241,
           "stalemates": 24,
           "total_casualties_inflicted": 918,
           "total_casualties_taken": 2905,
@@ -58893,7 +58893,7 @@
           "engagements": [
             {
               "battle_id": "25:op:banovici:seona:rs_2nd_armored:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 32,
+              "casualties_inflicted": 31,
               "casualties_taken": 61,
               "enemy_faction": "RS",
               "equipment_captured": {
@@ -58914,7 +58914,7 @@
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
               "casualties_inflicted": 37,
-              "casualties_taken": 167,
+              "casualties_taken": 168,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -58934,7 +58934,7 @@
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 36,
-              "casualties_taken": 180,
+              "casualties_taken": 181,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 0,
@@ -59016,11 +59016,11 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
-          "nadir_personnel": 155,
+          "nadir_personnel": 154,
           "peak_personnel": 600,
           "stalemates": 1,
-          "total_casualties_inflicted": 148,
-          "total_casualties_taken": 450,
+          "total_casualties_inflicted": 147,
+          "total_casualties_taken": 452,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -59035,7 +59035,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 2,
-          "worst_single_battle_casualties": 180,
+          "worst_single_battle_casualties": 181,
           "worst_single_battle_turn": 27
         },
         "cohesion": 67.25,
@@ -59104,7 +59104,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "lukavac",
-        "personnel": 150,
+        "personnel": 149,
         "posture": "hold",
         "readiness": "active",
         "status": "active",
@@ -59120,7 +59120,7 @@
           "faction": "RBiH",
           "formation_id": "arbih_9th_muslim_liberation",
           "formation_name": "9th Muslim Liberation",
-          "narrative": "The 9th Muslim Liberation is a shadow of what it was. After 6 battles and 450 casualties, it stands at 150 personnel — 25% of its peak strength. Still in the line, but barely.",
+          "narrative": "The 9th Muslim Liberation is a shadow of what it was. After 6 battles and 452 casualties, it stands at 149 personnel — 25% of its peak strength. Still in the line, but barely.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -59131,18 +59131,18 @@
               "turn": 25
             },
             {
-              "description": "Lost 180 in a single battle",
+              "description": "Lost 181 in a single battle",
               "turn": 27
             }
           ],
           "stats": {
             "battles_fought": 6,
             "defeats": 3,
-            "final_personnel": 150,
-            "nadir_personnel": 155,
+            "final_personnel": 149,
+            "nadir_personnel": 154,
             "peak_personnel": 600,
-            "total_casualties_inflicted": 148,
-            "total_casualties_taken": 450,
+            "total_casualties_inflicted": 147,
+            "total_casualties_taken": 452,
             "victories": 2
           }
         }
@@ -59165,16 +59165,16 @@
           "battles_as_defender": 421,
           "battles_fought": 421,
           "brigade_count": 119,
-          "casualty_exchange_ratio": 0.1498660797707784,
-          "current_personnel": 165765,
+          "casualty_exchange_ratio": 0.14983287312890567,
+          "current_personnel": 165752,
           "defeats": 95,
           "most_casualties_brigade_id": "arbih_225th_muslim_mountain",
           "most_victories_brigade_id": "arbih_211th_liberation",
-          "nadir_aggregate_personnel": 62984,
-          "peak_aggregate_personnel": 170893,
+          "nadir_aggregate_personnel": 62975,
+          "peak_aggregate_personnel": 170877,
           "stalemates": 303,
-          "total_casualties_inflicted": 7218,
-          "total_casualties_taken": 48163,
+          "total_casualties_inflicted": 7217,
+          "total_casualties_taken": 48167,
           "total_osids_captured": 0,
           "total_osids_lost": 47,
           "victories": 23,
@@ -60145,10 +60145,10 @@
           "longest_defense_streak": 3,
           "longest_victory_streak": 2,
           "nadir_personnel": 100,
-          "peak_personnel": 1372,
+          "peak_personnel": 1365,
           "stalemates": 1,
           "total_casualties_inflicted": 106,
-          "total_casualties_taken": 566,
+          "total_casualties_taken": 565,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -60255,7 +60255,7 @@
           "faction": "RBiH",
           "formation_id": "hrhb_107th_gradaac_brigade",
           "formation_name": "107th \"Gradačac\" Brigade",
-          "narrative": "The 107th \"Gradačac\" Brigade has been tested in 6 engagements, suffering 566 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1372 to a low of 100, rebuilding to 1075.",
+          "narrative": "The 107th \"Gradačac\" Brigade has been tested in 6 engagements, suffering 565 total casualties. It has won 2 and lost 3. The cost of holding the line is written in its ranks: from a peak of 1365 to a low of 100, rebuilding to 1075.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -60275,9 +60275,9 @@
             "defeats": 3,
             "final_personnel": 1075,
             "nadir_personnel": 100,
-            "peak_personnel": 1372,
+            "peak_personnel": 1365,
             "total_casualties_inflicted": 106,
-            "total_casualties_taken": 566,
+            "total_casualties_taken": 565,
             "victories": 2
           }
         }
@@ -61207,7 +61207,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -61233,7 +61233,7 @@
           "peak_personnel": 2200,
           "stalemates": 0,
           "total_casualties_inflicted": 20,
-          "total_casualties_taken": 174,
+          "total_casualties_taken": 177,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -61248,7 +61248,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 63.25,
@@ -61307,7 +61307,7 @@
         "max_personnel": 2200,
         "morale": 70,
         "name": "1st Brigade (Mostar)",
-        "officer_quality": 0.37467956382538403,
+        "officer_quality": 0.37191654307372324,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
@@ -61347,7 +61347,7 @@
             "nadir_personnel": 950,
             "peak_personnel": 2200,
             "total_casualties_inflicted": 20,
-            "total_casualties_taken": 174,
+            "total_casualties_taken": 177,
             "victories": 1
           }
         }
@@ -61385,7 +61385,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -61435,7 +61435,7 @@
           "peak_personnel": 1800,
           "stalemates": 3,
           "total_casualties_inflicted": 33,
-          "total_casualties_taken": 237,
+          "total_casualties_taken": 240,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -61450,7 +61450,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 40,
@@ -61514,7 +61514,7 @@
         "max_personnel": 1800,
         "morale": 100,
         "name": "1st Herzegovina Brigade \"Knez Domagoj\"",
-        "officer_quality": 0.37462589524574197,
+        "officer_quality": 0.37174539819856434,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
@@ -61558,7 +61558,7 @@
             "nadir_personnel": 900,
             "peak_personnel": 1800,
             "total_casualties_inflicted": 33,
-            "total_casualties_taken": 237,
+            "total_casualties_taken": 240,
             "victories": 1
           }
         }
@@ -62141,7 +62141,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -62215,7 +62215,7 @@
           "peak_personnel": 1800,
           "stalemates": 4,
           "total_casualties_inflicted": 47,
-          "total_casualties_taken": 263,
+          "total_casualties_taken": 266,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -62230,7 +62230,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 57.449999999999996,
@@ -62295,7 +62295,7 @@
         "max_personnel": 1800,
         "morale": 70,
         "name": "Čapljina Brigade",
-        "officer_quality": 0.36652103953809784,
+        "officer_quality": 0.363632660268276,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
@@ -62317,7 +62317,7 @@
           "faction": "HRHB",
           "formation_id": "hrhb_apljina_brigade",
           "formation_name": "Čapljina Brigade",
-          "narrative": "The Čapljina Brigade has been tested in 5 engagements, suffering 263 total casualties. It has won 1 and lost 0. The cost of holding the line is written in its ranks: from a peak of 1800 to a low of 900, rebuilding to 1800.",
+          "narrative": "The Čapljina Brigade has been tested in 5 engagements, suffering 266 total casualties. It has won 1 and lost 0. The cost of holding the line is written in its ranks: from a peak of 1800 to a low of 900, rebuilding to 1800.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
@@ -62339,7 +62339,7 @@
             "nadir_personnel": 900,
             "peak_personnel": 1800,
             "total_casualties_inflicted": 47,
-            "total_casualties_taken": 263,
+            "total_casualties_taken": 266,
             "victories": 1
           }
         }
@@ -62498,7 +62498,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -62524,7 +62524,7 @@
           "peak_personnel": 1800,
           "stalemates": 0,
           "total_casualties_inflicted": 20,
-          "total_casualties_taken": 145,
+          "total_casualties_taken": 148,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -62539,7 +62539,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 72.64999999999999,
@@ -62598,7 +62598,7 @@
         "max_personnel": 1800,
         "morale": 74,
         "name": "Grude Brigade",
-        "officer_quality": 0.35862547125772587,
+        "officer_quality": 0.35467058828615994,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
@@ -62634,7 +62634,7 @@
             "nadir_personnel": 900,
             "peak_personnel": 1800,
             "total_casualties_inflicted": 20,
-            "total_casualties_taken": 145,
+            "total_casualties_taken": 148,
             "victories": 1
           }
         }
@@ -62957,7 +62957,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -62983,7 +62983,7 @@
           "peak_personnel": 1800,
           "stalemates": 0,
           "total_casualties_inflicted": 20,
-          "total_casualties_taken": 53,
+          "total_casualties_taken": 56,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -62998,7 +62998,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 53.5499999999999,
@@ -63056,7 +63056,7 @@
         "max_personnel": 1800,
         "morale": 100,
         "name": "Čitluk Brigade",
-        "officer_quality": 0.2123709905223135,
+        "officer_quality": 0.20858909733971506,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
@@ -63092,7 +63092,7 @@
             "nadir_personnel": 900,
             "peak_personnel": 1800,
             "total_casualties_inflicted": 20,
-            "total_casualties_taken": 53,
+            "total_casualties_taken": 56,
             "victories": 1
           }
         }
@@ -64066,7 +64066,7 @@
           "peak_personnel": 2200,
           "stalemates": 0,
           "total_casualties_inflicted": 22,
-          "total_casualties_taken": 184,
+          "total_casualties_taken": 183,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -64180,7 +64180,7 @@
             "nadir_personnel": 950,
             "peak_personnel": 2200,
             "total_casualties_inflicted": 22,
-            "total_casualties_taken": 184,
+            "total_casualties_taken": 183,
             "victories": 1
           }
         }
@@ -64340,7 +64340,7 @@
             {
               "battle_id": "3:op:capljina:tasovcici_2:hrhb_1st_brigade_mostar:null",
               "casualties_inflicted": 20,
-              "casualties_taken": 28,
+              "casualties_taken": 31,
               "enemy_faction": "RS",
               "equipment_captured": {
                 "artillery": 5,
@@ -64363,10 +64363,10 @@
           "longest_defense_streak": 0,
           "longest_victory_streak": 1,
           "nadir_personnel": 900,
-          "peak_personnel": 1408,
+          "peak_personnel": 1406,
           "stalemates": 0,
           "total_casualties_inflicted": 20,
-          "total_casualties_taken": 179,
+          "total_casualties_taken": 182,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 5,
@@ -64381,7 +64381,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 1,
-          "worst_single_battle_casualties": 28,
+          "worst_single_battle_casualties": 31,
           "worst_single_battle_turn": 3
         },
         "cohesion": 57.449999999999996,
@@ -64440,13 +64440,13 @@
         "max_personnel": 1800,
         "morale": 70,
         "name": "Stolac Units",
-        "officer_quality": 0.37432090782309524,
+        "officer_quality": 0.3716189217996288,
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": 40
         },
         "origin_mun": "stolac",
-        "personnel": 1408,
+        "personnel": 1406,
         "posture": "dig_in",
         "readiness": "active",
         "status": "active",
@@ -64462,7 +64462,7 @@
           "faction": "HRHB",
           "formation_id": "hrhb_stolac_units",
           "formation_name": "Stolac Units",
-          "narrative": "The Stolac Units has held its ground. With only 1 engagements, its war has been one of patience, not blood. It currently fields 1408 personnel.",
+          "narrative": "The Stolac Units has held its ground. With only 1 engagements, its war has been one of patience, not blood. It currently fields 1406 personnel.",
           "notable_moments": [
             {
               "description": "First battle at op:capljina:tasovcici_2",
@@ -64472,11 +64472,11 @@
           "stats": {
             "battles_fought": 1,
             "defeats": 0,
-            "final_personnel": 1408,
+            "final_personnel": 1406,
             "nadir_personnel": 900,
-            "peak_personnel": 1408,
+            "peak_personnel": 1406,
             "total_casualties_inflicted": 20,
-            "total_casualties_taken": 179,
+            "total_casualties_taken": 182,
             "victories": 1
           }
         }
@@ -64776,7 +64776,7 @@
           "longest_defense_streak": 0,
           "longest_victory_streak": 0,
           "nadir_personnel": 825,
-          "peak_personnel": 880,
+          "peak_personnel": 875,
           "stalemates": 0,
           "total_casualties_inflicted": 0,
           "total_casualties_taken": 217,
@@ -64857,7 +64857,7 @@
           "last_supplied_turn": 40
         },
         "origin_mun": "bihac",
-        "personnel": 880,
+        "personnel": 875,
         "posture": "hold",
         "readiness": "active",
         "recruit_pool_faction": "HRHB",
@@ -64874,14 +64874,14 @@
           "faction": "RBiH",
           "formation_id": "hvo_101st_bihac",
           "formation_name": "101st Bihać HVO Brigade",
-          "narrative": "The 101st Bihać HVO Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 880 personnel.",
+          "narrative": "The 101st Bihać HVO Brigade has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 875 personnel.",
           "notable_moments": [],
           "stats": {
             "battles_fought": 0,
             "defeats": 0,
-            "final_personnel": 880,
+            "final_personnel": 875,
             "nadir_personnel": 825,
-            "peak_personnel": 880,
+            "peak_personnel": 875,
             "total_casualties_inflicted": 0,
             "total_casualties_taken": 217,
             "victories": 0
@@ -65246,16 +65246,16 @@
           "battles_as_defender": 17,
           "battles_fought": 26,
           "brigade_count": 33,
-          "casualty_exchange_ratio": 0.21916612093429383,
-          "current_personnel": 50832,
+          "casualty_exchange_ratio": 0.2183558068725533,
+          "current_personnel": 50830,
           "defeats": 2,
           "most_casualties_brigade_id": "hrhb_106th_bosanska_posavina_brigade",
           "most_victories_brigade_id": "hrhb_111th_brigade",
           "nadir_aggregate_personnel": 27500,
-          "peak_aggregate_personnel": 51858,
+          "peak_aggregate_personnel": 51856,
           "stalemates": 15,
           "total_casualties_inflicted": 1004,
-          "total_casualties_taken": 4581,
+          "total_casualties_taken": 4598,
           "total_osids_captured": 6,
           "total_osids_lost": 0,
           "victories": 9,
@@ -65815,16 +65815,16 @@
           "battles_as_defender": 11,
           "battles_fought": 18,
           "brigade_count": 14,
-          "casualty_exchange_ratio": 0.12241169305724726,
-          "current_personnel": 25099,
+          "casualty_exchange_ratio": 0.12115732368896925,
+          "current_personnel": 25097,
           "defeats": 0,
           "most_casualties_brigade_id": "hrhb_apljina_brigade",
           "most_victories_brigade_id": "hrhb_1st_brigade_mostar",
           "nadir_aggregate_personnel": 12850,
-          "peak_aggregate_personnel": 25121,
+          "peak_aggregate_personnel": 25119,
           "stalemates": 11,
           "total_casualties_inflicted": 201,
-          "total_casualties_taken": 1642,
+          "total_casualties_taken": 1659,
           "total_osids_captured": 6,
           "total_osids_lost": 0,
           "victories": 7,
@@ -72159,7 +72159,7 @@
           "engagements": [
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
-              "casualties_inflicted": 368,
+              "casualties_inflicted": 369,
               "casualties_taken": 82,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -72245,7 +72245,7 @@
           "nadir_personnel": 798,
           "peak_personnel": 1332,
           "stalemates": 1,
-          "total_casualties_inflicted": 902,
+          "total_casualties_inflicted": 903,
           "total_casualties_taken": 939,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -72369,7 +72369,7 @@
             "final_personnel": 1144,
             "nadir_personnel": 798,
             "peak_personnel": 1332,
-            "total_casualties_inflicted": 902,
+            "total_casualties_inflicted": 903,
             "total_casualties_taken": 939,
             "victories": 2
           }
@@ -75380,7 +75380,7 @@
             },
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 329,
+              "casualties_inflicted": 330,
               "casualties_taken": 67,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -75403,10 +75403,10 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 0,
           "longest_victory_streak": 3,
-          "nadir_personnel": 496,
+          "nadir_personnel": 497,
           "peak_personnel": 1000,
           "stalemates": 0,
-          "total_casualties_inflicted": 928,
+          "total_casualties_inflicted": 929,
           "total_casualties_taken": 433,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -75482,13 +75482,13 @@
         "max_personnel": 2800,
         "morale": 45,
         "name": "2nd Armored",
-        "officer_quality": 0.2371981986234542,
+        "officer_quality": 0.23788495281046468,
         "ops": {
           "fatigue": 4,
           "last_supplied_turn": 40
         },
         "origin_mun": "doboj",
-        "personnel": 531,
+        "personnel": 532,
         "posture": "defend",
         "readiness": "active",
         "scavenge_accumulator": {
@@ -75508,7 +75508,7 @@
           "faction": "RS",
           "formation_id": "rs_2nd_armored",
           "formation_name": "2nd Armored",
-          "narrative": "The 2nd Armored has held its ground. With only 3 engagements, its war has been one of patience, not blood. It currently fields 531 personnel.",
+          "narrative": "The 2nd Armored has held its ground. With only 3 engagements, its war has been one of patience, not blood. It currently fields 532 personnel.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -75522,10 +75522,10 @@
           "stats": {
             "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 531,
-            "nadir_personnel": 496,
+            "final_personnel": 532,
+            "nadir_personnel": 497,
             "peak_personnel": 1000,
-            "total_casualties_inflicted": 928,
+            "total_casualties_inflicted": 929,
             "total_casualties_taken": 433,
             "victories": 3
           }
@@ -76217,7 +76217,7 @@
             {
               "battle_id": "25:op:banovici:seona:rs_2nd_armored:hrhb_107th_gradaac_brigade",
               "casualties_inflicted": 231,
-              "casualties_taken": 120,
+              "casualties_taken": 119,
               "enemy_faction": "RBiH",
               "equipment_captured": {
                 "artillery": 0,
@@ -76236,7 +76236,7 @@
             },
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
-              "casualties_inflicted": 367,
+              "casualties_inflicted": 368,
               "casualties_taken": 81,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -76256,7 +76256,7 @@
             },
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 329,
+              "casualties_inflicted": 330,
               "casualties_taken": 67,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -76279,11 +76279,11 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 0,
           "longest_victory_streak": 3,
-          "nadir_personnel": 486,
+          "nadir_personnel": 487,
           "peak_personnel": 1000,
           "stalemates": 0,
-          "total_casualties_inflicted": 927,
-          "total_casualties_taken": 445,
+          "total_casualties_inflicted": 929,
+          "total_casualties_taken": 444,
           "total_equipment_captured": {
             "aa_systems": 0,
             "artillery": 0,
@@ -76298,7 +76298,7 @@
           "total_osids_lost": 0,
           "turns_under_siege": 0,
           "victories": 3,
-          "worst_single_battle_casualties": 120,
+          "worst_single_battle_casualties": 119,
           "worst_single_battle_turn": 25
         },
         "cohesion": 35,
@@ -76358,13 +76358,13 @@
         "max_personnel": 2000,
         "morale": 20,
         "name": "2nd Ozren Light Infantry",
-        "officer_quality": 0.2370555875178544,
+        "officer_quality": 0.23775853153737253,
         "ops": {
           "fatigue": 4,
           "last_supplied_turn": 40
         },
         "origin_mun": "lukavac",
-        "personnel": 452,
+        "personnel": 453,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -76380,25 +76380,25 @@
           "faction": "RS",
           "formation_id": "rs_2nd_ozren_light_infantry",
           "formation_name": "2nd Ozren Light Infantry",
-          "narrative": "The 2nd Ozren Light Infantry is a shadow of what it was. After 3 battles and 445 casualties, it stands at 452 personnel — 45% of its peak strength. Still in the line, but barely.",
+          "narrative": "The 2nd Ozren Light Infantry is a shadow of what it was. After 3 battles and 444 casualties, it stands at 453 personnel — 45% of its peak strength. Still in the line, but barely.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
               "turn": 25
             },
             {
-              "description": "Lost 120 in a single battle",
+              "description": "Lost 119 in a single battle",
               "turn": 25
             }
           ],
           "stats": {
             "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 452,
-            "nadir_personnel": 486,
+            "final_personnel": 453,
+            "nadir_personnel": 487,
             "peak_personnel": 1000,
-            "total_casualties_inflicted": 927,
-            "total_casualties_taken": 445,
+            "total_casualties_inflicted": 929,
+            "total_casualties_taken": 444,
             "victories": 3
           }
         }
@@ -78747,7 +78747,7 @@
           "engagements": [
             {
               "battle_id": "25:op:banovici:seona:rs_2nd_armored:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 230,
+              "casualties_inflicted": 231,
               "casualties_taken": 119,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -78767,7 +78767,7 @@
             },
             {
               "battle_id": "26:op:banovici:seona:rs_1st_krnjin_light_infantry:arbih_221st_mountain",
-              "casualties_inflicted": 367,
+              "casualties_inflicted": 368,
               "casualties_taken": 81,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -78787,7 +78787,7 @@
             },
             {
               "battle_id": "27:op:banovici:seona:rs_1st_krnjin_light_infantry:hrhb_107th_gradaac_brigade",
-              "casualties_inflicted": 329,
+              "casualties_inflicted": 330,
               "casualties_taken": 66,
               "enemy_faction": "RBiH",
               "equipment_captured": {
@@ -78810,10 +78810,10 @@
           "first_battle_turn": 25,
           "longest_defense_streak": 0,
           "longest_victory_streak": 3,
-          "nadir_personnel": 486,
+          "nadir_personnel": 487,
           "peak_personnel": 1000,
           "stalemates": 0,
-          "total_casualties_inflicted": 926,
+          "total_casualties_inflicted": 929,
           "total_casualties_taken": 443,
           "total_equipment_captured": {
             "aa_systems": 0,
@@ -78889,13 +78889,13 @@
         "max_personnel": 2000,
         "morale": 20,
         "name": "4th Ozren Light Infantry",
-        "officer_quality": 0.2370555875178544,
+        "officer_quality": 0.23775853153737253,
         "ops": {
           "fatigue": 4,
           "last_supplied_turn": 40
         },
         "origin_mun": "zavidovici",
-        "personnel": 452,
+        "personnel": 453,
         "posture": "defend",
         "readiness": "active",
         "status": "active",
@@ -78911,7 +78911,7 @@
           "faction": "RS",
           "formation_id": "rs_4th_ozren_light_infantry",
           "formation_name": "4th Ozren Light Infantry",
-          "narrative": "The 4th Ozren Light Infantry is a shadow of what it was. After 3 battles and 443 casualties, it stands at 452 personnel — 45% of its peak strength. Still in the line, but barely.",
+          "narrative": "The 4th Ozren Light Infantry is a shadow of what it was. After 3 battles and 443 casualties, it stands at 453 personnel — 45% of its peak strength. Still in the line, but barely.",
           "notable_moments": [
             {
               "description": "First battle at op:banovici:seona",
@@ -78925,10 +78925,10 @@
           "stats": {
             "battles_fought": 3,
             "defeats": 0,
-            "final_personnel": 452,
-            "nadir_personnel": 486,
+            "final_personnel": 453,
+            "nadir_personnel": 487,
             "peak_personnel": 1000,
-            "total_casualties_inflicted": 926,
+            "total_casualties_inflicted": 929,
             "total_casualties_taken": 443,
             "victories": 3
           }
@@ -81944,16 +81944,16 @@
           "battles_as_defender": 1,
           "battles_fought": 51,
           "brigade_count": 36,
-          "casualty_exchange_ratio": 0.9849277528649726,
-          "current_personnel": 43837,
+          "casualty_exchange_ratio": 0.9859225115236078,
+          "current_personnel": 43840,
           "defeats": 4,
           "most_casualties_brigade_id": "rs_1st_krnjin_light_infantry",
           "most_victories_brigade_id": "rs_19th_krajina_light_infantry",
-          "nadir_aggregate_personnel": 33257,
+          "nadir_aggregate_personnel": 33260,
           "peak_aggregate_personnel": 48274,
           "stalemates": 5,
-          "total_casualties_inflicted": 7907,
-          "total_casualties_taken": 8028,
+          "total_casualties_inflicted": 7914,
+          "total_casualties_taken": 8027,
           "total_osids_captured": 27,
           "total_osids_lost": 0,
           "victories": 42,
@@ -82508,16 +82508,16 @@
           "battles_as_defender": 9,
           "battles_fought": 77,
           "brigade_count": 83,
-          "casualty_exchange_ratio": 0.6028097062579821,
-          "current_personnel": 103763,
+          "casualty_exchange_ratio": 0.6032318969346957,
+          "current_personnel": 103766,
           "defeats": 7,
           "most_casualties_brigade_id": "rs_1st_krnjin_light_infantry",
           "most_victories_brigade_id": "rs_19th_krajina_light_infantry",
-          "nadir_aggregate_personnel": 82745,
+          "nadir_aggregate_personnel": 82748,
           "peak_aggregate_personnel": 114665,
           "stalemates": 12,
-          "total_casualties_inflicted": 10856,
-          "total_casualties_taken": 18009,
+          "total_casualties_inflicted": 10863,
+          "total_casualties_taken": 18008,
           "total_osids_captured": 31,
           "total_osids_lost": 0,
           "victories": 58,
@@ -82684,7 +82684,7 @@
     "general_supply_reserve": {
       "HRHB": 70.22730158730158,
       "RBiH": 47.62,
-      "RS": 88.00619589163094
+      "RS": 88.00598252572752
     },
     "heavy_munitions_reserve": {
       "HRHB": 50.09650793650793,
@@ -84631,7 +84631,7 @@
       },
       "mostar:HRHB": {
         "available": 4873,
-        "committed": 5736,
+        "committed": 5744,
         "exhausted": 236,
         "faction": "HRHB",
         "fatigue": 40,
@@ -89130,7 +89130,7 @@
             "hv_1st_guards_tg",
             "hv_4th_guards_tg"
           ],
-          "attackerCasualties": 249,
+          "attackerCasualties": 279,
           "corpsId": "hvo_southeast_herzegovina",
           "defenderBrigades": [],
           "defenderCasualties": 178,
@@ -90014,12 +90014,12 @@
             "rs_2nd_ozren_light_infantry",
             "rs_4th_ozren_light_infantry"
           ],
-          "attackerCasualties": 359,
+          "attackerCasualties": 358,
           "corpsId": "vrs_1st_krajina",
           "defenderBrigades": [
             "hrhb_107th_gradaac_brigade"
           ],
-          "defenderCasualties": 692,
+          "defenderCasualties": 693,
           "faction": "RS",
           "officerName": "Corps Commander",
           "outcome": "costly_victory",
@@ -90042,7 +90042,7 @@
           "defenderBrigades": [
             "arbih_221st_mountain"
           ],
-          "defenderCasualties": 1470,
+          "defenderCasualties": 1473,
           "faction": "RS",
           "officerName": "Corps Commander",
           "outcome": "victory",
@@ -90065,7 +90065,7 @@
           "defenderBrigades": [
             "hrhb_107th_gradaac_brigade"
           ],
-          "defenderCasualties": 1317,
+          "defenderCasualties": 1320,
           "faction": "RS",
           "officerName": "Corps Commander",
           "outcome": "victory",
@@ -90208,7 +90208,7 @@
           ],
           "enclaves_lost": [],
           "military_casualties_inflicted": 1004,
-          "military_casualties_taken": 4581,
+          "military_casualties_taken": 4598,
           "operations_launched": 9,
           "operations_successful": 9,
           "peace_plans_accepted": [],
@@ -90231,8 +90231,8 @@
             "bihac"
           ],
           "enclaves_lost": [],
-          "military_casualties_inflicted": 7218,
-          "military_casualties_taken": 48163,
+          "military_casualties_inflicted": 7217,
+          "military_casualties_taken": 48167,
           "operations_launched": 0,
           "operations_successful": 23,
           "peace_plans_accepted": [],
@@ -90249,8 +90249,8 @@
           "combat_effective_brigades": 62,
           "enclaves_held": [],
           "enclaves_lost": [],
-          "military_casualties_inflicted": 10856,
-          "military_casualties_taken": 18009,
+          "military_casualties_inflicted": 10863,
+          "military_casualties_taken": 18008,
           "operations_launched": 68,
           "operations_successful": 58,
           "peace_plans_accepted": [],
@@ -90309,13 +90309,13 @@
             "event_modifier": -10
           },
           "military_credibility": {
-            "base_value": 51.83680936699597,
-            "effective_value": 56.83680936699597,
+            "base_value": 51.8299795858851,
+            "effective_value": 56.8299795858851,
             "event_modifier": 5
           },
           "negotiating_leverage": {
-            "base_value": 52.42284977382332,
-            "effective_value": 52.42284977382332,
+            "base_value": 52.4205731801197,
+            "effective_value": 52.4205731801197,
             "event_modifier": 0
           },
           "patron_confidence": {
@@ -90341,13 +90341,13 @@
             "event_modifier": 25
           },
           "military_credibility": {
-            "base_value": 26.270950914999144,
-            "effective_value": 36.27095091499915,
+            "base_value": 26.270664101467865,
+            "effective_value": 36.270664101467865,
             "event_modifier": 10
           },
           "negotiating_leverage": {
-            "base_value": 38.47362432289476,
-            "effective_value": 43.47362432289476,
+            "base_value": 38.47352871838433,
+            "effective_value": 43.47352871838433,
             "event_modifier": 5
           },
           "patron_confidence": {
@@ -90373,13 +90373,13 @@
             "event_modifier": -78
           },
           "military_credibility": {
-            "base_value": 47.75470712223462,
-            "effective_value": 67.75470712223462,
+            "base_value": 47.75828913237702,
+            "effective_value": 67.75828913237703,
             "event_modifier": 20
           },
           "negotiating_leverage": {
-            "base_value": 74.39101503802519,
-            "effective_value": 69.39101503802519,
+            "base_value": 74.39220904140599,
+            "effective_value": 69.39220904140599,
             "event_modifier": -5
           },
           "patron_confidence": {
@@ -91524,14 +91524,14 @@
       "sector:arbih_2nd_corps:0": {
         "brigade_count": 8,
         "cohesion_avg": 69,
-        "defense_per_edge": 218,
-        "defensive_power": 3046,
+        "defense_per_edge": 217,
+        "defensive_power": 3043,
         "edge_count": 14,
         "faction": "RBiH",
         "fatigue_avg": 0.1,
         "morale_avg": 92,
-        "offensive_power": 2446,
-        "personnel": 7863,
+        "offensive_power": 2443,
+        "personnel": 7855,
         "sector_id": "sector:arbih_2nd_corps:0",
         "strength_class": "critical"
       },
@@ -91734,14 +91734,14 @@
       "sector:arbih_5th_corps:0": {
         "brigade_count": 3,
         "cohesion_avg": 84,
-        "defense_per_edge": 885,
-        "defensive_power": 2655,
+        "defense_per_edge": 884,
+        "defensive_power": 2652,
         "edge_count": 3,
         "faction": "RBiH",
         "fatigue_avg": 0,
         "morale_avg": 96,
-        "offensive_power": 1734,
-        "personnel": 4480,
+        "offensive_power": 1732,
+        "personnel": 4475,
         "sector_id": "sector:arbih_5th_corps:0",
         "strength_class": "thin"
       },
@@ -91847,26 +91847,26 @@
         "brigade_count": 7,
         "cohesion_avg": 59,
         "defense_per_edge": 400,
-        "defensive_power": 5999,
+        "defensive_power": 5994,
         "edge_count": 15,
         "faction": "HRHB",
         "fatigue_avg": 0,
         "morale_avg": 71,
-        "offensive_power": 2306,
-        "personnel": 13408,
+        "offensive_power": 2304,
+        "personnel": 13406,
         "sector_id": "sector:hvo_southeast_herzegovina:0",
         "strength_class": "critical"
       },
       "sector:hvo_southeast_herzegovina:1": {
         "brigade_count": 1,
         "cohesion_avg": 40,
-        "defense_per_edge": 583,
-        "defensive_power": 583,
+        "defense_per_edge": 582,
+        "defensive_power": 582,
         "edge_count": 1,
         "faction": "HRHB",
         "fatigue_avg": 0,
         "morale_avg": 100,
-        "offensive_power": 141,
+        "offensive_power": 140,
         "personnel": 1800,
         "sector_id": "sector:hvo_southeast_herzegovina:1",
         "strength_class": "thin"
@@ -91908,8 +91908,8 @@
         "faction": "RS",
         "fatigue_avg": 5.2,
         "morale_avg": 31,
-        "offensive_power": 741,
-        "personnel": 3012,
+        "offensive_power": 742,
+        "personnel": 3015,
         "sector_id": "sector:vrs_1st_krajina:0",
         "strength_class": "critical"
       },
@@ -103595,19 +103595,19 @@
         "tanks": 0
       },
       "faction": "HRHB",
-      "final_strength": 17305,
-      "force_ratio_estimate": 4.466962575824085,
+      "final_strength": 17288,
+      "force_ratio_estimate": 4.458981711156508,
       "grade": {
         "factors": {
           "exchange_ratio": 0,
           "objective_completion": 0,
-          "preservation": 105.21675685535357,
+          "preservation": 105.27982461482249,
           "tempo": 25
         },
         "stars": 3,
         "verdict": "Indecisive"
       },
-      "initial_strength": 16447,
+      "initial_strength": 16421,
       "objectives_captured": [],
       "objectives_held_without_logged_capture": [],
       "objectives_logged_captured": [],
@@ -104588,11 +104588,11 @@
             "rs_4th_ozren_light_infantry"
           ],
           "casualties_inflicted": {
-            "killed": 1044,
-            "wounded": 1914
+            "killed": 1046,
+            "wounded": 1917
           },
           "casualties_suffered": {
-            "killed": 286,
+            "killed": 285,
             "wounded": 523
           },
           "equipment_captured": {
@@ -104617,11 +104617,11 @@
       ],
       "capture_provenance": "no_objectives_held",
       "casualties_inflicted": {
-        "killed": 1044,
-        "wounded": 1914
+        "killed": 1046,
+        "wounded": 1917
       },
       "casualties_suffered": {
-        "killed": 286,
+        "killed": 285,
         "wounded": 523
       },
       "corps_id": "vrs_1st_krajina",
@@ -104640,7 +104640,7 @@
         "tanks": 17
       },
       "faction": "RS",
-      "final_strength": 3326,
+      "final_strength": 3329,
       "force_quality_traits_at_launch": {
         "applied_gate": "none",
         "inputs": {
@@ -104672,12 +104672,12 @@
           "support_delivery": 0.8920182618689905
         }
       },
-      "force_ratio_estimate": 1.0010251237534908,
+      "force_ratio_estimate": 1.0035757389838988,
       "grade": {
         "factors": {
           "exchange_ratio": 100,
           "objective_completion": 0,
-          "preservation": 73.3568592853992,
+          "preservation": 73.42302602558448,
           "tempo": 0
         },
         "stars": 3,
@@ -104866,7 +104866,7 @@
                 "wounded": 381
               },
               "casualties_suffered": {
-                "killed": 108,
+                "killed": 107,
                 "wounded": 197
               },
               "equipment_captured": {
@@ -104891,7 +104891,7 @@
             "wounded": 381
           },
           "casualties_suffered": {
-            "killed": 108,
+            "killed": 107,
             "wounded": 197
           },
           "equipment_captured": {
@@ -104921,8 +104921,8 @@
             "cmd_vrs_1st_krajina_main": {
               "attacks_this_turn": 1,
               "casualties_inflicted": {
-                "killed": 441,
-                "wounded": 809
+                "killed": 442,
+                "wounded": 810
               },
               "casualties_suffered": {
                 "killed": 98,
@@ -104946,8 +104946,8 @@
           },
           "brigade_count": 5,
           "casualties_inflicted": {
-            "killed": 441,
-            "wounded": 809
+            "killed": 442,
+            "wounded": 810
           },
           "casualties_suffered": {
             "killed": 98,
@@ -104978,8 +104978,8 @@
             "cmd_vrs_1st_krajina_main": {
               "attacks_this_turn": 1,
               "casualties_inflicted": {
-                "killed": 395,
-                "wounded": 724
+                "killed": 396,
+                "wounded": 726
               },
               "casualties_suffered": {
                 "killed": 80,
@@ -105003,8 +105003,8 @@
           },
           "brigade_count": 5,
           "casualties_inflicted": {
-            "killed": 395,
-            "wounded": 724
+            "killed": 396,
+            "wounded": 726
           },
           "casualties_suffered": {
             "killed": 80,
@@ -105141,21 +105141,21 @@
           "faction_pool_pressure": 0.23,
           "mean_cohesion_normalized": 0.3926527777777775,
           "mean_morale_normalized": 0.6477777777777777,
-          "mean_officer_quality": 0.5143856589747405,
+          "mean_officer_quality": 0.5144451267016515,
           "p25_officer_quality": 0.5129350590316583,
           "turn": 28
         },
         "traits": {
-          "axis_coordination": 0.6565868540171704,
-          "collapse_susceptibility": 0.3716544896580816,
-          "failure_recovery": 0.6338491925214628,
-          "operation_readiness": 0.5916240310257554,
+          "axis_coordination": 0.6565987475625525,
+          "collapse_susceptibility": 0.3716485428853905,
+          "failure_recovery": 0.6338640594531906,
+          "operation_readiness": 0.5916418713438287,
           "reserve_response": 0.7304444444444445,
-          "staging_reliability": 0.7583771317949481,
+          "staging_reliability": 0.7583890253403303,
           "support_delivery": 0.87255469947466
         }
       },
-      "force_ratio_estimate": 0.4323401615632521,
+      "force_ratio_estimate": 0.4328179527939958,
       "grade": {
         "factors": {
           "exchange_ratio": 12.478002378121284,
@@ -120392,7 +120392,7 @@
       "supply_snapshot": {
         "HRHB": 70.22730158730158,
         "RBiH": 47.62,
-        "RS": 88.00619589163094
+        "RS": 88.00598252572752
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -120531,7 +120531,7 @@
       "supply_snapshot": {
         "HRHB": 70.38584126984126,
         "RBiH": 47.612,
-        "RS": 87.9943120143993
+        "RS": 87.99409864849588
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -120641,7 +120641,7 @@
       "supply_snapshot": {
         "HRHB": 70.36038095238095,
         "RBiH": 47.601916215093226,
-        "RS": 88.11738642656779
+        "RS": 88.11717306066437
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -120721,21 +120721,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 0.03215873015873427,
-        "RBiH": 0.024136078013542672,
-        "RS": 0.044272156027091114
+        "RBiH": 0.024137355971941332,
+        "RS": 0.04427471194389909
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.09403174603174591,
-        "RBiH": 0.01722336583897288,
+        "RBiH": 0.017223898321638842,
         "RS": 0.21701286814715104
       },
       "supply_snapshot": {
         "HRHB": 70.33492063492064,
         "RBiH": 47.596,
-        "RS": 87.87958265295558
+        "RS": 87.87936928705216
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -120798,21 +120798,21 @@
               "casualties_taken": 8,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 83.57
+              "reactive_weight": 83.44
             },
             {
               "brigade_id": "arbih_212th_mountain",
               "casualties_taken": 3,
               "distance_hops": 4,
               "is_home_municipality": false,
-              "reactive_weight": 32.03
+              "reactive_weight": 31.99
             },
             {
               "brigade_id": "arbih_221st_mountain",
               "casualties_taken": 2,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 20.63
+              "reactive_weight": 20.55
             },
             {
               "brigade_id": "arbih_222nd_liberation",
@@ -120826,7 +120826,7 @@
               "casualties_taken": 5,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 55.52
+              "reactive_weight": 55.45
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
@@ -120837,10 +120837,10 @@
             },
             {
               "brigade_id": "arbih_9th_muslim_liberation",
-              "casualties_taken": 2,
+              "casualties_taken": 1,
               "distance_hops": 2,
               "is_home_municipality": false,
-              "reactive_weight": 16.67
+              "reactive_weight": 16.46
             },
             {
               "brigade_id": "hrhb_107th_gradaac_brigade",
@@ -121032,21 +121032,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 0.009301587301585812,
-        "RBiH": -0.0012004495821447136,
-        "RS": -0.006400899164290763
+        "RBiH": -0.0011999446282739967,
+        "RS": -0.006399889256556435
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": -0.014539682539677301,
-        "RBiH": 0.006666479340772469,
-        "RS": 0.17360802743917247
+        "RBiH": 0.006666689738217713,
+        "RS": 0.17360696247384055
       },
       "supply_snapshot": {
         "HRHB": 70.24088888888889,
-        "RBiH": 47.578776634161024,
-        "RS": 87.66256978480843
+        "RBiH": 47.57877610167836,
+        "RS": 87.662356418905
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121137,21 +121137,21 @@
               "casualties_taken": 13,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 71.56
+              "reactive_weight": 71.44
             },
             {
               "brigade_id": "arbih_212th_mountain",
               "casualties_taken": 6,
               "distance_hops": 4,
               "is_home_municipality": false,
-              "reactive_weight": 30.39
+              "reactive_weight": 30.35
             },
             {
               "brigade_id": "arbih_221st_mountain",
               "casualties_taken": 3,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 18.63
+              "reactive_weight": 18.55
             },
             {
               "brigade_id": "arbih_222nd_liberation",
@@ -121165,7 +121165,7 @@
               "casualties_taken": 9,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 51.65
+              "reactive_weight": 51.59
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
@@ -121179,7 +121179,7 @@
               "casualties_taken": 3,
               "distance_hops": 2,
               "is_home_municipality": false,
-              "reactive_weight": 16.7
+              "reactive_weight": 16.49
             },
             {
               "brigade_id": "hrhb_107th_gradaac_brigade",
@@ -121260,21 +121260,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": -0.05736507936508417,
-        "RBiH": 0.002331846354474365,
-        "RS": 0.009487853698757931
+        "RBiH": 0.002336630696309072,
+        "RS": 0.00951055689063196
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": -0.10787301587302522,
-        "RBiH": 0.008138269314358126,
-        "RS": 0.15130949337465438
+        "RBiH": 0.00814026279012836,
+        "RS": 0.15130800761444618
       },
       "supply_snapshot": {
         "HRHB": 70.25542857142857,
-        "RBiH": 47.57211015482025,
-        "RS": 87.48896175736925
+        "RBiH": 47.57210941194014,
+        "RS": 87.48874945643117
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121344,21 +121344,21 @@
               "casualties_taken": 48,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 63.41
+              "reactive_weight": 63.3
             },
             {
               "brigade_id": "arbih_212th_mountain",
               "casualties_taken": 21,
               "distance_hops": 4,
               "is_home_municipality": false,
-              "reactive_weight": 27.22
+              "reactive_weight": 27.19
             },
             {
               "brigade_id": "arbih_221st_mountain",
               "casualties_taken": 12,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 15.96
+              "reactive_weight": 15.89
             },
             {
               "brigade_id": "arbih_222nd_liberation",
@@ -121372,7 +121372,7 @@
               "casualties_taken": 35,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 46.12
+              "reactive_weight": 46.07
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
@@ -121386,7 +121386,7 @@
               "casualties_taken": 12,
               "distance_hops": 2,
               "is_home_municipality": false,
-              "reactive_weight": 16.43
+              "reactive_weight": 16.24
             },
             {
               "brigade_id": "hrhb_107th_gradaac_brigade",
@@ -121468,21 +121468,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 0.009301587301592917,
-        "RBiH": -0.0012674747858731905,
-        "RS": -0.04735911056155828
+        "RBiH": -0.0012740420399772745,
+        "RS": -0.04738537957797462
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.02546031746032895,
-        "RBiH": 0.06397188550589306,
-        "RS": 0.12239054268194138
+        "RBiH": 0.06396914915001162,
+        "RS": 0.12237959725844405
       },
       "supply_snapshot": {
         "HRHB": 70.36330158730159,
-        "RBiH": 47.56397188550589,
-        "RS": 87.3376522639946
+        "RBiH": 47.56396914915001,
+        "RS": 87.33744144881672
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121579,7 +121579,7 @@
       "supply_snapshot": {
         "HRHB": 70.33784126984126,
         "RBiH": 47.5,
-        "RS": 87.21526172131266
+        "RS": 87.21506185155827
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121645,7 +121645,7 @@
       "supply_snapshot": {
         "HRHB": 70.19238095238096,
         "RBiH": 47.604,
-        "RS": 87.24810445851261
+        "RS": 87.24790458875823
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121711,7 +121711,7 @@
       "supply_snapshot": {
         "HRHB": 70.33492063492064,
         "RBiH": 47.596,
-        "RS": 87.095916311719
+        "RS": 87.09571644196461
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121789,7 +121789,7 @@
       "supply_snapshot": {
         "HRHB": 70.24088888888889,
         "RBiH": 47.588,
-        "RS": 86.96869738785875
+        "RS": 86.96849751810437
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121857,7 +121857,7 @@
       "supply_snapshot": {
         "HRHB": 70.25542857142857,
         "RBiH": 47.58,
-        "RS": 86.86646166009051
+        "RS": 86.86626179033613
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -121911,8 +121911,8 @@
       ],
       "heavy_munitions_deltas": {
         "HRHB": -0.07958730158730276,
-        "RBiH": 0.012905732324338004,
-        "RS": 0.08724585859469869
+        "RBiH": 0.012940885596037788,
+        "RS": 0.08752708476829696
       },
       "movements": [
         {
@@ -121932,13 +121932,13 @@
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": -0.1523174603174624,
-        "RBiH": 4.240929515846325,
+        "RBiH": 4.240954876808836,
         "RS": 0.0872754432520253
       },
       "supply_snapshot": {
         "HRHB": 70.23885714285714,
         "RBiH": 47.572,
-        "RS": 86.75420370230307
+        "RS": 86.75400383254869
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -122015,18 +122015,18 @@
           ],
           "attacker_casualties": 267,
           "attacker_faction": "RS",
-          "defender_casualties": 1317,
+          "defender_casualties": 1320,
           "defender_contributions": [
             {
               "brigade_id": "arbih_211th_liberation",
               "casualties_taken": 252,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 40.94
+              "reactive_weight": 40.84
             },
             {
               "brigade_id": "arbih_212th_mountain",
-              "casualties_taken": 122,
+              "casualties_taken": 123,
               "distance_hops": 4,
               "is_home_municipality": false,
               "reactive_weight": 19.83
@@ -122036,42 +122036,42 @@
               "casualties_taken": 34,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 5.6
+              "reactive_weight": 5.53
             },
             {
               "brigade_id": "arbih_222nd_liberation",
-              "casualties_taken": 108,
+              "casualties_taken": 109,
               "distance_hops": 5,
               "is_home_municipality": false,
               "reactive_weight": 17.58
             },
             {
               "brigade_id": "arbih_223rd_mountain",
-              "casualties_taken": 191,
+              "casualties_taken": 192,
               "distance_hops": 3,
               "is_home_municipality": false,
               "reactive_weight": 31.05
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
-              "casualties_taken": 307,
+              "casualties_taken": 308,
               "distance_hops": 0,
               "is_home_municipality": true,
               "reactive_weight": 49.8
             },
             {
               "brigade_id": "arbih_9th_muslim_liberation",
-              "casualties_taken": 180,
+              "casualties_taken": 181,
               "distance_hops": 2,
               "is_home_municipality": false,
-              "reactive_weight": 29.3
+              "reactive_weight": 29.22
             },
             {
               "brigade_id": "hrhb_107th_gradaac_brigade",
               "casualties_taken": 122,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 19.84
+              "reactive_weight": 19.67
             }
           ],
           "defender_faction": "RBiH",
@@ -122123,21 +122123,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 0.009301587301585812,
-        "RBiH": 0.0007420336613108702,
-        "RS": -0.010063730709518381
+        "RBiH": 0.0007289718930127975,
+        "RS": -0.010168224855902963
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.02546031746031474,
-        "RBiH": 5.234575621553894,
-        "RS": -0.12369103042442475
+        "RBiH": 5.2345609743573505,
+        "RS": -0.12380820799675973
       },
       "supply_snapshot": {
         "HRHB": 70.3911746031746,
-        "RBiH": 43.33107048415368,
-        "RS": 86.66692825905105
+        "RBiH": 43.33104512319117,
+        "RS": 86.66672838929667
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -122157,14 +122157,14 @@
           ],
           "attacker_casualties": 325,
           "attacker_faction": "RS",
-          "defender_casualties": 1470,
+          "defender_casualties": 1473,
           "defender_contributions": [
             {
               "brigade_id": "arbih_211th_liberation",
-              "casualties_taken": 181,
+              "casualties_taken": 182,
               "distance_hops": 3,
               "is_home_municipality": false,
-              "reactive_weight": 44.63
+              "reactive_weight": 44.58
             },
             {
               "brigade_id": "arbih_212th_mountain",
@@ -122175,7 +122175,7 @@
             },
             {
               "brigade_id": "arbih_221st_mountain",
-              "casualties_taken": 129,
+              "casualties_taken": 130,
               "distance_hops": 5,
               "is_home_municipality": false,
               "reactive_weight": 31.78
@@ -122189,21 +122189,21 @@
             },
             {
               "brigade_id": "arbih_223rd_mountain",
-              "casualties_taken": 135,
+              "casualties_taken": 136,
               "distance_hops": 3,
               "is_home_municipality": false,
               "reactive_weight": 33.34
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
-              "casualties_taken": 619,
+              "casualties_taken": 620,
               "distance_hops": 0,
               "is_home_municipality": true,
-              "reactive_weight": 152.41
+              "reactive_weight": 152.1
             },
             {
               "brigade_id": "arbih_9th_muslim_liberation",
-              "casualties_taken": 167,
+              "casualties_taken": 168,
               "distance_hops": 2,
               "is_home_municipality": false,
               "reactive_weight": 41.15
@@ -122213,7 +122213,7 @@
               "casualties_taken": 80,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 19.68
+              "reactive_weight": 19.52
             }
           ],
           "defender_faction": "RBiH",
@@ -122257,8 +122257,8 @@
       ],
       "heavy_munitions_deltas": {
         "HRHB": 0.009301587301592917,
-        "RBiH": 0.0007046066104674509,
-        "RS": -0.027067892308480168
+        "RBiH": 0.0006861366420114479,
+        "RS": -0.027222895126016056
       },
       "movements": [
         {
@@ -122278,13 +122278,13 @@
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.02546031746032895,
-        "RBiH": 5.290063145465609,
-        "RS": 0.06551886549800656
+        "RBiH": 5.290053940672536,
+        "RS": 0.06544522715333301
       },
       "supply_snapshot": {
         "HRHB": 70.36571428571429,
-        "RBiH": 38.09649486259978,
-        "RS": 86.79061928947547
+        "RBiH": 38.09648414883382,
+        "RS": 86.79053659729342
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -122324,13 +122324,13 @@
           "all_attacker_ids": [
             "rs_2nd_armored"
           ],
-          "attacker_casualties": 359,
+          "attacker_casualties": 358,
           "attacker_faction": "RS",
-          "defender_casualties": 692,
+          "defender_casualties": 693,
           "defender_contributions": [
             {
               "brigade_id": "arbih_211th_liberation",
-              "casualties_taken": 60,
+              "casualties_taken": 61,
               "distance_hops": 3,
               "is_home_municipality": false,
               "reactive_weight": 40.4
@@ -122365,7 +122365,7 @@
             },
             {
               "brigade_id": "arbih_225th_muslim_mountain",
-              "casualties_taken": 377,
+              "casualties_taken": 378,
               "distance_hops": 0,
               "is_home_municipality": true,
               "reactive_weight": 252.03
@@ -122382,7 +122382,7 @@
               "casualties_taken": 48,
               "distance_hops": 5,
               "is_home_municipality": false,
-              "reactive_weight": 32.18
+              "reactive_weight": 32.02
             }
           ],
           "defender_faction": "RBiH",
@@ -122439,21 +122439,21 @@
       "formation_spawns": [],
       "heavy_munitions_deltas": {
         "HRHB": 0.009301587301585812,
-        "RBiH": 0.015570481493639932,
-        "RS": -0.006268527397182311
+        "RBiH": 0.015566859958694224,
+        "RS": -0.006290256606860112
       },
       "movements": [],
       "notable_events": [],
       "notable_flips": [],
       "supply_deltas": {
         "HRHB": 0.02546031746031474,
-        "RBiH": -14.724433760328424,
-        "RS": -0.03485529100079532
+        "RBiH": -14.724435269301317,
+        "RS": -0.03486434483816936
       },
       "supply_snapshot": {
         "HRHB": 70.34025396825396,
-        "RBiH": 32.806431717134174,
-        "RS": 86.72510042397747
+        "RBiH": 32.80643020816128,
+        "RS": 86.72509137014009
       },
       "supply_transitions": [],
       "territory_net": {},
@@ -127305,7 +127305,7 @@
           "all_attacker_ids": [
             "hrhb_1st_brigade_mostar"
           ],
-          "attacker_casualties": 249,
+          "attacker_casualties": 279,
           "attacker_faction": "HRHB",
           "defender_casualties": 0,
           "defender_faction": "RS",
@@ -127313,7 +127313,8 @@
             "attacker_confidence_band": "low",
             "labels": [
               "stale_intel",
-              "defender_opsec"
+              "defender_opsec",
+              "ambush_risk"
             ]
           },
           "mun_id": "capljina",

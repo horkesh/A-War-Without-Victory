@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
-import { getIntelExecutionFrictionMultipliers } from '../src/sim/combat/combat_math.js';
+import {
+    getIntelAmbushAttackerCasualtyMult,
+    getIntelExecutionFrictionMultipliers,
+} from '../src/sim/combat/combat_math.js';
 import { compileTurnSummary } from '../src/sim/compile_turn_summary.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
@@ -241,6 +244,13 @@ describe('attack resolution intel execution friction', () => {
         });
     });
 
+    it('computes deterministic ambush casualty friction only for low-confidence OPSEC contacts', () => {
+        expect(getIntelAmbushAttackerCasualtyMult(1, true)).toBe(1);
+        expect(getIntelAmbushAttackerCasualtyMult(0, false)).toBe(1);
+        expect(getIntelAmbushAttackerCasualtyMult(0.5, true)).toBe(1);
+        expect(getIntelAmbushAttackerCasualtyMult(0.2, true)).toBeGreaterThan(1);
+    });
+
     it('low attacker intel confidence reduces resolved power ratio without exposing hidden truth', () => {
         const fresh = makeScenario();
         const stale = makeScenario();
@@ -266,7 +276,7 @@ describe('attack resolution intel execution friction', () => {
 
         expect(neutralReport.battles[0]!.execution_friction).toBeUndefined();
         expect(frictionReport.battles[0]!.execution_friction).toEqual({
-            labels: ['stale_intel', 'defender_opsec'],
+            labels: ['stale_intel', 'defender_opsec', 'ambush_risk'],
             attacker_confidence_band: 'low',
         });
     });
@@ -287,5 +297,19 @@ describe('attack resolution intel execution friction', () => {
             labels: ['stale_intel', 'defender_opsec'],
             attacker_confidence_band: 'medium',
         });
+    });
+
+    it('applies low-confidence OPSEC ambush friction as extra attacker losses', () => {
+        const staleOnly = makeScenario();
+        seedIntel(staleOnly.state, 0);
+        const staleOnlyReport = resolveAttackOrdersOsid(staleOnly.state, staleOnly.edges, new Map<string, string[]>());
+
+        const ambush = makeScenario();
+        seedIntel(ambush.state, 0);
+        ambush.state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        const ambushReport = resolveAttackOrdersOsid(ambush.state, ambush.edges, new Map<string, string[]>());
+
+        expect(ambushReport.casualty_attacker).toBeGreaterThan(staleOnlyReport.casualty_attacker);
+        expect(ambushReport.battles[0]!.execution_friction?.labels).toContain('ambush_risk');
     });
 });

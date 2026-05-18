@@ -70,6 +70,16 @@ export function openArmyHQAftermathRecord(state: ShellNavigationState, turn: num
   return true;
 }
 
+export function openArmyHQOperationHistory(state: ShellNavigationState): boolean {
+  const faction = getPlayerFaction(state);
+  if (!faction) return false;
+  state.setSelectedArmyId(faction);
+  state.setArmyHQOpen(true);
+  state.setArmyHQRecordsSubTab('ops');
+  state.setChronicleOpen(false);
+  return true;
+}
+
 export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId: string | null): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;

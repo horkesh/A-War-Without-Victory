@@ -260,6 +260,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         const region = raw.slice(startIdx, endIdx);
         const labels = [
+            'buildFactionSectors:${faction}:active-combat-formation-index',
             'buildFactionSectors:${faction}:brigade-classification',
             'buildFactionSectors:${faction}:commander-review',
             'buildFactionSectors:${faction}:corps-sector-construction',

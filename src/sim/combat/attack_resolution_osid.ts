@@ -101,6 +101,7 @@ import {
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
+    getIntelAmbushAttackerCasualtyMult,
     getIntelExecutionFrictionMultipliers,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
@@ -227,10 +228,12 @@ function buildPublicIntelFrictionAnnotation(
     confidence: number,
     attackerPowerMult: number,
     defenderPowerMult: number,
+    attackerCasualtyMult: number,
 ): PublicIntelFrictionAnnotation | undefined {
     const labels: IntelFrictionLabel[] = [];
     if (attackerPowerMult < 1) labels.push('stale_intel');
     if (defenderPowerMult > 1) labels.push('defender_opsec');
+    if (attackerCasualtyMult > 1) labels.push('ambush_risk');
     if (labels.length === 0) return undefined;
     return {
         labels,
@@ -574,12 +577,17 @@ export function resolveAttackOrdersOsid(
             attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
         );
+        const intelAmbushAttackerCasualtyMult = getIntelAmbushAttackerCasualtyMult(
+            attackerIntelConfidence,
+            defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
+        );
         const effectiveAttackerPower = attackerPower * intelFriction.attackerPowerMult;
         defenderPower *= intelFriction.defenderPowerMult;
         const executionFriction = buildPublicIntelFrictionAnnotation(
             attackerIntelConfidence,
             intelFriction.attackerPowerMult,
             intelFriction.defenderPowerMult,
+            intelAmbushAttackerCasualtyMult,
         );
 
         const powerRatio = defenderPower <= 0 ? 10 : effectiveAttackerPower / defenderPower;
@@ -637,7 +645,7 @@ export function resolveAttackOrdersOsid(
             outcome,
             lastStandCasMult,
             militiaOnlyMult,
-            attCasMult,
+            attCasMult: attCasMult * intelAmbushAttackerCasualtyMult,
             defCasMult,
             defensiveFireMult,
             bombardmentMult,

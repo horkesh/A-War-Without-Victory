@@ -19,6 +19,8 @@ export interface ChronicleEntry {
         netFriendlyTerritory?: number;
         ownFormationsDestroyed?: number;
         aftermathId?: string;
+        operationAarId?: string;
+        operationOutcome?: string;
         costLedgerRef?: string;
         codexRef?: string;
         sensitiveSignals?: Array<'atrocity' | 'rupture'>;
@@ -41,6 +43,11 @@ const COST_DISPLACEMENT_THRESHOLD = 1000;
 
 function formatOutcome(outcome: string): string {
     return outcome.replace(/_/g, ' ');
+}
+
+function formatOperationOutcome(outcome: string): string {
+    const formatted = formatOutcome(outcome);
+    return formatted ? `${formatted[0].toUpperCase()}${formatted.slice(1)}` : 'Unknown';
 }
 
 function isDiplomaticEvent(id: string): boolean {
@@ -197,6 +204,51 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
     return entries;
 }
 
+function sumCasualties(value: any): number {
+    return Number(value?.killed ?? 0) + Number(value?.wounded ?? 0);
+}
+
+function buildOperationHistoryEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
+    if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
+
+    const entries: ChronicleEntry[] = [];
+    for (const op of state.operationHistory) {
+        if (op?.faction !== playerFaction) continue;
+
+        const targeted = Array.isArray(op.objectives_targeted) ? op.objectives_targeted.length : 0;
+        const captured = Array.isArray(op.objectives_captured) ? op.objectives_captured.length : 0;
+        const attacks = Number(op.total_attacks ?? 0);
+        const suffered = sumCasualties(op.casualties_suffered);
+        const inflicted = sumCasualties(op.casualties_inflicted);
+        const stars = Number(op.grade?.stars ?? 0);
+        const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
+        const operationName = getPlayerSafeDisplayLabel(op.operation_name, 'Operation');
+
+        entries.push({
+            id: typeof op.operation_id === 'string' ? `operation-aar-${op.operation_id}` : undefined,
+            turn: Number(op.ended_turn ?? state.turn ?? 0),
+            type: 'military',
+            headline: captured > 0 || outcome === 'success' || outcome === 'partial',
+            title: `${operationName} concluded`,
+            detail: [
+                formatOperationOutcome(outcome),
+                `${captured}/${targeted} objectives`,
+                `${attacks} attacks`,
+                `${suffered} suffered / ${inflicted} inflicted`,
+                `${stars} ${stars === 1 ? 'star' : 'stars'}`,
+            ].join(' | '),
+            metadata: {
+                corpsId: typeof op.corps_id === 'string' ? op.corps_id : undefined,
+                operationAarId: typeof op.operation_id === 'string' ? op.operation_id : undefined,
+                operationName,
+                operationOutcome: outcome,
+            },
+        });
+    }
+
+    return entries;
+}
+
 export function generateChronicleEntries(state: any): ChronicleEntry[] {
     if (!state || !state.turnSummaries || !Array.isArray(state.turnSummaries)) {
         return [];
@@ -313,6 +365,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
     }
 
     entries.push(...buildEndgameComparisonEntries(state));
+    entries.push(...buildOperationHistoryEntries(state, playerFaction));
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }

@@ -5,7 +5,7 @@ import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
-import { openArmyHQAftermathRecord } from '../../utils/shellNavigation.js';
+import { openArmyHQAftermathRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
 import { buildChronicleChapters } from '../../data/chronicleChapters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
@@ -355,6 +355,18 @@ export function ChronicleOverlay() {
         openArmyHQAftermathRecord(useGameStore.getState(), turn);
     }, []);
 
+    const handleOpenEntryRecord = useCallback((entry: ChronicleEntry) => {
+        if (entry.metadata?.operationAarId) {
+            openArmyHQOperationHistory(useGameStore.getState());
+            return;
+        }
+        handleOpenTurnRecord(entry.turn);
+    }, [handleOpenTurnRecord]);
+
+    const actionLabelForEntry = useCallback((entry: ChronicleEntry) => (
+        entry.metadata?.operationAarId ? 'Open Operation Record' : 'Open Turn Record'
+    ), []);
+
     if (!open || !state) return null;
 
     // Build turn columns
@@ -613,10 +625,10 @@ export function ChronicleOverlay() {
                                     <ChronicleCard entry={entry} />
                                     <button
                                         type="button"
-                                        onClick={() => handleOpenTurnRecord(entry.turn)}
+                                        onClick={() => handleOpenEntryRecord(entry)}
                                         className="mt-2 h-7 w-full rounded-sm border border-amber-400/30 bg-amber-400/10 px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-200 transition-colors hover:border-amber-300/70 hover:bg-amber-400/15"
                                     >
-                                        Open Turn Record
+                                        {actionLabelForEntry(entry)}
                                     </button>
                                 </div>
                             ))

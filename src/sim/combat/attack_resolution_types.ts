@@ -34,7 +34,7 @@ export interface AttackResolutionOsidSnapEvent {
     effects: Record<string, number | string | boolean | null>;
 }
 
-export type IntelFrictionLabel = 'stale_intel' | 'defender_opsec';
+export type IntelFrictionLabel = 'stale_intel' | 'defender_opsec' | 'ambush_risk';
 export type IntelConfidenceBand = 'low' | 'medium' | 'high';
 
 export interface PublicIntelFrictionAnnotation {

@@ -151,7 +151,7 @@ export function canEliteLoanReachCorpsTerritory(
     return Number.isFinite(
         computeFriendlyDistanceToCorpsSectors(
             state,
-            formation.faction as FactionId,
+            formation.faction,
             fromOsid,
             corpsId,
             adjacency,
@@ -370,7 +370,7 @@ function nearestSectorTarget(
     sectors: CorpsFrontSector[],
     adjacency?: Map<Osid, Osid[]>,
 ): string | null {
-    const faction = formation.faction as FactionId;
+    const faction = formation.faction;
     const startOsid = formation.location_osid ?? formation.home_osid;
     const candidates: Array<{ sectorId: string; osid: string; hops: number; threat: number }> = [];
 
@@ -413,7 +413,7 @@ function resolveEliteDeploymentTarget(
     corpsId: string,
     adjacency?: Map<Osid, Osid[]>,
 ): string | null {
-    const faction = formation.faction as FactionId;
+    const faction = formation.faction;
     const sectors = sortedCorpsSectors(state, corpsId);
     const sectorById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
     const operation = pickActiveOperation(state, corpsId, brigadeId);
@@ -1065,7 +1065,7 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             if (currentOsid) {
                 const reachableHops = computeFriendlyDistanceToCorpsSectors(
                     state,
-                    f.faction as FactionId,
+                    f.faction,
                     currentOsid,
                     ls.loaned_to_corps,
                     adjacency,
