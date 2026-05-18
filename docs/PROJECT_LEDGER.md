@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sector): Batch 32 enforceFinalSectorGeometryInvariants 5-phase sub-attribution (byte-identical)
+
+**Type:** Sector reconstruction sidecar-only nested sub-attribution.
+
+**Change:** Split `enforceFinalSectorGeometryInvariants(...)` body into 5 nested `_perfTime` children — `:setup`, `:split-pieces`, `:replace-sectors`, `:voronoi-repair`, `:seed-buckets`. Shared mutable state (`nextSectors`, `splitGroups`, `byCorps`, `friendlyByFaction`, `osidToCorpsByFaction`) declared `const` at function-body scope before any wrapper so the standard closure-mutation pattern (Batches 21/23/26) preserves cross-phase visibility. The optional `formations` narrowing is captured into `formationsResolved` before entering the `:seed-buckets` wrapper to survive callback-closure narrowing-loss in TypeScript. Static-grep contract test extended in `tests/sector_partition_instrumentation.test.ts` to require the 5 new label literals (17/17 instrumentation tests pass).
+
+**Attribution evidence (n1909, `PERF_PROFILE_SECTOR_PARTITION=true`):** Outer wrappers `:1`/`:2`/`:3` sum to 2158.2 ms across 241 invocations (94+94+53). The 5 children sum to 2185.8 ms across 243 invocations each — a +27.5 ms / +1.3% residual that maps cleanly to the 2-call surplus at the un-labeled line-1719 invocation (≈ 13.8 ms/call, matching the ~13 ms average per outer call). Per-child distribution: `:split-pieces` 1198.2 ms (55.5%) — clear dominant target, `:voronoi-repair` 568.0 ms (26.3%), `:seed-buckets` 328.6 ms (15.2%), `:setup` 66.0 ms (3.1%), `:replace-sectors` 24.9 ms (1.2%).
+
+**Determinism:** Pure sidecar attribution. 40w n1907 (default) and n1909 (flag-on) both hash `b14179d65639860c` — matches Batch 17 baseline literally. validate_run_consistency PASS; anchors 27/27; benchmarks 6/6 (HRHB 0.122 / RBiH 0.358 / RS 0.520).
+
+**Verification:** typecheck PASS; `tests/sector_partition_instrumentation.test.ts` 17/17 PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH32_ENFORCE_FINAL_GEOMETRY_ATTRIBUTION.md`; SECTOR_MASTER + MASTER_BACKLOG_EXECUTION_QUEUE + napkin updates. Next sector-perf target: `:split-pieces` (inspect `splitNonContiguousSectors` BFS reuse + `normalizeSectorSubSegmentsFromEdges` double-call).
+
+---
+
 ## [2026-05-18] chore(sector): Batch 27 :floor-completion hoist attempt + revert (learning-only)
 
 **Type:** Sector-perf optimization attempt + revert + durable knowledge capture.

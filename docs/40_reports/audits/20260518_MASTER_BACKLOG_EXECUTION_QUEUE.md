@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 32 — `enforceFinalSectorGeometryInvariants` 5-phase sub-attribution
+
+| Lane | Status | Source |
+|---|---|---|
+| Split function body into `:setup` / `:split-pieces` / `:replace-sectors` / `:voronoi-repair` / `:seed-buckets` children | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH32_ENFORCE_FINAL_GEOMETRY_ATTRIBUTION.md`. n1909 (flag-on): `:split-pieces` 1198 ms / 55.5% dominates; `:voronoi-repair` 568 ms (26.3%); `:seed-buckets` 329 ms (15.2%); child Σ 2185.8 ms vs outer Σ 2158.2 ms (+1.3%, accounted for by 2-call surplus at un-labeled line-1719 invocation). 40w n1907 (default) + n1909 (flag-on) both hash `b14179d65639860c`. Next target: `:split-pieces` — inspect `splitNonContiguousSectors` BFS reuse + `normalizeSectorSubSegmentsFromEdges` double-call. |
+
 ## Completed Batch 27 — :floor-completion hoist attempt + revert (learning-only)
 
 | Lane | Status | Source |

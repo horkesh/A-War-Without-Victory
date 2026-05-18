@@ -1,10 +1,37 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 27 :floor-completion hoist attempt + revert)
+**Updated:** 2026-05-18 (Batch 32 enforceFinalSectorGeometryInvariants 5-phase sub-attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 32 `enforceFinalSectorGeometryInvariants` 5-phase sub-attribution (byte-identical)
+
+**Change:** Split the function body into five nested `_perfTime` children — `:setup`, `:split-pieces`, `:replace-sectors`, `:voronoi-repair`, `:seed-buckets`. Shared state hoisted to function-body scope before any wrapper (standard closure-mutation pattern). Optional `formations` captured into `formationsResolved` for the `:seed-buckets` callback to survive TS narrowing-loss.
+
+**Run evidence (n1909, `PERF_PROFILE_SECTOR_PARTITION=true`):**
+
+| Label | Aggregate ms | Calls | % of outer Σ | ms/call |
+|---|---:|---:|---:|---:|
+| `:1` outer | 912.79 | 94 | 42.3% | 9.71 |
+| `:2` outer | 786.59 | 94 | 36.4% | 8.37 |
+| `:3` outer | 458.85 | 53 | 21.3% | 8.66 |
+| **outer Σ** | **2158.23** | 241 | 100% | — |
+| `:setup` | 65.97 | 243 | 3.1% | 0.27 |
+| `:split-pieces` | **1198.22** | 243 | **55.5%** | **4.93** |
+| `:replace-sectors` | 24.94 | 243 | 1.2% | 0.10 |
+| `:voronoi-repair` | 568.04 | 243 | 26.3% | 2.34 |
+| `:seed-buckets` | 328.57 | 243 | 15.2% | 1.35 |
+| **child Σ** | **2185.75** | 243 each | 101.3% | — |
+
+Residual +27.5 ms / +1.3% maps to the 2-call surplus at the un-labeled line-1719 invocation (≈13.8 ms/call matches outer average). Clean attribution.
+
+**Byte-identity:** 40w n1907 (default) and n1909 (flag-on) both `b14179d65639860c`; 27/27 anchors, 6/6 benchmarks.
+
+**Next target:** `:split-pieces` (1198 ms / 55%) — inspect `splitNonContiguousSectors` BFS reuse across same-corps sectors and `normalizeSectorSubSegmentsFromEdges` double-call on single-piece sectors.
+
+**Report:** [implemented/20260518_BATCH32_ENFORCE_FINAL_GEOMETRY_ATTRIBUTION.md](implemented/20260518_BATCH32_ENFORCE_FINAL_GEOMETRY_ATTRIBUTION.md)
 
 ## 2026-05-18: Batch 27 :floor-completion hoist attempt + revert (learning-only)
 
