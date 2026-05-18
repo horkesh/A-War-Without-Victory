@@ -351,6 +351,32 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: applyFinalSectorOwnerTruthPass has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function applyFinalSectorOwnerTruthPass(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'applyFinalSectorOwnerTruthPass:friendly-osids',
+            'applyFinalSectorOwnerTruthPass:normalize-buckets',
+            'applyFinalSectorOwnerTruthPass:rehome-unassigned',
+            'applyFinalSectorOwnerTruthPass:relocate-misassigned',
+            'applyFinalSectorOwnerTruthPass:rescue-adjacent',
+        ];
+
+        for (const label of labels) {
+            expect(region).toContain(`_perfTime('${label}'`);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\btimestamp\b/i);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 

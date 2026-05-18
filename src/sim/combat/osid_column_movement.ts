@@ -349,15 +349,15 @@ export function processOsidColumnMovement(
         if (remaining <= 0) {
             // Arrived at destination — only complete move if destination is still friendly
             const dest = ms.destination_sids?.[0];
-            const factionId = f.faction as FactionId;
+            const factionId = f.faction;
             const destController = dest ? getPoliticalControllerOSID(state, dest, reverseMap) : null;
             if (dest && (isFriendlyFaction(destController, factionId, state) || destController === null)) {
                 (f as { location_osid?: string }).location_osid = dest;
                 (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 report.column_arrivals += 1;
-            } else if (dest && (ms.path?.length ?? 0) >= 2) {
+            } else if (dest && ms.path && ms.path.length >= 2) {
                 // Destination flipped to enemy: stop at previous step on path (friendly when we left)
-                const prevStep = ms.path![ms.path!.length - 2];
+                const prevStep = ms.path[ms.path.length - 2];
                 (f as { location_osid?: string }).location_osid = prevStep;
                 (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 report.column_arrivals += 1;
@@ -404,7 +404,7 @@ export function processOsidColumnMovement(
             continue;
         }
 
-        const factionId = f.faction as FactionId;
+        const factionId = f.faction;
 
         // Corps boundary guard: build the allowed OSID set for this brigade's corps so
         // that Dijkstra cannot route through another corps' territory.

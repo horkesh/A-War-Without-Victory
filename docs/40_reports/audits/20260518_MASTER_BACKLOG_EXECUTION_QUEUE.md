@@ -20,6 +20,14 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 20 — Autonomous multi-lane closeout
+
+| Lane | Status | Source |
+|---|---|---|
+| Strict-null Phase 2 Batch 19 | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH20_AUTONOMOUS_MULTI_LANE.md`. 16 escapes removed across 6 combat files (`bot_brigade_ai_osid`, `bot_brigade_eval_front`, `officer_system`, `operation_preparation`, `osid_column_movement`, `commander_march_correction`); Phase 2 remaining 55 → 39. Two `correctTransitStates` `non_null_assertions_index` deliberately preserved because `brigade_movement_state` is absent from initial save. |
+| Sector reconstruction `applyFinalSectorOwnerTruthPass` deeper attribution | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH20_AUTONOMOUS_MULTI_LANE.md`. Five sidecar `_perfTime` children added; 40w n1897 hash `b14179d65639860c` matches Batch 17 baseline; `:normalize-buckets` at 2013.9 ms / 335 calls (73% of parent) is the next sector-perf optimization target. |
+| `apr1992_52w` baseline regression refresh | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH20_AUTONOMOUS_MULTI_LANE.md`. All 4 platform-stable artifact hashes refreshed for `apr1992_52w` plus partial refresh for `baseline_ops_4w` / `noop_4w`; preserved `bf8f6246`'s 4-artifact trim policy. `npm.cmd run test:baselines` now PASSES across all 3 scenarios. |
+
 ## Completed Batch 19 — Autonomous multi-lane closeout
 
 | Lane | Status | Source |

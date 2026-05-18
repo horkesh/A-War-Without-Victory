@@ -1,10 +1,36 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 19 staffability-filter optimization)
+**Updated:** 2026-05-18 (Batch 20 applyFinalSectorOwnerTruthPass attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 20 applyFinalSectorOwnerTruthPass deeper attribution (byte-identical)
+
+**Change:** `applyFinalSectorOwnerTruthPass(...)` in `src/sim/combat/corps_front_sectors.ts` now records sidecar attribution for its five inner helpers under labels `applyFinalSectorOwnerTruthPass:relocate-misassigned`, `:friendly-osids`, `:rehome-unassigned`, `:rescue-adjacent`, and `:normalize-buckets`. Wrappers use the existing module-local `_perfTime` helper; no new persisted state, no save fields, no behavior change. Pre-existing per-pass parent labels (`applyFinalSectorOwnerTruthPass:1` through `:4`) remain intact for cross-batch comparability.
+
+**Why:** After Batch 19 retired the staffability-filter `O(N²)` sharedPool rebuild, the n1896 profile showed `applyFinalSectorOwnerTruthPass:1–:4` aggregating ~2748ms across the 40w run (4 passes × ~94 turns + pass-3 sparse coverage at 53 turns) and `sealMergedSectorTruth:1–:5` at ~3700ms, both as un-attributed parents. This batch attributes one of the two; the inner helpers reveal a clear single dominant child.
+
+**Run evidence (n1897 with attribution):**
+
+| Label | Aggregate ms | Count | ms/call |
+|---|---:|---:|---:|
+| `applyFinalSectorOwnerTruthPass:normalize-buckets` | 2013.9 | 335 | 6.01 |
+| `applyFinalSectorOwnerTruthPass:relocate-misassigned` | 323.7 | 335 | 0.97 |
+| `applyFinalSectorOwnerTruthPass:rehome-unassigned` | 168.0 | 1005 | 0.17 |
+| `applyFinalSectorOwnerTruthPass:friendly-osids` | 146.5 | 1005 | 0.15 |
+| `applyFinalSectorOwnerTruthPass:rescue-adjacent` | 82.6 | 1005 | 0.08 |
+| Sum of children | 2734.7 | — | — |
+| Parent sum (`:1`–`:4`) | 2747.9 | 335 | — |
+
+`normalizeFinalSectorBuckets` accounts for 73% of the parent total. Per-faction children (`friendly-osids`, `rehome-unassigned`, `rescue-adjacent`) run 1005 times (335 passes × 3 factions) and are individually small.
+
+**Byte-identity proof:** 40w n1897 final hash `b14179d65639860c` matches Batch 17 baseline literally. `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1897` PASS. Anchors 27/27, benchmarks 6/6, no anomaly violations (three pre-existing sector-floor advisories unchanged from prior runs).
+
+**Next target:** Inspect `normalizeFinalSectorBuckets(...)` for a byte-identical optimization or one more level of attribution before optimizing. `sealMergedSectorTruth:1–:5` (~3700ms aggregate, six inner helpers per faction-loop) remains the other unfactored parent.
+
+**Report:** [implemented/20260518_BATCH20_AUTONOMOUS_MULTI_LANE.md](implemented/20260518_BATCH20_AUTONOMOUS_MULTI_LANE.md) (planned)
 
 ## 2026-05-18: Batch 19 staffability-filter optimization (byte-identical)
 

@@ -1037,7 +1037,8 @@ export function applyFinalSectorOwnerTruthPass(
     adjacency: Map<Osid, Osid[]>,
 ): void {
     const sectorList = Object.values(sectors);
-    relocateMisassignedBrigadesToTruthfulOwners(sectorList, state, formations, adjacency);
+    _perfTime('applyFinalSectorOwnerTruthPass:relocate-misassigned', () =>
+        relocateMisassignedBrigadesToTruthfulOwners(sectorList, state, formations, adjacency));
 
     const byFaction = new Map<FactionId, CorpsFrontSector[]>();
     for (const sector of sectorList) {
@@ -1047,28 +1048,32 @@ export function applyFinalSectorOwnerTruthPass(
     }
 
     for (const [faction, factionSectors] of byFaction) {
-        const friendlyOsids = buildFriendlyOsidsFromState(state, adjacency, faction);
-        rehomeUnassignedBrigadesToPhysicalSectorOwners(
-            factionSectors,
-            formations,
-            faction,
-            adjacency,
-            friendlyOsids,
-        );
-        rescueAdjacentLiveOwnersForEmptyFrontSectors(
-            factionSectors,
-            formations,
-            adjacency,
-            friendlyOsids,
-        );
+        const friendlyOsids = _perfTime('applyFinalSectorOwnerTruthPass:friendly-osids', () =>
+            buildFriendlyOsidsFromState(state, adjacency, faction));
+        _perfTime('applyFinalSectorOwnerTruthPass:rehome-unassigned', () =>
+            rehomeUnassignedBrigadesToPhysicalSectorOwners(
+                factionSectors,
+                formations,
+                faction,
+                adjacency,
+                friendlyOsids,
+            ));
+        _perfTime('applyFinalSectorOwnerTruthPass:rescue-adjacent', () =>
+            rescueAdjacentLiveOwnersForEmptyFrontSectors(
+                factionSectors,
+                formations,
+                adjacency,
+                friendlyOsids,
+            ));
     }
 
-    normalizeFinalSectorBuckets(
-        sectorList,
-        formations,
-        adjacency,
-        state.political?.political_controllers,
-    );
+    _perfTime('applyFinalSectorOwnerTruthPass:normalize-buckets', () =>
+        normalizeFinalSectorBuckets(
+            sectorList,
+            formations,
+            adjacency,
+            state.political?.political_controllers,
+        ));
 }
 
 function rescueAdjacentLiveOwnersForEmptyFrontSectors(

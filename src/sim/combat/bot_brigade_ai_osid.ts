@@ -233,14 +233,16 @@ interface BrigadeContext {
 
 /** Find the axis a brigade belongs to, or null if flat/not found. */
 export function getBrigadeAxis(op: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
-    if (!isMultiAxis(op)) return null;
-    return op.axes!.find(a => a.assigned_brigades.includes(brigadeId)) ?? null;
+    const axes = op.axes;
+    if (!Array.isArray(axes) || axes.length === 0) return null;
+    return axes.find(a => a.assigned_brigades.includes(brigadeId)) ?? null;
 }
 
 /** Check if a brigade participates in the operation (axis-aware). */
 export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationId): boolean {
-    if (isMultiAxis(op)) {
-        return op.axes!.some(a => a.assigned_brigades.includes(brigadeId));
+    const axes = op.axes;
+    if (Array.isArray(axes) && axes.length > 0) {
+        return axes.some(a => a.assigned_brigades.includes(brigadeId));
     }
     return op.participating_brigades.includes(brigadeId);
 }
@@ -796,7 +798,7 @@ export function generateAllBotOrdersOsid(
             const f = formations[bid];
             if (!f) continue;
             const corpsId = f.corps_id ?? '';
-            const faction = f.faction as FactionId;
+            const faction = f.faction;
             const targetController = pc[target] ?? '';
             // Skip Graz block for brigades attacking Op Jackal objectives only
             const grazCmd = corpsCmd[corpsId];

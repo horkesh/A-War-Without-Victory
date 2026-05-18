@@ -552,8 +552,9 @@ export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean
     if ((assignedSector.territory_osids?.length ?? 0) > POCKET_EVACUATION_MAX_TERRITORY) return false;
 
     // Don't evacuate named enclaves — they are strategically valuable and historically held
+    const sectorTerritoryOsids = assignedSector.territory_osids ?? [];
     const isNamedEnclave = ENCLAVE_DEFINITIONS.some(enc =>
-        assignedSector!.territory_osids?.some(osid => osidBelongsToEnclave(osid, enc)) === true
+        sectorTerritoryOsids.some(osid => osidBelongsToEnclave(osid, enc))
     );
     if (isNamedEnclave) return false;
 
@@ -571,7 +572,8 @@ export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean
     if (!state.military.brigade_movement_orders) {
         state.military.brigade_movement_orders = {};
     }
-    state.military.brigade_movement_orders![brigade.id] = {
+    const movementOrders = state.military.brigade_movement_orders;
+    movementOrders[brigade.id] = {
         destination_sids: [homeOsid as SettlementId],
         stance: 'column',
     } as { destination_sids: SettlementId[] };

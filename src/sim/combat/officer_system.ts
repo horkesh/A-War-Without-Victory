@@ -601,7 +601,7 @@ export function processOfficerSuccession(
         }
 
         // Find best available replacement from pool
-        const faction = corpsFormation.faction as FactionId;
+        const faction = corpsFormation.faction;
         const replacement = findBestReplacement(officers, officerData, faction, corpsFormId);
 
         if (replacement) {
@@ -753,7 +753,6 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
 
     const result: NamedOfficer[] = [];
     const seenIds = new Set<string>();
-    const validFactions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
     for (let i = 0; i < officers.length; i++) {
         const o = officers[i] as Record<string, unknown>;
@@ -764,8 +763,11 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
         if (seenIds.has(id)) throw new Error(`Duplicate officer id: ${id}`);
         seenIds.add(id);
 
-        const faction = o.faction as FactionId;
-        if (!validFactions.includes(faction)) throw new Error(`Officer ${id}: invalid faction ${faction}`);
+        const rawFaction = o.faction;
+        if (rawFaction !== 'RBiH' && rawFaction !== 'RS' && rawFaction !== 'HRHB') {
+            throw new Error(`Officer ${id}: invalid faction ${String(rawFaction)}`);
+        }
+        const faction: FactionId = rawFaction;
 
         const clampRating = (val: unknown, field: string): number => {
             const n = typeof val === 'number' ? val : 3;
@@ -784,7 +786,7 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             political_reliability: clampRating(o.political_reliability, 'political_reliability'),
             home_corps_id: typeof o.home_corps_id === 'string' ? o.home_corps_id : undefined,
             compatible_corps_ids: Array.isArray(o.compatible_corps_ids)
-                ? (o.compatible_corps_ids as unknown[]).filter((x): x is string => typeof x === 'string')
+                ? o.compatible_corps_ids.filter((x: unknown): x is string => typeof x === 'string')
                 : undefined,
             available_from_turn: typeof o.available_from_turn === 'number' ? o.available_from_turn : 0,
             available_until_turn: typeof o.available_until_turn === 'number' ? o.available_until_turn : undefined,

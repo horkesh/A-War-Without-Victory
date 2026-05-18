@@ -284,7 +284,7 @@ export function estimateForceRatio(
     // LANE-2026-05-02: sum attacker COMBAT POWER (override posture to 'attack' so
     // dig_in / defend brigades contribute their offensive value). Each brigade
     // gets supply/terrain/officer/morale/fatigue applied via combat_math.
-    const attackerFaction = (attackerFormations[0]!.faction as string) || 'RBiH';
+    const attackerFaction: FactionId = attackerFormations[0]!.faction || 'RBiH';
 
     // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: derive corps_id + faction
     // from the first attacker formation. CorpsOperation has no top-level
@@ -314,7 +314,7 @@ export function estimateForceRatio(
                 const approach = collectObjectiveApproachOsids(
                     state,
                     attackerCorpsId,
-                    attackerFaction as FactionId,
+                    attackerFaction,
                     [currentObjective],
                 );
                 for (const o of approach) relevanceOsids.add(o);
@@ -326,7 +326,7 @@ export function estimateForceRatio(
             const approach = collectObjectiveApproachOsids(
                 state,
                 attackerCorpsId,
-                attackerFaction as FactionId,
+                attackerFaction,
                 launchObjectives,
             );
             for (const o of approach) relevanceOsids.add(o);
