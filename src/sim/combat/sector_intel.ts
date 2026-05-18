@@ -17,6 +17,7 @@ import type {
     FormationId,
     GameState,
     SectorIntelRecord,
+    SectorIntelSource,
     SectorStrengthCategory,
     SectorPostureObserved,
 } from '../../state/game_state.js';
@@ -27,6 +28,7 @@ import {
     CONFIDENCE_FRONT_BRIGADES,
     CONFIDENCE_FULL_STRENGTH,
     CONFIDENCE_DEEP_INTEL,
+    SECTOR_INTEL_SOURCE_CONFIDENCE_BONUS,
 } from './sector_intel_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -90,7 +92,7 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
 
             const turnsInContact = prevTurnsInContact + 1;
             newRecords.push(buildRecord(
-                enemySectorId, enemySector, edgeCount,
+                sector, enemySectorId, enemySector, edgeCount,
                 newConfidence, turnsInContact, turn, state, profile.recon_range
             ));
         }
@@ -102,7 +104,7 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             const enemySector = sectors[enemySectorId];
             if (!enemySector) continue;
             newRecords.push(buildRecord(
-                enemySectorId, enemySector, 0,
+                sector, enemySectorId, enemySector, 0,
                 decayed, 0, turn, state, profile.recon_range
             ));
         }
@@ -157,6 +159,11 @@ export function updateSectorIntelFromCombat(
     rec.posture_observed = computePosture(enemySector, state, 1.0);
     rec.offensive_signs = computeOffensiveSigns(enemySector, state, 1.0, profile.recon_range);
     rec.visible_brigade_ids = computeVisibleBrigades(enemySector, 1.0, profile.recon_range).sort(strictCompare);
+    rec.osid_confidence = [{
+        osid: defenderOsid,
+        confidence: 1,
+        sources: ['combat'],
+    }];
 }
 
 // ===============================================================
@@ -164,6 +171,7 @@ export function updateSectorIntelFromCombat(
 // ===============================================================
 
 function buildRecord(
+    friendlySector: CorpsFrontSector,
     enemySectorId: string,
     enemySector: CorpsFrontSector,
     edgeCount: number,
@@ -184,8 +192,57 @@ function buildRecord(
         confidence,
         turns_in_contact: turnsInContact,
         visible_brigade_ids: computeVisibleBrigades(enemySector, confidence, reconRange).sort(strictCompare),
+        osid_confidence: computeOsidConfidence(friendlySector, enemySector, confidence, reconRange),
         last_updated_turn: turn,
     };
+}
+
+function computeOsidConfidence(
+    friendlySector: CorpsFrontSector,
+    enemySector: CorpsFrontSector,
+    confidence: number,
+    reconRange: number,
+): SectorIntelRecord['osid_confidence'] {
+    const enemyOsidSet = new Set<string>([
+        ...(enemySector.territory_osids ?? []),
+        ...enemySector.sub_segments.flatMap(sub => sub.friendly_osids),
+    ]);
+    const observed = new Set<string>();
+    for (const sub of friendlySector.sub_segments) {
+        for (const osid of sub.enemy_osids) {
+            if (enemyOsidSet.has(osid)) {
+                observed.add(osid);
+            }
+        }
+    }
+    const osids = [...observed].sort(strictCompare);
+    if (osids.length === 0) return [];
+
+    const sources = computeIntelSources(friendlySector, reconRange);
+    const sourceBonus = sources.reduce(
+        (sum, source) => sum + SECTOR_INTEL_SOURCE_CONFIDENCE_BONUS[source],
+        0,
+    );
+    const osidConfidence = Math.min(1, Math.max(0, confidence + sourceBonus));
+    return osids.map(osid => ({
+        osid,
+        confidence: osidConfidence,
+        sources: [...sources],
+    }));
+}
+
+function computeIntelSources(
+    friendlySector: CorpsFrontSector,
+    reconRange: number,
+): SectorIntelSource[] {
+    const sources: SectorIntelSource[] = ['passive_contact'];
+    if (friendlySector.sector_stance === 'screening' || friendlySector.sector_stance === 'active_defense') {
+        sources.push('patrol');
+    }
+    if (reconRange >= 2) {
+        sources.push('scout');
+    }
+    return sources;
 }
 
 function computeStrengthCategory(sector: CorpsFrontSector, confidence: number): SectorStrengthCategory {

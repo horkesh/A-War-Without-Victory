@@ -12,6 +12,8 @@
 
 **Current state:** Intel is modelled at the **sector-pair level** — `state.military.sector_intel[friendlySectorId][]` gives a single `confidence` value for the entire enemy sector (typically 5–25 OSIDs). The `strength_category` and `visible_brigade_ids` are derived from that single number and apply uniformly to all OSIDs in the enemy sector.
 
+**2026-05-18 status update:** First slice is implemented in `docs/40_reports/implemented/20260518_INTEL_EXTENSIONS_BATCH10.md`. The sector-pair record can now carry optional sorted `osid_confidence[]` entries for front-visible enemy OSIDs with source tags (`passive_contact`, `patrol`, `scout`, `combat`); combat refresh promotes the defender OSID to confidence `1`, and commander belief uses the entries when present. Remaining work is per-OSID target scoring, stale-intel execution penalties, and surprise/ambush friction.
+
 **What this misses:** Within a single enemy sector, some OSIDs are strongly held (a town OSID with 3 brigades and heavy weapons) and others are nearly empty (a mountain ridge with a platoon-sized screening force). A corps attacking into the sector treats all OSIDs as equally known or unknown.
 
 **Design sketch:**

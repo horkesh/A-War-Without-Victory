@@ -14779,30 +14779,30 @@
             "supply_continuity_confidence": 0,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 500,
+                "estimated_enemy_strength": 0.5756308629435015,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_central_bosnia:op:bugojno:medini"
               },
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 500,
+                "estimated_enemy_strength": 1.0281845226638963e-11,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_central_bosnia:op:fojnica:bakovici_2"
               },
               {
-                "confidence": 0.8,
+                "confidence": 0.04,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 1000,
+                "estimated_enemy_strength": 39.999999999999915,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_central_bosnia:op:kakanj:bukovlje_2"
               },
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 999.9999999999989,
+                "estimated_enemy_strength": 0.5756308629517125,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_central_bosnia:op:teslic:kamenica_2"
               }
@@ -16128,9 +16128,9 @@
             "supply_continuity_confidence": 0,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0.3199999999999996,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 999.9999994124123,
+                "estimated_enemy_strength": 337.14285595864146,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_northwest_bosnia:op:bosanski_samac:domaljevac_2"
               }
@@ -16512,9 +16512,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 1500.0000001921408,
+                "estimated_enemy_strength": 0.0000030092980088150495,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_southeast_herzegovina:op:capljina:capljina_2"
               }
@@ -17710,16 +17710,16 @@
             "supply_continuity_confidence": 0.9642857142857143,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 500,
+                "estimated_enemy_strength": 0,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_tomislavgrad:op:duvno:dobrici"
               },
               {
-                "confidence": 0.8,
+                "confidence": 0.08,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 500,
+                "estimated_enemy_strength": 39.999999999999694,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:hvo_tomislavgrad:op:konjic:turija"
               }
@@ -18737,9 +18737,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0.18249999999999997,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 13130.847339665164,
+                "estimated_enemy_strength": 4613.269171625565,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_1st_krajina:op:banja_luka:banja_luka_2"
               }
@@ -21994,9 +21994,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0.0899999999999999,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 2500.002657187566,
+                "estimated_enemy_strength": 377.16436858473804,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_2nd_krajina:op:bihac:orasac_2"
               }
@@ -23418,9 +23418,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0.012727272727272738,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 5503.435543619133,
+                "estimated_enemy_strength": 79.6537688377536,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_drina:op:bratunac:bratunac_2"
               }
@@ -25133,16 +25133,16 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 1000.0016122139764,
+                "estimated_enemy_strength": 0.027399104449485612,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_east_bosnian:op:bijeljina:bijeljina_2"
               },
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 1000.0008061951264,
+                "estimated_enemy_strength": 0.01370105010700169,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_east_bosnian:op:bosanski_samac:crkvina_2"
               }
@@ -26455,9 +26455,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 4500.000588722756,
+                "estimated_enemy_strength": 0.0019671184993855636,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_herzegovina:op:bileca:bileca_2"
               }
@@ -28171,9 +28171,9 @@
             "supply_continuity_confidence": 1,
             "zone_beliefs": [
               {
-                "confidence": 0.8,
+                "confidence": 0,
                 "estimated_enemy_intent": "hold",
-                "estimated_enemy_strength": 5000.0011433687405,
+                "estimated_enemy_strength": 0.006574955989486037,
                 "last_confirmed_turn": 40,
                 "zone_id": "zone:vrs_sarajevo_romanija:op:centar_sarajevo:radava"
               }
@@ -91915,6 +91915,16 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.9700000000000005,
+              "osid": "op:visoko:gornja_vratnica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 40,
@@ -91932,6 +91942,48 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": true,
+          "osid_confidence": [
+            {
+              "confidence": 0.7600000000000003,
+              "osid": "op:rogatica:kovanj",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7600000000000003,
+              "osid": "op:rogatica:kramer_selo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7600000000000003,
+              "osid": "op:rogatica:rogatica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7600000000000003,
+              "osid": "op:rogatica:stara_gora",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7600000000000003,
+              "osid": "op:visegrad:medjedja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "offensive_prep",
           "strength_category": "thin",
           "turns_in_contact": 34,
@@ -91947,6 +91999,48 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.8100000000000004,
+              "osid": "op:pale:bulozi",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8100000000000004,
+              "osid": "op:pale:gornje_pale",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8100000000000004,
+              "osid": "op:pale:hotocina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8100000000000004,
+              "osid": "op:pale:vrazalice",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8100000000000004,
+              "osid": "op:rogatica:kramer_selo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 32,
@@ -91965,6 +92059,48 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:foca:izbisno",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:foca:patkovina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:foca:ustikolina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:kalinovik:vlaholje",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:trnovo:tosici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -91981,6 +92117,40 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.5,
+              "osid": "op:kalinovik:obalj",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5,
+              "osid": "op:kalinovik:vlaholje",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5,
+              "osid": "op:konjic:glavaticevo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5,
+              "osid": "op:konjic:ljuta",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -91998,6 +92168,56 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:hadzici:misevici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:kasindo",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:rakovica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:sarajevo_dio_ilidza_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:novo_sarajevo:lukavica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:trnovo:gornja_presjenica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92017,6 +92237,32 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilijas:podlugovi",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilijas:srednje",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:vares:toljenak",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92035,6 +92281,24 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:rudnik_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilijas:podlugovi",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92054,6 +92318,40 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": true,
+          "osid_confidence": [
+            {
+              "confidence": 0.6400000000000003,
+              "osid": "op:rudo:mrsovo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6400000000000003,
+              "osid": "op:visegrad:drinsko",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6400000000000003,
+              "osid": "op:visegrad:medjedja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6400000000000003,
+              "osid": "op:visegrad:okrugla",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "offensive_prep",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92069,6 +92367,40 @@
           "front_edge_count": 9,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:cajnice:batotici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:foca:prevrac",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:foca:ustikolina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6200000000000003,
+              "osid": "op:gorazde:podkozara_donja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92085,6 +92417,32 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.12,
+              "osid": "op:cajnice:miljeno_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:cajnice:todorovici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:cajnice:zaborak",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -92100,6 +92458,56 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:sarajevo_dio_ilidza_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:novi_grad_sarajevo:recica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:novo_sarajevo:lukavica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:vogosca:hotonj",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7300000000000004,
+              "osid": "op:vogosca:vogosca_3",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92118,6 +92526,40 @@
           "front_edge_count": 8,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.7700000000000005,
+              "osid": "op:centar_sarajevo:radava",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7700000000000005,
+              "osid": "op:novo_sarajevo:lukavica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7700000000000005,
+              "osid": "op:stari_grad_sarajevo:faletici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.7700000000000005,
+              "osid": "op:vogosca:hotonj",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 16,
@@ -92136,6 +92578,24 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": true,
+          "osid_confidence": [
+            {
+              "confidence": 0.8500000000000004,
+              "osid": "op:kladanj:vucinici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8500000000000004,
+              "osid": "op:olovo:slivnje",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "offensive_prep",
           "strength_category": "thin",
           "turns_in_contact": 34,
@@ -92152,6 +92612,48 @@
           "front_edge_count": 7,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.8700000000000004,
+              "osid": "op:ilijas:dragoradi",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8700000000000004,
+              "osid": "op:ilijas:krivajevici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8700000000000004,
+              "osid": "op:ilijas:sirovine",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8700000000000004,
+              "osid": "op:sokolac:sasevci_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.8700000000000004,
+              "osid": "op:vares:toljenak",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 35,
@@ -92170,6 +92672,24 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.6000000000000003,
+              "osid": "op:banovici:seona",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6000000000000003,
+              "osid": "op:zavidovici:vozuca_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 38,
@@ -92188,6 +92708,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:vlasenica:sebiocina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 14,
@@ -92203,6 +92733,56 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.12,
+              "osid": "op:bratunac:bratunac_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:bratunac:glogova",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:bratunac:jezestica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:bratunac:slapasnica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:srebrenica:obadi",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:srebrenica:osmace_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92216,6 +92796,32 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:bratunac:vranesevici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:bratunac:zapolje_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:srebrenica:mala_daljegosta_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92231,6 +92837,64 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:hanpijesak:han_pijesak_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:rogatica:pljesevica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:rogatica:stara_gora",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:visegrad:prelovo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:visegrad:zlijeb",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:vlasenica:bacici",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:vlasenica:sebiocina",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 21,
@@ -92249,6 +92913,64 @@
           "front_edge_count": 15,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.12,
+              "osid": "op:brcko:brcko",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:brcko:donji_rahic",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:brcko:potocari_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:lopare:jablanica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:lopare:koraj_4",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:lopare:lopare_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:lopare:mrtvica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92264,6 +92986,24 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:modrica:garevac_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:modrica:skugric_gornji_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92277,6 +93017,16 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:gradacac:pelagicevo",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 14,
@@ -92294,6 +93044,32 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.12,
+              "osid": "op:zvornik:gornji_sepak_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:zvornik:kozluk_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:zvornik:zvornik",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92307,6 +93083,56 @@
           "front_edge_count": 14,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:bijeljina:cadjavica_gornja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:bijeljina:suho_polje_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:lopare:lopare_selo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:lopare:priboj_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:ugljevik:donja_trnova_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:ugljevik:zabrdje_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 14,
@@ -92324,6 +93150,56 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:banovici:seona",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:doboj:boljanic_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:doboj:brijesnica_velika",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:doboj:zelinja_gornja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:gracanica:petrovo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:lukavac:brijesnica_donja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 14,
@@ -92341,6 +93217,48 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:kladanj:brgule",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:kladanj:vucinici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:olovo:slivnje",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:sekovici:kastijelj_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.5900000000000002,
+              "osid": "op:vlasenica:grabovica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 21,
@@ -92359,6 +93277,56 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.12,
+              "osid": "op:kalesija:gojcin_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:sekovici:sekovici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:sekovici:udbina_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:vlasenica:cerska_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:zvornik:donja_kamenica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.12,
+              "osid": "op:zvornik:zvornik",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92372,6 +93340,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:kladanj:brgule",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 14,
@@ -92389,6 +93367,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:donji_vakuf:pribraca_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92402,6 +93390,32 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:kupres:bucovaca",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:kupres:goravci",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:kupres:kupres_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 38,
@@ -92421,6 +93435,24 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:donji_vakuf:donji_vakuf_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:donji_vakuf:komar_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92436,6 +93468,24 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:jajce:grdovo",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:skender_vakuf:donji_koricani",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92449,6 +93499,24 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:donji_vakuf:komar_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.45000000000000007,
+              "osid": "op:travnik:varosluk",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "moderate",
           "turns_in_contact": 14,
@@ -92464,6 +93532,24 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:kotor_varos:krusevo_brdo_i",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:teslic:blatnica_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92479,6 +93565,32 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": true,
+          "osid_confidence": [
+            {
+              "confidence": 0.6300000000000003,
+              "osid": "op:maglaj:donja_bocinja_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000003,
+              "osid": "op:maglaj:gornja_bocinja",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000003,
+              "osid": "op:zavidovici:vozuca_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "offensive_prep",
           "strength_category": "thin",
           "turns_in_contact": 35,
@@ -92497,6 +93609,56 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:doboj:boljanic_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:doboj:bukovica_velika_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:doboj:makljenovac",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:doboj:matuzici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:gracanica:petrovo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:maglaj:jablanica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92510,6 +93672,16 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:teslic:vitkovci",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92525,6 +93697,16 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.30999999999999994,
+              "osid": "op:maglaj:jablanica",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92540,6 +93722,48 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.6300000000000001,
+              "osid": "op:konjic:bijela_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000001,
+              "osid": "op:konjic:glavaticevo_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000001,
+              "osid": "op:mostar:hodbina_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000001,
+              "osid": "op:mostar:kruzanj_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.6300000000000001,
+              "osid": "op:mostar:vranjevici_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "thin",
           "turns_in_contact": 35,
@@ -92558,6 +93782,24 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:bihac:ripac",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:bosanska_krupa:gornja_suvaja",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "moderate",
           "turns_in_contact": 38,
@@ -92576,6 +93818,32 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:bosanska_krupa:gornja_suvaja",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:bosanska_krupa:ivanjska_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            },
+            {
+              "confidence": 0.9300000000000005,
+              "osid": "op:bosanska_krupa:vranjska_2",
+              "sources": [
+                "passive_contact",
+                "scout"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "moderate",
           "turns_in_contact": 38,
@@ -92595,6 +93863,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:donji_vakuf:komar_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92610,6 +93887,22 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:hadzici:misevici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ilidza:rudnik_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -92625,6 +93918,22 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:teslic:blatnica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:teslic:donji_ruzevic",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92638,6 +93947,22 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:teslic:teslic_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:teslic:vitkovci",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92653,6 +93978,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:zavidovici:vozuca_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 34,
@@ -92668,6 +94002,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.08,
+              "osid": "op:vares:toljenak",
+              "sources": [
+                "passive_contact",
+                "patrol"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 34,
@@ -92683,6 +94027,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.27999999999999964,
+              "osid": "op:bosanski_samac:tisina",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.27999999999999964,
+              "osid": "op:gradacac:pelagicevo",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 35,
@@ -92698,6 +94058,15 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:mostar:hodbina_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 23,
@@ -92711,6 +94080,57 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:bileca:vranjska",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ljubinje:bancici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ljubinje:ljubinje_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:nevesinje:nevesinje_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:nevesinje:sopilja",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:nevesinje:zovi_do",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stolac:rotimlja_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -92726,6 +94146,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:trebinje:trebimlja_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -92741,6 +94170,43 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:glamoc:glamoc_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:glamoc:vidimlije_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kupres:bucovaca",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kupres:donji_malovan",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:livno:gubin_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 38,
@@ -92756,6 +94222,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.08,
+              "osid": "op:konjic:bijela_2",
+              "sources": [
+                "passive_contact",
+                "patrol"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -92771,6 +94247,36 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.47999999999999965,
+              "osid": "op:banovici:banovici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.47999999999999965,
+              "osid": "op:banovici:banovici_selo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.47999999999999965,
+              "osid": "op:lukavac:poljice_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.47999999999999965,
+              "osid": "op:zavidovici:ribnica_dio",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 38,
@@ -92786,6 +94292,29 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.5199999999999997,
+              "osid": "op:maglaj:lijesnica",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5199999999999997,
+              "osid": "op:zavidovici:cinovici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5199999999999997,
+              "osid": "op:zavidovici:hajderovici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "dense",
           "turns_in_contact": 35,
@@ -92805,6 +94334,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.47999999999999965,
+              "osid": "op:vares:gornja_borovica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 34,
@@ -92820,6 +94358,57 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:gracanica:dzakule",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:gracanica:gracanica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:gracanica:malesici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:gracanica:miricina_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:lukavac:bikodze",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:lukavac:dobosnica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.5999999999999998,
+              "osid": "op:lukavac:orahovica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "defensive",
           "strength_category": "moderate",
           "turns_in_contact": 14,
@@ -92843,6 +94432,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:travnik:gornje_krcevine",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:travnik:paklarevo",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92858,6 +94463,29 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:travnik:gornje_krcevine",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:travnik:paklarevo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:travnik:turbe_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92871,6 +94499,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:bugojno:medini",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92886,6 +94523,43 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:maglaj:kosova_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:kalosevic_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:lepenica",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:sije_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:ularice_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92901,6 +94575,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:donji_vakuf:jemanlici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:donji_vakuf:korenici",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92916,6 +94606,22 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:maglaj:maglaj_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:maglaj:misurici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92931,6 +94637,29 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:travnik:gluha_bukovica",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:travnik:paklarevo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:zenica:serici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92944,6 +94673,15 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:teslic:kamenica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92959,6 +94697,36 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:maglaj:cobe_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:kalosevic_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:novi_miljanovci_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:tesanj:radusa_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -92972,6 +94740,15 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:teslic:kamenica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -92987,6 +94764,16 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.10000000000000013,
+              "osid": "op:donji_vakuf:prusac_2",
+              "sources": [
+                "passive_contact",
+                "patrol"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -93002,6 +94789,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:gradacac:gradacac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.02000000000000013,
+              "osid": "op:gradacac:zelinja_donja_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -93017,6 +94820,36 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.3199999999999996,
+              "osid": "op:bugojno:vesela_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.3199999999999996,
+              "osid": "op:bugojno:vrpec",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.3199999999999996,
+              "osid": "op:donji_vakuf:prusac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0.3199999999999996,
+              "osid": "op:gornji_vakuf:jagnjid_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "thin",
           "turns_in_contact": 38,
@@ -93032,6 +94865,57 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:duvno:kongora",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:duvno:suica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:duvno:tomislavgrad_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:livno:livno_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:livno:priluka_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:livno:zastinje",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:prozor:rumboci_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 38,
@@ -93047,6 +94931,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:bihac:bihac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:bihac:brekovica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 38,
@@ -93062,6 +94962,29 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:bosanska_krupa:jezerski_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:bosanska_krupa:otoka_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:bosanska_krupa:veliki_badic",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 38,
@@ -93077,6 +95000,22 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:rogatica:brcigovo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:rogatica:varosiste_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 34,
@@ -93090,6 +95029,15 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:rudo:gornja_strmica",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93105,6 +95053,22 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:bostahovine_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:ljeskovik_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93118,6 +95082,50 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:hanpijesak:godjenje_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:rogatica:zepa_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:ljeskovik_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:luka_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visegrad:kamenica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:vlasenica:pomol_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 21,
@@ -93133,6 +95141,29 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:zvornik:djulici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zvornik:rastosnica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zvornik:sapna",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93146,6 +95177,50 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kalesija:kalesija_grad_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kalesija:kalesija_selo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kalesija:seher_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kalesija:tojsici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zivinice:gracanica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zvornik:krizevici",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93161,6 +95236,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:olovo:gurdici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:olovo:olovo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 34,
@@ -93174,6 +95265,43 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kladanj:kladanj_3",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kladanj:staric_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kladanj:tarevo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kladanj:tuholj_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zivinice:basigovci_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 21,
@@ -93187,6 +95315,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:zivinice:gracanica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93202,6 +95339,64 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:bostahovine_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:brezovice_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:donji_potocari_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:ljeskovik_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:milacevici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:radovcici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:srebrenica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:srebrenica:sulice_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93217,6 +95412,24 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0.10000000000000013,
+              "osid": "op:srebrenica:brezovice_2",
+              "sources": [
+                "passive_contact",
+                "patrol"
+              ]
+            },
+            {
+              "confidence": 0.10000000000000013,
+              "osid": "op:srebrenica:radovcici",
+              "sources": [
+                "passive_contact",
+                "patrol"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 7,
@@ -93232,6 +95445,57 @@
           "front_edge_count": 14,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kalesija:kikaci",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:tuzla:gornja_tuzla",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:tuzla:simin_han_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ugljevik:jasikovac",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ugljevik:srednja_trnova_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:ugljevik:teocak_krstac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:zvornik:rastosnica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93247,6 +95511,43 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:brcko:krepsic",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:brcko:skakava_donja",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gradacac:donja_tramosnica_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gradacac:gradacac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gradacac:mionica",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93260,6 +95561,22 @@
           "front_edge_count": 3,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:bosanski_samac:domaljevac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:orasje:ostra_luka",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93275,6 +95592,71 @@
           "front_edge_count": 15,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:brcko:boce_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:brcko:brka_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:brcko:krepsic",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:brcko:palanka",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:brcko:skakava_donja",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:lopare:celic_3",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:lopare:nahvioci",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:tuzla:gornja_tuzla",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:tuzla:obodnica_donja_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 14,
@@ -93290,6 +95672,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:neum:gornje_hrasno_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93305,6 +95696,64 @@
           "front_edge_count": 12,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:foca:donje_zesce",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:foca:mazlina",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:faocici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kalinovik:golubici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:kalinovik:varos_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:delijas",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:kijevo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:trnovo",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93318,6 +95767,50 @@
           "front_edge_count": 9,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:bacci",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:gorazde_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:kola",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:kolovarice",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:slatina_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:ustipraca_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93333,6 +95826,29 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kalinovik:golubici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:trnovo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:tusila",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93346,6 +95862,50 @@
           "front_edge_count": 10,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:konjic:celebici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:konjic:dzepi_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:konjic:konjic_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:mostar:blagaj_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:mostar:mostar_istok_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:mostar:potoci",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93359,6 +95919,22 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:capljina:tasovcici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:mostar:jasenica",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 23,
@@ -93372,6 +95948,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:konjic:turija",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93387,6 +95972,50 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:capljina:tasovcici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:neum:gornje_hrasno_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stolac:hatelji_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stolac:pjesivac_kula_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stolac:prenj",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stolac:stolac_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93402,6 +96031,22 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:ustipraca_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:rudo:gornja_strmica",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93417,6 +96062,50 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:breza:mahala",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:breza:zupca_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:podvinjci_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:rajcici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:stuparici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:visoko_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 40,
@@ -93432,6 +96121,29 @@
           "front_edge_count": 5,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:breza:podgora",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:breza:zupca_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:vares:budozelje_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93445,6 +96157,29 @@
           "front_edge_count": 7,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:olovo:gurdici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:olovo:olovo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:vares:ravne",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93458,6 +96193,15 @@
           "front_edge_count": 1,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:vares:vares_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 34,
@@ -93473,6 +96217,15 @@
           "front_edge_count": 6,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93486,6 +96239,29 @@
           "front_edge_count": 8,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93501,6 +96277,64 @@
           "front_edge_count": 13,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:hadzici:binjezevo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:hadzici:hadzici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:hadzici:lokve",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:hadzici:tarcin_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:delijas",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:kijevo_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:trnovo",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:tusila",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93514,6 +96348,29 @@
           "front_edge_count": 4,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kiseljak:drazevici",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:rajcici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:visoko:stuparici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 16,
@@ -93527,6 +96384,15 @@
           "front_edge_count": 2,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:kiseljak:azapovici_2",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 35,
@@ -93542,6 +96408,50 @@
           "front_edge_count": 11,
           "last_updated_turn": 40,
           "offensive_signs": false,
+          "osid_confidence": [
+            {
+              "confidence": 0,
+              "osid": "op:foca:mazlina",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:gorazde:osjecani_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:pale:podgrab",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:pale:praca",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:rogatica:varosiste_2",
+              "sources": [
+                "passive_contact"
+              ]
+            },
+            {
+              "confidence": 0,
+              "osid": "op:trnovo:delijas",
+              "sources": [
+                "passive_contact"
+              ]
+            }
+          ],
           "posture_observed": "unknown",
           "strength_category": "unknown",
           "turns_in_contact": 32,

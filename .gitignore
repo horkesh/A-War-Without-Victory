@@ -73,6 +73,7 @@ tmp_sector_audit/
 
 # Repo cleanup 2026: run outputs and temp dirs (do not track)
 runs/
+runs_perf/
 .tmp_*/
 
 # Handoff inbox artifacts — ephemeral, generated per run (keep .gitkeep)

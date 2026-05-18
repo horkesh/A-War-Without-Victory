@@ -174,6 +174,45 @@ describe('v0.8.1 Phase 2 — belief creation from raw data', () => {
         expect(zoneBelief!.estimated_enemy_intent).toBe('mass');
     });
 
+    it('bounds fresh strength estimates by blended per-OSID confidence when present', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+
+        const intelData: CommanderIntelData = {
+            sector_intel: {
+                'sector_0': [
+                    makeIntelRecord({
+                        strength_category: 'fortress',
+                        confidence: 0.9,
+                        osid_confidence: [
+                            { osid: 'op:test:enemy_a', confidence: 0.25, sources: ['passive_contact'] },
+                            { osid: 'op:test:enemy_b', confidence: 0.75, sources: ['passive_contact', 'scout'] },
+                        ],
+                    }),
+                ],
+            },
+            opsec_active_sectors: [],
+        };
+
+        const briefing = makeMinimalBriefing({
+            turn: 10,
+            intel_data: intelData,
+            sectors: [makeSector({
+                sector_id: 'sector_0',
+                territory_osids: ['op:test:test_1'],
+            })],
+        });
+
+        const zones = [makeZone({ zone_id: zoneId, osids: ['op:test:test_1'] })];
+        const forces = makeForces([makeEval()]);
+
+        const result = assembleBeliefState(briefing, zones, forces, null, 10);
+
+        const zoneBelief = result.zone_beliefs.find(zb => zb.zone_id === zoneId);
+        expect(zoneBelief).toBeDefined();
+        expect(zoneBelief!.estimated_enemy_strength).toBe(2000);
+        expect(zoneBelief!.confidence).toBeCloseTo(0.5, 5);
+    });
+
     it('no intel records produces baseline defaults (strength 500, unknown intent, 0.3 confidence)', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
 

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close tenth backlog execution batch
+
+**Scope:** Tenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering intel extensions first slice, strict-null Phase 2 continuation, and sector-performance Task 5 proof. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, or external distribution changed.
+
+**Change:** Added optional, sorted `SectorIntelRecord.osid_confidence` entries with passive-contact, patrol, scout, and combat sources; combat refresh now records defender OSID confidence `1`, and commander belief estimates use per-OSID confidence when present while legacy records keep previous behavior. Cleaned two strict-null combat escapes in `hv_integration.ts` and `sector_splitting.ts`, lowering the Phase 2 remaining inventory from 102 to 100. Proved Batch 9 sector Task 4 artifacts byte-identical against n1881/n1885/fresh-profile runs and recorded `buildFactionSectors:RS/RBiH` as the next measured target. Refreshed the tracked `data/derived/latest_run_final_save.json` fixture from n1886 and updated the adapter completeness fixture test to respect player-faction scoping / no-active-operation saves. Added `runs_perf/` to `.gitignore` so local profile outputs remain untracked.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. Sector Task 5 is proof/report-only. Intel extensions intentionally change serialized state and commander belief behavior by adding front-visible per-OSID confidence evidence; 40w therefore re-anchors from n1885 `42607f83870e01d5` to n1886 `bc4e06185d3145aa` with anchors and bot benchmarks still green. The new intel entries are sorted by OSID and source-bounded; no hidden enemy truth or timestamp/random source is introduced.
+
+**Verification:** Parent integration passed `npm.cmd run typecheck`; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/sector_intel.test.ts tests/commander/commander_belief_layer.test.ts --reporter=dot` (3 files / 41 tests); `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts tests/adapter_field_completeness.test.ts tests/real_save_sector_truth_contracts.test.ts --reporter=dot` passed after updating the stale fixture-scoping assertions (3 files / 38 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w` produced n1886 hash `bc4e06185d3145aa`, 27/27 anchors, 6/6 bot benchmarks, and one non-critical anomaly warning; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1886` passed; and `git diff --check` passed with CRLF warnings only. Sector proof lane also recorded a known unrelated `npm.cmd run test:baselines` failure on `apr1992_52w activity_summary.json` expected `c29e296b27d04e2dc3ed6b159d1ccc40e9d9538e8c16878e0f3cda71f055e0b1`, actual `825c3c141adb757c1a068a9d9d3add092b6f2875a577ffeee392d2f0fa2c7ef9`.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Canon/system docs now describe per-OSID confidence as an observed/front-visible intel extension, not omniscient enemy truth. Stale-intel penalties and surprise/ambush friction remain separate follow-up work.
+
+---
+
 ## [2026-05-18] feat(roadmap): close ninth backlog execution batch
 
 **Scope:** Ninth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, sector-performance Task 4, and Phase D event-notification residual gating. No combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.

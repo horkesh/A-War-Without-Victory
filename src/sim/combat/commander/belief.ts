@@ -137,7 +137,7 @@ function assembleZoneBeliefs(
         const hasContact = zoneIntelRecords.length > 0;
 
         // 1. estimated_enemy_strength
-        const estimatedStrength = computeEstimatedEnemyStrength(
+        const { estimatedStrength, observationConfidence } = computeEstimatedEnemyStrength(
             zoneIntelRecords, prevBelief, hasContact,
         );
 
@@ -147,7 +147,8 @@ function assembleZoneBeliefs(
         );
 
         // 3. confidence
-        const confidence = briefing.previous_state?.intel_picture?.zone_confidence?.[zone.zone_id]
+        const confidence = observationConfidence
+            ?? briefing.previous_state?.intel_picture?.zone_confidence?.[zone.zone_id]
             ?? DEFAULT_CONFIDENCE;
 
         beliefs.push({
@@ -197,31 +198,64 @@ function computeEstimatedEnemyStrength(
     zoneIntelRecords: readonly import('../../../state/game_state.js').SectorIntelRecord[],
     prevBelief: ZoneBelief | null,
     hasContact: boolean,
-): number {
+): { estimatedStrength: number; observationConfidence: number | null } {
     if (hasContact) {
         // Fresh observation: sum strength estimates from intel records
         let freshObservation = 0;
+        const confidenceSamples: number[] = [];
         for (const rec of zoneIntelRecords) {
-            freshObservation += strengthCategoryToEstimate(rec.strength_category);
+            const osidConfidence = computeRecordOsidConfidence(rec);
+            if (osidConfidence !== null) {
+                confidenceSamples.push(osidConfidence);
+            }
+            freshObservation += strengthCategoryToEstimate(rec.strength_category) * (osidConfidence ?? 1);
         }
+        const observationConfidence = meanConfidence(confidenceSamples);
 
         if (prevBelief) {
             // Blend with previous
-            return FRESH_OBSERVATION_WEIGHT * freshObservation
-                + PREVIOUS_BELIEF_WEIGHT * prevBelief.estimated_enemy_strength;
+            return {
+                estimatedStrength: FRESH_OBSERVATION_WEIGHT * freshObservation
+                    + PREVIOUS_BELIEF_WEIGHT * prevBelief.estimated_enemy_strength,
+                observationConfidence,
+            };
         }
-        return freshObservation;
+        return { estimatedStrength: freshObservation, observationConfidence };
     }
 
     // No contact this turn
     if (prevBelief) {
         // Decay toward baseline
-        return prevBelief.estimated_enemy_strength * NO_CONTACT_DECAY
-            + BASELINE_ENEMY_STRENGTH * (1 - NO_CONTACT_DECAY);
+        return {
+            estimatedStrength: prevBelief.estimated_enemy_strength * NO_CONTACT_DECAY
+                + BASELINE_ENEMY_STRENGTH * (1 - NO_CONTACT_DECAY),
+            observationConfidence: null,
+        };
     }
 
     // No previous, no contact
-    return BASELINE_ENEMY_STRENGTH;
+    return { estimatedStrength: BASELINE_ENEMY_STRENGTH, observationConfidence: null };
+}
+
+function computeRecordOsidConfidence(
+    rec: import('../../../state/game_state.js').SectorIntelRecord,
+): number | null {
+    const entries = rec.osid_confidence ?? [];
+    if (entries.length === 0) return null;
+    let sum = 0;
+    for (const entry of entries) {
+        sum += Math.max(0, Math.min(1, entry.confidence));
+    }
+    return sum / entries.length;
+}
+
+function meanConfidence(samples: readonly number[]): number | null {
+    if (samples.length === 0) return null;
+    let sum = 0;
+    for (const sample of samples) {
+        sum += sample;
+    }
+    return sum / samples.length;
 }
 
 /**

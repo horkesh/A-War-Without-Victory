@@ -157,6 +157,10 @@ export interface HvIntegrationReport {
     turns_until_spawn: number;
 }
 
+type HvFormationState = FormationState & {
+    is_elite?: true;
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Spawn logic
 // ═══════════════════════════════════════════════════════════════════════════
@@ -168,7 +172,7 @@ export interface HvIntegrationReport {
 function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
     const turn = state.meta.turn;
 
-    const formation: FormationState = {
+    const formation: HvFormationState = {
         id: def.id,
         faction: 'HRHB',
         name: def.name,
@@ -187,11 +191,11 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
         equipment_class: def.equipment_class,
         tags: ['hv_origin', `corps:${HV_CORPS_ID}`],
         composition: { ...def.composition },
-    } as FormationState;
+    };
 
     // Mark as elite if applicable (no home distance debuff)
     if (def.is_elite) {
-        (formation as any).is_elite = true;
+        formation.is_elite = true;
     }
 
     state.military.formations[def.id] = formation;

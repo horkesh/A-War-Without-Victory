@@ -174,13 +174,13 @@ export function splitNonContiguousSectors(
         if (faction && edgeMeta) {
             edgeAdj = buildEdgeAdjacency(sector.edge_ids, edgeMeta, faction, osidAdjacency, sharedBoundaryAdj, centroids);
         } else {
-            const tempMeta = new Map<string, { a: string; b: string }>();
+            const tempMeta = new Map<string, { a: string; b: string; side_a?: string | null; side_b?: string | null }>();
             for (const eid of sector.edge_ids) {
                 const sep = eid.indexOf('__');
                 if (sep < 0) continue;
                 tempMeta.set(eid, { a: eid.slice(0, sep), b: eid.slice(sep + 2) });
             }
-            edgeAdj = buildEdgeAdjacency(sector.edge_ids, tempMeta as any);
+            edgeAdj = buildEdgeAdjacency(sector.edge_ids, tempMeta);
         }
 
         // Find connected components of edges

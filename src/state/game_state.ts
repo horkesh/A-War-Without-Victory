@@ -206,6 +206,16 @@ export interface SectorCombatRating {
     strength_class: SectorStrengthClass;
 }
 
+export type SectorIntelSource = 'passive_contact' | 'patrol' | 'scout' | 'combat';
+
+export interface SectorIntelOsidConfidence {
+    osid: string;
+    /** Current OSID-level intelligence confidence [0.0, 1.0]. */
+    confidence: number;
+    /** Sorted low-level observation sources contributing to this estimate. */
+    sources: SectorIntelSource[];
+}
+
 export interface SectorIntelRecord {
     enemy_sector_id: string;
     enemy_faction: FactionId;
@@ -224,6 +234,8 @@ export interface SectorIntelRecord {
     turns_in_contact: number;
     /** Enemy brigade IDs visible at current confidence level. Empty when confidence < CONFIDENCE_FRONT_BRIGADES. */
     visible_brigade_ids: FormationId[];
+    /** Optional bounded confidence for front-visible enemy OSIDs. Sorted by OSID. */
+    osid_confidence?: SectorIntelOsidConfidence[];
     /** Turn this record was last updated. */
     last_updated_turn: number;
 }

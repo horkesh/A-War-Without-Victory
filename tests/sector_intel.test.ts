@@ -456,3 +456,73 @@ describe('T13: confidence threshold ordering', () => {
         expect(CONFIDENCE_FULL_STRENGTH).toBeLessThan(CONFIDENCE_DEEP_INTEL);
     });
 });
+
+describe('Batch 10: per-OSID intel confidence and source blending', () => {
+    it('emits JSON-safe OSID confidence entries sorted by OSID', () => {
+        const sectorA = makeSector(
+            'sector:corps-A:0',
+            'corps-A',
+            'RS',
+            ['e1', 'e2'],
+            ['oA'],
+            ['op:zeta', 'op:alpha', 'op:middle'],
+        );
+        const sectorB = makeSector(
+            'sector:corps-B:0',
+            'corps-B',
+            'RBiH',
+            ['e1', 'e2'],
+            ['op:middle', 'op:zeta', 'op:alpha'],
+            ['oA'],
+        );
+        const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
+
+        deriveSectorIntel(state, 1);
+
+        const rec = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!;
+        expect(rec.osid_confidence).toEqual([
+            { osid: 'op:alpha', confidence: rec.confidence, sources: ['passive_contact'] },
+            { osid: 'op:middle', confidence: rec.confidence, sources: ['passive_contact'] },
+            { osid: 'op:zeta', confidence: rec.confidence, sources: ['passive_contact'] },
+        ]);
+        expect(JSON.parse(JSON.stringify(rec.osid_confidence))).toEqual(rec.osid_confidence);
+    });
+
+    it('blends passive contact, patrol, scout, and combat sources deterministically', () => {
+        const sectorA = makeSector(
+            'sector:corps-A:0',
+            'corps-A',
+            'RBiH',
+            ['e1'],
+            ['oA'],
+            ['op:target'],
+        );
+        sectorA.sector_stance = 'screening';
+        const sectorB = makeSector(
+            'sector:corps-B:0',
+            'corps-B',
+            'RS',
+            ['e1'],
+            ['op:target'],
+            ['oA'],
+        );
+        const state = makeMinimalState({ 'sector:corps-A:0': sectorA, 'sector:corps-B:0': sectorB });
+
+        deriveSectorIntel(state, 1);
+
+        const passivePatrolScout = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.osid_confidence![0]!;
+        expect(passivePatrolScout.sources).toEqual(['passive_contact', 'patrol', 'scout']);
+        expect(passivePatrolScout.confidence).toBeGreaterThan(
+            (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.confidence,
+        );
+
+        updateSectorIntelFromCombat(state, 'oA', 'op:target', 2);
+
+        const combat = (state.military.sector_intel!['sector:corps-A:0'] ?? [])[0]!.osid_confidence![0]!;
+        expect(combat).toEqual({
+            osid: 'op:target',
+            confidence: 1,
+            sources: ['combat'],
+        });
+    });
+});

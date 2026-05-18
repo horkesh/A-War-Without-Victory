@@ -87,6 +87,13 @@ export const CONFIDENCE_FULL_STRENGTH = 0.5;
 /** At or above this confidence (and recon_range >= 2): offensive_signs detectable + second-echelon sectors + deeper brigades visible. */
 export const CONFIDENCE_DEEP_INTEL = 0.8;
 
+export const SECTOR_INTEL_SOURCE_CONFIDENCE_BONUS = {
+    passive_contact: 0,
+    patrol: 0.08,
+    scout: 0.12,
+    combat: 1,
+} as const;
+
 /**
  * Intel confidence threshold for launching a full sector offensive.
  * Below this: launch a probe-type operation to gather intel first.
