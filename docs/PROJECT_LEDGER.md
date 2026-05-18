@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(ui): Batch 40 supply visibility read-model (UI-1)
+
+**Type:** UI / read-model projection only. No simulation authority, scenario state, save schema, generated artifact, or canon text changed.
+
+**Change:** Added `src/ui/map/data/playerSupplyVisibility.ts` and a Decision Room consumer in `src/ui/map/data/presidentialDecisionRoom.ts` (`addSupplyVisibilityCard`). The presidential Decision Room now emits a single player-scoped supply visibility card (id `supply:player-visibility`, category `operational`) when the player's own corridors are brittle/cut (`warning`) or the player's own brigades are isolated at critical-supply OSIDs / a critical OSID count exists (`critical`). Severity tiers — `critical` (criticalCount > 0 OR isolatedFormationCount > 0), `warning` (corridorAtRisk), `info`, `unknown`. The card stays silent on healthy or absent-data turns. The projection reads only player-faction-safe slices already exposed by `GameStateAdapter` (`supplySummaryByFaction[playerFaction]`, `supplyStateByOsid` — already filtered) and the player's own active brigades; no enemy-truth leakage. The Decision Room remains the singular synthesis surface; no new modal.
+
+**Determinism:** Pure projection, sorted formation iteration, no Math.random / Date.now / Date.
+
+**Verification:** `npm.cmd run typecheck` clean; `npx.cmd vitest run tests/ui_player_supply_visibility.test.ts tests/ui_decision_room_supply_visibility.test.ts tests/supply_panel_contract.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/presidential_decision_room_counter_offer.test.ts tests/ui_shell_navigation.test.ts --reporter=dot` 40/40 pass; `npm.cmd run desktop:map:build` 16.66s clean; `git diff --check` clean. No 40w run — UI read-model only, no sim or scenario authority.
+
+**Artifacts:** `src/ui/map/data/playerSupplyVisibility.ts`; updates to `src/ui/map/data/presidentialDecisionRoom.ts`; `tests/ui_player_supply_visibility.test.ts`; `tests/ui_decision_room_supply_visibility.test.ts`; `docs/40_reports/implemented/20260518_SUPPLY_VISIBILITY_READ_MODEL_BATCH40.md`; updates to `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md` row 8, and `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`.
+
+---
+
 ## [2026-05-18] refactor(strict-null): Batch 39 Phase 3 safe early-war + bot slice (byte-identical)
 
 **Type:** Type-erasure-only strict-null cleanup. Opens Phase 3 of the strict-null migration plan with the safe-scope first slice.

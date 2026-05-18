@@ -6,6 +6,7 @@ import {
   type TurnAftermathCostSeverity,
   type TurnAftermathView,
 } from './turnAftermath';
+import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -465,6 +466,31 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       sourceSort: opportunity.proposal_id,
     });
   }
+}
+
+function addSupplyVisibilityCard(state: LoadedGameState, cards: CandidateCard[]): void {
+  const view = buildPlayerSupplyVisibility(state);
+  if (!view || !view.hasSupplyData) return;
+  if (view.severity !== 'critical' && view.severity !== 'warning') return;
+
+  const cardSeverity: PresidentialDecisionRoomSeverity = view.severity === 'critical' ? 'critical' : 'warning';
+  cards.push({
+    id: 'supply:player-visibility',
+    category: 'operational',
+    severity: cardSeverity,
+    title: view.headline,
+    explanation:
+      view.severity === 'critical'
+        ? 'Supply truth shows formations isolated or settlements at critical supply. Inspect the operational SITREP and map supply mode before advancing.'
+        : 'Supply truth shows brittle or cut corridors that could fail under further pressure. Review the operational SITREP.',
+    sourceOwner: 'Supply derivation',
+    sourceLabel: 'Operational SITREP',
+    actionLabel: 'War Summary',
+    evidence: view.evidence,
+    navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+    urgencySort: cardSeverity === 'critical' ? 0 : 5,
+    sourceSort: 'supply:player-visibility',
+  });
 }
 
 function addSitrepCards(state: LoadedGameState, cards: CandidateCard[]): void {
@@ -1178,6 +1204,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addCounterOfferCards(state, candidates);
   addOpportunityCards(state, candidates);
   addSitrepCards(state, candidates);
+  addSupplyVisibilityCard(state, candidates);
   addBriefingCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
   addCampaignCostCard(state, osidNameMap, candidates);
