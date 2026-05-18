@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 26 — :severe-rescue sub-attribution
+
+| Lane | Status | Source |
+|---|---|---|
+| Split `:severe-rescue` into `:quiet-self-relief` + `:floor-completion` + `:severe-relief` | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH26_SEVERE_RESCUE_SUBSPLIT.md`. `:floor-completion` 696ms (65%) is the dominant child. 40w n1903 hash `b14179d65639860c`. |
+
 ## Completed Batch 25 — :zero-assigned activeCounts hoist
 
 | Lane | Status | Source |

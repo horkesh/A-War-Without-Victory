@@ -1,10 +1,31 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 25 :zero-assigned activeCounts hoist)
+**Updated:** 2026-05-18 (Batch 26 :severe-rescue sub-attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 26 :severe-rescue sub-attribution (byte-identical)
+
+**Change:** Phase E (`ensureMinimumSectorCoverage:severe-rescue`, ~290 lines) split into three nested `perfTime` children: `:quiet-self-relief` (~49 lines), `:floor-completion` (~98 lines), `:severe-relief` (~85+ lines).
+
+**Run evidence (n1903):**
+
+| Label | Aggregate ms | Calls | % of parent |
+|---|---:|---:|---:|
+| `:severe-rescue:floor-completion` | **696.4** | 1502 | 65.5% |
+| `:severe-rescue:quiet-self-relief` | 249.7 | 1502 | 23.5% |
+| `:severe-rescue:severe-relief` | 114.9 | 1502 | 10.8% |
+| Parent `:severe-rescue` | 1063.4 | 1502 | 100% |
+
+Children sum 99.8%; attribution overhead 0.2%.
+
+**Byte-identity:** 40w n1903 hash `b14179d65639860c` matches Batch 17 baseline literally; 27/27 anchors, 6/6 benchmarks.
+
+**Next target:** `:floor-completion` 696ms — line 1891 builds `activeCounts` per recipient; likely byte-identical hoist candidate (same pattern as Batch 25 saved 45%).
+
+**Report:** [implemented/20260518_BATCH26_SEVERE_RESCUE_SUBSPLIT.md](implemented/20260518_BATCH26_SEVERE_RESCUE_SUBSPLIT.md)
 
 ## 2026-05-18: Batch 25 :zero-assigned activeCounts hoist (byte-identical optimization)
 

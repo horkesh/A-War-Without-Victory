@@ -1822,6 +1822,7 @@ export function ensureMinimumSectorCoverage(
     // consume any reachable rear/reserve brigade it already owns before asking a
     // sibling sector to donate. This fixes quiet floor deficits without
     // cannibalizing another sector or requiring threat-gated rescue.
+    perfTime('ensureMinimumSectorCoverage:severe-rescue:quiet-self-relief', () => {
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length === 0) continue;
@@ -1867,6 +1868,9 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:severe-rescue:floor-completion', () => {
     const FLOOR_COMPLETION_MAX_RECIPIENT_DENSITY = 0.125;
     const FLOOR_COMPLETION_DONOR_MAX_THREAT = 100;
     const FLOOR_COMPLETION_MIN_DENSITY_ADVANTAGE = 0.05;
@@ -1966,6 +1970,9 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
+
+    perfTime('ensureMinimumSectorCoverage:severe-rescue:severe-relief', () => {
     const SEVERE_RECIPIENT_MAX_DENSITY = 0.125;
     const SEVERE_RECIPIENT_MIN_THREAT = 150;
     const SEVERE_NEARBY_RELIEF_MAX_HOPS = LOCAL_FRONT_RELIEF_MAX_HOPS;
@@ -2096,6 +2103,7 @@ export function ensureMinimumSectorCoverage(
             }
         }
     }
+    });
 
     });
 

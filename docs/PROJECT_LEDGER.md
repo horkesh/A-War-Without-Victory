@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sector): Batch 26 :severe-rescue sub-attribution (byte-identical)
+
+**Type:** Sector reconstruction sidecar-only nested sub-attribution.
+
+**Change:** Split Phase E (`ensureMinimumSectorCoverage:severe-rescue`, ~290 lines) into three nested `perfTime` children: `:quiet-self-relief` (sectors below floor consume own rear/reserve, ~49 lines), `:floor-completion` (low-density recipients pull from same-corps surplus, ~98 lines), `:severe-relief` (low-density high-threat recipients pull from rear/reserve/front of same-component donors, ~85+ lines). Static contract test extended to require the three new label literals. n1903 evidence (single-run filter): `:floor-completion` 696.4 ms / 1502 calls (65.5% of parent), `:quiet-self-relief` 249.7 ms / 1502 (23.5%), `:severe-relief` 114.9 ms / 1502 (10.8%); children sum 99.8% of the 1063.4 ms parent — clean attribution.
+
+**Determinism:** Pure sidecar attribution. 40w n1903 hash `b14179d65639860c` matches Batch 17 baseline literally. validate_run_consistency PASS; anchors 27/27; benchmarks 6/6.
+
+**Verification:** typecheck PASS. `tests/sector_partition_*.test.ts + final_sector_truth_* + war_phase_step_order` 65/65 PASS (includes new label literals).
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH26_SEVERE_RESCUE_SUBSPLIT.md`; SECTOR_MASTER + MASTER_BACKLOG_EXECUTION_QUEUE + napkin updates.
+
+**Next target:** `:floor-completion` 696 ms — line 1891 builds `activeCounts` per recipient and consumes it read-only inside the candidate `.flatMap`. Pattern matches Batch 25's hoist site; likely 30-50% saving.
+
+---
+
 ## [2026-05-18] feat(sector): Batch 25 :zero-assigned activeCounts hoist (byte-identical optimization)
 
 **Type:** Sector reconstruction byte-identical optimization.
