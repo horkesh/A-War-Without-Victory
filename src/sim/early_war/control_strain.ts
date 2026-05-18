@@ -72,7 +72,7 @@ export function getMunicipalityController(state: GameState, sids: SettlementId[]
         if (b[1] !== a[1]) return b[1] - a[1];
         return strictCompare(a[0], b[0]);
     });
-    return entries[0]![0] as FactionId;
+    return entries[0]![0];
 }
 
 /** Authority multiplier (Peace-phase §4.5.1): (1.0 - Faction_Authority_Score). State authority is 0-100. */

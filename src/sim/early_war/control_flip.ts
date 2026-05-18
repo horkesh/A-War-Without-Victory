@@ -168,7 +168,7 @@ function getMunicipalityController(
             best = countKey === '_null_' ? null : countKey;
         }
     }
-    return best as FactionId | null;
+    return best;
 }
 
 /** War is active if at least one faction has declared (Peace-phase §4.3.1). */
@@ -416,10 +416,9 @@ function applyFlip(
     );
 
     // Consolidation and militia updates (same as before)
-    if (!state.political.war_consolidation_until) {
-        (state as GameState & { war_consolidation_until: Record<string, number> }).political.war_consolidation_until = {};
-    }
-    state.political.war_consolidation_until![munId] = turn + CONSOLIDATION_BASE_TURNS;
+    const consolidationMap = state.political.war_consolidation_until ?? {};
+    state.political.war_consolidation_until = consolidationMap;
+    consolidationMap[munId] = turn + CONSOLIDATION_BASE_TURNS;
     const municipalities = state.political.municipalities ?? {};
     if (municipalities[munId]) {
         municipalities[munId].stability_score = POST_FLIP_STABILITY;

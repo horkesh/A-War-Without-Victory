@@ -6417,3 +6417,30 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/release/20260519_RC_EVIDENCE_BUNDLE.md` (new), `docs/40_reports/release/20260519_RELEASE_ARTIFACT_INDEX.md` (new), `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md` (template fields + guard expansion).
 
 ---
+
+## [2026-05-19] refactor(strict-null): Batch 40 Phase 3 continuation slice (byte-identical)
+
+**Type:** Type-only refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, packaging metadata, or FORAWWV text changed. `npm.cmd run test:baselines` PASS confirms byte-identity across the four baseline scenarios.
+
+**Change:** Closed eight more Phase 3 strict-null escapes from `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`. Phase 3 inventory: 27 → 19 remaining.
+- `src/sim/early_war/control_flip.ts`: removed redundant `as FactionId | null` on `return best` (line 171); replaced `(state as GameState & {...}).political.war_consolidation_until = {}` plus `state.political.war_consolidation_until![munId]` non-null write with a local-binding refactor (`const consolidationMap = state.political.war_consolidation_until ?? {}; state.political.war_consolidation_until = consolidationMap; consolidationMap[munId] = ...`). When the field is already defined, the `??` returns the same object reference and the reassignment is identity; when it is `undefined`, both versions install an empty object then write to it.
+- `src/sim/early_war/control_strain.ts`: removed redundant `as FactionId` on `return entries[0]![0]` (line 75).
+- `src/sim/early_war/minority_erosion.ts`: removed redundant `as FactionId | null` on `return best` (line 62). The file remains partially clean with 4 deferred escapes at lines 121-126 (latent-bug cluster — `(state as any).war_militia_strength = {}` writes to the wrong path; documented in `docs/40_reports/implemented/20260519_BATCH40_STRICT_NULL_PHASE3_CONTINUATION.md`).
+- `src/sim/early_war/minority_militia_decay.ts`: removed redundant `as FactionId` on `faction` argument to `getFactionShareInMun` (line 87).
+- `src/sim/early_war/pool_population.ts`: removed redundant `as FactionId[]` on `Object.keys(byFaction).sort(strictCompare)` (line 217).
+- `tests/strict_null_inventory_progress.test.ts`: added `PHASE_3_EARLY_WAR_BATCH_40_FILES` constant (`control_flip.ts`, `control_strain.ts`, `minority_militia_decay.ts`, `pool_population.ts`) and a new "cleans the Batch 40 Phase 3 early-war continuation slice" assertion.
+
+All five `as FactionId*` removals are no-ops under the current `type FactionId = string` alias (`src/state/game_state.ts:45`). They document the tightening boundary for any future refactor that makes `FactionId` a string-literal union — at that point the right pattern is a runtime `isFactionId(...)` type guard, not the casts.
+
+**Determinism:** Pure type erasure (5 sites) + local-binding refactor (1 site). TypeScript emits character-equivalent JS. `npm.cmd run test:baselines` PASS proves byte-identity.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 19/19 PASS (incl. new Batch 40 slice).
+- `npx.cmd vitest run tests/early_war_control_flip.test.ts tests/early_war_control_strain.test.ts tests/early_war_pool_population.test.ts --reporter=dot` — 23/23 PASS.
+- `npm.cmd run test:baselines` — PASS ("Baseline regression: all scenarios match").
+- `git diff --check` — clean.
+
+**Artifacts:** `src/sim/early_war/control_flip.ts`, `src/sim/early_war/control_strain.ts`, `src/sim/early_war/minority_erosion.ts`, `src/sim/early_war/minority_militia_decay.ts`, `src/sim/early_war/pool_population.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260519_BATCH40_STRICT_NULL_PHASE3_CONTINUATION.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (ledger row).
+
+---

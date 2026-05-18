@@ -214,7 +214,7 @@ export function runDisplacedAndCrossEthnicContributions(
         if (!sids?.length) continue;
         const byFaction = disp.displaced_in_by_faction;
         if (byFaction && typeof byFaction === 'object') {
-            for (const factionId of (Object.keys(byFaction) as FactionId[]).sort(strictCompare)) {
+            for (const factionId of Object.keys(byFaction).sort(strictCompare)) {
                 const displacedForFaction = byFaction[factionId];
                 if (displacedForFaction == null || displacedForFaction <= 0) continue;
                 const contribution = Math.min(

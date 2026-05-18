@@ -104,6 +104,13 @@ const PHASE_3_EARLY_WAR_BATCH_39_FILES = [
     'src/sim/early_war/militia_emergence.ts',
 ];
 
+const PHASE_3_EARLY_WAR_BATCH_40_FILES = [
+    'src/sim/early_war/control_flip.ts',
+    'src/sim/early_war/control_strain.ts',
+    'src/sim/early_war/minority_militia_decay.ts',
+    'src/sim/early_war/pool_population.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -399,6 +406,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_3_EARLY_WAR_BATCH_39_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 40 Phase 3 early-war continuation slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_3_EARLY_WAR_BATCH_40_FILES),
             0,
         );
 

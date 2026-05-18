@@ -84,7 +84,7 @@ export function runMinorityMilitiaDecay(
         const authorityState = state.political.municipalities?.[mun_id]?.control ?? 'consolidated';
         if (authorityState !== 'consolidated') continue;
 
-        const ethnicPct = getFactionShareInMun(population1991ByMun, mun_id, faction as FactionId);
+        const ethnicPct = getFactionShareInMun(population1991ByMun, mun_id, faction);
         const decay = Math.min(0.4, Math.max(0.2, 0.2 + (0.25 - ethnicPct)));
         const newAvailable = Math.max(0, Math.floor(pool.available * (1 - decay)));
         const removed = pool.available - newAvailable;
