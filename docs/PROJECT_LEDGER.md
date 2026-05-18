@@ -6395,3 +6395,25 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/audits/20260519_VISUAL_QA_EVIDENCE_INVENTORY.md` (new), `docs/40_reports/GUI_MASTER.md` (one row added).
 
 ---
+
+## [2026-05-19] docs(release): RC evidence bundle + packaging support — Batches D + E of RC hardening wave
+
+**Type:** Documentation only plus a template field expansion. No engine behavior, simulation output, scenario data, save schema, generated artifact, packaging metadata, signing config, or FORAWWV text changed.
+
+**Change:** Closed `docs/plans/2026-05-18-autonomous-rc-evidence-bundle-plan.md` Tasks 1-4 and `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md` PPB-2 + PPB-4. Operator-only gates (clean-VM, signing, SmartScreen, store/press/trailer, BCS native-speaker review, sensitive-history Codex prose, macOS notarization/auto-update) are explicitly left open.
+- `docs/40_reports/release/20260519_RC_EVIDENCE_BUNDLE.md`: new RC evidence bundle. §1 inventories every gate classified as repo-verified / operator-only / historian/user-gated / not-yet-prepared. §2 command evidence table records every command freshly run during the RC hardening wave with PASS/FAIL. §3 records committed-artifact SHA-256s and the local NSIS installer SHA with an explicit "operator must rebuild for release truth" caveat. §4 carries known-issue rows and explicitly creates no new waivers. §5 records the final gate sequence: typecheck PASS, `npm.cmd test` PASS (786 files / 7161 tests / 18 pre-existing skipIf), `npm.cmd run desktop:map:build` PASS (~18.4 s), `npm.cmd run test:baselines` PASS ("all scenarios match"), `git diff --check` PASS.
+- `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md`: PPB-2 template refresh. Added operator initials, host OS build (Windows), host distro/kernel (Linux), and run date fields. Added explicit "this template is NOT repo-proven" guard block. Expanded both checklists to columnize evidence path, OS/distro captured, screenshot path, result, and operator initials so each row demands operator-supplied closure rather than implicit pass.
+- `docs/40_reports/release/20260519_RELEASE_ARTIFACT_INDEX.md`: PPB-4 release artifact index. Local-only directory of repo-verified vs operator-pending evidence rows; `distributionApproved: false` is the canonical machine-readable line and autonomous workers MUST NOT flip it without explicit user/operator sign-off referencing the artifact SHA-256.
+
+**Determinism:** Documentation only.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npm.cmd test` — PASS, 786 files / 7161 tests / 18 pre-existing skipIf fixture guards / exit 0 / ~826 s.
+- `npm.cmd run desktop:map:build` — PASS, ~18.4 s.
+- `npm.cmd run test:baselines` — PASS, "Baseline regression: all scenarios match."
+- `git diff --check` — clean.
+
+**Artifacts:** `docs/40_reports/release/20260519_RC_EVIDENCE_BUNDLE.md` (new), `docs/40_reports/release/20260519_RELEASE_ARTIFACT_INDEX.md` (new), `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md` (template fields + guard expansion).
+
+---
