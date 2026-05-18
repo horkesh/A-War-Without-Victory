@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): Batch 22 autonomous closeout (normalizeFinalSectorBuckets friendlyUniverse hoist; ensureMinimumSectorCoverage attribution held)
+
+**Type:** Sector reconstruction byte-identical optimization + held attribution lane + parent doc propagation.
+
+**Change:** Batch 22 closed one lane and held one lane. Lane A hoisted `friendlyUniverseByFaction: Map<FactionId, Set<string>>` precompute out of the per-sector loop in `normalizeFinalSectorBuckets(...)` (src/sim/combat/corps_front_sectors.ts). The per-sector `Object.entries(politicalControllers).filter(c => c === sector.faction).map(...)` rebuild that iterated all ~700 entries 42,227 times per 40w run when only 3 distinct faction values exist is now one O(politicalControllers) pass per `normalizeFinalSectorBuckets` invocation, with per-sector consumption collapsing to `Map.get` + null check. New sidecar label `normalizeFinalSectorBuckets:friendly-universe-precompute` covers the one-shot build. n1899 evidence: per-sector `:friendly-universe` drops from 1897.3 ms (Batch 21 baseline) to 10.0 ms (–99.5%); `:friendly-universe-precompute` adds 78.6 ms; parent `applyFinalSectorOwnerTruthPass:normalize-buckets` drops from 2013.9 ms to 294.7 ms (–85% / –1.7 s on the 40w simulation bucket). Lane B (planned 5-phase attribution inside `ensureMinimumSectorCoverage(...)` for the `:ensure-coverage` 72% hotspot identified in Batch 21) was attempted and reverted: wrapping each phase in `_perfTime` callbacks broke closure scope because `needed` and `DENSITY_FLOOR_*` constants declared in Phase B (`density-floor`) are referenced from Phase E (`severe-rescue`) at 10+ sites. Reverted cleanly (function signature back to original 6 args; 5 phase wrappers removed; corps_front_sectors.ts call sites reverted; test removed). Re-attempt path documented: hoist shared closures to function-body scope BEFORE wrappers begin.
+
+**Determinism / output impact:** Lane A is a pure algorithmic refactor — Set contents and insertion order are identical to the prior per-sector construction (`Object.entries` iterates property declaration order, which is stable; matching keys land in the per-faction Set in the same order). Downstream consumption uses `.has(...)` reads only; reference identity is not observed. `territorySet` fallback when `politicalControllers` is undefined is preserved. 40w n1899 final hash `b14179d65639860c` matches Batch 17 baseline literally; anchors 27/27, benchmarks 6/6, `validate_run_consistency` PASS (15/15 invariants; pre-existing below-floor advisories unchanged). Lane B revert is back to Batch 21 source state.
+
+**Verification:** `npm.cmd run typecheck` PASS. `git diff --check` clean (CRLF normalization warnings only). `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_truth_reconciliation.test.ts tests/war_phase_step_order.test.ts --reporter=dot` 64/64 PASS. `PERF_PROFILE_SECTOR_PARTITION=true npm.cmd run sim:scenario:run:40w:timed` produced n1899 hash `b14179d65639860c`; expert verified GO for byte-identity.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH22_AUTONOMOUS_MULTI_LANE.md`; updates to `docs/40_reports/SECTOR_MASTER.md` (Batch 22 entry with full pre/post evidence table), `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md` (Batch 22 row including held lane), `docs/PROJECT_LEDGER_KNOWLEDGE.md` (durable rule), `.claude/napkin.md`.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` not edited. Sector docs record the byte-identical optimization and the held attribution lane with a path-forward note for Batch 23.
+
+---
+
 ## [2026-05-18] feat(roadmap): Batch 21 autonomous multi-lane closeout (strict-null Batch 20 + sector normalizeFinalSectorBuckets + sealMergedSectorTruth deeper attribution)
 
 **Type:** Mixed roadmap/backlog execution batch: combat strict-null cleanup, two sector reconstruction sidecar-only deeper attributions, and parent documentation propagation.

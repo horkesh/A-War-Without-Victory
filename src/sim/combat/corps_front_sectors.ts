@@ -1157,17 +1157,40 @@ function normalizeFinalSectorBuckets(
     adjacency: Map<Osid, Osid[]>,
     politicalControllers?: Record<string, FactionId | null | undefined>,
 ): void {
+    // Hoist: precompute friendlyUniverse per faction once for the whole call. The
+    // per-sector loop previously rebuilt this same set for every sector (~42k calls
+    // per 40w when only 3 distinct faction values exist) — Batch 21 profiling
+    // attributed 89% of normalize cost to the per-sector rebuild. With this map,
+    // each sector reads its faction's pre-built Set in O(1) and the friendly-universe
+    // child label collapses to a near-zero cost. Set contents and insertion order
+    // are identical to the prior per-sector construction (Object.entries iterates
+    // the same property order; matching keys land in the per-faction Set in the same
+    // order). Returns null when `politicalControllers` is undefined so the
+    // per-sector territorySet fallback path remains byte-identical.
+    const friendlyUniverseByFaction = _perfTime(
+        'normalizeFinalSectorBuckets:friendly-universe-precompute',
+        () => {
+            if (!politicalControllers) return null;
+            const result = new Map<FactionId, Set<string>>();
+            for (const [osid, controller] of Object.entries(politicalControllers)) {
+                if (controller == null) continue;
+                let set = result.get(controller);
+                if (!set) {
+                    set = new Set<string>();
+                    result.set(controller, set);
+                }
+                set.add(osid);
+            }
+            return result;
+        },
+    );
     for (const sector of sectors) {
         const frontSet = getSectorFrontOsids(sector);
         const territorySet = new Set(sector.territory_osids);
         const expandedTerritory = new Set(territorySet);
         const friendlyUniverse = _perfTime('normalizeFinalSectorBuckets:friendly-universe', () =>
-            politicalControllers
-                ? new Set(
-                    Object.entries(politicalControllers)
-                        .filter(([, controller]) => controller === sector.faction)
-                        .map(([osid]) => osid),
-                )
+            friendlyUniverseByFaction
+                ? friendlyUniverseByFaction.get(sector.faction) ?? new Set<string>()
                 : new Set(territorySet)
         );
         const reserveBand = _perfTime('normalizeFinalSectorBuckets:reserve-band', () => {

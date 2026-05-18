@@ -1,10 +1,24 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 21 normalizeFinalSectorBuckets + sealMergedSectorTruth attribution)
+**Updated:** 2026-05-18 (Batch 22 normalizeFinalSectorBuckets friendlyUniverse hoist)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 22 normalizeFinalSectorBuckets friendlyUniverse hoist (byte-identical optimization)
+
+**Change:** Precomputed `friendlyUniverseByFaction: Map<FactionId, Set<string>>` once at the start of `normalizeFinalSectorBuckets(...)` instead of rebuilding the per-faction set inside every per-sector iteration. New sidecar label `normalizeFinalSectorBuckets:friendly-universe-precompute` covers the one-shot build; the existing `normalizeFinalSectorBuckets:friendly-universe` label now covers only the per-sector `Map.get` lookup. Per-sector `:friendly-universe` drops from 1897.3 ms / 42227 calls to 10.0 ms / 42227 calls (–99.5%); the new `:friendly-universe-precompute` adds 78.6 ms; parent `applyFinalSectorOwnerTruthPass:normalize-buckets` drops from 2013.9 ms to 294.7 ms (–85%), a ~1.7 s win on the 40w simulation bucket.
+
+**Why:** Batch 21 attribution flagged `:friendly-universe` as 89% of `:normalize-buckets` cost — the per-sector `Object.entries(politicalControllers).filter(c => c === sector.faction).map(...)` rebuild iterated all ~700 politicalControllers entries 42,227 times per 40w run when only 3 distinct faction values exist. Precomputing once per call collapses the per-sector cost to a `Map.get` + null check.
+
+**Byte-identity proof:** 40w n1899 final hash `b14179d65639860c` matches Batch 17 baseline literally; `node tools/validate_run_consistency.cjs runs/.../n1899` PASS (15/15 invariants); anchors 27/27, benchmarks 6/6. Insertion order preserved across `Object.entries` iteration (declaration order is stable); downstream `.has(...)` reads don't observe Set reference identity.
+
+**Held for later batch:** Attempted 5-phase attribution inside `ensureMinimumSectorCoverage(...)` (the `:ensure-coverage` 72% hotspot from Batch 21). The phase wraps broke closure scope because `needed` (declared in Phase B `density-floor`) is referenced from Phase E `severe-rescue` (10+ sites). Reverted in this batch. Re-attempt path: hoist shared closures out of phase bodies to function scope BEFORE the wrappers begin.
+
+**Next target:** Either hoist-then-attribute `ensureMinimumSectorCoverage`, or pivot to descending into `sealMergedSectorTruth:ensure-coverage` (2666 ms / 1502 calls / 1.78 ms-per-call) via direct source inspection for byte-identical wins.
+
+**Report:** [implemented/20260518_BATCH22_AUTONOMOUS_MULTI_LANE.md](implemented/20260518_BATCH22_AUTONOMOUS_MULTI_LANE.md)
 
 ## 2026-05-18: Batch 21 normalizeFinalSectorBuckets + sealMergedSectorTruth deeper attribution (byte-identical)
 
