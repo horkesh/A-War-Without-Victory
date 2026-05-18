@@ -68,9 +68,12 @@
 | Batch 8 strict-null continuation | Implemented | `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH8.md`; Phase 2 remaining inventory reduced `105 -> 103`. |
 | Batch 8 notification content continuation | Implemented / content partial | `docs/40_reports/implemented/20260518_EVENT_NOTIFICATION_CONTENT_BATCH8.md`; six 1993 conflict/diplomacy rows moved `0/24 -> 24/24`, sensitive residual rows remain gated. |
 | Batch 8 sector performance Task 3 | Implemented as instrumentation | `docs/40_reports/implemented/20260518_SECTOR_RECONSTRUCTION_ATTRIBUTION_TASK3.md`; next Task 4 target is `recoverDroppedFrontEdges:faction-front-claim-setup`. |
-| Sector performance Task 4 | Optimize faction front-claim setup | Use the sector reconstruction plan; allowed only after byte-identity gates and focused sector equivalence tests. |
-| Strict-null continuation | Continue Phase 2 beyond Batch 8 combat leaves | Batch 8 leaves 103 combat inventory escapes; continue with small verified slices. |
-| Notification content continuation | Historian-reviewed Phase D residuals | Remaining atrocity/detention, enclave/siege, front-visit, Washington timing, and late-war diplomacy rows remain gated by historian/narrative review. |
+| Batch 9 strict-null continuation | Implemented | `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH9.md`; Phase 2 remaining inventory reduced `103 -> 102`. |
+| Batch 9 sector performance Task 4 | Implemented / hash-stable | `docs/40_reports/implemented/20260518_SECTOR_RECONSTRUCTION_TASK4_ATTEMPT.md`; build-scoped front-claim setup cache reuses setup across the two recovery passes; timed 40w n1885 stayed hash-stable at `42607f83870e01d5`. |
+| Batch 9 notification residual gate audit | Implemented as plan/audit | `docs/40_reports/implemented/20260518_EVENT_NOTIFICATION_RESIDUAL_GATE_AUDIT.md`; `docs/plans/2026-05-18-event-notification-sensitive-content-review-plan.md` owns 20 rows / 102 blocks of sensitive residual content. |
+| Sector performance follow-up | Measure Task 4 and choose Task 5 only from fresh evidence | Use the sector reconstruction plan; no further optimization without byte-identity proof and focused sector equivalence tests. |
+| Strict-null continuation | Continue Phase 2 beyond Batch 9 combat leaves | Batch 9 leaves 102 combat inventory escapes; continue with small verified slices. |
+| Notification content continuation | Historian-reviewed Phase D residuals | Remaining 20 rows / 102 blocks are gated by the sensitive-content review plan; do not author fallback prose. |
 | Operator evidence | Execute clean-VM and external playtest evidence outside the repo when an operator has target machines/artifacts | Repo now has templates/scripts; actual SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, outreach, and response triage remain operator-only. |
 
 ## Stale Or Already Closed Rows To Reconcile

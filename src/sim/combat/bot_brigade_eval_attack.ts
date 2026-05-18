@@ -759,7 +759,7 @@ export function evaluateUncontestedOccupation(
             // Check: no enemy formations physically at this OSID
             const hasDefender = profileTime('.defenderScan', () => {
                 if (activeFormationLocationsByFaction) {
-                    return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller as FactionId, n as Osid);
+                    return hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller, n as Osid);
                 }
                 for (const fid of Object.keys(formations)) {
                     const f = formations[fid] as FormationState | undefined;

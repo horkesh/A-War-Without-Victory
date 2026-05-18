@@ -47,6 +47,23 @@
 | `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | RBiH | 0/4 |
 | `war_1995.json` | `dayton_talks_begin_1995` | RBiH | 0/4 |
 
+## Batch 9 Residual Gate Audit
+
+**Plan:** [`docs/plans/2026-05-18-event-notification-sensitive-content-review-plan.md`](../plans/2026-05-18-event-notification-sensitive-content-review-plan.md)
+**Report:** [`docs/40_reports/implemented/20260518_EVENT_NOTIFICATION_RESIDUAL_GATE_AUDIT.md`](implemented/20260518_EVENT_NOTIFICATION_RESIDUAL_GATE_AUDIT.md)
+
+Batch 9 did not author any new `notifications_to_other_factions` copy. The residual surface is now classified for a future content pass.
+
+| Review type | Rows | Remaining recipient blocks | Events |
+|---|---:|---:|---|
+| Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
+| Narrative tone required | 2 | 8 | `rs_strategic_goals`; `rbih_state_identity` |
+| Washington timing policy | 2 | 8 | `washington_agreement_1994`; `ic_rbih_restraint_post_washington` |
+| Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
+| Front-visit mixed-sensitive | 3 | 30 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
+
+**Total residual:** 20 event rows and 102 recipient blocks. This total includes two sparse 1992 rows already listed under implemented coverage because they still have uncovered response/recipient combinations.
+
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
 |---|---|---|

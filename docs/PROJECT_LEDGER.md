@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close ninth backlog execution batch
+
+**Scope:** Ninth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, sector-performance Task 4, and Phase D event-notification residual gating. No combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.
+
+**Change:** Cleaned one strict-null combat escape in `bot_brigade_eval_attack.ts`, lowering the Phase 2 remaining inventory from 103 to 102. Implemented a build-scoped recovered-front-claim setup cache inside `buildCorpsFrontSectors(...)`, reused only across that build's two `recoverDroppedFrontEdges(...)` passes, with `SECTOR_COLDSTART_CACHE_DISABLED=true` preserving a focused cache-off equivalence path. Audited residual Phase D notification content and created an actionable sensitive-content review plan for the remaining 20 event rows / 102 recipient blocks instead of authoring unsafe fallback prose.
+
+**Determinism / output impact:** Strict-null change is type-only. The sector cache is scoped to one sector-build invocation, preserves sorted inputs/final truth passes, and is covered by cache-on/cache-off sector snapshot tests; final scenario byte-identity is parent-verified before commit. Notification residual work is docs-only and does not edit event JSON or generated notification state.
+
+**Verification:** Parent integration passed `npm.cmd run typecheck`; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/uncontested_sector_defense_cache.test.ts tests/brigade_aor_subsegment.test.ts tests/defensive_front_gap_count_cache.test.ts --reporter=dot` (4 files / 32 tests); `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_truth_reconciliation.test.ts tests/war_phase_step_order.test.ts --reporter=dot` (5 files / 27 tests, including 100 deterministic cache-on/cache-off sector variants); `npx.cmd vitest run tests/sim/events/event_notification_content_backfill.test.ts tests/sim/events/two_level_surfacing.test.ts tests/sim/events/dismiss_notifications.test.ts tests/event_timeline_integrity.test.ts --reporter=dot` (4 files / 26 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w:timed` produced n1885 hash `42607f83870e01d5`, 27/27 anchors, 6/6 bot benchmarks, and timing `96896.459ms` total / `2422.411ms` per turn; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1885` passed; and `git diff --check` passed with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Sensitive event-notification residuals remain intentionally unauthored until their historian/narrative/Washington/late-war/front-visit review lanes clear specific response/recipient copy.
+
+---
+
 ## [2026-05-18] feat(roadmap): close eighth backlog execution batch
 
 **Scope:** Eighth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, safe Phase D notification content, and sector-performance Task 3 attribution. No sector optimization, combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.

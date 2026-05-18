@@ -227,6 +227,30 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: recovered front claim setup cache is build-scoped only', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const buildStart = raw.indexOf('export function buildCorpsFrontSectors(');
+        const recoverStart = raw.indexOf('function recoverDroppedFrontEdges(');
+        const recoverEnd = raw.indexOf('function pickRecoveredFrontEdgeRecipient(', recoverStart);
+        expect(buildStart).toBeGreaterThanOrEqual(0);
+        expect(recoverStart).toBeGreaterThan(buildStart);
+        expect(recoverEnd).toBeGreaterThan(recoverStart);
+
+        const buildRegion = raw.slice(buildStart, recoverStart);
+        const recoverRegion = raw.slice(recoverStart, recoverEnd);
+        const beforeBuild = raw.slice(0, buildStart);
+
+        expect(beforeBuild).not.toContain('recoveredFrontClaimSetupCache');
+        expect(buildRegion).toContain('const recoveredFrontClaimSetupCache');
+        expect(buildRegion.match(/recoverDroppedFrontEdges\(/g)?.length).toBe(2);
+        expect(buildRegion.match(/recoveredFrontClaimSetupCache/g)?.length).toBeGreaterThanOrEqual(3);
+        expect(recoverRegion).toContain('recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>');
+        expect(recoverRegion).toContain('getRecoveredFrontClaimSetup(');
+        expect(recoverRegion).not.toMatch(/\bDate\.now\s*\(/);
+        expect(recoverRegion).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(recoverRegion).not.toMatch(/\bMath\.random\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 

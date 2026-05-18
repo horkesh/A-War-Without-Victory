@@ -138,6 +138,14 @@ interface SectorPartitionInvocationRecord {
     subFunctionNs: Map<string, SectorPartitionPerfBucket>;
 }
 
+interface RecoveredFrontClaimSetup {
+    corpsEdges: Map<FormationId, string[]>;
+    friendlyOsids: Set<string>;
+    componentOf: Map<string, number>;
+    factionBrigadeLocations: string[];
+    factionBrigadeComponents: Set<number>;
+}
+
 /**
  * Per-invocation-scoped timing record. The outer call to `buildCorpsFrontSectors`
  * creates one of these and threads it through the body via this module-local
@@ -352,6 +360,9 @@ export function buildCorpsFrontSectors(
     const formations = state.military.formations ?? {};
     const factions = getFactions(state);
     const result: Record<string, CorpsFrontSector> = {};
+    const recoveredFrontClaimSetupCache = nodeProcess?.env?.SECTOR_COLDSTART_CACHE_DISABLED === 'true'
+        ? undefined
+        : new Map<FactionId, RecoveredFrontClaimSetup>();
 
     for (const faction of factions) {
         const factionSectors = _perfTime(`buildFactionSectors:${faction}`, () => buildFactionSectors(
@@ -434,10 +445,10 @@ export function buildCorpsFrontSectors(
     _perfTime('relocateMisassignedBrigadesToTruthfulOwners', () => relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency));
     _perfTime('sealMergedSectorTruth:2', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
     _perfTime('pruneGhostArtifactSectors:1', () => pruneGhostArtifactSectors(result));
-    _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial));
+    _perfTime('recoverDroppedFrontEdges:1', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
     _perfTime('sealMergedSectorTruth:3', () => sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial));
     _perfTime('pruneGhostArtifactSectors:2', () => pruneGhostArtifactSectors(result));
-    _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial));
+    _perfTime('recoverDroppedFrontEdges:2', () => recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial, recoveredFrontClaimSetupCache));
 
     // Final geometry barrier: late recovery and seal passes can still leave
     // duplicate same-corps front ownership on sibling fragments. Resolve those
@@ -1502,6 +1513,7 @@ function recoverDroppedFrontEdges(
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
+    recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
 ): void {
     let recoveredAny = false;
 
@@ -1510,43 +1522,24 @@ function recoverDroppedFrontEdges(
         if (corpsIds.length === 0) continue;
 
         const {
-            osidToCorps,
             corpsEdges,
             friendlyOsids,
             componentOf,
             factionBrigadeLocations,
             factionBrigadeComponents,
-        } = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup', () => {
-            const mappedOsidToCorps = mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap);
-            const partitionedCorpsEdges = partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency);
-            consolidateCrossCorpsFronts(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, mappedOsidToCorps, centroids, sharedBoundaryAdj);
-            consolidateIsolatedCorpsPockets(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
-            const mappedFriendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
-                ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
-                : buildFriendlyOsidsFromState(state, adjacency, faction);
-            const mappedComponentOf = spatial?.componentsByFaction.get(faction)
-                ? new Map(spatial.componentsByFaction.get(faction)!)
-                : buildFriendlyComponents(adjacency, mappedFriendlyOsids);
-            const mappedFactionBrigadeLocations: string[] = [];
-            const mappedFactionBrigadeComponents = new Set<number>();
-            for (const fid of Object.keys(formations).sort(strictCompare)) {
-                const formation = formations[fid];
-                if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-                if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
-                if (!formation.location_osid) continue;
-                mappedFactionBrigadeLocations.push(formation.location_osid);
-                const componentId = mappedComponentOf.get(formation.location_osid);
-                if (componentId !== undefined) mappedFactionBrigadeComponents.add(componentId);
-            }
-            return {
-                osidToCorps: mappedOsidToCorps,
-                corpsEdges: partitionedCorpsEdges,
-                friendlyOsids: mappedFriendlyOsids,
-                componentOf: mappedComponentOf,
-                factionBrigadeLocations: mappedFactionBrigadeLocations,
-                factionBrigadeComponents: mappedFactionBrigadeComponents,
-            };
-        });
+        } = getRecoveredFrontClaimSetup(
+            state,
+            faction,
+            corpsIds,
+            osidFrontEdges,
+            adjacency,
+            sharedBoundaryAdj,
+            formations,
+            reverseMap,
+            centroids,
+            spatial,
+            recoveredFrontClaimSetupCache,
+        );
 
         for (const corpsId of corpsIds) {
             const { expectedEdgeIds, corpsSectorIds, missingEdgeIds } = _perfTime('recoverDroppedFrontEdges:corps-missing-edge-scan', () => {
@@ -1734,6 +1727,57 @@ function recoverDroppedFrontEdges(
     });
 
     pruneGhostArtifactSectors(sectors);
+}
+
+function getRecoveredFrontClaimSetup(
+    state: GameState,
+    faction: FactionId,
+    corpsIds: FormationId[],
+    osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
+    adjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    formations: Record<FormationId, FormationState>,
+    reverseMap: Map<string, string[]> | null,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+    recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
+): RecoveredFrontClaimSetup {
+    const cached = recoveredFrontClaimSetupCache?.get(faction);
+    if (cached) return cached;
+
+    const setup = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup', () => {
+        const mappedOsidToCorps = mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap);
+        const partitionedCorpsEdges = partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency);
+        consolidateCrossCorpsFronts(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, mappedOsidToCorps, centroids, sharedBoundaryAdj);
+        consolidateIsolatedCorpsPockets(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
+        const mappedFriendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        const mappedComponentOf = spatial?.componentsByFaction.get(faction)
+            ? new Map(spatial.componentsByFaction.get(faction)!)
+            : buildFriendlyComponents(adjacency, mappedFriendlyOsids);
+        const mappedFactionBrigadeLocations: string[] = [];
+        const mappedFactionBrigadeComponents = new Set<number>();
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const formation = formations[fid];
+            if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+            if (!formation.location_osid) continue;
+            mappedFactionBrigadeLocations.push(formation.location_osid);
+            const componentId = mappedComponentOf.get(formation.location_osid);
+            if (componentId !== undefined) mappedFactionBrigadeComponents.add(componentId);
+        }
+        return {
+            corpsEdges: partitionedCorpsEdges,
+            friendlyOsids: mappedFriendlyOsids,
+            componentOf: mappedComponentOf,
+            factionBrigadeLocations: mappedFactionBrigadeLocations,
+            factionBrigadeComponents: mappedFactionBrigadeComponents,
+        };
+    });
+
+    recoveredFrontClaimSetupCache?.set(faction, setup);
+    return setup;
 }
 
 function pickRecoveredFrontEdgeRecipient(
