@@ -1,6 +1,6 @@
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getTerrainScalarsForSid, type TerrainScalarsData } from '../../map/terrain_scalars.js';
-import type { FactionId, FormationId, GameState, SettlementId } from '../../state/game_state.js';
+import type { FormationId, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     COLUMN_BASE_MOVEMENT_RATE,
@@ -72,7 +72,7 @@ function computeReachable(
 ): SettlementId[] {
     const formation = state.military.formations?.[brigadeId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) return [];
-    const factionId = formation.faction as FactionId;
+    const factionId = formation.faction;
     const pc = state.political.political_controllers ?? {};
     const startSid = getStartSid(state, brigadeId);
     if (!startSid || pc[startSid] !== factionId) return [];
@@ -127,7 +127,7 @@ export function queryMovementPath(
 ): MovementPathQuery | null {
     const formation = state.military.formations?.[brigadeId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) return null;
-    const factionId = formation.faction as FactionId;
+    const factionId = formation.faction;
     const startSid = getStartSid(state, brigadeId);
     if (!startSid) return null;
 

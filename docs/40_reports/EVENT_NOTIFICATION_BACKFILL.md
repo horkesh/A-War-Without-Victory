@@ -18,20 +18,20 @@
 | `war_1993.json` | `strategic_posture_review_rbih` | RBiH | 8/8 | Batch 7 safe backfill complete from recurring posture narrative, response descriptions, effects, dimension shifts, and flags. |
 | `war_1993.json` | `strategic_posture_review_rs` | RS | 8/8 | Batch 7 safe backfill complete from recurring posture narrative, response descriptions, effects, dimension shifts, and flags. |
 | `war_1993.json` | `strategic_posture_review_hrhb` | HRHB | 8/8 | Batch 7 safe backfill complete from recurring posture narrative, response descriptions, effects, dimension shifts, and flags. |
+| `war_1993.json` | `gornji_vakuf_clashes_1993` | HRHB | 4/4 | Batch 8 safe backfill complete from existing military clash narrative, response descriptions, and alliance/morale effects. |
+| `war_1993.json` | `ic_pressure_vopp_engagement` | RBiH | 4/4 | Batch 8 safe backfill complete from existing Vance-Owen pressure narrative, response labels, and dimension shifts. |
+| `war_1993.json` | `vance_owen_plan_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing plan narrative, response descriptions, and diplomatic effects. |
+| `war_1993.json` | `rs_assembly_rejects_voplan_1993` | RS | 4/4 | Batch 8 safe backfill complete from existing assembly rejection narrative, response descriptions, and dimension shifts. |
+| `war_1993.json` | `owen_stoltenberg_plan_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tripartite union narrative, response descriptions, and diplomatic effects. |
+| `war_1993.json` | `os_rbih_tactical_acceptance_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tactical-acceptance narrative, response labels, and dimension shifts. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
 |---|---|---:|---:|
 | `war_1992.json` | `drina_cleansing_decision_1992` | RS | 0/4 |
 | `war_1992.json` | `concentration_camps_revealed_1992` | RS | 0/6 |
-| `war_1993.json` | `gornji_vakuf_clashes_1993` | HRHB | 0/4 |
-| `war_1993.json` | `ic_pressure_vopp_engagement` | RBiH | 0/4 |
-| `war_1993.json` | `vance_owen_plan_1993` | RBiH | 0/4 |
 | `war_1993.json` | `srebrenica_demilitarization_1993` | RBiH | 0/6 |
-| `war_1993.json` | `rs_assembly_rejects_voplan_1993` | RS | 0/4 |
 | `war_1993.json` | `operation_lukavac_93` | RS | 0/4 |
-| `war_1993.json` | `owen_stoltenberg_plan_1993` | RBiH | 0/4 |
-| `war_1993.json` | `os_rbih_tactical_acceptance_1993` | RBiH | 0/4 |
 | `war_1993.json` | `visit_to_front_rbih` | RBiH | 0/10 |
 | `war_1993.json` | `visit_to_front_rs` | RS | 0/10 |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 0/10 |
@@ -46,3 +46,25 @@
 | `war_1995.json` | `us_halts_federation_advance_1995` | RBiH | 0/4 |
 | `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | RBiH | 0/4 |
 | `war_1995.json` | `dayton_talks_begin_1995` | RBiH | 0/4 |
+
+## Batch 8 Gated Residual Notes
+| File | Event | Gate |
+|---|---|---|
+| `war_1992.json` | `drina_cleansing_decision_1992` | Atrocity/displacement decision text; requires historian/content review before recipient prose. |
+| `war_1992.json` | `concentration_camps_revealed_1992` | Detention-camp and atrocity disclosure text; requires historian/content review before recipient prose. |
+| `war_1993.json` | `srebrenica_demilitarization_1993` | Enclave/demilitarization/humanitarian-convoy sensitivities; not authored in safe-content batch. |
+| `war_1993.json` | `operation_lukavac_93` | Sarajevo siege/isolation and NATO-strike escalation sensitivities; not authored in safe-content batch. |
+| `war_1993.json` | `visit_to_front_rbih` | Front-visit text intersects Sarajevo siege and Bihac pocket context; recipient prose needs content review. |
+| `war_1993.json` | `visit_to_front_rs` | Front-visit text intersects Sarajevo siege lines, Drina enclaves, and international observation; recipient prose needs content review. |
+| `war_1993.json` | `visit_to_front_hrhb` | Front-visit text intersects Mostar blockade, central Bosnia, and detention-camp press management; recipient prose needs content review. |
+| `war_1994.json` | `nato_ultimatum_sarajevo_1994` | Markale/Sarajevo heavy-weapons ultimatum; siege/civilian-harm sensitivity. |
+| `war_1994.json` | `washington_agreement_1994` | Washington timing reconciliation remains gated by policy. |
+| `war_1994.json` | `ic_rbih_restraint_post_washington` | Post-Washington timing and restraint policy remains gated by policy. |
+| `war_1994.json` | `contact_group_plan_1994` | Late-war diplomacy trajectory; defer to diplomacy/outcome content review. |
+| `war_1994.json` | `belgrade_embargo_rs_1994` | Late-war diplomacy/patron rupture; defer to diplomacy/outcome content review. |
+| `war_1994.json` | `carter_ceasefire_1994` | Late-war ceasefire diplomacy; defer to diplomacy/outcome content review. |
+| `war_1995.json` | `un_hostage_crisis_1995` | UN hostage/human-shield crisis; sensitive-history row. |
+| `war_1995.json` | `karadzic_mladic_split_1995` | Late-war command crisis tied to Operation Storm timing; defer to late-war outcome review. |
+| `war_1995.json` | `us_halts_federation_advance_1995` | Late-war outcome/refugee catastrophe counterfactual; gated by policy. |
+| `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | Late-war diplomacy/outcome row; gated by policy. |
+| `war_1995.json` | `dayton_talks_begin_1995` | Late-war final settlement/outcome row; gated by policy. |

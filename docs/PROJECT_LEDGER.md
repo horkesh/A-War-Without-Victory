@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close eighth backlog execution batch
+
+**Scope:** Eighth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, safe Phase D notification content, and sector-performance Task 3 attribution. No sector optimization, combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.
+
+**Change:** Cleaned two more strict-null combat escapes in `brigade_movement_query.ts`, lowering the Phase 2 remaining inventory from 105 to 103. Added safe recipient notification copy for six 1993 conflict/diplomacy rows (`gornji_vakuf_clashes_1993`, `ic_pressure_vopp_engagement`, `vance_owen_plan_1993`, `rs_assembly_rejects_voplan_1993`, `owen_stoltenberg_plan_1993`, `os_rbih_tactical_acceptance_1993`), adding 24 recipient rows while leaving atrocity/detention/enclave/front-visit/Washington/late-war rows gated. Added opt-in `recoverDroppedFrontEdges(...)` child attribution under `PERF_PROFILE_SECTOR_PARTITION=true`, identifying `recoverDroppedFrontEdges:faction-front-claim-setup` as the next measured Task 4 target.
+
+**Determinism / output impact:** Strict-null changes are type-only. Notification content is static authored text consumed by the existing event-notification path; response IDs, triggers, effects, and event order did not change. Sector attribution writes only to the existing gitignored `data/derived/_debug/sector_partition_perf.jsonl` sidecar when the profiling flag is enabled; flag-off `_perfTime` tail-calls the wrapped function and writes no deterministic state/report artifacts.
+
+**Verification:** Parent integration passed `npm.cmd run typecheck`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` (5/5); `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\sim\events\dismiss_notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` (4 files / 26 tests); `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts tests\profile_hotspot_report.test.ts --reporter=dot` (2 files / 10 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w` produced n1884 hash `42607f83870e01d5`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1884` passed; and `git diff --check` passed with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Batch 8 notification content stays within existing narrative/response/effect framing; remaining sensitive-history and late-war diplomacy rows stay gated in `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+---
+
 ## [2026-05-18] feat(roadmap): close seventh backlog execution batch
 
 **Scope:** Seventh autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, safe Phase D notification content, sector-performance planning, and endgame small-screen verdict polish. No victory scoring, combat tuning, scenario trigger/effect logic, save schema, random source, 188w evidence claim, clean-VM run, or external distribution changed.

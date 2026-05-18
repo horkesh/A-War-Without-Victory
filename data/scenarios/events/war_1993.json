@@ -75,7 +75,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "escalate": {
+        "RBiH": {
+          "headline": "HVO reinforces Gornji Vakuf fight",
+          "body": "Herceg-Bosna sends reinforcements into the Gornji Vakuf clashes. Sarajevo staff see a significant escalation in the HVO-ARBiH confrontation and a sharper break in local cooperation."
+        },
+        "RS": {
+          "headline": "HVO and ARBiH fighting intensifies",
+          "body": "Herceg-Bosna answers the Gornji Vakuf clashes with force. Pale analysts see the Vance-Owen provincial map becoming a pretext for deeper Croat-Bosniak fighting."
+        }
+      },
+      "negotiate": {
+        "RBiH": {
+          "headline": "HVO seeks a local Gornji Vakuf ceasefire",
+          "body": "Herceg-Bosna tries to contain the fighting around Gornji Vakuf. Sarajevo sees de-escalation on the local front, though the underlying territorial dispute remains unresolved."
+        },
+        "RS": {
+          "headline": "Gornji Vakuf fighting is contained for now",
+          "body": "Herceg-Bosna moves toward a local ceasefire rather than a wider escalation. Pale reads the alliance strain as real, but not yet a full rupture."
+        }
+      }
+    }
   },
   {
     "id": "ic_pressure_vopp_engagement",
@@ -151,7 +173,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "acknowledge_pressure": {
+        "HRHB": {
+          "headline": "Sarajevo engages Vance-Owen pressure",
+          "body": "RBiH acknowledges Western pressure to engage seriously with the Vance-Owen Peace Plan. HVO staff see a more cooperative diplomatic posture, even as Sarajevo absorbs internal strain."
+        },
+        "RS": {
+          "headline": "Sarajevo answers Western pressure",
+          "body": "RBiH signals that it will engage with the Vance-Owen process to preserve international support. Pale sees Sarajevo trading some leverage for patron confidence."
+        }
+      },
+      "resist_patron": {
+        "HRHB": {
+          "headline": "Sarajevo holds its Vance-Owen line",
+          "body": "RBiH maintains its position despite Western warnings about isolation. HVO staff see Sarajevo preserving negotiating leverage while risking patron confidence."
+        },
+        "RS": {
+          "headline": "Sarajevo resists mediator pressure",
+          "body": "RBiH refuses to soften its Vance-Owen stance under Western pressure. Pale reads the move as a bid for leverage, with a visible cost to Sarajevo's international support."
+        }
+      }
+    }
   },
   {
     "id": "vance_owen_plan_1993",
@@ -223,7 +267,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "HRHB": {
+          "headline": "Sarajevo accepts Vance-Owen terms",
+          "body": "RBiH accepts the Vance-Owen Plan, improving international credibility while accepting a framework that legitimizes territorial losses. HVO leaders see Sarajevo moving into the same diplomatic channel."
+        },
+        "RS": {
+          "headline": "Sarajevo accepts Vance-Owen",
+          "body": "RBiH accepts the Vance-Owen framework and gains international credibility. Pale sees Sarajevo accepting the partition formula while pressure shifts toward the Bosnian Serb assembly."
+        }
+      },
+      "reject": {
+        "HRHB": {
+          "headline": "Sarajevo rejects Vance-Owen",
+          "body": "RBiH rejects the Vance-Owen Plan to preserve territorial claims. HVO leaders see Sarajevo keeping freedom of action at the cost of international standing."
+        },
+        "RS": {
+          "headline": "Sarajevo refuses Vance-Owen",
+          "body": "RBiH rejects the proposed ten-province settlement and preserves its territorial claims. Pale sees Sarajevo taking a morale gain while damaging its international standing."
+        }
+      }
+    }
   },
   {
     "id": "kravica_attack_1993",
@@ -1431,6 +1497,28 @@
         ]
       }
     ],
+    "notifications_to_other_factions": {
+      "accept_rejection": {
+        "HRHB": {
+          "headline": "Pale accepts the assembly rejection",
+          "body": "Republika Srpska accepts the Pale assembly vote against Vance-Owen and continues the war. HVO leaders see RS internal cohesion preserved while Belgrade's anger and international isolation grow."
+        },
+        "RBiH": {
+          "headline": "RS assembly rejection stands",
+          "body": "Republika Srpska accepts the assembly's rejection of Vance-Owen. Sarajevo sees the comprehensive peace proposal fail while Pale preserves cohesion and absorbs heavier outside pressure."
+        }
+      },
+      "override_assembly": {
+        "HRHB": {
+          "headline": "Pale tries to override its assembly",
+          "body": "Republika Srpska leadership attempts to push acceptance despite the assembly vote. HVO staff see improved diplomatic posture for Pale, but a serious fracture inside RS politics."
+        },
+        "RBiH": {
+          "headline": "RS leadership challenges the assembly vote",
+          "body": "Republika Srpska tries to override the nationalist rejection of Vance-Owen. Sarajevo sees a possible diplomatic opening, paired with visible strain in Pale's political structure."
+        }
+      }
+    },
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), paras. 3526-3530. RS National Assembly proceedings, May 5-6 1993."
   },
   {
@@ -2193,7 +2281,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "HRHB": {
+          "headline": "Sarajevo accepts Owen-Stoltenberg",
+          "body": "RBiH accepts the Owen-Stoltenberg framework and gains international relief. HVO leaders see Sarajevo conceding the principle of a unified Bosnia under a tripartite republic formula."
+        },
+        "RS": {
+          "headline": "Sarajevo accepts Owen-Stoltenberg",
+          "body": "RBiH accepts the proposed union of ethnic republics, improving diplomatic credibility while conceding the unity principle. Pale sees Sarajevo moving onto the mediator track."
+        }
+      },
+      "reject": {
+        "HRHB": {
+          "headline": "Sarajevo rejects ethnic partition",
+          "body": "RBiH rejects the Owen-Stoltenberg framework as a partition formula. HVO leaders see Sarajevo defending sovereignty while prolonging the war and frustrating mediators."
+        },
+        "RS": {
+          "headline": "Sarajevo refuses Owen-Stoltenberg",
+          "body": "RBiH rejects the tripartite republic framework and accepts the diplomatic cost. Pale sees Sarajevo preserve its sovereignty claim while mediator pressure rises."
+        }
+      }
+    }
   },
   {
     "id": "os_rbih_tactical_acceptance_1993",
@@ -2242,7 +2352,29 @@
         ],
         "effects": []
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept_for_optics": {
+        "HRHB": {
+          "headline": "Sarajevo tactically accepts the plan",
+          "body": "RBiH accepts the Union of Three Republics plan for diplomatic advantage, expecting RS rejection. HVO leaders see Sarajevo gain international standing while legitimizing partition in principle."
+        },
+        "RS": {
+          "headline": "Sarajevo accepts for diplomatic leverage",
+          "body": "RBiH accepts the Owen-Stoltenberg plan while calculating that Pale will reject its territorial allocation. RS staff see Sarajevo trying to isolate them diplomatically."
+        }
+      },
+      "reject_sincerely": {
+        "HRHB": {
+          "headline": "Sarajevo rejects partition on principle",
+          "body": "RBiH refuses the Union of Three Republics plan and accepts the cost to international standing. HVO leaders see Sarajevo preserve its sovereignty claim and negotiating leverage."
+        },
+        "RS": {
+          "headline": "Sarajevo rejects Owen-Stoltenberg",
+          "body": "RBiH refuses partition on principle instead of accepting for optics. Pale sees Sarajevo give up a diplomatic isolation play in order to preserve its core territorial claim."
+        }
+      }
+    }
   },
   {
     "id": "grabovica_uzdol_massacres_1993",

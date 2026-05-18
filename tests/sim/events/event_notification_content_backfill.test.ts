@@ -73,4 +73,33 @@ describe('event notification content backfill', () => {
             }
         }
     });
+
+    it('covers safe 1993 conflict and diplomacy response notifications for non-source recipients', () => {
+        const events = loadWar1993Events();
+        const cases = [
+            { eventId: 'gornji_vakuf_clashes_1993', source: 'HRHB', recipients: ['RBiH', 'RS'] },
+            { eventId: 'ic_pressure_vopp_engagement', source: 'RBiH', recipients: ['HRHB', 'RS'] },
+            { eventId: 'vance_owen_plan_1993', source: 'RBiH', recipients: ['HRHB', 'RS'] },
+            { eventId: 'rs_assembly_rejects_voplan_1993', source: 'RS', recipients: ['HRHB', 'RBiH'] },
+            { eventId: 'owen_stoltenberg_plan_1993', source: 'RBiH', recipients: ['HRHB', 'RS'] },
+            { eventId: 'os_rbih_tactical_acceptance_1993', source: 'RBiH', recipients: ['HRHB', 'RS'] },
+        ];
+
+        for (const { eventId, source, recipients } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+
+            expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const response of event.response_options) {
+                const byRecipient = event.notifications_to_other_factions[response.id];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
 });
