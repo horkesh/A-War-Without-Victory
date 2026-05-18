@@ -85,7 +85,7 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
         if (seenIds.has(id)) throw new Error(`Duplicate formation id in initial formations: ${id}`);
         seenIds.add(id);
 
-        const faction = raw.faction.trim() as FactionId;
+        const faction = raw.faction.trim();
         if (!CANONICAL_FACTIONS.includes(faction)) {
             throw new Error(
                 `Invalid initial formation ${id}: faction must be RBiH, RS, or HRHB, got ${raw.faction}`

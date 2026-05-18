@@ -470,7 +470,7 @@ export async function validateBrigadeMovementOrder(
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade' || !formation.faction) {
         return { valid: false, error: 'Invalid brigade' };
     }
-    const factionId = formation.faction as FactionId;
+    const factionId = formation.faction;
     const pc = state.political.political_controllers ?? {};
     for (const sid of destinationSids) {
         if (pc[sid] !== factionId) {

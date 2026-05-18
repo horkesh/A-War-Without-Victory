@@ -165,7 +165,7 @@ export function buildOperationCombatDiagnostics(
         const corpsState = corpsCommand[corpsId];
         for (const operation of corpsState?.active_operations ?? []) {
         const corpsFormation = state.military.formations?.[corpsId];
-        const factionId = (corpsFormation?.faction ?? 'unknown') as FactionId;
+        const factionId = corpsFormation?.faction ?? 'unknown';
         const brigades = sortedFormationIds(operation.participating_brigades ?? []);
         const currentObjective = getCurrentObjective(operation);
         const objectiveAttemptCount = operation.attack_attempt_count ?? 0;

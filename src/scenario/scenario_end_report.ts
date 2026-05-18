@@ -962,10 +962,11 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         lines.push(`- Weeks in war phase: ${a.weeks_at_war}`);
         lines.push(`- Weeks with nonzero orders processed: ${a.weeks_with_orders}`);
         lines.push(`- Orders processed: ${a.orders_processed}`);
-        if (a.orders_by_faction && Object.keys(a.orders_by_faction).length > 0) {
-            const obfLine = Object.keys(a.orders_by_faction)
+        const ordersByFaction = a.orders_by_faction;
+        if (ordersByFaction && Object.keys(ordersByFaction).length > 0) {
+            const obfLine = Object.keys(ordersByFaction)
                 .sort()
-                .map((fid) => `${fid}=${a.orders_by_faction![fid]}`)
+                .map((fid) => `${fid}=${ordersByFaction[fid]}`)
                 .join(', ');
             lines.push(`- Orders by faction: ${obfLine}`);
         }

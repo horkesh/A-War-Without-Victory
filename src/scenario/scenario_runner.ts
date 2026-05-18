@@ -978,7 +978,7 @@ async function createOobFormations(
                 const totalSpread = Object.values(spreadReport.brigades_spread).reduce((a, b) => a + b, 0);
                 const totalCovered = Object.values(spreadReport.front_osids_covered).reduce((a, b) => a + b, 0);
                 safeDebugLog(`[Placement] Spread ${totalSpread} brigades to front; ${totalCovered} front OSIDs now covered`);
-                for (const faction of Object.keys(spreadReport.brigades_spread).sort() as FactionId[]) {
+                for (const faction of Object.keys(spreadReport.brigades_spread).sort()) {
                     safeDebugLog(`  ${faction}: spread=${spreadReport.brigades_spread[faction]} covered=${spreadReport.front_osids_covered[faction]}`);
                 }
             }
@@ -1288,7 +1288,7 @@ export async function buildScenarioStartupState(
                 const sortedOsids = Object.keys(bySettlementId).sort((a, b) => a.localeCompare(b));
                 for (const osid of sortedOsids) {
                     const faction = bySettlementId[osid];
-                    if (faction) pc[osid] = faction as FactionId;
+                    if (faction) pc[osid] = faction;
                 }
                 state.political.political_controllers = pc;
                 // Reset contested_control to match (ethnic-based start = no contested)

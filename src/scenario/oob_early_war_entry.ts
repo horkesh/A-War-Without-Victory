@@ -225,7 +225,7 @@ export function createOobFormations(
         brigadeCountByFactionMun.set(`${b.faction}:${b.home_mun}`, ordinal);
         const name =
             population1991ByMun != null && eligiblePop < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE
-                ? resolveFormationName(b.faction as FactionId, b.home_mun, 'brigade', ordinal)
+                ? resolveFormationName(b.faction, b.home_mun, 'brigade', ordinal)
                 : b.name;
         // Resolve location OSID: deployment_osid overrides home_osid for initial placement (elite units deployed away from home).
         const location_osid = b.deployment_osid
@@ -288,7 +288,7 @@ export function createOobFormations(
         // Without this, pool.committed understates demographic commitment, causing the
         // exhaustion system to undercount troops already mobilized at scenario init.
         if (initialPersonnel > 0) {
-            const poolKey = militiaPoolKey(b.home_mun as MunicipalityId, b.faction as FactionId);
+            const poolKey = militiaPoolKey(b.home_mun, b.faction);
             const pool = (state.military.militia_pools as Record<string, { committed: number }>)?.[poolKey];
             if (pool) {
                 pool.committed += initialPersonnel;
@@ -338,7 +338,7 @@ export function spreadBrigadesToFrontOsids(
     };
 
     const adjacency = buildOsidAdjacency(edges);
-    const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare) as FactionId[];
+    const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare);
     const formations = state.military.formations ?? {};
 
     for (const faction of factions) {

@@ -111,6 +111,11 @@ const PHASE_3_EARLY_WAR_BATCH_40_FILES = [
     'src/sim/early_war/pool_population.ts',
 ];
 
+const PHASE_4_SCENARIO_BATCH_41_FILES = [
+    'src/scenario/combat_causality.ts',
+    'src/scenario/oob_early_war_entry.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -421,6 +426,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_3_EARLY_WAR_BATCH_40_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 41 Phase 4 scenario safe slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_4_SCENARIO_BATCH_41_FILES),
             0,
         );
 

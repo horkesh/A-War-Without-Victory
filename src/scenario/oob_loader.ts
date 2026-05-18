@@ -140,7 +140,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         if (seenIds.has(id)) throw new Error(`Duplicate OOB brigade id: ${id}`);
         seenIds.add(id);
 
-        const faction = r.faction.trim() as FactionId;
+        const faction = r.faction.trim();
         if (!CANONICAL_FACTIONS.includes(faction)) {
             throw new Error(`Invalid OOB brigade ${id}: faction must be RBiH, RS, or HRHB, got ${r.faction}`);
         }
@@ -169,8 +169,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
         const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
         const defense_terrain_bonus = typeof r.defense_terrain_bonus === 'number' && Number.isFinite(r.defense_terrain_bonus) ? r.defense_terrain_bonus : undefined;
-        const recruit_pool_faction = typeof r.recruit_pool_faction === 'string' && CANONICAL_FACTIONS.includes(r.recruit_pool_faction.trim() as FactionId)
-            ? r.recruit_pool_faction.trim() as FactionId : undefined;
+        const recruit_pool_faction = typeof r.recruit_pool_faction === 'string' && CANONICAL_FACTIONS.includes(r.recruit_pool_faction.trim())
+            ? r.recruit_pool_faction.trim() : undefined;
         const fallback_osid = typeof r.fallback_osid === 'string' && r.fallback_osid.trim() ? r.fallback_osid.trim() : undefined;
         // OOB Rework fields
         const available_until = typeof r.available_until === 'number' && Number.isFinite(r.available_until) ? r.available_until : undefined;
@@ -255,7 +255,7 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
         if (seenIds.has(id)) throw new Error(`Duplicate OOB corps id: ${id}`);
         seenIds.add(id);
 
-        const faction = r.faction.trim() as FactionId;
+        const faction = r.faction.trim();
         if (!CANONICAL_FACTIONS.includes(faction)) {
             throw new Error(`Invalid OOB corps ${id}: faction must be RBiH, RS, or HRHB, got ${r.faction}`);
         }

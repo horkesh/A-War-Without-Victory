@@ -6444,3 +6444,35 @@ All five `as FactionId*` removals are no-ops under the current `type FactionId =
 **Artifacts:** `src/sim/early_war/control_flip.ts`, `src/sim/early_war/control_strain.ts`, `src/sim/early_war/minority_erosion.ts`, `src/sim/early_war/minority_militia_decay.ts`, `src/sim/early_war/pool_population.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260519_BATCH40_STRICT_NULL_PHASE3_CONTINUATION.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (ledger row).
 
 ---
+
+## [2026-05-19] refactor(strict-null): Batch 41 Phase 4 scenario + IPC safe slice (byte-identical)
+
+**Type:** Type-only refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, packaging metadata, or FORAWWV text changed. `npm.cmd run test:baselines` PASS confirms byte-identity across the four baseline scenarios.
+
+**Change:** Opened Phase 4 (Scenario + IPC) of `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` with a 13-escape reduction. Phase 4 inventory: 53 → 40 remaining.
+- `src/scenario/combat_causality.ts:168`: dropped redundant `as FactionId` on `corpsFormation?.faction ?? 'unknown'`.
+- `src/scenario/oob_early_war_entry.ts`: dropped 3 redundant casts at lines 228, 291, 341 (`b.faction`, `b.faction` + `b.home_mun`, `(state.factions ?? []).map(f => f.id).sort(strictCompare)`).
+- `src/scenario/initial_formations_loader.ts:88`: dropped redundant `as FactionId` on `raw.faction.trim()` after the `typeof raw.faction === 'string'` narrow.
+- `src/scenario/oob_loader.ts` lines 143, 172, 173, 258: dropped 4 redundant `as FactionId` casts on `r.faction.trim()` / `r.recruit_pool_faction.trim()` after JSON-narrowing guards.
+- `src/desktop/desktop_sim.ts:473`: dropped redundant `as FactionId` on `formation.faction` after `!formation.faction` truthy-narrow in the active code path. The mirror cast at line 543 inside a `/* ... */` retired-code block is deliberately preserved as dead-code-block residue outside this lane.
+- `src/scenario/scenario_runner.ts` lines 981, 1291: dropped 2 redundant casts on `Object.keys(spreadReport.brigades_spread).sort()` and `bySettlementId[osid]` value assignment.
+- `src/scenario/scenario_end_report.ts` lines 965-970: replaced `a.orders_by_faction![fid]` non-null-after-truthy-check inside a `.map` closure with a local-binding refactor (`const ordersByFaction = a.orders_by_faction;` hoisted before the truthy guard so TypeScript narrows the local through the closure capture). JS emit is identical.
+- `tests/strict_null_inventory_progress.test.ts`: added `PHASE_4_SCENARIO_BATCH_41_FILES` constant (`combat_causality.ts`, `oob_early_war_entry.ts` — both now fully clean) and a new "cleans the Batch 41 Phase 4 scenario safe slice" assertion.
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`: added Phase 4 Batch 41 row and recorded the Batch 40 correction (the prior Batch 40 report's "27 → 19 / 8 eliminated" should read "27 → 21 / 6 eliminated"; the non-counted `(state as GameState & {...})` bookkeeping cast at `control_flip.ts:419-420` was removed as a side benefit but was never in the inventory regex).
+
+All twelve `as FactionId*` removals are no-ops under the current `type FactionId = string` alias (`src/state/game_state.ts:45`). They document the tightening boundary for a future literal-union refactor — at that point the right pattern is an `isFactionId(...)` runtime type guard for JSON-source values and a typed `Object.keys` helper for `Record<FactionId, V>` iteration. The `scenario_end_report.ts` local-binding refactor is a separate pattern that TypeScript narrowing handles natively after the hoist.
+
+The remaining 40 Phase 4 escapes are all classified as load-bearing (JSON-narrowing `as unknown[]` over `JSON.parse` outputs in `oob_loader.ts` × 6, `scenario_loader.ts` × 8, `brigade_temporal_emit.ts` × 5, `initial_formations_loader.ts:61`; non-null assertions after array length checks at `anomaly_detector.ts:151` and `scenario_end_report.ts:50` whose refactor would change JS emit shape; and one cast inside a `/* ... */` dead-code block in `desktop_sim.ts`).
+
+**Determinism:** Pure type erasure (12 sites) + local-binding refactor (1 site). TypeScript emits character-equivalent JS. `npm.cmd run test:baselines` PASS proves byte-identity.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 20/20 PASS (incl. new Batch 41 slice).
+- `npx.cmd vitest run tests/oob_early_war_entry.test.ts tests/oob_loader.test.ts tests/desktop_sim_bundle_smoke.test.ts tests/scenario_runner_artifact_repair.test.ts tests/integration_run_summary.test.ts tests/scenario_reporting_contracts.test.ts --reporter=dot` — 23/23 PASS (incl. the ~90 s end-to-end `integration_run_summary` suite that exercises `scenario_end_report` through a full scenario run).
+- `npm.cmd run test:baselines` — PASS ("Baseline regression: all scenarios match"). 40w/52w/baseline_ops_4w/noop_4w byte-identical.
+- `git diff --check` — clean.
+
+**Artifacts:** `src/scenario/combat_causality.ts`, `src/scenario/oob_early_war_entry.ts`, `src/scenario/initial_formations_loader.ts`, `src/scenario/oob_loader.ts`, `src/desktop/desktop_sim.ts`, `src/scenario/scenario_runner.ts`, `src/scenario/scenario_end_report.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260519_BATCH41_STRICT_NULL_PHASE4_SAFE_SLICE.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
+
+---
