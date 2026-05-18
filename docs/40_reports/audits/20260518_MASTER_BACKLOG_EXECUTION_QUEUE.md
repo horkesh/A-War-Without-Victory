@@ -41,13 +41,21 @@
 | Washington live-state vs narrative milestone reconciliation | Implemented | `docs/40_reports/audits/20260518_WASHINGTON_TIMING_RECONCILIATION.md`; live predicate AAR now uses `rbih_hrhb_framework_activated`, while `washington_agreement_1994` remains the week-102 calendar event. |
 | Gold/operator templates, clean-VM evidence templates, external playtest dry-run artifacts | Repo-side implemented | `tools/release/prepare_launch_artifacts.cjs`, `docs/50_launch/release/launch_day_automation_template.md`, `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md`, `docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md`. |
 
+## Completed Batch 5
+
+| Lane | Status | Source |
+|---|---|---|
+| Strict-null Phase 2 combat continuation | Partial implemented | `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH5.md`; integrated 40w n1880 stayed hash-stable at `42607f83870e01d5`; 110 combat inventory escapes remain. |
+| Phase D London Conference notification content | Implemented / content partial | `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`; `london_conference_1992` moved from 0/4 to 4/4 safe recipient coverage. |
+
 ## Next Implementable Batches
 
 | Batch | Candidate lanes | Notes |
 |---|---|---|
-| Batch 5 strictness | Continue strict-null Phase 2 beyond the cleaned combat leaf slice | Must remain type-only and 40w hash-stable. |
-| Batch 5 notifications/content | Continue Phase D notification content backfill | Remaining sensitive-history and late-war diplomacy rows still need historian/narrative review; sparse coverage remains tolerated until backfill closes. |
-| Batch 5 operator evidence | Execute clean-VM and external playtest evidence outside the repo when an operator has target machines/artifacts | Repo now has templates/scripts; actual SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, outreach, and response triage remain operator-only. |
+| Batch 6 product validation | Presidential campaign-loop validation | Repo-owned validation/cohesion lane over existing Decision Room/Warroom/AAR/Chronicle surfaces. |
+| Batch 6 formation-life | Formation-life packetization FL-A/FL-B | Start with diagnostics and non-sensitive inertness/owner-truth packets; sensitive-history successor lanes remain gated. |
+| Batch 6 performance/UI | Wall-clock measured optimization and/or cinematic verdict UI completion | Use measurement-first perf batches and visual validation for UI. |
+| Operator evidence | Execute clean-VM and external playtest evidence outside the repo when an operator has target machines/artifacts | Repo now has templates/scripts; actual SmartScreen, Settings -> Apps, `%APPDATA%`, uninstaller registry, outreach, and response triage remain operator-only. |
 
 ## Stale Or Already Closed Rows To Reconcile
 

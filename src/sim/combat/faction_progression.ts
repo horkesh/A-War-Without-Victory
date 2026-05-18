@@ -20,6 +20,21 @@ import type { WarTimeline } from '../../state/war_timeline.js';
 import { computeMaintenanceMult as computeMaintenanceMultFromConfig, resolveCohesionBound } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+function interpolateKeyframes(turn: number, keyframes: Array<[number, number]>, fallback: number): number {
+    for (let i = 0; i < keyframes.length - 1; i++) {
+        const current = keyframes[i];
+        const next = keyframes[i + 1];
+        if (current === undefined || next === undefined) continue;
+        const [t0, v0] = current;
+        const [t1, v1] = next;
+        if (turn >= t0 && turn <= t1) {
+            const frac = (turn - t0) / (t1 - t0);
+            return v0 + frac * (v1 - v0);
+        }
+    }
+    return fallback;
+}
+
 // ── C1: Cohesion floor and ceiling ──────────────────────────────────────────
 
 /**
@@ -37,15 +52,7 @@ function getRBiHCohesionFloor(turn: number): number {
     if (turn >= 52) return 62;
     // Linear interpolation between keyframes
     const keyframes: [number, number][] = [[0, 35], [13, 42], [26, 50], [39, 56], [52, 62]];
-    for (let i = 0; i < keyframes.length - 1; i++) {
-        const [t0, v0] = keyframes[i]!;
-        const [t1, v1] = keyframes[i + 1]!;
-        if (turn >= t0 && turn <= t1) {
-            const frac = (turn - t0) / (t1 - t0);
-            return v0 + frac * (v1 - v0);
-        }
-    }
-    return 62;
+    return interpolateKeyframes(turn, keyframes, 62);
 }
 
 /**
@@ -61,15 +68,7 @@ function getRSCohesionFloor(turn: number): number {
     if (turn <= 0) return 35;
     if (turn >= 80) return 20;
     const keyframes: [number, number][] = [[0, 35], [40, 35], [60, 25], [80, 20]];
-    for (let i = 0; i < keyframes.length - 1; i++) {
-        const [t0, v0] = keyframes[i]!;
-        const [t1, v1] = keyframes[i + 1]!;
-        if (turn >= t0 && turn <= t1) {
-            const frac = (turn - t0) / (t1 - t0);
-            return v0 + frac * (v1 - v0);
-        }
-    }
-    return 20;
+    return interpolateKeyframes(turn, keyframes, 20);
 }
 
 /**
@@ -97,15 +96,7 @@ function getRSCohesionCeiling(turn: number): number {
     if (turn <= 0) return 85;
     if (turn >= 52) return 68;
     const keyframes: [number, number][] = [[0, 85], [13, 82], [26, 78], [39, 73], [52, 68]];
-    for (let i = 0; i < keyframes.length - 1; i++) {
-        const [t0, v0] = keyframes[i]!;
-        const [t1, v1] = keyframes[i + 1]!;
-        if (turn >= t0 && turn <= t1) {
-            const frac = (turn - t0) / (t1 - t0);
-            return v0 + frac * (v1 - v0);
-        }
-    }
-    return 68;
+    return interpolateKeyframes(turn, keyframes, 68);
 }
 
 /**
@@ -188,7 +179,6 @@ export function runEquipmentProgression(state: GameState): EquipmentProgressionR
         if (!report.by_faction[faction]) {
             report.by_faction[faction] = { artillery: 0, tanks: 0 };
         }
-        const facReport = report.by_faction[faction]!;
 
         // Per-brigade auto-tickers removed (n898) — produced 243 ARBiH tanks / 668 artillery.
         // Primary equipment source is now battlefield scavenging + combat capture.
@@ -268,17 +258,20 @@ function distributeEquipmentToFaction(
             bestId = fid;
         }
     }
-    if (bestId && formations[bestId]?.composition) {
-        formations[bestId].composition![type] += amount;
+    const bestFormation = bestId ? formations[bestId] : undefined;
+    const bestComposition = bestFormation?.composition;
+    if (bestComposition) {
+        bestComposition[type] = (bestComposition[type] ?? 0) + amount;
         if (!report.by_faction[faction]) {
             report.by_faction[faction] = { artillery: 0, tanks: 0 };
         }
+        const factionReport = report.by_faction[faction];
         if (type === 'tanks') {
             report.tank_additions += amount;
-            report.by_faction[faction]!.tanks += amount;
+            factionReport.tanks += amount;
         } else {
             report.artillery_additions += amount;
-            report.by_faction[faction]!.artillery += amount;
+            factionReport.artillery += amount;
         }
     }
 }

@@ -16,6 +16,13 @@ const PHASE_2_COMBAT_BATCH_4_FILES = [
     'src/sim/combat/combat_estimate.ts',
 ];
 
+const PHASE_2_COMBAT_BATCH_5_FILES = [
+    'src/sim/combat/combat_math.ts',
+    'src/sim/combat/faction_progression.ts',
+    'src/sim/combat/operation_casualty_attribution.ts',
+    'src/sim/combat/warlord_friction.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -71,6 +78,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_4_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 5 Phase 2 combat continuation slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_5_FILES),
             0,
         );
 

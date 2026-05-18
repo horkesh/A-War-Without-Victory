@@ -1584,7 +1584,29 @@
     },
     "enables_events": [
       "vance_owen_plan_1993"
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "HRHB": {
+          "headline": "Sarajevo accepts London Conference terms",
+          "body": "RBiH signals willingness to negotiate under London declarations demanding ceasefire, an end to ethnic cleansing, and lifted sieges. HVO staff read the move as improved international standing, with possible constraints on operations."
+        },
+        "RS": {
+          "headline": "Sarajevo accepts London Conference terms",
+          "body": "RBiH accepts a diplomatic line framed around ceasefire, ending ethnic cleansing, and lifting sieges. Pale reads the decision as a credibility gain for Sarajevo, but also as a constraint on RBiH military freedom."
+        }
+      },
+      "reject": {
+        "HRHB": {
+          "headline": "Sarajevo rejects London terms as inadequate",
+          "body": "RBiH denounces the conference as rewarding aggression and preserves freedom of action. HVO staff note the morale value in Sarajevo, while international credibility takes a visible hit."
+        },
+        "RS": {
+          "headline": "Sarajevo rejects London terms as inadequate",
+          "body": "RBiH refuses the London formula and argues that declarations without enforcement reward aggression. Pale sees Sarajevo keeping military freedom at the cost of international credibility."
+        }
+      }
+    }
   },
   {
     "id": "gorazde_pocket_consolidation_1992",

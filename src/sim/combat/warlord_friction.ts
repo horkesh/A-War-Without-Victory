@@ -12,6 +12,12 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 import { deterministicRandom } from '../../state/deterministic_random.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+const VALID_FACTION_IDS = new Set<string>(['HRHB', 'RBiH', 'RS']);
+
+function readFactionId(value: string): FactionId | null {
+    return VALID_FACTION_IDS.has(value) ? value : null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════════════════════
@@ -83,14 +89,18 @@ export function checkWarlordFriction(state: GameState): WarlordFrictionReport {
 
     const officerIds = Object.keys(officers).sort(strictCompare);
     for (const id of officerIds) {
-        const os = officers[id]!;
+        const os = officers[id];
+        if (!os) continue;
         if (os.status !== 'active' || !os.assigned_corps_id) continue;
 
         const data = officerData.find(o => o.id === id);
         if (!data) continue;
 
         // Check faction friction end week
-        const factionConfig = state.military.war_timeline?.officer_config?.[data.faction as FactionId];
+        const factionId = readFactionId(data.faction);
+        const factionConfig = factionId
+            ? state.military.war_timeline?.officer_config?.[factionId]
+            : undefined;
         if (factionConfig?.warlord_friction_end_week !== undefined
             && turn >= factionConfig.warlord_friction_end_week) {
             continue;

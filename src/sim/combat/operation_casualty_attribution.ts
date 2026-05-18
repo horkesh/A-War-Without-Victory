@@ -95,7 +95,9 @@ function estimateEquipmentLosses(
     };
 }
 
-function ensureAxisEntry(pending: PendingOperationCasualties, axisId: string): void {
+type PendingAxisCasualties = NonNullable<PendingOperationCasualties['by_axis']>[string];
+
+function ensureAxisEntry(pending: PendingOperationCasualties, axisId: string): PendingAxisCasualties {
     if (!pending.by_axis) pending.by_axis = {};
     if (!pending.by_axis[axisId]) {
         pending.by_axis[axisId] = {
@@ -107,6 +109,7 @@ function ensureAxisEntry(pending: PendingOperationCasualties, axisId: string): v
             attacks: 0,
         };
     }
+    return pending.by_axis[axisId];
 }
 
 interface CasualtyCredit {
@@ -130,8 +133,7 @@ function addCredit(pending: PendingOperationCasualties, credit: CasualtyCredit, 
     pending.equipment_captured.artillery += credit.equipment_captured.artillery;
 
     if (axisId != null) {
-        ensureAxisEntry(pending, axisId);
-        const ax = pending.by_axis![axisId];
+        const ax = ensureAxisEntry(pending, axisId);
         ax.suffered.killed += credit.suffered.killed;
         ax.suffered.wounded += credit.suffered.wounded;
         ax.inflicted.killed += credit.inflicted.killed;

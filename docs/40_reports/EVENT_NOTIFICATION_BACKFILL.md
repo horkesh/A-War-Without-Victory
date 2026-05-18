@@ -14,13 +14,13 @@
 | `war_1992.json` | `rs_strategic_goals` | RS | 2/6 | Existing sparse coverage for `all_six`; remaining options need historian/narrative review. |
 | `war_1992.json` | `rbih_state_identity` | RBiH | 2/6 | Existing sparse coverage for `civic`; remaining options need historian/narrative review. |
 | `war_1992.json` | `hrhb_political_goal` | HRHB | 6/6 | Batch 4 safe backfill complete from existing authored event fields. |
+| `war_1992.json` | `london_conference_1992` | RBiH | 4/4 | Batch 5 safe backfill complete from existing conference narrative, response descriptions, and effects. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
 |---|---|---:|---:|
 | `war_1992.json` | `drina_cleansing_decision_1992` | RS | 0/4 |
 | `war_1992.json` | `concentration_camps_revealed_1992` | RS | 0/6 |
-| `war_1992.json` | `london_conference_1992` | RBiH | 0/4 |
 | `war_1993.json` | `gornji_vakuf_clashes_1993` | HRHB | 0/4 |
 | `war_1993.json` | `ic_pressure_vopp_engagement` | RBiH | 0/4 |
 | `war_1993.json` | `vance_owen_plan_1993` | RBiH | 0/4 |

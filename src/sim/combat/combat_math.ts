@@ -568,7 +568,8 @@ export function getThreeTierOfficerMod(
 
         // C.4: VRS pre-planned/general_offensive ops use army commander (Mladić) modifier
         if (formation.faction === 'RS' && role === 'attack') {
-            const brigadeOp = findBrigadeOperation(state.military.corps_command![corpsId]!, formation.id);
+            const corpsCommand = state.military.corps_command?.[corpsId];
+            const brigadeOp = corpsCommand ? findBrigadeOperation(corpsCommand, formation.id) : undefined;
             if (brigadeOp?.type === 'general_offensive' && brigadeOp.phase === 'execution') {
                 const armyCommander = officerLookup?.activeArmyCommanderByFaction.get('RS');
                 if (armyCommander) {
@@ -581,7 +582,8 @@ export function getThreeTierOfficerMod(
                     // Find army commander instead of corps commander
                     const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
                     for (const id of officerIds) {
-                        const os = state.military.named_officers[id]!;
+                        const os = state.military.named_officers[id];
+                        if (!os) continue;
                         if (os.status !== 'active') continue;
                         const data = state.military.named_officer_data.find(o => o.id === id);
                         if (!data || data.faction !== 'RS' || data.rank !== 'army_commander') continue;
@@ -629,7 +631,8 @@ export function getThreeTierOfficerMod(
 
         const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
         for (const id of officerIds) {
-            const os = state.military.named_officers[id]!;
+            const os = state.military.named_officers[id];
+            if (!os) continue;
             if (os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
             const data = state.military.named_officer_data.find(o => o.id === id);
             if (!data) continue;
@@ -698,7 +701,8 @@ export function getArtillerySuppression(attackers: FormationState[], attackerFac
     suppressions.sort((a, b) => b - a); // best first
     let totalSuppression = suppressions[0] ?? 0;
     for (let i = 1; i < suppressions.length; i++) {
-        totalSuppression += suppressions[i]! * 0.3;
+        const suppression = suppressions[i];
+        if (suppression !== undefined) totalSuppression += suppression * 0.3;
     }
     const munitionsMult = getHeavyMunitionsMult(attackerFactionId, state);
     return Math.min(0.7, totalSuppression) * munitionsMult;
@@ -917,8 +921,9 @@ export function lookupLogisticsPriority(
         if (Object.prototype.hasOwnProperty.call(logisticsPriority, assignment.region_id)) {
             priorities.push(clampLogisticsPriority(logisticsPriority[assignment.region_id]));
         }
-        if (priorities.length === 0) return 1.0;
-        return priorities.reduce((min, value) => Math.min(min, value), priorities[0]!);
+        const firstPriority = priorities[0];
+        if (firstPriority === undefined) return 1.0;
+        return priorities.reduce((min, value) => Math.min(min, value), firstPriority);
     }
 
     return 1.0;
@@ -1412,10 +1417,26 @@ export function rankDefendersByPower(
     supplyStateByOsid: import('../../state/supply_state_derivation.js').SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number
 ): { primary: FormationState; totalPower: number } {
-    const powers = defenders.map(d => computeDefenderPower(state, d, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethnicBonusFn(d)));
-    const sorted = defenders.map((d, i) => ({ f: d, p: powers[i]! })).sort((a, b) => b.p - a.p);
-    const totalPower = sorted[0]!.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
-    return { primary: sorted[0]!.f, totalPower };
+    const sorted = defenders
+        .map(d => ({
+            f: d,
+            p: computeDefenderPower(
+                state,
+                d,
+                targetOsid,
+                terrainMultByOsid,
+                artSuppression,
+                supplyStateByOsid,
+                ethnicBonusFn(d),
+            ),
+        }))
+        .sort((a, b) => b.p - a.p);
+    const primary = sorted[0];
+    if (primary === undefined) {
+        throw new Error('rankDefendersByPower requires at least one defender');
+    }
+    const totalPower = primary.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
+    return { primary: primary.f, totalPower };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

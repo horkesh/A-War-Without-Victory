@@ -3,6 +3,23 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close fifth backlog execution batch
+
+**Scope:** Fifth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation and a safe Phase D event-notification content backfill. No clean-VM run, external distribution, sensitive-history content backfill, save schema change, or combat retune was performed.
+
+**Change:**
+- Continued strict-null Phase 2 combat cleanup in `combat_math.ts`, `faction_progression.ts`, `operation_casualty_attribution.ts`, and `warlord_friction.ts`, replacing narrow casts/non-null assertions with explicit guards, typed accessors, and local narrowed variables. Parent integration preserved prior equipment-distribution semantics by treating absent equipment counts as zero during the narrowed update.
+- Added a Batch 5 inventory assertion to `tests/strict_null_inventory_progress.test.ts` and documented the remaining Phase 2 combat inventory count in `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` plus `docs/40_reports/implemented/20260518_STRICT_NULL_PHASE2_BATCH5.md`.
+- Backfilled non-sensitive London Conference event notifications: `london_conference_1992` now has 4/4 authored `notifications_to_other_factions` blocks for `accept`/`reject` to HRHB and RS, sourced only from the existing event narrative/responses/effects.
+- Updated `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md` and added `tests/sim/events/event_notification_content_backfill.test.ts` to track and pin the new coverage.
+
+**Determinism / output impact:** Strict-null changes are type-narrowing only and preserve ordering, schema, and state shape. London Conference content is static authored JSON and remains gated by the feature-flagged notification emission path; event triggers/effects/order did not change. 40w stayed hash-stable at `42607f83870e01d5`.
+
+**Verification:** Red/green checks were run in both lanes. Strict-null inventory first failed with 4 remaining Batch 5 escapes, then passed after cleanup. London Conference content coverage first failed while absent, then passed after backfill. Parent closeout passed `npm.cmd run typecheck`; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/sim/events/event_notification_content_backfill.test.ts tests/event_timeline_integrity.test.ts tests/sim/events/two_level_surfacing.test.ts tests/sim/events/dismiss_notifications.test.ts tests/state/serialize.notifications.test.ts tests/ui/inboxItems.notifications.test.ts tests/ui/inbox_dedup.test.ts --reporter=dot` (8 files / 34 tests); `git diff --check` with CRLF warnings only; `npm.cmd run sim:scenario:run:40w` produced n1880 hash `42607f83870e01d5`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1880` passed.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Sensitive-history notification rows remain tracked but unauthored pending historian/narrative review.
+
+---
 ## [2026-05-18] feat(roadmap): close fourth backlog execution batch
 
 **Scope:** Fourth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null continuation, notification dismissal/content, Washington timing reconciliation, launch/operator support, and event timeline guard repair. No clean-VM run was performed and no external distribution was approved.
@@ -13,11 +30,10 @@
 - Reconciled Washington timing as a two-clock output contract: live `washington_signed` remains an emergent RBiH-HRHB framework predicate, while `washington_agreement_1994` remains the formal week-102 calendar event; turn summaries now emit `rbih_hrhb_framework_activated` for the live predicate.
 - Added deterministic launch/playtest dry-run CLI `tools/release/prepare_launch_artifacts.cjs`, npm script `launch:artifacts:dry-run`, launch-day automation template, clean-VM evidence template, and external playtest artifact dry-run template.
 - Sorted `war_1992.json` back into chronological `turn_min` order and updated the event-integrity guard to the current 115-event corpus.
-- Propagated status to `MASTER_ROADMAP.md`, `CONSOLIDATED_BACKLOG.md`, `20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`.
 
-**Determinism / output impact:** Default 40w behavior remains hash-stable at `42607f83870e01d5` in the integrated-context proofs. Notification dismissal is an explicit player command against already-emitted notification state; authored notification text remains gated by `AWWV_TWO_LEVEL_NOTIFICATIONS=true`. Washington changes are projection/output wording only and do not retune thresholds, calendar events, combat, or turn ordering. The launch dry-run CLI writes nothing, uses no timestamps/randomness/network paths, and keeps `distributionApproved: false` until operator evidence is filled.
+**Determinism / output impact:** Default 40w behavior stayed hash-stable at `42607f83870e01d5`. Notification dismissal is an explicit player command against already-emitted notification state; authored notification text remains gated by `AWWV_TWO_LEVEL_NOTIFICATIONS=true`. Washington changes are projection/output wording only and do not retune thresholds, calendar events, combat, or turn ordering. The launch dry-run CLI writes nothing, uses no timestamps/randomness/network paths, and keeps `distributionApproved: false` until operator evidence is filled.
 
-**Verification:** Combined parent verification passed: `npm.cmd run typecheck`; focused merged suite `npx.cmd vitest run tests/sim/events/dismiss_notifications.test.ts tests/sim/events/two_level_surfacing.test.ts tests/state/serialize.notifications.test.ts tests/ui/inboxItems.notifications.test.ts tests/ui/inbox_dedup.test.ts tests/compile_turn_summary_washington_timing.test.ts tests/alliance_lifecycle.test.ts tests/washington_joint_pressure.test.ts tests/strict_null_inventory_progress.test.ts tests/attack_casualty_distribution.test.ts tests/brigade_pressure.test.ts tests/a4_army_co_roster_personalities.test.ts tests/launch_operator_artifacts.test.ts tests/release_notes_generator.test.ts tests/v092_playtest_package_docs.test.ts tests/event_timeline_integrity.test.ts --reporter=dot` passed 16 files / 152 tests; `npm.cmd run desktop:map:build` passed with existing Vite warnings; `npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged\DOES_NOT_EXIST.exe` emitted the expected non-distribution manifest; `npm.cmd run sim:scenario:run:40w` produced n1878 hash `42607f83870e01d5`, 27/27 anchors, 6/6 benchmarks; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1878` passed. `git diff --check` passed with existing CRLF warnings only.
+**Verification:** Parent closeout passed `npm.cmd run typecheck`, 16 focused files / 152 tests, `npm.cmd run desktop:map:build` with existing Vite warnings, launch dry-run, `npm.cmd run sim:scenario:run:40w` n1878 hash `42607f83870e01d5`, run consistency PASS, and `git diff --check` with CRLF warnings only.
 
 **Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. The only scenario-data edit is feature-flagged notification text plus chronological reordering of existing 1992 events; no sensitive-history outcome, random source, save schema, or formal Washington event timing changed.
 
@@ -5616,8 +5632,6 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Determinism:** Timing output is opt-in and not part of deterministic scenario artifacts. Focused tests compare timed-vs-untimed artifacts to pin deterministic equivalence. Diagnostic inventory/report files are read-only over existing run artifacts.
 
 **Verification:** `npm.cmd run typecheck` passed. `npx.cmd vitest run tests\scenario_timing_instrumentation.test.ts tests\formation_life_packet_inventory.test.ts tests\sensitive_history_status_diagnostic.test.ts` passed 5/5. `node --check tools\diagnostics\formation_life_packet_inventory.cjs` and `node --check tools\diagnostics\sensitive_history_status.cjs` passed. Timed 40w run `apr1992_definitive_40w__3649b3861a87e6ea__w40_n1846` emitted `timing.json` with simulation=76854.151ms, serialization/artifacts=9905.711ms, setup=2477.740ms, diagnostics/reporting=138.142ms, total=93798.472ms.
-
----
 
 ## [2026-05-17] docs(release): add gated launch, telemetry, Chronicle, and HRHB decision packets
 
