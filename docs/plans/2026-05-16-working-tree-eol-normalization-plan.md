@@ -4,7 +4,7 @@
 **Lane:** Studio Health / Repo Truth (Permanent Side Lane)
 **Status:** Proposed
 **Source:** `docs/40_reports/audits/20260516_CODE_AUDIT.md` — Findings 1 + 4
-**Companion docs:** `GUI_PLAYTEST_2026-05-16.md` (downstream symptom: HMR cascade)
+**Companion docs:** `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` (downstream symptom: HMR cascade)
 
 ---
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, React, Vite, MapLibre/Deck.gl, Zustand store, Electron, Vitest. No new dependencies. No simulation authority introduced — every fix consumes existing engine truth.
 
-**Date:** 2026-05-16. **Source:** `GUI_PLAYTEST_2026-05-16.md` (Cowork-mode RS playtest, v0.9.6-alpha.1).
+**Date:** 2026-05-16. **Source:** `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` (Cowork-mode RS playtest, v0.9.6-alpha.1).
 
 ---
 
@@ -29,7 +29,7 @@ Coordinate file ownership: this plan does not touch `inboxItems.ts`, `GameStateA
 
 ## Inputs
 
-- `GUI_PLAYTEST_2026-05-16.md` (source — at project root)
+- `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` (source playtest report)
 - `docs/plans/2026-05-16-gui-polish-action-plan.md` (parallel plan)
 - `docs/40_reports/GUI_POLISH_MASTER.md` (LIV-* findings overlap)
 - `docs/40_reports/GAME_STATE_RATING_MASTER.md` (impacts ratings #17, #21, #22, #24)
@@ -105,7 +105,7 @@ The 15 defects split into 3 severity tiers:
 - ✅ Aria-disabled / disabled state is consistent: if button is unresponsive, it's visually disabled too.
 - ✅ Triggering a render error inside the right panel preserves map + sidebar + toolbar visibility.
 - ✅ Tests committed for both behaviors.
-- ✅ `GUI_PLAYTEST_2026-05-16.md` defect #15 marked RESOLVED + recommendation #12 marked IMPLEMENTED.
+- ✅ `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` defect #15 marked RESOLVED + recommendation #12 marked IMPLEMENTED.
 
 **Effort:** ~3 person-days.
 
@@ -155,7 +155,7 @@ Cause: `@math.gl/web-mercator: assertion failed` in `lngLatToWorld` — invalid 
 - ✅ Both overlays visibly render when their map mode is active (visual confirmation required — Playwright screenshot OR manual verification per the existing visual regression bar from Track B5 of the AAA+++ shipping plan).
 - ✅ Builders silently skip + warn on bad coords; no crash if data drifts.
 - ✅ Determinism preserved — 40w hash stable across baseline reruns.
-- ✅ `GUI_PLAYTEST_2026-05-16.md` defect #2 marked RESOLVED.
+- ✅ `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` defect #2 marked RESOLVED.
 
 **Effort:** ~3 person-days (1 reproduce, 1 fix, 1 test + visual).
 
@@ -455,7 +455,7 @@ Suggested 3-way parallel split:
 
 This plan is DONE when:
 
-1. ✅ All 15 playtest defects have status RESOLVED or DEFERRED-WITH-REASON in `GUI_PLAYTEST_2026-05-16.md`.
+1. ✅ All 15 playtest defects have status RESOLVED or DEFERRED-WITH-REASON in `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md`.
 2. ✅ All 4 cross-cutting recommendations (rec #1, #2, #12, #13) are live, plus rec #5.
 3. ✅ Full focused regression GREEN:
    ```
@@ -471,7 +471,7 @@ This plan is DONE when:
    - Continue → ADVANCE_TURN gives visible feedback when blocked.
    - Trigger render error in right panel → map remains rendered.
    - Mladić personnel card shows ONE entry with `+N updates` indicator.
-5. ✅ `GUI_PLAYTEST_2026-05-16.md` updated with closing summary + cross-link to implementation report.
+5. ✅ `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` updated with closing summary + cross-link to implementation report.
 6. ✅ `docs/40_reports/GUI_MASTER.md` "Recent GUI changes" table cites the closeout.
 7. ✅ Implementation report committed: `docs/40_reports/implemented/YYYYMMDD_GUI_PLAYTEST_DEFECTS_CLOSEOUT.md` with verification screenshots.
 
@@ -518,7 +518,7 @@ This plan integrates into `docs/plans/MASTER_ROADMAP.md`:
 - Referenced from the AAA+++ shipping plan summary in `Path to v1.0`.
 - A 2026-05-16 hardening board note appended with playtest source + both plans + plan dispatch state.
 
-This plan is the **engineering execution answer** to the playtest findings in `GUI_PLAYTEST_2026-05-16.md`. Update both when defects close.
+This plan is the **engineering execution answer** to the playtest findings in `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md`. Update both when defects close.
 
 ---
 

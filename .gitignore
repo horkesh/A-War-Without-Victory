@@ -14,8 +14,6 @@ saves/save_*.json
 # Node modules
 node_modules/
 
-# External dev-tooling repo (separate git repo, not a submodule of AWWV)
-ralph-claude-code/
 dist-packaged/
 
 # Build outputs

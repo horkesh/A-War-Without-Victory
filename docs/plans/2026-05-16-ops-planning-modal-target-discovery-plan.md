@@ -3,7 +3,7 @@
 **Date:** 2026-05-16
 **Lane:** Codex UI/product (renderer-only; no IPC, no sim contract, no scenario data)
 **Status:** Implemented 2026-05-16
-**Source:** 2026-05-16 external audit playtest — `GUI_PLAYTEST_2026-05-16.md` + live walk-through of `OpsPlanningModal` Commander → Plan flow as RS / 1st Krajina at Turn 0
+**Source:** 2026-05-16 external audit playtest — `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` + live walk-through of `OpsPlanningModal` Commander → Plan flow as RS / 1st Krajina at Turn 0
 **Companion docs:** `docs/40_reports/audits/20260516_CODE_AUDIT.md`, `2026-05-16-working-tree-eol-normalization-plan.md`, `docs/40_reports/implemented/20260516_OPS_PLANNING_TARGET_DISCOVERY.md`
 
 ---
