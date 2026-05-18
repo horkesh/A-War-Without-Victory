@@ -605,6 +605,8 @@ Supporting inputs: `docs/plans/2026-03-16-v0.7.0-performance.md`, `docs/plans/20
 
 **Status (2026-04-15): groundwork only.** This milestone is still mostly ahead, but two bounded slices are already live: Warroom hotspot keyboard accessibility and tactical-map render-churn guards. Do not mistake that for closure; profiling, broader keyboard coverage, colorblind / rebind / text-scaling work, and explicit startup / memory proofs are still open.
 
+**Status update (2026-05-18):** Perf-memory and accessibility P0 surfaces are CLOSED for v0.9.3 — see the milestone closure entry further down (around line 771) for the canonical v0.9.3 state: "perf-memory surface CLOSED-FOR-V0.9.3 2026-05-08 via LANE D streaming" and "a11y Lanes A/B/C/D/E shipped (4/4 P0 v1.0-ship blockers CLOSED)". Wall-clock perf profiling on hot paths remains open as v0.9.4+ work; colorblind/keybind/text-scaling polish beyond the P0 lanes is now scoped as v0.9.4 visual polish, not a v0.9.3 reopen.
+
 ### v0.9.4 â€” Visual Polish + Legendary Map Features
 
 Loading screens, transitions, shell polish, warroom art finalization, icon polish, and the remaining late visual systems that are not already live.
