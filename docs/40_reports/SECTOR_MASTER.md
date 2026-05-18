@@ -1,10 +1,24 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 26 :severe-rescue sub-attribution)
+**Updated:** 2026-05-18 (Batch 27 :floor-completion hoist attempt + revert)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 27 :floor-completion hoist attempt + revert (learning-only)
+
+**Attempt:** Hoist `countActiveBrigadesByOsid(formations)` out of the per-recipient loop in `:floor-completion` — same pattern as Batch 25's successful -45% hoist on `:zero-assigned`.
+
+**Result:** Byte-identical at the hash level (n1904 / n1905 both `b14179d65639860c`) BUT `:floor-completion` consistently REGRESSED: 696.4 ms (Batch 26 baseline) → 902.5 / 907.5 ms (~+30%, two confirmation runs). Reverted.
+
+**Post-revert n1906:** hash `b14179d65639860c`, `:floor-completion` 710.1 ms (back within Batch 26 baseline variance).
+
+**Hypothesis:** V8 Map lookup cost grows with the hash-table capacity, not just live entry count. The hoisted Map accumulates transient OSID entries across many recipients via in-place `moveBrigadeToFrontTarget` mutations; the per-recipient fresh build produces a tighter Map. The Batch 25 win held because that loop ran ~2-4 moves per recipient (small Map churn). The `:floor-completion` site mutates many more entries per pass and the cumulative sparseness dominates the saved rebuild cost.
+
+**Durable rule:** Map-sparseness check before hoisting per-iteration `Map`-rebuild work in tight loops. Confirm empirically with TWO runs before declaring an optimization win. See `docs/40_reports/implemented/20260518_BATCH27_FLOOR_COMPLETION_HOIST_REVERT.md` for details + revert comment in source at line ~1891.
+
+**Report:** [implemented/20260518_BATCH27_FLOOR_COMPLETION_HOIST_REVERT.md](implemented/20260518_BATCH27_FLOOR_COMPLETION_HOIST_REVERT.md)
 
 ## 2026-05-18: Batch 26 :severe-rescue sub-attribution (byte-identical)
 

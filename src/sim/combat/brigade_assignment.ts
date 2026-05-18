@@ -1889,6 +1889,16 @@ export function ensureMinimumSectorCoverage(
                 || (a.assigned_brigade_ids.length / a.length_edges) - (b.assigned_brigade_ids.length / b.length_edges)
                 || strictCompare(a.sector_id, b.sector_id));
 
+        // Per-recipient rebuild kept deliberately. Batch 27 attempted to hoist
+        // `countActiveBrigadesByOsid(formations)` to once-per-pass on the theory
+        // that moveBrigadeToFrontTarget below updates activeCounts in-place with
+        // an identical delta. Byte-identity held (40w hash unchanged) but the
+        // hoisted measurement consistently regressed `:floor-completion` from
+        // 696 ms to 907 ms across two confirmation runs (n1904 and n1905). The
+        // suspected cause is Map sparseness: the hoisted Map accumulates entries
+        // for transient OSIDs across the whole pass and V8's lookup cost grows
+        // with that footprint, while the per-recipient fresh build produces a
+        // tighter Map. Revert documented in BATCH27_FLOOR_COMPLETION_HOIST_REVERT.
         for (const recipient of recipients) {
             const recipComp = getSectorComponent(recipient, componentOf);
             const recipientDensity = recipient.assigned_brigade_ids.length / Math.max(1, recipient.length_edges);

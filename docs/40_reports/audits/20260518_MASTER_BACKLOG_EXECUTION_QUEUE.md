@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 27 — :floor-completion hoist attempt + revert (learning-only)
+
+| Lane | Status | Source |
+|---|---|---|
+| Hoist `countActiveBrigadesByOsid` out of per-recipient loop in `:floor-completion` | Attempted + reverted | Report: `docs/40_reports/implemented/20260518_BATCH27_FLOOR_COMPLETION_HOIST_REVERT.md`. Two confirmation runs showed consistent +30% regression on the targeted label despite byte-identical hash. Hypothesis: V8 Map lookup cost grows with hash-table capacity; the hoisted Map accumulates transient OSID entries via `moveBrigadeToFrontTarget` in-place mutations. Reverted; n1906 hash `b14179d65639860c`. |
+
 ## Completed Batch 26 — :severe-rescue sub-attribution
 
 | Lane | Status | Source |

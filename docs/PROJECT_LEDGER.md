@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] chore(sector): Batch 27 :floor-completion hoist attempt + revert (learning-only)
+
+**Type:** Sector-perf optimization attempt + revert + durable knowledge capture.
+
+**Change:** Attempted to hoist `countActiveBrigadesByOsid(formations)` out of the per-recipient loop in `ensureMinimumSectorCoverage:severe-rescue:floor-completion` (same pattern as Batch 25's successful -45% hoist on `:zero-assigned`). Byte-identity held — hash unchanged at `b14179d65639860c` across two confirmation runs n1904 / n1905. But the targeted label `:floor-completion` consistently REGRESSED from 696.4 ms (Batch 26 baseline) to 902.5 / 907.5 ms (~+30%). Reverted. Post-revert n1906 hash `b14179d65639860c`; `:floor-completion` 710.1 ms (back within Batch 26 baseline variance). Added an inline source comment at the per-recipient rebuild site documenting the failed attempt and the Map-sparseness hypothesis so future maintainers don't repeat the experiment.
+
+**Why the regression:** Hypothesis is that V8 Map lookup cost grows with the underlying hash-table capacity, not just live entry count. The hoisted Map accumulates transient OSID entries across many recipients via `moveBrigadeToFrontTarget`'s in-place mutations; the per-recipient fresh build produces a tighter Map. The Batch 25 win held because `:zero-assigned` had ~2-4 moves per recipient (small Map churn); `:floor-completion` mutates many more entries per pass and the cumulative sparseness dominates the saved rebuild cost.
+
+**Determinism:** Byte-identical throughout (hash unchanged). Pure perf observation.
+
+**Durable rule recorded:** Map-sparseness check before hoisting per-iteration `Map`-rebuild work in tight loops; confirm with TWO runs before declaring an optimization win; not every "looks like the same pattern" hoist succeeds. Captured in `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+**Verification:** typecheck PASS. n1906 `validate_run_consistency` PASS (0 violations); 6/6 bot benchmarks.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH27_FLOOR_COMPLETION_HOIST_REVERT.md`; SECTOR_MASTER + MASTER_BACKLOG_EXECUTION_QUEUE + napkin updates; new entry in PROJECT_LEDGER_KNOWLEDGE.
+
+---
+
 ## [2026-05-18] feat(sector): Batch 26 :severe-rescue sub-attribution (byte-identical)
 
 **Type:** Sector reconstruction sidecar-only nested sub-attribution.
