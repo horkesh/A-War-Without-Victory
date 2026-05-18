@@ -206,30 +206,32 @@ Bugs at Turn 40:
 
 ### Real defects (real-mode bugs, not dev-server artifacts)
 
-1. **Literal `\U2014` instead of em-dash** in "UNDERSTOOD \U2014 BEGIN" button label on the Presidential Brief panel. Body text in the same panel uses em-dashes correctly. Localized to the action label.
-2. **deck.gl polygon-layer assertion failures** on every page load:
+> **Status legend (Batch 42 close, 2026-05-18):** [RESOLVED] = fix landed AND a focused test pins the regression. [DEFERRED] = closed elsewhere or out of scope for this batch. [DEV-ONLY] = environmental, see polish action plan / packaging lanes.
+
+1. **[RESOLVED]** **Literal `\U2014` instead of em-dash** in "UNDERSTOOD \U2014 BEGIN" button label on the Presidential Brief panel. Body text in the same panel uses em-dashes correctly. Localized to the action label. — Closed by Track D7.1 + `tests/ui/no_unicode_escapes_in_rendered_text.test.ts`.
+2. **[DEFERRED to D2 lane]** **deck.gl polygon-layer assertion failures** on every page load:
    - `osid-damage-overlay-fill` — `@math.gl/web-mercator: assertion failed` (`lngLatToWorld` → `projectFlat` → `getSurfaceIndices`).
    - `force-quality-glow-overlay-fill` — same stack.
-   These two overlays are silently absent. The cause is invalid (NaN or out-of-range) coordinates in the polygon data those layers consume.
-3. **WAR SUMMARY: missing empty-state placeholders** on CONVOYS, SUPPORT, CAPITAL tabs. CASUALTIES handles it correctly.
-4. **WAR SUMMARY · OPSEC inconsistency.** Lists 2 operations (Drina, Koridor) where OPS view lists 5 (adds Prijedor, Visegrad, Prsten). Either filter is undocumented or list is stale.
-5. **Personnel total mismatch** between "WAR BEGINS" briefing (82.5k) and WAR SUMMARY · OVERVIEW (118k). Same screen needs to label what each number includes.
-6. **RECORDS button: ambiguous behavior.** Highlights in the toolbar but opens nothing distinct from clicking a corps. Tutorial promise oversells it.
-7. **OPS-view right panel z-order.** Field Ops Snapshot panel is partially hidden behind the Presidential Inbox column when OPS view is active.
-8. **Bottom-bar "DEFENSE" appears twice** when +MORE is expanded.
-9. **Tutorial overlay replays on Continue.** Tutorial-seen flag isn't persisted in the save.
-10. **Vance-Owen modal: 0% / 0% / 0% territorial division.** Empty data fed to bars, or modal rendered before data loaded.
-11. **Vance-Owen modal: RS listed under "OTHER FACTION RESPONSES"** when the player IS RS.
-12. **Vance-Owen modal: no close/dismiss option.** Only Accept/Reject — no way to review without committing.
-13. **REJECT PLAN doesn't dismiss the inbox card.** Inbox count stays at 41.
-14. **Duplicate "Personnel Matter — Regarding Ratko Mladić"** cards stack without dedupe.
+   These two overlays are silently absent. The cause is invalid (NaN or out-of-range) coordinates in the polygon data those layers consume. — Out of scope for Batch 42 (UI-3 D3-D7 remainder); covered by Track D2 in the source plan.
+3. **[RESOLVED]** **WAR SUMMARY: missing empty-state placeholders** on CONVOYS, SUPPORT, CAPITAL tabs. CASUALTIES handles it correctly. — Closed by Track D4.1/D4.2 + `tests/ui/war_summary_empty_states.test.ts` (`<EmptyState>` reusable component lives).
+4. **[RESOLVED]** **WAR SUMMARY · OPSEC inconsistency.** Lists 2 operations (Drina, Koridor) where OPS view lists 5 (adds Prijedor, Visegrad, Prsten). Either filter is undocumented or list is stale. — Closed by Track D4.4 + `tests/ui/war_summary_opsec_reconciliation.test.ts`.
+5. **[RESOLVED]** **Personnel total mismatch** between "WAR BEGINS" briefing (82.5k) and WAR SUMMARY · OVERVIEW (118k). Same screen needs to label what each number includes. — Closed by Track D4.3 + `tests/ui/war_summary_personnel_label.test.ts`.
+6. **[RESOLVED]** **RECORDS button: ambiguous behavior.** Highlights in the toolbar but opens nothing distinct from clicking a corps. Tutorial promise oversells it. — Closed by Track D6.2 + `tests/ui/records_button_behavior.test.ts`.
+7. **[RESOLVED]** **OPS-view right panel z-order.** Field Ops Snapshot panel is partially hidden behind the Presidential Inbox column when OPS view is active. — Closed by `shouldRenderInboxPanel(primary, operationsPanelOpen)` in `src/ui/map/components/panelRail.ts` + `tests/ui/ops_view_right_panel_exclusivity.test.ts` (Batch 42, 2026-05-18).
+8. **[RESOLVED]** **Bottom-bar "DEFENSE" appears twice** when +MORE is expanded. — Closed by `PRIMARY_MODES` / secondary split in `src/ui/map/utils/mapModes.ts` + `tests/ui/map_modes_no_duplicate_labels.test.ts` (Batch 42, 2026-05-18).
+9. **[RESOLVED]** **Tutorial overlay replays on Continue.** Tutorial-seen flag isn't persisted in the save. — Closed by R2-3 (LANE-NIGHTSHIFT-ROUND2-TUTORIAL-ONBOARDING-SKELETON) + `tests/ui/tutorial_persistence.test.ts`.
+10. **[RESOLVED]** **Vance-Owen modal: 0% / 0% / 0% territorial division.** Empty data fed to bars, or modal rendered before data loaded. — Closed by Track D3.1 + `tests/ui/peace_plan_modal.test.ts`.
+11. **[RESOLVED]** **Vance-Owen modal: RS listed under "OTHER FACTION RESPONSES"** when the player IS RS. — Closed by Track D3.2 + `tests/ui/peace_plan_modal.test.ts`.
+12. **[RESOLVED]** **Vance-Owen modal: no close/dismiss option.** Only Accept/Reject — no way to review without committing. — Closed by Track D3.3 + `tests/ui/peace_plan_modal.test.ts`.
+13. **[RESOLVED]** **REJECT PLAN doesn't dismiss the inbox card.** Inbox count stays at 41. — Closed by Track D3.4 + `tests/ui/peace_plan_modal.test.ts`.
+14. **[RESOLVED]** **Duplicate "Personnel Matter — Regarding Ratko Mladić"** cards stack without dedupe. — Closed by Track D6.1 + `tests/ui/inbox_dedup.test.ts`.
 15. ~~**ADVANCE_TURN silently no-ops** when blocked. No tooltip, no toast, no auto-open of the Decision Room. Primary action gives zero feedback.~~ — **Retracted.** ADVANCE_TURN is an IPC action serviced by the Electron main process. The browser dev server doesn't have that bridge, so the no-op behavior is expected, not a defect.
 
 ### UX / friction (worth fixing but not critical)
 
-16. **Double faction picker** (Warroom on `:3000`, Map auto-spawned on `:3002`, each asking separately).
-17. **Inconsistent host names**: `127.0.0.1:3000` vs `localhost:3002`. Standardize on one for dev parity with packaged Electron behavior.
-18. **Auto-spawned popup** — strict popup blockers will break the boot path silently.
+16. **[DEV-ONLY]** **Double faction picker** (Warroom on `:3000`, Map auto-spawned on `:3002`, each asking separately). — Browser-only dev artifact (`postMessage` handoff lives in source plan recommendation R.5). Not reproducible in the packaged Electron build. No engineering closeout in Batch 42; tracked under R.5 in the source playtest plan.
+17. **[DEV-ONLY]** **Inconsistent host names**: `127.0.0.1:3000` vs `localhost:3002`. Standardize on one for dev parity with packaged Electron behavior. — Dev-server-only; the packaged Electron build runs in a single origin. No engineering closeout in Batch 42.
+18. **[DEV-ONLY]** **Auto-spawned popup** — strict popup blockers will break the boot path silently. — Dev-server-only. Not reproducible in the packaged Electron build. No engineering closeout in Batch 42.
 
 ### Dev-environment only (not bugs, but worth a note)
 

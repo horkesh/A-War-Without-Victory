@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] docs(playtest): Batch 42 GUI Playtest D3-D7 closeout (UI-3)
+
+**Type:** Status documentation + two coverage tests. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
+
+**Change:** Verified status of the 2026-05-16 GUI playtest defects covered by Tracks D3-D7 of `docs/plans/2026-05-16-gui-playtest-defects-plan.md`. Defects #1, #3-6, #9-14 already closed on disk with passing focused tests (UNCODE-ESCAPE, EMPTY-STATE, OPSEC, PERSONNEL-LABEL, RECORDS, TUTORIAL-PERSIST, PEACE-PLAN, INBOX-DEDUP). Added two missing focused coverage tests for previously uncovered D7 items: `tests/ui/ops_view_right_panel_exclusivity.test.ts` (defect #7 OPS-view right panel z-order — confirms `shouldRenderInboxPanel` suppresses Inbox when OperationsPanel is open) and `tests/ui/map_modes_no_duplicate_labels.test.ts` (defect #8 — confirms no map mode id or label appears in both primary and secondary buckets). Defects #16-18 marked DEV-ONLY (browser dev-server artifacts; not reproducible in packaged Electron build; out of engineering scope for this batch). Defect #2 (deck.gl polygon overlay assertions) explicitly DEFERRED to source plan Track D2; out of UI-3 D3-D7 remainder scope.
+
+**Determinism:** Documentation + two coverage tests only. No engine, scenario, or save changes.
+
+**Verification:** `npx.cmd vitest run tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/inbox_dedup.test.ts tests/ui/no_unicode_escapes_in_rendered_text.test.ts tests/ui/peace_plan_modal.test.ts tests/ui/records_button_behavior.test.ts tests/ui/tutorial_persistence.test.ts tests/ui/war_summary_empty_states.test.ts tests/ui/war_summary_opsec_reconciliation.test.ts tests/ui/war_summary_personnel_label.test.ts tests/ui/ops_view_right_panel_exclusivity.test.ts tests/ui/map_modes_no_duplicate_labels.test.ts tests/ui_shell_navigation.test.ts --reporter=dot` 46/46 pass; `npx.cmd tsc --noEmit` clean; `npm.cmd run desktop:map:build` 16.62s clean. No 40w run — no simulation or scenario authority touched.
+
+**Artifacts:** `tests/ui/ops_view_right_panel_exclusivity.test.ts`; `tests/ui/map_modes_no_duplicate_labels.test.ts`; updates to `docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md` (defect-by-defect status legend + status markers for all 18 defects).
+
+---
+
 ## [2026-05-18] feat(ui): Batch 41 Decision Room pushback explanations (UI-2)
 
 **Type:** UI / read-model projection only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
