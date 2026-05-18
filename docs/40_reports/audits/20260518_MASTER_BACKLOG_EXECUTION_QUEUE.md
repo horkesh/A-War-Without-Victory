@@ -20,6 +20,14 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 21 — Autonomous multi-lane closeout
+
+| Lane | Status | Source |
+|---|---|---|
+| Strict-null Phase 2 Batch 20 | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH21_AUTONOMOUS_MULTI_LANE.md`. 18 escapes removed across 3 combat files (`attack_resolution_osid`, `commander/emit`, `commander/plan`); Phase 2 remaining 39 → 21. |
+| Sector reconstruction `normalizeFinalSectorBuckets` deeper attribution | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH21_AUTONOMOUS_MULTI_LANE.md`. 4 sidecar `_perfTime` children; 40w n1898 hash `b14179d65639860c` matches Batch 17 baseline; `:friendly-universe` at 1897ms / 42227 calls (89% of parent) is the clear next optimization target. |
+| Sector reconstruction `sealMergedSectorTruth` deeper attribution | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH21_AUTONOMOUS_MULTI_LANE.md`. 7 sidecar `_perfTime` children; `:ensure-coverage` at 2666ms / 1502 calls (72% of parent) is the next deeper-attribution or optimization target. |
+
 ## Completed Batch 20 — Autonomous multi-lane closeout
 
 | Lane | Status | Source |

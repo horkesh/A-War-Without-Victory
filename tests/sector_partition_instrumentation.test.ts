@@ -351,6 +351,57 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: normalizeFinalSectorBuckets has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function normalizeFinalSectorBuckets(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'normalizeFinalSectorBuckets:brigade-classify',
+            'normalizeFinalSectorBuckets:friendly-universe',
+            'normalizeFinalSectorBuckets:reserve-band',
+            'normalizeFinalSectorBuckets:write-back',
+        ];
+
+        for (const label of labels) {
+            expect(region).toContain(`_perfTime('${label}'`);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
+    it('static contract: sealMergedSectorTruth has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function sealMergedSectorTruth(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'sealMergedSectorTruth:absorb-unstaffed',
+            'sealMergedSectorTruth:dedup-brigades',
+            'sealMergedSectorTruth:enforce-ownership',
+            'sealMergedSectorTruth:ensure-coverage',
+            'sealMergedSectorTruth:friendly-osids-and-components',
+            'sealMergedSectorTruth:reclassify-rear',
+            'sealMergedSectorTruth:rehome-unassigned',
+        ];
+
+        for (const label of labels) {
+            expect(region).toContain(`_perfTime('${label}'`);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('static contract: applyFinalSectorOwnerTruthPass has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('export function applyFinalSectorOwnerTruthPass(');

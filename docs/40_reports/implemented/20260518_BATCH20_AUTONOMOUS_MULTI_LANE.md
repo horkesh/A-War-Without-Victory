@@ -185,6 +185,16 @@ Baseline regression: all scenarios match.
 | `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1897` | PASS |
 | `npm.cmd run test:baselines` | PASS across all three scenarios after manifest refresh |
 
+## Post-Commit Verification (HEAD `2d66de92`)
+
+| Command | Result |
+|---|---|
+| `git log --oneline -3` | HEAD = `2d66de92` (this batch) |
+| `git status --short` | clean |
+| `npm.cmd run typecheck` | PASS |
+| `npm.cmd run desktop:map:build` | PASS (16.64s) |
+| `npm.cmd run test:baselines` | PASS across all 3 regression scenarios |
+
 ## Next Targets
 
 1. **Strict-null Phase 2** has 39 remaining combat escapes across `attack_resolution_osid.ts` (8), `commander/emit.ts` (6), `commander/plan.ts` (4), `corps_front_sectors.ts` (7 — Lane B territory), `commander_march_correction.ts` (2 preserved for save-shape contract), `paramilitary_sweep.ts` (3 — gated), `sector_*` (8 — Lane B territory), `supply_condition.ts` (1 — gated). Clean next-slice candidates: `attack_resolution_osid.ts`, `commander/emit.ts`, `commander/plan.ts`.

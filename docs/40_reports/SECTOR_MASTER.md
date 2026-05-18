@@ -1,10 +1,49 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 20 applyFinalSectorOwnerTruthPass attribution)
+**Updated:** 2026-05-18 (Batch 21 normalizeFinalSectorBuckets + sealMergedSectorTruth attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 21 normalizeFinalSectorBuckets + sealMergedSectorTruth deeper attribution (byte-identical)
+
+**Change:** `normalizeFinalSectorBuckets(...)` and `sealMergedSectorTruth(...)` in `src/sim/combat/corps_front_sectors.ts` now record sidecar attribution for their inner phases / helpers under labels `normalizeFinalSectorBuckets:{friendly-universe,reserve-band,brigade-classify,write-back}` (4 phases × 42,227 per-sector iterations) and `sealMergedSectorTruth:{friendly-osids-and-components,dedup-brigades,enforce-ownership,rehome-unassigned,ensure-coverage,reclassify-rear,absorb-unstaffed}` (7 helpers × per-faction × per-pass). Wrappers use the existing `_perfTime` helper; no behavior change. `normalizeFinalSectorBuckets` wrapper uses closure mutation (locals declared outside, mutated inside) so per-sector data structures stay coherent across phase boundaries.
+
+**Why:** After Batch 20 attributed `applyFinalSectorOwnerTruthPass` and identified `:normalize-buckets` as the dominant child (73%), this batch drills into both `normalizeFinalSectorBuckets` and the still-unfactored `sealMergedSectorTruth:1-5` parent (~3700ms aggregate). Two functions in one batch because they are disjoint (different functions, no shared state, separate test contracts).
+
+**Run evidence (n1898 with attribution):**
+
+`normalizeFinalSectorBuckets` parent total = 2131.0ms across 335 calls. Children:
+
+| Label | Aggregate ms | Count | ms/call | % of parent |
+|---|---:|---:|---:|---:|
+| `normalizeFinalSectorBuckets:friendly-universe` | 1897.3 | 42227 | 0.045 | 89% |
+| `normalizeFinalSectorBuckets:brigade-classify` | 110.2 | 42227 | 0.003 | 5% |
+| `normalizeFinalSectorBuckets:write-back` | 88.8 | 42227 | 0.002 | 4% |
+| `normalizeFinalSectorBuckets:reserve-band` | 86.1 | 42227 | 0.002 | 4% |
+
+`sealMergedSectorTruth:1-5` parent total = 3721.3ms across 470 calls. Children:
+
+| Label | Aggregate ms | Count | ms/call | % of parent |
+|---|---:|---:|---:|---:|
+| `sealMergedSectorTruth:ensure-coverage` | 2665.5 | 1502 | 1.78 | 72% |
+| `sealMergedSectorTruth:rehome-unassigned` | 277.0 | 1502 | 0.18 | 7% |
+| `sealMergedSectorTruth:absorb-unstaffed` | 222.4 | 1410 | 0.16 | 6% |
+| `sealMergedSectorTruth:enforce-ownership` | 213.7 | 1502 | 0.14 | 6% |
+| `sealMergedSectorTruth:reclassify-rear` | 150.9 | 1502 | 0.10 | 4% |
+| `sealMergedSectorTruth:friendly-osids-and-components` | 100.6 | 1410 | 0.07 | 3% |
+| `sealMergedSectorTruth:dedup-brigades` | 64.1 | 3004 | 0.02 | 2% |
+
+Overhead between parent totals and children sums: ~50ms / ~1.3% — clean attribution.
+
+**Byte-identity proof:** 40w n1898 final hash `b14179d65639860c` matches Batch 17 baseline literally. `node tools/validate_run_consistency.cjs runs/.../n1898` PASS. Anchors 27/27, benchmarks 6/6, validation 13/13 (3 pre-existing below-floor advisories unchanged).
+
+**Next targets (clear optimizations):**
+- `normalizeFinalSectorBuckets:friendly-universe` (89% of normalize cost): hoist `friendlyUniverse` construction out of the per-sector loop into a per-faction precompute. Each sector's `friendlyUniverse` is a function of `sector.faction` alone — currently rebuilt 42,227 times when 3 distinct values exist.
+- `sealMergedSectorTruth:ensure-coverage` (72% of seal cost): drill into `ensureMinimumSectorCoverage(...)` for one more level of attribution or byte-identical optimization.
+
+**Report:** [implemented/20260518_BATCH21_AUTONOMOUS_MULTI_LANE.md](implemented/20260518_BATCH21_AUTONOMOUS_MULTI_LANE.md)
 
 ## 2026-05-18: Batch 20 applyFinalSectorOwnerTruthPass deeper attribution (byte-identical)
 

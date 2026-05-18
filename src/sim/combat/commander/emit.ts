@@ -185,7 +185,7 @@ function predictDirectEnemyTargets(
         const prediction = predictCombatOutcome(
             briefing.state_ref,
             probeBrigadeId,
-            target as any,
+            target,
             adjacency,
             briefing.reverse_map,
             terrainMultByOsid,
@@ -759,7 +759,7 @@ function buildOperations(
         // Approach OSIDs are constant for the whole buildOperations call — computed once here.
         const friendlyApproachOsids: readonly string[] = (() => {
             if (!reachabilityObjectiveOsid || !friendlyOsids) return [];
-            const neighbors = (adjacencyMap.get(reachabilityObjectiveOsid as any) ?? []) as readonly string[];
+            const neighbors = (adjacencyMap.get(reachabilityObjectiveOsid) ?? []) as readonly string[];
             return neighbors.filter(n => friendlyOsids.has(n)).sort(strictCompare);
         })();
         const canReach = (brigadeId: string): boolean => {
@@ -796,7 +796,7 @@ function buildOperations(
                     // Avoids creating a new Set per candidate sector inside the filter.
                     const primaryNeighborSet = new Set<string>();
                     for (const osid of primarySector.territory_osids) {
-                        for (const n of (adjacencyMap.get(osid as any) ?? []) as readonly string[]) {
+                        for (const n of (adjacencyMap.get(osid) ?? []) as readonly string[]) {
                             primaryNeighborSet.add(n);
                         }
                     }
@@ -1040,7 +1040,7 @@ function buildOperations(
                                     () => {
                                         const directEnemyTargets = new Set<string>();
                                         for (const target of [...enemyTargets].sort(strictCompare)) {
-                                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                            const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
                                             if (targetNeighbors.includes(probeBrigLoc)) {
                                                 directEnemyTargets.add(target);
                                             }
@@ -1072,7 +1072,7 @@ function buildOperations(
                                             const targetController = briefing.reverse_map && briefing.state_ref
                                                 ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
                                                 : null;
-                                            const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                            const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
                                             const direct = true;
                                             const directPrediction = predictedTargetByOsid.get(target);
                                             let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
@@ -1146,7 +1146,7 @@ function buildOperations(
                         const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
                         const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
                         if (probeAdj && probeFriendly && probeBrigLoc) {
-                            const targetNeighbors = (probeAdj.get(probeTarget as any) ?? []) as readonly string[];
+                            const targetNeighbors = (probeAdj.get(probeTarget) ?? []) as readonly string[];
                             const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
                             for (const approachOsid of approachOsids) {
                                 const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);

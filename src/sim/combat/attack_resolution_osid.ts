@@ -325,7 +325,7 @@ export function resolveAttackOrdersOsid(
             if (!f || f.status !== 'active') continue;
             const loc = (f as { location_osid?: string }).location_osid;
             if (!loc) continue;
-            const factionId = f.faction as FactionId;
+            const factionId = f.faction;
             if (getPoliticalControllerOSID(state, loc, reverseMap) === factionId) continue;
             const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
             const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
@@ -380,7 +380,7 @@ export function resolveAttackOrdersOsid(
         if (attackerFormations.length === 0) continue;
 
         const firstAttacker = attackerFormations[0]!;
-        const attackerFaction = firstAttacker.faction as FactionId;
+        const attackerFaction = firstAttacker.faction;
 
         // Safety gate: suppress HRHB↔RBiH combat when mobilizing, ceasefire-active, or
         // post-Washington. Belt-and-suspenders if an order slips through upstream.
@@ -791,8 +791,9 @@ export function resolveAttackOrdersOsid(
             ? state.military.corps_command[attackerCorpsId]
             : null;
         const activeOp = attackerCmd ? findBrigadeOperation(attackerCmd, firstAttacker.id) : null;
-        const activeOperationId = activeOp && activeOp.phase === 'execution'
-            ? `${attackerCorpsId}:${activeOp.name}:t${activeOp.started_turn}`
+        const executionOp = activeOp && activeOp.phase === 'execution' ? activeOp : null;
+        const activeOperationId = executionOp
+            ? `${attackerCorpsId}:${executionOp.name}:t${executionOp.started_turn}`
             : undefined;
 
         // Compute deterministic battle_id join key
@@ -803,7 +804,7 @@ export function resolveAttackOrdersOsid(
             battle_id: battleId,
             attacker_brigade: firstAttacker.id,
             attacker_faction: attackerFaction,
-            defender_faction: (controller ?? attackerFaction) as FactionId,
+            defender_faction: controller ?? attackerFaction,
             target_osid: targetOsid,
             outcome,
             power_ratio: powerRatio,
@@ -820,9 +821,9 @@ export function resolveAttackOrdersOsid(
                 battleEquipDefenderTanksLost, battleEquipDefenderArtLost,
                 transfers,
             ),
-            ...(activeOperationId ? {
+            ...(executionOp ? {
                 operation_id: activeOperationId,
-                operation_name: activeOp!.name,
+                operation_name: executionOp.name,
             } : {}),
         });
 
@@ -922,7 +923,7 @@ export function resolveAttackOrdersOsid(
         // Enqueue significant battles for async narrative generation.
         // Significance: decisive/catastrophic outcome, OR territory flip, OR ≥200 total casualties.
         // Guard: skip in cadet mode (no AI client).
-        if ((state.meta as any).ai_commander_config?.mode !== 'cadet') {
+        if (state.meta.ai_commander_config?.mode !== 'cadet') {
             const aarTotalCas = finalAttackerCas + finalDefenderCas;
             const aarSignificant =
                 outcome === 'decisive_victory' ||
@@ -931,11 +932,11 @@ export function resolveAttackOrdersOsid(
                 aarTotalCas >= 200;
             if (aarSignificant && attackerCorpsId) {
                 (state.military.narrative_queue ??= []).push({
-                    faction: attackerFaction as FactionId,
+                    faction: attackerFaction,
                     corpsId: attackerCorpsId,
                     input: {
                         officerName: 'Corps Commander',
-                        faction: attackerFaction as FactionId,
+                        faction: attackerFaction,
                         corpsId: attackerCorpsId,
                         targetOsid,
                         outcome,
@@ -1052,7 +1053,7 @@ export function resolveAttackOrdersOsid(
         if (!f || f.status !== 'active') continue;
         const loc = (f as { location_osid?: string }).location_osid;
         if (!loc) continue;
-        const factionId = f.faction as FactionId;
+        const factionId = f.faction;
         const controller = getPoliticalControllerOSID(state, loc, reverseMap);
         if (controller === factionId) continue;
         const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };

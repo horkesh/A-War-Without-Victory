@@ -1408,7 +1408,7 @@ function selectOpportunityTargets(
     const adjacency = briefing.spatial?.adjacency;
     const approachCount = (osid: string): number => {
         if (!adjacency) return 0;
-        const neighbors = adjacency.get(osid as any) ?? [];
+        const neighbors = adjacency.get(osid) ?? [];
         return (neighbors as readonly string[]).filter(n => zoneOsidSet.has(n)).length;
     };
 
@@ -1421,7 +1421,7 @@ function selectOpportunityTargets(
     const factionFriendlyOsids = briefing.spatial?.friendlyOsidsByFaction?.get(briefing.faction);
     const isIsolatedCapture = (osid: string): boolean => {
         if (!sbAdjacency || !factionFriendlyOsids) return false; // no data → allow
-        const neighbors = sbAdjacency.get(osid as any) ?? [];
+        const neighbors = sbAdjacency.get(osid) ?? [];
         if ((neighbors as readonly string[]).length === 0) return false; // no neighbors → allow
         return !(neighbors as readonly string[]).some(n => factionFriendlyOsids.has(n));
     };
@@ -1467,7 +1467,7 @@ function filterSurplusByReachability(
     // A brigade is reachable if it can BFS to ANY of these approach OSIDs.
     const allApproachOsids = new Set<string>();
     for (const candidateOsid of candidateOsids) {
-        const neighbors = adjacency.get(candidateOsid as any) ?? [];
+        const neighbors = adjacency.get(candidateOsid) ?? [];
         for (const n of neighbors as readonly string[]) {
             if (factionFriendlyOsids.has(n)) allApproachOsids.add(n);
         }
@@ -1556,7 +1556,7 @@ function filterReachableObjectives(
     for (const candidateOsid of candidateOsids) {
         // Objectives are enemy-held; BFS through friendly territory to an approach
         // OSID (a friendly OSID neighboring the objective) instead of the objective itself.
-        const neighbors = adjacency.get(candidateOsid as any) ?? [];
+        const neighbors = adjacency.get(candidateOsid) ?? [];
         const approachOsids = (neighbors as readonly string[]).filter(n => factionFriendlyOsids.has(n));
         if (approachOsids.length === 0) continue; // isolation guard: no friendly neighbors → capture would be isolated garrison
 

@@ -1161,62 +1161,72 @@ function normalizeFinalSectorBuckets(
         const frontSet = getSectorFrontOsids(sector);
         const territorySet = new Set(sector.territory_osids);
         const expandedTerritory = new Set(territorySet);
-        const friendlyUniverse = politicalControllers
-            ? new Set(
-                Object.entries(politicalControllers)
-                    .filter(([, controller]) => controller === sector.faction)
-                    .map(([osid]) => osid),
-            )
-            : new Set(territorySet);
-        const reserveBand = new Set<string>();
-        for (const frontOsid of frontSet) {
-            for (const neighbor of adjacency.get(frontOsid as Osid) ?? []) {
-                if (frontSet.has(neighbor)) continue;
-                if (!friendlyUniverse.has(neighbor)) continue;
-                reserveBand.add(neighbor);
+        const friendlyUniverse = _perfTime('normalizeFinalSectorBuckets:friendly-universe', () =>
+            politicalControllers
+                ? new Set(
+                    Object.entries(politicalControllers)
+                        .filter(([, controller]) => controller === sector.faction)
+                        .map(([osid]) => osid),
+                )
+                : new Set(territorySet)
+        );
+        const reserveBand = _perfTime('normalizeFinalSectorBuckets:reserve-band', () => {
+            const band = new Set<string>();
+            for (const frontOsid of frontSet) {
+                for (const neighbor of adjacency.get(frontOsid as Osid) ?? []) {
+                    if (frontSet.has(neighbor)) continue;
+                    if (!friendlyUniverse.has(neighbor)) continue;
+                    band.add(neighbor);
+                }
             }
-        }
+            return band;
+        });
 
         const nextAssigned: FormationId[] = [];
         const nextRear: FormationId[] = [];
         const reserveCandidates: Array<{ bid: FormationId; personnel: number }> = [];
         const rearCandidates: Array<{ bid: FormationId; personnel: number }> = [];
-        const allBrigades = [...new Set([
-            ...sector.assigned_brigade_ids,
-            ...sector.reserve_brigade_ids,
-            ...(sector.rear_brigade_ids ?? []),
-        ])].sort(strictCompare);
 
-        for (const brigadeId of allBrigades) {
-            const locationOsid = formations[brigadeId]?.location_osid;
-            if (!locationOsid) {
-                nextRear.push(brigadeId);
-                continue;
-            }
-            if (frontSet.has(locationOsid)) {
-                expandedTerritory.add(locationOsid);
-                nextAssigned.push(brigadeId);
-                continue;
-            }
-            if (reserveBand.has(locationOsid)) {
-                expandedTerritory.add(locationOsid);
-                reserveCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
-                continue;
-            }
-            if (territorySet.has(locationOsid)) {
-                rearCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
-                nextRear.push(brigadeId);
-            }
-        }
+        _perfTime('normalizeFinalSectorBuckets:brigade-classify', () => {
+            const allBrigades = [...new Set([
+                ...sector.assigned_brigade_ids,
+                ...sector.reserve_brigade_ids,
+                ...(sector.rear_brigade_ids ?? []),
+            ])].sort(strictCompare);
 
-        reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
-        const nextReserve = reserveCandidates.slice(0, MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid);
-        nextRear.push(...reserveCandidates.slice(MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid));
+            for (const brigadeId of allBrigades) {
+                const locationOsid = formations[brigadeId]?.location_osid;
+                if (!locationOsid) {
+                    nextRear.push(brigadeId);
+                    continue;
+                }
+                if (frontSet.has(locationOsid)) {
+                    expandedTerritory.add(locationOsid);
+                    nextAssigned.push(brigadeId);
+                    continue;
+                }
+                if (reserveBand.has(locationOsid)) {
+                    expandedTerritory.add(locationOsid);
+                    reserveCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
+                    continue;
+                }
+                if (territorySet.has(locationOsid)) {
+                    rearCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
+                    nextRear.push(brigadeId);
+                }
+            }
+        });
 
-        sector.assigned_brigade_ids = nextAssigned.sort(strictCompare);
-        sector.reserve_brigade_ids = nextReserve.sort(strictCompare);
-        sector.rear_brigade_ids = nextRear.sort(strictCompare);
-        sector.territory_osids = [...expandedTerritory].sort(strictCompare);
+        _perfTime('normalizeFinalSectorBuckets:write-back', () => {
+            reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
+            const nextReserve = reserveCandidates.slice(0, MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid);
+            nextRear.push(...reserveCandidates.slice(MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid));
+
+            sector.assigned_brigade_ids = nextAssigned.sort(strictCompare);
+            sector.reserve_brigade_ids = nextReserve.sort(strictCompare);
+            sector.rear_brigade_ids = nextRear.sort(strictCompare);
+            sector.territory_osids = [...expandedTerritory].sort(strictCompare);
+        });
     }
 }
 
@@ -1888,27 +1898,32 @@ function sealMergedSectorTruth(
     }
 
     for (const [faction, factionSectors] of byFaction) {
-        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
-            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
-            : buildFriendlyOsidsFromState(state, adjacency, faction);
-        const componentOf = spatial?.componentsByFaction.get(faction)
-            ? new Map(spatial.componentsByFaction.get(faction)!)
-            : buildFriendlyComponents(adjacency, friendlyOsids);
+        const { friendlyOsids, componentOf } = _perfTime('sealMergedSectorTruth:friendly-osids-and-components', () => {
+            const fo = spatial?.friendlyOsidsByFaction.get(faction)
+                ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+                : buildFriendlyOsidsFromState(state, adjacency, faction);
+            const co = spatial?.componentsByFaction.get(faction)
+                ? new Map(spatial.componentsByFaction.get(faction)!)
+                : buildFriendlyComponents(adjacency, fo);
+            return { friendlyOsids: fo, componentOf: co };
+        });
 
-        deduplicateBrigadesAcrossSectors(factionSectors);
-        enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids);
-        rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids);
-        deduplicateBrigadesAcrossSectors(factionSectors);
-        ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state);
-        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
-        if (absorbUnstaffedSiblingFrontSectors(sectors, factionSectors, adjacency, edgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids)) {
+        _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
+        _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids));
+        _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids));
+        _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(factionSectors));
+        _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state));
+        _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids));
+        const absorbed = _perfTime('sealMergedSectorTruth:absorb-unstaffed', () =>
+            absorbUnstaffedSiblingFrontSectors(sectors, factionSectors, adjacency, edgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids));
+        if (absorbed) {
             const refreshedFactionSectors = Object.values(sectors).filter((sector) => sector.faction === faction);
-            deduplicateBrigadesAcrossSectors(refreshedFactionSectors);
-            enforcePhysicalSectorOwnership(refreshedFactionSectors, formations, adjacency, friendlyOsids);
-            rehomeUnassignedBrigadesToPhysicalSectorOwners(refreshedFactionSectors, formations, faction, adjacency, friendlyOsids);
-            deduplicateBrigadesAcrossSectors(refreshedFactionSectors);
-            ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state);
-            reclassifyRearBrigades(refreshedFactionSectors, formations, adjacency, friendlyOsids);
+            _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
+            _perfTime('sealMergedSectorTruth:enforce-ownership', () => enforcePhysicalSectorOwnership(refreshedFactionSectors, formations, adjacency, friendlyOsids));
+            _perfTime('sealMergedSectorTruth:rehome-unassigned', () => rehomeUnassignedBrigadesToPhysicalSectorOwners(refreshedFactionSectors, formations, faction, adjacency, friendlyOsids));
+            _perfTime('sealMergedSectorTruth:dedup-brigades', () => deduplicateBrigadesAcrossSectors(refreshedFactionSectors));
+            _perfTime('sealMergedSectorTruth:ensure-coverage', () => ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state));
+            _perfTime('sealMergedSectorTruth:reclassify-rear', () => reclassifyRearBrigades(refreshedFactionSectors, formations, adjacency, friendlyOsids));
         }
     }
 }

@@ -44,7 +44,7 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 | Phase | Scope | Cast / assertion count | Optional field count | Downstream consumer count | Determinism risk | Status |
 |---|---|---:|---:|---:|---|---|
 | 1 | State schema | 25 remaining after partial source pass | 458 | >5 for `GameState` and state namespaces | HIGH | In progress; validator `any` casts reduced |
-| 2 | Sim engine - combat | 39 remaining after Batch 19 | 0 | >5 for combat helpers and command state | HIGH | In progress; Batch 19 combat continuation slice cleaned |
+| 2 | Sim engine - combat | 21 remaining after Batch 20 | 0 | >5 for combat helpers and command state | HIGH | In progress; Batch 20 combat continuation slice cleaned |
 | 3 | Sim engine - early war + bot | 35 | 0 | >5 for turn pipeline / bot flow | MEDIUM | Inventory only; source deferred |
 | 4 | Scenario + IPC | 53 | 0 | 3-5 for loader/runner/desktop seams | MEDIUM | Inventory only; source deferred |
 | 5 | UI adapter | 68 | 0 | >5 renderer consumers | MEDIUM | Inventory only; source deferred |
