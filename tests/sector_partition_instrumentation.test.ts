@@ -365,6 +365,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'ensureMinimumSectorCoverage:moderate-reinforcement',
             'ensureMinimumSectorCoverage:severe-rescue',
             'ensureMinimumSectorCoverage:territory-claim-rescue',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-front',
         ];
 
         for (const label of labels) {

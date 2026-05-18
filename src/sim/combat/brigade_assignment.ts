@@ -1409,6 +1409,7 @@ export function ensureMinimumSectorCoverage(
     // authoritative: if a brigade's location_osid is in the zero-child's
     // territory_osids, it belongs there regardless of component boundaries.
     // No BFS required — the brigade is already there.
+    perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-front', () => {
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         const zeroFrontSectors = corpsSectors
             .filter(s => s.assigned_brigade_ids.length === 0 && s.length_edges > 0)
@@ -1466,7 +1467,9 @@ export function ensureMinimumSectorCoverage(
             }
         }
     }
+    });
 
+    perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned', () => {
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
@@ -1607,6 +1610,7 @@ export function ensureMinimumSectorCoverage(
         }
     }
 
+    });
     });
 
     perfTime('ensureMinimumSectorCoverage:density-floor', () => {

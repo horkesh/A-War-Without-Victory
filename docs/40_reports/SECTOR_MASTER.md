@@ -1,10 +1,30 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution)
+**Updated:** 2026-05-18 (Batch 24 territory-claim-rescue sub-attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 24 territory-claim-rescue sub-attribution (byte-identical)
+
+**Change:** Nested two `perfTime` children inside `ensureMinimumSectorCoverage:territory-claim-rescue` — `:zero-front` (the original zero-front-sector territory rescue, ~57 lines) and `:zero-assigned` (the 4-step rescue Step 1 promote reserve / Step 1b pull rear / Step 1c pull reserve / Step 2 transfer surplus, ~125 lines).
+
+**Run evidence (n1901):**
+
+| Label | Aggregate ms | Calls | % of parent |
+|---|---:|---:|---:|
+| `:territory-claim-rescue:zero-assigned` | **1466.9** | 1502 | 97.4% |
+| `:territory-claim-rescue:zero-front` | 36.8 | 1502 | 2.4% |
+| Parent `:territory-claim-rescue` | 1505.7 | 1502 | 100% |
+
+Attribution overhead 2 ms (<0.2%). Phase A cost is concentrated almost entirely in the 4-step `:zero-assigned` block.
+
+**Byte-identity:** 40w n1901 hash `b14179d65639860c` matches Batch 17 baseline literally; 27/27 anchors, 6/6 benchmarks, validate_run_consistency PASS.
+
+**Next target:** Drill `:zero-assigned` into its 4 inner steps OR hoist the per-step `countActiveBrigadesByOsid(formations)` rebuild that fires inside the `flatMap` callbacks at lines 1501/1532.
+
+**Report:** [implemented/20260518_BATCH24_TERRITORY_CLAIM_RESCUE_SUBSPLIT.md](implemented/20260518_BATCH24_TERRITORY_CLAIM_RESCUE_SUBSPLIT.md)
 
 ## 2026-05-18: Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution (byte-identical)
 

@@ -20,6 +20,12 @@
 | SettingsScreen shell cleanup | Implemented | Singer | Report: `docs/40_reports/implemented/20260518_SETTINGS_SCREEN_SHELL_CLEANUP.md`. |
 | Phase pipeline silent-skip diagnostics | Implemented | Godel | Report: `docs/40_reports/implemented/20260518_PHASE_PIPELINE_SKIP_DIAGNOSTICS.md`. |
 
+## Completed Batch 24 — territory-claim-rescue sub-attribution
+
+| Lane | Status | Source |
+|---|---|---|
+| Sub-split `:territory-claim-rescue` into `:zero-front` + `:zero-assigned` | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH24_TERRITORY_CLAIM_RESCUE_SUBSPLIT.md`. n1901 evidence: `:zero-assigned` 1466.9 ms / 1502 calls (97%) vs `:zero-front` 36.8 ms (2.4%). 40w hash `b14179d65639860c` matches Batch 17 baseline. |
+
 ## Completed Batch 23 — ensureMinimumSectorCoverage closure-hoist + 5-phase attribution
 
 | Lane | Status | Source |

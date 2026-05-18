@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(sector): Batch 24 territory-claim-rescue sub-attribution (byte-identical)
+
+**Type:** Sector reconstruction sidecar-only nested sub-attribution.
+
+**Change:** Wrapped Phase A's (`ensureMinimumSectorCoverage:territory-claim-rescue`) two natural sub-blocks in nested `perfTime` callbacks: `:zero-front` (the original zero-front-sector territory rescue, lines 1413-1468) and `:zero-assigned` (the 4-step rescue Step 1 promote reserve / Step 1b pull rear / Step 1c pull reserve / Step 2 transfer surplus, lines 1471-1594). Static-contract test extended to require the two new label literals. n1901 evidence: `:zero-assigned` is 1466.9 ms / 1502 calls (97.4% of parent), `:zero-front` is 36.8 ms (2.4%). Attribution overhead 2 ms (<0.2%) — the 4-step zero-assigned block is the actual Phase A hotspot.
+
+**Determinism:** Pure sidecar attribution; behavior unchanged. 40w n1901 final hash `b14179d65639860c` matches Batch 17 baseline literally. validate_run_consistency PASS; anchors 27/27; benchmarks 6/6.
+
+**Verification:** typecheck PASS; `tests/sector_partition_instrumentation.test.ts + sector_partition_buildCorpsFrontSectors_integration.test.ts + sector_frontline_truth.test.ts + final_sector_truth_reconciliation_cache.test.ts + final_sector_truth_reconciliation.test.ts + war_phase_step_order.test.ts` 65/65 PASS (including new label literals in the static-contract test).
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH24_TERRITORY_CLAIM_RESCUE_SUBSPLIT.md`; updates to `docs/40_reports/SECTOR_MASTER.md`, `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `.claude/napkin.md`.
+
+**Next target:** Either drill `:zero-assigned` into its 4 inner steps (Step 1/1b/1c/2), or hoist the per-step `countActiveBrigadesByOsid(formations)` rebuild that fires inside the `flatMap` callbacks at lines 1501/1532 — likely byte-identical optimization candidate.
+
+---
+
 ## [2026-05-18] feat(sector): Batch 23 ensureMinimumSectorCoverage closure-hoist + 5-phase attribution
 
 **Type:** Sector reconstruction sidecar-only attribution (byte-identical) + parent doc propagation.
