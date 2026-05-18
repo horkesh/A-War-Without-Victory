@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(ui): Batch 43 Army HQ + Decision Room progressive disclosure (UI-4)
+
+**Type:** UI / progressive disclosure only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
+
+**Change:** Wrapped the Army HQ BRIEFING tab's `SituationBriefing` component (in `src/ui/map/components/army_hq/SituationBriefing.tsx`) in a `<details>` / `<summary>` collapsible. Default open when any item is `critical`, default collapsed otherwise (warning/info only or empty). Summary line shows item count + severity tally (`N items · X critical / Y warning / Z info`). Items always remain in the DOM regardless of toggle state — primary cards stay reachable. The Presidential Decision Room already surfaces the same `commandBriefing.items` as `briefing:` priority cards (with its own `showAdvanced` toggle gating Advanced Desk + lens row + Inspect Next + Source Handoffs); this collapsible cuts the Briefing tab's first-paint double-render of the same data without removing any information or moving ownership. Decision execution paths and source handoff routes are untouched.
+
+**Determinism:** UI-only change, no engine/scenario authority.
+
+**Verification:** `npx.cmd tsc --noEmit` clean; `npx.cmd vitest run tests/ui/situation_briefing_progressive_disclosure.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_decision_room_pushback_explanations.test.ts tests/ui_decision_room_supply_visibility.test.ts tests/ui/pre_advance_command_review.test.ts tests/a5_army_co_pushback_ui.test.ts tests/ui_shell_navigation.test.ts tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` 67/67 pass; `npm.cmd run desktop:map:build` 16.26s clean. No 40w run — UI presentation only, no sim or scenario authority touched.
+
+**Artifacts:** updates to `src/ui/map/components/army_hq/SituationBriefing.tsx`; `tests/ui/situation_briefing_progressive_disclosure.test.ts`; updates to `docs/40_reports/GAME_STATE_RATING_MASTER.md` rows 20 and 21.
+
+---
+
 ## [2026-05-18] docs(playtest): Batch 42 GUI Playtest D3-D7 closeout (UI-3)
 
 **Type:** Status documentation + two coverage tests. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
