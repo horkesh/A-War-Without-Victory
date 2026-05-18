@@ -43,6 +43,26 @@ Use these in order unless Codex/user gives a newer priority:
    - Best for notification classification, officer/essay roster locks, localization extraction audit, soundscape readiness, operator evidence support, and PR evidence pack.
    - Must not claim historian/user/operator gates are complete.
 
+## Secondary Evidence Plans
+
+Use these when implementation lanes need proof scaffolding, merge support, or release-candidate evidence:
+
+1. `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md`
+   - Drafts a local PR/merge evidence packet.
+   - Does not push, squash, open PRs, or merge.
+
+2. `docs/plans/2026-05-18-autonomous-visual-qa-evidence-plan.md`
+   - Builds a repeatable browser/visual evidence matrix.
+   - Fixes code only if evidence finds a concrete defect.
+
+3. `docs/plans/2026-05-18-autonomous-ci-regression-hardening-plan.md`
+   - Adds post-Batch-36 regression safeguards and generated-artifact ownership docs.
+   - Must not weaken existing gates.
+
+4. `docs/plans/2026-05-18-autonomous-rc-evidence-bundle-plan.md`
+   - Assembles release-candidate evidence while keeping operator-only gates separate.
+   - Must not claim gold/RC readiness without fresh proof.
+
 ## Recommended Sequencing After Batch 36
 
 If Claude asks what to do next after Batch 36:
@@ -104,4 +124,3 @@ Canon conflicts or canon silence on required decision; determinism or stable ord
 ### 5. Output format and validation
 
 Report branch state, selected lane bank, files changed, commands run with pass/fail, 40w/consistency proof if applicable, docs updates, commit hash or not committed, blockers, and next recommended lane.
-
