@@ -64,6 +64,14 @@ const CAPTURE_PROVENANCE_LABEL: Record<string, string | null> = {
     mixed: 'Some objectives were logged during the operation; others were only held at finalization.',
 };
 
+const CAPTURE_PROVENANCE_SUMMARY: Record<string, string> = {
+    no_objectives_held: 'no objective held record',
+    logged_capture: 'logged capture record',
+    held_without_logged_capture: 'final-control record',
+    held_without_logged_attack: 'final-control record without logged attack',
+    mixed: 'mixed final-control record',
+};
+
 // --- Types ---
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 type ActiveOp = NonNullable<LoadedGameState['activeOperations']>[number];
@@ -152,6 +160,95 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
     );
 }
 
+function formatOutcome(value: string): string {
+    const label = OUTCOME_LABEL[value] ?? value.replace(/_/g, ' ');
+    return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function totalCasualties(cas: { killed: number; wounded: number }): number {
+    return cas.killed + cas.wounded;
+}
+
+function ObjectiveReviewChip({
+    label,
+    className,
+}: {
+    label: string;
+    className: string;
+}) {
+    return (
+        <span className={`inline-flex items-center rounded border px-2 py-1 text-[10px] font-mono ${className}`}>
+            {label}
+        </span>
+    );
+}
+
+function OperationDeepReview({
+    op,
+    osidDisplayNames,
+}: {
+    op: CompletedOp;
+    osidDisplayNames: Record<string, string> | null;
+}) {
+    const captured = new Set(op.objectives_captured);
+    const loggedCaptured = op.objectives_logged_captured
+        ? new Set(op.objectives_logged_captured)
+        : new Set(op.objectives_captured);
+    const suffered = totalCasualties(op.casualties_suffered);
+    const inflicted = totalCasualties(op.casualties_inflicted);
+    const provenance = CAPTURE_PROVENANCE_SUMMARY[op.capture_provenance ?? 'no_objectives_held'] ?? 'AAR record';
+
+    return (
+        <div className="rounded border border-panel-border/50 bg-panel-bg/60 p-2.5 space-y-2">
+            <div className="flex items-center justify-between gap-3">
+                <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Deep Review</div>
+                <div className="text-[10px] text-text-muted tabular-nums">
+                    {op.objectives_captured.length}/{op.objectives_targeted.length} objectives held at end
+                </div>
+            </div>
+            <div className="grid gap-1 text-[10px] text-text-secondary sm:grid-cols-2">
+                <span>Result: {formatOutcome(op.outcome)}</span>
+                <span>Attacks: {op.total_attacks.toLocaleString()}</span>
+                <span>Casualties: {suffered.toLocaleString()} suffered / {inflicted.toLocaleString()} inflicted</span>
+                <span>Grade: {op.grade.stars} stars - {op.grade.verdict}</span>
+                <span className="sm:col-span-2">Provenance: {provenance}</span>
+            </div>
+            {op.objectives_targeted.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                    {op.objectives_targeted.map((osid) => {
+                        const name = getOsidDisplayName(osid, osidDisplayNames);
+                        if (loggedCaptured.has(osid)) {
+                            return (
+                                <ObjectiveReviewChip
+                                    key={osid}
+                                    label={`Captured: ${name}`}
+                                    className="border-green-400/30 bg-green-400/5 text-green-300"
+                                />
+                            );
+                        }
+                        if (captured.has(osid)) {
+                            return (
+                                <ObjectiveReviewChip
+                                    key={osid}
+                                    label={`Held at end: ${name}`}
+                                    className="border-amber-300/30 bg-amber-300/5 text-amber-200"
+                                />
+                            );
+                        }
+                        return (
+                            <ObjectiveReviewChip
+                                key={osid}
+                                label={`Not held: ${name}`}
+                                className="border-red-400/30 bg-red-400/5 text-red-300"
+                            />
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
 // --- Completed operation card ---
 
 function CompletedOpCard({
@@ -214,6 +311,8 @@ function CompletedOpCard({
 
             {expanded && (
                 <div className="px-3 pb-2 pt-1 border-t border-panel-border/30 space-y-1.5">
+                    <OperationDeepReview op={op} osidDisplayNames={osidDisplayNames} />
+
                     {/* Casualties */}
                     <div>
                         <CasualtyLine label="Suffered" cas={op.casualties_suffered} />

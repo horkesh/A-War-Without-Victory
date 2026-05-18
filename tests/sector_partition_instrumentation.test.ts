@@ -293,6 +293,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         const region = raw.slice(startIdx, endIdx);
         const labels = [
+            'buildMultiSectorsForCorps:${corpsId}:active-combat-formation-scan-ids',
             'buildMultiSectorsForCorps:${corpsId}:brigade-cap-enforcement',
             'buildMultiSectorsForCorps:${corpsId}:edge-meta-lookup',
             'buildMultiSectorsForCorps:${corpsId}:final-filter',

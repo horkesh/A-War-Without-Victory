@@ -61,7 +61,7 @@ interface PhantomDef {
     /** If true, equipment disappears on withdrawal (not distributed to corps). */
     no_equipment_handoff?: boolean;
     /** Kind tag for the formation. Defaults to 'jna_phantom'. */
-    kind_tag?: string;
+    kind_tag?: FormationState['kind'];
 }
 
 const JNA_PHANTOM_DEFS: PhantomDef[] = [
@@ -331,7 +331,7 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
     for (const def of ALL_PHANTOM_DEFS) {
         if (state.military.formations[def.id]) continue; // already spawned
 
-        const faction = def.faction ?? 'RS';
+        const faction: FactionId = def.faction ?? 'RS';
         const kindTag = def.kind_tag ?? 'jna_phantom';
 
         const formation: FormationState = {
@@ -341,7 +341,7 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
             created_turn: turn,
             status: 'active',
             assignment: null,
-            kind: kindTag as FormationState['kind'],
+            kind: kindTag,
             personnel: 2000,
             corps_id: def.corps_id,
             location_osid: def.location_osid,
@@ -368,10 +368,10 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         if (def.capture_osids) {
             if (!state.political.political_controllers) state.political.political_controllers = {};
             for (const osid of def.capture_osids) {
-                const previousController = state.political.political_controllers[osid] as FactionId | undefined;
-                state.political.political_controllers[osid] = faction as FactionId;
+                const previousController = state.political.political_controllers[osid];
+                state.political.political_controllers[osid] = faction;
                 if (previousController && previousController !== faction) {
-                    seedDisplacementTimerOnFlip(state, osid, previousController, faction as FactionId);
+                    seedDisplacementTimerOnFlip(state, osid, previousController, faction);
                 }
                 if (previousController !== faction) {
                     (state.political.control_events ??= []).push({
@@ -410,13 +410,14 @@ export interface JnaWithdrawalEvent {
  */
 export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
     if (!state.military.formations) return [];
+    const formations = state.military.formations;
     const turn = state.meta?.turn ?? 0;
     const events: JnaWithdrawalEvent[] = [];
 
     const phantomKinds = new Set(['jna_phantom', 'hv_phantom']);
-    const phantomIds = Object.keys(state.military.formations)
+    const phantomIds = Object.keys(formations)
         .filter(id => {
-            const k = state.military.formations![id]?.kind;
+            const k = formations[id]?.kind;
             return k != null && phantomKinds.has(k);
         })
         .sort(strictCompare);
@@ -643,13 +644,14 @@ export interface JnaCountdownNotice {
  */
 export function getJnaWithdrawalCountdowns(state: GameState): JnaCountdownNotice[] {
     if (!state.military.formations) return [];
+    const formations = state.military.formations;
     const turn = state.meta?.turn ?? 0;
     const notices: JnaCountdownNotice[] = [];
 
     const phantomKinds = new Set(['jna_phantom', 'hv_phantom']);
-    const phantomIds = Object.keys(state.military.formations)
+    const phantomIds = Object.keys(formations)
         .filter(id => {
-            const k = state.military.formations![id]?.kind;
+            const k = formations[id]?.kind;
             return k != null && phantomKinds.has(k);
         })
         .sort(strictCompare);

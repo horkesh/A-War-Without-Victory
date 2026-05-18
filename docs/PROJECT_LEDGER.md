@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close fourteenth backlog execution batch
+
+**Scope:** Fourteenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering strict-null Phase 2 continuation, sector reconstruction scan-list reuse, and Army HQ operation AAR record visibility. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or new operation save fields changed.
+
+**Change:** Cleaned five strict-null escapes in `jna_phantom_brigades.ts`, lowering Phase 2 combat inventory from 80 to 75. Sector reconstruction now builds a sorted active-combat-formation scan list once inside `buildMultiSectorsForCorps(...)` and passes it to `buildSectorFromSubSegments(...)`, reducing repeated assigned-brigade and enemy-power scans while keeping direct-call fallback behavior. Army HQ Records -> Operation History completed-operation rows now expand into a compact read-only `Operational Deep Review` with result, attacks, casualties, grade, provenance, and objective status chips derived from existing AAR fields.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. The sector scan-list reuse is invocation-local, read-only, sorted with `strictCompare`, and not persisted across modules, turns, saves, or scenario artifacts. The Operation AAR Records change is renderer/read-model only and adds no simulation or schema state. The default April 1992 40w path stayed byte-identical to n1888/n1889: n1890 hash `248202ee4fd13027`.
+
+**Verification:** Parent integration passed `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/jna_phantom_brigades.test.ts tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts tests/ui/operation_aar_records_review.test.ts --reporter=dot` (6 files / 74 tests); `npm.cmd run typecheck`; `npx.cmd vitest run tests/ui/operation_aar_records_review.test.ts --reporter=dot`; `npm.cmd run desktop:map:build` with existing Vite warnings; `npm.cmd run sim:scenario:run:40w` producing n1890 hash `248202ee4fd13027`, 27/27 anchors, 6/6 bot benchmarks, and one non-critical anomaly warning; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1890`; and `git diff --check` with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Sector/performance docs now record the safe invocation-local reuse boundary, and GUI/backlog/rating docs now classify operation post-mortem visibility as partially closed through Army HQ Records, with Chronicle/deeper overlay polish left as follow-up.
+
+---
+
 ## [2026-05-18] feat(roadmap): close thirteenth backlog execution batch
 
 **Scope:** Thirteenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering per-OSID intel target scoring, strict-null Phase 2 continuation, deeper sector-performance attribution, and stale headline rating wording. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or hidden-truth UI surface changed.

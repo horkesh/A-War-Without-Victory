@@ -1,10 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-04-03 (frontline sector-mandatory invariant refined)
+**Updated:** 2026-05-18 (Batch 14 sector-object scan-list reuse)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 14 sector-object scan-list reuse
+
+**Change:** `buildMultiSectorsForCorps(...)` now builds one invocation-local, `strictCompare`-sorted active combat formation scan list and passes it into `buildSectorFromSubSegments(...)` sector creation/rebuild calls.
+
+**Why:** Batch 13 attribution showed repeated active-formation scans inside `buildSectorFromSubSegments(...)`. Batch 14 reduced the `assigned-brigade-scan` and `enemy-power-scan` child labels without adding module-level, cross-turn, or persisted cache state.
+
+**Run evidence:** 40w n1890 stayed byte-identical to n1888/n1889 at `248202ee4fd13027`; 27/27 anchors, 6/6 bot benchmarks, run consistency PASS.
+
+**Report:** [implemented/20260518_SECTOR_RECONSTRUCTION_BUILD_SECTOR_BATCH14.md](implemented/20260518_SECTOR_RECONSTRUCTION_BUILD_SECTOR_BATCH14.md)
 
 ## 2026-04-03: Physical sector ownership hardening
 
