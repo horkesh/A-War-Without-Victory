@@ -6335,3 +6335,24 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/audits/20260518_GATED_RELEASE_AND_CANON_DECISION_RESEARCH.md`; updates to `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`, `docs/plans/2026-05-18-autonomous-canon-design-decision-prep-bank.md`, and `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`.
 
 ---
+
+## [2026-05-19] docs+test(ci): CI regression hardening — Batch A of RC hardening wave
+
+**Type:** Documentation and one new static guard test. No engine behavior, simulation output, scenario data, save schema, generated artifact, packaging metadata, or FORAWWV text changed.
+
+**Change:** Closed `docs/plans/2026-05-18-autonomous-ci-regression-hardening-plan.md` Tasks 1-4.
+- Added `tests/docs_truth_no_skip_guard.test.ts` — static guard that scans `tests/docs_*truth*.test.ts` for unconditional `describe.skip(` / `it.skip(` / `test.skip(`. Allows `*.skipIf(...)` conditional fixture gates. Allowlist is empty and a paired test asserts it stays empty unless explicitly expanded.
+- Added `docs/40_reports/audits/20260519_FAST_SUITE_DRIFT_TAXONOMY.md` — classifies fast-suite failure modes (fixture / schema / generated-artifact / docs-truth / behavior / pre-merge-count drift), pairs each with right-fix and forbidden-shortcut, and adds a reviewer checklist.
+- Added `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md` — names the owner command, validation command, commit policy, and transient-output policy for every committed generated artifact (`apr_1992_initial_save.json`, `save_migration_drift.json`, baseline manifest + per-scenario baselines, `latest_run_final_save.json`).
+- Added `docs/20_engineering/PRE_MERGE_GATE.md` — documents the canonical local pre-merge gate sequence (typecheck → fast vitest → baselines → desktop:map:build → git diff --check) and clarifies its relation to existing `qa:all` and to CI-only proof.
+
+**Determinism:** Documentation plus a static-text scanner test. No simulation output, no generated artifacts.
+
+**Verification:**
+- `npx.cmd vitest run tests/docs_truth_no_skip_guard.test.ts --reporter=dot` — PASS, 1 file / 2 tests.
+- `npm.cmd run typecheck` — PASS.
+- `git diff --check` — clean.
+
+**Artifacts:** `tests/docs_truth_no_skip_guard.test.ts`, `docs/40_reports/audits/20260519_FAST_SUITE_DRIFT_TAXONOMY.md`, `docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`, `docs/20_engineering/PRE_MERGE_GATE.md`.
+
+---
