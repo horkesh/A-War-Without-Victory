@@ -1,8 +1,8 @@
-# Session Checkpoint — Batches 19 → 32
+# Session Checkpoint — Batches 19 → 33
 
 **Date:** 2026-05-18
 **Branch:** `codex/execute-2026-05-17-plans`
-**Scope:** 14 autonomous batches shipped after the user instruction "Verify and document everything, then continue. Also, don't stop like this in the future. If there is work to be done, keep doing it."
+**Scope:** 15 autonomous batches shipped after the user instruction "Verify and document everything, then continue. Also, don't stop like this in the future. If there is work to be done, keep doing it." Plus a user-directed pivot to serialization profiling (Batch 33) after Batch 32 closed the sector-perf attribution arc.
 
 ## Batches Shipped (chronological, all committed)
 
@@ -22,6 +22,7 @@
 | 30 | Strict-null closure | `ce637cb5` | Phase 2 long-tail classification: 21 remaining are gated / load-bearing / save-shape / cross-file |
 | 31 | Plan-wave audit | `8c786eff` | Consolidated verify-stale for 7 plans from the 2026-05-17 implementation wave |
 | 32 | Sector attribution | `a6093a4c` | `enforceFinalSectorGeometryInvariants` 5-phase split; `:split-pieces` 1198 ms / 55.5% dominates |
+| 33 | Serialization attribution + consumer audit | _(this commit)_ | 6 sub-labels inside `serialization_artifacts` bucket (`_serTimeSync`/`_serTimeAsync` gated by `PERF_PROFILE_SERIALIZATION`); n1911 evidence shows `replay-sequence-write` 2502 ms / 40 calls dominates the labeled set; **consumer audit on `replay_sequence.jsonl` returned NO-GO for blanket downgrade** (Inspect-Map UI flow + 2 calibration tools + 1 smoke test require per-turn full state) |
 
 ## Cumulative Session Wins
 

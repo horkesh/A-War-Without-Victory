@@ -757,6 +757,87 @@ function nsToMs(value: bigint): number {
     return Math.round((Number(value) / 1_000_000) * 1000) / 1000;
 }
 
+// Batch-33 serialization attribution: module-local accumulator gated by
+// PERF_PROFILE_SERIALIZATION=true. Independent of the --timing-json bucket
+// gate so the default 40w npm script (which omits --timing-json) can profile.
+// Dumped to stderr in the runScenario `finally` block. Use this surface to
+// identify the next byte-identical serialization optimization target;
+// see docs/40_reports/implemented/20260518_BATCH33_SERIALIZATION_ATTRIBUTION.md
+// for the n1911 baseline and the consumer-audit verdict on the replay-frame
+// downgrade option.
+const _serDetailNs = new Map<string, bigint>();
+const _serDetailCalls = new Map<string, number>();
+const _serDetailEnabled = (): boolean =>
+    typeof process !== 'undefined' && process.env?.PERF_PROFILE_SERIALIZATION === 'true';
+
+function _serTimeSync<T>(
+    enabled: boolean,
+    totals: ScenarioTimingTotals,
+    label: string,
+    fn: () => T,
+): T {
+    // SPIKE: timer is started if EITHER the timing-json bucket gate is on OR the
+    // serialization detail gate is on. Detail recording must not be coupled to
+    // --timing-json since the default 40w npm script omits that flag.
+    const detailOn = _serDetailEnabled();
+    const start = (enabled || detailOn) ? process.hrtime.bigint() : 0n;
+    try {
+        return fn();
+    } finally {
+        if (start !== 0n) {
+            const ns = process.hrtime.bigint() - start;
+            if (enabled) totals.serialization_artifacts += ns;
+            if (detailOn) {
+                _serDetailNs.set(label, (_serDetailNs.get(label) ?? 0n) + ns);
+                _serDetailCalls.set(label, (_serDetailCalls.get(label) ?? 0) + 1);
+            }
+        }
+    }
+}
+
+async function _serTimeAsync<T>(
+    enabled: boolean,
+    totals: ScenarioTimingTotals,
+    label: string,
+    fn: () => Promise<T>,
+): Promise<T> {
+    const detailOn = _serDetailEnabled();
+    const start = (enabled || detailOn) ? process.hrtime.bigint() : 0n;
+    try {
+        return await fn();
+    } finally {
+        if (start !== 0n) {
+            const ns = process.hrtime.bigint() - start;
+            if (enabled) totals.serialization_artifacts += ns;
+            if (detailOn) {
+                _serDetailNs.set(label, (_serDetailNs.get(label) ?? 0n) + ns);
+                _serDetailCalls.set(label, (_serDetailCalls.get(label) ?? 0) + 1);
+            }
+        }
+    }
+}
+
+function _serDetailDumpToStderr(): void {
+    if (!_serDetailEnabled() || _serDetailNs.size === 0) return;
+    const rows: Array<{ label: string; ms: number; calls: number }> = [];
+    for (const [label, ns] of _serDetailNs.entries()) {
+        rows.push({
+            label,
+            ms: nsToMs(ns),
+            calls: _serDetailCalls.get(label) ?? 0,
+        });
+    }
+    rows.sort((a, b) => b.ms - a.ms);
+    process.stderr.write('\n[serialization-detail] sub-label breakdown:\n');
+    for (const row of rows) {
+        process.stderr.write(`  ${row.label.padEnd(28)} ${row.ms.toFixed(1).padStart(10)} ms  ×${row.calls}\n`);
+    }
+    const totalLabeledMs = rows.reduce((acc, r) => acc + r.ms, 0);
+    process.stderr.write(`  ${'(labeled total)'.padEnd(28)} ${totalLabeledMs.toFixed(1).padStart(10)} ms\n`);
+    _serDetailNs.clear();
+    _serDetailCalls.clear();
+}
+
 function buildScenarioTimingJson(args: {
     run_id: string;
     scenario_id: string;
@@ -2306,7 +2387,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (firstReportRow === null) firstReportRow = reportRow;
             lastReportRow = reportRow;
             timingAdd(timingTotals, 'diagnostics_reporting', weeklyDiagnosticsStart);
-            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+            _serTimeSync(emitTimingJson, timingTotals, 'weekly-report-write', () => {
                 reportStream.write(stableStringify(reportRow) + '\n');
             });
 
@@ -2314,7 +2395,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // Pure read-only projection over state.military.formations after all turn
             // reconciliation. strictCompare-sorted by brigade_id for byte-stability.
             const brigadeTemporalRows = buildBrigadeTemporalRows(state, week_index);
-            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+            _serTimeSync(emitTimingJson, timingTotals, 'brigade-temporal-write', () => {
                 for (const row of brigadeTemporalRows) {
                     brigadeTemporalStream.write(stableStringify(row) + '\n');
                 }
@@ -2327,15 +2408,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // `serializeState(state)` is the canonical writer (also produces
             // final_save.json). State is NOT mutated.
             const replayFrameRow = buildReplayFrameRow(state, week_index);
-            timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
+            _serTimeSync(emitTimingJson, timingTotals, 'replay-sequence-write', () => {
                 replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
             });
 
             if (week_index === weeks - 1) {
-                const serialized = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                const serialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>
                     serializeState(state)
                 );
-                final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+                final_state_hash = _serTimeSync(emitTimingJson, timingTotals, 'final-save-hash', () =>
                     createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16)
                 );
             }
@@ -2371,7 +2452,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         if (!final_state_hash) {
-            final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            final_state_hash = _serTimeSync(emitTimingJson, timingTotals, 'final-save-hash', () =>
                 createHash('sha256')
                     .update(serializeState(state), 'utf8')
                     .digest('hex')
@@ -2419,13 +2500,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 operationalCentroids,
             );
         }
-        const finalSerialized = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+        const finalSerialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>
             serializeState(state)
         );
-        final_state_hash = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+        final_state_hash = _serTimeSync(emitTimingJson, timingTotals, 'final-save-hash', () =>
             createHash('sha256').update(finalSerialized, 'utf8').digest('hex').slice(0, 16)
         );
-        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+        await _serTimeAsync(emitTimingJson, timingTotals, 'final-save-write', async () => {
             await ensureRunOutputDir(outDir);
             await writeFile(finalSavePath, finalSerialized, 'utf8');
         });
@@ -2860,6 +2941,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (!consoleDiagnostics) {
             popRoutineConsoleDiagnosticsSuppressed();
         }
+        _serDetailDumpToStderr();
     }
 }
 

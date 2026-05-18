@@ -3,6 +3,26 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(serialization): Batch 33 serialization sub-attribution + replay-frame consumer audit (byte-identical)
+
+**Type:** Serialization sidecar-only sub-attribution scaffolding + consumer audit on the per-turn replay-frame downgrade option.
+
+**Change:** Added 6 sub-labels inside the `serialization_artifacts` timing bucket of `src/scenario/scenario_runner.ts` via new module-local `_serTimeSync` / `_serTimeAsync` helpers gated by `PERF_PROFILE_SERIALIZATION=true`. Gate is independent of `--timing-json` so the default 40w npm script can profile without enabling the timing-json bucket. Replaced 8 of the ~25 existing `timedSync(.., 'serialization_artifacts', ..)` call sites with the labeled helper at: `weekly-report-write`, `brigade-temporal-write`, `replay-sequence-write`, `final-save-serialize` (×2), `final-save-hash` (×3), `final-save-write`. End-of-run dump to stderr inside `runScenario`'s `finally` block. Static-grep contract test `tests/serialization_attribution_contract.test.ts` enumerates the 6 label literals and forbids `Date.now`/`new Date`/`performance.now` in the helpers region (3/3 PASS).
+
+**Spike evidence (n1911, `PERF_PROFILE_SERIALIZATION=true`, no `--timing-json`):** `replay-sequence-write` 2502.3 ms / 40 calls (62.5 ms/call) dominates, `final-save-serialize` 227.6 ms / 2, `final-save-write` 145.9 ms / 1, `brigade-temporal-write` 105.1 ms / 40, `final-save-hash` 53.6 ms / 2, `weekly-report-write` 11.7 ms / 40. Labeled total 3046.3 ms; the remaining ~7-8 s of the Batch-6 n1881 bucket (10,581 ms) is in the un-labeled remainder — dominated by the per-turn `serializeState(state)` call inside `buildReplayFrameRow` (`replay_save_emit.ts:114-121`), which is the SAME canonical writer used for `final_save.json`. So a 40w run currently executes 42 full-state serializations (40 per-turn replay frames + 1 in-loop final-week + 1 post-reconciliation final).
+
+**Consumer audit verdict — NO-GO for blanket replay-frame downgrade:** Four full-state consumers hard-require the per-turn canonical `serializeState(state)` payload: (1) ReplayScrubber → "Inspect Map" → tactical map (canonical UX); (2) `tools/extract_weekly_save_from_replay.cjs` calibration tooling; (3) `tools/diagnostics/fatigue_distribution_audit.cjs`; (4) `tests/supply_sensitive_history_smoke.test.ts` (pinned 40w hash-locked smoke). UI summary path is already hybrid (sparse `replay_save_manifest.json` for UI; full `replay_save_sequence.json` for tools/tests). A hybrid `emit_every` checkpoint flag is feasible but a multi-batch refactor with regression-test migration.
+
+**Smaller byte-identical win (next-session candidate):** The in-loop block at `scenario_runner.ts:2408-2415` redundantly serializes + hashes the state at week 39; the result is overwritten by the post-reconciliation block at lines 2496-2500. Skipping the in-loop block for war-phase scenarios (with reconciliation) saves 1 full-state serialize. The only consumer of the in-loop `final_state_hash` is the replay-actions JSONL `state_hash` field, which currently captures the pre-reconciliation hash — almost certainly wrong if reconciliation runs.
+
+**Determinism:** Pure sidecar attribution. 40w n1911 hash `b14179d65639860c` matches Batch 17 baseline literally — spike instrumentation is sim-neutral. The no-flag path is byte-identical by construction (when both `enabled` and `detailOn` are false, the helpers degenerate to a direct `fn()` invocation).
+
+**Verification:** typecheck PASS; `tests/serialization_attribution_contract.test.ts` 3/3 PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH33_SERIALIZATION_ATTRIBUTION.md` (consumer-matrix table + per-consumer evidence cited from `gameStore.ts`, `ReplayScrubber.tsx`, `extract_weekly_save_from_replay.cjs`, `fatigue_distribution_audit.cjs`, `supply_sensitive_history_smoke.test.ts`, `replay_save_emit.test.ts`).
+
+---
+
 ## [2026-05-18] feat(sector): Batch 32 enforceFinalSectorGeometryInvariants 5-phase sub-attribution (byte-identical)
 
 **Type:** Sector reconstruction sidecar-only nested sub-attribution.
