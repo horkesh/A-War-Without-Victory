@@ -74,29 +74,23 @@ describe('player-knowledge integrity — adapter-level filtering', () => {
         expect(Object.keys(parsed.warPhaseExhaustion!)).toEqual(['RS']);
     });
 
-    it('passes all factions through in observer mode (no player_faction)', () => {
+    it('strips enemy-truth families when player_faction is absent (2026-05-18 contract; no observer mode)', () => {
+        // Per docs/40_reports/implemented/20260518_player_faction_contract_and_codex_visibility.md
+        // loaded gameplay state requires meta.player_faction. When the adapter is fed a
+        // raw state with no player_faction (legacy/dev fallback paths), the scope helper
+        // returns undefined for enemy-truth families rather than leaking RS/HRHB truth.
         const parsed = parseGameState(buildMinimalState(null));
-        // In a non-dev environment without window, playerFaction resolves to null = observer
-        // The adapter may fall through to dev defaults in some envs, so we check
-        // that at minimum the data is present and not reduced to a single faction
-        const ledgerKeys = Object.keys(parsed.casualtyLedger ?? {});
-        const reserveKeys = Object.keys(parsed.factionReserves ?? {});
-        const supplyKeys = Object.keys(parsed.warPhaseSupplyPressure ?? {});
-        const exhaustionKeys = Object.keys(parsed.warPhaseExhaustion ?? {});
-
-        // Observer mode: all 3 factions should be present
-        // (If dev fallback kicks in during test, at minimum the filtering still works correctly)
         if (parsed.player_faction == null) {
-            expect(ledgerKeys).toEqual(expect.arrayContaining(['RBiH', 'RS', 'HRHB']));
-            expect(reserveKeys).toEqual(expect.arrayContaining(['RBiH', 'RS', 'HRHB']));
-            expect(supplyKeys).toEqual(expect.arrayContaining(['RBiH', 'RS', 'HRHB']));
-            expect(exhaustionKeys).toEqual(expect.arrayContaining(['RBiH', 'RS', 'HRHB']));
+            expect(parsed.casualtyLedger).toBeUndefined();
+            expect(parsed.factionReserves).toBeUndefined();
+            expect(parsed.warPhaseSupplyPressure).toBeUndefined();
+            expect(parsed.warPhaseExhaustion).toBeUndefined();
         } else {
             // Dev fallback resolved a faction — verify scoping is consistent
-            expect(ledgerKeys).toHaveLength(1);
-            expect(reserveKeys).toHaveLength(1);
-            expect(supplyKeys).toHaveLength(1);
-            expect(exhaustionKeys).toHaveLength(1);
+            expect(Object.keys(parsed.casualtyLedger ?? {})).toHaveLength(1);
+            expect(Object.keys(parsed.factionReserves ?? {})).toHaveLength(1);
+            expect(Object.keys(parsed.warPhaseSupplyPressure ?? {})).toHaveLength(1);
+            expect(Object.keys(parsed.warPhaseExhaustion ?? {})).toHaveLength(1);
         }
     });
 });

@@ -657,7 +657,8 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('no_launch_readiness');
+        // evaluateOpeningAttackReadiness blocker is more specific than the generic no_launch_readiness fallback.
+        expect(op?.recovery_reason).toBe('participants_below_attack_floor');
     });
 
     it('never promotes a planning operation when brigades only sit on a later-objective approach', () => {
@@ -835,7 +836,8 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('no_launch_readiness');
+        // evaluateOpeningAttackReadiness blocker is more specific than the generic no_launch_readiness fallback.
+        expect(op?.recovery_reason).toBe('zero_eligible_axis');
     });
 
     it('never promotes a planning operation when brigades are only assembled at rear staging', () => {
@@ -1014,6 +1016,7 @@ describe('sector offensive idle recovery', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('no_launch_readiness');
+        // evaluateOpeningAttackReadiness blocker is more specific than the generic no_launch_readiness fallback.
+        expect(op?.recovery_reason).toBe('zero_eligible_axis');
     });
 });

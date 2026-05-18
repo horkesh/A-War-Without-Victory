@@ -18,6 +18,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
             referendum_eligible_turn: null,
             referendum_deadline_turn: null,
             game_over: false,
+            player_faction: 'RBiH',
         },
         factions: [
             {

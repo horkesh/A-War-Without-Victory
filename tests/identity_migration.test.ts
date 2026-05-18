@@ -22,9 +22,11 @@ describe('identity migration contracts', () => {
     });
 
     it('migration canonicalizes faction IDs in factions array', () => {
+        // Legacy save shape predates v3+ required-field defaults; declare schema_version=0 so
+        // applyMigrations() fills in the v3..v14 defaults before the strict validator runs.
         const rawState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            schema_version: 0,
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'VRS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -39,6 +41,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],
@@ -54,9 +57,11 @@ describe('identity migration contracts', () => {
     });
 
     it('migration canonicalizes formation faction IDs and preserves army labels as force_label', () => {
+        // Legacy save shape predates v3+ required-field defaults; declare schema_version=0 so
+        // applyMigrations() fills in the v3..v14 defaults before the strict validator runs.
         const rawState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            schema_version: 0,
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -78,6 +83,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],
@@ -92,9 +98,11 @@ describe('identity migration contracts', () => {
     });
 
     it('migration sets default force_label when faction is already political and force_label missing', () => {
+        // Legacy save shape predates v3+ required-field defaults; declare schema_version=0 so
+        // applyMigrations() fills in the v3..v14 defaults before the strict validator runs.
         const rawState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            schema_version: 0,
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -116,6 +124,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],
@@ -130,9 +139,11 @@ describe('identity migration contracts', () => {
     });
 
     it('migration canonicalizes militia pool faction IDs', () => {
+        // Legacy save shape predates v3+ required-field defaults; declare schema_version=0 so
+        // applyMigrations() fills in the v3..v14 defaults before the strict validator runs.
         const rawState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            schema_version: 0,
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -154,6 +165,7 @@ describe('identity migration contracts', () => {
                 },
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],
@@ -167,9 +179,11 @@ describe('identity migration contracts', () => {
     });
 
     it('migration canonicalizes negotiation ledger faction_id', () => {
+        // Legacy save shape predates v3+ required-field defaults; declare schema_version=0 so
+        // applyMigrations() fills in the v3..v14 defaults before the strict validator runs.
         const rawState = {
-            schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            schema_version: 0,
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -182,6 +196,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [
@@ -199,7 +214,7 @@ describe('identity migration contracts', () => {
     it('validation rejects ARBiH/VRS/HVO as faction IDs (before migration)', () => {
         const invalidState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
             ],
@@ -212,6 +227,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],
@@ -227,7 +243,7 @@ describe('identity migration contracts', () => {
     it('validation accepts only POLITICAL_SIDES as faction IDs', () => {
         const validState = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'test' },
+            meta: { turn: 0, seed: 'test', player_faction: 'RBiH' },
             factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -242,6 +258,7 @@ describe('identity migration contracts', () => {
                 militia_pools: {},
             } as any,
             political: {
+                political_controllers: {},
                 negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
                 ceasefire: {},
                 negotiation_ledger: [],

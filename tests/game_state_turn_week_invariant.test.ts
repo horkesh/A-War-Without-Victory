@@ -11,7 +11,7 @@ describe('GameState turn/week invariant', () => {
     it('meta.turn must be non-negative integer (weeks)', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 5, seed: 'x' },
+            meta: { turn: 5, seed: 'x', player_faction: 'RBiH' },
             factions: [],
             military: {
                 formations: {},
@@ -76,10 +76,10 @@ describe('GameState turn/week invariant', () => {
         expect((result as { errors: string[] }).errors.some(e => e.includes('non-negative') || e.includes('integer'))).toBe(true);
     });
 
-    it('allows no timestamp or date fields in meta (contract: meta only turn + seed + optional phase)', () => {
+    it('allows no timestamp or date fields in meta (contract: meta only turn + seed + optional phase + player_faction)', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 0, seed: 'x' },
+            meta: { turn: 0, seed: 'x', player_faction: 'RBiH' },
             factions: [],
             military: {
                 formations: {},
@@ -95,9 +95,9 @@ describe('GameState turn/week invariant', () => {
             displacement: {} as any,
         };
         const meta = state.meta as Record<string, unknown>;
-        const allowed = new Set(['turn', 'seed', 'phase']);
+        const allowed = new Set(['turn', 'seed', 'phase', 'player_faction']);
         for (const key of Object.keys(meta)) {
-            expect(allowed.has(key), `meta must not contain "${key}" (no timestamps/dates); only turn, seed, phase allowed`).toBe(true);
+            expect(allowed.has(key), `meta must not contain "${key}" (no timestamps/dates); only turn, seed, phase, player_faction allowed`).toBe(true);
         }
     });
 });

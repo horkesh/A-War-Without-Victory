@@ -269,7 +269,7 @@ describe('warroom player visibility', () => {
 
   it('warroom command briefing renders the canonical sim-owned briefing packet', () => {
     const state = {
-      meta: { turn: 9, phase: 'war' },
+      meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
       factions: [
         { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
         { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
@@ -336,7 +336,7 @@ describe('warroom player visibility', () => {
 
   it('warroom reports use generic player-safe authorship instead of fake specific headquarters', () => {
     const state = {
-      meta: { turn: 9, phase: 'war' },
+      meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
       factions: [
         { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
         { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
@@ -376,7 +376,7 @@ describe('warroom player visibility', () => {
 
   it('warroom faction overview hands detailed command review off to Army HQ', () => {
     const state = {
-      meta: { turn: 10, phase: 'war' },
+      meta: { turn: 10, phase: 'war', player_faction: 'RBiH' },
       factions: [
         { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
         { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },

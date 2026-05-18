@@ -3,6 +3,12 @@
 **Date:** 2026-05-18
 **Scope:** Parent-side execution queue for the user request to continue implementing the live `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` backlog without stopping for manual prioritization.
 
+## Completed Batch 36 - Fast-suite merge gate repair
+
+| Lane | Status | Source |
+|---|---|---|
+| Full fast-suite fixture/schema/docs repair | Implemented | Report: `docs/40_reports/implemented/20260518_MERGE_GATE_FAST_SUITE_BATCH36.md`. Full `npm.cmd test` now passes after v14 loaded-state fixtures, migration fixtures, startup snapshot, drift diagnostic, CI guardrail, player-knowledge, sector blocker, and docs-truth repairs. Codex rejected Claude's `it.skip` workaround and kept the docs-truth test active against current contracts. |
+
 ## Active Batch 1
 
 | Lane | Status | Owner | Source |

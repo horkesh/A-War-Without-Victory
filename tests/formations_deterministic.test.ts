@@ -94,9 +94,10 @@ test('deterministic formation ID generation', () => {
 });
 
 test('save migration defaults formations to empty object', () => {
+    // Legacy save shape; declare schema_version=0 so applyMigrations() fills v3..v14 defaults.
     const rawState = {
-        schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 1, seed: 'seed' },
+        schema_version: 0,
+        meta: { turn: 1, seed: 'seed', player_faction: 'RBiH' },
         factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],

@@ -12,7 +12,7 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 function minimalValidGameState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 0, seed: 'phase-a1.1-fixture' },
+        meta: { turn: 0, seed: 'phase-a1.1-fixture', player_faction: 'RBiH' },
         factions: [],
         military: {
             formations: {},

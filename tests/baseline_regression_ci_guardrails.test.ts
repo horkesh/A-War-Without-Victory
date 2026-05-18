@@ -11,14 +11,14 @@ test('baseline regression workflow installs nested map UI deps before typecheck,
 
     const nestedInstalls = workflow.match(/npm install --legacy-peer-deps --prefix src\/ui\/map/g) ?? [];
 
-    // 3 jobs: typecheck, test, scenarios. Baselines job removed
+    // 4 jobs: typecheck, scenario-anchors, test, scenarios. Baselines job removed
     // 2026-05-04 (LANE-NIGHTSHIFT-PLATFORM-STABLE-MANIFEST follow-up)
     // because byte-hash baseline comparison is platform-bound and
-    // fails between Windows dev and Linux CI.
+    // fails between Windows dev and Linux CI. scenario-anchors job added later.
     assert.strictEqual(
         nestedInstalls.length,
-        3,
-        'baseline regression workflow should install nested map UI dependencies in the typecheck, test, and scenarios jobs',
+        4,
+        'baseline regression workflow should install nested map UI dependencies in the typecheck, scenario-anchors, test, and scenarios jobs',
     );
     assert.match(
         workflow,

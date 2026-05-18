@@ -26,7 +26,8 @@ function warPhaseGameStateFixture(): GameState {
             referendum_deadline_turn: null,
             game_over: false,
             outcome: undefined,
-        },
+            player_faction: 'RBiH',
+        } as any,
         factions: [
             {
                 id: 'RBiH',

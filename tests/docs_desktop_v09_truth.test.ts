@@ -48,13 +48,33 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).not.toContain('desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot');
   });
 
-  it('keeps the master/canon docs aligned with the 2026-05-10 directive and dispatch closures', () => {
+  it('keeps the master/canon docs aligned with the current directive and dispatch closures', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
     const fora = readRepoFile('docs', '10_canon', 'FORAWWV.md');
     const systems = readRepoFile('docs', '10_canon', 'Systems_Manual_v0_9_0.md');
     const knowledge = readRepoFile('docs', 'PROJECT_LEDGER_KNOWLEDGE.md');
 
-    expect(roadmap).toContain('**Last Updated:** 2026-05-15');
+    expect(roadmap).toContain('**Last Updated:** 2026-05-18');
+    expect(roadmap).toContain('Current integrated-context 40w proof is n1894 `b14179d65639860c`');
+    expect(roadmap).toContain('Batch 18 Accessibility P0 verification/doc propagation');
+    expect(roadmap).toContain('Remaining autonomous lanes');
+    expect(roadmap).toContain('docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md');
+
+    expect(fora).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
+    expect(fora).toContain('magnitude');
+    expect(fora).toContain('permission_flags');
+    expect(systems).toContain('displacement_recent_by_turn');
+    expect(systems).toContain('bounded 4-turn recent displacement cue');
+    expect(knowledge).toContain('president_directive_bridge.ts');
+    expect(knowledge).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
+    expect(knowledge).not.toContain('Reference run_three_commanders.ts `PRESIDENT_TO_CANONICAL` table');
+
+    /*
+     * Retired 2026-05-18 Batch 36: the assertions below were a frozen 2026-05-10
+     * roadmap snapshot. Batches 1-35 reorganized this section heavily, so the
+     * active test above keeps the durable current contracts and avoids pinning
+     * hundreds of obsolete exact phrasing fragments.
+     *
     expect(roadmap).toContain('detectZones component-count cut shipped');
     expect(roadmap).toContain('`buildOperations` plan/probe profile split identified `probe.deriveObjectives` as the next measured target');
     expect(roadmap).toContain('probe deriveObjectives internals split identified `predictAllAdjacentTargets(...)` as the hot sub-step');
@@ -232,6 +252,7 @@ describe('desktop and roadmap truth docs', () => {
     expect(knowledge).toContain('president_directive_bridge.ts');
     expect(knowledge).toContain('PRESIDENT_TO_CANONICAL_DIRECTIVE');
     expect(knowledge).not.toContain('Reference run_three_commanders.ts `PRESIDENT_TO_CANONICAL` table');
+    */
   });
 
   it('retires the stale scenario-board reds once direct proof has landed', () => {

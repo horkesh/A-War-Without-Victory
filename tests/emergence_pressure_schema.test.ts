@@ -14,7 +14,7 @@ import { validateGameStateShape } from '../src/state/validateGameState.js';
 function minimalStateWithFrontPressure(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 1, seed: 's', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+  meta: { turn: 1, seed: 's', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1, player_faction: 'RBiH' } as any,
   factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }

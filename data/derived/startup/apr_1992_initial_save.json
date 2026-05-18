@@ -33782,6 +33782,12 @@
         "victories": 0
       }
     },
+    "negotiation": {
+      "capital": {},
+      "patron_relationships": {},
+      "peace_plan_history": [],
+      "pending_counter_offers": []
+    },
     "political_leader_data": [
       {
         "_sources": [
@@ -42531,6 +42537,7 @@
     "negotiation_status": {
       "ceasefire_active": false,
       "ceasefire_since_turn": null,
+      "last_counter_turn": {},
       "last_offer_turn": null
     },
     "political_controllers": {
@@ -43257,11 +43264,14 @@
         "travnik",
         "vitez"
       ],
+      "bilateral_corps_release_progress": {},
+      "bilateral_diverted_corps": {},
       "bilateral_flips_this_turn": 0,
       "ceasefire_active": false,
       "ceasefire_since_turn": null,
       "mobilization_started_turn": null,
       "stalemate_turns": 0,
+      "territorial_incidents_this_turn": 0,
       "total_bilateral_flips": 0,
       "war_started_turn": null,
       "washington_signed": false,
@@ -43278,5 +43288,5 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 12
+  "schema_version": 14
 }

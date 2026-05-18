@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 12,
-  "registered_migration_count": 12,
+  "latest_schema_version": 14,
+  "registered_migration_count": 14,
   "strict_required_field_count": 23,
   "anonymous_default_count": 0,
   "fields": [],
@@ -53,6 +53,14 @@
     {
       "version": 12,
       "description": "Top-level optional save arrays/policy counters when optional family is already present. Sensitive: no."
+    },
+    {
+      "version": 13,
+      "description": "Negotiation counter-offer docket and per-faction counter-turn defaults. Sensitive: no."
+    },
+    {
+      "version": 14,
+      "description": "Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH."
     }
   ],
   "required_fields": [

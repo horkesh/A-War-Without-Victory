@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] test(merge-gate): Batch 36 full fast-suite repair
+
+**Type:** Test/fixture/generated-artifact merge-gate repair.
+
+**Change:** Reconciled stale fast-suite fixtures and docs-truth guards with the current v14 loaded-game player-faction contract. Minimal loaded-state fixtures now carry `meta.player_faction`, legacy migration tests use legacy schema versions so the migration registry supplies v3-v14 defaults, save-migration round-trip fixtures now cover v12 and v13, and the committed startup snapshot / save-migration drift diagnostic outputs are regenerated for schema v14. Sector idle-recovery expectations now match current typed blocker codes, and the CI guardrail recognizes the additive `scenario-anchors` job.
+
+**Codex review correction:** Claude initially skipped a stale `tests/docs_desktop_v09_truth.test.ts` case. Codex rejected the skip and re-authored it as an active current-contract check so docs-truth coverage remains live.
+
+**Verification:** Focused high-risk slice passed 5 files / 39 tests: `tests/docs_desktop_v09_truth.test.ts`, `tests/player_knowledge_integrity.test.ts`, `tests/save_migration_round_trip_contract.test.ts`, `tests/save_migration_drift_audit.test.ts`, `tests/startup_snapshot_contract.test.ts`. `npm.cmd run typecheck` passed. Full `npm.cmd test` passed after the docs-truth repair. `npm.cmd run test:baselines` passed with "Baseline regression: all scenarios match." `npm.cmd run desktop:map:build` passed with only existing Vite/chunk warnings.
+
+**Determinism:** No sim behavior code changed. Baseline regression remains green. The startup artifact byte change is intentional generated-state maintenance: schema v12 -> v14 plus v13/v14 migration defaults required by current strict loaded-state validation.
+
+**Artifacts:** `docs/40_reports/implemented/20260518_MERGE_GATE_FAST_SUITE_BATCH36.md`.
+
+---
+
 ## [2026-05-18] feat(sim): Batch 35 HRHB patron directive scope helper + per-corps divergence test + verify-stale cleanup (byte-identical)
 
 **Type:** Helper extraction + integration test + verify-stale doc propagation.

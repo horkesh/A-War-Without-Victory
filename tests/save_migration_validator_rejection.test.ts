@@ -18,6 +18,7 @@ function currentVersionState(): any {
             referendum_eligible_turn: null,
             referendum_deadline_turn: null,
             game_over: false,
+            player_faction: 'RBiH',
         },
         factions: [
             {
@@ -108,6 +109,7 @@ describe('save migration validator hardening', () => {
             ceasefire_active: false,
             ceasefire_since_turn: null,
             last_offer_turn: null,
+            last_counter_turn: {},
         });
         expect(migrated.displacement.displacement_humanitarian_aggregates).toEqual({});
     });
