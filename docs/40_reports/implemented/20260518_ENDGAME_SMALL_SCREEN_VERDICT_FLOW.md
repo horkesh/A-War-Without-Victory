@@ -1,6 +1,6 @@
 # Endgame Small-Screen Verdict Flow
 
-**Date:** 2026-05-18  
+**Date:** 2026-05-18
 **Scope:** UI-only verdict presentation polish. No scoring, simulation, Cost Ledger, historical comparison, save schema, scenario data, or generated scenario artifact changed.
 
 ## Summary

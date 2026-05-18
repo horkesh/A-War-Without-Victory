@@ -1,7 +1,7 @@
 # Formation-Life Packetization FL-A / FL-B
 
-**Date:** 2026-05-18  
-**Scope:** Batch 6 FL-A and FL-B only  
+**Date:** 2026-05-18
+**Scope:** Batch 6 FL-A and FL-B only
 **Type:** Diagnostic packetization; no simulation behavior change
 
 ## Summary
