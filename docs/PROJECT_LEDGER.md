@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(ui): Batch 41 Decision Room pushback explanations (UI-2)
+
+**Type:** UI / read-model projection only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
+
+**Change:** Added `src/ui/map/data/playerArmyCoPushbackVisibility.ts` and a Decision Room consumer in `src/ui/map/data/presidentialDecisionRoom.ts` (`addArmyCoPushbackCard`). The presidential Decision Room now emits a single player-scoped Army CO pushback card (id `pushback:player-army-co`, category `decision`) when the player's faction has unacknowledged `order_refused` / `order_pushback` / `order_modified` pending officer events or PARTIAL/REFUSED rationale in `armyCoDecisionTraces` for the player faction. Severity tiers — `blocking` (refused), `warning` (pushback / modified / pushback-rationale trace), no card when silent. The card explanation surfaces the existing pushback reason verbatim and routes the player back to the Army HQ briefing tab where the canonical `OrderInterpretationPanel` and `ArmyCoPushbackPanel` packets already render. Reuses the existing pushback signals; no second owner, no new queue, no enemy-truth leakage. The advance-turn `ArmyCoPushbackPanel` (canonical pre-advance review) and the Army HQ `OrderInterpretationPanel` (canonical acknowledgement surface) remain authoritative.
+
+**Determinism:** Pure projection over already player-faction-filtered data; sorted iteration; no Math.random / Date.now / Date.
+
+**Verification:** `npx.cmd tsc --noEmit` clean; `npx.cmd vitest run tests/ui_decision_room_pushback_explanations.test.ts tests/a5_army_co_pushback_ui.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_shell_navigation.test.ts tests/ui_decision_room_supply_visibility.test.ts --reporter=dot` 52/52 pass; `npm.cmd run desktop:map:build` 16.24s clean. No 40w run — UI read-model only, no sim or scenario authority touched.
+
+**Artifacts:** `src/ui/map/data/playerArmyCoPushbackVisibility.ts`; updates to `src/ui/map/data/presidentialDecisionRoom.ts`; `tests/ui_decision_room_pushback_explanations.test.ts`; updates to `docs/40_reports/GAME_STATE_RATING_MASTER.md` row 3.
+
+---
+
 ## [2026-05-18] feat(ui): Batch 40 supply visibility read-model (UI-1)
 
 **Type:** UI / read-model projection only. No simulation authority, scenario state, save schema, generated artifact, or canon text changed.

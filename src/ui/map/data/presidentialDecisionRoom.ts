@@ -7,6 +7,7 @@ import {
   type TurnAftermathView,
 } from './turnAftermath';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
+import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -490,6 +491,32 @@ function addSupplyVisibilityCard(state: LoadedGameState, cards: CandidateCard[])
     navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
     urgencySort: cardSeverity === 'critical' ? 0 : 5,
     sourceSort: 'supply:player-visibility',
+  });
+}
+
+function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): void {
+  const view = buildPlayerArmyCoPushbackVisibility(state);
+  if (!view || !view.hasSignal) return;
+
+  const cardSeverity: PresidentialDecisionRoomSeverity = view.severity === 'blocking'
+    ? 'blocking'
+    : view.severity === 'warning'
+      ? 'warning'
+      : 'info';
+
+  cards.push({
+    id: 'pushback:player-army-co',
+    category: 'decision',
+    severity: cardSeverity,
+    title: view.headline,
+    explanation: view.rationale,
+    sourceOwner: 'Army HQ pushback',
+    sourceLabel: 'Decision Room',
+    actionLabel: 'Review Pushback',
+    evidence: view.evidence,
+    navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    urgencySort: cardSeverity === 'blocking' ? 0 : 5,
+    sourceSort: 'pushback:player-army-co',
   });
 }
 
@@ -1202,6 +1229,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addParamilitaryReviewCard(state, candidates);
   addManifestDecisionCards(state, candidates);
   addCounterOfferCards(state, candidates);
+  addArmyCoPushbackCard(state, candidates);
   addOpportunityCards(state, candidates);
   addSitrepCards(state, candidates);
   addSupplyVisibilityCard(state, candidates);
