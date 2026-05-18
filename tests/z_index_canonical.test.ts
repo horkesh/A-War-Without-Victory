@@ -58,7 +58,10 @@ const MIGRATED_FILES = [
   'src/ui/map/components/EventDecisionModal.tsx',
   'src/ui/map/components/EventLogPanel.tsx',
   'src/ui/map/components/EventModal.tsx',
-  'src/ui/map/components/FirstTurnOrientationCard.tsx',
+  // FirstTurnOrientationCard.tsx retired in Batch 45 (2026-05-18, UI-6) —
+  // OnboardingOverlay is the canonical first-run owner. See
+  // `tests/ui/onboarding_persistence_replacement.test.ts` for the migrated
+  // coverage.
   'src/ui/map/components/GameOverModal.tsx',
   'src/ui/map/components/GlassPanel.tsx',
   'src/ui/map/components/LoadErrorToast.tsx',

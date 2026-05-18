@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] refactor(ui): Batch 45 onboarding legacy cleanup + persistence coverage migration (UI-6)
+
+**Type:** UI / dead-code removal + test migration. No simulation authority, scenario state, save schema, IPC handler, generated artifact, or canon text changed. The legacy first-turn orientation surface was already dormant (not mounted by `src/ui/map/App.tsx`); existing `tests/ui/onboarding_track_d_consolidation.test.ts` already asserts the App shell never imports it.
+
+**Change:** Retired the legacy first-session orientation surface after migrating its compatibility coverage forward onto the canonical owner. Deleted: `src/ui/map/components/FirstTurnOrientationCard.tsx`, `src/ui/map/data/firstTurnOrientation.ts`, `tests/ui/first_turn_orientation_persistence.test.ts`, `tests/ui/first_turn_orientation.test.ts`. Added: `tests/ui/onboarding_persistence_replacement.test.ts` (asserts (a) ESC-driven dismissal on the canonical `OnboardingOverlay` flows through the IPC bridge `tutorial:dismiss` and never writes to browser localStorage — the migrated form of the legacy "no localStorage write" assertion, (b) the overlay does not render when `tutorial_state.dismissed === true`, (c) a fresh save with null `tutorial_state` still renders the overlay). Updated `tests/z_index_canonical.test.ts` `MIGRATED_FILES` list with a retirement note pointing to the new coverage. No first-session affordance was removed without replacement coverage — `OnboardingOverlay` remains the single mounted owner.
+
+**Determinism:** Test/refactor only.
+
+**Verification:** `npx.cmd tsc --noEmit` clean; `npx.cmd vitest run tests/ui/onboarding_persistence_replacement.test.ts tests/ui/onboarding_track_d_consolidation.test.ts tests/onboarding_spotlight_targets.test.ts tests/ui_shell_navigation.test.ts tests/z_index_canonical.test.ts tests/ui_presidential_toolbar_summary_click.test.ts --reporter=dot` 53/53 pass; `npm.cmd run desktop:map:build` 16.03s clean. No 40w run — UI dead-code removal + test migration only, no sim or scenario authority touched.
+
+**Artifacts:** deletions of `src/ui/map/components/FirstTurnOrientationCard.tsx`, `src/ui/map/data/firstTurnOrientation.ts`, `tests/ui/first_turn_orientation_persistence.test.ts`, `tests/ui/first_turn_orientation.test.ts`; `tests/ui/onboarding_persistence_replacement.test.ts`; updates to `tests/z_index_canonical.test.ts` and `docs/40_reports/GAME_STATE_RATING_MASTER.md` row 24.
+
+---
+
 ## [2026-05-18] feat(ui): Batch 44 endgame faction report mobile subdivision (UI-5)
 
 **Type:** UI / progressive disclosure only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, scoring contract, Cost Ledger truth, verdict selection, or canon text changed.
