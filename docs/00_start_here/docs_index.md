@@ -4,7 +4,7 @@
 
 ## Where to start
 
-- **New player guide:** [NEW_PLAYER_GUIDE.md](NEW_PLAYER_GUIDE.md) - player-facing walkthrough for the gap between finishing the in-game tutorial and understanding the weekly turn loop.
+- **New player guide:** [NEW_PLAYER_GUIDE.md](NEW_PLAYER_GUIDE.md) - player-facing walkthrough for the gap between finishing the in-game tutorial and understanding the weekly turn loop. Bosnian-language parallel: [VODIC_ZA_NOVE_IGRACE.md](VODIC_ZA_NOVE_IGRACE.md).
 
 - **Process and workflow:** [docs/10_canon/context.md](../10_canon/context.md) — mandatory first read for agents and contributors (ledger, mistake guard, determinism).
 - **Political control:** Control is **settlement-level** (each settlement has a controller); municipality-level control is a derived view (e.g. majority of settlements) for display only. See [Systems_Manual_v0_9_0.md § System 11](../10_canon/Systems_Manual_v0_9_0.md).

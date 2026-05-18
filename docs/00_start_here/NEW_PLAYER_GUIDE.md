@@ -6,6 +6,8 @@ This guide is the new-player walkthrough I wished the in-game 8-step tutorial ha
 
 If you've finished the in-game tutorial and you're still wondering what the buttons mean, start here.
 
+> **Na bosanskom jeziku:** [VODIC_ZA_NOVE_IGRACE.md](VODIC_ZA_NOVE_IGRACE.md) — paralelni vodič na bosanskom. UI labels remain quoted in English because the in-game UI is still English-only.
+
 ---
 
 ## 1. The premise (read this first)
