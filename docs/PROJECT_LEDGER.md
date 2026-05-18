@@ -3,11 +3,25 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] docs(merge): Correct Batch 47 branch evidence fingerprint
+
+**Type:** Documentation correction only. No code, simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
+
+**Change:** Corrected `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md` after Codex review found the Batch 47 packet still described the pre-packet tip (`7e05b967`) as the branch tip. The packet now names `d70f5516` as the Batch 47 packet commit, records the reviewed ahead count as 70 commits, and explicitly tells reviewers to use `git rev-parse HEAD` plus `git diff --shortstat origin/main..HEAD` for live branch metadata before push / PR creation because a committed Markdown file cannot self-describe its own final commit hash without becoming stale.
+
+**Determinism:** Documentation only.
+
+**Verification:** `npm.cmd run typecheck` clean; cumulative UI-focused verification sweep passed 37 files / 264 tests; `npm.cmd run desktop:map:build` passed with existing Vite/chunk warnings; `git diff --check` clean.
+
+**Artifacts:** `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-18] docs(merge): Batch 47 branch merge / PR evidence packet
 
 **Type:** Reviewer-facing merge documentation only. No push, no PR open, no squash, no rebase. No simulation authority, scenario state, save schema, code, or canon text changed.
 
-**Change:** Authored `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md`. Captures (a) branch fingerprint — `codex/execute-2026-05-17-plans` at tip `7e05b967`, 68 commits ahead of `origin/main` from merge base `4fa16b1`, 597 files / +73,639 / -41,321; (b) commit category inventory split across sim/output-behavior (16 sector/strict-null/serialization batches, all byte-identical except where noted), UI/product (Batches 40-46 just landed in this branch), performance/attribution, tests/fixtures, docs/plans/reports/audits, and operator-support-only carve-out; (c) evidence matrix recording the strongest locally verifiable signal for each claim — 40w `n1915 b14179d65639860c` byte-identical, 52w baseline refreshed at Batch 20, typecheck + map build clean per batch, latest UI-7 33/33 a11y matrix pass; (d) draft PR body using HEREDOC-safe formatting for the user to copy when ready; (e) explicit non-execution of fresh merge gates (Task 4 of the source plan only runs them on user ask, which the autonomous prompt didn't include); (f) reviewer reading path and stop-gate honor record. Plan: `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md`.
+**Change:** Authored `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md`. Captures (a) branch fingerprint — `codex/execute-2026-05-17-plans` at Batch 47 packet commit `d70f5516`, then corrected by Codex review to avoid treating a committed packet as a live-tip hash; (b) commit category inventory split across sim/output-behavior (16 sector/strict-null/serialization batches, all byte-identical except where noted), UI/product (Batches 40-46 just landed in this branch), performance/attribution, tests/fixtures, docs/plans/reports/audits, and operator-support-only carve-out; (c) evidence matrix recording the strongest locally verifiable signal for each claim — 40w `n1915 b14179d65639860c` byte-identical, 52w baseline refreshed at Batch 20, typecheck + map build clean per batch, latest UI-7 33/33 a11y matrix pass; (d) draft PR body using HEREDOC-safe formatting for the user to copy when ready; (e) explicit non-execution of fresh merge gates (Task 4 of the source plan only runs them on user ask, which the autonomous prompt didn't include); (f) reviewer reading path and stop-gate honor record. Plan: `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md`.
 
 **Determinism:** Documentation only.
 

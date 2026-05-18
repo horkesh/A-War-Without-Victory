@@ -13,10 +13,12 @@
 |---|---|
 | Branch | `codex/execute-2026-05-17-plans` |
 | Merge base with `origin/main` | `4fa16b13417437d4dafa29aa0bd82cc367ddd6f9` |
-| Branch tip | `7e05b967798148239f69dea928afdf617acf00bd` |
-| Commits ahead of `origin/main` | **68** |
-| `git status` | clean (no unrelated dirty files at packet authoring) |
-| `git diff --shortstat origin/main..HEAD` | 597 files changed, 73,639 insertions(+), 41,321 deletions(-) |
+| Batch 47 packet commit | `d70f55160d59ec4b4dda27e7ef552b3835c83cde` |
+| Commits ahead of `origin/main` at Codex review | **70** |
+| `git status` | clean at packet authoring; re-check before push |
+| `git diff --shortstat origin/main..HEAD` | Recompute live before push / PR creation |
+
+> A committed Markdown packet cannot self-describe the final branch tip hash without becoming stale on commit. Use `git rev-parse HEAD` for the live tip before push / PR creation.
 
 ---
 
@@ -130,7 +132,7 @@ Each row records the strongest **locally verifiable** signal for a claim. Stale 
 ```markdown
 ## Summary
 
-Closes 68 commits' worth of autonomous batch work since `origin/main` —
+Closes 70 commits' worth of autonomous batch work since `origin/main` —
 the v0.9.x autonomous roadmap lane bank execution from late 2026-05-17
 through 2026-05-18, including the 7-batch UI product lane bank wave
 (supply visibility, decision-room pushback, GUI playtest D3-D7 closeout,
