@@ -289,3 +289,22 @@ git diff --check
 ```
 
 Record the new tip and any new aggregate counts in a follow-up §9 block; do not edit §8 in place.
+
+---
+
+## 9. Post-push note — final merged tip (2026-05-19)
+
+Codex later committed the fresh-gate packet update as `50312dc81d592ce9103d4539b3e8720045fb0ca2` (`docs(merge): record fresh pre-push gate`), re-ran the engineering merge gate at that tip, fast-forwarded `main`, pushed `main` to `origin/main`, and verified local `HEAD` and `origin/main` both resolved to `50312dc81d592ce9103d4539b3e8720045fb0ca2`.
+
+Post-packet verification at `50312dc8`:
+
+| Gate | Result |
+|---|---|
+| `npm.cmd run typecheck` | PASS |
+| `npm.cmd test` | PASS |
+| `npm.cmd run test:baselines` | PASS — `Baseline regression: all scenarios match` |
+| `npm.cmd run desktop:map:build` | PASS — standard Vite/chunk-size advisory only |
+| `git diff --check` | PASS |
+| `git status --short --branch` after push | `## main...origin/main` (clean) |
+
+This §9 records the final merge/push evidence for the landed branch. Later bookkeeping commits, if any, are ordinary post-merge maintenance and do not alter the Batch 47 merge packet's evidence scope.

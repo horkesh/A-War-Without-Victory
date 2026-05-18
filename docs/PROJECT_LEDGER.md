@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] docs(merge): Post-merge bookkeeping cleanup
+
+**Type:** Documentation bookkeeping only. No code, simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
+
+**Change:** Closed two post-merge documentation gaps after the `codex/execute-2026-05-17-plans` branch landed on `main`: added explicit Batch 41-47 rows to `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, and added a §9 post-push note to `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md` recording that `main` and `origin/main` were aligned at `50312dc8` after Codex re-ran the engineering merge gate and pushed.
+
+**Determinism:** Documentation only.
+
+**Verification:** `git diff --check` clean before commit; pre-commit hook treated the staged change as docs/process-only and skipped typecheck.
+
+**Artifacts:** `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`; `docs/40_reports/audits/20260518_BRANCH_MERGE_EVIDENCE_PACKET.md`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-18] docs(merge): Correct Batch 47 branch evidence fingerprint
 
 **Type:** Documentation correction only. No code, simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.
