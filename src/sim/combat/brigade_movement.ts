@@ -196,7 +196,7 @@ export function processBrigadeMovement(
         const formation = formations[formationId];
         if (!formation || formation.faction == null || (formation.kind ?? 'brigade') !== 'brigade') continue;
         if (state.military.brigade_encircled?.[formationId]) continue;
-        const factionId = formation.faction as FactionId;
+        const factionId = formation.faction;
         const order = movementOrders[formationId];
         const dest = order?.destination_sids;
         if (dest?.length && dest.every(sid => isFriendlyFaction(pc[sid], factionId, state))) {
@@ -219,7 +219,7 @@ export function processBrigadeMovement(
             delete movementState[formationId];
             continue;
         }
-        const factionId = formation.faction as FactionId;
+        const factionId = formation.faction;
 
         if (current.status === 'packing') {
             const dest = current.destination_sids ?? [];

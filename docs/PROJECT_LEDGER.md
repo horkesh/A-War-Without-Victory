@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close eleventh backlog execution batch
+
+**Scope:** Eleventh autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering deterministic intel execution friction, strict-null Phase 2 continuation, and sector-performance `buildFactionSectors:*` attribution. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, or external distribution changed.
+
+**Change:** Attack resolution now reads attacker-side sector intel for the target sector/OSID and applies a bounded execution multiplier: stale or missing attacker confidence scales attacker power from `0.85` to `1.0`, while an active defender OPSEC sector applies a bounded `1.08` defender multiplier. Cleaned eight strict-null combat escapes in `brigade_home_return.ts`, `brigade_movement.ts`, and `brigade_front_distribution.ts`, lowering the Phase 2 remaining inventory from 100 to 92. Added opt-in sidecar-only attribution below `buildFactionSectors:*`, with `corps-sector-construction` and then `buildMultiSectorsForCorps(...)` as the next measured target. Refreshed the tracked `data/derived/latest_run_final_save.json` fixture from n1887.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. Sector attribution writes only to gitignored profile sidecars when `PERF_PROFILE_SECTOR_PARTITION=true`; flag-off behavior is unchanged. Intel execution friction is simulation-affecting by design and re-anchors the active 40w proof from n1886 `bc4e06185d3145aa` to n1887 `38fcfed23b5b5c11`, with 27/27 anchors and 6/6 bot benchmarks still green. The combat hook uses sorted sector lookup, front-visible intel state, fixed numeric bounds, and no random/clock/schema/UI hidden-truth exposure.
+
+**Verification:** Parent integration passed `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/attack_resolution_osid_intel_friction.test.ts tests/sector_intel.test.ts tests/sector_offensive.test.ts tests/sector_partition_instrumentation.test.ts tests/profile_hotspot_report.test.ts --reporter=dot` (6 files / 53 tests); `npm.cmd run typecheck`; `npm.cmd run sim:scenario:run:40w` producing n1887 hash `38fcfed23b5b5c11`, 27/27 anchors, 6/6 bot benchmarks, and one non-critical anomaly warning; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1887`; `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts tests/adapter_field_completeness.test.ts tests/real_save_sector_truth_contracts.test.ts --reporter=dot` (3 files / 38 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; and `git diff --check` with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Canon/system docs now describe sector intel as both commander-belief evidence and a bounded deterministic execution-friction input. Broader per-OSID target scoring, AAR/read-model annotation, and ambush/surprise modeling remain follow-up backlog work.
+
+---
+
 ## [2026-05-18] feat(roadmap): close tenth backlog execution batch
 
 **Scope:** Tenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering intel extensions first slice, strict-null Phase 2 continuation, and sector-performance Task 5 proof. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, or external distribution changed.

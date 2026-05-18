@@ -35,6 +35,10 @@ import type { CorpsCommandState, FormationId, FormationState, GameState, Operati
 import type { TurnContext } from '../turn_pipeline_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+type CorpsAssetFormationState = FormationState & {
+    active_operations?: CorpsCommandState['active_operations'];
+};
+
 // ── Corps boundary helpers ─────────────────────────────────────────────────────
 
 /**
@@ -161,11 +165,12 @@ function bfsDistanceToAny(
  * Mirrors the logic in compute_home_defense.ts and brigade_front_distribution.ts.
  */
 function isOperationParticipant(state: GameState, brigadeId: FormationId): boolean {
-    const formations = state.military.formations ?? {};
+    const formations: Record<string, CorpsAssetFormationState> = state.military.formations ?? {};
     for (const fid of Object.keys(formations)) {
-        const f = formations[fid as FormationId]!;
+        const f = formations[fid];
+        if (!f) continue;
         if (f.kind !== 'corps_asset') continue;
-        const ops = (f as unknown as Partial<CorpsCommandState>).active_operations;
+        const ops = f.active_operations;
         if (!ops) continue;
         for (const op of ops) {
             if (op.axes) {
@@ -358,7 +363,8 @@ export function evaluateHomeReturn(
             if (!state.military.brigade_movement_orders) {
                 state.military.brigade_movement_orders = {};
             }
-            state.military.brigade_movement_orders![order.brigade_id] = {
+            const movementOrders = state.military.brigade_movement_orders;
+            movementOrders[order.brigade_id] = {
                 destination_sids: [order.target_osid as SettlementId],
                 stance: 'column',
             } as { destination_sids: SettlementId[] };

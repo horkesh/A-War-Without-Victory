@@ -101,6 +101,7 @@ import {
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
+    getIntelExecutionFrictionMultipliers,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
@@ -180,6 +181,38 @@ export { pushSnapEvent };
 // Backward-compat re-exports for retreat/displacement (consumers may import from this file)
 export { _findEmergencyRetreatOsid as findEmergencyRetreatOsid };
 export { _displaceFormationsInEnemyTerritory as displaceFormationsInEnemyTerritory };
+
+function findFriendlySectorIdForOsid(state: GameState, osid: string): string | null {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return null;
+    const sectorIds = Object.keys(sectors).sort(strictCompare);
+    for (const sectorId of sectorIds) {
+        const sector = sectors[sectorId];
+        if (!sector) continue;
+        for (const subSegment of sector.sub_segments ?? []) {
+            if (subSegment.friendly_osids.includes(osid)) return sectorId;
+        }
+    }
+    return null;
+}
+
+function getAttackIntelConfidence(
+    state: GameState,
+    attackerOsid: string,
+    defenderSectorId: string | undefined,
+    targetOsid: string,
+): number {
+    if (!defenderSectorId) return 0;
+    const attackerSectorId = findFriendlySectorIdForOsid(state, attackerOsid);
+    if (!attackerSectorId) return 0;
+    const record = state.military.sector_intel?.[attackerSectorId]
+        ?.find(rec => rec.enemy_sector_id === defenderSectorId);
+    if (!record) return 0;
+    const osidConfidence = record.osid_confidence
+        ?.find(entry => entry.osid === targetOsid)
+        ?.confidence;
+    return osidConfidence ?? record.confidence;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolver-only constants
@@ -342,6 +375,7 @@ export function resolveAttackOrdersOsid(
         let sectorBrigadeMeta: Map<FormationId, { hops: number; isHome: boolean }> | null = null;
         // Phase B: sub-segment responsible for defending this OSID
         let defendingSubSegmentId: string | undefined;
+        let defendingSectorId: string | undefined;
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         const pc = state.political?.political_controllers ?? {};
@@ -353,6 +387,7 @@ export function resolveAttackOrdersOsid(
         // Casualties distributed by the same weights.
         if (isEnemyControlled) {
             const sector = findSectorForEnemyOsid(state, targetOsid, controller);
+            defendingSectorId = sector?.sector_id;
             // Phase B: identify which sub-segment is responsible for this OSID
             const defendingSubSeg = sector ? findSubSegmentForOsid(sector, targetOsid) : undefined;
             defendingSubSegmentId = defendingSubSeg?.sub_segment_id;
@@ -505,8 +540,19 @@ export function resolveAttackOrdersOsid(
         }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus
             * getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
         defenderPower *= seasonal.defense_mult;
+        const intelFriction = getIntelExecutionFrictionMultipliers(
+            getAttackIntelConfidence(
+                state,
+                firstAttacker.location_osid ?? '',
+                defendingSectorId,
+                targetOsid,
+            ),
+            defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
+        );
+        const effectiveAttackerPower = attackerPower * intelFriction.attackerPowerMult;
+        defenderPower *= intelFriction.defenderPowerMult;
 
-        const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
+        const powerRatio = defenderPower <= 0 ? 10 : effectiveAttackerPower / defenderPower;
         // Snap: Surrender Cascade
         const surrenderCascade = defenderFormation !== null
             && (defenderFormation.cohesion ?? 60) < 10

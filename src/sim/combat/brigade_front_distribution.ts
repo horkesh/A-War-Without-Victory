@@ -41,6 +41,10 @@ import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, Ga
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 
+type CorpsAssetFormationState = FormationState & {
+    active_operations?: CorpsCommandState['active_operations'];
+};
+
 interface FrontDistributionOptions {
     rearDirectRepairMaxHops?: number;
     frontGapRepairMaxHops?: number;
@@ -105,11 +109,12 @@ function isSarajevoSiegeSector(sector: CorpsFrontSector): boolean {
  */
 function buildOperationParticipantSet(state: GameState): Set<string> {
     const participants = new Set<string>();
-    const formations = state.military.formations ?? {};
+    const formations: Record<string, CorpsAssetFormationState> = state.military.formations ?? {};
     for (const fid of Object.keys(formations)) {
-        const f = formations[fid]!;
+        const f = formations[fid];
+        if (!f) continue;
         if (f.kind !== 'corps_asset') continue;
-        const ops = (f as unknown as Partial<CorpsCommandState>).active_operations;
+        const ops = f.active_operations;
         if (!ops) continue;
         for (const op of ops) {
             if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
@@ -510,8 +515,9 @@ export function distributeBrigadesToFront(
     const pc = state.political?.political_controllers ?? {};
     for (const [osid, controller] of Object.entries(pc)) {
         if (!controller) continue;
-        let s = friendlyByFaction.get(controller as FactionId);
-        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller as FactionId, s); }
+        const factionId = controller;
+        let s = friendlyByFaction.get(factionId);
+        if (!s) { s = new Set<string>(); friendlyByFaction.set(factionId, s); }
         s.add(osid);
     }
 
@@ -666,7 +672,8 @@ export function distributeBrigadesToFront(
                     if (!state.military.brigade_movement_orders) {
                         state.military.brigade_movement_orders = {};
                     }
-                    state.military.brigade_movement_orders![bid] = {
+                    const movementOrders = state.military.brigade_movement_orders;
+                    movementOrders[bid] = {
                         destination_sids: [target as SettlementId],
                         stance: 'column',
                     } as { destination_sids: SettlementId[] };

@@ -44,6 +44,12 @@ const PHASE_2_COMBAT_BATCH_10_FILES = [
     'src/sim/combat/sector_splitting.ts',
 ];
 
+const PHASE_2_COMBAT_BATCH_11_FILES = [
+    'src/sim/combat/brigade_home_return.ts',
+    'src/sim/combat/brigade_movement.ts',
+    'src/sim/combat/brigade_front_distribution.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -174,6 +180,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_10_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 11 Phase 2 combat continuation slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_2_COMBAT_BATCH_11_FILES),
             0,
         );
 

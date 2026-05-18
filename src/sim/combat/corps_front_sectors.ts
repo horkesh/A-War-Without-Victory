@@ -2463,55 +2463,68 @@ function buildFactionSectors(
     if (corpsIds.length === 0) return [];
 
     // Step 2: Map OSIDs to corps via multi-source BFS
-    const osidToCorps = mapOsidsToCorps(
+    const osidToCorps = _perfTime(`buildFactionSectors:${faction}:osid-to-corps`, () => mapOsidsToCorps(
         state, faction, corpsIds, adjacency, formations, reverseMap
-    );
+    ));
 
     // Step 3: Partition front edges to corps
-    const corpsEdges = partitionFrontEdges(
+    const corpsEdges = _perfTime(`buildFactionSectors:${faction}:front-edge-partition`, () => partitionFrontEdges(
         osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency
-    );
+    ));
     // Step 3b: Consolidate cross-corps front splits.
-    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps, centroids, sharedBoundaryAdj);
+    _perfTime(`buildFactionSectors:${faction}:front-edge-consolidation`, () => {
+        consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps, centroids, sharedBoundaryAdj);
+    });
     // Step 3c: Consolidate isolated corps pockets.
-    consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
+    _perfTime(`buildFactionSectors:${faction}:isolated-pocket-consolidation`, () => {
+        consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
+    });
 
     // Pre-compute friendly OSIDs once for territory, brigade assignment, and contiguity checks.
     // Use SpatialContext if available; otherwise build from political_controllers (backward compat).
-    let friendlyOsids: Set<string>;
-    if (spatial) {
-        const spatialFriendly = spatial.friendlyOsidsByFaction.get(faction);
-        friendlyOsids = spatialFriendly ? new Set(spatialFriendly) : new Set<string>();
-    } else {
-        friendlyOsids = new Set<string>();
+    const friendlyOsids = _perfTime(`buildFactionSectors:${faction}:friendly-osid-setup`, () => {
+        if (spatial) {
+            const spatialFriendly = spatial.friendlyOsidsByFaction.get(faction);
+            return spatialFriendly ? new Set(spatialFriendly) : new Set<string>();
+        }
+        const derivedFriendlyOsids = new Set<string>();
         const pc = state.political.political_controllers ?? {};
         for (const osid of adjacency.keys()) {
-            if (pc[osid] === faction) friendlyOsids.add(osid);
+            if (pc[osid] === faction) derivedFriendlyOsids.add(osid);
         }
         for (const [osid, ctrl] of Object.entries(pc)) {
-            if (ctrl === faction) friendlyOsids.add(osid);
+            if (ctrl === faction) derivedFriendlyOsids.add(osid);
         }
-    }
+        return derivedFriendlyOsids;
+    });
 
     // Pre-compute friendly connected components for staffability check (FIX 1).
     // A sector is "unstaffable" if no brigade from its corps exists in the same
     // friendly connected component — meaning no unit can physically reach it.
     // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
-    const preComponentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
-    const factionBrigadeLocations: string[] = [];
-    const factionBrigadeComponents = new Set<number>();
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid) continue;
-        factionBrigadeLocations.push(f.location_osid);
-        const comp = preComponentOf.get(f.location_osid);
-        if (comp !== undefined) factionBrigadeComponents.add(comp);
-    }
+    const { preComponentOf, factionBrigadeLocations, factionBrigadeComponents } = _perfTime(`buildFactionSectors:${faction}:pre-component-setup`, () => {
+        const componentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
+        const brigadeLocations: string[] = [];
+        const brigadeComponents = new Set<number>();
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[fid];
+            if (!f || f.faction !== faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f.location_osid) continue;
+            brigadeLocations.push(f.location_osid);
+            const comp = componentOf.get(f.location_osid);
+            if (comp !== undefined) brigadeComponents.add(comp);
+        }
+        return {
+            preComponentOf: componentOf,
+            factionBrigadeLocations: brigadeLocations,
+            factionBrigadeComponents: brigadeComponents,
+        };
+    });
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
+    _perfTime(`buildFactionSectors:${faction}:corps-sector-construction`, () => {
     for (const corpsId of corpsIds) {
         if (isSectorAssignmentExemptCorpsId(corpsId)) continue;
         const edgeIds = corpsEdges.get(corpsId);
@@ -2529,10 +2542,10 @@ function buildFactionSectors(
             if (comp !== undefined) corpsBrigadeComponents.add(comp);
         }
 
-        const corpsMultiSectors = buildMultiSectorsForCorps(
+        const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () => buildMultiSectorsForCorps(
             state, corpsId, faction, edgeIds, osidFrontEdges,
             adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids
-        );
+        ));
 
         // Collect sorted brigade locations for reachability BFS (deterministic: sorted by formation ID).
         const corpsBrigadeLocations: string[] = [];
@@ -2577,6 +2590,7 @@ function buildFactionSectors(
             sectors.push(sector);
         }
     }
+    });
 
     // NOTE: Cold-front sector suppression was attempted here but reverted.
     // Removing even tiny cold-front sectors changes Territory Voronoi (Step 5),
@@ -2666,33 +2680,40 @@ function buildFactionSectors(
     }
 
     // Step 5: Territory Voronoi — BFS from Front Edges into Depth
-    assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
+    _perfTime(`buildFactionSectors:${faction}:territory-voronoi`, () => {
+        assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
 
     // Step 5b: Repair disconnected territory — Voronoi BFS can assign non-contiguous
     // OSIDs to a sector when front edges are separated. BFS through each sector's
     // territory, keep the largest connected component, reassign orphans to adjacent sectors.
-    repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
+        repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
+    });
 
     // Pre-compute friendly territory connected components (used by steps 6 and 7).
     // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
     const componentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
 
     // Step 6: Classify brigades — corps-driven assignment.
-    const commanderProfiles = buildCorpsCommanderProfiles(state, sectors);
-    const playerOverrides = state.military.brigade_sector_override;
-    classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, commanderProfiles, playerOverrides, state);
+    const commanderProfiles = _perfTime(`buildFactionSectors:${faction}:brigade-classification`, () => {
+        const profiles = buildCorpsCommanderProfiles(state, sectors);
+        const playerOverrides = state.military.brigade_sector_override;
+        classifyBrigadesByTerritory(sectors, faction, formations, adjacency, friendlyOsids, componentOf, profiles, playerOverrides, state);
 
-    // Step 6b: Cross-corps enclave defense
-    assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);
+        // Step 6b: Cross-corps enclave defense
+        assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);
 
-    // Step 7: Ensure every sector with front edges has at least one assigned brigade.
-    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf, state);
+        // Step 7: Ensure every sector with front edges has at least one assigned brigade.
+        ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf, state);
+        return profiles;
+    });
 
     // Step 8: Reclassify brigades by frontline proximity.
-    reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+    _perfTime(`buildFactionSectors:${faction}:post-classification-normalization`, () => {
+        reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+    });
 
     // Step 8a: Commander reviews mechanical assignment and issues overrides.
-    {
+    _perfTime(`buildFactionSectors:${faction}:commander-review`, () => {
         const uniqueCorps = [...new Set(sectors.map(s => s.corps_id))].sort();
         for (const cid of uniqueCorps) {
             const profile = commanderProfiles.get(cid);
@@ -2713,23 +2734,25 @@ function buildFactionSectors(
                 componentOf, adjacency, friendlyOsids, opParticipants,
             );
         }
-    }
+    });
 
-    // Step 8b: Deduplicate
-    deduplicateBrigadesAcrossSectors(sectors);
+    _perfTime(`buildFactionSectors:${faction}:post-classification-normalization`, () => {
+        // Step 8b: Deduplicate
+        deduplicateBrigadesAcrossSectors(sectors);
 
-    // Step 8c: Strip any residual paper assignments that do not physically belong to the sector.
-    enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
+        // Step 8c: Strip any residual paper assignments that do not physically belong to the sector.
+        enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
 
-    // Step 8d: Reattach any now-unassigned brigades whose current locations are still
-    // truthfully owned by an existing sector.
-    rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
+        // Step 8d: Reattach any now-unassigned brigades whose current locations are still
+        // truthfully owned by an existing sector.
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
 
-    // Step 8e: Re-normalize reserve/frontline roles after truthful rehome.
-    reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+        // Step 8e: Re-normalize reserve/frontline roles after truthful rehome.
+        reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
 
-    // Step 8f: Recompute defensive_power and threat_ratio from final brigade sets.
-    recomputeSectorPowerAndThreat(sectors, formations, faction, state);
+        // Step 8f: Recompute defensive_power and threat_ratio from final brigade sets.
+        recomputeSectorPowerAndThreat(sectors, formations, faction, state);
+    });
 
     // Final prune: remove ghost artifact sectors
     const sectorMap = Object.fromEntries(sectors.map((sector) => [sector.sector_id, sector] as const));
@@ -2744,6 +2767,7 @@ function buildFactionSectors(
     // assertBrigadeReachability returns unreachable brigade IDs; demote them from
     // assigned_brigade_ids to reserve_brigade_ids so the pipeline does not write
     // false frontline state. Does NOT throw — demotion is safer than hard-crash.
+    _perfTime(`buildFactionSectors:${faction}:final-invariant-and-coverage`, () => {
     const unreachableIds = assertBrigadeReachability(pruned, formations, componentOf);
     if (unreachableIds.length > 0) {
         const unreachableSet = new Set(unreachableIds);
@@ -2770,6 +2794,7 @@ function buildFactionSectors(
     reclassifyRearBrigades(pruned, formations, adjacency, friendlyOsids);
     recomputeSectorPowerAndThreat(pruned, formations, faction, state);
     assertSectorBrigadesActive(pruned, formations);
+    });
 
     return pruned;
 }
