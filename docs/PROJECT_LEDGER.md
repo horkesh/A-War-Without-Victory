@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close twelfth backlog execution batch
+
+**Scope:** Twelfth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering public intel-friction AAR annotation, strict-null Phase 2 continuation, deeper sector-performance attribution, and stale master-rating reconciliation. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or hidden-truth UI surface changed.
+
+**Change:** Added optional public-safe `execution_friction` battle annotations (`stale_intel`, `defender_opsec`, broad attacker confidence band) and threaded them through attack-resolution reports, turn AAR summaries, weekly scenario battle reports, `AARPanel`, and battle tooltips. Cleaned five strict-null combat casts in `rear_pocket_consolidation.ts`, `sector_rearrangement.ts`, and `subsegment_assignment.ts`, lowering Phase 2 remaining inventory from 92 to 87. Added opt-in sidecar-only `buildMultiSectorsForCorps:*` attribution labels, identifying `sector-object-construction` / `buildSectorFromSubSegments(...)` formation scans as the next measured performance target. Refreshed `data/derived/latest_run_final_save.json` from n1888. Updated `GAME_STATE_RATING_MASTER.md` to reflect verified current truth for paramilitary Inbox surfacing and SidePicker emoji removal.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. Sector attribution writes only ignored profile sidecars when `PERF_PROFILE_SECTOR_PARTITION=true`. The intel annotation is additive and optional, exposes no exact hidden confidence or enemy truth, and does not alter combat math beyond Batch 11; it intentionally re-anchors serialized scenario/report output from n1887 `38fcfed23b5b5c11` to n1888 `248202ee4fd13027`.
+
+**Verification:** Parent integration passed `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/attack_resolution_osid_intel_friction.test.ts tests/sector_intel.test.ts tests/sector_offensive.test.ts tests/sector_partition_instrumentation.test.ts tests/profile_hotspot_report.test.ts tests/ui_shell_frame_contract.test.ts tests/ui/paramilitary_inbox_items.test.ts tests/ui/paramilitary_review_modal.test.ts tests/ui/inbox_items.test.ts tests/ui_presidential_decision_room_wiring.test.ts --reporter=dot` (11 files / 111 tests); `npm.cmd run typecheck`; `npm.cmd run sim:scenario:run:40w` producing n1888 hash `248202ee4fd13027`, 27/27 anchors, 6/6 bot benchmarks, and one non-critical anomaly warning; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1888`; `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts tests/adapter_field_completeness.test.ts tests/real_save_sector_truth_contracts.test.ts --reporter=dot` (3 files / 38 tests); `npm.cmd run desktop:map:build` with existing Vite warnings; and `git diff --check` with CRLF warnings only.
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Canon/system docs now describe the public AAR label boundary for intel execution friction. Broader per-OSID target scoring and ambush/surprise modeling remain follow-up backlog work.
+
+---
+
 ## [2026-05-18] feat(roadmap): close eleventh backlog execution batch
 
 **Scope:** Eleventh autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering deterministic intel execution friction, strict-null Phase 2 continuation, and sector-performance `buildFactionSectors:*` attribution. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, or external distribution changed.

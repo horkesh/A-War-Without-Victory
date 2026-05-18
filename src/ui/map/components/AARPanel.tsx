@@ -48,6 +48,10 @@ const OUTCOME_COLOR: Record<string, string> = {
     repulsed: 'text-red-400',
     catastrophic: 'text-red-600',
 };
+const INTEL_FRICTION_LABEL: Record<string, string> = {
+    stale_intel: 'Stale intel',
+    defender_opsec: 'Defender OPSEC',
+};
 
 // --- Notable event labels ---
 const NOTABLE_LABEL: Record<TurnNotableEvent['kind'], string> = {
@@ -189,6 +193,14 @@ function BattleRow({
             {(battle.attacker_casualties > 0 || battle.defender_casualties > 0) && (
                 <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
                     att −{battle.attacker_casualties.toLocaleString()}  ·  def −{battle.defender_casualties.toLocaleString()}
+                </div>
+            )}
+            {battle.execution_friction && (
+                <div className="text-[9px] text-amber-300 mt-0.5 ml-6">
+                    {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? label).join(' / ')}
+                    {battle.execution_friction.attacker_confidence_band
+                        ? ` (${battle.execution_friction.attacker_confidence_band} confidence)`
+                        : ''}
                 </div>
             )}
             {onSelectFormation && (

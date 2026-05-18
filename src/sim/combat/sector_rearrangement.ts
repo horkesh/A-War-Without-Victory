@@ -292,7 +292,7 @@ function createPocketContainmentSectors(
             sector_id: `sector:${corpsId}:pocket${gi}`,
             corps_id: corpsId,
             faction,
-            opposing_factions: [...opposingFactions].sort(strictCompare) as FactionId[],
+            opposing_factions: [...opposingFactions].sort(strictCompare),
             edge_ids: [],
             sub_segments: [subSeg],
             length_edges: 0,

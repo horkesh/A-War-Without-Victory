@@ -284,6 +284,37 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: buildMultiSectorsForCorps has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function buildMultiSectorsForCorps(');
+        const endIdx = raw.indexOf('/**\n * Recursively split sub-segments', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'buildMultiSectorsForCorps:${corpsId}:brigade-cap-enforcement',
+            'buildMultiSectorsForCorps:${corpsId}:edge-meta-lookup',
+            'buildMultiSectorsForCorps:${corpsId}:final-filter',
+            'buildMultiSectorsForCorps:${corpsId}:post-split-merge',
+            'buildMultiSectorsForCorps:${corpsId}:sector-object-construction',
+            'buildMultiSectorsForCorps:${corpsId}:split-non-contiguous-sectors',
+            'buildMultiSectorsForCorps:${corpsId}:subsegment-discovery',
+            'buildMultiSectorsForCorps:${corpsId}:subsegment-edge-cap-split',
+            'buildMultiSectorsForCorps:${corpsId}:subsegment-merge-undersized',
+            'buildMultiSectorsForCorps:${corpsId}:subsegment-renumber',
+        ];
+
+        for (const label of labels) {
+            expect(region).toContain(`perfTime(\`${label}\``);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\btimestamp\b/i);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 

@@ -10,6 +10,7 @@ import type { FactionId, FormationId } from './game_state.js';
 import type { CombatOutcome } from './brigade_history.js';
 import type { NarrativeArc } from '../sim/war_stories.js';
 import type { BrigadeDecoration } from './decoration_types.js';
+import type { PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
 
 /** A single battle that occurred this turn. One entry per OSID (concentrated assaults merged). */
 export interface TurnBattle {
@@ -28,6 +29,8 @@ export interface TurnBattle {
     defender_casualties: number;
     territory_flipped: boolean;
     was_concentrated: boolean;
+    /** Public-safe execution-friction annotation; no hidden enemy truth. */
+    execution_friction?: PublicIntelFrictionAnnotation;
     /** Per-brigade defender contributions from distance-weighted defense (Layer A). */
     defender_contributions?: Array<{
         brigade_id: string;

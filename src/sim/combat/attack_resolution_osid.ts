@@ -138,6 +138,9 @@ import {
     type AttackResolutionOsidSnapEvent,
     type AttackResolutionOsidReport,
     type DefenderContribution,
+    type IntelConfidenceBand,
+    type IntelFrictionLabel,
+    type PublicIntelFrictionAnnotation,
     pushSnapEvent,
 } from './attack_resolution_types.js';
 
@@ -212,6 +215,27 @@ function getAttackIntelConfidence(
         ?.find(entry => entry.osid === targetOsid)
         ?.confidence;
     return osidConfidence ?? record.confidence;
+}
+
+function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
+    if (confidence < 1 / 3) return 'low';
+    if (confidence < 2 / 3) return 'medium';
+    return 'high';
+}
+
+function buildPublicIntelFrictionAnnotation(
+    confidence: number,
+    attackerPowerMult: number,
+    defenderPowerMult: number,
+): PublicIntelFrictionAnnotation | undefined {
+    const labels: IntelFrictionLabel[] = [];
+    if (attackerPowerMult < 1) labels.push('stale_intel');
+    if (defenderPowerMult > 1) labels.push('defender_opsec');
+    if (labels.length === 0) return undefined;
+    return {
+        labels,
+        ...(attackerPowerMult < 1 ? { attacker_confidence_band: getIntelConfidenceBand(confidence) } : {}),
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -540,17 +564,23 @@ export function resolveAttackOrdersOsid(
         }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus
             * getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
         defenderPower *= seasonal.defense_mult;
+        const attackerIntelConfidence = getAttackIntelConfidence(
+            state,
+            firstAttacker.location_osid ?? '',
+            defendingSectorId,
+            targetOsid,
+        );
         const intelFriction = getIntelExecutionFrictionMultipliers(
-            getAttackIntelConfidence(
-                state,
-                firstAttacker.location_osid ?? '',
-                defendingSectorId,
-                targetOsid,
-            ),
+            attackerIntelConfidence,
             defendingSectorId ? (state.military.opsec_sectors ?? []).includes(defendingSectorId) : false,
         );
         const effectiveAttackerPower = attackerPower * intelFriction.attackerPowerMult;
         defenderPower *= intelFriction.defenderPowerMult;
+        const executionFriction = buildPublicIntelFrictionAnnotation(
+            attackerIntelConfidence,
+            intelFriction.attackerPowerMult,
+            intelFriction.defenderPowerMult,
+        );
 
         const powerRatio = defenderPower <= 0 ? 10 : effectiveAttackerPower / defenderPower;
         // Snap: Surrender Cascade
@@ -770,6 +800,7 @@ export function resolveAttackOrdersOsid(
             attacker_casualties: finalAttackerCas,
             defender_casualties: finalDefenderCas,
             defender_contributions: defenderContributions,
+            ...(executionFriction ? { execution_friction: executionFriction } : {}),
             defending_sub_segment_id: defendingSubSegmentId,
             equipment: buildBattleEquipmentReport(
                 battleEquipAttackerTanksLost, battleEquipAttackerArtLost,

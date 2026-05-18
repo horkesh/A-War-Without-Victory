@@ -120584,6 +120584,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "medium",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bugojno:vrpec",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_7th_krajina_motorized",
@@ -120845,6 +120851,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "catastrophic",
           "primary_attacker_id": "rs_3rd_ozren_light_infantry",
@@ -121178,6 +121190,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "catastrophic",
           "primary_attacker_id": "rs_1st_krnjin_light_infantry",
@@ -121379,6 +121397,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_1st_krnjin_light_infantry",
@@ -121417,6 +121441,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:donji_vakuf:prusac_2",
           "outcome": "decisive_victory",
           "primary_attacker_id": "rs_2nd_krajina_infantry",
@@ -122045,6 +122075,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "victory",
           "primary_attacker_id": "rs_1st_krnjin_light_infantry",
@@ -122181,6 +122217,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "victory",
           "primary_attacker_id": "rs_1st_krnjin_light_infantry",
@@ -122344,6 +122386,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "medium",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:banovici:seona",
           "outcome": "costly_victory",
           "primary_attacker_id": "rs_2nd_armored",
@@ -122479,6 +122527,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:brcko:krepsic",
           "outcome": "repulsed",
           "primary_attacker_id": "rs_3rd_posavina_light_infantry",
@@ -122494,6 +122548,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 131,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bugojno:vrpec",
           "outcome": "decisive_victory",
           "primary_attacker_id": "rs_7th_krajina_motorized",
@@ -122649,6 +122709,12 @@
             }
           ],
           "defender_faction": "RS",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:gradacac:pelagicevo",
           "outcome": "repulsed",
           "primary_attacker_id": "hrhb_101st_oraje_brigade",
@@ -122773,6 +122839,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 175,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bugojno:vrpec",
           "outcome": "decisive_victory",
           "primary_attacker_id": "rs_7th_krajina_motorized",
@@ -122788,6 +122860,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 59,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:teslic:kamenica_2",
           "outcome": "repulsed",
           "primary_attacker_id": "rs_22nd_krajina_infantry",
@@ -122909,6 +122987,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 103,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:teslic:kamenica_2",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_22nd_krajina_infantry",
@@ -123052,6 +123136,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 152,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bugojno:vrpec",
           "outcome": "victory",
           "primary_attacker_id": "rs_7th_krajina_motorized",
@@ -123067,6 +123157,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 114,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:teslic:kamenica_2",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_22nd_krajina_infantry",
@@ -123375,6 +123471,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:brcko:krepsic",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_3rd_posavina_light_infantry",
@@ -123593,6 +123695,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:brcko:krepsic",
           "outcome": "costly_victory",
           "primary_attacker_id": "rs_3rd_posavina_light_infantry",
@@ -123819,6 +123927,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 61,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:teslic:kamenica_2",
           "outcome": "repulsed",
           "primary_attacker_id": "rs_1st_gradika_light_infantry",
@@ -124005,6 +124119,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "medium",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "donji_vakuf",
           "osid": "op:donji_vakuf:donji_vakuf_2",
           "outcome": "decisive_victory",
@@ -124021,6 +124141,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 102,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:teslic:kamenica_2",
           "outcome": "stalemate",
           "primary_attacker_id": "rs_1st_gradika_light_infantry",
@@ -124264,6 +124390,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bosanska_krupa:veliki_badic",
           "outcome": "repulsed",
           "primary_attacker_id": "rs_11th_krupa_light_infantry",
@@ -124295,6 +124427,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "donji_vakuf",
           "osid": "op:donji_vakuf:oborci_2",
           "outcome": "decisive_victory",
@@ -124469,6 +124607,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bosanska_krupa:veliki_badic",
           "outcome": "costly_victory",
           "primary_attacker_id": "rs_11th_krupa_light_infantry",
@@ -124647,6 +124791,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "high",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bosanska_krupa:veliki_badic",
           "outcome": "costly_victory",
           "primary_attacker_id": "rs_11th_krupa_light_infantry",
@@ -124685,6 +124835,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilidza",
           "osid": "op:ilidza:rakovica_2",
           "outcome": "decisive_victory",
@@ -124717,6 +124873,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilijas",
           "osid": "op:ilijas:sirovine",
           "outcome": "decisive_victory",
@@ -124910,6 +125072,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilijas",
           "osid": "op:ilijas:krivajevici",
           "outcome": "decisive_victory",
@@ -125188,6 +125356,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilijas",
           "osid": "op:ilijas:dragoradi",
           "outcome": "decisive_victory",
@@ -125549,6 +125723,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bosanska_krupa:otoka_2",
           "outcome": "costly_victory",
           "primary_attacker_id": "rs_11th_krupa_light_infantry",
@@ -125580,6 +125760,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilidza",
           "osid": "op:ilidza:sarajevo_dio_ilidza_2",
           "outcome": "decisive_victory",
@@ -125612,6 +125798,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "ilijas",
           "osid": "op:ilijas:medojevici",
           "outcome": "decisive_victory",
@@ -125628,6 +125820,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:jajce_3",
           "outcome": "decisive_victory",
@@ -125644,6 +125842,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:kruscica",
           "outcome": "decisive_victory",
@@ -125660,6 +125864,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "kalinovik",
           "osid": "op:kalinovik:sela_2",
           "outcome": "decisive_victory",
@@ -125713,6 +125923,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "vogosca",
           "osid": "op:vogosca:hotonj",
           "outcome": "decisive_victory",
@@ -126202,6 +126418,12 @@
           "attacker_faction": "HRHB",
           "defender_casualties": 31,
           "defender_faction": "RS",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:bosanski_samac:tisina",
           "outcome": "catastrophic",
           "primary_attacker_id": "hrhb_106th_bosanska_posavina_brigade",
@@ -126217,6 +126439,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:barevo_2",
           "outcome": "decisive_victory",
@@ -126233,6 +126461,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:divicani_2",
           "outcome": "decisive_victory",
@@ -126249,6 +126483,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:jezero_2",
           "outcome": "decisive_victory",
@@ -126265,6 +126505,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "jajce",
           "osid": "op:jajce:vinac_2",
           "outcome": "decisive_victory",
@@ -126304,6 +126550,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "konjic",
           "osid": "op:konjic:ljuta",
           "outcome": "decisive_victory",
@@ -126378,6 +126630,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "mostar",
           "osid": "op:mostar:kruzanj_2",
           "outcome": "decisive_victory",
@@ -126394,6 +126652,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "odzak",
           "osid": "op:odzak:donja_dubica",
           "outcome": "decisive_victory",
@@ -127045,6 +127309,13 @@
           "attacker_faction": "HRHB",
           "defender_casualties": 0,
           "defender_faction": "RS",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel",
+              "defender_opsec"
+            ]
+          },
           "mun_id": "capljina",
           "osid": "op:capljina:tasovcici_2",
           "outcome": "decisive_victory",
@@ -127061,6 +127332,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "donji_vakuf",
           "osid": "op:donji_vakuf:torlakovac_2",
           "outcome": "decisive_victory",
@@ -127128,6 +127405,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "konjic",
           "osid": "op:konjic:glavaticevo_2",
           "outcome": "decisive_victory",
@@ -127144,6 +127427,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "modrica",
           "osid": "op:modrica:garevac_2",
           "outcome": "decisive_victory",
@@ -127160,6 +127449,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "modrica",
           "osid": "op:modrica:modrica",
           "outcome": "decisive_victory",
@@ -127227,6 +127522,12 @@
             }
           ],
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "mostar",
           "osid": "op:mostar:vranjevici_2",
           "outcome": "decisive_victory",
@@ -127243,6 +127544,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "mrkonjic_grad",
           "osid": "op:mrkonjic_grad:baljvine_2",
           "outcome": "decisive_victory",
@@ -127259,6 +127566,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "sipovo",
           "osid": "op:sipovo:volari_2",
           "outcome": "decisive_victory",
@@ -127275,6 +127588,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "skender_vakuf",
           "osid": "op:skender_vakuf:donji_koricani",
           "outcome": "decisive_victory",
@@ -127291,6 +127610,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "RBiH",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "teslic",
           "osid": "op:teslic:donji_ruzevic",
           "outcome": "decisive_victory",
@@ -127307,6 +127632,12 @@
           "attacker_faction": "RS",
           "defender_casualties": 0,
           "defender_faction": "HRHB",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "mun_id": "trebinje",
           "osid": "op:trebinje:trebimlja_2",
           "outcome": "decisive_victory",
@@ -127912,6 +128243,12 @@
           "attacker_faction": "HRHB",
           "defender_casualties": 0,
           "defender_faction": "RS",
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel"
+            ]
+          },
           "osid": "op:capljina:tasovcici_2",
           "outcome": "costly_victory",
           "primary_attacker_id": "hrhb_mostar_brigade",

@@ -8,6 +8,7 @@ import { strictCompare } from '../state/validateGameState.js';
 import type { OperationCombatDiagnostic } from './combat_causality.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
+import type { PublicIntelFrictionAnnotation } from '../sim/combat/attack_resolution_types.js';
 import { getFactionLiveSupplyCondition } from '../sim/combat/supply_condition.js';
 
 /** Phase H1.7: Per-week activity diagnostics (counts only; derived reporting). */
@@ -122,6 +123,8 @@ export interface WeeklyBattleEntry {
     defender_brigade: FormationId | null;
     attacker_casualties: number;
     defender_casualties: number;
+    /** Public-safe execution-friction annotation; no hidden enemy truth. */
+    execution_friction?: PublicIntelFrictionAnnotation;
     /** Deterministic operation join key: {corps_id}:{op_name}:t{started_turn} */
     operation_id?: string;
     /** Human-readable operation name. */

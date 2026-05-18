@@ -935,7 +935,7 @@ The following systems are canonical at v0.4. This manual provides the authoritat
 
 **State:** `sector_intel` on `military`. Module: `src/sim/combat/sector_intel.ts`, constants in `sector_intel_constants.ts`.
 
-**Execution friction extension (2026-05-18):** `attack_resolution_osid.ts` reads attacker-side sector intel for the defending sector and target OSID. Missing/stale confidence applies a deterministic attacker power multiplier from `0.85` at confidence `0` to `1.0` at confidence `1`; sectors currently in `opsec_sectors` apply a bounded `1.08` defender-power multiplier. This is execution-time combat friction only: no randomness, no hidden-truth UI exposure, and no public AAR annotation yet.
+**Execution friction extension (2026-05-18):** `attack_resolution_osid.ts` reads attacker-side sector intel for the defending sector and target OSID. Missing/stale confidence applies a deterministic attacker power multiplier from `0.85` at confidence `0` to `1.0` at confidence `1`; sectors currently in `opsec_sectors` apply a bounded `1.08` defender-power multiplier. Batch 12 threads a public-safe optional `execution_friction` annotation into battle/AAR/read-model outputs using only `stale_intel`, `defender_opsec`, and broad confidence bands. This remains execution-time combat friction: no randomness, no exact hidden confidence in UI, and no hidden enemy truth exposure.
 
 ### System 9: Tactical Doctrines
 **State:** extended postures and eligibility flags. **Core rules:** ARBiH INFILTRATE, RS ARTILLERY_COUNTER, HRHB COORDINATED_STRIKE; eligibility per formation per turn. **Constraints:** doctrines respect supply, equipment, exhaustion.

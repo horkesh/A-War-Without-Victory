@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
 import { getIntelExecutionFrictionMultipliers } from '../src/sim/combat/combat_math.js';
+import { compileTurnSummary } from '../src/sim/compile_turn_summary.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
+import type { AARSnapshot, TurnReport } from '../src/sim/turn_pipeline_types.js';
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
@@ -186,6 +188,20 @@ function makeScenario() {
     return { state, edges };
 }
 
+function makeSnapshot(turn: number): AARSnapshot {
+    return {
+        turn,
+        supply: {},
+        heavy_munitions: {},
+        arcs: {},
+        decoration_tiers: {},
+        already_destroyed: new Set(),
+        formation_ids: new Set(),
+        formation_locations: {},
+        supply_state_by_osid: {},
+    };
+}
+
 function seedIntel(state: GameState, confidence: number): void {
     state.military.sector_intel = {
         'sector:vrs_1st:0': [{
@@ -236,5 +252,40 @@ describe('attack resolution intel execution friction', () => {
 
         expect(staleReport.battles[0]!.power_ratio).toBeLessThan(freshReport.battles[0]!.power_ratio);
         expect(stale.state.military.sector_intel!['sector:vrs_1st:0']![0]!.visible_brigade_ids).toEqual([]);
+    });
+
+    it('annotates stale intel and defender OPSEC only when execution multipliers changed', () => {
+        const neutral = makeScenario();
+        seedIntel(neutral.state, 1);
+        const neutralReport = resolveAttackOrdersOsid(neutral.state, neutral.edges, new Map<string, string[]>());
+
+        const friction = makeScenario();
+        seedIntel(friction.state, 0);
+        friction.state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        const frictionReport = resolveAttackOrdersOsid(friction.state, friction.edges, new Map<string, string[]>());
+
+        expect(neutralReport.battles[0]!.execution_friction).toBeUndefined();
+        expect(frictionReport.battles[0]!.execution_friction).toEqual({
+            labels: ['stale_intel', 'defender_opsec'],
+            attacker_confidence_band: 'low',
+        });
+    });
+
+    it('carries public intel-friction annotations into the compiled turn AAR', () => {
+        const friction = makeScenario();
+        seedIntel(friction.state, 0.5);
+        friction.state.military.opsec_sectors = ['sector:rbih_defense:0'];
+        const report = resolveAttackOrdersOsid(friction.state, friction.edges, new Map<string, string[]>());
+
+        const summary = compileTurnSummary(
+            friction.state,
+            makeSnapshot(5),
+            { attack_resolution_osid: report } as TurnReport,
+        );
+
+        expect(summary.battles[0]!.execution_friction).toEqual({
+            labels: ['stale_intel', 'defender_opsec'],
+            attacker_confidence_band: 'medium',
+        });
     });
 });

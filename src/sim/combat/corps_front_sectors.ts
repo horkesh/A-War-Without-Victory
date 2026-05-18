@@ -2544,7 +2544,8 @@ function buildFactionSectors(
 
         const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () => buildMultiSectorsForCorps(
             state, corpsId, faction, edgeIds, osidFrontEdges,
-            adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids
+            adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
+            _perfTime,
         ));
 
         // Collect sorted brigade locations for reachability BFS (deterministic: sorted by formation ID).

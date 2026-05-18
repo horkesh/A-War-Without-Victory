@@ -34,6 +34,14 @@ export interface AttackResolutionOsidSnapEvent {
     effects: Record<string, number | string | boolean | null>;
 }
 
+export type IntelFrictionLabel = 'stale_intel' | 'defender_opsec';
+export type IntelConfidenceBand = 'low' | 'medium' | 'high';
+
+export interface PublicIntelFrictionAnnotation {
+    labels: IntelFrictionLabel[];
+    attacker_confidence_band?: IntelConfidenceBand;
+}
+
 export interface AttackResolutionOsidReport {
     orders_processed: number;
     unique_attack_targets: number;
@@ -62,6 +70,8 @@ export interface AttackResolutionOsidReport {
         defender_casualties: number;
         /** Per-brigade defender contributions (Layer A distance-weighted). */
         defender_contributions?: DefenderContribution[];
+        /** Public-safe execution-friction annotation; no hidden enemy truth. */
+        execution_friction?: PublicIntelFrictionAnnotation;
         /** Sub-segment that defended this OSID (Phase B). */
         defending_sub_segment_id?: string;
         /** Equipment destroyed, scavenged, and captured in this battle. */

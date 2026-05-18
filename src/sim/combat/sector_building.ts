@@ -25,6 +25,8 @@ import { buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { mergeUndersizedSubSegments, splitNonContiguousSectors, mergeUndersizedSectors } from './sector_splitting.js';
 import { deduplicateBrigadesAcrossSectors } from './brigade_assignment.js';
 
+type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
+
 /**
  * Decompose a corps' front edges into connected sub-segments via BFS.
  */
@@ -120,7 +122,8 @@ export function buildMultiSectorsForCorps(
     formations: Record<FormationId, FormationState>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
-    friendlyOsids?: Set<string>
+    friendlyOsids?: Set<string>,
+    perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
@@ -130,92 +133,108 @@ export function buildMultiSectorsForCorps(
     // municipality-level control fallback. Re-derivation can smear canonical
     // control across operational OSIDs and fuse unrelated front arcs into one
     // fake sector line.
-    const edgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
-    const frontEdgeLookup = new Map(
-        osidFrontEdges.map((edge) => [edge.edge_id, edge] as const),
-    );
-    for (const eid of edgeIds) {
-        const frontEdge = frontEdgeLookup.get(eid);
-        if (frontEdge) {
-            edgeMeta.set(eid, {
-                a: frontEdge.a,
-                b: frontEdge.b,
-                side_a: frontEdge.side_a,
-                side_b: frontEdge.side_b,
+    const edgeMeta = perfTime(`buildMultiSectorsForCorps:${corpsId}:edge-meta-lookup`, () => {
+        const nextEdgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
+        const frontEdgeLookup = new Map(
+            osidFrontEdges.map((edge) => [edge.edge_id, edge] as const),
+        );
+        for (const eid of edgeIds) {
+            const frontEdge = frontEdgeLookup.get(eid);
+            if (frontEdge) {
+                nextEdgeMeta.set(eid, {
+                    a: frontEdge.a,
+                    b: frontEdge.b,
+                    side_a: frontEdge.side_a,
+                    side_b: frontEdge.side_b,
+                });
+                continue;
+            }
+            const sep = eid.indexOf('__');
+            if (sep < 0) continue;
+            const osidA = eid.slice(0, sep);
+            const osidB = eid.slice(sep + 2);
+            nextEdgeMeta.set(eid, {
+                a: osidA,
+                b: osidB,
+                side_a: getPoliticalControllerOSID(state, osidA, reverseMap ?? undefined),
+                side_b: getPoliticalControllerOSID(state, osidB, reverseMap ?? undefined),
             });
-            continue;
         }
-        const sep = eid.indexOf('__');
-        if (sep < 0) continue;
-        const osidA = eid.slice(0, sep);
-        const osidB = eid.slice(sep + 2);
-        edgeMeta.set(eid, {
-            a: osidA,
-            b: osidB,
-            side_a: getPoliticalControllerOSID(state, osidA, reverseMap ?? undefined),
-            side_b: getPoliticalControllerOSID(state, osidB, reverseMap ?? undefined),
-        });
-    }
+        return nextEdgeMeta;
+    });
 
     // Step 1: Find connected components via triple-junction connectivity.
     // Pass sharedBoundaryAdj so Case A/B only connect edges at true polygon
     // boundaries (≤5.5m). Without this, distance_contact adjacency (>33m) bridges
     // disconnected fronts — e.g. hajderovici_2↔kamensko_2 (38m) bridges Zavidovici
     // to Olovo via Case B at gornja_borovica_2.
-    let subSegments = findSubSegments(corpsId, faction, edgeIds, edgeMeta, adjacency, sharedBoundaryAdj, centroids);
+    let subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-discovery`, () => findSubSegments(
+        corpsId, faction, edgeIds, edgeMeta, adjacency, sharedBoundaryAdj, centroids
+    ));
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
     // not unbounded BFS through rear territory (which merges distant segments).
-    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency, sharedBoundaryAdj, caseBSplitAdj, centroids);
+    subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-merge-undersized`, () => mergeUndersizedSubSegments(
+        corpsId, subSegments, adjacency, sharedBoundaryAdj, caseBSplitAdj, centroids
+    ));
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
-    subSegments = splitOversizedSubSegments(corpsId, subSegments, edgeMeta);
+    subSegments = perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-edge-cap-split`, () => splitOversizedSubSegments(
+        corpsId, subSegments, edgeMeta
+    ));
 
     // Renumber sub-segments deterministically
-    subSegments.sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
-    for (let i = 0; i < subSegments.length; i++) {
-        subSegments[i]!.sub_segment_id = `subseg:${corpsId}:${i}`;
-    }
+    perfTime(`buildMultiSectorsForCorps:${corpsId}:subsegment-renumber`, () => {
+        subSegments.sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+        for (let i = 0; i < subSegments.length; i++) {
+            subSegments[i]!.sub_segment_id = `subseg:${corpsId}:${i}`;
+        }
+    });
 
     // Step 3: Build sectors with full brigade assignment (front + interior BFS)
-    const sectors: CorpsFrontSector[] = [];
-    for (let i = 0; i < subSegments.length; i++) {
-        const sector = buildSectorFromSubSegments(
-            state, corpsId, faction, i, [subSegments[i]!], edgeMeta,
-            formations
-        );
-        if (sector) sectors.push(sector);
-    }
+    const sectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-object-construction`, () => {
+        const builtSectors: CorpsFrontSector[] = [];
+        for (let i = 0; i < subSegments.length; i++) {
+            const sector = buildSectorFromSubSegments(
+                state, corpsId, faction, i, [subSegments[i]!], edgeMeta,
+                formations
+            );
+            if (sector) builtSectors.push(sector);
+        }
+        return builtSectors;
+    });
 
     // Step 4 (Phase 1E): Recursively split sectors exceeding MAX_SECTOR_BRIGADES
-    let sectorPool = sectors;
-    let splitOccurred = true;
-    while (splitOccurred) {
-        splitOccurred = false;
-        const next: CorpsFrontSector[] = [];
-        for (const sector of sectorPool) {
-            const total = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
-            if (total > MAX_SECTOR_BRIGADES && sector.length_edges >= 4) {
-                const halves = splitSubSegmentAtMidpoint(sector.sub_segments[0]!, corpsId, edgeMeta);
-                if (halves) {
-                    for (const half of halves) {
-                        const s = buildSectorFromSubSegments(
-                            state, corpsId, faction, next.length, [half],
-                            edgeMeta, formations
-                        );
-                        if (s) next.push(s);
+    const finalSectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:brigade-cap-enforcement`, () => {
+        let sectorPool = sectors;
+        let splitOccurred = true;
+        while (splitOccurred) {
+            splitOccurred = false;
+            const next: CorpsFrontSector[] = [];
+            for (const sector of sectorPool) {
+                const total = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+                if (total > MAX_SECTOR_BRIGADES && sector.length_edges >= 4) {
+                    const halves = splitSubSegmentAtMidpoint(sector.sub_segments[0]!, corpsId, edgeMeta);
+                    if (halves) {
+                        for (const half of halves) {
+                            const s = buildSectorFromSubSegments(
+                                state, corpsId, faction, next.length, [half],
+                                edgeMeta, formations
+                            );
+                            if (s) next.push(s);
+                        }
+                        splitOccurred = true;
+                        continue;
                     }
-                    splitOccurred = true;
-                    continue;
                 }
+                sector.sector_id = `sector:${corpsId}:${next.length}`;
+                next.push(sector);
             }
-            sector.sector_id = `sector:${corpsId}:${next.length}`;
-            next.push(sector);
+            sectorPool = next;
         }
-        sectorPool = next;
-    }
-    const finalSectors = sectorPool;
+        return sectorPool;
+    });
 
     // Dedup: Phase 1E splits can produce the same brigade in two sectors when
     // a junction OSID has edges on both sides of a midpoint split.
@@ -229,18 +248,18 @@ export function buildMultiSectorsForCorps(
     // at true polygon boundaries, matching the front edge filter threshold.
     // Strict Case B re-check uses caseBSplitAdj (16.6m) — wider than 5.5m strict
     // to preserve legitimate triple junctions, but catches pocket bridges (>16.6m).
-    const contiguousSectors = splitNonContiguousSectors(
+    const contiguousSectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:split-non-contiguous-sectors`, () => splitNonContiguousSectors(
         finalSectors, adjacency, faction, edgeMeta, sharedBoundaryAdj, friendlyOsids, caseBSplitAdj, centroids
-    );
+    ));
 
     // Step 4c: Post-split merge — re-merge undersized sectors created by contiguity
     // splits back into adjacent same-corps sectors. Uses caseBSplitAdj (16.6m) for
     // edge adjacency — same threshold as the split, so merges never re-bridge
     // connections that were cut. Friendly BFS component gate provides additional
     // safety against merging sectors separated by enemy territory.
-    const mergedSectors = mergeUndersizedSectors(
+    const mergedSectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:post-split-merge`, () => mergeUndersizedSectors(
         corpsId, contiguousSectors, edgeMeta, faction, caseBSplitAdj, friendlyOsids
-    );
+    ));
 
     // Brigade assignment (territory_osids, assigned/reserve classification) is now
     // handled faction-wide by assignTerritoryVoronoi + classifyBrigadesByTerritory
@@ -248,7 +267,7 @@ export function buildMultiSectorsForCorps(
 
     // Filter ghost/orphan sectors: require at least 1 front edge.
     // Sectors with territory but 0 edges are pockets that lost their front — prune them.
-    return mergedSectors.filter(s => s.length_edges > 0);
+    return perfTime(`buildMultiSectorsForCorps:${corpsId}:final-filter`, () => mergedSectors.filter(s => s.length_edges > 0));
 }
 
 /**

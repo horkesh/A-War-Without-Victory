@@ -156,6 +156,7 @@ function compileBattles(
             defender_casualties: cas.def,
             territory_flipped: flippedOsids.has(osid),
             was_concentrated: group.length > 1,
+            ...(first.execution_friction ? { execution_friction: first.execution_friction } : {}),
             defender_contributions: first.defender_contributions,
         });
     }

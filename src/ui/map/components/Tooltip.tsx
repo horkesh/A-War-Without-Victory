@@ -33,6 +33,10 @@ const OUTCOME_COLOR: Record<string, string> = {
   decisive_victory: '#56d364', victory: '#56d364', costly_victory: '#e8a838',
   stalemate: '#aaa', repulsed: '#f47068', catastrophic: '#f44',
 };
+const INTEL_FRICTION_LABEL: Record<string, string> = {
+  stale_intel: 'Stale intel',
+  defender_opsec: 'Defender OPSEC',
+};
 function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   osid: string;
   battles?: TurnBattle[];
@@ -69,6 +73,14 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       </div>
       {battle.territory_flipped && (
         <div className="mt-1 text-[9px] text-amber-400">Territory captured</div>
+      )}
+      {battle.execution_friction && (
+        <div className="mt-1 text-[9px] text-amber-300">
+          {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? label).join(' / ')}
+          {battle.execution_friction.attacker_confidence_band
+            ? ` (${battle.execution_friction.attacker_confidence_band} confidence)`
+            : ''}
+        </div>
       )}
       <div className="mt-1.5 text-[9px] text-text-muted italic">Click for After-Action Report</div>
     </div>

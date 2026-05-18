@@ -187,7 +187,7 @@ Battle outcomes now feed into morale drift with diminishing returns and faction-
 
 ## Intel-Gated Operation Launch (2026-03-12)
 
-**2026-05-18 extension:** `SectorIntelRecord.osid_confidence[]` optionally records sorted, front-visible OSID confidence with deterministic sources (`passive_contact`, `patrol`, `scout`, `combat`). Commander belief estimates consume this field when present to bound fresh strength estimates; legacy records without the field keep the sector-pair confidence behavior. Batch 11 also routes attacker-side confidence into execution-time friction: stale/missing intel scales attack power from `0.85` to `1.0`, and `opsec_sectors` gives the defender a bounded `1.08` multiplier.
+**2026-05-18 extension:** `SectorIntelRecord.osid_confidence[]` optionally records sorted, front-visible OSID confidence with deterministic sources (`passive_contact`, `patrol`, `scout`, `combat`). Commander belief estimates consume this field when present to bound fresh strength estimates; legacy records without the field keep the sector-pair confidence behavior. Batch 11 also routes attacker-side confidence into execution-time friction: stale/missing intel scales attack power from `0.85` to `1.0`, and `opsec_sectors` gives the defender a bounded `1.08` multiplier. Batch 12 exposes only public-safe AAR/read-model labels (`stale_intel`, `defender_opsec`) plus broad confidence bands when those multipliers affect a battle.
 
 Before launching sector offensives, the corps AI gates on sector intel confidence. Low-confidence sectors receive probe operations instead of full attacks, preventing blind overcommitment.
 

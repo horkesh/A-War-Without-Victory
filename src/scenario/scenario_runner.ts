@@ -2264,6 +2264,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         defender_brigade: b.defender_brigade,
                         attacker_casualties: b.attacker_casualties,
                         defender_casualties: b.defender_casualties,
+                        ...(b.execution_friction ? { execution_friction: b.execution_friction } : {}),
                         ...(b.equipment ? { equipment: b.equipment } : {}),
                         ...(operation_id ? { operation_id, operation_name } : {}),
                     };

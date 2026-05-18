@@ -46,8 +46,8 @@ export function assignBrigadesToSubSegments(
     const pc = state.political?.political_controllers ?? {};
     for (const [osid, controller] of Object.entries(pc)) {
         if (!controller) continue;
-        let s = friendlyByFaction.get(controller as FactionId);
-        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller as FactionId, s); }
+        let s = friendlyByFaction.get(controller);
+        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller, s); }
         s.add(osid);
     }
 
