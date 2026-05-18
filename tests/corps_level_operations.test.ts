@@ -470,4 +470,55 @@ describe('Corps-Level Operation Launch', () => {
         // 12 brigades → max 6 objectives (min(6, floor(12 * 0.5)))
         expect(op!.objectives!.length).toBe(6);
     });
+    it('prefers higher-confidence OSID intel between otherwise comparable targets', () => {
+        const state = makeState(5, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:f2' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:f3' },
+        }, {
+            'sector:corps_1:0': {
+                corps_id: 'corps_1',
+                sub_segments: [makeSub(['op:a:f1', 'op:a:f2', 'op:a:f3'], ['op:e:stale', 'op:e:fresh'])],
+            },
+            'sector:enemy:0': {
+                corps_id: 'enemy_corps',
+                faction: 'RBiH' as FactionId,
+                sub_segments: [makeSub(['op:e:stale', 'op:e:fresh'], ['op:a:f1'])],
+                territory_osids: ['op:e:stale', 'op:e:fresh'],
+            },
+        }, [
+            { a: 'op:a:f1', b: 'op:e:stale' },
+            { a: 'op:a:f1', b: 'op:e:fresh' },
+        ]);
+        state.military.sector_intel = {
+            'sector:corps_1:0': [{
+                enemy_sector_id: 'sector:enemy:0',
+                enemy_faction: 'RBiH',
+                enemy_corps_id: 'enemy_corps',
+                front_edge_count: 2,
+                strength_category: 'moderate',
+                posture_observed: 'defensive',
+                offensive_signs: false,
+                confidence: 0.4,
+                turns_in_contact: 2,
+                visible_brigade_ids: [],
+                osid_confidence: [
+                    { osid: 'op:e:fresh', confidence: 0.9, sources: ['patrol'] },
+                    { osid: 'op:e:stale', confidence: 0.1, sources: ['passive_contact'] },
+                ],
+                last_updated_turn: 5,
+            }],
+        };
+
+        const op = evaluateCorpsOffensiveLaunch(
+            state, 'corps_1', 'RS' as FactionId,
+            ['b1', 'b2', 'b3'],
+            ['op:e:stale', 'op:e:fresh'],
+            ['op:e:stale', 'op:e:fresh'],
+            null, undefined, 'sector:corps_1:0',
+        );
+
+        expect(op).not.toBeNull();
+        expect(op!.objectives).toEqual(['op:e:fresh']);
+    });
 });

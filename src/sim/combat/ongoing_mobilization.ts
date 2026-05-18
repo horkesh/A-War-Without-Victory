@@ -181,12 +181,12 @@ const CROSS_FACTION_POOL_MOBILIZATION_MULT = 5.0;
  * (chicken-and-egg: pool needed before brigade spawns, but loop only scans active formations).
  * Ensures pools are seeded from turn 1 so cross-faction mandatory brigades can spawn on time. */
 const CROSS_FACTION_POOL_MUNICIPALITIES: Array<{ munId: MunicipalityId; poolFaction: FactionId }> = [
-    { munId: 'gradacac' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
-    { munId: 'brcko' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
-    { munId: 'bihac' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
-    { munId: 'tesanj' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
-    { munId: 'tuzla' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
-    { munId: 'centar_sarajevo' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'gradacac' as MunicipalityId, poolFaction: 'HRHB' },
+    { munId: 'brcko' as MunicipalityId, poolFaction: 'HRHB' },
+    { munId: 'bihac' as MunicipalityId, poolFaction: 'HRHB' },
+    { munId: 'tesanj' as MunicipalityId, poolFaction: 'HRHB' },
+    { munId: 'tuzla' as MunicipalityId, poolFaction: 'HRHB' },
+    { munId: 'centar_sarajevo' as MunicipalityId, poolFaction: 'HRHB' },
 ];
 
 /**
@@ -416,7 +416,7 @@ export function runOngoingMobilization(
             for (const target of route.targets) {
                 const key = militiaPoolKey(target, 'RBiH');
                 if (!pools[key]) {
-                    pools[key] = { mun_id: target, faction: 'RBiH' as FactionId, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+                    pools[key] = { mun_id: target, faction: 'RBiH', available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
                 }
                 pools[key].available += perTarget;
                 pools[key].updated_turn = currentTurn;

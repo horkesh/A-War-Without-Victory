@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(roadmap): close thirteenth backlog execution batch
+
+**Scope:** Thirteenth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering per-OSID intel target scoring, strict-null Phase 2 continuation, deeper sector-performance attribution, and stale headline rating wording. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or hidden-truth UI surface changed.
+
+**Change:** Corps offensive launch now reads attacker-side public/front-visible `SectorIntelRecord.osid_confidence[]` to order otherwise comparable objective candidates before contiguous-chain selection, falling back to sector-pair confidence only when the target belongs to the observed enemy sector and preserving directive order on equal/missing confidence. Cleaned seven strict-null combat casts in `ongoing_mobilization.ts`, lowering Phase 2 remaining inventory from 87 to 80. Added opt-in sidecar-only `buildSectorFromSubSegments:${corpsId}:${sectorIndex}:*` attribution labels for input aggregation, edge sorting, assigned-brigade scan, defensive power, enemy-power scan, and sector-record assembly. Updated `GAME_STATE_RATING_MASTER.md` headline weakness wording so paramilitary surfacing is no longer described as an open invisible-decision blocker.
+
+**Determinism / output impact:** Strict-null cleanup is type-only. Sector attribution writes only ignored profile sidecars when `PERF_PROFILE_SECTOR_PARTITION=true`. Intel target ordering is deterministic, sorted where it reads sector/intel records, and uses no random/clock/hidden defender truth. The default April 1992 40w path stayed byte-identical to n1888: n1889 hash `248202ee4fd13027`.
+
+**Verification:** Parent integration passed `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/ongoing_mobilization.test.ts tests/corps_level_operations.test.ts tests/sector_intel.test.ts tests/attack_resolution_osid_intel_friction.test.ts tests/bot_supply_awareness_target_scoring.test.ts tests/sector_partition_instrumentation.test.ts tests/sector_rearrangement.test.ts tests/sector_contiguity_split.test.ts tests/sector_split_brigade_assignment.test.ts tests/sector_frontline_truth.test.ts --reporter=dot` (11 files / 118 tests); `npm.cmd run typecheck`; `npm.cmd run sim:scenario:run:40w` producing n1889 hash `248202ee4fd13027`, 27/27 anchors, 6/6 bot benchmarks, and one non-critical anomaly warning; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1889`; and `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts tests/adapter_field_completeness.test.ts tests/real_save_sector_truth_contracts.test.ts --reporter=dot` (3 files / 38 tests).
+
+**Canon posture:** `docs/10_canon/FORAWWV.md` was not edited. Canon/system docs now describe per-OSID confidence as a safe objective-ordering input as well as a commander-belief/execution-friction input. Broader ambush/surprise modeling remains follow-up backlog work.
+
+---
+
 ## [2026-05-18] feat(roadmap): close twelfth backlog execution batch
 
 **Scope:** Twelfth autonomous execution batch from the live `MASTER_ROADMAP.md` / `CONSOLIDATED_BACKLOG.md` queue, covering public intel-friction AAR annotation, strict-null Phase 2 continuation, deeper sector-performance attribution, and stale master-rating reconciliation. No event authored text, scenario trigger/effect JSON, save migration version, random source, 188w evidence claim, clean-VM run, external distribution, or hidden-truth UI surface changed.

@@ -250,6 +250,63 @@ const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
+function sectorContainsFriendlyOsid(
+    sector: { territory_osids?: readonly string[]; sub_segments?: readonly { friendly_osids: readonly string[] }[] },
+    osid: string,
+): boolean {
+    if (sector.territory_osids?.includes(osid)) return true;
+    for (const sub of sector.sub_segments ?? []) {
+        if (sub.friendly_osids.includes(osid)) return true;
+    }
+    return false;
+}
+
+export function getTargetOsidIntelConfidenceForCorps(
+    state: GameState,
+    corpsId: FormationId,
+    targetOsid: string,
+): number | null {
+    const sectors = state.military.corps_front_sectors ?? {};
+    const intel = state.military.sector_intel ?? {};
+    let bestConfidence: number | null = null;
+
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        const records = [...(intel[sectorId] ?? [])].sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
+        for (const record of records) {
+            const osidEntry = (record.osid_confidence ?? []).find(entry => entry.osid === targetOsid);
+            const enemySector = sectors[record.enemy_sector_id];
+            const confidence = osidEntry?.confidence
+                ?? (enemySector && sectorContainsFriendlyOsid(enemySector, targetOsid)
+                    ? record.confidence
+                    : null);
+            if (confidence == null) continue;
+            bestConfidence = bestConfidence == null ? confidence : Math.max(bestConfidence, confidence);
+        }
+    }
+
+    return bestConfidence;
+}
+
+function sortTargetsByOsidIntelConfidence(
+    state: GameState,
+    corpsId: FormationId,
+    targets: readonly string[],
+): string[] {
+    const originalIndex = new Map<string, number>();
+    targets.forEach((target, index) => originalIndex.set(target, index));
+    return [...targets].sort((a, b) => {
+        const confidenceDelta =
+            (getTargetOsidIntelConfidenceForCorps(state, corpsId, b) ?? 0)
+            - (getTargetOsidIntelConfidenceForCorps(state, corpsId, a) ?? 0);
+        if (Math.abs(confidenceDelta) > 1e-9) return confidenceDelta > 0 ? 1 : -1;
+        const indexDelta = (originalIndex.get(a) ?? 0) - (originalIndex.get(b) ?? 0);
+        if (indexDelta !== 0) return indexDelta;
+        return strictCompare(a, b);
+    });
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Post-operation brigade release
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1579,7 +1636,11 @@ export function evaluateCorpsOffensiveLaunch(
     // a friendly OSID or a previously accepted objective. Prevents operations
     // from targeting disconnected enemy OSIDs.
     const corpsTargetSet = new Set(corpsEnemyOsids);
-    const candidateTargets = offensiveTargets.filter(t => corpsTargetSet.has(t));
+    const candidateTargets = sortTargetsByOsidIntelConfidence(
+        state,
+        corpsId,
+        offensiveTargets.filter(t => corpsTargetSet.has(t)),
+    );
 
     // Use caller's adjacency if provided; otherwise build from front edges.
     // Caller (bot_corps_directives) already builds adjacency once per turn.

@@ -1609,6 +1609,7 @@ function recoverDroppedFrontEdges(
                         [subSegment],
                         edgeMeta,
                         formations,
+                        _perfTime,
                     );
                     if (!recoveredSector || recoveredSector.edge_ids.length === 0) return null;
                     const currentCorpsSectors = corpsSectorIds

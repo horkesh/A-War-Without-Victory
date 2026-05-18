@@ -198,7 +198,7 @@ export function buildMultiSectorsForCorps(
         for (let i = 0; i < subSegments.length; i++) {
             const sector = buildSectorFromSubSegments(
                 state, corpsId, faction, i, [subSegments[i]!], edgeMeta,
-                formations
+                formations, perfTime
             );
             if (sector) builtSectors.push(sector);
         }
@@ -220,7 +220,7 @@ export function buildMultiSectorsForCorps(
                         for (const half of halves) {
                             const s = buildSectorFromSubSegments(
                                 state, corpsId, faction, next.length, [half],
-                                edgeMeta, formations
+                                edgeMeta, formations, perfTime
                             );
                             if (s) next.push(s);
                         }
@@ -467,58 +467,82 @@ export function buildSectorFromSubSegments(
     sectorIndex: number,
     subSegments: CorpsFrontSubSegment[],
     edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
-    formations: Record<FormationId, FormationState>
+    formations: Record<FormationId, FormationState>,
+    perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
 ): CorpsFrontSector | null {
     if (subSegments.length === 0) return null;
 
-    const allEdgeIds = new Set<string>();
-    const allFriendlyOsids = new Set<string>();
-    const allEnemyOsids = new Set<string>();
-    const allOpposingFactions = new Set<string>();
+    const {
+        allEdgeIds,
+        allFriendlyOsids,
+        allEnemyOsids,
+        allOpposingFactions,
+    } = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:input-aggregation`, () => {
+        const nextEdgeIds = new Set<string>();
+        const nextFriendlyOsids = new Set<string>();
+        const nextEnemyOsids = new Set<string>();
+        const nextOpposingFactions = new Set<string>();
 
-    for (const ss of subSegments) {
-        for (const eid of ss.edge_ids) allEdgeIds.add(eid);
-        for (const o of ss.friendly_osids) allFriendlyOsids.add(o);
-        for (const o of ss.enemy_osids) allEnemyOsids.add(o);
-        for (const eid of ss.edge_ids) {
-            const meta = edgeMeta.get(eid);
-            if (!meta) continue;
-            const enemy = meta.side_a === faction ? meta.side_b : meta.side_a;
-            if (enemy) allOpposingFactions.add(enemy);
+        for (const ss of subSegments) {
+            for (const eid of ss.edge_ids) nextEdgeIds.add(eid);
+            for (const o of ss.friendly_osids) nextFriendlyOsids.add(o);
+            for (const o of ss.enemy_osids) nextEnemyOsids.add(o);
+            for (const eid of ss.edge_ids) {
+                const meta = edgeMeta.get(eid);
+                if (!meta) continue;
+                const enemy = meta.side_a === faction ? meta.side_b : meta.side_a;
+                if (enemy) nextOpposingFactions.add(enemy);
+            }
         }
-    }
 
-    const sortedEdgeIds = [...allEdgeIds].sort(strictCompare);
+        return {
+            allEdgeIds: nextEdgeIds,
+            allFriendlyOsids: nextFriendlyOsids,
+            allEnemyOsids: nextEnemyOsids,
+            allOpposingFactions: nextOpposingFactions,
+        };
+    });
+
+    const sortedEdgeIds = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:sorted-edge-list`, () => [...allEdgeIds].sort(strictCompare));
     const totalEdges = sortedEdgeIds.length;
 
     // Per-sector brigade assignment: brigade at OSID in sector's friendly_osids
-    const assignedBrigadeIds: FormationId[] = [];
-    const sortedFormIds = Object.keys(formations).sort(strictCompare);
-    for (const fid of sortedFormIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid || !allFriendlyOsids.has(f.location_osid)) continue;
-        if (getFormationCorpsId(f) !== corpsId) continue;
-        assignedBrigadeIds.push(fid);
-    }
+    const { assignedBrigadeIds, sortedFormIds } = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:assigned-brigade-scan`, () => {
+        const nextAssignedBrigadeIds: FormationId[] = [];
+        const nextSortedFormIds = Object.keys(formations).sort(strictCompare);
+        for (const fid of nextSortedFormIds) {
+            const f = formations[fid];
+            if (!f || f.faction !== faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f.location_osid || !allFriendlyOsids.has(f.location_osid)) continue;
+            if (getFormationCorpsId(f) !== corpsId) continue;
+            nextAssignedBrigadeIds.push(fid);
+        }
+        return {
+            assignedBrigadeIds: nextAssignedBrigadeIds,
+            sortedFormIds: nextSortedFormIds,
+        };
+    });
 
     const density = totalEdges > 0 ? assignedBrigadeIds.length / totalEdges : 0;
-    const defensivePower = computeLocalFrontDefensivePower(
+    const defensivePower = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:defensive-power`, () => computeLocalFrontDefensivePower(
         formations, assignedBrigadeIds, totalEdges
-    );
+    ));
 
-    let enemyPower = 0;
-    for (const fid of sortedFormIds) {
-        const f = formations[fid];
-        if (!f || f.faction === faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid || !allEnemyOsids.has(f.location_osid)) continue;
-        enemyPower += f.personnel ?? 0;
-    }
+    const enemyPower = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:enemy-power-scan`, () => {
+        let nextEnemyPower = 0;
+        for (const fid of sortedFormIds) {
+            const f = formations[fid];
+            if (!f || f.faction === faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f.location_osid || !allEnemyOsids.has(f.location_osid)) continue;
+            nextEnemyPower += f.personnel ?? 0;
+        }
+        return nextEnemyPower;
+    });
     const threatRatio = defensivePower > 0 ? enemyPower / defensivePower : 0;
 
-    return {
+    return perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:sector-record-assembly`, () => ({
         sector_id: `sector:${corpsId}:${sectorIndex}`,
         corps_id: corpsId,
         faction,
@@ -535,5 +559,5 @@ export function buildSectorFromSubSegments(
         defensive_power: defensivePower,
         sector_stance: 'defend',
         stance_source: 'bot',
-    };
+    }));
 }

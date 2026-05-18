@@ -2,7 +2,7 @@
 
 **Purpose:** Single living "where is the game today, honestly" master. Per-system rating against an AAA+++ / Paradox-tier reference bar, with the exact remaining gap and what work would close it. **Observation-only — no code changes.**
 
-**Updated:** 2026-05-16
+**Updated:** 2026-05-18
 
 **Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.6-alpha.1 · **Last baselines:** 40w n1740 hash `86ebf26ae0271465` (26/27 anchors, 6/6 benchmarks); 188w n1741 hash `a4bf8b8095050881`.
 
@@ -54,8 +54,8 @@ AWWV is a **deterministic strategic-level simulation of the 1992–1995 Bosnian 
 
 **Weaknesses that are genre-blocking right now:**
 
-**2026-05-16 Phase 0 correction:** The first weakness below is preserved as the observation that triggered Phase 0, but it is no longer open for engineering scope. `docs/40_reports/audits/20260516_PRESIDENTIAL_INBOX_DECISION_SURFACE_AUDIT.md` and `docs/40_reports/implemented/20260516_GUI_PHASE0_DECISION_SURFACE_AND_POLISH.md` close the hidden-decision blocker by surfacing paramilitary requests, Dayton negotiation, and convoy decisions in Presidential Inbox. The remaining gap is richer branching depth and authored downstream context, not invisible player decision queues.
-- **Engine ↔ UI truth drift on sensitive-history decisions.** Live observation 2026-05-16 (GUI_POLISH `LIV-P0-1`) found the RS paramilitary deployment queue (86 requests on turn 1, decaying through turn 16) is generated and routed by the sim but **not surfaced as Presidential Inbox cards**. The engine is asking the player about paramilitary deployments with war-crimes implications; the UI silently hides the question. This is the **single most urgent open finding** — sensitive-history credibility blocker, not polish.
+**2026-05-18 correction:** The former hidden-decision blocker is closed for engineering scope. `docs/40_reports/audits/20260516_PRESIDENTIAL_INBOX_DECISION_SURFACE_AUDIT.md`, `docs/40_reports/implemented/20260516_GUI_PHASE0_DECISION_SURFACE_AND_POLISH.md`, `docs/40_reports/implemented/20260517_PARAMILITARY_INBOX_AND_REVIEW.md`, and `docs/40_reports/implemented/20260518_INTEL_FRICTION_AAR_ANNOTATION_BATCH12.md` document the surfacing chain from engine-routed paramilitary requests through Inbox / Decision Room / AAR context. Remaining sensitive-history work is richer branching depth, public-safe framing, and authored downstream consequence arcs.
+- **Sensitive-history consequence depth.** The engine now asks visible player-facing questions for paramilitary deployment and related decision families; the AAA+++ gap is that those decisions still need deeper downstream arcs, Codex framing, and post-resolution context. This is now a content-reactivity and narrative-framing gap, not an invisible decision queue.
 - **UI presents control / front lines / supply / authority with more crispness than the historical war actually had** (Strategic Design Council audit P0; still mostly unaddressed at the visualization layer).
 - **First-session player experience.** Tutorial onboarding is present but spread across 4–5 sequential overlays; opening brief is a paragraph block; no in-context glossary; the player cannot tell what the game is for inside the first 10 minutes.
 - **No audio system.** Zero ambience, zero stingers, zero UI feedback sounds, no music. For a sober historical wargame this is survivable; for AAA+++ it is not.

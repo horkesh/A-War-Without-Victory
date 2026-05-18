@@ -315,6 +315,33 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: buildSectorFromSubSegments has deterministic child attribution labels', () => {
+        const raw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
+        const startIdx = raw.indexOf('export function buildSectorFromSubSegments(');
+        const endIdx = raw.indexOf('\n}\n', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const labels = [
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:assigned-brigade-scan',
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:defensive-power',
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:enemy-power-scan',
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:input-aggregation',
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:sector-record-assembly',
+            'buildSectorFromSubSegments:${corpsId}:${sectorIndex}:sorted-edge-list',
+        ];
+
+        for (const label of labels) {
+            expect(region).toContain(`perfTime(\`${label}\``);
+        }
+        expect([...labels].sort()).toEqual(labels);
+        expect(region).not.toMatch(/\btimestamp\b/i);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 

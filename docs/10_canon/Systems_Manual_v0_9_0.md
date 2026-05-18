@@ -918,7 +918,7 @@ The following systems are canonical at v0.4. This manual provides the authoritat
 
 **Implementation-note (elevated to normative v0.7):** Per-sector confidence model replaces the legacy SID-keyed `recon_intelligence.ts` (deleted 2026-03-05). Intel confidence represents how well a faction understands the enemy's disposition in an adjacent sector.
 
-**Per-OSID confidence extension (2026-05-18):** `SectorIntelRecord` may carry optional sorted `osid_confidence[]` entries for enemy OSIDs directly visible across a sector front. Each entry is JSON-safe (`osid`, `confidence`, `sources`) and source-bounded by deterministic observation tags: `passive_contact`, `patrol`, `scout`, and `combat`. These entries refine commander belief strength estimates when present; records without them retain legacy sector-pair behavior. This field must not expose non-front hidden enemy truth.
+**Per-OSID confidence extension (2026-05-18):** `SectorIntelRecord` may carry optional sorted `osid_confidence[]` entries for enemy OSIDs directly visible across a sector front. Each entry is JSON-safe (`osid`, `confidence`, `sources`) and source-bounded by deterministic observation tags: `passive_contact`, `patrol`, `scout`, and `combat`. These entries refine commander belief strength estimates when present and order comparable corps offensive objectives toward better-known OSIDs; records without them retain legacy sector-pair behavior. This field must not expose non-front hidden enemy truth.
 
 **Confidence model:** Each sector has a confidence value [0, 1] per opposing faction. Confidence decays over time and grows through:
 - **Passive observation:** Frontline contact with enemy sectors provides baseline confidence growth.
