@@ -3,6 +3,12 @@
 **Date:** 2026-05-18
 **Scope:** Parent-side execution queue for the user request to continue implementing the live `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` backlog without stopping for manual prioritization.
 
+## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
+
+| Lane | Status | Source |
+|---|---|---|
+| Remove in-loop week-39 `serializeState`+hash + post-loop `if (!final_state_hash)` fallback + replay JSONL `state_hash` field | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH38_SERIALIZATION_WEEK39_CLEANUP.md`. Closes Batch 33's "smaller byte-identical win" candidate. Two dead-on-arrival serialize+hash blocks removed; the unconditional post-reconciliation block at line ~2503 is now the sole producer of `final_state_hash` and `final_save.json` bytes. `replayLine.state_hash` field dropped (0 consumers in src/tests/tools — verified by grep). 40w n1914 hash `b14179d65639860c` matches baseline; consistency validator PASS; 7/7 serialization contract tests PASS (incl. 4 new pinning the cleanup); `npm run test:baselines` all-match. Expected perf effect (inference, not formally re-instrumented): ≈140 ms saved per 40w run (113.8 ms `final-save-serialize` + 26.8 ms `final-save-hash` redundant calls eliminated). |
+
 ## Completed Batch 37 — Sector `:split-pieces` redundant normalize skip
 
 | Lane | Status | Source |

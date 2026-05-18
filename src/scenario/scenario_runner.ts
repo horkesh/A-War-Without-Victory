@@ -2412,20 +2412,23 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 replaySequenceStream.write(JSON.stringify(replayFrameRow) + '\n');
             });
 
-            if (week_index === weeks - 1) {
-                const serialized = _serTimeSync(emitTimingJson, timingTotals, 'final-save-serialize', () =>
-                    serializeState(state)
-                );
-                final_state_hash = _serTimeSync(emitTimingJson, timingTotals, 'final-save-hash', () =>
-                    createHash('sha256').update(serialized, 'utf8').digest('hex').slice(0, 16)
-                );
-            }
+            // Batch 38: the previous in-loop week-39 `serializeState(state)` +
+            // hash and the post-loop `if (!final_state_hash)` fallback were both
+            // structurally redundant — they produced a pre-reconciliation hash
+            // that the post-loop step at line ~2503 unconditionally overwrites
+            // with the canonical post-reconciliation hash actually written to
+            // `final_save.json`. The pre-reconciliation hash was only attached
+            // to `replay.jsonl`'s per-week `state_hash` field, which has zero
+            // consumers anywhere in src/tests/tools (verified by grep). Removed:
+            // saves one `serializeState` + one SHA-256 per scenario run, and
+            // drops the documented "almost certainly wrong" pre-reconciliation
+            // hash from the actions JSONL. Canonical `final_state_hash` in
+            // `run_summary.json` is unchanged.
             if (replayStream) {
-                const replayLine: { week_index: number; actions: ScenarioAction[]; state_hash?: string } = {
+                const replayLine: { week_index: number; actions: ScenarioAction[] } = {
                     week_index,
                     actions
                 };
-                if (final_state_hash) replayLine.state_hash = final_state_hash;
                 timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
                     replayStream.write(stableStringify(replayLine) + '\n');
                 });
@@ -2451,14 +2454,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
-        if (!final_state_hash) {
-            final_state_hash = _serTimeSync(emitTimingJson, timingTotals, 'final-save-hash', () =>
-                createHash('sha256')
-                    .update(serializeState(state), 'utf8')
-                    .digest('hex')
-                    .slice(0, 16)
-            );
-        }
+        // Batch 38: post-loop `if (!final_state_hash)` fallback removed —
+        // structurally redundant with the unconditional final-save block at
+        // line ~2503 below, which always re-serializes the post-reconciliation
+        // state and overwrites `final_state_hash`. No external caller reads
+        // `final_state_hash` between here and the canonical setter.
 
         timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
             reportStream.end();

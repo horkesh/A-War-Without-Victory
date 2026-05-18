@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] perf(serialization): Batch 38 scenario_runner redundant week-39 serialize/hash cleanup (byte-identical)
+
+**Type:** Dead-code removal in serialization path. Single canonical producer for `final_state_hash`.
+
+**Change:** `src/scenario/scenario_runner.ts` removed two structurally redundant final-save blocks that Batch 33's attribution had identified as the smaller byte-identical win: (a) the in-loop `if (week_index === weeks - 1) { serializeState(state); createHash(...); }` block that produced a pre-reconciliation hash at the end of week 39; (b) the post-loop `if (!final_state_hash) { ... }` fallback that produced the same pre-reconciliation hash. Both writes were dead-on-arrival: the unconditional post-reconciliation block at line ~2503 always re-serialized the state after `reconcileFinalSectorTruth(state, ...)` mutation and overwrote `final_state_hash` with the canonical post-reconciliation value actually written to `final_save.json`. Also dropped the `state_hash?: string` field from the replay actions JSONL line (and its conditional assignment); the field had zero readers in src/tests/tools (verified by exhaustive grep, corroborated by Batch 33's audit which classified it as "almost certainly wrong" pre-reconciliation hash). Added 4 new static-grep contract tests to `tests/serialization_attribution_contract.test.ts` pinning the cleanup.
+
+**Determinism:** 40w n1914 hash `b14179d65639860c` matches Batch 17 / Batch 32 / Batch 35 / Batch 37 baseline literally. validate_run_consistency PASS (0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 below-floor missed legal donors). Four "below floor with no legal donor" tildes identical to prior runs. Per scenario-creator-runner-tester verdict: VERDICT: GO — hash byte-identical, validator PASS, dead-code removal with zero behavioral surface.
+
+**Verification:** `npx tsc --noEmit` PASS; `vitest run tests/serialization_attribution_contract.test.ts` 7/7 PASS (incl. 4 new contracts: in-loop block removed; fallback removed; exactly 1 `final-save-serialize` + 1 `final-save-hash` call site; replay line type no longer carries `state_hash`). `npm run test:baselines` all-match. 40w byte-identity proof n1914 + consistency validator PASS.
+
+**Expected perf effect (inference):** Batch 33 attribution showed `final-save-serialize` 227.6 ms / 2 calls / 113.8 ms/call and `final-save-hash` 53.6 ms / 2 calls. After Batch 38 both labels have exactly 1 call site, eliminating ≈140 ms of redundant work per 40w run. Re-instrumented attribution in a follow-up batch would confirm.
+
+**Carried forward:** The blanket `replay_sequence.jsonl` per-turn full-state downgrade remains BLOCKED on user-direction (multi-batch refactor with regression-test reshape; four hard-requirement consumers per Batch 33 audit). Next attribution candidate: wrap `buildReplayFrameRow` inside the `replay-sequence-write` label (trivial scope, attribution-only).
+
+**Artifacts:** `docs/40_reports/implemented/20260518_BATCH38_SERIALIZATION_WEEK39_CLEANUP.md`.
+
+---
+
 ## [2026-05-18] perf(sector): Batch 37 split-pieces redundant normalize skip (byte-identical)
 
 **Type:** Pure compute-elision perf optimization inside `enforceFinalSectorGeometryInvariants:split-pieces`.
