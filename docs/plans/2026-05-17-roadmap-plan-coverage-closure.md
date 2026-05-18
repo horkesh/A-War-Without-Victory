@@ -48,6 +48,8 @@ This is a planning-control document. It does not implement features. It maps roa
 
 > **2026-05-17 upgrade pass:** 14 of the 18 entries below were upgraded from short stubs to full execution-grade plans. Stubs at the original near-duplicate filenames were removed via `git rm` (`...sim-wiring`, `...188w-endgame-verification`, `...counteroffers`, `...alliance-breakdown-bc`, `...consequence-batch-flavor`, `...special-case-canon-decision`, `...constraint`, `...cleanup`, `...full-supply-spec`). Three research audits ground design picks: `docs/40_reports/audits/20260517_{HISTORIAN,GAME_DESIGNER,ENGINEERING}_OPEN_QUESTIONS_*.md`. The Intel extensions, VRS Corridor 92, ARBiH zero-attack stalls, and ARBiH catastrophic attack stalls plans remain at their original stub paths pending follow-up upgrade.
 
+> **2026-05-18 autonomous coverage pass:** The residual "all remaining work" surface is now routed through `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`. That matrix adds explicit owner plans for save/replay determinism, canon decision preparation, content/Codex arcs, platform packaging, and product polish/assets, while preserving stop gates for historian/user/operator-only work.
+
 | Backlog Point | Plan |
 | --- | --- |
 | Logistics Priority lever (wire-or-remove) | `docs/plans/2026-05-17-logistics-priority-wire-or-remove-plan.md` |

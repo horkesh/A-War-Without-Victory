@@ -63,6 +63,34 @@ Use these when implementation lanes need proof scaffolding, merge support, or re
    - Assembles release-candidate evidence while keeping operator-only gates separate.
    - Must not claim gold/RC readiness without fresh proof.
 
+## Remaining-Work Coverage Plans
+
+Use these when Codex/user asks for "all remaining work" coverage or when a primary lane blocks on a gate:
+
+1. `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`
+   - Top-level matrix routing every residual roadmap/backlog class to an autonomous, gated-prep, or operator-only owner.
+   - Best first read before assigning Claude a long unattended work session.
+
+2. `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`
+   - Focused determinism bank for save-continue hash-chain, replay equivalence, and packaging-build determinism support.
+   - Requires extra caution around generated artifacts and scenario hashes.
+
+3. `docs/plans/2026-05-18-autonomous-canon-design-decision-prep-bank.md`
+   - Support-only bank for Open Design Questions, FORAWWV review packets, sensitive-history treatment, and RS/HRHB/enclave gate packets.
+   - Must not edit `FORAWWV.md` or settle design questions.
+
+4. `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`
+   - Content/Codex bank for notification residual prep, dynamic Codex breadth, attribution matrices, and downstream arc packets.
+   - Must stop before unreviewed sensitive-history prose or new historical claims.
+
+5. `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`
+   - Platform/release bank for repo-side reproducible-build support, clean-VM packet refresh, signing/macOS/auto-update decision prep, and release artifact indexing.
+   - Operator-only proof stays pending.
+
+6. `docs/plans/2026-05-18-autonomous-product-polish-and-assets-bank.md`
+   - Product polish/assets bank for Warroom ambient motion, soundscape readiness, side-picker validation, press/trailer evidence prep, and High Concept one-pager.
+   - Public assets and marketing claims require approval.
+
 ## Recommended Sequencing After Batch 36
 
 If Claude asks what to do next after Batch 36:
@@ -80,6 +108,7 @@ If Claude asks what to do next after Batch 36:
    - GR-1 Notification sensitive-content review prep.
    - GR-2/GR-3 roster locks.
    - GR-7 PR and merge evidence pack.
+5. If the user asks for all remaining work or a full-day autonomous assignment, start from the remaining-work coverage matrix and pair one code lane with one support/evidence lane.
 
 ## Merge Readiness Gate
 

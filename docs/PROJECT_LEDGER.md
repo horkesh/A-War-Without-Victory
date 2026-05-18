@@ -6131,3 +6131,17 @@ The mechanism is now proven: when the step-curve sits at path #0 of the preceden
 **Artifacts:** `docs/40_reports/implemented/20260518_ACCESSIBILITY_P0_BATCH18.md`; updates to `docs/40_reports/GUI_MASTER.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/40_reports/audits/20260518_MASTER_BACKLOG_EXECUTION_QUEUE.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin.md`; predecessor implementation report `docs/40_reports/implemented/20260517_ACCESSIBILITY_P0_CLOSEOUT.md` and audit `docs/40_reports/audits/20260517_ACCESSIBILITY_P0_DISCOVERY.md` remain authoritative for the source-level patches.
 
 ---
+
+## [2026-05-18] docs(plans): add autonomous remaining-work coverage banks
+
+**Type:** Planning/control documentation only. No runtime behavior, UI rendering, simulation output, scenario data, save schema, build metadata, or generated artifact changed.
+
+**Change:** Added a remaining-work coverage matrix and five new autonomous lane banks so Claude can receive large unattended assignments without losing gates: save/replay determinism, canon/design decision preparation, content/Codex arcs, platform packaging, and product polish/assets. Wired the new banks into the autonomous dispatch index, the roadmap coverage closure matrix, and the Master Roadmap active plan table.
+
+**Determinism:** Documentation only.
+
+**Verification:** `git diff --check` performed during plan closeout.
+
+**Artifacts:** `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`; `docs/plans/2026-05-18-autonomous-save-replay-determinism-bank.md`; `docs/plans/2026-05-18-autonomous-canon-design-decision-prep-bank.md`; `docs/plans/2026-05-18-autonomous-content-codex-arc-bank.md`; `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`; `docs/plans/2026-05-18-autonomous-product-polish-and-assets-bank.md`; updates to `docs/plans/2026-05-18-autonomous-dispatch-index.md`, `docs/plans/2026-05-17-roadmap-plan-coverage-closure.md`, and `docs/plans/MASTER_ROADMAP.md`.
+
+---
