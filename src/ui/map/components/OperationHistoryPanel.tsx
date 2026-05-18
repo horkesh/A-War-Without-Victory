@@ -263,6 +263,7 @@ function CompletedOpCard({
     focused: boolean;
 }) {
     const [expanded, setExpanded] = useState(focused);
+    const captured = new Set(op.objectives_captured);
     const objRate = op.objectives_targeted.length > 0
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
         : '0/0';
@@ -435,15 +436,50 @@ function CompletedOpCard({
                     {op.axis_summaries && op.axis_summaries.length > 0 && (
                         <div>
                             <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Axes</div>
-                            {op.axis_summaries.map(ax => (
-                                <div key={ax.axis_id} className="text-[10px] border-l-2 border-panel-border/50 pl-2 mb-1">
-                                    <div className="text-text-primary font-semibold">{ax.axis_name}</div>
-                                    <div className="text-text-muted">
-                                        Obj {ax.objectives_captured.length}/{ax.objectives_targeted.length} | Attacks {ax.total_attacks}
+                            {op.axis_summaries.map(ax => {
+                                const axisCaptured = new Set(ax.objectives_captured);
+                                return (
+                                    <div key={ax.axis_id} className="text-[10px] border-l-2 border-panel-border/50 pl-2 mb-1">
+                                        <div className="text-text-primary font-semibold">{ax.axis_name}</div>
+                                        <div className="text-text-muted">
+                                            Obj {ax.objectives_captured.length}/{ax.objectives_targeted.length} | Attacks {ax.total_attacks}
+                                        </div>
+                                        {ax.objectives_targeted.length > 0 && (
+                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                {ax.objectives_targeted.map((osid) => {
+                                                    const name = getOsidDisplayName(osid, osidDisplayNames);
+                                                    if (axisCaptured.has(osid)) {
+                                                        return (
+                                                            <ObjectiveReviewChip
+                                                                key={osid}
+                                                                label={`Axis captured: ${name}`}
+                                                                className="border-green-400/30 bg-green-400/5 text-green-300"
+                                                            />
+                                                        );
+                                                    }
+                                                    if (captured.has(osid)) {
+                                                        return (
+                                                            <ObjectiveReviewChip
+                                                                key={osid}
+                                                                label={`Axis held elsewhere: ${name}`}
+                                                                className="border-amber-300/30 bg-amber-300/5 text-amber-200"
+                                                            />
+                                                        );
+                                                    }
+                                                    return (
+                                                        <ObjectiveReviewChip
+                                                            key={osid}
+                                                            label={`Axis not held: ${name}`}
+                                                            className="border-red-400/30 bg-red-400/5 text-red-300"
+                                                        />
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        <CasualtyLine label="Cas" cas={ax.casualties_suffered} />
                                     </div>
-                                    <CasualtyLine label="Cas" cas={ax.casualties_suffered} />
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
 

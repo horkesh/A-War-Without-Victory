@@ -2566,15 +2566,18 @@ function buildFactionSectors(
         // Reuse the per-faction active-combat index built for this invocation.
         const corpsBrigadeComponents = activeCombatComponentsByCorps.get(corpsId) ?? new Set<number>();
 
-        const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () => buildMultiSectorsForCorps(
-            state, corpsId, faction, edgeIds, osidFrontEdges,
-            adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
-            _perfTime,
-        ));
+        const corpsMultiSectors = _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}`, () =>
+            _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build`, () => buildMultiSectorsForCorps(
+                state, corpsId, faction, edgeIds, osidFrontEdges,
+                adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids,
+                _perfTime,
+            )),
+        );
 
         // Locations remain sorted by formation ID because the index iterates sorted IDs.
         const corpsBrigadeLocations = activeCombatLocationsByCorps.get(corpsId) ?? [];
 
+        _perfTime(`buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter`, () => {
         for (const sector of corpsMultiSectors) {
             // FIX 1 (Option Y): Strengthened unstaffable-sector guard.
             //
@@ -2607,6 +2610,7 @@ function buildFactionSectors(
             }
             sectors.push(sector);
         }
+        });
     }
     });
 

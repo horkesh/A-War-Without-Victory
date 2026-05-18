@@ -256,6 +256,15 @@ describe('attack resolution intel execution friction', () => {
         expect(getIntelAmbushDefenderCasualtyMult(0.2, true)).toBeLessThan(1);
     });
 
+    it('scales deterministic ambush casualty friction by observed confidence gap', () => {
+        expect(getIntelAmbushAttackerCasualtyMult(0, true)).toBeGreaterThan(
+            getIntelAmbushAttackerCasualtyMult(0.2, true),
+        );
+        expect(getIntelAmbushDefenderCasualtyMult(0, true)).toBeLessThan(
+            getIntelAmbushDefenderCasualtyMult(0.2, true),
+        );
+    });
+
     it('low attacker intel confidence reduces resolved power ratio without exposing hidden truth', () => {
         const fresh = makeScenario();
         const stale = makeScenario();

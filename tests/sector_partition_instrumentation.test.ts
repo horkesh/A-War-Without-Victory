@@ -268,6 +268,8 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'buildFactionSectors:${faction}:brigade-classification:territory-assignment',
             'buildFactionSectors:${faction}:commander-review',
             'buildFactionSectors:${faction}:corps-sector-construction',
+            'buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:multi-sector-build',
+            'buildFactionSectors:${faction}:corps-sector-construction:${corpsId}:staffability-filter',
             'buildFactionSectors:${faction}:final-invariant-and-coverage',
             'buildFactionSectors:${faction}:friendly-osid-setup',
             'buildFactionSectors:${faction}:front-edge-consolidation',

@@ -82,6 +82,21 @@ function makeLoadedState(): LoadedGameState {
                         casualties_inflicted: { killed: 12, wounded: 31 },
                     },
                 ],
+                axis_summaries: [
+                    {
+                        axis_id: 'axis-west',
+                        axis_name: 'Western Axis',
+                        objectives_targeted: [
+                            'op:prijedor:prijedor_1',
+                            'op:kozara:kozarac_1',
+                            'op:sanski_most:sanski_most_1',
+                        ],
+                        objectives_captured: ['op:prijedor:prijedor_1'],
+                        total_attacks: 3,
+                        casualties_suffered: { killed: 7, wounded: 20 },
+                        casualties_inflicted: { killed: 10, wounded: 25 },
+                    },
+                ],
                 recovery_reason: 'completed',
                 commander_assessment_at_launch: 'launch',
             },
@@ -124,6 +139,18 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Captured: Prijedor')).toBeTruthy();
         expect(screen.getByText('Held at end: Kozarac')).toBeTruthy();
         expect(screen.getByText('Not held: Sanski Most')).toBeTruthy();
+    });
+
+    it('shows per-axis objective status labels from existing AAR axis summaries', () => {
+        render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        expect(screen.getByText('Western Axis')).toBeTruthy();
+        expect(screen.getByText('Axis captured: Prijedor')).toBeTruthy();
+        expect(screen.getByText('Axis held elsewhere: Kozarac')).toBeTruthy();
+        expect(screen.getByText('Axis not held: Sanski Most')).toBeTruthy();
     });
 
     it('shows a clear completed-operation empty state in Records OPERATIONS history', () => {

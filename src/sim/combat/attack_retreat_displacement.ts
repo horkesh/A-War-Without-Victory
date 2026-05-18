@@ -159,7 +159,7 @@ export function getFriendlyRetreatDestinations(
     reverseMap: OperationalToCanonicalReverseMap
 ): Osid[] {
     const loc = (formation as { location_osid?: string }).location_osid;
-    const factionId = formation.faction as FactionId;
+    const factionId = formation.faction;
     if (!loc) return [];
     const neighbors = adjacency.get(loc) ?? [];
     let friendly: Osid[] = [];
@@ -264,7 +264,7 @@ export function findEmergencyRetreatOsid(
     sourceOsid?: string,
     friendlyOsids?: Set<string>
 ): string | null {
-    const factionId = formation.faction as FactionId;
+    const factionId = formation.faction;
     const pc = state.political?.political_controllers ?? {};
 
     // Build friendly set and connected components for reachability checks
@@ -480,7 +480,7 @@ export function displaceFormationsInEnemyTerritory(
         if (!f || f.status !== 'active') continue;
         const loc = (f as { location_osid?: string }).location_osid;
         if (!loc) continue;
-        const factionId = f.faction as FactionId;
+        const factionId = f.faction;
         if (getPoliticalControllerOSID(state, loc, reverseMap) === factionId) continue;
         const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
         const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);

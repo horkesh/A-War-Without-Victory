@@ -1,10 +1,22 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 16 buildFactionSectors attribution)
+**Updated:** 2026-05-18 (Batch 17 corps-sector construction attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-05-18: Batch 17 corps-sector construction attribution
+
+**Change:** `PERF_PROFILE_SECTOR_PARTITION=true` now records child attribution under `buildFactionSectors:*:corps-sector-construction:${corpsId}` for `multi-sector-build` and `staffability-filter`.
+
+**Why:** Batch 16 identified broader corps construction as a remaining measured owner. Batch 17 keeps the parent label intact for profile comparability and splits attribution between the `buildMultiSectorsForCorps(...)` call and the staffability filter loop without changing sector truth, cache lifetime, state, or serialization.
+
+**Run evidence:** Profiled 40w n1894 kept the current integrated hash `b14179d65639860c`; 27/27 anchors, 6/6 bot benchmarks, consistency validation PASS.
+
+**Next measured targets:** Inspect the largest child owners before optimizing: `multi-sector-build` for RBiH 1st/2nd Corps and VRS 1st Krajina/Herzegovina/Drina, plus `staffability-filter` for RBiH 2nd/3rd Corps. Continue sidecar-only attribution if no byte-identical reuse boundary is obvious.
+
+**Report:** [implemented/20260518_SECTOR_RECONSTRUCTION_BATCH17.md](implemented/20260518_SECTOR_RECONSTRUCTION_BATCH17.md)
 
 ## 2026-05-18: Batch 16 buildFactionSectors brigade-classification attribution
 

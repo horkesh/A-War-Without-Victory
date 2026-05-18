@@ -374,9 +374,10 @@ export function getIntelAmbushAttackerCasualtyMult(
     const clampedConfidence = Number.isFinite(confidence)
         ? Math.max(0, Math.min(1, confidence as number))
         : 0;
-    return defenderOpsecActive && clampedConfidence < INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD
-        ? INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT
-        : 1;
+    if (!defenderOpsecActive || clampedConfidence >= INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD) return 1;
+    const confidenceGapRatio = (INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD - clampedConfidence)
+        / INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD;
+    return 1 + (INTEL_EXECUTION_AMBUSH_ATTACKER_CASUALTY_MULT - 1) * confidenceGapRatio;
 }
 
 export function getIntelAmbushDefenderCasualtyMult(
@@ -386,9 +387,10 @@ export function getIntelAmbushDefenderCasualtyMult(
     const clampedConfidence = Number.isFinite(confidence)
         ? Math.max(0, Math.min(1, confidence as number))
         : 0;
-    return defenderOpsecActive && clampedConfidence < INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD
-        ? INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT
-        : 1;
+    if (!defenderOpsecActive || clampedConfidence >= INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD) return 1;
+    const confidenceGapRatio = (INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD - clampedConfidence)
+        / INTEL_EXECUTION_AMBUSH_CONFIDENCE_THRESHOLD;
+    return 1 - (1 - INTEL_EXECUTION_AMBUSH_DEFENDER_CASUALTY_MULT) * confidenceGapRatio;
 }
 
 // Cohesion deltas (§4.5)
