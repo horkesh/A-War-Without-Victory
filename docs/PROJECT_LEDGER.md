@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-18] feat(ui): Batch 44 endgame faction report mobile subdivision (UI-5)
+
+**Type:** UI / progressive disclosure only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, scoring contract, Cost Ledger truth, verdict selection, or canon text changed.
+
+**Change:** Subdivided the long `FactionReport` block in `src/ui/map/components/VerdictScreen.tsx` into four stable named sections with explicit `data-testid` markers — `faction-report-score`, `faction-report-dimensions`, `faction-report-statistics`, and (conditional) `faction-report-dayton`. The Pyrrhic Score hero stays always-visible (no collapsible wrapper — primary signal). The three lower-priority sections (Capital Dimensions, Final Statistics, Dayton) wrap in `<details open>` with a `sm:hidden` summary toggle: desktop renders dense and unchanged because the summary is hidden and `open` keeps content visible, while mobile gains a tap-to-collapse affordance. All score/grade/dimension/statistic/Dayton field text remains in the DOM regardless of toggle state — automated tests and accessibility tooling continue to see the full report.
+
+**Determinism:** UI presentation only, no engine/scenario authority. Faction-report stat values flow from the same `FactionVerdict` + `DaytonResult` contracts unchanged.
+
+**Verification:** `npx.cmd tsc --noEmit` clean; `npx.cmd vitest run tests/ui/faction_report_mobile_subdivision.test.ts tests/ui/endgame_verdict_screen_mount.test.ts tests/ui/endgame_presentation_proof.test.ts tests/ui/render_proof_real_fixtures.test.ts tests/ui/verdict_visibility.test.ts --reporter=dot` 114/114 pass (existing endgame mount + visibility tests unchanged); `npm.cmd run desktop:map:build` 16.24s clean. No 40w run — UI presentation only, no sim or scenario authority touched.
+
+**Artifacts:** updates to `src/ui/map/components/VerdictScreen.tsx`; `tests/ui/faction_report_mobile_subdivision.test.ts`; updates to `docs/40_reports/GAME_STATE_RATING_MASTER.md` row 15.
+
+---
+
 ## [2026-05-18] feat(ui): Batch 43 Army HQ + Decision Room progressive disclosure (UI-4)
 
 **Type:** UI / progressive disclosure only. No simulation authority, scenario state, save schema, generated artifact, IPC surface, or canon text changed.

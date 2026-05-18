@@ -629,8 +629,8 @@ export function FactionReport({
 
     return (
         <div className="p-6 space-y-5">
-            {/* Pyrrhic Score Hero */}
-            <div className="text-center py-4">
+            {/* Pyrrhic Score Hero — always-visible primary signal, NOT collapsible. */}
+            <div data-testid="faction-report-score" className="text-center py-4">
                 <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary mb-1">
                     Pyrrhic Score
                 </div>
@@ -669,9 +669,28 @@ export function FactionReport({
                 </div>
             </div>
 
-            {/* 5-Dimension Breakdown */}
-            <div>
-                <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+            {/* UI-5 Batch 44 mobile subdivision: subsections wrap in <details>
+                with `open` set + a `sm:hidden` summary so desktop renders dense
+                and unchanged while mobile gains a tap-to-collapse affordance.
+                Content stays in the DOM regardless of toggle state, so no
+                score/result text is ever hidden from automated tests or
+                accessibility tooling. */}
+
+            {/* 6-Dimension Breakdown */}
+            <details
+                data-testid="faction-report-dimensions"
+                open
+                className="block"
+            >
+                <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
+                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                        Capital Dimensions
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                        {verdict.dimension_grades.length} bars
+                    </span>
+                </summary>
+                <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
                     Capital Dimensions
                 </div>
                 <div className="space-y-2">
@@ -679,11 +698,23 @@ export function FactionReport({
                         <DimensionBar key={dg.dimension} dg={dg} factionColor={color} />
                     ))}
                 </div>
-            </div>
+            </details>
 
             {/* Statistics */}
-            <div>
-                <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+            <details
+                data-testid="faction-report-statistics"
+                open
+                className="block"
+            >
+                <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
+                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                        Final Statistics
+                    </span>
+                    <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                        Tap to toggle
+                    </span>
+                </summary>
+                <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
                     Final Statistics
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
@@ -718,12 +749,24 @@ export function FactionReport({
                         </>
                     )}
                 </div>
-            </div>
+            </details>
 
             {/* Dayton Details (if applicable) */}
             {daytonResult && (
-                <div>
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                <details
+                    data-testid="faction-report-dayton"
+                    open
+                    className="block"
+                >
+                    <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
+                        <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                            Dayton Agreement
+                        </span>
+                        <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                            Tap to toggle
+                        </span>
+                    </summary>
+                    <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
                         Dayton Agreement
                     </div>
                     <div className="space-y-2 text-[11px] text-text-secondary">
@@ -762,7 +805,7 @@ export function FactionReport({
                             </div>
                         )}
                     </div>
-                </div>
+                </details>
             )}
         </div>
     );
