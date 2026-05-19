@@ -293,3 +293,61 @@ The mechanical reality is a **scenario-authoring asymmetry between 40w (painted)
 - Commands run: `git status --short --branch`, `git fetch origin`, `git rebase origin/main` (1 conflict resolved in PROJECT_LEDGER.md by interleaving both 2026-05-19 entries, no semantic loss), `git stash pop`, several `node -e` JSON inspections of n1917/n1916 saves and AARs.
 - Remaining risk: brcko anchor remains as chronic 188w residue. All other risk surfaces unchanged from Batch C close.
 - Committed: documentation-only commit pending after this edit (audit doc only; no code, no scenario, no canon).
+
+---
+
+## 11. Batch A (Lane 2, 2026-05-19 evening) — JNA phantom design analysis + OSID identity reaffirmation
+
+**Branch:** `codex/late-war-188w-brcko-probe-2026-05-19` (from latest `main` at `3a77a9a5`, which already carries the Batch A-D reconciliation from this audit).
+**Scope:** Audit-only. Closes the open question from §10 follow-up item 2 ("Audit the JNA phantom filter that drops jna_17th_corps_tg from the AAR — was that intentional?") and reaffirms OSID identity for `op:brcko:brcko` before Batch B probe code.
+
+### 11.1 OSID identity reaffirmation
+
+Three independent data sources confirm `op:brcko:brcko` is the canonical Brčko-proper operational settlement, **not** a synthetic naming artifact like the old `op:brcko:brcko_1` / `_2` test IDs that previously caused confusion:
+
+| Source | Result |
+|---|---|
+| `data/derived/operational/canonical_to_operational_map.json` | `S300136 → "op:brcko:brcko"` (canonical S-ID mapping confirms one-to-one alias) |
+| `data/derived/operational/urban_osids.json` | Contains `"op:brcko:brcko"` (5th entry — Brčko classified as urban for the P2 urban-defender combat bonus per n1289 fix) |
+| `data/source/calibration/painted_control_oct1995.json` `by_settlement_id` | Has `"op:brcko:brcko": "RS"` as the anchor expectation |
+| `data/scenarios/apr1992_definitive_40w.json` `initial_osid_controllers` | Has `"op:brcko:brcko": "RS"` at turn 0 (40w paints it; 188w does not) |
+
+This rules out the "OSID naming error" trap entirely — Codex's earlier note in the lane prompt is corroborated.
+
+### 11.2 JNA phantom `jna_17th_corps_tg` design — canonically intended, not a bug
+
+The Batch D audit (§10 follow-up item 2) asked whether `jna_17th_corps_tg`'s absence from the n1917 AAR `axis_summaries.brcko_corridor.brigades` list is a filter bug. Reading `src/sim/combat/jna_phantom_brigades.ts:103–110` and `processJnaWithdrawals(...)` (lines 411–630):
+
+| Property | Value | Implication |
+|---|---|---|
+| `corps_id` | `vrs_east_bosnian` | matches Operation Koridor's corps |
+| `location_osid` | `op:bijeljina:dvorovi_2` | matches Operation Koridor's fallback `staging_osid` |
+| `withdrawal_turn` | **6** | phantom dissolves at turn 6 |
+| `no_equipment_handoff` | NOT set (undefined → false) | equipment IS distributed to VRS brigades on withdrawal |
+| 25 tanks / 15 artillery / 10 APCs | real equipment | gets handed off to vrs_east_bosnian brigades in same corps |
+
+Phantom lifecycle in 188w (n1917 timing):
+
+1. **Turn 0:** `spawnJnaPhantomBrigades(state)` injects `jna_17th_corps_tg` into formations. Listed in Operation Koridor brcko_corridor axis.brigades on disk.
+2. **Turns 0–3:** Operation Koridor in `planning` phase. Phantom is active but not attacking yet.
+3. **Turn 4 (execution start):** Phantom is eligible to participate. The n1917 AAR shows the brcko_corridor axis began attacking turn 5.
+4. **Turn 6:** `processJnaWithdrawals(state)` fires — phantom's `withdrawal_turn === turn` triggers withdrawal. Equipment (25 tanks + 15 art + 10 APCs) is distributed to vrs_east_bosnian brigades (tank-priority filter: mechanized/motorized first, then light/mountain). Lines 612–617 explicitly remove the phantom from `op.participating_brigades` AND every `axis.assigned_brigades` array. `phantom.status = 'inactive'`; `delete state.military.formations[phantomId]`.
+5. **Turns 7–13:** Operation Koridor continues with the 3 surviving VRS brigades only. AAR `axis_summaries.brcko_corridor.brigades` reflects the final brigade list, which by design excludes the withdrawn phantom.
+
+**Verdict:** The phantom's absence from the AAR final brigade list is **canon-intended behavior**, not a filter bug. The 19 May 1992 historical JNA withdrawal from BiH is encoded as `withdrawal_turn: 6` (about 6 weeks after the March 6 1992 scenario start ≈ historical mid-May). Equipment handoff to corps brigades is the correct mechanism for the VRS inheriting JNA matériel.
+
+The phantom contributed for ~2 turns of execution (turns 5–6), enough to factor into the early attacks but not enough to single-handedly carry the axis. The casualty asymmetry (641 KIA suffered vs 351 KIA inflicted) is from the post-withdrawal turns 7–13 where the 3 VRS brigades attacked unsupported by JNA equipment dividends only partially absorbed.
+
+**No safe phantom-side fix exists.** Extending `withdrawal_turn` past 6 would distort historical canon (19 May 1992 withdrawal is a hard date with massive downstream story implications), and there is no other phantom-restoration knob that doesn't push past the lane's STOP gates.
+
+### 11.3 Status going into Batch B
+
+- §11.1 (OSID identity) confirmed.
+- §11.2 (JNA phantom design) confirmed canon-intended; Batch C ("JNA phantom probe") is therefore **closed without code change**.
+- Remaining bounded candidate from Batch D §D.5: **(a) Add `op:brcko:brcko` to `brcko_corridor` axis objectives**.
+
+This is structurally necessary (brcko is not currently a Koridor target — see `pre_planned_operations.ts:92–98`) and the lane prompt explicitly authorizes attempting it: *"If Brčko falls because Operation Koridor never secures the town proper early enough: add op:brcko:brcko to the Koridor objective contract and prove this is enough."* Batch B will attempt this single-knob change with focused tests, run 40w + 188w, and either commit on success or revert + document on failure.
+
+Expected outcome assessment (recorded BEFORE running for falsifiability): The brcko_corridor axis already collapses against 2 RBiH peripheral OSIDs (`krepsic`, `skakava_donja`) with `zero_eligible_axis` after 4 attacks for 0 captures. Adding `op:brcko:brcko` (urban OSID, gets P2 urban-defender bonus, ARBiH 108th Brigade likely defending) as a 3rd target will not strengthen the attackers. **The most likely empirical result is: brcko_corridor still collapses, op:brcko:brcko still RBiH at 188w, 188w hash drifts (because Koridor planning hash inputs change), 188w anchors regress unless 40w also drifts cleanly.** If that outcome obtains, Batch B reverts and Batch D commits the decision packet only.
+
+There is one optimistic alternative: it is conceivable that brcko-proper attracts the axis brigades' primary effort (per axis-objective-prioritization heuristics in `sector_offensive.ts`) such that they concentrate on the urban target instead of dispersing across krepsic + skakava_donja. Empirical test will resolve this.
