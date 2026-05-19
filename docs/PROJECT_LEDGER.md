@@ -3,6 +3,44 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] docs(audit): Brčko 188w anchor — Batch D mechanical root-cause + STOP-AND-ASK decision
+
+**Type:** Documentation-only diagnostic. No code, simulation authority, scenario JSON, save schema, generated artifact, IPC surface, canon text, or run artifact changed. No new test added. No new scenario run executed (n1916/n1917 baselines already on disk; no behavior change to verify).
+
+**Branch:** `codex/late-war-188w-anchor-repair-2026-05-19` (rebased onto `main` at `d1458385`; head was `f1f8bd95`, becomes `0bb48a22` after rebase + this append).
+
+**Change:** Appended a Batch D root-cause section to `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md` and updated the Brčko summary lines in `docs/40_reports/CALIBRATION_MASTER.md` and `docs/40_reports/CONSOLIDATED_BACKLOG.md` to reflect mechanical inspection of `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917/` artifacts (initial_save, final_save, operation_aars, control_delta).
+
+**Falsified prior hypothesis:** The Batch A audit (committed at `bc4ff56d` / rebased to `672adf1c`) hypothesized that "RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it back to ARBiH counter-pressure over the 40w→188w long horizon." Direct inspection of n1917 save artifacts proves this is **not** what happens. `final_save.political.control_events` contains **zero** entries naming `op:brcko:brcko` as either `osid` or `settlement_id`. Initial controller (turn 0) is `RBiH`; final controller (turn 188) is `RBiH`. There is no "captured early-war then lost" trajectory — RS never captures the OSID at all.
+
+**Mechanism (proven):**
+1. The 40w scenario `data/scenarios/apr1992_definitive_40w.json` paints `op:brcko:brcko = RS` at turn 0 via two override keys (`initial_osid_controllers` and `osid_control_overrides`) and pins it to `vrs_east_bosnian` must-hold doctrine via `must_hold_osids_by_corps`. The 188w scenario `data/scenarios/apr1992_definitive_188w.json` lacks all three keys and lets the canonical `init_control: "apr1992"` (`init_control_mode: "hybrid_1992"`) ethnic-majority derivation initialize `op:brcko:brcko` as RBiH — historically correct for March 6 1992 (pre-VRS-attack).
+2. Operation Koridor (`src/sim/combat/pre_planned_operations.ts:74–119`) is the only mechanism that could have flipped brcko to RS in 188w. Its `brcko_corridor` axis lists 5 peripheral objectives (`brezovo_polje_selo_2`, `donji_rahic`, `krepsic`, `potocari_2`, `skakava_donja`) but **does not include `op:brcko:brcko` itself**.
+3. In n1917 the brcko_corridor axis ran from turn 1 (planning) through turn 13 (recovery), launched only against the 2 peripheral OSIDs that started as RBiH (`krepsic`, `skakava_donja`), completed 4 attacks for 0 captures, suffered 641 KIA / 1175 WIA against 351 KIA / 643 WIA inflicted, and terminated with `launch_blocker: "zero_eligible_axis"`. The corps-level "Partial Success" grade comes from the Posavina-flank axis capturing 5 OSIDs (`samac_2`, `modrica`, `garevac_2`, `derventa_2`, `brod`), not from anything brcko-related.
+4. No 1992–1995 event in `data/scenarios/events/war_199*.json` flips brcko's controller. No triggered operation or recapture mechanism is wired to brcko. Once Operation Koridor ends turn 13, nothing else in the engine ever attempts to capture or flip `op:brcko:brcko` in 188w.
+
+**Determinism:** Documentation only.
+
+**Verification (no scenario re-run):**
+- Direct read of `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917/initial_save.json`, `final_save.json`, `operation_aars.json`, `control_delta.json` via `node -e` JSON queries: `political_controllers["op:brcko:brcko"]` and `initial_political_controllers["op:brcko:brcko"]` both `"RBiH"` at turn 0 and turn 188; `control_events` filtered for `op:brcko:brcko` returns `[]`; Operation Koridor `axis_summaries.brcko_corridor.objectives_captured = []`, `launch_blocker = "zero_eligible_axis"`.
+- Direct comparison of `data/scenarios/apr1992_definitive_40w.json` vs `apr1992_definitive_188w.json`: 40w has six unique keys (`comms_override_by_corps`, `enable_rbih_hrhb_dynamics`, `initial_osid_controllers`, `must_hold_osids_by_corps`, `osid_control_overrides`, `supply_reserves_enabled`), 188w has none of them.
+- Direct read of `src/sim/combat/pre_planned_operations.ts:92–98` confirms the 5-objective `brcko_corridor` axis list without brcko itself.
+- 40w n1916 hash `5c6e7b62fa6670c0` and 188w n1917 hash `6dcf925afdb30e3b` unchanged (no behavior change in this lane).
+
+**Decision (audit §10):** **STOP-AND-ASK. No code, no scenario, no canon edit in this lane beyond the audit-update documentation.** All four bounded repair candidates (a/b/c/d in audit §2.5 and re-evaluated in audit §D.5) either cannot succeed without strengthening Operation Koridor's brcko_corridor axis (option a alone is structurally necessary but insufficient given axis collapse), require broader work that crosses the lane's explicit STOP gate ("broader balancing or canon-sensitive issue: stop and produce decision packet"), or are already in place dynamically (option c, must-hold already in n1868 final_save). The decision packet records 4 follow-up scope options for engineering / canon leads: (1) scenario authoring symmetry review between 40w and 188w, (2) Operation Koridor axis strengthening incl. JNA phantom filter audit, (3) explicit JNA-handover-to-VRS event class (historical 19 May 1992 withdrawal), or (4) accept the 26/27 residue for v0.9.x.
+
+**Sensitive-history boundary:** Brčko is on the Sensitive-History list (ICTY *Jelisić* TJ, *Todorović* SJ — Brčko ethnic cleansing 1–3 May 1992 onwards). Per the lane's explicit instruction *"Do not change FORAWWV"* and the SENSITIVE_HISTORY_DESIGN_GATE Ring framework, no FORAWWV edit, no canon text edit, no `avoided_osids_by_faction` override, no hidden manual flip was authored or even drafted. The audit documents the mechanical gap without proposing a canon-touching workaround.
+
+**Remaining residue:** Same as Batch C — `op:brcko:brcko` chronic 188w failure (now with corrected mechanical attribution; previously misattributed as "captured-then-lost"). Sarajevo casualty railroad, force-quality late-war shape, and `patron_pressure` serialization continue to be tracked in their respective lanes — out of scope here.
+
+**Artifacts:**
+- `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md` (Batch D append: §D.1–§D.6 + §10 decision)
+- `docs/40_reports/CALIBRATION_MASTER.md` (Brčko sub-bullet under the n1916/n1917 section, corrected attribution)
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` (188w endgame verification row, Brčko residue paragraph updated)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-19] fix(sim): Teocak singleton enclave — 188w anchor repair
 
 **Type:** Engine geometry data extension (engine code path). Closes the `op:ugljevik:teocak_krstac_2` 188w anchor regression. No canon edit, no scenario JSON edit, no combat math edit, no sensitive-history surface touched.
