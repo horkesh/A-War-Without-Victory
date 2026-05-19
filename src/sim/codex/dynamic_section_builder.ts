@@ -176,7 +176,7 @@ function eventFiredById(state: GameState, eventId: string): boolean {
  *  StateMeta schema. Falls back to RBiH if unset; predicates that rely on
  *  player_faction-specific state are tolerant of absence. */
 function playerFaction(state: GameState): FactionId {
-    return ((state.meta?.player_faction as FactionId | undefined) ?? ('RBiH' as FactionId));
+    return state.meta?.player_faction ?? 'RBiH';
 }
 
 // — Ghost 1: alliance_held —

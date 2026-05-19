@@ -124,6 +124,14 @@ const PHASE_6_WARROOM_BATCH_42_FILES = [
     'src/ui/warroom/data/war_data_extractor.ts',
 ];
 
+const SIM_NON_COMBAT_BATCH_43_FILES = [
+    'src/sim/codex/dynamic_section_builder.ts',
+    'src/sim/compile_turn_summary.ts',
+    'src/sim/consolidation_scoring.ts',
+    'src/sim/events/evaluate_events.ts',
+    'src/sim/local_truces.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -458,6 +466,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_6_WARROOM_BATCH_42_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 43 sim non-combat safe slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, SIM_NON_COMBAT_BATCH_43_FILES),
             0,
         );
 

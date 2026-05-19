@@ -168,7 +168,7 @@ export function evaluateEvents(
         state.military.fired_event_ids = [];
     }
     const firedIds = state.military.fired_event_ids;
-    const playerFaction = state.meta.player_faction as FactionId | undefined;
+    const playerFaction = state.meta.player_faction;
 
     const events = registry ?? getEventRegistry();
 
@@ -219,9 +219,9 @@ export function evaluateEvents(
             // Explicit owner first. Legacy soft derivation is kept only from authored event data,
             // never from the current player faction.
             const respondingFaction: FactionId | null =
-                (def.responding_faction as FactionId | undefined)
-                ?? (def.dimension_shifts?.[0]?.faction as FactionId | undefined)
-                ?? (def.response_options?.[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined)
+                def.responding_faction
+                ?? def.dimension_shifts?.[0]?.faction
+                ?? def.response_options?.[0]?.dimension_shifts?.[0]?.faction
                 ?? null;
             const isPlayerRespondent = playerFaction != null && respondingFaction === playerFaction;
             const mustShowPlayer = isPlayerRespondent && (autonomyLevel < 3 || def.requires_player_response === true);

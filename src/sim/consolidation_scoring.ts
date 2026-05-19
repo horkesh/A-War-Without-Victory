@@ -147,7 +147,7 @@ function getMunController(
             best = key === '_null_' ? null : key;
         }
     }
-    return best as FactionId | null;
+    return best;
 }
 
 /**

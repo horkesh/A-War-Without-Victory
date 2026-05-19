@@ -93,7 +93,7 @@ export function isGrazAccordsActive(state: GameState): boolean {
     if ((state.meta?.turn ?? 0) < state.political.vienna_declaration_turn) return false;
     const accepted = state.political.vienna_accepted;
     if (!accepted) return false;
-    return accepted['RS' as FactionId] === true && accepted['HRHB' as FactionId] === true;
+    return accepted['RS'] === true && accepted['HRHB'] === true;
 }
 
 /** @deprecated Use isGrazAccordsActive. */
@@ -294,8 +294,8 @@ export function checkAndFireGrazAccords(state: GameState): string | null {
     // Auto-accept for both factions (bot behavior).
     // Player-controlled factions get accept/decline via IPC (future).
     if (!state.political.vienna_accepted) state.political.vienna_accepted = {};
-    state.political.vienna_accepted['RS' as FactionId] = true;
-    state.political.vienna_accepted['HRHB' as FactionId] = true;
+    state.political.vienna_accepted['RS'] = true;
+    state.political.vienna_accepted['HRHB'] = true;
 
     return '6 May 1992 — Karadžić and Boban meet in Graz, Austria, and agree to divide Bosnia between them. '
         + 'Herzegovina Corps and HVO Southeast Herzegovina observe a ceasefire. '

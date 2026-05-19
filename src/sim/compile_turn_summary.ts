@@ -308,7 +308,7 @@ function compileSupplyDeltas(
     const heavy_munitions_deltas: Partial<Record<FactionId, number>> = {};
 
     // Derive factions from actual state rather than a hardcoded literal
-    const factions = Object.keys(state.military.general_supply_reserve ?? snapshot.supply) as FactionId[];
+    const factions = Object.keys(state.military.general_supply_reserve ?? snapshot.supply);
     for (const f of factions) {
         const supplyDelta = (state.military.general_supply_reserve?.[f] ?? 0) - (snapshot.supply[f] ?? 0);
         if (supplyDelta !== 0) supply_deltas[f] = supplyDelta;
@@ -376,7 +376,7 @@ function compileTerritoryAndSupplySnapshots(
 
     const areaByFaction: Partial<Record<FactionId, number>> = {};
     for (const osid of Object.keys(pc).sort(strictCompare)) {
-        const faction = pc[osid] as FactionId | undefined;
+        const faction = pc[osid];
         if (!faction) continue;
         const osidArea = areas[osid] ?? 0;
         areaByFaction[faction] = (areaByFaction[faction] ?? 0) + osidArea;
@@ -384,14 +384,14 @@ function compileTerritoryAndSupplySnapshots(
 
     const territory_snapshot: Partial<Record<FactionId, number>> = {};
     if (total > 0) {
-        for (const faction of (Object.keys(areaByFaction) as FactionId[]).sort(strictCompare)) {
+        for (const faction of Object.keys(areaByFaction).sort(strictCompare)) {
             territory_snapshot[faction] = Math.round(((areaByFaction[faction] ?? 0) / total) * 10000) / 10000;
         }
     }
 
     const supply_snapshot: Partial<Record<FactionId, number>> = {};
     const reserves = state.military?.general_supply_reserve ?? {};
-    for (const faction of (Object.keys(reserves) as FactionId[]).sort(strictCompare)) {
+    for (const faction of Object.keys(reserves).sort(strictCompare)) {
         const val = reserves[faction];
         if (val != null) supply_snapshot[faction] = val;
     }
@@ -419,7 +419,7 @@ function compileNotableEvents(state: GameState, turn: number): TurnNotableEvent[
             events.push({
                 kind: 'truce_broken',
                 description: `${faction} broke the Graz Accords truce.`,
-                faction: faction as FactionId,
+                faction,
             });
         }
     }

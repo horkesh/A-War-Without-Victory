@@ -3,6 +3,48 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] refactor(strict-null): Batch 43 sim non-combat safe slice (byte-identical)
+
+**Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `5358f968`).
+
+**Change:** Removed 16 redundant `as FactionId` / `as FactionId | undefined` / `as FactionId | null` / `as FactionId[]` casts (13 inventory-counted entries) from 5 sim non-combat files outside the Phase 2 combat long-tail and Phase 5 GameStateAdapter:
+
+- `src/sim/compile_turn_summary.ts` (5 sites): `Object.keys(...) as FactionId[]` patterns, `pc[osid] as FactionId | undefined` (null narrowing folded into the existing `if (!faction) continue` guard), `faction as FactionId` field-shorthand.
+- `src/sim/local_truces.ts` (4 sites): `'RS' as FactionId` / `'HRHB' as FactionId` literal casts at L96 and L297-298.
+- `src/sim/events/evaluate_events.ts` (4 sites): `state.meta.player_faction as FactionId | undefined`, `def.responding_faction as FactionId | undefined`, two nested `DimensionShift.faction as FactionId | undefined` casts.
+- `src/sim/codex/dynamic_section_builder.ts` (1 line, 2 casts): `(state.meta?.player_faction as FactionId | undefined) ?? ('RBiH' as FactionId)` → `state.meta?.player_faction ?? 'RBiH'`.
+- `src/sim/consolidation_scoring.ts` (1 site): `return best as FactionId | null` where `best: string | null`.
+
+All removed casts were no-ops under the current `FactionId = string` alias declared at `src/state/game_state.ts:45`. Added a new `Batch 43 sim non-combat safe slice` assertion in `tests/strict_null_inventory_progress.test.ts` pinning all five touched files at zero inventory escapes.
+
+**Determinism:** Type-only erasure. Compiled JS is byte-equivalent.
+
+**Verification:**
+- `npm.cmd run typecheck`: PASS.
+- `node_modules/.bin/vitest run tests/strict_null_inventory_progress.test.ts`: **22/22 PASS** (was 21/21; added one slice assertion for the new files).
+- `node_modules/.bin/vitest run tests/events_evaluate.test.ts tests/event_decisions.test.ts tests/compile_turn_summary_washington_timing.test.ts tests/event_response_ownership_catalog.test.ts`: 28/28 PASS.
+- `node_modules/.bin/vitest run tests/local_truces.test.ts tests/consolidation_scoring.test.ts`: 71/71 PASS.
+- `npm.cmd run test:baselines`: **"Baseline regression: all scenarios match"** — 40w/52w/baseline_ops_4w/noop_4w byte-identical to the prior baseline floor (no manifest refresh needed).
+- `git diff --check`: clean.
+
+**Inventory delta:** `as_factionid_casts` 64 → 48 (-16 sites, 24 → 19 files). Other categories unchanged. Five files now fully CLEAN for the inventory regex: `compile_turn_summary.ts`, `local_truces.ts`, `evaluate_events.ts`, `dynamic_section_builder.ts`, `consolidation_scoring.ts`.
+
+**Stop-gate compliance:** Did NOT touch `src/ui/map/data/GameStateAdapter.ts` (Phase 5 deferred), Phase 2 combat long-tail (21 classified-blocked escapes per `20260518_STRICT_NULL_PHASE2_LONG_TAIL_CLASSIFICATION.md`), `commander_march_correction.ts` save-shape casts, loader JSON guards needing schema redesign, or paramilitary/supply/fatigue gated files.
+
+**Artifacts:**
+- `src/sim/codex/dynamic_section_builder.ts`
+- `src/sim/compile_turn_summary.ts`
+- `src/sim/consolidation_scoring.ts`
+- `src/sim/events/evaluate_events.ts`
+- `src/sim/local_truces.ts`
+- `tests/strict_null_inventory_progress.test.ts` (+ Batch 43 slice)
+- `docs/40_reports/implemented/20260519_STRICT_NULL_BATCH43_SIM_NON_COMBAT.md`
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-19] fix(sim): Operation Koridor Brcko objective closes 188w anchor residue
 
 **Type:** Simulation behavior change, focused operation objective contract. No scenario paint, save schema, IPC surface, UI surface, FORAWWV text, sensitive-history prose, or hidden manual flip changed.
