@@ -3,6 +3,48 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] fix(sim): Teocak singleton enclave — 188w anchor repair
+
+**Type:** Engine geometry data extension (engine code path). Closes the `op:ugljevik:teocak_krstac_2` 188w anchor regression. No canon edit, no scenario JSON edit, no combat math edit, no sensitive-history surface touched.
+
+**Branch:** `codex/late-war-188w-anchor-repair-2026-05-19` (from `main` at `a04cba9a`).
+
+**Commits:**
+- `bc4ff56d` docs(audit): Batch A late-war 188w anchor residue root-cause report (docs-only).
+- `efec3323` fix(sim): add Teocak singleton enclave to repair 188w anchor regression.
+- `[this commit]` docs(release): Batch C — calibration master + ledger + manifest refresh.
+
+**Change:** Added Teocak as a singleton `ENCLAVE_DEFINITIONS` entry in `src/sim/combat/enclave_resilience.ts`, mirroring the existing Žepa pattern: `osid_list: ['op:ugljevik:teocak_krstac_2']`, `resilience_start_turn: 16`, `capital_osid` same as singleton. Added matching `ENCLAVE_CONFIG` row (max_resilience 20, growth_mult 0.30, max_personnel 400). Authored 15 focused tests under `tests/teocak_enclave_singleton.test.ts` pinning the definition contract, OSID lookup, max-personnel cap, resilience growth gating, defense bonus wiring, and boundary discipline (no Sarajevo prefix overlap, no Srebrenica/Žepa osid_list collision).
+
+**Mechanism / why:** Commit `04c750e3` ("default player_faction in headless harness, Phase B") unblocked autonomy and command-briefing gates, changing ARBiH 2nd Corps response shape enough that VRS East Bosnian Plamen-class pressure now carried Teocak to RS by 188w in the n1847..n1868 wave. Teocak (255th Slavna Mountain Brigade "Hajrudin Mesić" garrison, BB1 p.509) historically held against VRS East Bosnian Corps pressure throughout 1992-1995. It was not in `ENCLAVE_DEFINITIONS`, so it had no resilience growth, no defense bonus, no capital_osid retreat focus, and no enclave exhaustion reduction. The 188w loss was mechanically unsurprising once `04c750e3` shifted bot behavior. Adding the singleton restores the historical lone-holdout mechanic on the same surface that already encodes Žepa/HRHB pockets.
+
+**Determinism:** ENCLAVE_DEFINITIONS sorted by id at use sites via `strictCompare` (line 322 of `enclave_resilience.ts`). New entry uses sorted-iteration paths only. No `Math.random()`, no timestamps. 40w n1916 and 188w n1917 both reproducible from clean trees.
+
+**Verification:**
+- `npx.cmd tsc --noEmit`: clean
+- 15 focused Teocak tests + 4 existing enclave test files (34 tests): all PASS
+- 7 sensitive-history regression test files (41 tests): all PASS (rupture_consequences, rupture_silence_when_defended, late_state_rupture_proof, sensitive_history_status_diagnostic, srebrenica_diagnostic_v2, srebrenica_rupture_trace_diagnostic, supply_sensitive_history_smoke)
+- 40w `npm run sim:scenario:run:40w` n1916: hash `5c6e7b62fa6670c0`, **27/27 anchors PASS**, 6 benchmarks. Drift from prior baseline `b14179d65639860c` authorized by 04c750e3's LANE-V09X-PLAYER-FACTION-CONTRACT re-anchor handoff.
+- 188w n1917 (`apr1992_definitive_188w.json`, 12GB heap): hash `6dcf925afdb30e3b`, **26/27 anchors PASS** (Teocak now PASSES; sole failure `op:brcko:brcko` is chronic pre-existing residue documented in `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md` as a separate STOP-AND-ASK lane), 6 benchmarks. `validate_run_consistency.cjs` exit 0 (structural sector-coverage long-run signals only; no determinism errors). `diagnose_run.cjs`: 0 errors, 28 warnings.
+- `npm.cmd run test:baselines`: GREEN after manifest refresh (4-artifact trim preserved per Batch 20 precedent; surgical edit only — `apr1992_52w.run_summary.json` hash drifted, both 4w scenarios drifted as expected per the H2 state-shape extension verdict from the dispatched scenario expert).
+- `git diff --check`: clean across all 3 commits.
+
+**Sensitive-history boundary:** Teocak is a defensive holdout, not a rupture-eligible event. No FORAWWV edit, no scoring change, no rupture authoring, no sensitive prose authored, no `avoided_osids_by_faction` used, no fallback prose, no hidden manual override. ENCLAVE_DEFINITIONS already contained 3 HRHB pockets (Kiseljak, Lasva Valley, Žepče) added without canon edits — non-Sarajevo enclave geometry is engine code, not scenario/canon authoring. The Sarajevo `SARAJEVO_ID_SET_ENGINE_GEOMETRY_CANON` gate applies only to Sarajevo prefixes; tests explicitly assert Teocak's singleton OSID has no Sarajevo prefix overlap.
+
+**Remaining residue:** `op:brcko:brcko` continues to fail at 188w (chronic; persistent across n1741, n1844, n1847..n1868, n1917). Root cause documented in audit: RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it to ARBiH counter-pressure over 40w→188w because Operation Koridor's `brcko_corridor` axis does not include `op:brcko:brcko` itself in its objectives, and there is no persistent late-war re-take operation. Every candidate fix the dispatched scenario expert evaluated was flagged "insufficient evidence" or required broad retuning. Brcko is therefore left untouched in this lane and queued as a follow-up STOP-AND-ASK investigation lane.
+
+**Artifacts:**
+- `src/sim/combat/enclave_resilience.ts` (Teocak singleton + ENCLAVE_CONFIG row)
+- `tests/teocak_enclave_singleton.test.ts`
+- `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md`
+- `docs/40_reports/CALIBRATION_MASTER.md` (n1916/n1917 entry prepended)
+- `docs/PROJECT_LEDGER.md` (this entry)
+- `data/derived/scenario/baselines/manifest.json` (apr1992_52w/baseline_ops_4w/noop_4w hash refresh, 4-artifact trim preserved)
+- 40w run dir `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1916/`
+- 188w run dir `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917/`
+
+---
+
 ## [2026-05-19] test(ci): Repair GitHub fast-suite portable guards
 
 **Type:** Test/CI hygiene only. No code, simulation authority, scenario state, save schema, generated artifact, UI surface, IPC surface, canon text, FORAWWV text, or run artifact changed.

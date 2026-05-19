@@ -1,5 +1,16 @@
 # AWWV Calibration Master Reference
 
+## n1916/n1917 Teocak singleton enclave repair (2026-05-19)
+
+- **40w run. Hash: `5c6e7b62fa6670c0`. Anchors: 27/27. Benchmarks: 6/6.**
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1916`.
+- **188w run. Hash: `6dcf925afdb30e3b`. Anchors: 26/27. Benchmarks: 6/6. Sole failure: `op:brcko:brcko` (chronic, deferred).**
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917`.
+- Scope: closes the `op:ugljevik:teocak_krstac_2` 188w anchor regression introduced by `04c750e3` (player_faction default fix) by adding Teocak as a singleton ENCLAVE_DEFINITIONS entry mirroring the existing Žepa pattern. Mechanically analogous to Žepa: lone Bosniak holdout near Ugljevik/Majevica, 255th Slavna Mountain Brigade "Hajrudin Mesić" garrison, BB1 p.509.
+- Hash drift authorized by 04c750e3's "Re-anchor pending under LANE-V09X-PLAYER-FACTION-CONTRACT if drift exceeds noise" handoff. test:baselines refreshed (4-artifact trim preserved per Batch 20 precedent). Sensitive-history regression suite 41/41 PASS; sensitive-history surfaces (Srebrenica/Žepa/Goražde controllers + rupture event status) unchanged vs prior baselines.
+- Brcko residue documented as a separate STOP-AND-ASK lane in `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md`.
+- Commit: `efec3323`. Branch: `codex/late-war-188w-anchor-repair-2026-05-19`.
+
 ## n1867/n1868 RBiH-HRHB Phase C + supply closure integration probe (2026-05-17)
 
 - **40w integrated-context run. Hash: `583aaa2f33875d8c`. Anchors: 27/27. Benchmarks: 6/6.**

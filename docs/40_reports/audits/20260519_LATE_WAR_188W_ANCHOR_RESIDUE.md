@@ -105,6 +105,56 @@ Per the n1844 verification report, three signals exist alongside the brcko ancho
 3. Add focused unit test asserting the new enclave is recognized by `getEnclaveIdForOsid(...)` and that resilience growth proceeds under isolation, matching the Žepa case.
 4. Add static regression asserting Teocak is part of `ENCLAVE_DEFINITIONS` and faction is RBiH.
 
+## 6.1 Batch B applied (commit `efec3323`)
+
+- `src/sim/combat/enclave_resilience.ts`: added Teocak singleton to `ENCLAVE_DEFINITIONS` (after Žepa entry); added Teocak row to `ENCLAVE_CONFIG`.
+- `tests/teocak_enclave_singleton.test.ts`: 15 focused tests covering definition contract, OSID lookup, max-personnel cap, resilience growth under isolation, defense bonus wiring, and boundary discipline.
+- Typecheck: clean.
+- Focused tests (5 files, 49 tests): all PASS.
+- Sensitive-history regression suite (7 files, 41 tests): all PASS.
+
+## 6.2 Batch C results
+
+**40w n1916**
+- Hash: `5c6e7b62fa6670c0` (drifted from `b14179d65639860c`, authorized by 04c750e3 lane handoff).
+- **Anchors: 27/27 PASS, zero failures.**
+- Benchmarks: 6 (out of 6).
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1916`.
+
+**188w n1917**
+- Hash: `6dcf925afdb30e3b` (drifted from accepted n1844 `ccd3f9f770052614` and integrated n1868 `3700a34cd255c99c`).
+- **Anchors: 26/27 PASS. Single failure: `op:brcko:brcko` (chronic, documented residue).**
+- Teocak repair verified: `op:ugljevik:teocak_krstac_2` now RBiH PASS (was RS FAIL in n1868).
+- Benchmarks: 6 (out of 6).
+- `validate_run_consistency.cjs` exit 0 (structural sector-coverage long-run signals only; no determinism errors).
+- `diagnose_run.cjs`: 0 errors, 28 warnings.
+- Sensitive-history check: Srebrenica/Žepa/Goražde controllers at 188w unchanged vs n1844/n1868 baselines; `srebrenica_genocide_1995` rupture event NOT fired (status unchanged; gap predates this fix).
+- Side-effect drift vs n1868: 8 controller flips total — Teocak primary + 7 collateral (`op:mostar:hodbina_2` HRHB→RS, `op:srebrenica:brezovice_2` RS→RBiH, `op:stolac:pjesivac_kula_2 + rotimlja_2` HRHB→RS, `op:teslic:kamenica_2` HRHB→RS, `op:ugljevik:jasikovac + srednja_trnova_2` RS→RBiH). The Ugljevik cluster is expected micro-spillover from Teocak hardening; non-anchor, non-benchmark.
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917`.
+
+**Baseline regression**
+- `npm.cmd run test:baselines`: **GREEN** after surgical manifest refresh.
+- Manifest refresh scope: `apr1992_52w.run_summary.json` hash updated; `baseline_ops_4w` and `noop_4w` all 4 artifact hashes updated (state-shape extension confirmed by scenario expert as H2: `updateEnclaveResilience` seeds a new `teocak: { resilience: 0, ... }` entry every turn regardless of `resilience_start_turn` gating, shifting serialized state byte order in alpha-sorted iteration).
+- 4-artifact trim preserved per Batch 20 (`bf8f6246`) precedent.
+
+**Acceptance verdict from dispatched `/scenario-creator-runner-tester` expert (twice — pre-Batch-B and post-runs):** GO. Teocak fix delivers the contracted repair (n1868 FAIL → n1917 PASS) without anchor or benchmark regression. Collateral drift is within the authorized 04c750e3 envelope. Hashes `5c6e7b62fa6670c0` (40w) / `6dcf925afdb30e3b` (188w) are acceptable new baselines.
+
+## 6.3 Docs propagated
+
+- `docs/PROJECT_LEDGER.md`: top entry with full mechanism, verification, sensitive-history boundary, and remaining residue.
+- `docs/40_reports/CALIBRATION_MASTER.md`: n1916/n1917 entry prepended at top.
+- `data/derived/scenario/baselines/manifest.json`: hashes refreshed, 4-artifact trim preserved.
+- This audit: final results section + Brcko residue handoff (§9).
+
+## 9. Remaining residue and follow-up handoff
+
+- **`op:brcko:brcko`**: chronic late-war loss (40w PASS → 188w FAIL). Persists across n1741, n1844, n1847..n1868, n1917. Root cause documented in §2: RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it to ARBiH counter-pressure over 40w→188w because Operation Koridor's `brcko_corridor` axis does not include `op:brcko:brcko` itself in its objectives, and there is no persistent late-war re-take operation. Every candidate fix flagged by the scenario expert as "insufficient evidence" or requiring broad retuning. Brcko is therefore queued as a follow-up STOP-AND-ASK investigation lane separate from this PR.
+- **Sarajevo casualty railroad signal** (3.785 attacker:defender ratio): owned by Sarajevo Branch B canon lane — out of scope here.
+- **Force-quality late-war shape** (HRHB/RS personnel growth, fatigue collapse, HRHB morale/quality drift): owned by `docs/plans/2026-05-17-fatigue-recovery-rebalance-plan.md` follow-up — out of scope here.
+- **`patron_pressure` not serialized**: owned by a separate political-state serialization audit — out of scope here.
+
+## 7. Plan for Batch C (validation + docs)
+
 ## 7. Plan for Batch C (validation + docs)
 
 1. `npm.cmd run typecheck`.
