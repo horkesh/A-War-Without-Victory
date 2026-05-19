@@ -1065,7 +1065,7 @@ export const warPhases: NamedPhase[] = [
 
             const results = await Promise.allSettled(
                 botFactions.map(async (faction: string) => {
-                    const decision = await generateArmyDecision(context.state, faction as FactionId, client);
+                    const decision = await generateArmyDecision(context.state, faction, client);
                     if (decision) {
                         if (!context.state.military.ai_army_decisions) {
                             context.state.military.ai_army_decisions = {};
@@ -1101,7 +1101,7 @@ export const warPhases: NamedPhase[] = [
 
             for (const faction of botFactions) {
                 const armyDecision = context.state.military.ai_army_decisions?.[faction] ?? null;
-                await generateCorpsDecisions(context.state, faction as FactionId, armyDecision, client);
+                await generateCorpsDecisions(context.state, faction, armyDecision, client);
             }
         }
     },
@@ -1276,7 +1276,7 @@ export const warPhases: NamedPhase[] = [
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
                 generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat);
-                corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
+                corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {
                 context.report.corps_ai_report = corpsReport;
@@ -1305,7 +1305,7 @@ export const warPhases: NamedPhase[] = [
             }
             // generateCorpsStanceOrders sets ai_recommended_stance on each corps cmd
             // and respects player_ordered_stance guard (will not overwrite cmd.stance).
-            generateCorpsStanceOrders(context.state, playerFaction as FactionId, edges, sidToMun);
+            generateCorpsStanceOrders(context.state, playerFaction, edges, sidToMun);
         },
     },
     {
@@ -1317,7 +1317,7 @@ export const warPhases: NamedPhase[] = [
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
             if (context.state.meta.autonomy_level !== 1) return;
-            const proposals = generateLevel1StanceProposals(context.state, playerFaction as FactionId);
+            const proposals = generateLevel1StanceProposals(context.state, playerFaction);
             if (proposals.length === 0) return;
             if (!context.state.meta.pending_proposal_reviews) {
                 context.state.meta.pending_proposal_reviews = [];
@@ -1356,7 +1356,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction ?? null;
-            applyBotOpportunityDecisions(context.state, context.state.meta.turn, playerFaction as FactionId | null);
+            applyBotOpportunityDecisions(context.state, context.state.meta.turn, playerFaction);
         },
     },
     {
@@ -1370,7 +1370,7 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
-            const reviews = generateOpportunityProposalReviews(context.state, playerFaction as FactionId);
+            const reviews = generateOpportunityProposalReviews(context.state, playerFaction);
             if (reviews.length === 0) return;
             if (!context.state.meta.pending_proposal_reviews) {
                 context.state.meta.pending_proposal_reviews = [];
@@ -1388,7 +1388,7 @@ export const warPhases: NamedPhase[] = [
             const playerFaction = context.state.meta.player_faction;
             if (!playerFaction) return;
             if (context.state.meta.autonomy_level !== 1) return;
-            const proposals = generateLevel1OpProposals(context.state, playerFaction as FactionId);
+            const proposals = generateLevel1OpProposals(context.state, playerFaction);
             if (proposals.length === 0) return;
             if (!context.state.meta.pending_proposal_reviews) {
                 context.state.meta.pending_proposal_reviews = [];
@@ -1932,8 +1932,8 @@ export const warPhases: NamedPhase[] = [
                         settlement_flipped: true,
                         location: sid,
                         osid: b.target_osid,
-                        attacker_faction: b.attacker_faction as FactionId,
-                        defender_faction: b.defender_faction as FactionId
+                        attacker_faction: b.attacker_faction,
+                        defender_faction: b.defender_faction
                     });
                 }
             }

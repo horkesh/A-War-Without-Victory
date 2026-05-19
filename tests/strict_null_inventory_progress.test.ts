@@ -145,6 +145,10 @@ const STATE_SIM_DESKTOP_BATCH_44_FILES = [
     'src/state/seed_organizational_penetration_from_control.ts',
 ];
 
+const WAR_PIPELINE_BATCH_45_FILES = [
+    'src/sim/turn_phases/war_phases.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -513,5 +517,23 @@ describe('strict null inventory progress', () => {
         );
 
         expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 45 war pipeline FactionId-cast slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        // war_phases.ts retains save-shape-preserving non-null assertions on
+        // optional supply_reserve / heavy_munitions_reserve / events_fired
+        // collections plus one deliberately preserved `as any` widening. Those
+        // are documented as out-of-scope per the lane's save-shape stop-gate
+        // (analogous to the Batch 19 commander_march_correction precedent).
+        // This slice pins only the as_factionid_casts category at zero.
+        const factionIdCount = phaseCount(current, 'as_factionid_casts', WAR_PIPELINE_BATCH_45_FILES);
+
+        expect(factionIdCount).toBe(0);
     });
 });

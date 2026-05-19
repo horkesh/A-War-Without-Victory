@@ -3,6 +3,41 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] refactor(strict-null): Batch 45 war pipeline FactionId-cast slice (byte-identical)
+
+**Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `5358f968`; follows Batch 44 at `cb5e1478`).
+
+**Change:** Removed 10 redundant `as FactionId` / `as FactionId | null` casts in `src/sim/turn_phases/war_phases.ts` (the 151-step war pipeline orchestrator), at sites L1068, L1104, L1279, L1308, L1320, L1359, L1373, L1391, L1935, L1936. Each cast was a no-op under `FactionId = string`:
+
+- L1068, L1104, L1279: `faction as FactionId` inside loops/maps over `string[]` lists derived from `state.factions.map(f => f.id)`.
+- L1308, L1320, L1373, L1391: `playerFaction as FactionId` after preceding `if (!playerFaction) return;` guards already narrowed `state.meta.player_faction` to `FactionId`.
+- L1359: `playerFaction as FactionId | null` where `playerFaction = state.meta.player_faction ?? null` is already `FactionId | null`.
+- L1935, L1936: `b.attacker_faction as FactionId` / `b.defender_faction as FactionId` where the surrounding `osidBattles` array element type already declares both as `FactionId` and the source values are `string`.
+
+Added `Batch 45 war pipeline FactionId-cast slice` assertion in `tests/strict_null_inventory_progress.test.ts`, restricted to the `as_factionid_casts` category only (war_phases.ts retains 6 non-FactionId-cast escapes: 1 `as_any_casts` pipeline-step widening at L3069, 1 `non_null_assertions_dot` on `context.report.events_fired!` at L301, and 4 `non_null_assertions_index` on optional `state.military.general_supply_reserve!`/`heavy_munitions_reserve!` collections at L607-610 — all preserved per save-shape stop-gate, same precedent as Batch 19 commander_march_correction).
+
+**Determinism:** Type-only erasure. Compiled JS is byte-equivalent.
+
+**Verification:**
+- `npm.cmd run typecheck`: PASS.
+- `node_modules/.bin/vitest run tests/strict_null_inventory_progress.test.ts`: **24/24 PASS** (was 23/23; added Batch 45 slice).
+- `npm.cmd run test:baselines`: **"Baseline regression: all scenarios match"** — 40w/52w/baseline_ops_4w/noop_4w byte-identical to the post-Batch-44 baseline floor.
+- `git diff --check`: clean.
+
+**Inventory delta:** `as_factionid_casts` 38 → 28 (-10 sites, 11 → 10 files in inventory). Cumulative Batch 43 + 44 + 45: 64 → 28 (-36 sites, 14 files cleaned of as_factionid_casts). Other inventory categories unchanged.
+
+**Stop-gate compliance:** Did NOT touch `GameStateAdapter.ts` (Phase 5), Phase 2 combat long-tail, commander-movement save-shape casts, or loader JSON guards. Explicitly preserved the 4 supply-reserve / heavy-munitions-reserve non-null index assertions in war_phases.ts under the established save-shape precedent.
+
+**Artifacts:**
+- `src/sim/turn_phases/war_phases.ts`
+- `tests/strict_null_inventory_progress.test.ts` (+ Batch 45 slice)
+- `docs/40_reports/implemented/20260519_STRICT_NULL_BATCH45_WAR_PIPELINE.md`
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-19] refactor(strict-null): Batch 44 state + sim + desktop safe slice (byte-identical)
 
 **Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.
