@@ -159,7 +159,7 @@ export class NewspaperModal {
         const succession = report?.details?.officer_succession;
         if (!succession) return [];
 
-        const snap = extractWarData(this.gameState, playerFaction as FactionId);
+        const snap = extractWarData(this.gameState, playerFaction);
         const nameById = new Map<string, string>(Object.entries(snap.officerNamesById));
         const corpsName = (corpsId: string): string =>
             snap.ownForces.formationDetails.find(fd => fd.id === corpsId)?.name ?? corpsId;
@@ -287,10 +287,10 @@ export class NewspaperModal {
      */
     render(): HTMLElement {
         const content = this.generateContent();
-        const identity = getWarroomFactionIdentity(content.factionId as FactionId);
+        const identity = getWarroomFactionIdentity(content.factionId);
 
         const newspaper = document.createElement('div');
-        const fCss = factionCssClass(content.factionId as any);
+        const fCss = factionCssClass(content.factionId);
         newspaper.className = `newspaper-modal newspaper-urgency-${content.urgency} faction-${fCss}`;
         const fc = FACTION_COLORS[content.factionId] ?? FACTION_COLORS['RBiH'];
         newspaper.style.borderTop = `3px solid ${fc.primary}`;

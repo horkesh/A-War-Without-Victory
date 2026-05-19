@@ -370,8 +370,8 @@ export class ReportsModal {
      */
     private renderPhase0(): HTMLElement {
         const content = this.generateContent();
-        const identity = getWarroomFactionIdentity(content.factionId as FactionId);
-        const report = this.createShell(content.factionId as FactionId, content.classification);
+        const identity = getWarroomFactionIdentity(content.factionId);
+        const report = this.createShell(content.factionId, content.classification);
 
         // Header
         const header = document.createElement('div');

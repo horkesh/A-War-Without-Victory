@@ -858,7 +858,7 @@ function extractObservedTerritoryPct(state: GameState): Partial<Record<FactionId
 
     const counts = new Map<FactionId, number>();
     for (const key of keys) {
-        const faction = controllers[key] as FactionId | null | undefined;
+        const faction = controllers[key];
         if (!faction) continue;
         counts.set(faction, (counts.get(faction) ?? 0) + 1);
     }

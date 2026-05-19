@@ -601,7 +601,7 @@ export class ClickableRegionManager {
 
         const state = gameState as GameState;
         const briefingRoot = new CommandBriefingModal(state).render();
-        const snap = extractWarData(state, getPlayerFaction(state) as FactionId);
+        const snap = extractWarData(state, getPlayerFaction(state));
         const composite = snap.ivpState.composite;
         const hasConsequences = snap.ivpState.activeConsequenceIds.length > 0;
         if (state.meta.phase === 'war' && (composite >= INTERNATIONAL_SANCTIONS_THRESHOLD || hasConsequences)) {

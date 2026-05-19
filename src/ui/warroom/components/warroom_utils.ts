@@ -217,5 +217,5 @@ export function factionCssClass(factionId: FactionId): string {
  * Reads the required loaded-state meta.player_faction contract.
  */
 export function getPlayerFaction(gameState: GameState): FactionId {
-    return requirePlayerFaction(gameState.meta?.player_faction, 'warroom player faction') as FactionId;
+    return requirePlayerFaction(gameState.meta?.player_faction, 'warroom player faction');
 }

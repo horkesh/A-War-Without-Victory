@@ -116,6 +116,15 @@ const PHASE_4_SCENARIO_BATCH_41_FILES = [
     'src/scenario/oob_early_war_entry.ts',
 ];
 
+const PHASE_6_WARROOM_BATCH_42_FILES = [
+    'src/ui/warroom/components/FactionOverviewPanel.ts',
+    'src/ui/warroom/components/IvpBreakdownModal.ts',
+    'src/ui/warroom/components/NewspaperModal.ts',
+    'src/ui/warroom/components/ReportsModal.ts',
+    'src/ui/warroom/components/warroom_utils.ts',
+    'src/ui/warroom/data/war_data_extractor.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -441,6 +450,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_4_SCENARIO_BATCH_41_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 42 Phase 6 warroom safe slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_6_WARROOM_BATCH_42_FILES),
             0,
         );
 

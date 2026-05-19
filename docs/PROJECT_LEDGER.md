@@ -6476,3 +6476,32 @@ The remaining 40 Phase 4 escapes are all classified as load-bearing (JSON-narrow
 **Artifacts:** `src/scenario/combat_causality.ts`, `src/scenario/oob_early_war_entry.ts`, `src/scenario/initial_formations_loader.ts`, `src/scenario/oob_loader.ts`, `src/desktop/desktop_sim.ts`, `src/scenario/scenario_runner.ts`, `src/scenario/scenario_end_report.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260519_BATCH41_STRICT_NULL_PHASE4_SAFE_SLICE.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
 
 ---
+
+## [2026-05-19] refactor(strict-null): Batch 42 Phase 6 warroom safe slice (UI-only, byte-identical UI)
+
+**Type:** Type-only UI refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, or FORAWWV text changed. UI-only refactor confirmed via `npm.cmd run desktop:map:build` PASS plus 91/91 focused warroom tests.
+
+**Change:** Opens Phase 6 (Renderer + Warroom) of `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` with a 13-escape reduction confined to the `src/ui/warroom/` subtree plus one renderer panel narrowing. Phase 6 inventory: 74 → 61 remaining.
+- Removed 10 redundant `as FactionId` casts on already-typed `FactionId` (≡ `string`) values across `src/ui/warroom/ClickableRegionManager.ts:604`, `src/ui/warroom/components/FactionOverviewPanel.ts:229`, `src/ui/warroom/components/IvpBreakdownModal.ts:35`, `src/ui/warroom/components/NewspaperModal.ts:162,290`, `src/ui/warroom/components/ReportsModal.ts:373,374`, `src/ui/warroom/components/warroom_utils.ts:220` (the literal-union `CanonicalPlayerFaction` widens automatically to the declared `FactionId = string` return type), `src/ui/warroom/data/war_data_extractor.ts:861` (redundant `| null | undefined` cast where TS already infers the same type from the `Record<SettlementId, FactionId | null>?` lookup), and `src/ui/warroom/warroom.ts:401` (cast on DOM `btn.dataset.faction: string | undefined`).
+- Removed 1 redundant `as any` cast on `content.factionId` passed to `factionCssClass(factionId: FactionId)` at `NewspaperModal.ts:293`.
+- Refactored 1 JSX ternary in `src/ui/map/components/AutonomyPanel.tsx:148-150` from `{resolved ? ... statusIndicator!.cls ... statusIndicator!.label ... : ...}` to `{statusIndicator ? ... statusIndicator.cls ... statusIndicator.label ... : ...}`. `statusIndicator = resolved ? { label, cls } : null` (lines 109-113) gives `resolved === true ⇔ statusIndicator !== null`, so the switch from the predicate variable to the value-object truthy check preserves identical branch behavior and lets TypeScript narrow `statusIndicator` natively inside the truthy JSX branch.
+- `tests/strict_null_inventory_progress.test.ts`: added `PHASE_6_WARROOM_BATCH_42_FILES` constant (six warroom files now fully clean: `FactionOverviewPanel.ts`, `IvpBreakdownModal.ts`, `NewspaperModal.ts`, `ReportsModal.ts`, `warroom_utils.ts`, `war_data_extractor.ts`) and a new "cleans the Batch 42 Phase 6 warroom safe slice" assertion.
+
+**Phase 5 explicitly skipped this wave.** `src/ui/map/data/GameStateAdapter.ts` (48 `as_any_casts` + 13 `as_unknown_casts` + 2 `as_factionid_casts` = 63 escapes) is the renderer data chokepoint and the plan ledger row warns: "Coordinate with the boundary cleanup lane before replacing adapter reads. This file is the renderer data chokepoint and should be touched once." Touching it piecemeal would leak load-bearing assumptions about field optionality into UI consumers without a corresponding GameState schema tightening. The skip is documented in `docs/40_reports/implemented/20260519_BATCH42_STRICT_NULL_PHASE6_SAFE_SLICE.md`'s "Phase 5 (GameStateAdapter) skip rationale" section.
+
+All ten `as FactionId*` removals are no-ops under the current `type FactionId = string` alias. They document the tightening boundary for a future literal-union refactor — at that point each consumer signature would need to be tightened to accept `CanonicalPlayerFaction`, and the DOM-source / JSON-source values would need `isFactionId(...)` runtime type guards.
+
+**Determinism:** Pure type erasure (11 sites) + JSX-narrowing refactor (1 site). UI-only; no simulation code touched.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 21/21 PASS (incl. new Batch 42 slice).
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/autonomy_panel_player_faction_truth.test.ts tests/ivp_breakdown.test.ts tests/ivp_breakdown_modal_boundary.test.ts tests/newspaper_modal_officer_boundary.test.ts tests/warroom_smoke.test.ts tests/warroom_player_visibility.test.ts tests/warroom_shell_layer.test.ts --reporter=dot` — 91/91 PASS.
+- `npm.cmd run desktop:map:build` — PASS (exit 0).
+- `git diff --check` — clean.
+
+`npm.cmd run test:baselines` not re-run for this batch because the touched files are pure UI/warroom components that do not participate in scenario simulation. The Batch 41 baselines run remains the active byte-identity floor.
+
+**Artifacts:** `src/ui/warroom/ClickableRegionManager.ts`, `src/ui/warroom/components/FactionOverviewPanel.ts`, `src/ui/warroom/components/IvpBreakdownModal.ts`, `src/ui/warroom/components/NewspaperModal.ts`, `src/ui/warroom/components/ReportsModal.ts`, `src/ui/warroom/components/warroom_utils.ts`, `src/ui/warroom/data/war_data_extractor.ts`, `src/ui/warroom/warroom.ts`, `src/ui/map/components/AutonomyPanel.tsx`, `tests/strict_null_inventory_progress.test.ts`, `docs/40_reports/implemented/20260519_BATCH42_STRICT_NULL_PHASE6_SAFE_SLICE.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
+
+---

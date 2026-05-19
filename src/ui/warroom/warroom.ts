@@ -398,7 +398,7 @@ class WarroomApp {
 
         for (const btn of factionButtons) {
             btn.onclick = async () => {
-                const faction = btn.dataset.faction as FactionId | undefined;
+                const faction = btn.dataset.faction;
                 if (!faction) return;
                 if (errorEl) { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
 

@@ -226,7 +226,7 @@ export class FactionOverviewPanel {
         const identity = getWarroomFactionIdentity(snap.factionId);
 
         const panel = document.createElement('div');
-        panel.className = `panel-power-on weathered-panel faction-overview-panel faction-${factionCssClass(snap.factionId as FactionId)}`;
+        panel.className = `panel-power-on weathered-panel faction-overview-panel faction-${factionCssClass(snap.factionId)}`;
         const fc = FACTION_COLORS[snap.factionId] ?? FACTION_COLORS['RBiH'];
         panel.style.borderTop = `3px solid ${fc.primary}`;
 

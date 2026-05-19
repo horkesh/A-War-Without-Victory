@@ -145,9 +145,9 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
             </p>
 
             {/* Action row */}
-            {resolved ? (
-                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-[9px] font-mono uppercase tracking-[0.15em] ${statusIndicator!.cls}`}>
-                    {statusIndicator!.label}
+            {statusIndicator ? (
+                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-[9px] font-mono uppercase tracking-[0.15em] ${statusIndicator.cls}`}>
+                    {statusIndicator.label}
                 </div>
             ) : (
                 <div className="flex gap-2 pt-0.5">

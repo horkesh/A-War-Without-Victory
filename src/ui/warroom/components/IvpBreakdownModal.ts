@@ -32,7 +32,7 @@ export class IvpBreakdownModal {
     }
 
     render(): HTMLElement {
-        const pf = getPlayerFaction(this.gameState) as FactionId;
+        const pf = getPlayerFaction(this.gameState);
         const snap = extractWarData(this.gameState, pf);
         const ivpSnap = snap.ivpState;
         const composite = ivpSnap.composite;
