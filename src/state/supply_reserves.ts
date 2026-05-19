@@ -59,14 +59,14 @@ export function ensureSupplyReserves(state: GameState): void {
     if (!state.military.general_supply_reserve) {
         state.military.general_supply_reserve = {};
         for (const fid of factionIds) {
-            state.military.general_supply_reserve[fid as FactionId] =
+            state.military.general_supply_reserve[fid] =
                 INIT_GENERAL_SUPPLY_RESERVE_BY_FACTION[fid] ?? INIT_GENERAL_SUPPLY_RESERVE;
         }
     }
     if (!state.military.heavy_munitions_reserve) {
         state.military.heavy_munitions_reserve = {};
         for (const fid of factionIds) {
-            state.military.heavy_munitions_reserve[fid as FactionId] =
+            state.military.heavy_munitions_reserve[fid] =
                 INIT_HEAVY_MUNITIONS_RESERVE_BY_FACTION[fid] ?? INIT_HEAVY_MUNITIONS_RESERVE;
         }
     }
@@ -321,7 +321,7 @@ export function updateSupplyReserves(
     const entries: SupplyReservesFactionEntry[] = [];
 
     for (const fid of factionIds) {
-        const factionKey = fid as FactionId;
+        const factionKey: FactionId = fid;
         const formCount = formationCountByFaction[fid] ?? 0;
         const faction = state.factions.find((f) => f.id === fid);
 
@@ -425,7 +425,7 @@ export function deductCombatExpenditure(
     intensity: number
 ): void {
     if (!state.military.general_supply_reserve || !state.military.heavy_munitions_reserve) return;
-    const fkey = factionId as FactionId;
+    const fkey: FactionId = factionId;
 
     const heavyDrain = attackerCount * intensity * COMBAT_HEAVY_MUNITIONS_RATE / 100;
     const generalDrain = attackerCount * intensity * COMBAT_GENERAL_SUPPLY_RATE / 100;
@@ -540,7 +540,7 @@ function determineConvoyRouteFaction(enclave: EnclaveState, state: GameState, ed
         if (enclaveSet.has(edge.a) && !enclaveSet.has(edge.b)) externalSid = edge.b;
         if (enclaveSet.has(edge.b) && !enclaveSet.has(edge.a)) externalSid = edge.a;
         if (!externalSid) continue;
-        const controller = state.political.political_controllers?.[externalSid] as FactionId | undefined;
+        const controller = state.political.political_controllers?.[externalSid];
         if (!controller || controller === enclave.faction_id) continue;
         hostileCounts.set(controller, (hostileCounts.get(controller) ?? 0) + 1);
     }

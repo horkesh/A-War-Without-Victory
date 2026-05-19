@@ -292,10 +292,10 @@ function buildFriendlyMunicipalitiesByFaction(
         const osids = Object.keys(pc).sort(strictCompare);
         for (const osid of osids) {
             const controller = pc[osid] as string | undefined;
-            if (!controller || !out[controller as FactionId]) continue;
+            if (!controller || !out[controller]) continue;
             const parts = osid.split(':');
             const mun = parts.length >= 2 ? parts[1] : undefined;
-            if (mun) out[controller as FactionId].add(mun as MunicipalityId);
+            if (mun) out[controller].add(mun as MunicipalityId);
         }
     }
     return out;
@@ -555,7 +555,7 @@ export function processDisplacementTakeover(
             const osids = Object.keys(pc).sort(strictCompare);
             for (const osid of osids) {
                 if (!osid.startsWith('op:')) continue;
-                const controller = pc[osid] as FactionId;
+                const controller = pc[osid];
                 if (!controller) continue;
                 const parts = osid.split(':');
                 const munId = parts.length >= 2 ? parts[1] as MunicipalityId : undefined;
@@ -638,7 +638,7 @@ export function processDisplacementTakeover(
         const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
         // Recapture check: if displaced faction regained control, delete timer
-        const currentController = state.political.political_controllers?.[osid] as FactionId | undefined;
+        const currentController = state.political.political_controllers?.[osid];
         if (currentController === timer.from_faction) {
             delete timerMap[timerKey];
             continue;
@@ -757,13 +757,13 @@ export function processDisplacementTakeover(
             // additional killed/fled_abroad and does not increment displaced_total.
             if (dispState.displaced_in > 0) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
-                const fKeys = (Object.keys(byFaction) as FactionId[]).sort(strictCompare);
+                const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
                     const result = routeDisplacedCohort(
-                        state, munId, fid as FactionId, rem,
-                        friendlyMunsByFaction[fid as FactionId],
+                        state, munId, fid, rem,
+                        friendlyMunsByFaction[fid],
                         settlements, routedByPoolKey, report,
                         { causedByFaction: timer.to_faction }
                     );
@@ -892,7 +892,7 @@ export function processDisplacementTakeover(
         if (currentTurn - camp.started_turn < CAMP_REROUTE_DELAY_TURNS) continue;
 
         let routedFromCamp = 0;
-        const factionKeys = (Object.keys(camp.by_faction) as FactionId[]).sort(strictCompare);
+        const factionKeys = Object.keys(camp.by_faction).sort(strictCompare);
         for (const factionId of factionKeys) {
             const cohortAmount = Math.max(0, Math.floor(camp.by_faction[factionId] ?? 0));
             if (cohortAmount <= 0) continue;

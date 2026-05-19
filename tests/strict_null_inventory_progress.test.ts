@@ -149,6 +149,12 @@ const WAR_PIPELINE_BATCH_45_FILES = [
     'src/sim/turn_phases/war_phases.ts',
 ];
 
+const STATE_BATCH_46_FILES = [
+    'src/state/displacement.ts',
+    'src/state/displacement_takeover.ts',
+    'src/state/supply_reserves.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -533,6 +539,25 @@ describe('strict null inventory progress', () => {
         // (analogous to the Batch 19 commander_march_correction precedent).
         // This slice pins only the as_factionid_casts category at zero.
         const factionIdCount = phaseCount(current, 'as_factionid_casts', WAR_PIPELINE_BATCH_45_FILES);
+
+        expect(factionIdCount).toBe(0);
+    });
+
+    it('cleans the Batch 46 state FactionId-cast slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        // displacement.ts, displacement_takeover.ts, and supply_reserves.ts
+        // retain save-shape-preserving `non_null_assertions_index` escapes on
+        // optional state collections (e.g. `state.military.general_supply_reserve![fid]`)
+        // that would shift serialized save shape if rewritten to an idempotent
+        // default-init. Those are documented as out-of-scope per the lane's
+        // save-shape stop-gate (analogous to the Batch 19 / Batch 45 precedent).
+        // This slice pins only the as_factionid_casts category at zero.
+        const factionIdCount = phaseCount(current, 'as_factionid_casts', STATE_BATCH_46_FILES);
 
         expect(factionIdCount).toBe(0);
     });

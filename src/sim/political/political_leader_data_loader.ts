@@ -148,7 +148,7 @@ export function isValidLeaderProfile(profile: unknown): profile is PoliticalLead
     if (typeof p.leader_id !== 'string' || p.leader_id.length === 0) return false;
     if (typeof p.name !== 'string') return false;
     if (typeof p.faction !== 'string') return false;
-    if (!CANONICAL_FACTIONS.includes(p.faction as FactionId)) return false;
+    if (!CANONICAL_FACTIONS.includes(p.faction)) return false;
     for (const field of NUMERIC_FIELDS) {
         const v = p[field];
         if (typeof v !== 'number' || !Number.isFinite(v)) return false;
