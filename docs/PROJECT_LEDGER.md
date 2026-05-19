@@ -3,6 +3,32 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] docs(audit): Teslić kamenica_2 collateral residue — decision packet
+
+**Type:** Documentation-only audit. No code, scenario, canon, save schema, or FORAWWV change. Ledger backfill for commit `a9504b20` that landed earlier in this branch without a ledger entry.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `5358f968`).
+
+**Change:** Authored `docs/40_reports/audits/20260519_TESLIC_KAMENICA_COLLATERAL_RESIDUE.md` to investigate and decide on the lone divergent collateral controller flip introduced by the Brčko 188w anchor fix at `5358f968`.
+
+**Mechanism:** `op:teslic:kamenica_2` initial controller is HRHB in both n1917 and n1919 (canon-derived via `init_control: "apr1992"`, `init_control_mode: "hybrid_1992"` — scenario authoring unchanged). In the n1917 baseline some RS attacker captured it at turn 60 via combat. In n1919 (Brčko fix applied) it stays HRHB all 188 turns — `control_events` filtered for this OSID is empty. The Brčko fix made EBK succeed in Operation Koridor (5 brcko-cluster captures in turns 5-8), which appears to have re-prioritized army-CO scheduling so vrs_1st_krajina no longer drifts into HRHB-held Lašva-Tešanj fringe at turn ~60. Emergent side-effect of the mechanical Brčko fix, not a bug.
+
+**Scope:** Isolated. The other 6 Teslić OSIDs (`blatnica_2`, `buletic_2`, `cecava_2`, `donji_ruzevic`, `teslic_2`, `vitkovci`) are all stable RS in both runs and match painted. The Žepče HRHB cluster (`ozimica_2`, `viniste_2`, `zepce_2`) is stable.
+
+**Classification:** Harmless contestation noise. Not an anchor, not a benchmark, not sensitive-history. ≤0.02% of the 5822-node graph by count. Net Brčko-fix historical-alignment trade is +5/6 positive vs painted Oct 1995 reference.
+
+**Decision:** Accept as documented minor collateral noise. Defer to a future calibration lane if Lašva-valley front-edge tooling work touches this area. No code change in this batch.
+
+**Determinism:** Documentation only.
+
+**Verification:** `git diff --check` clean. No code touched. 40w n1918 hash `5c6e7b62fa6670c0` (27/27 anchors, 6/6 benchmarks) and 188w n1919 hash `7b57a8592f668137` (27/27 anchors, 6/6 benchmarks) both unchanged.
+
+**Artifacts:**
+- `docs/40_reports/audits/20260519_TESLIC_KAMENICA_COLLATERAL_RESIDUE.md` (audit, committed at `a9504b20`)
+- `docs/PROJECT_LEDGER.md` (this backfill entry)
+
+---
+
 ## [2026-05-19] refactor(strict-null): Batch 45 war pipeline FactionId-cast slice (byte-identical)
 
 **Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.
