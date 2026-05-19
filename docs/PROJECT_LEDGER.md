@@ -3,6 +3,41 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] refactor(strict-null): Batch 46 state + loader FactionId-cast slice (byte-identical)
+
+**Type:** Type-only refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, ordering, or FORAWWV text changed.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19`. **Commit:** `04f65be8`.
+
+**Change:** Continues the strict-null FactionId-cast cleanup from Batch 45 with the next safe slice — the Phase 1 state subset plus one Phase B political-leader loader site. Removes 19 inventory-counted `as_factionid_casts`, all behavior-preserving under the current `type FactionId = string` alias. Adds an explicit audit + decision packet for the 9 remaining as_factionid_casts (combat / adapter / JSON-schema) to `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`, each with a stop-gate citation and future-owner note.
+
+- `src/state/displacement.ts` (5 → 0): literal `['RBiH','RS','HRHB'] as FactionId[]` arrays at lines 554 + 846 → `CANONICAL_FACTIONS` (newly imported); `value as FactionId` at 57 → `: FactionId =` annotation after existing `!value` guard; `factionId as FactionId` at 817 → `: FactionId =` annotation after existing `typeof === 'string'` guard; cast at 854 dropped (already typed).
+- `src/state/displacement_takeover.ts` (8 → 0): two `out[controller as FactionId]` indexings at 295/298 → bare `out[controller]` (record key is `FactionId = string`); `pc[osid] as FactionId` at 558 → bare lookup before truthy guard; `pc?.[osid] as FactionId | undefined` widening at 641 → bare optional-chain lookup; `Object.keys(byFaction) as FactionId[]` at 760 → bare `Object.keys`; two `fid as FactionId` at 765/766 → bare `fid`; `Object.keys(camp.by_faction) as FactionId[]` at 895 → bare `Object.keys`.
+- `src/state/supply_reserves.ts` (5 → 0): two `fid as FactionId` index casts at 62/69 → bare `fid` (record keys are `string`-typed under `FactionId = string`); `fid as FactionId` at 324 → `: FactionId` annotation; `factionId as FactionId` at 428 → `: FactionId` annotation; `pc[externalSid] as FactionId | undefined` widening at 543 → bare optional-chain lookup before truthy guard.
+- `src/sim/political/political_leader_data_loader.ts` (1 → 0): `CANONICAL_FACTIONS.includes(p.faction as FactionId)` at 151 → `.includes(p.faction)` — `readonly FactionId[]` accepts `string` directly under the current alias, and `p.faction` is already narrowed to `string` by the immediately-preceding `typeof p.faction !== 'string'` guard.
+
+All 19 cast removals are no-ops under the current `type FactionId = string` alias. They document the tightening boundary for a future literal-union refactor — at that point each consumer would need to either accept a literal-union, gain an `isFactionId(...)` runtime type guard, or move behind an explicit canonical-faction set check.
+
+**Phase 1 escape-hatch count drops from 25 to 15.** Remaining Phase 1 escapes: 8 `non_null_assertions_index` in `supply_reserves.ts` + 2 in `displacement.ts` (save-shape-preserving deferred — analogous to the Batch 19 / Batch 45 precedent for war_phases.ts) + 5 `as_unknown_casts` and 2 `as_any_casts` in `serialize.ts` + `validateGameState.ts` (save migration territory; outside Batch 46's behavior-stable scope).
+
+**Batch 46-D decision packet (deliberately NOT touched this lane):** 9 sites across `paramilitary_sweep.ts` (2), `sector_offensive.ts` (2), `sector_building.ts` (1), `supply_condition.ts` (1), `GameStateAdapter.ts` (2), and `response_parser.ts` (1). The 8 combat/adapter casts are themselves trivial aliases, but Phase 2 ("conflict-prone in current multi-agent lane") and Phase 5 ("renderer data chokepoint; touch once") stop-gates from `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` apply. The `response_parser.ts:101` site is `unknown→FactionId` JSON schema validation territory rather than a trivial alias and is routed to a future LLM-response schema-validation lane that owns the wider AI-commander `unknown→typed` boundary.
+
+`displacement_takeover.ts` is not currently in the Phase 1 file list of `tests/strict_null_inventory_progress.test.ts`; the new Batch 46 assertion adds it alongside `displacement.ts` and `supply_reserves.ts`, and the audit note flags that future ledger expansion should fold the file into the Phase 1 stop-gate accounting.
+
+**Determinism:** Pure type erasure (16 alias removals + 2 literal-array → CANONICAL_FACTIONS substitutions + 1 includes-cast removal). No control flow change; no runtime branch added or removed.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 25/25 PASS (incl. new Batch 46 slice).
+- `npx.cmd vitest run tests/displacement.test.ts tests/displacement_takeover.test.ts tests/supply_reserves.test.ts tests/bilateral_displacement_cascade.test.ts --reporter=dot` — 25/25 PASS (4 skipped pre-existing).
+- `npx.cmd vitest run tests/b2_political_leader_data.test.ts tests/ai_commander_parser.test.ts --reporter=dot` — 28/28 PASS.
+- `npm.cmd run test:baselines` — PASS ("Baseline regression: all scenarios match"). 40w / 52w / baseline_ops_4w / noop_4w byte-identical.
+- `git diff --check` — clean (CRLF normalization warnings only; no whitespace violations).
+
+**Artifacts:** `src/state/displacement.ts`, `src/state/displacement_takeover.ts`, `src/state/supply_reserves.ts`, `src/sim/political/political_leader_data_loader.ts`, `tests/strict_null_inventory_progress.test.ts`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
+
+---
+
 ## [2026-05-19] docs(audit): Teslić kamenica_2 collateral residue — decision packet
 
 **Type:** Documentation-only audit. No code, scenario, canon, save schema, or FORAWWV change. Ledger backfill for commit `a9504b20` that landed earlier in this branch without a ledger entry.
