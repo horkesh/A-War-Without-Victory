@@ -1,4 +1,4 @@
-# Late-War 188w Anchor Residue — Diagnostic + Root Cause (Batch A)
+# Late-War 188w Anchor Residue — Diagnostic + Root Cause (Batch A-D)
 
 **Date:** 2026-05-19
 **Branch:** `codex/late-war-188w-anchor-repair-2026-05-19` (from `main` at `a04cba9a`)
@@ -28,9 +28,9 @@ Run trajectory:
 
 The matching n1855/n1856 hashes confirm embargo caps and B3 counter-offers are NOT the cause of the Teocak regression (per `docs/40_reports/CALIBRATION_MASTER.md` lines 21 and 30).
 
-## 2. Brcko root cause (`op:brcko:brcko` expected RS, actual RBiH at 188w)
+## 2. Brcko initial hypothesis (`op:brcko:brcko` expected RS, actual RBiH at 188w)
 
-**Class:** Chronic late-war drift. **Mechanism:** RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it back to ARBiH counter-pressure over the 40w→188w long horizon. There is no operational re-take or persistent garrison contract for Brčko proper across the full 188w span.
+**Status after Batch D:** Superseded by the artifact-backed diagnosis in §D and §10. This Batch A hypothesis said RS captured Brčko early via Operation Koridor, then lost it over the long horizon. Direct n1917 inspection falsifies that: `op:brcko:brcko` is RBiH at turn 0 and turn 188, has zero control events, is not listed in the `brcko_corridor` axis objectives, and is never captured in 188w. The current root cause is scenario-authoring asymmetry between 40w painted control and 188w canon-derived initial control, compounded by an under-strength early-war Brčko corridor axis.
 
 **Mechanical evidence:**
 
@@ -148,7 +148,7 @@ Per the n1844 verification report, three signals exist alongside the brcko ancho
 
 ## 9. Remaining residue and follow-up handoff
 
-- **`op:brcko:brcko`**: chronic late-war loss (40w PASS → 188w FAIL). Persists across n1741, n1844, n1847..n1868, n1917. Root cause documented in §2: RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it to ARBiH counter-pressure over 40w→188w because Operation Koridor's `brcko_corridor` axis does not include `op:brcko:brcko` itself in its objectives, and there is no persistent late-war re-take operation. Every candidate fix flagged by the scenario expert as "insufficient evidence" or requiring broad retuning. Brcko is therefore queued as a follow-up STOP-AND-ASK investigation lane separate from this PR.
+- **`op:brcko:brcko`**: chronic 188w failure (40w PASS → 188w FAIL). Persists across n1741, n1844, n1847..n1868, n1917. Batch D (§D.1-D.6, §10) supersedes the earlier captured-then-lost hypothesis: RS never captures Brčko in n1917, `control_events` has zero entries for the OSID, Operation Koridor's `brcko_corridor` axis omits `op:brcko:brcko` itself and collapses with zero captures against the two RBiH peripheral OSIDs it does target. Closure requires a separate STOP-AND-ASK decision on scenario-paint convergence, axis/JNA-strengthening, explicit JNA handoff modeling, or accepting the 26/27 residue for v0.9.x.
 - **Sarajevo casualty railroad signal** (3.785 attacker:defender ratio): owned by Sarajevo Branch B canon lane — out of scope here.
 - **Force-quality late-war shape** (HRHB/RS personnel growth, fatigue collapse, HRHB morale/quality drift): owned by `docs/plans/2026-05-17-fatigue-recovery-rebalance-plan.md` follow-up — out of scope here.
 - **`patron_pressure` not serialized**: owned by a separate political-state serialization audit — out of scope here.
@@ -219,7 +219,7 @@ The 40w scenario sidesteps Operation Koridor entirely for brcko by painting `op:
 
 ### D.3 Operation Koridor brcko_corridor axis — execution detail in n1917
 
-Per `runs/.../n1917/operation_aars.json`, `Operation Koridor` (corps `vrs_east_bosnian`, started turn 1, ended turn 13):
+Per `runs/.../n1917/operation_aars.json`, `Operation Koridor` (corps `vrs_east_bosnian`, started turn 0, ended turn 13):
 
 ```
 axis_summaries.brcko_corridor:

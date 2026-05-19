@@ -3,11 +3,23 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] docs(audit): Codex overseer cleanup for Brčko Batch D evidence wording
+
+**Type:** Documentation-only correction. No code, simulation authority, scenario JSON, save schema, generated artifact, IPC surface, canon text, or run artifact changed.
+
+**Change:** Reconciled the Brčko 188w residue audit after Codex verification of Claude's Batch D handoff. The artifact-backed Batch D conclusion remains unchanged: `op:brcko:brcko` is RBiH at turn 0 and turn 188 in n1917, has zero control events, and Operation Koridor's `brcko_corridor` axis omits Brčko proper and collapses against peripheral objectives. The cleanup retitles the earlier §2 text as a superseded Batch A hypothesis, updates the §9 handoff to the current never-captured mechanism, and corrects the AAR timing note from "started turn 1" to "started turn 0" based on `operation_aars.json`.
+
+**Verification:** Codex direct-read JSON check against `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917/` and `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1916/`; `git diff --check HEAD~1..HEAD` was clean before this correction. Full branch validation recorded separately before push/merge.
+
+**Artifacts:** `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-19] docs(audit): Brčko 188w anchor — Batch D mechanical root-cause + STOP-AND-ASK decision
 
 **Type:** Documentation-only diagnostic. No code, simulation authority, scenario JSON, save schema, generated artifact, IPC surface, canon text, or run artifact changed. No new test added. No new scenario run executed (n1916/n1917 baselines already on disk; no behavior change to verify).
 
-**Branch:** `codex/late-war-188w-anchor-repair-2026-05-19` (rebased onto `main` at `d1458385`; head was `f1f8bd95`, becomes `0bb48a22` after rebase + this append).
+**Branch:** `codex/late-war-188w-anchor-repair-2026-05-19` (rebased onto `main` at `d1458385`; Claude Batch D committed at `84176176`, followed by a Codex overseer wording-correction commit above).
 
 **Change:** Appended a Batch D root-cause section to `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md` and updated the Brčko summary lines in `docs/40_reports/CALIBRATION_MASTER.md` and `docs/40_reports/CONSOLIDATED_BACKLOG.md` to reflect mechanical inspection of `runs/apr1992_definitive_188w__210e69404d054959__w188_n1917/` artifacts (initial_save, final_save, operation_aars, control_delta).
 
@@ -16,7 +28,7 @@
 **Mechanism (proven):**
 1. The 40w scenario `data/scenarios/apr1992_definitive_40w.json` paints `op:brcko:brcko = RS` at turn 0 via two override keys (`initial_osid_controllers` and `osid_control_overrides`) and pins it to `vrs_east_bosnian` must-hold doctrine via `must_hold_osids_by_corps`. The 188w scenario `data/scenarios/apr1992_definitive_188w.json` lacks all three keys and lets the canonical `init_control: "apr1992"` (`init_control_mode: "hybrid_1992"`) ethnic-majority derivation initialize `op:brcko:brcko` as RBiH — historically correct for March 6 1992 (pre-VRS-attack).
 2. Operation Koridor (`src/sim/combat/pre_planned_operations.ts:74–119`) is the only mechanism that could have flipped brcko to RS in 188w. Its `brcko_corridor` axis lists 5 peripheral objectives (`brezovo_polje_selo_2`, `donji_rahic`, `krepsic`, `potocari_2`, `skakava_donja`) but **does not include `op:brcko:brcko` itself**.
-3. In n1917 the brcko_corridor axis ran from turn 1 (planning) through turn 13 (recovery), launched only against the 2 peripheral OSIDs that started as RBiH (`krepsic`, `skakava_donja`), completed 4 attacks for 0 captures, suffered 641 KIA / 1175 WIA against 351 KIA / 643 WIA inflicted, and terminated with `launch_blocker: "zero_eligible_axis"`. The corps-level "Partial Success" grade comes from the Posavina-flank axis capturing 5 OSIDs (`samac_2`, `modrica`, `garevac_2`, `derventa_2`, `brod`), not from anything brcko-related.
+3. In n1917 the brcko_corridor axis ran from turn 0 through turn 13, launched only against the 2 peripheral OSIDs that started as RBiH (`krepsic`, `skakava_donja`), completed 4 attacks for 0 captures, suffered 641 KIA / 1175 WIA against 351 KIA / 643 WIA inflicted, and terminated with `launch_blocker: "zero_eligible_axis"`. The corps-level "Partial Success" grade comes from the Posavina-flank axis capturing 5 OSIDs (`samac_2`, `modrica`, `garevac_2`, `derventa_2`, `brod`), not from anything brcko-related.
 4. No 1992–1995 event in `data/scenarios/events/war_199*.json` flips brcko's controller. No triggered operation or recapture mechanism is wired to brcko. Once Operation Koridor ends turn 13, nothing else in the engine ever attempts to capture or flip `op:brcko:brcko` in 188w.
 
 **Determinism:** Documentation only.
@@ -69,7 +81,7 @@
 
 **Sensitive-history boundary:** Teocak is a defensive holdout, not a rupture-eligible event. No FORAWWV edit, no scoring change, no rupture authoring, no sensitive prose authored, no `avoided_osids_by_faction` used, no fallback prose, no hidden manual override. ENCLAVE_DEFINITIONS already contained 3 HRHB pockets (Kiseljak, Lasva Valley, Žepče) added without canon edits — non-Sarajevo enclave geometry is engine code, not scenario/canon authoring. The Sarajevo `SARAJEVO_ID_SET_ENGINE_GEOMETRY_CANON` gate applies only to Sarajevo prefixes; tests explicitly assert Teocak's singleton OSID has no Sarajevo prefix overlap.
 
-**Remaining residue:** `op:brcko:brcko` continues to fail at 188w (chronic; persistent across n1741, n1844, n1847..n1868, n1917). Root cause documented in audit: RS captures Brčko early-war via Operation Koridor (passes at 40w), then loses it to ARBiH counter-pressure over 40w→188w because Operation Koridor's `brcko_corridor` axis does not include `op:brcko:brcko` itself in its objectives, and there is no persistent late-war re-take operation. Every candidate fix the dispatched scenario expert evaluated was flagged "insufficient evidence" or required broad retuning. Brcko is therefore left untouched in this lane and queued as a follow-up STOP-AND-ASK investigation lane.
+**Remaining residue:** `op:brcko:brcko` continues to fail at 188w (chronic; persistent across n1741, n1844, n1847..n1868, n1917). Superseded by the Batch D entry above: direct n1917 inspection proves RS never captures Brčko in 188w; Operation Koridor's `brcko_corridor` axis omits the OSID itself and collapses against peripheral objectives. Brcko is therefore left untouched in this lane and queued as a follow-up STOP-AND-ASK investigation lane.
 
 **Artifacts:**
 - `src/sim/combat/enclave_resilience.ts` (Teocak singleton + ENCLAVE_CONFIG row)
