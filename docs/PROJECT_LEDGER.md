@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] fix(sim): Operation Koridor Brcko objective closes 188w anchor residue
+
+**Type:** Simulation behavior change, focused operation objective contract. No scenario paint, save schema, IPC surface, UI surface, FORAWWV text, sensitive-history prose, or hidden manual flip changed.
+
+**Change:** Added `op:brcko:brcko` to Operation Koridor's `brcko_corridor` axis objectives in `src/sim/combat/pre_planned_operations.ts`, preserving alphabetical objective ordering. Added a focused regression in `tests/pre_planned_operations.test.ts` that pins Brcko proper inclusion and objective ordering. Verified the preserved four-artifact golden baseline manifest still passes under the accepted LANE-V09X re-anchor envelope and propagated the new n1918/n1919 accepted pair to the calibration, backlog, roadmap, and Brcko audit docs.
+
+**Mechanism:** The n1917 audit proved the 188w failure was not "captured then lost"; Brcko was never targeted or captured. Adding Brcko proper to the already-existing Brcko corridor axis lets Operation Koridor attack the historically central objective. In n1919, `op:brcko:brcko` flips RBiH -> RS by combat at turn 5; Operation Koridor starts turn 0, ends turn 10, and grades as a 4-star Solid Victory.
+
+**Verification:** 40w n1918 hash `5c6e7b62fa6670c0`, 27/27 anchors, 6/6 benchmarks, byte-identical to n1916. 188w n1919 hash `7b57a8592f668137`, 27/27 anchors, 6/6 benchmarks. `npm.cmd run typecheck` passed. `npx.cmd vitest run tests/pre_planned_operations.test.ts --reporter=dot` passed 18/18. `node tools/diagnose_run.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n1919` reported 0 errors / 26 warnings. `node tools/validate_run_consistency.cjs runs/apr1992_definitive_188w__210e69404d054959__w188_n1919` exited nonzero with 49 long-run structural sector/intel signals; this is recorded as a known signal, not a determinism pass. `UPDATE_BASELINES=1 npm.cmd run test:baselines` passed as a probe but only expanded the manifest back to the seven-artifact script default; the existing four tracked hashes were unchanged, so no manifest change is committed. `npm.cmd run test:baselines` passed with the preserved four-artifact manifest. `git diff --check` clean.
+
+**Collateral:** Five controller shifts improve painted Oct 1995 alignment (`op:brcko:brcko`, `op:brcko:donji_rahic`, `op:brcko:krepsic`, `op:brcko:skakava_donja`, `op:pale:praca`). One non-anchor/non-benchmark residue remains: `op:teslic:kamenica_2` moves RS -> HRHB and should be watched in later front-edge calibration.
+
+**Artifacts:** `src/sim/combat/pre_planned_operations.ts`; `tests/pre_planned_operations.test.ts`; `docs/40_reports/implemented/20260519_OPERATION_KORIDOR_BRCKO_CLOSURE.md`; `docs/40_reports/audits/20260519_LATE_WAR_188W_ANCHOR_RESIDUE.md`; `docs/40_reports/CALIBRATION_MASTER.md`; `docs/40_reports/CONSOLIDATED_BACKLOG.md`; `docs/plans/MASTER_ROADMAP.md`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-19] docs(audit): Codex overseer cleanup for Brčko Batch D evidence wording
 
 **Type:** Documentation-only correction. No code, simulation authority, scenario JSON, save schema, generated artifact, IPC surface, canon text, or run artifact changed.

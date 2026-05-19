@@ -168,6 +168,24 @@ describe('pre-planned operations', () => {
         assert.equal(koridor!.planning_duration, 3);
     });
 
+    it('lists op:brcko:brcko as a brcko_corridor axis objective in alphabetical order', () => {
+        const koridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Koridor');
+        assert.ok(koridor);
+        const brckoAxis = koridor!.axes.find((axis) => axis.axis_id === 'brcko_corridor');
+        assert.ok(brckoAxis, 'brcko_corridor axis must exist');
+        assert.ok(
+            brckoAxis!.objectives.includes('op:brcko:brcko'),
+            'brcko_corridor axis must include op:brcko:brcko as a primary urban objective',
+        );
+        // Stable alphabetical ordering — ensures deterministic axis-objective iteration
+        const sorted = [...brckoAxis!.objectives].sort();
+        assert.deepEqual(
+            brckoAxis!.objectives,
+            sorted,
+            'brcko_corridor objectives must remain in stable alphabetical order',
+        );
+    });
+
     it('filters already-controlled objectives without dropping viable axes', () => {
         const state = makeMinimalState();
         state.political.political_controllers!['op:zvornik:zvornik'] = 'RS';

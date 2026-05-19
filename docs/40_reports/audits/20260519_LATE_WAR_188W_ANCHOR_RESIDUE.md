@@ -148,7 +148,7 @@ Per the n1844 verification report, three signals exist alongside the brcko ancho
 
 ## 9. Remaining residue and follow-up handoff
 
-- **`op:brcko:brcko`**: chronic 188w failure (40w PASS → 188w FAIL). Persists across n1741, n1844, n1847..n1868, n1917. Batch D (§D.1-D.6, §10) supersedes the earlier captured-then-lost hypothesis: RS never captures Brčko in n1917, `control_events` has zero entries for the OSID, Operation Koridor's `brcko_corridor` axis omits `op:brcko:brcko` itself and collapses with zero captures against the two RBiH peripheral OSIDs it does target. Closure requires a separate STOP-AND-ASK decision on scenario-paint convergence, axis/JNA-strengthening, explicit JNA handoff modeling, or accepting the 26/27 residue for v0.9.x.
+- **`op:brcko:brcko`**: chronic 188w failure (40w PASS → 188w FAIL). Persists across n1741, n1844, n1847..n1868, n1917. Batch D (§D.1-D.6, §10) supersedes the earlier captured-then-lost hypothesis: RS never captures Brčko in n1917, `control_events` has zero entries for the OSID, Operation Koridor's `brcko_corridor` axis omits `op:brcko:brcko` itself and collapses with zero captures against the two RBiH peripheral OSIDs it does target. This residue is superseded by the empirical closure in §12: adding Brcko proper to the existing `brcko_corridor` objective contract produces n1919 at 27/27 anchors.
 - **Sarajevo casualty railroad signal** (3.785 attacker:defender ratio): owned by Sarajevo Branch B canon lane — out of scope here.
 - **Force-quality late-war shape** (HRHB/RS personnel growth, fatigue collapse, HRHB morale/quality drift): owned by `docs/plans/2026-05-17-fatigue-recovery-rebalance-plan.md` follow-up — out of scope here.
 - **`patron_pressure` not serialized**: owned by a separate political-state serialization audit — out of scope here.
@@ -267,7 +267,7 @@ The mechanical reality is a **scenario-authoring asymmetry between 40w (painted)
 
 ## 10. Decision (Batch D close)
 
-**Decision:** **STOP-AND-ASK. No code, no scenario, no canon edit.** The `op:brcko:brcko` 188w anchor failure has been root-caused mechanically (this section §D.1–D.5), the original audit hypothesis (40w-pass-then-lose) is falsified, and the four bounded candidates have been re-evaluated against the live n1917 evidence. The smallest historically-defensible repair (adding brcko to the brcko_corridor axis) cannot succeed without also strengthening the axis — which is a broader early-war balance change that crosses the lane's explicit STOP gate.
+**Decision at n1917:** **STOP-AND-ASK. No code, no scenario, no canon edit.** The `op:brcko:brcko` 188w anchor failure has been root-caused mechanically (this section §D.1–D.5), the original audit hypothesis (40w-pass-then-lose) is falsified, and the four bounded candidates have been re-evaluated against the live n1917 evidence. This conservative call is superseded by §12: the single-knob objective-list candidate did succeed without axis strengthening.
 
 **Why this is the right call:**
 - The 40w anchor already passes via painted overrides. The 188w anchor is the canonical "let-the-engine-simulate" path. Forcing 188w to pass without painting would require either (a) duplicating the 40w paint into 188w (which collapses the distinction between the two scenarios and effectively voids the historical-start scenario's purpose), or (b) tuning early-war combat strength so VRS can win Brčko in 5 turns against RBiH defenders — a broader retune.
@@ -348,6 +348,26 @@ The phantom contributed for ~2 turns of execution (turns 5–6), enough to facto
 
 This is structurally necessary (brcko is not currently a Koridor target — see `pre_planned_operations.ts:92–98`) and the lane prompt explicitly authorizes attempting it: *"If Brčko falls because Operation Koridor never secures the town proper early enough: add op:brcko:brcko to the Koridor objective contract and prove this is enough."* Batch B will attempt this single-knob change with focused tests, run 40w + 188w, and either commit on success or revert + document on failure.
 
-Expected outcome assessment (recorded BEFORE running for falsifiability): The brcko_corridor axis already collapses against 2 RBiH peripheral OSIDs (`krepsic`, `skakava_donja`) with `zero_eligible_axis` after 4 attacks for 0 captures. Adding `op:brcko:brcko` (urban OSID, gets P2 urban-defender bonus, ARBiH 108th Brigade likely defending) as a 3rd target will not strengthen the attackers. **The most likely empirical result is: brcko_corridor still collapses, op:brcko:brcko still RBiH at 188w, 188w hash drifts (because Koridor planning hash inputs change), 188w anchors regress unless 40w also drifts cleanly.** If that outcome obtains, Batch B reverts and Batch D commits the decision packet only.
+Expected outcome assessment (recorded BEFORE running for falsifiability): The brcko_corridor axis already collapses against 2 RBiH peripheral OSIDs (`krepsic`, `skakava_donja`) with `zero_eligible_axis` after 4 attacks for 0 captures. Adding `op:brcko:brcko` (urban OSID, gets P2 urban-defender bonus, ARBiH 108th Brigade likely defending) as a 3rd target will not strengthen the attackers. **This prediction was falsified by Batch B/D in §12.** The axis concentrated enough to capture Brcko proper at turn 5 and close the 188w anchor sweep.
 
 There is one optimistic alternative: it is conceivable that brcko-proper attracts the axis brigades' primary effort (per axis-objective-prioritization heuristics in `sector_offensive.ts`) such that they concentrate on the urban target instead of dispersing across krepsic + skakava_donja. Empirical test will resolve this.
+
+---
+
+## 12. Batch B/D empirical closure — Operation Koridor Brcko objective (2026-05-19, n1918/n1919)
+
+**Status:** Production fix accepted. The conservative n1917 STOP-AND-ASK call in §10 was useful as a guardrail, but the single-knob probe authorized by §11.3 falsified the predicted failure.
+
+**Change:** `src/sim/combat/pre_planned_operations.ts` adds `op:brcko:brcko` as the first alphabetically sorted objective in Operation Koridor's `brcko_corridor` axis. `tests/pre_planned_operations.test.ts` pins that Brcko proper is included and that the axis objective list remains stable/alphabetical.
+
+**40w proof:** n1918 `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1918`, final hash `5c6e7b62fa6670c0`, 27/27 anchors, 6/6 benchmarks. This is byte-identical to n1916 because the 40w scenario paints Brcko proper as RS at turn 0; the operation-injection filter removes already controlled objectives.
+
+**188w proof:** n1919 `runs/apr1992_definitive_188w__210e69404d054959__w188_n1919`, final hash `7b57a8592f668137`, 27/27 anchors, 6/6 benchmarks. `op:brcko:brcko` flips RBiH -> RS by combat at turn 5. Operation Koridor starts turn 0 and ends turn 10 as a 4-star Solid Victory. Its `brcko_corridor` axis captures `op:brcko:brcko`, `op:brcko:krepsic`, and `op:brcko:skakava_donja` with 4 attacks, 487 KIA / 894 WIA inflicted, and 278 KIA / 512 WIA suffered.
+
+**Controller drift vs n1917:** Positive lane drift: `op:brcko:brcko`, `op:brcko:donji_rahic`, `op:brcko:krepsic`, `op:brcko:skakava_donja`, and `op:pale:praca` move to the painted Oct 1995 side. One collateral negative residue remains: `op:teslic:kamenica_2` moves RS -> HRHB, a non-anchor/non-benchmark OSID to watch in future front-edge calibration.
+
+**Sensitive-history boundary:** No FORAWWV edit, no sensitive prose, no `avoided_osids_by_faction`, no initial-control paint, and no hidden manual flip. Srebrenica, Zepa, Gorazde, and Teocak final controllers are unchanged vs n1917. Brcko's sensitive-history events remain un-authored; this lane only repairs the corps-level operational capture contract.
+
+**Validation:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/pre_planned_operations.test.ts --reporter=dot` PASS 18/18; `node tools/diagnose_run.cjs runs/...n1919` reports 0 errors / 26 warnings. `node tools/validate_run_consistency.cjs runs/...n1919` exits nonzero with 49 long-run structural sector/intel signals; this is recorded as a known signal, not a determinism pass. Golden baseline comparison passes with the preserved four-artifact manifest. An `UPDATE_BASELINES=1 npm.cmd run test:baselines` probe was rejected as a commit artifact because it only expanded the manifest back to the seven-artifact script default; the existing four tracked hashes were unchanged.
+
+**Decision:** Brcko 188w residue closed. Current accepted pair becomes n1918/n1919.

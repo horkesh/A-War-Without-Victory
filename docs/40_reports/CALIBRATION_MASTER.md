@@ -1,5 +1,16 @@
 # AWWV Calibration Master Reference
 
+## n1918/n1919 Operation Koridor Brcko closure (2026-05-19)
+
+- **40w run. Hash: `5c6e7b62fa6670c0`. Anchors: 27/27. Benchmarks: 6/6.** Byte-identical to n1916 because the 40w scenario already paints `op:brcko:brcko = RS`; the new Koridor objective is filtered as already controlled.
+- Run dir: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1918`.
+- **188w run. Hash: `7b57a8592f668137`. Anchors: 27/27. Benchmarks: 6/6.** This is the first clean 188w anchor sweep in the v0.9.x line.
+- Run dir: `runs/apr1992_definitive_188w__210e69404d054959__w188_n1919`.
+- Scope: closes the chronic `op:brcko:brcko` 188w residue by adding Brcko proper to Operation Koridor's `brcko_corridor` objective contract. In n1919 the axis captures `op:brcko:brcko` at turn 5 by combat, then captures `op:brcko:krepsic` and `op:brcko:skakava_donja`; Operation Koridor ends turn 10 as a 4-star Solid Victory.
+- Hash drift from n1917 is authorized under the same LANE-V09X player-faction re-anchor envelope consumed by the Teocak repair. Drift is bounded and positive for the lane: 40w remains byte-identical, 188w moves from 26/27 to 27/27 anchors, sensitive-history watched controllers for Srebrenica/Zepa/Gorazde/Teocak remain unchanged, and the known collateral `op:teslic:kamenica_2 = HRHB` remains a non-anchor/non-benchmark minor residue to watch in later front-edge calibration.
+- `validate_run_consistency.cjs` on n1919 exits nonzero with 49 long-run structural sector/intel signals; this is not a determinism pass. `diagnose_run.cjs` reports 0 errors / 26 warnings. Golden baseline comparison passes with the preserved four-artifact manifest; an `UPDATE_BASELINES=1` probe produced no existing tracked-hash changes, so no manifest refresh is committed.
+- Report: `docs/40_reports/implemented/20260519_OPERATION_KORIDOR_BRCKO_CLOSURE.md`.
+
 ## n1916/n1917 Teocak singleton enclave repair (2026-05-19)
 
 - **40w run. Hash: `5c6e7b62fa6670c0`. Anchors: 27/27. Benchmarks: 6/6.**
