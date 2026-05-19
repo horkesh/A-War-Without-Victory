@@ -112,6 +112,19 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         capital_osid: 'op:rogatica:zepa_2',
     },
     {
+        id: 'teocak',
+        faction: 'RBiH',
+        // Lone Bosniak holdout in Ugljevik municipality near the Drina.
+        // 255th Slavna Mountain Brigade "Hajrudin Mesić" (home Teočak)
+        // held against VRS East Bosnian Corps pressure throughout
+        // 1992–1995 (BB1 p.509). Mechanically analogous to Žepa:
+        // small, isolated, surrounded by VRS, historically held.
+        // Single painted RBiH OSID.
+        osid_list: ['op:ugljevik:teocak_krstac_2'],
+        resilience_start_turn: 16,  // Formed during 1992 VRS Drina/Majevica offensives
+        capital_osid: 'op:ugljevik:teocak_krstac_2',
+    },
+    {
         id: 'gorazde',
         faction: 'RBiH',
         // Painted January 1993 RBiH OSIDs only — not entire municipality (20 total, 16 RBiH)
@@ -193,6 +206,7 @@ const ENCLAVE_CONFIG: Record<string, { max_resilience: number; growth_mult: numb
     bihac_pocket: { max_resilience: 40, growth_mult: 0.55, max_personnel: 1500 },  // Large pocket, supply routes
     srebrenica: { max_resilience: 25, growth_mult: 0.35, max_personnel: 600 },     // Small, isolated, ~8k pop in enclave
     zepa: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },           // Tiny, most isolated, ~3k pop
+    teocak: { max_resilience: 20, growth_mult: 0.30, max_personnel: 400 },         // Lone Bosniak holdout near Ugljevik, ~3–5k pop, 255th Slavna garrison
     gorazde: { max_resilience: 35, growth_mult: 0.45, max_personnel: 800 },        // Medium, besieged, ~37k prewar but under siege
     sarajevo: { max_resilience: 45, growth_mult: 0.60, max_personnel: 1500 },      // Largest, tunnel supply, 300k pop
     // HRHB enclaves — smaller, less organized than RBiH equivalents, but held until Washington Agreement
