@@ -3,6 +3,53 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-19] refactor(strict-null): Batch 44 state + sim + desktop safe slice (byte-identical)
+
+**Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `5358f968`; follows Batch 43 at `be933525`).
+
+**Change:** Removed 10 redundant `as FactionId` / `as FactionId | null` / `as FactionId | undefined` / `as FactionId[]` casts across 9 files spanning state, sim, AI commander, negotiation, turn-phases, and desktop layers:
+
+- `src/state/assignable_front_segments.ts` (2 sites): `edge.side_a as FactionId | null, edge.side_b as FactionId | null` — `FrontEdge.side_a` is `string | null`, equivalent under the alias.
+- `src/state/political_control_init.ts` (2 sites): `best = fid as FactionId` where `fid ∈ CANONICAL_FACTION_IDS as const`; `pc[osid] = faction as FactionId` where `faction` is already `string` from `overrides[osid]`.
+- `src/state/minority_flight.ts` (1 site): `value as FactionId` after `!value` filter.
+- `src/state/seed_organizational_penetration_from_control.ts` (1 site): `return bestKey as FactionId` after the null/'_null' filter narrows to non-null string.
+- `src/sim/turn_phases/early_war_phases.ts` (1 site): `.sort(strictCompare) as FactionId[]` — sort returns same `string[]` type.
+- `src/sim/ai_commander/corps_dialogue.ts` (1 site): `fmn.faction as FactionId` — `FormationState.faction: FactionId` per game_state.ts:616.
+- `src/sim/negotiation/compute_combat_effective.ts` (1 site): `formation.faction as FactionId | undefined` — Formation.faction is non-optional; the `| undefined` cast was widening, not narrowing, and the downstream `!faction || !(faction in counts)` guard already covers falsy values.
+- `src/desktop/desktop_sim.ts` (1 site): `formation.faction as FactionId` — same Formation.faction narrowing, guarded by L540 `!formation.faction` filter.
+
+Added new `Batch 44 state + sim + desktop safe slice` assertion in `tests/strict_null_inventory_progress.test.ts`, restricted to the 5 files that are fully CLEAN across all 5 inventory categories. The 3 files where `as_unknown` state-widening casts and JSON-loader-guard casts remain (`desktop_sim.ts`, `corps_dialogue.ts`, `political_control_init.ts`) are documented in an explanatory comment as out-of-scope per the lane prompt's loader-JSON / save-shape stop-gates.
+
+**Determinism:** Type-only erasure. Compiled JS is byte-equivalent.
+
+**Verification:**
+- `npm.cmd run typecheck`: PASS.
+- `node_modules/.bin/vitest run tests/strict_null_inventory_progress.test.ts`: **23/23 PASS** (was 22/22; added Batch 44 slice).
+- `node_modules/.bin/vitest run tests/assignable_front_segments.test.ts tests/minority_flight.test.ts tests/corps_dialogue.test.ts`: 32/32 PASS.
+- `npm.cmd run test:baselines`: **"Baseline regression: all scenarios match"** — 40w/52w/baseline_ops_4w/noop_4w byte-identical to the post-Batch-43 baseline floor.
+- `git diff --check`: clean.
+
+**Inventory delta:** `as_factionid_casts` 48 → 38 (-10 sites, 19 → 11 files). Cumulative Batch 43 + 44: 64 → 38 (-26 sites, -13 files cleaned). Other categories unchanged.
+
+**Stop-gate compliance:** Did NOT touch `GameStateAdapter.ts` (Phase 5), Phase 2 combat long-tail, save-shape commander-movement casts, or loader JSON guards — explicitly preserved the 7 `JSON.parse(...) as unknown` casts in `political_control_init.ts`, the `as_unknown` state-widening casts in `desktop_sim.ts` and `corps_dialogue.ts`, and the AdvisorResponse / leader-profile loader casts in `response_parser.ts` / `political_leader_data_loader.ts`.
+
+**Artifacts:**
+- `src/desktop/desktop_sim.ts`
+- `src/sim/ai_commander/corps_dialogue.ts`
+- `src/sim/negotiation/compute_combat_effective.ts`
+- `src/sim/turn_phases/early_war_phases.ts`
+- `src/state/assignable_front_segments.ts`
+- `src/state/minority_flight.ts`
+- `src/state/political_control_init.ts`
+- `src/state/seed_organizational_penetration_from_control.ts`
+- `tests/strict_null_inventory_progress.test.ts` (+ Batch 44 slice)
+- `docs/40_reports/implemented/20260519_STRICT_NULL_BATCH44_STATE_SIM_DESKTOP.md`
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-19] refactor(strict-null): Batch 43 sim non-combat safe slice (byte-identical)
 
 **Type:** Type-system tightening only. No simulation behavior change, no save schema change, no IPC surface change, no UI change, no canon/FORAWWV change.

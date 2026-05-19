@@ -131,7 +131,7 @@ function buildMunDominantController(state: GameState): Map<MunicipalityId, Facti
         const parts = key.split(':');
         if (parts.length < 2) continue;
         const munId = parts[1] as MunicipalityId;
-        const faction = value as FactionId;
+        const faction = value;
         let mc = counts.get(munId);
         if (!mc) { mc = new Map(); counts.set(munId, mc); }
         mc.set(faction, (mc.get(faction) ?? 0) + 1);

@@ -72,7 +72,7 @@ function getMajorityController(state: GameState, sids: string[]): FactionId | nu
         }
     }
     if (bestKey === null || bestKey === '_null') return null;
-    return bestKey as FactionId;
+    return bestKey;
 }
 
 function buildAlignedPopulationShareByFaction(

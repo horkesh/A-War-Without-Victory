@@ -238,7 +238,7 @@ export async function generateCorpsDialogues(
     for (const corpsId of botCorpsIds) {
         try {
             const fmn = formations[corpsId]!;
-            const faction = fmn.faction as FactionId;
+            const faction = fmn.faction;
             const commander = getCorpsCommander(corpsId, state);
             if (!commander) continue;
 

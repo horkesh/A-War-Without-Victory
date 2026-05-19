@@ -58,7 +58,7 @@ export function computeCombatEffectiveBrigades(state: GameState): void {
 
     const formations = state.military?.formations ?? {};
     for (const formation of Object.values(formations)) {
-        const faction = formation.faction as FactionId | undefined;
+        const faction = formation.faction;
         if (!faction || !(faction in counts)) continue;
         if (formation.status !== 'active') continue;
         if (formation.kind !== 'brigade' && formation.kind !== undefined) continue;

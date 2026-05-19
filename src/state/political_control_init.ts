@@ -54,7 +54,7 @@ export function promotePoliticalControllersToOsid(
         for (const fid of CANONICAL_FACTION_IDS) {
             const n = factionCounts[fid] ?? 0;
             if (n > bestCount) {
-                best = fid as FactionId;
+                best = fid;
                 bestCount = n;
             }
         }
@@ -81,7 +81,7 @@ export function applyOsidControlOverrides(
     for (const osid of keys) {
         const faction = overrides[osid];
         if (faction && CANONICAL_FACTION_IDS.includes(faction as (typeof CANONICAL_FACTION_IDS)[number])) {
-            pc[osid] = faction as FactionId;
+            pc[osid] = faction;
             // Mark as contested (historically these were disputed areas)
             if (state.political.contested_control) {
                 state.political.contested_control[osid] = true;

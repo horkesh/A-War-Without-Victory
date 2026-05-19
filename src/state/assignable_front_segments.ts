@@ -53,7 +53,7 @@ export function deriveAssignableFrontSegments(frontEdges: FrontEdge[]): Assignab
     const bucketsByPair = new Map<string, Bucket>();
     for (const edge of sortedEdges) {
         const edgeId = edge.edge_id;
-        const [sideA, sideB] = normalizeSidePair(edge.side_a as FactionId | null, edge.side_b as FactionId | null);
+        const [sideA, sideB] = normalizeSidePair(edge.side_a, edge.side_b);
         edgeMeta.set(edgeId, { sideA, sideB });
         const pair = sidePairKey(sideA, sideB);
         const existing = bucketsByPair.get(pair);

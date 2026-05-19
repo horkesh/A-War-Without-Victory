@@ -132,6 +132,19 @@ const SIM_NON_COMBAT_BATCH_43_FILES = [
     'src/sim/local_truces.ts',
 ];
 
+// Batch 44 lists only the files that are FULLY clean across all
+// inventory categories. desktop_sim.ts, corps_dialogue.ts, and
+// political_control_init.ts retain non-FactionId-cast escapes (as_unknown
+// state-shape widenings + JSON.parse(...) as unknown loader guards) that
+// are out of scope for this lane per the safe-slice stop-gates.
+const STATE_SIM_DESKTOP_BATCH_44_FILES = [
+    'src/sim/negotiation/compute_combat_effective.ts',
+    'src/sim/turn_phases/early_war_phases.ts',
+    'src/state/assignable_front_segments.ts',
+    'src/state/minority_flight.ts',
+    'src/state/seed_organizational_penetration_from_control.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -481,6 +494,21 @@ describe('strict null inventory progress', () => {
 
         const currentTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, SIM_NON_COMBAT_BATCH_43_FILES),
+            0,
+        );
+
+        expect(currentTotal).toBe(0);
+    });
+
+    it('cleans the Batch 44 state + sim + desktop safe slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const currentTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, STATE_SIM_DESKTOP_BATCH_44_FILES),
             0,
         );
 

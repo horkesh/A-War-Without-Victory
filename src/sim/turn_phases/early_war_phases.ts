@@ -209,7 +209,7 @@ export const earlyWarPhases: NamedPhase[] = [
             const botFactions = (context.state.factions ?? [])
                 .map(f => f.id)
                 .filter(fid => playerFaction == null || fid !== playerFaction)
-                .sort(strictCompare) as FactionId[];
+                .sort(strictCompare);
             runEarlyWarBotPosture(context.state, frontEdges, botFactions);
         }
     },
