@@ -21,7 +21,6 @@ import { PresidentialDecisionRoomPanel } from './PresidentialDecisionRoomPanel';
 import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
-import { ExhaustionClock } from './ExhaustionClock';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
@@ -127,9 +126,6 @@ export function ArmyHQModal() {
         }
         const territoryPct = osidAreas.total_area_km2 > 0 ? (factionArea / osidAreas.total_area_km2) * 100 : 0;
 
-        const exhaustion = state.warPhaseExhaustion?.[faction];
-        const exhaustionDisplay = typeof exhaustion === 'number' ? exhaustion.toFixed(1) : '0.0';
-
         const reserves = state.factionReserves?.[faction];
         const eff = aggregateEffectiveness(brigades);
 
@@ -156,7 +152,7 @@ export function ArmyHQModal() {
         return {
             formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
             sectorsByCorps, opsByCorps,
-            territoryPct, exhaustionDisplay, reserves,
+            territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
         };
     }, [open, state, faction]);
@@ -425,11 +421,21 @@ export function ArmyHQModal() {
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
-                            {/* Top section: CoS Brief | Commander | Crest | Strategic Position */}
+                            {/*
+                             * Top section: two-band layout.
+                             *   Briefing band (left, lg:col-span-7) — paper Chief of Staff briefing.
+                             *   Evidence/Action band (right, lg:col-span-5) — commander, mini-bio,
+                             *   counts row, and Strategic Position (when dimensions exist).
+                             * Palette: gold = command/action; blue-green = friendly state; red =
+                             * threat/critical; paper = authored briefing; gray = secondary metadata.
+                             * War Exhaustion is intentionally NOT a standalone Army HQ widget —
+                             * the underlying mechanic stays alive in Chief of Staff prose, War
+                             * Summary, OOB summaries, and Command Relationship.
+                             */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-1 gap-1.5 mb-2 items-start lg:grid-cols-12 lg:gap-2">
-                                    {/* Chief of Staff Briefing */}
-                                    <div className="lg:col-span-4">
+                                <div className="grid grid-cols-1 gap-2 mb-2 items-start lg:grid-cols-12">
+                                    {/* Briefing band — Chief of Staff (primary document) */}
+                                    <div className="lg:col-span-7">
                                         <ChiefOfStaffBriefing
                                             briefingItems={data.briefingItems}
                                             gameState={state}
@@ -438,68 +444,48 @@ export function ArmyHQModal() {
                                         />
                                     </div>
 
-                                    {/* Commander */}
-                                    <div className="bg-panel-card border border-panel-border rounded-lg p-2 lg:col-span-3">
-                                        <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-1 pb-1 border-b border-panel-border">
-                                            COMMANDER
-                                        </div>
-                                        {data.commander ? (
-                                            <>
-                                                <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" />
-                                                <OfficerMiniBio officer={data.commander} />
-                                            </>
-                                        ) : (
-                                            <div className="text-text-secondary text-[12px] py-4 text-center italic">
-                                                No commander data available
+                                    {/* Evidence / Action band */}
+                                    <div className="lg:col-span-5 flex flex-col gap-2">
+                                        {/* Commander dossier — friendly identity + mini-bio */}
+                                        <div className="bg-panel-card border border-emerald-500/20 rounded-lg p-2.5">
+                                            <div className="text-[8px] uppercase tracking-[0.22em] text-emerald-300/80 font-bold mb-1 pb-1 border-b border-emerald-500/15">
+                                                COMMANDER
                                             </div>
-                                        )}
-                                            <div className="mt-1 grid grid-cols-3 gap-1">
-                                            <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
-                                                <div className="text-[8px] uppercase tracking-wide text-text-secondary">Critical</div>
-                                                <div className="text-[11px] font-bold text-red-400">
+                                            {data.commander ? (
+                                                <>
+                                                    <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" />
+                                                    <OfficerMiniBio officer={data.commander} />
+                                                </>
+                                            ) : (
+                                                <div className="text-text-secondary/70 text-[11px] py-3 text-center italic">
+                                                    No commander data available
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Counts row — red threat / amber warning / blue-green active ops */}
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div className="rounded-lg border border-red-500/25 bg-red-500/[0.04] px-2 py-1.5">
+                                                <div className="text-[8px] uppercase tracking-[0.18em] text-red-300/70 font-bold">Critical</div>
+                                                <div className="text-[16px] font-bold text-red-400 tabular-nums leading-tight">
                                                     {data.briefingItems.filter((item) => item.severity === 'critical').length}
                                                 </div>
                                             </div>
-                                            <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
-                                                <div className="text-[8px] uppercase tracking-wide text-text-secondary">Warnings</div>
-                                                <div className="text-[11px] font-bold text-amber-400">
+                                            <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.04] px-2 py-1.5">
+                                                <div className="text-[8px] uppercase tracking-[0.18em] text-amber-300/70 font-bold">Warnings</div>
+                                                <div className="text-[16px] font-bold text-amber-300 tabular-nums leading-tight">
                                                     {data.briefingItems.filter((item) => item.severity === 'warning').length}
                                                 </div>
                                             </div>
-                                            <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
-                                                <div className="text-[8px] uppercase tracking-wide text-text-secondary">Active Ops</div>
-                                                <div className="text-[11px] font-bold text-text-primary">
+                                            <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.04] px-2 py-1.5">
+                                                <div className="text-[8px] uppercase tracking-[0.18em] text-emerald-300/70 font-bold">Active Ops</div>
+                                                <div className="text-[16px] font-bold text-emerald-300 tabular-nums leading-tight">
                                                     {data.operations.length}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* Army Crest */}
-                                    <div className="flex flex-col items-center justify-center px-1 py-0.5 select-none lg:col-span-1">
-                                        {crestSrc && (
-                                            <img
-                                                src={crestSrc}
-                                                alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
-                                                className="w-[72px] h-[72px] lg:w-[84px] lg:h-[84px] object-contain drop-shadow-lg"
-                                                draggable={false}
-                                            />
-                                        )}
-                                        <div className="text-[8px] uppercase tracking-[0.13em] text-text-secondary mt-1 text-center leading-relaxed">
-                                            {FACTION_DISPLAY[faction] ?? faction}
-                                        </div>
-                                    </div>
-
-                                    {/* Exhaustion Clock */}
-                                    <div className="lg:col-span-2">
-                                        <ExhaustionClock
-                                            exhaustion={state.warPhaseExhaustion?.[faction] ?? 0}
-                                            faction={faction}
-                                        />
-                                    </div>
-
-                                    {/* Strategic Position — 6 dimension bars */}
-                                    <div className="lg:col-span-2">
+                                        {/* Strategic Position — renders null when dimensions absent */}
                                         <StrategicPosition
                                             dimensions={state.strategicDimensions?.[faction]}
                                             faction={faction}

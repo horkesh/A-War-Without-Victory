@@ -971,7 +971,7 @@ Features that make AWWV 10x more powerful, assigned to specific versions. Source
 | Feature | Version | Effort | Description |
 |---------|---------|--------|-------------|
 | **Ghost Map** | Implemented | Low | 1991 census demographics overlay beneath current military situation |
-| **Exhaustion Clock** | Retire from Army HQ visual roadmap | Low | Standalone candle/depletion widget is no longer desired; keep war-exhaustion mechanics and decision-relevant staff copy, but remove the gimmick surface via `docs/plans/2026-05-20-army-hq-visual-hierarchy-palette-refresh-plan.md` |
+| **Exhaustion Clock** | RETIRED from Army HQ (implementation closed 2026-05-20) | Low | Standalone candle/depletion widget removed from Army HQ briefing tab; underlying war-exhaustion mechanic remains live in Chief of Staff prose, War Summary, OOB summaries, and Command Relationship. Implementation: `src/ui/map/components/army_hq/ArmyHQModal.tsx` (mount + dead data plumbing removed) + `src/ui/map/components/army_hq/ExhaustionClock.tsx` (component deleted). Plan: `docs/plans/2026-05-20-army-hq-visual-hierarchy-palette-refresh-plan.md`. |
 | **Letter Home** | Implemented | Low | Procedural casualty vignettes in CoS briefing |
 | **Patron Phone Call** | v0.8.2 | Medium | 8-12 dramatic patron pressure events with ICTY-sourced dialogue |
 | **Command Chain That Disobeys** | v0.8.3 | High | Officers interpret, delay, refuse orders |

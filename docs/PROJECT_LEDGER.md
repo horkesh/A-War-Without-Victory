@@ -3,6 +3,55 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] feat(ui): Army HQ visual hierarchy + palette refresh — ExhaustionClock retired
+
+**Type:** UI-only presentation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed. All edits scoped to three React components under `src/ui/map/components/army_hq/` plus the Legendary Features row in `docs/plans/MASTER_ROADMAP.md`.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; HEAD before commit: `029fe16a` — Strict-null Batch C schema-boundary validation plan + post-Batch-50/51 count reconciliation).
+
+**Change:** Executed `docs/plans/2026-05-20-army-hq-visual-hierarchy-palette-refresh-plan.md` (the accepted UI direction from browser-smoke/product review):
+
+- **Retired the standalone War Exhaustion candle from Army HQ.** `ExhaustionClock.tsx` deleted; mount + import removed from `ArmyHQModal.tsx`; dead `exhaustionDisplay` field removed from the data memo. The underlying war-exhaustion mechanic remains live in `state.warPhaseExhaustion`, Chief of Staff prose (`ChiefOfStaffBriefing.tsx` `exhaustionItem` warning branches), War Summary, OOB summaries, and Command Relationship explanations.
+- **Recomposed the briefing tab top grid into two broad visual bands** instead of a 5-cell row of similarly-styled small black cards. Old layout: `grid-cols-12` with ChiefOfStaff col-4 / Commander col-3 / ArmyCrest col-1 / ExhaustionClock col-2 / StrategicPosition col-2. New layout: `grid-cols-12` with BriefingBand col-7 (Chief of Staff briefing as the primary document surface) / EvidenceBand col-5 (Commander dossier with mini-bio + 3-cell counts row + Strategic Position bars stacked).
+- **Applied semantic palette discipline.** Gold/amber retains command-action authority (Emergency Posture select, Stage Orders modal button, active tab indicator). Blue-green replaces amber for friendly-state surfaces (Commander dossier border + tab label, Active Ops count card, Negotiating Capital composite bar in `StrategicPosition.tsx`). Red retains threat/critical (Critical counts card). The Chief of Staff briefing keeps its paper-toned authored-document surface. Per-dimension bars in StrategicPosition retain their existing semantic colors (red military_credibility, etc.); only the composite bar shifted.
+- **Treated unavailable Strategic Position data as absence, not a feature.** `StrategicPosition.tsx` now returns `null` when `dimensions` is undefined instead of rendering a large `DIMENSION DATA NOT AVAILABLE` empty card. The plan's "no prime briefing space for empty status" rule.
+
+**Preserved (per plan stop-gates):**
+
+- `role="dialog"`, `aria-modal="true"`, `aria-label="Army Headquarters"`, tab roles/labels, close-button behavior, tab arrow-key navigation, and the Emergency Posture confirmation modal contract are all unchanged. The 33 a11y static guards and the 7 focused UI vitest suites still pass.
+- War exhaustion warning copy in `ChiefOfStaffBriefing.tsx` `exhaustionItem && count < 3` branch is unchanged. The mechanic still surfaces in decision-relevant prose where the briefing items emit a warning.
+- No changes to `GameStateAdapter.ts`, `MapContainer.tsx`, save schema, scenario data, sim, IPC, canon, or `FORAWWV.md`.
+
+**Artifacts (committed):**
+
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx` — ExhaustionClock import + JSX mount removed, `exhaustionDisplay` removed from data memo, top grid recomposed into two-band layout, palette refresh on the counts row + commander border.
+- `src/ui/map/components/army_hq/StrategicPosition.tsx` — return `null` for absent dimensions; composite bar palette shift to emerald.
+- `src/ui/map/components/army_hq/ExhaustionClock.tsx` — **deleted** (orphan after mount removal).
+- `docs/plans/MASTER_ROADMAP.md` — Legendary Features row for `Exhaustion Clock` flipped from "Retire from Army HQ visual roadmap" (intent) to "RETIRED from Army HQ (implementation closed 2026-05-20)" (closeout).
+- `docs/40_reports/implemented/20260520_ARMY_HQ_VISUAL_HIERARCHY_REFRESH.md` — closeout report (this entry's long-form companion with the per-file changes, visual gates, and non-baseline rationale).
+- `docs/PROJECT_LEDGER.md` — this entry.
+
+**Artifacts (local-only, in `data/derived/_debug/` which is gitignored):**
+
+- `data/derived/_debug/army_hq_visual_2026-05-20/smoke.cjs` — puppeteer smoke script driving system Chrome against the Vite dev server.
+- `data/derived/_debug/army_hq_visual_2026-05-20/army_hq_briefing_{desktop_1280x720,mobile_390x844}.png` — Army HQ briefing tab at both viewports with foreground Dayton modal `display: none` removed for clean capture.
+- `data/derived/_debug/army_hq_visual_2026-05-20/{landing,post_faction_pick,army_hq_full}_*.png` — supplementary captures (faction picker, post-Continue Dayton modal, full-page Army HQ with Dayton foreground).
+- `data/derived/_debug/army_hq_visual_2026-05-20/vite.{out,err,pid}` — dev server boot logs.
+
+**Verification:**
+
+- `npm.cmd run typecheck` — PASS (clean `tsc --noEmit -p tsconfig.json`).
+- `npx.cmd vitest run tests/ui_army_hq_war_summary_visibility.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/ui/officer_mini_bio.test.ts tests/ui/emergency_posture_confirm.test.ts tests/ui/error_boundary_isolation.test.ts tests/ui/accessibility_form_labels.test.ts --reporter=dot` — **34/34 PASS** across 7 suites. Covers Army HQ war-summary visibility, Presidential Decision Room rendering + wiring, officer mini-bio formatting, emergency posture confirmation modal, root error boundary isolation, and form-label accessibility.
+- `npm.cmd run desktop:map:build` — PASS (`✓ built in 16.59s`; output to `dist/tactical-map/`).
+- Browser visual smoke at 1280×720 + 390×844 — captured under `data/derived/_debug/army_hq_visual_2026-05-20/` (ignored path); confirms band layout renders, no standalone War Exhaustion candle, no empty Strategic Position card.
+- `git diff --check` — clean.
+
+**Non-baseline decision:** `npm.cmd run test:baselines` was **not** run for this packet. All changed files are presentation-layer React components consumed only by the renderer; none participate in the scenario-runner formula-bot path. No edits to `src/sim/**`, `src/scenario/**`, `src/state/**`, `GameStateAdapter.ts`, save schema, IPC, generated saves, or scenario JSON. Matches the same non-baseline rationale recorded in Batch 50 (UI-only trivial alias / JSX truthy-narrowing closeout, 2026-05-20).
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+---
+
 ## [2026-05-20] docs(plan): Strict-null Batch C schema-boundary validation plan + post-Batch-50/51 count reconciliation
 
 **Type:** Docs-only planning + roadmap/backlog count reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.

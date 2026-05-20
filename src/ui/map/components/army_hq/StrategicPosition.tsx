@@ -46,8 +46,10 @@ function gradeColor(value: number): string {
 }
 
 function compositeGradeColor(value: number): string {
-    if (value >= 70) return 'text-amber-300';
-    if (value >= 40) return 'text-amber-400';
+    // Friendly-state composite reads in blue-green; reserve amber/gold for
+    // command-action surfaces (selection, primary CTA, presidential authority).
+    if (value >= 70) return 'text-emerald-300';
+    if (value >= 40) return 'text-emerald-400';
     return 'text-red-400';
 }
 
@@ -64,17 +66,11 @@ function formatWeight(w: number): string {
 export function StrategicPosition({ dimensions, faction, compositeScore }: StrategicPositionProps) {
     const [hoveredDim, setHoveredDim] = useState<string | null>(null);
 
+    // Render nothing when dimensions are absent — do not occupy prime briefing
+    // space with a "DATA NOT AVAILABLE" card. Decision-relevant absence belongs
+    // to staff prose (Chief of Staff briefing), not a hero-sized empty card.
     if (!dimensions) {
-        return (
-            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-                <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
-                    STRATEGIC POSITION
-                </div>
-                <div className="text-[11px] text-text-secondary/60 italic py-4 font-mono text-center">
-                    DIMENSION DATA NOT AVAILABLE
-                </div>
-            </div>
-        );
+        return null;
     }
 
     const weights = FACTION_WEIGHTS[faction];
@@ -86,19 +82,19 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                 STRATEGIC POSITION
             </div>
 
-            {/* Composite Negotiating Capital bar */}
+            {/* Composite Negotiating Capital bar — friendly-state weighted composite. */}
             <div className="mb-3 pb-2 border-b border-panel-border/50">
                 <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wide text-amber-400/90">
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/90">
                         NEGOTIATING CAPITAL
                     </span>
                     <span className={`text-[13px] font-mono font-bold tabular-nums ${compositeGradeColor(score)}`}>
                         {score}
                     </span>
                 </div>
-                <div className="h-[6px] rounded-full bg-amber-500/15 overflow-hidden">
+                <div className="h-[6px] rounded-full bg-emerald-500/15 overflow-hidden">
                     <div
-                        className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-500"
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
                         style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
                     />
                 </div>
