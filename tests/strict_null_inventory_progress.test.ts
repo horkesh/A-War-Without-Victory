@@ -162,6 +162,31 @@ const PHASE_2_COMBAT_BATCH_47_FILES = [
     'src/sim/combat/supply_condition.ts',
 ];
 
+const PHASE_5_ADAPTER_BATCH_48_FILES = [
+    'src/ui/map/data/GameStateAdapter.ts',
+];
+
+// The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
+// count at exactly 10 retained escapes documented in
+// `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
+//   - 1 JSON entry boundary at L401 (`json: unknown` → `any`)
+//   - 4 `Record<string, unknown>` field widenings at L551/607/665/736
+//     (f.ops, f.combat_summary, f.brigade_history × 2 — load-bearing for
+//     downstream free-form property access through the FormationRecord
+//     `Record<string, unknown>` boundary)
+//   - 2 multi-branch ternary widenings at L934 + L2278 (`activeOps` /
+//     `opsArray` joining a typed-array branch with a `[singleton]` branch)
+//   - 1 JSON-import baseline cast at L2916 (`historicalBaseline as any`
+//     to bypass structural mismatch with the `HistoricalBaseline` interface
+//     across a JSON resolve)
+//   - 2 UI-local literal-union `FactionId` casts at L1842 + L1863 — the
+//     UI `FactionId` in `src/ui/map/data/types.ts:8` is the literal union
+//     `'RS' | 'RBiH' | 'HRHB' | null` and SHADOWS the engine
+//     `FactionId = string` alias from `src/state/game_state.ts:45`; the
+//     `string` source value (`ENCLAVE_UI_DEFINITIONS[i].faction`) does not
+//     structurally match the literal union without the cast.
+const ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING = 10;
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -589,5 +614,34 @@ describe('strict null inventory progress', () => {
         const factionIdCount = phaseCount(current, 'as_factionid_casts', PHASE_2_COMBAT_BATCH_47_FILES);
 
         expect(factionIdCount).toBe(0);
+    });
+
+    it('caps the Batch 48 Phase 5 GameStateAdapter adapter-local cleanup', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        // GameStateAdapter.ts retains exactly 10 documented load-bearing
+        // escapes after Batch 48 (see `ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING`
+        // constant for the per-site classification):
+        // - 1 JSON entry boundary cast (`json as any`)
+        // - 4 Record<string, unknown> field widenings (f.ops, f.combat_summary,
+        //   f.brigade_history × 2)
+        // - 2 multi-branch ternary widenings (activeOps / opsArray)
+        // - 1 JSON-import baseline cast (historicalBaseline as any)
+        // - 2 UI-local literal-union FactionId casts (enclave faction lookups
+        //   against ENCLAVE_UI_DEFINITIONS[i].faction: string, target field
+        //   typed as `'RS' | 'RBiH' | 'HRHB' | null | undefined`)
+        // The ceiling is enforced with `toBeLessThanOrEqual` (not exact)
+        // so future schema-tightening or GameState-contract work that
+        // removes additional sites does not require updating this test.
+        const adapterTotal = ESCAPE_CATEGORIES.reduce(
+            (sum, category) => sum + phaseCount(current, category, PHASE_5_ADAPTER_BATCH_48_FILES),
+            0,
+        );
+
+        expect(adapterTotal).toBeLessThanOrEqual(ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING);
     });
 });
