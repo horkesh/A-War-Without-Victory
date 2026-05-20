@@ -3,6 +3,63 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] docs(plan): Strict-null Batch C schema-boundary validation plan + post-Batch-50/51 count reconciliation
+
+**Type:** Docs-only planning + roadmap/backlog count reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; HEAD before commit: `ad87fb3e` — Batch 51 sim runtime-invariant cleanup closeout).
+
+**Change:** Authored `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` (Batch C plan), the third batch in the post-FactionId strict-null cleanup wave, building on the Batch A (UI-only) and Batch B (sim runtime-invariant) closeouts from Batches 50/51. The plan is **plan-only** — no schema-boundary code changes happen in this packet; the implementation lane is a separate commit series.
+
+The plan covers all 12 schema-boundary files enumerated in `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` §7 Batch C scope:
+
+1. `src/scenario/scenario_loader.ts` (8 `as_unknown_casts`)
+2. `src/state/war_timeline.ts` (8)
+3. `src/state/political_control_init.ts` (7)
+4. `src/scenario/oob_loader.ts` (6)
+5. `src/scenario/brigade_temporal_emit.ts` (5)
+6. `src/sim/briefing/collect_briefing.ts` (4)
+7. `src/desktop/desktop_sim.ts` (3)
+8. `src/state/serialize.ts` (3)
+9. `src/state/validateGameState.ts` (2)
+10. `src/sim/replay/replay_frame_summary.ts` (2)
+11. `src/sim/ai_commander/war_dispatches.ts` (2)
+12. `src/sim/combat/sector_offensive_launch_helpers.ts` (2 — signature-tightening alternative)
+
+Total: 52 of the 80 inventory-counted `as_unknown_casts`. The plan defines:
+
+- **Six shared validator primitives** (`asRecord`, `asArray`, `asString`, `asFiniteNumber`, `asBoolean`, `asTypedArray<T>`) landing in a new `src/state/schema_validators.ts` module, generalizing the Batch 49 `parseFactionId(...)` / `parseAdvisorContextType(...)` prototype.
+- **Per-loader composed helpers** co-located with each loader, with explicit `parse<ShapeName>(raw: unknown): ShapeName | null` contracts and matching `<helper>_schema_boundary.test.ts` fixture suites.
+- **Fallback semantics matrix** documenting which cases are byte-identical, which are "stricter at the boundary, looser downstream" (only `war_timeline.ts` `.length`-on-non-array and `replay_frame_summary.ts` malformed-military-sub-object), and which require an unchanged loader-throw path on top-level shape mismatch.
+- **Risk-ordering** of the 12 files (lowest = `sector_offensive_launch_helpers.ts` signature-loosen; highest = `brigade_temporal_emit.ts` engine-state-shape reads with side-effecting fallbacks).
+- **Byte-identity gates**: `npm.cmd run typecheck`, `npm.cmd run test:baselines` (critical for all 12 sim-path files), `npm.cmd run desktop:map:build` (for `desktop_sim.ts`), 12 new `BATCH_C_*` slice assertions in `tests/strict_null_inventory_progress.test.ts`, predicted post-Batch-C floor `2 / 28 / 319 / 11 / 38 / 463`.
+- **Stop gates**: no save-shape promotions, no `GameStateAdapter.ts` edits, no behavior fixes disguised as type cleanup, no helper that silently coerces a previously-erroring path on the live serialization line.
+
+**Inventory reconciliation:** Updated the strict-null rows in `docs/40_reports/CONSOLIDATED_BACKLOG.md` (lines ~44 and ~266) and `docs/plans/MASTER_ROADMAP.md` (the "Strict-null closeout addendum" section around line 1225) to reflect the post-Batch-50/51 floor:
+
+```
+Pre this packet (post Batch 49):    as_factionid 2 / as_unknown 80 / as_any 319 / nn_dot 39 / nn_index 43 / opt_fields 463
+Post Batch 50/51 (this packet):     as_factionid 2 / as_unknown 80 / as_any 319 / nn_dot 11 / nn_index 38 / opt_fields 463
+                                                                                  ^^^^^^^^^^^   ^^^^^^^^^^^^^
+                                                                                  −28 dot       −5 index
+```
+
+The −28 `non_null_assertions_dot` delta is the sum of Batch 50 (−7) and Batch 51 (−21); the −5 `non_null_assertions_index` delta is from Batch 50 alone. Batch 51 was scoped to dot-style runtime-invariant cleanup and did not touch index-style. Both source figures are confirmed against the prior two ledger entries (Batch 50 + Batch 51) which themselves cite the inventory snapshots `data/derived/_debug/strict_null_inventory_post_batch_A.json` and `data/derived/_debug/strict_null_inventory_post_batch_B.json`.
+
+**Out-of-scope cross-references documented:** Validator type-tightening (CLI/validate — 195 sites by design), save-migration `as any` cleanup (23 sites in `save_migration.ts`), GameStateAdapter Phase 5 follow-up (8 retained `as any` + 2 `as FactionId`), MapContainer library-boundary (12 sites — MapLibre/Deck.gl `@types` upgrades), save-shape index assertions (~30 sites in treaty/supply/displacement/negotiation), `war_militia_strength` latent bug (3 sites in `minority_erosion.ts`), optional `GameState` field promotion (463 fields — save-shape lane).
+
+**Verification:** `git diff --check` clean for the docs changes. Typecheck, vitest, desktop build, and baselines not run for this docs-only packet (no source files touched). Batch 50's UI-source verification and Batch 51's baseline-byte-identical proof remain recorded in their respective ledger entries below.
+
+**Artifacts (committed):**
+- `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` (new, plan body)
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` (strict-null rows reconciled to post-50/51 floor)
+- `docs/plans/MASTER_ROADMAP.md` (strict-null closeout addendum extended with Batches 50/51 + Batch C plan reference)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+---
+
 ## [2026-05-20] refactor(strict-null): Batch 51 sim runtime-invariant cleanup — Batch B closeout (byte-identical baselines)
 
 **Type:** Type-only refactor + perf-instrumentation alias + 1 test regex widen + plan/ledger updates. **Sim-facing**: 8 sim/scenario files touched. `npm.cmd run test:baselines` PASS — "Baseline regression: all scenarios match." across all baseline scenarios. No simulation behavior, scenario data, save schema, generated artifact (apart from the inventory snapshot under `data/derived/_debug/`), IPC contract, canon text, or FORAWWV text changed.
