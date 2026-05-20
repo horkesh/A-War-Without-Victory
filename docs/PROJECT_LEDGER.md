@@ -3,6 +3,25 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] docs(plan): Army HQ visual hierarchy and palette refresh roadmap packet
+
+**Type:** Docs-only product/UI planning. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; based on accepted Batch 50 UI-only strict-null cleanup).
+
+**Change:** Added `docs/plans/2026-05-20-army-hq-visual-hierarchy-palette-refresh-plan.md` and wired it into `docs/plans/MASTER_ROADMAP.md`. The plan captures the accepted UI direction from browser-smoke/product review:
+
+- Retire the standalone War Exhaustion candle/card from Army HQ. The underlying war-exhaustion mechanic remains intact and can still surface through decision-relevant staff copy, War Summary, OOB/read-model summaries, and Command Relationship explanations.
+- Recompose the Army HQ briefing tab around broad visual bands (masthead, briefing/document band, evidence/action band) instead of another row of similarly styled small black cards.
+- Apply semantic palette discipline: gold for presidential action/selection, blue-green for friendly force state/readiness/supply, red for threat/civilian harm/hard blockers, paper/off-white for authored briefing/document truth, and gray for unavailable/secondary metadata.
+- Allow generated raster assets only as non-deceptive texture/masthead/background plates, with provenance and build/package checks if committed.
+
+**Roadmap updates:** `MASTER_ROADMAP.md` now marks Army HQ as functional with this visual-hierarchy refresh queued; retires the old "Exhaustion Clock" legendary-feature row from the Army HQ visual roadmap; adds the plan to the active plan registry; and extends the 2026-05-20 roadmap implementation-packet addendum from seven to eight planning/control assets.
+
+**Verification:** `git diff --check` clean for the docs changes. Typecheck, vitest, desktop build, and baselines not run for this docs-only packet; Batch 50's UI-source verification remains recorded in the entry below.
+
+---
+
 ## [2026-05-20] refactor(strict-null): Batch 50 UI-only trivial alias / JSX truthy-narrowing — Batch A closeout
 
 **Type:** Type-only refactor + plan/ledger updates. No simulation behavior, scenario data, save schema, generated artifact (apart from the inventory snapshot under `data/derived/_debug/`), IPC contract, prompt format, canon text, or FORAWWV text changed. UI-only lane: all eight touched files are read-only render-model consumers and GeoJSON view builders, none participate in baseline scenario runs (formula bots), so `npm.cmd run test:baselines` is not re-run — Batch 47/48 baselines floor remains the active byte-identity reference.
