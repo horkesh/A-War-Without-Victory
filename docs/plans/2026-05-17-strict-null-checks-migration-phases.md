@@ -315,6 +315,40 @@ The baseline also finds strictness escapes in CLI, validation, map/data, additio
 
 Before any later source cleanup touches those files, this ledger must be expanded to assign each remaining inventory file to exactly one phase or a new approved follow-up phase.
 
+### Batch 49: AI Commander Response Parser Schema Validation (2026-05-20)
+
+Files:
+- `src/sim/ai_commander/response_parser.ts`
+
+Pre-Batch-49 inventory counts (file-local):
+- `as_factionid_casts`: 1 (line 101, `(data.faction as FactionId) ?? 'RBiH'` in `parseAdvisorResponse`)
+- `non_null_assertions_dot`: 1 (line 43, `d!.stance` in `parseArmyResponse` corps_directives loop)
+- Non-counted same-shape schema casts: `data.operation_plan as CorpsDecision['operation_plan']`, `data.brigade_movements as CorpsDecision['brigade_movements']`, `data.reserve_deployment as ArmyDecision['reserve_deployment']`, `data.context_type as AdvisorResponse['context_type']`, plus `Record<string, unknown>` directive/sector_stances widenings and `as string[]` / `as 'accept' | 'reject'` literal-union narrowings.
+
+Post-Batch-49 inventory counts (file-local):
+- `as_factionid_casts`: 0
+- `non_null_assertions_dot`: 0
+- Remaining non-counted schema casts: unchanged from the pre-batch list except for the `data.context_type` widening, which was also replaced by a `parseAdvisorContextType` helper in the same wave (the cast was not in the inventory regex but sits on the same `unknown → typed` schema boundary; cleaning it here keeps the helper API symmetric).
+
+Implementation:
+- Added two narrow helpers near the existing `VALID_STANCES` / `VALID_SECTOR_STANCES` sets: `parseFactionId(value: unknown, fallback: FactionId): FactionId` requires both `typeof === 'string'` and `CANONICAL_FACTIONS.includes(value)`; `parseAdvisorContextType(value: unknown): AdvisorResponse['context_type']` requires both `typeof === 'string'` and `VALID_ADVISOR_CONTEXT_TYPES.has(value)` against the three literal context-type strings declared in `src/sim/ai_commander/ai_types.ts:86` (`'situation_analysis' | 'operation_planning' | 'peace_plan'`).
+- Promoted the `FactionId` import to a value+type import (`CANONICAL_FACTIONS, type FactionId`) from `src/state/game_state.ts`.
+- `parseAdvisorResponse(...)`: replaced `(data.faction as FactionId) ?? 'RBiH'` with `parseFactionId(data.faction, 'RBiH')`; replaced `(data.context_type as AdvisorResponse['context_type']) ?? 'situation_analysis'` with `parseAdvisorContextType(data.context_type)`.
+- `parseArmyResponse(...)` corps_directives loop: hoisted `d?.stance` to a `rawStance` local with `typeof === 'string' && VALID_STANCES.has(rawStance)` narrowing; the `d!.stance` non-null assertion drops because the typeof narrowing makes the conditional branch type `string` directly.
+
+Fallback-semantics narrowing (documented contract change for invalid LLM input):
+- For *valid* LLM inputs (canonical-string `faction`, valid `context_type`) the parser output is byte-identical to the pre-Batch-49 behavior.
+- For *invalid* inputs the contract narrows: non-canonical strings (e.g. `'NATO'`) and non-string truthy values (e.g. `42`, `{...}`) on `data.faction` now fall back to the supplied default (`'RBiH'` for `parseAdvisorResponse`) instead of being passed through the cast as a type lie. Identical narrowing applies to `data.context_type` (non-canonical strings fall back to `'situation_analysis'`).
+- Safe at every downstream consumer because `getAdvisorRecommendation` (`src/sim/ai_commander/player_advisor.ts:35`) supplies its own caller-side `faction: FactionId` parameter to `logDecision`; the parsed advisor `faction` is informational metadata returned in the response object, not a sim-state mutation key. UI consumers benefit from the canonical-only guarantee.
+
+Stop-gate notes:
+- The parser remains the AI commander JSON boundary. Future Batch 50+ continuation passes can fold `data.operation_plan`, `data.brigade_movements`, `data.reserve_deployment`, sector stance iteration, and recommendation iteration into shared `typeof === 'string' && VALID_SET.has(value)` helpers, but those changes touch `unknown → object` boundaries that are out of scope for the visible `as FactionId` closeout this batch delivers.
+- No prompt format change. No AI commander behavior tuning. No `parseCorpsResponse` operation-plan schema redesign. No `GameStateAdapter.ts`, combat files, save fixtures, or scenario harness touched.
+
+`tests/ai_commander_parser.test.ts` extended from 8 → 14 tests with the six new fallback-semantics tests (missing/non-canonical-string/non-string-truthy faction; missing/invalid context_type; preserved valid `operation_planning`/`peace_plan` context types). `tests/strict_null_inventory_progress.test.ts` extended from 27 → 28 tests with a Batch 49 slice assertion. Repo-wide `as_factionid_casts` floor drops from 3 → 2; the residual 2 are exactly the two retained Batch 48 `enclaveDef?.faction as FactionId | undefined` UI-literal-union casts in `src/ui/map/data/GameStateAdapter.ts` (lines 1842, 1863), gated by the UI/engine FactionId-unification stop-gate documented in the Batch 48 narrative.
+
+`npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/ai_commander_parser.test.ts --reporter=dot` 14/14 PASS; `npx.cmd vitest run tests/ai_commander_parser.test.ts tests/ai_commander_validation.test.ts tests/ai_commander_event_decision.test.ts tests/ai_commander_ipc.test.ts tests/ai_commander_prompt.test.ts --reporter=dot` 72/72 PASS broader AI commander surface check; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` 28/28 PASS. `npm.cmd run test:baselines` not re-run: the parser is consumed by the AI commander integration path (advisor button click + AI commander turn invocation); the baseline scenario runner uses formula bots and does not exercise the parser at all. The Batch 47/48 baselines floor remains the active byte-identity reference.
+
 ## Source Migration Status
 
 No source phase was completed in this lane. Current worktree status shows unrelated active edits in protected source areas (`supply`, `paramilitary`, `RBiH-HRHB`, `fatigue`, and turn pipeline files), so type-only source migration is deferred to avoid conflicts.

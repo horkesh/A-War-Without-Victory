@@ -84,4 +84,76 @@ describe('response parser', () => {
         const result = parseArmyResponse(wrapped, 'RS', 10);
         expect(result).not.toBeNull();
     });
+
+    it('parseAdvisorResponse falls back to RBiH when faction is missing', () => {
+        const json = JSON.stringify({
+            assessment: 'situation report',
+            recommendations: [],
+            context_type: 'situation_analysis',
+        });
+        const result = parseAdvisorResponse(json);
+        expect(result).not.toBeNull();
+        expect(result!.faction).toBe('RBiH');
+    });
+
+    it('parseAdvisorResponse falls back to RBiH when faction is a non-canonical string', () => {
+        const json = JSON.stringify({
+            faction: 'NATO',
+            assessment: 'situation report',
+            recommendations: [],
+            context_type: 'situation_analysis',
+        });
+        const result = parseAdvisorResponse(json);
+        expect(result!.faction).toBe('RBiH');
+    });
+
+    it('parseAdvisorResponse falls back to RBiH when faction is a non-string truthy value', () => {
+        const json = JSON.stringify({
+            faction: { id: 'RS' },
+            assessment: 'situation report',
+            recommendations: [],
+            context_type: 'situation_analysis',
+        });
+        const result = parseAdvisorResponse(json);
+        expect(result!.faction).toBe('RBiH');
+    });
+
+    it('parseAdvisorResponse falls back to situation_analysis when context_type is missing', () => {
+        const json = JSON.stringify({
+            faction: 'RS',
+            assessment: 'situation report',
+            recommendations: [],
+        });
+        const result = parseAdvisorResponse(json);
+        expect(result!.context_type).toBe('situation_analysis');
+    });
+
+    it('parseAdvisorResponse falls back to situation_analysis when context_type is invalid', () => {
+        const json = JSON.stringify({
+            faction: 'RS',
+            assessment: 'situation report',
+            recommendations: [],
+            context_type: 'tactical_recon',
+        });
+        const result = parseAdvisorResponse(json);
+        expect(result!.context_type).toBe('situation_analysis');
+    });
+
+    it('parseAdvisorResponse preserves valid operation_planning and peace_plan context types', () => {
+        const planning = parseAdvisorResponse(JSON.stringify({
+            faction: 'RS',
+            assessment: 'a',
+            recommendations: [],
+            context_type: 'operation_planning',
+        }));
+        expect(planning!.context_type).toBe('operation_planning');
+
+        const peace = parseAdvisorResponse(JSON.stringify({
+            faction: 'HRHB',
+            assessment: 'a',
+            recommendations: [],
+            context_type: 'peace_plan',
+        }));
+        expect(peace!.context_type).toBe('peace_plan');
+    });
 });

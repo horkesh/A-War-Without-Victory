@@ -166,6 +166,10 @@ const PHASE_5_ADAPTER_BATCH_48_FILES = [
     'src/ui/map/data/GameStateAdapter.ts',
 ];
 
+const AI_COMMANDER_BATCH_49_FILES = [
+    'src/sim/ai_commander/response_parser.ts',
+];
+
 // The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
 // count at exactly 10 retained escapes documented in
 // `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
@@ -643,5 +647,47 @@ describe('strict null inventory progress', () => {
         );
 
         expect(adapterTotal).toBeLessThanOrEqual(ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING);
+    });
+
+    it('cleans the Batch 49 AI commander response_parser schema-validation slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        // response_parser.ts is the AI commander JSON boundary that ingests
+        // `unknown` LLM output and narrows it to typed AdvisorResponse /
+        // ArmyDecision / CorpsDecision shapes. Batch 49 replaces the two
+        // inventory-counted escape sites with explicit schema validation:
+        //   - 1 `as FactionId` widening on `data.faction` at parseAdvisorResponse
+        //     replaced by `parseFactionId(value, fallback)` helper that requires
+        //     both `typeof === 'string'` and `CANONICAL_FACTIONS.includes(value)`.
+        //     Fallback semantics narrow: non-canonical strings and non-string
+        //     truthy values now fall back to the supplied default ('RBiH' for
+        //     parseAdvisorResponse) instead of being passed through. Documented
+        //     in the Batch 49 ledger entry; covered by new parser tests.
+        //   - 1 `d!.stance` non-null-assertion-dot at parseArmyResponse hoisted
+        //     to a `rawStance` local with `typeof === 'string' &&
+        //     VALID_STANCES.has(rawStance)` narrowing. Behavior-identical because
+        //     VALID_STANCES only matches the three valid string stances.
+        // The adjacent `parseAdvisorContextType` helper also replaced the
+        // redundant `(data.context_type as AdvisorResponse['context_type']) ??
+        // 'situation_analysis'` widening — that cast was not in the inventory
+        // regex but is part of the same schema boundary. Other unknown→typed
+        // widenings in this file (`data.operation_plan as
+        // CorpsDecision['operation_plan']`, `data.brigade_movements as
+        // CorpsDecision['brigade_movements']`, `data.reserve_deployment as
+        // ArmyDecision['reserve_deployment']`, plus the `Record<string,
+        // unknown>` directive/sector_stances widenings and the `as string[]` /
+        // `as 'accept' | 'reject'` literal-union narrowings) do not match the
+        // inventory regex and remain as future schema-validation lane work.
+        // This slice pins both `as_factionid_casts` and `non_null_assertions_dot`
+        // categories at zero for response_parser.ts.
+        const factionIdCount = phaseCount(current, 'as_factionid_casts', AI_COMMANDER_BATCH_49_FILES);
+        const nonNullDotCount = phaseCount(current, 'non_null_assertions_dot', AI_COMMANDER_BATCH_49_FILES);
+
+        expect(factionIdCount).toBe(0);
+        expect(nonNullDotCount).toBe(0);
     });
 });
