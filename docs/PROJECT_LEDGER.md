@@ -3,6 +3,111 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] refactor(strict-null): Batch 49 AI commander response_parser schema validation (byte-identical for valid inputs)
+
+**Type:** Type-only refactor + schema-validation tightening + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, prompt format, or FORAWWV text changed. Parser-boundary lane: `src/sim/ai_commander/response_parser.ts` is consumed by `getAdvisorRecommendation` / `corps_commander_ai` / `army_commander_ai`, none of which participate in baseline scenario runs (scenarios use formula bots), so `npm.cmd run test:baselines` is not re-run — see baseline decision below.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `473e1d96`; follows Batch 48 at `473e1d96`).
+
+**Change:** Closes the AI commander LLM-schema-validation lane defined in `docs/plans/2026-05-20-ai-commander-response-parser-schema-validation-plan.md`. Replaces the remaining `unknown → FactionId` cast at `parseAdvisorResponse(...)` and the nearby `d!.stance` non-null assertion at `parseArmyResponse(...)` with explicit canonical-set validation helpers, plus extends parser tests for the new fallback semantics.
+
+- `src/sim/ai_commander/response_parser.ts`:
+  - Promoted `FactionId` import to a value+type import (`CANONICAL_FACTIONS, type FactionId`) from `src/state/game_state.ts`.
+  - Added `VALID_ADVISOR_CONTEXT_TYPES` constant pinning the three literal values from `AdvisorResponse['context_type']` (`'situation_analysis'`, `'operation_planning'`, `'peace_plan'`).
+  - Added two narrow helpers: `parseFactionId(value: unknown, fallback: FactionId): FactionId` (requires `typeof === 'string'` AND `CANONICAL_FACTIONS.includes(value)`) and `parseAdvisorContextType(value: unknown): AdvisorResponse['context_type']` (requires `typeof === 'string'` AND set-membership; falls back to `'situation_analysis'`).
+  - `parseAdvisorResponse(...)`: `(data.faction as FactionId) ?? 'RBiH'` → `parseFactionId(data.faction, 'RBiH')`. `(data.context_type as AdvisorResponse['context_type']) ?? 'situation_analysis'` → `parseAdvisorContextType(data.context_type)`. The second swap removes a non-inventory-counted but same-shape `unknown → literal-union` widening at the same schema boundary.
+  - `parseArmyResponse(...)` corps_directives loop: hoisted `d?.stance` to a `rawStance` local with `typeof === 'string' && VALID_STANCES.has(rawStance)` narrowing so the `d!.stance` non-null-assertion-dot drops. Behavior is identical because `VALID_STANCES` only contains three string values (`'offensive'`, `'balanced'`, `'defensive'`) — under the prior code `VALID_STANCES.has(d?.stance as string)` returning true already implied `d?.stance` was one of those strings (so `d` was defined and `stance` was a valid string).
+- `tests/ai_commander_parser.test.ts`:
+  - Added six new tests covering the tightened fallback contract: (a) missing `faction` → `'RBiH'`; (b) non-canonical string `faction: 'NATO'` → `'RBiH'`; (c) non-string truthy `faction: { id: 'RS' }` → `'RBiH'`; (d) missing `context_type` → `'situation_analysis'`; (e) invalid string `context_type: 'tactical_recon'` → `'situation_analysis'`; (f) valid `'operation_planning'` and `'peace_plan'` context types preserved.
+- `tests/strict_null_inventory_progress.test.ts`: added `AI_COMMANDER_BATCH_49_FILES` constant (`src/sim/ai_commander/response_parser.ts`) and a "cleans the Batch 49 AI commander response_parser schema-validation slice" assertion that pins both `as_factionid_casts` and `non_null_assertions_dot` for this file at zero.
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`: added a Batch 49 row to the Deferred Inventory Expansion section recording the AI commander schema-validation lane outcome and the residual unknown→typed widenings still on this file's schema-boundary surface.
+
+**Fallback-semantics narrowing (documented contract change for invalid LLM input):**
+
+For *valid* LLM inputs (string `faction` matching `'RBiH' | 'RS' | 'HRHB'`, valid `context_type`) the parser output is byte-identical to the pre-Batch-49 behavior. For *invalid* inputs the contract narrows:
+
+| Input shape | Pre-Batch-49 `parsed.faction` | Post-Batch-49 `parsed.faction` |
+| --- | --- | --- |
+| `faction: 'RS'` (valid canonical) | `'RS'` | `'RS'` (unchanged) |
+| `faction: 'NATO'` (non-canonical string) | `'NATO'` (passed through cast) | `'RBiH'` (fallback) |
+| `faction: 42` (number) | `42` (passed through cast, downstream type lie) | `'RBiH'` (fallback) |
+| `faction: { id: 'RS' }` (object) | `{ id: 'RS' }` (passed through cast, downstream type lie) | `'RBiH'` (fallback) |
+| `faction: null` / missing | `'RBiH'` (via `??`) | `'RBiH'` (unchanged) |
+
+The same narrowing applies to `context_type` — invalid strings and non-strings now fall back to `'situation_analysis'` instead of being passed through the literal-union cast as a type lie. This was a non-counted but parallel sibling cast removed in the same wave because it sits on the same schema boundary.
+
+This narrowing is safe at every downstream consumer of `parseAdvisorResponse(...)` because (a) `getAdvisorRecommendation` (`src/sim/ai_commander/player_advisor.ts:35`) already supplies its own caller-side `faction: FactionId` parameter to `logDecision`, so the parsed advisor faction is informational metadata returned in the response object rather than a sim-state input; (b) downstream UI consumers display `result.faction` as a label and benefit from the canonical-only guarantee; (c) `logDecision` writes the parsed advisor object into the decision log for replay determinism, where the canonical-only constraint is the correct contract. No sim phase reads the parsed `faction` field as a faction-key for state mutation.
+
+**Inventory deltas:**
+
+| Category | response_parser.ts (file-local) | Repo-wide |
+| --- | --- | --- |
+| `as_factionid_casts` | 1 → 0 (−1) | 3 → 2 (−1) |
+| `non_null_assertions_dot` | 1 → 0 (−1) | (repo-wide N/A — not tracked at this slice level) |
+
+The repo-wide `as_factionid_casts` floor is now 2, and both residual sites are the two retained Batch 48 `enclaveDef?.faction as FactionId | undefined` UI-literal-union casts in `src/ui/map/data/GameStateAdapter.ts` (lines 1842, 1863) gated by the UI/engine FactionId-unification stop-gate documented in the Batch 48 narrative. The "visible `as FactionId` cast" lane is now closed except for that single contract-decision item.
+
+**Retained schema-boundary sites in response_parser.ts (future LLM-schema lane):**
+
+The file still has the following non-inventory-counted widenings on its `unknown → typed` schema boundary, deliberately out of scope for Batch 49 per the lane plan's "do not redesign the AI commander or command model" stop-gate:
+
+- `data.corps_directives as Record<string, unknown>` (parseArmyResponse) — record-shape widening for directive iteration.
+- `Array.isArray(...) ? ... as string[] : undefined` (×3 in parseArmyResponse) — narrowing-after-guard literal casts on `hold_municipalities`, `offensive_targets`, and the three `operation_decisions` arrays.
+- `data.peace_plan_response as 'accept' | 'reject'` — literal-union cast after equality narrowing (already guarded by `=== 'accept' || === 'reject'`).
+- `data.reserve_deployment as ArmyDecision['reserve_deployment']` — full unchecked widening of an optional nested object.
+- `data.sector_stances as Record<string, unknown>` (parseCorpsResponse) — record-shape widening for sector-stance iteration.
+- `(stance as string)` (parseCorpsResponse line 83) — duplicate of the parseArmyResponse stance pattern; could be folded into a shared `parseStance` helper in a future continuation pass.
+- `data.operation_plan as CorpsDecision['operation_plan']` — full unchecked widening of an optional nested object.
+- `data.brigade_movements as CorpsDecision['brigade_movements']` — full unchecked widening of an optional nested record.
+- `data.recommendations as Array<Record<string, unknown>>` (parseAdvisorResponse) — record-shape widening for recommendations iteration after `Array.isArray` guard.
+
+These would close in a future Batch 50+ pass that adds shared helpers (`parseOperationPlan`, `parseBrigadeMovements`, `parseStance`, `parseRecommendation`) following the same `typeof === 'string' && VALID_SET.has(value)` pattern. None of them block the visible `as FactionId` closeout this batch delivers.
+
+**`test:baselines` decision:** Not re-run. Batch 49 touches `src/sim/ai_commander/response_parser.ts` only — a parser consumed by the live AI commander integration path (`getAdvisorRecommendation`, `runArmyCommander`, `runCorpsCommander`). The baseline scenario runner uses formula bots and does not exercise these AI commander entry points; no save serialization code, no scenario harness code, no IPC writer was touched. The Batch 47/48 baselines floor (40w/52w/baseline_ops_4w/noop_4w byte-identical at hash `a2a51d4a9994a7f5` for the 40w lane) remains the active byte-identity reference. Parser-boundary correctness is proven via 14/14 parser tests (was 8/8; +6 new fallback-semantics tests) plus the typecheck pass.
+
+**Determinism:** Pure type erasure + helper-extraction refactor (3 cast sites) + 1 non-null-assertion elimination. The parser is invoked only outside the scenario runner pipeline (advisor button click; AI commander turn invocation). TypeScript emits character-equivalent JS for valid inputs; for invalid inputs the runtime semantics narrow (documented above) but no replay-determinism path consumes invalid LLM input — formula-bot baselines do not exercise the parser at all.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/ai_commander_parser.test.ts --reporter=dot` — **14/14 PASS** (was 8/8; +6 new fallback-semantics tests).
+- `npx.cmd vitest run tests/ai_commander_validation.test.ts --reporter=dot` — **15/15 PASS** (unchanged; touches `decision_validator.ts` not the parser).
+- `npx.cmd vitest run tests/ai_commander_parser.test.ts tests/ai_commander_validation.test.ts tests/ai_commander_event_decision.test.ts tests/ai_commander_ipc.test.ts tests/ai_commander_prompt.test.ts --reporter=dot` — **72/72 PASS** broader AI commander surface check.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — **28/28 PASS** (was 27/27; +Batch 49 slice).
+- `git diff --check` — clean (LF/CRLF normalization warning on `src/sim/ai_commander/response_parser.ts` only; consistent with repo `.gitattributes` autocrlf handling).
+- `npm.cmd run test:baselines` — NOT RE-RUN by design (see "test:baselines decision" above). Batch 47/48 baselines floor remains active.
+
+**Files touched:**
+- `src/sim/ai_commander/response_parser.ts` (helper extraction + cast/assertion removal)
+- `tests/ai_commander_parser.test.ts` (+6 fallback-semantics tests)
+- `tests/strict_null_inventory_progress.test.ts` (+Batch 49 slice constant + assertion)
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (Batch 49 narrative row)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Two expected dirty transient files remain unstaged** per pre-existing repo convention: `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of the Batch 49 commit set.
+
+---
+
+## [2026-05-20] docs(plans): Post-Batch-48 roadmap implementation plan packet
+
+**Type:** Documentation/planning only. No code, simulation behavior, scenario data, save schema, generated artifact, CI workflow, packaging metadata, canon text, or FORAWWV text changed.
+
+**Change:** Added seven standalone implementation plans and wired them into `docs/plans/MASTER_ROADMAP.md` as a 2026-05-20 planning/control addendum to make the next roadmap/backlog lanes executable while Claude continues the active strict-null implementation lane:
+- `docs/plans/2026-05-20-ai-commander-response-parser-schema-validation-plan.md` - formalizes the `response_parser.ts` LLM-schema lane for the remaining AI commander `unknown -> FactionId` site, parser helper contracts, fallback semantics, tests, and strict-null ledger updates.
+- `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md` - defines the next strict-null roadmap after visible `as FactionId` closeout, classifying remaining `as unknown`, `as any`, dot non-null, and index non-null escapes by trivial alias, schema boundary, save-shape risk, runtime invariant, UI adapter boundary, and deferred behavior fix.
+- `docs/plans/2026-05-20-sector-performance-next-target-plan.md` - refreshes the sector performance lane around current profiling, target-function selection, single-call-frame cache limits, byte-identity proof, and hash-drift stop gates.
+- `docs/plans/2026-05-20-h1-watched-operation-visibility-refresh-plan.md` - reframes H1 watched-operation work as evidence/visibility first for Krivaja, Stupcanica, and Cerska-Kamenica before any operation behavior tuning.
+- `docs/plans/2026-05-20-notification-sensitive-content-review-prep-plan.md` - prepares the residual 20-row / 102-block notification content review matrix with safe, historian-required, narrative-tone, Washington-timing, late-war-outcome, and blocked-sensitive buckets.
+- `docs/plans/2026-05-20-roadmap-backlog-reconciliation-plan.md` - defines a docs-only reconciliation pass for `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` after Batch 48 / AI parser strict-null updates without inventing new status.
+- `docs/plans/2026-05-20-release-evidence-ci-proof-packet-plan.md` - defines a repeatable release/merge proof packet for local checks, GitHub Actions status, baseline hashes, generated-artifact ownership, and operator-only evidence.
+
+**Determinism:** Planning documentation only.
+
+**Verification:** `git diff --check -- docs/PROJECT_LEDGER.md docs/plans/MASTER_ROADMAP.md docs/plans/2026-05-20-*.md` clean in this working session. Full-worktree status also showed concurrent Claude implementation edits in `src/sim/ai_commander/response_parser.ts` and `tests/strict_null_inventory_progress.test.ts`; those files are outside this docs packet and were not modified by this planning pass.
+
+**Artifacts:** The seven `docs/plans/2026-05-20-*.md` files above, `docs/plans/MASTER_ROADMAP.md`, plus this ledger entry.
+
+---
+
 ## [2026-05-20] refactor(strict-null): Batch 48 Phase 5 GameStateAdapter boundary cleanup (UI-only, behavior-preserving)
 
 **Type:** Type-only refactor + test extension + docs + reusable process rule. No simulation behavior, scenario data, save schema, generated artifact, ordering, IPC contract, renderer data shape, or FORAWWV text changed. UI-only refactor confirmed via `npm.cmd run typecheck` + `npm.cmd run desktop:map:build` PASS + 39/39 focused adapter tests + 78/78 broader UI map tests. `npm.cmd run test:baselines` not re-run because Batch 48 touches the renderer adapter only, not any sim-facing projection or shared state contract (Batch 47 baselines remain the active byte-identity floor — see "test:baselines decision" below).
