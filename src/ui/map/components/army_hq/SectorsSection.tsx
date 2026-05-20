@@ -52,7 +52,6 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
     const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
     const currentStance = sector.sector_stance ?? 'defend';
-    const stanceMismatch = stanceHint !== null && stanceHint !== currentStance;
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -69,9 +68,9 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                         THREAT: <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
                 )}
-                {stanceMismatch && (
+                {stanceHint !== null && stanceHint !== currentStance && (
                     <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
-                        RECOMMEND: {stanceHint!.toUpperCase()} (current: {currentStance.toUpperCase()})
+                        RECOMMEND: {stanceHint.toUpperCase()} (current: {currentStance.toUpperCase()})
                     </div>
                 )}
             </div>

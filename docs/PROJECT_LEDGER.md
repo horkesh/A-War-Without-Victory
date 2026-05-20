@@ -3,6 +3,75 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] refactor(strict-null): Batch 50 UI-only trivial alias / JSX truthy-narrowing — Batch A closeout
+
+**Type:** Type-only refactor + plan/ledger updates. No simulation behavior, scenario data, save schema, generated artifact (apart from the inventory snapshot under `data/derived/_debug/`), IPC contract, prompt format, canon text, or FORAWWV text changed. UI-only lane: all eight touched files are read-only render-model consumers and GeoJSON view builders, none participate in baseline scenario runs (formula bots), so `npm.cmd run test:baselines` is not re-run — Batch 47/48 baselines floor remains the active byte-identity reference.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; HEAD before commit: `9eebd9c1` — Post-FactionId classification audit).
+
+**Change:** Closes Batch A from `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` §7 ("UI-only trivial alias / JSX truthy-narrowing"). Eight UI-only files cleaned of inventory-counted non-null assertions using the Batch 42 `AutonomyPanel.tsx` predicate-variable → value-truthy narrowing precedent plus local-binding hoists:
+
+- `src/ui/map/components/CorpsFrontPanel.tsx` (1 dot) — useMemo predicate widened from `_sector ?` to `(_sector && loadedGameState) ?`; `loadedGameState!.frontEdgesOsid` → `loadedGameState.frontEdgesOsid`. `_sector` non-null already implies `loadedGameState` non-null via `findPlayerFacingSectorById` semantics, so the added guard is TS-only.
+- `src/ui/map/components/OperationHistoryPanel.tsx` (1 dot) — JSX gate changed from `(op.objectives_logged_captured?.length ?? 0) > 0` to `op.objectives_logged_captured && op.objectives_logged_captured.length > 0`; the `!` on the `.map(...)` call disappears because TS now narrows the array reference itself through the truthy gate.
+- `src/ui/map/components/army_hq/CommandRelationshipSection.tsx` (1 dot) — replaced `hasDelegationNotice` boolean alias with `delegationSummaryLabel = delegationSummary?.summaryLabel ?? null` value-binding. Silence check now checks `=== null` against the binding; JSX uses `{delegationSummaryLabel !== null && (... {delegationSummaryLabel} ...)}` with no `!` on `delegationSummary.summaryLabel`.
+- `src/ui/map/components/army_hq/SectorsSection.tsx` (1 dot) — removed intermediate `stanceMismatch` boolean alias; inlined `stanceHint !== null && stanceHint !== currentStance` predicate at the JSX gate so TS narrows `stanceHint` to non-null directly. `{stanceHint!.toUpperCase()}` → `{stanceHint.toUpperCase()}`.
+- `src/ui/map/components/chronicle/generateWrappedSlides.ts` (3 dot) — hoisted `internationalStandingDetail` local binding above the `slides.push({...})` literal with `internationalStanding && intlValue != null` narrowing both. Three `internationalStanding!.base_value` / `internationalStanding!.event_modifier` accesses collapse into one narrowed conditional; slides literal uses `detail: internationalStandingDetail`.
+- `src/ui/map/map/builders/buildEthnicGeoJSON.ts` (3 index) — three `departedByOsid![osid]` / `displacementByMun![munId]` index accesses converted to optional chaining (`?.[osid] ?? {}`, `?.[munId]`). The line-127 invariant guarantees both params are truthy inside the `if (hasDepartures && munEthnicTotals)` / `else if (hasDisplacement)` branches; optional chaining is TS-only.
+- `src/ui/map/map/builders/buildPoliticalMetricGeoJSON.ts` (1 index) — hoisted typed local `metricsByOsid: Record<string, PoliticalMetricView> = args.politicalMetricsByOsid ?? {}` at the top of the function; rewrote `Object.keys(args.politicalMetricsByOsid ?? {})` chain and the inner `args.politicalMetricsByOsid![osid]` against the local. The two non-inventory-counted post-`]` `!` sites (`featuresByOsid.get(osid)!`, `metrics[args.metric]!`) are out of regex scope and preserved.
+- `src/ui/map/map/builders/buildSupplyReachGeoJSON.ts` (1 index) — same hoist pattern. `supplyStateByOsid: Record<string, SupplyReachClass> = args.supplyStateByOsid ?? {}` typed local; `args.supplyStateByOsid![osid]` rewritten against the local.
+
+**Inventory delta vs the post-Batch-49 floor (regenerated `data/derived/_debug/strict_null_inventory_post_batch_A.json` via `node tools/diagnostics/strict_null_inventory.cjs`):**
+
+| Category | Post-Batch-49 | Post-Batch-50 | Δ |
+|---|---:|---:|---:|
+| `as_factionid_casts` | 2 | 2 | 0 |
+| `as_unknown_casts` | 80 | 80 | 0 |
+| `as_any_casts` | 319 | 319 | 0 |
+| `non_null_assertions_dot` | 39 | 32 | −7 |
+| `non_null_assertions_index` | 43 | 38 | −5 |
+| `optional_fields_game_state` | 463 | 463 | 0 |
+
+Deltas match the Batch A audit prediction exactly (`non_null_assertions_dot` 39→32 = −7 across 1+1+1+1+3; `non_null_assertions_index` 43→38 = −5 across 3+1+1). Other categories unchanged because Batch A was scoped to UI-only non-null assertions per the lane's stop-gate.
+
+**Distinctions preserved (per audit + plan stop-gates):**
+
+- `strictNullChecks` migration is NOT marked closed. Closing still requires Batches B + C + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
+- No source cleanup proposed that looks like a behavior fix. All edits are TS-only narrowing patterns (predicate widening, local-binding hoists, optional chaining) with provably equivalent runtime semantics on the same input domain.
+- No GameStateAdapter.ts, MapContainer.tsx, sim runtime-invariant Batch B file, schema-boundary file, generated save, canon doc, or FORAWWV.md touched.
+- Post-`]` `!` assertions in `buildPoliticalMetricGeoJSON.ts` (`featuresByOsid.get(osid)!`, `metrics[args.metric]!`) and `buildSupplyReachGeoJSON.ts` (`featuresByOsid.get(osid)!`) preserved — out of the strict-null regex scope (regex requires identifier directly before `!`).
+
+**Baseline decision:** `npm.cmd run test:baselines` NOT run. Batch A is UI-only (read-only render-model consumers and GeoJSON view builders, no sim path, no GameState writes, no scenario data, no save schema, no IPC contract surface). Per the audit's "Baselines not required (UI-only, no sim path)" stop-gate, the Batch 47/48 baselines floor remains the active byte-identity reference. The eight touched files have zero cross-reference into `src/sim/`, `src/scenario/`, `src/state/serialize.ts`, or `src/state/save_migration.ts`.
+
+**Determinism:** Type-only edits with provably equivalent runtime semantics. No iteration ordering changed, no sort introduced, no `Math.random` / `Date.now` / `process.hrtime` added, no save serialization shifted, no engine state mutated. The hoisted typed locals in `buildPoliticalMetricGeoJSON.ts` and `buildSupplyReachGeoJSON.ts` use the existing `?? {}` fallback already in the `Object.keys(args.X ?? {})` chain — same fallback value, same iteration order.
+
+**Verification:**
+
+- `npm.cmd run typecheck` — PASS (clean `tsc --noEmit -p tsconfig.json`).
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 28/28 PASS (Phase 1 cap ≤ 25 escapes re-verified; all per-batch slice assertions for Batches 4-49 still PASS).
+- `npx.cmd vitest run tests/command_authority_explanation_delegation.test.ts tests/ui/accessibility_form_labels.test.ts tests/ui/command_relationship_campaign_drag_proof.test.ts tests/ui_map_political_metrics.test.ts tests/ui_map_supply_reach.test.ts tests/ui_opord_player_safe_labels.test.ts tests/v093_a11y_lane_c_warroom_decision_room.test.ts tests/wrapped_slides.test.ts --reporter=dot` — 118/118 PASS across the eight UI focused suites covering the touched files (delegation summary readout, command relationship campaign-drag proof, political metric GeoJSON view, supply reach GeoJSON view, OPORD player-safe labels, warroom decision-room a11y, wrapped slides chronicle).
+- `npm.cmd run desktop:map:build` — PASS (3,563.93 kB tactical_map.js + 186.39 kB tactical_map.css emitted to `dist/tactical-map/`).
+- `git diff --check` — clean (only the expected Windows CRLF/LF normalization warnings on three touched files; no whitespace or conflict-marker errors).
+- `node tools/diagnostics/strict_null_inventory.cjs > data/derived/_debug/strict_null_inventory_post_batch_A.json` — counts confirmed (319 / 2 / 80 / 32 / 38 / 463).
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+**Artifacts (committed):**
+- `src/ui/map/components/CorpsFrontPanel.tsx` (-1 dot)
+- `src/ui/map/components/OperationHistoryPanel.tsx` (-1 dot)
+- `src/ui/map/components/army_hq/CommandRelationshipSection.tsx` (-1 dot)
+- `src/ui/map/components/army_hq/SectorsSection.tsx` (-1 dot)
+- `src/ui/map/components/chronicle/generateWrappedSlides.ts` (-3 dot)
+- `src/ui/map/map/builders/buildEthnicGeoJSON.ts` (-3 index)
+- `src/ui/map/map/builders/buildPoliticalMetricGeoJSON.ts` (-1 index)
+- `src/ui/map/map/builders/buildSupplyReachGeoJSON.ts` (-1 index)
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (Batch 50 section + Batch A line marked CLOSED)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Artifacts (local-only, in `data/derived/_debug/` which is gitignored):**
+- `data/derived/_debug/strict_null_inventory_post_batch_A.json` — regenerable inventory snapshot.
+
+---
+
 ## [2026-05-20] docs(strict-null): Post-FactionId classification audit + post-Batch-49 phase ledger queue
 
 **Type:** Classification-only audit + planning. No source files, tests, generated saves, canon, or `FORAWWV.md` touched. No cleanup batch executed. Executes the docs-only plan at `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`.

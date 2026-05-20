@@ -150,8 +150,8 @@ export function buildEthnicGeoJSON(
     if (hasDepartures && munEthnicTotals) {
       // OSID-level per-ethnic computation
       const munId = getMunIdForDisplacement(base);
-      const dep = departedByOsid![osid] ?? {};
-      const disp = munId ? displacementByMun![munId] : undefined;
+      const dep = departedByOsid?.[osid] ?? {};
+      const disp = munId ? displacementByMun?.[munId] : undefined;
       const munTot = munId ? munEthnicTotals[munId] : undefined;
       const arr = disp?.arrivedByFaction ?? {};
 
@@ -200,7 +200,7 @@ export function buildEthnicGeoJSON(
     } else if (hasDisplacement) {
       // Fallback: municipality-level uniform ratio (old behavior, for saves without origin_osid)
       const munId = getMunIdForDisplacement(base);
-      const disp = munId ? displacementByMun![munId] : undefined;
+      const disp = munId ? displacementByMun?.[munId] : undefined;
       if (disp && disp.originalPopulation > 0 && Number.isFinite(disp.currentPopulation)) {
         const ratio = Math.max(0, disp.currentPopulation / disp.originalPopulation);
         const scaled = {

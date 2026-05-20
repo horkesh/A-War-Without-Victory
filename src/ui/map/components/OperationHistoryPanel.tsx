@@ -424,9 +424,9 @@ function CompletedOpCard({
                                     );
                                 })}
                             </div>
-                            {(op.objectives_logged_captured?.length ?? 0) > 0 && (
+                            {op.objectives_logged_captured && op.objectives_logged_captured.length > 0 && (
                                 <div className="mt-1 text-[9px] text-text-muted">
-                                    Logged during operation: {op.objectives_logged_captured!.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ')}
+                                    Logged during operation: {op.objectives_logged_captured.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ')}
                                 </div>
                             )}
                         </div>

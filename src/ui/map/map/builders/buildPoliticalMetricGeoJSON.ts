@@ -45,16 +45,17 @@ export function buildPoliticalMetricGeoJSON(args: BuildPoliticalMetricArgs): Fea
     featuresByOsid.set(osid, feature);
   }
 
-  const features = Object.keys(args.politicalMetricsByOsid ?? {})
+  const metricsByOsid: Record<string, PoliticalMetricView> = args.politicalMetricsByOsid ?? {};
+  const features = Object.keys(metricsByOsid)
     .filter((osid) => featuresByOsid.has(osid))
     .filter((osid) => {
-      const metricValue = args.politicalMetricsByOsid?.[osid]?.[args.metric];
+      const metricValue = metricsByOsid[osid]?.[args.metric];
       return typeof metricValue === 'number' && Number.isFinite(metricValue);
     })
     .sort(strictCompare)
     .map((osid) => {
       const source = featuresByOsid.get(osid)!;
-      const metrics = args.politicalMetricsByOsid![osid];
+      const metrics = metricsByOsid[osid];
       const value = metrics[args.metric]!;
       return {
         type: 'Feature' as const,

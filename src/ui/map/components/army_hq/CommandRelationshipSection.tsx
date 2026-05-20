@@ -93,14 +93,14 @@ export function CommandRelationshipSection({
         typeof factionWarExhaustion === 'number'
         && factionWarExhaustion >= FACTION_WAR_EXHAUSTION_ELEVATED;
 
-    const hasDelegationNotice = delegationSummary?.summaryLabel != null;
+    const delegationSummaryLabel = delegationSummary?.summaryLabel ?? null;
 
     // Silence = healthy: nothing to show when strain is 0, no unresolved friction,
     // no delegation notice, and faction war strain below the engine's tempo-throttle floor.
     if (
         commandStrain === 0
         && unresolvedCount === 0
-        && !hasDelegationNotice
+        && delegationSummaryLabel === null
         && !factionExhaustionElevated
     ) return null;
 
@@ -166,11 +166,11 @@ export function CommandRelationshipSection({
 
                 {/* 1b. Delegation summary — Delegation Visibility Wave 1: standing delegation health.
                     Silence = healthy: hidden when all active ops are ordinary compliance. */}
-                {hasDelegationNotice && (
+                {delegationSummaryLabel !== null && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-blue-400/70 shrink-0">◆</span>
                         <span className="text-[10px] text-text-secondary font-mono">
-                            Active operations: {delegationSummary!.summaryLabel}
+                            Active operations: {delegationSummaryLabel}
                         </span>
                     </div>
                 )}

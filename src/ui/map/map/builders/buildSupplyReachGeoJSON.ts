@@ -47,12 +47,13 @@ export function buildSupplyReachGeoJSON(args: BuildSupplyReachArgs): FeatureColl
     featuresByOsid.set(osid, feature);
   }
 
-  const features = Object.keys(args.supplyStateByOsid ?? {})
+  const supplyStateByOsid: Record<string, SupplyReachClass> = args.supplyStateByOsid ?? {};
+  const features = Object.keys(supplyStateByOsid)
     .filter((osid) => featuresByOsid.has(osid))
     .sort(strictCompare)
     .map((osid) => {
       const source = featuresByOsid.get(osid)!;
-      const supplyClass = args.supplyStateByOsid![osid];
+      const supplyClass = supplyStateByOsid[osid];
       return {
         type: 'Feature' as const,
         geometry: source.geometry,

@@ -177,7 +177,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   const _sector = findPlayerFacingSectorById(loadedGameState, selectedSectorId);
   const sectorFriendlyOsids = useMemo(
-    () => _sector ? collectSectorFriendlyOsids(_sector, loadedGameState!.frontEdgesOsid) : [],
+    () => (_sector && loadedGameState) ? collectSectorFriendlyOsids(_sector, loadedGameState.frontEdgesOsid) : [],
     [_sector, loadedGameState?.frontEdgesOsid]
   );
   const sectorFriendlySet = useMemo(() => new Set(sectorFriendlyOsids), [sectorFriendlyOsids]);

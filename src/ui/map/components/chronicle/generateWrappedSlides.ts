@@ -181,6 +181,9 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
     const playerDimensions = strategicDimensions?.[playerFaction];
     const internationalStanding = playerDimensions?.['international_standing'] ?? playerDimensions?.['International Standing'];
     const intlValue = internationalStanding?.effective_value;
+    const internationalStandingDetail = internationalStanding && intlValue != null
+        ? `Base: ${internationalStanding.base_value.toFixed(1)}, modifier: ${internationalStanding.event_modifier >= 0 ? '+' : ''}${internationalStanding.event_modifier.toFixed(1)}`
+        : undefined;
     slides.push({
         id: 'world_watching',
         title: 'The World Was Watching',
@@ -189,7 +192,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
             : 'International standing data unavailable',
         heroValue: intlValue != null ? intlValue.toFixed(1) : '-',
         heroLabel: 'international standing',
-        detail: intlValue != null ? `Base: ${internationalStanding!.base_value.toFixed(1)}, modifier: ${internationalStanding!.event_modifier >= 0 ? '+' : ''}${internationalStanding!.event_modifier.toFixed(1)}` : undefined,
+        detail: internationalStandingDetail,
         data: { internationalStanding: internationalStanding ?? null },
     });
 
