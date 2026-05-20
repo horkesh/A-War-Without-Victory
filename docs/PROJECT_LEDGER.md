@@ -3,6 +3,46 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] docs(roadmap+backlog): Post-Batch-49 strict-null count reconciliation
+
+**Type:** Documentation-only reconciliation. No code, simulation behavior, scenario data, save schema, generated artifact, CI workflow, packaging metadata, canon text, or FORAWWV text changed. Executes the docs-only plan at `docs/plans/2026-05-20-roadmap-backlog-reconciliation-plan.md`.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main`; follows Batch 49 at `d9464ccf`).
+
+**Change:** Reconciled three stale strict-null surfaces to the accepted Batch 46/47/48/49 state using current disk truth from `node tools/diagnostics/strict_null_inventory.cjs`:
+
+- `docs/plans/MASTER_ROADMAP.md` — appended a "Strict-null closeout addendum 2026-05-20 (Batches 46/47/48/49)" subsection at the end of the existing Roadmap implementation-packet addendum. The new subsection summarizes Batch 46 state + loader (-19 `as_factionid_casts`), Batch 47 Phase 2 combat closeout (-6), Batch 48 Phase 5 GameStateAdapter boundary cleanup wave (-53; 10 documented load-bearing retained), and Batch 49 AI commander parser schema validation (-1 `as_factionid_cast`, -1 `non_null_assertion_dot`). States current top-level inventory counts versus the 2026-05-17 baseline and explicitly preserves the open-status distinction: visible non-UI `as FactionId` lane is closed; `as unknown` / `as any` / non-null assertions / optional `GameState` fields remain open and route to `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`. Historical narrative addenda (Batch 43/44/45 line, earlier per-batch lines) are intentionally left untouched as accurate point-in-time evidence.
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` line 44 ("Strict null contract cleanup" row) — refreshed from the Batch-17 "Phase 2 remaining inventory to 66" snapshot to the Batch-49 current-truth row that names all closed phases and the two retained UI-literal-union sites.
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` line 266 ("`strictNullChecks` migration" row) — replaced the 2026-05-18 quoted baseline counts (154/395/97/50/59/458 with Batches 4-16 progress) with the current 2026-05-20 truth (2/319/80/39/43/463 with all visible non-UI `as FactionId` closed) plus a routing pointer to the post-FactionId roadmap.
+
+**Inventory used (current disk truth, `node tools/diagnostics/strict_null_inventory.cjs` 2026-05-20):**
+- `as_any_casts` 319 (baseline 395)
+- `as_factionid_casts` 2 — both at `src/ui/map/data/GameStateAdapter.ts` lines 1845 + 1866 (baseline 154; current inventory line numbers differ from Batch 48's prose snapshot at 1842/1863, but the two retained casts themselves are unchanged and remain gated by the UI/engine FactionId-unification stop-gate)
+- `as_unknown_casts` 80 (baseline 97)
+- `non_null_assertions_dot` 39 (baseline 50)
+- `non_null_assertions_index` 43 (baseline 59)
+- `optional_fields_game_state` 463 (baseline 458; the increase is from GameState schema additions across the 2026-05-17 → 2026-05-20 window, not regression of the cleanup work)
+
+**Distinctions preserved (explicit per the reconciliation plan's "do not invent new work or mark planned lanes implemented" stop-gate):**
+- Visible non-UI `as FactionId` lane is CLOSED.
+- Repo-wide `as_factionid_casts` remains 2; both retained in `GameStateAdapter.ts` under the documented UI/engine FactionId-unification stop-gate (see `docs/PROJECT_LEDGER_KNOWLEDGE.md` "UI `FactionId` literal-union shadows the engine `FactionId = string`" entry).
+- `as unknown`, `as any`, both non-null-assertion categories, and the 463 optional `GameState` fields remain open.
+- All open work routes to `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md` for next-phase classification before any further cleanup batch starts.
+- `strictNullChecks` migration is NOT marked closed.
+
+**Determinism:** Documentation only.
+
+**Verification:**
+- `node tools/diagnostics/strict_null_inventory.cjs` — recorded current counts (above) before editing.
+- `git diff --check` — clean.
+- No typecheck/baselines/scenario runs required for docs-only reconciliation per the plan's "Do not run typecheck or baselines for docs-only reconciliation" gate.
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+**Artifacts:** `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/PROJECT_LEDGER.md` (this entry).
+
+---
+
 ## [2026-05-20] refactor(strict-null): Batch 49 AI commander response_parser schema validation (byte-identical for valid inputs)
 
 **Type:** Type-only refactor + schema-validation tightening + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, prompt format, or FORAWWV text changed. Parser-boundary lane: `src/sim/ai_commander/response_parser.ts` is consumed by `getAdvisorRecommendation` / `corps_commander_ai` / `army_commander_ai`, none of which participate in baseline scenario runs (scenarios use formula bots), so `npm.cmd run test:baselines` is not re-run — see baseline decision below.
