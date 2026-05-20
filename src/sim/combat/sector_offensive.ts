@@ -531,8 +531,9 @@ function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recover
 }
 
 function getTotalObjectiveCount(op: CorpsOperation): number {
-    if (isMultiAxis(op)) {
-        return op.axes!.reduce((count, axis) => count + axis.objectives.length, 0);
+    const axes = op.axes;
+    if (Array.isArray(axes) && axes.length > 0) {
+        return axes.reduce((count, axis) => count + axis.objectives.length, 0);
     }
     return op.objectives?.length ?? 0;
 }
@@ -780,7 +781,8 @@ export function advanceSectorOffensives(
             const isPrePlannedBlitz = activePhase?.probe_exempt === true;
             if (op.type === 'sector_attack' && op.force_launch !== true && !isPrePlannedBlitz) {
                 // Auto-resolve any pending probes that didn't trigger combat
-                if (hasUnresolvedProbe(op) && (turn - (op.active_probe!.started_turn)) >= 1) {
+                const activeProbe = op.active_probe;
+                if (hasUnresolvedProbe(op) && activeProbe && (turn - activeProbe.started_turn) >= 1) {
                     autoResolveProbe(state, op, faction);
                 }
 

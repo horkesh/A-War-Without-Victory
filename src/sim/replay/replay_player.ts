@@ -68,8 +68,10 @@ function readDate(frame: ReplayFrameLike | undefined | null): string | null {
 function readTurn(frame: ReplayFrameLike | undefined | null): number | null {
     if (!frame) return null;
     if (typeof frame.turn === 'number') return frame.turn;
-    if (typeof frame.metadata?.turn === 'number') return frame.metadata!.turn!;
-    if (typeof frame.meta?.turn === 'number') return frame.meta!.turn!;
+    const metaTurn = frame.metadata?.turn;
+    if (typeof metaTurn === 'number') return metaTurn;
+    const altMetaTurn = frame.meta?.turn;
+    if (typeof altMetaTurn === 'number') return altMetaTurn;
     return null;
 }
 

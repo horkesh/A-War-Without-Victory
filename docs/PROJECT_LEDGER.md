@@ -3,6 +3,84 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] refactor(strict-null): Batch 51 sim runtime-invariant cleanup — Batch B closeout (byte-identical baselines)
+
+**Type:** Type-only refactor + perf-instrumentation alias + 1 test regex widen + plan/ledger updates. **Sim-facing**: 8 sim/scenario files touched. `npm.cmd run test:baselines` PASS — "Baseline regression: all scenarios match." across all baseline scenarios. No simulation behavior, scenario data, save schema, generated artifact (apart from the inventory snapshot under `data/derived/_debug/`), IPC contract, canon text, or FORAWWV text changed.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; HEAD before commit: `d63bd06e` — Army HQ visual hierarchy refresh plan, post-Batch-50).
+
+**Change:** Closes Batch B from `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` §7 (the `runtime-invariant` + `trivial-alias after guard` classification of the remaining 21 `non_null_assertions_dot` sites scoped to sim runtime invariants). All eight target files cleaned via local-binding refactor (Batch 19 / Batch 41 precedent) plus one non-null typed alias for a flag-gated module-local. Test brittleness fix: one static-grep regex in `tests/sector_partition_instrumentation.test.ts` widened to accept the new identifier alias.
+
+- `src/sim/combat/corps_front_sectors.ts` (7 dot)
+  - Five `nodeProcess!.hrtime.bigint()` / `nodeProcess!.cwd()` sites under the `SECTOR_PARTITION_PERF_FLAG` perf instrumentation collapsed to a new module-local non-null alias `perfNodeProcess: NodeJS.Process = nodeProcess ?? ({} as NodeJS.Process)`. The flag derivation `nodeProcess?.env?.PERF_PROFILE_SECTOR_PARTITION === 'true'` already requires `nodeProcess` to be defined when the flag is true; `perfNodeProcess` captures the same reference under a non-null type for use inside flag-gated code. In browser builds where `nodeProcess` is undefined the flag is false and `perfNodeProcess` is never read (the `{} as NodeJS.Process` placeholder is unreachable). The nullable `nodeProcess` retains its existing role for non-perf optional reads (e.g. `nodeProcess?.env?.SECTOR_COLDSTART_CACHE_DISABLED`); singular ownership preserved.
+  - `winnerEntry!.piece.edge_ids.filter(...)` inside an arrow callback that loses narrowing across `.filter(...)` hoisted to `const winnerPiece = winnerEntry.piece;` after the existing `if (!winnerEntry) continue;` guard.
+  - `formations[brigadeId]!.elite_loan_state!.loaned_to_corps` (chained-optional-truthy-but-not-narrowed access inside a `.map(candidate => ...)` callback) hoisted to `const loanState = formations[brigadeId]?.elite_loan_state;` with `loanState?.on_loan && loanState.loaned_to_corps` truthy-narrowing the ternary's `loanState.loaned_to_corps` branch. The non-inventory-counted `formations[brigadeId]!.` (post-`]` `!`, not identifier-prefixed) is unchanged and out of regex scope.
+- `src/sim/combat/sector_offensive.ts` (2 dot)
+  - `op.axes!.reduce(...)` in `getTotalObjectiveCount(op)` rewritten as `const axes = op.axes; if (Array.isArray(axes) && axes.length > 0) return axes.reduce(...)`. The inline check is exactly what `isMultiAxis(op)` returns (`Array.isArray(op.axes) && op.axes.length > 0`), so runtime semantics are byte-identical; `isMultiAxis` remains in use at the other `op.axes!` site on line 528 (which is `!,` postfix not `!.` dot, out of regex scope).
+  - `op.active_probe!.started_turn` after `hasUnresolvedProbe(op)` hoisted to `const activeProbe = op.active_probe; if (hasUnresolvedProbe(op) && activeProbe && (turn - activeProbe.started_turn) >= 1)`. `hasUnresolvedProbe` returns `boolean` (not a type guard), so the extra `activeProbe &&` is required to carry TS narrowing without changing runtime semantics (hasUnresolvedProbe already implies activeProbe truthy).
+- `src/sim/events/event_constraints.ts` (2 dot) — `restriction.allowed_municipalities!.includes(...)` and `restriction.blocked_municipalities!.includes(...)` inside `.filter(osid => ...)` arrow callbacks: TS does not carry the outer `if (restriction.allowed_municipalities)` truthy-guard narrowing through arrow callbacks because `restriction` is a loop variable. Hoisted `const allowed = restriction.allowed_municipalities;` and `const blocked = restriction.blocked_municipalities;` ABOVE each `if` guard; `const`-bindings narrow correctly inside the arrow callback.
+- `src/sim/replay/replay_player.ts` (2 dot) — `frame.metadata!.turn!` after `typeof frame.metadata?.turn === 'number'` and `frame.meta!.turn!` after `typeof frame.meta?.turn === 'number'` hoisted to `const metaTurn = frame.metadata?.turn; if (typeof metaTurn === 'number') return metaTurn;` and `const altMetaTurn = frame.meta?.turn; if (typeof altMetaTurn === 'number') return altMetaTurn;`.
+- `src/sim/political/political_peace_plan.ts` (1 dot) — `acceptOption.dimension_shifts!.push(...)` after a literal initializer guaranteed the array. Hoisted `const acceptDimensionShifts: NonNullable<EventResponseOption['dimension_shifts']> = [...]` above the `acceptOption` literal; the literal references `acceptDimensionShifts` (same array object, reference equality preserved); the conditional `.push(...)` uses the typed local.
+- `src/sim/endgame/endgame_comparison.ts` (1 dot) — `Number.isFinite(rupture?.recorded_turn) ? rupture!.recorded_turn! : null` rewritten as `const recordedTurn = rupture?.recorded_turn; playerWeek = typeof recordedTurn === 'number' && Number.isFinite(recordedTurn) ? recordedTurn : null`. `Number.isFinite` returns `false` for `undefined` and non-number arguments, so the explicit `typeof === 'number' &&` guard is redundant at runtime but required for TS narrowing.
+- `src/sim/recruitment_engine.ts` (1 dot) — `pool!.available += mandatoryDrain;` after a `pool = pools[poolKey]!` reassignment where `pools: Record<string, any>`. Rewrote the block so the seeded pool is hoisted to `const seededPool = pools[poolKey];` (typed `any` because `pools` is `Record<string, any>`); the reassignment `pool = seededPool` and the mutation `seededPool.available += mandatoryDrain;` both reference the same object.
+- `src/scenario/scenario_runner.ts` (5 dot) — five `replayTimelineStream!.write(...)`/`.end()`/`.on(...)` sites inside feature-flag-gated (`emitWeeklySavesForVideo`) `timedSync`/`timedAsync` arrow-callback closures. Hoisted local `const stream = replayTimelineStream;` in three gated blocks (init, mid-loop write, close) — each captures the non-nullable narrowing of `replayTimelineStream` at the gate entry for use inside the immediately-following arrow callback. Module-local `replayTimelineStream` retains its nullable type and acts as the durable cross-scope reference (set on init, checked for truthiness on subsequent visits, finalized on close); local `stream` captures are scope-bound to each gated block.
+
+**Test regex widen:** `tests/sector_partition_instrumentation.test.ts:197` static-grep guard widened from `(?:nodeProcess|process)!\.hrtime\.bigint\s*\(` to `(?:perfNodeProcess|nodeProcess|process)!?\.hrtime\.bigint\s*\(` to accept the new alias identifier and the now-optional `!`. The test's intent (instrumentation block uses `hrtime.bigint()`, NOT `Date.now`/`Math.random`/`new Date`/`performance.now`/`.toLocaleString`/`.localeCompare`) is preserved; banned-pattern guards (lines 181-187) are unchanged. Comment added inline to document the Batch 51 rationale.
+
+**Inventory delta vs the post-Batch-50 floor (regenerated `data/derived/_debug/strict_null_inventory_post_batch_B.json` via `node tools/diagnostics/strict_null_inventory.cjs`):**
+
+| Category | Post-Batch-50 | Post-Batch-51 | Δ |
+|---|---:|---:|---:|
+| `as_factionid_casts` | 2 | 2 | 0 |
+| `as_unknown_casts` | 80 | 80 | 0 |
+| `as_any_casts` | 319 | 319 | 0 |
+| `non_null_assertions_dot` | 32 | 11 | −21 |
+| `non_null_assertions_index` | 38 | 38 | 0 |
+| `optional_fields_game_state` | 463 | 463 | 0 |
+
+Delta exactly matches Batch B audit prediction (`non_null_assertions_dot` 32 → 11; index lane unchanged because Batch B was scoped to dot-style runtime-invariant cleanup).
+
+**Distinctions preserved (per audit + plan stop-gates):**
+
+- `strictNullChecks` migration is NOT marked closed. Closing still requires Batch C (schema-boundary validation plan) + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
+- No source cleanup proposed that looks like a behavior fix. All edits are TS-only narrowing patterns (local-binding hoists, predicate inlining, non-null typed aliases for flag-gated module-locals) with provably equivalent runtime semantics, verified by `npm.cmd run test:baselines` byte-identical PASS.
+- No Batch C schema-boundary file, save-shape/index-risk lane, GameStateAdapter.ts, MapContainer.tsx, generated save, canon doc, FORAWWV.md, or Army HQ visual hierarchy plan touched.
+- 11 retained `non_null_assertions_dot` sites remain outside Batch B's runtime-invariant scope. They split across save-shape/default-decision sites (`local_strain!.by_entity`, `negotiation!.pending_dayton`, `events_fired!.push`, `rec!.properties!`), UI/map renderer boundary sites (`MapContainer.tsx`, `buildCorpsFrontLinesGeoJSON.ts`), the warroom viewer geometry fallback (`map_viewer_app.ts`), and the anomaly assignment invariant (`assignment!.sector_id`); see classification audit section 5 for the per-site stop-gate.
+- `corps_front_sectors.ts` retains the existing `_activeInvocation!` non-null assertion at lines that already require active-invocation narrowing through closure boundaries; the strict-null regex matches identifier-prefixed `!.` so that site is `_activeInvocation!` postfix-style (not `!.` dot-style), out of inventory regex scope. Unchanged.
+
+**Baseline result:** `npm.cmd run test:baselines` **PASS — "Baseline regression: all scenarios match."** All hashes byte-identical across baseline scenarios. The 21-site refactor preserves sim determinism exactly. No `Math.random`/`Date.now`/iteration-order-changes/serialization-shifts introduced.
+
+**Determinism:** Type-only edits with provably equivalent runtime semantics, verified by byte-identical baseline regression. The `perfNodeProcess` alias resolves to the same `globalThis.process` reference as the original `nodeProcess!` when the flag is on (the only branch where it's read); in the flag-off branch the alias is constructed but unread. The local-binding hoists, predicate inlining, and per-block `stream` captures all preserve reference identity and call ordering.
+
+**Verification:**
+
+- `npm.cmd run typecheck` — PASS (clean `tsc --noEmit -p tsconfig.json`).
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 28/28 PASS (Phase 1 cap ≤ 25 escapes re-verified; all per-batch slice assertions for Batches 4-49 still PASS).
+- Focused vitest 20-suite run — 263/263 PASS across `corps_front_sectors_multi`, `corps_front_sector_corps_ownership`, `sector_partition_buildCorpsFrontSectors_integration` (100+ deterministic state variants at 138 s wall — heaviest exercise of corps_front_sectors), `sector_partition_instrumentation` (17 tests including the widened static-grep guard), `sector_offensive`, `sector_offensive_idle_recovery`, `sector_offensive_in_transit_predictor`, `sector_offensive_launch_gates`, `exhaustion_gate_sector_offensive`, `recruitment_engine`, `replay_player`, `peace_plans`, `peace_plans_war_ended_early_producer`, `sim/political/political_peace_plan`, `v091_endgame_milestone_closure`, `endgame_188w_diagnostics`, `scenario_runner_artifact_repair`, `consequence_chains`, `consequence_consumers`, `consequence_effects`.
+- `npm.cmd run test:baselines` — **PASS** with "Baseline regression: all scenarios match."
+- `git diff --check` — clean (only the expected Windows CRLF/LF normalization warning on `src/sim/recruitment_engine.ts`; no whitespace or conflict-marker errors).
+- `node tools/diagnostics/strict_null_inventory.cjs > data/derived/_debug/strict_null_inventory_post_batch_B.json` — counts confirmed (319 / 2 / 80 / 11 / 38 / 463).
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+**Artifacts (committed):**
+- `src/sim/combat/corps_front_sectors.ts` (-7 dot)
+- `src/sim/combat/sector_offensive.ts` (-2 dot)
+- `src/sim/events/event_constraints.ts` (-2 dot)
+- `src/sim/replay/replay_player.ts` (-2 dot)
+- `src/sim/political/political_peace_plan.ts` (-1 dot)
+- `src/sim/endgame/endgame_comparison.ts` (-1 dot)
+- `src/sim/recruitment_engine.ts` (-1 dot)
+- `src/scenario/scenario_runner.ts` (-5 dot)
+- `tests/sector_partition_instrumentation.test.ts` (static-grep regex widen + transitional comment)
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (Batch 51 section + Batch B roadmap line marked CLOSED)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Artifacts (local-only, in `data/derived/_debug/` which is gitignored):**
+- `data/derived/_debug/strict_null_inventory_post_batch_B.json` — regenerable inventory snapshot.
+
+---
+
 ## [2026-05-20] docs(plan): Army HQ visual hierarchy and palette refresh roadmap packet
 
 **Type:** Docs-only product/UI planning. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.

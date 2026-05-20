@@ -180,20 +180,21 @@ export function computePoliticalPeacePlanResponse(
     // Credibility signal: accepting avoids the reject penalty; rejecting incurs it.
     const credentialityChangeOnReject = plan.credibility_change_on_reject[faction] ?? 0;
 
+    const acceptDimensionShifts: NonNullable<EventResponseOption['dimension_shifts']> = [
+        {
+            faction,
+            dimension: 'international_standing',
+            // Accepting avoids the reject penalty (flip sign)
+            delta: -credentialityChangeOnReject,
+        },
+    ];
     const acceptOption: EventResponseOption = {
         id: 'accept',
         label: 'Accept',
         effects: [],
         aggression_affinity: acceptAggression,
         risk_level: 0.3,
-        dimension_shifts: [
-            {
-                faction,
-                dimension: 'international_standing',
-                // Accepting avoids the reject penalty (flip sign)
-                delta: -credentialityChangeOnReject,
-            },
-        ],
+        dimension_shifts: acceptDimensionShifts,
     };
 
     const rejectOption: EventResponseOption = {
@@ -221,7 +222,7 @@ export function computePoliticalPeacePlanResponse(
     // Source: UNSCR 942 (23 September 1994); Holbrooke To End a War p. 44; Burg & Shoup pp. 311-315.
     if (faction === 'RBiH' && plan.id === 'contact_group') {
         // dimension_shifts is initialised as an array in the acceptOption literal above.
-        acceptOption.dimension_shifts!.push({
+        acceptDimensionShifts.push({
             faction: 'RBiH',
             dimension: 'international_standing',
             delta: 8,

@@ -1862,12 +1862,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         if (emitWeeklySavesForVideo) {
             replayTimelinePath = join(outDir, 'replay_timeline.json');
             await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => ensureRunOutputDir(outDir));
-            replayTimelineStream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
+            const stream = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
                 createWriteStream(replayTimelinePath!, { flags: 'w' })
             );
+            replayTimelineStream = stream;
             const meta = { run_id, scenario_id: scenario.scenario_id, weeks };
             timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
-                replayTimelineStream!.write('{"meta":' + stableStringify(meta) + ',"frames":[');
+                stream.write('{"meta":' + stableStringify(meta) + ',"frames":[');
             });
         }
         let baseline_ops_enabled = false;
@@ -2445,9 +2446,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
                 weeklySavePaths.push(midPath);
                 if (emitWeeklySavesForVideo && replayTimelineStream) {
+                    const stream = replayTimelineStream;
                     const frameJson = '{"week_index":' + week_index + ',"game_state":' + serializedMid + '}';
                     timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
-                        replayTimelineStream!.write((replayTimelineFirstFrame ? '' : ',') + frameJson);
+                        stream.write((replayTimelineFirstFrame ? '' : ',') + frameJson);
                     });
                     replayTimelineFirstFrame = false;
                 }
@@ -2767,12 +2769,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         if (emitWeeklySavesForVideo && replayTimelineStream) {
+            const stream = replayTimelineStream;
             timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () => {
-                replayTimelineStream!.write(']}');
-                replayTimelineStream!.end();
+                stream.write(']}');
+                stream.end();
             });
             await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', () => new Promise<void>((resolve, reject) => {
-                replayTimelineStream!.on('finish', resolve).on('error', reject);
+                stream.on('finish', resolve).on('error', reject);
             }));
         }
 

@@ -772,9 +772,10 @@ export function runBotRecruitment(
                             updated_turn: state.meta.turn,
                         };
                     }
-                    pool = pools[poolKey]!;
+                    const seededPool = pools[poolKey];
+                    pool = seededPool;
                     // Seed with enough for this brigade
-                    pool!.available += mandatoryDrain;
+                    seededPool.available += mandatoryDrain;
                     effectiveManpower = mandatoryDrain;
                 }
             }

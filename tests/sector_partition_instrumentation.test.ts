@@ -193,8 +193,11 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         }
 
         // Positive guard: the instrumentation block MUST contain the
-        // canonical hrtime.bigint() and env-flag patterns.
-        expect(/(?:nodeProcess|process)!\.hrtime\.bigint\s*\(/.test(region)).toBe(true);
+        // canonical hrtime.bigint() and env-flag patterns. The non-null
+        // assertion is optional — Batch 51 hoisted a non-nullable
+        // `perfNodeProcess` alias bound to the same reference so the `!`
+        // is no longer required at each call site.
+        expect(/(?:perfNodeProcess|nodeProcess|process)!?\.hrtime\.bigint\s*\(/.test(region)).toBe(true);
         expect(/PERF_PROFILE_SECTOR_PARTITION/.test(region)).toBe(true);
     });
 

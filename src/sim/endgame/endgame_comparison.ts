@@ -84,7 +84,8 @@ function buildMilestoneComparison(
                 playerWeek = costLedger.war_duration_weeks;
             } else if (milestone.kind === 'rupture' && milestone.event_id) {
                 const rupture = costLedger.rupture_consequences.find(r => r.id === milestone.event_id);
-                playerWeek = Number.isFinite(rupture?.recorded_turn) ? rupture!.recorded_turn! : null;
+                const recordedTurn = rupture?.recorded_turn;
+                playerWeek = typeof recordedTurn === 'number' && Number.isFinite(recordedTurn) ? recordedTurn : null;
             }
 
             const deltaWeeks = playerWeek === null ? null : playerWeek - milestone.historical_week;

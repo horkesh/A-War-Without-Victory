@@ -64,16 +64,18 @@ export function filterByScope(
     let filtered = targetOsids;
 
     for (const restriction of activeRestrictions) {
-        if (restriction.allowed_municipalities) {
+        const allowed = restriction.allowed_municipalities;
+        if (allowed) {
             filtered = filtered.filter(osid => {
                 const mun = munFromOsid(osid) ?? '';
-                return restriction.allowed_municipalities!.includes(mun);
+                return allowed.includes(mun);
             });
         }
-        if (restriction.blocked_municipalities) {
+        const blocked = restriction.blocked_municipalities;
+        if (blocked) {
             filtered = filtered.filter(osid => {
                 const mun = munFromOsid(osid) ?? '';
-                return !restriction.blocked_municipalities!.includes(mun);
+                return !blocked.includes(mun);
             });
         }
     }

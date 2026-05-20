@@ -119,6 +119,15 @@ const nodeProcess = (globalThis as { process?: NodeJS.Process }).process;
 const SECTOR_PARTITION_PERF_FLAG: boolean =
     nodeProcess?.env?.PERF_PROFILE_SECTOR_PARTITION === 'true';
 
+// Non-null alias for flag-gated perf paths. `SECTOR_PARTITION_PERF_FLAG` is true
+// only when `nodeProcess?.env?.PERF_PROFILE_SECTOR_PARTITION === 'true'`, which
+// requires `nodeProcess` itself to be defined. `perfNodeProcess` captures the
+// same reference under a non-null type for use inside flag-gated code. Outside
+// the gate (e.g. browser builds where `nodeProcess` is undefined and the flag
+// is therefore false), `perfNodeProcess` shadows an unread `{}` placeholder.
+const perfNodeProcess: NodeJS.Process =
+    nodeProcess ?? ({} as NodeJS.Process);
+
 /** Returns true iff the sector-partition perf-profile flag is enabled for this process. */
 export function isSectorPartitionPerfEnabled(): boolean {
     return SECTOR_PARTITION_PERF_FLAG;
@@ -175,11 +184,11 @@ function _newInvocation(): SectorPartitionInvocationRecord {
 function _perfTime<T>(label: string, fn: () => T): T {
     if (!SECTOR_PARTITION_PERF_FLAG) return fn();
     if (!_activeInvocation) return fn();
-    const start = nodeProcess!.hrtime.bigint();
+    const start = perfNodeProcess.hrtime.bigint();
     try {
         return fn();
     } finally {
-        const elapsed = nodeProcess!.hrtime.bigint() - start;
+        const elapsed = perfNodeProcess.hrtime.bigint() - start;
         const inv = _activeInvocation!;
         let bucket = inv.subFunctionNs.get(label);
         if (!bucket) {
@@ -206,7 +215,7 @@ function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolea
     if (!_activeInvocation) return null;
     const fs = _fsModule;
     const path = _pathModule;
-    const cwd = nodeProcess!.cwd();
+    const cwd = perfNodeProcess.cwd();
     const outDir = path.join(cwd, 'data', 'derived', '_debug');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const outPath = path.join(outDir, 'sector_partition_perf.jsonl');
@@ -320,7 +329,7 @@ export function buildCorpsFrontSectors(
     if (!edges || edges.length === 0) return {};
 
     // Open a per-invocation perf record (no-op when flag is OFF).
-    const _invStart: bigint = SECTOR_PARTITION_PERF_FLAG ? nodeProcess!.hrtime.bigint() : 0n;
+    const _invStart: bigint = SECTOR_PARTITION_PERF_FLAG ? perfNodeProcess.hrtime.bigint() : 0n;
     if (SECTOR_PARTITION_PERF_FLAG) {
         _activeInvocation = _newInvocation();
     }
@@ -573,7 +582,7 @@ export function buildCorpsFrontSectors(
 
     // Flush jsonl line for this invocation (no-op when flag is OFF).
     if (SECTOR_PARTITION_PERF_FLAG) {
-        const totalNs = nodeProcess!.hrtime.bigint() - _invStart;
+        const totalNs = perfNodeProcess.hrtime.bigint() - _invStart;
         _flushInvocation(state, totalNs, isFinalPass);
     }
 
@@ -1510,9 +1519,10 @@ function canonicalizeDuplicateFrontOwnershipByPiece(
 
                 let mutated = false;
                 const winner = winnerEntry.sector;
+                const winnerPiece = winnerEntry.piece;
                 const nextWinnerEdgeIds = [
                     ...new Set([
-                        ...winner.edge_ids.filter((edgeId) => !winnerEntry!.piece.edge_ids.includes(edgeId)),
+                        ...winner.edge_ids.filter((edgeId) => !winnerPiece.edge_ids.includes(edgeId)),
                         ...mergedWinnerEdges,
                     ]),
                 ].sort(strictCompare);
@@ -2126,9 +2136,10 @@ export function relocateMisassignedBrigadesToTruthfulOwners(
                 const candidates = claims
                     .map((candidate) => {
                         if (!locationOsid) return null;
+                        const loanState = formations[brigadeId]?.elite_loan_state;
                         const effectiveCorpsId =
-                            (formations[brigadeId]?.elite_loan_state?.on_loan && formations[brigadeId]?.elite_loan_state?.loaned_to_corps)
-                                ? formations[brigadeId]!.elite_loan_state!.loaned_to_corps
+                            (loanState?.on_loan && loanState.loaned_to_corps)
+                                ? loanState.loaned_to_corps
                                 : formations[brigadeId]?.corps_id;
                         if (!effectiveCorpsId || candidate.sector.corps_id !== effectiveCorpsId) return null;
                         let claim: 'front' | 'territory' | 'reserve' | null = null;
