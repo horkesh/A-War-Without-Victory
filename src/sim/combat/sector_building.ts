@@ -560,7 +560,7 @@ export function buildSectorFromSubSegments(
         sector_id: `sector:${corpsId}:${sectorIndex}`,
         corps_id: corpsId,
         faction,
-        opposing_factions: [...allOpposingFactions].sort(strictCompare) as FactionId[],
+        opposing_factions: [...allOpposingFactions].sort(strictCompare),
         edge_ids: sortedEdgeIds,
         sub_segments: subSegments,
         length_edges: totalEdges,

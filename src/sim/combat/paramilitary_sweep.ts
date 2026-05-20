@@ -110,7 +110,7 @@ function buildDefenderFactionMap(state: GameState): Map<string, FactionId> {
         const f = formations[fid];
         if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
         if (f.location_osid && !map.has(f.location_osid)) {
-            map.set(f.location_osid, f.faction as FactionId);
+            map.set(f.location_osid, f.faction);
         }
     }
     return map;
@@ -589,7 +589,7 @@ export function advanceParamilitaries(
 
         // Capture: flip control
         const pc = state.political.political_controllers ??= {};
-        const previousController = pc[targetOsid] as FactionId | undefined;
+        const previousController = pc[targetOsid];
         pc[targetOsid] = f.faction;
         if (previousController && previousController !== f.faction) {
             seedDisplacementTimerOnFlip(state, targetOsid, previousController, f.faction);

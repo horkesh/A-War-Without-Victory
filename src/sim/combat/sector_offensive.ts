@@ -695,7 +695,7 @@ export function advanceSectorOffensives(
 
         const turn = state.meta?.turn ?? 0;
         const corps = state.military.formations?.[corpsId];
-        const faction = (corps?.faction ?? 'RS') as FactionId;
+        const faction: FactionId = corps?.faction ?? 'RS';
         const multiAxis = isMultiAxis(op);
 
         const allObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
@@ -1137,7 +1137,7 @@ export function updateSectorOffensiveResults(
             if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
 
             const corps = state.military.formations?.[corpsId];
-            const faction = (corps?.faction ?? 'RS') as FactionId;
+            const faction: FactionId = corps?.faction ?? 'RS';
             const turn = state.meta?.turn ?? 0;
 
             if (isMultiAxis(op)) {

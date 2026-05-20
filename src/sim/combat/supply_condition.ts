@@ -43,7 +43,7 @@ export function deriveFactionSupplyConditionFromOsidReport(
         }
         const score = scoreStates(states);
         if (score !== undefined) {
-            out[factionEntry.faction_id as FactionId] = score;
+            out[factionEntry.faction_id] = score;
         }
     }
     return Object.keys(out).length > 0 ? out : undefined;

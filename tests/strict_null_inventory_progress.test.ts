@@ -155,6 +155,13 @@ const STATE_BATCH_46_FILES = [
     'src/state/supply_reserves.ts',
 ];
 
+const PHASE_2_COMBAT_BATCH_47_FILES = [
+    'src/sim/combat/paramilitary_sweep.ts',
+    'src/sim/combat/sector_offensive.ts',
+    'src/sim/combat/sector_building.ts',
+    'src/sim/combat/supply_condition.ts',
+];
+
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
     'as_unknown_casts',
@@ -558,6 +565,28 @@ describe('strict null inventory progress', () => {
         // save-shape stop-gate (analogous to the Batch 19 / Batch 45 precedent).
         // This slice pins only the as_factionid_casts category at zero.
         const factionIdCount = phaseCount(current, 'as_factionid_casts', STATE_BATCH_46_FILES);
+
+        expect(factionIdCount).toBe(0);
+    });
+
+    it('cleans the Batch 47 Phase 2 combat closeout FactionId-cast slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        // paramilitary_sweep.ts, sector_offensive.ts, sector_building.ts, and
+        // supply_condition.ts close out the Batch 46-D decision packet's
+        // Phase 2 combat sites. Other inventory categories in these files
+        // remain out-of-scope per the Phase 2 long-tail classification
+        // (gated / load-bearing / save-shape / cross-file refactor): see
+        // `docs/40_reports/audits/20260518_STRICT_NULL_PHASE2_LONG_TAIL_CLASSIFICATION.md`.
+        // GameStateAdapter.ts (Phase 5) and response_parser.ts (LLM-schema) sites
+        // from the Batch 46-D packet are not in this slice — they remain
+        // documented as future-owner lanes per their respective stop-gates.
+        // This slice pins only the as_factionid_casts category at zero.
+        const factionIdCount = phaseCount(current, 'as_factionid_casts', PHASE_2_COMBAT_BATCH_47_FILES);
 
         expect(factionIdCount).toBe(0);
     });
