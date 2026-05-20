@@ -3,6 +3,74 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] docs(strict-null): Post-FactionId classification audit + post-Batch-49 phase ledger queue
+
+**Type:** Classification-only audit + planning. No source files, tests, generated saves, canon, or `FORAWWV.md` touched. No cleanup batch executed. Executes the docs-only plan at `docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (HEAD: `1321c0ac` — Post-Batch-49 reconciliation).
+
+**Change:**
+
+1. Generated a fresh strict-null inventory snapshot at `data/derived/_debug/strict_null_inventory_post_factionid.json` from current main via `node tools/diagnostics/strict_null_inventory.cjs`. Confirmed top-level counts vs the 2026-05-17 baseline and the Batch 48 floor + Batch 49 delta.
+2. Authored `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md`. The audit enumerates every remaining `as_unknown_casts`, `as_any_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` site by file-grouped class (trivial-alias, schema-boundary, save-shape-risk, runtime-invariant, ui-adapter-boundary, deferred-behavior-fix) using the plan's six-class taxonomy. Hotspot tables list top 20 files per category. Site-level confirmation by inline `Read`/`Grep` for `event_constraints.ts:67-79`, `replay_player.ts:66-74`, `treaty_apply.ts:616-767`, and the snapshot's sampled top files (CLI harness `(state as any)` partial states, validate-family tolerant-shape readers, scenario/state JSON-parse boundaries, sim runtime-invariant non-null assertion clusters).
+3. Updated the phase ledger `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` with a "Post-FactionId Roadmap (2026-05-20)" section listing the three implementable next batches:
+   - **Batch A — UI-only trivial alias / JSX truthy-narrowing.** 8 files: `CorpsFrontPanel.tsx`, `OperationHistoryPanel.tsx`, `army_hq/CommandRelationshipSection.tsx`, `army_hq/SectorsSection.tsx`, `chronicle/generateWrappedSlides.ts`, `buildEthnicGeoJSON.ts`, `buildPoliticalMetricGeoJSON.ts`, `buildSupplyReachGeoJSON.ts`. Pattern: Batch 42 `AutonomyPanel.tsx` precedent. Expected delta `non_null_assertions_dot` 39→32, `non_null_assertions_index` 43→38. Baselines NOT required (UI-only).
+   - **Batch B — Sim runtime-invariant cleanup.** 8 files including `corps_front_sectors.ts` (7 `nodeProcess!.` cluster + 2 enclosing-guard sites), `sector_offensive.ts`, `event_constraints.ts`, `replay_player.ts`, `political_peace_plan.ts`, `endgame_comparison.ts`, `recruitment_engine.ts`, `scenario_runner.ts` (5 `replayTimelineStream!.`). Pattern: Batch 19 / Batch 41 local-binding refactor precedents. Expected delta `non_null_assertions_dot` 32→11. **`npm.cmd run test:baselines` PASS required**.
+   - **Batch C — Schema-boundary validation plan (NOT immediate code).** ≈12 files dominated by `scenario_loader.ts` (8), `war_timeline.ts` (8), `political_control_init.ts` (7), `oob_loader.ts` (6), `brigade_temporal_emit.ts` (5), plus `serialize.ts`, `validateGameState.ts`, `desktop_sim.ts`, `replay_frame_summary.ts`, `war_dispatches.ts`, `sector_offensive_launch_helpers.ts`. Pattern: per-file `parse<X>(raw: unknown): X | null` helpers following the Batch 49 `parseFactionId` / `parseAdvisorContextType` precedent. Requires a dedicated schema-validation plan before any code is written.
+
+**Inventory deltas vs the Batch 48 floor:**
+
+| Category | Batch 48 floor | Post-Batch-49 current | Δ |
+|---|---:|---:|---:|
+| `as_factionid_casts` | 3 | 2 | −1 (Batch 49 closeout) |
+| `as_unknown_casts` | 80 | 80 | 0 |
+| `as_any_casts` | 319 | 319 | 0 |
+| `non_null_assertions_dot` | 40 | 39 | −1 (Batch 49 `d!.stance`) |
+| `non_null_assertions_index` | 43 | 43 | 0 |
+| `optional_fields_game_state` | 463 | 463 | 0 |
+
+The Batch 49 delta is confirmed (-1 `as_factionid_casts`, -1 `non_null_assertions_dot`). Other categories unchanged because Batch 49 was scoped to AI commander parser only.
+
+**Deferred / stop-gated (≈ 280 sites; documented per-class in the classification audit):**
+
+- CLI / validate diagnostic harness `as any` (≈195 sites, 18 files) — validators tolerate partial state by design; out of strict-null scope.
+- `save_migration.ts` `as any` (23 sites) — save-migration lane.
+- `GameStateAdapter.ts` 8 `as any` + 2 `as FactionId` (10 retained sites) — Phase 5 chokepoint floor at Batch 48; cleanup blocked until contract decisions.
+- `MapContainer.tsx` 12 `as any` (library-boundary) — requires MapLibre / Deck.gl `@types` upgrades.
+- ≈30 `non_null_assertions_index` save-shape sites across `treaty_apply.ts` (7), `supply_reserves.ts` (6), `war_phases.ts` (4), `commander_march_correction.ts` (2), `formation_spawn.ts` (3), `displacement.ts` (2), `displacement_state_utils.ts` (1), `negotiation/counter_offer_generator.ts` (2), and others — per Batches 19/40/45/46/47 stop-gates.
+- `minority_erosion.ts` `war_militia_strength` 3 sites — **deferred-behavior-fix** (writes to wrong state path; needs behavior plan).
+- 463 optional `GameState` fields — save-migration / default-decision lane.
+
+**Distinctions preserved (per plan stop-gates):**
+
+- `strictNullChecks` migration is NOT marked closed. Closing requires Batches A + B + C + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
+- No source cleanup proposed that looks like a behavior fix. The latent `minority_erosion.ts` bug stays in the deferred-behavior bucket.
+- Optional `GameState` promotion is not required for any of the next three batches.
+- `GameStateAdapter.ts` cleanup does not require engine schema changes (the 10 retained sites stay retained).
+- No batch mixes schema validation with trivial-alias cleanup.
+
+**Determinism:** Documentation only. No code, simulation behavior, scenario data, save schema, generated artifact (apart from the inventory snapshot under `data/derived/_debug/`), CI workflow, packaging metadata, canon text, or FORAWWV text changed.
+
+**Verification:**
+
+- `git status --short --branch` — clean except the two expected transient files.
+- `node tools/diagnostics/strict_null_inventory.cjs > data/derived/_debug/strict_null_inventory_post_factionid.json` — generated 9030-line snapshot from current tree.
+- `git diff --check` — clean (no edits to source/tests).
+- Typecheck / vitest / baselines NOT run: per the plan's "No baseline run is needed for a classification-only docs/test-cap pass unless source files change" gate. No source files or tests were modified.
+
+**Two expected dirty transient files remain unstaged:** `.claude/settings.local.json` and `data/derived/latest_run_final_save.json`. Neither file is part of this commit set.
+
+**Artifacts (committed):**
+- `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` (new — classification audit, 10 sections)
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (Post-FactionId Roadmap section added before "Source Migration Status")
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+**Artifacts (local-only, in `data/derived/_debug/` which is gitignored):**
+- `data/derived/_debug/strict_null_inventory_post_factionid.json` — regenerable inventory snapshot (re-run `node tools/diagnostics/strict_null_inventory.cjs > data/derived/_debug/strict_null_inventory_post_factionid.json` for a fresh dump).
+- `data/derived/_debug/_classify_sample.cjs` — reusable site-sampling helper script that consumes the snapshot above and dumps representative top-file sites by category. Useful for future re-audits.
+
+---
+
 ## [2026-05-20] docs(roadmap+backlog): Post-Batch-49 strict-null count reconciliation
 
 **Type:** Documentation-only reconciliation. No code, simulation behavior, scenario data, save schema, generated artifact, CI workflow, packaging metadata, canon text, or FORAWWV text changed. Executes the docs-only plan at `docs/plans/2026-05-20-roadmap-backlog-reconciliation-plan.md`.

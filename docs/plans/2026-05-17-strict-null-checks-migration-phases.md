@@ -349,6 +349,28 @@ Stop-gate notes:
 
 `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/ai_commander_parser.test.ts --reporter=dot` 14/14 PASS; `npx.cmd vitest run tests/ai_commander_parser.test.ts tests/ai_commander_validation.test.ts tests/ai_commander_event_decision.test.ts tests/ai_commander_ipc.test.ts tests/ai_commander_prompt.test.ts --reporter=dot` 72/72 PASS broader AI commander surface check; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` 28/28 PASS. `npm.cmd run test:baselines` not re-run: the parser is consumed by the AI commander integration path (advisor button click + AI commander turn invocation); the baseline scenario runner uses formula bots and does not exercise the parser at all. The Batch 47/48 baselines floor remains the active byte-identity reference.
 
+### Post-FactionId Roadmap (2026-05-20)
+
+The visible non-UI `as FactionId` lane closed at Batch 49. The remaining strict-null inventory is classified in [`docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md`](../40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md), which executes [`docs/plans/2026-05-20-strict-null-post-factionid-roadmap.md`](2026-05-20-strict-null-post-factionid-roadmap.md). Current floor (top-level): `as_any_casts` 319, `as_factionid_casts` 2 (both retained in `GameStateAdapter.ts` under literal-union stop-gate), `as_unknown_casts` 80, `non_null_assertions_dot` 39, `non_null_assertions_index` 43, `optional_fields_game_state` 463.
+
+Next three implementable batches (proposed; no source code written by this plan):
+
+- **Batch A — UI-only trivial alias / JSX truthy-narrowing.** 8 files: `CorpsFrontPanel.tsx`, `OperationHistoryPanel.tsx`, `army_hq/CommandRelationshipSection.tsx`, `army_hq/SectorsSection.tsx`, `chronicle/generateWrappedSlides.ts`, `buildEthnicGeoJSON.ts`, `buildPoliticalMetricGeoJSON.ts`, `buildSupplyReachGeoJSON.ts`. Expected delta `non_null_assertions_dot` 39→32, `non_null_assertions_index` 43→38. Pattern: Batch 42 `AutonomyPanel.tsx` predicate-variable → value-truthy narrowing precedent. Validation: typecheck + strict-null inventory test + `desktop:map:build`. Baselines NOT required (UI-only).
+- **Batch B — Sim runtime-invariant cleanup.** 8 files: `corps_front_sectors.ts` (7 dot, `nodeProcess!.` cluster + 2 enclosing-guard sites), `sector_offensive.ts` (2 dot), `event_constraints.ts` (2 dot), `replay_player.ts` (2 dot), `political_peace_plan.ts` (1), `endgame_comparison.ts` (1), `recruitment_engine.ts` (1), `scenario_runner.ts` (5 `replayTimelineStream!.`). Expected delta `non_null_assertions_dot` 32→11. Pattern: Batch 19 / Batch 41 local-binding refactor precedents. Validation: typecheck + focused vitest + **`npm.cmd run test:baselines` PASS required** (sim-facing).
+- **Batch C — Schema-boundary validation plan (NOT immediate code).** ≈12 files: `scenario_loader.ts` (8), `war_timeline.ts` (8), `political_control_init.ts` (7), `oob_loader.ts` (6), `brigade_temporal_emit.ts` (5), `collect_briefing.ts` (4), `desktop_sim.ts` (3), `serialize.ts` (3), `validateGameState.ts` (2), `replay_frame_summary.ts` (2), `war_dispatches.ts` (2), `sector_offensive_launch_helpers.ts` (2). Pattern: per-file `parse<X>(raw: unknown): X | null` helpers following the Batch 49 `parseFactionId` / `parseAdvisorContextType` precedent. Requires a dedicated schema-validation plan before any code is written.
+
+Deferred / stop-gated (≈ 280 sites; documented per-class in the classification audit):
+
+- CLI / validate diagnostic harness `as any` (≈195 sites, 18 files) — validators tolerate partial state by design; out of strict-null scope.
+- `save_migration.ts` `as any` (23 sites) — save-migration lane.
+- `GameStateAdapter.ts` 8 `as any` + 2 `as FactionId` (10 retained sites) — Phase 5 chokepoint floor at Batch 48; requires contract decisions (UI/engine FactionId unification, JSON-schema validation for `historicalBaseline`, `parseGameState` external input).
+- `MapContainer.tsx` 12 `as any` (library-boundary) — requires MapLibre / Deck.gl `@types` upgrades.
+- ≈30 `non_null_assertions_index` sites across `treaty_apply.ts` (7), `supply_reserves.ts` (6), `war_phases.ts` (4), `commander_march_correction.ts` (2), `formation_spawn.ts` (3), `displacement.ts` (2), `displacement_state_utils.ts` (1), `negotiation/counter_offer_generator.ts` (2), `recruitment_engine.ts` (1), `scenario_runner.ts` (2), `war_stories.ts` (1), plus 3 dot save-shape sites — all save-shape per Batches 19/40/45/46/47 stop-gates.
+- `minority_erosion.ts` `war_militia_strength` 3 sites — **deferred-behavior-fix** (writes to wrong state path; needs behavior plan).
+- 463 optional `GameState` fields — save-migration / default-decision lane.
+
+`strictNullChecks` migration is NOT closed; closing requires Batches A + B + C + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
+
 ## Source Migration Status
 
 No source phase was completed in this lane. Current worktree status shows unrelated active edits in protected source areas (`supply`, `paramilitary`, `RBiH-HRHB`, `fatigue`, and turn pipeline files), so type-only source migration is deferred to avoid conflicts.
