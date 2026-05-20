@@ -3,6 +3,52 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-20] refactor(strict-null): Batch 47 Phase 2 combat closeout FactionId-cast slice (byte-identical)
+
+**Type:** Type-only refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, ordering, or FORAWWV text changed.
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (from `main` at `2bc8c513`; follows Batch 46 at `04f65be8`).
+
+**Change:** Explicit Phase 2 combat closeout for the six `as_factionid_casts` enumerated in the Batch 46-D decision packet that are owned by the Phase 2 stop-gate. Closes the four combat files (`paramilitary_sweep.ts`, `sector_offensive.ts`, `sector_building.ts`, `supply_condition.ts`) and documents the still-blocked Phase 5 / LLM-schema sites left as ledger entries.
+
+Sites cleaned (6 total):
+- `src/sim/combat/paramilitary_sweep.ts:113` — `map.set(f.location_osid, f.faction as FactionId)` → `map.set(f.location_osid, f.faction)`. `f` is `FormationState` so `f.faction: FactionId`; the target map is `Map<string, FactionId>`.
+- `src/sim/combat/paramilitary_sweep.ts:592` — `const previousController = pc[targetOsid] as FactionId | undefined;` → `const previousController = pc[targetOsid];`. `pc: Record<SettlementId, FactionId | null>` so the bare lookup yields `FactionId | null | undefined`; the downstream truthy guard `if (previousController && previousController !== f.faction)` narrows to `FactionId` before `seedDisplacementTimerOnFlip(state, targetOsid, previousController, f.faction)` (signature `(state, osid, fromFaction: FactionId, toFaction: FactionId)`).
+- `src/sim/combat/sector_offensive.ts:698` — `const faction = (corps?.faction ?? 'RS') as FactionId;` → `const faction: FactionId = corps?.faction ?? 'RS';`. Declaration-type-annotation pattern matching the Batch 19 `(formation.faction as string) || 'RBiH'` → `formation.faction || 'RBiH'` typed `: FactionId` precedent.
+- `src/sim/combat/sector_offensive.ts:1140` — same pattern as L698 (mirror site in `updateSectorOffensiveResults`).
+- `src/sim/combat/sector_building.ts:563` — `opposing_factions: [...allOpposingFactions].sort(strictCompare) as FactionId[]` → `opposing_factions: [...allOpposingFactions].sort(strictCompare)`. `allOpposingFactions: Set<string>`; assigned-to field `CorpsFrontSector.opposing_factions: FactionId[]`.
+- `src/sim/combat/supply_condition.ts:46` — `out[factionEntry.faction_id as FactionId] = score;` → `out[factionEntry.faction_id] = score;`. `SupplyReservesFactionEntry.faction_id: string`; `FactionSupplyCondition = Record<FactionId, number>` so the index assignment is bare-string-keyed under `FactionId = string`.
+
+All six removals are no-ops at runtime under the current `type FactionId = string` alias (`src/state/game_state.ts:45`). TypeScript emits character-equivalent JS. They document the tightening boundary for any future literal-union refactor — at that point each combat consumer signature would tighten to a `CanonicalFaction` literal union and the `Set<string>`/`Record<SettlementId, FactionId | null>`-sourced values would need `isFactionId(...)` runtime type guards.
+
+**Retained sites (Phase 5 + LLM-schema lanes, NOT touched this batch):** 3 residual `as_factionid_casts` after Batch 47 are exactly the non-combat Batch 46-D decision-packet sites:
+- `src/ui/map/data/GameStateAdapter.ts:1842,1863` (2 sites) — `enclaveDef?.faction as FactionId | undefined`. Trivially redundant under `FactionId = string` but gated by the Phase 5 stop-gate: "renderer data chokepoint; touch once" — folded into the future Phase 5 sweep along with the other 61 escapes in this file (`as_any_casts` 48 + `as_unknown_casts` 13).
+- `src/sim/ai_commander/response_parser.ts:101` (1 site) — `(data.faction as FactionId) ?? 'RBiH'`. NOT a trivial alias: the cast performs `unknown→FactionId` widening on `JSON.parse`-derived input. Replacing with a `typeof === 'string'` guard would change runtime semantics for non-string truthy LLM-derived values (number/object would fall back to 'RBiH' under the guard, but pass through under the cast + `??`). Routed to a future LLM-response schema-validation lane that owns the wider AI-commander `unknown→typed` boundary alongside `data.operation_plan as CorpsDecision['operation_plan']`, `data.brigade_movements as CorpsDecision['brigade_movements']`, and `data.context_type as AdvisorResponse['context_type']` in the same file.
+
+**Inventory delta:** `as_factionid_casts` top-level total drops from 9 (Batch 46 floor) to 3. Other categories unchanged (`as_unknown_casts` 93, `as_any_casts` 359, `non_null_assertions_dot` 40, `non_null_assertions_index` 43). The four touched combat files retain non-FactionId-cast inventory escapes that remain out-of-scope per the Phase 2 long-tail classification (`docs/40_reports/audits/20260518_STRICT_NULL_PHASE2_LONG_TAIL_CLASSIFICATION.md`): combat-specific load-bearing `as_unknown_casts` on JSON or save-shape boundaries, `as_any_casts` on cross-file save-shape widenings, `non_null_assertions_*` after array-length guards whose refactor would shift JS emit shape (same precedent as Batch 19 `commander_march_correction` / Batch 45 `war_phases` / Batch 46 `supply_reserves` save-shape stop-gates).
+
+**Test:** Added `PHASE_2_COMBAT_BATCH_47_FILES` constant (`paramilitary_sweep.ts`, `sector_offensive.ts`, `sector_building.ts`, `supply_condition.ts`) + new `cleans the Batch 47 Phase 2 combat closeout FactionId-cast slice` assertion in `tests/strict_null_inventory_progress.test.ts`, restricted to the `as_factionid_casts` category only (same scoping as the Batch 45 / Batch 46 slices).
+
+**Determinism:** Pure type erasure (4 sites) + declaration-type-annotation refactor (2 sites). TypeScript emits character-equivalent JS for each. `npm.cmd run test:baselines` PASS proves byte-identity across 40w / 52w / baseline_ops_4w / noop_4w. No defaults, schema changes, random source changes, ordering changes, or serialized output changes were introduced.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — **26/26 PASS** (was 25/25; +Batch 47 slice).
+- `node_modules/.bin/vitest run tests/paramilitary_sweep.test.ts tests/sector_offensive.test.ts tests/sector_offensive_idle_recovery.test.ts tests/sector_offensive_in_transit_predictor.test.ts tests/sector_offensive_launch_gates.test.ts tests/sector_counter_attack.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/combat_supply_pressure.test.ts tests/supply_pressure_vs_condition_reconciliation.test.ts tests/exhaustion_gate_sector_offensive.test.ts --reporter=dot` — **134/134 PASS** across 10 focused combat suites covering all four touched modules.
+- `npm.cmd run test:baselines` — PASS ("Baseline regression: all scenarios match"). 40w/52w/baseline_ops_4w/noop_4w byte-identical to the Batch 46 floor.
+- `git diff --check` — clean.
+
+**Artifacts:**
+- `src/sim/combat/paramilitary_sweep.ts` (2 sites cleaned)
+- `src/sim/combat/sector_offensive.ts` (2 sites cleaned)
+- `src/sim/combat/sector_building.ts` (1 site cleaned)
+- `src/sim/combat/supply_condition.ts` (1 site cleaned)
+- `tests/strict_null_inventory_progress.test.ts` (+ Batch 47 slice)
+- `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` (Phase 2 table-row update + Batch 47 narrative row)
+- `docs/PROJECT_LEDGER.md` (this entry)
+
+---
+
 ## [2026-05-20] refactor(strict-null): Batch 46 state + loader FactionId-cast slice (byte-identical)
 
 **Type:** Type-only refactor + test extension + docs. No simulation behavior, scenario data, save schema, generated artifact, ordering, or FORAWWV text changed.
