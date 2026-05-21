@@ -671,6 +671,6 @@ export class ClickableRegionManager {
     }
 
     private getDesktopBridge(): DesktopBridge | null {
-        return (window as unknown as { awwv?: DesktopBridge }).awwv ?? null;
+        return (window as Window & { awwv?: DesktopBridge }).awwv ?? null;
     }
 }

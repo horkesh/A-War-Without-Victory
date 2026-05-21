@@ -71,6 +71,7 @@ import type { PoolDecayReport } from './combat/pool_decay.js';
 import type { StrategicReserveCollectionReport, StrategicReserveReinforcementReport } from './combat/strategic_reserve.js';
 import type { ResolveAttackOrdersReport } from './combat/resolve_attack_orders.js';
 import type { OsidColumnMovementReport } from './combat/osid_column_movement.js';
+import type { BrigadeMovementReport } from './combat/brigade_movement_orders.js';
 import type { OfficerQualityReport } from './combat/officer_quality_update.js';
 import type { OfficerSuccessionReport } from './combat/officer_system.js';
 import type { Phase3AAuditSummary } from './pressure/phase3a_pressure_eligibility.js';
@@ -241,6 +242,10 @@ export interface TurnReport {
     };
     /** War phase: OSID column movement report */
     osid_column_movement?: OsidColumnMovementReport;
+    /** War phase: legacy weekly-report column movement diagnostic. */
+    column_movement?: OsidColumnMovementReport;
+    /** War phase: legacy weekly-report movement diagnostic mirror. */
+    movement_report?: BrigadeMovementReport;
     /** Officer quality growth/loss report */
     officer_quality_update?: OfficerQualityReport;
     /** Named officer succession report */

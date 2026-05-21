@@ -16,7 +16,7 @@ import type { EventConstraints } from '../events/event_constraints.js';
 
 /** Read AI mode from GameState config. Defaults to 'officer' if not set. */
 function getMode(state: GameState): AiCommanderMode {
-    return (state.meta as unknown as Record<string, { mode?: AiCommanderMode }>).ai_commander_config?.mode ?? 'officer';
+    return state.meta.ai_commander_config?.mode ?? 'officer';
 }
 
 export function buildArmyPrompt(state: GameState, faction: FactionId): AiPrompt {

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): Post-Batch-C unknown bridge/reporting tail
+
+**Type:** Type-only strict-null cleanup across scenario reporting, AI commander config access, UI/window bridge reads, SVG aria props, debug save loading, and warroom bridge probes. No simulation behavior, scenario data, save schema, generated artifact, IPC runtime contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** After the first post-Batch-C tail pass, the remaining `as_unknown_casts` inventory still included direct window bridge widenings, a redundant `state.meta` AI-config widening, a JSX aria prop type lie, a debug-only JSON.parse annotation, and two weekly-report diagnostic attachments that could be represented explicitly in the report types instead of using `as unknown as Record<string, unknown>`.
+
+**Change:** Cleaned 12 additional `as_unknown_casts` by adding explicit `column_movement` / `movement_report` diagnostic fields to `TurnReport` and `WeeklyReportRow`, reading `state.meta.ai_commander_config?.mode` directly in `prompt_builder.ts`, changing renderer/warroom `window.awwv` and `window.__DATA_BASE_URL` reads from `window as unknown as ...` to direct `Window & ...` bridge casts, changing `debugLoadSave.ts` to `const json: unknown = JSON.parse(text)`, and removing the unnecessary `true as unknown as boolean` JSX prop cast in `Icon.tsx`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`). The remaining six `as_unknown_casts` are deliberately retained: one absent-path AI commander combat summary read, one dynamic negotiation-capital dimension write, one null-verdict behavior mismatch, and three mock/adapter-shape double-casts where TypeScript correctly requires the `unknown` bridge.
+
+**Verification:** `npm.cmd run typecheck` PASS; focused vitest PASS (`strict_null_inventory_progress`, `ai_commander_prompt`, `scenario_operation_diagnostics`, `displacement_reporting_fix`, `ipc_contract_shape`, `ui/advance_turn_button_gated_feedback`, `ui/accessibility_form_labels`) with 90/90 passing; `npm.cmd run desktop:map:build` PASS with existing Vite warnings; `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"); `git diff --check` clean.
+
+---
+
 ## [2026-05-21] refactor(strict-null): Post-Batch-C JSON/array type-erasure tail
 
 **Type:** Type-only strict-null cleanup across data/map/scenario loader leaves plus docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, packaging metadata, IPC contract, canon text, or `FORAWWV.md` changed.

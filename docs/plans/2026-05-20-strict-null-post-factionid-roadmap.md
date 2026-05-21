@@ -12,9 +12,9 @@
 
 ## Current Inventory Floor
 
-Use the latest accepted main after Batch 48 and the AI parser lane as the start point.
+This plan was authored before Batches 50/51, Batch C, and the two post-Batch-C tail passes. The historical Batch 48 floor remains useful context, but the current accepted floor is now lower.
 
-Known Batch 48 floor:
+Historical Batch 48 floor:
 
 | category | count |
 |---|---:|
@@ -28,6 +28,19 @@ Known Batch 48 floor:
 Expected after the AI parser schema lane:
 - `as_factionid_casts` should be 2, both retained in `GameStateAdapter.ts` because UI `FactionId` is a literal union.
 - If the parser lane also removes `d!.stance`, `non_null_assertions_dot` may drop by 1.
+
+Current post-tail floor as of 2026-05-21:
+
+| category | count |
+|---|---:|
+| `as_factionid_casts` | 2 |
+| `as_unknown_casts` | 6 |
+| `as_any_casts` | 319 |
+| `non_null_assertions_dot` | 11 |
+| `non_null_assertions_index` | 38 |
+| `optional_fields_game_state` | 463 |
+
+Remaining `as_unknown_casts` are no longer the next broad safe batch. They are classified as behavior-shaped or intentionally incomplete mock/adapter bridges and should move only under their owning behavior/schema plans.
 
 ## Scope
 

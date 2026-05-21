@@ -244,7 +244,7 @@ class WarroomApp {
     }
 
     private getDesktopBridge(): DesktopBridge | null {
-        return (window as unknown as { awwv?: DesktopBridge }).awwv ?? null;
+        return (window as Window & { awwv?: DesktopBridge }).awwv ?? null;
     }
 
     private applyGameStateFromJson(stateJson: string): void {
@@ -560,7 +560,7 @@ class WarroomApp {
      * In dev/browser: opens the tactical map in a new tab.
      */
     private async showTacticalMapScene(mode: 'operational' | 'sandbox' | 'warroom' = 'operational'): Promise<void> {
-        const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
+        const isElectron = !!(window as Window & { awwv?: unknown }).awwv;
         if (!isElectron) {
             // Dev/browser: cross-origin prevents meaningful iframe interaction.
             // warroom mode not reachable in dev (warroom.ts runs in Electron only).

@@ -49,7 +49,7 @@ function useOsidAreas(): OsidAreasFile | null {
     if (cachedAreas || areaLoadAttempted) return;
     areaLoadAttempted = true;
     // Try data server first (Electron), then relative path (dev server)
-    const baseUrl = (window as unknown as Record<string, unknown>).__DATA_BASE_URL as string | undefined;
+    const baseUrl = (window as Window & { __DATA_BASE_URL?: string }).__DATA_BASE_URL;
     const url = baseUrl
       ? `${baseUrl}/derived/operational/osid_areas.json`
       : '/data/derived/operational/osid_areas.json';

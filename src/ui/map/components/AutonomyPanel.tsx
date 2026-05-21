@@ -58,7 +58,7 @@ interface AutonomyBridge {
 
 function getAutonomyBridge(): AutonomyBridge | undefined {
     return typeof window !== 'undefined'
-        ? (window as unknown as { awwv?: AutonomyBridge }).awwv
+        ? (window as Window & { awwv?: AutonomyBridge }).awwv
         : undefined;
 }
 

@@ -69,7 +69,7 @@ export const Icon = memo(function Icon({ name, size = 16, className = '', color 
             viewBox="0 0 24 24"
             className={`awwv-icon ${className}`}
             style={{ ...style, fill: color, display: 'inline-block', verticalAlign: 'text-bottom' }}
-            {...(title ? {} : { 'aria-hidden': true as unknown as boolean })}
+            {...(title ? {} : { 'aria-hidden': true })}
         >
             {title && <title>{title}</title>}
             <path d={path} />

@@ -148,7 +148,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
   // typed in LoadedGameState — read via permissive cast and degrade gracefully
   // when undefined. The panel itself returns null when no data surfaces.
   const armyCoPushbackData = useMemo(() => {
-    const lgs = loadedGameState as unknown as
+    const lgs = loadedGameState as
       | (Record<string, unknown> & {
           turn?: number;
           player_faction?: string | null;

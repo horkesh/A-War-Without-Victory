@@ -2373,13 +2373,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 weeklyReconstitution
             );
             // Attach movement diagnostics from turn report
-            const rowAny = reportRow as unknown as Record<string, unknown>;
-            const trAny = turnReport as unknown as Record<string, unknown>;
-            if (trAny.column_movement) {
-                rowAny.column_movement = trAny.column_movement;
+            if (turnReport.column_movement) {
+                reportRow.column_movement = turnReport.column_movement;
             }
-            if (trAny.movement_report) {
-                rowAny.movement_report = trAny.movement_report;
+            if (turnReport.movement_report) {
+                reportRow.movement_report = turnReport.movement_report;
             }
             // Attach fired events from turn report
             if (turnReport.events_fired && turnReport.events_fired.length > 0) {

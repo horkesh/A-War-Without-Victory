@@ -260,7 +260,7 @@ export type IPC = ReturnType<typeof useIPC>;
 export function useIPC() {
     return useMemo(() => {
         const awwv = typeof window !== 'undefined'
-            ? (window as unknown as { awwv?: WindowAwwv }).awwv
+            ? (window as Window & { awwv?: WindowAwwv }).awwv
             : undefined;
         const isAvailable = !!awwv;
 

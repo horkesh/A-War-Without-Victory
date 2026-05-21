@@ -25,7 +25,7 @@ function main() {
   console.log('Read file in', Date.now() - t0, 'ms, length', text.length);
 
   const t1 = Date.now();
-  const json = JSON.parse(text) as unknown;
+  const json: unknown = JSON.parse(text);
   console.log('JSON.parse done in', Date.now() - t1, 'ms');
 
   const t2 = Date.now();

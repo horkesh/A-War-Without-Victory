@@ -86,6 +86,10 @@ export interface WeeklyReportRow {
     brigade_reconstitution?: WeeklyReconstitutionEntry[];
     /** Historical events that fired this turn (id + narrative text). */
     events_fired?: Array<{ id: string; text: string }>;
+    /** War phase movement diagnostics copied from the turn report when present. */
+    column_movement?: unknown;
+    /** Legacy movement diagnostic payload copied from the turn report when present. */
+    movement_report?: unknown;
 }
 
 /** Compact per-dissolution entry persisted in weekly report. */

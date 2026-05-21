@@ -1,6 +1,6 @@
 # Strict-Null Batch C Schema-Boundary Validation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:writing-plans. This began as a plan-only contract. Batch C0-C7 has now implemented the first schema-boundary slices; continue to treat the remaining scenario/loader work as gated implementation under this plan.
+> **Status:** Batch C is implementation-closed as of 2026-05-21. This document remains the design/verification contract for the closed schema-boundary lane and the precedent for future schema-validation work.
 
 **Goal:** Define the contract for converting the 52 `as_unknown_casts` distributed across 12 schema-boundary files into typed `parse<X>(raw: unknown): X | null` helpers with explicit fallback semantics, so the Strict-Null migration can close its third batch class (`schema-boundary`) without changing runtime behavior on valid input or hiding behavior bugs behind silent default coercions.
 
@@ -12,9 +12,7 @@
 
 ## Status
 
-This document was originally authored as the contract and validation gates for Batch C. As of 2026-05-21, Batch C0-C7 has partially consumed it: `src/state/schema_validators.ts` is live, and the first seven implementation slices landed for `sector_offensive_launch_helpers.ts`, `validateGameState.ts`, `replay_frame_summary.ts`, `war_dispatches.ts`, `desktop_sim.ts`, `collect_briefing.ts`, and `serialize.ts`.
-
-The heavier scenario/loader half remains open under the same gates: `scenario_loader.ts`, `war_timeline.ts`, `political_control_init.ts`, `oob_loader.ts`, and `brigade_temporal_emit.ts`. Batch C0-C7 reduced the verified top-level `as_unknown_casts` floor from 80 to 62; the predicted full-Batch-C floor of 28 is not yet claimed.
+This document was originally authored as the contract and validation gates for Batch C. As of 2026-05-21, Batch C0-C12 consumed it completely: `src/state/schema_validators.ts` is live, all twelve plan-scoped files are pinned at zero `as_unknown_casts`, and the predicted full-Batch-C floor of 28 was reached. Two follow-on tail passes then reduced the repo-wide `as_unknown_casts` floor further to 6.
 
 ## Inventory Baseline — Post Batch 50/51
 
@@ -29,7 +27,7 @@ Top-level inventory after Batch 50 (UI-only trivial alias / JSX truthy-narrowing
 | `non_null_assertions_index` | 59 | 43 | 38 | **38** | −21 |
 | `optional_fields_game_state` | 458 | 463 | 463 | **463** | +5 |
 
-The expected current floor is `2 / 80 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+The current post-tail floor is `2 / 6 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
 
 Both Batch A (UI-only) and Batch B (sim runtime-invariant) are closed. Batch C (this plan) targets `as_unknown_casts`, which has held flat at 80 across Batches 49 → 50 → 51. Of those 80 sites, 52 cluster in 12 schema-boundary files; the remaining 28 sit in singleton files documented in `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` §3.
 
