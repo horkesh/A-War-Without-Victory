@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean war-phases non-null tail
+
+**Type:** Strict-null cleanup. Runtime refactor with existing locals/guards; no event firing, Graz Accords behavior, smuggling income, reserve formulas, save schema, scenario data, or output tuning changed.
+
+**Why:** `war_phases.ts` retained the final runtime inventory-counted dot/index non-null assertions: one report-array append after `events_fired` assignment and four reserve-map reads/writes inside a branch that already checked both optional reserve maps.
+
+**Change:** Appended Graz Accords through the already-owned `result.fired` array and narrowed `general_supply_reserve` / `heavy_munitions_reserve` into locals before applying smuggling income. Added a strict-null progress test pinning `war_phases.ts` at zero for dot/index non-null assertions.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (70/70); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 4`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_WAR_PHASES_NONNULL_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean treaty-apply non-null tail
 
 **Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, treaty acceptance, territorial transfer, Brcko special-status, recognition, capital cost, or output tuning changed.

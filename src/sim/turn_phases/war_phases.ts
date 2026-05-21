@@ -298,7 +298,7 @@ export const warPhases: NamedPhase[] = [
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
             if (grazText) {
-                context.report.events_fired!.push({ id: 'graz_accords', text: grazText });
+                result.fired.push({ id: 'graz_accords', text: grazText });
             }
         }
     },
@@ -601,13 +601,14 @@ export const warPhases: NamedPhase[] = [
             updateSmugglingRoutes(context.state, turn);
             // Apply smuggling income to supply reserves
             const income = getSmugglingIncome(context.state);
-            if (context.state.military.general_supply_reserve && context.state.military.heavy_munitions_reserve) {
+            const generalSupplyReserve = context.state.military.general_supply_reserve;
+            const heavyMunitionsReserve = context.state.military.heavy_munitions_reserve;
+            if (generalSupplyReserve && heavyMunitionsReserve) {
                 for (const fid of Object.keys(income.general).sort()) {
-                    const fkey = fid as import('../../state/game_state.js').FactionId;
-                    context.state.military.general_supply_reserve![fkey] = Math.min(100,
-                        (context.state.military.general_supply_reserve![fkey] ?? 0) + (income.general[fid] ?? 0));
-                    context.state.military.heavy_munitions_reserve![fkey] = Math.min(100,
-                        (context.state.military.heavy_munitions_reserve![fkey] ?? 0) + (income.heavy[fid] ?? 0));
+                    generalSupplyReserve[fid] = Math.min(100,
+                        (generalSupplyReserve[fid] ?? 0) + (income.general[fid] ?? 0));
+                    heavyMunitionsReserve[fid] = Math.min(100,
+                        (heavyMunitionsReserve[fid] ?? 0) + (income.heavy[fid] ?? 0));
                 }
             }
         }

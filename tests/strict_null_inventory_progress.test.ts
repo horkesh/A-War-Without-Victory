@@ -149,6 +149,10 @@ const WAR_PIPELINE_BATCH_45_FILES = [
     'src/sim/turn_phases/war_phases.ts',
 ];
 
+const WAR_PHASES_NON_NULL_TAIL_FILES = [
+    'src/sim/turn_phases/war_phases.ts',
+];
+
 const STATE_BATCH_46_FILES = [
     'src/state/displacement.ts',
     'src/state/displacement_takeover.ts',
@@ -1279,6 +1283,18 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const nonNullIndexCount = phaseCount(current, 'non_null_assertions_index', TREATY_APPLY_NON_NULL_TAIL_FILES);
+        expect(nonNullIndexCount).toBe(0);
+    });
+
+    it('cleans the war-phases non-null assertion tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const nonNullDotCount = phaseCount(current, 'non_null_assertions_dot', WAR_PHASES_NON_NULL_TAIL_FILES);
+        const nonNullIndexCount = phaseCount(current, 'non_null_assertions_index', WAR_PHASES_NON_NULL_TAIL_FILES);
+        expect(nonNullDotCount).toBe(0);
         expect(nonNullIndexCount).toBe(0);
     });
 
