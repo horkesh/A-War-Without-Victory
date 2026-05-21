@@ -9,6 +9,12 @@
 |---|---|---|
 | Open Phase 3 of strict-null migration with safe-scope early-war + bot slice | Implemented | Report: `docs/40_reports/implemented/20260518_BATCH39_STRICT_NULL_PHASE3_SAFE_SLICE.md`. 8 inventory-counted Phase 3 escapes eliminated across 4 files: `simple_general_bot.ts` (5 non-null-assertion writes → local-const hoist with shared object identity), `authority_degradation.ts` (redundant `as FactionId` on already-typed `faction.id`), `control_strain.ts:132` + `militia_emergence.ts:157` (redundant `as FactionId[]` on already-typed `.map((f) => f.id).sort()`). 3 files fully CLEAN; `control_strain.ts` partial (1 load-bearing `Object.entries` return cast retained). 40w n1915 hash `b14179d65639860c` byte-identical (type-erasure-only); 18/18 strict-null inventory progress + 18/18 focused early-war tests PASS. Phase 3 remaining: 27 escapes (was 35); concentrated in `Object.entries`/`Object.keys` narrowing patterns + save-shape state inits. `alliance_update.ts` and `war_phases.ts` deliberately untouched per lane bank stop-gate. |
 
+## Completed H1 Evidence Boundary — Watched-operation defender-power review
+
+| Lane | Status | Source |
+|---|---|---|
+| H1 watched-operation visibility/component evidence | Diagnostic complete / outcome gated | Reports: `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` and `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md`. Fresh 188w n1931 hash `3099a5fabaa04d6b` proves Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are catalog-present runtime rows with no AAR and honest `build_defender_power_too_high` blockers. Active defender-power components are attributed; further outcome tuning is gated sensitive-history design under Q-H1-KRIVAJA-OUTCOME. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |

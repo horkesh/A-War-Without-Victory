@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(h1): classify defender power review boundary
+
+**Type:** Documentation-only sensitive-history audit/roadmap update. No code, operation behavior, scenario data, OOB, combat math, save schema, canon text, or `FORAWWV.md` changed.
+
+**Why:** The trace-backed H1 packet exposed defender-power multiplier components, but the roadmap still needed a durable boundary saying which parts are evidence-complete and which parts require sensitive-history outcome sign-off before tuning.
+
+**Change:** Added `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md` and updated the H1 visibility plan, engine-health plan, master roadmap, backlog execution queue, and ledger. The packet records that all three watched operations are catalog-present runtime rows with honest `build_defender_power_too_high` blockers in 188w `n1931`, that Stupcanica's `1.15` per-brigade terrain bonus comes from the runtime tier-2 decoration defense bonus path, and that existing Shape B tests deliberately protect this bonus as orthogonal defender-power behavior.
+
+**Decision:** H1 diagnostic/visibility work is complete enough for autonomous closeout. Any change that relaxes defender power, alters decorations, changes watched-operation objectives, or makes Krivaja/Stupcanica/Cerska-Kamenica deliverable remains gated by Q-H1-KRIVAJA-OUTCOME with user + historian/canon review.
+
+**Verification:** Docs-only gate: `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): trace defender power modifier components
 
 **Type:** Sensitive-history diagnostic/output-contract refinement. Touched shared combat math reporting, watched-operation trace schema, diagnostic summaries, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
