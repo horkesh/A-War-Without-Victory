@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean factions and supply-rights validator any casts
+
+**Type:** Type-only validator cleanup in `src/validate/factions.ts` and `src/validate/supply_rights.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** The remaining validator-tail casts in these files were property/membership shortcuts: `faction.id as any` for political-side membership, `(faction as any).command_capacity` for a typed optional field, and `corridor.scope as any` after an object guard. All can be represented with local guards or `Record<string, unknown>` without changing diagnostics.
+
+**Change:** Added an `isPoliticalSideId(...)` helper in `validate/factions.ts`, read `faction.command_capacity` directly, and typed supply-rights `scope` as `Record<string, unknown>` under the existing scope object guard. Added a strict-null progress assertion pinning both validator files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 233 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (48/48). Baselines not run: validator-only type narrowing, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean corps front-lines builder any casts
 
 **Type:** Type-only UI map builder cleanup in `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

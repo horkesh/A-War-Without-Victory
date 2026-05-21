@@ -108,7 +108,7 @@ export function validateSupplyRights(state: GameState): ValidationIssue[] {
                 message: 'corridor.scope must be an object'
             });
         } else {
-            const scope = corridor.scope as any;
+            const scope: Record<string, unknown> = corridor.scope;
             if (scope.kind === 'region') {
                 if (typeof scope.region_id !== 'string' || scope.region_id.length === 0) {
                     issues.push({

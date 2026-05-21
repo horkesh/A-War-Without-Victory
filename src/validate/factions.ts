@@ -1,6 +1,10 @@
 import type { GameState } from '../state/game_state.js';
-import { POLITICAL_SIDES } from '../state/identity.js';
+import { POLITICAL_SIDES, type PoliticalSideId } from '../state/identity.js';
 import type { ValidationIssue } from './validate.js';
+
+function isPoliticalSideId(value: string): value is PoliticalSideId {
+    return (POLITICAL_SIDES as readonly string[]).includes(value);
+}
 
 export function validateFactions(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
@@ -20,7 +24,7 @@ export function validateFactions(state: GameState): ValidationIssue[] {
 
         if (!faction.id || typeof faction.id !== 'string') {
             issues.push({ severity: 'error', code: 'faction.id.invalid', path: `${basePath}.id`, message: 'id must be a non-empty string' });
-        } else if (!POLITICAL_SIDES.includes(faction.id as any)) {
+        } else if (!isPoliticalSideId(faction.id)) {
             issues.push({
                 severity: 'error',
                 code: 'faction.id.not_political_side',
@@ -30,7 +34,7 @@ export function validateFactions(state: GameState): ValidationIssue[] {
         }
 
         // command_capacity validation (Phase 9)
-        const commandCapacity = (faction as any).command_capacity;
+        const commandCapacity = faction.command_capacity;
         if (commandCapacity !== undefined) {
             if (!Number.isInteger(commandCapacity) || commandCapacity < 0) {
                 issues.push({
