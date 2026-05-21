@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean OpsMap casts
+
+**Type:** Strict-null cleanup. UI map type-surface refactor; no operation planning behavior, target selection, map data, save schema, scenario data, or output tuning changed.
+
+**Why:** `OpsMap.tsx` retained two broad `as any` sites around the Deck overlay control and dashed arrow layer extension props.
+
+**Change:** Passed `MapboxOverlay` directly through its implemented MapLibre control interface, typed dashed-arrow extension props with `PathStyleExtensionProps<ArrowPathData>`, and used the current luma/deck depth parameter names for the dashed layer. Added a strict-null progress assertion pinning `OpsMap.tsx` at zero for `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (74/74); `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite browser-external/dynamic-import/chunk-size warnings. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 174`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_OPS_MAP_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean SupplyIntelligence casts
 
 **Type:** Strict-null cleanup. UI data-contract correction; no mobilization simulation, save schema, scenario data, adapter serialization, or output tuning changed.

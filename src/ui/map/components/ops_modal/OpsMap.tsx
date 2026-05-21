@@ -10,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { PathLayer, PolygonLayer, TextLayer } from '@deck.gl/layers';
-import { PathStyleExtension } from '@deck.gl/extensions';
+import { PathStyleExtension, type PathStyleExtensionProps } from '@deck.gl/extensions';
 import type { FeatureCollection } from 'geojson';
 import { useGameStore } from '../../store/gameStore';
 import { loadOperationalSettlements, loadTerrainScalars, type TerrainScalars } from '../../data/DataLoader';
@@ -291,7 +291,7 @@ export function OpsMap({
 
                 // Deck.gl overlay for animated advance arrows
                 const deckOverlay = new MapboxOverlay({ interleaved: true, layers: [] });
-                map.addControl(deckOverlay as any);
+                map.addControl(deckOverlay);
                 deckOverlayRef.current = deckOverlay;
 
                 // Single map-level click handler — query features at click point
@@ -620,6 +620,13 @@ function updateDeckArrows(
     const layers = [];
 
     if (data.paths.length > 0) {
+        const dashedPathStyleProps: PathStyleExtensionProps<ArrowPathData> = {
+            getDashArray: [8, 4],
+            dashGapPickable: true,
+            dashJustified: true,
+            getOffset: 0,
+        };
+
         // Glow layer — wide, semi-transparent, no dash
         layers.push(new PathLayer({
             id: 'ops-arrow-glow',
@@ -634,7 +641,7 @@ function updateDeckArrows(
         }));
 
         // Body — faction-colored with animated marching dashes
-        layers.push(new PathLayer({
+        layers.push(new PathLayer<ArrowPathData>({
             id: 'ops-arrow-body',
             data: data.paths,
             getPath: (d: ArrowPathData) => d.path,
@@ -643,14 +650,11 @@ function updateDeckArrows(
             widthUnits: 'pixels',
             capRounded: true,
             jointRounded: true,
-            getDashArray: [8, 4],
-            dashGapPickable: true,
-            dashJustified: true,
+            ...dashedPathStyleProps,
             extensions: [new PathStyleExtension({ dash: true, offset: true })],
-            getOffset: 0,
-            parameters: { depthTest: false },
+            parameters: { depthWriteEnabled: false, depthCompare: 'always' },
             updateTriggers: { getOffset: dashOffsetRef.current },
-        } as any));
+        }));
 
         // Solid outline beneath the dashes
         layers.push(new PathLayer({
