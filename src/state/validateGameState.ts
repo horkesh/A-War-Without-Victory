@@ -595,8 +595,8 @@ export function validateGameStateShape(
                         errors.push(`military.army_co_decision_traces.${fid} must be an array`);
                         continue;
                     }
-                    for (let i = 0; i < (list as unknown[]).length; i++) {
-                        const entry = (list as unknown[])[i] as Record<string, unknown>;
+                    for (let i = 0; i < list.length; i++) {
+                        const entry = list[i] as Record<string, unknown>;
                         if (entry == null || typeof entry !== 'object' || Array.isArray(entry)) {
                             errors.push(`military.army_co_decision_traces.${fid}[${i}] must be an object`);
                             continue;
