@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): index isolated-pocket home locations
+
+**Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** Recovery setup attribution showed `recoverDroppedFrontEdges:faction-front-claim-setup:isolated-pocket-consolidation` as the leading child at 582.834ms / 282 calls. The hot path repeatedly scanned every formation while checking whether an isolated pocket contained a same-corps home formation.
+
+**Change:** Added an invocation-local `corpsLocations` index inside `consolidateIsolatedCorpsPockets(...)` and reused it for the home-brigade protection check. The index is rebuilt from the same `formations` input each call and remains local to the consolidation pass.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts --reporter=dot` PASS (17/17); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_isolated_pocket_location_index_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, `watched_operations.json`) are byte-identical at current final state hash `4368f50c00c464ad`. Clean sidecar comparison: recovery setup isolated-pocket consolidation 582.834ms -> 197.511ms; recovery setup parent 1288.512ms -> 882.674ms.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_ISOLATED_POCKET_LOCATION_INDEX.md`; `data/derived/_debug/sector_partition_perf_isolated_pocket_location_index_clean.jsonl`; `runs_perf/sector_reconstruction_isolated_pocket_location_index_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
 ## [2026-05-21] perf(sector): attribute recovery setup children
 
 **Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

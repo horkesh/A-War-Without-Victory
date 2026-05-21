@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-18 (Batch 37 :split-pieces redundant normalize skip)
+**Updated:** 2026-05-21 (isolated-pocket location index)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-21: Isolated-pocket location index (byte-identical)
+
+**Change:** `src/sim/combat/sector_territory.ts` `consolidateIsolatedCorpsPockets(...)` now builds one invocation-local corps-location index before processing components. The home-brigade protection check no longer scans every formation for every isolated pocket edge; it reads the same formation facts through the local index.
+
+**Byte-identity:** The post-change 40w profile produced the same deterministic artifacts as the recovery setup attribution baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, and `watched_operations.json` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_isolated_pocket_location_index_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** In the clean 94-invocation sidecar batch, `recoverDroppedFrontEdges:faction-front-claim-setup:isolated-pocket-consolidation` drops from 582.834ms to 197.511ms, and the parent `recoverDroppedFrontEdges:faction-front-claim-setup` drops from 1288.512ms to 882.674ms. Main build isolated-pocket labels also drop: RS 258.333ms -> 105.114ms, RBiH 274.059ms -> 101.004ms, HRHB 52.795ms -> 24.928ms.
+
+**Report:** [implemented/20260521_ISOLATED_POCKET_LOCATION_INDEX.md](implemented/20260521_ISOLATED_POCKET_LOCATION_INDEX.md)
 
 ---
 

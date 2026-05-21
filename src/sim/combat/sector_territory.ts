@@ -912,6 +912,16 @@ export function consolidateIsolatedCorpsPockets(
         for (const eid of edges) edgeToCorps.set(eid, corpsId);
     }
 
+    const corpsLocations = new Map<FormationId, Set<Osid>>();
+    for (const f of Object.values(formations)) {
+        if (f.faction !== faction || !f.location_osid) continue;
+        const fCorpsId = getFormationCorpsId(f);
+        if (!fCorpsId) continue;
+        let locations = corpsLocations.get(fCorpsId);
+        if (!locations) { locations = new Set(); corpsLocations.set(fCorpsId, locations); }
+        locations.add(f.location_osid);
+    }
+
     // Process each corps: find connected components of its edges
     for (const corpsId of [...corpsEdges.keys()].sort(strictCompare)) {
         const edges = corpsEdges.get(corpsId);
@@ -944,12 +954,7 @@ export function consolidateIsolatedCorpsPockets(
                 const meta = edgeMeta.get(eid);
                 if (!meta) continue;
                 const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
-                for (const f of Object.values(formations)) {
-                    if (f.faction === faction && f.location_osid === friendlyOsid && getFormationCorpsId(f) === corpsId) {
-                        homeBrigadePresent = true;
-                        break;
-                    }
-                }
+                if (corpsLocations.get(corpsId)?.has(friendlyOsid)) homeBrigadePresent = true;
                 if (homeBrigadePresent) break;
             }
             if (homeBrigadePresent) continue;

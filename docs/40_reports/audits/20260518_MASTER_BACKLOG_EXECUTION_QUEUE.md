@@ -33,6 +33,12 @@
 |---|---|---|
 | `recoverDroppedFrontEdges:faction-front-claim-setup` child attribution | Implemented as instrumentation | Report: `docs/40_reports/implemented/20260521_RECOVERY_SETUP_ATTRIBUTION.md`. Sidecar-only child labels now split setup into isolated-pocket consolidation, OSID-to-corps, cross-corps consolidation, front-edge partition, friendly/component setup, and faction brigade component indexing. Pre/post profiled artifacts are byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. |
 
+## Completed Sector Performance — Isolated-pocket location index
+
+| Lane | Status | Source |
+|---|---|---|
+| `consolidateIsolatedCorpsPockets(...)` home-location scan | Implemented as byte-identical performance reduction | Report: `docs/40_reports/implemented/20260521_ISOLATED_POCKET_LOCATION_INDEX.md`. The isolated-pocket home-brigade protection check now uses an invocation-local corps-location index instead of scanning every formation per pocket edge. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. Recovery setup isolated-pocket consolidation dropped 582.834ms -> 197.511ms in the clean sidecar batch. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |
