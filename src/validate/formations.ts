@@ -6,6 +6,18 @@ import type { ValidationIssue } from './validate.js';
 
 const MAX_NAME_LENGTH = 80;
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' ? value as Record<string, unknown> : undefined;
+}
+
+function isPoliticalSide(value: string): value is typeof POLITICAL_SIDES[number] {
+    return (POLITICAL_SIDES as readonly string[]).includes(value);
+}
+
+function isArmyLabel(value: string): value is typeof ARMY_LABELS[number] {
+    return (ARMY_LABELS as readonly string[]).includes(value);
+}
+
 export function validateFormations(
     state: GameState,
     frontRegions?: FrontRegionsFile,
@@ -13,15 +25,17 @@ export function validateFormations(
 ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const formations = ((state as any)?.military?.formations ?? (state as any)?.formations) as Record<string, any> | undefined;
+    const stateRecord = state as GameState & { formations?: unknown };
+    const formations = asRecord(state.military?.formations) ?? asRecord(stateRecord.formations);
     if (!formations || typeof formations !== 'object') return issues;
 
-    const factionIds = new Set<string>((state.factions ?? []).map((f) => (f as any)?.id).filter((x) => typeof x === 'string'));
+    const factionIds = new Set<string>((state.factions ?? []).map((f) => f.id).filter((x) => typeof x === 'string'));
 
     const knownRegionIds = new Set<string>();
     if (frontRegions) {
         for (const r of frontRegions.regions ?? []) {
-            if (r && typeof r === 'object' && typeof (r as any).region_id === 'string') knownRegionIds.add((r as any).region_id);
+            const regionId = asRecord(r)?.region_id;
+            if (typeof regionId === 'string') knownRegionIds.add(regionId);
         }
     }
 
@@ -36,10 +50,11 @@ export function validateFormations(
     for (const id of ids) {
         const f = formations[id];
         const basePath = `formations.${id}`;
-        if (!f || typeof f !== 'object') continue;
+        const fRecord = asRecord(f);
+        if (!fRecord) continue;
 
         // formation_id key must equal FormationState.id
-        const formationId = (f as any).id;
+        const formationId = fRecord.id;
         if (typeof formationId !== 'string' || formationId !== id) {
             issues.push({
                 severity: 'error',
@@ -56,7 +71,7 @@ export function validateFormations(
         }
 
         // faction must exist in state.factions and be a political side
-        const faction = (f as any).faction;
+        const faction = fRecord.faction;
         if (typeof faction !== 'string' || faction.length === 0) {
             issues.push({
                 severity: 'error',
@@ -64,7 +79,7 @@ export function validateFormations(
                 path: `${basePath}.faction`,
                 message: 'faction must be a non-empty string'
             });
-        } else if (!POLITICAL_SIDES.includes(faction as any)) {
+        } else if (!isPoliticalSide(faction)) {
             issues.push({
                 severity: 'error',
                 code: 'formations.faction.not_political_side',
@@ -81,18 +96,18 @@ export function validateFormations(
         }
 
         // force_label validation (if present)
-        const forceLabel = (f as any).force_label;
+        const forceLabel = fRecord.force_label;
         if (forceLabel !== undefined && forceLabel !== null) {
-            if (typeof forceLabel !== 'string' || !ARMY_LABELS.includes(forceLabel as any)) {
+            if (typeof forceLabel !== 'string' || !isArmyLabel(forceLabel)) {
                 issues.push({
                     severity: 'error',
                     code: 'formations.force_label.invalid',
                     path: `${basePath}.force_label`,
                     message: `force_label must be one of: ${ARMY_LABELS.join(', ')}`
                 });
-            } else if (typeof faction === 'string' && POLITICAL_SIDES.includes(faction as any)) {
+            } else if (typeof faction === 'string' && isPoliticalSide(faction)) {
                 // Optional consistency warning: if force_label doesn't match default for faction
-                const defaultLabel = defaultArmyLabelForSide(faction as any);
+                const defaultLabel = defaultArmyLabelForSide(faction);
                 if (forceLabel !== defaultLabel) {
                     issues.push({
                         severity: 'warn',
@@ -105,7 +120,7 @@ export function validateFormations(
         }
 
         // Peace phase.0: kind validation (if present)
-        const kind = (f as any).kind;
+        const kind = fRecord.kind;
         if (kind !== undefined && kind !== null) {
             const validKinds = ['militia', 'brigade', 'operational_group', 'corps_asset'];
             if (typeof kind !== 'string' || !validKinds.includes(kind)) {
@@ -119,7 +134,7 @@ export function validateFormations(
         }
 
         // Peace phase.0: readiness validation (if present)
-        const readiness = (f as any).readiness;
+        const readiness = fRecord.readiness;
         if (readiness !== undefined && readiness !== null) {
             const validReadiness = ['forming', 'active', 'overextended', 'degraded'];
             if (typeof readiness !== 'string' || !validReadiness.includes(readiness)) {
@@ -133,9 +148,9 @@ export function validateFormations(
         }
 
         // Peace phase.0: cohesion validation (if present)
-        const cohesion = (f as any).cohesion;
+        const cohesion = fRecord.cohesion;
         if (cohesion !== undefined && cohesion !== null) {
-            if (!Number.isInteger(cohesion) || cohesion < 0 || cohesion > 100) {
+            if (typeof cohesion !== 'number' || !Number.isInteger(cohesion) || cohesion < 0 || cohesion > 100) {
                 issues.push({
                     severity: 'error',
                     code: 'formations.cohesion.invalid',
@@ -146,9 +161,9 @@ export function validateFormations(
         }
 
         // WIA trickleback: wounded_pending (if present) must be non-negative integer
-        const woundedPending = (f as any).wounded_pending;
+        const woundedPending = fRecord.wounded_pending;
         if (woundedPending !== undefined && woundedPending !== null) {
-            if (!Number.isInteger(woundedPending) || woundedPending < 0) {
+            if (typeof woundedPending !== 'number' || !Number.isInteger(woundedPending) || woundedPending < 0) {
                 issues.push({
                     severity: 'error',
                     code: 'formations.wounded_pending.invalid',
@@ -159,7 +174,7 @@ export function validateFormations(
         }
 
         // Peace phase.0: activation_gated validation (if present)
-        const activationGated = (f as any).activation_gated;
+        const activationGated = fRecord.activation_gated;
         if (activationGated !== undefined && activationGated !== null) {
             if (typeof activationGated !== 'boolean') {
                 issues.push({
@@ -172,9 +187,9 @@ export function validateFormations(
         }
 
         // Peace phase.0: activation_turn validation (if present)
-        const activationTurn = (f as any).activation_turn;
+        const activationTurn = fRecord.activation_turn;
         if (activationTurn !== undefined && activationTurn !== null) {
-            if (!Number.isInteger(activationTurn) || activationTurn > (state.meta?.turn ?? 0)) {
+            if (typeof activationTurn !== 'number' || !Number.isInteger(activationTurn) || activationTurn > (state.meta?.turn ?? 0)) {
                 issues.push({
                     severity: 'error',
                     code: 'formations.activation_turn.invalid',
@@ -185,7 +200,7 @@ export function validateFormations(
         }
 
         // name must be non-empty, trimmed, max length
-        const name = (f as any).name;
+        const name = fRecord.name;
         if (typeof name !== 'string' || name.trim().length === 0) {
             issues.push({
                 severity: 'error',
@@ -203,8 +218,8 @@ export function validateFormations(
         }
 
         // created_turn <= current turn
-        const created_turn = (f as any).created_turn;
-        if (!Number.isInteger(created_turn) || created_turn > (state.meta?.turn ?? 0)) {
+        const created_turn = fRecord.created_turn;
+        if (typeof created_turn !== 'number' || !Number.isInteger(created_turn) || created_turn > (state.meta?.turn ?? 0)) {
             issues.push({
                 severity: 'error',
                 code: 'formations.created_turn.invalid',
@@ -214,7 +229,7 @@ export function validateFormations(
         }
 
         // status in enum
-        const status = (f as any).status;
+        const status = fRecord.status;
         if (status !== 'active' && status !== 'inactive') {
             issues.push({
                 severity: 'error',
@@ -225,7 +240,7 @@ export function validateFormations(
         }
 
         // assignment validation
-        const assignment = (f as any).assignment;
+        const assignment = fRecord.assignment;
         if (assignment !== null && assignment !== undefined) {
             if (typeof assignment !== 'object') {
                 issues.push({
@@ -235,7 +250,8 @@ export function validateFormations(
                     message: 'assignment must be null or an object'
                 });
             } else {
-                const kind = (assignment as any).kind;
+                const assignmentRecord = assignment as Record<string, unknown>;
+                const kind = assignmentRecord?.kind;
                 if (kind !== 'region' && kind !== 'edge') {
                     issues.push({
                         severity: 'error',
@@ -244,7 +260,7 @@ export function validateFormations(
                         message: 'assignment.kind must be one of region|edge'
                     });
                 } else if (kind === 'region') {
-                    const region_id = (assignment as any).region_id;
+                    const region_id = assignmentRecord.region_id;
                     if (typeof region_id !== 'string' || region_id.length === 0) {
                         issues.push({
                             severity: 'error',
@@ -261,7 +277,7 @@ export function validateFormations(
                         });
                     }
                     // edge_id should not be present for region kind
-                    if ((assignment as any).edge_id !== undefined) {
+                    if (assignmentRecord.edge_id !== undefined) {
                         issues.push({
                             severity: 'error',
                             code: 'formations.assignment.edge_id.unexpected',
@@ -270,7 +286,7 @@ export function validateFormations(
                         });
                     }
                 } else if (kind === 'edge') {
-                    const edge_id = (assignment as any).edge_id;
+                    const edge_id = assignmentRecord.edge_id;
                     if (typeof edge_id !== 'string' || edge_id.length === 0) {
                         issues.push({
                             severity: 'error',
@@ -287,7 +303,7 @@ export function validateFormations(
                         });
                     }
                     // region_id should not be present for edge kind
-                    if ((assignment as any).region_id !== undefined) {
+                    if (assignmentRecord.region_id !== undefined) {
                         issues.push({
                             severity: 'error',
                             code: 'formations.assignment.region_id.unexpected',
@@ -300,7 +316,7 @@ export function validateFormations(
         }
 
         // Phase 10: ops validation (if present)
-        const ops = (f as any).ops;
+        const ops = fRecord.ops;
         if (ops !== undefined) {
             if (typeof ops !== 'object' || ops === null) {
                 issues.push({
@@ -310,8 +326,9 @@ export function validateFormations(
                     message: 'ops must be an object if present'
                 });
             } else {
-                const fatigue = (ops as any).fatigue;
-                if (!Number.isInteger(fatigue) || fatigue < 0) {
+                const opsRecord = ops as Record<string, unknown>;
+                const fatigue = opsRecord.fatigue;
+                if (typeof fatigue !== 'number' || !Number.isInteger(fatigue) || fatigue < 0) {
                     issues.push({
                         severity: 'error',
                         code: 'formations.ops.fatigue.invalid',
@@ -319,9 +336,9 @@ export function validateFormations(
                         message: 'ops.fatigue must be an integer >= 0'
                     });
                 }
-                const lastSuppliedTurn = (ops as any).last_supplied_turn;
+                const lastSuppliedTurn = opsRecord.last_supplied_turn;
                 if (lastSuppliedTurn !== null && lastSuppliedTurn !== undefined) {
-                    if (!Number.isInteger(lastSuppliedTurn) || lastSuppliedTurn > (state.meta?.turn ?? 0)) {
+                    if (typeof lastSuppliedTurn !== 'number' || !Number.isInteger(lastSuppliedTurn) || lastSuppliedTurn > (state.meta?.turn ?? 0)) {
                         issues.push({
                             severity: 'error',
                             code: 'formations.ops.last_supplied_turn.invalid',
@@ -334,7 +351,7 @@ export function validateFormations(
         }
 
         // tags validation (if present)
-        const tags = (f as any).tags;
+        const tags = fRecord.tags;
         if (tags !== undefined) {
             if (!Array.isArray(tags)) {
                 issues.push({

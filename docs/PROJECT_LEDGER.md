@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): validateFormations record-narrowing as-any slice
+
+**Type:** Type-only validator cleanup in `src/validate/formations.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `validateFormations(...)` is deliberately tolerant of malformed or partial state, but its property reads were using `as any` throughout even after object guards. Those casts hid the validator's real contract: it reads arbitrary records and reports validation issues without mutating state.
+
+**Change:** Added a local `asRecord(...)` helper and narrow `isPoliticalSide(...)` / `isArmyLabel(...)` type guards, then replaced 31 counted `as_any_casts` with `Record<string, unknown>` reads and explicit `typeof === 'number'` checks before numeric comparisons. Added a strict-null progress assertion pinning `src/validate/formations.ts` at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 288 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/formations_validate.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (43/43); `git diff --check` clean.
+
+---
+
 ## [2026-05-21] refactor(strict-null): Post-Batch-C unknown bridge/reporting tail
 
 **Type:** Type-only strict-null cleanup across scenario reporting, AI commander config access, UI/window bridge reads, SVG aria props, debug save loading, and warroom bridge probes. No simulation behavior, scenario data, save schema, generated artifact, IPC runtime contract, canon text, or `FORAWWV.md` changed.
