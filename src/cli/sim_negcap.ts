@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
 import { runTurn } from '../sim/turn_pipeline.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import type { NegotiationCapitalStepReport } from '../state/negotiation_capital.js';
 import { spendNegotiationCapital } from '../state/negotiation_capital.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
@@ -138,7 +138,7 @@ function parseArgs(argv: string[]): CliOptions {
 
         // Canonicalize faction ID
         const canonicalFaction = canonicalizePoliticalSideId(faction);
-        if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+        if (!isPoliticalSideId(canonicalFaction)) {
             throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
         }
 

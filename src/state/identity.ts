@@ -1,6 +1,10 @@
 export const POLITICAL_SIDES = ["RBiH", "RS", "HRHB"] as const;
 export type PoliticalSideId = typeof POLITICAL_SIDES[number];
 
+export function isPoliticalSideId(id: string): id is PoliticalSideId {
+    return (POLITICAL_SIDES as readonly string[]).includes(id);
+}
+
 export const ARMY_LABELS = ["ARBiH", "VRS", "HVO"] as const;
 export type ArmyLabel = typeof ARMY_LABELS[number];
 

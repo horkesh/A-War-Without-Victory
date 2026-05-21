@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean CLI political-side and MapKit any casts
+
+**Type:** Type-only CLI/tooling strict-null cleanup plus strict-null inventory guard/docs reconciliation. Touched `src/state/identity.ts`, seven simulation helper CLIs, `src/cli/mapkit_validate.ts`, and `tests/strict_null_inventory_progress.test.ts`. No simulation turn behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Fifteen remaining `as_any_casts` were safe tooling leaves: repeated `POLITICAL_SIDES.includes(value as any)` checks on canonicalized strings, two typed `FormationState` property reads in `sim_formations.ts`, three `sim_phase5_check.ts` front-posture / settlement-edge casts, and one MapKit `properties.sid` read where `properties` is already `Record<string, unknown>`.
+
+**Change:** Added `isPoliticalSideId(id: string): id is PoliticalSideId` in `src/state/identity.ts`, replaced the CLI membership casts with that guard, used typed `FormationState` reads for generated formation IDs, typed `sim_phase5_check.ts` settlement edges as `EdgeRecord[]`, read front-posture assignments through the existing `GameState` type, and read `f.properties?.sid` directly in `mapkit_validate.ts`. Added a strict-null progress assertion pinning the cleaned CLI files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 202 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused CLI/inventory vitest PASS (59/59). `npm.cmd run map:validate` could not run because the default `data/derived/settlements_polygons.geojson` artifact is absent in this checkout; no alternate `settlements_polygons*.geojson` artifact was present.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean bot response and interaction-layer any casts
 
 **Type:** Type-only strict-null cleanup in `src/sim/events/bot_response.ts` and `src/ui/map/map/interactionLayerConfig.ts` plus strict-null inventory guard/docs reconciliation. No scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

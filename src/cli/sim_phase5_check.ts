@@ -5,10 +5,11 @@ import { pathToFileURL } from 'node:url';
 
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
+import type { EdgeRecord } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import type { GameState } from '../state/game_state.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { runScenarioDeterministic } from './sim_scenario.js';
 
@@ -86,7 +87,7 @@ function parseArgs(argv: string[]): CliOptions {
 
     // Canonicalize faction ID
     const canonicalFaction = canonicalizePoliticalSideId(faction);
-    if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+    if (!isPoliticalSideId(canonicalFaction)) {
         throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
     }
 
@@ -129,7 +130,7 @@ function ensureFactionMaps(state: GameState, faction: string): void {
 
 export async function runPhase5CheckInProcess(
     baseState: GameState,
-    settlementEdges: Array<{ a: string; b: string }>,
+    settlementEdges: EdgeRecord[],
     options: { faction: string; region_id: string; edge_id: string; weight: number }
 ): Promise<Phase5CheckResult> {
     // Step 1: region posture set
@@ -169,8 +170,8 @@ export async function runPhase5CheckInProcess(
     );
 
     // Verify override after expansion step on turn 1 by executing a single turn and inspecting nextState.
-    const { nextState: afterTurn1 } = await runTurn(state2, { seed: state2.meta.seed, settlementEdges: settlementEdges as any });
-    const got = (afterTurn1.military.front_posture as any)?.[options.faction]?.assignments?.[options.edge_id];
+    const { nextState: afterTurn1 } = await runTurn(state2, { seed: state2.meta.seed, settlementEdges });
+    const got = afterTurn1.military.front_posture[options.faction]?.assignments?.[options.edge_id];
     assert.ok(got && typeof got === 'object', 'expected chosen edge to have a posture assignment after turn 1');
     assert.strictEqual(got.posture, 'hold', 'expected explicit per-edge override posture to remain after expansion');
     assert.strictEqual(got.weight, 0, 'expected explicit per-edge override weight to remain after expansion');
@@ -233,7 +234,7 @@ async function main(): Promise<void> {
 
     const state2 = structuredClone(state1);
     ensureFactionMaps(state2, opts.faction);
-    (state2.military.front_posture as any)[opts.faction].assignments[chosenEdgeId] = { edge_id: chosenEdgeId, posture: 'hold', weight: 0 };
+    state2.military.front_posture[opts.faction].assignments[chosenEdgeId] = { edge_id: chosenEdgeId, posture: 'hold', weight: 0 };
     const save2Path = resolve(opts.outdir, 'save_region_plus_override.json');
     await writeFile(save2Path, serializeState(state2), 'utf8');
 

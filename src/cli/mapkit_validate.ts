@@ -71,7 +71,7 @@ function boundsArea(b: Bounds): number {
 }
 
 function stableSid(f: GeoJSONFeature): string {
-    const sid = (f.properties as any)?.sid;
+    const sid = f.properties?.sid;
     return sid == null ? '' : String(sid);
 }
 

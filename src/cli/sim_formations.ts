@@ -6,7 +6,7 @@ import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import type { FormationState, GameState } from '../state/game_state.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { validateFormations } from '../validate/formations.js';
 
@@ -40,8 +40,8 @@ function generateDeterministicFormationId(state: GameState, faction: string): st
     ensureFormations(state);
     const formations = state.military.formations;
     const factionFormations = Object.values(formations)
-        .filter((f) => f && typeof f === 'object' && (f as any).faction === faction)
-        .map((f) => (f as any).id)
+        .filter((f) => f.faction === faction)
+        .map((f) => f.id)
         .filter((id): id is string => typeof id === 'string');
 
     // Extract numeric suffix from existing IDs matching F_<FACTION>_<NNNN> pattern
@@ -170,7 +170,7 @@ function parseArgs(argv: string[]): CliOptions {
 
         // Canonicalize faction ID
         const canonicalFaction = canonicalizePoliticalSideId(faction);
-        if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+        if (!isPoliticalSideId(canonicalFaction)) {
             throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
         }
 

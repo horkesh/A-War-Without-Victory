@@ -274,6 +274,17 @@ const BOT_RESPONSE_INTERACTION_LAYER_AS_ANY_TAIL_FILES = [
     'src/ui/map/map/interactionLayerConfig.ts',
 ];
 
+const CLI_POLITICAL_SIDE_MAPKIT_AS_ANY_TAIL_FILES = [
+    'src/cli/mapkit_validate.ts',
+    'src/cli/sim_formations.ts',
+    'src/cli/sim_generate_formations.ts',
+    'src/cli/sim_militia.ts',
+    'src/cli/sim_negcap.ts',
+    'src/cli/sim_phase5_check.ts',
+    'src/cli/sim_set_posture.ts',
+    'src/cli/sim_set_posture_region.ts',
+];
+
 // The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
 // count at exactly 10 retained escapes documented in
 // `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
@@ -980,6 +991,16 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', BOT_RESPONSE_INTERACTION_LAYER_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
+    it('cleans the CLI political-side and MapKit singleton as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', CLI_POLITICAL_SIDE_MAPKIT_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

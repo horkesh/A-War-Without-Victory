@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import { getValidMunicipalityIds } from '../map/municipalities.js';
 import type { GameState, MilitiaPoolState } from '../state/game_state.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { validateMilitiaPools } from '../validate/militia_pools.js';
@@ -180,7 +180,7 @@ function parseArgs(argv: string[]): CliOptions {
         let canonicalFaction: string | null = null;
         if (!factionNull && faction !== null) {
             canonicalFaction = canonicalizePoliticalSideId(faction);
-            if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+            if (!isPoliticalSideId(canonicalFaction)) {
                 throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
             }
         }
@@ -219,7 +219,7 @@ function parseArgs(argv: string[]): CliOptions {
                 const next = rest[i + 1];
                 if (next === undefined) throw new Error('Missing value for --faction');
                 faction = canonicalizePoliticalSideId(next);
-                if (!POLITICAL_SIDES.includes(faction as any)) throw new Error(`Invalid faction: ${next}`);
+                if (!isPoliticalSideId(faction)) throw new Error(`Invalid faction: ${next}`);
                 i += 1;
                 continue;
             }
@@ -284,7 +284,7 @@ function parseArgs(argv: string[]): CliOptions {
                 const next = rest[i + 1];
                 if (next === undefined) throw new Error('Missing value for --faction');
                 faction = canonicalizePoliticalSideId(next);
-                if (!POLITICAL_SIDES.includes(faction as any)) throw new Error(`Invalid faction: ${next}`);
+                if (!isPoliticalSideId(faction)) throw new Error(`Invalid faction: ${next}`);
                 i += 1;
                 continue;
             }

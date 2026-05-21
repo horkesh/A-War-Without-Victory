@@ -2,7 +2,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 import { PostureLevel } from '../state/game_state.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 
 type CliOptions = {
@@ -94,7 +94,7 @@ function parseArgs(argv: string[]): CliOptions {
 
     // Canonicalize faction ID
     const canonicalFaction = canonicalizePoliticalSideId(faction);
-    if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+    if (!isPoliticalSideId(canonicalFaction)) {
         throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
     }
 

@@ -9,7 +9,7 @@ import { loadSettlementGraph } from '../map/settlements.js';
 import { spawnFormationsFromPools } from '../sim/formation_spawn.js';
 import { loadOperationalData, type CanonicalToOperationalMap } from '../data/operational_data.js';
 import type { GameState, MilitiaPoolState } from '../state/game_state.js';
-import { canonicalizePoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
+import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { validateFormations } from '../validate/formations.js';
 import { validateMilitiaPools } from '../validate/militia_pools.js';
@@ -170,7 +170,7 @@ function parseArgs(argv: string[]): CliOptions {
     let canonicalFaction: string | null = null;
     if (faction !== null) {
         canonicalFaction = canonicalizePoliticalSideId(faction);
-        if (!POLITICAL_SIDES.includes(canonicalFaction as any)) {
+        if (!isPoliticalSideId(canonicalFaction)) {
             throw new Error(`Invalid faction: "${faction}" (canonicalized to "${canonicalFaction}"). Must be one of: ${POLITICAL_SIDES.join(', ')}`);
         }
     }
