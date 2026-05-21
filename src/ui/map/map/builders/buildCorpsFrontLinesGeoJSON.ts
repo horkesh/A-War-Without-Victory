@@ -506,7 +506,8 @@ export function mergeGlowSegments(
             }
 
             const [next] = pending.splice(bestIndex, 1);
-            const other = next!.geometry.coordinates as [number, number][];
+            if (!next) break;
+            const other = next.geometry.coordinates as [number, number][];
             if (bestMode === 'tail-head') {
                 coords = coords.concat(other);
             } else if (bestMode === 'tail-tail') {

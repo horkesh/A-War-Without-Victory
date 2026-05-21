@@ -557,7 +557,9 @@ export function MapContainer() {
         // gracefully (no contested edges → no layer).
         corridorHeartbeatData: (CORRIDOR_HEARTBEAT_FEATURE_FLAG && nextInputs.loadedGameState)
           ? (() => {
-              const edgesRaw = nextInputs.loadedGameState!.frontEdgesOsid ?? [];
+              const loadedGameState = nextInputs.loadedGameState;
+              if (!loadedGameState) return undefined;
+              const edgesRaw = loadedGameState.frontEdgesOsid ?? [];
               const edges: CorridorFrontEdgeRecord[] = edgesRaw.map((e) => ({
                 edge_id: e.edge_id,
                 a: e.a,
@@ -565,7 +567,7 @@ export function MapContainer() {
                 side_a: e.side_a,
                 side_b: e.side_b,
               }));
-              const pressureMap = nextInputs.loadedGameState!.frontPressureByEdge;
+              const pressureMap = loadedGameState.frontPressureByEdge;
               let pressureLookup: Map<string, CorridorFrontPressureRecord> | null = null;
               if (pressureMap) {
                 pressureLookup = new Map<string, CorridorFrontPressureRecord>();
@@ -2199,16 +2201,16 @@ export function MapContainer() {
       const ids = Array.from(activeSectorIds);
       const isMulti = ids.length > 1;
       const selectedSector = state?.corpsFrontSectors?.find(s => s.sector_id === selectedCorpsFrontSectorId);
+      const frontEdgesOsid = state?.frontEdgesOsid;
+      if (!frontEdgesOsid) return true;
 
       // For fill, we can highlight all OSIDs in all active sectors
       const allActiveSectors = state?.corpsFrontSectors?.filter(s => activeSectorIds.has(s.sector_id)) ?? [];
       const allOsids = allActiveSectors.flatMap(s =>
         s.territory_osids && s.territory_osids.length > 0
           ? s.territory_osids
-          : collectSectorFriendlyOsids(s, state!.frontEdgesOsid!)
+          : collectSectorFriendlyOsids(s, frontEdgesOsid)
       );
-
-      if (!state?.frontEdgesOsid) return true;
 
       // Compute corps color map once for all branches
       const corpsColorMap = state?.corpsFrontSectors ? buildCorpsColorMap(state.corpsFrontSectors) : {};

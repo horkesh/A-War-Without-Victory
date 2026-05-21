@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean UI map non-null tail
+
+**Type:** Strict-null cleanup. UI/runtime refactor with no map presentation, front-line geometry, sector-highlight, corridor-heartbeat, save schema, scenario data, or output tuning change.
+
+**Why:** The top-level strict-null inventory had four remaining dot non-null assertions, all in the UI map path.
+
+**Change:** Narrowed `loadedGameState` inside the corridor-heartbeat closure, narrowed `frontEdgesOsid` before sector highlight fallback collection, and handled the defensive empty-splice case in `connectChains(...)`. Added a strict-null progress test pinning the UI map files at zero for dot non-null assertions.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/ui_map_front_lines_phase_a.test.ts tests/ui_sector_glow_continuity.test.ts tests/sector_front_glow_continuity_real_save.test.ts tests/ui_map_no_corridor_heartbeat_default_overlay.test.ts --reporter=dot` PASS (76/76); `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite browser-external/dynamic-import/chunk-size warnings. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_UI_MAP_NONNULL_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean war-phases non-null tail
 
 **Type:** Strict-null cleanup. Runtime refactor with existing locals/guards; no event firing, Graz Accords behavior, smuggling income, reserve formulas, save schema, scenario data, or output tuning changed.
