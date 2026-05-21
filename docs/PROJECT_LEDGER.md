@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean bot response and interaction-layer any casts
+
+**Type:** Type-only strict-null cleanup in `src/sim/events/bot_response.ts` and `src/ui/map/map/interactionLayerConfig.ts` plus strict-null inventory guard/docs reconciliation. No scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Three remaining `as_any_casts` were low-risk typed leaves: `bot_response.ts` casted an already discriminated event effect only to read `delta`, and `interactionLayerConfig.ts` casted a MapLibre zoom-width expression return.
+
+**Change:** Added `getNumericDelta(effect: EventEffect)` so the bot-response tiebreaker reads numeric deltas through a typed helper, and typed `toZoomWidthExpression(...)` as `ExpressionSpecification` from `maplibre-gl` so the expression array no longer needs a terminal `as any`. Added a strict-null progress assertion pinning both files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 217 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused bot-response/UI/inventory vitest PASS (111/111); `npm.cmd run desktop:map:build` PASS; `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`).
+
+---
+
 ## [2026-05-21] refactor(strict-null): type UI window bridge callbacks
 
 **Type:** Type-only UI bridge cleanup in `src/ui/map/App.tsx` and `src/ui/map/components/SidePickerOverlay.tsx` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

@@ -1,9 +1,15 @@
-import type { EventResponseOption, EventDefinition } from './event_types.js';
+import type { EventResponseOption, EventDefinition, EventEffect } from './event_types.js';
 import { DIMENSION_WEIGHTS } from './strategic_dimensions.js';
 
 interface CommanderProfile {
     aggressiveness: number;  // 1-5
     competence: number;      // 1-5
+}
+
+function getNumericDelta(effect: EventEffect): number | undefined {
+    return 'delta' in effect && typeof effect.delta === 'number'
+        ? effect.delta
+        : undefined;
 }
 
 /**
@@ -70,8 +76,9 @@ export function pickBotResponseV1(
             // Score mechanical effects as tiebreaker
             if (opt.effects) {
                 for (const eff of opt.effects) {
-                    if ('delta' in eff && typeof (eff as any).delta === 'number') {
-                        score += (eff as any).delta * 0.05;
+                    const delta = getNumericDelta(eff);
+                    if (delta !== undefined) {
+                        score += delta * 0.05;
                     }
                 }
             }

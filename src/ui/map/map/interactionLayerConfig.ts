@@ -1,3 +1,5 @@
+import type { ExpressionSpecification } from 'maplibre-gl';
+
 export const INTERACTION_HITBOX_OPACITY = 0.01;
 
 export const FRONT_SURFACE_VISIBLE_WIDTHS = {
@@ -12,7 +14,7 @@ export const FRONT_SURFACE_HITBOX_WIDTHS = {
   z14: 44,
 } as const;
 
-export function toZoomWidthExpression(widths: { z6: number; z10: number; z14: number }) {
+export function toZoomWidthExpression(widths: { z6: number; z10: number; z14: number }): ExpressionSpecification {
   return [
     'interpolate',
     ['linear'],
@@ -23,5 +25,5 @@ export function toZoomWidthExpression(widths: { z6: number; z10: number; z14: nu
     widths.z10,
     14,
     widths.z14,
-  ] as any;
+  ];
 }
