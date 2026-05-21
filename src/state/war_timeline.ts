@@ -244,10 +244,21 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
             throw new Error(`WarTimeline: "${field}" must be an object`);
         }
     }
-    for (const field of ['equipment_decay', 'external_support', 'maintenance_decay']) {
-        if (!Array.isArray(obj[field])) {
-            throw new Error(`WarTimeline: "${field}" must be an array`);
-        }
+    // BATCH C §3.2: hoist the three required array fields into typed locals so
+    // the downstream for-loops at lines 318+/330+/342+ can drop their
+    // `(obj.X as unknown[])` redundant casts. The Array.isArray narrow at
+    // assignment carries the `any[]` type through the rest of the function.
+    const equipmentDecayList = obj.equipment_decay;
+    if (!Array.isArray(equipmentDecayList)) {
+        throw new Error('WarTimeline: "equipment_decay" must be an array');
+    }
+    const externalSupportList = obj.external_support;
+    if (!Array.isArray(externalSupportList)) {
+        throw new Error('WarTimeline: "external_support" must be an array');
+    }
+    const maintenanceDecayList = obj.maintenance_decay;
+    if (!Array.isArray(maintenanceDecayList)) {
+        throw new Error('WarTimeline: "maintenance_decay" must be an array');
     }
 
     // Validate doctrine phases entries
@@ -315,8 +326,8 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
     }
 
     // Validate equipment_decay entries
-    for (let i = 0; i < (obj.equipment_decay as unknown[]).length; i++) {
-        const d = (obj.equipment_decay as unknown[])[i] as Record<string, unknown> | null;
+    for (let i = 0; i < equipmentDecayList.length; i++) {
+        const d = equipmentDecayList[i] as Record<string, unknown> | null;
         if (typeof d !== 'object' || d === null) {
             throw new Error(`WarTimeline: equipment_decay[${i}] must be an object`);
         }
@@ -327,8 +338,8 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
     }
 
     // Validate external_support entries
-    for (let i = 0; i < (obj.external_support as unknown[]).length; i++) {
-        const s = (obj.external_support as unknown[])[i] as Record<string, unknown> | null;
+    for (let i = 0; i < externalSupportList.length; i++) {
+        const s = externalSupportList[i] as Record<string, unknown> | null;
         if (typeof s !== 'object' || s === null) {
             throw new Error(`WarTimeline: external_support[${i}] must be an object`);
         }
@@ -339,8 +350,8 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
     }
 
     // Validate maintenance_decay entries
-    for (let i = 0; i < (obj.maintenance_decay as unknown[]).length; i++) {
-        const m = (obj.maintenance_decay as unknown[])[i] as Record<string, unknown> | null;
+    for (let i = 0; i < maintenanceDecayList.length; i++) {
+        const m = maintenanceDecayList[i] as Record<string, unknown> | null;
         if (typeof m !== 'object' || m === null) {
             throw new Error(`WarTimeline: maintenance_decay[${i}] must be an object`);
         }
@@ -393,10 +404,17 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                 );
             }
             if (hasStepCurve) {
-                validateStepCurveEntries(
-                    c.learning_rate_per_turn_step_curve as unknown[],
-                    `officer_config["${faction}"].learning_rate_per_turn_step_curve`
-                );
+                // hasStepCurve was set via Array.isArray(...) above, so the value
+                // is a real array — but TS does not propagate that narrow through
+                // the boolean local. Re-narrow here so the helper call drops the
+                // prior `(c.learning_rate_per_turn_step_curve as unknown[])` cast.
+                const stepCurveEntries = c.learning_rate_per_turn_step_curve;
+                if (Array.isArray(stepCurveEntries)) {
+                    validateStepCurveEntries(
+                        stepCurveEntries,
+                        `officer_config["${faction}"].learning_rate_per_turn_step_curve`
+                    );
+                }
             }
             if (typeof c.faction !== 'string') {
                 throw new Error(`WarTimeline: officer_config["${faction}"].faction must be a string`);
@@ -404,5 +422,11 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
         }
     }
 
-    return obj as unknown as WarTimeline;
+    // BATCH C §3.2: after the full validator pass above, `obj` is a
+    // `Record<string, unknown>` that has been field-validated against the
+    // WarTimeline contract (id is non-empty string, six required objects, three
+    // required arrays, etc.). Going through `Partial<WarTimeline>` as the
+    // intermediate cast satisfies the structural-overlap check without an
+    // `unknown` bounce — the function still returns the same runtime object.
+    return obj as Partial<WarTimeline> as WarTimeline;
 }
