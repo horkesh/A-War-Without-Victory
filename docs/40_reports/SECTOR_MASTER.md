@@ -18,6 +18,20 @@
 
 ---
 
+## 2026-05-21: OSID-to-corps prefilter (byte-identical)
+
+**Change:** `src/sim/combat/sector_territory.ts` `mapOsidsToCorps(...)` now builds one sorted active same-faction combat-formation list plus invocation-local corps membership sets. The function reuses that list across home-vote, home-municipality, current-location, and disconnected-pocket passes instead of repeating the same status/kind/faction/corps checks.
+
+**Byte-identity:** The post-change 40w profile produced the same deterministic artifacts as the isolated-pocket location-index baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, and `watched_operations.json` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_osid_to_corps_prefilter_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** In the clean 94-invocation sidecar batch, recovery setup `:osid-to-corps` drops from 333.054ms to 307.073ms. Build-faction OSID-to-corps labels also drop: RS 146.848ms -> 140.660ms, RBiH 131.772ms -> 123.287ms, HRHB 62.519ms -> 53.777ms. Parent recovery setup movement is small/noisy at 882.674ms -> 873.043ms.
+
+**Rejected experiment:** A per-sector front/reserve/territory set cache inside `ensureMinimumSectorCoverage(...)` was byte-identical but slower (`sealMergedSectorTruth:ensure-coverage` 2064.183ms -> 2112.303ms), so it was reverted.
+
+**Report:** [implemented/20260521_OSID_TO_CORPS_PREFILTER.md](implemented/20260521_OSID_TO_CORPS_PREFILTER.md)
+
+---
+
 ## 2026-05-21: Recovery setup attribution (byte-identical)
 
 **Change:** `recoverDroppedFrontEdges:faction-front-claim-setup` now records child labels for OSID-to-corps mapping, front-edge partition, cross-corps consolidation, isolated-pocket consolidation, friendly/component setup, and faction brigade component indexing. This is sidecar-only instrumentation under `PERF_PROFILE_SECTOR_PARTITION=true`.

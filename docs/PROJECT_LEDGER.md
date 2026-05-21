@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): prefilter OSID-to-corps brigades
+
+**Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** After the isolated-pocket location index, `recoverDroppedFrontEdges:faction-front-claim-setup:osid-to-corps` remained a measured recovery setup child at 333.054ms / 282 calls. `mapOsidsToCorps(...)` repeatedly filtered the same sorted formation list and repeatedly checked membership against the same corps ID array.
+
+**Change:** Added an invocation-local `corpsIdSet`, sorted active same-faction combat-formation prefilter, and locked-seed corps set inside `mapOsidsToCorps(...)`. The existing phase order, BFS order, municipality guards, and disconnected-pocket claims are unchanged.
+
+**Verification:** `npx.cmd vitest run tests/trnovo_kalinovik_sector_fix.test.ts tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts --reporter=dot` PASS (69/69); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_osid_to_corps_prefilter_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, `watched_operations.json`) are byte-identical at current final state hash `4368f50c00c464ad`. Clean sidecar comparison: recovery setup `:osid-to-corps` 333.054ms -> 307.073ms; build-faction OSID-to-corps labels also drop across RS/RBiH/HRHB. A byte-identical per-sector `ensureMinimumSectorCoverage(...)` set-cache experiment regressed `sealMergedSectorTruth:ensure-coverage` and was reverted.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_OSID_TO_CORPS_PREFILTER.md`; `data/derived/_debug/sector_partition_perf_osid_to_corps_prefilter_clean.jsonl`; `runs_perf/sector_reconstruction_osid_to_corps_prefilter_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
 ## [2026-05-21] perf(sector): index isolated-pocket home locations
 
 **Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

@@ -51,6 +51,7 @@ export function mapOsidsToCorps(
 ): Map<Osid, FormationId> {
     const result = new Map<Osid, FormationId>();
     const pc = state.political.political_controllers ?? {};
+    const corpsIdSet = new Set(corpsIds);
 
     // Pre-compute friendly OSIDs for fast membership checks.
     // Sector partitioning is operational-front truth. It must only read explicit
@@ -76,12 +77,16 @@ export function mapOsidsToCorps(
     // 1st Corps brigades are FROM there.
     const osidCorpsVotes = new Map<Osid, Map<FormationId, number>>();
     const sortedBrigadeIds = Object.keys(formations).sort(strictCompare);
+    const activeCorpsBrigades: Array<{ formation: FormationState; corpsId: FormationId }> = [];
     for (const fid of sortedBrigadeIds) {
         const f = formations[fid];
         if (!f || f.faction !== faction || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         const fCorpsId = getFormationCorpsId(f);
-        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
+        if (!fCorpsId || !corpsIdSet.has(fCorpsId)) continue;
+        activeCorpsBrigades.push({ formation: f, corpsId: fCorpsId });
+    }
+    for (const { formation: f, corpsId: fCorpsId } of activeCorpsBrigades) {
 
         // Primary seed: home_osid (where the brigade belongs)
         const homeOsid = f.home_osid;
@@ -126,12 +131,7 @@ export function mapOsidsToCorps(
         corps.add(seed.corpsId);
     }
     // Phase B: from ALL brigade home_mun fields (even if home_osid is in enemy territory)
-    for (const fid of sortedBrigadeIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        const fCorpsId = getFormationCorpsId(f);
-        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
+    for (const { formation: f, corpsId: fCorpsId } of activeCorpsBrigades) {
         // Extract municipality from home_osid (even if enemy-controlled)
         const homeOsid = f.home_osid;
         if (homeOsid) {
@@ -143,14 +143,9 @@ export function mapOsidsToCorps(
             }
         }
     }
-    for (const fid of sortedBrigadeIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+    for (const { formation: f, corpsId: fCorpsId } of activeCorpsBrigades) {
         if (!f.location_osid || !friendlyOsids.has(f.location_osid)) continue;
         if (result.has(f.location_osid)) continue; // Home-based claim takes precedence
-        const fCorpsId = getFormationCorpsId(f);
-        if (!fCorpsId || !corpsIds.includes(fCorpsId)) continue;
         // Skip if another corps has home seeds in this municipality
         const locMun = munFromOsid(f.location_osid);
         if (locMun) {
@@ -170,8 +165,9 @@ export function mapOsidsToCorps(
     }
 
     // Fallback: if a corps has zero locked seeds (no brigades at all), use HQ
+    const corpsWithLockedSeeds = new Set(lockedSeeds.map((seed) => seed.corpsId));
     for (const corpsId of corpsIds) {
-        if (lockedSeeds.some(s => s.corpsId === corpsId)) continue;
+        if (corpsWithLockedSeeds.has(corpsId)) continue;
         const corpsFormation = formations[corpsId];
         if (corpsFormation?.location_osid && friendlyOsids.has(corpsFormation.location_osid) && !result.has(corpsFormation.location_osid)) {
             result.set(corpsFormation.location_osid, corpsId);
@@ -211,15 +207,10 @@ export function mapOsidsToCorps(
 
     // Post-BFS: claim disconnected friendly OSIDs where corps brigades are located.
     // Handles pockets/enclaves not reachable through contiguous friendly territory.
-    for (const fid of sortedBrigadeIds) {
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        const fCorpsId = getFormationCorpsId(f);
-        if (!f.location_osid || !fCorpsId) continue;
+    for (const { formation: f, corpsId: fCorpsId } of activeCorpsBrigades) {
+        if (!f.location_osid) continue;
         if (!friendlyOsids.has(f.location_osid)) continue;
         if (result.has(f.location_osid)) continue;
-        if (!corpsIds.includes(fCorpsId)) continue;
         result.set(f.location_osid, fCorpsId);
         const pocketQueue: Osid[] = [f.location_osid];
         let pHead = 0;
