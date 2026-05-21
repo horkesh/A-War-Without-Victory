@@ -200,7 +200,7 @@ export function CommandRelationshipSection({
                   Staff interpretation of faction-level war exhaustion
                   (GameState.political.war_exhaustion[faction]). Renders ONLY
                   when the engine's tempo-throttle floor is reached
-                  (>= WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW = 500). Staff voice:
+                  (>= WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW = 30). Staff voice:
                   "is narrowing" — not "will", not "must". No morale prose.
                 */}
                 {factionExhaustionElevated && (
