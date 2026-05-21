@@ -246,8 +246,8 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
     }
     // BATCH C §3.2: hoist the three required array fields into typed locals so
     // the downstream for-loops at lines 318+/330+/342+ can drop their
-    // `(obj.X as unknown[])` redundant casts. The Array.isArray narrow at
-    // assignment carries the `any[]` type through the rest of the function.
+    // redundant element widenings. The Array.isArray narrow at assignment
+    // carries the `any[]` type through the rest of the function.
     const equipmentDecayList = obj.equipment_decay;
     if (!Array.isArray(equipmentDecayList)) {
         throw new Error('WarTimeline: "equipment_decay" must be an array');
@@ -407,7 +407,7 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
                 // hasStepCurve was set via Array.isArray(...) above, so the value
                 // is a real array — but TS does not propagate that narrow through
                 // the boolean local. Re-narrow here so the helper call drops the
-                // prior `(c.learning_rate_per_turn_step_curve as unknown[])` cast.
+                // prior step-curve placeholder cast at the parameter boundary.
                 const stepCurveEntries = c.learning_rate_per_turn_step_curve;
                 if (Array.isArray(stepCurveEntries)) {
                     validateStepCurveEntries(

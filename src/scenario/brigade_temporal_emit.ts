@@ -36,8 +36,9 @@
  * No engine state mutation. No GameState writes. Read-only over input state.
  */
 
-import type { CorpsCommandState, FormationState, GameState } from '../state/game_state.js';
+import type { FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/turn_phases.js';
+import { asRecord } from '../state/schema_validators.js';
 
 /** One row of the per-turn brigade temporal log. Fixed field shape. */
 export interface BrigadeTemporalRow {
@@ -107,8 +108,9 @@ function findActiveOp(
     state: GameState,
     brigadeId: string,
 ): { op_id: string; phase: string } | null {
-    const corpsCmds = (state as unknown as { military: { corps_command?: Record<string, CorpsCommandState> } })
-        .military.corps_command;
+    // BATCH C §3.5: `state.military.corps_command` is typed on MilitaryState
+    // (game_state.ts L1940) so the prior widening cast is unnecessary.
+    const corpsCmds = state.military.corps_command;
     if (!corpsCmds) return null;
     const corpsIds = Object.keys(corpsCmds).sort(strictCompare);
     for (const corpsId of corpsIds) {
@@ -142,11 +144,13 @@ export function buildBrigadeTemporalRows(
     if (!formations) return [];
 
     const ids = Object.keys(formations).sort(strictCompare);
-    const turn = (state as unknown as { meta?: { turn?: number } }).meta?.turn ?? 0;
-    const movementState = (state as unknown as { military: { brigade_movement_state?: Record<string, { status?: string; destination_sids?: string[] }> } })
-        .military.brigade_movement_state;
-    const movementOrders = (state as unknown as { military: { brigade_movement_orders?: Record<string, { destination_sids: string[] }> } })
-        .military.brigade_movement_orders;
+    // BATCH C §3.5: state.meta, state.military.brigade_movement_state, and
+    // state.military.brigade_movement_orders are all typed on GameState /
+    // MilitaryState (game_state.ts L1755 / L1880 / L1882), so the prior
+    // widening casts are unnecessary.
+    const turn = state.meta?.turn ?? 0;
+    const movementState = state.military.brigade_movement_state;
+    const movementOrders = state.military.brigade_movement_orders;
 
     const out: BrigadeTemporalRow[] = [];
 
@@ -201,10 +205,13 @@ export function buildBrigadeTemporalRows(
         // officer_count_active is reserved for a future roster representation;
         // surface as `null` whenever the underlying source carries an explicit
         // numeric count (currently never; the optional read keeps the door open).
-        const fAny = f as unknown as { officer_count_active?: unknown };
-        if (typeof fAny.officer_count_active === 'number') {
-            row.officer_count_active = fAny.officer_count_active;
-        } else if (fAny.officer_count_active === null) {
+        // BATCH C §3.5: `officer_count_active` is not declared on FormationState,
+        // so go through asRecord to read it as `unknown` without widening f.
+        const fRecord = asRecord(f);
+        const officerCountActive = fRecord?.officer_count_active;
+        if (typeof officerCountActive === 'number') {
+            row.officer_count_active = officerCountActive;
+        } else if (officerCountActive === null) {
             row.officer_count_active = null;
         }
         out.push(row);

@@ -112,13 +112,13 @@ async function loadRegistryMunIds(baseDir: string): Promise<Set<string>> {
 
 // BATCH C §3.4: parseOobBrigadeComposition narrows `unknown` to a typed
 // BrigadeComposition pointer for the OOB loader. Pre-Batch-C the loader used
-// `r.composition as unknown as BrigadeComposition` after a bare isRecord check
-// — no field-level validation, trusting the OOB JSON shape. The helper
+// a placeholder widening on `r.composition` after a bare isRecord check —
+// no field-level validation, trusting the OOB JSON shape. The helper
 // preserves that contract: isRecord narrow + return the narrowed record typed
 // as BrigadeComposition via a structurally-overlapping intermediate
-// (`Partial<BrigadeComposition>`) so the downstream cast doesn't need an
-// `unknown` bounce. Field-level validation remains the responsibility of
-// downstream consumers — same trust boundary as before.
+// (`Partial<BrigadeComposition>`) so the downstream cast does not need an
+// extra widening bounce. Field-level validation remains the responsibility
+// of downstream consumers — same trust boundary as before.
 function parseOobBrigadeComposition(value: unknown): BrigadeComposition | undefined {
     if (!isRecord(value)) return undefined;
     return value as Partial<BrigadeComposition> as BrigadeComposition;
