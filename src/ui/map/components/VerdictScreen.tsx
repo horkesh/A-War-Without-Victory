@@ -291,7 +291,7 @@ export function VerdictScreen() {
     const codexGhosts: BuiltGhostEntry[] = useMemo(() => {
         if (!loadedGameState) return [];
         try {
-            return buildGhostEntries(loadedGameState as unknown as Parameters<typeof buildGhostEntries>[0], turnForCodex);
+            return buildGhostEntries(loadedGameState, turnForCodex);
         } catch {
             return [];
         }

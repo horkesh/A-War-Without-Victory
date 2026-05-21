@@ -100,6 +100,33 @@ export interface BuilderInput {
     currentTurn: number;
 }
 
+type GhostEntryFlagValue = string | number | boolean | undefined;
+
+interface GhostEntryNegotiationCapitalView {
+    war_crimes_events?: number;
+}
+
+/**
+ * Minimal read shape required for ghost-entry predicates. The sim passes full
+ * `GameState`; renderer consumers pass the flattened `LoadedGameState`
+ * adapter snapshot. Keep this narrow so UI code does not need to pretend it
+ * owns raw engine state.
+ */
+export interface GhostEntryStateView {
+    meta?: {
+        player_faction?: FactionId;
+    };
+    player_faction?: FactionId | null;
+    paramilitary_policy?: GameState['paramilitary_policy'];
+    military?: {
+        event_flags?: Record<string, GhostEntryFlagValue>;
+        event_fire_counts?: Record<string, number | undefined>;
+        negotiation?: {
+            capital?: Partial<Record<FactionId, GhostEntryNegotiationCapitalView>>;
+        };
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Ring guard — refuses §6 sensitive-history flags
 // ═══════════════════════════════════════════════════════════════════════════
@@ -120,7 +147,7 @@ const RING_3_REFUSED_FLAGS: readonly string[] = [
     'commit_genocide_authorised',
 ];
 
-function assertRingGuard(state: GameState): void {
+function assertRingGuard(state: GhostEntryStateView): void {
     const flags = state.military?.event_flags;
     if (!flags) return;
     for (const refused of RING_3_REFUSED_FLAGS) {
@@ -140,7 +167,7 @@ function assertRingGuard(state: GameState): void {
 // Predicate helpers (faction-agnostic, deterministic, side-effect-free)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function isTruthyFlag(value: string | number | boolean | undefined): boolean {
+function isTruthyFlag(value: GhostEntryFlagValue): boolean {
     if (value === undefined) return false;
     if (typeof value === 'boolean') return value;
     if (typeof value === 'number') return value !== 0;
@@ -149,11 +176,11 @@ function isTruthyFlag(value: string | number | boolean | undefined): boolean {
 }
 
 /** Read an event flag from MilitaryState.event_flags. */
-function flag(state: GameState, name: string): boolean {
+function flag(state: GhostEntryStateView, name: string): boolean {
     return isTruthyFlag(state.military?.event_flags?.[name]);
 }
 
-function flagNumber(state: GameState, name: string): number {
+function flagNumber(state: GhostEntryStateView, name: string): number {
     const value = state.military?.event_flags?.[name];
     if (typeof value === 'number' && Number.isFinite(value)) return value;
     if (typeof value === 'string') {
@@ -164,7 +191,7 @@ function flagNumber(state: GameState, name: string): number {
     return 0;
 }
 
-function eventFiredById(state: GameState, eventId: string): boolean {
+function eventFiredById(state: GhostEntryStateView, eventId: string): boolean {
     const counts = state.military?.event_fire_counts;
     if (!counts) return false;
     const n = counts[eventId];
@@ -175,14 +202,14 @@ function eventFiredById(state: GameState, eventId: string): boolean {
  *  patron-pressure predicates. Lives on `state.meta.player_faction` per the
  *  StateMeta schema. Falls back to RBiH if unset; predicates that rely on
  *  player_faction-specific state are tolerant of absence. */
-function playerFaction(state: GameState): FactionId {
-    return state.meta?.player_faction ?? 'RBiH';
+function playerFaction(state: GhostEntryStateView): FactionId {
+    return state.meta?.player_faction ?? state.player_faction ?? 'RBiH';
 }
 
 // — Ghost 1: alliance_held —
 //   federation_never_fractured = true AND croat_bosniak_war_begins_1993 did
 //   NOT fire by t70.
-function predAllianceHeld(state: GameState, currentTurn: number): boolean {
+function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): boolean {
     if (!flag(state, 'federation_never_fractured')) return false;
     if (currentTurn < 70) return false;
     return !eventFiredById(state, 'croat_bosniak_war_begins_1993');
@@ -194,7 +221,7 @@ function predAllianceHeld(state: GameState, currentTurn: number): boolean {
 //   negotiation breakdown (`state.political.negotiation.capital[faction]`),
 //   which is the canonical accumulator written by paramilitary_sweep and
 //   per-turn negotiation-capital recalculation.
-function predCleansingRefused(state: GameState, currentTurn: number): boolean {
+function predCleansingRefused(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 100) return false;
     if (state.paramilitary_policy !== 'always_deny') return false;
     const faction = playerFaction(state);
@@ -212,20 +239,20 @@ function predCleansingRefused(state: GameState, currentTurn: number): boolean {
 //   forecast, and NOT a claim about Srebrenica 1995 outcomes. The
 //   surrounding ghost-entry body (data/codex/ghost_entries/enclave_defended.md)
 //   carries the strict audit register; this predicate only gates emission.
-function predEnclaveDefended(state: GameState): boolean {
+function predEnclaveDefended(state: GhostEntryStateView): boolean {
     return flag(state, 'enclave_held_through_turn');
 }
 
 // — Ghost 4: patron_resisted —
 //   count of patron_pressure_refused increments ≥ 3.
-function predPatronResisted(state: GameState): boolean {
+function predPatronResisted(state: GhostEntryStateView): boolean {
     return flagNumber(state, 'patron_pressure_refused') >= 3;
 }
 
 // — Ghost 5: early_peace_accepted —
 //   vance_owen_accepted (turn 50-70) OR owen_stoltenberg_accepted (turn 70-90);
 //   mutually exclusive with dayton_signed_1995.
-function predEarlyPeaceAccepted(state: GameState): boolean {
+function predEarlyPeaceAccepted(state: GhostEntryStateView): boolean {
     if (eventFiredById(state, 'dayton_signed_1995')) return false;
     if (flag(state, 'vance_owen_accepted')) return true;
     if (flag(state, 'owen_stoltenberg_accepted')) return true;
@@ -235,7 +262,7 @@ function predEarlyPeaceAccepted(state: GameState): boolean {
 // — Ghost 6: force_quality_inversion —
 //   vrs_quality_inverted = true (RS per-brigade combat power < ARBiH for ≥ 8
 //   turns sustained). Set by an upstream auditor; we just observe the flag.
-function predForceQualityInversion(state: GameState): boolean {
+function predForceQualityInversion(state: GhostEntryStateView): boolean {
     return flag(state, 'vrs_quality_inverted');
 }
 
@@ -257,7 +284,7 @@ function predForceQualityInversion(state: GameState): boolean {
 //   come from csq_paramilitary_authorization_refused. Distinct from
 //   cleansing_refused, which is gated on policy + war_crimes counter
 //   rather than the upstream divergence-event flag.
-function predParamilitaryStreakRefused(state: GameState, currentTurn: number): boolean {
+function predParamilitaryStreakRefused(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 80) return false;
     if (!flag(state, 'paramilitary_authorization_refused')) return false;
     return flag(state, 'clean_record');
@@ -270,7 +297,7 @@ function predParamilitaryStreakRefused(state: GameState, currentTurn: number): b
 //   (analogous to enclave_held_through_turn) AND the per-faction
 //   winter_supply_attrition_active_<faction> flag remains unset.
 //   Faction-agnostic via player_faction.
-function predWinterHeld(state: GameState, currentTurn: number): boolean {
+function predWinterHeld(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 80) return false;
     if (!flag(state, 'winter_held_through_turn')) return false;
     const faction = playerFaction(state);
@@ -284,7 +311,7 @@ function predWinterHeld(state: GameState, currentTurn: number): boolean {
 //   eventFiredById('operation_corridor_1992'). Turn ≥ 30 is a margin past
 //   the historical operational window (w12-w22) so we are observing the
 //   post-window state, not racing it.
-function predCorridorBlocked(state: GameState, currentTurn: number): boolean {
+function predCorridorBlocked(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 30) return false;
     if (!flag(state, 'corridor_blocked_through_turn')) return false;
     if (flag(state, 'corridor_secured')) return false;
@@ -296,7 +323,7 @@ function predCorridorBlocked(state: GameState, currentTurn: number): boolean {
 //   modernisation pulse fired AND drift did NOT fire on player faction's track.
 //   Faction-agnostic via player_faction. Modernisation chains on prior reform
 //   (csq_doctrine_modernization_<faction> requires doctrine_reform_initiated).
-function predDoctrineReformCompleted(state: GameState): boolean {
+function predDoctrineReformCompleted(state: GhostEntryStateView): boolean {
     const faction = playerFaction(state);
     if (!flag(state, `doctrine_reform_initiated_${faction}`)) return false;
     if (!flag(state, `doctrine_modernization_active_${faction}`)) return false;
@@ -309,7 +336,7 @@ function predDoctrineReformCompleted(state: GameState): boolean {
 //   observer to set `arms_embargo_compliant_through_turn` as a positive
 //   audit signal AND no third-party-channel or attenuation flags are set
 //   for the player faction. Faction-agnostic via player_faction.
-function predArmsEmbargoFullCompliance(state: GameState, currentTurn: number): boolean {
+function predArmsEmbargoFullCompliance(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 100) return false;
     if (!flag(state, 'arms_embargo_compliant_through_turn')) return false;
     const faction = playerFaction(state);
@@ -323,7 +350,7 @@ function predArmsEmbargoFullCompliance(state: GameState, currentTurn: number): b
 //   set `political_unity_held_through_turn` as a positive audit signal AND
 //   the per-faction political_split_temporary_active_<faction> flag remains
 //   unset. Faction-agnostic via player_faction.
-function predPoliticalUnityHeld(state: GameState, currentTurn: number): boolean {
+function predPoliticalUnityHeld(state: GhostEntryStateView, currentTurn: number): boolean {
     if (currentTurn < 100) return false;
     if (!flag(state, 'political_unity_held_through_turn')) return false;
     const faction = playerFaction(state);
@@ -335,7 +362,7 @@ function predPoliticalUnityHeld(state: GameState, currentTurn: number): boolean 
 //   on player faction's track. Reads equipment_quality_collapsed flag (set by
 //   an upstream auditor when per-brigade equipment-quality readings cross the
 //   collapse audit threshold).
-function predEquipmentQualityCollapse(state: GameState): boolean {
+function predEquipmentQualityCollapse(state: GhostEntryStateView): boolean {
     return flag(state, 'equipment_quality_collapsed');
 }
 
@@ -343,7 +370,7 @@ function predEquipmentQualityCollapse(state: GameState): boolean {
 //   Divergence note: diplomatic capital ran out without any canonical peace
 //   plan being signed. Reads negotiation_capital_exhausted flag AND
 //   no peace-plan acceptance flag is set.
-function predNegotiationCapitalExhausted(state: GameState): boolean {
+function predNegotiationCapitalExhausted(state: GhostEntryStateView): boolean {
     if (!flag(state, 'negotiation_capital_exhausted')) return false;
     if (flag(state, 'vance_owen_accepted')) return false;
     if (flag(state, 'owen_stoltenberg_accepted')) return false;
@@ -363,7 +390,7 @@ interface GhostRegistryEntry {
     /** Diagnostic predicate names recorded on the emission. */
     conditional_on: string[];
     /** Pure predicate over (state, currentTurn). */
-    predicate: (state: GameState, currentTurn: number) => boolean;
+    predicate: (state: GhostEntryStateView, currentTurn: number) => boolean;
 }
 
 const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
@@ -524,7 +551,7 @@ const GHOST_ENTRIES: readonly GhostRegistryEntry[] = [
  *
  * Throws if the input state carries any §6 refused flag; see `assertRingGuard`.
  */
-export function buildGhostEntries(state: GameState, currentTurn: number): BuiltGhostEntry[] {
+export function buildGhostEntries(state: GhostEntryStateView, currentTurn: number): BuiltGhostEntry[] {
     assertRingGuard(state);
 
     const emitted: BuiltGhostEntry[] = [];

@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): clean Verdict Codex unknown cast
+
+**Type:** Strict-null cleanup. Endgame Codex ghost-entry display boundary refactor; no simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.
+
+**Why:** `src/ui/map/components/VerdictScreen.tsx` still double-cast the renderer `LoadedGameState` snapshot to the raw `GameState` type in order to call `buildGhostEntries(...)`. This violated the adapter-boundary rule and was the last inventory-counted `as_unknown_casts` site.
+
+**Change:** Added a narrow `GhostEntryStateView` contract to `src/sim/codex/dynamic_section_builder.ts` covering only the optional fields ghost predicates read, updated ghost predicates and Ring guard to consume it, and removed the VerdictScreen double-cast. Added a strict-null progress assertion pinning the VerdictScreen Codex ghost-entry slice at zero `as_unknown_casts`.
+
+**Verification:** Red guard failed as expected before implementation (`expected 1 to be +0`); `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (83/83); `npx.cmd vitest run tests/codex_ghost_entries_wave_2.test.ts --reporter=dot` PASS (40/40); `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite warnings. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 147`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_STRICT_NULL_VERDICT_CODEX_UNKNOWN_TAIL.md`.
+
+---
 ## [2026-05-22] refactor(strict-null): clean Warroom mock-state casts
 
 **Type:** Strict-null cleanup. Warroom browser/dev fallback initializer refactor; no simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.
