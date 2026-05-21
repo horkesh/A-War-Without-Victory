@@ -360,10 +360,8 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
         if (existingOrders[bid]) continue;
 
         // Issue column march toward home_osid (the movement system will BFS there)
-        if (!state.military.brigade_movement_orders) {
-            state.military.brigade_movement_orders = {};
-        }
-        state.military.brigade_movement_orders![bid] = {
+        const movementOrders = state.military.brigade_movement_orders ?? (state.military.brigade_movement_orders = {});
+        movementOrders[bid] = {
             destination_sids: [homeOsid as SettlementId],
             stance: 'column',
         } as { destination_sids: SettlementId[] };

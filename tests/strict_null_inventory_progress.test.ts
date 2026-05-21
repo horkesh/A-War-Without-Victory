@@ -330,6 +330,13 @@ const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/state/displacement_takeover.ts',
 ];
 
+const RUNTIME_NON_NULL_ASSERTION_TAIL_2_FILES = [
+    'src/sim/combat/sector_offensive.ts',
+    'src/sim/turn_phases/war_phase_negotiation_steps.ts',
+    'src/sim/war_stories.ts',
+    'src/state/displacement_state_utils.ts',
+];
+
 // The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
 // count at exactly 10 retained escapes documented in
 // `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
@@ -1150,6 +1157,20 @@ describe('strict null inventory progress', () => {
 
         const nonNullDotCount = phaseCount(current, 'non_null_assertions_dot', RUNTIME_NON_NULL_ASSERTION_TAIL_FILES);
         const nonNullIndexCount = phaseCount(current, 'non_null_assertions_index', RUNTIME_NON_NULL_ASSERTION_TAIL_FILES);
+
+        expect(nonNullDotCount).toBe(0);
+        expect(nonNullIndexCount).toBe(0);
+    });
+
+    it('cleans the second runtime non-null assertion tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const nonNullDotCount = phaseCount(current, 'non_null_assertions_dot', RUNTIME_NON_NULL_ASSERTION_TAIL_2_FILES);
+        const nonNullIndexCount = phaseCount(current, 'non_null_assertions_index', RUNTIME_NON_NULL_ASSERTION_TAIL_2_FILES);
 
         expect(nonNullDotCount).toBe(0);
         expect(nonNullIndexCount).toBe(0);

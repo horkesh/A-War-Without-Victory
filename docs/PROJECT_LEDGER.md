@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean second runtime non-null tail
+
+**Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, sector/offensive behavior, negotiation rules, displacement math, or war-story output semantics changed.
+
+**Why:** After the first runtime non-null tail cleanup, a second safe four-file slice remained where local initialized maps or guards could replace inventory-counted dot/index non-null assertions.
+
+**Change:** Replaced non-null assertion writes/reads in `sector_offensive.ts`, `war_phase_negotiation_steps.ts`, `war_stories.ts`, and `displacement_state_utils.ts` with explicit locals and guards. Added a strict-null progress test pinning those four files at zero for `non_null_assertions_dot` and `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/war_stories.test.ts tests/dayton_negotiation.test.ts tests/brigade_home_return.test.ts tests/displacement.test.ts --reporter=dot` PASS (131/131); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 180`, `non_null_assertions_dot 7`, `non_null_assertions_index 29`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL_2.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean runtime non-null tail
 
 **Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, operation behavior, combat math, negotiation rules, or anomaly semantics changed.

@@ -44,7 +44,8 @@ export function recordCivilianDisplacementCasualties(
     fledAbroad: number
 ): void {
     ensureCivilianCasualties(state);
-    const entry = state.displacement.civilian_casualties![factionId];
+    const casualties = state.displacement.civilian_casualties ?? {};
+    const entry = casualties[factionId];
     if (entry) {
         entry.killed += killed;
         entry.fled_abroad += fledAbroad;

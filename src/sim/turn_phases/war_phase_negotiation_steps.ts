@@ -73,7 +73,8 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
             if (neg?.pending_dayton) return;
             if (shouldInitiateDayton(context.state)) {
                 const menu = initiateDaytonNegotiation(context.state);
-                context.state.military.negotiation!.pending_dayton = menu;
+                const negotiation = context.state.military.negotiation;
+                if (negotiation) negotiation.pending_dayton = menu;
             }
         }
     },

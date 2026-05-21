@@ -260,10 +260,12 @@ export function generateWarStoryForFormation(f: FormationState): BrigadeWarStory
  */
 export function generateWarStories(state: GameState): BrigadeWarStory[] {
     const stories: BrigadeWarStory[] = [];
-    const formationIds = Object.keys(state.military.formations ?? {}).sort(strictCompare);
+    const formations = state.military.formations ?? {};
+    const formationIds = Object.keys(formations).sort(strictCompare);
 
     for (const id of formationIds) {
-        const f = state.military.formations![id];
+        const f = formations[id];
+        if (!f) continue;
         const kind = f.kind ?? 'brigade';
         if (kind !== 'brigade') continue;
 

@@ -62,6 +62,7 @@
 | Lane | Status | Source |
 |---|---|---|
 | Runtime dot/index non-null assertion cleanup | Implemented as behavior-equivalent type-safety cleanup | Report: `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL.md`. Four runtime files (`anomaly_detector.ts`, `scenario_runner.ts`, `counter_offer_generator.ts`, `displacement_takeover.ts`) now contribute zero inventory-counted dot/index non-null assertions. Global strict-null floor is now `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 180`, `non_null_assertions_dot 8`, `non_null_assertions_index 32`, `optional_fields_game_state 473`. |
+| Runtime dot/index non-null assertion cleanup continuation | Implemented as behavior-equivalent type-safety cleanup | Report: `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL_2.md`. Four more runtime files (`sector_offensive.ts`, `war_phase_negotiation_steps.ts`, `war_stories.ts`, `displacement_state_utils.ts`) now contribute zero inventory-counted dot/index non-null assertions. Global strict-null floor is now `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 180`, `non_null_assertions_dot 7`, `non_null_assertions_index 29`, `optional_fields_game_state 473`. |
 
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
