@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(roadmap): Batch C0-C7 strict-null + Army HQ status reconciliation
+
+**Type:** Docs-only roadmap/backlog reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** After verified Batch C0-C7 implementation and the Army HQ visual hierarchy closeout, `MASTER_ROADMAP.md` and `CONSOLIDATED_BACKLOG.md` still carried two stale statuses: Army HQ visual refresh as queued, and strict-null Batch C as plan-only with `as_unknown_casts` still at 80. Current disk truth from `node tools/diagnostics/strict_null_inventory.cjs` after Batch C0-C7 is `2 / 62 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Change:** Reconciled docs only:
+
+- `docs/plans/MASTER_ROADMAP.md` now marks Army HQ as visually refreshed with the standalone War Exhaustion widget retired, and records Batch C0-C7 as partial strict-null implementation rather than plan-only.
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` strict-null rows now record Batch C0-C7 and the current `as_unknown_casts` floor of 62.
+- `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` now has an implementation-status addendum: C0-C7 landed, while the heavier scenario/loader half remains open under the same plan gates.
+
+**Verification:** `git diff --check` clean. No typecheck/baselines required for docs-only status/count reconciliation; source verification for Batch C0-C7 was completed before the prior push.
+
+---
+
 ## [2026-05-20] feat(ui): Army HQ visual hierarchy + palette refresh — ExhaustionClock retired
 
 **Type:** UI-only presentation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed. All edits scoped to three React components under `src/ui/map/components/army_hq/` plus the Legendary Features row in `docs/plans/MASTER_ROADMAP.md`.

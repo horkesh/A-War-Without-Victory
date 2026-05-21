@@ -1,6 +1,6 @@
 # Strict-Null Batch C Schema-Boundary Validation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:writing-plans. This is a PLAN ONLY. No schema-boundary code changes happen in this packet.
+> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:writing-plans. This began as a plan-only contract. Batch C0-C7 has now implemented the first schema-boundary slices; continue to treat the remaining scenario/loader work as gated implementation under this plan.
 
 **Goal:** Define the contract for converting the 52 `as_unknown_casts` distributed across 12 schema-boundary files into typed `parse<X>(raw: unknown): X | null` helpers with explicit fallback semantics, so the Strict-Null migration can close its third batch class (`schema-boundary`) without changing runtime behavior on valid input or hiding behavior bugs behind silent default coercions.
 
@@ -10,9 +10,11 @@
 
 ---
 
-## Status — Plan Only
+## Status
 
-This document describes the contract and validation gates for Batch C. **No source code, no test code, no schema migration, no roadmap-status flip, and no FORAWWV edit happens in this packet.** The implementation lane that consumes this plan is a separate commit.
+This document was originally authored as the contract and validation gates for Batch C. As of 2026-05-21, Batch C0-C7 has partially consumed it: `src/state/schema_validators.ts` is live, and the first seven implementation slices landed for `sector_offensive_launch_helpers.ts`, `validateGameState.ts`, `replay_frame_summary.ts`, `war_dispatches.ts`, `desktop_sim.ts`, `collect_briefing.ts`, and `serialize.ts`.
+
+The heavier scenario/loader half remains open under the same gates: `scenario_loader.ts`, `war_timeline.ts`, `political_control_init.ts`, `oob_loader.ts`, and `brigade_temporal_emit.ts`. Batch C0-C7 reduced the verified top-level `as_unknown_casts` floor from 80 to 62; the predicted full-Batch-C floor of 28 is not yet claimed.
 
 ## Inventory Baseline — Post Batch 50/51
 
