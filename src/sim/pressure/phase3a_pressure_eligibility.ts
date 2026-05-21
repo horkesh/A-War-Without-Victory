@@ -145,7 +145,7 @@ export async function loadEnrichedContactGraph(
 ): Promise<EnrichedContactGraph> {
     const graphPath = resolve(path ?? 'data/derived/settlement_contact_graph_enriched.json');
     const content = await readFile(graphPath, 'utf8');
-    const json = JSON.parse(content) as unknown;
+    const json: unknown = JSON.parse(content);
 
     if (!isEnrichedContactGraph(json)) {
         throw new Error('Invalid enriched contact graph format');

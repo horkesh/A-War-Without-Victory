@@ -58,7 +58,7 @@ function parseAssignment(raw: unknown): FormationAssignment | null {
 export async function loadInitialFormations(path: string): Promise<FormationState[]> {
     const absPath = resolve(path);
     const content = await readFile(absPath, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
     let rows: unknown[];
     if (Array.isArray(parsed)) {
         rows = parsed;
@@ -102,7 +102,7 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
             kind = raw.kind as FormationKind;
         }
         const assignment = parseAssignment(raw.assignment);
-        const tags = Array.isArray(raw.tags) ? (raw.tags as string[]).filter((t): t is string => typeof t === 'string') : undefined;
+        const tags = Array.isArray(raw.tags) ? raw.tags.filter((t: unknown): t is string => typeof t === 'string') : undefined;
         const personnel = typeof raw.personnel === 'number' && Number.isFinite(raw.personnel) ? raw.personnel : undefined;
         const hq_sid = typeof raw.hq_sid === 'string' && raw.hq_sid.trim() ? raw.hq_sid.trim() : undefined;
         const location_osid = typeof raw.location_osid === 'string' && raw.location_osid.trim() ? raw.location_osid.trim() : undefined;

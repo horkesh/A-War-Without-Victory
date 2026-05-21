@@ -51,8 +51,8 @@ export async function loadSettlementGraph(options?: {
     const settlementsPath = resolve(options?.settlementsPath ?? 'data/derived/operational/operational_settlements.geojson');
     const edgesPath = resolve(options?.edgesPath ?? 'data/derived/operational/operational_contact_graph.json');
 
-    const settlementsJson = JSON.parse(await readFile(settlementsPath, 'utf8')) as unknown;
-    const edgesJson = JSON.parse(await readFile(edgesPath, 'utf8')) as unknown;
+    const settlementsJson: unknown = JSON.parse(await readFile(settlementsPath, 'utf8'));
+    const edgesJson: unknown = JSON.parse(await readFile(edgesPath, 'utf8'));
 
     const settlements = parseSettlements(settlementsJson);
     const edges = parseEdges(edgesJson);

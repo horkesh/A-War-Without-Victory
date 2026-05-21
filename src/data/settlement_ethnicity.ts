@@ -33,7 +33,7 @@ export async function loadSettlementEthnicityData(
     const filePath = resolve(path ?? 'data/derived/settlement_ethnicity_data.json');
     if (cached && cachedPath === filePath) return cached;
     const content = await readFile(filePath, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
     if (!parsed || typeof parsed !== 'object' || !(parsed as Record<string, unknown>).by_settlement_id) {
         throw new Error(
             'Invalid settlement_ethnicity_data.json: expected { by_settlement_id: Record<string, EthnicityEntry> }'

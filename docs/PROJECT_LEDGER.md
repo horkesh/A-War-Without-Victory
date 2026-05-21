@@ -3,6 +3,58 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): Post-Batch-C JSON/array type-erasure tail
+
+**Type:** Type-only strict-null cleanup across data/map/scenario loader leaves plus docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, packaging metadata, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** After Batch C closed the twelve planned schema-boundary files, the remaining `as_unknown_casts` tail still included several trivial `JSON.parse(...) as unknown` declarations and already-array-narrowed array casts. These sites are safe type erasure: they keep the same runtime values and existing downstream validation/fallback semantics.
+
+**Change:** Cleaned 10 `as_unknown_casts` across `src/cli/sim_scenario.ts`, `src/data/geography.ts`, `src/data/operational_data.ts`, `src/data/settlement_ethnicity.ts`, `src/map/settlements.ts`, `src/scenario/campaign_unlock.ts`, `src/scenario/initial_formations_loader.ts`, and `src/sim/pressure/phase3a_pressure_eligibility.ts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 18 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`). The remaining 18 `as_unknown_casts` are deliberately left for narrower lanes: UI/window bridge boundaries, typed mock/save adapters, and behavior-shaped coercions.
+
+**Verification:** `npm.cmd run typecheck` PASS; focused vitest PASS (`campaign_unlock`, `operational_data_osid`, `sim_scenario`, `phase10_ops_fatigue_scenario`, `early_war_injected_graph_parity`, `front_edge_foca_shared_border_real_save`, `sector_drina_frontline_integrity`, `strict_null_inventory_progress`) with 65/65 passing and 1 intentional skip; `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"); `git diff --check` clean.
+
+---
+
+## [2026-05-21] refactor(strict-null): Batch C schema-boundary validation closed (C0-C13)
+
+**Type:** Type-only refactor across twelve files + new shared module + tests + docs/ledger reconciliation. No simulation behavior, scenario data, save schema, generated artifact, packaging metadata, IPC contract, or `FORAWWV.md` text changed. `npm.cmd run test:baselines` PASS at the tip confirms byte-identity across the four baseline scenarios (40w/52w/baseline_ops_4w/noop_4w).
+
+**Branch:** `codex/teslic-collateral-and-strict-null-2026-05-19` (continued; HEAD before C0 commit: `029fe16a` — Strict-null Batch C plan + post-Batch-50/51 count reconciliation).
+
+**Change:** Executed `docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md` end to end across thirteen commits (C0 + 12 file commits + C13 closeout). All twelve plan-scoped files now hold their `as_unknown_casts` count at zero; inventory floor confirmed at `2 / 28 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`) — hits the §6 predicted target exactly.
+
+- **C0 (29258f22):** New `src/state/schema_validators.ts` shared module — six narrowing primitives (`asRecord`, `asArray`, `asString`, `asFiniteNumber`, `asBoolean`, `asTypedArray`) plus 6 unit tests in `tests/schema_validators.test.ts`. Pure addition; no consumer files touched. Generalizes the Batch 49 `parseFactionId(...)` precedent into a shared module so the twelve loaders do not each re-invent `typeof === ...` chains.
+- **C1 (f392f516):** `sector_offensive_launch_helpers.ts` — Plan §3.12 Option A executed as a local `EMPTY_REVERSE_MAP = new Map()` placeholder rather than a `predictAllAdjacentTargets` signature change. Drops 2 placeholder casts in `axisHasExecutableOpeningAttack` / `shouldStallAxisForRecentCatastrophicObjective`. Also folds in `schema_validators.ts` self-cleanup (rewrites the file-header prose + replaces `asArray`'s internal narrowing cast with `Array.isArray` auto-narrow).
+- **C2 (49e5c18b):** `validateGameState.ts` — drops 2 redundant casts inside the `army_co_decision_traces` Array.isArray branch. The casts were defensive but TS already narrows `list: any[]` after the guard, so `list.length` / `list[i]` typecheck without them.
+- **C3 (94e6359a):** `replay_frame_summary.ts` — replaces 2 casts in `readTotalCasualties` / `readTotalDisplaced` with a single `parseReplayFrameSubobject(value: unknown)` helper. New `tests/replay_frame_summary_schema_boundary.test.ts` (7 cases) covers valid payload, missing sub-object, non-object sub-object, aggregate-vs-top-level displacement fallback. Documented stricter-at-boundary, looser-downstream — replay frames are diagnostic-only.
+- **C4 (c20016a6):** `war_dispatches.ts` — replaces 2 `(state.X as ...).enclave_state` / `.control_events` widenings in `generateWarDispatch` with two co-located helpers (`parseOptionalEnclaveState` / `parseOptionalControlEvents`). Helpers accept the typed parent slot as `unknown` so call sites pass the typed reference without an inline cast.
+- **C5 (4c28839a):** `desktop_sim.ts` — replaces 3 casts in `queryBattleEvents` with a single `parseOptionalControlEvents(military: unknown): unknown[]` helper. Diverges from Plan §3.7's `ControlEvent[] | undefined` signature because the actual site is internal iteration (`raw` is always-array, never returned). `npm.cmd run desktop:map:build` PASS at this commit.
+- **C6 (dc2c4bf1):** `collect_briefing.ts` — replaces 4 widening casts with three co-located helpers (`parseCorpsCommandFactionField`, `parseCorpsCommandActiveOperationsValues`, `parseFormationOpsDisruptedTurns`) plus `parseOptionalEnclaveResilienceFromMilitary`. **Three latent path-bugs documented at helper sites and explicitly preserved** for separate behavior lanes: (a) `cc.faction` reads a non-existent field on `CorpsCommandState` — always undefined → ops always empty; (b) `f.ops.disrupted_turns` reads a non-existent field on `FormationOpsState` (canonical lives on `FormationState`) — always undefined → no disrupted-brigades warnings; (c) `state.military.enclave_resilience` reads from the wrong slot (canonical is on `PoliticalState`, game_state.ts L2264) — always undefined → no enclave warnings. Plan §3.6 explicitly accepted "both are optional reads inside briefing assembly — helper must not require either field" — baseline byte-identity is preserved precisely because the helpers return undefined exactly as the casts did.
+- **C7 (a6b28446):** `serialize.ts` — eliminates 3 widening casts without any new helper: changes `candidate` declared type from `Record<string, any>` to `GameState & Record<string, any>` so the same variable serves the typed consumer paths (`applyMigrations` + `return`) AND the legacy-field-rescue / sweep / `delete candidate.brigade_aor` paths. The declaration cast is from `unknown` directly (via `structuredClonePolyfill<T>` propagation), no intermediate widening.
+- **C8 (ed7dcf21):** `political_control_init.ts` — six JSON.parse boundary annotations (`const parsed = JSON.parse(...) as unknown;` → `const parsed: unknown = JSON.parse(...);`) plus one return-statement narrowing replacement (`return parsed as unknown as SettlementsInitialMaster` → `if (!isSettlementsInitialMaster(parsed)) throw ...; return parsed;` backed by a new co-located `isSettlementsInitialMaster` type-predicate guard).
+- **C9 (9d6c73a5):** `oob_loader.ts` — three JSON.parse boundary annotations + two redundant array casts dropped + one `parseOobBrigadeComposition` helper for the `r.composition` widening (isRecord narrow + `Partial<BrigadeComposition>` intermediate cast — no `unknown` bounce).
+- **C10 (649371ca):** `scenario_loader.ts` — one JSON.parse boundary annotation + six redundant `(... as unknown[])` casts dropped from Array.isArray branches + one `t as unknown as Record<string, unknown>` turn-shape widening replaced with `asRecord(t)`.
+- **C11 (4fbf2c86):** `war_timeline.ts` — three required array fields (`equipment_decay`, `external_support`, `maintenance_decay`) hoisted into typed locals at the top of `validateWarTimeline` so the downstream for-loops drop their per-element widenings + one step-curve narrowing re-narrow + one final-return cast through `Partial<WarTimeline>` intermediate.
+- **C12 (8b1dcf0f):** `brigade_temporal_emit.ts` (highest-risk per §3.5) — four typed-state-slot widenings dropped (all four fields are typed on GameState / MilitaryState; the casts were unnecessary historical artifacts) + one `officer_count_active` forward-compat read preserved via `asRecord(f)?.officer_count_active`. Also folds in three comment-text false-positive fixes (`oob_loader.ts` L115 + `war_timeline.ts` L249 + L410 each contained the literal regex-matching phrase from C9/C11 commits).
+- **C13 (this commit):** Twelve `BATCH_C_*` slice constants added to `tests/strict_null_inventory_progress.test.ts` pinning each plan-scoped file at zero `as_unknown_casts`. Post-Batch-C inventory snapshot written to `data/derived/_debug/strict_null_inventory_post_batch_C.json`. Docs reconciled: `docs/plans/MASTER_ROADMAP.md` Strict-null closeout addendum, `docs/40_reports/CONSOLIDATED_BACKLOG.md` strict null rows, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md` Batch C status flipped to CLOSED.
+
+**Determinism:** Pure type/narrowing refactor across all twelve files. TypeScript emits character-equivalent JS for the dropped redundant casts; the helper-backed sites preserve identical runtime semantics for the live serialization paths. `npm.cmd run test:baselines` PASS proves byte-identity.
+
+**Verification:**
+- `npm.cmd run typecheck` — PASS at every commit.
+- `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` — 40/40 PASS (28 prior + 12 new `BATCH_C_*` slice assertions).
+- `npx.cmd vitest run tests/schema_validators.test.ts` — 6/6 PASS.
+- Per-file focused vitest suites PASS at each commit (combined ~280 individual tests across the twelve scoped files).
+- `npm.cmd run test:baselines` — PASS at the tip ("Baseline regression: all scenarios match" across 40w/52w/baseline_ops_4w/noop_4w).
+- `npm.cmd run desktop:map:build` — PASS for the `desktop_sim.ts` IPC bridge gate at C5.
+- `git diff --check` — clean.
+
+**Artifacts:** `src/state/schema_validators.ts` (new), `tests/schema_validators.test.ts` (new), `tests/replay_frame_summary_schema_boundary.test.ts` (new), twelve modified loader/helper files in `src/`, `tests/strict_null_inventory_progress.test.ts` (12 new slice constants + 12 new test cases), `data/derived/_debug/strict_null_inventory_post_batch_C.json` (post-Batch-C inventory snapshot), `docs/plans/MASTER_ROADMAP.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
+
+---
+
 ## [2026-05-21] docs(roadmap): Batch C strict-null closeout reconciliation
 
 **Type:** Docs-only roadmap/backlog reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.

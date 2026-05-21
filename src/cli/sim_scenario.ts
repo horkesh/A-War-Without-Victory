@@ -214,7 +214,7 @@ function parseArgs(argv: string[]): CliOptions {
 }
 
 function parseScenarioScriptFile(jsonText: string): ScenarioScriptFile {
-    const data = JSON.parse(jsonText) as unknown;
+    const data: unknown = JSON.parse(jsonText);
     if (!data || typeof data !== 'object') throw new Error('Invalid script: expected JSON object');
     const schema = (data as any).schema;
     if (schema !== 1) throw new Error(`Invalid script schema: ${(data as any).schema} (expected 1)`);

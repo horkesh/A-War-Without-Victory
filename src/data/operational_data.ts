@@ -51,7 +51,7 @@ export async function loadOperationalEdges(baseDir?: string): Promise<EdgeRecord
         'data/derived/operational/operational_contact_graph.json'
     );
     const content = await readFile(path, 'utf8');
-    const raw = JSON.parse(content) as unknown;
+    const raw: unknown = JSON.parse(content);
     return parseEdges(raw);
 }
 
@@ -103,7 +103,7 @@ export async function loadOperationalData(
         'data/derived/operational/canonical_to_operational_map.json'
     );
     const content = await readFile(path, 'utf8');
-    const raw = JSON.parse(content) as unknown;
+    const raw: unknown = JSON.parse(content);
     if (!isRecord(raw)) {
         throw new Error('canonical_to_operational_map: expected object');
     }

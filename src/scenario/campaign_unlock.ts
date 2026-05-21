@@ -49,10 +49,10 @@ export async function readCompletedScenarioIds(filePath: string): Promise<Set<st
     const { readFile } = await import('node:fs/promises');
     try {
         const content = await readFile(filePath, 'utf8');
-        const raw = JSON.parse(content);
+        const raw: unknown = JSON.parse(content);
         if (!Array.isArray(raw)) return new Set();
-        const ids = (raw as unknown[])
-            .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+        const ids = raw
+            .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
             .map((x) => x.trim());
         return new Set(ids);
     } catch {

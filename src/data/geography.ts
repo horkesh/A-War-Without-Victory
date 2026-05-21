@@ -100,7 +100,7 @@ function loadGeography(): { data: GeographyCollection; hasData: boolean } {
         return { data: EMPTY_GEOGRAPHY, hasData: false };
     }
     const content = readFileSync(GEO_PATH, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
     if (
         typeof parsed !== 'object' ||
         parsed === null ||
