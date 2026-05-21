@@ -46,8 +46,8 @@ export interface EnclaveStatus {
 }
 
 export interface MobilizationInfo {
-    exhaustedMunicipalityCount: number;
-    totalMunicipalities: number;
+    exhaustionPct: number;
+    activePoolCount: number;
     currentPoolTotal: number;
 }
 
@@ -124,9 +124,9 @@ export function getMobilizationInfo(
     if (!mob) return null;
 
     return {
-        exhaustedMunicipalityCount: (mob as any).exhausted_municipality_count ?? 0,
-        totalMunicipalities: (mob as any).total_municipalities ?? 0,
-        currentPoolTotal: (mob as any).current_pool_total ?? 0,
+        exhaustionPct: mob.exhaustion_pct,
+        activePoolCount: mob.top_pools.length,
+        currentPoolTotal: mob.total_available,
     };
 }
 
@@ -213,8 +213,12 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
             {mobilization && (
                 <div className="text-[11px] text-text-secondary flex flex-wrap gap-x-4">
                     <span>
-                        <span className="text-text-primary font-bold">{mobilization.exhaustedMunicipalityCount}</span>
-                        /{mobilization.totalMunicipalities} municipalities at mobilization cap
+                        <span className="text-text-primary font-bold tabular-nums">{mobilization.exhaustionPct.toFixed(1)}%</span>
+                        {' '}pool exhausted
+                    </span>
+                    <span>
+                        <span className="text-text-primary font-bold tabular-nums">{mobilization.activePoolCount}</span>
+                        {' '}active municipality pools
                     </span>
                     <span>
                         Manpower pool: <span className="text-text-primary font-bold tabular-nums">{mobilization.currentPoolTotal.toLocaleString()}</span>

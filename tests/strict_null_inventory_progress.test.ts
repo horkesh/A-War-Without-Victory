@@ -337,6 +337,10 @@ const FORCE_READINESS_AS_ANY_TAIL_FILES = [
     'src/ui/map/components/army_hq/ForceReadiness.tsx',
 ];
 
+const SUPPLY_INTELLIGENCE_AS_ANY_TAIL_FILES = [
+    'src/ui/map/components/army_hq/SupplyIntelligence.tsx',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1189,6 +1193,16 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', FORCE_READINESS_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
+    it('cleans the SupplyIntelligence Army HQ as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', SUPPLY_INTELLIGENCE_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

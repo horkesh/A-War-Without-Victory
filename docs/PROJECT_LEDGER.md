@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean SupplyIntelligence casts
+
+**Type:** Strict-null cleanup. UI data-contract correction; no mobilization simulation, save schema, scenario data, adapter serialization, or output tuning changed.
+
+**Why:** `SupplyIntelligence.tsx` still read three obsolete mobilization fields through `as any`, which masked a stale adapter contract and could display zeroed Army HQ manpower values despite valid current mobilization summary data.
+
+**Change:** Mapped `getMobilizationInfo(...)` to the current `MobilizationSummaryView` fields (`exhaustion_pct`, `top_pools.length`, `total_available`), updated the Army HQ footer labels to match those derivable values, added a focused mobilization mapping test, and added a strict-null progress assertion pinning `SupplyIntelligence.tsx` at zero for `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests/ui/supply_intelligence_mobilization.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (75/75); `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite browser-external/dynamic-import/chunk-size warnings. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 176`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_SUPPLY_INTELLIGENCE_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean safe unknown tail
 
 **Type:** Strict-null cleanup. Type-contract and compatibility-read refactor; no verdict scoring, condemnation, dialogue prompting/parsing, save schema, scenario data, or output tuning changed.
