@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean Phase 3C exhaustion-gating non-null tail
+
+**Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, Phase 3C thresholds, feature flags, eligibility rules, or output tuning changed.
+
+**Why:** `updateLocalStrain(...)` initialized `state.political.local_strain` before use but still relied on two post-initialization dot non-null assertions.
+
+**Change:** Narrowed the initialized local-strain state into a local before reading and writing the entity accumulator. Failed initialization now throws a clear invariant error instead of failing through `!`. Added a strict-null progress test pinning `phase3c_exhaustion_collapse_gating.ts` at zero for `non_null_assertions_dot`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (66/66); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 5`, `non_null_assertions_index 19`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_PHASE3C_EXHAUSTION_GATING_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean recruitment-engine non-null tail
 
 **Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, recruitment selection, formation generation, or resource-cost rules changed.

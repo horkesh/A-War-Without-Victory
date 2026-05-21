@@ -271,11 +271,15 @@ function getOrInitLocalStrain(state: GameState): void {
 function updateLocalStrain(state: GameState, entityId: EntityId, exposure: number): number {
     getOrInitLocalStrain(state);
 
-    const current = state.political.local_strain!.by_entity[entityId] ?? 0;
+    const localStrain = state.political.local_strain;
+    if (!localStrain) {
+        throw new Error('Phase 3C local strain state failed to initialize');
+    }
+    const current = localStrain.by_entity[entityId] ?? 0;
     const increment = exposure * STRAIN_FRACTION;
     const newStrain = Math.min(Math.max(0, current + increment), STRAIN_MAX);
 
-    state.political.local_strain!.by_entity[entityId] = newStrain;
+    localStrain.by_entity[entityId] = newStrain;
     return newStrain;
 }
 
