@@ -37,6 +37,7 @@ import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { asArray, asRecord } from '../state/schema_validators.js';
 import type { Osid } from '../sim/combat/osid_adjacency.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
@@ -281,14 +282,26 @@ export function queryCorpsSectors(
     return sectors;
 }
 
+// BATCH C §3.7: control_events is an optional IPC-bridge slot on
+// MilitaryState that is not yet declared at the typed engine state shape.
+// Helper accepts the typed `state.military` slot as `unknown` and walks
+// down via `asRecord` / `asArray` from the Batch C0 schema_validators
+// module. Returns an empty array when the parent or the field is missing
+// or not an array — runtime-identical to the prior `Array.isArray(...)
+// ? ... : []` ternary because the inner per-item narrowing inside
+// queryBattleEvents still drops malformed entries.
+function parseOptionalControlEvents(military: unknown): unknown[] {
+    const parent = asRecord(military);
+    if (parent === null) return [];
+    return asArray(parent.control_events) ?? [];
+}
+
 /** Read-only query: normalized battle/control events sorted for deterministic replay. */
 export function queryBattleEvents(
     state: GameState
 ): { turn: number; events: BattleEventQueryEntry[] } {
     const turn = state.meta?.turn ?? 0;
-    const raw = Array.isArray((state as unknown as { military: { control_events?: unknown[] } }).military.control_events)
-        ? ((state as unknown as { military: { control_events?: unknown[] } }).military.control_events as unknown[])
-        : [];
+    const raw = parseOptionalControlEvents(state.military);
     const events: BattleEventQueryEntry[] = [];
     for (const item of raw) {
         if (!item || typeof item !== 'object') continue;
