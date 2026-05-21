@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): attribute recovery setup children
+
+**Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** After multi-source staffability reachability, `recoverDroppedFrontEdges:faction-front-claim-setup` remained a measured recovery owner. The existing build-scoped setup cache already removes duplicate recovery-pass setup work, so the next optimization needed child attribution inside the remaining once-per-faction setup.
+
+**Change:** Added child `_perfTime(...)` labels inside `getRecoveredFrontClaimSetup(...)` for OSID-to-corps mapping, front-edge partitioning, cross-corps consolidation, isolated-pocket consolidation, friendly/component setup, and faction brigade component indexing. Updated the static instrumentation contract and filed `docs/40_reports/implemented/20260521_RECOVERY_SETUP_ATTRIBUTION.md`.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts --reporter=dot` PASS (17/17); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_recovery_setup_attribution_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`) are byte-identical at current final state hash `4368f50c00c464ad`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_RECOVERY_SETUP_ATTRIBUTION.md`; `data/derived/_debug/sector_partition_perf_recovery_setup_attribution_clean.jsonl`; `runs_perf/sector_reconstruction_recovery_setup_attribution_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
+
 ## [2026-05-21] perf(sector): use multi-source staffability reachability
 
 **Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

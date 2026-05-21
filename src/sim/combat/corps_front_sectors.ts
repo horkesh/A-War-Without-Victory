@@ -1819,27 +1819,44 @@ function getRecoveredFrontClaimSetup(
     if (cached) return cached;
 
     const setup = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup', () => {
-        const mappedOsidToCorps = mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap);
-        const partitionedCorpsEdges = partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency);
-        consolidateCrossCorpsFronts(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, mappedOsidToCorps, centroids, sharedBoundaryAdj);
-        consolidateIsolatedCorpsPockets(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
-        const mappedFriendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
-            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
-            : buildFriendlyOsidsFromState(state, adjacency, faction);
-        const mappedComponentOf = spatial?.componentsByFaction.get(faction)
-            ? new Map(spatial.componentsByFaction.get(faction)!)
-            : buildFriendlyComponents(adjacency, mappedFriendlyOsids);
-        const mappedFactionBrigadeLocations: string[] = [];
-        const mappedFactionBrigadeComponents = new Set<number>();
-        for (const fid of Object.keys(formations).sort(strictCompare)) {
-            const formation = formations[fid];
-            if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
-            if (!formation.location_osid) continue;
-            mappedFactionBrigadeLocations.push(formation.location_osid);
-            const componentId = mappedComponentOf.get(formation.location_osid);
-            if (componentId !== undefined) mappedFactionBrigadeComponents.add(componentId);
-        }
+        const mappedOsidToCorps = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:osid-to-corps', () =>
+            mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap),
+        );
+        const partitionedCorpsEdges = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:front-edge-partition', () =>
+            partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency),
+        );
+        _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:cross-corps-consolidation', () => {
+            consolidateCrossCorpsFronts(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, mappedOsidToCorps, centroids, sharedBoundaryAdj);
+        });
+        _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:isolated-pocket-consolidation', () => {
+            consolidateIsolatedCorpsPockets(partitionedCorpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
+        });
+        const { mappedFriendlyOsids, mappedComponentOf } = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:friendly-component-setup', () => {
+            const friendly = spatial?.friendlyOsidsByFaction.get(faction)
+                ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+                : buildFriendlyOsidsFromState(state, adjacency, faction);
+            const component = spatial?.componentsByFaction.get(faction)
+                ? new Map(spatial.componentsByFaction.get(faction)!)
+                : buildFriendlyComponents(adjacency, friendly);
+            return { mappedFriendlyOsids: friendly, mappedComponentOf: component };
+        });
+        const { mappedFactionBrigadeLocations, mappedFactionBrigadeComponents } = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:faction-brigade-component-index', () => {
+            const locations: string[] = [];
+            const components = new Set<number>();
+            for (const fid of Object.keys(formations).sort(strictCompare)) {
+                const formation = formations[fid];
+                if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+                if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+                if (!formation.location_osid) continue;
+                locations.push(formation.location_osid);
+                const componentId = mappedComponentOf.get(formation.location_osid);
+                if (componentId !== undefined) components.add(componentId);
+            }
+            return {
+                mappedFactionBrigadeLocations: locations,
+                mappedFactionBrigadeComponents: components,
+            };
+        });
         return {
             corpsEdges: partitionedCorpsEdges,
             friendlyOsids: mappedFriendlyOsids,

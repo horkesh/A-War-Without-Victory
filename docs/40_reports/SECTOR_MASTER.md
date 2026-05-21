@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-05-21: Recovery setup attribution (byte-identical)
+
+**Change:** `recoverDroppedFrontEdges:faction-front-claim-setup` now records child labels for OSID-to-corps mapping, front-edge partition, cross-corps consolidation, isolated-pocket consolidation, friendly/component setup, and faction brigade component indexing. This is sidecar-only instrumentation under `PERF_PROFILE_SECTOR_PARTITION=true`.
+
+**Byte-identity:** The attribution profile produced the same deterministic artifacts as the multi-source reachability baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, and `end_report.md` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_recovery_setup_attribution_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** In the clean 94-invocation sidecar batch, setup cost splits to isolated-pocket consolidation 582.834ms, OSID-to-corps 317.618ms, and cross-corps consolidation 294.750ms. Front-edge partition, friendly/component setup, and faction brigade component indexing are smaller.
+
+**Report:** [implemented/20260521_RECOVERY_SETUP_ATTRIBUTION.md](implemented/20260521_RECOVERY_SETUP_ATTRIBUTION.md)
+
+---
+
 ## 2026-05-21: Multi-source reachability for staffability checks (byte-identical)
 
 **Change:** `src/sim/combat/sector_utils.ts` `canAnyBrigadeReachAny(...)` now performs one multi-source BFS per reachability query instead of one BFS per brigade location. It preserves the same max-hop, friendly-territory, and early-target semantics while avoiding repeated traversal during sector staffability checks.
