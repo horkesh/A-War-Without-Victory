@@ -930,6 +930,14 @@ export function checkTriggeredOperations(state: GameState): string[] {
         };
         const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
+        for (const warning of trigWarnings) {
+            if (warning.severity !== 'warning') continue;
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'unknown',
+                eligibility_status: 'unknown',
+                blocker_code: warning.check || 'validation_warning',
+            });
+        }
         if (hasBlockingOpInjectionWarnings(trigWarnings)) {
             const blocker = trigWarnings.find((warning) => warning.severity === 'error')?.check ?? 'validation_blocker';
             recordWatchedOperationTrace(state, def, turn, {

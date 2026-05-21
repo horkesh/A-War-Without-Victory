@@ -13,7 +13,7 @@
 
 ### Triggered Operation Trace
 
-- `src/sim/combat/triggered_operations.ts` records `state.military.watched_operations` rows for active primary corps, active secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation blockers, build failure, and accepted/injected outcomes.
+- `src/sim/combat/triggered_operations.ts` records `state.military.watched_operations` rows for active primary corps, active secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation warnings/blockers, build failure, and accepted/injected outcomes.
 - Trace rows use stable fields: operation name/id, canonical window, catalog/eligibility/launch/delivery status, typed blocker, and turn.
 - Rows are updated compactly when the same operation/status/blocker recurs, and ordered deterministically by turn, operation, launch status, and blocker.
 
@@ -39,8 +39,8 @@ No randomness, timestamps, unordered filesystem reads, or wall-clock values were
 
 ## Verification
 
-- `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (15/15)
-- `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (20/20)
+- `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (16/16)
+- `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (21/21)
 - `npm.cmd run typecheck` PASS
 - `npm.cmd run test:baselines` PASS after manifest refresh
 

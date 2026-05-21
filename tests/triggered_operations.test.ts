@@ -299,6 +299,34 @@ describe('checkTriggeredOperations', () => {
         );
     });
 
+    it('persists non-blocking validation warnings in watched-operation traces', () => {
+        const state = makeState(170);
+        state.military.triggered_operations_accepted = {
+            'Operation Cerska-Kamenica': 40,
+        };
+        state.military.formations!['rs_skelani_battalion']!.status = 'inactive';
+        state.military.formations!['rs_skelani_battalion']!.personnel = 0;
+
+        checkTriggeredOperations(state);
+
+        const warningRow = state.military.watched_operations?.find((row: any) =>
+            row.operation_name === 'Operation Krivaja-95'
+            && row.blocker_code === 'brigade_ineligible'
+        );
+        assert.deepEqual(warningRow, {
+            operation_id: '',
+            operation_name: 'Operation Krivaja-95',
+            canonical_window: '170-178',
+            catalog_status: 'present',
+            eligibility_status: 'unknown',
+            launch_status: 'unknown',
+            delivery_status: 'unknown',
+            blocker_code: 'brigade_ineligible',
+            typed_blocker: 'brigade_ineligible',
+            turn: 170,
+        });
+    });
+
     it('filters already-controlled objectives without dropping a viable triggered axis', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
