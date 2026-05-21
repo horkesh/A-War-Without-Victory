@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): validateFrontSegments record-narrowing as-any slice
+
+**Type:** Type-only validator cleanup in `src/validate/front_segments.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `validateFrontSegments(...)` is another partial-state validator whose segment reads were guarded at runtime but still expressed with `as any`. The current validator lane can tighten these reads to `Record<string, unknown>` while preserving deterministic diagnostics.
+
+**Change:** Added a local `asRecord(...)` helper, replaced 9 counted `as_any_casts`, and made current-turn / segment numeric checks use explicit `typeof === 'number'` guards before `Number.isInteger(...)`. Added a strict-null progress assertion pinning `src/validate/front_segments.ts` at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 257 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/front_segments_validate.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (46/46). Baselines not run: validator-only type narrowing, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): validateEndState record-narrowing as-any slice
 
 **Type:** Type-only validator cleanup in `src/validate/end_state.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

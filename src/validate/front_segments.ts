@@ -2,6 +2,10 @@ import { EdgeRecord } from '../map/settlements.js';
 import { GameState } from '../state/game_state.js';
 import { ValidationIssue } from './validate.js';
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
 export function validateFrontSegments(
     state: GameState,
     settlementEdges: EdgeRecord[],
@@ -10,10 +14,10 @@ export function validateFrontSegments(
     const issues: ValidationIssue[] = [];
 
     const turn = state?.meta?.turn;
-    const currentTurn = Number.isInteger(turn) ? (turn as number) : null;
+    const currentTurn = typeof turn === 'number' && Number.isInteger(turn) ? turn : null;
 
-    const segments = (state as any)?.military.front_segments as Record<string, any> | undefined;
-    if (!segments || typeof segments !== 'object') return issues;
+    const segments = asRecord(state.military?.front_segments);
+    if (!segments) return issues;
 
     // Deterministic key iteration.
     const keys = Object.keys(segments).sort();
@@ -109,10 +113,11 @@ export function validateFrontSegments(
         }
 
         // C) segment field sanity (bounds-only; deterministic)
-        if (!seg || typeof seg !== 'object') continue;
+        const segRecord = asRecord(seg);
+        if (!segRecord) continue;
 
-        const createdTurn = (seg as any).created_turn;
-        if (Number.isInteger(createdTurn) && currentTurn !== null) {
+        const createdTurn = segRecord.created_turn;
+        if (typeof createdTurn === 'number' && Number.isInteger(createdTurn) && currentTurn !== null) {
             if (createdTurn > currentTurn) {
                 issues.push({
                     severity: 'error',
@@ -123,16 +128,16 @@ export function validateFrontSegments(
             }
         }
 
-        const active = (seg as any).active === true;
-        const sinceTurn = (seg as any).since_turn;
-        const lastActiveTurn = (seg as any).last_active_turn;
-        const activeStreak = (seg as any).active_streak;
-        const maxActiveStreak = (seg as any).max_active_streak;
-        const friction = (seg as any).friction;
-        const maxFriction = (seg as any).max_friction;
+        const active = segRecord.active === true;
+        const sinceTurn = segRecord.since_turn;
+        const lastActiveTurn = segRecord.last_active_turn;
+        const activeStreak = segRecord.active_streak;
+        const maxActiveStreak = segRecord.max_active_streak;
+        const friction = segRecord.friction;
+        const maxFriction = segRecord.max_friction;
 
         // E) streak sanity (deterministic)
-        if (!Number.isInteger(activeStreak) || activeStreak < 0) {
+        if (typeof activeStreak !== 'number' || !Number.isInteger(activeStreak) || activeStreak < 0) {
             issues.push({
                 severity: 'error',
                 code: 'front_segments.streak.active.invalid',
@@ -140,7 +145,7 @@ export function validateFrontSegments(
                 message: 'active_streak must be an integer >= 0'
             });
         }
-        if (!Number.isInteger(maxActiveStreak) || maxActiveStreak < 0) {
+        if (typeof maxActiveStreak !== 'number' || !Number.isInteger(maxActiveStreak) || maxActiveStreak < 0) {
             issues.push({
                 severity: 'error',
                 code: 'front_segments.streak.max.invalid',
@@ -148,7 +153,7 @@ export function validateFrontSegments(
                 message: 'max_active_streak must be an integer >= 0'
             });
         }
-        if (Number.isInteger(activeStreak) && Number.isInteger(maxActiveStreak)) {
+        if (typeof activeStreak === 'number' && Number.isInteger(activeStreak) && typeof maxActiveStreak === 'number' && Number.isInteger(maxActiveStreak)) {
             if (maxActiveStreak < activeStreak) {
                 issues.push({
                     severity: 'error',
@@ -159,7 +164,7 @@ export function validateFrontSegments(
             }
         }
         if (!active) {
-            if (Number.isInteger(activeStreak) && activeStreak !== 0) {
+            if (typeof activeStreak === 'number' && Number.isInteger(activeStreak) && activeStreak !== 0) {
                 issues.push({
                     severity: 'warn',
                     code: 'front_segments.streak.inactive_nonzero',
@@ -170,7 +175,7 @@ export function validateFrontSegments(
         }
 
         // F) friction sanity (deterministic)
-        if (!Number.isInteger(friction) || friction < 0) {
+        if (typeof friction !== 'number' || !Number.isInteger(friction) || friction < 0) {
             issues.push({
                 severity: 'error',
                 code: 'front_segments.friction.current.invalid',
@@ -178,7 +183,7 @@ export function validateFrontSegments(
                 message: 'friction must be an integer >= 0'
             });
         }
-        if (!Number.isInteger(maxFriction) || maxFriction < 0) {
+        if (typeof maxFriction !== 'number' || !Number.isInteger(maxFriction) || maxFriction < 0) {
             issues.push({
                 severity: 'error',
                 code: 'front_segments.friction.max.invalid',
@@ -186,7 +191,7 @@ export function validateFrontSegments(
                 message: 'max_friction must be an integer >= 0'
             });
         }
-        if (Number.isInteger(friction) && Number.isInteger(maxFriction)) {
+        if (typeof friction === 'number' && Number.isInteger(friction) && typeof maxFriction === 'number' && Number.isInteger(maxFriction)) {
             if (maxFriction < friction) {
                 issues.push({
                     severity: 'error',
@@ -198,7 +203,7 @@ export function validateFrontSegments(
         }
 
         if (active) {
-            if (!Number.isInteger(sinceTurn)) {
+            if (typeof sinceTurn !== 'number' || !Number.isInteger(sinceTurn)) {
                 issues.push({
                     severity: 'error',
                     code: 'front_segments.turn.since.missing',
@@ -207,7 +212,7 @@ export function validateFrontSegments(
                 });
             }
 
-            if (Number.isInteger(lastActiveTurn) && currentTurn !== null) {
+            if (typeof lastActiveTurn === 'number' && Number.isInteger(lastActiveTurn) && currentTurn !== null) {
                 if (lastActiveTurn > currentTurn) {
                     issues.push({
                         severity: 'error',
@@ -219,7 +224,7 @@ export function validateFrontSegments(
             }
         } else {
             if (lastActiveTurn !== null && lastActiveTurn !== undefined) {
-                if (Number.isInteger(lastActiveTurn) && currentTurn !== null && lastActiveTurn > currentTurn) {
+                if (typeof lastActiveTurn === 'number' && Number.isInteger(lastActiveTurn) && currentTurn !== null && lastActiveTurn > currentTurn) {
                     issues.push({
                         severity: 'error',
                         code: 'front_segments.turn.last_active.invalid',
