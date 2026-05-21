@@ -213,7 +213,7 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
         const mixed = initMixedMunicipalities
             ? [...initMixedMunicipalities].sort(strictCompare)
             : [...DEFAULT_MIXED_MUNICIPALITIES].sort(strictCompare);
-        (state as any).political.rbih_hrhb_state = {
+        state.political.rbih_hrhb_state = {
             war_started_turn: null,
             mobilization_started_turn: null,
             ceasefire_active: false,
@@ -466,4 +466,3 @@ export function countTerritorialIncidents(
 function normalizeMunicipalityId(munId: string): string {
     return munId.trim().toLowerCase();
 }
-

@@ -226,9 +226,9 @@ export async function loadMunicipalityControllerMapping(
         }
 
         // Validate all values are valid faction IDs or null
-        const CANONICAL_IDS = ['RBiH', 'HRHB', 'RS'];
+        const CANONICAL_IDS: readonly string[] = ['RBiH', 'HRHB', 'RS'];
         for (const [mun_code, controller] of Object.entries(parsed.mappings)) {
-            if (controller !== null && !CANONICAL_IDS.includes(controller as any)) {
+            if (controller !== null && (typeof controller !== 'string' || !CANONICAL_IDS.includes(controller))) {
                 throw new Error(`Invalid controller for municipality ${mun_code}: ${controller} (must be RBiH, RS, HRHB, or null)`);
             }
         }

@@ -102,7 +102,7 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
     // internal_cohesion: alliance + avg cohesion - exhaustion
     const alliance = state.political?.war_alliance_rbih_hrhb ?? 1;
     const allianceVal = (faction === 'RBiH' || faction === 'HRHB') ? alliance * 40 : 20;
-    const fmns = Object.values(state.military?.formations ?? {}) as any[];
+    const fmns = Object.values(state.military?.formations ?? {});
     const factionBrigades = fmns.filter((f: any) => f.faction === faction && f.kind === 'brigade' && f.status === 'active');
     const avgCohesion = factionBrigades.length > 0
         ? factionBrigades.reduce((s: number, b: any) => s + (b.cohesion ?? 50), 0) / factionBrigades.length

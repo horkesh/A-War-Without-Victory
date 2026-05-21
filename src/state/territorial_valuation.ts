@@ -180,7 +180,7 @@ function computeControlComponent(sid: string, side: PoliticalSideId, state: Game
 /**
  * B2) Contiguity component (0..20)
  * - If settlement is adjacent (in settlement graph) to any settlement effectively controlled by side => +10
- * - If also within same municipality as any effectively controlled settlement => +10
+ * - If also within same municipality as an effectively controlled settlement => +10
  */
 function computeContiguityComponent(
     sid: string,

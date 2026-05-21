@@ -193,7 +193,12 @@ export function updateSmugglingRoutes(state: GameState, turn: number): Smuggling
 
         // RBiH Adriatic Coast requires alliance with HRHB (alliance_value > 0)
         if (def.id === 'rbih_adriatic_coast') {
-            const allianceValue = (state.political as any).rbih_hrhb_state?.alliance_value ?? 0;
+            const allianceValueRaw = state.political.rbih_hrhb_state && 'alliance_value' in state.political.rbih_hrhb_state
+                ? state.political.rbih_hrhb_state.alliance_value
+                : undefined;
+            const allianceValue = typeof allianceValueRaw === 'number'
+                ? allianceValueRaw
+                : 0;
             if (allianceValue <= 0) {
                 routeState.disrupted = true;
                 routeState.capacity = Math.max(0, routeState.capacity - SMUGGLING_DISRUPTION_CAPACITY_LOSS);

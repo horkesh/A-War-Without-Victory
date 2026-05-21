@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean low-risk as-any leaf slice
+
+**Type:** Type-only strict-null cleanup across low-risk singleton leaves plus strict-null inventory guard/docs reconciliation. Touched files: `src/map/front_regions.ts`, `src/sim/economy/smuggling_routes.ts`, `src/sim/events/strategic_dimensions.ts`, `src/sim/early_war/alliance_update.ts`, `src/state/territorial_valuation.ts`, `src/state/political_control_init.ts`, and `src/ui/map/data/diplomacyView.ts`. No scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Seven remaining `as_any_casts` were singleton leaves outside the known stop-gated clusters: typed `front_segments`/`rbih_hrhb_state`/IVP/dimension reads, a typed assignment to `state.political.rbih_hrhb_state`, a controller membership guard over an `unknown` JSON mapping value, and one inventory false positive in prose.
+
+**Change:** Removed redundant casts by reading typed fields directly where the interface already carries the property, preserving the legacy `rbih_hrhb_state.alliance_value` compatibility read via an `'alliance_value' in ...` guard and zero fallback, narrowing controller mapping values with `typeof controller === 'string'`, and rewording the territorial valuation comment so the inventory no longer counts prose as `as any`. Added a strict-null progress assertion pinning the seven files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 226 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused vitest run across front regions, economy production, alliance, strategic dimensions, territorial valuation, diplomacy view, and strict-null inventory PASS (170/170); `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`).
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean factions and supply-rights validator any casts
 
 **Type:** Type-only validator cleanup in `src/validate/factions.ts` and `src/validate/supply_rights.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

@@ -3,6 +3,7 @@ import {
     getIvpComponentContributions,
     ivpComponentLabel,
     sortIvpConsequenceIds,
+    type IvpBreakdownInput,
     type IvpComponentKey,
 } from '../../../state/patron_pressure.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -171,8 +172,8 @@ function buildActiveProposals(state: any): DiplomacyProposalView[] {
 }
 
 function buildPressureReasons(state: any): DiplomacyPressureReasonView[] {
-    const ivp = asRecord(state?.political?.international_visibility_pressure);
-    return getIvpComponentContributions(ivp as any)
+    const ivp = asRecord(state?.political?.international_visibility_pressure) as IvpBreakdownInput | undefined;
+    return getIvpComponentContributions(ivp)
         .map((entry) => ({
             key: entry.key,
             label: ivpComponentLabel(entry.key),
