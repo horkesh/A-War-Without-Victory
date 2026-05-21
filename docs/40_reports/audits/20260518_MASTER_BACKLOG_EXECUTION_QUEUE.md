@@ -51,6 +51,12 @@
 |---|---|---|
 | `consolidateCrossCorpsFronts(...)` component scans | Implemented as byte-identical performance reduction | Report: `docs/40_reports/implemented/20260521_CROSS_CORPS_COMPONENT_INDEX.md`. Cross-corps component traversal now uses an index cursor and a per-component `componentEdgesByCorps` map for protected-corps checks. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. Recovery setup `:cross-corps-consolidation` dropped 278.967ms -> 272.419ms, while parent recovery setup moved noisily upward and is not claimed as a wall-clock win. |
 
+## Completed Sector Performance — Zero-assigned coverage attribution
+
+| Lane | Status | Source |
+|---|---|---|
+| `ensureMinimumSectorCoverage(...)` zero-assigned split | Implemented as instrumentation | Report: `docs/40_reports/implemented/20260521_ZERO_ASSIGNED_COVERAGE_ATTRIBUTION.md`. `territory-claim-rescue:zero-assigned` now splits into `:promote-reserve`, `:pull-rear`, `:pull-reserve`, and `:transfer-surplus` labels while preserving early exits. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. New evidence: `:pull-rear` 275.737ms, `:pull-reserve` 264.345ms, `:promote-reserve` 245.887ms, `:transfer-surplus` 19.009ms. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |

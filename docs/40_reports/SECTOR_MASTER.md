@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-21 (cross-corps component edge index)
+**Updated:** 2026-05-21 (zero-assigned coverage attribution)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-21: Zero-assigned coverage attribution (byte-identical)
+
+**Change:** `src/sim/combat/brigade_assignment.ts` `ensureMinimumSectorCoverage(...)` now splits `territory-claim-rescue:zero-assigned` into four deterministic child labels: `:promote-reserve`, `:pull-rear`, `:pull-reserve`, and `:transfer-surplus`. The early-exit control flow is preserved by returning booleans from the timed children and continuing the outer loop at the same points.
+
+**Byte-identity:** The post-change 40w profile produced the same deterministic artifacts as the cross-corps component-index baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, and `watched_operations.json` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_zero_assigned_subsplit_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** In the clean 94-invocation sidecar batch, `zero-assigned` splits into `:pull-rear` 275.737ms, `:pull-reserve` 264.345ms, `:promote-reserve` 245.887ms, and `:transfer-surplus` 19.009ms. Parent `zero-assigned` is effectively stable at 836.103ms -> 831.096ms. Do not optimize `:transfer-surplus` from this evidence.
+
+**Report:** [implemented/20260521_ZERO_ASSIGNED_COVERAGE_ATTRIBUTION.md](implemented/20260521_ZERO_ASSIGNED_COVERAGE_ATTRIBUTION.md)
 
 ---
 

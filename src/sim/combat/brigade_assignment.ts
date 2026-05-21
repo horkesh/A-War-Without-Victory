@@ -1477,9 +1477,8 @@ export function ensureMinimumSectorCoverage(
             const sectorComp = getSectorComponent(sector, componentOf);
 
             // Step 1: promote first connected reserve to assigned
-            {
+            const promotedReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve', () => {
                 const activeCounts = countActiveBrigadesByOsid(formations);
-                let promoted = false;
                 for (let ri = 0; ri < sector.reserve_brigade_ids.length; ri++) {
                     const bid = sector.reserve_brigade_ids[ri]!;
                     const target = pickVacantLocalFrontTarget(bid, sector, activeCounts);
@@ -1487,15 +1486,15 @@ export function ensureMinimumSectorCoverage(
                         sector.reserve_brigade_ids.splice(ri, 1);
                         moveBrigadeToFrontTarget(bid, target.target, activeCounts);
                         sector.assigned_brigade_ids.push(bid);
-                        promoted = true;
-                        break;
+                        return true;
                     }
                 }
-                if (promoted) continue;
-            }
+                return false;
+            });
+            if (promotedReserve) continue;
 
             // Step 1b: pull the nearest reachable same-corps rear brigade.
-            {
+            const pulledRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear', () => {
                 // Hoisted from inside the flatMap callback: formations is read-only
                 // across donor iterations within this step, so the per-donor rebuild
                 // produced identical activeCounts maps. Byte-identical because
@@ -1527,12 +1526,14 @@ export function ensureMinimumSectorCoverage(
                     donor.rear_brigade_ids = (donor.rear_brigade_ids ?? []).filter((candidate) => candidate !== bid);
                     moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
-                    continue;
+                    return true;
                 }
-            }
+                return false;
+            });
+            if (pulledRear) continue;
 
             // Step 1c: if no rear brigade exists, pull the nearest reachable same-corps reserve.
-            {
+            const pulledReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve', () => {
                 // Hoisted from inside the flatMap callback (same justification as Step 1b).
                 const stepActiveCounts = countActiveBrigadesByOsid(formations);
                 const reserveCandidates = corpsSectors
@@ -1559,9 +1560,11 @@ export function ensureMinimumSectorCoverage(
                     donor.reserve_brigade_ids = donor.reserve_brigade_ids.filter((candidate) => candidate !== bid);
                     moveBrigadeToFrontTarget(bid, target, activeCounts);
                     sector.assigned_brigade_ids.push(bid);
-                    continue;
+                    return true;
                 }
-            }
+                return false;
+            });
+            if (pulledReserve) continue;
 
             // Step 2: transfer from surplus within the same connected component only.
             // If a component has no donor, the sector stays under-covered rather than
@@ -1571,7 +1574,7 @@ export function ensureMinimumSectorCoverage(
             // territory at all (returns null), the transfer is skipped and the sector
             // remains understaffed. This is intentional — pulling a physically unreachable
             // brigade across a disconnected front would manufacture false assignment truth.
-            {
+            perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:transfer-surplus', () => {
                 let transferred = false;
 
                 // Pass A: same connected component (original behavior)
@@ -1613,7 +1616,7 @@ export function ensureMinimumSectorCoverage(
                         break;
                     }
                 }
-            }
+            });
         }
     }
 

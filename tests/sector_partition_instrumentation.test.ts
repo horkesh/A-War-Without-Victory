@@ -386,6 +386,10 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'ensureMinimumSectorCoverage:severe-rescue:severe-relief',
             'ensureMinimumSectorCoverage:territory-claim-rescue',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-reserve',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve',
+            'ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:transfer-surplus',
             'ensureMinimumSectorCoverage:territory-claim-rescue:zero-front',
         ];
 

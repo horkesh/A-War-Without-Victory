@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): split zero-assigned coverage attribution
+
+**Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** The current clean sector profile still shows `sealMergedSectorTruth:ensure-coverage` as the largest remaining measured sector owner, with `ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned` at 836.103ms / 1502 calls. Prior work had split zero-assigned only as a parent block, leaving its internal Step 1 / Step 1b / Step 1c / Step 2 distribution unknown.
+
+**Change:** Split `zero-assigned` into deterministic child labels for reserve promotion, rear pull, reserve pull, and surplus transfer. The existing early-exit behavior is preserved by returning booleans from child callbacks and continuing the outer sector loop at the same points.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/sector_coverage_truth_preservation.test.ts tests/sector_severe_undercoverage_rebalance.test.ts --reporter=dot` PASS (32/32); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_zero_assigned_subsplit_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, `watched_operations.json`) are byte-identical at current final state hash `4368f50c00c464ad`. Clean sidecar evidence: `:pull-rear` 275.737ms, `:pull-reserve` 264.345ms, `:promote-reserve` 245.887ms, `:transfer-surplus` 19.009ms.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_ZERO_ASSIGNED_COVERAGE_ATTRIBUTION.md`; `data/derived/_debug/sector_partition_perf_zero_assigned_subsplit_clean.jsonl`; `runs_perf/sector_reconstruction_zero_assigned_subsplit_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
 ## [2026-05-21] perf(sector): index cross-corps component edges
 
 **Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
