@@ -3,6 +3,21 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(roadmap): Batch C strict-null closeout reconciliation
+
+**Type:** Docs-only roadmap/backlog reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Batch C is now fully implemented through C0-C12 and the previous roadmap/backlog text still described only the C0-C7 partial floor. Current disk truth from `node tools/diagnostics/strict_null_inventory.cjs` is `2 / 28 / 319 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Change:** Reconciled docs only:
+
+- `docs/plans/MASTER_ROADMAP.md` now marks Batch C schema-boundary validation as closed, records all 12 plan-scoped files at zero `as_unknown_casts`, and records the post-Batch-C floor of `2 / 28 / 319 / 11 / 38 / 463`.
+- `docs/40_reports/CONSOLIDATED_BACKLOG.md` now records Batch C C0-C12 closeout, the `as_unknown_casts` 80 -> 28 delta, and the remaining strict-null categories still routed to the post-FactionId roadmap.
+
+**Verification:** `git diff --check` clean. No typecheck/baselines required for docs-only reconciliation; source and test verification for Batch C closeout was completed before the prior push.
+
+---
+
 ## [2026-05-21] docs(roadmap): Batch C0-C7 strict-null + Army HQ status reconciliation
 
 **Type:** Docs-only roadmap/backlog reconciliation. No source code, tests, generated saves, scenario data, save schema, IPC contract, canon text, or `FORAWWV.md` changed.
