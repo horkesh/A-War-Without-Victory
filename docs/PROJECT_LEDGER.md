@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean runtime non-null tail
+
+**Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, operation behavior, combat math, negotiation rules, or anomaly semantics changed.
+
+**Why:** The strict-null inventory still had a small, safe dot/index non-null assertion tail in runtime code where local guards or initializer helpers already proved the value shape.
+
+**Change:** Replaced the remaining inventory-counted dot/index non-null assertions in `anomaly_detector.ts`, `scenario_runner.ts`, `counter_offer_generator.ts`, and `displacement_takeover.ts` with explicit locals and guards. Added a strict-null progress test pinning those four files at zero for `non_null_assertions_dot` and `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/counter_offer_generator.test.ts tests/resolve_counter_offers_phase.test.ts tests/anomaly_detector_sector_subtype.test.ts tests/territorial_anomaly_sector_coverage_truth.test.ts tests/brigade_stacking_sector_truth.test.ts --reporter=dot` PASS (82/82); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 180`, `non_null_assertions_dot 8`, `non_null_assertions_index 32`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL.md`.
+
+---
 ## [2026-05-21] perf(sector): split zero-assigned coverage attribution
 
 **Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

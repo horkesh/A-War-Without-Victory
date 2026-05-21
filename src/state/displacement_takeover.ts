@@ -226,7 +226,8 @@ function getOsidCensusPopulation(rec: SettlementRecord | undefined): number {
 function getOsidCensusHostileShare(rec: SettlementRecord | undefined, fromFaction: FactionId): number | null {
     const total = getOsidCensusPopulation(rec);
     if (total <= 0) return null;
-    const props = rec!.properties!;
+    const props = rec?.properties;
+    if (!props) return null;
     const b = typeof props.population_bosniaks === 'number' ? (props.population_bosniaks as number) : 0;
     const s = typeof props.population_serbs === 'number' ? (props.population_serbs as number) : 0;
     const c = typeof props.population_croats === 'number' ? (props.population_croats as number) : 0;
@@ -924,4 +925,3 @@ export function processDisplacementTakeover(
     });
     return report;
 }
-

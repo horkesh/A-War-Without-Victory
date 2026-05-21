@@ -57,6 +57,12 @@
 |---|---|---|
 | `ensureMinimumSectorCoverage(...)` zero-assigned split | Implemented as instrumentation | Report: `docs/40_reports/implemented/20260521_ZERO_ASSIGNED_COVERAGE_ATTRIBUTION.md`. `territory-claim-rescue:zero-assigned` now splits into `:promote-reserve`, `:pull-rear`, `:pull-reserve`, and `:transfer-surplus` labels while preserving early exits. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. New evidence: `:pull-rear` 275.737ms, `:pull-reserve` 264.345ms, `:promote-reserve` 245.887ms, `:transfer-surplus` 19.009ms. |
 
+## Completed Strict-Null Runtime Non-Null Tail
+
+| Lane | Status | Source |
+|---|---|---|
+| Runtime dot/index non-null assertion cleanup | Implemented as behavior-equivalent type-safety cleanup | Report: `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL.md`. Four runtime files (`anomaly_detector.ts`, `scenario_runner.ts`, `counter_offer_generator.ts`, `displacement_takeover.ts`) now contribute zero inventory-counted dot/index non-null assertions. Global strict-null floor is now `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 180`, `non_null_assertions_dot 8`, `non_null_assertions_index 32`, `optional_fields_game_state 473`. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |

@@ -892,9 +892,10 @@ function settlementIdsFromFrontDescriptors(
         if (d.stability !== stabilityFilter) continue;
         for (const eid of d.edge_ids) {
             const parts = eid.split('__');
-            if (parts.length >= 2) {
-                set.add(parts[0]!);
-                set.add(parts[1]!);
+            const [left, right] = parts;
+            if (left !== undefined && right !== undefined) {
+                set.add(left);
+                set.add(right);
             }
         }
     }
@@ -1532,10 +1533,12 @@ export async function buildScenarioStartupState(
 
     if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
         const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
-        state.political.coercion_pressure_by_municipality = {};
+        const coercionPressure: Record<string, number> = {};
         for (const munId of keys) {
-            state.political.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
+            const pressure = scenario.coercion_pressure_by_municipality[munId];
+            if (pressure !== undefined) coercionPressure[munId] = pressure;
         }
+        state.political.coercion_pressure_by_municipality = coercionPressure;
     }
 
     let oobCreated = false;
@@ -1805,8 +1808,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Phase H2.2: snapshot initial formations (id -> kind) for formation_delta at end-of-run.
         const initialFormationsSnapshot: Record<string, string> = {};
         const initialFormationFatigue: Record<string, number> = {};
-        for (const id of Object.keys(state.military.formations ?? {}).sort(strictCompare)) {
-            const f = state.military.formations![id];
+        const formations = state.military.formations ?? {};
+        for (const id of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[id];
+            if (!f) continue;
             initialFormationsSnapshot[id] = (f.kind as string) ?? 'brigade';
             const ops = (f as { ops?: { fatigue?: number } }).ops;
             initialFormationFatigue[id] =

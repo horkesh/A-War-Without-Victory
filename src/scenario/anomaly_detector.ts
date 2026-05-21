@@ -148,7 +148,9 @@ function isLoanedArmyHqRearSupportStack(
     const sectorIds = [...new Set(assignments.map((assignment) => assignment.sector_id as string))];
     if (sectorIds.length !== 1) return false;
 
-    const sector = sectors[sectorIds[0]!] ?? null;
+    const [sectorId] = sectorIds;
+    if (!sectorId) return false;
+    const sector = sectors[sectorId] ?? null;
     if (!sector) return false;
     if (!(sector.territory_osids ?? []).includes(osid)) return false;
     if (getSectorFrontOsids(sector).has(osid)) return false;
@@ -998,12 +1000,16 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
         // Exempt: all brigades at this OSID are frontline brigades of the same sector,
         // and that sector canonically covers this OSID.
         const assignments = brigades.map((bid) => formations[bid]?.assignment ?? null);
+        const frontSectorIds = assignments.flatMap((assignment) =>
+            assignment?.kind === 'sector'
+            && assignment.role === 'front'
+            && typeof assignment.sector_id === 'string'
+                ? [assignment.sector_id]
+                : []
+        );
         const sameSectorFrontStack = assignments.length > 0
-            && assignments.every((assignment) =>
-                assignment?.kind === 'sector'
-                && assignment.role === 'front'
-                && typeof assignment.sector_id === 'string')
-            && new Set(assignments.map((assignment) => assignment!.sector_id)).size === 1;
+            && frontSectorIds.length === assignments.length
+            && new Set(frontSectorIds).size === 1;
         if (sameSectorFrontStack) {
             const sectorId = assignments[0]?.sector_id;
             if (typeof sectorId === 'string' && osidSectorCoverage.get(osid)?.has(sectorId)) {

@@ -172,12 +172,13 @@ export function resolveCounterOffers(state: GameState): CounterOfferResolutionRe
 
     const playerFaction = state.meta.player_faction ?? 'RBiH';
     const created: CounterOffer[] = [];
+    const lastCounterTurn = status.last_counter_turn ?? (status.last_counter_turn = {});
     for (const faction of COUNTER_FACTIONS) {
         if (faction === playerFaction) continue;
         const counter = generateCounterOffer(state, faction, parent, envelope);
         if (!counter) continue;
         created.push(counter);
-        status.last_counter_turn![faction] = state.meta.turn;
+        lastCounterTurn[faction] = state.meta.turn;
         neg.pending_counter_offers = sortCounterOffers([...(neg.pending_counter_offers ?? []), counter]);
     }
 
@@ -221,7 +222,8 @@ export function submitPlayerCounterOffer(state: GameState, payload: PlayerCounte
         created_turn: state.meta.turn,
     };
     neg.pending_counter_offers = sortCounterOffers([...(neg.pending_counter_offers ?? []), offer]);
-    status.last_counter_turn![faction] = state.meta.turn;
+    const lastCounterTurn = status.last_counter_turn ?? (status.last_counter_turn = {});
+    lastCounterTurn[faction] = state.meta.turn;
     return offer;
 }
 
