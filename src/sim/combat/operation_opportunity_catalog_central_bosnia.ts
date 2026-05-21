@@ -17,9 +17,11 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_3rd_corps';
+const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_7th_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
 
 const STAGING_TRAVNIK = 'op:travnik:travnik_2';
@@ -39,12 +41,6 @@ const VLASIC_SKENDER_VAKUF_OBJECTIVES: readonly string[] = [
     'op:skender_vakuf:knezevo_2',
 ];
 
-const BUGOJNO_SUPPORT_OBJECTIVES: readonly string[] = [
-    'op:donji_vakuf:komar_2',
-    'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:donji_vakuf_2',
-];
-
 const VLASIC_STAGING_ANCHORS: readonly string[] = [
     STAGING_TRAVNIK,
     STAGING_TURBE,
@@ -60,6 +56,38 @@ const VLASIC_READINESS_FLOOR = 0.36;
 const VLASIC_AXIS_COORDINATION_FLOOR = 0.35;
 const VLASIC_SUPPLY_PRESSURE_CEILING = 90;
 const FEDERATION_ALLIANCE_FLOOR = 0.50;
+
+const DONJI_VAKUF_STAGING_GRACANICA = 'op:bugojno:gracanica';
+const DONJI_VAKUF_STAGING_KOPCIC = 'op:bugojno:kopcic_2';
+const DONJI_VAKUF_STAGING_ANCHORS: readonly string[] = [
+    DONJI_VAKUF_STAGING_GRACANICA,
+    DONJI_VAKUF_STAGING_KOPCIC,
+];
+
+const DONJI_VAKUF_NORTHERN_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:babin_potok_2',
+    'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:jemanlici',
+    'op:donji_vakuf:komar_2',
+    'op:donji_vakuf:korenici',
+];
+
+const DONJI_VAKUF_SOUTHERN_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:kutanja',
+    'op:donji_vakuf:oborci_2',
+    'op:donji_vakuf:pribraca_2',
+    'op:donji_vakuf:prusac_2',
+    'op:donji_vakuf:torlakovac_2',
+];
+
+const DONJI_VAKUF_OBJECTIVES: readonly string[] = [
+    ...DONJI_VAKUF_NORTHERN_OBJECTIVES,
+    ...DONJI_VAKUF_SOUTHERN_OBJECTIVES,
+];
+
+const DONJI_VAKUF_READINESS_FLOOR = 0.36;
+const DONJI_VAKUF_AXIS_COORDINATION_FLOOR = 0.35;
+const DONJI_VAKUF_SUPPLY_PRESSURE_CEILING = 90;
 
 const KUPRES_CINCAR_STAGING_LIVNO = 'op:livno:livno_2';
 const KUPRES_CINCAR_STAGING_TOMISLAVGRAD = 'op:tomislavgrad:tomislavgrad_2';
@@ -131,18 +159,28 @@ const VLASIC_RIDGE_PROBE_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
-const BUGOJNO_SUPPORT_AXES: readonly OpportunityAxisDef[] = [
+const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
     {
-        axis_id: 'vlasic_bugojno_support',
-        name: 'Bugojno Support Axis',
-        corps: PRIMARY_CORPS,
+        axis_id: 'donji_vakuf_northern_line',
+        name: 'Donji Vakuf Northern Line',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
         brigades: [
             'arbih_705th_slavna_mountain' as FormationId,
             'arbih_707th_slavna_mountain' as FormationId,
-            'arbih_717th_slavna_mountain' as FormationId,
         ],
-        objectives: BUGOJNO_SUPPORT_OBJECTIVES,
-        staging_osid: 'op:bugojno:gracanica',
+        objectives: DONJI_VAKUF_NORTHERN_OBJECTIVES,
+        staging_osid: DONJI_VAKUF_STAGING_GRACANICA,
+    },
+    {
+        axis_id: 'donji_vakuf_southern_line',
+        name: 'Donji Vakuf Southern Line',
+        corps: DONJI_VAKUF_PRIMARY_CORPS,
+        brigades: [
+            'arbih_717th_slavna_mountain' as FormationId,
+            'arbih_770th_slavna_mountain' as FormationId,
+        ],
+        objectives: DONJI_VAKUF_SOUTHERN_OBJECTIVES,
+        staging_osid: DONJI_VAKUF_STAGING_KOPCIC,
     },
 ];
 
@@ -268,6 +306,83 @@ const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
     if (turn < 154) return { green: false, reason: 'late-winter mountain conditions still constrain ridge action' };
     return { green: true, reason: 'spring mountain conditions are acceptable for ridge action' };
 };
+
+const dateWindowDonjiVakuf: AxisPredicate = (_state, turn) => {
+    if (turn < 177) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
+    if (turn > 180) return { green: false, reason: 'September 1995 Donji Vakuf window has closed' };
+    return { green: true, reason: 'within September 1995 Donji Vakuf operation window' };
+};
+
+const allianceContextDonjiVakuf: AxisPredicate = (state) => {
+    if (!isWesternTheaterRuptured(state)) {
+        return { green: false, reason: 'Operation Storm theater rupture has not opened the western collapse window' };
+    }
+    return { green: true, reason: 'Operation Storm theater rupture opens the western collapse window' };
+};
+
+const stagingAccessDonjiVakuf: AxisPredicate = (state) => {
+    for (const osid of DONJI_VAKUF_STAGING_ANCHORS) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl !== null && ctrl !== 'RBiH') {
+            return { green: false, reason: 'Bugojno staging anchor no longer held by 7th Corps' };
+        }
+    }
+    return { green: true, reason: 'Bugojno staging anchors held for the Donji Vakuf operation' };
+};
+
+const enemyWeaknessDonjiVakuf: AxisPredicate = (state) => {
+    let enemyHeld = 0;
+    for (const osid of DONJI_VAKUF_OBJECTIVES) {
+        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
+        if (ctrl === 'RS') enemyHeld++;
+    }
+    if (enemyHeld === 0) {
+        return { green: false, reason: 'no Donji Vakuf objectives remain in enemy hands' };
+    }
+    return { green: true, reason: 'Donji Vakuf objectives remain in enemy hands' };
+};
+
+const corpsReadinessDonjiVakuf: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[DONJI_VAKUF_PRIMARY_CORPS]) {
+        return { green: false, reason: '7th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, DONJI_VAKUF_PRIMARY_CORPS as FormationId);
+    if (traits.operation_readiness < DONJI_VAKUF_READINESS_FLOOR) {
+        return { green: false, reason: '7th Corps readiness below Donji Vakuf operation floor' };
+    }
+    return { green: true, reason: '7th Corps readiness sufficient for Donji Vakuf operation' };
+};
+
+const logisticsDonjiVakuf: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    if (pressure >= DONJI_VAKUF_SUPPLY_PRESSURE_CEILING) {
+        return { green: false, reason: 'RBiH supply pressure too high for Donji Vakuf operation' };
+    }
+    return { green: true, reason: 'RBiH supply pressure within Donji Vakuf margin' };
+};
+
+const commanderConfidenceDonjiVakuf: AxisPredicate = (state) => {
+    const commanderState = state.military.corps_command?.[DONJI_VAKUF_PRIMARY_CORPS]?.commander_state;
+    if (!commanderState) {
+        return { green: false, reason: '7th Corps commander state unavailable' };
+    }
+    return { green: true, reason: '7th Corps commander state present' };
+};
+
+const forceQualityDonjiVakuf: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[DONJI_VAKUF_PRIMARY_CORPS]) {
+        return { green: false, reason: '7th Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, DONJI_VAKUF_PRIMARY_CORPS as FormationId);
+    if (traits.axis_coordination < DONJI_VAKUF_AXIS_COORDINATION_FLOOR) {
+        return { green: false, reason: '7th Corps axis coordination below Donji Vakuf threshold' };
+    }
+    return { green: true, reason: '7th Corps axis coordination supports Donji Vakuf' };
+};
+
+const weatherSeasonDonjiVakuf: AxisPredicate = () => (
+    { green: true, reason: 'September conditions are acceptable for Donji Vakuf' }
+);
 
 const dateWindowKupresCincar: AxisPredicate = (_state, turn) => {
     if (turn < 132) return { green: false, reason: 'autumn 1994 Kupres/Cincar window not yet open' };
@@ -458,17 +573,57 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
             axes: VLASIC_RIDGE_PROBE_AXES,
             staging_osid: STAGING_TURBE,
         },
-        {
-            variant_id: 'bugojno_support',
-            name: 'Bugojno Support Axis',
-            axes: BUGOJNO_SUPPORT_AXES,
-            staging_osid: 'op:bugojno:gracanica',
-        },
     ],
+    staff_recommendation: 'approve',
+};
+
+export const DONJI_VAKUF_95_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'donji_vakuf_95',
+    name: 'Operation Donji Vakuf 95',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: DONJI_VAKUF_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: DONJI_VAKUF_AXES,
+    staging_osid: DONJI_VAKUF_STAGING_GRACANICA,
+    planning_duration: 3,
+    min_attack_outcome: 'repulsed',
+    citations: [
+        'docs/40_reports/audits/20260521_OPERATIONS_EXPERT_BB_CODE_GAPS.md - Donji Vakuf 1995 ARBiH 7th Corps catalog gap',
+        'data/source/calibration/painted_control_apr1995.json + oct1995.json - Donji Vakuf dated-control references',
+        'docs/40_reports/audits/20260522_OPS_FORCE_TRAJECTORY_GATING.md - lowest-risk catalog-fill recommendation after opportunity lifecycle tracing',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowDonjiVakuf,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessDonjiVakuf,
+        logistics: logisticsDonjiVakuf,
+        staging_access: stagingAccessDonjiVakuf,
+        weather_season: weatherSeasonDonjiVakuf,
+        commander_confidence: commanderConfidenceDonjiVakuf,
+        enemy_weakness: enemyWeaknessDonjiVakuf,
+        alliance_context: allianceContextDonjiVakuf,
+        force_quality: forceQualityDonjiVakuf,
+    },
     staff_recommendation: 'approve',
 };
 
 export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     KUPRES_CINCAR_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
+    DONJI_VAKUF_95_OPPORTUNITY,
 ];

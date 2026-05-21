@@ -1,5 +1,12 @@
 # AWWV Calibration Master Reference
 
+## Donji Vakuf 95 opportunity catalog fill (2026-05-22)
+
+- `donji_vakuf_95` is now a T1 Central Bosnia operation opportunity for ARBiH 7th Corps in the September 1995 window.
+- It targets the ten Donji Vakuf OSIDs that are mostly RS-held in the Apr 1995 painted map and RBiH-held in the Oct 1995 painted map, gated on Operation Storm theater rupture, Bugojno staging, live RS-held objectives, 7th Corps readiness, RBiH supply, commander state, and axis coordination.
+- Single-owner cleanup: `vlasic_ridge_95` no longer exposes the spring `bugojno_support` redirect variant for Donji Vakuf cells.
+- Report: `docs/40_reports/implemented/20260522_DONJI_VAKUF_95_OPPORTUNITY.md`.
+
 ## Opportunity lifecycle trace (2026-05-22)
 
 - `state.military.operation_opportunity_traces` now records compact Operation Opportunity lifecycle rows for blocked, eligible, expired, decision, spawn-failed, approved, and T3 no-offensive outcomes.

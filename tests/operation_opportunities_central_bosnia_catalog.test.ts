@@ -11,6 +11,7 @@ import {
 } from '../src/sim/combat/operation_opportunities.js';
 import {
     CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
+    DONJI_VAKUF_95_OPPORTUNITY,
     KUPRES_CINCAR_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_central_bosnia.js';
@@ -40,6 +41,31 @@ const VLASIC_BRIGADES = [
     'arbih_727th_slavna',
     'arbih_737th_muslim_light',
     'arbih_705th_slavna_mountain',
+];
+
+const DONJI_VAKUF_STAGING_ANCHORS = [
+    'op:bugojno:gracanica',
+    'op:bugojno:kopcic_2',
+];
+
+const DONJI_VAKUF_OBJECTIVES = [
+    'op:donji_vakuf:babin_potok_2',
+    'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:jemanlici',
+    'op:donji_vakuf:komar_2',
+    'op:donji_vakuf:korenici',
+    'op:donji_vakuf:kutanja',
+    'op:donji_vakuf:oborci_2',
+    'op:donji_vakuf:pribraca_2',
+    'op:donji_vakuf:prusac_2',
+    'op:donji_vakuf:torlakovac_2',
+];
+
+const DONJI_VAKUF_BRIGADES = [
+    'arbih_705th_slavna_mountain',
+    'arbih_707th_slavna_mountain',
+    'arbih_717th_slavna_mountain',
+    'arbih_770th_slavna_mountain',
 ];
 
 const KUPRES_STAGING_ANCHORS = [
@@ -150,6 +176,94 @@ function buildVlasicState(opts: {
     } as unknown as GameState;
 }
 
+function buildDonjiVakufState(opts: {
+    turn: number;
+    stormRuptured?: boolean;
+    stagingHeld?: boolean;
+    objectivesHeldByRs?: boolean;
+    addCommanderState?: boolean;
+    supplyPressure?: number;
+    axisCoordinationLow?: boolean;
+}): GameState {
+    const cmd: CorpsCommandState = {
+        command_span: 4,
+        subordinate_count: 4,
+        og_slots: 1,
+        active_ogs: [],
+        corps_exhaustion: 8,
+        stance: 'offensive',
+        active_operations: [],
+        commander_state: (opts.addCommanderState ?? true)
+            ? { current_plan: null, decision_trace: null, operation_history: [] } as unknown as CorpsCommandState['commander_state']
+            : undefined,
+    };
+
+    const controllers: Record<string, FactionId> = {};
+    for (const osid of DONJI_VAKUF_STAGING_ANCHORS) {
+        controllers[osid] = (opts.stagingHeld ?? true) ? 'RBiH' : 'RS';
+    }
+    for (const osid of DONJI_VAKUF_OBJECTIVES) {
+        controllers[osid] = (opts.objectivesHeldByRs ?? true) ? 'RS' : 'RBiH';
+    }
+
+    const formations: Record<string, unknown> = {};
+    for (const id of DONJI_VAKUF_BRIGADES) {
+        formations[id] = {
+            id,
+            name: id,
+            faction: 'RBiH',
+            own_corps_cmd: 'arbih_7th_corps',
+            strength: 1350,
+            officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
+            cohesion: opts.axisCoordinationLow ? 34 : 68,
+            morale: opts.axisCoordinationLow ? 40 : 70,
+            composition: {
+                tanks: 0,
+                artillery: 1,
+                tank_condition: { operational: 0 },
+                artillery_condition: { operational: 1 },
+            },
+        };
+    }
+
+    return {
+        schema_version: 0,
+        meta: {
+            turn: opts.turn,
+            seed: 'donji-vakuf-test',
+            phase: 'war',
+            operation_storm_turn: (opts.stormRuptured ?? true) ? 172 : undefined,
+        },
+        factions: [{
+            id: 'RBiH',
+            capability_profile: {
+                training_quality: opts.axisCoordinationLow ? 0.3 : 0.7,
+                organizational_maturity: opts.axisCoordinationLow ? 0.3 : 0.7,
+                equipment_access: 0.55,
+                equipment_operational: 0.55,
+                doctrine_effectiveness: { ATTACK: 0.62, COORDINATED_STRIKE: 0.62 },
+            },
+        }],
+        military: {
+            formations,
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            corps_command: { arbih_7th_corps: cmd },
+            faction_officer_maturity: { RBiH: opts.axisCoordinationLow ? 1.5 : 3.5 },
+            event_last_fired_turn: (opts.stormRuptured ?? true) ? { operation_storm_1995: 172 } : {},
+        },
+        political: {
+            political_controllers: controllers,
+            war_supply_pressure: { RBiH: opts.supplyPressure ?? 55 },
+            war_alliance_rbih_hrhb: 0.65,
+        } as unknown as GameState['political'],
+        displacement: {} as GameState['displacement'],
+    } as unknown as GameState;
+}
+
 function buildKupresCincarState(opts: {
     turn: number;
     alliance?: number;
@@ -238,9 +352,11 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES).toEqual([
             KUPRES_CINCAR_94_OPPORTUNITY,
             VLASIC_RIDGE_95_OPPORTUNITY,
+            DONJI_VAKUF_95_OPPORTUNITY,
         ]);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'kupres_cincar_94')).toBe(true);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'vlasic_ridge_95')).toBe(true);
+        expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'donji_vakuf_95')).toBe(true);
         expect(KUPRES_CINCAR_94_OPPORTUNITY.family).toBe('central_bosnia_vlasic');
         expect(KUPRES_CINCAR_94_OPPORTUNITY.tier).toBe('T1');
         expect(KUPRES_CINCAR_94_OPPORTUNITY.faction).toBe('HRHB');
@@ -252,7 +368,11 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(VLASIC_RIDGE_95_OPPORTUNITY.faction).toBe('RBiH');
         expect(VLASIC_RIDGE_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
         expect(VLASIC_RIDGE_95_OPPORTUNITY.variants?.map(v => v.variant_id).sort())
-            .toEqual(['bugojno_support', 'ridge_probe']);
+            .toEqual(['ridge_probe']);
+        expect(DONJI_VAKUF_95_OPPORTUNITY.family).toBe('central_bosnia_vlasic');
+        expect(DONJI_VAKUF_95_OPPORTUNITY.tier).toBe('T1');
+        expect(DONJI_VAKUF_95_OPPORTUNITY.faction).toBe('RBiH');
+        expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_7th_corps');
     });
 
     it('surfaces Kupres/Cincar in autumn 1994 as a dependency opportunity', () => {
@@ -316,7 +436,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(proposal!.status).toBe('eligible_pending_review');
         expect(proposal!.last_axis_evaluation).toHaveLength(10);
         expect(proposal!.redirect_variants?.map(v => v.variant_id).sort())
-            .toEqual(['bugojno_support', 'ridge_probe']);
+            .toEqual(['ridge_probe']);
         expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, evaluateAxes(state, 156, VLASIC_RIDGE_95_OPPORTUNITY)))
             .toBe(true);
     });
@@ -388,6 +508,55 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(redirected?.redirect_variant_id).toBe('ridge_probe');
         expect(redirectState.military.corps_command!.arbih_3rd_corps.active_operations[0].axes)
             .toHaveLength(1);
+    });
+
+    it('surfaces Donji Vakuf 95 after Storm rupture when 7th Corps staging and live RS objectives hold', () => {
+        const state = buildDonjiVakufState({ turn: 178 });
+        runOpportunityEvaluationStep(state, 178);
+
+        const proposal = state.military.operation_opportunities
+            ?.find(p => p.opportunity_id === 'donji_vakuf_95');
+
+        expect(proposal).toBeDefined();
+        expect(proposal!.proposal_id).toBe('OPP_178_donji_vakuf_95');
+        expect(proposal!.status).toBe('eligible_pending_review');
+        expect(proposal!.last_axis_evaluation).toHaveLength(10);
+        expect(isOpportunityEligible(
+            DONJI_VAKUF_95_OPPORTUNITY,
+            evaluateAxes(state, 178, DONJI_VAKUF_95_OPPORTUNITY),
+        )).toBe(true);
+    });
+
+    it('blocks Donji Vakuf 95 outside window, pre-Storm, lost staging, or no enemy-held objectives', () => {
+        const cases = [
+            buildDonjiVakufState({ turn: 176 }),
+            buildDonjiVakufState({ turn: 181 }),
+            buildDonjiVakufState({ turn: 178, stormRuptured: false }),
+            buildDonjiVakufState({ turn: 178, stagingHeld: false }),
+            buildDonjiVakufState({ turn: 178, objectivesHeldByRs: false }),
+        ];
+
+        for (const state of cases) {
+            runOpportunityEvaluationStep(state, state.meta.turn);
+            expect((state.military.operation_opportunities ?? [])
+                .find(p => p.opportunity_id === 'donji_vakuf_95')).toBeUndefined();
+        }
+    });
+
+    it('spawns Donji Vakuf 95 through the canonical opportunity decision path', () => {
+        const state = buildDonjiVakufState({ turn: 178 });
+        runOpportunityEvaluationStep(state, 178);
+        const proposalId = buildProposalId('donji_vakuf_95', 178);
+
+        const approved = applyOpportunityDecision(state, 178, proposalId, 'approve');
+
+        expect(approved?.status).toBe('approved');
+        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].name)
+            .toBe('Operation Donji Vakuf 95');
+        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].axes![0].objectives)
+            .toEqual(DONJI_VAKUF_OBJECTIVES.slice(0, 5));
+        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].axes![1].objectives)
+            .toEqual(DONJI_VAKUF_OBJECTIVES.slice(5));
     });
 
     it('links partial AAR exit class deterministically for failed/partial outcomes', () => {

@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] feat(opportunity): add Donji Vakuf 95 catalog entry
+
+**Type:** Operation Opportunity catalog behavior. No scenario data, painted-control target data, OOB source rows, save schema, combat math, or outcome tuning changed.
+
+**Why:** Fresh painted-target work and BB gap audits identify Donji Vakuf 1995 as the lowest-risk missing late-war catalog entry: ten `op:donji_vakuf:*` OSIDs are mostly RS-held in Apr 1995 and RBiH-held in Oct 1995, but no existing opportunity targeted them through ARBiH 7th Corps.
+
+**Change:** Added `donji_vakuf_95` to the Central Bosnia opportunity family as a T1 RBiH opportunity for `arbih_7th_corps` in turns 177-180. The entry is gated on Operation Storm theater rupture, Bugojno staging access, live RS-held Donji Vakuf objectives, 7th Corps readiness, RBiH supply pressure, commander state, and axis coordination. Retired the `vlasic_ridge_95` `bugojno_support` redirect variant so `komar_2`, `prusac_2`, and `donji_vakuf_2` have a single Donji Vakuf owner instead of a spring Vlasic redirect path.
+
+**Verification:** TDD red run failed first because `donji_vakuf_95` was absent and no proposal spawned. Green verification: `npx.cmd vitest run tests/operation_opportunities_central_bosnia_catalog.test.ts --reporter=dot` PASS (12/12); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS ("Baseline regression: all scenarios match"); `git diff --check` clean aside from CRLF normalization warnings on the edited central-Bosnia catalog/test/design files.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_DONJI_VAKUF_95_OPPORTUNITY.md`.
+
+---
 ## [2026-05-22] feat(diagnostics): persist opportunity lifecycle trace
 
 **Type:** Diagnostic state/output observability. Adds optional `state.military.operation_opportunity_traces`; no operation eligibility, operation decisions, scenario data, combat math, or tuning changed.
