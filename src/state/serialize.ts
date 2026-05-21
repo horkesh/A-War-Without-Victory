@@ -23,7 +23,7 @@ export function serializeState(state: GameState): string {
 }
 
 export function deserializeState(payload: string): GameState {
-    const parsed = JSON.parse(payload) as unknown;
+    const parsed: unknown = JSON.parse(payload);
     const migrated = migrateState(parsed);
     assertShapeNoErrors(
         validateGameStateShape(migrated, { requireVersion: CURRENT_SCHEMA_VERSION }),
@@ -93,7 +93,15 @@ function migrateState(raw: unknown): GameState {
         throw new Error('Cannot migrate: state is not an object');
     }
 
-    const candidate = structuredClonePolyfill(raw) as Record<string, any>;
+    // BATCH C §3.8: candidate carries both the typed GameState shape (consumed
+    // by applyMigrations + return) and the free-form Record<string, any> shape
+    // needed for legacy-field rescue/sweep + ad-hoc `delete candidate.brigade_aor`
+    // path. Declaring the intersection lets us drop the prior pair of widening
+    // casts at the applyMigrations call + the return statement without changing
+    // applyMigrations' signature. The cast itself is from `unknown`
+    // (structuredClonePolyfill propagates `T = unknown` through), so it does
+    // not introduce a new boundary widening site.
+    const candidate = structuredClonePolyfill(raw) as GameState & Record<string, any>;
     const version = candidate.schema_version;
     if (version !== undefined && (!Number.isInteger(version) || version < 0 || version > CURRENT_SCHEMA_VERSION)) {
         throw new Error(`Unsupported schema_version ${String(version)}`);
@@ -145,7 +153,7 @@ function migrateState(raw: unknown): GameState {
         'displacement_recent_by_turn',
     ]);
 
-    applyMigrations(candidate as unknown as GameState);
+    applyMigrations(candidate);
     canonicalizeCurrentFields(candidate);
 
     delete candidate.brigade_aor;
@@ -192,7 +200,7 @@ function migrateState(raw: unknown): GameState {
         'displacement_recent_by_turn',
     ]);
 
-    return candidate as unknown as GameState;
+    return candidate;
 }
 
 function strictCompare(a: string, b: string): number {
