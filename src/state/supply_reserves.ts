@@ -313,12 +313,18 @@ export function updateSupplyReserves(
     }
     // Cap total siege drain per faction to prevent early-war cascade
     for (const fid of factionIds) {
-        const sd = siegeDrainByFaction[fid]!;
+        const sd = siegeDrainByFaction[fid];
+        if (!sd) continue;
         sd.general = Math.min(MAX_SIEGE_DRAIN_GENERAL_PER_FACTION, sd.general);
         sd.heavy = Math.min(MAX_SIEGE_DRAIN_HEAVY_PER_FACTION, sd.heavy);
     }
 
     const entries: SupplyReservesFactionEntry[] = [];
+    const generalSupplyReserve = state.military.general_supply_reserve;
+    const heavyMunitionsReserve = state.military.heavy_munitions_reserve;
+    if (!generalSupplyReserve || !heavyMunitionsReserve) {
+        throw new Error('Supply reserve state failed to initialize');
+    }
 
     for (const fid of factionIds) {
         const factionKey: FactionId = fid;
@@ -369,22 +375,24 @@ export function updateSupplyReserves(
         const totalIncomeHeavy = (productionHeavy + patronAidHeavy) * embargoFactorHeavy;
 
         // Update reserves
-        const prevGeneral = state.military.general_supply_reserve![factionKey] ?? INIT_GENERAL_SUPPLY_RESERVE;
-        const prevHeavy = state.military.heavy_munitions_reserve![factionKey] ?? INIT_HEAVY_MUNITIONS_RESERVE;
+        const prevGeneral = generalSupplyReserve[factionKey] ?? INIT_GENERAL_SUPPLY_RESERVE;
+        const prevHeavy = heavyMunitionsReserve[factionKey] ?? INIT_HEAVY_MUNITIONS_RESERVE;
 
         const reserveCap = EMBARGO_SUPPLY_CAP[fid] ?? 100;
-        state.military.general_supply_reserve![factionKey] = Math.max(0, Math.min(reserveCap,
+        const generalSupply = Math.max(0, Math.min(reserveCap,
             prevGeneral - maintenanceDrain - siegeDrain.general + totalIncomeGeneral
         ));
+        generalSupplyReserve[factionKey] = generalSupply;
         const heavyCap = EMBARGO_HEAVY_CAP[fid] ?? 100;
-        state.military.heavy_munitions_reserve![factionKey] = Math.max(0, Math.min(heavyCap,
+        const heavyMunitions = Math.max(0, Math.min(heavyCap,
             prevHeavy - heavyMaintenanceDrain - siegeDrain.heavy + totalIncomeHeavy
         ));
+        heavyMunitionsReserve[factionKey] = heavyMunitions;
 
         entries.push({
             faction_id: fid,
-            general_supply: state.military.general_supply_reserve![factionKey],
-            heavy_munitions: state.military.heavy_munitions_reserve![factionKey],
+            general_supply: generalSupply,
+            heavy_munitions: heavyMunitions,
             maintenance_drain: maintenanceDrain,
             heavy_maintenance_drain: heavyMaintenanceDrain,
             production_income_general: productionGeneral,
