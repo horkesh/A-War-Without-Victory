@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean entrypoint initializer casts
+
+**Type:** Strict-null cleanup and smoke harness repair. Entrypoint initializer refactor; no live gameplay entrypoint, scenario behavior, save schema, or output tuning changed.
+
+**Why:** `src/cli/sim_run.ts` and `src/index.ts` used six total `as any` casts to assemble minimal `GameState` initializers. Verification also exposed that the demoted smoke harness in `src/index.ts` serialized without canonical political-control initialization.
+
+**Change:** Imported `GameState` as a type in both entrypoints and constructed their minimal state domains directly. Added a strict-null progress assertion pinning both files at zero for `as_any_casts`. Updated `src/index.ts` to load the settlement graph and run `prepareNewGameState` before legacy `executeTurn`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (80/80); `npm.cmd run typecheck` PASS; `npx.cmd tsx src/index.ts > $env:TEMP\awwv_index_smoke.json` PASS (`exit=0`). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 153`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_ENTRYPOINT_INITIALIZER_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean Phase F4 unknown-attribution casts
 
 **Type:** Strict-null cleanup. CLI diagnostic state-initializer refactor; no unknown-control attribution behavior, settlement source data, derived canonical data, scenario behavior, save schema, or output tuning changed.

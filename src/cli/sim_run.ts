@@ -3,7 +3,7 @@ import { basename, dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
 import { runTurn } from '../sim/turn_pipeline.js';
-import { CURRENT_SCHEMA_VERSION, GameState } from '../state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import { serializeState } from '../state/serialize.js';
 
@@ -36,8 +36,9 @@ async function main(): Promise<void> {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
-  } as any,
-  political: {} as any, displacement: {} as any
+  },
+  political: {},
+  displacement: {}
 };
 
     await prepareNewGameState(initial, graph);
