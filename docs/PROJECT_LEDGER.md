@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean displacement non-null tail
+
+**Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, displacement formulas, routing rules, militia-pool reductions, or output tuning changed.
+
+**Why:** The displacement routing paths initialized `state.displacement.displacement_state` before use but still read destination original populations through indexed non-null assertions.
+
+**Change:** Narrowed the initialized displacement-state map into locals before route calculation in both routing paths, passed that local into `routeDisplacedPopulation(...)`, and reused it for destination original-population lookups. Added a strict-null progress test pinning `displacement.ts` at zero for `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/displacement.test.ts tests/displacement_routing.test.ts tests/bilateral_displacement_cascade.test.ts tests/displacement_pipeline_displacement_accumulation.test.ts --reporter=dot` PASS (103/103); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 5`, `non_null_assertions_index 11`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_DISPLACEMENT_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean supply-reserves non-null tail
 
 **Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, reserve formulas, siege drain, patron aid, embargo caps, or output tuning changed.

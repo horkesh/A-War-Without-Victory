@@ -572,11 +572,15 @@ export function applyDisplacementFromFlips(
         dispState.last_updated_turn = turn;
 
         if (routedAmount > 0) {
+            const displacementState = state.displacement.displacement_state;
+            if (!displacementState) {
+                throw new Error('Displacement state failed to initialize before routing');
+            }
             const routing = routeDisplacedPopulation(
                 munId,
                 fromFaction,
                 routedAmount,
-                state.displacement.displacement_state!,
+                displacementState,
                 mc
             );
             const totalRoutable = routableByFaction
@@ -586,7 +590,7 @@ export function applyDisplacementFromFlips(
                 const destState = getOrInitDisplacementState(
                     state,
                     route.to_mun,
-                    state.displacement.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
+                    displacementState[route.to_mun]?.original_population ?? defaultOriginalPopulation
                 );
                 destState.displaced_in += route.amount;
                 destState.last_updated_turn = turn;
@@ -876,11 +880,15 @@ export function updateDisplacement(
 
             // Route displaced population
             if (routedAmount > 0) {
+                const displacementState = state.displacement.displacement_state;
+                if (!displacementState) {
+                    throw new Error('Displacement state failed to initialize before routing');
+                }
                 const routing = routeDisplacedPopulation(
                     munId,
                     factionId,
                     routedAmount,
-                    state.displacement.displacement_state!,
+                    displacementState,
                     munControl
                 );
 
@@ -892,7 +900,7 @@ export function updateDisplacement(
                     const destState = getOrInitDisplacementState(
                         state,
                         route.to_mun,
-                        state.displacement.displacement_state![route.to_mun]?.original_population ?? defaultOriginalPopulation
+                        displacementState[route.to_mun]?.original_population ?? defaultOriginalPopulation
                     );
                     destState.displaced_in += route.amount;
                     destState.last_updated_turn = currentTurn;
