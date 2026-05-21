@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean Phase D2 reconcile casts
+
+**Type:** Strict-null cleanup. CLI diagnostic type-shape correction; no source data, derived canonical data, scenario behavior, save schema, or output tuning changed.
+
+**Why:** `phaseD2_settlement_count_reconcile_audit.ts` still used three `as any` reads around settlement-index and census JSON shapes.
+
+**Change:** Replaced the broad casts with typed reads through the current top-level `SettlementsIndex.settlements` and `CensusFile.municipalities` fields. Added a strict-null progress assertion pinning the CLI at zero for `as_any_casts`. Local verification rejected an intermediate wrapper-shaped read because it produced zero counts; the committed form preserves the live diagnostic counts.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (75/75); `npm.cmd run typecheck` PASS; `npx.cmd tsx src/cli/phaseD2_settlement_count_reconcile_audit.ts` PASS with counts `6101 / 6139 / 6081 / 20 / 58`. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 171`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_PHASED2_RECONCILE_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean OpsMap casts
 
 **Type:** Strict-null cleanup. UI map type-surface refactor; no operation planning behavior, target selection, map data, save schema, scenario data, or output tuning changed.
