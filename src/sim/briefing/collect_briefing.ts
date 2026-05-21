@@ -15,6 +15,59 @@ import type { GameState, FactionId, FormationState, CorpsCommandState, EnclaveRe
 import type { PendingOfficerEvent, OfficerEventType } from '../../state/officer_types.js';
 import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { asRecord } from '../../state/schema_validators.js';
+
+// BATCH C §3.6: the briefing collector reads two fields that are NOT
+// declared on the typed engine state shape — `faction` /
+// `active_operations` on each CorpsCommandState entry (the typed shape
+// only has command_span / og_slots / corps_exhaustion / stance and
+// `active_operations: CorpsOperation[]` — `faction` is not on the type),
+// and `disrupted_turns` on each FormationOpsState entry (the typed shape
+// only has `fatigue` and `last_supplied_turn`; the canonical
+// `disrupted_turns` lives on FormationState directly). Both reads
+// silently return `undefined` at runtime today because the fields are
+// structurally absent — the pre-Batch-C casts widened past TS into a
+// free-form Record. These helpers preserve the same tolerant
+// "missing-returns-undefined" behavior so collector output is byte-
+// identical; fixing the latent bugs (correct field paths) is a separate
+// behavior lane per the Batch C stop-gate.
+function parseCorpsCommandFactionField(cc: unknown): unknown {
+    const record = asRecord(cc);
+    return record === null ? undefined : record.faction;
+}
+
+function parseCorpsCommandActiveOperationsValues(cc: unknown): unknown[] {
+    const record = asRecord(cc);
+    if (record === null) return [];
+    const ops = record.active_operations;
+    // Accept both arrays (CorpsCommandState.active_operations is typed
+    // `CorpsOperation[]`) and records (defensive — pre-Batch-C cast wrote
+    // `as Record<string, unknown> ?? {}` and then `Object.values(...)`).
+    if (ops === null || typeof ops !== 'object') return [];
+    return Object.values(ops);
+}
+
+function parseFormationOpsDisruptedTurns(ops: unknown): number | undefined {
+    const record = asRecord(ops);
+    if (record === null) return undefined;
+    const value = record.disrupted_turns;
+    return typeof value === 'number' ? value : undefined;
+}
+
+function parseOptionalEnclaveResilienceFromMilitary(
+    military: unknown,
+): Record<string, number | EnclaveResilienceEntry> | undefined {
+    // See call-site comment for the broken-tolerant rationale: this helper
+    // reads `enclave_resilience` from MilitaryState even though the
+    // canonical slot is on PoliticalState. Both at runtime today produce
+    // `undefined` because the field is structurally absent on military;
+    // helper preserves that behavior exactly.
+    const parent = asRecord(military);
+    if (parent === null) return undefined;
+    const inner = asRecord(parent.enclave_resilience);
+    if (inner === null) return undefined;
+    return inner as Record<string, number | EnclaveResilienceEntry>;
+}
 
 export type BriefingSeverity = 'critical' | 'warning' | 'info';
 
@@ -106,8 +159,8 @@ registerBriefingCollector('military', (state, faction) => {
 
     // Count active operations
     const ops = Object.values(state.military?.corps_command ?? {})
-        .filter((cc) => (cc as unknown as Record<string, unknown>)['faction'] === faction)
-        .flatMap((cc) => Object.values((cc as unknown as Record<string, unknown>)['active_operations'] as Record<string, unknown> ?? {}));
+        .filter((cc) => parseCorpsCommandFactionField(cc) === faction)
+        .flatMap((cc) => parseCorpsCommandActiveOperationsValues(cc));
 
     if (ops.length > 0) {
         items.push({
@@ -121,7 +174,7 @@ registerBriefingCollector('military', (state, faction) => {
 
     // Count disrupted brigades
     const disrupted = Object.values(formations).filter((f: FormationState) =>
-        f.faction === faction && f.kind === 'brigade' && f.status === 'active' && ((f.ops as unknown as Record<string, unknown>)?.disrupted_turns as number ?? 0) > 0
+        f.faction === faction && f.kind === 'brigade' && f.status === 'active' && (parseFormationOpsDisruptedTurns(f.ops) ?? 0) > 0
     );
     if (disrupted.length >= 3) {
         items.push({
@@ -205,8 +258,14 @@ registerBriefingCollector('diplomatic', (state, faction) => {
 registerBriefingCollector('humanitarian', (state, faction) => {
     const items: BriefingItem[] = [];
 
-    // Enclave status
-    const enclaveRes = (state.military as unknown as Record<string, unknown>)?.enclave_resilience as Record<string, number | EnclaveResilienceEntry> | undefined;
+    // Enclave status. NOTE: canonical `enclave_resilience` lives on PoliticalState
+    // (game_state.ts L2264), not MilitaryState. The pre-Batch-C cast widened
+    // `state.military` to a free-form Record and read `enclave_resilience`,
+    // which is structurally absent at runtime — the `if (enclaveRes && ...)`
+    // gate below always short-circuits today. The helper preserves the same
+    // tolerant "missing-returns-undefined" behavior so collector output is
+    // byte-identical; correcting the slot path is a separate behavior lane.
+    const enclaveRes = parseOptionalEnclaveResilienceFromMilitary(state.military);
     if (enclaveRes && typeof enclaveRes === 'object') {
         for (const [enclaveId, entry] of Object.entries(enclaveRes).sort((a, b) => strictCompare(a[0], b[0]))) {
             const e: { resilience: number; isolation_turns: number } = typeof entry === 'number' ? { resilience: entry, isolation_turns: 0 } : entry as EnclaveResilienceEntry;
