@@ -38,6 +38,29 @@ import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
+export interface DefenderPowerBreakdown {
+    base: number;
+    postureMult: number;
+    entrenchmentMult: number;
+    supplyMult: number;
+    terrainMult: number;
+    terrainClassMult: number;
+    toTerrainMult: number;
+    perBrigadeTerrainBonus: number;
+    corpsDefMult: number;
+    resilienceMult: number;
+    frontDensityMult: number;
+    ethnicMult: number;
+    finalEnvMult: number;
+    disruptionMult: number;
+    officerMult: number;
+    fatigueMult: number;
+    homeMult: number;
+    moraleMult: number;
+    equipmentQualityMult: number;
+    power: number;
+}
+
 export const LOGISTICS_PRIORITY_MIN = 0.5;
 export const LOGISTICS_PRIORITY_MAX = 1.5;
 export const INTEL_EXECUTION_ATTACK_POWER_MIN = 0.85;
@@ -1292,6 +1315,32 @@ export function computeDefenderPower(
     densityModifierByFormationId?: LocalFrontDensityModifierLookup,
     officerLookup?: OfficerCombatLookup,
 ): number {
+    return computeDefenderPowerBreakdown(
+        state,
+        formation,
+        targetOsid,
+        terrainMultByOsid,
+        artillerySuppression,
+        supplyStateByOsid,
+        ethnicDefenseBonus,
+        profileTime,
+        densityModifierByFormationId,
+        officerLookup,
+    ).power;
+}
+
+export function computeDefenderPowerBreakdown(
+    state: GameState,
+    formation: FormationState,
+    targetOsid: Osid,
+    terrainMultByOsid: Record<string, number>,
+    artillerySuppression: number = 0,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
+    ethnicDefenseBonus?: number,
+    profileTime?: CombatMathProfileTimer,
+    densityModifierByFormationId?: LocalFrontDensityModifierLookup,
+    officerLookup?: OfficerCombatLookup,
+): DefenderPowerBreakdown {
     const base = combatMathProfileTime(profileTime, '.base', () => basePower(formation));
     const {
         postureMult,
@@ -1380,7 +1429,10 @@ export function computeDefenderPower(
     // where two or more of {urban, forest, enclave} are >1.0, irrespective of
     // faction or operation. ICTY Krstić IT-98-33-T §§120-150 + Popović IT-05-88-T
     // §§240-250 ground the historical record (an OSID is one terrain class).
-    const finalEnvMult = combatMathProfileTime(profileTime, '.environmentCap', () => {
+    const {
+        finalEnvMult,
+        terrainClassMult,
+    } = combatMathProfileTime(profileTime, '.environmentCap', () => {
         const terrainClassMult = Math.max(urbanMult, forestMult, enclaveMult);
 
         // ── Mechanic B: Defense environmental soft cap ─────────────────────
@@ -1395,7 +1447,10 @@ export function computeDefenderPower(
             ? envBonus
             : DEFENSE_ENV_CAP_THRESHOLD + (envBonus - DEFENSE_ENV_CAP_THRESHOLD) * DEFENSE_ENV_COMPRESSION;
         const cappedEnvMult = 1.0 + Math.max(0, cappedBonus);
-        return Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP);
+        return {
+            finalEnvMult: Math.min(cappedEnvMult, DEFENSE_ENV_HARD_CAP),
+            terrainClassMult,
+        };
     });
 
     let power = combatMathProfileTime(profileTime, '.powerProduct', () =>
@@ -1408,7 +1463,28 @@ export function computeDefenderPower(
         getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0)
     );
     if (eqMult !== 1.0) power *= eqMult;
-    return power;
+    return {
+        base,
+        postureMult,
+        entrenchmentMult,
+        supplyMult,
+        terrainMult,
+        terrainClassMult,
+        toTerrainMult,
+        perBrigadeTerrainBonus,
+        corpsDefMult,
+        resilienceMult,
+        frontDensityMult,
+        ethnicMult,
+        finalEnvMult,
+        disruptionMult,
+        officerMult,
+        fatigueMult,
+        homeMult,
+        moraleMult: moralePenalty,
+        equipmentQualityMult: eqMult,
+        power,
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1461,20 +1537,20 @@ export function rankDefendersByPower(
     artSuppression: number,
     supplyStateByOsid: import('../../state/supply_state_derivation.js').SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number
-): { primary: FormationState; totalPower: number; rankedDefenders: Array<{ id: string; power: number }> } {
+): { primary: FormationState; totalPower: number; rankedDefenders: Array<{ id: string; power: number; breakdown: DefenderPowerBreakdown }> } {
     const sorted = defenders
-        .map(d => ({
-            f: d,
-            p: computeDefenderPower(
-                state,
-                d,
-                targetOsid,
-                terrainMultByOsid,
-                artSuppression,
-                supplyStateByOsid,
-                ethnicBonusFn(d),
-            ),
-        }))
+        .map(d => {
+            const breakdown = computeDefenderPowerBreakdown(
+                    state,
+                    d,
+                    targetOsid,
+                    terrainMultByOsid,
+                    artSuppression,
+                    supplyStateByOsid,
+                    ethnicBonusFn(d),
+                );
+            return { f: d, p: breakdown.power, breakdown };
+        })
         .sort((a, b) => b.p - a.p);
     const primary = sorted[0];
     if (primary === undefined) {
@@ -1487,6 +1563,7 @@ export function rankDefendersByPower(
         rankedDefenders: sorted.map((entry) => ({
             id: entry.f.id,
             power: entry.p,
+            breakdown: entry.breakdown,
         })),
     };
 }

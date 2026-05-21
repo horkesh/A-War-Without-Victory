@@ -364,8 +364,18 @@ describe('sensitive_history_status diagnostic script', () => {
                 launch_defender_count: 2,
                 launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
                 launch_defender_power_by_id: [
-                    { formation_id: 'arbih_282nd_light', power: 500, stacked_power: 500 },
-                    { formation_id: 'arbih_283rd_light', power: 250, stacked_power: 75 },
+                    {
+                        formation_id: 'arbih_282nd_light',
+                        power: 500,
+                        stacked_power: 500,
+                        breakdown: { base: 400, final_env_mult: 1.25 },
+                    },
+                    {
+                        formation_id: 'arbih_283rd_light',
+                        power: 250,
+                        stacked_power: 75,
+                        breakdown: { base: 250, final_env_mult: 1 },
+                    },
                 ],
                 launch_feasibility_ratio: 0.317,
                 launch_attacker_power: 205.892,
@@ -403,6 +413,7 @@ describe('sensitive_history_status diagnostic script', () => {
                     formation_id: string;
                     power: number;
                     stacked_power: number;
+                    breakdown?: Record<string, number>;
                 }>;
                 launch_feasibility_ratio?: number;
                 launch_attacker_power?: number;
@@ -418,8 +429,18 @@ describe('sensitive_history_status diagnostic script', () => {
             launch_defender_count: 2,
             launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
             launch_defender_power_by_id: [
-                { formation_id: 'arbih_282nd_light', power: 500, stacked_power: 500 },
-                { formation_id: 'arbih_283rd_light', power: 250, stacked_power: 75 },
+                {
+                    formation_id: 'arbih_282nd_light',
+                    power: 500,
+                    stacked_power: 500,
+                    breakdown: { base: 400, final_env_mult: 1.25 },
+                },
+                {
+                    formation_id: 'arbih_283rd_light',
+                    power: 250,
+                    stacked_power: 75,
+                    breakdown: { base: 250, final_env_mult: 1 },
+                },
             ],
             launch_feasibility_ratio: 0.317,
             launch_attacker_power: 205.892,

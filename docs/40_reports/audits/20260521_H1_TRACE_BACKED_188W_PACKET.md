@@ -1,8 +1,8 @@
 # H1 Trace-Backed 188w Packet
 
 **Date:** 2026-05-21
-**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1930`
-**Final hash:** `c218d2e865a54f5b`
+**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1931`
+**Final hash:** `3099a5fabaa04d6b`
 **Verdict:** OPEN_P0
 
 ## Summary
@@ -31,12 +31,12 @@ The key change from the pre-trace packet is that Cerska-Kamenica and Stupcanica-
 
 ## H1 Interpretation
 
-H1 remains open because none of the three watched operations produce a visible operation AAR or delivered capture. The owner is now narrower than before: `buildOperation(...)` reaches launch-feasibility evaluation, then fails the defender-power predicate for Cerska-Kamenica, Krivaja-95, and Stupcanica-95 in the 188w state after their windows. Krivaja additionally has a concrete formation eligibility warning: `rs_skelani_battalion` is present but inactive with zero personnel. The defender stack is now attributed at formation level: Cerska-Kamenica and Krivaja-95 are blocked by a four-brigade East Bosnian stack with one primary defender plus three secondary stacked contributions, while Stupcanica-95 is dominated by `arbih_1st_cerska` at 1080.063 stacked power.
+H1 remains open because none of the three watched operations produce a visible operation AAR or delivered capture. The owner is now narrower than before: `buildOperation(...)` reaches launch-feasibility evaluation, then fails the defender-power predicate for Cerska-Kamenica, Krivaja-95, and Stupcanica-95 in the 188w state after their windows. Krivaja additionally has a concrete formation eligibility warning: `rs_skelani_battalion` is present but inactive with zero personnel. The defender stack is now attributed at formation and multiplier level: Cerska-Kamenica and Krivaja-95 are blocked by a four-brigade East Bosnian stack with one primary defender plus three secondary stacked contributions, while Stupcanica-95 is dominated by `arbih_1st_cerska` at 1080.063 stacked power.
 
-Do not tune operation outcomes yet. The next implementation lane should attribute the modifier components behind each raw defender-power value, especially terrain, supply, posture, entrenchment, local density, fatigue, home-distance, morale, and artillery suppression contributors, before deciding whether report projection, formation eligibility, axis construction, or behavior tuning owns the next fix.
+The active contributors are now visible. Srebrenica defenders are not helped by supply, home-distance, fatigue, disruption, corps stance, or equipment-quality multipliers; their active lift is base power, posture, entrenchment, terrain-class, final environment cap, officer, morale, and front-density. Stupcanica is additionally dominated by `arbih_1st_cerska` base power and a `1.15` per-brigade terrain bonus. Do not tune operation outcomes yet; next work should review those active components against canon and historical expectations before deciding whether report projection, formation eligibility, axis construction, or behavior tuning owns the next fix.
 
 ## Verification
 
 - `npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs` PASS.
-- `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1930` PASS.
-- `watched_operations.json` present with six deterministic rows, including Krivaja `brigade_ineligible`, `build_defender_power_too_high`, launch-feasibility power evidence, objective OSIDs, defender roster evidence, and per-defender raw/stacked power contribution evidence.
+- `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1931` PASS.
+- `watched_operations.json` present with six deterministic rows, including Krivaja `brigade_ineligible`, `build_defender_power_too_high`, launch-feasibility power evidence, objective OSIDs, defender roster evidence, per-defender raw/stacked power contribution evidence, and per-defender modifier breakdowns.

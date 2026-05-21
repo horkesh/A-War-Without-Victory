@@ -953,6 +953,28 @@ export type WatchedOperationBlocker =
     | 'build_failure'
     | 'accepted_injected';
 
+export interface WatchedOperationDefenderPowerBreakdown {
+    base: number;
+    posture_mult: number;
+    entrenchment_mult: number;
+    supply_mult: number;
+    terrain_mult: number;
+    terrain_class_mult: number;
+    to_terrain_mult: number;
+    per_brigade_terrain_bonus: number;
+    corps_def_mult: number;
+    resilience_mult: number;
+    front_density_mult: number;
+    ethnic_mult: number;
+    final_env_mult: number;
+    disruption_mult: number;
+    officer_mult: number;
+    fatigue_mult: number;
+    home_mult: number;
+    morale_mult: number;
+    equipment_quality_mult: number;
+}
+
 export interface WatchedOperationTraceRow {
     operation_id: string;
     operation_name: string;
@@ -972,6 +994,7 @@ export interface WatchedOperationTraceRow {
         formation_id: FormationId;
         power: number;
         stacked_power: number;
+        breakdown?: WatchedOperationDefenderPowerBreakdown;
     }>;
     launch_feasibility_ratio?: number;
     launch_attacker_power?: number;

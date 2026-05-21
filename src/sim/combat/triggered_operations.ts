@@ -19,10 +19,12 @@ import type {
     OperationAxis,
     SettlementId, // LANE-2026-05-02-KRIVAJA: for prestageBrigadesForTriggeredOp brigade_movement_orders writes
     WatchedOperationBlocker,
+    WatchedOperationDefenderPowerBreakdown,
     WatchedOperationTraceRow,
 } from '../../state/game_state.js';
 import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import type { DefenderPowerBreakdown } from './combat_math.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
@@ -648,6 +650,7 @@ function recordWatchedOperationTrace(
                     formation_id: entry.formationId,
                     power: roundTraceNumber(entry.power),
                     stacked_power: roundTraceNumber(entry.stackedPower),
+                    breakdown: roundDefenderPowerBreakdown(entry.breakdown),
                 }))
                 .sort((a, b) =>
                     (b.stacked_power - a.stacked_power)
@@ -681,6 +684,32 @@ function recordWatchedOperationTrace(
 function roundTraceNumber(value: number): number {
     if (!Number.isFinite(value)) return value;
     return Number(value.toFixed(3));
+}
+
+function roundDefenderPowerBreakdown(
+    breakdown: DefenderPowerBreakdown,
+): WatchedOperationDefenderPowerBreakdown {
+    return {
+        base: roundTraceNumber(breakdown.base),
+        posture_mult: roundTraceNumber(breakdown.postureMult),
+        entrenchment_mult: roundTraceNumber(breakdown.entrenchmentMult),
+        supply_mult: roundTraceNumber(breakdown.supplyMult),
+        terrain_mult: roundTraceNumber(breakdown.terrainMult),
+        terrain_class_mult: roundTraceNumber(breakdown.terrainClassMult),
+        to_terrain_mult: roundTraceNumber(breakdown.toTerrainMult),
+        per_brigade_terrain_bonus: roundTraceNumber(breakdown.perBrigadeTerrainBonus),
+        corps_def_mult: roundTraceNumber(breakdown.corpsDefMult),
+        resilience_mult: roundTraceNumber(breakdown.resilienceMult),
+        front_density_mult: roundTraceNumber(breakdown.frontDensityMult),
+        ethnic_mult: roundTraceNumber(breakdown.ethnicMult),
+        final_env_mult: roundTraceNumber(breakdown.finalEnvMult),
+        disruption_mult: roundTraceNumber(breakdown.disruptionMult),
+        officer_mult: roundTraceNumber(breakdown.officerMult),
+        fatigue_mult: roundTraceNumber(breakdown.fatigueMult),
+        home_mult: roundTraceNumber(breakdown.homeMult),
+        morale_mult: roundTraceNumber(breakdown.moraleMult),
+        equipment_quality_mult: roundTraceNumber(breakdown.equipmentQualityMult),
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

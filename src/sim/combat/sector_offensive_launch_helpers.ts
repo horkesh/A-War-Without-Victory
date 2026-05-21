@@ -13,6 +13,7 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import {
     computeAttackerPower,
+    type DefenderPowerBreakdown,
     getArtillerySuppression,
     rankDefendersByPower,
     STACKING_DEFENDER_SUPPORT,
@@ -50,6 +51,7 @@ export interface LaunchFeasibilityResult {
         formationId: FormationId;
         power: number;
         stackedPower: number;
+        breakdown: DefenderPowerBreakdown;
     }>;
 }
 
@@ -192,6 +194,7 @@ export function evaluateLaunchFeasibility(
                 formationId: defender.id,
                 power: defender.power,
                 stackedPower: index === 0 ? defender.power : defender.power * STACKING_DEFENDER_SUPPORT,
+                breakdown: defender.breakdown,
             })),
         };
         const candidate: LaunchFeasibilityResult = ratio >= VICTORY_THRESHOLD_COSTLY

@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): trace defender power modifier components
+
+**Type:** Sensitive-history diagnostic/output-contract refinement. Touched shared combat math reporting, watched-operation trace schema, diagnostic summaries, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
+
+**Why:** The prior trace named the blocking defender stack and stacked contribution, but still left the raw defender power as an opaque number. H1 needed to know whether supply, terrain, posture, entrenchment, local density, fatigue, home-distance, morale, officer, or per-brigade terrain components were actually driving the blockers before any tuning discussion.
+
+**Change:** Added `computeDefenderPowerBreakdown(...)` beside the existing `computeDefenderPower(...)` wrapper, preserving the original final-power source while exposing deterministic multiplier components. Threaded the breakdown through `rankDefendersByPower(...)`, launch feasibility, watched-operation trace rows, and `sensitive_history_status.cjs` summaries. Persisted breakdown keys are rounded to three decimals and omit duplicate final `power` because the parent row already carries raw and stacked power.
+
+**Finding:** Fresh `n1931` final hash `3099a5fabaa04d6b` completed with anchors 27/27. Cerska-Kamenica and Krivaja-95 are not blocked by supply, home-distance, fatigue, disruption, corps stance, or equipment-quality multipliers; their active lift is base power `155.754`, posture `1.2`, entrenchment (`1.132` / `1.143`), terrain-class `1.575`, final environment cap (`1.387` / `1.4`), officer `1.228`, morale `1.065`, and front-density `0.778`. Stupcanica-95 is dominated by `arbih_1st_cerska` base power `457.602`, final environment cap `1.518`, and per-brigade terrain bonus `1.15`, with secondary defenders contributing through `STACKING_DEFENDER_SUPPORT`.
+
+**Verification:** `npx.cmd vitest run tests/operation_launch_feasibility_defender_aware.test.ts tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (26/26); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1931` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1931` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_H1_LAUNCH_FEASIBILITY_INPUT_TRACE.md`; `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): preserve defender power contributions
 
 **Type:** Sensitive-history diagnostic/output-contract refinement. Touched launch-feasibility result metadata, watched-operation trace schema, diagnostic summaries, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.

@@ -1,17 +1,17 @@
 # H1 Launch Feasibility Input Trace
 
 **Date:** 2026-05-21
-**Result:** Watched-operation build blockers now preserve compact launch-feasibility power inputs and per-defender stacked-power contributions.
+**Result:** Watched-operation build blockers now preserve compact launch-feasibility power inputs, per-defender stacked-power contributions, and the modifier components behind each defender power value.
 
 ## Summary
 
-- Added optional `launch_feasibility_ratio`, `launch_attacker_power`, `launch_defender_power`, and `launch_defender_power_by_id` fields to watched-operation trace rows when `buildOperation(...)` fails launch feasibility.
+- Added optional `launch_feasibility_ratio`, `launch_attacker_power`, `launch_defender_power`, and `launch_defender_power_by_id` fields to watched-operation trace rows when `buildOperation(...)` fails launch feasibility. Each defender row now includes a compact `breakdown` object for the final defender-power multipliers.
 - Kept the change diagnostic-only: operation behavior, objectives, OOB, launch thresholds, scenario data, and sensitive-history outcomes are unchanged.
 - Updated the sensitive-history diagnostic to prefer concrete launched/blocked/not-launched trace rows over same-turn warning-only rows, while preserving warnings in `watched_operations.json`.
 
 ## 188w Evidence
 
-Fresh run `runs/apr1992_definitive_188w__210e69404d054959__w188_n1930` completed with final hash `c218d2e865a54f5b`.
+Fresh run `runs/apr1992_definitive_188w__210e69404d054959__w188_n1931` completed with final hash `3099a5fabaa04d6b`.
 
 | Operation | Blocker | Ratio | Attacker power | Defender power | Objective | Primary defender | Defender count |
 | --- | --- | ---: | ---: | ---: | --- | --- | ---: |
@@ -41,10 +41,16 @@ The trace now preserves raw defender power and the stacked contribution used by 
 | Stupcanica-95 | `arbih_282nd_east_bosnian_light` | 329.375 | 98.812 |
 | Stupcanica-95 | `arbih_285th_light` | 164.571 | 49.371 |
 
+## Modifier Breakdown Findings
+
+The modifier trace shows the Srebrenica stack is not blocked by supply, home-distance, fatigue, disruption, corps stance, or equipment-quality multipliers; those are all `1.0` for the East Bosnian defenders. The binding contributors are base power `155.754`, posture `1.2`, entrenchment (`1.132` for Cerska-Kamenica and `1.143` for Krivaja-95), terrain-class `1.575`, final environment cap (`1.387` / `1.4`), morale `1.065`, officer `1.228`, and front-density `0.778`.
+
+Stupcanica-95 is dominated by `arbih_1st_cerska`: base power `457.602`, posture `1.2`, entrenchment `1.147`, terrain-class `1.47`, final environment cap `1.518`, morale `1.065`, officer `1.228`, front-density `0.8`, and per-brigade terrain bonus `1.15`. The two secondary defenders have lower base power and no per-brigade terrain bonus, then contribute only through `STACKING_DEFENDER_SUPPORT`.
+
 ## Determinism
 
-The new fields are derived from the existing launch-feasibility calculation and rounded to three decimals before trace persistence. Defender contribution rows are sorted by descending stacked power and then formation id. No randomness, wall-clock values, unordered filesystem reads, or behavior-affecting state changes were introduced.
+The new fields are derived from the existing launch-feasibility calculation and rounded to three decimals before trace persistence. Defender contribution rows are sorted by descending stacked power and then formation id. Breakdown objects contain only already-computed deterministic multipliers. No randomness, wall-clock values, unordered filesystem reads, or behavior-affecting state changes were introduced.
 
 ## Next Owner
 
-H1 is now narrowed to modifier-level defender-power attribution: inspect terrain, supply, posture, entrenchment, local density, fatigue, home-distance, morale, and artillery suppression contributors behind each raw power value before considering any report projection or behavior tuning.
+H1 is now narrowed past attribution into decision: the trace identifies which components are active. Next work should decide whether any of posture, entrenchment, terrain class, final environment compression, officer, morale, front density, or the `arbih_1st_cerska` per-brigade terrain bonus are historically over-stating the watched-operation defense before considering report projection or behavior tuning.

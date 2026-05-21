@@ -130,6 +130,10 @@ describe('operation launch feasibility uses defender-aware combat power', () => 
         expect(result.attackerPower).toBeGreaterThan(0);
         expect(result.defenderPower).toBeGreaterThan(result.attackerPower);
         expect(result.ratio).toBeCloseTo(result.attackerPower / result.defenderPower, 10);
+        expect(result.defenderPowerById?.[0]?.breakdown.power).toBeCloseTo(result.defenderPower, 10);
+        expect(result.defenderPowerById?.[0]?.breakdown.base).toBeGreaterThan(0);
+        expect(result.defenderPowerById?.[0]?.breakdown.entrenchmentMult).toBeGreaterThan(1);
+        expect(result.defenderPowerById?.[0]?.breakdown.finalEnvMult).toBeGreaterThan(1);
         expect(checkLaunchFeasibility(
             state,
             ['rs_atk_b', 'rs_atk_a'],
