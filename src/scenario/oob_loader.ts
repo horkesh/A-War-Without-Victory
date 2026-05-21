@@ -110,6 +110,20 @@ async function loadRegistryMunIds(baseDir: string): Promise<Set<string>> {
     return set;
 }
 
+// BATCH C §3.4: parseOobBrigadeComposition narrows `unknown` to a typed
+// BrigadeComposition pointer for the OOB loader. Pre-Batch-C the loader used
+// `r.composition as unknown as BrigadeComposition` after a bare isRecord check
+// — no field-level validation, trusting the OOB JSON shape. The helper
+// preserves that contract: isRecord narrow + return the narrowed record typed
+// as BrigadeComposition via a structurally-overlapping intermediate
+// (`Partial<BrigadeComposition>`) so the downstream cast doesn't need an
+// `unknown` bounce. Field-level validation remains the responsibility of
+// downstream consumers — same trust boundary as before.
+function parseOobBrigadeComposition(value: unknown): BrigadeComposition | undefined {
+    if (!isRecord(value)) return undefined;
+    return value as Partial<BrigadeComposition> as BrigadeComposition;
+}
+
 function isRecord(x: unknown): x is Record<string, unknown> {
     return typeof x === 'object' && x !== null && !Array.isArray(x);
 }
@@ -120,7 +134,7 @@ function isRecord(x: unknown): x is Record<string, unknown> {
  */
 export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
     const path = resolve(baseDir, 'data/source/oob_brigades.json');
-    const raw = JSON.parse(await readFile(path, 'utf8')) as unknown;
+    const raw: unknown = JSON.parse(await readFile(path, 'utf8'));
     const registry = await loadRegistryMunIds(baseDir);
 
     const rows = Array.isArray(raw)
@@ -166,8 +180,12 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
         const initial_entrenchment_turns = typeof r.initial_entrenchment_turns === 'number' && Number.isFinite(r.initial_entrenchment_turns) && r.initial_entrenchment_turns > 0
             ? r.initial_entrenchment_turns : undefined;
-        const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
-        const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
+        const composition = parseOobBrigadeComposition(r.composition);
+        // r.tags is narrowed by Array.isArray to `any[]`; the type predicate
+        // callback `(t): t is string` selects the strings without any further cast.
+        const oobTags = Array.isArray(r.tags)
+            ? r.tags.filter((t: unknown): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0)
+            : undefined;
         const defense_terrain_bonus = typeof r.defense_terrain_bonus === 'number' && Number.isFinite(r.defense_terrain_bonus) ? r.defense_terrain_bonus : undefined;
         const recruit_pool_faction = typeof r.recruit_pool_faction === 'string' && CANONICAL_FACTIONS.includes(r.recruit_pool_faction.trim())
             ? r.recruit_pool_faction.trim() : undefined;
@@ -178,7 +196,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const is_elite = r.is_elite === true ? true : undefined;
         const garrison = r.garrison === true ? true : undefined;
         const historical_decorations: HistoricalDecoration[] | undefined = Array.isArray(r.historical_decorations)
-            ? (r.historical_decorations as unknown[]).filter((d): d is Record<string, unknown> =>
+            ? r.historical_decorations.filter((d: unknown): d is Record<string, unknown> =>
                 isRecord(d) && typeof d.tier === 'string' && typeof d.name === 'string'
             ).map(d => ({ tier: d.tier as HistoricalDecoration['tier'], name: String(d.name).trim() }))
             : undefined;
@@ -239,7 +257,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
  */
 export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
     const path = resolve(baseDir, 'data/source/oob_corps.json');
-    const raw = JSON.parse(await readFile(path, 'utf8')) as unknown;
+    const raw: unknown = JSON.parse(await readFile(path, 'utf8'));
     const registry = await loadRegistryMunIds(baseDir);
 
     const rows = isRecord(raw) && Array.isArray(raw.corps) ? raw.corps : [];
@@ -298,7 +316,7 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
  */
 export async function loadMunicipalityHqSettlement(baseDir: string): Promise<Record<string, string>> {
     const path = resolve(baseDir, 'data/derived/municipality_hq_settlement.json');
-    const raw = JSON.parse(await readFile(path, 'utf8')) as unknown;
+    const raw: unknown = JSON.parse(await readFile(path, 'utf8'));
     const byMun = isRecord(raw) && isRecord(raw.by_mun1990_id) ? raw.by_mun1990_id as Record<string, string> : {};
     const result: Record<string, string> = {};
     for (const [k, v] of Object.entries(byMun)) {
