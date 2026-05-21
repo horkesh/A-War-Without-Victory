@@ -117,13 +117,9 @@ export function runMinorityErosion(
         // Apply erosion
         const eroded = Math.floor(militiaBefore * MINORITY_EROSION_RATE_PER_TURN);
         const militiaAfter = Math.max(0, militiaBefore - eroded);
-        if (!state.military.war_militia_strength) {
-            (state as any).war_militia_strength = {};
-        }
-        if (!state.military.war_militia_strength![munId]) {
-            state.military.war_militia_strength![munId] = {};
-        }
-        state.military.war_militia_strength![munId][minorityFaction] = militiaAfter;
+        const militiaStrength = state.military.war_militia_strength ?? (state.military.war_militia_strength = {});
+        const municipalityStrength = militiaStrength[munId] ?? (militiaStrength[munId] = {});
+        municipalityStrength[minorityFaction] = militiaAfter;
 
         // Displace formations if militia below threshold
         const displacedFormations: string[] = [];
@@ -161,4 +157,3 @@ export function runMinorityErosion(
 
     return report;
 }
-

@@ -181,12 +181,12 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
 
         // Wrong transit destination — cancel transit state first, then issue corrected order
         if (brigadeAlreadyAtValidFront && !frontOsids.includes(transitDest)) {
-            delete state.military.brigade_movement_state![bid];
+            delete moveStates[bid];
             delete state.military.brigade_movement_orders?.[bid];
             continue;
         }
 
-        delete state.military.brigade_movement_state![bid];
+        delete moveStates[bid];
         if (state.military.brigade_movement_orders?.[bid]) {
             delete state.military.brigade_movement_orders[bid];
         }

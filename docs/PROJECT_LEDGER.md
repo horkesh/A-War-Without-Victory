@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean third runtime non-null tail
+
+**Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, commander movement correction behavior, paramilitary capture/casualty rules, or minority-erosion behavior changed.
+
+**Why:** The remaining runtime inventory still had a small safe cluster in commander march correction, paramilitary sweep casualty bookkeeping, and minority erosion militia-strength writes.
+
+**Change:** Replaced commander movement-state delete assertions with the existing `moveStates` local, replaced paramilitary casualty-map `cc!` with the initialized map local, and replaced minority-erosion militia-strength non-null writes with initialized local strength maps. Added a strict-null progress test pinning these three files at zero for `as_any_casts`, `non_null_assertions_dot`, and `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/paramilitary_sweep.test.ts tests/commander/elite_formation_utilization.test.ts --reporter=dot` PASS (130/130); `npx.cmd vitest run tests/alliance_lifecycle.test.ts tests/seam_a_isolation_guard.test.ts --reporter=dot` PASS (46/46); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 7`, `non_null_assertions_index 23`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_RUNTIME_NONNULL_TAIL_3.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean second runtime non-null tail
 
 **Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, sector/offensive behavior, negotiation rules, displacement math, or war-story output semantics changed.

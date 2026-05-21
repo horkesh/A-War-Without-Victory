@@ -616,7 +616,7 @@ export function advanceParamilitaries(
         const civCas = Math.ceil(PARAMILITARY_TARGET_AVG_POPULATION * civCasRate);
         if (currentController) {
             const cc = state.displacement.civilian_casualties ??= {} as typeof state.displacement.civilian_casualties & Record<string, { killed?: number; fled_abroad?: number }>;
-            const civFaction = cc![currentController] ??= { killed: 0, fled_abroad: 0 };
+            const civFaction = cc[currentController] ??= { killed: 0, fled_abroad: 0 };
             civFaction.killed = (civFaction.killed ?? 0) + civCas;
 
             appendDisplacementEvent(state, {
