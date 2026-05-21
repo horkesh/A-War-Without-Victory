@@ -168,6 +168,30 @@ function escapeHtml(s: string): string {
     return div.innerHTML;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+    return value != null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+function readStringNullRecord(value: unknown): Record<string, string | null> | undefined {
+    const record = asRecord(value);
+    if (!record) return undefined;
+    const out: Record<string, string | null> = {};
+    for (const [key, entry] of Object.entries(record)) {
+        if (entry === null || typeof entry === 'string') out[key] = entry;
+    }
+    return out;
+}
+
+function readBooleanRecord(value: unknown): Record<string, boolean> | undefined {
+    const record = asRecord(value);
+    if (!record) return undefined;
+    const out: Record<string, boolean> = {};
+    for (const [key, entry] of Object.entries(record)) {
+        if (typeof entry === 'boolean') out[key] = entry;
+    }
+    return out;
+}
+
 async function loadJson<T>(url: string): Promise<T> {
     const res = await fetch(url);
     const text = await res.text();
@@ -570,9 +594,10 @@ async function main(): Promise<void> {
             `<p><strong>Faction</strong> ${escapeHtml(controller)}</p>`,
             `<p><strong>State</strong> ${escapeHtml(stateLabel)}</p>`
         ].join('');
-        const hasDemographics = props?.majority_ethnicity != null;
+        const majorityEthnicity = props.majority_ethnicity;
+        const hasDemographics = majorityEthnicity != null;
         const demoBody = hasDemographics
-            ? `<p><strong>Majority (1991)</strong> ${escapeHtml(props!.majority_ethnicity!)}</p>`
+            ? `<p><strong>Majority (1991)</strong> ${escapeHtml(majorityEthnicity)}</p>`
             : '<p class="panel-phase">Settlement-level / municipality-derived (when available)</p>';
         const militaryBody = '<p class="panel-phase">Assigned brigade, corps, exhaustion %, supply (War phase)</p>';
         const stabilityBody = '<p class="panel-phase">Stability score, control strain (Peace phase+)</p>';
@@ -732,32 +757,36 @@ async function main(): Promise<void> {
             reader.onload = () => {
                 try {
                     const text = reader.result as string;
-                    const state = JSON.parse(text) as any;
-                    const pc = state.political.political_controllers as Record<string, string | null> | undefined;
+                    const state = asRecord(JSON.parse(text));
+                    if (!state) throw new Error('Expected top-level state object');
+                    const political = asRecord(state.political);
+                    const pc = readStringNullRecord(political?.political_controllers);
                     if (pc && typeof pc === 'object') {
+                        const controlStatusBySettlementId: Record<string, string> = {};
                         controlData = {
                             by_settlement_id: buildControlLookup(pc),
-                            control_status_by_settlement_id: {}
+                            control_status_by_settlement_id: controlStatusBySettlementId
                         };
-                        const contested = state.political.contested_control as Record<string, boolean> | undefined;
+                        const contested = readBooleanRecord(political?.contested_control);
                         if (contested && typeof contested === 'object') {
                             for (const [sid, isContested] of Object.entries(contested)) {
-                                if (isContested) controlData.control_status_by_settlement_id![controlKey(sid)] = 'CONTESTED';
+                                if (isContested) controlStatusBySettlementId[controlKey(sid)] = 'CONTESTED';
                             }
                         }
                     }
-                    const meta = state.meta as { turn?: number; phase?: string } | undefined;
+                    const meta = asRecord(state.meta);
                     if (turnDisplay && meta && typeof meta === 'object') {
                         const turn = typeof meta.turn === 'number' ? meta.turn : 0;
                         const phase = typeof meta.phase === 'string' ? meta.phase : '';
                         turnDisplay.textContent = phase ? `Turn ${turn} — ${phase}` : `Turn ${turn}`;
                     }
-                    const rawFormations = state.military.formations as Record<string, Record<string, unknown>> | undefined;
+                    const military = asRecord(state.military);
+                    const rawFormations = asRecord(military?.formations);
                     loadedFormations = [];
                     if (rawFormations && typeof rawFormations === 'object') {
                         for (const id of Object.keys(rawFormations).sort()) {
-                            const f = rawFormations[id];
-                            if (!f || typeof f !== 'object') continue;
+                            const f = asRecord(rawFormations[id]);
+                            if (!f) continue;
                             const faction = typeof f.faction === 'string' ? f.faction : '';
                             const name = typeof f.name === 'string' ? f.name : id;
                             const kind = typeof f.kind === 'string' ? f.kind : 'brigade';

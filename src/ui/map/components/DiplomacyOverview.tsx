@@ -79,6 +79,7 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
     const factions = playerFaction
         ? [playerFaction]
         : Object.keys(strategicDimensions ?? {}).sort();
+    const dimensionsByFaction = strategicDimensions ?? {};
 
     return (
         <div className="space-y-5">
@@ -103,7 +104,7 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
                         Negotiation Capital
                     </div>
                     {factions.map(faction => {
-                        const dims = strategicDimensions![faction];
+                        const dims = dimensionsByFaction[faction];
                         if (!dims) return null;
                         const composite = negotiatingCapital?.[faction];
                         return (

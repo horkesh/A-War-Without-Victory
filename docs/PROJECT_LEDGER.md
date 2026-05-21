@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean warroom viewer and diplomacy overview tails
+
+**Type:** UI-only strict-null cleanup in the standalone warroom map viewer and diplomacy overview. Touched `src/ui/warroom/map_viewer_app.ts`, `src/ui/map/components/DiplomacyOverview.tsx`, strict-null progress test, and docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** The standalone viewer retained a JSON-load `as any`, one dot non-null assertion for settlement demographics, and two index non-null assertions while loading a local save file. `DiplomacyOverview.tsx` retained one JSX narrowing assertion on `strategicDimensions![faction]`. All four sites were UI/read-model boundaries with value-level guards available.
+
+**Change:** Added local `unknown`-to-record readers for the standalone viewer save-file path, preserved tolerant optional-record behavior for political control / contested control / formations, captured `control_status_by_settlement_id` before writing contested flags, hoisted `majorityEthnicity` under a value guard, and replaced the diplomacy overview predicate alias with a `dimensionsByFaction` value binding. Added an inventory assertion pinning both files to zero counted `as_any_casts`, dot non-null assertions, and index non-null assertions.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 182 / 10 / 36 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green strict-null inventory assertion failed at 4 before the source edit and passed after; `npm.cmd run typecheck` PASS; `node tools/diagnostics/strict_null_inventory.cjs` confirmed `as_any_casts` 183 → 182, `non_null_assertions_dot` 11 → 10, and `non_null_assertions_index` 38 → 36. Baselines not run: UI-only read-model/viewer cleanup with no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): validate treaty CLI clause kind
 
 **Type:** Treaty diagnostic/authoring CLI strict-null cleanup. Touched `src/cli/sim_treaty.ts`, strict-null progress test, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
