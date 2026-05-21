@@ -75,10 +75,10 @@ export function SidePickerOverlay({
                 const reader = new FileReader();
                 reader.onload = (event) => {
                   try {
-                    const json = JSON.parse(event.target?.result as string);
+                    const json: unknown = JSON.parse(event.target?.result as string);
                     // We need a way to pass this back to App.tsx
                     // I'll add onManualLoad to props
-                    (window as any).handleManualSaveLoad?.(json);
+                    window.handleManualSaveLoad?.(json);
                   } catch (err) {
                     console.error('Failed to parse save file:', err);
                   }
@@ -98,7 +98,7 @@ export function SidePickerOverlay({
             <button
               type="button"
               disabled={starting}
-              onClick={() => (window as any).handleContinueLastRun?.()}
+              onClick={() => window.handleContinueLastRun?.()}
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 mt-2 rounded border border-interactive/30 bg-interactive/10 hover:bg-interactive/20 text-interactive transition-all text-xs uppercase tracking-wider font-semibold"
             >
               <Icon name="transit" size={13} />

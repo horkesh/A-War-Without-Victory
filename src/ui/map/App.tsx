@@ -86,6 +86,13 @@ import {
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
 
+declare global {
+  interface Window {
+    handleManualSaveLoad?: (json: unknown) => Promise<void>;
+    handleContinueLastRun?: () => Promise<void>;
+  }
+}
+
 function CommanderSelectionModalWrapper() {
   const ctx = useGameStore((s) => s.commanderSelectionContext);
   const setCtx = useGameStore((s) => s.setCommanderSelectionContext);
@@ -348,7 +355,7 @@ function App() {
 
   // Global handler for manual save load (called by SidePickerOverlay)
   useEffect(() => {
-    (window as any).handleManualSaveLoad = async (json: any) => {
+    window.handleManualSaveLoad = async (json: unknown) => {
       try {
         await loadSave(json);
         setSidePickerOpen(false);
@@ -358,10 +365,10 @@ function App() {
         setLoadError(err instanceof Error ? err.message : String(err));
       }
     };
-    (window as any).handleContinueLastRun = async () => {
+    window.handleContinueLastRun = async () => {
       try {
         const text = await loadLatestRunSaveAsText();
-        const json = JSON.parse(text);
+        const json: unknown = JSON.parse(text);
         await loadSave(json);
         setSidePickerOpen(false);
         setSidePickerDismissed(false);
@@ -371,8 +378,8 @@ function App() {
       }
     };
     return () => {
-      delete (window as any).handleManualSaveLoad;
-      delete (window as any).handleContinueLastRun;
+      delete window.handleManualSaveLoad;
+      delete window.handleContinueLastRun;
     };
   }, [loadSave, setLoadError]);
 

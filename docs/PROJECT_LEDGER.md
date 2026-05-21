@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): type UI window bridge callbacks
+
+**Type:** Type-only UI bridge cleanup in `src/ui/map/App.tsx` and `src/ui/map/components/SidePickerOverlay.tsx` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** The side-picker browser/dev save-load bridge stored two callbacks on `window` through six `as any` casts. The callbacks are stable app-level bridge properties and can be represented with a local `Window` interface augmentation.
+
+**Change:** Declared `window.handleManualSaveLoad?: (json: unknown) => Promise<void>` and `window.handleContinueLastRun?: () => Promise<void>`, replaced the casted assignments/deletes/calls with typed property access, and annotated `JSON.parse(...)` results as `unknown` before passing them to the existing load path. Added a strict-null progress assertion pinning the two files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 220 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused UI/inventory vitest PASS (51/51); `npm.cmd run desktop:map:build` PASS. Baselines not run: UI-only bridge typing, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean low-risk as-any leaf slice
 
 **Type:** Type-only strict-null cleanup across low-risk singleton leaves plus strict-null inventory guard/docs reconciliation. Touched files: `src/map/front_regions.ts`, `src/sim/economy/smuggling_routes.ts`, `src/sim/events/strategic_dimensions.ts`, `src/sim/early_war/alliance_update.ts`, `src/state/territorial_valuation.ts`, `src/state/political_control_init.ts`, and `src/ui/map/data/diplomacyView.ts`. No scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
