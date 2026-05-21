@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] fix(ui): save AI commander settings through typed IPC bridge
+
+**Type:** UI IPC bug fix plus strict-null inventory guard/docs reconciliation. Touched `src/ui/map/components/AiSettingsPanel.tsx` and tests/docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, canon text, or `FORAWWV.md` changed.
+
+**Why:** `AiSettingsPanel` attempted to call a generic `(ipc as any).invoke?.('set-ai-commander-config', ...)`, but `useIPC()` exposes a typed `setAiCommanderConfig(...)` method instead. In the renderer this meant the save button could silently no-op even when desktop IPC was available.
+
+**Change:** Replaced the casted optional invoke call with `ipc.setAiCommanderConfig(...)` while preserving the existing `ipc.isAvailable` gate, silent catch fallback, and saved-feedback UI behavior. Added static and strict-null assertions so the panel stays on the typed bridge.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 197 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused UI / AI IPC / inventory vitest PASS (82/82) before the final static assertion; final static+inventory rerun PASS (67/67); `npm.cmd run desktop:map:build` PASS. Baselines not run: UI-only IPC bridge fix, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean core singleton any casts
 
 **Type:** Type-only strict-null cleanup in core serialization/validation and turn-report typing plus strict-null inventory guard/docs reconciliation. Touched `src/state/serialize.ts`, `src/state/validateGameState.ts`, `src/sim/turn_pipeline_types.ts`, `src/sim/turn_phases/war_phase_negotiation_steps.ts`, and `src/sim/turn_phases/war_phases.ts`. No scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.

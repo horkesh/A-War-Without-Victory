@@ -236,4 +236,10 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
             ).toBe(false);
         }
     });
+
+    it('T13 - AiSettingsPanel saves through the typed AI commander IPC bridge', () => {
+        const src = read(AI_SETTINGS_PATH);
+        expect(src).toContain('ipc.setAiCommanderConfig');
+        expect(src).not.toContain('(ipc as any).invoke');
+    });
 });

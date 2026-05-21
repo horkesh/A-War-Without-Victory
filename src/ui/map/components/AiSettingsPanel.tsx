@@ -26,7 +26,7 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
     const handleSave = async () => {
         if (ipc.isAvailable) {
             try {
-                await (ipc as any).invoke?.('set-ai-commander-config', { mode, anthropic_api_key: apiKey || undefined });
+                await ipc.setAiCommanderConfig({ mode, anthropic_api_key: apiKey || undefined });
             } catch {
                 // IPC not yet implemented — silent fallback
             }
