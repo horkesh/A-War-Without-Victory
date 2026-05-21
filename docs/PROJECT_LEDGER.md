@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean recruitment-engine non-null tail
+
+**Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, recruitment selection, formation generation, or resource-cost rules changed.
+
+**Why:** `applyRecruitment(...)` still relied on a success-path indexed non-null assertion even though recruitment/resource checks already occurred before returning a successful result.
+
+**Change:** Narrowed the target militia pool, recruitment-capital pool, and equipment pool into locals before applying deductions. Malformed external success results now throw a clear invariant error instead of failing through `!`. Added a strict-null progress test pinning `recruitment_engine.ts` at zero for `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/recruitment_engine.test.ts tests/recruitment_existing_formation_identity.test.ts tests/emergent_brigade_formation.test.ts --reporter=dot` PASS (108/108); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 7`, `non_null_assertions_index 19`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_RECRUITMENT_ENGINE_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean formation-spawn non-null tail
 
 **Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, formation-spawn rules, reinforcement rules, or output semantics changed.

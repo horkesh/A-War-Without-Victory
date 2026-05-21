@@ -579,16 +579,21 @@ export function applyRecruitment(
 
     // Deduct manpower (use pool_faction for cross-faction recruitment)
     const poolKey = militiaPoolKey(action.home_mun, action.pool_faction ?? action.faction);
-    const pool = state.military.militia_pools![poolKey]!;
+    const pool = state.military.militia_pools?.[poolKey];
+    const capitalPool = resources.recruitment_capital[action.faction];
+    const equipmentPool = resources.equipment_pools[action.faction];
+    if (!pool || !capitalPool || !equipmentPool) {
+        throw new Error(`Recruitment result references missing resources for ${action.brigade_id}`);
+    }
     pool.available -= action.manpower_spent;
     pool.committed += action.manpower_spent;
     pool.updated_turn = state.meta.turn;
 
     // Deduct capital
-    resources.recruitment_capital[action.faction]!.points -= action.capital_spent;
+    capitalPool.points -= action.capital_spent;
 
     // Deduct equipment
-    resources.equipment_pools[action.faction]!.points -= action.equipment_spent;
+    equipmentPool.points -= action.equipment_spent;
 
     // Register formation
     if (!state.military.formations) state.military.formations = {};
