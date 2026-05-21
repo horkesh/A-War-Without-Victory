@@ -8,7 +8,7 @@ import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import styleJson from '../../map/awwv_map_style.json';
-import type { FeatureCollection } from 'geojson';
+import type { Feature, FeatureCollection, LineString } from 'geojson';
 
 export type OpType = 'offensive' | 'feint' | 'recon';
 
@@ -17,6 +17,12 @@ export interface AxisRenderingData {
     stagingCoords: [number, number] | null;
     objectiveCoords: [number, number][];
     color: string;
+}
+
+interface AxisFeatureProperties {
+    id: string;
+    color: string;
+    isFeint: boolean;
 }
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
@@ -41,16 +47,16 @@ export class OpsMapRenderer {
         // Register PMTiles protocol (same as main MapContainer)
         const pmtilesProtocol = new Protocol();
         const origin = window.location.origin;
-        const tileHandler = async (params: { url: string; type?: string }, abortController: AbortController) => {
+        const tileHandler: Parameters<typeof maplibregl.addProtocol>[1] = async (params, abortController) => {
             try {
-                return await (pmtilesProtocol as any).tilev4(params, abortController);
+                return await pmtilesProtocol.tilev4(params, abortController);
             } catch (e) {
                 console.error('[OpsMap PMTiles] tile error', params.url, e);
                 throw e;
             }
         };
         // addProtocol is idempotent — safe to call if already registered
-        try { maplibregl.addProtocol('pmtiles', tileHandler as any); } catch { /* already registered */ }
+        try { maplibregl.addProtocol('pmtiles', tileHandler); } catch { /* already registered */ }
 
         const style = rewritePmtilesUrls(
             JSON.parse(JSON.stringify(styleJson)) as Record<string, unknown>,
@@ -138,10 +144,13 @@ export class OpsMapRenderer {
     public updateAxes(axes: AxisRenderingData[]) {
         if (!this.ready) return;
 
-        const features = axes.map(axis => this.buildAxisFeature(axis)).filter(Boolean);
+        const features = axes.flatMap(axis => {
+            const feature = this.buildAxisFeature(axis);
+            return feature ? [feature] : [];
+        });
         this.arrowsSource?.setData({
             type: 'FeatureCollection',
-            features: features as any
+            features
         });
     }
 
@@ -172,7 +181,7 @@ export class OpsMapRenderer {
         });
     }
 
-    private buildAxisFeature(axis: AxisRenderingData) {
+    private buildAxisFeature(axis: AxisRenderingData): Feature<LineString, AxisFeatureProperties> | null {
         if (!axis.stagingCoords || axis.objectiveCoords.length === 0) return null;
 
         const points = [axis.stagingCoords, ...axis.objectiveCoords];

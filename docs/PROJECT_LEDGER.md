@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): clean OpsMapRenderer casts
+
+**Type:** Strict-null cleanup. UI map type-surface refactor; no operation-planning behavior, map layer IDs, source data, scenario behavior, save schema, or output tuning changed.
+
+**Why:** `OpsMapRenderer.ts` used three `as any` casts around PMTiles protocol registration and operation-axis GeoJSON feature updates.
+
+**Change:** Typed the PMTiles handler from `maplibregl.addProtocol` and typed generated axis lines as GeoJSON `Feature<LineString, AxisFeatureProperties>`. Added a strict-null progress assertion pinning the renderer at zero for `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (81/81); `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite warnings. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 150`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_STRICT_NULL_OPS_MAP_RENDERER_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean entrypoint initializer casts
 
 **Type:** Strict-null cleanup and smoke harness repair. Entrypoint initializer refactor; no live gameplay entrypoint, scenario behavior, save schema, or output tuning changed.
