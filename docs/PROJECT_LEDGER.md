@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(notifications): classify residual sensitive-content review blocks
+
+**Type:** Documentation-only event-notification prep. Touched reports/plans only. No event JSON, notification copy, tests, simulation behavior, generated artifact ownership, canon text, or `FORAWWV.md` changed.
+
+**Why:** The event-notification residual tracker still had 20 rows / 102 missing recipient blocks gated as broad sensitive-content scope. Future authors need a block-level implementation matrix before drafting copy, including a safe-first slice and explicit reviewer packets.
+
+**Change:** Added `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_RESIDUAL_REVIEW_MATRIX.md`, `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_HISTORIAN_REVIEW_PACKET.md`, and `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_NARRATIVE_TIMING_PACKET.md`. The matrix reconciles tracker counts against event JSON and classifies every missing block into `safe` (12), `historian-required` (34), `narrative-tone` (16), `Washington-timing` (8), `late-war-outcome` (28), or `blocked-sensitive` (4). Updated the sensitive-content review plan with the packet links and the first future safe-only implementation slice.
+
+**Next slice:** Author only the twelve safe front-visit blocks across `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb`, with the focused notification test set listed in the plan. Narrative-tone and blocked-sensitive front-visit blocks remain out of that first content pass.
+
+**Verification:** `git diff --check` clean. Typecheck, vitest, and baselines not run: docs-only classification, no code/data behavior.
+
+---
+
 ## [2026-05-21] diagnostic(h1): watched-operation visibility evidence packet
 
 **Type:** Sensitive-history diagnostic/reporting refresh. Touched `tools/diagnostics/sensitive_history_status.cjs`, its fixture/test, and docs only. No operation behavior, launch feasibility, objectives, OOB, save schema, scenario data, generated artifact ownership, canon text, or `FORAWWV.md` changed.

@@ -21,6 +21,26 @@ No sensitive recipient copy is provided here.
 | Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
 | Front-visit mixed-sensitive | 3 | 30 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
+## Prep Matrix Addendum 2026-05-21
+
+Docs-only prep is complete:
+
+- Residual matrix: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_RESIDUAL_REVIEW_MATRIX.md`
+- Historian packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_HISTORIAN_REVIEW_PACKET.md`
+- Narrative/timing/outcome packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_NARRATIVE_TIMING_PACKET.md`
+
+The matrix reconciles the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigns every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4).
+
+First future implementation slice: safe rows only, capped below five event rows. Author only the twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb`; do not include narrative-tone or blocked-sensitive front-visit blocks in that slice.
+
+Required tests for that future safe slice:
+
+```powershell
+npx.cmd vitest run tests/sim/events/event_notification_content_backfill.test.ts tests/sim/events/two_level_surfacing.test.ts tests/ui/inboxItems.notifications.test.ts tests/event_timeline_integrity.test.ts --reporter=dot
+```
+
+Feature-flag-off baseline behavior must remain stable; notification text may only emit through the existing two-level-notification path.
+
 ## Review Lanes
 
 1. Historian-required lane
