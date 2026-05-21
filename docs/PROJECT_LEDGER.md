@@ -3,6 +3,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): classify catalog-present watched operations
+
+**Type:** Sensitive-history diagnostic/reporting refinement. Touched `tools/diagnostics/sensitive_history_status.cjs`, fixture/test coverage, and docs only. No operation behavior, launch feasibility, objectives, OOB, save schema, scenario data, generated artifact ownership, canon text, or `FORAWWV.md` changed.
+
+**Why:** The H1 diagnostic could classify warning-blocked Krivaja-95, but still collapsed Cerska-Kamenica and Stupcanica-95 into generic `missing` because no watched-operation trace, injection warning, or AAR survived in the run artifact.
+
+**Change:** Added a read-only watched-operation catalog fallback that reads `watched_operation_catalog.json`, `state.military.triggered_operation_catalog`, or finally the local `src/sim/combat/triggered_operations.ts` source text to distinguish catalog-present/no-launch-trace operations from true catalog absence. Added fixture coverage for the catalog-present/no-launch-trace state and updated the H1 packet/roadmap wording. Current 188w evidence now classifies Cerska-Kamenica and Stupcanica-95 as catalog-present, not launched, no AAR, unknown delivery; Krivaja-95 remains warning-blocked by `brigade_ineligible`.
+
+**Verification:** `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (5/5). Baselines not run: diagnostic/report-only change, no sim behavior or scenario output contract changed.
+
+---
+
 ## [2026-05-21] docs(backlog): reconcile notification residual count
 
 **Type:** Documentation-only backlog reconciliation. Touched `docs/40_reports/CONSOLIDATED_BACKLOG.md` and ledger only. No source, tests, scenario data, generated artifacts, save schema, canon text, or `FORAWWV.md` changed.

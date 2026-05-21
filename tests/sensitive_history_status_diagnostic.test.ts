@@ -282,4 +282,55 @@ describe('sensitive_history_status diagnostic script', () => {
             delivery_status: 'blocked',
         });
     });
+
+    it('distinguishes catalog-present watched operations from missing operations when no launch trace survives', () => {
+        const runDir = join(TMP_ROOT, 'catalog_only_trace');
+        mkdirSync(runDir, { recursive: true });
+        writeJson(join(runDir, 'run_summary.json'), {
+            weeks: 188,
+            final_state_hash: 'catalog-only-fixture',
+        });
+        writeJson(join(runDir, 'final_save.json'), {
+            meta: { turn: 188 },
+            political: { political_controllers: {} },
+            military: {
+                formations: {},
+            },
+        });
+        writeJson(join(runDir, 'watched_operation_catalog.json'), [
+            { operation_name: 'Operation Cerska-Kamenica' },
+        ]);
+        writeJson(join(runDir, 'operation_aars.json'), []);
+
+        const jsonOutput = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', '--json', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+        const [summary] = JSON.parse(jsonOutput) as Array<{
+            watched_operations: Array<{
+                operation_name: string;
+                canonical_window: string;
+                catalog_status: string;
+                eligibility_status: string;
+                launch_status: string;
+                aar_status: string;
+                delivery_status: string;
+            }>;
+        }>;
+
+        expect(summary.watched_operations.find((op) => op.operation_name === 'Operation Cerska-Kamenica')).toMatchObject({
+            canonical_window: '40',
+            catalog_status: 'present',
+            eligibility_status: 'unknown',
+            launch_status: 'not_launched',
+            aar_status: 'not_visible',
+            delivery_status: 'unknown',
+        });
+        expect(summary.watched_operations.find((op) => op.operation_name === 'Operation Krivaja-95')).toMatchObject({
+            catalog_status: 'missing',
+            launch_status: 'unknown',
+            delivery_status: 'missing',
+        });
+    });
 });

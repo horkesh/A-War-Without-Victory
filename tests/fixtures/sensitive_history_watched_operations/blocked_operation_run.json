@@ -20,6 +20,16 @@
     },
     "watched_operations.json": [
       {
+        "operation_id": "",
+        "operation_name": "Operation Cerska-Kamenica",
+        "canonical_window": "",
+        "catalog_status": "missing",
+        "eligibility_status": "unknown",
+        "launch_status": "unknown",
+        "delivery_status": "missing",
+        "typed_blocker": ""
+      },
+      {
         "operation_id": "vrs_drina:Operation Krivaja-95:t168",
         "operation_name": "Operation Krivaja-95",
         "canonical_window": {

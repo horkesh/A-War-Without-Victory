@@ -254,6 +254,30 @@ function watchedOperationTraceSource(runDir, state) {
     return asArray(state.military && state.military.watched_operations);
 }
 
+function watchedOperationCatalogSource(runDir, state) {
+    const fileRows = readJsonIfExists(path.join(runDir, 'watched_operation_catalog.json'), null);
+    if (Array.isArray(fileRows)) {
+        return new Set(fileRows.map(row => operationNameOf(row)).filter(Boolean));
+    }
+
+    const stateRows = asArray(state.military && state.military.triggered_operation_catalog);
+    if (stateRows.length > 0) {
+        return new Set(stateRows.map(row => operationNameOf(row)).filter(Boolean));
+    }
+
+    const sourcePath = path.join(process.cwd(), 'src', 'sim', 'combat', 'triggered_operations.ts');
+    if (!fs.existsSync(sourcePath)) return new Set();
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    const names = new Set();
+    for (const name of WATCH_OPS) {
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (new RegExp(`name:\\s*['"]${escaped}['"]`).test(source)) {
+            names.add(name);
+        }
+    }
+    return names;
+}
+
 function operationNameOf(row) {
     return String(row && (row.operation_name || row.name) || '');
 }
@@ -293,9 +317,10 @@ function deliveryStatusFromAar(aar) {
     return 'missing';
 }
 
-function normalizedCatalogStatus(trace, aar) {
+function normalizedCatalogStatus(trace, aar, catalogHasName) {
     const status = String(trace && trace.catalog_status || '').trim();
     if (status === 'present' || status === 'missing' || status === 'not_applicable') return status;
+    if (catalogHasName) return 'present';
     return trace || aar ? 'present' : 'missing';
 }
 
@@ -305,12 +330,13 @@ function normalizedEligibilityStatus(trace) {
     return 'unknown';
 }
 
-function normalizedLaunchStatus(trace, aar, blockerCode) {
+function normalizedLaunchStatus(trace, aar, blockerCode, catalogHasName) {
     const status = String(trace && (trace.launch_status || trace.launch) || '').trim();
     if (status === 'launched' || status === 'blocked' || status === 'not_launched' || status === 'unknown') return status;
     if (aar) return 'launched';
     if (blockerCode) return 'blocked';
     if (trace) return 'not_launched';
+    if (catalogHasName) return 'not_launched';
     return 'unknown';
 }
 
@@ -337,9 +363,11 @@ function latestInjectionWarning(state, name) {
 
 function summarizeWatchedOperations(runDir, state) {
     const traces = watchedOperationTraceSource(runDir, state);
+    const catalogNames = watchedOperationCatalogSource(runDir, state);
     const aars = aarSource(runDir, state);
 
     return WATCH_OPS.map(name => {
+        const catalogHasName = catalogNames.has(name);
         const trace = latestByTurnThenId(traces.filter(row => operationNameOf(row) === name));
         const traceId = operationIdOf(trace);
         const warning = latestInjectionWarning(state, name);
@@ -348,24 +376,25 @@ function summarizeWatchedOperations(runDir, state) {
             return traceId ? operationIdOf(row) === traceId : true;
         }));
         const aarVisible = Boolean(aar);
+        const catalogStatus = normalizedCatalogStatus(trace || warning, aar, catalogHasName);
         const deliveryStatus = normalizedDeliveryStatus(trace && trace.delivery_status)
             || (warning ? 'blocked' : '')
+            || (catalogStatus === 'present' && !aar ? 'unknown' : '')
             || deliveryStatusFromAar(aar);
         const blockerCode = String((trace && (trace.blocker_code || trace.typed_blocker || trace.blocker)) || (warning && warning.check) || (aar && (aar.blocker || aar.recovery_reason)) || '');
-        const catalogStatus = normalizedCatalogStatus(trace || warning, aar);
         const eligibilityStatus = trace
             ? normalizedEligibilityStatus(trace)
             : (warning ? 'not_eligible' : 'unknown');
-        const launchStatus = normalizedLaunchStatus(trace, aar, blockerCode);
+        const launchStatus = normalizedLaunchStatus(trace, aar, blockerCode, catalogStatus === 'present');
         const aarStatus = normalizedAarStatus(aar, catalogStatus);
-        const presenceStatus = trace || warning || aar
+        const presenceStatus = (trace && catalogStatus !== 'missing') || warning || aar
             ? (aarVisible ? 'aar_visible' : 'aar_not_visible')
             : 'missing';
         return {
             operation_name: name,
             watched_label: WATCH_OP_LABELS[name] || name,
             operation_id: traceId || operationIdOf(aar) || String(warning && warning.op_name || ''),
-            canonical_window: formatCanonicalWindow(trace && trace.canonical_window) || (warning ? WATCH_OP_WINDOWS[name] || '' : ''),
+            canonical_window: formatCanonicalWindow(trace && trace.canonical_window) || (warning || catalogStatus === 'present' ? WATCH_OP_WINDOWS[name] || '' : ''),
             catalog_status: catalogStatus,
             eligibility_status: eligibilityStatus,
             launch_status: launchStatus,
