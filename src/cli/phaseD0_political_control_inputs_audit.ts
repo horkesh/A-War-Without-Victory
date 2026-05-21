@@ -42,6 +42,9 @@ interface SettlementRecord {
 
 interface SettlementsIndex {
     settlements?: SettlementRecord[];
+    political?: {
+        settlements?: SettlementRecord[];
+    };
     [k: string]: unknown;
 }
 
@@ -71,6 +74,12 @@ function isAllowedController(value: string | null): boolean {
     return value === null || ALLOWED_FACTIONS.has(value);
 }
 
+function readSettlements(indexData: SettlementsIndex): SettlementRecord[] {
+    if (Array.isArray(indexData.settlements)) return indexData.settlements;
+    if (Array.isArray(indexData.political?.settlements)) return indexData.political.settlements;
+    return [];
+}
+
 async function main(): Promise<void> {
     const indexPath = resolve(ROOT, 'data/derived/settlements_index_1990.json');
     const mappingPath = resolve(ROOT, 'data/derived/municipality_political_controllers_1990.json');
@@ -87,7 +96,7 @@ async function main(): Promise<void> {
     const mappingData = JSON.parse(mappingText) as ControllerMappingFile;
     const registryData = JSON.parse(registryText) as RegistryFile;
 
-    const settlements: SettlementRecord[] = Array.isArray((indexData as any).political.settlements) ? (indexData as any).political.settlements : [];
+    const settlements = readSettlements(indexData);
     const controllersByMun1990 = mappingData.controllers_by_mun1990_id ?? {};
     const registryRows: RegistryRow[] = Array.isArray(registryData.rows) ? registryData.rows : [];
 

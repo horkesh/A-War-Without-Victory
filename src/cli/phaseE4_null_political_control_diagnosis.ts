@@ -34,6 +34,9 @@ interface SettlementRecord {
 
 interface SettlementsIndex {
     settlements?: SettlementRecord[];
+    political?: {
+        settlements?: SettlementRecord[];
+    };
     [k: string]: unknown;
 }
 
@@ -45,6 +48,12 @@ interface ControllerMappingFile {
 function getSid(s: SettlementRecord): string {
     if (typeof s.sid === 'string' && s.sid.length > 0) return s.sid;
     return '';
+}
+
+function readSettlements(indexData: SettlementsIndex): SettlementRecord[] {
+    if (Array.isArray(indexData.settlements)) return indexData.settlements;
+    if (Array.isArray(indexData.political?.settlements)) return indexData.political.settlements;
+    return [];
 }
 
 async function main(): Promise<void> {
@@ -60,7 +69,7 @@ async function main(): Promise<void> {
     const indexData = JSON.parse(indexText) as SettlementsIndex;
     const mappingData = JSON.parse(mappingText) as ControllerMappingFile;
 
-    const settlements: SettlementRecord[] = Array.isArray((indexData as any).political.settlements) ? (indexData as any).political.settlements : [];
+    const settlements = readSettlements(indexData);
     const controllersByMun1990 = mappingData.controllers_by_mun1990_id ?? {};
 
     // Sort settlements deterministically

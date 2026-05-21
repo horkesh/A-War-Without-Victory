@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] fix(cli): read current political-control audit index shape
+
+**Type:** Diagnostic CLI bug fix plus strict-null cleanup. Touched `src/cli/phaseD0_political_control_inputs_audit.ts`, `src/cli/phaseE4_null_political_control_diagnosis.ts`, tests, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Both political-control audit CLIs attempted to read `(indexData as any).political.settlements`, but current `data/derived/settlements_index_1990.json` exposes `settlements` at the top level. The casts hid the shape mismatch until runtime, where both tools crashed with `TypeError: Cannot read properties of undefined (reading 'settlements')`.
+
+**Change:** Added a small `readSettlements(...)` helper in each CLI that accepts the current top-level `settlements` shape while preserving compatibility with the older nested `political.settlements` shape. Added a CLI regression test that proves `phaseE4:null_political_control_diagnosis` runs and `phaseD0:political_control_inputs_audit` reports its validation result without crashing.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 184 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green strict-null inventory assertion failed at 4 before the source edit and passed after; `npx.cmd vitest run tests/political_control_audit_cli.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (58/58); `npm.cmd run typecheck` PASS; `git diff --check` clean except Windows CRLF normalization warnings. `phaseD0:political_control_inputs_audit` now returns validation failure instead of TypeError because the current derived index carries display-name `mun1990_id` values like `Banja Luka`, which do not match the audit's slug-id contract. That data-shape mismatch is a separate generated-data lane.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean CLI front-state diagnostic casts
 
 **Type:** Diagnostic CLI strict-null cleanup plus stale diagnostic-source fix. Touched `src/cli/sim_front_state.ts`, `tests/strict_null_inventory_progress.test.ts`, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
