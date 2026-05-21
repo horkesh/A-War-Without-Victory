@@ -439,6 +439,7 @@ function summarizeWatchedOperations(runDir, state) {
         if (trace && trace.launch_primary_defender_id !== undefined) summary.launch_primary_defender_id = trace.launch_primary_defender_id;
         if (trace && trace.launch_defender_count !== undefined) summary.launch_defender_count = trace.launch_defender_count;
         if (trace && trace.launch_defender_ids !== undefined) summary.launch_defender_ids = trace.launch_defender_ids;
+        if (trace && trace.launch_defender_power_by_id !== undefined) summary.launch_defender_power_by_id = trace.launch_defender_power_by_id;
         return summary;
     });
 }

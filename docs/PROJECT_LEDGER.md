@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): preserve defender power contributions
+
+**Type:** Sensitive-history diagnostic/output-contract refinement. Touched launch-feasibility result metadata, watched-operation trace schema, diagnostic summaries, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
+
+**Why:** H1 roster attribution named the blocking objective and defenders, but still did not explain how each defender contributed to the total launch-feasibility defender power. The next owner needed primary-vs-secondary stacked-power evidence before drilling into terrain/supply/posture/entrenchment/local-density modifiers.
+
+**Change:** Threaded per-defender raw power and stacked contribution from `evaluateLaunchFeasibility(...)` into watched-operation trace rows and `sensitive_history_status.cjs` summaries. The rows reuse the existing `STACKING_DEFENDER_SUPPORT` contribution, round to three decimals, and sort deterministically by descending stacked power then formation id. This is trace/reporting only.
+
+**Finding:** Fresh `n1930` final hash `c218d2e865a54f5b` completed with anchors 27/27. Cerska-Kamenica is blocked by `arbih_280th_east_bosnian_light` at 338.758 stacked power plus three secondary East Bosnian contributions at 101.627 each. Krivaja-95 is blocked by the same four-defender stack at 341.974 + 102.592 + 102.592 + 102.592 and still preserves the separate `brigade_ineligible` row for `rs_skelani_battalion`. Stupcanica-95 is dominated by `arbih_1st_cerska` at 1080.063 stacked power, with `arbih_282nd_east_bosnian_light` at 98.812 and `arbih_285th_light` at 49.371.
+
+**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts tests/operation_launch_feasibility_defender_aware.test.ts --reporter=dot` PASS (26/26); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1930` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1930` PASS; `git diff --check` PASS with CRLF normalization warnings only.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_H1_LAUNCH_FEASIBILITY_INPUT_TRACE.md`; `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): preserve launch-feasibility power inputs
 
 **Type:** Sensitive-history diagnostic/output-contract refinement. Touched watched-operation trace schema, diagnostic row selection, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.

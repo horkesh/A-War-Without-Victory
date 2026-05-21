@@ -363,6 +363,10 @@ describe('sensitive_history_status diagnostic script', () => {
                 launch_primary_defender_id: 'arbih_282nd_light',
                 launch_defender_count: 2,
                 launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
+                launch_defender_power_by_id: [
+                    { formation_id: 'arbih_282nd_light', power: 500, stacked_power: 500 },
+                    { formation_id: 'arbih_283rd_light', power: 250, stacked_power: 75 },
+                ],
                 launch_feasibility_ratio: 0.317,
                 launch_attacker_power: 205.892,
                 launch_defender_power: 649.751,
@@ -395,6 +399,11 @@ describe('sensitive_history_status diagnostic script', () => {
                 launch_primary_defender_id?: string;
                 launch_defender_count?: number;
                 launch_defender_ids?: string[];
+                launch_defender_power_by_id?: Array<{
+                    formation_id: string;
+                    power: number;
+                    stacked_power: number;
+                }>;
                 launch_feasibility_ratio?: number;
                 launch_attacker_power?: number;
                 launch_defender_power?: number;
@@ -408,6 +417,10 @@ describe('sensitive_history_status diagnostic script', () => {
             launch_primary_defender_id: 'arbih_282nd_light',
             launch_defender_count: 2,
             launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
+            launch_defender_power_by_id: [
+                { formation_id: 'arbih_282nd_light', power: 500, stacked_power: 500 },
+                { formation_id: 'arbih_283rd_light', power: 250, stacked_power: 75 },
+            ],
             launch_feasibility_ratio: 0.317,
             launch_attacker_power: 205.892,
             launch_defender_power: 649.751,

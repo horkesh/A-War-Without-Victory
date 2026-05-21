@@ -15,6 +15,7 @@ import {
     computeAttackerPower,
     getArtillerySuppression,
     rankDefendersByPower,
+    STACKING_DEFENDER_SUPPORT,
     VICTORY_THRESHOLD_COSTLY,
 } from './combat_math.js';
 import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
@@ -45,6 +46,11 @@ export interface LaunchFeasibilityResult {
     objectiveOsid?: string;
     primaryDefenderId?: FormationId;
     defenderIds?: FormationId[];
+    defenderPowerById?: Array<{
+        formationId: FormationId;
+        power: number;
+        stackedPower: number;
+    }>;
 }
 
 export function getEquipmentOffensivePriority(equipmentClass: string | undefined): number {
@@ -182,6 +188,11 @@ export function evaluateLaunchFeasibility(
             objectiveOsid: obj,
             primaryDefenderId: primary.id,
             defenderIds: rankedDefenders.map((defender) => defender.id),
+            defenderPowerById: rankedDefenders.map((defender, index) => ({
+                formationId: defender.id,
+                power: defender.power,
+                stackedPower: index === 0 ? defender.power : defender.power * STACKING_DEFENDER_SUPPORT,
+            })),
         };
         const candidate: LaunchFeasibilityResult = ratio >= VICTORY_THRESHOLD_COSTLY
             ? { feasible: true, ratio, attackerPower, defenderPower, ...defenderContext }

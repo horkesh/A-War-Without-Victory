@@ -968,6 +968,11 @@ export interface WatchedOperationTraceRow {
     launch_primary_defender_id?: FormationId;
     launch_defender_count?: number;
     launch_defender_ids?: FormationId[];
+    launch_defender_power_by_id?: Array<{
+        formation_id: FormationId;
+        power: number;
+        stacked_power: number;
+    }>;
     launch_feasibility_ratio?: number;
     launch_attacker_power?: number;
     launch_defender_power?: number;

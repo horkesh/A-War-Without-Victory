@@ -642,6 +642,18 @@ function recordWatchedOperationTrace(
             row.launch_defender_ids = [...outcome.launch_feasibility.defenderIds].sort(strictCompare);
             row.launch_defender_count = row.launch_defender_ids.length;
         }
+        if (outcome.launch_feasibility.defenderPowerById) {
+            row.launch_defender_power_by_id = outcome.launch_feasibility.defenderPowerById
+                .map((entry) => ({
+                    formation_id: entry.formationId,
+                    power: roundTraceNumber(entry.power),
+                    stacked_power: roundTraceNumber(entry.stackedPower),
+                }))
+                .sort((a, b) =>
+                    (b.stacked_power - a.stacked_power)
+                    || strictCompare(a.formation_id, b.formation_id)
+                );
+        }
         row.launch_feasibility_ratio = roundTraceNumber(outcome.launch_feasibility.ratio);
         row.launch_attacker_power = roundTraceNumber(outcome.launch_feasibility.attackerPower);
         row.launch_defender_power = roundTraceNumber(outcome.launch_feasibility.defenderPower);

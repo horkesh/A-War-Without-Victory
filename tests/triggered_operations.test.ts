@@ -375,6 +375,8 @@ describe('checkTriggeredOperations', () => {
         assert.equal(row.launch_primary_defender_id, 'arbih_kotor_varos_defender');
         assert.equal(row.launch_defender_count, 1);
         assert.deepEqual(row.launch_defender_ids, ['arbih_kotor_varos_defender']);
+        assert.equal(row.launch_defender_power_by_id?.[0]?.formation_id, 'arbih_kotor_varos_defender');
+        assert.equal(row.launch_defender_power_by_id?.[0]?.power, row.launch_defender_power_by_id?.[0]?.stacked_power);
         assert.equal(typeof row.launch_feasibility_ratio, 'number');
         assert.equal(typeof row.launch_attacker_power, 'number');
         assert.equal(typeof row.launch_defender_power, 'number');
