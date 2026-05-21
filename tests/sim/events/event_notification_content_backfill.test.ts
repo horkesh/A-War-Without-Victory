@@ -102,4 +102,46 @@ describe('event notification content backfill', () => {
             }
         }
     });
+
+    it('covers safe front-visit residual response notifications for non-source recipients', () => {
+        const events = loadWar1993Events();
+        const cases = [
+            {
+                eventId: 'visit_to_front_rbih',
+                responses: {
+                    visit_eastern_front: ['HRHB', 'RS'],
+                    stay_capital_rbih: ['HRHB', 'RS'],
+                },
+            },
+            {
+                eventId: 'visit_to_front_rs',
+                responses: {
+                    visit_posavina: ['HRHB', 'RBiH'],
+                    stay_pale_rs: ['HRHB', 'RBiH'],
+                },
+            },
+            {
+                eventId: 'visit_to_front_hrhb',
+                responses: {
+                    visit_posavina_hrhb: ['RBiH', 'RS'],
+                    stay_mostar_hrhb: ['RBiH', 'RS'],
+                },
+            },
+        ];
+
+        for (const { eventId, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
 });

@@ -6,6 +6,8 @@ Scope: docs-only classification for residual `notifications_to_other_factions` b
 
 Source tracker: `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`
 
+2026-05-21 closeout note: the first future safe slice identified below has now been implemented. The historical matrix below remains the pre-implementation classification for the 102-block floor; current residual after implementation is 90 blocks, with all 12 `safe` blocks closed.
+
 ## Count Reconciliation
 
 | Source | Rows | Missing recipient blocks |
@@ -64,6 +66,8 @@ The first content implementation slice should be safe-only and capped at these f
 | `visit_to_front_hrhb` | `visit_posavina_hrhb` -> RBiH/RS; `stay_mostar_hrhb` -> RBiH/RS |
 
 This is three rows and twelve recipient blocks, below the five-row cap. Do not include narrative-tone or blocked-sensitive front-visit blocks in the first pass.
+
+Status: implemented 2026-05-21. Current safe residual is zero; remaining front-visit blocks stay in historian-required, narrative-tone, or blocked-sensitive review.
 
 Future verification for the safe content slice:
 

@@ -31,9 +31,9 @@ Docs-only prep is complete:
 
 The matrix reconciles the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigns every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4).
 
-First future implementation slice: safe rows only, capped below five event rows. Author only the twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb`; do not include narrative-tone or blocked-sensitive front-visit blocks in that slice.
+First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Narrative-tone and blocked-sensitive front-visit blocks remain out of scope.
 
-Required tests for that future safe slice:
+Required tests for the safe slice:
 
 ```powershell
 npx.cmd vitest run tests/sim/events/event_notification_content_backfill.test.ts tests/sim/events/two_level_surfacing.test.ts tests/ui/inboxItems.notifications.test.ts tests/event_timeline_integrity.test.ts --reporter=dot

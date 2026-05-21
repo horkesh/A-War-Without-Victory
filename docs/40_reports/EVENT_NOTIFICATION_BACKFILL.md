@@ -24,6 +24,9 @@
 | `war_1993.json` | `rs_assembly_rejects_voplan_1993` | RS | 4/4 | Batch 8 safe backfill complete from existing assembly rejection narrative, response descriptions, and dimension shifts. |
 | `war_1993.json` | `owen_stoltenberg_plan_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tripartite union narrative, response descriptions, and diplomatic effects. |
 | `war_1993.json` | `os_rbih_tactical_acceptance_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tactical-acceptance narrative, response labels, and dimension shifts. |
+| `war_1993.json` | `visit_to_front_rbih` | RBiH | 4/10 | Safe front-visit slice complete for `visit_eastern_front` and `stay_capital_rbih`; Sarajevo/Bihac/press options remain gated. |
+| `war_1993.json` | `visit_to_front_rs` | RS | 4/10 | Safe front-visit slice complete for `visit_posavina` and `stay_pale_rs`; Sarajevo/Drina/press options remain gated. |
+| `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 | Safe front-visit slice complete for `visit_posavina_hrhb` and `stay_mostar_hrhb`; Mostar/central-Bosnia/press options remain gated. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
@@ -32,9 +35,9 @@
 | `war_1992.json` | `concentration_camps_revealed_1992` | RS | 0/6 |
 | `war_1993.json` | `srebrenica_demilitarization_1993` | RBiH | 0/6 |
 | `war_1993.json` | `operation_lukavac_93` | RS | 0/4 |
-| `war_1993.json` | `visit_to_front_rbih` | RBiH | 0/10 |
-| `war_1993.json` | `visit_to_front_rs` | RS | 0/10 |
-| `war_1993.json` | `visit_to_front_hrhb` | HRHB | 0/10 |
+| `war_1993.json` | `visit_to_front_rbih` | RBiH | 4/10 |
+| `war_1993.json` | `visit_to_front_rs` | RS | 4/10 |
+| `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 |
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 0/4 |
 | `war_1994.json` | `washington_agreement_1994` | RBiH | 0/4 |
 | `war_1994.json` | `ic_rbih_restraint_post_washington` | RBiH | 0/4 |
@@ -60,9 +63,9 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Narrative tone required | 2 | 8 | `rs_strategic_goals`; `rbih_state_identity` |
 | Washington timing policy | 2 | 8 | `washington_agreement_1994`; `ic_rbih_restraint_post_washington` |
 | Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
-| Front-visit mixed-sensitive | 3 | 30 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
+| Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 20 event rows and 102 recipient blocks. This total includes two sparse 1992 rows already listed under implemented coverage because they still have uncovered response/recipient combinations.
+**Total residual:** 20 event rows and 90 recipient blocks after the 2026-05-21 safe front-visit slice. The prior Batch 9 residual floor was 20 rows / 102 blocks. This total includes two sparse 1992 rows already listed under implemented coverage because they still have uncovered response/recipient combinations.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |

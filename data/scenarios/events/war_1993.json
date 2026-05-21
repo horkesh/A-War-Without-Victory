@@ -3646,7 +3646,29 @@
         "aggression_affinity": -0.3,
         "risk_level": 0.2
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "visit_eastern_front": {
+        "HRHB": {
+          "headline": "RBiH Leadership Tours Northeastern Front",
+          "body": "RBiH officials are directing attention to Tuzla and the corridor towns. The visit signals that Sarajevo is prioritizing cohesion and defense in the northeast."
+        },
+        "RS": {
+          "headline": "RBiH Leadership Tours Northeastern Front",
+          "body": "RBiH officials are directing attention to Tuzla and the corridor towns. The visit signals a public commitment to hold the northeastern front."
+        }
+      },
+      "stay_capital_rbih": {
+        "HRHB": {
+          "headline": "RBiH President Remains In Sarajevo",
+          "body": "The RBiH presidency is staying in Sarajevo while staff officers handle front-line contact. The decision keeps diplomatic and command work centered in the capital."
+        },
+        "RS": {
+          "headline": "RBiH President Remains In Sarajevo",
+          "body": "The RBiH presidency is staying in Sarajevo while staff officers handle front-line contact. The decision keeps political attention on capital-level command and diplomacy."
+        }
+      }
+    }
   },
   {
     "id": "visit_to_front_rs",
@@ -3872,7 +3894,29 @@
         "aggression_affinity": -0.2,
         "risk_level": 0.2
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "visit_posavina": {
+        "HRHB": {
+          "headline": "RS Leadership Visits Posavina Corridor",
+          "body": "The RS presidency is emphasizing the Posavina corridor and the forces holding the northern link between RS territories."
+        },
+        "RBiH": {
+          "headline": "RS Leadership Visits Posavina Corridor",
+          "body": "The RS presidency is emphasizing the Posavina corridor and the forces holding the northern link between RS territories."
+        }
+      },
+      "stay_pale_rs": {
+        "HRHB": {
+          "headline": "RS President Stays In Pale",
+          "body": "The RS presidency is keeping the front visit at staff level while the Assembly and outside contacts remain active in Pale."
+        },
+        "RBiH": {
+          "headline": "RS President Stays In Pale",
+          "body": "The RS presidency is keeping the front visit at staff level while the Assembly and outside contacts remain active in Pale."
+        }
+      }
+    }
   },
   {
     "id": "visit_to_front_hrhb",
@@ -4098,6 +4142,28 @@
         "aggression_affinity": -0.3,
         "risk_level": 0.2
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "visit_posavina_hrhb": {
+        "RBiH": {
+          "headline": "HRHB Leadership Visits Posavina Positions",
+          "body": "HRHB officials are touring HVO positions along the Sava line, signaling continued attention to the northern front."
+        },
+        "RS": {
+          "headline": "HRHB Leadership Visits Posavina Positions",
+          "body": "HRHB officials are touring HVO positions along the Sava line, signaling continued attention to the northern front."
+        }
+      },
+      "stay_mostar_hrhb": {
+        "RBiH": {
+          "headline": "HRHB President Stays In Mostar",
+          "body": "HRHB leadership is keeping the front visit at deputy-command level while diplomatic contacts continue in Mostar."
+        },
+        "RS": {
+          "headline": "HRHB President Stays In Mostar",
+          "body": "HRHB leadership is keeping the front visit at deputy-command level while diplomatic contacts continue in Mostar."
+        }
+      }
+    }
   }
 ]

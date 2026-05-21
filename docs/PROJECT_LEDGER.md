@@ -3,6 +3,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] content(notifications): author safe front-visit recipient blocks
+
+**Type:** Event-notification content backfill, safe slice only. Touched `data/scenarios/events/war_1993.json`, notification content tests, and docs. No simulation mechanics, event trigger timing, response effects, save schema, canon text, or `FORAWWV.md` changed.
+
+**Why:** The 2026-05-21 notification residual matrix identified twelve safe recipient blocks across the recurring front-visit events that could be authored without historian, timing, late-war-outcome, or blocked-sensitive review.
+
+**Change:** Added `notifications_to_other_factions` for safe response ids only: `visit_to_front_rbih` (`visit_eastern_front`, `stay_capital_rbih` to HRHB/RS), `visit_to_front_rs` (`visit_posavina`, `stay_pale_rs` to HRHB/RBiH), and `visit_to_front_hrhb` (`visit_posavina_hrhb`, `stay_mostar_hrhb` to RBiH/RS). Updated the content-backfill test and tracker docs. Residual notification floor is now 20 event rows / 90 recipient blocks; all remaining front-visit blocks stay gated by historian-required, narrative-tone, or blocked-sensitive review.
+
+**Verification:** `npx.cmd vitest run tests/sim/events/event_notification_content_backfill.test.ts tests/sim/events/two_level_surfacing.test.ts tests/ui/inboxItems.notifications.test.ts tests/event_timeline_integrity.test.ts --reporter=dot` PASS (26/26); residual counter script confirms 90 remaining recipient blocks; `git diff --check` clean. Baselines not run: notification-copy-only data change behind existing two-level-notification emission path, no sim mechanics or feature-flag-off behavior changed.
+
+---
+
 ## [2026-05-21] docs(notifications): classify residual sensitive-content review blocks
 
 **Type:** Documentation-only event-notification prep. Touched reports/plans only. No event JSON, notification copy, tests, simulation behavior, generated artifact ownership, canon text, or `FORAWWV.md` changed.
