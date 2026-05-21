@@ -2802,12 +2802,16 @@ function buildFactionSectors(
 
     // Step 5: Territory Voronoi — BFS from Front Edges into Depth
     _perfTime(`buildFactionSectors:${faction}:territory-voronoi`, () => {
-        assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
+        _perfTime(`buildFactionSectors:${faction}:territory-voronoi:assign`, () => {
+            assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
+        });
 
     // Step 5b: Repair disconnected territory — Voronoi BFS can assign non-contiguous
     // OSIDs to a sector when front edges are separated. BFS through each sector's
     // territory, keep the largest connected component, reassign orphans to adjacent sectors.
-        repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
+        _perfTime(`buildFactionSectors:${faction}:territory-voronoi:repair-disconnected`, () => {
+            repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
+        });
     });
 
     // Pre-compute friendly territory connected components (used by steps 6 and 7).
@@ -2837,7 +2841,7 @@ function buildFactionSectors(
     });
 
     // Step 8: Reclassify brigades by frontline proximity.
-    _perfTime(`buildFactionSectors:${faction}:post-classification-normalization`, () => {
+    _perfTime(`buildFactionSectors:${faction}:post-classification-rear-normalization`, () => {
         reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
     });
 
@@ -2865,22 +2869,32 @@ function buildFactionSectors(
         }
     });
 
-    _perfTime(`buildFactionSectors:${faction}:post-classification-normalization`, () => {
+    _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization`, () => {
         // Step 8b: Deduplicate
-        deduplicateBrigadesAcrossSectors(sectors);
+        _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:dedup-initial`, () => {
+            deduplicateBrigadesAcrossSectors(sectors);
+        });
 
         // Step 8c: Strip any residual paper assignments that do not physically belong to the sector.
-        enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
+        _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:enforce-ownership`, () => {
+            enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
+        });
 
         // Step 8d: Reattach any now-unassigned brigades whose current locations are still
         // truthfully owned by an existing sector.
-        rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
+        _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:rehome-unassigned`, () => {
+            rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
+        });
 
         // Step 8e: Re-normalize reserve/frontline roles after truthful rehome.
-        reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+        _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:reclassify-rear`, () => {
+            reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+        });
 
         // Step 8f: Recompute defensive_power and threat_ratio from final brigade sets.
-        recomputeSectorPowerAndThreat(sectors, formations, faction, state);
+        _perfTime(`buildFactionSectors:${faction}:post-classification-truth-normalization:recompute-power`, () => {
+            recomputeSectorPowerAndThreat(sectors, formations, faction, state);
+        });
     });
 
     // Final prune: remove ghost artifact sectors

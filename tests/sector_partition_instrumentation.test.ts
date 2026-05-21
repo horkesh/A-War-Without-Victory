@@ -280,9 +280,17 @@ describe('sector-partition instrumentation — env-flag gating', () => {
             'buildFactionSectors:${faction}:front-edge-partition',
             'buildFactionSectors:${faction}:isolated-pocket-consolidation',
             'buildFactionSectors:${faction}:osid-to-corps',
-            'buildFactionSectors:${faction}:post-classification-normalization',
+            'buildFactionSectors:${faction}:post-classification-rear-normalization',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization:dedup-initial',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization:enforce-ownership',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization:reclassify-rear',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization:recompute-power',
+            'buildFactionSectors:${faction}:post-classification-truth-normalization:rehome-unassigned',
             'buildFactionSectors:${faction}:pre-component-setup',
             'buildFactionSectors:${faction}:territory-voronoi',
+            'buildFactionSectors:${faction}:territory-voronoi:assign',
+            'buildFactionSectors:${faction}:territory-voronoi:repair-disconnected',
         ];
 
         for (const label of labels) {

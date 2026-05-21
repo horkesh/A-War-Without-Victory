@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): split build-faction attribution labels
+
+**Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** Fresh sector profiling showed `buildFactionSectors:RS/RBiH` remained a leading parent, but current source had two distinct post-classification phases writing the same label and territory Voronoi combined assignment and repair. The next optimization owner needed narrower labels before changing sector logic.
+
+**Change:** Split `buildFactionSectors:${faction}:territory-voronoi` into `:assign` and `:repair-disconnected`. Replaced the duplicated post-classification label with `:post-classification-rear-normalization` and `:post-classification-truth-normalization`, then split truth normalization into `:dedup-initial`, `:enforce-ownership`, `:rehome-unassigned`, `:reclassify-rear`, and `:recompute-power`. Updated the static instrumentation contract and filed `docs/40_reports/implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md`.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts --reporter=dot` PASS (17/17); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_label_split_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre-edit and post-edit profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`) are byte-identical at current final state hash `4368f50c00c464ad`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md`; `data/derived/_debug/sector_partition_perf_label_split_clean.jsonl`; `runs_perf/sector_reconstruction_label_split_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
+
 ## [2026-05-21] docs(h1): classify defender power review boundary
 
 **Type:** Documentation-only sensitive-history audit/roadmap update. No code, operation behavior, scenario data, OOB, combat math, save schema, canon text, or `FORAWWV.md` changed.

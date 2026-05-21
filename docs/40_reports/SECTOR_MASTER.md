@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-05-21: Build-faction post-classification label split (byte-identical)
+
+**Change:** `src/sim/combat/corps_front_sectors.ts` now splits the ambiguous `buildFactionSectors:*:territory-voronoi` and duplicated `buildFactionSectors:*:post-classification-normalization` sidecar labels into deterministic child labels. Territory Voronoi now records `:assign` and `:repair-disconnected`; post-classification now separates rear normalization from truth normalization and splits truth normalization into `:dedup-initial`, `:enforce-ownership`, `:rehome-unassigned`, `:reclassify-rear`, and `:recompute-power`.
+
+**Byte-identity:** Pre-edit current profile and post-edit label-split profile both produced final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, and `end_report.md` are byte-identical between the two profiled runs. Consistency validation passed on `runs_perf/sector_reconstruction_label_split_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** The split shows `post-classification-truth-normalization:recompute-power` at 104.846ms (RS) + 87.539ms (RBiH), while `territory-voronoi:assign` is 65.001ms (RS) + 62.165ms (RBiH) and `:repair-disconnected` is lower. The larger current targets remain `corps-sector-construction` and `brigade-classification:territory-assignment`.
+
+**Report:** [implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md](implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md)
+
+---
+
 ## 2026-05-18: Batch 37 `:split-pieces` redundant normalize skip (byte-identical)
 
 **Change:** `src/sim/combat/corps_front_sectors.ts` `enforceFinalSectorGeometryInvariants:split-pieces` inner loop now guards the per-piece `normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta)` call on `contiguousPiece !== sector`. The seven pass-through paths inside `splitNonContiguousSectors` all `result.push(sector); continue;` — same object reference. The function's only mutation on pass-through is the trailing `result[i]!.sector_id = sector:${corpsId}:${i}` renumbering; `edge_ids` and `sub_segments` are untouched. The line-960 normalize (BEFORE `splitNonContiguousSectors`) already canonicalized the sector, and `normalizeSectorSubSegmentsFromEdges` is idempotent on already-normalized input — re-normalizing the pass-through reference is byte-identical compute that produces no observable state change (lines 992-995 then unconditionally overwrite `sub_segment_id`).

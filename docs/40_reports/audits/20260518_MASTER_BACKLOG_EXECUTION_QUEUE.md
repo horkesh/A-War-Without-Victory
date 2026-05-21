@@ -15,6 +15,12 @@
 |---|---|---|
 | H1 watched-operation visibility/component evidence | Diagnostic complete / outcome gated | Reports: `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` and `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md`. Fresh 188w n1931 hash `3099a5fabaa04d6b` proves Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are catalog-present runtime rows with no AAR and honest `build_defender_power_too_high` blockers. Active defender-power components are attributed; further outcome tuning is gated sensitive-history design under Q-H1-KRIVAJA-OUTCOME. |
 
+## Completed Sector Performance — Build-faction label split
+
+| Lane | Status | Source |
+|---|---|---|
+| Sector reconstruction `buildFactionSectors` label split | Implemented as instrumentation | Report: `docs/40_reports/implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md`. Sidecar-only labels now distinguish territory Voronoi assign vs repair and split the duplicated post-classification label into rear normalization, truth normalization, and truth-normalization children. Pre/post profiled artifacts are byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |
