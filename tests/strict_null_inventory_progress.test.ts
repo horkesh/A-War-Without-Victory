@@ -353,6 +353,10 @@ const PHASE_F0_NULL_CONTROL_AS_ANY_TAIL_FILES = [
     'src/cli/phaseF0_null_political_control_settlements_report.ts',
 ];
 
+const PHASE_F1_UNKNOWN_CONTROL_AS_ANY_TAIL_FILES = [
+    'src/cli/phaseF1_unknown_control_behavior_audit.ts',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1245,6 +1249,16 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', PHASE_F0_NULL_CONTROL_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
+    it('cleans the Phase F1 unknown-control CLI as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', PHASE_F1_UNKNOWN_CONTROL_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 
