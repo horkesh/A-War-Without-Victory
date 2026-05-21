@@ -5,6 +5,8 @@
 **Status:** DRAFT — read-only proposal. No code edits. Awaiting user review before any `src/scenario/` change.
 **Sibling work (do not touch):** Codex is editing `src/sim/combat/*` strict-null leaves and sector perf. This plan is `src/scenario/` only.
 
+**Fresh-compare addendum 2026-05-22:** The stale n1597-n1599 painted-compare assumptions have been superseded by regenerated n1932-n1935 artifacts and `docs/40_reports/audits/20260522_PAINTED_COMPARE_FRESH_DELTA_ANALYSIS.md`. Current reclassification: Jan 1993 RS/RBiH/HRHB remain Tier 1 PASS candidates; Apr 1994 HRHB remains PASS; Apr 1995 HRHB remains PASS; Apr 1995 RS is promoted from diagnostic-only to contract-anchor candidate (fresh sim 61.0% inside 60-67% band); Oct 1995 RS is demoted from the planned Dayton-band Tier 1 gate to diagnostic-only (fresh sim 61.0% vs 47-51% band); Oct 1995 RBiH remains diagnostic-only but sign-flipped from overshoot to undershoot. Do not wire the Oct 1995 RS pass/fail gate from §4.4 without first closing the Krajina-collapse / Mistral-Sana-Storm mechanic gap and reconfirming against a fresh run.
+
 ---
 
 ## 1. Goal

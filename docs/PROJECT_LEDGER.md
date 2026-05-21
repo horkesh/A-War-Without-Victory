@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(calibration): reconcile fresh painted compares
+
+**Type:** Calibration evidence refresh + documentation. No simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.
+
+**Why:** The remaining painted-target compare artifacts were generated from fresh n1932-n1935 runs and materially supersede stale n1597-n1599 assumptions used by the Tier 1 painted-target plan. The fresh analysis changes area-band classification: Apr 1995 RS improves into its proposed band, while Oct 1995 RS no longer qualifies as a pass/fail late-war Dayton-band anchor.
+
+**Change:** Committed regenerated painted-vs-sim compare artifacts for 40w Jan 1993, 104w Apr 1994, 156w Apr 1995, and 188w Oct 1995; added `20260522_PAINTED_COMPARE_FRESH_DELTA_ANALYSIS.md`; propagated the reclassification to the Tier 1 painted-target anchor plan, Calibration Master, and Master Roadmap.
+
+**Verification:** Re-ran all four compare commands with forward-slash run paths and byte-compared against the staged artifacts: `fc /W` reported no differences for 40w/jan1993, 104w/apr1994, 156w/apr1995, and 188w/oct1995. `git diff --check` clean aside from expected CRLF warnings on the four compare text files.
+
+**Artifacts:** `tools/diagnostics/_phase5a_painted_compares/painted_{40w_jan1993,104w_apr1994,156w_apr1995,188w_oct1995}.txt`; `docs/40_reports/audits/20260522_PAINTED_COMPARE_FRESH_DELTA_ANALYSIS.md`.
+
+---
 ## [2026-05-22] refactor(strict-null): clean Verdict Codex unknown cast
 
 **Type:** Strict-null cleanup. Endgame Codex ghost-entry display boundary refactor; no simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.

@@ -1,31 +1,31 @@
 === Painted vs Sim Comparison ===
-Run: runs/apr1992_definitive_188w__210e69404d054959__w188_n1599
+Run: runs/apr1992_definitive_188w__210e69404d054959__w188_n1935
 Painted target: oct1995 (October 1995)
 Painted file: data/source/calibration/painted_control_oct1995.json
 Total OSIDs: 712
 
 OVERALL
-  Match:    496 / 712  (69.7%)
-  Mismatch: 216 / 712  (30.3%)
-  Area-weighted match: 31817 / 51337 km²  (62.0%)
+  Match:    536 / 712  (75.3%)
+  Mismatch: 176 / 712  (24.7%)
+  Area-weighted match: 36813 / 51337 km²  (71.7%)
 
 FACTION TOTALS (count)
-  Painted  RS=320 (44.9%)  RBiH=285 (40.0%)  HRHB=107 (15.0%)
-  Sim      RS=316 (44.4%)  RBiH=322 (45.2%)  HRHB=74 (10.4%)
-  Delta    RS=-4  RBiH=+37  HRHB=-33
+  Painted  RS=319 (44.8%)  RBiH=286 (40.2%)  HRHB=107 (15.0%)
+  Sim      RS=365 (51.3%)  RBiH=261 (36.7%)  HRHB=86 (12.1%)
+  Delta    RS=+46  RBiH=-25  HRHB=-21
 
 FACTION TOTALS (area-weighted)
-  Painted  RS=25033 km² (48.8%)  RBiH=15736 km² (30.7%)  HRHB=10569 km² (20.6%)
-  Sim      RS=25976 km² (50.6%)  RBiH=19596 km² (38.2%)  HRHB=5765 km² (11.2%)
+  Painted  RS=25013 km² (48.7%)  RBiH=15755 km² (30.7%)  HRHB=10569 km² (20.6%)
+  Sim      RS=31297 km² (61.0%)  RBiH=13550 km² (26.4%)  HRHB=6490 km² (12.6%)
 
 BY REGION
   KRAJINA           match    84/127 (66.1%)   area  60.0% (11992 km²)  RS_sim=107 RBiH_sim=20 HRHB_sim=0 | painted RS=64 RBiH=51 HRHB=12
-  POSAVINA_NE       match    88/104 (84.6%)   area  87.5% (5778 km²)  RS_sim=47 RBiH_sim=53 HRHB_sim=4 | painted RS=61 RBiH=41 HRHB=2
-  DRINA             match    62/112 (55.4%)   area  54.7% (7160 km²)  RS_sim=55 RBiH_sim=57 HRHB_sim=0 | painted RS=101 RBiH=11 HRHB=0
-  CENTRAL_CORRIDOR  match     84/92 (91.3%)   area  88.8% (4880 km²)  RS_sim=33 RBiH_sim=59 HRHB_sim=0 | painted RS=31 RBiH=61 HRHB=0
-  CENTRAL_BOSNIA    match   106/155 (68.4%)   area  63.2% (8241 km²)  RS_sim=38 RBiH_sim=88 HRHB_sim=29 | painted RS=13 RBiH=110 HRHB=32
-  SARAJEVO          match     24/30 (80.0%)   area  69.5% (1524 km²)  RS_sim=17 RBiH_sim=13 HRHB_sim=0 | painted RS=23 RBiH=7 HRHB=0
-  HERZEGOVINA       match     48/92 (52.2%)   area  42.9% (11763 km²)  RS_sim=19 RBiH_sim=32 HRHB_sim=41 | painted RS=27 RBiH=4 HRHB=61
+  POSAVINA_NE       match    96/104 (92.3%)   area  92.3% (5778 km²)  RS_sim=57 RBiH_sim=43 HRHB_sim=4 | painted RS=61 RBiH=41 HRHB=2
+  DRINA             match    76/112 (67.9%)   area  74.9% (7160 km²)  RS_sim=68 RBiH_sim=44 HRHB_sim=0 | painted RS=100 RBiH=12 HRHB=0
+  CENTRAL_CORRIDOR  match     79/92 (85.9%)   area  86.9% (4880 km²)  RS_sim=34 RBiH_sim=53 HRHB_sim=5 | painted RS=31 RBiH=61 HRHB=0
+  CENTRAL_BOSNIA    match   108/155 (69.7%)   area  64.2% (8241 km²)  RS_sim=36 RBiH_sim=84 HRHB_sim=35 | painted RS=13 RBiH=110 HRHB=32
+  SARAJEVO          match     24/30 (80.0%)   area  75.3% (1524 km²)  RS_sim=21 RBiH_sim=9 HRHB_sim=0 | painted RS=23 RBiH=7 HRHB=0
+  HERZEGOVINA       match     69/92 (75.0%)   area  70.1% (11763 km²)  RS_sim=42 RBiH_sim=8 HRHB_sim=42 | painted RS=27 RBiH=4 HRHB=61
 
 MISMATCHES (painted→sim)
   op:bihac:orasac_2                         painted=RBiH  sim=RS    region=KRAJINA
@@ -72,37 +72,21 @@ MISMATCHES (painted→sim)
   op:sipovo:sipovo_2                        painted=HRHB  sim=RS    region=KRAJINA
   op:sipovo:volari_2                        painted=HRHB  sim=RS    region=KRAJINA
   op:bosanski_samac:domaljevac_2            painted=RS    sim=HRHB  region=POSAVINA_NE
-  op:brcko:brcko                            painted=RS    sim=RBiH  region=POSAVINA_NE
   op:brcko:brka_2                           painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:brcko:donji_rahic                      painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:brcko:krepsic                          painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:brcko:skakava_donja                    painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:lopare:jablanica_2                     painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:lopare:lopare_2                        painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:lopare:lopare_selo_2                   painted=RS    sim=RBiH  region=POSAVINA_NE
-  op:lopare:priboj_2                        painted=RS    sim=RBiH  region=POSAVINA_NE
   op:lukavac:brijesnica_donja_2             painted=RBiH  sim=RS    region=POSAVINA_NE
   op:orasje:ostra_luka                      painted=RS    sim=HRHB  region=POSAVINA_NE
-  op:ugljevik:donja_trnova_2                painted=RS    sim=RBiH  region=POSAVINA_NE
   op:ugljevik:jasikovac                     painted=RS    sim=RBiH  region=POSAVINA_NE
   op:ugljevik:srednja_trnova_2              painted=RS    sim=RBiH  region=POSAVINA_NE
   op:zvornik:djulici                        painted=RS    sim=RBiH  region=POSAVINA_NE
+  op:zvornik:rastosnica_2                   painted=RBiH  sim=RS    region=POSAVINA_NE
   op:bosanski_novi:krslje_2                 painted=RBiH  sim=RS    region=DRINA
   op:bosanski_novi:matavazi_2               painted=RBiH  sim=RS    region=DRINA
   op:cajnice:miljeno_2                      painted=RS    sim=RBiH  region=DRINA
-  op:foca:brod_3                            painted=RS    sim=RBiH  region=DRINA
   op:foca:donje_zesce                       painted=RS    sim=RBiH  region=DRINA
-  op:foca:foca_3                            painted=RS    sim=RBiH  region=DRINA
-  op:foca:izbisno                           painted=RS    sim=RBiH  region=DRINA
-  op:foca:kosman                            painted=RS    sim=RBiH  region=DRINA
   op:foca:mazlina                           painted=RS    sim=RBiH  region=DRINA
-  op:foca:miljevina_2                       painted=RS    sim=RBiH  region=DRINA
   op:foca:patkovina                         painted=RS    sim=RBiH  region=DRINA
-  op:foca:tjentiste_2                       painted=RS    sim=RBiH  region=DRINA
   op:foca:ustikolina                        painted=RS    sim=RBiH  region=DRINA
-  op:foca:zavait_3                          painted=RS    sim=RBiH  region=DRINA
   op:gorazde:faocici_2                      painted=RS    sim=RBiH  region=DRINA
-  op:gorazde:gorazde_2                      painted=RS    sim=RBiH  region=DRINA
   op:gorazde:hrancici                       painted=RS    sim=RBiH  region=DRINA
   op:gorazde:kolovarice                     painted=RS    sim=RBiH  region=DRINA
   op:gorazde:podkozara_donja_2              painted=RS    sim=RBiH  region=DRINA
@@ -111,17 +95,13 @@ MISMATCHES (painted→sim)
   op:gorazde:ustipraca_2                    painted=RS    sim=RBiH  region=DRINA
   op:gorazde:zorovici                       painted=RS    sim=RBiH  region=DRINA
   op:hanpijesak:godjenje_2                  painted=RS    sim=RBiH  region=DRINA
-  op:hanpijesak:han_pijesak_2               painted=RS    sim=RBiH  region=DRINA
-  op:kalinovik:kalinovik_2                  painted=RS    sim=RBiH  region=DRINA
-  op:kalinovik:obalj                        painted=RS    sim=RBiH  region=DRINA
   op:kalinovik:sela_2                       painted=RS    sim=RBiH  region=DRINA
-  op:kalinovik:tomislja                     painted=RS    sim=RBiH  region=DRINA
   op:kalinovik:varos_2                      painted=RS    sim=RBiH  region=DRINA
-  op:kalinovik:vlaholje                     painted=RS    sim=RBiH  region=DRINA
   op:rogatica:brcigovo                      painted=RS    sim=RBiH  region=DRINA
   op:rogatica:rogatica_2                    painted=RS    sim=RBiH  region=DRINA
   op:rogatica:varosiste_2                   painted=RS    sim=RBiH  region=DRINA
   op:rogatica:zepa_2                        painted=RS    sim=RBiH  region=DRINA
+  op:rudo:gornja_strmica                    painted=RS    sim=RBiH  region=DRINA
   op:srebrenica:bostahovine_2               painted=RS    sim=RBiH  region=DRINA
   op:srebrenica:brezovice_2                 painted=RS    sim=RBiH  region=DRINA
   op:srebrenica:donji_potocari_2            painted=RS    sim=RBiH  region=DRINA
@@ -134,23 +114,26 @@ MISMATCHES (painted→sim)
   op:srebrenica:sulice_2                    painted=RS    sim=RBiH  region=DRINA
   op:visegrad:kamenica_2                    painted=RS    sim=RBiH  region=DRINA
   op:visegrad:medjedja_2                    painted=RS    sim=RBiH  region=DRINA
-  op:vlasenica:bacici                       painted=RS    sim=RBiH  region=DRINA
   op:vlasenica:pomol_2                      painted=RS    sim=RBiH  region=DRINA
-  op:vlasenica:sebiocina                    painted=RS    sim=RBiH  region=DRINA
   op:doboj:grapska_gornja_2                 painted=RS    sim=RBiH  region=CENTRAL_CORRIDOR
   op:doboj:makljenovac                      painted=RS    sim=RBiH  region=CENTRAL_CORRIDOR
   op:ilijas:krivajevici                     painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
+  op:kakanj:bukovlje_2                      painted=RBiH  sim=HRHB  region=CENTRAL_CORRIDOR
+  op:kakanj:poljani_2                       painted=RBiH  sim=HRHB  region=CENTRAL_CORRIDOR
+  op:kakanj:seoce_2                         painted=RBiH  sim=HRHB  region=CENTRAL_CORRIDOR
+  op:kakanj:slapnica_2                      painted=RBiH  sim=HRHB  region=CENTRAL_CORRIDOR
   op:maglaj:donja_bocinja_2                 painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
   op:maglaj:gornja_bocinja                  painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
   op:maglaj:jablanica                       painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
-  op:teslic:kamenica_2                      painted=RS    sim=RBiH  region=CENTRAL_CORRIDOR
+  op:teslic:kamenica_2                      painted=RS    sim=HRHB  region=CENTRAL_CORRIDOR
+  op:visoko:gornja_vratnica_2               painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
   op:zavidovici:vozuca_2                    painted=RBiH  sim=RS    region=CENTRAL_CORRIDOR
   op:bosansko_grahovo:bosansko_grahovo_2    painted=HRHB  sim=RS    region=CENTRAL_BOSNIA
   op:bosansko_grahovo:crni_lug              painted=HRHB  sim=RS    region=CENTRAL_BOSNIA
   op:bosansko_grahovo:malesevci             painted=HRHB  sim=RS    region=CENTRAL_BOSNIA
   op:bosansko_grahovo:ugarci                painted=HRHB  sim=RS    region=CENTRAL_BOSNIA
   op:bugojno:brizina                        painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
-  op:bugojno:medini                         painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
+  op:bugojno:medini                         painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:bugojno:prijaci                        painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
   op:bugojno:vesela_2                       painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
   op:bugojno:vrpec                          painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
@@ -165,7 +148,6 @@ MISMATCHES (painted→sim)
   op:donji_vakuf:prusac_2                   painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
   op:donji_vakuf:torlakovac_2               painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
   op:fojnica:bakovici_2                     painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
-  op:gornji_vakuf:jagnjid_2                 painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
   op:gornji_vakuf:zdrimci                   painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:jablanica:doljani_2                    painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:jajce:barevo_2                         painted=HRHB  sim=RS    region=CENTRAL_BOSNIA
@@ -190,28 +172,15 @@ MISMATCHES (painted→sim)
   op:travnik:cukle_2                        painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:travnik:ovcarevo_2                     painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:travnik:varosluk                       painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
+  op:vares:gornja_borovica_2                painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:vares:toljenak                         painted=RBiH  sim=RS    region=CENTRAL_BOSNIA
-  op:zepce:ozimica_2                        painted=HRHB  sim=RBiH  region=CENTRAL_BOSNIA
-  op:zepce:viniste_2                        painted=HRHB  sim=RBiH  region=CENTRAL_BOSNIA
-  op:zepce:zepce_2                          painted=HRHB  sim=RBiH  region=CENTRAL_BOSNIA
+  op:vares:vares_2                          painted=RBiH  sim=HRHB  region=CENTRAL_BOSNIA
   op:pale:podgrab                           painted=RS    sim=RBiH  region=SARAJEVO
-  op:pale:praca                             painted=RS    sim=RBiH  region=SARAJEVO
   op:trnovo:delijas                         painted=RS    sim=RBiH  region=SARAJEVO
+  op:trnovo:gornja_presjenica               painted=RBiH  sim=RS    region=SARAJEVO
   op:trnovo:kijevo_2                        painted=RS    sim=RBiH  region=SARAJEVO
-  op:trnovo:tosici                          painted=RS    sim=RBiH  region=SARAJEVO
   op:trnovo:trnovo                          painted=RS    sim=RBiH  region=SARAJEVO
-  op:bileca:bileca_2                        painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:bileca:korita                          painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:bileca:mirilovici                      painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:bileca:vranjska                        painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:bileca:zausje                          painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:capljina:tasovcici_2                   painted=HRHB  sim=RBiH  region=HERZEGOVINA
-  op:gacko:avtovac_2                        painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:gacko:bahori                           painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:gacko:gacko_2                          painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:gacko:gradina                          painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:gacko:izgori                           painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:gacko:nadinici                         painted=RS    sim=RBiH  region=HERZEGOVINA
+  op:vogosca:hotonj                         painted=RBiH  sim=RS    region=SARAJEVO
   op:glamoc:glamoc_2                        painted=HRHB  sim=RS    region=HERZEGOVINA
   op:glamoc:halapic                         painted=HRHB  sim=RS    region=HERZEGOVINA
   op:glamoc:kovacevci_2                     painted=HRHB  sim=RS    region=HERZEGOVINA
@@ -224,23 +193,14 @@ MISMATCHES (painted→sim)
   op:kupres:kupres_2                        painted=HRHB  sim=RS    region=HERZEGOVINA
   op:kupres:novo_selo_2                     painted=HRHB  sim=RS    region=HERZEGOVINA
   op:livno:gubin_2                          painted=HRHB  sim=RS    region=HERZEGOVINA
-  op:ljubinje:ljubinje_2                    painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:mostar:hodbina_2                       painted=HRHB  sim=RBiH  region=HERZEGOVINA
+  op:mostar:hodbina_2                       painted=HRHB  sim=RS    region=HERZEGOVINA
   op:mostar:kruzanj_2                       painted=RS    sim=RBiH  region=HERZEGOVINA
   op:mostar:vranjevici_2                    painted=RS    sim=RBiH  region=HERZEGOVINA
   op:nevesinje:hrusta_2                     painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:nevesinje:krekovi_2                    painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:nevesinje:nevesinje_2                  painted=RS    sim=RBiH  region=HERZEGOVINA
   op:nevesinje:sopilja                      painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:nevesinje:zovi_do                      painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:stolac:hatelji_2                       painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:stolac:pjesivac_kula_2                 painted=HRHB  sim=RBiH  region=HERZEGOVINA
-  op:stolac:rotimlja_2                      painted=HRHB  sim=RBiH  region=HERZEGOVINA
+  op:stolac:pjesivac_kula_2                 painted=HRHB  sim=RS    region=HERZEGOVINA
+  op:stolac:rotimlja_2                      painted=HRHB  sim=RS    region=HERZEGOVINA
   op:titov_drvar:drvar_2                    painted=HRHB  sim=RS    region=HERZEGOVINA
   op:titov_drvar:prekaja_2                  painted=HRHB  sim=RS    region=HERZEGOVINA
   op:titov_drvar:sipovljani_2               painted=HRHB  sim=RS    region=HERZEGOVINA
-  op:trebinje:bihovo_2                      painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:trebinje:hum                           painted=RS    sim=RBiH  region=HERZEGOVINA
   op:trebinje:trebimlja_2                   painted=HRHB  sim=RS    region=HERZEGOVINA
-  op:trebinje:trebinje_2                    painted=RS    sim=RBiH  region=HERZEGOVINA
-  op:trebinje:zakovo_2                      painted=RS    sim=RBiH  region=HERZEGOVINA

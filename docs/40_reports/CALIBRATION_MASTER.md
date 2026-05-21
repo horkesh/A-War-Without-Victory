@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## n1932-n1935 fresh painted-compare reconciliation (2026-05-22)
+
+- Fresh compare artifacts replace the stale n1597-n1599 diagnostic files at `tools/diagnostics/_phase5a_painted_compares/painted_{40w_jan1993,104w_apr1994,156w_apr1995,188w_oct1995}.txt`.
+- Evidence runs: n1932 40w `3649b3861a87e6ea`, n1933 104w `13abfd609800bba2`, n1934 156w `fdb0f7cf25f31032`, n1935 188w `210e69404d054959`.
+- Fresh headline: Jan 1993 remains strong (91.2% count / 93.2% area); Apr 1994 improves to 87.6% count / 88.5% area; Apr 1995 improves to 86.4% count / 86.8% area; Oct 1995 improves to 75.3% count / 71.7% area.
+- Anchor-planning implication: Apr 1995 RS area share is now a Tier 1 contract-anchor candidate (61.0% inside the 60-67% band), while Oct 1995 RS is demoted to diagnostic-only (61.0% vs the 47-51% Dayton band). The missing Krajina-collapse / Operation Mistral-Sana-Storm mechanics dominate the Oct 1995 gap.
+- Report: `docs/40_reports/audits/20260522_PAINTED_COMPARE_FRESH_DELTA_ANALYSIS.md`.
+
 ## n1918/n1919 Operation Koridor Brcko closure (2026-05-19)
 
 - **40w run. Hash: `5c6e7b62fa6670c0`. Anchors: 27/27. Benchmarks: 6/6.** Byte-identical to n1916 because the 40w scenario already paints `op:brcko:brcko = RS`; the new Koridor objective is filtered as already controlled.
