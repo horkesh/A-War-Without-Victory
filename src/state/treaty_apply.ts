@@ -495,6 +495,11 @@ export function applyTreatyTerritorialAnnex(
     if (!state.political.control_recognition || typeof state.political.control_recognition !== 'object') {
         state.political.control_recognition = {};
     }
+    const controlOverrides = state.political.control_overrides;
+    const controlRecognition = state.political.control_recognition;
+    if (!controlOverrides || !controlRecognition) {
+        throw new Error('Treaty territorial control state failed to initialize');
+    }
 
     // Get proposer faction
     const proposerFaction = state.factions.find((f) => f.id === treatyDraft.proposer_faction_id);
@@ -613,7 +618,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Set control override to BRCKO_CONTROLLER_ID
-            state.political.control_overrides![sid] = {
+            controlOverrides[sid] = {
                 side: BRCKO_CONTROLLER_ID,
                 kind: 'treaty_transfer',
                 treaty_id: treatyDraft.treaty_id,
@@ -621,7 +626,7 @@ export function applyTreatyTerritorialAnnex(
             };
 
             // Also write recognition
-            state.political.control_recognition![sid] = {
+            controlRecognition[sid] = {
                 side: BRCKO_CONTROLLER_ID,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn
@@ -686,7 +691,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Apply transfer
-            state.political.control_overrides![sid] = {
+            controlOverrides[sid] = {
                 side: clause.receiver_side,
                 kind: 'treaty_transfer',
                 treaty_id: treatyDraft.treaty_id,
@@ -694,7 +699,7 @@ export function applyTreatyTerritorialAnnex(
             };
 
             // Also write recognition
-            state.political.control_recognition![sid] = {
+            controlRecognition[sid] = {
                 side: clause.receiver_side,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn
@@ -713,8 +718,8 @@ export function applyTreatyTerritorialAnnex(
     if (infeasibleSids.length > 0) {
         // Rollback any transfers we already applied
         for (const transfer of appliedTransfers) {
-            delete state.political.control_overrides![transfer.sid];
-            delete state.political.control_recognition![transfer.sid];
+            delete controlOverrides[transfer.sid];
+            delete controlRecognition[transfer.sid];
         }
         return {
             state,
@@ -764,7 +769,7 @@ export function applyTreatyTerritorialAnnex(
             }
 
             // Apply recognition (recognition-only, no control override)
-            state.political.control_recognition![sid] = {
+            controlRecognition[sid] = {
                 side: recognizedSide,
                 treaty_id: treatyDraft.treaty_id,
                 since_turn: currentTurn

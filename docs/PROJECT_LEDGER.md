@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean treaty-apply non-null tail
+
+**Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, treaty acceptance, territorial transfer, Brcko special-status, recognition, capital cost, or output tuning changed.
+
+**Why:** `applyTreatyTerritorialAnnex(...)` initialized `control_overrides` and `control_recognition` before use but still wrote/deleted territorial effects through indexed non-null assertions.
+
+**Change:** Narrowed initialized control override and recognition maps into locals and used those locals for Brcko status writes, transfer writes, rollback deletes, and recognition writes. Added a strict-null progress test pinning `treaty_apply.ts` at zero for `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/treaty_apply_territorial.test.ts tests/treaty_brcko.test.ts tests/treaty_apply_military.test.ts tests/treaty.test.ts --reporter=dot` PASS (115/115); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 5`, `non_null_assertions_index 4`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_TREATY_APPLY_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean displacement non-null tail
 
 **Type:** Strict-null cleanup. Runtime refactor with explicit invariant guard; no scenario data, save schema, displacement formulas, routing rules, militia-pool reductions, or output tuning changed.
