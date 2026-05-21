@@ -4,6 +4,8 @@
 
 **Goal:** Refresh H1 so Krivaja, Stupcanica, and Cerska-Kamenica work is diagnostic and evidence-first before anyone changes operation behavior.
 
+**2026-05-21 status:** Task 1, Task 2, Task 3, and Task 5 diagnostic packet are complete in `docs/40_reports/audits/20260521_H1_WATCHED_OPERATION_VISIBILITY_PACKET.md`. Current 188w evidence shows all three watched operations missing from structured artifacts; Krivaja-95 has a console-only injection warning, so the next implementation owner is persisted triggered-operation lifecycle tracing before Task 4 report projection or any behavior tuning.
+
 **Architecture:** Separate four questions: catalog presence, eligibility status, execution/blocker status, and report visibility. No outcome tuning starts until each watched operation has an evidence row proving where it is missing or blocked.
 
 **Tech Stack:** Existing sensitive-history diagnostics, triggered operation tests, scenario reporting tests, 188w runner.

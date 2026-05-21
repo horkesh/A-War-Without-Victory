@@ -50,6 +50,12 @@ const WATCH_OPS = [
     'Operation Stupčanica-95',
 ].sort(strictCompare);
 
+const WATCH_OP_LABELS = {
+    'Operation Cerska-Kamenica': 'Cerska-Kamenica',
+    'Operation Krivaja-95': 'Krivaja',
+    'Operation Stupčanica-95': 'Stupcanica',
+};
+
 const WATCH_BRIGADES = [
     'rs_1st_birac',
     'rs_5th_podrinje',
@@ -267,7 +273,7 @@ function formatCanonicalWindow(value) {
 
 function normalizedDeliveryStatus(value) {
     const status = String(value || '').trim();
-    if (status === 'blocked' || status === 'delivered' || status === 'missing') return status;
+    if (status === 'blocked' || status === 'delivered' || status === 'missing' || status === 'unknown') return status;
     if (status === 'aar_not_visible') return 'missing';
     return '';
 }
@@ -279,6 +285,32 @@ function deliveryStatusFromAar(aar) {
     const blocker = String(aar.blocker || aar.recovery_reason || '').trim();
     if (blocker) return 'blocked';
     return 'missing';
+}
+
+function normalizedCatalogStatus(trace, aar) {
+    const status = String(trace && trace.catalog_status || '').trim();
+    if (status === 'present' || status === 'missing' || status === 'not_applicable') return status;
+    return trace || aar ? 'present' : 'missing';
+}
+
+function normalizedEligibilityStatus(trace) {
+    const status = String(trace && (trace.eligibility_status || trace.eligibility) || '').trim();
+    if (status === 'eligible' || status === 'not_eligible' || status === 'unknown') return status;
+    return 'unknown';
+}
+
+function normalizedLaunchStatus(trace, aar, blockerCode) {
+    const status = String(trace && (trace.launch_status || trace.launch) || '').trim();
+    if (status === 'launched' || status === 'blocked' || status === 'not_launched' || status === 'unknown') return status;
+    if (aar) return 'launched';
+    if (blockerCode) return 'blocked';
+    if (trace) return 'not_launched';
+    return 'unknown';
+}
+
+function normalizedAarStatus(aar, catalogStatus) {
+    if (catalogStatus === 'not_applicable') return 'not_applicable';
+    return aar ? 'visible' : 'not_visible';
 }
 
 function latestByTurnThenId(rows) {
@@ -305,16 +337,27 @@ function summarizeWatchedOperations(runDir, state) {
         const aarVisible = Boolean(aar);
         const deliveryStatus = normalizedDeliveryStatus(trace && trace.delivery_status)
             || deliveryStatusFromAar(aar);
+        const blockerCode = String((trace && (trace.blocker_code || trace.typed_blocker || trace.blocker)) || (aar && (aar.blocker || aar.recovery_reason)) || '');
+        const catalogStatus = normalizedCatalogStatus(trace, aar);
+        const eligibilityStatus = normalizedEligibilityStatus(trace);
+        const launchStatus = normalizedLaunchStatus(trace, aar, blockerCode);
+        const aarStatus = normalizedAarStatus(aar, catalogStatus);
         const presenceStatus = trace || aar
             ? (aarVisible ? 'aar_visible' : 'aar_not_visible')
             : 'missing';
         return {
             operation_name: name,
+            watched_label: WATCH_OP_LABELS[name] || name,
             operation_id: traceId || operationIdOf(aar),
             canonical_window: formatCanonicalWindow(trace && trace.canonical_window),
+            catalog_status: catalogStatus,
+            eligibility_status: eligibilityStatus,
+            launch_status: launchStatus,
+            blocker_code: blockerCode,
+            aar_status: aarStatus,
             presence_status: presenceStatus,
             delivery_status: deliveryStatus,
-            typed_blocker: String((trace && (trace.typed_blocker || trace.blocker)) || (aar && (aar.blocker || aar.recovery_reason)) || ''),
+            typed_blocker: blockerCode,
             aar_visible: aarVisible,
         };
     });
@@ -420,10 +463,10 @@ function formatMarkdown(results) {
 
         out.push('### Watched Operation Visibility');
         out.push('');
-        out.push('| Operation | Operation ID | Canonical window | Presence | Delivery | Typed blocker | AAR visible? |');
-        out.push('|---|---|---|---|---|---|---|');
+        out.push('| Operation | Label | Operation ID | Canonical window | Catalog | Eligibility | Launch | Blocker | AAR | Delivery |');
+        out.push('|---|---|---|---|---|---|---|---|---|---|');
         for (const op of result.watched_operations) {
-            out.push(`| ${op.operation_name} | ${op.operation_id || '-'} | ${op.canonical_window || '-'} | ${op.presence_status} | ${op.delivery_status} | ${op.typed_blocker || '-'} | ${op.aar_visible ? 'yes' : 'no'} |`);
+            out.push(`| ${op.operation_name} | ${op.watched_label} | ${op.operation_id || '-'} | ${op.canonical_window || '-'} | ${op.catalog_status} | ${op.eligibility_status} | ${op.launch_status} | ${op.blocker_code || '-'} | ${op.aar_status} | ${op.delivery_status} |`);
         }
         out.push('');
 

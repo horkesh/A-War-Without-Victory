@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): watched-operation visibility evidence packet
+
+**Type:** Sensitive-history diagnostic/reporting refresh. Touched `tools/diagnostics/sensitive_history_status.cjs`, its fixture/test, and docs only. No operation behavior, launch feasibility, objectives, OOB, save schema, scenario data, generated artifact ownership, canon text, or `FORAWWV.md` changed.
+
+**Why:** H1 required evidence-first visibility for Krivaja-95, Stupcanica-95, and Cerska-Kamenica before anyone tunes operation outcomes. The prior diagnostic collapsed missing, blocked, and AAR-invisible cases into a smaller presence/delivery view, which was not enough to identify the owner seam.
+
+**Change:** Expanded the watched-operation diagnostic table with explicit lifecycle columns (`watched_label`, `catalog_status`, `eligibility_status`, `launch_status`, `blocker_code`, `aar_status`, `delivery_status`) while retaining the old JSON fields as transitional aliases. Updated the compact fixture so one test run covers missing, typed-blocker, and delivered-visible statuses. Ran a fresh 188w evidence pass and filed `docs/40_reports/audits/20260521_H1_WATCHED_OPERATION_VISIBILITY_PACKET.md`.
+
+**Finding:** Current 188w evidence (`runs/apr1992_definitive_188w__210e69404d054959__w188_n1922`, hash `7b57a8592f668137`) leaves all three watched-operation rows missing from structured artifacts. `operation_aars.json` has no Krivaja/Stupcanica/Cerska rows, and `final_save.json` has no `state.military.watched_operations`. The console did print a Krivaja-95 injection warning (`brigade_ineligible` on `rs_skelani_battalion`), but `src/sim/combat/triggered_operations.ts` does not persist skipped/blocked triggered-operation lifecycle rows before continuing.
+
+**Verification:** `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (3/3); `npm.cmd run typecheck` PASS; 188w scenario evidence run PASS. Baselines not run: diagnostic/report-only changes do not alter sim behavior or scenario output contracts.
+
+---
+
 ## [2026-05-21] perf(sector): cache per-corps formation scans during sector construction
 
 **Type:** Sector reconstruction performance implementation. Touched `src/sim/combat/sector_building.ts` and docs only. No combat outcome math, operation selection, brigade assignment semantics, save schema, scenario data, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.

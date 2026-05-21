@@ -26,6 +26,9 @@
           "start_turn": 168,
           "end_turn": 176
         },
+        "catalog_status": "present",
+        "eligibility_status": "not_eligible",
+        "launch_status": "blocked",
         "delivery_status": "blocked",
         "typed_blocker": "defender_power_too_high"
       },
@@ -36,6 +39,9 @@
           "start_turn": 172,
           "end_turn": 180
         },
+        "catalog_status": "present",
+        "eligibility_status": "eligible",
+        "launch_status": "launched",
         "delivery_status": "delivered",
         "typed_blocker": ""
       }

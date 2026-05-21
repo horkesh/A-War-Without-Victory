@@ -152,8 +152,14 @@ describe('sensitive_history_status diagnostic script', () => {
         const [summary] = JSON.parse(jsonOutput) as Array<{
             watched_operations: Array<{
                 operation_name: string;
+                watched_label: string;
                 operation_id: string;
                 canonical_window: string;
+                catalog_status: string;
+                eligibility_status: string;
+                launch_status: string;
+                blocker_code: string;
+                aar_status: string;
                 presence_status: string;
                 delivery_status: string;
                 typed_blocker: string;
@@ -164,8 +170,14 @@ describe('sensitive_history_status diagnostic script', () => {
         expect(summary.watched_operations).toEqual([
             {
                 operation_name: 'Operation Cerska-Kamenica',
+                watched_label: 'Cerska-Kamenica',
                 operation_id: '',
                 canonical_window: '',
+                catalog_status: 'missing',
+                eligibility_status: 'unknown',
+                launch_status: 'unknown',
+                blocker_code: '',
+                aar_status: 'not_visible',
                 presence_status: 'missing',
                 delivery_status: 'missing',
                 typed_blocker: '',
@@ -173,8 +185,14 @@ describe('sensitive_history_status diagnostic script', () => {
             },
             {
                 operation_name: 'Operation Krivaja-95',
+                watched_label: 'Krivaja',
                 operation_id: 'vrs_drina:Operation Krivaja-95:t168',
                 canonical_window: '168-176',
+                catalog_status: 'present',
+                eligibility_status: 'not_eligible',
+                launch_status: 'blocked',
+                blocker_code: 'defender_power_too_high',
+                aar_status: 'not_visible',
                 presence_status: 'aar_not_visible',
                 delivery_status: 'blocked',
                 typed_blocker: 'defender_power_too_high',
@@ -182,8 +200,14 @@ describe('sensitive_history_status diagnostic script', () => {
             },
             {
                 operation_name: 'Operation Stupčanica-95',
+                watched_label: 'Stupcanica',
                 operation_id: 'vrs_drina:Operation Stupcanica-95:t172',
                 canonical_window: '172-180',
+                catalog_status: 'present',
+                eligibility_status: 'eligible',
+                launch_status: 'launched',
+                blocker_code: '',
+                aar_status: 'visible',
                 presence_status: 'aar_visible',
                 delivery_status: 'delivered',
                 typed_blocker: '',
@@ -197,8 +221,8 @@ describe('sensitive_history_status diagnostic script', () => {
             { cwd: process.cwd(), encoding: 'utf8' },
         );
 
-        expect(markdown).toContain('| Operation Krivaja-95 | vrs_drina:Operation Krivaja-95:t168 | 168-176 | aar_not_visible | blocked | defender_power_too_high | no |');
-        expect(markdown).toContain('| Operation Cerska-Kamenica | - | - | missing | missing | - | no |');
-        expect(markdown).toContain('| Operation Stupčanica-95 | vrs_drina:Operation Stupcanica-95:t172 | 172-180 | aar_visible | delivered | - | yes |');
+        expect(markdown).toContain('| Operation Krivaja-95 | Krivaja | vrs_drina:Operation Krivaja-95:t168 | 168-176 | present | not_eligible | blocked | defender_power_too_high | not_visible | blocked |');
+        expect(markdown).toContain('| Operation Cerska-Kamenica | Cerska-Kamenica | - | - | missing | unknown | unknown | - | not_visible | missing |');
+        expect(markdown).toContain('| Operation Stupčanica-95 | Stupcanica | vrs_drina:Operation Stupcanica-95:t172 | 172-180 | present | eligible | launched | - | visible | delivered |');
     });
 });
