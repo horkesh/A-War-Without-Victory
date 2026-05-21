@@ -19,6 +19,22 @@
 
 ---
 
+## [2026-05-21] diagnostic(h1): attribute watched-operation defender rosters
+
+**Type:** Sensitive-history diagnostic/output-contract refinement. Touched launch-feasibility result metadata, watched-operation trace schema, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
+
+**Why:** The prior H1 trace preserved ratio and total attacker/defender power, but did not name the binding objective or defender roster. H1 needed roster attribution before drilling into terrain/supply/posture/entrenchment/local-density contributors.
+
+**Change:** Threaded objective OSID, primary defender id, defender count, and sorted defender ids from `evaluateLaunchFeasibility(...)` into watched-operation trace rows and diagnostic summaries. Extended `rankDefendersByPower(...)` to return the already-computed ranked defender ids/powers while preserving existing total-power behavior.
+
+**Finding:** Fresh `n1929` final hash `61cf4c64879efe14` completed with anchors 27/27. Cerska-Kamenica is blocked on `op:srebrenica:brezovice_2` against primary `arbih_280th_east_bosnian_light` and four East Bosnian defenders. Krivaja-95 is blocked on `op:srebrenica:bostahovine_2` against the same four-defender stack and still preserves the separate `brigade_ineligible` row. Stupcanica-95 is blocked on `op:rogatica:zepa_2` against primary `arbih_1st_cerska`, with `arbih_282nd_east_bosnian_light` and `arbih_285th_light`.
+
+**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts tests/operation_launch_feasibility_defender_aware.test.ts --reporter=dot` PASS (26/26); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1929` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1929` PASS; `git diff --check` PASS with CRLF normalization warnings only.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_H1_LAUNCH_FEASIBILITY_INPUT_TRACE.md`; `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): add trace-backed 188w packet
 
 **Type:** Sensitive-history diagnostic/output refinement. Touched triggered-operation trace emission, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.

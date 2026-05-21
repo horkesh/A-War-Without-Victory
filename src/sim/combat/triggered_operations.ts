@@ -636,6 +636,12 @@ function recordWatchedOperationTrace(
         turn,
     };
     if (outcome.launch_feasibility) {
+        if (outcome.launch_feasibility.objectiveOsid) row.launch_objective_osid = outcome.launch_feasibility.objectiveOsid;
+        if (outcome.launch_feasibility.primaryDefenderId) row.launch_primary_defender_id = outcome.launch_feasibility.primaryDefenderId;
+        if (outcome.launch_feasibility.defenderIds) {
+            row.launch_defender_ids = [...outcome.launch_feasibility.defenderIds].sort(strictCompare);
+            row.launch_defender_count = row.launch_defender_ids.length;
+        }
         row.launch_feasibility_ratio = roundTraceNumber(outcome.launch_feasibility.ratio);
         row.launch_attacker_power = roundTraceNumber(outcome.launch_feasibility.attackerPower);
         row.launch_defender_power = roundTraceNumber(outcome.launch_feasibility.defenderPower);

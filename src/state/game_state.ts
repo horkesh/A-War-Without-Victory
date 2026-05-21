@@ -964,6 +964,10 @@ export interface WatchedOperationTraceRow {
     blocker_code: WatchedOperationBlocker | string;
     typed_blocker: WatchedOperationBlocker | string;
     turn: number;
+    launch_objective_osid?: string;
+    launch_primary_defender_id?: FormationId;
+    launch_defender_count?: number;
+    launch_defender_ids?: FormationId[];
     launch_feasibility_ratio?: number;
     launch_attacker_power?: number;
     launch_defender_power?: number;

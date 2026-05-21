@@ -42,6 +42,9 @@ export interface LaunchFeasibilityResult {
     attackerPower: number;
     defenderPower: number;
     blocker?: LaunchFeasibilityBlocker;
+    objectiveOsid?: string;
+    primaryDefenderId?: FormationId;
+    defenderIds?: FormationId[];
 }
 
 export function getEquipmentOffensivePriority(equipmentClass: string | undefined): number {
@@ -152,7 +155,7 @@ export function evaluateLaunchFeasibility(
 
         const artSuppression = getArtillerySuppression(attackers, faction, state);
         const noEthnicBonus = (_defender: FormationState) => 0;
-        const { totalPower: defenderPower } = rankDefendersByPower(
+        const { primary, totalPower: defenderPower, rankedDefenders } = rankDefendersByPower(
             defenders,
             state,
             obj,
@@ -168,13 +171,21 @@ export function evaluateLaunchFeasibility(
                 ratio: Number.POSITIVE_INFINITY,
                 attackerPower,
                 defenderPower,
+                objectiveOsid: obj,
+                primaryDefenderId: primary.id,
+                defenderIds: rankedDefenders.map((defender) => defender.id),
             };
         }
 
         const ratio = attackerPower / defenderPower;
+        const defenderContext = {
+            objectiveOsid: obj,
+            primaryDefenderId: primary.id,
+            defenderIds: rankedDefenders.map((defender) => defender.id),
+        };
         const candidate: LaunchFeasibilityResult = ratio >= VICTORY_THRESHOLD_COSTLY
-            ? { feasible: true, ratio, attackerPower, defenderPower }
-            : { feasible: false, ratio, attackerPower, defenderPower, blocker: 'defender_power_too_high' };
+            ? { feasible: true, ratio, attackerPower, defenderPower, ...defenderContext }
+            : { feasible: false, ratio, attackerPower, defenderPower, blocker: 'defender_power_too_high', ...defenderContext };
         if (!best || candidate.ratio > best.ratio) best = candidate;
         if (candidate.feasible) return candidate;
     }

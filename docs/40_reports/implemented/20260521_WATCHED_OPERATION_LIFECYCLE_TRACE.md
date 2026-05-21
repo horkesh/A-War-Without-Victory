@@ -47,5 +47,5 @@ No randomness, timestamps, unordered filesystem reads, or wall-clock values were
 ## Next Steps
 
 - Project the persisted trace rows into the H1 sensitive-history status packet for fresh 188w runs.
-- Use the preserved blocker reasons and launch-feasibility input fields to decide whether H1 needs report projection only or a later behavior-tuning lane.
+- Use the preserved blocker reasons, launch-feasibility input fields, and defender roster attribution to decide whether H1 needs report projection only or a later behavior-tuning lane.
 - Do not tune watched-operation outcomes until the trace rows identify the binding blocker in the target 188w run.

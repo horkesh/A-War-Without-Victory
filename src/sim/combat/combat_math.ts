@@ -1461,7 +1461,7 @@ export function rankDefendersByPower(
     artSuppression: number,
     supplyStateByOsid: import('../../state/supply_state_derivation.js').SupplyStateByOsidReport | null | undefined,
     ethnicBonusFn: (d: FormationState) => number
-): { primary: FormationState; totalPower: number } {
+): { primary: FormationState; totalPower: number; rankedDefenders: Array<{ id: string; power: number }> } {
     const sorted = defenders
         .map(d => ({
             f: d,
@@ -1481,7 +1481,14 @@ export function rankDefendersByPower(
         throw new Error('rankDefendersByPower requires at least one defender');
     }
     const totalPower = primary.p + sorted.slice(1).reduce((s, x) => s + x.p * STACKING_DEFENDER_SUPPORT, 0);
-    return { primary: primary.f, totalPower };
+    return {
+        primary: primary.f,
+        totalPower,
+        rankedDefenders: sorted.map((entry) => ({
+            id: entry.f.id,
+            power: entry.p,
+        })),
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

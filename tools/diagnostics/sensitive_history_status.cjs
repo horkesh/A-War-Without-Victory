@@ -435,6 +435,10 @@ function summarizeWatchedOperations(runDir, state) {
         if (trace && trace.launch_feasibility_ratio !== undefined) summary.launch_feasibility_ratio = trace.launch_feasibility_ratio;
         if (trace && trace.launch_attacker_power !== undefined) summary.launch_attacker_power = trace.launch_attacker_power;
         if (trace && trace.launch_defender_power !== undefined) summary.launch_defender_power = trace.launch_defender_power;
+        if (trace && trace.launch_objective_osid !== undefined) summary.launch_objective_osid = trace.launch_objective_osid;
+        if (trace && trace.launch_primary_defender_id !== undefined) summary.launch_primary_defender_id = trace.launch_primary_defender_id;
+        if (trace && trace.launch_defender_count !== undefined) summary.launch_defender_count = trace.launch_defender_count;
+        if (trace && trace.launch_defender_ids !== undefined) summary.launch_defender_ids = trace.launch_defender_ids;
         return summary;
     });
 }

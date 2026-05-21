@@ -359,6 +359,10 @@ describe('sensitive_history_status diagnostic script', () => {
                 blocker_code: 'build_defender_power_too_high',
                 typed_blocker: 'build_defender_power_too_high',
                 turn: 188,
+                launch_objective_osid: 'op:srebrenica:srebrenica_2',
+                launch_primary_defender_id: 'arbih_282nd_light',
+                launch_defender_count: 2,
+                launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
                 launch_feasibility_ratio: 0.317,
                 launch_attacker_power: 205.892,
                 launch_defender_power: 649.751,
@@ -387,6 +391,10 @@ describe('sensitive_history_status diagnostic script', () => {
                 operation_name: string;
                 launch_status: string;
                 blocker_code: string;
+                launch_objective_osid?: string;
+                launch_primary_defender_id?: string;
+                launch_defender_count?: number;
+                launch_defender_ids?: string[];
                 launch_feasibility_ratio?: number;
                 launch_attacker_power?: number;
                 launch_defender_power?: number;
@@ -396,6 +404,10 @@ describe('sensitive_history_status diagnostic script', () => {
         expect(summary.watched_operations.find((op) => op.operation_name === 'Operation Krivaja-95')).toMatchObject({
             launch_status: 'not_launched',
             blocker_code: 'build_defender_power_too_high',
+            launch_objective_osid: 'op:srebrenica:srebrenica_2',
+            launch_primary_defender_id: 'arbih_282nd_light',
+            launch_defender_count: 2,
+            launch_defender_ids: ['arbih_282nd_light', 'arbih_283rd_light'],
             launch_feasibility_ratio: 0.317,
             launch_attacker_power: 205.892,
             launch_defender_power: 649.751,
