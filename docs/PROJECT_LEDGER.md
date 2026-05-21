@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): validate treaty CLI clause kind
+
+**Type:** Treaty diagnostic/authoring CLI strict-null cleanup. Touched `src/cli/sim_treaty.ts`, strict-null progress test, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `sim_treaty.ts` parsed the clause kind as a plain string and passed it to `createClause(...)` through `parsed.kind as any`. That hid the CLI boundary where free-form user text must become a `TreatyClauseKind`.
+
+**Change:** Added an explicit `isTreatyClauseKind(...)` switch guard at parse time, changed `parseClauseSpec(...)` to return `TreatyClauseKind`, and passed `parsed.kind` directly into `createClause(...)`. Invalid kinds now fail at the CLI parse boundary with `Invalid clause kind: ...` instead of crossing a type lie.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 183 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green strict-null inventory assertion failed at 1 before the source edit and passed after; `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (57/57); `npm.cmd run sim:treaty -- propose data\derived\startup\apr_1992_initial_save.json --proposer RBiH --turns 1 --clause military:ceasefire_global:RS:global:all --json --out-report data\derived\_debug\tmp_treaty_draft.json` PASS. Baselines not run: CLI authoring helper only, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] fix(cli): read current political-control audit index shape
 
 **Type:** Diagnostic CLI bug fix plus strict-null cleanup. Touched `src/cli/phaseD0_political_control_inputs_audit.ts`, `src/cli/phaseE4_null_political_control_diagnosis.ts`, tests, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.

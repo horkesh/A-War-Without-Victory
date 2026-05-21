@@ -10,7 +10,7 @@ import { canonicalizePoliticalSideId } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import type { TerritorialValuationReport } from '../state/territorial_valuation.js';
 import { computeSettlementValues } from '../state/territorial_valuation.js';
-import type { TreatyDraft, TreatyScope } from '../state/treaty.js';
+import type { TreatyClauseKind, TreatyDraft, TreatyScope } from '../state/treaty.js';
 import type { TreatyAcceptanceReport } from '../state/treaty_acceptance.js';
 import { evaluateTreatyAcceptance } from '../state/treaty_acceptance.js';
 import { applyTreaty } from '../state/treaty_apply.js';
@@ -49,6 +49,27 @@ interface ApplyOptions {
 
 type CliOptions = ProposeOptions | EvalOptions | ApplyOptions;
 
+function isTreatyClauseKind(kind: string): kind is TreatyClauseKind {
+    switch (kind) {
+        case 'ceasefire_global':
+        case 'freeze_region':
+        case 'freeze_edges':
+        case 'monitoring_light':
+        case 'monitoring_robust':
+        case 'recognize_control_settlements':
+        case 'corridor_right_of_way':
+        case 'transfer_settlements':
+        case 'brcko_special_status':
+        case 'autonomy_municipal':
+        case 'autonomy_regional':
+        case 'independence_pathway_step1':
+        case 'allocate_competence':
+            return true;
+        default:
+            return false;
+    }
+}
+
 /**
  * Parse clause spec: <annex>:<kind>:<targets_csv>:<scope_kind>:<scope_value>[:giver=<SIDE>][:receiver=<SIDE>][:beneficiary=<SIDE>]
  * Examples:
@@ -60,7 +81,7 @@ type CliOptions = ProposeOptions | EvalOptions | ApplyOptions;
  */
 function parseClauseSpec(spec: string, clauseIndex: number): {
     annex: 'military' | 'territorial' | 'institutional';
-    kind: string;
+    kind: TreatyClauseKind;
     targets: string[];
     scope: TreatyScope;
     giver_side?: string;
@@ -79,6 +100,9 @@ function parseClauseSpec(spec: string, clauseIndex: number): {
         throw new Error(`Invalid annex: ${annexStr} (expected military, territorial, or institutional)`);
     }
     const annex = annexStr as 'military' | 'territorial' | 'institutional';
+    if (!isTreatyClauseKind(kind)) {
+        throw new Error(`Invalid clause kind: ${kind}`);
+    }
 
     // Parse targets (split by |, sort unique)
     const targets = Array.from(new Set(targetsStr.split('|').filter((t) => t.length > 0))).sort();
@@ -321,7 +345,7 @@ async function runProposeMode(opts: ProposeOptions): Promise<void> {
         const clause = createClause(
             clauseId,
             parsed.annex,
-            parsed.kind as any,
+            parsed.kind,
             opts.proposer,
             parsed.targets,
             parsed.scope,
