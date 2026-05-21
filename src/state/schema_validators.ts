@@ -2,10 +2,11 @@
 //
 // These helpers narrow `unknown` payloads (JSON ingestion, IPC reads, replay
 // frame sidecars, LLM responses) into typed values for downstream engine
-// consumers without using `as unknown` casts. Each primitive returns `null`
-// when the value does not match the expected shape; callers compose them into
-// per-loader `parse<Shape>` helpers and decide whether `null` is fatal
-// (loader throws) or skippable (loader uses a documented fallback).
+// consumers without using the prior untyped widening pattern. Each primitive
+// returns `null` when the value does not match the expected shape; callers
+// compose them into per-loader `parse<Shape>` helpers and decide whether
+// `null` is fatal (loader throws) or skippable (loader uses a documented
+// fallback).
 //
 // Reference precedent: `parseFactionId` / `parseAdvisorContextType` in
 // `src/sim/ai_commander/response_parser.ts` (Batch 49, commit 9f78a37b).
@@ -28,7 +29,9 @@ export function asRecord(value: unknown): Record<string, unknown> | null {
  * Narrow `unknown` to `unknown[]`. Returns `null` if the value is not an array.
  */
 export function asArray(value: unknown): unknown[] | null {
-    return Array.isArray(value) ? (value as unknown[]) : null;
+    // Array.isArray narrows `unknown` to `any[]`; that assigns to `unknown[]`
+    // without an explicit cast, keeping the primitive cast-free at boundary.
+    return Array.isArray(value) ? value : null;
 }
 
 /**

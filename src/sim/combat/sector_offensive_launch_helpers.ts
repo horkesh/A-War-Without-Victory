@@ -23,6 +23,14 @@ import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
 
+// BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
+// to query whether the brigade has a direct-objective adjacency entry; they do
+// not consult the canonical-controller fallback that the reverse map drives in
+// `getPoliticalControllerOSID`. An empty map is runtime-identical to passing
+// `undefined` to that optional `operationalToCanonical` parameter (Map.get
+// returns undefined → null fallback). Replaces the prior placeholder cast.
+const EMPTY_REVERSE_MAP: OperationalToCanonicalReverseMap = new Map();
+
 export type LaunchFeasibilityBlocker =
     | 'no_enemy_objective'
     | 'no_attacker_power'
@@ -536,7 +544,7 @@ export function axisHasExecutableOpeningAttack(
             state,
             brigadeId,
             adjacency,
-            undefined as unknown as OperationalToCanonicalReverseMap,
+            EMPTY_REVERSE_MAP,
             {},
             'attack',
         ).find((target) => target.osid === objective);
@@ -633,7 +641,7 @@ export function shouldStallAxisForRecentCatastrophicObjective(
             state,
             brigadeId,
             adjacency,
-            undefined as unknown as OperationalToCanonicalReverseMap,
+            EMPTY_REVERSE_MAP,
             {},
             'attack',
         ).find((target) => target.osid === objective);
