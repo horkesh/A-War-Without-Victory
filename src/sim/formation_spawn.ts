@@ -509,6 +509,7 @@ export function spawnFormationsFromPools(
         (state as GameState & { militia_pools: Record<string, MilitiaPoolState> }).military.militia_pools = {};
     }
 
+    const formations = state.military.formations as Record<string, FormationState>;
     const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
     const currentTurn = state.meta.turn;
     const recruitmentMode = state.meta.recruitment_mode;
@@ -593,7 +594,7 @@ export function spawnFormationsFromPools(
             report.pools_touched += 1;
 
             if (applyChanges) {
-                state.military.formations![formationId] = formation;
+                formations[formationId] = formation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
@@ -672,7 +673,7 @@ export function spawnFormationsFromPools(
                     ...(dispLocationOsid != null ? { location_osid: dispLocationOsid } : {})
                 };
 
-                state.military.formations![dispFormationId] = dispFormation;
+                formations[dispFormationId] = dispFormation;
                 pool.available -= MIN_DETACHMENT_SPAWN;
                 pool.committed += MIN_DETACHMENT_SPAWN;
                 pool.updated_turn = currentTurn;
@@ -776,7 +777,7 @@ export function spawnFormationsFromPools(
             report.manpower_committed += batchSize;
 
             if (applyChanges) {
-                state.military.formations![formationId] = formation;
+                formations[formationId] = formation;
                 pool.available -= batchSize;
                 pool.committed += batchSize;
                 pool.updated_turn = currentTurn;

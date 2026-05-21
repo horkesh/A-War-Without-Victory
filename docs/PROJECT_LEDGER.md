@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean formation-spawn non-null tail
+
+**Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, formation-spawn rules, reinforcement rules, or output semantics changed.
+
+**Why:** `spawnFormationsFromPools(...)` already initialized `state.military.formations`, but still wrote through three inventory-counted `state.military.formations!` index assertions.
+
+**Change:** Hoisted the initialized formations map to a local `formations` record and wrote through that local at the normal detachment, displacement-driven TO, and legacy brigade spawn sites. Added a strict-null progress test pinning `formation_spawn.ts` at zero for `non_null_assertions_index`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/formation_spawn.test.ts tests/formation_spawn_directive.test.ts tests/wia_trickleback.test.ts --reporter=dot` PASS (67/67); `npx.cmd vitest run tests/militia_rework.test.ts tests/proto_brigade_spawn.test.ts tests/siege_mobilization.test.ts tests/early_war_turn_structure.test.ts --reporter=dot` PASS (38/38); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match). Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 4`, `as_any_casts 179`, `non_null_assertions_dot 7`, `non_null_assertions_index 20`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_FORMATION_SPAWN_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean third runtime non-null tail
 
 **Type:** Strict-null cleanup. Behavior-equivalent runtime refactor; no scenario data, save schema, commander movement correction behavior, paramilitary capture/casualty rules, or minority-erosion behavior changed.
