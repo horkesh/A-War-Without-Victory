@@ -9,11 +9,11 @@
 
 **Why:** The first trace-backed 188w run proved lifecycle rows existed, but non-blocking validation warnings were still only preserved in `op_injection_warnings` while the watched-operation row collapsed Krivaja-95 to generic `build_failure`. H1 needs both the typed warning and the later no-launch outcome before assigning the next owner.
 
-**Change:** Persisted validation-warning rows into `state.military.watched_operations` with `launch_status: "unknown"` so they do not imply the warning itself blocked launch. Added regression coverage for Krivaja-95 `brigade_ineligible` preservation, refreshed baselines, and filed `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` from fresh 188w run `n1924`.
+**Change:** Persisted validation-warning rows into `state.military.watched_operations` with `launch_status: "unknown"` so they do not imply the warning itself blocked launch. Replaced generic `build_failure` rows with typed build-failure subcodes (`build_no_built_axes`, `build_insufficient_participants`, or `build_<launch-feasibility-blocker>`). Added regression coverage for Krivaja-95 `brigade_ineligible` preservation and typed build-failure detail, refreshed baselines, and filed `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` from fresh 188w run `n1926`.
 
-**Finding:** Fresh `n1924` final hash `53b1cee10bd6c3f1` completed with anchors 27/27. Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are now all catalog-present runtime rows with no AAR. Cerska-Kamenica and Stupcanica-95 show `build_failure`; Krivaja-95 preserves both `brigade_ineligible` on `rs_skelani_battalion` and later `build_failure`.
+**Finding:** Fresh `n1926` final hash `28507baee3ca2d33` completed with anchors 27/27. Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are now all catalog-present runtime rows with no AAR. All three show `build_defender_power_too_high`; Krivaja-95 also preserves `brigade_ineligible` on `rs_skelani_battalion`.
 
-**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (16/16); `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1924` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1924` PASS.
+**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (17/17); `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (22/22); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1926` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1926` PASS; `git diff --check` PASS with CRLF normalization warnings only.
 
 **Artifacts:** `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md`.
 
@@ -25,11 +25,11 @@
 
 **Why:** The catalog-present diagnostic still had to infer Cerska-Kamenica and Stupcanica status from source text because skipped triggered operations did not persist a lifecycle row. H1 needs skip/block/inject evidence before any outcome tuning.
 
-**Change:** Added compact `state.military.watched_operations` rows for triggered-operation skip/block/inject outcomes, including active primary/secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation warnings/blockers, build failure, and accepted/injected. The scenario runner now emits deterministic `watched_operations.json`; the baseline manifest now tracks that artifact alongside existing scenario outputs.
+**Change:** Added compact `state.military.watched_operations` rows for triggered-operation skip/block/inject outcomes, including active primary/secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation warnings/blockers, typed build failures, and accepted/injected. The scenario runner now emits deterministic `watched_operations.json`; the baseline manifest now tracks that artifact alongside existing scenario outputs.
 
 **Determinism/scope:** Deterministic observability/output-contract change. Rows are sorted with `strictCompare`, serialized with existing stable JSON paths, and contain no timestamps or random values. Save hashes and baseline hashes drift intentionally because the trace rows are now persisted; combat behavior and sensitive-history outcomes are unchanged.
 
-**Verification:** TDD red/green on `tests/triggered_operations.test.ts`; `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (16/16); `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (21/21); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after manifest refresh.
+**Verification:** TDD red/green on `tests/triggered_operations.test.ts`; `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (17/17); `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (22/22); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after manifest refresh.
 
 **Artifacts:** `docs/40_reports/implemented/20260521_WATCHED_OPERATION_LIFECYCLE_TRACE.md`.
 

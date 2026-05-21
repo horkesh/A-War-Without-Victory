@@ -13,7 +13,7 @@
 
 ### Triggered Operation Trace
 
-- `src/sim/combat/triggered_operations.ts` records `state.military.watched_operations` rows for active primary corps, active secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation warnings/blockers, build failure, and accepted/injected outcomes.
+- `src/sim/combat/triggered_operations.ts` records `state.military.watched_operations` rows for active primary corps, active secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation warnings/blockers, typed build failures, and accepted/injected outcomes.
 - Trace rows use stable fields: operation name/id, canonical window, catalog/eligibility/launch/delivery status, typed blocker, and turn.
 - Rows are updated compactly when the same operation/status/blocker recurs, and ordered deterministically by turn, operation, launch status, and blocker.
 
@@ -28,7 +28,7 @@
 `apr1992_52w` now emits three watched-operation trace rows:
 
 - `Operation Herzegovina Consolidation`: launched at turn 14.
-- `Operation Cerska-Kamenica`: catalog-present, not launched, latest blocker `build_failure` at turn 52.
+- `Operation Cerska-Kamenica`: catalog-present, not launched, latest blocker `build_defender_power_too_high` at turn 52.
 - `Operation Kotor Varos`: catalog-present, not launched, latest blocker `already_owned_objectives` at turn 52.
 
 The existing 188w H1 sensitive-history diagnostic remains evidence-first; this lane adds the persistence boundary needed before further H1 report projection or tuning.

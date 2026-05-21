@@ -664,7 +664,7 @@ function buildOperation(
     def: TriggeredOpDef,
     state: GameState,
     turn: number,
-): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | null {
+): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | { failure: string } {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
 
@@ -709,8 +709,8 @@ function buildOperation(
         corpsAxes.get(axisDef.corps)!.push(axis);
     }
 
-    if (builtAxes.length === 0) return null;
-    if (allParticipating.length < MIN_OPERATION_PARTICIPANTS) return null;
+    if (builtAxes.length === 0) return { failure: 'build_no_built_axes' };
+    if (allParticipating.length < MIN_OPERATION_PARTICIPANTS) return { failure: 'build_insufficient_participants' };
 
     const allObjectives = builtAxes.flatMap(a => a.objectives);
 
@@ -730,7 +730,7 @@ function buildOperation(
         op.objectives ?? [],
         def.faction,
     );
-    if (!feasibility.feasible) return null;
+    if (!feasibility.feasible) return { failure: `build_${feasibility.blocker || 'launch_feasibility'}` };
 
     return { op, corpsAxes };
 }
@@ -951,10 +951,10 @@ export function checkTriggeredOperations(state: GameState): string[] {
 
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(effectiveDef, state, turn);
-        if (!result) {
+        if ('failure' in result) {
             recordWatchedOperationTrace(state, def, turn, {
                 launch_status: 'not_launched',
-                blocker_code: 'build_failure',
+                blocker_code: result.failure,
             });
             continue;
         }

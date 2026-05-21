@@ -1,8 +1,8 @@
 # H1 Trace-Backed 188w Packet
 
 **Date:** 2026-05-21
-**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1924`
-**Final hash:** `53b1cee10bd6c3f1`
+**Run:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1926`
+**Final hash:** `28507baee3ca2d33`
 **Verdict:** OPEN_P0
 
 ## Summary
@@ -23,20 +23,20 @@ This remains diagnostic evidence only. No operation objectives, OOB, launch tuni
 
 | Operation | Trace status | Canonical window | Blocker evidence | AAR | Delivery |
 | --- | --- | --- | --- | --- | --- |
-| Cerska-Kamenica | catalog-present, not launched | 40 | `build_failure` at turn 188 | not visible | unknown |
-| Krivaja-95 | catalog-present, warning plus no-launch trace | 170-178 | `brigade_ineligible` warning for `rs_skelani_battalion`; later `build_failure` | not visible | unknown |
-| Stupcanica-95 | catalog-present, not launched | 172-180 | `build_failure` at turn 188 | not visible | unknown |
+| Cerska-Kamenica | catalog-present, not launched | 40 | `build_defender_power_too_high` at turn 188 | not visible | unknown |
+| Krivaja-95 | catalog-present, warning plus no-launch trace | 170-178 | `build_defender_power_too_high` at turn 188; separate `brigade_ineligible` warning for `rs_skelani_battalion` | not visible | unknown |
+| Stupcanica-95 | catalog-present, not launched | 172-180 | `build_defender_power_too_high` at turn 188 | not visible | unknown |
 
 The key change from the pre-trace packet is that Cerska-Kamenica and Stupcanica-95 are no longer merely catalog-present by source fallback; they are persisted runtime rows. Krivaja-95 also preserves the typed `brigade_ineligible` validation warning in the trace artifact instead of relying only on `op_injection_warnings`.
 
 ## H1 Interpretation
 
-H1 remains open because none of the three watched operations produce a visible operation AAR or delivered capture. The owner is now narrower than before: investigate why `buildOperation(...)` returns null for Cerska-Kamenica, Krivaja-95, and Stupcanica-95 in the 188w state after their windows. Krivaja additionally has a concrete formation eligibility warning: `rs_skelani_battalion` is present but inactive with zero personnel.
+H1 remains open because none of the three watched operations produce a visible operation AAR or delivered capture. The owner is now narrower than before: `buildOperation(...)` reaches launch-feasibility evaluation, then fails the defender-power predicate for Cerska-Kamenica, Krivaja-95, and Stupcanica-95 in the 188w state after their windows. Krivaja additionally has a concrete formation eligibility warning: `rs_skelani_battalion` is present but inactive with zero personnel.
 
-Do not tune operation outcomes yet. The next implementation lane should add or inspect build-failure detail at the triggered-operation/build boundary so the generic `build_failure` rows become typed enough to decide whether report projection, formation eligibility, axis construction, or behavior tuning owns the next fix.
+Do not tune operation outcomes yet. The next implementation lane should inspect defender-power launch-feasibility inputs for these triggered operations before deciding whether report projection, formation eligibility, axis construction, or behavior tuning owns the next fix.
 
 ## Verification
 
 - `npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --unique --map --out runs` PASS.
-- `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1924` PASS.
-- `watched_operations.json` present with six deterministic rows, including both Krivaja `brigade_ineligible` and `build_failure` evidence.
+- `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1926` PASS.
+- `watched_operations.json` present with six deterministic rows, including both Krivaja `brigade_ineligible` and `build_defender_power_too_high` evidence.

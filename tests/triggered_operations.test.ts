@@ -327,6 +327,21 @@ describe('checkTriggeredOperations', () => {
         });
     });
 
+    it('persists typed build-failure detail when no triggered axis can be built', () => {
+        const state = makeState(10);
+        for (const brigadeId of ['rs_1st_kotor_varo_light_infantry', 'rs_12th_kotorsko_light_infantry', 'rs_22nd_krajina_infantry']) {
+            state.military.formations![brigadeId]!.personnel = 1;
+        }
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(!injected.includes('Operation Kotor Varos'));
+        assert.equal(
+            state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Kotor Varos')?.blocker_code,
+            'build_no_built_axes',
+        );
+    });
+
     it('filters already-controlled objectives without dropping a viable triggered axis', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
