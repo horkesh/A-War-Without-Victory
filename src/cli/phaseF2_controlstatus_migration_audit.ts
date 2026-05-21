@@ -9,7 +9,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadSettlementGraph } from '../map/settlements.js';
-import { CURRENT_SCHEMA_VERSION, GameState } from '../state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
     getSettlementControlStatus,
@@ -39,6 +39,7 @@ const MIGRATED_MODULE_PATHS = [
 ];
 
 const SAMPLE_SIZE = 200;
+const RAW_POLITICAL_CONTROLLER_READ = /\.political_controller(?!s)\b/;
 
 function runStaticGuard(): { forbidden: boolean; filesChecked: string[]; forbiddenIn: string[] } {
     const forbiddenIn: string[] = [];
@@ -46,7 +47,7 @@ function runStaticGuard(): { forbidden: boolean; filesChecked: string[]; forbidd
         const absPath = resolve(ROOT, relPath);
         try {
             const text = readFileSync(absPath, 'utf8');
-            if (text.includes('.political_controller')) {
+            if (RAW_POLITICAL_CONTROLLER_READ.test(text)) {
                 forbiddenIn.push(relPath);
             }
         } catch {
@@ -74,8 +75,9 @@ async function main(): Promise<void> {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
-  } as any,
-  political: {} as any, displacement: {} as any
+  },
+  political: {},
+  displacement: {}
 };
 
     await prepareNewGameState(state, graph);
