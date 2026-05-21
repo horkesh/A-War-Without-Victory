@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(combat): repair war exhaustion tempo thresholds
+
+**Type:** Combat-math calibration/wiring repair plus matching Army HQ readout threshold. No scenario data, painted-control targets, OOB source rows, save schema, operation catalog data, or new mechanics changed.
+
+**Why:** Claude's trajectory roadmap handoff flagged a disk-verifiable dead wire: `political.war_exhaustion` is capped at 100, but `getWarExhaustionTempoMult(...)` only began applying attack-tempo drag at 500 and saturated at 800. The existing penalty could not fire for canonical exhaustion values.
+
+**Change:** Re-anchored `WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW/HIGH` from `500/800` to `30/80`, preserving the existing `1.0 -> 0.85` multiplier shape. Updated the Army HQ command-relationship campaign-drag readout threshold from `500` to `30` so the player-facing signal matches the engine threshold.
+
+**Verification:** TDD red runs failed first: exhaustion `55` returned multiplier `1.0`, and the campaign-drag readout stayed hidden at exhaustion `62`. Green focused verification: `npx.cmd vitest run tests/combat_exhaustion.test.ts --reporter=dot` PASS (7/7); `npx.cmd vitest run tests/ui/command_relationship_campaign_drag_proof.test.ts --reporter=dot` PASS (6/6); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` updated the expected 52-week hashes after confirming 27/27 anchors and 6/6 bot benchmarks still passed; `npm.cmd run test:baselines` PASS; `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_WAR_EXHAUSTION_TEMPO_THRESHOLD_REPAIR.md`.
+
+---
 ## [2026-05-22] feat(opportunity): add Donji Vakuf 95 catalog entry
 
 **Type:** Operation Opportunity catalog behavior. No scenario data, painted-control target data, OOB source rows, save schema, combat math, or outcome tuning changed.

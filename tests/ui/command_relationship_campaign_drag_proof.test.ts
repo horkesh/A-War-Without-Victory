@@ -10,7 +10,7 @@
  * Proof classification: DIRECT RENDER PROOF
  * - Mounts CommandRelationshipSection with jsdom + @testing-library/react.
  * - Mocks useGameStore (collapsible expansion state) and useIPC (no-op).
- * - Threshold under test: FACTION_WAR_EXHAUSTION_ELEVATED = 500, matching
+ * - Threshold under test: FACTION_WAR_EXHAUSTION_ELEVATED = 30, matching
  *   the engine's WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW in combat_math.ts.
  * - Wording under test: "National war strain (N) is narrowing the latitude
  *   this corps has for sustained offensive tempo."
@@ -77,22 +77,22 @@ afterEach(() => {
 describe('CommandRelationshipSection — campaign drag readout', () => {
     it('renders the campaign-drag readout when faction war exhaustion is elevated', () => {
         const { container } = render(
-            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 620 })),
+            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 62 })),
         );
 
         const drag = container.querySelector('[data-testid="faction-campaign-drag"]');
         expect(drag).not.toBeNull();
         expect(drag!.textContent).toContain('National war strain');
-        expect(drag!.textContent).toContain('620');
+        expect(drag!.textContent).toContain('62');
         expect(drag!.textContent).toContain('narrowing the latitude');
         expect(drag!.textContent).toContain('sustained offensive tempo');
     });
 
     it('does not render the campaign-drag readout below the engine threshold', () => {
-        // Threshold matches combat_math.ts WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW = 500.
-        // 120 is a typical low-band value; the whole section should stay silent.
+        // Threshold matches combat_math.ts WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW = 30.
+        // 20 is a low-band value; the whole section should stay silent.
         const { container } = render(
-            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 120 })),
+            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 20 })),
         );
         expect(container.querySelector('[data-testid="faction-campaign-drag"]')).toBeNull();
         // Silence=healthy still holds: nothing else to show either.
@@ -111,7 +111,7 @@ describe('CommandRelationshipSection — campaign drag readout', () => {
             createElement(CommandRelationshipSection, baseProps({
                 commandStrain: 3,
                 commandStrainLabel: 'strained',
-                factionWarExhaustion: 720,
+                factionWarExhaustion: 72,
             })),
         );
         // Strain line present
@@ -119,14 +119,14 @@ describe('CommandRelationshipSection — campaign drag readout', () => {
         // And the new readout
         const drag = container.querySelector('[data-testid="faction-campaign-drag"]');
         expect(drag).not.toBeNull();
-        expect(drag!.textContent).toContain('720');
+        expect(drag!.textContent).toContain('72');
     });
 
     it('renders the section even when corps is healthy but national strain is elevated', () => {
         // This is the new behaviour: the section now has a reason to appear
         // purely because of campaign drag, independent of corps-level friction.
         const { container } = render(
-            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 500 })),
+            createElement(CommandRelationshipSection, baseProps({ factionWarExhaustion: 30 })),
         );
         const drag = container.querySelector('[data-testid="faction-campaign-drag"]');
         expect(drag).not.toBeNull();

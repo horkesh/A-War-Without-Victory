@@ -42,7 +42,7 @@ const COMPROMISED_THRESHOLD = 6;
  * in src/sim/combat/combat_math.ts — at this value attacker-power tempo
  * multiplier starts dropping from 1.0 toward 0.85.
  */
-const FACTION_WAR_EXHAUSTION_ELEVATED = 500;
+const FACTION_WAR_EXHAUSTION_ELEVATED = 30;
 
 interface CommandRelationshipSectionProps {
     corpsId: string;
@@ -54,7 +54,7 @@ interface CommandRelationshipSectionProps {
     corpsExhaustion: number;
     /**
      * Faction-level war exhaustion from GameState.political.war_exhaustion[faction]
-     * (unbounded accumulator; engine tempo throttle fires at 500, saturates at 800).
+     * (0-100 accumulator; engine tempo throttle fires at 30, saturates at 80).
      * When elevated, one readout line advertises that national strain is narrowing
      * this corps's latitude for sustained offensive tempo. Staff interpretation only;
      * does not claim certainty the payload does not support.

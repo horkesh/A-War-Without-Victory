@@ -1572,14 +1572,14 @@ export function rankDefendersByPower(
 // P7 — War Exhaustion → Attack Tempo Penalty
 // ═══════════════════════════════════════════════════════════════════════════
 
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 500;
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 800;
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 30;
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 80;
 const WAR_EXHAUSTION_TEMPO_MULT_MIN       = 0.85;
 
 /**
  * Returns a [0.85, 1.0] multiplier on attacker power based on faction war exhaustion.
  * Applied to attacker power ONLY — never to defender power.
- * Linear interpolation between thresholds 500 and 800.
+ * Linear interpolation between thresholds 30 and 80.
  */
 export function getWarExhaustionTempoMult(
     state: GameState,

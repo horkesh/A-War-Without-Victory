@@ -1,5 +1,12 @@
 # AWWV Calibration Master Reference
 
+## War exhaustion tempo threshold repair (2026-05-22)
+
+- The attack-tempo penalty from `political.war_exhaustion` now operates in the canonical 0-100 range: drag begins above 30 and saturates at 80.
+- This repairs the previous dead 500/800 threshold band while preserving the existing multiplier shape (`1.0` down to `0.85`).
+- Army HQ campaign-drag readout now uses the same 30 threshold.
+- Report: `docs/40_reports/implemented/20260522_WAR_EXHAUSTION_TEMPO_THRESHOLD_REPAIR.md`.
+
 ## Donji Vakuf 95 opportunity catalog fill (2026-05-22)
 
 - `donji_vakuf_95` is now a T1 Central Bosnia operation opportunity for ARBiH 7th Corps in the September 1995 window.

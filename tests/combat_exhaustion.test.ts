@@ -6,6 +6,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { getWarExhaustionTempoMult } from '../src/sim/combat/combat_math.js';
 import { updateExhaustion } from '../src/sim/combat/exhaustion.js';
 import type { FrontDescriptor, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -127,5 +128,14 @@ describe('exhaustion accumulation', () => {
         updateExhaustion(state, []);
         expect(state.political.war_exhaustion?.RBiH).toBe(0);
         expect(state.political.war_exhaustion?.RS).toBe(0);
+    });
+
+    it('applies attack tempo drag inside the canonical 0-100 exhaustion range', () => {
+        const state = minimalPhaseIIState();
+        state.political.war_exhaustion = { RBiH: 30, RS: 55, HRHB: 80 };
+
+        expect(getWarExhaustionTempoMult(state, 'RBiH')).toBe(1.0);
+        expect(getWarExhaustionTempoMult(state, 'RS')).toBeCloseTo(0.925, 6);
+        expect(getWarExhaustionTempoMult(state, 'HRHB')).toBe(0.85);
     });
 });
