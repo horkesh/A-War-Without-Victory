@@ -170,6 +170,47 @@ const AI_COMMANDER_BATCH_49_FILES = [
     'src/sim/ai_commander/response_parser.ts',
 ];
 
+// Batch C (Strict-Null schema-boundary lane, 2026-05-21): each of the twelve
+// files in scope had its `as_unknown_casts` count driven to zero. Per-file
+// slice constants pin the floor so future edits cannot silently regress.
+// Plan: docs/plans/2026-05-20-strict-null-schema-boundary-validation-plan.md
+const BATCH_C_SECTOR_OFFENSIVE_LAUNCH_HELPERS_FILES = [
+    'src/sim/combat/sector_offensive_launch_helpers.ts',
+];
+const BATCH_C_VALIDATE_GAME_STATE_FILES = [
+    'src/state/validateGameState.ts',
+];
+const BATCH_C_REPLAY_FRAME_SUMMARY_FILES = [
+    'src/sim/replay/replay_frame_summary.ts',
+];
+const BATCH_C_WAR_DISPATCHES_FILES = [
+    'src/sim/ai_commander/war_dispatches.ts',
+];
+const BATCH_C_DESKTOP_SIM_FILES = [
+    'src/desktop/desktop_sim.ts',
+];
+const BATCH_C_COLLECT_BRIEFING_FILES = [
+    'src/sim/briefing/collect_briefing.ts',
+];
+const BATCH_C_SERIALIZE_FILES = [
+    'src/state/serialize.ts',
+];
+const BATCH_C_POLITICAL_CONTROL_INIT_FILES = [
+    'src/state/political_control_init.ts',
+];
+const BATCH_C_OOB_LOADER_FILES = [
+    'src/scenario/oob_loader.ts',
+];
+const BATCH_C_SCENARIO_LOADER_FILES = [
+    'src/scenario/scenario_loader.ts',
+];
+const BATCH_C_WAR_TIMELINE_FILES = [
+    'src/state/war_timeline.ts',
+];
+const BATCH_C_BRIGADE_TEMPORAL_EMIT_FILES = [
+    'src/scenario/brigade_temporal_emit.ts',
+];
+
 // The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
 // count at exactly 10 retained escapes documented in
 // `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
@@ -647,6 +688,126 @@ describe('strict null inventory progress', () => {
         );
 
         expect(adapterTotal).toBeLessThanOrEqual(ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING);
+    });
+
+    it('cleans the Batch C sector_offensive_launch_helpers slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_SECTOR_OFFENSIVE_LAUNCH_HELPERS_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C validateGameState slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_VALIDATE_GAME_STATE_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C replay_frame_summary slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_REPLAY_FRAME_SUMMARY_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C war_dispatches slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_WAR_DISPATCHES_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C desktop_sim slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_DESKTOP_SIM_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C collect_briefing slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_COLLECT_BRIEFING_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C serialize slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_SERIALIZE_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C political_control_init slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_POLITICAL_CONTROL_INIT_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C oob_loader slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_OOB_LOADER_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C scenario_loader slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_SCENARIO_LOADER_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C war_timeline slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_WAR_TIMELINE_FILES);
+        expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the Batch C brigade_temporal_emit slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', BATCH_C_BRIGADE_TEMPORAL_EMIT_FILES);
+        expect(unknownCount).toBe(0);
     });
 
     it('cleans the Batch 49 AI commander response_parser schema-validation slice', () => {
