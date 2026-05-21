@@ -27,6 +27,11 @@ import { deduplicateBrigadesAcrossSectors } from './brigade_assignment.js';
 
 type SectorPartitionPerfTimer = <T>(label: string, fn: () => T) => T;
 
+interface SectorFormationScanIndex {
+    assignedCandidateIds: readonly FormationId[];
+    enemyPersonnelByLocation: ReadonlyMap<string, number>;
+}
+
 function isActiveCombatFormation(formation: FormationState | undefined): formation is FormationState {
     return !!formation
         && formation.status === 'active'
@@ -39,6 +44,34 @@ function buildActiveCombatFormationScanIds(
     return Object.keys(formations)
         .sort(strictCompare)
         .filter((fid): fid is FormationId => isActiveCombatFormation(formations[fid]));
+}
+
+function buildSectorFormationScanIndex(
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+    corpsId: FormationId,
+    formationScanIds: readonly FormationId[],
+): SectorFormationScanIndex {
+    const assignedCandidateIds: FormationId[] = [];
+    const enemyPersonnelByLocation = new Map<string, number>();
+
+    for (const fid of formationScanIds) {
+        const formation = formations[fid];
+        if (!formation?.location_osid) continue;
+        if (formation.faction === faction) {
+            if (getFormationCorpsId(formation) === corpsId) assignedCandidateIds.push(fid);
+            continue;
+        }
+        enemyPersonnelByLocation.set(
+            formation.location_osid,
+            (enemyPersonnelByLocation.get(formation.location_osid) ?? 0) + (formation.personnel ?? 0),
+        );
+    }
+
+    return {
+        assignedCandidateIds,
+        enemyPersonnelByLocation,
+    };
 }
 
 /**
@@ -210,13 +243,16 @@ export function buildMultiSectorsForCorps(
     const activeCombatFormationScanIds = perfTime(`buildMultiSectorsForCorps:${corpsId}:active-combat-formation-scan-ids`, () => (
         buildActiveCombatFormationScanIds(formations)
     ));
+    const sectorFormationScanIndex = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-formation-scan-index`, () => (
+        buildSectorFormationScanIndex(formations, faction, corpsId, activeCombatFormationScanIds)
+    ));
 
     const sectors = perfTime(`buildMultiSectorsForCorps:${corpsId}:sector-object-construction`, () => {
         const builtSectors: CorpsFrontSector[] = [];
         for (let i = 0; i < subSegments.length; i++) {
             const sector = buildSectorFromSubSegments(
                 state, corpsId, faction, i, [subSegments[i]!], edgeMeta,
-                formations, perfTime, activeCombatFormationScanIds
+                formations, perfTime, activeCombatFormationScanIds, sectorFormationScanIndex
             );
             if (sector) builtSectors.push(sector);
         }
@@ -238,7 +274,7 @@ export function buildMultiSectorsForCorps(
                         for (const half of halves) {
                             const s = buildSectorFromSubSegments(
                                 state, corpsId, faction, next.length, [half],
-                                edgeMeta, formations, perfTime, activeCombatFormationScanIds
+                                edgeMeta, formations, perfTime, activeCombatFormationScanIds, sectorFormationScanIndex
                             );
                             if (s) next.push(s);
                         }
@@ -488,6 +524,7 @@ export function buildSectorFromSubSegments(
     formations: Record<FormationId, FormationState>,
     perfTime: SectorPartitionPerfTimer = (_label, fn) => fn(),
     activeCombatFormationScanIds?: readonly FormationId[],
+    sectorFormationScanIndex?: SectorFormationScanIndex,
 ): CorpsFrontSector | null {
     if (subSegments.length === 0) return null;
 
@@ -525,15 +562,14 @@ export function buildSectorFromSubSegments(
     const sortedEdgeIds = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:sorted-edge-list`, () => [...allEdgeIds].sort(strictCompare));
     const totalEdges = sortedEdgeIds.length;
     const formationScanIds = activeCombatFormationScanIds ?? buildActiveCombatFormationScanIds(formations);
+    const scanIndex = sectorFormationScanIndex ?? buildSectorFormationScanIndex(formations, faction, corpsId, formationScanIds);
 
     // Per-sector brigade assignment: brigade at OSID in sector's friendly_osids
     const assignedBrigadeIds = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:assigned-brigade-scan`, () => {
         const nextAssignedBrigadeIds: FormationId[] = [];
-        for (const fid of formationScanIds) {
+        for (const fid of scanIndex.assignedCandidateIds) {
             const f = formations[fid];
-            if (!f || f.faction !== faction) continue;
             if (!f.location_osid || !allFriendlyOsids.has(f.location_osid)) continue;
-            if (getFormationCorpsId(f) !== corpsId) continue;
             nextAssignedBrigadeIds.push(fid);
         }
         return nextAssignedBrigadeIds;
@@ -546,11 +582,8 @@ export function buildSectorFromSubSegments(
 
     const enemyPower = perfTime(`buildSectorFromSubSegments:${corpsId}:${sectorIndex}:enemy-power-scan`, () => {
         let nextEnemyPower = 0;
-        for (const fid of formationScanIds) {
-            const f = formations[fid];
-            if (!f || f.faction === faction) continue;
-            if (!f.location_osid || !allEnemyOsids.has(f.location_osid)) continue;
-            nextEnemyPower += f.personnel ?? 0;
+        for (const osid of allEnemyOsids) {
+            nextEnemyPower += scanIndex.enemyPersonnelByLocation.get(osid) ?? 0;
         }
         return nextEnemyPower;
     });

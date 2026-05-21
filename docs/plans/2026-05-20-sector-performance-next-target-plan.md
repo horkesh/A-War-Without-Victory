@@ -2,6 +2,8 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
+> **Status:** First implementation slice closed 2026-05-21. The measured target was `buildFactionSectors:*` / corps-sector construction, and the accepted optimization is an invocation-local per-corps formation scan index in `src/sim/combat/sector_building.ts`. See `docs/40_reports/implemented/20260521_SECTOR_FORMATION_SCAN_INDEX_CACHE.md`. This plan remains the active template for the next sector-performance pass: re-profile first, pick one remaining owner, and keep byte-identity gates.
+
 **Goal:** Turn the sector reconstruction performance lane into one measured next-target implementation plan with byte-identity proof gates.
 
 **Architecture:** Profile first, choose the hottest repeated child function from current evidence, then allow only single-call-frame caches or precomputed lookup maps scoped to one sector reconstruction invocation. Any hash drift is a stop condition, not an optimization result.

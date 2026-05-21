@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): cache per-corps formation scans during sector construction
+
+**Type:** Sector reconstruction performance implementation. Touched `src/sim/combat/sector_building.ts` and docs only. No combat outcome math, operation selection, brigade assignment semantics, save schema, scenario data, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Fresh profiling kept sector reconstruction as a top hotspot: pre-change partition profile recorded `reconcile-final-sector-truth` `8946.5ms` and `partition-corps-front-sectors` `8851.0ms`, with `buildFactionSectors:RBiH/RS` and corps-sector construction still leading sector children. `buildSectorFromSubSegments(...)` was repeatedly scanning active formations per built sector to derive assigned brigade IDs and enemy power.
+
+**Change:** Added an invocation-local `SectorFormationScanIndex` inside `buildMultiSectorsForCorps(...)`. It precomputes same-faction/same-corps active formation IDs in the existing sorted scan order and enemy personnel totals by `location_osid`, then passes that single-call-frame index to `buildSectorFromSubSegments(...)`. The cache dies with the `buildMultiSectorsForCorps(...)` call and never crosses turns or sector reconstruction invocations.
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/sector_partition_buildCorpsFrontSectors_integration.test.ts --reporter=dot` PASS (5/5, including 100+ deterministic state variants); `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts tests/profile_hotspot_report.test.ts --reporter=dot` PASS (19/19); `npx.cmd vitest run tests/final_sector_truth_reconciliation_cache.test.ts tests/final_sector_truth_reconciliation.test.ts tests/war_phase_step_order.test.ts --reporter=dot` PASS (13/13); `npm.cmd run sim:scenario:run:40w:timed` PASS with unchanged final hash `5c6e7b62fa6670c0`; `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`). Post-change partition profile measured `95.23s` wall time with `partition-corps-front-sectors` `8680.7ms`; full timed run wrote total `96384.533ms`. Performance direction is positive but modest.
+
+**Report:** `docs/40_reports/implemented/20260521_SECTOR_FORMATION_SCAN_INDEX_CACHE.md`.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean ForceReadiness UI casts
 
 **Type:** UI-only Army HQ strict-null cleanup. Touched `src/ui/map/components/army_hq/ForceReadiness.tsx`, strict-null progress test, and docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
