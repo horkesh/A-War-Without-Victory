@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(roadmap): intake force-trajectory specialist bundle
+
+**Type:** Roadmap/audit intake. No source behavior, scenario data, painted-control targets, OOB rows, save schema, baseline hashes, or tuning changed.
+
+**Why:** Claude added a multi-specialist force-trajectory roadmap bundle. Codex needed to preserve the useful research while treating it as claims until disk-verified, and update the execution state after W1 war-exhaustion threshold repair and N2 Donji Vakuf were already shipped.
+
+**Change:** Accepted the force-trajectory wiring plan as roadmap intake, added Codex execution status, marked W1 and N2 complete, and kept W2 defender-corps readiness / W4 Sana-floor verification as the next measured behavior lane. Added the accompanying specialist audit memos for canon, historical datapoints, trajectory gaps, engine inventory, and ops gating.
+
+**Verification:** Disk checks confirmed the referenced code surfaces exist (`operation_opportunity_traces`, `donji_vakuf_95`, `mistral_2_95`, `SANA_READINESS_FLOOR`, `computeCorpsOperationReadiness`, `casualty_ledger`, and `faction_officer_maturity`). `git diff --check` PASS.
+
+**Artifacts:** `docs/plans/2026-05-22-force-trajectory-wiring-plan.md`; `docs/40_reports/audits/20260522_{CANON_TRAJECTORY_FRAME,HISTORICAL_FORCE_TRAJECTORY_DATAPOINTS,TRAJECTORY_MECHANIC_GAPS,FORCE_TRAJECTORY_ENGINE_INVENTORY,OPS_FORCE_TRAJECTORY_GATING}.md`.
+
+---
 ## [2026-05-22] fix(combat): repair war exhaustion tempo thresholds
 
 **Type:** Combat-math calibration/wiring repair plus matching Army HQ readout threshold. No scenario data, painted-control targets, OOB source rows, save schema, operation catalog data, or new mechanics changed.
