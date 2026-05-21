@@ -7,6 +7,14 @@ import { BRCKO_CONTROLLER_ID } from '../state/brcko.js';
 import type { GameState } from '../state/game_state.js';
 import type { ValidationIssue } from './validate.js';
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
+function isControllerCountTuple(value: unknown): value is [string, number] {
+    return Array.isArray(value) && value.length === 2 && typeof value[0] === 'string' && typeof value[1] === 'number';
+}
+
 export function validateEndState(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
@@ -30,7 +38,8 @@ export function validateEndState(state: GameState): ValidationIssue[] {
         return issues;
     }
 
-    if (typeof endState !== 'object') {
+    const endStateRecord = asRecord(endState);
+    if (!endStateRecord) {
         issues.push({
             severity: 'error',
             code: 'end_state.not_object',
@@ -41,7 +50,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
     }
 
     // Validate kind
-    const kind = (endState as any).kind;
+    const kind = endStateRecord.kind;
     if (kind !== 'peace_treaty') {
         issues.push({
             severity: 'error',
@@ -52,7 +61,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
     }
 
     // Validate treaty_id
-    const treatyId = (endState as any).treaty_id;
+    const treatyId = endStateRecord.treaty_id;
     if (typeof treatyId !== 'string' || treatyId.length === 0) {
         issues.push({
             severity: 'error',
@@ -63,8 +72,8 @@ export function validateEndState(state: GameState): ValidationIssue[] {
     }
 
     // Validate since_turn
-    const sinceTurn = (endState as any).since_turn;
-    if (!Number.isInteger(sinceTurn) || sinceTurn < 0) {
+    const sinceTurn = endStateRecord.since_turn;
+    if (typeof sinceTurn !== 'number' || !Number.isInteger(sinceTurn) || sinceTurn < 0) {
         issues.push({
             severity: 'error',
             code: 'end_state.since_turn.invalid',
@@ -85,7 +94,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
     }
 
     // Validate note (optional)
-    const note = (endState as any).note;
+    const note = endStateRecord.note;
     if (note !== undefined && note !== null) {
         if (typeof note !== 'string') {
             issues.push({
@@ -108,9 +117,10 @@ export function validateEndState(state: GameState): ValidationIssue[] {
     }
 
     // Phase 12D.1: Validate snapshot if present
-    const snapshot = (endState as any).snapshot;
+    const snapshot = endStateRecord.snapshot;
     if (snapshot !== undefined && snapshot !== null) {
-        if (typeof snapshot !== 'object') {
+        const snapshotRecord = asRecord(snapshot);
+        if (!snapshotRecord) {
             issues.push({
                 severity: 'error',
                 code: 'end_state.snapshot.not_object',
@@ -119,8 +129,8 @@ export function validateEndState(state: GameState): ValidationIssue[] {
             });
         } else {
             // Validate snapshot.turn equals end_state.since_turn
-            const snapshotTurn = (snapshot as any).turn;
-            if (!Number.isInteger(snapshotTurn) || snapshotTurn !== sinceTurn) {
+            const snapshotTurn = snapshotRecord.turn;
+            if (typeof snapshotTurn !== 'number' || !Number.isInteger(snapshotTurn) || snapshotTurn !== sinceTurn) {
                 issues.push({
                     severity: 'error',
                     code: 'end_state.snapshot.turn.mismatch',
@@ -130,7 +140,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
             }
 
             // Validate controllers is sorted by sid asc, unique sids
-            const controllers = (snapshot as any).controllers;
+            const controllers = snapshotRecord.controllers;
             if (Array.isArray(controllers)) {
                 for (let i = 0; i < controllers.length; i += 1) {
                     const entry = controllers[i];
@@ -154,8 +164,9 @@ export function validateEndState(state: GameState): ValidationIssue[] {
                     }
                     // Check sorting
                     if (i > 0) {
-                        const prevSid = controllers[i - 1][0];
-                        if (sid <= prevSid) {
+                        const prevEntry = controllers[i - 1];
+                        const prevSid = Array.isArray(prevEntry) ? prevEntry[0] : undefined;
+                        if (typeof sid === 'number' && typeof prevSid === 'number' && sid <= prevSid) {
                             issues.push({
                                 severity: 'error',
                                 code: 'end_state.snapshot.controllers.not_sorted',
@@ -168,7 +179,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
             }
 
             // Phase 13A.0: Validate competences array if present
-            const competences = (snapshot as any).competences;
+            const competences = snapshotRecord.competences;
             if (competences !== undefined && competences !== null) {
                 if (!Array.isArray(competences)) {
                     issues.push({
@@ -190,7 +201,8 @@ export function validateEndState(state: GameState): ValidationIssue[] {
                         const seenCompetences = new Set<string>();
                         for (let i = 0; i < competences.length; i += 1) {
                             const comp = competences[i];
-                            if (!comp || typeof comp !== 'object' || Array.isArray(comp)) {
+                            const compRecord = asRecord(comp);
+                            if (!compRecord) {
                                 issues.push({
                                     severity: 'error',
                                     code: 'end_state.snapshot.competences.invalid_entry',
@@ -200,8 +212,8 @@ export function validateEndState(state: GameState): ValidationIssue[] {
                                 continue;
                             }
 
-                            const compId = comp.competence;
-                            const holder = comp.holder;
+                            const compId = compRecord.competence;
+                            const holder = compRecord.holder;
 
                             if (typeof compId !== 'string' || compId.length === 0) {
                                 issues.push({
@@ -222,22 +234,25 @@ export function validateEndState(state: GameState): ValidationIssue[] {
                             }
 
                             // Check for duplicates
-                            if (seenCompetences.has(compId)) {
-                                issues.push({
-                                    severity: 'error',
-                                    code: 'end_state.snapshot.competences.duplicate',
-                                    message: `end_state.snapshot.competences: duplicate competence ${compId}`,
-                                    path: `end_state.snapshot.competences[${i}]`
-                                });
-                            } else {
-                                seenCompetences.add(compId);
+                            if (typeof compId === 'string') {
+                                if (seenCompetences.has(compId)) {
+                                    issues.push({
+                                        severity: 'error',
+                                        code: 'end_state.snapshot.competences.duplicate',
+                                        message: `end_state.snapshot.competences: duplicate competence ${compId}`,
+                                        path: `end_state.snapshot.competences[${i}]`
+                                    });
+                                } else {
+                                    seenCompetences.add(compId);
+                                }
                             }
 
                             // Check sorting (must be sorted by competence ID)
                             if (i > 0) {
                                 const prevComp = competences[i - 1];
-                                if (prevComp && typeof prevComp === 'object' && !Array.isArray(prevComp)) {
-                                    const prevCompId = prevComp.competence;
+                                const prevCompRecord = asRecord(prevComp);
+                                if (prevCompRecord) {
+                                    const prevCompId = prevCompRecord.competence;
                                     if (typeof prevCompId === 'string' && typeof compId === 'string' && compId < prevCompId) {
                                         issues.push({
                                             severity: 'error',
@@ -254,7 +269,7 @@ export function validateEndState(state: GameState): ValidationIssue[] {
             }
 
             // Validate outcome_hash is 64 hex chars
-            const outcomeHash = (snapshot as any).outcome_hash;
+            const outcomeHash = snapshotRecord.outcome_hash;
             if (typeof outcomeHash !== 'string' || !/^[0-9a-f]{64}$/.test(outcomeHash)) {
                 issues.push({
                     severity: 'error',
@@ -265,20 +280,21 @@ export function validateEndState(state: GameState): ValidationIssue[] {
             }
 
             // Validate settlements_by_controller matches controllers aggregation (optional consistency check)
-            const settlementsByController = (snapshot as any).settlements_by_controller;
+            const settlementsByController = snapshotRecord.settlements_by_controller;
             if (Array.isArray(settlementsByController) && Array.isArray(controllers)) {
                 const controllerCounts = new Map<string, number>();
-                for (const [sid, controller] of controllers) {
+                for (const entry of controllers) {
+                    if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[1] !== 'string') continue;
+                    const controller = entry[1];
                     const count = controllerCounts.get(controller) ?? 0;
                     controllerCounts.set(controller, count + 1);
                 }
-                const expected = Array.from(controllerCounts.entries())
+                const expected: Array<[string, number]> = Array.from(controllerCounts.entries())
                     .sort((a, b) => a[0].localeCompare(b[0]))
                     .map(([controller, count]) => [controller, count]);
                 const actual = settlementsByController
-                    .map((entry: any) => Array.isArray(entry) && entry.length === 2 ? entry : null)
-                    .filter((e: any) => e !== null)
-                    .sort((a: any, b: any) => a[0].localeCompare(b[0]));
+                    .filter(isControllerCountTuple)
+                    .sort((a, b) => a[0].localeCompare(b[0]));
 
                 if (expected.length !== actual.length || !expected.every((e, i) => actual[i] && e[0] === actual[i][0] && e[1] === actual[i][1])) {
                     issues.push({

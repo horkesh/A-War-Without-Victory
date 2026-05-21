@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): validateEndState record-narrowing as-any slice
+
+**Type:** Type-only validator cleanup in `src/validate/end_state.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `validateEndState(...)` reads optional and malformed treaty snapshot payloads, but its guarded property access still used `as any`. This matched the current validator-as-partial-state-reader lane and could be tightened without changing valid save semantics.
+
+**Change:** Added local `asRecord(...)` and tuple guards, replaced 10 counted `as_any_casts` with `Record<string, unknown>` reads, and made numeric checks explicit before `Number.isInteger(...)`. The settlement aggregation consistency check now skips malformed controller tuples after the validator has already reported tuple-shape errors, avoiding an avoidable crash on malformed diagnostic input. Added a strict-null progress assertion pinning `src/validate/end_state.ts` at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 266 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/end_state.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (49/49). Baselines not run: validator-only type narrowing, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): validateMilitiaPools record-narrowing as-any slice
 
 **Type:** Type-only validator cleanup in `src/validate/militia_pools.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
