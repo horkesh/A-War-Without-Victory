@@ -225,4 +225,61 @@ describe('sensitive_history_status diagnostic script', () => {
         expect(markdown).toContain('| Operation Cerska-Kamenica | Cerska-Kamenica | - | - | missing | unknown | unknown | - | not_visible | missing |');
         expect(markdown).toContain('| Operation Stupčanica-95 | Stupcanica | vrs_drina:Operation Stupcanica-95:t172 | 172-180 | present | eligible | launched | - | visible | delivered |');
     });
+
+    it('uses persisted injection warnings when no watched-operation trace exists', () => {
+        const runDir = join(TMP_ROOT, 'injection_warning_trace');
+        mkdirSync(runDir, { recursive: true });
+        writeJson(join(runDir, 'run_summary.json'), {
+            weeks: 188,
+            final_state_hash: 'warning-only-fixture',
+        });
+        writeJson(join(runDir, 'final_save.json'), {
+            meta: { turn: 188 },
+            political: { political_controllers: {} },
+            military: {
+                op_injection_warnings: [
+                    {
+                        op_name: 'Operation Krivaja-95',
+                        axis_id: 'srebrenica_enclave',
+                        check: 'brigade_ineligible',
+                        detail: 'Brigade "rs_skelani_battalion" ineligible: kind="brigade", status="inactive"',
+                        severity: 'warning',
+                        turn: 172,
+                    },
+                ],
+                formations: {},
+            },
+        });
+        writeJson(join(runDir, 'operation_aars.json'), []);
+
+        const jsonOutput = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', '--json', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+        const [summary] = JSON.parse(jsonOutput) as Array<{
+            watched_operations: Array<{
+                operation_name: string;
+                operation_id: string;
+                canonical_window: string;
+                catalog_status: string;
+                eligibility_status: string;
+                launch_status: string;
+                blocker_code: string;
+                aar_status: string;
+                delivery_status: string;
+            }>;
+        }>;
+
+        expect(summary.watched_operations.find((op) => op.operation_name === 'Operation Krivaja-95')).toMatchObject({
+            operation_id: 'Operation Krivaja-95',
+            canonical_window: '170-178',
+            catalog_status: 'present',
+            eligibility_status: 'not_eligible',
+            launch_status: 'blocked',
+            blocker_code: 'brigade_ineligible',
+            aar_status: 'not_visible',
+            delivery_status: 'blocked',
+        });
+    });
 });

@@ -29,21 +29,21 @@ Scope: diagnostic/reporting only. No operation behavior, launch feasibility, obj
 | Operation | Label | Operation ID | Canonical window | Catalog | Eligibility | Launch | Blocker | AAR | Delivery |
 |---|---|---|---|---|---|---|---|---|---|
 | Operation Cerska-Kamenica | Cerska-Kamenica | - | - | missing | unknown | unknown | - | not_visible | missing |
-| Operation Krivaja-95 | Krivaja | - | - | missing | unknown | unknown | - | not_visible | missing |
+| Operation Krivaja-95 | Krivaja | Operation Krivaja-95 | 170-178 | present | not_eligible | blocked | brigade_ineligible | not_visible | blocked |
 | Operation Stupcanica-95 | Stupcanica | - | - | missing | unknown | unknown | - | not_visible | missing |
 
-Interpretation: the current saved run artifacts cannot distinguish "not injected" from "validated but skipped" for these three watched operations. `operation_aars.json` contains 56 operations, but no Krivaja, Stupcanica, Cerska, or Kamenica rows. `final_save.json` has no `state.military.watched_operations` array. The run console did print an injection warning for Krivaja-95 (`brigade_ineligible` on `rs_skelani_battalion`), but that warning is not persisted in a watched-operation trace.
+Interpretation: the current saved run artifacts now distinguish Krivaja-95 from fully missing operations. `operation_aars.json` contains 56 operations, but no Krivaja, Stupcanica, Cerska, or Kamenica AAR rows. `final_save.json` has no `state.military.watched_operations` array, but it does persist `state.military.op_injection_warnings`; Krivaja-95 is present there with `brigade_ineligible` on `rs_skelani_battalion`. Cerska-Kamenica and Stupcanica-95 still have no structured watched-operation row, injection warning, or AAR evidence in the 188w final save.
 
 ## Owner Finding
 
 The next owner is the triggered-operation trace boundary, not outcome tuning:
 
 - `src/sim/combat/triggered_operations.ts` already defines the three watched operations.
-- `checkTriggeredOperations(...)` calls `validateOpAtInjection(...)` and `collectOpInjectionWarnings(...)`, then silently continues on blocking warnings before building an active operation or AAR.
+- `checkTriggeredOperations(...)` calls `validateOpAtInjection(...)` and `collectOpInjectionWarnings(...)`; those warnings are persisted in `state.military.op_injection_warnings`, and the sensitive-history diagnostic now reads them.
 - `src/scenario/scenario_runner.ts` writes `operation_aars.json` from `state.operation_history`, but skipped/blocked triggered operations never reach `state.operation_history`.
-- No current runner artifact writes a neutral watched-operation lifecycle row for a skipped sensitive-history operation.
+- No current runner artifact writes a complete neutral watched-operation lifecycle row for all watched operations. Krivaja is recoverable from `op_injection_warnings`; Cerska-Kamenica and Stupcanica remain absent from structured lifecycle evidence.
 
-Required next implementation: persist a compact watched-operation trace row when a watched triggered operation reaches its trigger window and is skipped, blocked, or injected. The row should carry the columns now exposed by `tools/diagnostics/sensitive_history_status.cjs`: `operation_id`, `watched_label`, `canonical_window`, `catalog_status`, `eligibility_status`, `launch_status`, `blocker_code`, `aar_status`, and `delivery_status`.
+Required next implementation: persist a compact watched-operation trace row when a watched triggered operation reaches its trigger window and is skipped, blocked, or injected. The row should carry the columns now exposed by `tools/diagnostics/sensitive_history_status.cjs`: `operation_id`, `watched_label`, `canonical_window`, `catalog_status`, `eligibility_status`, `launch_status`, `blocker_code`, `aar_status`, and `delivery_status`. The implementation should preserve the existing `op_injection_warnings` fallback and add rows for non-warning skip reasons such as already-owned objectives, active primary corps, cooldown/decline state, empty live axes, or missing trigger-window evidence.
 
 ## Sign-Off Status
 
@@ -51,7 +51,7 @@ No sensitive-history outcome sign-off is required for this packet because no ope
 
 ## Verification
 
-- `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (3/3)
+- `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (4/4)
 - `npm.cmd run typecheck` PASS
 - 188w scenario run PASS, final hash `7b57a8592f668137`
 

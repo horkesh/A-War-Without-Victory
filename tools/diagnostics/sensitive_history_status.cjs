@@ -56,6 +56,12 @@ const WATCH_OP_LABELS = {
     'Operation Stupčanica-95': 'Stupcanica',
 };
 
+const WATCH_OP_WINDOWS = {
+    'Operation Cerska-Kamenica': '40',
+    'Operation Krivaja-95': '170-178',
+    'Operation Stupčanica-95': '172-180',
+};
+
 const WATCH_BRIGADES = [
     'rs_1st_birac',
     'rs_5th_podrinje',
@@ -323,6 +329,12 @@ function latestByTurnThenId(rows) {
     return sorted[sorted.length - 1] || null;
 }
 
+function latestInjectionWarning(state, name) {
+    const warnings = asArray(state.military && state.military.op_injection_warnings)
+        .filter(row => String(row.op_name || '') === name);
+    return latestByTurnThenId(warnings);
+}
+
 function summarizeWatchedOperations(runDir, state) {
     const traces = watchedOperationTraceSource(runDir, state);
     const aars = aarSource(runDir, state);
@@ -330,26 +342,30 @@ function summarizeWatchedOperations(runDir, state) {
     return WATCH_OPS.map(name => {
         const trace = latestByTurnThenId(traces.filter(row => operationNameOf(row) === name));
         const traceId = operationIdOf(trace);
+        const warning = latestInjectionWarning(state, name);
         const aar = latestByTurnThenId(aars.filter(row => {
             if (operationNameOf(row) !== name) return false;
             return traceId ? operationIdOf(row) === traceId : true;
         }));
         const aarVisible = Boolean(aar);
         const deliveryStatus = normalizedDeliveryStatus(trace && trace.delivery_status)
+            || (warning ? 'blocked' : '')
             || deliveryStatusFromAar(aar);
-        const blockerCode = String((trace && (trace.blocker_code || trace.typed_blocker || trace.blocker)) || (aar && (aar.blocker || aar.recovery_reason)) || '');
-        const catalogStatus = normalizedCatalogStatus(trace, aar);
-        const eligibilityStatus = normalizedEligibilityStatus(trace);
+        const blockerCode = String((trace && (trace.blocker_code || trace.typed_blocker || trace.blocker)) || (warning && warning.check) || (aar && (aar.blocker || aar.recovery_reason)) || '');
+        const catalogStatus = normalizedCatalogStatus(trace || warning, aar);
+        const eligibilityStatus = trace
+            ? normalizedEligibilityStatus(trace)
+            : (warning ? 'not_eligible' : 'unknown');
         const launchStatus = normalizedLaunchStatus(trace, aar, blockerCode);
         const aarStatus = normalizedAarStatus(aar, catalogStatus);
-        const presenceStatus = trace || aar
+        const presenceStatus = trace || warning || aar
             ? (aarVisible ? 'aar_visible' : 'aar_not_visible')
             : 'missing';
         return {
             operation_name: name,
             watched_label: WATCH_OP_LABELS[name] || name,
-            operation_id: traceId || operationIdOf(aar),
-            canonical_window: formatCanonicalWindow(trace && trace.canonical_window),
+            operation_id: traceId || operationIdOf(aar) || String(warning && warning.op_name || ''),
+            canonical_window: formatCanonicalWindow(trace && trace.canonical_window) || (warning ? WATCH_OP_WINDOWS[name] || '' : ''),
             catalog_status: catalogStatus,
             eligibility_status: eligibilityStatus,
             launch_status: launchStatus,
