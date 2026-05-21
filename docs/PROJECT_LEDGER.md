@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] feat(opportunity): read defender trajectory in late-war weakness gates
+
+**Type:** Operation Opportunity predicate behavior and diagnostics. No scenario data, painted-control targets, OOB rows, save schema, combat math, baseline manifest, or outcome tuning changed.
+
+**Why:** Claude's force-trajectory roadmap correctly identified that late-war opportunity gates counted enemy-held objectives but did not compare the attacker opportunity against VRS defender trajectory. W2 needed to make the existing per-corps readiness substrate load-bearing before adding larger casualty-trajectory schema work.
+
+**Change:** Added a shared deterministic defender-trajectory weakness helper and wired it into `sana_95`, `sana_95_follow_on`, and `mistral_2_95`. When active VRS 2nd Krajina subordinate brigades exist, `enemy_weakness` now combines defender `collapse_susceptibility`, inverse `operation_readiness`, and active RS equipment-quality degradation. When defender-corps evidence is absent, the catalogs preserve prior live-objective posture behavior.
+
+**Verification:** TDD red runs failed first: healthy VRS 2nd Krajina fixtures still allowed `sana_95` and `mistral_2_95` to surface. Green verification: `npx.cmd vitest run tests/operation_opportunities_catalog.test.ts tests/operation_opportunities_federation_western_bosnia_catalog.test.ts --reporter=dot` PASS (50/50); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS; `git diff --check` PASS. Fresh 188w run `runs/apr1992_definitive_188w__210e69404d054959__w188_n1936` completed with final hash `2a76baab245442d4`; `sana_95` is eligible at turn 175 through VRS Krajina trajectory weakness, while `mistral_2_95` remains blocked by Federation authorization and Kupres/Cincar staging.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_DEFENDER_TRAJECTORY_WEAKNESS_PREDICATE.md`.
+
+---
 ## [2026-05-22] docs(roadmap): intake force-trajectory specialist bundle
 
 **Type:** Roadmap/audit intake. No source behavior, scenario data, painted-control targets, OOB rows, save schema, baseline hashes, or tuning changed.

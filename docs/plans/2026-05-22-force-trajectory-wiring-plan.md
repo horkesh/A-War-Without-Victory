@@ -41,9 +41,9 @@ The expected outcome from closing these gaps: ~6-8pp of the current 10pp Oct-199
 | Item | State | Evidence |
 |---|---|---|
 | W1 war-exhaustion tempo threshold repair | DONE | `combat_math.ts` thresholds are now 30/80; Army HQ readout threshold is 30; focused tests, typecheck, baseline re-bless, and diff hygiene passed. |
-| W2 defender-corps readiness predicate | NEXT | Code surfaces verified: `computeCorpsOperationReadiness(...)`, `sana_95`, `sana_95_follow_on`, and `mistral_2_95` exist. |
+| W2 defender-corps readiness predicate | DONE | `sana_95`, `sana_95_follow_on`, and `mistral_2_95` now read VRS 2nd Krajina trajectory when defender-corps evidence is present. |
 | W3 casualty-trajectory consumer | PENDING | Larger schema/output lane; defer until W2/W4 trace evidence is measured. |
-| W4 Sana readiness floor recalibration | NEXT-WITH-W2 | Current `SANA_READINESS_FLOOR` remains 0.40; change only with W2 trace proof. |
+| W4 Sana readiness floor recalibration | NOT NEEDED ON CURRENT TRACE | Fresh 188w `n1936` shows `sana_95` eligible at turn 175 with the 0.40 floor still in place. |
 | W5 officer-maturity combat consumer | PENDING | `faction_officer_maturity` already feeds corps readiness; any combat-math consumer remains opt-in/default-off work. |
 
 ### W1. `war_exhaustion` threshold repair (gameplay-programmer S2)

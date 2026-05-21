@@ -1,5 +1,12 @@
 # AWWV Calibration Master Reference
 
+## Defender trajectory weakness predicate (2026-05-22)
+
+- `sana_95`, `sana_95_follow_on`, and `mistral_2_95` now read VRS 2nd Krajina defender-corps trajectory when active subordinate defender brigades are present.
+- The predicate combines defender `collapse_susceptibility`, inverse `operation_readiness`, and active RS equipment-quality degradation; when defender-corps evidence is absent, prior live-objective posture behavior is preserved.
+- Fresh 188w `n1936` result: `sana_95` reaches eligible at turn 175 with `enemy_weakness` opened by VRS Krajina degradation; `mistral_2_95` is still blocked by Federation authorization and Kupres/Cincar staging, so W2 is not the remaining Mistral blocker.
+- Report: `docs/40_reports/implemented/20260522_DEFENDER_TRAJECTORY_WEAKNESS_PREDICATE.md`.
+
 ## War exhaustion tempo threshold repair (2026-05-22)
 
 - The attack-tempo penalty from `political.war_exhaustion` now operates in the canonical 0-100 range: drag begins above 30 and saturates at 80.

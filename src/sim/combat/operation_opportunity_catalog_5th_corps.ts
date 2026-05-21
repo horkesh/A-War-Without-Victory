@@ -43,10 +43,13 @@ import type {
     OpportunityAxisDef,
 } from './operation_opportunities.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { evaluateDefenderTrajectoryWeakness } from './operation_opportunity_defender_weakness.js';
 import { isPreStormWesternTheater, isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_5th_corps';
+const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
+const SANA_DEFENDER_WEAKNESS_FLOOR = 0.40;
 
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
@@ -236,7 +239,7 @@ const corpsReadinessSana: AxisPredicate = (state) => {
 /** enemy_weakness: VRS Krajina still holds the operational targets but the
  *  front exists — at least one Petrovac/Sanski/Ključ anchor is RS-controlled
  *  (something to liberate) AND at least one is RBiH-controlled (front exists). */
-const enemyWeaknessSana: AxisPredicate = (state) => {
+const enemyWeaknessSana: AxisPredicate = (state, turn) => {
     let rs = 0;
     let rbih = 0;
     for (const osid of VRS_HELD_TARGETS_FOR_WEAKNESS) {
@@ -247,16 +250,36 @@ const enemyWeaknessSana: AxisPredicate = (state) => {
     if (rs === 0) {
         return { green: false, reason: 'no operational targets remain in enemy hands' };
     }
+    const trajectory = evaluateDefenderTrajectoryWeakness(state, {
+        defenderCorpsId: VRS_KRAJINA_DEFENDER_CORPS,
+        defenderFaction: 'RS',
+        currentTurn: turn,
+        weaknessFloor: SANA_DEFENDER_WEAKNESS_FLOOR,
+        label: 'VRS Krajina',
+    });
+    if (trajectory.available) {
+        return { green: trajectory.green, reason: trajectory.reason };
+    }
     return {
         green: true,
         reason: 'enemy western posture stretched — exploitation targets still in enemy hands',
     };
 };
 
-const enemyWeaknessSanaFollowOn: AxisPredicate = (state) => {
+const enemyWeaknessSanaFollowOn: AxisPredicate = (state, turn) => {
     for (const osid of SANA_FOLLOW_ON_TARGETS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
         if (ctrl === 'RS') {
+            const trajectory = evaluateDefenderTrajectoryWeakness(state, {
+                defenderCorpsId: VRS_KRAJINA_DEFENDER_CORPS,
+                defenderFaction: 'RS',
+                currentTurn: turn,
+                weaknessFloor: SANA_DEFENDER_WEAKNESS_FLOOR,
+                label: 'VRS Krajina',
+            });
+            if (trajectory.available) {
+                return { green: trajectory.green, reason: trajectory.reason };
+            }
             return { green: true, reason: 'interior liberation targets remain in enemy hands' };
         }
     }

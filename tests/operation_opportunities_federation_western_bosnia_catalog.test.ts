@@ -168,6 +168,74 @@ function buildMistralState(opts: {
     } as unknown as GameState;
 }
 
+function addVrsKrajinaDefenderCorps(
+    state: GameState,
+    opts: { degraded?: boolean; equipmentMultiplier?: number } = {},
+): void {
+    const degraded = opts.degraded ?? false;
+    state.factions.push({
+        id: 'RS',
+        capability_profile: {
+            training_quality: degraded ? 0.25 : 0.75,
+            organizational_maturity: degraded ? 0.25 : 0.75,
+            equipment_access: degraded ? 0.35 : 0.8,
+            equipment_operational: degraded ? 0.35 : 0.8,
+            doctrine_effectiveness: { ATTACK: degraded ? 0.3 : 0.75 },
+        },
+    } as unknown as GameState['factions'][number]);
+    state.military.corps_command ??= {};
+    state.military.corps_command.vrs_2nd_krajina = {
+        command_span: 7,
+        subordinate_count: 3,
+        og_slots: 0,
+        active_ogs: [],
+        corps_exhaustion: degraded ? 70 : 5,
+        stance: 'defensive',
+        active_operations: [],
+        commander_state: {
+            current_plan: null,
+            decision_trace: null,
+            operation_history: degraded
+                ? [
+                    { operation_name: 'Krajina Line', ended_turn: 170, outcome: 'failure' },
+                    { operation_name: 'Storm Spillover', ended_turn: 172, outcome: 'failure' },
+                ]
+                : [],
+        } as unknown as CorpsCommandState['commander_state'],
+    };
+    state.military.faction_officer_maturity = {
+        ...(state.military.faction_officer_maturity ?? {}),
+        RS: degraded ? 1.4 : 4.2,
+    };
+    if (typeof opts.equipmentMultiplier === 'number') {
+        state.military.equipment_quality_modifiers = [{
+            faction: 'RS',
+            multiplier: opts.equipmentMultiplier,
+            expires_turn: 999,
+        }];
+    }
+    for (let i = 0; i < 3; i++) {
+        state.military.formations[`rs_krajina_test_${i}`] = {
+            id: `rs_krajina_test_${i}`,
+            name: `RS Krajina test ${i}`,
+            kind: 'brigade',
+            status: 'active',
+            faction: 'RS',
+            corps_id: 'vrs_2nd_krajina',
+            strength: degraded ? 650 : 1800,
+            officer_quality: degraded ? 0.28 : 0.78,
+            cohesion: degraded ? 22 : 78,
+            morale: degraded ? 18 : 76,
+            composition: {
+                tanks: degraded ? 0 : 2,
+                artillery: degraded ? 1 : 4,
+                tank_condition: { operational: degraded ? 0 : 2 },
+                artillery_condition: { operational: degraded ? 1 : 4 },
+            },
+        } as unknown as GameState['military']['formations'][string];
+    }
+}
+
 describe('Federation / Western Bosnia operation opportunity catalog', () => {
     it('exposes Mistral 2 through its family export and the canonical catalog', () => {
         expect(FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES).toEqual([MISTRAL_2_95_OPPORTUNITY]);
@@ -228,6 +296,23 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
             expect((state.military.operation_opportunities ?? [])
                 .find(p => p.opportunity_id === 'mistral_2_95')).toBeUndefined();
         }
+    });
+
+    it('requires VRS Krajina trajectory weakness when defender-corps evidence is available', () => {
+        const healthyDefender = buildMistralState({ turn: 180 });
+        addVrsKrajinaDefenderCorps(healthyDefender);
+        runOpportunityEvaluationStep(healthyDefender, 180);
+        expect((healthyDefender.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'mistral_2_95')).toBeUndefined();
+
+        const degradedDefender = buildMistralState({ turn: 180 });
+        addVrsKrajinaDefenderCorps(degradedDefender, { degraded: true, equipmentMultiplier: 0.70 });
+        runOpportunityEvaluationStep(degradedDefender, 180);
+        const proposal = (degradedDefender.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'mistral_2_95');
+        expect(proposal).toBeDefined();
+        expect(proposal!.last_axis_evaluation.find(a => a.axis === 'enemy_weakness')?.green)
+            .toBe(true);
     });
 
     it('spawns Mistral 2 as a multi-axis opportunity through the canonical path', () => {

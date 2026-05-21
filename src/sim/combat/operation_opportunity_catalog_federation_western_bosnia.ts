@@ -18,10 +18,13 @@ import type {
 } from './operation_opportunities.js';
 import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { computeCorpsOperationReadiness } from './corps_operation_readiness.js';
+import { evaluateDefenderTrajectoryWeakness } from './operation_opportunity_defender_weakness.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'hvo_main_staff';
 const SECONDARY_CORPS = 'hvo_tomislavgrad';
+const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
+const MISTRAL_DEFENDER_WEAKNESS_FLOOR = 0.40;
 
 const STAGING_LIVNO_MISI = 'op:livno:misi_2';
 const STAGING_LIVNO = 'op:livno:livno_2';
@@ -198,7 +201,7 @@ const commanderConfidenceMistral: AxisPredicate = (state) => {
     return { green: true, reason: 'HVO/HV commander state present for Mistral 2' };
 };
 
-const enemyWeaknessMistral: AxisPredicate = (state) => {
+const enemyWeaknessMistral: AxisPredicate = (state, turn) => {
     let enemyHeld = 0;
     for (const osid of MISTRAL_TARGETS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
@@ -206,6 +209,16 @@ const enemyWeaknessMistral: AxisPredicate = (state) => {
     }
     if (enemyHeld === 0) {
         return { green: false, reason: 'no Mistral 2 objectives remain in enemy hands' };
+    }
+    const trajectory = evaluateDefenderTrajectoryWeakness(state, {
+        defenderCorpsId: VRS_KRAJINA_DEFENDER_CORPS,
+        defenderFaction: 'RS',
+        currentTurn: turn,
+        weaknessFloor: MISTRAL_DEFENDER_WEAKNESS_FLOOR,
+        label: 'VRS Krajina',
+    });
+    if (trajectory.available) {
+        return { green: trajectory.green, reason: trajectory.reason };
     }
     return { green: true, reason: 'Mistral 2 objectives remain in enemy hands' };
 };

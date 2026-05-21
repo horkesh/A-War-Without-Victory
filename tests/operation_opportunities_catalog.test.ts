@@ -412,6 +412,74 @@ function buildState(opts: BuildOpts): GameState {
     } as unknown as GameState;
 }
 
+function addVrsKrajinaDefenderCorps(
+    state: GameState,
+    opts: { degraded?: boolean; equipmentMultiplier?: number } = {},
+): void {
+    const degraded = opts.degraded ?? false;
+    state.factions.push({
+        id: 'RS',
+        capability_profile: {
+            training_quality: degraded ? 0.25 : 0.75,
+            organizational_maturity: degraded ? 0.25 : 0.75,
+            equipment_access: degraded ? 0.35 : 0.8,
+            equipment_operational: degraded ? 0.35 : 0.8,
+            doctrine_effectiveness: { ATTACK: degraded ? 0.3 : 0.75 },
+        },
+    } as unknown as GameState['factions'][number]);
+    state.military.corps_command ??= {};
+    state.military.corps_command.vrs_2nd_krajina = {
+        command_span: 7,
+        subordinate_count: 3,
+        og_slots: 0,
+        active_ogs: [],
+        corps_exhaustion: degraded ? 70 : 5,
+        stance: 'defensive',
+        active_operations: [],
+        commander_state: {
+            current_plan: null,
+            decision_trace: null,
+            operation_history: degraded
+                ? [
+                    { operation_name: 'Krajina Line', ended_turn: 170, outcome: 'failure' },
+                    { operation_name: 'Storm Spillover', ended_turn: 172, outcome: 'failure' },
+                ]
+                : [],
+        } as unknown as CorpsCommandState['commander_state'],
+    };
+    state.military.faction_officer_maturity = {
+        ...(state.military.faction_officer_maturity ?? {}),
+        RS: degraded ? 1.4 : 4.2,
+    };
+    if (typeof opts.equipmentMultiplier === 'number') {
+        state.military.equipment_quality_modifiers = [{
+            faction: 'RS',
+            multiplier: opts.equipmentMultiplier,
+            expires_turn: 999,
+        }];
+    }
+    for (let i = 0; i < 3; i++) {
+        state.military.formations[`rs_krajina_test_${i}`] = {
+            id: `rs_krajina_test_${i}`,
+            name: `RS Krajina test ${i}`,
+            kind: 'brigade',
+            status: 'active',
+            faction: 'RS',
+            corps_id: 'vrs_2nd_krajina',
+            strength: degraded ? 650 : 1800,
+            officer_quality: degraded ? 0.28 : 0.78,
+            cohesion: degraded ? 22 : 78,
+            morale: degraded ? 18 : 76,
+            composition: {
+                tanks: degraded ? 0 : 2,
+                artillery: degraded ? 1 : 4,
+                tank_condition: { operational: degraded ? 0 : 2 },
+                artillery_condition: { operational: degraded ? 1 : 4 },
+            },
+        } as unknown as GameState['military']['formations'][string];
+    }
+}
+
 // ─── 1. Shared parameterized skeleton (2 tests × 7 entries = 14) ────────────
 //
 // Collapses the original per-entry 5-step shape (pre-window, post-window,
@@ -938,6 +1006,23 @@ describe('entry-specific: sana_95 family', () => {
         runOpportunityEvaluationStep(stateNothing, 180);
         expect((stateNothing.military.operation_opportunities ?? [])
             .find(p => p.opportunity_id === 'sana_95')).toBeUndefined();
+    });
+
+    it('requires VRS Krajina trajectory weakness when defender-corps evidence is available', () => {
+        const healthyDefender = buildState({ entry, turn: 180, operationStormTriggered: true });
+        addVrsKrajinaDefenderCorps(healthyDefender);
+        runOpportunityEvaluationStep(healthyDefender, 180);
+        expect((healthyDefender.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'sana_95')).toBeUndefined();
+
+        const degradedDefender = buildState({ entry, turn: 180, operationStormTriggered: true });
+        addVrsKrajinaDefenderCorps(degradedDefender, { degraded: true, equipmentMultiplier: 0.70 });
+        runOpportunityEvaluationStep(degradedDefender, 180);
+        const proposal = (degradedDefender.military.operation_opportunities ?? [])
+            .find(p => p.opportunity_id === 'sana_95');
+        expect(proposal).toBeDefined();
+        expect(proposal!.last_axis_evaluation.find(a => a.axis === 'enemy_weakness')?.green)
+            .toBe(true);
     });
 
     it('axis shape: parent has Krupa 2/6 + Bihac-Petrovac 3/12 (no Sanski-Most/Kljuc); follow-on owns Sanski-Most/Kljuc 4/13', () => {
