@@ -374,6 +374,10 @@ const OPS_MAP_RENDERER_AS_ANY_TAIL_FILES = [
     'src/ui/map/components/plan_ui/OpsMapRenderer.ts',
 ];
 
+const WARROOM_MOCK_STATE_STRICT_NULL_TAIL_FILES = [
+    'src/ui/warroom/warroom.ts',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1317,6 +1321,20 @@ describe('strict null inventory progress', () => {
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', OPS_MAP_RENDERER_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
+    });
+
+    it('cleans the warroom mock-state strict-null tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+
+        const anyCount = phaseCount(current, 'as_any_casts', WARROOM_MOCK_STATE_STRICT_NULL_TAIL_FILES);
+        const unknownCount = phaseCount(current, 'as_unknown_casts', WARROOM_MOCK_STATE_STRICT_NULL_TAIL_FILES);
+
+        expect(anyCount).toBe(0);
+        expect(unknownCount).toBe(0);
     });
 
     it('cleans the runtime non-null assertion tail slice', () => {

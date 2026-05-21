@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): clean Warroom mock-state casts
+
+**Type:** Strict-null cleanup. Warroom browser/dev fallback initializer refactor; no simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.
+
+**Why:** `src/ui/warroom/warroom.ts` still used three `as any` casts and one `as unknown as GameState` cast to assemble the legacy mock state fallback.
+
+**Change:** Imported `CURRENT_SCHEMA_VERSION`, typed `loadMockState(...)` phase input as `GameState['meta']['phase']`, and constructed typed `military`, `political`, and `displacement` domains before assigning the mock `GameState`. Added a strict-null progress assertion pinning `warroom.ts` at zero for both `as_any_casts` and `as_unknown_casts`.
+
+**Verification:** Red guard failed as expected before implementation (`expected 3 to be +0`); `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (82/82); `npm.cmd run typecheck` PASS; `npm.cmd run warroom:build` PASS with the existing loaders.gl browser-external warning. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 1`, `as_any_casts 147`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_STRICT_NULL_WARROOM_MOCK_STATE_TAIL.md`.
+
+---
 ## [2026-05-22] refactor(strict-null): clean OpsMapRenderer casts
 
 **Type:** Strict-null cleanup. UI map type-surface refactor; no operation-planning behavior, map layer IDs, source data, scenario behavior, save schema, or output tuning changed.

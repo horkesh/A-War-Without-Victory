@@ -1,4 +1,4 @@
-import type { FactionId, GameState } from '../../state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type FactionId, type GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';
 import { ModalManager } from './components/ModalManager.js';
 import { SettingsModal } from './components/SettingsModal.js';
@@ -144,15 +144,36 @@ class WarroomApp {
 
     }
 
-    async loadMockState(params?: { turn?: number; phase?: string; faction?: FactionId; politicalControllers?: Record<string, string | null> }) {
+    async loadMockState(params?: {
+        turn?: number;
+        phase?: GameState['meta']['phase'];
+        faction?: FactionId;
+        politicalControllers?: Record<string, string | null>;
+    }) {
         const politicalControllers = params?.politicalControllers ?? await this.loadInitialPoliticalControllers();
 
-        this.gameState = {
-            schema_version: 1,
+        const military: GameState['military'] = {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+        };
+        const political: GameState['political'] = {
+            political_controllers: politicalControllers,
+            municipalities: {},
+            negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+            ceasefire: {},
+            negotiation_ledger: [],
+            supply_rights: { corridors: [] },
+        };
+        const mockState: GameState = {
+            schema_version: CURRENT_SCHEMA_VERSION,
             meta: {
                 turn: params?.turn ?? 0,
                 seed: 'start_mock',
-                phase: (params?.phase as any) ?? 'peace',
+                phase: params?.phase ?? 'peace',
                 player_faction: params?.faction
             },
             factions: [
@@ -160,23 +181,11 @@ class WarroomApp {
                 { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null },
                 { id: 'HRHB', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], command_capacity: 0, negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }, declaration_pressure: 0, declared: false, declaration_turn: null }
             ],
-            military: {
-                formations: {},
-                front_segments: {},
-                front_posture: {},
-                front_posture_regions: {},
-                front_pressure: {},
-                militia_pools: {}
-            } as any,
-            political: {
-                political_controllers: politicalControllers,
-                municipalities: {},
-                negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-                ceasefire: {},
-                negotiation_ledger: [],
-                supply_rights: { corridors: [] }
-            } as any,
-        } as unknown as GameState;
+            military,
+            political,
+            displacement: {},
+        };
+        this.gameState = mockState;
 
         if (params?.turn === 30) {
             this.gameState.meta.scenario_start_date = { year: 1992, month: 4, day: 1 };
