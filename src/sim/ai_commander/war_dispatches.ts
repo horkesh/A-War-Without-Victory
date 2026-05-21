@@ -14,6 +14,30 @@ import type { GameState } from '../../state/game_state.js';
 import type { AiClient } from './ai_client.js';
 import type { AiPrompt } from './ai_types.js';
 import { AI_TEMPERATURE } from './ai_config.js';
+import { asArray, asRecord } from '../../state/schema_validators.js';
+
+// BATCH C §3.11: war_dispatches is cosmetic-only (never feeds back into sim
+// state). `enclave_state` and `control_events` are read for monthly dispatch
+// flavor; both fields are not yet declared at the typed engine state shape,
+// so each helper accepts the typed parent slot (`MilitaryState` /
+// `PoliticalState`) as `unknown` and walks down via `asRecord` / `asArray`.
+// Plan §3.11 fallback semantics: tolerant-of-undefined consumers (no enclave
+// dispatch when slot is absent, recentBattleCount stays 0).
+function parseOptionalEnclaveState(military: unknown): Record<string, { status?: string }> | undefined {
+    const parent = asRecord(military);
+    if (parent === null) return undefined;
+    const subobject = asRecord(parent.enclave_state);
+    if (subobject === null) return undefined;
+    return subobject as Record<string, { status?: string }>;
+}
+
+function parseOptionalControlEvents(political: unknown): Array<{ turn: number; mechanism: string }> | undefined {
+    const parent = asRecord(political);
+    if (parent === null) return undefined;
+    const arr = asArray(parent.control_events);
+    if (arr === null) return undefined;
+    return arr as Array<{ turn: number; mechanism: string }>;
+}
 
 // --- Types ---
 
@@ -190,7 +214,7 @@ export async function generateWarDispatch(
 
     // --- Sieged cities ---
     const siegedCities = ['Sarajevo'];
-    const enclaveState = (state.military as unknown as Record<string, unknown>).enclave_state as Record<string, { status?: string }> | undefined;
+    const enclaveState = parseOptionalEnclaveState(state.military);
     if (enclaveState) {
         for (const [name, enc] of Object.entries(enclaveState)) {
             if (enc?.status && enc.status !== 'relief' && name !== 'sarajevo') {
@@ -203,7 +227,7 @@ export async function generateWarDispatch(
     }
 
     // --- Recent battle count (from control events as proxy) ---
-    const controlEvents = (state.political as unknown as Record<string, unknown>)?.control_events as Array<{ turn: number; mechanism: string }> | undefined;
+    const controlEvents = parseOptionalControlEvents(state.political);
     let recentBattleCount = 0;
     if (controlEvents) {
         recentBattleCount = controlEvents.filter(e => e.turn >= turn - 4).length;
