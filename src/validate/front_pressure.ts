@@ -1,20 +1,26 @@
 import { GameState } from '../state/game_state.js';
 import { ValidationIssue } from './validate.js';
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
 export function validateFrontPressure(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const rec = (state as any)?.front_pressure as Record<string, any> | undefined;
-    if (!rec || typeof rec !== 'object') return issues;
+    const stateRecord = state as GameState & { front_pressure?: unknown };
+    const rec = asRecord(stateRecord.front_pressure);
+    if (!rec) return issues;
 
-    const currentTurn = Number.isInteger(state?.meta?.turn) ? (state.meta.turn as number) : null;
-    const segmentKeys = new Set(Object.keys((state as any)?.military.front_segments ?? {}));
+    const currentTurn = typeof state?.meta?.turn === 'number' && Number.isInteger(state.meta.turn) ? state.meta.turn : null;
+    const segmentKeys = new Set(Object.keys(state.military?.front_segments ?? {}));
 
     const keys = Object.keys(rec).sort();
     for (const key of keys) {
         const p = rec[key];
         const basePath = `front_pressure.${key}`;
-        if (!p || typeof p !== 'object') continue;
+        const pressureRecord = asRecord(p);
+        if (!pressureRecord) continue;
 
         // edge_id canonical a__b with a<b
         if (typeof key !== 'string' || !key.includes('__')) {
@@ -47,8 +53,8 @@ export function validateFrontPressure(state: GameState): ValidationIssue[] {
         }
 
         // value integer
-        const value = (p as any).value;
-        if (!Number.isInteger(value)) {
+        const value = pressureRecord.value;
+        if (typeof value !== 'number' || !Number.isInteger(value)) {
             issues.push({
                 severity: 'error',
                 code: 'front_pressure.value.invalid',
@@ -58,15 +64,15 @@ export function validateFrontPressure(state: GameState): ValidationIssue[] {
         }
 
         // max_abs integer >= abs(value)
-        const maxAbs = (p as any).max_abs;
-        if (!Number.isInteger(maxAbs) || maxAbs < 0) {
+        const maxAbs = pressureRecord.max_abs;
+        if (typeof maxAbs !== 'number' || !Number.isInteger(maxAbs) || maxAbs < 0) {
             issues.push({
                 severity: 'error',
                 code: 'front_pressure.max_abs.invalid',
                 path: `${basePath}.max_abs`,
                 message: 'max_abs must be an integer >= 0'
             });
-        } else if (Number.isInteger(value)) {
+        } else if (typeof value === 'number' && Number.isInteger(value)) {
             const absValue = Math.abs(value);
             if (maxAbs < absValue) {
                 issues.push({
@@ -79,8 +85,8 @@ export function validateFrontPressure(state: GameState): ValidationIssue[] {
         }
 
         // last_updated_turn <= state.meta.turn
-        const lastUpdatedTurn = (p as any).last_updated_turn;
-        if (Number.isInteger(lastUpdatedTurn) && currentTurn !== null) {
+        const lastUpdatedTurn = pressureRecord.last_updated_turn;
+        if (typeof lastUpdatedTurn === 'number' && Number.isInteger(lastUpdatedTurn) && currentTurn !== null) {
             if (lastUpdatedTurn > currentTurn) {
                 issues.push({
                     severity: 'error',

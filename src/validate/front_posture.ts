@@ -1,6 +1,10 @@
 import { GameState } from '../state/game_state.js';
 import { ValidationIssue } from './validate.js';
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
 function isPostureLevel(value: unknown): boolean {
     return value === 'hold' || value === 'probe' || value === 'push';
 }
@@ -8,23 +12,26 @@ function isPostureLevel(value: unknown): boolean {
 export function validateFrontPosture(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const fp = (state as any)?.front_posture as Record<string, any> | undefined;
-    if (!fp || typeof fp !== 'object') return issues;
+    const stateRecord = state as GameState & { front_posture?: unknown };
+    const fp = asRecord(stateRecord.front_posture);
+    if (!fp) return issues;
 
-    const segmentKeys = new Set(Object.keys((state as any)?.military.front_segments ?? {}));
+    const segmentKeys = new Set(Object.keys(state.military?.front_segments ?? {}));
     const factionIds = Object.keys(fp).sort();
 
     for (const factionId of factionIds) {
         const faction = fp[factionId];
-        if (!faction || typeof faction !== 'object') continue;
-        const assignments = (faction as any).assignments as Record<string, any> | undefined;
-        if (!assignments || typeof assignments !== 'object') continue;
+        const factionRecord = asRecord(faction);
+        if (!factionRecord) continue;
+        const assignments = asRecord(factionRecord.assignments);
+        if (!assignments) continue;
 
         const edgeIds = Object.keys(assignments).sort();
         for (const edge_id of edgeIds) {
             const a = assignments[edge_id];
             const basePath = `front_posture.${factionId}.assignments.${edge_id}`;
-            if (!a || typeof a !== 'object') continue;
+            const assignmentRecord = asRecord(a);
+            if (!assignmentRecord) continue;
 
             // edge_id canonical format a__b with a<b
             if (typeof edge_id !== 'string' || !edge_id.includes('__')) {
@@ -57,7 +64,8 @@ export function validateFrontPosture(state: GameState): ValidationIssue[] {
             }
 
             // assignment.edge_id consistency (error if mismatched)
-            if (typeof (a as any).edge_id === 'string' && (a as any).edge_id !== edge_id) {
+            const assignmentEdgeId = assignmentRecord.edge_id;
+            if (typeof assignmentEdgeId === 'string' && assignmentEdgeId !== edge_id) {
                 issues.push({
                     severity: 'error',
                     code: 'front_posture.edge_id.mismatch',
@@ -67,7 +75,7 @@ export function validateFrontPosture(state: GameState): ValidationIssue[] {
             }
 
             // posture value must be valid (normalize step may fix; validate should error)
-            const posture = (a as any).posture;
+            const posture = assignmentRecord.posture;
             if (!isPostureLevel(posture)) {
                 issues.push({
                     severity: 'error',
@@ -78,8 +86,8 @@ export function validateFrontPosture(state: GameState): ValidationIssue[] {
             }
 
             // weight integer >= 0
-            const weight = (a as any).weight;
-            if (!Number.isInteger(weight) || weight < 0) {
+            const weight = assignmentRecord.weight;
+            if (typeof weight !== 'number' || !Number.isInteger(weight) || weight < 0) {
                 issues.push({
                     severity: 'error',
                     code: 'front_posture.weight.invalid',
