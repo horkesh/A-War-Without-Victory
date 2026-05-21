@@ -91,28 +91,28 @@ async function main(): Promise<void> {
         if (!seg || typeof seg !== 'object') continue;
         totalSegments += 1;
 
-        const isActive = (seg as any).active === true;
+        const isActive = seg.active === true;
         if (isActive) activeSegments += 1;
         else inactiveSegments += 1;
 
-        const max_active_streak_all = stableNumber((seg as any).max_active_streak) ?? 0;
+        const max_active_streak_all = stableNumber(seg.max_active_streak) ?? 0;
         if (max_active_streak_all > longestEverStreak) longestEverStreak = max_active_streak_all;
-        const max_friction_all = stableNumber((seg as any).max_friction) ?? 0;
+        const max_friction_all = stableNumber(seg.max_friction) ?? 0;
         if (max_friction_all > highestEverFriction) highestEverFriction = max_friction_all;
 
         if (!isActive) continue;
 
-        const pressureRec = (state as any).front_pressure?.[edge_id] as any;
+        const pressureRec = state.military.front_pressure?.[edge_id];
         const pressure_value = stableNumber(pressureRec?.value) ?? 0;
         const pressure_max_abs = stableNumber(pressureRec?.max_abs) ?? 0;
         const absPressure = Math.abs(pressure_value);
         if (absPressure > highestAbsPressureCurrent) highestAbsPressureCurrent = absPressure;
 
-        const since_turn = stableNumber((seg as any).since_turn);
-        const last_active_turn = stableNumber((seg as any).last_active_turn);
-        const active_streak = stableNumber((seg as any).active_streak) ?? 0;
+        const since_turn = stableNumber(seg.since_turn);
+        const last_active_turn = stableNumber(seg.last_active_turn);
+        const active_streak = stableNumber(seg.active_streak) ?? 0;
         const max_active_streak = max_active_streak_all;
-        const friction = stableNumber((seg as any).friction) ?? 0;
+        const friction = stableNumber(seg.friction) ?? 0;
         const max_friction = max_friction_all;
         if (since_turn === null || last_active_turn === null) continue;
 

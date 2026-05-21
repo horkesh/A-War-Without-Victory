@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean CLI front-state diagnostic casts
+
+**Type:** Diagnostic CLI strict-null cleanup plus stale diagnostic-source fix. Touched `src/cli/sim_front_state.ts`, `tests/strict_null_inventory_progress.test.ts`, and docs only. No simulation turn behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `sim_front_state.ts` still used nine `as_any_casts` to read fields already typed on `FrontSegmentState` / `FrontPressureState`. One cast also hid a stale top-level `state.front_pressure` lookup; canonical pressure lives at `state.military.front_pressure`, so the CLI could report zero current pressure even when the save contained military front-pressure entries.
+
+**Change:** Read segment counters directly from the typed `state.military.front_segments` records, read pressure from `state.military.front_pressure?.[edge_id]`, and added an inventory progress assertion pinning the diagnostic CLI at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 188 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green inventory test confirmed the new assertion failed at 9 before the production edit and passed after; `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (55/55); `npm.cmd run sim:frontstate -- data\derived\startup\apr_1992_initial_save.json --top 1` PASS; `npm.cmd run sim:frontstate -- data\derived\latest_run_final_save.json --top 1` PASS. Baselines not run: diagnostic CLI only, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] fix(ui): save AI commander settings through typed IPC bridge
 
 **Type:** UI IPC bug fix plus strict-null inventory guard/docs reconciliation. Touched `src/ui/map/components/AiSettingsPanel.tsx` and tests/docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, canon text, or `FORAWWV.md` changed.
