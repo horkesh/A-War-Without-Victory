@@ -219,7 +219,7 @@ export async function loadMunicipalityControllerMapping(
 
     try {
         const content = await readFile(path, 'utf8');
-        const parsed = JSON.parse(content) as unknown;
+        const parsed: unknown = JSON.parse(content);
 
         if (!isRecord(parsed) || typeof parsed.version !== 'string' || !isRecord(parsed.mappings)) {
             throw new Error(`Invalid municipality controller mapping format: expected { version: string, mappings: Record<string, FactionId|null> }`);
@@ -251,7 +251,7 @@ export async function loadSettlementControllerOverrides(
     const path = resolve(overridesPath ?? 'data/source/settlement_political_controllers_overrides.json');
     try {
         const content = await readFile(path, 'utf8');
-        const parsed = JSON.parse(content) as unknown;
+        const parsed: unknown = JSON.parse(content);
 
         if (!isRecord(parsed) || typeof parsed.version !== 'string' || !isRecord(parsed.overrides)) {
             throw new Error(
@@ -284,13 +284,24 @@ export async function loadSettlementsInitialMaster(
 ): Promise<SettlementsInitialMaster> {
     const path = resolve(masterPath ?? 'data/source/settlements_initial_master.json');
     const content = await readFile(path, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
-    if (!isRecord(parsed) || !Array.isArray(parsed.settlements)) {
+    const parsed: unknown = JSON.parse(content);
+    if (!isSettlementsInitialMaster(parsed)) {
         throw new Error(
             'Invalid settlements initial master: expected { settlements: Array<{ sid, political_controller, ... }> }'
         );
     }
-    return parsed as unknown as SettlementsInitialMaster;
+    return parsed;
+}
+
+// BATCH C §3.3: type-predicate guard for SettlementsInitialMaster. Narrows
+// `unknown` through `isRecord` + array shape check on `settlements` so the
+// caller can return the narrowed value without an extra `unknown` widening
+// cast. Field-by-field validation of each entry is intentionally deferred
+// to the downstream consumers (matching pre-Batch-C behavior).
+function isSettlementsInitialMaster(value: unknown): value is SettlementsInitialMaster {
+    if (!isRecord(value)) return false;
+    const settlements = value.settlements;
+    return Array.isArray(settlements);
 }
 
 /**
@@ -477,7 +488,7 @@ export async function loadCanonicalMunicipalityControllers1990(
 ): Promise<Record<string, PoliticalControllerId>> {
     const path = resolve(mappingPath ?? 'data/derived/municipality_political_controllers_1990.json');
     const content = await readFile(path, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
 
     if (!isRecord(parsed) || !isRecord(parsed.controllers_by_mun1990_id)) {
         throw new Error(
@@ -510,7 +521,7 @@ export async function loadInitialMunicipalityControllers1990(
 ): Promise<Record<string, PoliticalControllerId>> {
     const path = resolve(mappingPath ?? 'data/source/municipalities_1990_initial_political_controllers.json');
     const content = await readFile(path, 'utf8');
-    const parsed = JSON.parse(content) as unknown;
+    const parsed: unknown = JSON.parse(content);
 
     if (!isRecord(parsed) || !isRecord(parsed.controllers_by_mun1990_id)) {
         throw new Error(
@@ -867,7 +878,7 @@ export async function initializePoliticalControllers(
     if (mappingPath) {
         const path = resolve(mappingPath);
         const content = await readFile(path, 'utf8');
-        const parsed = JSON.parse(content) as unknown;
+        const parsed: unknown = JSON.parse(content);
         if (isMun1990OnlyControlFile(parsed)) {
             const munResult = await applyMunicipalityControllersFromMun1990Only(state, settlementGraph, path);
             if (munResult.applied && initOptions?.operationalToCanonical) {
