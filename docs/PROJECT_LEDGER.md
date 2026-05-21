@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean event effect and UI mock unknown tails
+
+**Type:** Sim event typing plus UI test/mock strict-null cleanup. Touched `src/sim/events/apply_effects.ts`, `src/ui/map/__mocks__/loadedGameState.ts`, strict-null progress test, and docs only. No scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Two residual `as_unknown_casts` were safe to remove without changing real scenario state shape: the negotiation-capital event writer used an `unknown` bridge only to update dynamic numeric capital/dimension keys, and the UI loaded-state mock used `as unknown as LoadedGameState` because it omitted required empty arrays.
+
+**Change:** Replaced the event writer bridge with a typed dynamic record view that preserves the existing "only mutate present numeric keys" behavior, and completed the mock with `historicalEventsByTurn: []` and `turnSummaries: []` so it can return `LoadedGameState` directly. Added an inventory assertion pinning both files at zero `as_unknown_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 4 / 182 / 10 / 36 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green strict-null inventory assertion failed at 2 before the source edit and passed after; `npm.cmd run typecheck` PASS; focused event/UI/inventory vitest PASS (`tests/consequence_substrate_inventory_diagnostic.test.ts`, `tests/divergence_events_consequences.test.ts`, `tests/divergence_events_wave_5.test.ts`, `tests/divergence_events_wave_8.test.ts`, `tests/strict_null_inventory_progress.test.ts`, then the expanded UI mock rerun, 98/98); `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`).
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean warroom viewer and diplomacy overview tails
 
 **Type:** UI-only strict-null cleanup in the standalone warroom map viewer and diplomacy overview. Touched `src/ui/warroom/map_viewer_app.ts`, `src/ui/map/components/DiplomacyOverview.tsx`, strict-null progress test, and docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.

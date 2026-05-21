@@ -62,6 +62,7 @@ export function makeMockLoadedGameState(): LoadedGameState {
     battlesByOsid: {},
     movementsByOsid: {},
     supplyTransitionsByOsid: {},
-    controlEventsByOsid: {},
-  } as unknown as LoadedGameState;
+    historicalEventsByTurn: [],
+    turnSummaries: [],
+  };
 }

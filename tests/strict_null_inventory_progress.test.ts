@@ -314,6 +314,11 @@ const UI_WARROOM_DIPLOMACY_STRICT_NULL_TAIL_FILES = [
     'src/ui/map/components/DiplomacyOverview.tsx',
 ];
 
+const EVENT_EFFECTS_LOADED_STATE_UNKNOWN_TAIL_FILES = [
+    'src/sim/events/apply_effects.ts',
+    'src/ui/map/__mocks__/loadedGameState.ts',
+];
+
 // The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
 // count at exactly 10 retained escapes documented in
 // `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
@@ -1103,6 +1108,16 @@ describe('strict null inventory progress', () => {
             0
         );
         expect(total).toBe(0);
+    });
+
+    it('cleans the event-effects and loaded-state mock unknown-cast tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', EVENT_EFFECTS_LOADED_STATE_UNKNOWN_TAIL_FILES);
+        expect(unknownCount).toBe(0);
     });
 
     it('cleans the Batch 49 AI commander response_parser schema-validation slice', () => {

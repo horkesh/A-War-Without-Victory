@@ -273,9 +273,12 @@ function applyNegotiationBreakdown(
 ): void {
     const neg = state.military.negotiation;
     if (!neg?.capital?.[faction]) return;
-    const cap = neg.capital[faction] as unknown as Record<string, number>;
+    const cap = neg.capital[faction] as typeof neg.capital[typeof faction] & Record<string, unknown>;
     if (dimension in cap) {
-        cap[dimension] = (cap[dimension] ?? 0) + delta;
+        const current = cap[dimension];
+        if (typeof current === 'number') {
+            cap[dimension] = current + delta;
+        }
     }
 }
 
