@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { strictCompare } from '../state/validateGameState.js';
+import { asRecord } from '../state/schema_validators.js';
 import { stableStringify } from '../utils/stable_json.js';
 import type { Scenario, ScenarioAction, ScenarioTurn } from './scenario_types.js';
 import type { FactionId } from '../state/game_state.js';
@@ -76,8 +77,8 @@ export function normalizeActions(actions: ScenarioAction[]): ScenarioAction[] {
  */
 function normalizePrerequisites(raw: unknown): Scenario['prerequisites'] {
     if (!Array.isArray(raw)) return undefined;
-    const list = (raw as unknown[])
-        .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+    const list = raw
+        .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
         .map((x) => x.trim());
     const seen = new Set<string>();
     const out: string[] = [];
@@ -144,8 +145,8 @@ function normalizeVictoryConditions(raw: unknown): Scenario['victory_conditions'
                 ? Math.max(0, v.max_exhaustion)
                 : undefined;
         const required_settlements_all = Array.isArray(v.required_settlements_all)
-            ? (v.required_settlements_all as unknown[])
-                .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+            ? v.required_settlements_all
+                .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
                 .map((x) => x.trim())
                 .sort(strictCompare)
             : undefined;
@@ -234,8 +235,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             : undefined;
     let turns: ScenarioTurn[] = Array.isArray(o.turns) ? (o.turns as ScenarioTurn[]) : [];
     turns = turns.map((t) => {
-        const row = t as unknown as Record<string, unknown>;
-        if (t == null || typeof row !== 'object') throw new Error('Each turn must be an object');
+        const row = asRecord(t);
+        if (row === null) throw new Error('Each turn must be an object');
         const week_index = typeof row.week_index === 'number'
             ? Math.floor(row.week_index as number)
             : undefined;
@@ -243,7 +244,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             throw new Error('Each turn must have week_index (integer)');
         }
         let actions: ScenarioAction[] = Array.isArray(row.actions)
-            ? (row.actions as unknown[]).map(normalizeAction)
+            ? row.actions.map(normalizeAction)
             : [];
         actions = normalizeActions(actions);
         return { week_index, actions };
@@ -300,8 +301,8 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? Math.max(-1, Math.min(1, o.init_alliance_rbih_hrhb))
             : undefined;
     const init_mixed_municipalities = Array.isArray(o.init_mixed_municipalities)
-        ? (o.init_mixed_municipalities as unknown[])
-            .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+        ? o.init_mixed_municipalities
+            .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
             .map((x) => x.trim())
             .sort(strictCompare)
         : undefined;
@@ -358,8 +359,8 @@ export function normalizeScenario(raw: unknown): Scenario {
         const result: Record<string, string[]> = {};
         for (const [k, v] of Object.entries(raw as Record<string, unknown>).sort(([a], [b]) => strictCompare(a, b))) {
             if (typeof k === 'string' && Array.isArray(v)) {
-                const osids = (v as unknown[])
-                    .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+                const osids = v
+                    .filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0)
                     .map((x) => x.trim())
                     .sort(strictCompare);
                 if (osids.length > 0) result[k] = osids;
@@ -380,7 +381,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         const result: Record<string, string[]> = {};
         for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
             if (typeof k === 'string' && Array.isArray(v)) {
-                const osids = (v as unknown[]).filter((x): x is string => typeof x === 'string').sort();
+                const osids = v.filter((x: unknown): x is string => typeof x === 'string').sort();
                 if (osids.length > 0) result[k] = osids;
             }
         }
@@ -549,7 +550,7 @@ export function normalizeScenario(raw: unknown): Scenario {
  */
 export async function loadScenario(path: string): Promise<Scenario> {
     const content = await readFile(path, 'utf8');
-    const raw = JSON.parse(content) as unknown;
+    const raw: unknown = JSON.parse(content);
     return normalizeScenario(raw);
 }
 
