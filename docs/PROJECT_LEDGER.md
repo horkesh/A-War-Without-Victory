@@ -29,6 +29,22 @@
 **Artifacts:** `docs/40_reports/implemented/20260522_STRICT_NULL_OPS_MAP_RENDERER_AS_ANY.md`.
 
 ---
+## [2026-05-21] feat(scenario): Tier 1 painted-target anchor commissioning + APWB cut decision
+
+**Type:** Multi-lane planning + Tier 1 scenario/test landing + painted-map repaint. Touched `src/scenario/historical_anchors.ts` (extended in-place), new `data/scenarios/apr1992_definitive_156w.json`, new `tools/diagnostics/painted_target_anomaly_fix.cjs`, new `tests/scenario_historical_painted_anchors.test.ts`, extended `tests/painted_control_targets.test.ts`, and three `data/source/calibration/painted_control_*.json` files (1 cell each). No `src/sim/*` edits; no `FORAWWV.md` edits.
+
+**Why:** Existing calibration anchors covered only Dec 1992 (27 OSIDs in `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992`). The simulation runs to w188 (Oct 1995) but late-war fidelity (Apr 1994 / Apr 1995 / Oct 1995 painted targets) was unmeasured. Last painted-vs-sim diagnostics were n1597-n1599 (~4 weeks stale).
+
+**Change:** A six-specialist commissioning wave produced citation-backed anchor proposals across four painted-target epochs (`/historian` 33 events + ~162 Type-3 OSIDs; `/balkan-battlegrounds-historical-extractor` 10 HIGH + 1 MED Krajina flips + 4 ops-catalog gaps; `/scenario-creator-runner-tester` 12 Type-1 + 40 Type-5 bands with 6/12 failing >5pp; `/war-or-game` 13-mechanic engine gap matrix; `/canon-compliance-reviewer` 246 event IDs inventoried + 4 XOR pairs; `/operations-expert` 4 ops-catalog gaps with 35 orphaned OSIDs + correction to war-or-game's joint-ops claim). A research memo resolved all 10 plan open questions; Tier 1 was landed (47 new contract tests + 5 repaint regression assertions). Painted-map anomalies repainted: `op:gorazde:gorazde_2` RS→RBiH at apr1994/apr1995/oct1995; `op:rogatica:zepa_2` at oct1995 was already RS. A separate APWB cut plan was authored to remove the two 5th-Corps APWB ops + `targets_friendly_overrides` substrate (~500 lines), replaced with consequence-debuff pair using existing faction-scoped effect kinds (Path A). Cut plan §6 stop-gate pre-cleared.
+
+**Finding:** Tier 1 wiring engineering-complete and contract-verified; runtime evaluation against scenario final-saves is a deliberately-deferred follow-on. 6 of 12 SCRT-proposed area-share bands fail by >5pp under current engine — diagnostic-only until Issue #37 + 4 BB ops-catalog gaps close.
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/scenario_historical_painted_anchors.test.ts tests/painted_control_targets.test.ts tests/scenario_anchor_contract.test.ts --reporter=dot` PASS (59/59 in 1.53s); painted-map repaint counts verified (apr1994 RS 412→411 RBiH 233→234; apr1995 RS 393→392 RBiH 240→241; oct1995 RS 320→319 RBiH 285→286). No `src/sim/combat/*` edits.
+
+**Artifacts:** `docs/plans/2026-05-21-{tier1-painted-target-anchors,apwb-cut-and-debuff-replacement}-plan.md`; `docs/40_reports/audits/20260521_{HISTORIAN_PAINTED_TARGET_ANCHOR_PROPOSALS,BB_KRAJINA_COLLAPSE_ANCHORS,SCRT_PAINTED_TARGET_BAND_ANCHORS,WAR_OR_GAME_ANCHOR_REVIEW_CRITERIA,CANON_COMPLIANCE_ANCHOR_FRAME,OPERATIONS_EXPERT_BB_CODE_GAPS,PLAN_OPEN_QUESTIONS_RESEARCH,APWB_CUT_SUBSTRATE_CONSUMER_PRECLEAR}.md`; `src/scenario/historical_anchors.ts`; `tests/scenario_historical_painted_anchors.test.ts`; `tools/diagnostics/painted_target_anomaly_fix.cjs`; `data/scenarios/apr1992_definitive_156w.json`.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean entrypoint initializer casts
 
 **Type:** Strict-null cleanup and smoke harness repair. Entrypoint initializer refactor; no live gameplay entrypoint, scenario behavior, save schema, or output tuning changed.

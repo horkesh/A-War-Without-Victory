@@ -6,8 +6,8 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 320,
-      "RBiH": 285,
+      "RS": 319,
+      "RBiH": 286,
       "HRHB": 107
     },
     "source": "painted_control_targets"
@@ -251,7 +251,7 @@
     "op:gorazde:citluk_2": "RBiH",
     "op:gorazde:faocici_2": "RS",
     "op:gorazde:glamoc": "RBiH",
-    "op:gorazde:gorazde_2": "RS",
+    "op:gorazde:gorazde_2": "RBiH",
     "op:gorazde:hrancici": "RS",
     "op:gorazde:kamen": "RBiH",
     "op:gorazde:kola": "RBiH",

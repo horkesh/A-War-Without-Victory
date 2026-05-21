@@ -40,6 +40,40 @@ describe('painted control target tooling', () => {
     }
   });
 
+  // ─── Repaint regression assertions (2026-05-21) ────────────────────────
+  // Source: docs/40_reports/audits/20260521_PLAN_OPEN_QUESTIONS_RESEARCH.md Q1.4
+  // Tool: tools/diagnostics/painted_target_anomaly_fix.cjs
+  //
+  // Two anomalies repainted:
+  //   - op:gorazde:gorazde_2 -> RBiH at apr1994 / apr1995 / oct1995
+  //     (ICTY Karadžić TJ §3823+; BB1 p.187,448 — Goražde core held RBiH continuously)
+  //   - op:rogatica:zepa_2  -> RS  at oct1995 only
+  //     (ICTY Krstić TJ + Karadžić TJ §5662+ — Žepa fell 25 Jul 1995)
+  //
+  // The repaint is idempotent; these assertions guard against accidental reversion.
+
+  it('repaint regression: op:gorazde:gorazde_2 = RBiH at apr1994', () => {
+    expect(loadPaintedTarget('apr1994').control['op:gorazde:gorazde_2']).toBe('RBiH');
+  });
+
+  it('repaint regression: op:gorazde:gorazde_2 = RBiH at apr1995', () => {
+    expect(loadPaintedTarget('apr1995').control['op:gorazde:gorazde_2']).toBe('RBiH');
+  });
+
+  it('repaint regression: op:gorazde:gorazde_2 = RBiH at oct1995', () => {
+    expect(loadPaintedTarget('oct1995').control['op:gorazde:gorazde_2']).toBe('RBiH');
+  });
+
+  it('repaint regression: op:rogatica:zepa_2 = RS at oct1995', () => {
+    expect(loadPaintedTarget('oct1995').control['op:rogatica:zepa_2']).toBe('RS');
+  });
+
+  it('repaint regression: jan1993 anchors unchanged (Goražde + Žepa pre-repaint epochs)', () => {
+    const jan = loadPaintedTarget('jan1993').control;
+    expect(jan['op:gorazde:gorazde_2'], 'gorazde_2 in jan1993').toBe('RBiH');
+    expect(jan['op:rogatica:zepa_2'], 'zepa_2 in jan1993').toBe('RBiH');
+  });
+
   it('compare_painted_vs_sim accepts an explicit painted file path', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'awwv-painted-target-'));
     const runDir = path.join(tmp, 'run');
