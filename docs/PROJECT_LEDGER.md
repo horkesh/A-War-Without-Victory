@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean ForceReadiness UI casts
+
+**Type:** UI-only Army HQ strict-null cleanup. Touched `src/ui/map/components/army_hq/ForceReadiness.tsx`, strict-null progress test, and docs only. No simulation behavior, scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `ForceReadiness.tsx` retained two redundant `as_any_casts` to read fields already present on the UI read-model types: brigade `homeHops` and operation `participating_brigade_ids`.
+
+**Change:** Read `FormationView.homeHops` directly for the overextension count and `OperationView.participating_brigade_ids?.length` directly for active operation brigade count. Added an inventory assertion pinning the component at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 4 / 180 / 10 / 36 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** Red/green strict-null inventory assertion failed at 2 before the source edit and passed after; `npm.cmd run typecheck` PASS. Baselines not run: UI-only read-model consumer, no sim path.
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean event effect and UI mock unknown tails
 
 **Type:** Sim event typing plus UI test/mock strict-null cleanup. Touched `src/sim/events/apply_effects.ts`, `src/ui/map/__mocks__/loadedGameState.ts`, strict-null progress test, and docs only. No scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.

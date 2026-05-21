@@ -95,7 +95,7 @@ export function generateForceReadiness(
         const avgFatigue = corpsBrigades.reduce((s, b) => s + (b.fatigue ?? 0), 0) / corpsBrigades.length;
         const avgCohesion = corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length;
         const disruptedCount = corpsBrigades.filter(b => (b.disrupted_turns ?? 0) > 0).length;
-        const overextendedCount = corpsBrigades.filter(b => ((b as any).home_distance_hops ?? 0) >= 7).length;
+        const overextendedCount = corpsBrigades.filter(b => (b.homeHops ?? 0) >= 7).length;
 
         const activeOp = operations.find(op =>
             op.corps_id === corps.id && op.phase === 'execution',
@@ -116,7 +116,7 @@ export function generateForceReadiness(
             disruptedCount,
             overextendedCount,
             activeOpName: activeOp?.name,
-            activeOpBrigadeCount: activeOp ? (activeOp as any).participating_brigade_ids?.length : undefined,
+            activeOpBrigadeCount: activeOp?.participating_brigade_ids?.length,
             hasThreat,
             recommendation,
         });
