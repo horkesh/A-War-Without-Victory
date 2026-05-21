@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-21 (isolated-pocket location index)
+**Updated:** 2026-05-21 (cross-corps component edge index)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-21: Cross-corps component edge index (byte-identical)
+
+**Change:** `src/sim/combat/sector_territory.ts` `consolidateCrossCorpsFronts(...)` now traverses connected components with an index cursor instead of `queue.shift()`, and builds one per-component `componentEdgesByCorps` map while counting ownership. Minority-corps zero-edge and brigade-presence protection checks reuse that component edge list instead of rescanning all component edges per corps.
+
+**Byte-identity:** The post-change 40w profile produced the same deterministic artifacts as the OSID-to-corps prefilter baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, and `watched_operations.json` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_cross_corps_component_index_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** In the clean 94-invocation sidecar batch, recovery setup `:cross-corps-consolidation` drops from 278.967ms to 272.419ms. Build-faction front-edge consolidation drops for RS 131.084ms -> 124.293ms and RBiH 120.643ms -> 109.385ms, with HRHB effectively flat at 31.654ms -> 31.815ms. Parent recovery setup moved noisily upward at 873.043ms -> 887.333ms, so this is classified as a narrow child-bucket reduction rather than a total wall-clock win.
+
+**Report:** [implemented/20260521_CROSS_CORPS_COMPONENT_INDEX.md](implemented/20260521_CROSS_CORPS_COMPONENT_INDEX.md)
 
 ---
 

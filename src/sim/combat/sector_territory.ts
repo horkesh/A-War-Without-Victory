@@ -725,8 +725,9 @@ export function consolidateCrossCorpsFronts(
         const component: string[] = [];
         const queue = [seed];
         visited.add(seed);
-        while (queue.length > 0) {
-            const eid = queue.shift()!;
+        let qHead = 0;
+        while (qHead < queue.length) {
+            const eid = queue[qHead++]!;
             component.push(eid);
             for (const next of edgeAdj.get(eid) ?? []) {
                 if (visited.has(next)) continue;
@@ -737,9 +738,14 @@ export function consolidateCrossCorpsFronts(
 
         // Count edges per corps in this component
         const corpsCounts = new Map<FormationId, number>();
+        const componentEdgesByCorps = new Map<FormationId, string[]>();
         for (const eid of component) {
             const c = edgeToCorps.get(eid);
-            if (c) corpsCounts.set(c, (corpsCounts.get(c) ?? 0) + 1);
+            if (!c) continue;
+            corpsCounts.set(c, (corpsCounts.get(c) ?? 0) + 1);
+            let list = componentEdgesByCorps.get(c);
+            if (!list) { list = []; componentEdgesByCorps.set(c, list); }
+            list.push(eid);
         }
         if (corpsCounts.size <= 1) continue; // No split — single corps owns all
 
@@ -763,19 +769,18 @@ export function consolidateCrossCorpsFronts(
         // at Kiseljak) get drained edge-by-edge across multiple components until they
         // have zero sectors despite having active brigades at the front.
         const protectedCorps = new Set<FormationId>();
-        for (const [cid, countInComponent] of corpsCounts) {
+        for (const [cid, edgesForCorps] of componentEdgesByCorps) {
             if (cid === majorityCorps) continue;
             // (a) Zero-edge protection
             const remainingForCorps = corpsEdges.get(cid)?.length ?? 0;
-            if (remainingForCorps <= countInComponent) {
+            if (remainingForCorps <= edgesForCorps.length) {
                 protectedCorps.add(cid);
                 continue;
             }
             // (b) Brigade-presence protection: if ANY edge in this component
             // has a brigade of this corps stationed at its friendly OSID,
             // protect the entire corps in this component.
-            for (const eid of component) {
-                if (edgeToCorps.get(eid) !== cid) continue;
+            for (const eid of edgesForCorps) {
                 const meta = edgeMeta.get(eid);
                 if (!meta) continue;
                 const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;

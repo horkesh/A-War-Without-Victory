@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): index cross-corps component edges
+
+**Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** After the OSID-to-corps prefilter, `recoverDroppedFrontEdges:faction-front-claim-setup:cross-corps-consolidation` remained a measured child at 278.967ms / 282 calls. `consolidateCrossCorpsFronts(...)` used `queue.shift()` for component traversal and rescanned each component for every minority-corps protection check.
+
+**Change:** Replaced component BFS `queue.shift()` with an index cursor and built a per-component `componentEdgesByCorps` map while counting ownership. Protected-corps zero-edge and brigade-presence checks now iterate only the current corps' component edges; final reassignment still iterates the original component order.
+
+**Verification:** `npx.cmd vitest run tests/trnovo_kalinovik_sector_fix.test.ts tests/sector_partition_instrumentation.test.ts tests/sector_partition_buildCorpsFrontSectors_integration.test.ts tests/sector_frontline_truth.test.ts --reporter=dot` PASS (69/69); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_cross_corps_component_index_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`, `watched_operations.json`) are byte-identical at current final state hash `4368f50c00c464ad`. Clean sidecar comparison: recovery setup `:cross-corps-consolidation` 278.967ms -> 272.419ms; build-faction front-edge consolidation drops for RS and RBiH, HRHB is flat; recovery setup parent moved noisily upward and is not claimed as a wall-clock win.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_CROSS_CORPS_COMPONENT_INDEX.md`; `data/derived/_debug/sector_partition_perf_cross_corps_component_index_clean.jsonl`; `runs_perf/sector_reconstruction_cross_corps_component_index_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
 ## [2026-05-21] perf(sector): prefilter OSID-to-corps brigades
 
 **Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

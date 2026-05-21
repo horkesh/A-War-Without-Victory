@@ -45,6 +45,12 @@
 |---|---|---|
 | `mapOsidsToCorps(...)` repeated brigade filtering | Implemented as byte-identical performance reduction | Report: `docs/40_reports/implemented/20260521_OSID_TO_CORPS_PREFILTER.md`. `mapOsidsToCorps(...)` now reuses one sorted active same-faction combat-formation list and invocation-local corps membership sets. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. Recovery setup `:osid-to-corps` dropped 333.054ms -> 307.073ms. A byte-identical `ensureMinimumSectorCoverage(...)` set-cache experiment regressed and was reverted. |
 
+## Completed Sector Performance — Cross-corps component index
+
+| Lane | Status | Source |
+|---|---|---|
+| `consolidateCrossCorpsFronts(...)` component scans | Implemented as byte-identical performance reduction | Report: `docs/40_reports/implemented/20260521_CROSS_CORPS_COMPONENT_INDEX.md`. Cross-corps component traversal now uses an index cursor and a per-component `componentEdgesByCorps` map for protected-corps checks. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. Recovery setup `:cross-corps-consolidation` dropped 278.967ms -> 272.419ms, while parent recovery setup moved noisily upward and is not claimed as a wall-clock win. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |
