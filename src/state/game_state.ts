@@ -2022,6 +2022,10 @@ operation_opportunity_resolutions?: import('../sim/combat/operation_opportunitie
  *  or AAR linkage. Read by tools/diagnostics/opportunity_health_audit.cjs and
  *  any LANE-D-class stress audit. Bounded by len(catalog × in-window-turns). */
 operation_opportunity_diagnostics?: import('../sim/combat/operation_opportunities.js').OperationOpportunityIneligibilityDiagnostic[];
+/** Compact operation-opportunity lifecycle trace. Observability only; separates
+ *  in-window blocked, eligible, decision, spawn-failed, and no-offensive T3 rows
+ *  before late-war operation outcome tuning. */
+operation_opportunity_traces?: import('../sim/combat/operation_opportunities.js').OperationOpportunityTraceRow[];
 /** Army-level stance per faction. */
 army_stance?: Record<FactionId, ArmyStance>;
 /** OG activation orders (consumed once per turn). */

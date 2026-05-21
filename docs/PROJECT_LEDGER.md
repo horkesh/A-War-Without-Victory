@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] feat(diagnostics): persist opportunity lifecycle trace
+
+**Type:** Diagnostic state/output observability. Adds optional `state.military.operation_opportunity_traces`; no operation eligibility, operation decisions, scenario data, combat math, or tuning changed.
+
+**Why:** The late-war painted-target gap needs evidence separating catalog absence, eligibility blockers, proposal surfacing, acceptance, spawn failure, and launch before any Krajina-collapse outcome tuning.
+
+**Change:** Added `OperationOpportunityTraceRow` and deterministic lifecycle event ordering in `src/sim/combat/operation_opportunities.ts`; `runOpportunityEvaluationStep(...)` now appends `blocked`, `eligible`, and `expired` rows; `applyOpportunityDecision(...)` now appends decision/spawn rows. Added the optional field to `GameState` and regression tests for blocked/eligible trace rows plus approve/spawn trace rows.
+
+**Verification:** Red lifecycle tests failed before implementation because `operation_opportunity_traces` was undefined. Green verification: `npx.cmd vitest run tests/operation_opportunities_substrate.test.ts --reporter=dot` PASS (44/44); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS (all scenarios match); `npm.cmd run desktop:package:probe` PASS; `git diff --check` clean aside from the existing CRLF normalization warning on `src/sim/combat/operation_opportunities.ts`.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_OPPORTUNITY_LIFECYCLE_TRACE.md`.
+
+---
 ## [2026-05-22] docs(calibration): audit late-war force-trajectory gating
 
 **Type:** Read-only calibration/operations audit. No simulation behavior, scenario data, save schema, operation catalog data, or output tuning changed.

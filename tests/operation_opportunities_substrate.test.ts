@@ -1052,3 +1052,58 @@ describe('operation_opportunities — LANE E ineligible-skip diagnostics', () =>
         expect(state.military.operation_opportunity_resolutions ?? []).toHaveLength(0);
     });
 });
+
+describe('operation_opportunities - compact lifecycle trace', () => {
+    it('records blocked and eligible evaluation outcomes in one deterministic trace stream', () => {
+        const base = fixtureSana();
+        const blocked = {
+            ...base,
+            opportunity_id: 'blocked_fixture',
+            prerequisites: {
+                ...base.prerequisites,
+                logistics: 'required' as const,
+            },
+            evaluators: { ...base.evaluators, logistics: redAxis },
+        };
+        const eligible = { ...fixtureSana(), opportunity_id: 'eligible_fixture' };
+        const state = buildMinimalState(175);
+
+        runOpportunityEvaluationStep(state, 175, [eligible, blocked]);
+
+        expect(state.military.operation_opportunity_traces).toEqual([
+            {
+                turn: 175,
+                opportunity_id: 'blocked_fixture',
+                event: 'blocked',
+                failed_required_axes: [{ axis: 'logistics', reason: 'not yet' }],
+                failed_optional_axes: [],
+                optional_green_count: 1,
+                min_optional_axes: 0,
+            },
+            {
+                turn: 175,
+                opportunity_id: 'eligible_fixture',
+                event: 'eligible',
+                proposal_id: 'OPP_175_eligible_fixture',
+                optional_green_count: 2,
+                min_optional_axes: 0,
+            },
+        ]);
+    });
+
+    it('records approve launch outcome with spawned operation name', () => {
+        const def = fixtureSana();
+        const state = buildMinimalState(175);
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        applyOpportunityDecision(state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def]);
+
+        expect(state.military.operation_opportunity_traces?.at(-1)).toEqual({
+            turn: 175,
+            opportunity_id: def.opportunity_id,
+            event: 'approved',
+            proposal_id: 'OPP_175_fixture_sana_95',
+            executed_op_name: 'Fixture Sana',
+        });
+    });
+});

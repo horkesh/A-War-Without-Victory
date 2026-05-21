@@ -329,6 +329,51 @@ export interface OperationOpportunityIneligibilityDiagnostic {
     readonly min_optional_axes: number;
 }
 
+export type OperationOpportunityTraceEvent =
+    | 'blocked'
+    | 'eligible'
+    | 'expired'
+    | 'declined'
+    | 'delayed'
+    | 'redirected'
+    | 'under_resourced_approved'
+    | 'approved'
+    | 'spawn_failed'
+    | 't3_authorized_no_offensive';
+
+/**
+ * Compact opportunity lifecycle trace. Observability only: records enough to
+ * separate in-window blocked, surfaced, accepted, and spawn-failed outcomes
+ * before any late-war operation tuning.
+ */
+export interface OperationOpportunityTraceRow {
+    readonly turn: number;
+    readonly opportunity_id: string;
+    readonly event: OperationOpportunityTraceEvent;
+    readonly proposal_id?: string;
+    readonly failed_required_axes?: ReadonlyArray<{ readonly axis: PrereqAxis; readonly reason: string }>;
+    readonly failed_optional_axes?: ReadonlyArray<{ readonly axis: PrereqAxis; readonly reason: string }>;
+    readonly optional_green_count?: number;
+    readonly min_optional_axes?: number;
+    readonly executed_op_name?: string;
+    readonly redirect_variant_id?: string;
+}
+
+function opportunityTraceEventRank(event: OperationOpportunityTraceEvent): number {
+    switch (event) {
+        case 'blocked': return 0;
+        case 'eligible': return 1;
+        case 'delayed': return 2;
+        case 'declined': return 3;
+        case 'expired': return 4;
+        case 'redirected': return 5;
+        case 'under_resourced_approved': return 6;
+        case 't3_authorized_no_offensive': return 7;
+        case 'spawn_failed': return 8;
+        case 'approved': return 9;
+    }
+}
+
 /** Resolution log entry written when a proposal exits the queue. */
 export interface OperationOpportunityResolution {
     readonly proposal_id: string;
@@ -570,6 +615,7 @@ export function evaluateOperationOpportunities(
      * or already enqueued under the one-shot guard.
      */
     newDiagnostics: OperationOpportunityIneligibilityDiagnostic[];
+    newTraces: OperationOpportunityTraceRow[];
 } {
     // Defensive shallow clone of each proposal record so this evaluator is a
     // pure function of the snapshot at call time. The pipeline-step wrapper
@@ -618,6 +664,7 @@ export function evaluateOperationOpportunities(
 
     const newResolutions: OperationOpportunityResolution[] = [];
     const newDiagnostics: OperationOpportunityIneligibilityDiagnostic[] = [];
+    const newTraces: OperationOpportunityTraceRow[] = [];
 
     const sortedCatalog = [...catalog].sort((a, b) =>
         strictCompare(a.opportunity_id, b.opportunity_id));
@@ -657,6 +704,12 @@ export function evaluateOperationOpportunities(
                     response: 'expire',
                     response_turn: turn,
                 });
+                newTraces.push({
+                    turn,
+                    opportunity_id: live.opportunity_id,
+                    event: 'expired',
+                    proposal_id: live.proposal_id,
+                });
             }
             continue;
         }
@@ -684,13 +737,18 @@ export function evaluateOperationOpportunities(
                             else failedOptional.push({ axis: a.axis, reason: a.reason });
                         }
                     }
-                    newDiagnostics.push({
+                    const traceShape = {
                         turn,
                         opportunity_id: def.opportunity_id,
                         failed_required_axes: failedRequired,
                         failed_optional_axes: failedOptional,
                         optional_green_count: optionalGreen,
                         min_optional_axes: def.prerequisites.min_optional_axes,
+                    };
+                    newDiagnostics.push(traceShape);
+                    newTraces.push({
+                        ...traceShape,
+                        event: 'blocked',
                     });
                 }
             }
@@ -721,6 +779,18 @@ export function evaluateOperationOpportunities(
         working.push(fresh);
         seenOpportunityIds.add(def.opportunity_id);
         liveByOpportunityId.set(def.opportunity_id, fresh);
+        let optionalGreen = 0;
+        for (const a of axes) {
+            if (a.mode === 'optional' && a.green) optionalGreen++;
+        }
+        newTraces.push({
+            turn,
+            opportunity_id: def.opportunity_id,
+            event: 'eligible',
+            proposal_id: proposalId,
+            optional_green_count: optionalGreen,
+            min_optional_axes: def.prerequisites.min_optional_axes,
+        });
     }
 
     const sortedProposals = working.sort((a, b) => {
@@ -738,7 +808,14 @@ export function evaluateOperationOpportunities(
         return strictCompare(a.opportunity_id, b.opportunity_id);
     });
 
-    return { proposals: sortedProposals, newResolutions, newDiagnostics: sortedDiagnostics };
+    const sortedTraces = newTraces.sort((a, b) => {
+        if (a.turn !== b.turn) return a.turn - b.turn;
+        const cmpId = strictCompare(a.opportunity_id, b.opportunity_id);
+        if (cmpId !== 0) return cmpId;
+        return opportunityTraceEventRank(a.event) - opportunityTraceEventRank(b.event);
+    });
+
+    return { proposals: sortedProposals, newResolutions, newDiagnostics: sortedDiagnostics, newTraces: sortedTraces };
 }
 
 /**
@@ -750,7 +827,7 @@ export function runOpportunityEvaluationStep(
     turn: number,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
 ): void {
-    const { proposals, newResolutions, newDiagnostics } = evaluateOperationOpportunities(state, turn, catalog);
+    const { proposals, newResolutions, newDiagnostics, newTraces } = evaluateOperationOpportunities(state, turn, catalog);
     state.military.operation_opportunities = proposals;
     if (newResolutions.length > 0) {
         if (!state.military.operation_opportunity_resolutions) {
@@ -767,6 +844,25 @@ export function runOpportunityEvaluationStep(
         }
         state.military.operation_opportunity_diagnostics.push(...newDiagnostics);
     }
+    appendOpportunityTraces(state, newTraces);
+}
+
+function appendOpportunityTraces(state: GameState, rows: readonly OperationOpportunityTraceRow[]): void {
+    if (rows.length === 0) return;
+    if (!state.military.operation_opportunity_traces) {
+        state.military.operation_opportunity_traces = [];
+    }
+    state.military.operation_opportunity_traces.push(...rows);
+    state.military.operation_opportunity_traces.sort((a, b) => {
+        if (a.turn !== b.turn) return a.turn - b.turn;
+        const cmpId = strictCompare(a.opportunity_id, b.opportunity_id);
+        if (cmpId !== 0) return cmpId;
+        const proposalA = a.proposal_id ?? '';
+        const proposalB = b.proposal_id ?? '';
+        const cmpProposal = strictCompare(proposalA, proposalB);
+        if (cmpProposal !== 0) return cmpProposal;
+        return opportunityTraceEventRank(a.event) - opportunityTraceEventRank(b.event);
+    });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -846,6 +942,12 @@ export function applyOpportunityDecision(
             const delayTurns = Math.max(1, options.delay_turns ?? 4);
             proposal.status = 'delayed';
             proposal.reevaluate_at_turn = Math.min(turn + delayTurns, proposal.expires_turn + 1);
+            appendOpportunityTraces(state, [{
+                turn,
+                opportunity_id: proposal.opportunity_id,
+                event: 'delayed',
+                proposal_id: proposal.proposal_id,
+            }]);
             return proposal;
         }
         case 'decline': {
@@ -857,6 +959,12 @@ export function applyOpportunityDecision(
                 response: 'decline',
                 response_turn: turn,
             });
+            appendOpportunityTraces(state, [{
+                turn,
+                opportunity_id: proposal.opportunity_id,
+                event: 'declined',
+                proposal_id: proposal.proposal_id,
+            }]);
             return proposal;
         }
         case 'redirect': {
@@ -886,6 +994,14 @@ export function applyOpportunityDecision(
                 response_turn: turn,
                 executed_op_name: opName ?? undefined,
             });
+            appendOpportunityTraces(state, [{
+                turn,
+                opportunity_id: proposal.opportunity_id,
+                event: opName ? 'redirected' : 'spawn_failed',
+                proposal_id: proposal.proposal_id,
+                executed_op_name: opName ?? undefined,
+                redirect_variant_id: variantId,
+            }]);
             return proposal;
         }
         case 'under_resource': {
@@ -907,6 +1023,13 @@ export function applyOpportunityDecision(
                 response_turn: turn,
                 executed_op_name: opName ?? undefined,
             });
+            appendOpportunityTraces(state, [{
+                turn,
+                opportunity_id: proposal.opportunity_id,
+                event: opName ? 'under_resourced_approved' : 'spawn_failed',
+                proposal_id: proposal.proposal_id,
+                executed_op_name: opName ?? undefined,
+            }]);
             return proposal;
         }
         case 'approve': {
@@ -928,6 +1051,12 @@ export function applyOpportunityDecision(
                     executed_op_aar_id: undefined,
                     exit_class: 't3_authorized_no_offensive',
                 });
+                appendOpportunityTraces(state, [{
+                    turn,
+                    opportunity_id: proposal.opportunity_id,
+                    event: 't3_authorized_no_offensive',
+                    proposal_id: proposal.proposal_id,
+                }]);
                 return proposal;
             }
             const opName = spawnCorpsOperationFromOpportunity(
@@ -946,6 +1075,13 @@ export function applyOpportunityDecision(
                 response_turn: turn,
                 executed_op_name: opName ?? undefined,
             });
+            appendOpportunityTraces(state, [{
+                turn,
+                opportunity_id: proposal.opportunity_id,
+                event: opName ? 'approved' : 'spawn_failed',
+                proposal_id: proposal.proposal_id,
+                executed_op_name: opName ?? undefined,
+            }]);
             return proposal;
         }
     }

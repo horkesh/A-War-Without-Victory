@@ -1,5 +1,11 @@
 # AWWV Calibration Master Reference
 
+## Opportunity lifecycle trace (2026-05-22)
+
+- `state.military.operation_opportunity_traces` now records compact Operation Opportunity lifecycle rows for blocked, eligible, expired, decision, spawn-failed, approved, and T3 no-offensive outcomes.
+- Calibration use: future 156w/188w painted runs can now distinguish operation catalog/gating failure from accepted-but-not-launched or accepted-and-launched delivery failure before changing late-war operation outcomes.
+- Report: `docs/40_reports/implemented/20260522_OPPORTUNITY_LIFECYCLE_TRACE.md`.
+
 ## Late-war force-trajectory gating audit (2026-05-22)
 
 - Read-only audits: `docs/40_reports/audits/20260522_OPS_FORCE_TRAJECTORY_GATING.md` and `docs/40_reports/audits/20260522_FORCE_TRAJECTORY_ENGINE_INVENTORY.md`.
