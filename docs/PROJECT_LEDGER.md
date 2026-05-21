@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(calibration): audit late-war force-trajectory gating
+
+**Type:** Read-only calibration/operations audit. No simulation behavior, scenario data, save schema, operation catalog data, or output tuning changed.
+
+**Why:** Fresh painted compares prove the current sim stays flat from w104 to w188 at RS 61.0% / RBiH 26.4% / HRHB 12.6%, leaving the Oct 1995 Krajina-collapse gap unresolved. Before adding or tuning operations, the repo needed a disk-verified answer on whether existing late-war opportunity gates can express the required VRS degradation and Federation/ARBiH force trajectory.
+
+**Change:** Completed two audit memos: one inventories the current operations catalog gates for `sana_95`, `mistral_2_95`, `kupres_cincar_94`, and `vlasic_ridge_95`; the other inventories the force-quality/readiness substrate. Verdict: existing ops are macro-availability gated and necessary, but not sufficient; they do not yet compare attacker readiness against defender theater degradation. Recommended next implementation is compact opportunity lifecycle trace persistence before outcome tuning, followed by either `donji_vakuf_95` catalog fill or a Krajina defender-trajectory predicate based on trace evidence.
+
+**Verification:** Read-only file/code inspection; `git diff --check` clean.
+
+**Artifacts:** `docs/40_reports/audits/20260522_OPS_FORCE_TRAJECTORY_GATING.md`; `docs/40_reports/audits/20260522_FORCE_TRAJECTORY_ENGINE_INVENTORY.md`.
+
+---
 ## [2026-05-22] docs(calibration): reconcile fresh painted compares
 
 **Type:** Calibration evidence refresh + documentation. No simulation behavior, scenario data, save schema, operation behavior, or output tuning changed.

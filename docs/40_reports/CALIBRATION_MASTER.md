@@ -1,5 +1,11 @@
 # AWWV Calibration Master Reference
 
+## Late-war force-trajectory gating audit (2026-05-22)
+
+- Read-only audits: `docs/40_reports/audits/20260522_OPS_FORCE_TRAJECTORY_GATING.md` and `docs/40_reports/audits/20260522_FORCE_TRAJECTORY_ENGINE_INVENTORY.md`.
+- Verdict: current late-war opportunity operations are necessary but not sufficient for the Oct 1995 Krajina-collapse gap. They gate macro availability and attacker readiness, but do not yet compare attacker force trajectory against VRS defender theater degradation.
+- Calibration implication: keep Oct 1995 RS diagnostic-only; do not tune outcomes from painted deltas alone. Next implementation should persist opportunity lifecycle trace rows so eligible/block/launch/validation/under-delivery cases are separable before adding `donji_vakuf_95` or a Krajina defender-trajectory predicate.
+
 ## n1932-n1935 fresh painted-compare reconciliation (2026-05-22)
 
 - Fresh compare artifacts replace the stale n1597-n1599 diagnostic files at `tools/diagnostics/_phase5a_painted_compares/painted_{40w_jan1993,104w_apr1994,156w_apr1995,188w_oct1995}.txt`.
