@@ -28,7 +28,7 @@
 `apr1992_52w` now emits three watched-operation trace rows:
 
 - `Operation Herzegovina Consolidation`: launched at turn 14.
-- `Operation Cerska-Kamenica`: catalog-present, not launched, latest blocker `build_defender_power_too_high` at turn 52.
+- `Operation Cerska-Kamenica`: catalog-present, not launched, latest blocker `build_defender_power_too_high` at turn 52, ratio 0.506, attacker power 357.407, defender power 706.25.
 - `Operation Kotor Varos`: catalog-present, not launched, latest blocker `already_owned_objectives` at turn 52.
 
 The existing 188w H1 sensitive-history diagnostic remains evidence-first; this lane adds the persistence boundary needed before further H1 report projection or tuning.
@@ -47,5 +47,5 @@ No randomness, timestamps, unordered filesystem reads, or wall-clock values were
 ## Next Steps
 
 - Project the persisted trace rows into the H1 sensitive-history status packet for fresh 188w runs.
-- Use the preserved blocker reasons to decide whether H1 needs report projection only or a later behavior-tuning lane.
+- Use the preserved blocker reasons and launch-feasibility input fields to decide whether H1 needs report projection only or a later behavior-tuning lane.
 - Do not tune watched-operation outcomes until the trace rows identify the binding blocker in the target 188w run.

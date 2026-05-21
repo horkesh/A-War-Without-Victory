@@ -355,6 +355,33 @@ function latestByTurnThenId(rows) {
     return sorted[sorted.length - 1] || null;
 }
 
+function launchStatusPriority(row) {
+    const status = String(row && (row.launch_status || row.launch) || '').trim();
+    switch (status) {
+        case 'launched':
+        case 'blocked':
+        case 'not_launched':
+            return 2;
+        case 'unknown':
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+function latestTraceByTurnThenStatus(rows) {
+    const sorted = rows.slice().sort((a, b) => {
+        const ta = numeric(a.started_turn ?? a.turn ?? a.canonical_window?.start_turn, 0);
+        const tb = numeric(b.started_turn ?? b.turn ?? b.canonical_window?.start_turn, 0);
+        if (ta !== tb) return ta - tb;
+        const pa = launchStatusPriority(a);
+        const pb = launchStatusPriority(b);
+        if (pa !== pb) return pa - pb;
+        return strictCompare(operationIdOf(a), operationIdOf(b));
+    });
+    return sorted[sorted.length - 1] || null;
+}
+
 function latestInjectionWarning(state, name) {
     const warnings = asArray(state.military && state.military.op_injection_warnings)
         .filter(row => String(row.op_name || '') === name);
@@ -368,7 +395,7 @@ function summarizeWatchedOperations(runDir, state) {
 
     return WATCH_OPS.map(name => {
         const catalogHasName = catalogNames.has(name);
-        const trace = latestByTurnThenId(traces.filter(row => operationNameOf(row) === name));
+        const trace = latestTraceByTurnThenStatus(traces.filter(row => operationNameOf(row) === name));
         const traceId = operationIdOf(trace);
         const warning = latestInjectionWarning(state, name);
         const aar = latestByTurnThenId(aars.filter(row => {
@@ -390,7 +417,7 @@ function summarizeWatchedOperations(runDir, state) {
         const presenceStatus = (trace && catalogStatus !== 'missing') || warning || aar
             ? (aarVisible ? 'aar_visible' : 'aar_not_visible')
             : 'missing';
-        return {
+        const summary = {
             operation_name: name,
             watched_label: WATCH_OP_LABELS[name] || name,
             operation_id: traceId || operationIdOf(aar) || String(warning && warning.op_name || ''),
@@ -405,6 +432,10 @@ function summarizeWatchedOperations(runDir, state) {
             typed_blocker: blockerCode,
             aar_visible: aarVisible,
         };
+        if (trace && trace.launch_feasibility_ratio !== undefined) summary.launch_feasibility_ratio = trace.launch_feasibility_ratio;
+        if (trace && trace.launch_attacker_power !== undefined) summary.launch_attacker_power = trace.launch_attacker_power;
+        if (trace && trace.launch_defender_power !== undefined) summary.launch_defender_power = trace.launch_defender_power;
+        return summary;
     });
 }
 

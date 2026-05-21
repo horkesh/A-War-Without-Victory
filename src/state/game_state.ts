@@ -964,6 +964,9 @@ export interface WatchedOperationTraceRow {
     blocker_code: WatchedOperationBlocker | string;
     typed_blocker: WatchedOperationBlocker | string;
     turn: number;
+    launch_feasibility_ratio?: number;
+    launch_attacker_power?: number;
+    launch_defender_power?: number;
 }
 
 export type DoctrineType = 'INFILTRATE' | 'ARTILLERY_COUNTER' | 'COORDINATED_STRIKE' | 'STATIC_DEFENSE' | 'ATTACK' | 'DEFEND';

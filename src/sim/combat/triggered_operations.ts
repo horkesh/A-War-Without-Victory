@@ -39,7 +39,7 @@ import {
     hasActiveOperation,
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
-import { evaluateLaunchFeasibility } from './sector_offensive_launch_helpers.js';
+import { evaluateLaunchFeasibility, type LaunchFeasibilityResult } from './sector_offensive_launch_helpers.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -619,6 +619,7 @@ function recordWatchedOperationTrace(
         delivery_status?: WatchedOperationTraceRow['delivery_status'];
         blocker_code?: WatchedOperationBlocker | string;
         operation_id?: string;
+        launch_feasibility?: LaunchFeasibilityResult;
     },
 ): void {
     const blocker = outcome.blocker_code ?? '';
@@ -634,6 +635,11 @@ function recordWatchedOperationTrace(
         typed_blocker: blocker,
         turn,
     };
+    if (outcome.launch_feasibility) {
+        row.launch_feasibility_ratio = roundTraceNumber(outcome.launch_feasibility.ratio);
+        row.launch_attacker_power = roundTraceNumber(outcome.launch_feasibility.attackerPower);
+        row.launch_defender_power = roundTraceNumber(outcome.launch_feasibility.defenderPower);
+    }
 
     if (!state.military.watched_operations) state.military.watched_operations = [];
     const existingIndex = state.military.watched_operations.findIndex((existing) =>
@@ -654,6 +660,11 @@ function recordWatchedOperationTrace(
     );
 }
 
+function roundTraceNumber(value: number): number {
+    if (!Number.isFinite(value)) return value;
+    return Number(value.toFixed(3));
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Core logic
 // ═══════════════════════════════════════════════════════════════════════════
@@ -664,7 +675,7 @@ function buildOperation(
     def: TriggeredOpDef,
     state: GameState,
     turn: number,
-): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | { failure: string } {
+): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | { failure: string; launch_feasibility?: LaunchFeasibilityResult } {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
 
@@ -730,7 +741,7 @@ function buildOperation(
         op.objectives ?? [],
         def.faction,
     );
-    if (!feasibility.feasible) return { failure: `build_${feasibility.blocker || 'launch_feasibility'}` };
+    if (!feasibility.feasible) return { failure: `build_${feasibility.blocker || 'launch_feasibility'}`, launch_feasibility: feasibility };
 
     return { op, corpsAxes };
 }
@@ -955,6 +966,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
             recordWatchedOperationTrace(state, def, turn, {
                 launch_status: 'not_launched',
                 blocker_code: result.failure,
+                launch_feasibility: result.launch_feasibility,
             });
             continue;
         }

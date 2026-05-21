@@ -333,4 +333,72 @@ describe('sensitive_history_status diagnostic script', () => {
             delivery_status: 'missing',
         });
     });
+
+    it('prefers concrete no-launch traces over same-turn warning-only traces', () => {
+        const runDir = join(TMP_ROOT, 'same_turn_warning_and_no_launch');
+        mkdirSync(runDir, { recursive: true });
+        writeJson(join(runDir, 'run_summary.json'), {
+            weeks: 188,
+            final_state_hash: 'same-turn-fixture',
+        });
+        writeJson(join(runDir, 'final_save.json'), {
+            meta: { turn: 188 },
+            political: { political_controllers: {} },
+            military: {
+                formations: {},
+            },
+        });
+        writeJson(join(runDir, 'watched_operations.json'), [
+            {
+                operation_name: 'Operation Krivaja-95',
+                canonical_window: '170-178',
+                catalog_status: 'present',
+                eligibility_status: 'unknown',
+                launch_status: 'not_launched',
+                delivery_status: 'unknown',
+                blocker_code: 'build_defender_power_too_high',
+                typed_blocker: 'build_defender_power_too_high',
+                turn: 188,
+                launch_feasibility_ratio: 0.317,
+                launch_attacker_power: 205.892,
+                launch_defender_power: 649.751,
+            },
+            {
+                operation_name: 'Operation Krivaja-95',
+                canonical_window: '170-178',
+                catalog_status: 'present',
+                eligibility_status: 'unknown',
+                launch_status: 'unknown',
+                delivery_status: 'unknown',
+                blocker_code: 'brigade_ineligible',
+                typed_blocker: 'brigade_ineligible',
+                turn: 188,
+            },
+        ]);
+        writeJson(join(runDir, 'operation_aars.json'), []);
+
+        const jsonOutput = execFileSync(
+            process.execPath,
+            ['tools/diagnostics/sensitive_history_status.cjs', '--json', runDir],
+            { cwd: process.cwd(), encoding: 'utf8' },
+        );
+        const [summary] = JSON.parse(jsonOutput) as Array<{
+            watched_operations: Array<{
+                operation_name: string;
+                launch_status: string;
+                blocker_code: string;
+                launch_feasibility_ratio?: number;
+                launch_attacker_power?: number;
+                launch_defender_power?: number;
+            }>;
+        }>;
+
+        expect(summary.watched_operations.find((op) => op.operation_name === 'Operation Krivaja-95')).toMatchObject({
+            launch_status: 'not_launched',
+            blocker_code: 'build_defender_power_too_high',
+            launch_feasibility_ratio: 0.317,
+            launch_attacker_power: 205.892,
+            launch_defender_power: 649.751,
+        });
+    });
 });

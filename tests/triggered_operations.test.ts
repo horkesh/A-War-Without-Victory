@@ -342,6 +342,43 @@ describe('checkTriggeredOperations', () => {
         );
     });
 
+    it('persists launch-feasibility power inputs for defender-power build blockers', () => {
+        const state = makeState(10);
+        const objectives = [
+            'op:kotor_varos:kotor_varos_2',
+            'op:kotor_varos:prisocka_2',
+            'op:kotor_varos:vrbanjci_2',
+        ];
+        state.military.formations!['arbih_kotor_varos_defender'] = makeFormation('arbih_kotor_varos_defender', 'arbih_1st_corps', {
+            faction: 'RBiH' as FactionId,
+            personnel: 100000,
+            location_osid: objectives[0],
+        });
+        state.military.corps_front_sectors!['sector:arbih_1st_corps:0'] = makeSector({
+            sector_id: 'sector:arbih_1st_corps:0',
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH' as FactionId,
+            opposing_factions: ['RS' as FactionId],
+            edge_ids: ['edge:kotor_varos'],
+            friendly_osids: objectives,
+            assigned_brigade_ids: ['arbih_kotor_varos_defender'],
+            length_edges: 1,
+        });
+
+        const injected = checkTriggeredOperations(state);
+        const row = state.military.watched_operations?.find((traceRow: any) => traceRow.operation_name === 'Operation Kotor Varos');
+
+        assert.ok(!injected.includes('Operation Kotor Varos'));
+        assert.ok(row);
+        assert.equal(row.blocker_code, 'build_defender_power_too_high');
+        assert.equal(typeof row.launch_feasibility_ratio, 'number');
+        assert.equal(typeof row.launch_attacker_power, 'number');
+        assert.equal(typeof row.launch_defender_power, 'number');
+        const attackerPower = row.launch_attacker_power ?? 0;
+        const defenderPower = row.launch_defender_power ?? 0;
+        assert.ok(defenderPower > attackerPower);
+    });
+
     it('filters already-controlled objectives without dropping a viable triggered axis', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];

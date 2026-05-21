@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): preserve launch-feasibility power inputs
+
+**Type:** Sensitive-history diagnostic/output-contract refinement. Touched watched-operation trace schema, diagnostic row selection, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
+
+**Why:** H1 had typed `build_defender_power_too_high` blockers, but the trace did not preserve the ratio or attacker/defender power values needed to assign the next owner. Krivaja-95 also had same-turn warning and no-launch rows; the diagnostic needed to summarize the concrete no-launch row without dropping the warning artifact.
+
+**Change:** Added optional `launch_feasibility_ratio`, `launch_attacker_power`, and `launch_defender_power` fields to watched-operation trace rows for launch-feasibility build failures. Rounded persisted values to three decimals for compact deterministic output. Updated `sensitive_history_status.cjs` to prefer same-turn concrete launch rows over `unknown` warning rows, added regression coverage, refreshed baselines, and filed `docs/40_reports/implemented/20260521_H1_LAUNCH_FEASIBILITY_INPUT_TRACE.md`.
+
+**Finding:** Fresh `n1928` final hash `c482c67ab918075c` completed with anchors 27/27. Cerska-Kamenica is blocked at ratio 0.334 (attacker 215.03 / defender 643.639), Krivaja-95 at 0.317 (205.892 / 649.751), and Stupcanica-95 at 0.138 (169.937 / 1228.247). Krivaja-95 still preserves the separate `brigade_ineligible` row for `rs_skelani_battalion`.
+
+**Verification:** `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (18/18); `npx.cmd vitest run tests/sensitive_history_status_diagnostic.test.ts tests/triggered_operations.test.ts --reporter=dot` PASS (24/24); `npm.cmd run typecheck` PASS; `UPDATE_BASELINES=1 npm.cmd run test:baselines` PASS; `npm.cmd run test:baselines` PASS; 188w run `n1928` PASS; `node tools\diagnostics\sensitive_history_status.cjs --json runs\apr1992_definitive_188w__210e69404d054959__w188_n1928` PASS; `git diff --check` PASS with CRLF normalization warnings only.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_H1_LAUNCH_FEASIBILITY_INPUT_TRACE.md`; `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): add trace-backed 188w packet
 
 **Type:** Sensitive-history diagnostic/output refinement. Touched triggered-operation trace emission, focused tests, baseline manifest, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
