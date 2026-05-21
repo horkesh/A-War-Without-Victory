@@ -35,12 +35,12 @@ Current post-tail floor as of 2026-05-21:
 |---|---:|
 | `as_factionid_casts` | 2 |
 | `as_unknown_casts` | 6 |
-| `as_any_casts` | 239 |
+| `as_any_casts` | 236 |
 | `non_null_assertions_dot` | 11 |
 | `non_null_assertions_index` | 38 |
 | `optional_fields_game_state` | 463 |
 
-Remaining `as_unknown_casts` are no longer the next broad safe batch. They are classified as behavior-shaped or intentionally incomplete mock/adapter bridges and should move only under their owning behavior/schema plans. The active safe lane is now validator type-tightening where tolerant partial-state validators can replace `as any` property reads with `Record<string, unknown>` guards without changing diagnostics or scenario output.
+Remaining `as_unknown_casts` are no longer the next broad safe batch. They are classified as behavior-shaped or intentionally incomplete mock/adapter bridges and should move only under their owning behavior/schema plans. The active safe lane has narrowed after the validator and corps front-lines builder slices: remaining `as any` cleanup should start only from a fresh per-file classification, because the large validator leaf cluster is already closed and the next visible clusters are library boundaries, save-shape risk, diagnostic harnesses, or behavior-shaped UI contracts.
 
 ## Scope
 

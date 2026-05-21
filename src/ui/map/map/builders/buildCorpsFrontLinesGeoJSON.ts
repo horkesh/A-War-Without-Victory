@@ -220,7 +220,7 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
     }
 
     const used = new Set<number>();
-    const chains: { coords: [number, number][]; props: P }[] = [];
+    const chains: Array<{ coords: [number, number][]; props: P } | null> = [];
 
     for (let seed = 0; seed < segments.length; seed++) {
         if (used.has(seed)) continue;
@@ -292,8 +292,9 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
         bridging = false;
         const deadEnds: Array<{ chainIdx: number; key: string; end: 'head' | 'tail' }> = [];
         for (let ci = 0; ci < chains.length; ci++) {
-            if (!chains[ci]) continue;
-            const c = chains[ci].coords;
+            const chain = chains[ci];
+            if (!chain) continue;
+            const c = chain.coords;
             deadEnds.push({ chainIdx: ci, key: coordKey(c[0]), end: 'head' });
             deadEnds.push({ chainIdx: ci, key: coordKey(c[c.length - 1]), end: 'tail' });
         }
@@ -301,7 +302,8 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
         for (const de of deadEnds) deadEndByKey.set(de.key, de);
 
         for (const source of deadEnds) {
-            if (!(chains as any)[source.chainIdx]) continue;
+            const sourceChain = chains[source.chainIdx];
+            if (!sourceChain) continue;
             const visited = new Map<string, string | null>();
             visited.set(source.key, null);
             let frontier = [source.key];
@@ -317,6 +319,9 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
 
                         const target = deadEndByKey.get(nk);
                         if (target && target.chainIdx !== source.chainIdx && chains[target.chainIdx]) {
+                            const srcChain = chains[source.chainIdx];
+                            const dstChain = chains[target.chainIdx];
+                            if (!srcChain || !dstChain) continue;
                             const path: [number, number][] = [];
                             let cur: string | null = nk;
                             while (cur !== null) {
@@ -325,8 +330,6 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
                                 cur = visited.get(cur) ?? null;
                             }
 
-                            const srcChain = chains[source.chainIdx];
-                            const dstChain = chains[target.chainIdx];
                             const bridge = path.slice(1, -1);
 
                             let mergedCoords: [number, number][];
@@ -341,7 +344,7 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
                             }
 
                             chains[source.chainIdx] = { coords: mergedCoords, props: srcChain.props };
-                            (chains as any)[target.chainIdx] = null;
+                            chains[target.chainIdx] = null;
                             bridging = true;
                             found = true;
                             break;
@@ -847,5 +850,5 @@ export function buildCorpsFrontLinesGeoJSON(
     const mergedFront = stitchSegmentsWithFriendlyBridges(allFrontSegments, edgeMap, controllerMap);
     const mergedGlow = mergeGlowSegments(glowFeatures, edgeMap, controllerMap);
     const allFeatures: Feature<LineString>[] = [...mergedGlow, ...mergedFront];
-    return { type: 'FeatureCollection', features: allFeatures as any };
+    return { type: 'FeatureCollection', features: allFeatures };
 }
