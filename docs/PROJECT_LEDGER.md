@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): validateMilitiaPools record-narrowing as-any slice
+
+**Type:** Type-only validator cleanup in `src/validate/militia_pools.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** `validateMilitiaPools(...)` validates malformed and legacy militia-pool shapes, but its guarded property reads were still expressed as `as any` casts. The validator contract is better represented as tolerant `Record<string, unknown>` reads followed by explicit diagnostics.
+
+**Change:** Added local `asRecord(...)` and `isPoliticalSide(...)` helpers, replaced 12 counted `as_any_casts` with record reads, and added explicit numeric type guards before `Number.isInteger(...)` comparisons. Added a strict-null progress assertion pinning `src/validate/militia_pools.ts` at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 276 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/militia_pools.test.ts tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (47/47). Baselines not run: validator-only type narrowing, no sim path or scenario output.
+
+---
+
 ## [2026-05-21] refactor(strict-null): validateFormations record-narrowing as-any slice
 
 **Type:** Type-only validator cleanup in `src/validate/formations.ts` plus strict-null inventory guard/docs reconciliation. No simulation behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

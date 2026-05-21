@@ -3,6 +3,14 @@ import { POLITICAL_SIDES } from '../state/identity.js';
 import { parseMilitiaPoolKey } from '../state/militia_pool_key.js';
 import type { ValidationIssue } from './validate.js';
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' ? value as Record<string, unknown> : undefined;
+}
+
+function isPoliticalSide(value: string): value is typeof POLITICAL_SIDES[number] {
+    return (POLITICAL_SIDES as readonly string[]).includes(value);
+}
+
 /**
  * Validates militia_pools field.
  * - Keys: either MunicipalityId (legacy) or composite "mun_id:faction"
@@ -19,11 +27,12 @@ export function validateMilitiaPools(
 ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const militiaPools = ((state as any)?.military?.militia_pools ?? (state as any)?.militia_pools) as Record<string, any> | undefined;
+    const stateRecord = state as GameState & { militia_pools?: unknown };
+    const militiaPools = asRecord(state.military?.militia_pools) ?? asRecord(stateRecord.militia_pools);
     if (!militiaPools || typeof militiaPools !== 'object') return issues;
 
     const validMunIds = new Set(validMunicipalityIds);
-    const factionIds = new Set<string>((state.factions ?? []).map((f) => (f as any)?.id).filter((x) => typeof x === 'string'));
+    const factionIds = new Set<string>((state.factions ?? []).map((f) => f.id).filter((x) => typeof x === 'string'));
 
     const poolKeys = Object.keys(militiaPools).sort(); // deterministic ordering
     const currentTurn = state.meta?.turn ?? 0;
@@ -31,8 +40,9 @@ export function validateMilitiaPools(
     for (const key of poolKeys) {
         const pool = militiaPools[key];
         const basePath = `militia_pools.${key}`;
+        const poolRecord = asRecord(pool);
 
-        if (!pool || typeof pool !== 'object') {
+        if (!poolRecord) {
             issues.push({
                 severity: 'error',
                 code: 'militia_pools.entry.invalid',
@@ -42,8 +52,8 @@ export function validateMilitiaPools(
             continue;
         }
 
-        const mun_id = (pool as any).mun_id;
-        const faction = (pool as any).faction;
+        const mun_id = poolRecord.mun_id;
+        const faction = poolRecord.faction;
         const parsed = parseMilitiaPoolKey(key);
 
         // Key must match: legacy mun_id === key, or composite key === "${mun_id}:${faction}"
@@ -86,7 +96,7 @@ export function validateMilitiaPools(
                     path: `${basePath}.faction`,
                     message: 'faction must be null or a non-empty string'
                 });
-            } else if (!POLITICAL_SIDES.includes(faction as any)) {
+            } else if (!isPoliticalSide(faction)) {
                 issues.push({
                     severity: 'error',
                     code: 'militia_pools.faction.not_political_side',
@@ -104,8 +114,8 @@ export function validateMilitiaPools(
         }
 
         // available, committed, exhausted must be integers >= 0
-        const available = (pool as any).available;
-        if (!Number.isInteger(available) || available < 0) {
+        const available = poolRecord.available;
+        if (typeof available !== 'number' || !Number.isInteger(available) || available < 0) {
             issues.push({
                 severity: 'error',
                 code: 'militia_pools.available.invalid',
@@ -114,8 +124,8 @@ export function validateMilitiaPools(
             });
         }
 
-        const committed = (pool as any).committed;
-        if (!Number.isInteger(committed) || committed < 0) {
+        const committed = poolRecord.committed;
+        if (typeof committed !== 'number' || !Number.isInteger(committed) || committed < 0) {
             issues.push({
                 severity: 'error',
                 code: 'militia_pools.committed.invalid',
@@ -124,8 +134,8 @@ export function validateMilitiaPools(
             });
         }
 
-        const exhausted = (pool as any).exhausted;
-        if (!Number.isInteger(exhausted) || exhausted < 0) {
+        const exhausted = poolRecord.exhausted;
+        if (typeof exhausted !== 'number' || !Number.isInteger(exhausted) || exhausted < 0) {
             issues.push({
                 severity: 'error',
                 code: 'militia_pools.exhausted.invalid',
@@ -135,8 +145,8 @@ export function validateMilitiaPools(
         }
 
         // updated_turn must be <= current turn
-        const updated_turn = (pool as any).updated_turn;
-        if (!Number.isInteger(updated_turn) || updated_turn > currentTurn) {
+        const updated_turn = poolRecord.updated_turn;
+        if (typeof updated_turn !== 'number' || !Number.isInteger(updated_turn) || updated_turn > currentTurn) {
             issues.push({
                 severity: 'error',
                 code: 'militia_pools.updated_turn.invalid',
@@ -146,9 +156,9 @@ export function validateMilitiaPools(
         }
 
         // Phase 10: fatigue validation (if present)
-        const fatigue = (pool as any).fatigue;
+        const fatigue = poolRecord.fatigue;
         if (fatigue !== undefined && fatigue !== null) {
-            if (!Number.isInteger(fatigue) || fatigue < 0) {
+            if (typeof fatigue !== 'number' || !Number.isInteger(fatigue) || fatigue < 0) {
                 issues.push({
                     severity: 'error',
                     code: 'militia_pools.fatigue.invalid',
@@ -159,7 +169,7 @@ export function validateMilitiaPools(
         }
 
         // tags validation (if present)
-        const tags = (pool as any).tags;
+        const tags = poolRecord.tags;
         if (tags !== undefined && tags !== null) {
             if (!Array.isArray(tags)) {
                 issues.push({
