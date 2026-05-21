@@ -1,5 +1,19 @@
 import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { asRecord } from '../../state/schema_validators.js';
+
+// BATCH C §3.10: replay frames are diagnostic-only — `military` and
+// `displacement` sub-objects are widened to free-form Record reads here so the
+// summary can pull fields that are not part of the typed engine state shape
+// (e.g. `casualty_totals_by_faction`). The helper returns `undefined` for
+// missing or non-object inputs; the previous casts produced the same `undefined`
+// for the missing case but downstream TypeError on the non-object case. The
+// new behavior is documented stricter-at-boundary, looser-downstream — replay
+// summaries never feed back into sim state.
+function parseReplayFrameSubobject(value: unknown): Record<string, unknown> | undefined {
+    if (value === undefined) return undefined;
+    return asRecord(value) ?? undefined;
+}
 
 export interface ReplayControlSummary {
     faction: string;
@@ -47,7 +61,7 @@ function sumNumbers(value: unknown): number {
 }
 
 function readTotalCasualties(frame: ReplayFrameLike): number {
-    const military = frame.military as unknown as Record<string, unknown> | undefined;
+    const military = parseReplayFrameSubobject(frame.military);
     return sumNumbers(
         military?.casualty_totals_by_faction
         ?? military?.casualties_by_faction
@@ -57,7 +71,7 @@ function readTotalCasualties(frame: ReplayFrameLike): number {
 }
 
 function readTotalDisplaced(frame: ReplayFrameLike): number {
-    const displacement = frame.displacement as unknown as Record<string, unknown> | undefined;
+    const displacement = parseReplayFrameSubobject(frame.displacement);
     const aggregate = displacement?.displacement_humanitarian_aggregates as Record<string, unknown> | undefined;
     const direct = aggregate?.total_displaced ?? displacement?.total_displaced;
     return typeof direct === 'number' && Number.isFinite(direct) ? direct : 0;
