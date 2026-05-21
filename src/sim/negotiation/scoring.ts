@@ -324,7 +324,7 @@ export function computeFactionVerdict(
             pyrrhic_score: 0,
             grade: 'F',
             grade_description: 'No negotiation data available',
-            capital_breakdown: null as unknown as NegotiationBreakdown,
+            capital_breakdown: null,
             dimension_grades: emptyDims,
             outcome_class: 'collapse' as OutcomeClass,
             condemnation_flags: [],

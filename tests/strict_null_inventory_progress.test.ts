@@ -258,6 +258,11 @@ const UI_MAP_NON_NULL_TAIL_FILES = [
     'src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts',
 ];
 
+const SAFE_UNKNOWN_TAIL_FILES = [
+    'src/sim/ai_commander/corps_dialogue.ts',
+    'src/sim/negotiation/scoring.ts',
+];
+
 const VALIDATE_FACTIONS_SUPPLY_RIGHTS_AS_ANY_TAIL_FILES = [
     'src/validate/factions.ts',
     'src/validate/supply_rights.ts',
@@ -1311,6 +1316,16 @@ describe('strict null inventory progress', () => {
         const current = diagnostic.buildInventory(process.cwd());
         const nonNullDotCount = phaseCount(current, 'non_null_assertions_dot', UI_MAP_NON_NULL_TAIL_FILES);
         expect(nonNullDotCount).toBe(0);
+    });
+
+    it('cleans the safe unknown-cast tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const unknownCount = phaseCount(current, 'as_unknown_casts', SAFE_UNKNOWN_TAIL_FILES);
+        expect(unknownCount).toBe(0);
     });
 
     it('cleans the Batch 49 AI commander response_parser schema-validation slice', () => {

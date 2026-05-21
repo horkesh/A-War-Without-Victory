@@ -36,6 +36,12 @@ interface DialogueRaw {
     confidence: 'high' | 'medium' | 'low';
 }
 
+interface CombatSummaryCompat {
+    combat_summary?: {
+        battles?: Array<{ attacker_corps?: string; defender_corps?: string; outcome?: string }>;
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Model constant
 // ═══════════════════════════════════════════════════════════════════════════
@@ -182,9 +188,7 @@ function getCorpsPersonnel(state: GameState, corpsId: string): number {
 
 /** Build a brief recent-battle summary for a corps from combat_summary if available. */
 function buildRecentBattleSummary(state: GameState, corpsId: string): string {
-    const summary = (state.military as unknown as Record<string, unknown>).combat_summary as
-        | { battles?: Array<{ attacker_corps?: string; defender_corps?: string; outcome?: string }> }
-        | undefined;
+    const summary = (state.military as typeof state.military & CombatSummaryCompat).combat_summary;
     if (!summary?.battles?.length) return '';
 
     const relevant = summary.battles

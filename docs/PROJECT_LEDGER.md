@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean safe unknown tail
+
+**Type:** Strict-null cleanup. Type-contract and compatibility-read refactor; no verdict scoring, condemnation, dialogue prompting/parsing, save schema, scenario data, or output tuning changed.
+
+**Why:** Two remaining `as unknown` sites were safe local cleanups rather than true adapter boundaries: a no-data verdict field whose runtime value was already `null`, and a corps-dialogue compatibility read.
+
+**Change:** Changed `FactionVerdict.capital_breakdown` to `NegotiationBreakdown | null` and returned plain `null` for no-negotiation-data verdicts. Replaced the corps-dialogue `unknown` double-cast with a local `CombatSummaryCompat` structural type. Added a strict-null progress test pinning these two files at zero for `as_unknown_casts`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts tests/scoring.test.ts tests/rupture_consequences.test.ts tests/rupture_silence_when_defended.test.ts tests/corps_dialogue.test.ts --reporter=dot` PASS (159/159); `npm.cmd run typecheck` PASS. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 179`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_SAFE_UNKNOWN_TAIL.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean UI map non-null tail
 
 **Type:** Strict-null cleanup. UI/runtime refactor with no map presentation, front-line geometry, sector-highlight, corridor-heartbeat, save schema, scenario data, or output tuning change.

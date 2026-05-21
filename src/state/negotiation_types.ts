@@ -282,7 +282,7 @@ export interface FactionVerdict {
     /** Human-readable description of the grade anchor matched. */
     grade_description: string;
     /** Full negotiation capital breakdown. */
-    capital_breakdown: NegotiationBreakdown;
+    capital_breakdown: NegotiationBreakdown | null;
     /** Per-dimension letter grades (5 dimensions). */
     dimension_grades: DimensionGrade[];
     /** Classified outcome — primary narrative driver, not a naked number. */
