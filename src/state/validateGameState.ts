@@ -379,8 +379,8 @@ export function validateGameStateShape(
     // War phase: AoR keys removed (brigade_municipality_assignment, brigade_mun_orders not validated; legacy load may strip)
 
     // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
-    const displacement = s.displacement as any;
-    if (displacement && typeof displacement === 'object' && !Array.isArray(displacement)) {
+    const displacement = s.displacement;
+    if (isRecord(displacement)) {
         if ('settlement_displacement' in displacement && displacement.settlement_displacement !== undefined) {
             const sd = displacement.settlement_displacement;
             if (sd !== null && typeof sd === 'object' && !Array.isArray(sd)) {
@@ -781,5 +781,4 @@ export function validateGameStateShape(
     }
     return { ok: true };
 }
-
 

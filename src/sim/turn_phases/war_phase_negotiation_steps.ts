@@ -22,7 +22,7 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const result = resolveCounterOffers(context.state);
             if (result.created_counter_offer_ids.length > 0) {
-                (context.report as any).counter_offers = result;
+                context.report.counter_offers = result;
             }
         }
     },

@@ -3066,7 +3066,7 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         moveOrders[fid] = {
             destination_sids: [f.home_osid],
             stance: 'column',
-        } as any;
+        };
     }
 }
 

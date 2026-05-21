@@ -11,7 +11,7 @@ export interface ValidationResult {
 }
 
 export function serializeState(state: GameState): string {
-    const canonicalState = migrateState({ ...(state as any), schema_version: 0 });
+    const canonicalState = migrateState({ ...state, schema_version: 0 });
     assertNoErrors(validateState(canonicalState), 'State failed validation before serialize');
 
     const withVersion: GameState = {

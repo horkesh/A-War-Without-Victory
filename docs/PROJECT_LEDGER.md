@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean core singleton any casts
+
+**Type:** Type-only strict-null cleanup in core serialization/validation and turn-report typing plus strict-null inventory guard/docs reconciliation. Touched `src/state/serialize.ts`, `src/state/validateGameState.ts`, `src/sim/turn_pipeline_types.ts`, `src/sim/turn_phases/war_phase_negotiation_steps.ts`, and `src/sim/turn_phases/war_phases.ts`. No scenario data, save schema, generated artifact ownership, IPC contract, canon text, or `FORAWWV.md` changed.
+
+**Why:** Four singleton `as_any_casts` remained in files that already had typed alternatives: spreading a `GameState` into a migration candidate, reading `displacement` through the validator's local `isRecord(...)` helper, storing the counter-offer report on `TurnReport`, and assigning a typed `BrigadeMovementOrder` literal.
+
+**Change:** Removed the serialize spread cast, used `isRecord(displacement)` in `validateGameStateShape`, added `counter_offers?: CounterOfferResolutionReport` to `TurnReport`, assigned `context.report.counter_offers` directly, and removed the terminal cast from the drift-recall movement order literal. Added a strict-null progress assertion pinning the four files at zero `as_any_casts`.
+
+Current inventory from `node tools/diagnostics/strict_null_inventory.cjs`: `2 / 6 / 198 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+
+**Verification:** `npm.cmd run typecheck` PASS; focused serialization/displacement/negotiation/turn-pipeline/inventory vitest PASS (91/91); `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`).
+
+---
+
 ## [2026-05-21] refactor(strict-null): clean CLI political-side and MapKit any casts
 
 **Type:** Type-only CLI/tooling strict-null cleanup plus strict-null inventory guard/docs reconciliation. Touched `src/state/identity.ts`, seven simulation helper CLIs, `src/cli/mapkit_validate.ts`, and `tests/strict_null_inventory_progress.test.ts`. No simulation turn behavior, scenario data, save schema, generated artifact, IPC contract, canon text, or `FORAWWV.md` changed.

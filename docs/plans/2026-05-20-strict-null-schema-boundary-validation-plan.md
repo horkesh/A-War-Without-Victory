@@ -27,7 +27,7 @@ Top-level inventory after Batch 50 (UI-only trivial alias / JSX truthy-narrowing
 | `non_null_assertions_index` | 59 | 43 | 38 | **38** | −21 |
 | `optional_fields_game_state` | 458 | 463 | 463 | **463** | +5 |
 
-The current post-tail / validator / UI-builder / bot-response / CLI floor is `2 / 6 / 202 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
+The current post-tail / validator / UI-builder / bot-response / CLI / core-singleton floor is `2 / 6 / 198 / 11 / 38 / 463` (`as_factionid_casts / as_unknown_casts / as_any_casts / non_null_assertions_dot / non_null_assertions_index / optional_fields_game_state`).
 
 Both Batch A (UI-only) and Batch B (sim runtime-invariant) are closed. Batch C (this plan) targets `as_unknown_casts`, which has held flat at 80 across Batches 49 → 50 → 51. Of those 80 sites, 52 cluster in 12 schema-boundary files; the remaining 28 sit in singleton files documented in `docs/40_reports/audits/20260520_STRICT_NULL_POST_FACTIONID_CLASSIFICATION.md` §3.
 

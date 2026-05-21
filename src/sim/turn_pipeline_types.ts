@@ -78,6 +78,7 @@ import type { Phase3AAuditSummary } from './pressure/phase3a_pressure_eligibilit
 import type { Phase3BExhaustionResult } from './pressure/phase3b_pressure_exhaustion.js';
 import type { Phase3CEligibilityResult } from './pressure/phase3c_exhaustion_collapse_gating.js';
 import type { SiegeRatioByMunFaction } from './early_war/compute_siege_state.js';
+import type { CounterOfferResolutionReport } from './negotiation/counter_offer_generator.js';
 import { loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
 
 
@@ -140,6 +141,7 @@ export interface TurnReport {
     sustainability?: SustainabilityStepReport;
     negotiation_pressure?: NegotiationPressureStepReport;
     negotiation_capital?: NegotiationCapitalStepReport;
+    counter_offers?: CounterOfferResolutionReport;
     negotiation_offer?: OfferGenerationReport;
     negotiation_acceptance?: AcceptanceReport;
     negotiation_apply?: { applied: boolean; freeze_edges_count: number };
