@@ -252,27 +252,33 @@ export function canAnyBrigadeReachAny(
     maxHops: number,
 ): boolean {
     if (targets.size === 0 || brigadeLocations.length === 0) return false;
+    const visited = new Set<string>();
+    let frontier: string[] = [];
+
     for (const startOsid of brigadeLocations) {
         if (!startOsid) continue;
         if (targets.has(startOsid)) return true;
-        const visited = new Set<string>([startOsid]);
-        let frontier: string[] = [startOsid];
-        for (let hop = 1; hop <= maxHops; hop++) {
-            const next: string[] = [];
-            for (const osid of frontier) {
-                for (const nb of adjacency.get(osid as Osid) ?? []) {
-                    if (visited.has(nb)) continue;
-                    visited.add(nb);
-                    // Only traverse through friendly territory
-                    if (!friendlyOsids.has(nb)) continue;
-                    if (targets.has(nb)) return true;
-                    next.push(nb);
-                }
-            }
-            if (next.length === 0) break;
-            frontier = next;
-        }
+        if (visited.has(startOsid)) continue;
+        visited.add(startOsid);
+        frontier.push(startOsid);
     }
+
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const nb of adjacency.get(osid as Osid) ?? []) {
+                if (visited.has(nb)) continue;
+                visited.add(nb);
+                // Only traverse through friendly territory
+                if (!friendlyOsids.has(nb)) continue;
+                if (targets.has(nb)) return true;
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+
     return false;
 }
 

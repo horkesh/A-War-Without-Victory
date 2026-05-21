@@ -6,6 +6,18 @@
 
 ---
 
+## 2026-05-21: Multi-source reachability for staffability checks (byte-identical)
+
+**Change:** `src/sim/combat/sector_utils.ts` `canAnyBrigadeReachAny(...)` now performs one multi-source BFS per reachability query instead of one BFS per brigade location. It preserves the same max-hop, friendly-territory, and early-target semantics while avoiding repeated traversal during sector staffability checks.
+
+**Byte-identity:** The post-change 40w profile produced the same deterministic artifacts as the label-split baseline: final state hash `4368f50c00c464ad`; `final_save.json`, `run_summary.json`, `weekly_report.jsonl`, and `end_report.md` are byte-identical. Consistency validation passed on `runs_perf/sector_reconstruction_multisource_reachability_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+**New evidence:** Staffability buckets dropped from 194.482ms to 13.558ms for RBiH 2nd Corps, 185.285ms to 14.109ms for RBiH 3rd Corps, 86.585ms to 14.473ms for HVO Central Bosnia, and 28.312ms to 6.243ms for VRS 1st Krajina in the clean 94-invocation sidecar batch. A broader whole-frontier cache was tested and rejected because it was slower despite byte identity.
+
+**Report:** [implemented/20260521_SECTOR_MULTI_SOURCE_REACHABILITY.md](implemented/20260521_SECTOR_MULTI_SOURCE_REACHABILITY.md)
+
+---
+
 ## 2026-05-21: Build-faction post-classification label split (byte-identical)
 
 **Change:** `src/sim/combat/corps_front_sectors.ts` now splits the ambiguous `buildFactionSectors:*:territory-voronoi` and duplicated `buildFactionSectors:*:post-classification-normalization` sidecar labels into deterministic child labels. Territory Voronoi now records `:assign` and `:repair-disconnected`; post-classification now separates rear normalization from truth normalization and splits truth normalization into `:dedup-initial`, `:enforce-ownership`, `:rehome-unassigned`, `:reclassify-rear`, and `:recompute-power`.

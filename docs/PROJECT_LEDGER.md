@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] perf(sector): use multi-source staffability reachability
+
+**Type:** Sector reconstruction performance implementation. No sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.
+
+**Why:** The fresh build-faction label split showed large staffability-filter costs, especially RBiH 2nd/3rd Corps and HVO Central Bosnia. The old reachability predicate ran one BFS per brigade location for each sector staffability query, repeatedly traversing the same friendly territory.
+
+**Change:** Reworked `canAnyBrigadeReachAny(...)` in `src/sim/combat/sector_utils.ts` to seed one BFS frontier with all valid brigade start OSIDs, then expand by hop layer once. The rule remains "any brigade can reach any target within `TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS` through friendly territory." A broader whole-frontier precompute was tested and rejected as slower despite byte identity.
+
+**Verification:** `npx.cmd vitest run tests/sector_partition_instrumentation.test.ts --reporter=dot` PASS (17/17); `npm.cmd run typecheck` PASS; profiled 40w with `PERF_PROFILE_SECTOR_PARTITION=true` PASS; `node tools\validate_run_consistency.cjs runs_perf\sector_reconstruction_multisource_reachability_profile\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` PASS. Pre/post profiled artifacts (`final_save.json`, `run_summary.json`, `weekly_report.jsonl`, `end_report.md`) are byte-identical at current final state hash `4368f50c00c464ad`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_SECTOR_MULTI_SOURCE_REACHABILITY.md`; `data/derived/_debug/sector_partition_perf_multisource_reachability_clean.jsonl`; `runs_perf/sector_reconstruction_multisource_reachability_profile/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0`.
+
+---
+
 ## [2026-05-21] perf(sector): split build-faction attribution labels
 
 **Type:** Sector reconstruction performance instrumentation. Sidecar-only profiling labels changed; no sector behavior, scenario data, save schema, combat math, operation logic, or canon text changed.

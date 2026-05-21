@@ -21,6 +21,12 @@
 |---|---|---|
 | Sector reconstruction `buildFactionSectors` label split | Implemented as instrumentation | Report: `docs/40_reports/implemented/20260521_SECTOR_BUILD_FACTION_LABEL_SPLIT.md`. Sidecar-only labels now distinguish territory Voronoi assign vs repair and split the duplicated post-classification label into rear normalization, truth normalization, and truth-normalization children. Pre/post profiled artifacts are byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. |
 
+## Completed Sector Performance — Multi-source reachability
+
+| Lane | Status | Source |
+|---|---|---|
+| Sector staffability reachability | Implemented as byte-identical performance reduction | Report: `docs/40_reports/implemented/20260521_SECTOR_MULTI_SOURCE_REACHABILITY.md`. `canAnyBrigadeReachAny(...)` now uses one multi-source BFS per query instead of one BFS per brigade location. The 40w profile stayed byte-identical at current hash `4368f50c00c464ad`; consistency validation passed. Main staffability buckets dropped sharply in the clean sidecar batch. |
+
 ## Completed Batch 38 — Scenario runner redundant week-39 serialize/hash cleanup
 
 | Lane | Status | Source |
