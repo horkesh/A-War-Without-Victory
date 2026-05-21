@@ -3,6 +3,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(backlog): reconcile notification residual count
+
+**Type:** Documentation-only backlog reconciliation. Touched `docs/40_reports/CONSOLIDATED_BACKLOG.md` and ledger only. No source, tests, scenario data, generated artifacts, save schema, canon text, or `FORAWWV.md` changed.
+
+**Why:** The consolidated backlog still described Phase D notification content residuals as 20 rows / 102 missing recipient blocks after the 2026-05-21 safe front-visit implementation reduced the accepted residual floor to 20 rows / 90 blocks.
+
+**Change:** Updated the Phase D notification content row to the post-safe-slice truth and linked the 2026-05-21 residual review matrix. The remaining content work is still gated by historian-required, narrative-tone, Washington-timing, late-war-outcome, and blocked-sensitive review lanes.
+
+**Verification:** `git diff --check` clean. Typecheck, vitest, and baselines not run: docs-only status reconciliation.
+
+---
+
 ## [2026-05-21] docs(release): current-tip CI proof packet
 
 **Type:** Documentation-only release evidence packet. Touched release docs only. No source, tests, scenario data, generated artifacts, save schema, canon text, or `FORAWWV.md` changed.
