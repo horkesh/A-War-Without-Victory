@@ -941,6 +941,31 @@ export interface EquipmentState {
     last_maintenance: number | null; // turn index
 }
 
+export type WatchedOperationBlocker =
+    | ''
+    | 'active_primary_corps'
+    | 'active_secondary_corps'
+    | 'cooldown_decline_state'
+    | 'already_owned_objectives'
+    | 'empty_live_axes'
+    | 'validation_warning'
+    | 'validation_blocker'
+    | 'build_failure'
+    | 'accepted_injected';
+
+export interface WatchedOperationTraceRow {
+    operation_id: string;
+    operation_name: string;
+    canonical_window: string;
+    catalog_status: 'present' | 'missing' | 'not_applicable';
+    eligibility_status: 'eligible' | 'not_eligible' | 'unknown';
+    launch_status: 'launched' | 'blocked' | 'not_launched' | 'unknown';
+    delivery_status: 'blocked' | 'unknown' | 'missing';
+    blocker_code: WatchedOperationBlocker | string;
+    typed_blocker: WatchedOperationBlocker | string;
+    turn: number;
+}
+
 export type DoctrineType = 'INFILTRATE' | 'ARTILLERY_COUNTER' | 'COORDINATED_STRIKE' | 'STATIC_DEFENSE' | 'ATTACK' | 'DEFEND';
 
 export interface DoctrineState {
@@ -1942,6 +1967,8 @@ corps_command?: Record<FormationId, CorpsCommandState>;
 corps_equipment_reserve?: Record<FormationId, { tanks: number; artillery: number; apcs: number }>;
 /** Operation injection validation warnings (collected at injection time, surfaced in run_summary). */
 op_injection_warnings?: OpInjectionWarning[];
+/** Compact triggered-operation lifecycle diagnostics. Observability only; does not affect launch behavior. */
+watched_operations?: WatchedOperationTraceRow[];
 /** Triggered operations that have been offered and accepted (operation name → turn accepted). */
 triggered_operations_accepted?: Record<string, number>;
 /** Triggered operations that have been declined (operation name → { declined_turn, decline_count }). */

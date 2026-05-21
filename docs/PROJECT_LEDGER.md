@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] diagnostic(h1): persist watched-operation lifecycle trace
+
+**Type:** Sensitive-history diagnostic/output contract. Touched `src/sim/combat/triggered_operations.ts`, `src/state/game_state.ts`, `src/scenario/scenario_runner.ts`, baseline tooling/manifest, focused tests, and H1 docs. No operation objectives, OOB, launch tuning, scenario data, canon text, or `FORAWWV.md` changed.
+
+**Why:** The catalog-present diagnostic still had to infer Cerska-Kamenica and Stupcanica status from source text because skipped triggered operations did not persist a lifecycle row. H1 needs skip/block/inject evidence before any outcome tuning.
+
+**Change:** Added compact `state.military.watched_operations` rows for triggered-operation skip/block/inject outcomes, including active primary/secondary corps, decline/cooldown state, already-owned objectives, empty live axes, validation blockers, build failure, and accepted/injected. The scenario runner now emits deterministic `watched_operations.json`; the baseline manifest now tracks that artifact alongside existing scenario outputs.
+
+**Determinism/scope:** Deterministic observability/output-contract change. Rows are sorted with `strictCompare`, serialized with existing stable JSON paths, and contain no timestamps or random values. Save hashes and baseline hashes drift intentionally because the trace rows are now persisted; combat behavior and sensitive-history outcomes are unchanged.
+
+**Verification:** TDD red/green on `tests/triggered_operations.test.ts`; `npx.cmd vitest run tests/triggered_operations.test.ts --reporter=dot` PASS (15/15); `npx.cmd vitest run tests/triggered_operations.test.ts tests/sensitive_history_status_diagnostic.test.ts --reporter=dot` PASS (20/20); `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after manifest refresh.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_WATCHED_OPERATION_LIFECYCLE_TRACE.md`.
+
+---
+
 ## [2026-05-21] diagnostic(h1): classify catalog-present watched operations
 
 **Type:** Sensitive-history diagnostic/reporting refinement. Touched `tools/diagnostics/sensitive_history_status.cjs`, fixture/test coverage, and docs only. No operation behavior, launch feasibility, objectives, OOB, save schema, scenario data, generated artifact ownership, canon text, or `FORAWWV.md` changed.

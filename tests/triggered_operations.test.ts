@@ -158,6 +158,18 @@ describe('checkTriggeredOperations', () => {
 
         const injected = checkTriggeredOperations(state);
         assert.ok(!injected.includes('Operation Posavina Corridor'));
+        assert.deepEqual(state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Posavina Corridor'), {
+            operation_id: '',
+            operation_name: 'Operation Posavina Corridor',
+            canonical_window: '5',
+            catalog_status: 'present',
+            eligibility_status: 'unknown',
+            launch_status: 'not_launched',
+            delivery_status: 'unknown',
+            blocker_code: 'active_primary_corps',
+            typed_blocker: 'active_primary_corps',
+            turn: 5,
+        });
     });
 
     it('injects Herzegovina Consolidation once the corps finishes its earlier chain', () => {
@@ -207,6 +219,18 @@ describe('checkTriggeredOperations', () => {
         assert.ok(!injected.includes('Operation Kotor Varos'));
         assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations.length, 0);
         assert.deepEqual(state.military.op_injection_warnings ?? [], []);
+        assert.deepEqual(state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Kotor Varos'), {
+            operation_id: '',
+            operation_name: 'Operation Kotor Varos',
+            canonical_window: '10',
+            catalog_status: 'present',
+            eligibility_status: 'unknown',
+            launch_status: 'not_launched',
+            delivery_status: 'unknown',
+            blocker_code: 'already_owned_objectives',
+            typed_blocker: 'already_owned_objectives',
+            turn: 10,
+        });
     });
 
     it('does not inject Kotor Varos before turn 10', () => {
@@ -224,6 +248,18 @@ describe('checkTriggeredOperations', () => {
 
         const op = state.military.corps_command!['vrs_drina']!.active_operations[0];
         assert.equal(op?.sector_id, 'sector:vrs_drina:0');
+        assert.deepEqual(state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Cerska-Kamenica'), {
+            operation_id: 'Operation Cerska-Kamenica',
+            operation_name: 'Operation Cerska-Kamenica',
+            canonical_window: '40',
+            catalog_status: 'present',
+            eligibility_status: 'eligible',
+            launch_status: 'launched',
+            delivery_status: 'unknown',
+            blocker_code: '',
+            typed_blocker: '',
+            turn: 40,
+        });
     });
 
     it('does not inject the same triggered operation twice', () => {
@@ -241,6 +277,10 @@ describe('checkTriggeredOperations', () => {
             'Operation Kotor Varos': { declined_turn: 15, decline_count: 1 },
         };
         assert.ok(!checkTriggeredOperations(inCooldown).includes('Operation Kotor Varos'));
+        assert.equal(
+            inCooldown.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Kotor Varos')?.blocker_code,
+            'cooldown_decline_state',
+        );
 
         const reoffered = makeState(24);
         reoffered.military.declined_operations = {
@@ -253,6 +293,10 @@ describe('checkTriggeredOperations', () => {
             'Operation Kotor Varos': { declined_turn: 40, decline_count: 3 },
         };
         assert.ok(!checkTriggeredOperations(permanentlyDeclined).includes('Operation Kotor Varos'));
+        assert.equal(
+            permanentlyDeclined.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Kotor Varos')?.blocker_code,
+            'cooldown_decline_state',
+        );
     });
 
     it('filters already-controlled objectives without dropping a viable triggered axis', () => {

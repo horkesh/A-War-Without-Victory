@@ -347,6 +347,8 @@ export interface RunScenarioResult {
         destroyed_brigades: string;
         /** Operation AARs (completed operations). */
         operation_aars: string;
+        /** Triggered-operation lifecycle diagnostics for watched historical operations. */
+        watched_operations?: string;
         /** LANE-2026-05-02-A1: Per-turn brigade-keyed snapshot (read-only observability). */
         brigade_temporal_log: string;
         /** LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state JSONL stream. */
@@ -2802,6 +2804,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             await writeFile(operationAarsPath, stableStringify(operationAars, 2), 'utf8');
         });
 
+        const watchedOperations = [...(state.military.watched_operations ?? [])].sort((a, b) =>
+            (a.turn - b.turn)
+            || strictCompare(a.operation_name, b.operation_name)
+            || strictCompare(a.launch_status, b.launch_status)
+            || strictCompare(a.blocker_code, b.blocker_code)
+        );
+        const watchedOperationsPath = join(outDir, 'watched_operations.json');
+        await timedAsync(emitTimingJson, timingTotals, 'serialization_artifacts', async () => {
+            await ensureRunOutputDir(outDir);
+            await writeFile(watchedOperationsPath, stableStringify(watchedOperations, 2), 'utf8');
+        });
+
         endDiagnosticsStart = timingStart(emitTimingJson);
         let formationFatigueSummary: FormationFatigueSummary | null = null;
         const formationIds = Object.keys(finalFormations).sort(strictCompare);
@@ -2921,9 +2935,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 control_delta: controlDeltaPath,
                 end_report: endReportPath,
                 activity_summary: activitySummaryPath,
-            formation_delta: formationDeltaPath,
+                formation_delta: formationDeltaPath,
                 destroyed_brigades: destroyedBrigadesPath,
                 operation_aars: operationAarsPath,
+                watched_operations: watchedOperationsPath,
                 displacement_event_log: displacementEventLogPath,
             ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
             ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),

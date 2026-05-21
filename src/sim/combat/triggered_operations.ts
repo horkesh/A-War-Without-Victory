@@ -18,6 +18,8 @@ import type {
     GameState,
     OperationAxis,
     SettlementId, // LANE-2026-05-02-KRIVAJA: for prestageBrigadesForTriggeredOp brigade_movement_orders writes
+    WatchedOperationBlocker,
+    WatchedOperationTraceRow,
 } from '../../state/game_state.js';
 import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -577,6 +579,81 @@ const TRIGGERED_OPS: TriggeredOpDef[] = TRIGGERED_OPS_RAW.filter(
 const REOFFER_COOLDOWN_TURNS = 8;
 const MAX_DECLINE_COUNT = 3;
 
+function canonicalWindowForTriggeredOp(def: TriggeredOpDef, turn: number): string {
+    switch (def.name) {
+        case 'Operation Kotor Varos':
+            return '10';
+        case 'Operation Cerska-Kamenica':
+            return '40';
+        case 'Operation Krivaja-95':
+            return '170-178';
+        case 'Operation Stupčanica-95':
+            return '172-180';
+        default:
+            return String(turn);
+    }
+}
+
+function triggeredOpWindowReached(def: TriggeredOpDef, state: GameState, turn: number): boolean {
+    switch (def.name) {
+        case 'Operation Kotor Varos':
+            return turn >= 10;
+        case 'Operation Cerska-Kamenica':
+            return turn >= 40;
+        case 'Operation Krivaja-95':
+            return turn >= 170;
+        case 'Operation Stupčanica-95':
+            return turn >= 172;
+        default:
+            return def.trigger(state, turn);
+    }
+}
+
+function recordWatchedOperationTrace(
+    state: GameState,
+    def: TriggeredOpDef,
+    turn: number,
+    outcome: {
+        launch_status: WatchedOperationTraceRow['launch_status'];
+        eligibility_status?: WatchedOperationTraceRow['eligibility_status'];
+        delivery_status?: WatchedOperationTraceRow['delivery_status'];
+        blocker_code?: WatchedOperationBlocker | string;
+        operation_id?: string;
+    },
+): void {
+    const blocker = outcome.blocker_code ?? '';
+    const row: WatchedOperationTraceRow = {
+        operation_id: outcome.operation_id ?? '',
+        operation_name: def.name,
+        canonical_window: canonicalWindowForTriggeredOp(def, turn),
+        catalog_status: 'present',
+        eligibility_status: outcome.eligibility_status ?? 'unknown',
+        launch_status: outcome.launch_status,
+        delivery_status: outcome.delivery_status ?? (outcome.launch_status === 'blocked' ? 'blocked' : 'unknown'),
+        blocker_code: blocker,
+        typed_blocker: blocker,
+        turn,
+    };
+
+    if (!state.military.watched_operations) state.military.watched_operations = [];
+    const existingIndex = state.military.watched_operations.findIndex((existing) =>
+        existing.operation_name === row.operation_name
+        && existing.launch_status === row.launch_status
+        && existing.blocker_code === row.blocker_code
+    );
+    if (existingIndex >= 0) {
+        state.military.watched_operations[existingIndex] = row;
+        return;
+    }
+    state.military.watched_operations.push(row);
+    state.military.watched_operations.sort((a, b) =>
+        (a.turn - b.turn)
+        || strictCompare(a.operation_name, b.operation_name)
+        || strictCompare(a.launch_status, b.launch_status)
+        || strictCompare(a.blocker_code, b.blocker_code)
+    );
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Core logic
 // ═══════════════════════════════════════════════════════════════════════════
@@ -755,17 +832,47 @@ export function checkTriggeredOperations(state: GameState): string[] {
 
         // Permanently declined (3 strikes)?
         const declineInfo = state.military.declined_operations?.[def.name];
-        if (declineInfo && declineInfo.decline_count >= MAX_DECLINE_COUNT) continue;
+        if (declineInfo && declineInfo.decline_count >= MAX_DECLINE_COUNT) {
+            if (def.trigger(state, turn)) {
+                recordWatchedOperationTrace(state, def, turn, {
+                    launch_status: 'not_launched',
+                    blocker_code: 'cooldown_decline_state',
+                });
+            }
+            continue;
+        }
 
         // In re-offer cooldown?
-        if (declineInfo && (turn - declineInfo.declined_turn) < REOFFER_COOLDOWN_TURNS) continue;
+        if (declineInfo && (turn - declineInfo.declined_turn) < REOFFER_COOLDOWN_TURNS) {
+            if (def.trigger(state, turn)) {
+                recordWatchedOperationTrace(state, def, turn, {
+                    launch_status: 'not_launched',
+                    blocker_code: 'cooldown_decline_state',
+                });
+            }
+            continue;
+        }
 
         // Check trigger condition
-        if (!def.trigger(state, turn)) continue;
+        if (!def.trigger(state, turn)) {
+            if (triggeredOpWindowReached(def, state, turn) && !opStillHasEnemyObjectives(state, def)) {
+                recordWatchedOperationTrace(state, def, turn, {
+                    launch_status: 'not_launched',
+                    blocker_code: 'already_owned_objectives',
+                });
+            }
+            continue;
+        }
 
         // Primary corps must not have an active operation
         const primaryCmd = cc[def.primary_corps];
-        if (!primaryCmd || hasActiveOperation(primaryCmd)) continue;
+        if (!primaryCmd || hasActiveOperation(primaryCmd)) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'active_primary_corps',
+            });
+            continue;
+        }
 
         // For joint ops, check secondary corps too
         const secondaryCorps = new Set(def.axes.map(a => a.corps).filter(c => c !== def.primary_corps));
@@ -777,12 +884,24 @@ export function checkTriggeredOperations(state: GameState): string[] {
                 break;
             }
         }
-        if (secondaryBlocked) continue;
+        if (secondaryBlocked) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'active_secondary_corps',
+            });
+            continue;
+        }
 
         // Skip stale offers that no longer have any enemy objectives to pursue.
         // This keeps historical-op orchestration honest when the map state has
         // already made an offer moot before its trigger date.
-        if (!opStillHasEnemyObjectives(state, def)) continue;
+        if (!opStillHasEnemyObjectives(state, def)) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'already_owned_objectives',
+            });
+            continue;
+        }
 
         // Validate before building
         const liveAxes = def.axes
@@ -794,7 +913,13 @@ export function checkTriggeredOperations(state: GameState): string[] {
                 }),
             }))
             .filter((axis) => axis.objectives.length > 0);
-        if (liveAxes.length === 0) continue;
+        if (liveAxes.length === 0) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'empty_live_axes',
+            });
+            continue;
+        }
         const effectiveDef = { ...def, axes: liveAxes };
 
         const validatable: ValidatableOpDef = {
@@ -805,11 +930,26 @@ export function checkTriggeredOperations(state: GameState): string[] {
         };
         const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
-        if (hasBlockingOpInjectionWarnings(trigWarnings)) continue;
+        if (hasBlockingOpInjectionWarnings(trigWarnings)) {
+            const blocker = trigWarnings.find((warning) => warning.severity === 'error')?.check ?? 'validation_blocker';
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'blocked',
+                eligibility_status: 'not_eligible',
+                blocker_code: blocker,
+                delivery_status: 'blocked',
+            });
+            continue;
+        }
 
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(effectiveDef, state, turn);
-        if (!result) continue;
+        if (!result) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'build_failure',
+            });
+            continue;
+        }
 
         // LANE-2026-05-02-KRIVAJA: emit column-march orders for any participant
         // whose location_osid is not the axis staging_osid. Phase B distribution
@@ -829,6 +969,12 @@ export function checkTriggeredOperations(state: GameState): string[] {
         // Track acceptance
         if (!state.military.triggered_operations_accepted) state.military.triggered_operations_accepted = {};
         state.military.triggered_operations_accepted[def.name] = turn;
+        recordWatchedOperationTrace(state, def, turn, {
+            launch_status: 'launched',
+            eligibility_status: 'eligible',
+            blocker_code: '',
+            operation_id: result.op.name,
+        });
 
         injected.push(def.name);
     }

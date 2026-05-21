@@ -24,6 +24,7 @@ const ARTIFACTS = [
     'formation_delta.json',
     'final_save.json',
     'run_summary.json',
+    'watched_operations.json',
     'weekly_report.jsonl'
 ].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 
