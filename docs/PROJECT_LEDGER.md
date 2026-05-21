@@ -3,6 +3,19 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] refactor(strict-null): clean Phase F0 null-control casts
+
+**Type:** Strict-null cleanup. CLI diagnostic state-initializer refactor; no political-control initialization behavior, source data, derived canonical data, scenario behavior, save schema, or output tuning changed.
+
+**Why:** `phaseF0_null_political_control_settlements_report.ts` used three `as any` casts to assemble a minimal audit `GameState`.
+
+**Change:** Imported `GameState` as a type and constructed the audit state with directly typed `military`, `political`, and `displacement` domains. Added a strict-null progress assertion pinning the CLI at zero for `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (76/76); `npm.cmd run typecheck` PASS; `npx.cmd tsx src/cli/phaseF0_null_political_control_settlements_report.ts` PASS with canonical init reporting 744 graph nodes and `null=0`. Current inventory floor: `as_factionid_casts 2`, `as_unknown_casts 2`, `as_any_casts 168`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 473`.
+
+**Artifacts:** `docs/40_reports/implemented/20260521_STRICT_NULL_PHASEF0_NULL_CONTROL_AS_ANY.md`.
+
+---
 ## [2026-05-21] refactor(strict-null): clean Phase D2 reconcile casts
 
 **Type:** Strict-null cleanup. CLI diagnostic type-shape correction; no source data, derived canonical data, scenario behavior, save schema, or output tuning changed.
