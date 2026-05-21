@@ -3,6 +3,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-21] docs(release): current-tip CI proof packet
+
+**Type:** Documentation-only release evidence packet. Touched release docs only. No source, tests, scenario data, generated artifacts, save schema, canon text, or `FORAWWV.md` changed.
+
+**Why:** After the strict-null, sector performance, H1 diagnostic, and notification safe-slice wave, the branch needed a consolidated proof packet that distinguishes repo-verifiable local checks from pending GitHub Actions and operator-only release gates.
+
+**Change:** Added `docs/40_reports/release/20260521_RELEASE_EVIDENCE_CI_PROOF_PACKET.md` with the exact git fingerprint for `f368b225`, current strict-null counts (`2 / 4 / 180 / 10 / 36 / 463`), local verification matrix, current GitHub Actions run ids, baseline and H1 evidence hashes, generated-artifact ownership, and operator-only evidence gaps.
+
+**Verification:** `npm.cmd run typecheck` PASS; `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --reporter=dot` PASS (60/60); `node tools/diagnostics/strict_null_inventory.cjs` PASS; `npm.cmd run test:baselines` PASS; `npm.cmd run desktop:map:build` PASS; `git diff --check` clean. Current-tip GitHub Actions were still pending at packet authoring and are recorded as pending, not green.
+
+---
+
 ## [2026-05-21] content(notifications): author safe front-visit recipient blocks
 
 **Type:** Event-notification content backfill, safe slice only. Touched `data/scenarios/events/war_1993.json`, notification content tests, and docs. No simulation mechanics, event trigger timing, response effects, save schema, canon text, or `FORAWWV.md` changed.
