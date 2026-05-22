@@ -578,6 +578,50 @@ function countControllers(snapshot: ControlKey[]): Map<string, number> {
     return counts;
 }
 
+/**
+ * Pick the historical-control reference key for a scenario based on its
+ * declared duration. Scenarios that end at jan1993 (40w / 52w / 56w from
+ * apr1992) compare to the jan1993 painted snapshot; longer scenarios pick
+ * the closest later painted snapshot we maintain (apr1994 / apr1995 / oct1995).
+ *
+ * Wave 15 architectural fix: prior to this, scenario_runner hardcoded a
+ * jan1993 reference for ALL apr1992 scenarios regardless of duration, so a
+ * 188w run that ended in oct1995 was compared to a 30-month-stale snapshot.
+ * Painted snapshots come from `data/source/calibration/painted_control_*.json`.
+ */
+function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995' {
+    const weeks = scenario.weeks ?? 0;
+    if (weeks <= 56) return 'jan1993';   // 40w / 52w / 56w apr1992-start scenarios
+    if (weeks <= 108) return 'apr1994';  // ~104 weeks from apr1992 → apr1994
+    if (weeks <= 160) return 'apr1995';  // ~156 weeks from apr1992 → apr1995
+    return 'oct1995';                     // ~187+ weeks → oct1995 endpoint
+}
+
+/**
+ * Load a painted-control reference snapshot directly from
+ * `data/source/calibration/painted_control_{refKey}.json` as a ControlKey[].
+ *
+ * The painted files are OSID-keyed under `by_settlement_id` (keys like
+ * `op:banja_luka:banja_luka_2`). This loader bypasses the
+ * `createInitialGameState` detour used for the legacy jan1993 path —
+ * painted controls are already at OSID granularity, no municipality→OSID
+ * promotion needed.
+ */
+async function loadPaintedControlReferenceSnapshot(
+    refKey: string,
+    baseDir: string
+): Promise<ControlKey[]> {
+    const path = join(baseDir, 'data', 'source', 'calibration', `painted_control_${refKey}.json`);
+    const json = JSON.parse(await readFile(path, 'utf8')) as { by_settlement_id?: Record<string, string> };
+    const bySettlement = json.by_settlement_id ?? {};
+    const keys = Object.keys(bySettlement).sort(strictCompare);
+    return keys.map((osid) => ({
+        settlement_id: osid,
+        municipality_id: osid.startsWith('op:') ? (osid.split(':')[1] ?? null) : null,
+        controller: bySettlement[osid] ?? null,
+    }));
+}
+
 function computeHistoricalControlAlignmentDiagnostics(
     final: ControlKey[],
     reference: ControlKey[],
@@ -2595,15 +2639,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
         if (scenario.init_control === 'apr1992' || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'))) {
-            const referenceControlPath = resolveInitControlPath('data/scenarios/initial_control/jan1993.json', baseDir);
-            const historicalReferenceState = await createInitialGameState('harness-historical-reference', referenceControlPath, {
-                init_control_mode: 'institutional'
-            }, { baseDir, settlementGraph: graph, operationalData: operationalData ?? undefined });
-            const historicalReferenceSnapshot = extractSettlementControlSnapshot(historicalReferenceState, graph);
+            // Wave 15: pick the painted reference matching scenario duration.
+            // Loads the OSID-keyed painted_control_{key}.json directly, skipping
+            // the createInitialGameState detour used by the legacy mun1990 path.
+            const referenceKey = pickHistoricalReferenceKey(scenario);
+            const historicalReferenceSnapshot = await loadPaintedControlReferenceSnapshot(referenceKey, baseDir);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
                 finalControlSnapshot,
                 historicalReferenceSnapshot,
-                'jan1993'
+                referenceKey
             );
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
         }
