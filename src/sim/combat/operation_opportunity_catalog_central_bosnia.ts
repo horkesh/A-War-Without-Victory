@@ -742,10 +742,12 @@ const KUPRES_PHASE_2_AXIS_COORDINATION_FLOOR = 0.30;
 const KUPRES_PHASE_2_SUPPLY_PRESSURE_CEILING = 92;
 
 // Phase 1 dependency: Cincar's captured shoulder MUST be HRHB-held. If RS has
-// somehow retaken bucovaca, Phase 2 is geometrically impossible.
-const KUPRES_PHASE_2_CINCAR_DEPENDENCY_ANCHORS: readonly string[] = [
-    KUPRES_PHASE_2_STAGING_BUCOVACA,
-];
+// somehow retaken bucovaca, Phase 2 is geometrically impossible. Wave 9C
+// inlined this check into stagingAccessKupresPhase2 — an anchor-array
+// formulation caused the engine to route Phase 2 brigades toward bucovaca
+// as a corridor waypoint instead of forward to the actual objectives.
+// The constant is retained for cross-reference but no longer enumerated as
+// an anchor array.
 
 // Standard HVO Tomislavgrad rear staging spine (carried forward from Cincar
 // for supply / commander headquarters access). Treat unpainted (null/undefined)
@@ -835,10 +837,12 @@ const allianceContextKupresPhase2: AxisPredicate = (state) => {
 const stagingAccessKupresPhase2: AxisPredicate = (state) => {
     // Phase 1 dependency: Bučovača MUST be HRHB-held. This is the hard gate
     // distinguishing Phase 2 from any standalone Kupres push — Phase 2 only
-    // makes sense once Cincar's captured shoulder is locked in.
-    for (const osid of KUPRES_PHASE_2_CINCAR_DEPENDENCY_ANCHORS) {
-        const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl !== 'HRHB') {
+    // makes sense once Cincar's captured shoulder is locked in. Inlined here
+    // (Wave 9C) to avoid the engine treating an anchor array as a routing
+    // waypoint list.
+    {
+        const bucovacaCtrl = getPoliticalControllerOSID(state, KUPRES_PHASE_2_STAGING_BUCOVACA, undefined);
+        if (bucovacaCtrl !== 'HRHB') {
             return { green: false, reason: 'Bučovača (Cincar Phase 1 capture) is not HRHB-held — Phase 2 precondition fails' };
         }
     }
