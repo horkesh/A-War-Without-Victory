@@ -90,14 +90,25 @@ const DONJI_VAKUF_SUPPLY_PRESSURE_CEILING = 90;
 
 const KUPRES_CINCAR_STAGING_LIVNO = 'op:livno:livno_2';
 const KUPRES_CINCAR_STAGING_TOMISLAVGRAD = 'op:tomislavgrad:tomislavgrad_2';
+// Retained as identifiers (referenced by axis `staging_osid` fields below) but
+// deliberately NOT in the precondition anchors list — see comment on
+// KUPRES_CINCAR_STAGING_ANCHORS.
 const KUPRES_CINCAR_STAGING_KUPRES = 'op:kupres:kupres_2';
 const KUPRES_CINCAR_STAGING_GORAVCI = 'op:kupres:goravci';
+void KUPRES_CINCAR_STAGING_GORAVCI;
 
+// 2026-05-22 Wave 3B-A.1 (forensics memo
+// docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3 kupres_cincar_94):
+// previously the anchors list also included op:kupres:kupres_2 and op:kupres:goravci,
+// but those are RS-held targets the op is supposed to take — listing them as
+// REQUIRED-HRHB-HELD precondition staging anchors creates a circular precondition.
+// Trimmed to the genuine HVO/HV western-Herzegovina staging spine (Livno +
+// Tomislavgrad). The Kupres identifier is still used as axis `staging_osid` for
+// the axis that converges on Kupres area — that field accepts non-Federation-held
+// OSIDs because it's about route geometry, not pre-held precondition.
 const KUPRES_CINCAR_STAGING_ANCHORS: readonly string[] = [
     KUPRES_CINCAR_STAGING_LIVNO,
     KUPRES_CINCAR_STAGING_TOMISLAVGRAD,
-    KUPRES_CINCAR_STAGING_KUPRES,
-    KUPRES_CINCAR_STAGING_GORAVCI,
 ];
 
 const KUPRES_CINCAR_OBJECTIVES: readonly string[] = [
@@ -390,13 +401,18 @@ const allianceContextKupresCincar: AxisPredicate = (state) => {
 };
 
 const stagingAccessKupresCincar: AxisPredicate = (state) => {
+    // 2026-05-22 Wave 3B-A.1: use `!= null` (catches both null and undefined)
+    // so unpainted OSIDs are treated as pass-through. Previously `!== null`
+    // missed undefined — tomislavgrad_2 has no entry in political_controllers
+    // (undefined, not null), bricking this predicate. Forensics memo
+    // 20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md cross-cutting paint-gap finding.
     for (const osid of KUPRES_CINCAR_STAGING_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl !== null && ctrl !== 'HRHB') {
-            return { green: false, reason: 'Livno-Tomislavgrad-Kupres staging anchors are not held' };
+        if (ctrl != null && ctrl !== 'HRHB') {
+            return { green: false, reason: 'Livno-Tomislavgrad staging anchors are not Federation-held' };
         }
     }
-    return { green: true, reason: 'Livno-Tomislavgrad-Kupres staging anchors are held' };
+    return { green: true, reason: 'Livno-Tomislavgrad staging anchors are Federation-held' };
 };
 
 const enemyWeaknessKupresCincar: AxisPredicate = (state) => {
