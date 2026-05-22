@@ -12,9 +12,17 @@ describe('event notification residual diagnostic', () => {
 
         expect(payload.rows).toBe(2);
         expect(payload.missing_blocks).toBe(4);
+        expect(payload.classified_blocks).toBe(4);
+        expect(payload.unclassified_blocks).toBe(0);
         expect(payload.residuals.map((row: { event: string }) => row.event).sort()).toEqual([
             'visit_to_front_hrhb',
             'visit_to_front_rs',
+        ]);
+        expect(payload.residuals.flatMap((row: { missing: Array<{ bucket: string }> }) => row.missing).map((entry: { bucket: string }) => entry.bucket)).toEqual([
+            'blocked-sensitive',
+            'blocked-sensitive',
+            'blocked-sensitive',
+            'blocked-sensitive',
         ]);
     });
 });

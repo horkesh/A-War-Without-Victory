@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] diagnostic(notifications): classify blocked residuals
+
+**Type:** Event-notification diagnostic/test/docs guard. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** After the historian and narrative content slices, the final 2 rows / 4 missing recipient blocks are intentional blocked-sensitive press omissions. The diagnostic needed to distinguish those policy residuals from unreviewed missing copy.
+
+**Change:** Added deterministic residual classification to `tools/diagnostics/event_notification_residuals.cjs` for `visit_press_rs` and `visit_press_hrhb`. JSON output now reports `classified_blocks` and `unclassified_blocks`, and the focused test pins 4 classified blocked-sensitive blocks with 0 unclassified blocks. Added report `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md` and propagated the policy-residual state through Phase D tracker docs and roadmap/backlog indexes.
+
+**Determinism / output impact:** Diagnostic/reporting only. The event JSON, notification emission path, response IDs, triggers, effects, scenario order, save schema, and feature-flag behavior are unchanged.
+
+**Verification:** `node tools\diagnostics\event_notification_residuals.cjs --json` reports 2 rows / 4 missing blocks, 4 classified blocks, and 0 unclassified blocks. `npx.cmd vitest run tests\sim\events\event_notification_residuals_diagnostic.test.ts --reporter=dot` passed 1/1. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `tools/diagnostics/event_notification_residuals.cjs`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md`.
+
+**Roadmap delta:** Phase D notification backfill is now in policy-residual state: 2 rows / 4 missing blocks remain, all blocked-sensitive, with 0 unclassified residual blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close Srebrenica demilitarization row
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

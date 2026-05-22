@@ -109,4 +109,4 @@ Feature-flag-off baseline behavior must remain stable; notification text may onl
 
 If a tracker consistency script is added in the future, it should assert that every row listed as complete has all non-source recipient blocks for all response options, and that every row listed as residual still has the expected missing blocks.
 
-2026-05-22 update: `tools/diagnostics/event_notification_residuals.cjs` now computes the event-JSON residual floor directly. `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins the current 2-row / 4-block floor and residual event id set.
+2026-05-22 update: `tools/diagnostics/event_notification_residuals.cjs` now computes the event-JSON residual floor directly and classifies the remaining 4 blocked-sensitive press omissions. `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins the current 2-row / 4-block floor, residual event id set, 4 classified blocks, and 0 unclassified blocks.

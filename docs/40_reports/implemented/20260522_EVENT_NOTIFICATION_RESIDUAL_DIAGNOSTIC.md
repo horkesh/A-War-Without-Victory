@@ -5,15 +5,16 @@
 
 ## Summary
 
-Added `tools/diagnostics/event_notification_residuals.cjs`, a deterministic diagnostic that reads `data/scenarios/events/war_*.json`, finds `requires_player_response` events with a `responding_faction`, and counts missing non-source `notifications_to_other_factions[response_id][recipient]` blocks.
+Added `tools/diagnostics/event_notification_residuals.cjs`, a deterministic diagnostic that reads `data/scenarios/events/war_*.json`, finds `requires_player_response` events with a `responding_faction`, and counts missing non-source `notifications_to_other_factions[response_id][recipient]` blocks. The diagnostic now also classifies the remaining blocked-sensitive press omissions so unclassified gaps cannot hide inside the residual floor.
 
 The diagnostic reports:
 
 ```text
 Event notification residuals: 2 rows / 4 recipient blocks
+Classified residual blocks: 4; unclassified residual blocks: 0
 ```
 
-The focused test `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins that floor and the residual event-id set so future content slices must update the executable proof, not only prose trackers. The original diagnostic landed at 9 rows / 38 blocks; later historian-cleared slices updated the pinned floor to 2 rows / 4 blocks.
+The focused test `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins that floor, the residual event-id set, and the fact that every remaining missing block is `blocked-sensitive`. Future content slices must update the executable proof, not only prose trackers. The original diagnostic landed at 9 rows / 38 blocks; later historian-cleared slices updated the pinned floor to 2 rows / 4 blocks.
 
 ## Behavior
 
