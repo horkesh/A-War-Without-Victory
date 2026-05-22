@@ -166,14 +166,20 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
 /** Adjust RBiH-HRHB alliance value.
  *  Applies delta, clamps to [-1, 1], then clamps against any active
  *  alliance_locks (floor/ceiling). Active locks override any incoming delta
- *  that would push the value past them. */
+ *  that would push the value past them.
+ *
+ *  Clamp order is ceiling-then-floor so that floor wins when locks contradict
+ *  (e.g. Washington Agreement floor=0.80 simultaneously active with a stale
+ *  recovery-event ceiling=0.55). Floor is the stronger semantic guarantee —
+ *  a minimum that must hold — so a contradictory ceiling cannot pull the
+ *  value below it. */
 function applyAllianceChange(state: GameState, delta: number): void {
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
     let next = clamp(current + delta, -1, 1);
     const currentTurn = state.meta.turn ?? 0;
     const bounds = getActiveAllianceBounds(state, currentTurn);
-    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
     if (bounds.ceiling != null && next > bounds.ceiling) next = bounds.ceiling;
+    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
     state.political.war_alliance_rbih_hrhb = next;
 }
 

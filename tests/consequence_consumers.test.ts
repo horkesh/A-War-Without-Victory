@@ -87,6 +87,21 @@ describe('applyAllianceChange with alliance_lock floor', () => {
         applyEventEffects(state, [{ kind: 'alliance_change', delta: -0.4 }]);
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.1);
     });
+
+    it('floor wins when contradictory floor and ceiling locks both active', () => {
+        // Washington Agreement scenario: floor=0.80 + stale recovery
+        // ceiling=0.55 simultaneously active. A positive delta would push
+        // value into 1.0; ceiling pulls it to 0.55; floor must lift back
+        // to 0.80. Floor is the stronger semantic guarantee.
+        const state = makeState();
+        state.political.war_alliance_rbih_hrhb = 0.8;
+        applyEventEffects(state, [
+            { kind: 'alliance_lock', mode: 'floor', value: 0.8, duration_turns: 60 },
+            { kind: 'alliance_lock', mode: 'ceiling', value: 0.55, duration_turns: 20 },
+        ]);
+        applyEventEffects(state, [{ kind: 'alliance_change', delta: 0.8 }]);
+        expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.8);
+    });
 });
 
 describe('getActiveRecruitmentMultiplier', () => {
