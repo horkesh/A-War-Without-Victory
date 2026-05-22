@@ -479,3 +479,11 @@ No source phase was completed in this lane. Current worktree status shows unrela
 - Verification: `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` PASS 89/89, `npm.cmd run typecheck` PASS, `npm.cmd run phase3:abc_audit` PASS with deterministic A-D report hashes, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
 - Fixture repair: the harness mock states now declare `meta.phase: 'war'`, use canonical strategy-table faction IDs (`RBiH`, `RS`), and write front-posture assignments with required `edge_id` fields. This restores diagnostic harness compatibility with the current turn pipeline and typed front-posture contract without calibration tuning.
 - Remaining `as_any_casts`: `src/state/save_migration.ts` (23) and `src/ui/map/data/GameStateAdapter.ts` (8). The Phase 3A A/B addendum above is superseded for current counts by this addendum.
+
+## 2026-05-22 Save Migration Tail Addendum
+
+- `src/state/save_migration.ts` is now closed for `as_any_casts` and pinned by `tests/strict_null_inventory_progress.test.ts`.
+- Delta: top-level `as_any_casts` 31 -> 8; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` remain 0.
+- Verification: `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` PASS 90/90, `npm.cmd run typecheck` PASS, `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`), `git diff --check` PASS, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
+- Implementation note: the slice replaces casts on `state` / `state.military` with direct typed reads or the existing tolerant `asRecord(...)` save-boundary helper. It does not add, remove, or change migration defaults.
+- Remaining visible strict-null escapes: `src/ui/map/data/GameStateAdapter.ts` has 8 `as_any_casts` and 2 retained `as_factionid_casts`. The Phase 3ABC addendum above is superseded for current counts by this addendum.

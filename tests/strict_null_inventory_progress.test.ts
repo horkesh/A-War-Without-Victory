@@ -406,6 +406,10 @@ const PHASE3ABC_AUDIT_HARNESS_AS_ANY_TAIL_FILES = [
     'src/cli/phase3abc_audit_harness.ts',
 ];
 
+const SAVE_MIGRATION_AS_ANY_TAIL_FILES = [
+    'src/state/save_migration.ts',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1432,6 +1436,16 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', PHASE3ABC_AUDIT_HARNESS_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
+    it('cleans the save migration as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', SAVE_MIGRATION_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

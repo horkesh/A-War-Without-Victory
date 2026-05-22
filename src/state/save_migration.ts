@@ -41,7 +41,7 @@ function isCanonicalPlayerFaction(value: unknown): value is FactionId {
 }
 
 function currentTurn(state: GameState): number {
-    const turn = (state as any).meta?.turn;
+    const turn = state.meta?.turn;
     return Number.isInteger(turn) && turn >= 0 ? turn : 0;
 }
 
@@ -112,7 +112,7 @@ function sanitizeCeasefire(pol: Record<string, any>, turn: number): void {
 }
 
 function canonicalizeFactions(state: GameState): void {
-    const factions = (state as any).factions;
+    const factions = state.factions;
     if (!Array.isArray(factions)) return;
     for (const f of [...factions].sort((a: any, b: any) => strictCompare(a?.id ?? '', b?.id ?? ''))) {
         if (!f || typeof f !== 'object') continue;
@@ -121,12 +121,12 @@ function canonicalizeFactions(state: GameState): void {
 }
 
 function defaultFactionState(state: GameState): void {
-    const factions = (state as any).factions;
+    const factions = state.factions;
     if (!Array.isArray(factions)) return;
     for (const f of [...factions].sort((a: any, b: any) => strictCompare(a?.id ?? '', b?.id ?? ''))) {
         if (!f || typeof f !== 'object') continue;
         if (!Array.isArray(f.supply_sources)) f.supply_sources = [];
-        if (!Number.isInteger(f.command_capacity) || f.command_capacity < 0) f.command_capacity = 0;
+        if (typeof f.command_capacity !== 'number' || !Number.isInteger(f.command_capacity) || f.command_capacity < 0) f.command_capacity = 0;
         if (!f.negotiation || typeof f.negotiation !== 'object' || Array.isArray(f.negotiation)) {
             f.negotiation = { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null };
         } else {
@@ -148,7 +148,7 @@ function defaultFactionState(state: GameState): void {
 }
 
 function canonicalizeMilitaryRecords(state: GameState): void {
-    const mil = asRecord((state as any).military);
+    const mil = asRecord(state.military);
     if (!mil) return;
     for (const key of ['front_posture', 'front_posture_regions'] as const) {
         const rec = asRecord(mil[key]);
@@ -162,7 +162,7 @@ function canonicalizeMilitaryRecords(state: GameState): void {
 }
 
 function defaultFrontSegments(state: GameState): void {
-    const segments = asRecord((state as any).military?.front_segments);
+    const segments = asRecord(state.military?.front_segments);
     if (!segments) return;
     for (const key of sortedKeys(segments)) {
         const seg = segments[key];
@@ -175,7 +175,7 @@ function defaultFrontSegments(state: GameState): void {
 }
 
 function defaultFormations(state: GameState): void {
-    const formations = asRecord((state as any).military?.formations);
+    const formations = asRecord(state.military?.formations);
     if (!formations) return;
     const turn = currentTurn(state);
     for (const key of sortedKeys(formations)) {
@@ -211,7 +211,7 @@ function defaultFormations(state: GameState): void {
 }
 
 function defaultMilitiaPools(state: GameState): void {
-    const pools = asRecord((state as any).military?.militia_pools);
+    const pools = asRecord(state.military?.militia_pools);
     if (!pools) return;
     for (const key of sortedKeys(pools)) {
         const pool = pools[key];
@@ -268,7 +268,7 @@ function defaultJna(mil: Record<string, any>): void {
 }
 
 function ensureNegotiationCounterOfferDefaults(state: GameState): void {
-    const mil = asRecord((state as any).military);
+    const mil = asRecord(state.military);
     if (mil) {
         const negotiation = ensureRecord(mil, 'negotiation');
         if (!asRecord(negotiation.capital)) negotiation.capital = {};
@@ -281,7 +281,7 @@ function ensureNegotiationCounterOfferDefaults(state: GameState): void {
         negotiation.pending_counter_offers = offers;
     }
 
-    const pol = asRecord((state as any).political);
+    const pol = asRecord(state.political);
     if (pol) {
         sanitizeNegotiationStatus(pol, currentTurn(state));
     }
@@ -314,7 +314,8 @@ registerMigration({
     version: 1,
     description: 'Add HRHB enclave resilience entries if missing. Sensitive: no.',
     migrate: (state) => {
-        const er = asRecord((state.military as any)?.enclave_resilience);
+        const military = asRecord(state.military);
+        const er = asRecord(military?.enclave_resilience);
         if (!er) return;
         for (const id of ['kiseljak', 'lasva_valley', 'zepce'].sort(strictCompare)) {
             if (!(id in er)) {
@@ -328,7 +329,7 @@ registerMigration({
     version: 2,
     description: 'Migrate corps_command active_operation to active_operations array. Sensitive: no.',
     migrate: (state) => {
-        const corpsCommand = asRecord((state.military as any)?.corps_command);
+        const corpsCommand = asRecord(state.military?.corps_command);
         if (!corpsCommand) return;
         for (const corpsId of sortedKeys(corpsCommand)) {
             const cmd = corpsCommand[corpsId];
@@ -345,7 +346,7 @@ registerMigration({
     version: 3,
     description: '2026-05-17 Phase 0 meta and faction declaration defaults. Sensitive: no.',
     migrate: (state) => {
-        const meta = asRecord((state as any).meta);
+        const meta = asRecord(state.meta);
         if (meta) {
             if (meta.referendum_held === undefined) meta.referendum_held = false;
             if (meta.referendum_turn === undefined) meta.referendum_turn = null;
@@ -367,7 +368,7 @@ registerMigration({
     version: 4,
     description: 'Political-domain defaults and negotiation substrate. Sensitive: no.',
     migrate: (state) => {
-        const pol = asRecord((state as any).political);
+        const pol = asRecord(state.political);
         if (!pol) return;
         sanitizeNegotiationStatus(pol, currentTurn(state));
         sanitizeCeasefire(pol, currentTurn(state));
@@ -381,7 +382,7 @@ registerMigration({
     version: 5,
     description: 'Military-domain default skeleton and front segment counters. Sensitive: no.',
     migrate: (state) => {
-        const mil = asRecord((state as any).military);
+        const mil = asRecord(state.military);
         if (!mil) return;
         ensureRecord(mil, 'front_segments');
         ensureRecord(mil, 'theatres');
@@ -402,9 +403,9 @@ registerMigration({
     version: 6,
     description: 'Peace-phase war substrate defaults. Sensitive: no.',
     migrate: (state) => {
-        const mil = asRecord((state as any).military);
-        const pol = asRecord((state as any).political);
-        const disp = asRecord((state as any).displacement);
+        const mil = asRecord(state.military);
+        const pol = asRecord(state.political);
+        const disp = asRecord(state.displacement);
         if (mil) {
             ensureRecord(mil, 'war_militia_strength');
             defaultJna(mil);
@@ -421,8 +422,8 @@ registerMigration({
     version: 7,
     description: 'War-phase supply, exhaustion, and displacement substrate defaults. Sensitive: no.',
     migrate: (state) => {
-        const pol = asRecord((state as any).political);
-        const disp = asRecord((state as any).displacement);
+        const pol = asRecord(state.political);
+        const disp = asRecord(state.displacement);
         if (pol) {
             ensureRecord(pol, 'war_supply_pressure');
             ensureRecord(pol, 'war_supply_condition');
@@ -444,7 +445,7 @@ registerMigration({
     version: 8,
     description: 'Phase E/F humanitarian aggregate defaults. Sensitive: no.',
     migrate: (state) => {
-        const disp = asRecord((state as any).displacement);
+        const disp = asRecord(state.displacement);
         if (!disp) return;
         ensureRecord(disp, 'displacement_humanitarian_aggregates');
         ensureRecord(disp, 'displacement_origin_dest_arrivals');
@@ -465,7 +466,7 @@ registerMigration({
     version: 10,
     description: 'A2/C1 command substrate default skeletons. Sensitive: no.',
     migrate: (state) => {
-        const mil = asRecord((state as any).military);
+        const mil = asRecord(state.military);
         if (!mil) return;
         ensureRecord(mil, 'army_co_decision_traces');
         ensureRecord(mil, 'army_corps_directives_by_faction');
@@ -498,7 +499,8 @@ registerMigration({
     version: 12,
     description: 'Top-level optional save arrays/policy counters when optional family is already present. Sensitive: no.',
     migrate: (state) => {
-        const s = state as any;
+        const s = asRecord(state);
+        if (!s) return;
         const optionalKeys = [
             'turn_summaries',
             'operation_history',
@@ -531,7 +533,7 @@ registerMigration({
     version: 14,
     description: 'Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH.',
     migrate: (state) => {
-        const meta = asRecord((state as any).meta);
+        const meta = asRecord(state.meta);
         if (!meta) return;
         if (!isCanonicalPlayerFaction(meta.player_faction)) {
             meta.player_faction = 'RBiH';
