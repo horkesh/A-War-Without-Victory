@@ -49,7 +49,20 @@ import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_5th_corps';
 const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
-const SANA_DEFENDER_WEAKNESS_FLOOR = 0.40;
+// 2026-05-22: lowered 0.40 → 0.20 per Wave 3B Wave B (forensics memo
+// docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3 sana_95).
+// At n1956, vrs_2nd_krajina has corps_exhaustion=0 + 5 active subordinates;
+// the composite weakness formula `0.5·collapse + 0.3·(1−readiness) + 0.2·equipWeak`
+// stays sub-0.40 across the late-war window, blocking sana_95 + sana_95_follow_on
+// from ever firing. The historical Aug-1995 Sana 95 launch happened under VRS
+// 2nd Krajina conditions that the engine's force-quality substrate captures
+// correctly in shape (per audit 20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md
+// — VRS w188 morale 12.6/cohesion 26.5 vs RBiH 89.5/73.6) but with a magnitude
+// the predicate floor doesn't see. 0.20 is a calibrated middle ground: still
+// requires meaningful trajectory weakness (well above 0), but doesn't demand
+// the 40% collapse-susceptibility number that the current substrate can never
+// produce. Re-tune empirically against painted Oct 1995 once 188w deltas land.
+const SANA_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
