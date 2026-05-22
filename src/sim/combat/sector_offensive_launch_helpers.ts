@@ -355,7 +355,23 @@ export function collectObjectiveApproachOsids(
                 break;
             }
         }
-        return graphApproachOsids;
+        // 2026-05-22 Wave 11 (proposal memo
+        // docs/40_reports/proposals/20260522_WAVE_11_PHASE2_DISABLE_JAJCE_EDGES.md §"Problem 2"):
+        // Sister patch to Wave 10 commit 6c7fe96e in bot_brigade_ai_osid.ts. The
+        // launch-gate previously fell through to collectSectorSubsegmentApproachOsids
+        // ONLY when the global front-edge graph was globally empty (adjacency.size === 0).
+        // When the graph has thousands of edges overall but ZERO entries for the specific
+        // objective's deep-zone neighbors (e.g. HVO–VRS Jajce / Kupres / Glamoč), the
+        // helper returned an empty Set and the launch gate reported 'no_approach_osid'
+        // even though the corps front sector sub-segments carry approach OSIDs the
+        // engine successfully used to clear the prerequisite predicates. Per-turn brain
+        // (Wave 10) and launch gate (this Wave 11) now both fall through to the
+        // sub-segment scan when the graph yields nothing for the objective set.
+        // Faction-symmetric; emergent (sub-segments are computed by sector reconciliation,
+        // not authored); zero new constants.
+        if (graphApproachOsids.size > 0) {
+            return graphApproachOsids;
+        }
     }
 
     return collectSectorSubsegmentApproachOsids(state, corpsId, objectives);

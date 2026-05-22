@@ -977,9 +977,21 @@ export const KUPRES_PHASE_2_94_OPPORTUNITY: OperationOpportunityDef = {
     staff_recommendation: 'approve',
 };
 
+// 2026-05-22 Wave 11 (proposal memo
+// docs/40_reports/proposals/20260522_WAVE_11_PHASE2_DISABLE_JAJCE_EDGES.md §"Problem 1"):
+// KUPRES_PHASE_2_94_OPPORTUNITY is intentionally UNENUMERATED here. The op def
+// + constants + predicates are retained above for forensic reference and possible
+// future re-enablement once HVO undelivery / Cincar Phase 1 expansion can land
+// kupres_2. As authored in Wave 9 it captured 0 OSIDs across n1969-n1972 (then
+// n1973), and its brigade pool overlaps 5/5 with Mistral 1's pool — Phase 2
+// running t148-156 leaves Mistral 1 (t160) launching with zero active participants
+// (recovery_reason='brigade_attrition'). Sacred Rule #2 in operations-expert
+// SKILL.md ("NEVER share brigades between ops on different corps. The first op
+// grabs them; the second runs empty") explicitly forbids this configuration.
+// Removing the array entry is the smallest surface-area fix; re-enable by
+// reintroducing one identifier in the array.
 export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
     KUPRES_CINCAR_94_OPPORTUNITY,
-    KUPRES_PHASE_2_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
     DONJI_VAKUF_95_OPPORTUNITY,
 ];
