@@ -8,12 +8,12 @@
  * calls ipc.respondToEventDecision directly. Inbox 'event_modal' clicks route
  * the president to that panel; they do not land here.
  *
- * Uses GlassPanel overlay with dispatch paper inner content.
+ * Uses the shared Modal wrapper with dispatch paper inner content.
  */
 
-import { GlassPanel } from './GlassPanel';
 import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
+import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
@@ -100,7 +100,33 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
 
     return (
-        <GlassPanel position="overlay" title="Event" width="520px" zIndex={Z.GLASS_PANEL_EVENT_MODAL}>
+        <Modal
+            isOpen={true}
+            onClose={onAcknowledge}
+            zIndex={Z.GLASS_PANEL_EVENT_MODAL}
+            ariaLabelledBy="event-modal-title"
+            backdropClassName="bg-black/50 backdrop-blur-sm"
+            panelClassName="relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
+            panelStyle={{ width: '520px', maxHeight: '84vh' }}
+            testIdBackdrop="event-modal-backdrop"
+            testIdPanel="event-modal-panel"
+        >
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-[rgba(180,160,130,0.15)]">
+                <h2
+                    className="text-accent-gold uppercase tracking-[0.22em] text-[12px] font-black leading-none"
+                    style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
+                >
+                    Event
+                </h2>
+                <button
+                    onClick={onAcknowledge}
+                    className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
+                    aria-label="Close event"
+                >
+                    &times;
+                </button>
+            </div>
+            <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(84vh - 38px)' }}>
             {/* Queue indicator */}
             {queueTotal != null && queueTotal > 1 && (
                 <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>
@@ -164,6 +190,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
 
                     {/* Title — typewriter style on paper */}
                     <h3
+                        id="event-modal-title"
                         className="text-lg font-bold mb-3 pr-24"
                         style={{ color: '#3a3228', fontFamily: 'Georgia, serif' }}
                     >
@@ -232,6 +259,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     </div>
                 </div>
             </div>
-        </GlassPanel>
+            </div>
+        </Modal>
     );
 }
