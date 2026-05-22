@@ -20,7 +20,7 @@ import type { LoadedGameState } from '../../data/types';
 import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
 import { useGameStore } from '../../store/gameStore';
-import { formatTurnLabel } from '../../utils/formatters';
+import { formatTurnLabel, turnToDateString } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
 import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
@@ -297,12 +297,18 @@ export function getWarroomBoardDateLabel(
   state: (Pick<LoadedGameState, 'metadata' | 'turn'> & Partial<Pick<LoadedGameState, 'label'>>) | null | undefined,
 ): string {
   const rawDate = state?.metadata?.date?.trim();
-  if (rawDate && rawDate !== 'UNKNOWN') return rawDate.split('·')[0].trim();
+  const cleanRawDate = rawDate?.split('·')[0].trim();
+  const hasTurn = typeof state?.turn === 'number';
+  const hasFullRawDate = cleanRawDate
+    && cleanRawDate !== 'UNKNOWN'
+    && /\b\d{1,2}\b/.test(cleanRawDate)
+    && /\b\d{4}\b/.test(cleanRawDate);
+  if (hasFullRawDate) return cleanRawDate;
+  if (hasTurn) return turnToDateString(state.turn);
+  if (cleanRawDate && cleanRawDate !== 'UNKNOWN') return cleanRawDate;
   const labelDate = state?.label ? formatTurnLabel(state.label).split('·')[0].trim() : '';
   if (labelDate && !labelDate.toLowerCase().startsWith('turn ')) return labelDate;
-  return typeof state?.turn === 'number'
-    ? t('warroomShell.turnLabel', { turn: state.turn })
-    : t('warroomShell.datePending');
+  return t('warroomShell.datePending');
 }
 
 function factionInkColor(faction: string | null): string {
@@ -397,21 +403,22 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
       }}
     >
       <div
+        data-testid="warroom-date-board-label"
         style={{
           // Darker, smaller, less aggressive — reads as a scribbled marker
           // note rather than a billboarded UI label. Less luminous blue
           // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
           color: 'rgba(15, 32, 70, 0.92)',
-          fontFamily: '"Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive',
+          fontFamily: '"Segoe Print", "Segoe UI", Arial, sans-serif',
           fontSize: 'clamp(7px, 1.05vw, 18px)',
           fontWeight: 600,
-          lineHeight: 1,
-          transform: 'rotate(-2deg)',
+          lineHeight: 1.05,
+          transform: 'rotate(-1.4deg)',
           textShadow: 'none',
-          whiteSpace: 'nowrap',
-          maxWidth: '92%',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          whiteSpace: 'normal',
+          textAlign: 'center',
+          maxWidth: '96%',
+          overflowWrap: 'break-word',
         }}
       >
         {label}

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
@@ -17,7 +18,7 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 }));
 
 // @ts-expect-error TS1378: top-level await is supported by vitest runtime.
-const { WarroomShellLayer } = await import('../../src/ui/map/components/warroom/WarroomShellLayer');
+const { WarroomShellLayer, getWarroomBoardDateLabel } = await import('../../src/ui/map/components/warroom/WarroomShellLayer');
 
 function renderShell(onNavigate = vi.fn(), onOpenSidePicker = vi.fn()) {
     return {
@@ -147,5 +148,25 @@ describe('WarroomShellLayer accessibility proof', () => {
 
         expect(fetch).toHaveBeenCalledWith('/data/ui/hq_rbih_clickable_regions.json');
         expect(onNavigate).toHaveBeenCalledWith(undefined);
+    });
+
+    it('formats Warroom calendar labels as full dates when metadata is partial', () => {
+        expect(getWarroomBoardDateLabel({
+            turn: 188,
+            metadata: { turn: 188, date: '8 Nov' },
+            label: 'Turn 188',
+        })).toMatch(/\d{1,2} \w{3} 1995/);
+        expect(getWarroomBoardDateLabel({
+            turn: 52,
+            metadata: { turn: 52, date: 'April 1993' },
+            label: 'Turn 52',
+        })).toMatch(/\d{1,2} \w{3} 1993/);
+    });
+
+    it('renders the Warroom calendar without Comic Sans fallback or ellipsis truncation', () => {
+        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+        expect(source).not.toContain('Comic Sans MS');
+        expect(source).not.toContain("textOverflow: 'ellipsis'");
+        expect(source).toContain('data-testid="warroom-date-board-label"');
     });
 });

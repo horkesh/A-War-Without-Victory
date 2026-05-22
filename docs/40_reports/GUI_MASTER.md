@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit map mode shortcut contract H3)
+**Updated:** 2026-05-22 (GUI visual audit Warroom calendar H4)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit Warroom calendar H4** | [implemented/20260522_GUI_AUDIT_WARROOM_CALENDAR_H4.md](implemented/20260522_GUI_AUDIT_WARROOM_CALENDAR_H4.md) - fourth Batch H slice from the 2026-05-22 GUI visual audit: Warroom calendar labels now fall back to full turn-derived dates for partial metadata and use a sober non-truncating font contract. |
 | **GUI visual audit map mode shortcut contract H3** | [implemented/20260522_GUI_AUDIT_MAP_MODE_SHORTCUT_CONTRACT_H3.md](implemented/20260522_GUI_AUDIT_MAP_MODE_SHORTCUT_CONTRACT_H3.md) - third Batch H slice from the 2026-05-22 GUI visual audit: numeric map-mode shortcuts now derive from `MAP_MODES`, key `9` selects Legitimacy, and player/engineering docs describe the nine live modes. |
 | **GUI visual audit ops planning draft guard H2** | [implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md](implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md) - second Batch H slice from the 2026-05-22 GUI visual audit: Ops Planning now confirms discard when a draft has assigned objectives or brigades, and axis IDs derive from local plan state instead of a module-global counter. |
 | **GUI visual audit polish cleanup H1** | [implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md](implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md) - first Batch H polish slice from the 2026-05-22 GUI visual audit: dead coachmark selector fields, dev separators, raw warning glyphs, duplicated force-launch constants, and OpsMap console logs are cleaned up with static guards. |
@@ -107,6 +108,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit Warroom calendar H4** - Warroom calendar labels now fall back to full turn-derived dates for partial metadata and use a sober non-truncating font contract. | [implemented/20260522_GUI_AUDIT_WARROOM_CALENDAR_H4.md](implemented/20260522_GUI_AUDIT_WARROOM_CALENDAR_H4.md) |
 | 2026-05-22 | **GUI visual audit map mode shortcut contract H3** - numeric map-mode shortcuts now derive from `MAP_MODES`, key `9` selects Legitimacy, and player/engineering docs describe the nine live modes. | [implemented/20260522_GUI_AUDIT_MAP_MODE_SHORTCUT_CONTRACT_H3.md](implemented/20260522_GUI_AUDIT_MAP_MODE_SHORTCUT_CONTRACT_H3.md) |
 | 2026-05-22 | **GUI visual audit ops planning draft guard H2** - Ops Planning now confirms discard when a draft has assigned objectives or brigades, and axis IDs derive from local plan state instead of a module-global counter. | [implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md](implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md) |
 | 2026-05-22 | **GUI visual audit polish cleanup H1** - dead coachmark selector fields, dev separators, raw warning glyphs, duplicated force-launch constants, and OpsMap console logs are cleaned up with static guards. | [implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md](implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md) |

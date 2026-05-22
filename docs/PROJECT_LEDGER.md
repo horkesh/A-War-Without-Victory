@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): format Warroom calendar fully
+
+**Type:** Warroom visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found that the Warroom wall-calendar could render a truncated partial date and used a casual marker fallback stack including Comic Sans.
+
+**Change:** `getWarroomBoardDateLabel(...)` now falls back to the canonical turn date when metadata is partial, month-only, or missing a year, while preserving full raw dates that include day and year. The date-board label now uses a sober fallback stack, smaller responsive type, centered wrapping, and no ellipsis truncation. Added regression coverage to `tests/ui/warroom_shell_accessibility.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\warroom_shell_accessibility.test.ts --reporter=dot` failed before the patch because partial metadata returned `8 Nov` and the source still contained `Comic Sans MS`. After the patch, `npx.cmd vitest run tests\ui\warroom_shell_accessibility.test.ts --reporter=dot` passed 8/8. Focused surrounding suite `npx.cmd vitest run tests\ui\warroom_shell_accessibility.test.ts tests\ui\warroom_shell_ownership.test.ts tests\warroom_shell_layer.test.ts tests\ui\stale_state_resets.test.ts --reporter=dot` passed 53/53. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`; `tests/ui/warroom_shell_accessibility.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_CALENDAR_H4.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P2-9. Remaining Batch H queue: Command Briefing banner contrast/placement, supply legend overlap, desk-map projection polish, commander empty-state verification, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): align map mode shortcut contract
 
 **Type:** Tactical-map keyboard/docs contract fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or map rendering layer semantics changed.
