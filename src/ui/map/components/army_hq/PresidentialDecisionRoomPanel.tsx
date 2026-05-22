@@ -410,7 +410,13 @@ export function PresidentialDecisionRoomPanel() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setShowAdvanced((value) => !value)}
+            onClick={() => {
+              const nextShowAdvanced = !showAdvanced;
+              setShowAdvanced(nextShowAdvanced);
+              if (!nextShowAdvanced) {
+                setActiveLens('all');
+              }
+            }}
             className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"
             aria-pressed={showAdvanced}
           >

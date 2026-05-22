@@ -375,7 +375,12 @@ export function PresidentialToolbar({
                         {/* Inbox badge — unified presidential decision queue */}
                         <InboxBadge onClick={() => {
                             const gs = useGameStore.getState();
-                            // Deselect everything to return to inbox home state
+                            // Close store-owned overlays, then deselect everything to return to inbox home state.
+                            gs.setArmyHQOpen(false);
+                            gs.setCodexOpen(false);
+                            gs.setChronicleOpen(false);
+                            gs.setIsOperationsPanelOpen(false);
+                            gs.setOpsPlanningModalOpen(false);
                             gs.setSelectedOsid(null);
                             gs.setSelectedFormationId(null);
                             gs.setSelectedCorpsId(null);

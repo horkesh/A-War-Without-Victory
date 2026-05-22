@@ -3,7 +3,7 @@ import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { SettlementDetailContent } from './SettlementDetailContent';
 import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
 import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
@@ -37,6 +37,10 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const [supportMessage, setSupportMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSupportMessage(null);
+  }, [selectedOsid]);
 
   if (!selectedOsid) return null;
 

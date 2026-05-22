@@ -160,6 +160,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   // When sector changes, show Overview tab (one section visible, no stacking)
   useEffect(() => {
     setActiveTab('overview');
+    setSectorActionMessage(null);
   }, [selectedSectorId]);
 
   useEffect(() => {

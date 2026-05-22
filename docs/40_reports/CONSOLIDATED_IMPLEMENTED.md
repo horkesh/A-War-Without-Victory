@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest GUI stale-state resets:** [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: selection-bound confirmations, Army HQ last-tab state, hidden Decision Room lens filters, and Inbox home overlay state now reset when their owning surface changes.
+
 **Latest GUI modal palette unification:** [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: `OperationBriefingModal` and `CommanderSelectionModal` now use dark panel tokens instead of the old light command-card palette.
 
 **Latest GUI peace plan split meters:** [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-meter slice from the 2026-05-22 GUI visual audit: `GameStateAdapter` now resolves pending peace-plan display data through a static `PEACE_PLANS` import, so Vance-Owen meters render the catalog split instead of falling back to `0%`.
