@@ -278,6 +278,7 @@ describe('warroom region data contract', () => {
     expect(model?.territoryPaths).toHaveLength(1);
     expect(model?.frontLinePaths).toHaveLength(1);
     expect(model?.outlinePaths).toHaveLength(2);
+    expect(model?.outlinePaths.join(' ')).toContain('M1 74.5');
   });
 
   it('formats the whiteboard date from loaded game metadata', () => {

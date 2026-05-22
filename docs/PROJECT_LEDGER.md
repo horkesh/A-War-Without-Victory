@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): enlarge Warroom desk map projection
+
+**Type:** Warroom visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found that the Warroom `desk_map` projection was small and faint on a large empty corkboard.
+
+**Change:** The Warroom projected-map projector now uses a larger 98x94 viewBox footprint, the wrapper padding is reduced, and the paper/frame/ink styling has stronger opacity, border, shadow, outline, territory stroke, and front-line stroke values. `tests/warroom_shell_layer.test.ts` now asserts the larger projected footprint.
+
+**Verification:** Red run `npx.cmd vitest run tests\warroom_shell_layer.test.ts --reporter=dot` failed before the patch because the projected outline still started at `M4 73`. After the patch, the same focused test passed 37/37 with the projected outline reaching `M1 74.5`. Focused GUI audit suite `npx.cmd vitest run tests\ui\supply_legend_overlap_contract.test.ts tests\ui\command_briefing_banner_contract.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\ops_planning_draft_guard.test.ts tests\ui\map_mode_shortcut_contract.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_shell_layer.test.ts --reporter=dot` passed 61/61. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`; `tests/warroom_shell_layer.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P3-7. Remaining Batch H queue: commander empty-state verification and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): move supply overlays off OOB sidebar
 
 **Type:** Tactical-map visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
