@@ -245,13 +245,22 @@ const allianceContextVlasic: AxisPredicate = (state) => {
 };
 
 const stagingAccessVlasic: AxisPredicate = (state) => {
+    // 2026-05-22 Wave 3B-C (forensics memo
+    // docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3
+    // vlasic_ridge_95): accept either RBiH OR HRHB as Federation-held staging.
+    // After the Stupni Do flip (Nov 1993) and Washington Agreement (Mar 1994),
+    // central-Bosnia Federation operations stage from a mix of RBiH-held and
+    // HRHB-held OSIDs in the Travnik/Vitez corridor. The original predicate
+    // rejected HRHB-held cukle_2 as "not 3rd Corps" — pre-Federation logic
+    // that no longer matches the post-Washington alliance reality. Also: use
+    // `!= null` to catch both null (unpainted) and undefined (paint-gap) OSIDs.
     for (const osid of VLASIC_STAGING_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl !== null && ctrl !== 'RBiH') {
-            return { green: false, reason: 'Travnik staging anchor no longer held by 3rd Corps' };
+        if (ctrl != null && ctrl !== 'RBiH' && ctrl !== 'HRHB') {
+            return { green: false, reason: 'Travnik staging anchor no longer Federation-held' };
         }
     }
-    return { green: true, reason: 'Travnik staging anchors held by 3rd Corps' };
+    return { green: true, reason: 'Travnik staging anchors Federation-held' };
 };
 
 const enemyWeaknessVlasic: AxisPredicate = (state) => {
