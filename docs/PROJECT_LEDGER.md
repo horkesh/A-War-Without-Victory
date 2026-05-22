@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] diagnostic(notifications): guard residual tracker floor
+
+**Type:** Diagnostic/test tooling for event-notification content backfill. No simulation behavior, save schema, scenario mechanics, event trigger, response effect, calibration/army-arc tuning, combat math, operation behavior, notification emission behavior, or painted target changed.
+
+**Why:** The Phase D notification tracker now changes through small content slices. Without an executable residual counter, docs could drift from event JSON and reopen stale block counts.
+
+**Change:** Added `tools/diagnostics/event_notification_residuals.cjs` to compute missing non-source recipient notification blocks from `war_*.json`. Added `tests/sim/events/event_notification_residuals_diagnostic.test.ts` to pin the current 9-row / 38-block residual floor and event-id set.
+
+**Verification:** `node tools\diagnostics\event_notification_residuals.cjs` reports 9 rows / 38 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_residuals_diagnostic.test.ts --reporter=dot` passed 1/1.
+
+**Artifacts:** `tools/diagnostics/event_notification_residuals.cjs`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md`.
+
+**Roadmap delta:** Phase D notification residual tracking is now executable; future content slices must update the diagnostic test floor with the docs.
+
+---
+
 ## [2026-05-22] content(notifications): close front-visit tone rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

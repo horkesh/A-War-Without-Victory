@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-18
 **Scope:** Phase D tracker for `notifications_to_other_factions` on `requires_player_response` events.
+**Diagnostic:** `node tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON.
 
 ## Policy
 - Backfill only when the existing event title, narrative, response label, response description, effects, and historical source already support the recipient text.
