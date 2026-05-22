@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest GUI peace plan split meters:** [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-meter slice from the 2026-05-22 GUI visual audit: `GameStateAdapter` now resolves pending peace-plan display data through a static `PEACE_PLANS` import, so Vance-Owen meters render the catalog split instead of falling back to `0%`.
+
 **Latest GUI peace plan dismissal scope:** [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals.
 
 **Latest GUI event modal dismissal:** [implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md](implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md) - Batch C event-notification slice from the 2026-05-22 GUI visual audit: non-decision event dispatches now use unified modal-style semantics, expose a labelled dialog, and acknowledge through the same path for button, Escape, close affordance, and backdrop dismissal.

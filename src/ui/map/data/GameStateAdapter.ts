@@ -67,6 +67,7 @@ import {
     deriveFactionSupplyConditionFromFlatOsidState,
     deriveFactionSupplyConditionFromOsidReport,
 } from '../../../sim/combat/supply_condition.js';
+import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -2785,21 +2786,21 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
     const neg = state.military?.negotiation;
     const pp = neg?.pending_peace_plan;
     if (!pp || typeof pp.plan_id !== 'string') return undefined;
-    // Look up plan definition for display data
     let planName = pp.plan_id;
     let narrative = '';
-    let proposedSplit = { RBiH: 0, RS: 0, HRHB: 0 };
+    let proposedSplit: { RBiH: number; RS: number; HRHB: number } = { RBiH: 0, RS: 0, HRHB: 0 };
     let institutionalModel = '';
-    try {
-        const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
-        const def = PEACE_PLANS.find((p: any) => p.id === pp.plan_id);
-        if (def) {
-            planName = getPlayerSafeDisplayLabel(def.name ?? pp.plan_id, 'Peace proposal');
-            narrative = def.narrative ?? '';
-            proposedSplit = def.proposed_split ?? proposedSplit;
-            institutionalModel = def.institutional_model ?? '';
-        }
-    } catch { /* non-fatal — display with raw id */ }
+    const def = PEACE_PLANS.find((p) => p.id === pp.plan_id);
+    if (def) {
+        planName = getPlayerSafeDisplayLabel(def.name ?? pp.plan_id, 'Peace proposal');
+        narrative = def.narrative ?? '';
+        proposedSplit = {
+            RBiH: finiteNumber(def.proposed_split?.RBiH),
+            RS: finiteNumber(def.proposed_split?.RS),
+            HRHB: finiteNumber(def.proposed_split?.HRHB),
+        };
+        institutionalModel = def.institutional_model ?? '';
+    }
     planName = getPlayerSafeDisplayLabel(planName, 'Peace proposal');
     return {
         planId: pp.plan_id,
@@ -2818,16 +2819,12 @@ function derivePendingCounterOffers(state: any): LoadedGameState['pendingCounter
     const offers = state.military?.negotiation?.pending_counter_offers;
     if (!Array.isArray(offers) || offers.length === 0) return undefined;
 
-    let planNames: Record<string, string> = {};
-    try {
-        const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
-        planNames = Object.fromEntries(
-            (PEACE_PLANS as Array<{ id: string; name: string }>).map((plan) => [
-                plan.id,
-                getPlayerSafeDisplayLabel(plan.name, 'Peace proposal'),
-            ]),
-        );
-    } catch { /* non-fatal - display with plan id */ }
+    const planNames = Object.fromEntries(
+        PEACE_PLANS.map((plan) => [
+            plan.id,
+            getPlayerSafeDisplayLabel(plan.name, 'Peace proposal'),
+        ]),
+    );
 
     const result: NonNullable<LoadedGameState['pendingCounterOffers']> = [];
     for (const offer of [...offers].sort((a, b) => strictCompare(String(a?.id ?? ''), String(b?.id ?? '')))) {

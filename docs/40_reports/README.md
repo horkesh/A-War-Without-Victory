@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest GUI peace plan split meters** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-meter slice from the 2026-05-22 GUI visual audit: pending peace-plan display data now comes from a browser-safe static `PEACE_PLANS` import, so Vance-Owen meters render the catalog split instead of `0%`. |
 | **Latest GUI peace plan dismissal scope** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. |
 | **Latest GUI event modal dismissal** | [implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md](implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md) - Batch C event-notification slice from the 2026-05-22 GUI visual audit: non-decision event dispatches now use unified modal-style semantics, expose a labelled dialog, and acknowledge through the same path for button, Escape, close affordance, and backdrop dismissal. |
 | **Latest GUI MapLibre dasharray repair** | [implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md](implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md) - first Batch A render-correctness slice from the 2026-05-22 GUI visual audit: front stripes and supply-reach outlines now avoid data-driven `line-dasharray` expressions. |

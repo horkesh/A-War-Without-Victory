@@ -269,6 +269,22 @@
 
 **Phase-2 cascade addendum (waves 6-10, +10 commits):** Continued the autonomous push for an HRHB territorial unlock — Cincar Phase 2 → kupres_2 → Mistral 1 + Jajce 95. Wave 6 (briefing overlay override) replaced Wave 4A's faction-blind threshold lift with the principled CampaignPlan-wins-over-economy-overlay rule. Wave 7 authored two ICTY-cited HVO ops (mistral_1_95 + jajce_95, 16 objective OSIDs); Wave 7B widened kupres_cincar_94's brigade pool 2→4 active + added kupres_2 to objectives; Wave 8 fixed the Graz corps-pair branch to honor exemption sets + exempted hvo_tomislavgrad. Result: **n1968 delivered HRHB +2 / RBiH +3 / RS −5** via Cincar Phase 1 capturing bucovaca (4-star Solid Victory). Wave 9 authored Cincar Phase 2 follow-on op; Wave 9B/9C/9D corrected staging, decoupling, and Mistral 1/Jajce kupres_2 dependency. Wave 10 unified the per-turn brigade approach view with the launch-gate sub-segment fallback (`bot_brigade_ai_osid.ts:299` engine fix). Runs n1969–n1973 produced varying hashes but byte-identical territorial counts (HRHB −45, RBiH +23, RS +22) — Cincar Phase 2 / Mistral 1 / Jajce 95 spawn with healthy force_ratio 2.24 and 5 brigades attached but issue zero attacks in execution. Engine-deep audit `docs/40_reports/audits/20260522_HVO_OP_EXECUTION_DEEP.md` identifies the asymmetry between op launch gate (sub-segment view) and per-turn brigade brain (tactical_adjacency view) but Wave 10's fallback is observably inert, meaning the real blocker is one gate further downstream. Final branch state: **27 commits, OSID 84.13→86.66% (+2.53pp), anchors 22→23, HVO ops succeeding 0/2 → 2/4** (Op Jackal + Cincar Phase 1). Cincar Phase 2 / Mistral 1 / Jajce 95 stay authored and propose-passing for a next-session engine investigation of `evaluateSectorAttack` post-launch dispatch.
 
+## [2026-05-22] fix(gui): resolve peace plan splits in browser
+
+**Type:** Tactical-map UI adapter/browser-bundle fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified Vance-Owen peace-plan territory meters rendering as `0%`. `PeacePlanModal` already renders nonzero split data when provided; the adapter could instead fall back to `{ RBiH: 0, RS: 0, HRHB: 0 }` because it loaded peace-plan catalog data with runtime `require(...)` in the browser read path.
+
+**Change:** `GameStateAdapter` now imports `PEACE_PLANS` statically and resolves pending peace-plan display data from that browser-safe catalog import. Pending counter-offer plan names reuse the same static import, removing the nearby runtime `require(...)` pattern. Added an adapter-boundary regression that forbids the browser-unsafe require and proves `vance_owen` resolves to the catalog split `{ RBiH: 39, RS: 43, HRHB: 18 }`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui_adapter_boundary.test.ts --reporter=dot` failed before the patch because `GameStateAdapter.ts` still contained the runtime peace-plan catalog `require(...)`; after the patch, `npx.cmd vitest run tests\ui_adapter_boundary.test.ts tests\ui\peace_plan_modal.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` passed 23/23.
+
+**Artifacts:** `src/ui/map/data/GameStateAdapter.ts`; `tests/ui_adapter_boundary.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md`.
+
+**Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. Modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+
+---
+
 ## [2026-05-22] fix(gui): scope peace plan dismissal
 
 **Type:** Tactical-map modal hygiene fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
@@ -281,7 +297,7 @@
 
 **Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/peacePlanDismissal.ts`; `tests/ui/peace_plan_dismissal_scope.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md`.
 
-**Roadmap delta:** Closes the stale peace-plan dismissal scope slice of GUI visual audit Batch C. Peace-meter split semantics, modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+**Roadmap delta:** Closes the stale peace-plan dismissal scope slice of GUI visual audit Batch C. Modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
 
 ---
 
