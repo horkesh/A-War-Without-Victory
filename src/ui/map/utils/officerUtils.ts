@@ -15,7 +15,9 @@ export function getFormationCommander(
     if (formation.kind === 'army_hq') {
         const stateById = loadedGameState.namedOfficerStateById;
         return loadedGameState.namedOfficerData?.find(
-            o => o.faction === formation.faction && o.rank === 'army_commander' && stateById?.[o.id]?.status === 'active'
+            o => o.faction === formation.faction
+                && o.rank === 'army_commander'
+                && (stateById?.[o.id]?.status === 'active' || (!stateById?.[o.id] && o.status === 'active'))
         ) || null;
     }
 
@@ -31,7 +33,9 @@ export function getFactionArmyCommander(
 ) {
     const stateById = loadedGameState.namedOfficerStateById;
     return loadedGameState.namedOfficerData?.find(
-        o => o.faction === faction && o.rank === 'army_commander' && stateById?.[o.id]?.status === 'active'
+        o => o.faction === faction
+            && o.rank === 'army_commander'
+            && (stateById?.[o.id]?.status === 'active' || (!stateById?.[o.id] && o.status === 'active'))
     ) || null;
 }
 
