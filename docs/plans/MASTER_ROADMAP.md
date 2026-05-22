@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Event notification blocked residual classification addendum 2026-05-22:** Phase D notification content backfill now has an executable policy-residual state: `tools/diagnostics/event_notification_residuals.cjs` reports 2 rows / 4 missing blocks, all classified as `blocked-sensitive`, with 0 unclassified residual blocks. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md`. On top of:
+
 **Strict-null derived optional-fields classification addendum 2026-05-22:** The 8-field `derived` optional `GameState` slice is classified in `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`. All 8 remain intentionally optional today: frozen endgame/end-state fields are save-shape risks, while posture/global-factor and loss-of-control previous-snapshot fields are runtime optional diagnostics. No count reduction is allowed here without a migration/defaulting lane. On top of:
 
 **Event notification Srebrenica demilitarization addendum 2026-05-22:** Phase D notification content backfill now closes `srebrenica_demilitarization_1993` with complete non-source recipient coverage grounded in existing row text, ICTY Krstic support, and agreement records. Residual Phase D notification scope is now 2 rows / 4 blocks, both blocked-sensitive front-visit press options. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md`. On top of:

@@ -4,6 +4,36 @@ const { join, resolve } = require('path');
 
 const FACTIONS = ['RBiH', 'RS', 'HRHB'];
 const EVENTS_DIR = resolve(__dirname, '..', '..', 'data', 'scenarios', 'events');
+const RESIDUAL_CLASSIFICATIONS = new Map([
+  [
+    'war_1993.json|visit_to_front_rs|visit_press_rs|RBiH',
+    {
+      bucket: 'blocked-sensitive',
+      reason: 'RS press visit risks unsupported disclosure/propaganda framing from the current row.',
+    },
+  ],
+  [
+    'war_1993.json|visit_to_front_rs|visit_press_rs|HRHB',
+    {
+      bucket: 'blocked-sensitive',
+      reason: 'RS press visit risks unsupported disclosure/propaganda framing from the current row.',
+    },
+  ],
+  [
+    'war_1993.json|visit_to_front_hrhb|visit_press_hrhb|RBiH',
+    {
+      bucket: 'blocked-sensitive',
+      reason: 'HRHB press visit risks unsupported detention/blockade implications from the current row.',
+    },
+  ],
+  [
+    'war_1993.json|visit_to_front_hrhb|visit_press_hrhb|RS',
+    {
+      bucket: 'blocked-sensitive',
+      reason: 'HRHB press visit risks unsupported detention/blockade implications from the current row.',
+    },
+  ],
+]);
 
 function isNonEmptyText(value) {
   return typeof value === 'string' && value.trim().length > 0;
@@ -17,6 +47,10 @@ function loadWarEventFiles() {
       file,
       events: JSON.parse(readFileSync(join(EVENTS_DIR, file), 'utf8')),
     }));
+}
+
+function classifyResidual(file, eventId, response, recipient) {
+  return RESIDUAL_CLASSIFICATIONS.get(`${file}|${eventId}|${response}|${recipient}`) ?? null;
 }
 
 function collectResiduals() {
@@ -45,7 +79,14 @@ function collectResiduals() {
         for (const recipient of expectedRecipients) {
           const notification = byRecipient[recipient];
           if (!notification || !isNonEmptyText(notification.headline) || !isNonEmptyText(notification.body)) {
-            missing.push({ response: response.id, recipient });
+            const classification = classifyResidual(file, event.id, response.id, recipient);
+            missing.push({
+              response: response.id,
+              recipient,
+              ...(classification
+                ? { bucket: classification.bucket, reason: classification.reason }
+                : { bucket: 'unclassified' }),
+            });
           }
         }
       }
@@ -68,9 +109,19 @@ function collectResiduals() {
 function main() {
   const asJson = process.argv.includes('--json');
   const rows = collectResiduals();
+  const classifiedBlocks = rows.reduce(
+    (sum, row) => sum + row.missing.filter((entry) => entry.bucket !== 'unclassified').length,
+    0,
+  );
+  const unclassifiedBlocks = rows.reduce(
+    (sum, row) => sum + row.missing.filter((entry) => entry.bucket === 'unclassified').length,
+    0,
+  );
   const payload = {
     rows: rows.length,
     missing_blocks: rows.reduce((sum, row) => sum + row.missing_blocks, 0),
+    classified_blocks: classifiedBlocks,
+    unclassified_blocks: unclassifiedBlocks,
     residuals: rows,
   };
 
@@ -80,8 +131,9 @@ function main() {
   }
 
   console.log(`Event notification residuals: ${payload.rows} rows / ${payload.missing_blocks} recipient blocks`);
+  console.log(`Classified residual blocks: ${payload.classified_blocks}; unclassified residual blocks: ${payload.unclassified_blocks}`);
   for (const row of rows) {
-    const missing = row.missing.map((entry) => `${entry.response}->${entry.recipient}`).join(', ');
+    const missing = row.missing.map((entry) => `${entry.response}->${entry.recipient} (${entry.bucket})`).join(', ');
     console.log(`- ${row.file} ${row.event} (${row.source}): ${row.missing_blocks} [${missing}]`);
   }
 }

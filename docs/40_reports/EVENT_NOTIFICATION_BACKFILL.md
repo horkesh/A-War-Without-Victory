@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-18
 **Scope:** Phase D tracker for `notifications_to_other_factions` on `requires_player_response` events.
-**Diagnostic:** `node tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON.
+**Diagnostic:** `node tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON and classifies the remaining blocked-sensitive omissions.
 
 ## Policy
 - Backfill only when the existing event title, narrative, response label, response description, effects, and historical source already support the recipient text.
@@ -63,7 +63,7 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
 | Front-visit mixed-sensitive | 2 | 4 | `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 2 event rows and 4 recipient blocks after the 2026-05-22 Srebrenica demilitarization historian-cleared slice. The prior 1992 historian floor was 3 rows / 10 blocks.
+**Total residual:** 2 event rows and 4 recipient blocks after the 2026-05-22 Srebrenica demilitarization historian-cleared slice. All 4 remaining blocks are diagnostically classified as `blocked-sensitive`; unclassified residual blocks are 0. The prior 1992 historian floor was 3 rows / 10 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
