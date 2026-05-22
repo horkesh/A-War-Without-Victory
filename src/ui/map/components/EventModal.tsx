@@ -8,10 +8,10 @@
  * calls ipc.respondToEventDecision directly. Inbox 'event_modal' clicks route
  * the president to that panel; they do not land here.
  *
- * Uses GlassPanel overlay with dispatch paper inner content.
+ * Uses a modal-style overlay with dispatch paper inner content.
  */
 
-import { GlassPanel } from './GlassPanel';
+import { useEffect } from 'react';
 import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import type { EventEffect } from '../../../sim/events/event_types';
@@ -100,8 +100,50 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
 
+    useEffect(() => {
+        const handler = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onAcknowledge();
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+    }, [onAcknowledge]);
+
     return (
-        <GlassPanel position="overlay" title={t('event.title')} width="520px" zIndex={Z.GLASS_PANEL_EVENT_MODAL}>
+        <div
+            className="fixed inset-0 flex items-center justify-center animate-fadeIn"
+            style={{ zIndex: Z.GLASS_PANEL_EVENT_MODAL }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-modal-title"
+        >
+            <button
+                type="button"
+                className="absolute inset-0 border-0 bg-black/50 p-0 backdrop-blur-sm"
+                onClick={onAcknowledge}
+                aria-label={t('common.close')}
+                data-testid="event-modal-backdrop"
+            />
+            <div
+                className="relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
+                style={{ width: '520px', maxHeight: '84vh' }}
+                data-testid="event-modal-panel"
+            >
+            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-[rgba(180,160,130,0.15)]">
+                <h2
+                    className="text-accent-gold uppercase tracking-[0.22em] text-[12px] font-black leading-none"
+                    style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
+                >
+                    {t('event.title')}
+                </h2>
+                <button
+                    onClick={onAcknowledge}
+                    className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
+                    aria-label={t('common.close')}
+                >
+                    &times;
+                </button>
+            </div>
+            <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(84vh - 38px)' }}>
             {/* Queue indicator */}
             {queueTotal != null && queueTotal > 1 && (
                 <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>
@@ -165,6 +207,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
 
                     {/* Title — typewriter style on paper */}
                     <h3
+                        id="event-modal-title"
                         className="text-lg font-bold mb-3 pr-24"
                         style={{ color: '#3a3228', fontFamily: 'Georgia, serif' }}
                     >
@@ -233,6 +276,8 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     </div>
                 </div>
             </div>
-        </GlassPanel>
+            </div>
+            </div>
+        </div>
     );
 }
