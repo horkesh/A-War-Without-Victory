@@ -98,23 +98,24 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
   const hasCritical = criticalCount > 0;
 
   return (
-    <div className={`fixed ${topOffset} left-[19rem] right-4 z-20 pointer-events-none`}>
+    <div className={`fixed ${topOffset} left-4 right-4 md:left-auto md:right-5 md:w-[min(32rem,calc(100vw-22rem))] z-20 pointer-events-none`}>
       <div
-        className={`pointer-events-auto relative mt-2 rounded-lg backdrop-blur-xl shadow-xl px-4 py-4 ${
+        data-testid="command-briefing-banner"
+        className={`pointer-events-auto relative mt-2 rounded-md backdrop-blur-md shadow-2xl px-4 py-4 ${
           hasCritical
-            ? 'bg-red-950/30 border-2 border-red-500/40 alert-pulse'
-            : 'bg-panel-card/80 border border-panel-border'
+            ? 'bg-red-950/95 border-2 border-red-500/70 alert-pulse'
+            : 'bg-panel-bg/95 border border-panel-border'
         }`}
       >
         {/* Header line with persistent alert count */}
-        <div className="flex items-center justify-center gap-3 mb-3">
+        <div className="flex items-center justify-start gap-3 pr-24 mb-3">
           <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-accent-gold">
             COMMAND BRIEFING
           </span>
           <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-red-600 text-white text-[11px] font-bold tabular-nums">
             {commandBriefing.items.length}
           </span>
-          <span className="text-[10px] font-mono text-text-secondary">
+          <span className="text-[10px] font-mono font-semibold text-text-primary">
             {commandBriefing.headline}
           </span>
           <button
@@ -127,7 +128,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
           </button>
         </div>
         {/* Item cards — taller, severity-colored */}
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-col gap-2.5 max-h-[38vh] overflow-y-auto pr-1">
           {commandBriefing.items.map((item) => (
             <button
               key={item.id}

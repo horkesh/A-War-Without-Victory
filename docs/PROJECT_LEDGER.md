@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): move Command Briefing banner off counters
+
+**Type:** Tactical-map visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found that the COMMAND BRIEFING banner overlapped the top-center map counter field and used low-contrast secondary text against terrain.
+
+**Change:** `CommandBriefingLayer` now anchors as a compact right-side strip on desktop instead of spanning the top-center map, uses opaque panel/critical backing, raises headline contrast to `text-text-primary`, and stacks briefing items inside a bounded scroll area. Added a static regression contract in `tests/ui/command_briefing_banner_contract.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\command_briefing_banner_contract.test.ts --reporter=dot` failed before the patch because the banner lacked the right-side placement test id and opaque/high-contrast classes. After the patch, the same focused test passed 2/2. Focused GUI audit suite `npx.cmd vitest run tests\ui\command_briefing_banner_contract.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\ops_planning_draft_guard.test.ts tests\ui\map_mode_shortcut_contract.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_shell_layer.test.ts --reporter=dot` passed 59/59. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed.
+
+**Artifacts:** `src/ui/map/components/CommandBriefingLayer.tsx`; `tests/ui/command_briefing_banner_contract.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P2-5. Remaining Batch H queue: supply legend overlap, desk-map projection polish, commander empty-state verification, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): format Warroom calendar fully
 
 **Type:** Warroom visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
