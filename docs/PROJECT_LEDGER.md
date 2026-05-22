@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): use literal map dasharrays
+
+**Type:** Tactical-map render correctness fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit found MapLibre render errors from data-driven `line-dasharray` usage on `front-line-stripe` and `supply-reach-outline`. This could leave front stripes noisy/error-prone and supply-mode reach outlines absent.
+
+**Change:** Removed the runtime front-stripe dash expression and left the base style literal dasharray in force. Split supply reach outlines into two filtered MapLibre layers with literal dash arrays: `supply-reach-outline` for non-isolated supply polygons and `supply-reach-isolated-outline` for isolated polygons. Added a static regression contract to reject data-driven dasharray expressions on these surfaces.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui_map_maplibre_dasharray_contract.test.ts --reporter=dot` failed on both audited expressions before the patch; after the patch it passed 2/2. `npx.cmd vitest run tests\ui_map_maplibre_dasharray_contract.test.ts tests\ui_map_supply_reach.test.ts tests\ui_map_front_stability.test.ts tests\ui_map_front_lines_phase_a.test.ts --reporter=dot` passed 9/9. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+**Artifacts:** `src/ui/map/map/MapContainer.tsx`; `tests/ui_map_maplibre_dasharray_contract.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md`.
+
+**Roadmap delta:** Closes the MapLibre dasharray render-correctness slice from GUI visual audit Batch A. Remaining GUI audit work stays active for peace/event modal hygiene, palette unification, stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): clean audit label discipline leaks
 
 **Type:** Tactical-map player-facing UI text cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

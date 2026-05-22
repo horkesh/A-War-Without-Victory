@@ -276,6 +276,7 @@ const OSID_SUPPLY_SOURCE_ID = 'osid-supply';
 const SUPPLY_REACH_SOURCE_ID = 'supply-reach';
 const SUPPLY_REACH_FILL_LAYER_ID = 'supply-reach-fill';
 const SUPPLY_REACH_OUTLINE_LAYER_ID = 'supply-reach-outline';
+const SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID = 'supply-reach-isolated-outline';
 const POLITICAL_METRIC_SOURCE_ID = 'political-metric';
 const POLITICAL_METRIC_FILL_LAYER_ID = 'political-metric-fill';
 const OSID_OPERATIONS_FILL_LAYER_ID = 'osid-operations-fill';
@@ -1274,18 +1275,6 @@ export function MapContainer() {
             }
             const stableFrontLinesGeoJson = buildFrontStabilityGeoJSON(frontLinesGeoJson);
             (m2.getSource('front-lines') as GeoJSONSource)?.setData(stableFrontLinesGeoJson);
-            try {
-              m2.setPaintProperty('front-line-stripe', 'line-dasharray', [
-                'match',
-                ['get', 'stability_class'],
-                'static', ['literal', [7, 3]],
-                'fluid', ['literal', [2, 2]],
-                'oscillating', ['literal', [1, 1]],
-                ['literal', [4, 3]],
-              ] as maplibregl.ExpressionSpecification);
-            } catch (e) {
-              console.warn('[MapContainer] Failed to set front stability dash expression:', e);
-            }
 
             // Operational Heatmap (Mode 7) update
             if (Number(mapMode) === 7 && osidCentroidsRef.current.size > 0) {
@@ -2925,6 +2914,7 @@ export function MapContainer() {
             id: SUPPLY_REACH_OUTLINE_LAYER_ID,
             type: 'line',
             source: SUPPLY_REACH_SOURCE_ID,
+            filter: ['!=', ['get', 'isolated'], true],
             paint: {
               'line-color': [
                 'match',
@@ -2942,12 +2932,31 @@ export function MapContainer() {
                 10, 0.8,
                 13, 1.7,
               ],
-              'line-dasharray': [
-                'case',
-                ['==', ['get', 'isolated'], true],
-                ['literal', [1.5, 1.5]],
-                ['literal', [6, 3]],
+              'line-dasharray': [6, 3],
+            },
+            layout: { visibility: mapMode === 'supply' ? 'visible' : 'none' },
+          },
+          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
+        );
+      }
+      if (!safeHasLayer(m, SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID)) {
+        m.addLayer(
+          {
+            id: SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID,
+            type: 'line',
+            source: SUPPLY_REACH_SOURCE_ID,
+            filter: ['==', ['get', 'isolated'], true],
+            paint: {
+              'line-color': 'rgba(248, 113, 113, 0.88)',
+              'line-width': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                7, 0.4,
+                10, 1.0,
+                13, 2.0,
               ],
+              'line-dasharray': [1.5, 1.5],
             },
             layout: { visibility: mapMode === 'supply' ? 'visible' : 'none' },
           },
@@ -2957,6 +2966,7 @@ export function MapContainer() {
       safeSetLayoutVisibility(m, OSID_SUPPLY_FILL_LAYER_ID, mapMode === 'supply');
       safeSetLayoutVisibility(m, SUPPLY_REACH_FILL_LAYER_ID, mapMode === 'supply');
       safeSetLayoutVisibility(m, SUPPLY_REACH_OUTLINE_LAYER_ID, mapMode === 'supply');
+      safeSetLayoutVisibility(m, SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID, mapMode === 'supply');
     });
     return () => {
       cancelled = true;
@@ -3001,6 +3011,7 @@ export function MapContainer() {
       if (safeHasLayer(map, POLITICAL_METRIC_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, POLITICAL_METRIC_FILL_LAYER_ID, mapMode === 'authority' || mapMode === 'legitimacy')) allExist = false;
       if (safeHasLayer(map, SUPPLY_REACH_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, SUPPLY_REACH_FILL_LAYER_ID, mapMode === 'supply')) allExist = false;
       if (safeHasLayer(map, SUPPLY_REACH_OUTLINE_LAYER_ID) && !safeSetLayoutVisibility(map, SUPPLY_REACH_OUTLINE_LAYER_ID, mapMode === 'supply')) allExist = false;
+      if (safeHasLayer(map, SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID) && !safeSetLayoutVisibility(map, SUPPLY_REACH_ISOLATED_OUTLINE_LAYER_ID, mapMode === 'supply')) allExist = false;
       if (safeHasLayer(map, OSID_OPERATIONS_FILL_LAYER_ID) && !safeSetLayoutVisibility(map, OSID_OPERATIONS_FILL_LAYER_ID, mapMode === 'operations')) allExist = false;
       // Operation arrows: only visible in operations map mode
       const showOps = mapMode === 'operations';
