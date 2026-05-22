@@ -2,7 +2,9 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest event-notification NATO/UN crisis slice:** [implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md](implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md) - `nato_ultimatum_sarajevo_1994` and `un_hostage_crisis_1995` now have complete non-source recipient notification coverage; Phase D residual is down to 7 rows / 30 blocks.
+**Latest event-notification Igman/Lukavac slice:** [implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md](implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md) - `operation_lukavac_93` now has complete non-source recipient notification coverage; Phase D residual is down to 6 rows / 26 blocks.
+
+**Latest event-notification NATO/UN crisis slice:** [implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md](implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md) - `nato_ultimatum_sarajevo_1994` and `un_hostage_crisis_1995` now have complete non-source recipient notification coverage; Phase D residual dropped to 7 rows / 30 blocks before the Igman/Lukavac slice.
 
 **Latest event-notification residual diagnostic:** [implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md](implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md) - `tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON and a focused test pins the 7-row / 30-block residual event set.
 

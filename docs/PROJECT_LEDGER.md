@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close Igman/Lukavac row
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** `operation_lukavac_93` had enough support from the authored event row and BB2 Operation Lukavac 93 account to author neutral observer notifications without adding new casualty, atrocity, or final-outcome claims.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `comply` and `defy_nato` on `operation_lukavac_93`, targeting RBiH and HRHB only. The copy is limited to withdrawal/holding posture, Igman supply-route pressure, and NATO air-strike risk. BB support: BB2 pp.391-392.
+
+**Verification:** JSON parse for `war_1993.json` passed. `node tools\diagnostics\event_notification_residuals.cjs` reports 6 rows / 26 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\event_notification_residuals_diagnostic.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 34/34. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md`.
+
+**Roadmap delta:** Historian-required residual drops from 4 rows / 20 blocks to 3 rows / 16 blocks. Overall Phase D notification residual drops from 7 rows / 30 blocks to 6 rows / 26 blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close NATO and UN crisis rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

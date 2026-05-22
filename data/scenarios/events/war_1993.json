@@ -1958,6 +1958,28 @@
         ]
       }
     ],
+    "notifications_to_other_factions": {
+      "comply": {
+        "RBiH": {
+          "headline": "VRS withdraws from Igman under pressure",
+          "body": "RS accepts the UN-brokered withdrawal demand after the Lukavac 93 advance. Sarajevo sees the immediate threat to the Igman route ease, while VRS gives up a strategic gain."
+        },
+        "HRHB": {
+          "headline": "VRS complies on Igman withdrawal",
+          "body": "RS pulls back from the Igman positions rather than trigger NATO strikes. Mostar sees Western pressure contain the offensive, with VRS credibility taking a cost."
+        }
+      },
+      "defy_nato": {
+        "RBiH": {
+          "headline": "VRS defies NATO over Igman",
+          "body": "RS holds the captured Igman positions despite the threat of air strikes. Sarajevo faces renewed isolation pressure, while the risk of NATO combat action rises sharply."
+        },
+        "HRHB": {
+          "headline": "VRS holds Igman against NATO warning",
+          "body": "RS calls the air-strike threat and keeps the Igman gains. Mostar sees stronger VRS battlefield posture, but also a more dangerous confrontation with NATO."
+        }
+      }
+    },
     "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T). Washington Post, Aug 14 1993."
   },
   {

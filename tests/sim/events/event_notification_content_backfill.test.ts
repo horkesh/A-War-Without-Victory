@@ -196,9 +196,19 @@ describe('event notification content backfill', () => {
     });
 
     it('covers historian-cleared NATO and UN crisis rows for non-source recipients', () => {
+        const war1993Events = loadWar1993Events();
         const war1994Events = loadWar1994Events();
         const war1995Events = loadWar1995Events();
         const cases = [
+            {
+                events: war1993Events,
+                eventId: 'operation_lukavac_93',
+                source: 'RS',
+                responses: {
+                    comply: ['HRHB', 'RBiH'],
+                    defy_nato: ['HRHB', 'RBiH'],
+                },
+            },
             {
                 events: war1994Events,
                 eventId: 'nato_ultimatum_sarajevo_1994',

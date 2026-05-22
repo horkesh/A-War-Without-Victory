@@ -10,12 +10,11 @@ describe('event notification residual diagnostic', () => {
         );
         const payload = JSON.parse(output);
 
-        expect(payload.rows).toBe(7);
-        expect(payload.missing_blocks).toBe(30);
+        expect(payload.rows).toBe(6);
+        expect(payload.missing_blocks).toBe(26);
         expect(payload.residuals.map((row: { event: string }) => row.event).sort()).toEqual([
             'concentration_camps_revealed_1992',
             'drina_cleansing_decision_1992',
-            'operation_lukavac_93',
             'srebrenica_demilitarization_1993',
             'visit_to_front_hrhb',
             'visit_to_front_rbih',
