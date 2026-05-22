@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type Phase 3ABC audit harness
+
+**Type:** Strict-null diagnostic harness cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
+
+**Why:** After the Phase 3A A/B harness tail, the last diagnostic-harness strict-null cluster was `src/cli/phase3abc_audit_harness.ts`, contributing 33 `as_any_casts`.
+
+**Change:** `phase3abc_audit_harness.ts` now uses typed `EffectivePressureEdge[]`, `EdgeRecord[]`, `TurnReport`, front-pressure, front-segment, and front-posture structures instead of broad `any` widening. The harness fixtures now use canonical strategy-table faction IDs (`RBiH`, `RS`), declare `meta.phase: 'war'`, and write typed front-posture assignments with `edge_id`.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 89/89 with the new Phase 3ABC harness cap. `npm.cmd run typecheck` passed. `npm.cmd run phase3:abc_audit` passed and emitted deterministic A-D hashes (`af234629acd600274dc686878045016f67183ff175a9a35f5c24e48288bcdbdb`, `60e29e56aea11572ebcfdd814bbe34135682fe5113033212b0900518b588c924`, `10b78029c549b2df04cda0ed6e1386ad2a5d41b8044df69b760573a04a05de64`, `23544920575e8dfdf2a46c82574e511cec6242dc94e37576ee3b6ef0953774be`). `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_any_casts 31`, `as_unknown_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`.
+
+**Artifacts:** `src/cli/phase3abc_audit_harness.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_PHASE3ABC_AUDIT_HARNESS_TAIL.md`.
+
+**Roadmap delta:** Removes `src/cli/phase3abc_audit_harness.ts` from the remaining strict-null `as_any_casts` queue. Remaining `as_any_casts` are now confined to `src/state/save_migration.ts` and `src/ui/map/data/GameStateAdapter.ts`.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type Phase 3A A/B harness
 
 **Type:** Strict-null diagnostic harness cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
