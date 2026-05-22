@@ -4,6 +4,8 @@
 
 **Latest event-notification blocked residual classification:** [implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md](implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md) - The final 2 rows / 4 missing notification blocks are now diagnostically classified as blocked-sensitive, with 0 unclassified residual blocks.
 
+**Latest strict-null optional interface summary:** [implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md](implemented/20260522_STRICT_NULL_OPTIONAL_INTERFACE_SUMMARY.md) - `tools/diagnostics/strict_null_inventory.cjs --field-interfaces` now groups optional `GameState` fields by interface/domain so future optional-field work can pick bounded owner slices from evidence.
+
 **Latest event-notification Srebrenica demilitarization slice:** [implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md](implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md) - `srebrenica_demilitarization_1993` now has complete non-source recipient notification coverage; Phase D residual is down to 2 rows / 4 blocked-sensitive press blocks.
 
 **Latest event-notification 1992 historian slice:** [implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md](implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md) - `drina_cleansing_decision_1992` and `concentration_camps_revealed_1992` now have complete non-source recipient notification coverage; Phase D residual is down to 3 rows / 10 blocks.

@@ -255,6 +255,58 @@ function buildDomainReport(optionalFields) {
     };
 }
 
+function buildInterfaceReport(optionalFields) {
+    const byInterface = {};
+
+    for (const field of optionalFields) {
+        if (!byInterface[field.interface]) {
+            byInterface[field.interface] = {
+                interface: field.interface,
+                domain: field.domain,
+                count: 0,
+                fields: [],
+            };
+        }
+
+        byInterface[field.interface].count += 1;
+        byInterface[field.interface].fields.push(field.field);
+    }
+
+    const interfaces = Object.values(byInterface)
+        .map((entry) => ({
+            ...entry,
+            fields: entry.fields.sort(strictCompare),
+        }))
+        .sort((a, b) => b.count - a.count || strictCompare(a.interface, b.interface));
+
+    const byDomain = {};
+    for (const domain of DOMAIN_NAMES) byDomain[domain] = [];
+    for (const entry of interfaces) {
+        const domain = DOMAIN_NAMES.includes(entry.domain) ? entry.domain : 'unknown';
+        byDomain[domain].push({
+            interface: entry.interface,
+            count: entry.count,
+        });
+    }
+
+    for (const domain of DOMAIN_NAMES) {
+        byDomain[domain] = byDomain[domain].sort((a, b) => b.count - a.count || strictCompare(a.interface, b.interface));
+    }
+
+    return {
+        total: optionalFields.length,
+        interfaces,
+        by_domain: byDomain,
+    };
+}
+
+function buildOptionalFieldReports(optionalFields) {
+    return {
+        domains: buildDomainReport(optionalFields),
+        interfaces: buildInterfaceReport(optionalFields),
+    };
+}
+
 function buildInventory(rootDir = process.cwd()) {
     const resolvedRoot = path.resolve(rootDir);
     const collected = {};
@@ -281,22 +333,31 @@ function buildInventory(rootDir = process.cwd()) {
         counts[category] = categories[category].count;
     }
 
+    const optionalFieldReports = buildOptionalFieldReports(optionalFields);
+
     return {
         generated_by: 'tools/diagnostics/strict_null_inventory.cjs',
         scanned_root: resolvedRoot,
         counts,
         categories,
         hotspots: buildHotspots(categories),
-        optional_field_domains: buildDomainReport(optionalFields),
+        optional_field_domains: optionalFieldReports.domains,
+        optional_field_interfaces: optionalFieldReports.interfaces,
     };
 }
 
 function main(argv) {
     const args = argv.slice(2);
     const fieldDomainsOnly = args.includes('--field-domains');
-    const rootArg = args.find(arg => arg !== '--field-domains') || process.cwd();
+    const fieldInterfacesOnly = args.includes('--field-interfaces');
+    const rootArg = args.find(arg => arg !== '--field-domains' && arg !== '--field-interfaces') || process.cwd();
     const inventory = buildInventory(rootArg);
-    process.stdout.write(stableStringify(fieldDomainsOnly ? inventory.optional_field_domains : inventory));
+    const output = fieldDomainsOnly
+        ? inventory.optional_field_domains
+        : fieldInterfacesOnly
+            ? inventory.optional_field_interfaces
+            : inventory;
+    process.stdout.write(stableStringify(output));
 }
 
 if (require.main === module) {
@@ -306,5 +367,6 @@ if (require.main === module) {
 module.exports = {
     buildInventory,
     classifyDomain,
+    buildInterfaceReport,
     stableStringify,
 };
