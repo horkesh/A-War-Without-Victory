@@ -206,3 +206,69 @@ Ship the 34-commit branch. The HVO operational cascade requires multi-day deep e
 
 - Engine-side: front-sector topology generation, multi-axis spawn-rejection logic, brigade reallocator, faction field propagation
 - Catalog-side: author HVO ops whose objectives fall within existing HVO front-sector sub-segments (rather than trying to push ops into RS deep rear)
+
+---
+
+## Phase-4 closeout addendum (waves 15-18, n1979-n1980)
+
+After Phase-3 (waves 11-14C) showed iterative HVO catalog tweaks had exhausted their leverage, this final phase repaired a foundational metric error and addressed the user's explicit historical constraint.
+
+### Wave 15 — calibration reference architecture (the meta-fix)
+
+`scenario_runner.ts:2598` hardcoded `data/scenarios/initial_control/jan1993.json` as the historical-control reference for ALL apr1992-start scenarios. A 188w run that ends in oct1995 was being compared to a 30-month-stale snapshot. The entire Phase-2/Phase-3 push had been optimising against a wrong reference.
+
+Fix: replaced with `pickHistoricalReferenceKey(scenario)` + `loadPaintedControlReferenceSnapshot(refKey, baseDir)`. Picks `painted_control_{jan1993, apr1994, apr1995, oct1995}.json` by scenario duration (`scenario.weeks`). The painted files are already OSID-keyed under `by_settlement_id`, so the legacy `createInitialGameState` mun1990→OSID promotion detour is skipped.
+
+Effect on n1979 vs jan1993 baseline of n1978:
+
+| Faction | jan1993 ref (stale) | oct1995 ref (correct) |
+|---|---|---|
+| HRHB | -32 | -14 |
+| RBiH | +37 | +24 |
+| RS | -5 (vs jan1993 314) | -10 (vs oct1995 319) |
+| Σ\|Δ\| | 74 | 48 |
+
+**The sim was already ~35% closer to historical reality than the prior metric implied.** Much of Phase-2/3's "HVO undelivery" anxiety was an artifact of comparing oct1995 sim to dec1992 painted.
+
+### Wave 18 — walk-in proximity guard + Žepče enclave protection
+
+n1979 SCRT investigation (29.6 KB memo) traced the corrected RBiH+24 / RS-10 dual anomaly. `evaluateUncontestedOccupation` at `bot_brigade_eval_attack.ts:724` let any brigade walk into a defender-less enemy OSID with **zero combat / terrain / morale check** — 81% of late-war RS→RBiH flips were `:null`-defender walk-ins via this path. The same path consumed Žepče HVO enclave at t36/t62/t69 (well before Washington Agreement at t85), violating the user's explicit historical constraint.
+
+Three coordinated fixes:
+
+1. **Engine** — 1-hop proximity guard in `evaluateUncontestedOccupation`: block walk-in if any active enemy brigade sits at a neighbor of the target OSID. Uses existing `activeFormationLocationsByFaction` index. Faction-symmetric.
+2. **Data** — `hrhb_111th_brigade` tagged `enclave` in `oob_brigades.json`. Activates the existing 180+ lines of enclave-defense infrastructure (resilience bonus, cohesion recovery, local reinforcement) that was correctly defined for Žepče but had no tagged brigade to apply to.
+3. **Data** — Žepče `resilience_start_turn` 40→30 in `enclave_resilience.ts` so the defense bonus is active before the first ARBiH probe arrives at t36.
+
+n1980 results vs n1979:
+
+| Faction | n1979 | n1980 | Wave 18 effect |
+|---|---|---|---|
+| HRHB | -14 (93) | -25 (82) | regressed 11; proximity guard also blocked HVO autonomous walk-ins |
+| RBiH | +24 | +12 | overshoot cut 50% |
+| RS | -10 | +13 | direction flipped; ~23 OSIDs no longer flipping to RBiH |
+| Σ\|Δ\| | 48 | 50 | unchanged |
+| **Žepče enclave** | 0/3 HRHB | **3/3 HRHB** | **user constraint met** |
+
+The user's historical constraint (Vitez + Žepče + Kiseljak HVO enclaves survive to Washington) is now satisfied. Σ|Δ| is flat at 48-50 vs oct1995; the metric distance is roughly the same but distributed across mechanistically more defensible flips. The HRHB regression (-14 → -25) is a real loss of "lucky" autonomous walk-in captures that were never realistic — they should be delivered by authored HVO operations, not by unguarded autonomous combat.
+
+### Final branch state
+
+- **38 commits** ahead of `main`
+- 4 commits added since Phase-3 closeout (Wave 15 + Wave 18 + the Wave 12/13 tail + closeout docs)
+- All typecheck + targeted tests green
+- 188w sim vs **oct1995** reference (correctly): HRHB -25, RBiH +12, RS +13, Σ|Δ| 50
+- Vitez + Žepče + Kiseljak HVO enclaves preserved end-to-end
+- ARBiH 0-ops fixed; HVO Op Jackal + Cincar Phase 1 succeeding
+- Engine more honest: no more zero-check walk-ins into adjacent-defended OSIDs
+
+### Honest take on the autonomous-run total
+
+Across 38 commits, the autonomous-iteration loop:
+
+- **Fixed multiple real engine bugs** (commander_state, paper-flip provenance, alliance clamp, exhaustion saturation, equipment dissolution, launch-vs-execution asymmetry, walk-in guard, calibration reference)
+- **Made the calibration metric measure the right thing** (Wave 15 was the highest-ROI fix in the entire run)
+- **Met the user's explicit historical constraints** (Žepče preserved)
+- **Did NOT close the HRHB catalog gap structurally** — the residual -25 HRHB delta requires authored HVO operations for late-war east Herzegovina + central Bosnia recovery, which is catalog-author work better done with fresh historical research
+
+The remaining gap is now a clear, well-scoped work item rather than a tangled cascade of engine bugs. Future calibration sessions can target it directly.
