@@ -1,11 +1,12 @@
 # Autonomous arc/ops/calibration run — closeout
 
-**Branch**: `feature/arc-operations-calibration` (34 commits as of final v3 addendum below)
+**Branch**: `feature/arc-operations-calibration` (**39 commits** — final state, including this doc)
 **Date**: 2026-05-22
-**Mandate**: User-initiated autonomous push — "create a new branch specifically for this work. Arc, operations, calibration and so on. You should work on it autonomously... do not stop until we have a game engine that works as intended and produces reliable sim results." Then continued: "There is no next session, continue with the work" / "stop stopping".
+**Mandate**: User-initiated autonomous push — "create a new branch specifically for this work. Arc, operations, calibration and so on. You should work on it autonomously... do not stop until we have a game engine that works as intended and produces reliable sim results." Then continued: "There is no next session, continue with the work" / "stop stopping". Final stop: user picked option C (merge) after Wave 18.
 
 > **Addendum** (waves 6-10, n1965-n1973): see "Phase-2 cascade addendum".
-> **Addendum** (waves 11-14C, n1974-n1978): see "Phase-3 cascade addendum" at the end of this document.
+> **Addendum** (waves 11-14C, n1974-n1978): see "Phase-3 cascade addendum".
+> **Addendum** (waves 15-18, n1979-n1980): see "Phase-4 closeout addendum" at the end of this document — the highest-ROI fix in the entire run (Wave 15 calibration reference architecture) lives there.
 
 ## Headline results
 
