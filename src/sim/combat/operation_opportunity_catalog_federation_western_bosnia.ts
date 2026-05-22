@@ -635,6 +635,17 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 //   (b) uses ARBiH brigades that historically performed the operation
 //       (rolled-up 7th Corps brigades on the 3rd Corps roster),
 //   (c) leaves the Mistral 2 HVO/HV brigade pool undisturbed.
+//
+// Wave 14 axis split (2026-05-22): the single 11-OSID axis was failing at
+// `no_approach_osid` because 8 of 11 targets lay deep in RS rear with no
+// shared front edge to any `arbih_3rd_corps:N` sub-segment (see SCRT memo
+// docs/40_reports/audits/20260522_WAVE_11_12_13_BREAKTHROUGH_N1975.md §Q5).
+// Restructured into a NEAR axis (3 sub-segment-reachable OSIDs) and a RING
+// axis (7 deep-Jajce OSIDs, deferred via the engine's empty-axis skip path
+// until the corridor opens). `op:mrkonjic_grad:podrasnica_2` was dropped
+// from the op entirely — it connects only to the Mrkonjić cluster (Mistral 2
+// footprint), not to any Jajce-municipality OSID. Proposal memo:
+// docs/40_reports/proposals/20260522_WAVE_14_JAJCE_AXIS_SPLIT.md.
 // ═══════════════════════════════════════════════════════════════════════════
 
 const JAJCE_PRIMARY_CORPS = 'arbih_3rd_corps';
@@ -656,29 +667,66 @@ const JAJCE_STAGING_ANCHORS: readonly string[] = [
     JAJCE_STAGING_TURBE,
 ];
 
-// Wave 12: objectives expanded to include the Donji Vakuf approach corridor
-// (torlakovac_2, oborci_2) as stepping-stones into the Jajce zone. The
-// adjacency graph (data/derived/operational/operational_contact_graph.json)
-// confirms:
-//   - op:donji_vakuf:torlakovac_2 → op:jajce:grdovo, op:jajce:vinac_2
-//   - op:donji_vakuf:oborci_2     → op:jajce:grdovo
-// Without these, the sub-segment fallback in `getSectorOffensiveApproachOsids`
-// cannot bridge the corps's friendly front (Donji Vakuf town) to the painted
-// Jajce objectives. `op:jajce:grdovo` is also added as the first-touch
-// objective; it sits directly on the live arbih_3rd_corps:1 sub-segment
-// per live-save inspection and is therefore the natural opening attack.
-const JAJCE_OBJECTIVES: readonly string[] = [
-    'op:donji_vakuf:torlakovac_2',
+// Wave 14 (2026-05-22): axis split honoring sub-segment topology.
+//
+// Per n1975 SCRT memo (docs/40_reports/audits/20260522_WAVE_11_12_13_BREAKTHROUGH_N1975.md
+// §Q5), the previous 11-objective single-axis pool failed at `no_approach_osid`
+// because only 3 of 11 OSIDs appear in any `arbih_3rd_corps` front-sector
+// sub-segment's `enemy_osids`. The Wave 11 sub-segment fallback in
+// `collectObjectiveApproachOsids` (sector_offensive_launch_helpers.ts:377)
+// is sound — it had nothing to return because the deep-Jajce ring shares no
+// front edge with any `arbih_3rd_corps:N` sub-segment.
+//
+// Verified against `data/derived/operational/operational_contact_graph.json`
+// (2026-05-22):
+//
+//   PRIMARY AXIS — reachable from arbih_3rd_corps:1 sub-segment:
+//     op:donji_vakuf:oborci_2     ←adj→ op:donji_vakuf:komar_2 (3rd-corps friendly)
+//                                  ←adj→ op:donji_vakuf:donji_vakuf_2 (3rd-corps friendly)
+//                                  ←adj→ op:jajce:grdovo, op:donji_vakuf:torlakovac_2
+//     op:donji_vakuf:torlakovac_2 ←adj→ op:jajce:grdovo, op:jajce:vinac_2
+//     op:jajce:grdovo             ←adj→ op:jajce:jajce_3, op:jajce:vinac_2
+//                                  (sub-segment arbih_3rd_corps:1 lists this as enemy_osid)
+//
+//   DEFERRED AXIS — deep RS rear; no shared 3rd-corps front edge until the
+//   corridor opens via primary-axis captures. The engine's
+//   `spawnCorpsOperationFromOpportunity` skip-empty-axis behavior
+//   (operation_opportunities.ts:1135 `if (filteredObjectives.length === 0) continue`)
+//   combined with the per-turn sub-segment fallback means this axis safely
+//   no-ops until the primary advances. Once grdovo / torlakovac_2 / vinac_2
+//   flip to RBiH, the 3rd-corps front sub-segment recomputes and the deep
+//   ring becomes reachable.
+//     op:jajce:vinac_2     (hub: torlakovac_2, grdovo, jajce_3, bravnice)
+//     op:jajce:jajce_3     (hub: barevo_2, bravnice, grdovo, lupnica, vinac_2 — Jajce town)
+//     op:jajce:bravnice    (hub: barevo_2, jajce_3, jezero_2, vinac_2)
+//     op:jajce:barevo_2    (hub: bravnice, jajce_3, jezero_2, lupnica, prisoje)
+//     op:jajce:lupnica     (adj: barevo_2, jajce_3)
+//     op:jajce:jezero_2    (adj: barevo_2, bravnice, prisoje)
+//     op:jajce:prisoje     (adj: barevo_2, jezero_2)
+//
+//   DROPPED: op:mrkonjic_grad:podrasnica_2 — connects only to the Mrkonjic
+//   Grad cluster (gerzovo_2, majdan_2, mrkonjic_grad_2) and Ključ, not to
+//   any Jajce-municipality OSID. Belongs to the Mistral 2 Šipovo/Mrkonjić
+//   axis footprint, never reachable from a 3rd-corps approach.
+const JAJCE_NEAR_OBJECTIVES: readonly string[] = [
     'op:donji_vakuf:oborci_2',
+    'op:donji_vakuf:torlakovac_2',
     'op:jajce:grdovo',
+];
+
+const JAJCE_RING_OBJECTIVES: readonly string[] = [
     'op:jajce:vinac_2',
-    'op:jajce:barevo_2',
-    'op:jajce:bravnice',
-    'op:jajce:jezero_2',
-    'op:jajce:lupnica',
-    'op:jajce:prisoje',
     'op:jajce:jajce_3',
-    'op:mrkonjic_grad:podrasnica_2',
+    'op:jajce:bravnice',
+    'op:jajce:barevo_2',
+    'op:jajce:lupnica',
+    'op:jajce:jezero_2',
+    'op:jajce:prisoje',
+];
+
+const JAJCE_OBJECTIVES: readonly string[] = [
+    ...JAJCE_NEAR_OBJECTIVES,
+    ...JAJCE_RING_OBJECTIVES,
 ];
 
 // Brigade pool: ARBiH 3rd Corps brigades that home in the Bugojno / Travnik /
@@ -693,21 +741,43 @@ const JAJCE_OBJECTIVES: readonly string[] = [
 //   - arbih_717th_slavna_mountain  — home op:gornji_vakuf:crkvice
 //   - arbih_727th_slavna           — home op:travnik:podstinje
 //   - arbih_737th_muslim_light     — home op:travnik:travnik_2
+//
+// Wave 14 brigade split:
+//   - NEAR axis (Donji Vakuf shoulder): three brigades home to that ring
+//     (770th Donji Vakuf town, 705th Bugojno, 707th Bugojno-Kopčić). They
+//     have the shortest column-march to oborci_2 / torlakovac_2 / grdovo.
+//   - RING axis (deep Jajce): three brigades home to the Gornji Vakuf /
+//     Travnik shoulder (717th, 727th, 737th). They follow the corridor once
+//     the near axis opens it; if the corridor never opens, the engine's
+//     skip-empty-axis path leaves them with their home formations.
+const JAJCE_NEAR_AXIS_BRIGADES: readonly FormationId[] = [
+    'arbih_770th_slavna_mountain' as FormationId,
+    'arbih_705th_slavna_mountain' as FormationId,
+    'arbih_707th_slavna_mountain' as FormationId,
+];
+
+const JAJCE_RING_AXIS_BRIGADES: readonly FormationId[] = [
+    'arbih_717th_slavna_mountain' as FormationId,
+    'arbih_727th_slavna' as FormationId,
+    'arbih_737th_muslim_light' as FormationId,
+];
+
 const JAJCE_AXES: readonly OpportunityAxisDef[] = [
     {
-        axis_id: 'jajce_recovery',
-        name: 'Jajce Recovery Axis',
+        axis_id: 'jajce_recovery_near',
+        name: 'Donji Vakuf Shoulder Axis',
         corps: JAJCE_PRIMARY_CORPS,
-        brigades: [
-            'arbih_770th_slavna_mountain' as FormationId,
-            'arbih_705th_slavna_mountain' as FormationId,
-            'arbih_707th_slavna_mountain' as FormationId,
-            'arbih_717th_slavna_mountain' as FormationId,
-            'arbih_727th_slavna' as FormationId,
-            'arbih_737th_muslim_light' as FormationId,
-        ],
-        objectives: JAJCE_OBJECTIVES,
+        brigades: JAJCE_NEAR_AXIS_BRIGADES,
+        objectives: JAJCE_NEAR_OBJECTIVES,
         staging_osid: JAJCE_STAGING_BUGOJNO,
+    },
+    {
+        axis_id: 'jajce_recovery_ring',
+        name: 'Jajce Ring Axis (deferred until corridor opens)',
+        corps: JAJCE_PRIMARY_CORPS,
+        brigades: JAJCE_RING_AXIS_BRIGADES,
+        objectives: JAJCE_RING_OBJECTIVES,
+        staging_osid: JAJCE_STAGING_TURBE,
     },
 ];
 
@@ -833,6 +903,8 @@ export const JAJCE_95_OPPORTUNITY: OperationOpportunityDef = {
         'ICTY Prosecutor v. Hadžihasanović IT-01-47-T (ARBiH 7th Corps OOB, central Bosnia ridge sector brigade composition)',
         'UNHCR Situation Report, 15 September 1995 (Federation control of Jajce town and 9 surrounding OSIDs)',
         'docs/40_reports/proposals/20260522_WAVE_12_MISTRAL1_THRESHOLD_JAJCE_CORPS.md (Wave 12 re-host rationale)',
+        'docs/40_reports/audits/20260522_WAVE_11_12_13_BREAKTHROUGH_N1975.md §Q5 (n1975 no_approach_osid diagnosis: 8 of 11 OSIDs unreachable from arbih_3rd_corps sub-segments)',
+        'docs/40_reports/proposals/20260522_WAVE_14_JAJCE_AXIS_SPLIT.md (Wave 14 NEAR/RING axis split rationale and adjacency verification)',
     ],
     historical_exit_class: 'decisive_success',
     prerequisites: {
