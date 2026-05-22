@@ -783,7 +783,7 @@ const KUPRES_PHASE_2_AXES: readonly OpportunityAxisDef[] = [
             'hvo_rama_brigade' as FormationId,
         ],
         objectives: KUPRES_PHASE_2_SOUTHERN_OBJECTIVES,
-        staging_osid: KUPRES_PHASE_2_STAGING_BUCOVACA,
+        staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
     },
     {
         axis_id: 'kupres_phase_2_northern',
@@ -795,7 +795,7 @@ const KUPRES_PHASE_2_AXES: readonly OpportunityAxisDef[] = [
             'hvo_1st_guard_abb' as FormationId,
         ],
         objectives: KUPRES_PHASE_2_NORTHERN_OBJECTIVES,
-        staging_osid: KUPRES_PHASE_2_STAGING_BUCOVACA,
+        staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
     },
 ];
 
@@ -814,7 +814,7 @@ const KUPRES_PHASE_2_SOUTHERN_ONLY_AXES: readonly OpportunityAxisDef[] = [
             'op:kupres:kupres_2',
             'op:kupres:novo_selo_2',
         ],
-        staging_osid: KUPRES_PHASE_2_STAGING_BUCOVACA,
+        staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
     },
 ];
 
@@ -920,8 +920,13 @@ export const KUPRES_PHASE_2_94_OPPORTUNITY: OperationOpportunityDef = {
     primary_corps: KUPRES_PHASE_2_PRIMARY_CORPS,
     family: 'central_bosnia_vlasic',
     axes: KUPRES_PHASE_2_AXES,
-    staging_osid: KUPRES_PHASE_2_STAGING_BUCOVACA,
-    planning_duration: 2,
+    // staging_osid is Livno (rear area where Phase 1 brigades home), NOT bucovaca:
+    // brigades do not auto-relocate to a captured objective. bucovaca remains a
+    // corridor anchor (validated by stagingAccessKupresPhase2's
+    // KUPRES_PHASE_2_CINCAR_DEPENDENCY_ANCHORS check). planning_duration bumped
+    // 2→4 to give brigades movement time from Livno toward donji_malovan/goravci.
+    staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
+    planning_duration: 4,
     min_attack_outcome: 'repulsed',
     citations: [
         'Balkan Battlegrounds v2 ch. 28 (pp.529-530) — Kupres / Cincar OOB and multi-day campaign sequencing',
@@ -962,7 +967,7 @@ export const KUPRES_PHASE_2_94_OPPORTUNITY: OperationOpportunityDef = {
             variant_id: 'kupres_phase_2_southern_only',
             name: 'Donji Malovan Thrust Only',
             axes: KUPRES_PHASE_2_SOUTHERN_ONLY_AXES,
-            staging_osid: KUPRES_PHASE_2_STAGING_BUCOVACA,
+            staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
         },
     ],
     staff_recommendation: 'approve',
