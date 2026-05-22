@@ -83,7 +83,7 @@ Top center: faction crest. Date and turn number top-left. Top-right toolbar from
 - **AUTH** (gauge) — your Command Authority. 100/100 max, recovers +2 per turn. Spent on Level 3 overrides: force-launching operations against commander recommendation, manual brigade orders.
 - **ADVANCE TURN** — primary action. Click to roll one week forward.
 
-Bottom toolbar: map overlay selector (Political / Ethnic / Supply / Operations / +More for Casualties / Morale / Defense). Status bar shows Friendly %, Hostile-held %, patron/alliance state.
+Bottom toolbar: map overlay selector on keys 1-9 (Political / Ethnic / Supply / Casualties / Morale / Operations / Defense / Authority / Legitimacy). Status bar shows Friendly %, Hostile-held %, patron/alliance state.
 
 Left column ("Command"):
 - **SITUATION** — your faction's territory, sitrep, priority fronts, weakest brigades, casualties, alliance gauge, international pressure. Read this every turn.

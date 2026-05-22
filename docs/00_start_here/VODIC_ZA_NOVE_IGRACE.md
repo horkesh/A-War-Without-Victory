@@ -83,7 +83,7 @@ Gore u sredini: grb vaše frakcije. Datum i broj poteza gore lijevo. Gore desno,
 - **AUTH** (mjerač) — vaš Command Authority (komandna ovlast). Maksimum 100/100, oporavlja se +2 po potezu. Troši se na nadređenja trećeg nivoa (Level 3): force-launch operacija protiv preporuke komandanta, ručna brigadna naređenja.
 - **ADVANCE TURN** — glavna akcija. Kliknite za pomjeranje jednu sedmicu naprijed.
 
-Donja alatna traka: birač sloja na mapi (Political / Ethnic / Supply / Operations / +More za Casualties / Morale / Defense). Statusna traka pokazuje procenat Friendly, Hostile-held, stav patrona ili saveza.
+Donja alatna traka: birač sloja na mapi na tipkama 1-9 (Political / Ethnic / Supply / Casualties / Morale / Operations / Defense / Authority / Legitimacy). Statusna traka pokazuje procenat Friendly, Hostile-held, stav patrona ili saveza.
 
 Lijeva kolona („Command"):
 - **SITUATION** — teritorija vaše frakcije, sitrep, prioritetni frontovi, najslabije brigade, gubici, mjerač saveza, međunarodni pritisak. Čitajte svaki potez.

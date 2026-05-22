@@ -119,7 +119,7 @@ src/ui/map/
 │   └── ControlLookup.ts           Control/status lookup builders
 │
 ├── hooks/
-│   ├── useKeyboardShortcuts.ts    Enter/Escape/1–5 global key handler (map modes 1–5)
+│   ├── useKeyboardShortcuts.ts    Enter/Escape/1-9 global key handler (map modes 1-9 from MAP_MODES)
 │   └── useDesktopSession.ts       Bootstrap + game-state-updated/turn-report-updated IPC subscriptions (Phase 4)
 │
 ├── saved/                         Phase 4 staging area — promoted to live files; kept for reference (excluded from tsconfig)
@@ -316,7 +316,7 @@ Collapsible accordion, left edge, position:fixed.
 
 ### 3.3 MapModeToolbar
 
-Seven map modes (bottom bar, centered) — see `src/ui/map/utils/mapModes.ts`:
+Nine map modes (bottom bar, centered; primary row + `+MORE` overflow) — see `src/ui/map/utils/mapModes.ts`:
 
 | Button | Key | Store value | Layers activated |
 |--------|-----|-------------|-----------------|
@@ -327,6 +327,8 @@ Seven map modes (bottom bar, centered) — see `src/ui/map/utils/mapModes.ts`:
 | Morale | 5 | `'morale'` | `osid-morale-fill` |
 | Operations | 6 | `'operations'` | `osid-operations-fill` (+ operation arrows when applicable) |
 | Defense | 7 | `'defense'` | `osid-defense-fill` |
+| Authority | 8 | `'authority'` | `political-metric-fill` (`authority`) |
+| Legitimacy | 9 | `'legitimacy'` | `political-metric-fill` (`legitimacy`) |
 
 Layer toggles (no keys):
 
@@ -709,6 +711,7 @@ All 6 layers are hidden (`visibility: 'none'`) when `operationTargetOsids` is em
 | `osid-morale-fill` | `mapMode === 'morale'` |
 | `osid-operations-fill` | `mapMode === 'operations'` |
 | `osid-defense-fill` | `mapMode === 'defense'` |
+| `political-metric-fill` | `mapMode === 'authority' || mapMode === 'legitimacy'` |
 
 ### Municipality / OSID outline toggle
 
@@ -757,8 +760,12 @@ Map mode fill layers (ethnic, supply, …) are inserted **below** `osid-selected
 | `1` | setMapMode('political') |
 | `2` | setMapMode('ethnic') |
 | `3` | setMapMode('supply') |
-| `4` | setMapMode('pressure') |
-| `5` | setMapMode('density') |
+| `4` | setMapMode('casualties') |
+| `5` | setMapMode('morale') |
+| `6` | setMapMode('operations') |
+| `7` | setMapMode('defense') |
+| `8` | setMapMode('authority') |
+| `9` | setMapMode('legitimacy') |
 
 (Keys skipped when focus is in INPUT/TEXTAREA.)
 
