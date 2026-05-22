@@ -762,20 +762,21 @@ const JAJCE_RING_AXIS_BRIGADES: readonly FormationId[] = [
     'arbih_737th_muslim_light' as FormationId,
 ];
 
-// Wave 14B (2026-05-22): n1976 demonstrated that the two-axis split with one
-// unreachable axis caused the engine to drop the entire op between approval
-// and AAR (both Jajce + Mistral 1 vanished post-approval). Collapsing to a
-// single near-axis preserves the topology-honest scope (3 reachable OSIDs)
-// while keeping the brigade pool intact (all 6 brigades on one axis allows
-// the engine to satisfy front-edge feasibility from a larger attacker base).
-// The 7 deep RING OSIDs are deferred to a future op (or a dedicated follow-on
-// once the corridor opens via near-axis captures).
+// Wave 14C (2026-05-22): n1977 fired the single-axis Wave 14B variant but
+// recovered as zero_eligible_axis. The combined 6-brigade pool included the
+// RING brigades (717th/727th/737th from Travnik & Gornji Vakuf shoulder) that
+// don't sit in the arbih_3rd_corps:1 front sector covering Donji Vakuf →
+// Jajce. Per-turn axis evaluation requires brigades in the same front sector
+// as the objective sub-segment, so RING brigades were marked ineligible and
+// the axis returned zero eligible attackers. Shrinking to the 3 NEAR brigades
+// (770th + 705th + 707th, all homed in Donji Vakuf / Bugojno cluster) which
+// ARE in arbih_3rd_corps:1's sub-segment.
 const JAJCE_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'jajce_recovery_near',
         name: 'Donji Vakuf Shoulder Axis',
         corps: JAJCE_PRIMARY_CORPS,
-        brigades: [...JAJCE_NEAR_AXIS_BRIGADES, ...JAJCE_RING_AXIS_BRIGADES],
+        brigades: JAJCE_NEAR_AXIS_BRIGADES,
         objectives: JAJCE_NEAR_OBJECTIVES,
         staging_osid: JAJCE_STAGING_BUGOJNO,
     },
