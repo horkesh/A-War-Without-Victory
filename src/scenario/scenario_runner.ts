@@ -72,6 +72,10 @@ import { setUrbanOsidSet, setForestOsidSet } from '../sim/combat/combat_math.js'
 import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { reconcileFinalSectorTruth } from '../sim/combat/final_sector_truth_reconciliation.js';
+import {
+    applyBotOpportunityDecisions,
+    autoResolveOpportunityProposalReviews,
+} from '../sim/combat/operation_opportunities.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
 import { applyPoliticalLeaderDataInit } from '../sim/political/political_leader_data_loader.js';
 import {
@@ -2038,6 +2042,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
                 state = runResult.nextState;
                 turnReport = runResult.report;
+                autoResolveOpportunityProposalReviews(
+                    state,
+                    state.meta.turn,
+                    state.meta.player_faction ?? null
+                );
+                // Scenario runs are non-interactive. Any opportunity still
+                // pending after the war pipeline is headless-controlled and
+                // should follow the same deterministic staff path as bot ops.
+                applyBotOpportunityDecisions(state, state.meta.turn, null);
                 if (!oobCreated && state.meta.phase === 'war') {
                     await createOobFormations(
                         state,

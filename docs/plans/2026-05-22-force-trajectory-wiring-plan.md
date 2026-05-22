@@ -42,7 +42,9 @@ The expected outcome from closing these gaps: ~6-8pp of the current 10pp Oct-199
 |---|---|---|
 | W1 war-exhaustion tempo threshold repair | DONE | `combat_math.ts` thresholds are now 30/80; Army HQ readout threshold is 30; focused tests, typecheck, baseline re-bless, and diff hygiene passed. |
 | W2 defender-corps readiness predicate | DONE | `sana_95`, `sana_95_follow_on`, and `mistral_2_95` now read VRS 2nd Krajina trajectory when defender-corps evidence is present. |
-| W3 casualty-trajectory consumer | PENDING | Larger schema/output lane; defer until W2/W4 trace evidence is measured. |
+| W2.5 headless opportunity decision bridge | DONE | Non-interactive scenario runs now resolve eligible player-faction opportunities through the existing deterministic staff/bot decision path. Fresh 188w `n1938` approves Sana and Donji with linked AARs. |
+| W2.6 opening-attack launch feasibility | NEXT | Fresh 188w `n1938` proves the remaining blocker is accepted-but-not-launched delivery: Sana has `NO_OPENING_ATTACK:2`; Donji Vakuf has `NO-CONTACT-PATH:2` / `defender_power_too_high`. |
+| W3 casualty-trajectory consumer | PENDING | Larger schema/output lane; defer until the accepted-operation launch boundary is diagnosed. |
 | W4 Sana readiness floor recalibration | NOT NEEDED ON CURRENT TRACE | Fresh 188w `n1936` shows `sana_95` eligible at turn 175 with the 0.40 floor still in place. |
 | W5 officer-maturity combat consumer | PENDING | `faction_officer_maturity` already feeds corps readiness; any combat-math consumer remains opt-in/default-off work. |
 

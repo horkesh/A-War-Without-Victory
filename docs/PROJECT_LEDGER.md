@@ -16,6 +16,31 @@
 **Artifacts:** `docs/40_reports/implemented/20260522_DEFENDER_TRAJECTORY_WEAKNESS_PREDICATE.md`.
 
 ---
+
+## [2026-05-22] feat(opportunity): resolve headless opportunity decisions
+
+**Type:** Scenario harness decision-boundary repair + opportunity decision tests + calibration docs. No operation catalog definitions, scenario data, OOB rows, painted targets, combat math, save schema, or outcome tuning changed.
+
+**Change:** Non-interactive scenario runs now resolve Operation Opportunity proposals instead of leaving player-faction opportunities permanently pending. Added `autoResolveOpportunityProposalReviews(...)` for Level 1 review rows and called the existing deterministic `applyBotOpportunityDecisions(..., playerFaction = null)` after each war turn in the scenario harness so any remaining `eligible_pending_review` opportunity follows the same staff recommendation path as bot opportunities. Desktop/manual semantics remain unchanged because the war pipeline still requires IPC-marked review rows for interactive player decisions.
+
+**Determinism:** Deterministic, same-state same-decision harness behavior. Decisions are resolved through the existing sorted proposal/default-decision path; no randomness, wall-clock, save-schema migration, or data-order dependency added. 40w/52w/baseline regression artifacts remain byte-stable under the current manifest.
+
+**188w evidence:** Fresh run `runs/apr1992_definitive_188w__210e69404d054959__w188_n1938` completed with final hash `091949f7cb8dcbf9` and bot benchmarks 6/6. `sana_95` approved at turn 175 with linked AAR `arbih_5th_corps:Operation Sana:t175`; `donji_vakuf_95` approved at turn 177 with linked AAR `arbih_7th_corps:Operation Donji Vakuf 95:t177`. Opportunity campaign proof now reports `surfaced_executed: 2`, `health_decisions: 5`, no broken AAR links, and no unlinked approvals.
+
+**Residual:** This closes the proposal decision boundary, not the late-war delivery gap. Both accepted operations still exit `did_not_launch`: Sana has `NO_OPENING_ATTACK:2`; Donji Vakuf has `NO-CONTACT-PATH:2` / `defender_power_too_high`; `mistral_2_95` remains blocked by Federation authorization and Kupres/Cincar staging. Oct 1995 painted area-weighted match remains 71.7%. The next roadmap lane is accepted-operation opening-attack / launch feasibility before W3 casualty-trajectory schema.
+
+**Verification:**
+- Red first: `npx.cmd vitest run tests\operation_opportunities_phase2_decisions.test.ts --reporter=dot` failed on missing `autoResolveOpportunityProposalReviews`.
+- `npx.cmd vitest run tests\operation_opportunities_phase2_decisions.test.ts --reporter=dot` PASS (15/15).
+- `npx.cmd vitest run tests\operation_opportunities_phase2_decisions.test.ts tests\operation_opportunities_catalog.test.ts tests\operation_opportunities_central_bosnia_catalog.test.ts tests\operation_opportunities_federation_western_bosnia_catalog.test.ts --reporter=dot` PASS (76/76).
+- `npm.cmd run typecheck` PASS.
+- `npm.cmd run test:baselines` PASS.
+- `npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --unique --out runs` PASS (`n1938`).
+- `node tools\compare_painted_vs_sim.cjs runs\apr1992_definitive_188w__210e69404d054959__w188_n1938 --target oct1995` completed; area-weighted match remained 71.7%.
+
+**Artifacts:** `src/sim/combat/operation_opportunities.ts`, `src/scenario/scenario_runner.ts`, `tests/operation_opportunities_phase2_decisions.test.ts`, `docs/40_reports/implemented/20260522_HEADLESS_OPPORTUNITY_DECISION_BRIDGE.md`, `docs/40_reports/CALIBRATION_MASTER.md`, `docs/plans/2026-05-22-force-trajectory-wiring-plan.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
 ## [2026-05-22] docs(roadmap): intake force-trajectory specialist bundle
 
 **Type:** Roadmap/audit intake. No source behavior, scenario data, painted-control targets, OOB rows, save schema, baseline hashes, or tuning changed.

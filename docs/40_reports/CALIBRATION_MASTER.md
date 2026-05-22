@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## Headless opportunity decision bridge (2026-05-22)
+
+- Scenario harness runs are non-interactive, so player-faction Operation Opportunities no longer remain permanently pending when no IPC marks the review row.
+- Level 1 review rows are marked with their staff recommendation, and any remaining `eligible_pending_review` opportunities are resolved with the existing deterministic bot/staff decision path under `playerFaction = null`.
+- Fresh 188w `n1938` result: `sana_95` approves at turn 175 and `donji_vakuf_95` approves at turn 177 with linked AARs; opportunity proof reports `surfaced_executed: 2`, no broken AAR links, and no unlinked approvals.
+- Residual: both accepted ops still fail launch/delivery (`Sana`: `NO_OPENING_ATTACK:2`; `Donji Vakuf`: `NO-CONTACT-PATH:2` / `defender_power_too_high`), and Oct 1995 painted area match remains 71.7%. Next calibration lane is launch/opening-attack feasibility, not W3 casualty schema by itself.
+- Report: `docs/40_reports/implemented/20260522_HEADLESS_OPPORTUNITY_DECISION_BRIDGE.md`.
+
 ## Defender trajectory weakness predicate (2026-05-22)
 
 - `sana_95`, `sana_95_follow_on`, and `mistral_2_95` now read VRS 2nd Krajina defender-corps trajectory when active subordinate defender brigades are present.

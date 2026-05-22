@@ -1312,6 +1312,37 @@ export function generateOpportunityProposalReviews(
 }
 
 /**
+ * Headless harness helper: mark unresolved opportunity review rows with the
+ * same deterministic staff recommendation the player would see in the review
+ * queue. This does not apply the decision directly; the existing next-turn
+ * `applyResolvedOpportunityDecisions` owner still routes through
+ * `applyOpportunityDecision`.
+ */
+export function autoResolveOpportunityProposalReviews(
+    state: GameState,
+    turn: number,
+    playerFaction: FactionId | null,
+): number {
+    const reviews = state.meta.pending_proposal_reviews;
+    if (!reviews || reviews.length === 0) return 0;
+
+    let marked = 0;
+    for (const review of reviews) {
+        if (!review.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)) continue;
+        if (review.accepted !== undefined || normalizeOpportunityDecision(review.opportunity_decision) !== null) continue;
+        if (playerFaction !== null && review.faction !== playerFaction) continue;
+
+        const decision = normalizeOpportunityDecision(review.proposed_value);
+        if (decision === null) continue;
+
+        review.opportunity_decision = decision;
+        review.resolved_turn = turn;
+        marked += 1;
+    }
+    return marked;
+}
+
+/**
  * Consume any `pending_proposal_reviews` rows whose `proposed_action` starts
  * with `OPPORTUNITY:` and which carry either an explicit rich
  * `opportunity_decision` or the legacy binary `accepted` flag. Rich decisions

@@ -26,6 +26,7 @@ import {
     OPPORTUNITY_PROPOSAL_ACTION_PREFIX,
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
+    autoResolveOpportunityProposalReviews,
     buildProposalId,
     generateOpportunityProposalReviews,
     runOpportunityEvaluationStep,
@@ -156,6 +157,19 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         expect(state.military.operation_opportunities ?? []).toEqual([]);
     });
 
+    it('bot opportunity resolver treats null player faction as fully headless control', () => {
+        const state = buildMinimalState(175, 'RBiH', 0);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        applyBotOpportunityDecisions(state, 175, null, [def]);
+
+        const after = state.military.operation_opportunities![0];
+        expect(after.status).toBe('approved');
+        expect(after.executed_op_id).toBe(def.name);
+        expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
+    });
+
     it('player opportunity surfaces as a PendingProposalReview at autonomy_level=1', () => {
         const state = buildMinimalState(175, 'RBiH', 1);
         const def = fixtureOpp();
@@ -284,6 +298,27 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
             p => p.opportunity_id === def.opportunity_id);
         expect(proposal!.status).toBe('eligible_pending_review');
         expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
+    });
+
+    it('headless auto-resolve marks opportunity reviews with the staff recommendation for next-turn application', () => {
+        const state = buildMinimalState(175, 'RBiH', 1);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        state.meta.pending_proposal_reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+
+        const marked = autoResolveOpportunityProposalReviews(state, 175, 'RBiH');
+
+        expect(marked).toBe(1);
+        expect(state.meta.pending_proposal_reviews![0].opportunity_decision).toBe('approve');
+        expect(state.meta.pending_proposal_reviews![0].resolved_turn).toBe(175);
+
+        state.meta.turn = 176;
+        applyResolvedOpportunityDecisions(state, 176, [def]);
+
+        const proposal = state.military.operation_opportunities!.find(
+            p => p.opportunity_id === def.opportunity_id);
+        expect(proposal!.status).toBe('approved');
+        expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
     });
 
     it('bot decisions are deterministic across two independent runs', () => {
