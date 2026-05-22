@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event-notification Srebrenica demilitarization slice:** [implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md](implemented/20260522_EVENT_NOTIFICATION_SREBRENICA_DEMILITARIZATION.md) - `srebrenica_demilitarization_1993` now has complete non-source recipient notification coverage; Phase D residual is down to 2 rows / 4 blocked-sensitive press blocks.
+
 **Latest event-notification 1992 historian slice:** [implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md](implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md) - `drina_cleansing_decision_1992` and `concentration_camps_revealed_1992` now have complete non-source recipient notification coverage; Phase D residual is down to 3 rows / 10 blocks.
 
 **Latest event-notification front-visit command-signaling slice:** [implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md](implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md) - Sarajevo and Drina front-visit command-signaling options now have non-source recipient notification coverage; Phase D residual is down to 5 rows / 20 blocks.

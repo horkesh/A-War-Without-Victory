@@ -27,6 +27,7 @@
 | `war_1993.json` | `rs_assembly_rejects_voplan_1993` | RS | 4/4 | Batch 8 safe backfill complete from existing assembly rejection narrative, response descriptions, and dimension shifts. |
 | `war_1993.json` | `owen_stoltenberg_plan_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tripartite union narrative, response descriptions, and diplomatic effects. |
 | `war_1993.json` | `os_rbih_tactical_acceptance_1993` | RBiH | 4/4 | Batch 8 safe backfill complete from existing tactical-acceptance narrative, response labels, and dimension shifts. |
+| `war_1993.json` | `srebrenica_demilitarization_1993` | RBiH | 6/6 | Historian-cleared Srebrenica demilitarization slice complete from the authored row, ICTY Krstic source, and agreement records. |
 | `war_1993.json` | `visit_to_front_rbih` | RBiH | 10/10 | Front-visit recipient coverage complete; Sarajevo command-signaling option cleared without adding new siege facts. |
 | `war_1993.json` | `visit_to_front_rs` | RS | 8/10 | Safe front-visit slice complete for `visit_posavina` and `stay_pale_rs`; Sarajevo-line and Drina command-signaling options cleared; press option remains blocked-sensitive. |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 8/10 | Safe front-visit slice complete for `visit_posavina_hrhb` and `stay_mostar_hrhb`; narrative-tone slice complete for `visit_mostar_front` and `visit_central_bosnia`; press option remains blocked-sensitive. |
@@ -46,7 +47,6 @@
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
 |---|---|---:|---:|
-| `war_1993.json` | `srebrenica_demilitarization_1993` | RBiH | 0/6 |
 | `war_1993.json` | `visit_to_front_rs` | RS | 8/10 |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 8/10 |
 
@@ -59,18 +59,18 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
-| Historian-required | 1 | 6 | `srebrenica_demilitarization_1993` |
+| Historian-required | 0 | 0 | Closed 2026-05-22 by the 1992 and Srebrenica historian-cleared slices. |
 | Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
 | Front-visit mixed-sensitive | 2 | 4 | `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 3 event rows and 10 recipient blocks after the 2026-05-22 1992 historian-cleared slice. The prior front-visit command-signaling floor was 5 rows / 20 blocks.
+**Total residual:** 2 event rows and 4 recipient blocks after the 2026-05-22 Srebrenica demilitarization historian-cleared slice. The prior 1992 historian floor was 3 rows / 10 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
 |---|---|---|
 | `war_1992.json` | `drina_cleansing_decision_1992` | Historian-cleared 1992 reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1992.json` | `concentration_camps_revealed_1992` | Historian-cleared 1992 reconciliation implemented 2026-05-22; row is no longer residual. |
-| `war_1993.json` | `srebrenica_demilitarization_1993` | Enclave/demilitarization/humanitarian-convoy sensitivities; not authored in safe-content batch. |
+| `war_1993.json` | `srebrenica_demilitarization_1993` | Historian-cleared Srebrenica demilitarization reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1993.json` | `operation_lukavac_93` | Historian-cleared Igman/Lukavac reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1993.json` | `visit_to_front_rbih` | Sarajevo front command-signaling reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1993.json` | `visit_to_front_rs` | Sarajevo-line and Drina command-signaling options implemented 2026-05-22; press option remains blocked-sensitive. |
