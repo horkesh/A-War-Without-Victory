@@ -368,14 +368,14 @@ export function resolveAttackOrdersOsid(
         targetOsid: Osid,
         reason: AttackOrderSkipReason,
         locationOsid?: string,
-        targetController?: string | null,
+        targetController?: FactionId | null,
     ): void => {
         (report.skipped_attack_orders ??= []).push({
             brigade_id: brigadeId,
             target_osid: targetOsid,
             reason,
             ...(locationOsid ? { location_osid: locationOsid } : {}),
-            ...(targetController !== undefined ? { target_controller: targetController as FactionId | null } : {}),
+            ...(targetController !== undefined ? { target_controller: targetController } : {}),
         });
     };
 
