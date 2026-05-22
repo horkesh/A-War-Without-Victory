@@ -14,6 +14,10 @@ function loadWar1994Events(): any[] {
     return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1994.json'), 'utf-8'));
 }
 
+function loadWar1995Events(): any[] {
+    return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1995.json'), 'utf-8'));
+}
+
 describe('event notification content backfill', () => {
     it('covers narrative-tone 1992 identity decisions for non-source recipients', () => {
         const events = loadWar1992Events();
@@ -116,6 +120,60 @@ describe('event notification content backfill', () => {
                 responses: {
                     respect: ['HRHB', 'RS'],
                     exploit: ['HRHB', 'RS'],
+                },
+            },
+        ];
+
+        for (const { eventId, source, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
+    it('covers 1995 late-war outcome rows for non-source recipients', () => {
+        const events = loadWar1995Events();
+        const cases = [
+            {
+                eventId: 'karadzic_mladic_split_1995',
+                source: 'RS',
+                responses: {
+                    remove_mladic: ['HRHB', 'RBiH'],
+                    back_down: ['HRHB', 'RBiH'],
+                },
+            },
+            {
+                eventId: 'us_halts_federation_advance_1995',
+                source: 'RBiH',
+                responses: {
+                    comply: ['HRHB', 'RS'],
+                    push_further: ['HRHB', 'RS'],
+                },
+            },
+            {
+                eventId: 'holbrooke_ceasefire_demand_oct95',
+                source: 'RBiH',
+                responses: {
+                    accept_ceasefire: ['HRHB', 'RS'],
+                    continue_offensive: ['HRHB', 'RS'],
+                },
+            },
+            {
+                eventId: 'dayton_talks_begin_1995',
+                source: 'RBiH',
+                responses: {
+                    accept: ['HRHB', 'RS'],
+                    hardline: ['HRHB', 'RS'],
                 },
             },
         ];

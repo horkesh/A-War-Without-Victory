@@ -6,7 +6,7 @@
 ## Policy
 - Backfill only when the existing event title, narrative, response label, response description, effects, and historical source already support the recipient text.
 - Do not invent fallback prose. Missing recipient/response blocks stay absent and are skipped by the engine.
-- Sensitive-history, late-war diplomacy, and mixed-sensitive front-visit events remain content-review scope before authoring. Washington timing rows are closed under the two-clock policy.
+- Sensitive-history and mixed-sensitive front-visit events remain content-review scope before authoring. Washington timing rows are closed under the two-clock policy; late-war outcome rows are closed where copy stays posture/process-focused and avoids unsupported final-outcome assertions.
 
 ## Implemented Coverage
 | File | Event | Source | Coverage | Status |
@@ -32,6 +32,10 @@
 | `war_1994.json` | `contact_group_plan_1994` | RBiH | 4/4 | 1994 late-war diplomacy slice complete; copy describes the proposal and pressure without asserting final settlement outcomes. |
 | `war_1994.json` | `belgrade_embargo_rs_1994` | RS | 4/4 | 1994 late-war diplomacy slice complete; copy describes the Belgrade-Pale split, embargo pressure, and response posture. |
 | `war_1994.json` | `carter_ceasefire_1994` | RBiH | 4/4 | 1994 late-war diplomacy slice complete; copy describes ceasefire compliance or preparation posture without asserting later battlefield outcomes. |
+| `war_1995.json` | `karadzic_mladic_split_1995` | RS | 4/4 | 1995 late-war outcome slice complete; copy describes the Pale-Mladic command crisis without asserting downstream campaign outcomes. |
+| `war_1995.json` | `us_halts_federation_advance_1995` | RBiH | 4/4 | 1995 late-war outcome slice complete; copy describes the Washington halt choice, refugee-warning context, and diplomatic risk without asserting a final settlement. |
+| `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | RBiH | 4/4 | 1995 late-war outcome slice complete; copy describes ceasefire posture and US-support risk without asserting Dayton success. |
+| `war_1995.json` | `dayton_talks_begin_1995` | RBiH | 4/4 | 1995 late-war outcome slice complete; copy describes opening negotiation posture without asserting final terms. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
@@ -45,10 +49,6 @@
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 |
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 0/4 |
 | `war_1995.json` | `un_hostage_crisis_1995` | RS | 0/4 |
-| `war_1995.json` | `karadzic_mladic_split_1995` | RS | 0/4 |
-| `war_1995.json` | `us_halts_federation_advance_1995` | RBiH | 0/4 |
-| `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | RBiH | 0/4 |
-| `war_1995.json` | `dayton_talks_begin_1995` | RBiH | 0/4 |
 
 ## Batch 9 Residual Gate Audit
 
@@ -60,10 +60,10 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
-| Late-war outcome policy | 4 | 16 | `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
+| Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 13 event rows and 62 recipient blocks after the 2026-05-22 1994 late-war diplomacy slice. The prior Washington-timing floor was 16 rows / 74 blocks.
+**Total residual:** 9 event rows and 46 recipient blocks after the 2026-05-22 1995 late-war outcome slice. The prior 1994 late-war diplomacy floor was 13 rows / 62 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
@@ -82,7 +82,7 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | `war_1994.json` | `belgrade_embargo_rs_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `carter_ceasefire_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1995.json` | `un_hostage_crisis_1995` | UN hostage/human-shield crisis; sensitive-history row. |
-| `war_1995.json` | `karadzic_mladic_split_1995` | Late-war command crisis tied to Operation Storm timing; defer to late-war outcome review. |
-| `war_1995.json` | `us_halts_federation_advance_1995` | Late-war outcome/refugee catastrophe counterfactual; gated by policy. |
-| `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | Late-war diplomacy/outcome row; gated by policy. |
-| `war_1995.json` | `dayton_talks_begin_1995` | Late-war final settlement/outcome row; gated by policy. |
+| `war_1995.json` | `karadzic_mladic_split_1995` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1995.json` | `us_halts_federation_advance_1995` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1995.json` | `dayton_talks_begin_1995` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
