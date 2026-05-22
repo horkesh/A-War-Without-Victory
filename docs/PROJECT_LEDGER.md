@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(operations): bound attack-through to objective path
+
+**Type:** Bot operation target-selection behavior. No scenario data, painted-control targets, OOB source rows, save schema, combat odds, or force-trajectory predicates changed.
+
+**Why:** The target trace showed Donji Vakuf participants emitting attacks against non-current, non-axis adjacent targets with zero battles. The root boundary was attack-through selection: when no friendly path to the current objective existed, the fallback could pick any adjacent target held by the same controller as the objective.
+
+**Change:** Added objective-path distance bounding for operation attack-through. A fallback intermediate target must be held by the objective controller and must reduce tactical distance to the current objective through friendly or objective-controller territory. Direct current-objective attacks and friendly approach movement keep their existing behavior.
+
+**Verification:** Red/green test coverage in `tests\bot_operation_objective_focus.test.ts` proves a committed operation participant no longer attacks an unrelated easy adjacent target off the objective path. Focused suite `npx.cmd vitest run tests\bot_operation_objective_focus.test.ts tests\sector_offensive_idle_recovery.test.ts tests\operation_completion_truth.test.ts tests\scenario_operation_diagnostics.test.ts --reporter=dot` passed 49/49. `npm.cmd run typecheck` passed. Fresh 188w `n1945` completed with final hash `150d112d2ae6958a`; Oct 1995 painted area match improved to 71.8%; `donji_vakuf_95` remains approved but exits cleanly as `did_not_launch` / `no_logged_attempt` / `NO_OPENING_ATTACK:1`. `npm.cmd run test:baselines` passed with no manifest update.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_OPERATION_ATTACK_THROUGH_PATH_BOUNDARY.md`.
+
+**Roadmap delta:** The unrelated-target symptom is closed. Donji remains undelivered, so the next lane is opening-contact/approach delivery for accepted late-war operations, not combat odds, force-trajectory tuning, or painted-target promotion.
+
+---
+
 ## [2026-05-22] diagnostic(operations): trace operation attack-order targets
 
 **Type:** Scenario diagnostic/reporting output contract. No operation behavior, scenario data, painted-control targets, OOB source rows, combat math, force-trajectory tuning, or final-state save schema changed.

@@ -1,5 +1,6 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
+import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -117,6 +118,35 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
         return true;
     }
     return false;
+}
+
+function buildObjectivePathDistances(
+    state: GameState,
+    faction: FactionId,
+    currentObjective: Osid,
+    objectiveController: FactionId | null,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): Map<Osid, number> {
+    const distances = new Map<Osid, number>();
+    if (objectiveController === null) return distances;
+    distances.set(currentObjective, 0);
+    const queue: Osid[] = [currentObjective];
+    for (let index = 0; index < queue.length; index += 1) {
+        const osid = queue[index]!;
+        const distance = distances.get(osid)!;
+        const neighbors = [...getTacticalAdjacentOsids(state, osid, adjacency)].sort(strictCompare);
+        for (const neighbor of neighbors) {
+            if (distances.has(neighbor)) continue;
+            const controller = getPoliticalControllerOSID(state, neighbor, reverseMap);
+            const pathAllowed = controller === objectiveController
+                || (controller !== null && isFriendlyFaction(controller, faction, state));
+            if (!pathAllowed) continue;
+            distances.set(neighbor, distance + 1);
+            queue.push(neighbor);
+        }
+    }
+    return distances;
 }
 
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
@@ -345,6 +375,19 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // as attack-through intermediaries (e.g. Brčko city center — VRS held
             // the corridor but not the city core; without this, operation brigades
             // sweep through avoided OSIDs opportunistically).
+            const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
+            const objectivePathDistances = sectorAttackProfileTime(
+                '.sectorAttack.executionObjectivePathDistances',
+                () => buildObjectivePathDistances(
+                    state,
+                    faction,
+                    currentObjective,
+                    objectiveController,
+                    adjacency,
+                    reverseMap,
+                )
+            );
+            const locObjectiveDistance = objectivePathDistances.get(loc as Osid);
             const allTargets = sectorAttackProfileTime(
                 '.sectorAttack.executionPredictTargets',
                 () => predictAllAdjacentTargets(
@@ -372,10 +415,15 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 '.sectorAttack.executionIntermediateTargets',
                 () => {
                     const _avoidedOsids = state.meta?.avoided_osids_by_faction?.[faction];
-                    const objectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap);
                     const filteredIntermediateTargets = (objectiveController
                         ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
-                        : targets).filter(t => !_avoidedOsids?.includes(t.osid));
+                        : targets).filter(t => {
+                            if (_avoidedOsids?.includes(t.osid)) return false;
+                            const targetDistance = objectivePathDistances.get(t.osid);
+                            return targetDistance !== undefined
+                                && locObjectiveDistance !== undefined
+                                && targetDistance < locObjectiveDistance;
+                        });
                     const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                     const best = filteredIntermediateTargets.find((t) => {
                         const alreadyAt = chosenTargets.get(t.osid) ?? 0;

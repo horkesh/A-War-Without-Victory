@@ -614,6 +614,87 @@ test('execution-phase operation still moves toward a risky approach OSID when th
     assert.equal(state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry, undefined);
 });
 
+test('execution-phase operation does not attack unrelated intermediates off the current objective path', () => {
+    const state = {
+  meta: { turn: 19, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
+            rs_1st_doboj_light_infantry: {
+                id: 'rs_1st_doboj_light_infantry',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_1st_krajina',
+                home_defense_active: false,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 700,
+                equipment: { infantry: 700, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:start',
+            },
+            arbih_path_defender: {
+                id: 'arbih_path_defender',
+                kind: 'brigade',
+                faction: 'RBiH',
+                status: 'active',
+                corps_id: 'arbih_test',
+                posture: 'defend',
+                cohesion: 85,
+                morale: 85,
+                personnel: 2200,
+                equipment: { infantry: 2200, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:path_step',
+            },
+        },
+    corps_command: {
+            vrs_1st_krajina: {
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'Operacija Lukavac',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 10,
+                    phase_started_turn: 17,
+                    participating_brigades: ['rs_1st_doboj_light_infantry'],
+                    objectives: ['op:test:objective'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                }],
+            },
+        },
+    brigade_posture_orders: []
+  } as any,
+  political: {
+    political_controllers: {
+            'op:test:start': 'RS',
+            'op:test:a_unrelated_easy': 'RBiH',
+            'op:test:path_step': 'RBiH',
+            'op:test:objective': 'RBiH',
+        }
+  } as any,
+} as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:start', b: 'op:test:a_unrelated_easy' },
+            { a: 'op:test:start', b: 'op:test:path_step' },
+            { a: 'op:test:path_step', b: 'op:test:objective' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.notEqual(
+        state.military.brigade_attack_orders?.rs_1st_doboj_light_infantry,
+        'op:test:a_unrelated_easy'
+    );
+});
+
 test('planning-phase operation emits the first hop toward a distant staging OSID', () => {
     const state = {
   meta: { turn: 11, phase: 'war', seed: 'test-seed' },

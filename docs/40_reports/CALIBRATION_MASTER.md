@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## Operation attack-through path boundary (2026-05-22)
+
+- Operation attack-through candidates are now bounded to targets that reduce tactical distance to the current objective through friendly or objective-controller territory.
+- Fresh 188w `n1945` result: final hash `150d112d2ae6958a`; Oct 1995 painted area match improves slightly to 71.8%.
+- Donji Vakuf finding: `donji_vakuf_95` remains approved but undelivered, now as clean `did_not_launch` / `no_logged_attempt` / `NO_OPENING_ATTACK:1` evidence rather than unrelated non-current attack orders.
+- Baseline regression passed with no manifest update.
+- Report: `docs/40_reports/implemented/20260522_OPERATION_ATTACK_THROUGH_PATH_BOUNDARY.md`.
+
 ## Operation attack-order target trace (2026-05-22)
 
 - Weekly `operation_combat_diagnostics[]` rows now include `attack_order_targets[]` and `participant_attack_orders[]` so accepted operation under-delivery can be audited at target and brigade-location level.
