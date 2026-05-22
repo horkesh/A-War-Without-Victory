@@ -6,7 +6,7 @@
 
 **Scope:** Post-MVP (Phase 7) unless otherwise noted. MVP scope remains frozen per Executive Roadmap.
 
-**Strict-null current floor 2026-05-22:** The tactical `MapContainer.tsx` bridge tail is closed and pinned at zero `as_any_casts`. Current inventory from `tools/diagnostics/strict_null_inventory.cjs`: `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 135`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`. Remaining `as_any_casts` are confined to the CLI harnesses, scenario-runner diagnostics, save-migration boundary, and `GameStateAdapter`/FactionId-unification lanes; calibration/army-arc work is not part of this strict-null cleanup lane.
+**Strict-null current floor 2026-05-22:** The tactical `MapContainer.tsx` bridge tail and Phase D3 missing-census trace CLI tail are closed and pinned at zero `as_any_casts`. Current inventory from `tools/diagnostics/strict_null_inventory.cjs`: `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 127`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`. Remaining `as_any_casts` are confined to the CLI harnesses, `sim_scenario.ts`, scenario-runner diagnostics, save-migration boundary, and `GameStateAdapter`/FactionId-unification lanes; calibration/army-arc work is not part of this strict-null cleanup lane.
 
 ---
 

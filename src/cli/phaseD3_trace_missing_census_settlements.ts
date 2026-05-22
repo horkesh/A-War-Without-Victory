@@ -42,7 +42,9 @@ interface SettlementRecord {
 }
 
 interface SettlementsIndex {
-    settlements?: SettlementRecord[];
+    political?: {
+        settlements?: SettlementRecord[];
+    };
     [k: string]: unknown;
 }
 
@@ -53,7 +55,9 @@ interface CensusMunicipality {
 }
 
 interface CensusFile {
-    municipalities?: Record<string, CensusMunicipality>;
+    political?: {
+        municipalities?: Record<string, CensusMunicipality>;
+    };
     [k: string]: unknown;
 }
 
@@ -155,7 +159,7 @@ async function main(): Promise<void> {
         process.exit(1);
     }
 
-    const settlements: SettlementRecord[] = Array.isArray((indexData as any).political.settlements) ? (indexData as any).political.settlements : [];
+    const settlements = Array.isArray(indexData.political?.settlements) ? indexData.political.settlements : [];
     const indexSids = new Set<string>();
     for (const s of settlements) {
         const sid = typeof s.sid === 'string' && s.sid ? s.sid : '';
@@ -164,10 +168,10 @@ async function main(): Promise<void> {
 
     const censusSids = new Set<string>();
     const censusMunName = new Map<string, string>();
-    const municipalities = (censusData as any).political.municipalities ?? {};
+    const municipalities = censusData.political?.municipalities ?? {};
     for (const [munCode, mun] of Object.entries(municipalities).sort(([a], [b]) => a.localeCompare(b))) {
-        const name = typeof (mun as any).n === 'string' ? (mun as any).n : '';
-        const sArr = Array.isArray((mun as any).s) ? (mun as any).s : [];
+        const name = typeof mun.n === 'string' ? mun.n : '';
+        const sArr = Array.isArray(mun.s) ? mun.s : [];
         for (const id of sArr) {
             const sid = `${munCode}:${String(id)}`;
             censusSids.add(sid);
@@ -200,7 +204,7 @@ async function main(): Promise<void> {
             const masterData = JSON.parse(masterText) as GeoJSONCollection;
             const masterFeatures = Array.isArray(masterData.features) ? masterData.features : [];
             const settlementFeatures = masterFeatures.filter(
-                (f) => (f.properties as any)?.layer === 'settlement'
+                (f) => f.properties?.layer === 'settlement'
             );
             const detected = detectPropertyKeys(settlementFeatures, INSPECT_FEATURES);
             masterMunKey = detected.munKey;

@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type Phase D3 census trace reads
+
+**Type:** Audit-CLI type-boundary cleanup. No simulation behavior, save schema, scenario data, substrate regeneration, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** After closing the tactical-map bridge tail, the strict-null inventory still had a small isolated audit CLI with broad `as any` JSON reads. The file is diagnostic-only and safe to clean while Claude works calibration/army-arc elsewhere.
+
+**Change:** Typed the Phase D3 missing-census trace input shapes for optional `political.settlements` and `political.municipalities`, replaced broad index/census/master GeoJSON property reads with optional chaining, and added a strict-null inventory guard pinning the CLI at zero `as_any_casts`.
+
+**Verification:** `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` passed. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 127`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`. `npm.cmd run phaseD3:trace_missing_census_settlements` was attempted but hit the existing required-input guard because `data/derived/settlements_substrate.geojson` is absent in this checkout.
+
+**Artifacts:** `src/cli/phaseD3_trace_missing_census_settlements.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_PHASED3_TRACE_CLI_TAIL.md`.
+
+**Roadmap delta:** The Phase D3 trace CLI is closed for inventory-counted `as_any_casts`. Remaining strict-null inventory stays concentrated in Phase 3A/3ABC CLI harnesses, `sim_scenario.ts`, scenario-runner diagnostics, save migration, and `GameStateAdapter`.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type MapContainer map bridges
 
 **Type:** Tactical-map type-boundary cleanup. No simulation behavior, save schema, scenario data, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
