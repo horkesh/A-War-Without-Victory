@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): scope peace plan dismissal by offer
+
+**Type:** Tactical-map UI modal-state fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified stale peace-plan modal behavior. `App.tsx` used one global dismissal boolean, so dismissing one pending peace proposal could suppress a later or changed plan while the save remained loaded.
+
+**Change:** Added `src/ui/map/utils/peacePlanDismissal.ts` with `getPeacePlanDismissalKey(...)` and `shouldShowPeacePlanModal(...)`. `App.tsx` now stores `dismissedPeacePlanKey` scoped as `planId@turnOffered`, resets that key on save-load fingerprint changes and explicit Inbox/Dayton review routes, and dismisses only the currently offered plan. Added `tests/ui/peace_plan_dismissal_scope.test.ts` covering same-plan suppression, different-plan resurfacing, and a static guard against reintroducing the global boolean.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts --reporter=dot` failed before the patch because the scoped-dismissal helper did not exist and `App.tsx` still used the global boolean; after the patch, `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts --reporter=dot` passed 2/2. Focused UI/adapter suite `npx.cmd vitest run tests\ui\peace_plan_dismissal_scope.test.ts tests\ui\peace_plan_modal.test.ts tests\ui_adapter_boundary.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/peacePlanDismissal.ts`; `tests/ui/peace_plan_dismissal_scope.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md`.
+
+**Roadmap delta:** Closes the stacked stale peace-modal slice of GUI visual audit Batch C. Remaining GUI audit queue: modal palette unification, stale-state resets, Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): resolve peace plan splits in browser
 
 **Type:** Tactical-map UI adapter/browser-bundle fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

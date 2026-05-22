@@ -79,6 +79,7 @@ import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { isWarroomLocalCommand } from './utils/warroomNavigation';
+import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
@@ -272,7 +273,7 @@ function App() {
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
-  const [peacePlanDismissed, setPeacePlanDismissed] = useState(false);
+  const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
   const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
@@ -285,7 +286,7 @@ function App() {
   // Without this, stale flags from a previous save hide real pending items.
   const stateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
   useEffect(() => {
-    setPeacePlanDismissed(false);
+    setDismissedPeacePlanKey(null);
     setAcknowledgedEventIds(new Set());
   }, [stateFingerprint]);
 
@@ -702,6 +703,9 @@ function App() {
     }
   }, []);
 
+  const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
+  const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
+
   return (
     <div
       className="h-screen w-screen relative"
@@ -790,10 +794,10 @@ function App() {
           }
           if (action === 'peace_plan_modal') {
             // Reset dismissal so the PeacePlanModal renders again
-            setPeacePlanDismissed(false);
+            setDismissedPeacePlanKey(null);
           }
           if (action === 'dayton_modal') {
-            setPeacePlanDismissed(false);
+            setDismissedPeacePlanKey(null);
           }
           if (action === 'paramilitary_review') {
             setParamilitaryReviewOpen(true);
@@ -964,10 +968,10 @@ function App() {
         />
       )}
       {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
-      {loadedGameState?.pendingPeacePlan && !peacePlanDismissed && (
+      {showPeacePlanModal && pendingPeacePlan && (
         <PeacePlanModal
-          plan={loadedGameState.pendingPeacePlan}
-          onDismiss={() => setPeacePlanDismissed(true)}
+          plan={pendingPeacePlan}
+          onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
         />
       )}
       <ParamilitaryReviewModal
