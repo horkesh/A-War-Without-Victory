@@ -110,9 +110,11 @@ function makeOsidReport(
         casualty_attacker: 0,
         casualty_defender: 0,
         orders_by_faction: filled.length > 0 ? { RS: filled.length } : {},
+        orders_seen_by_brigade: {},
         engaged_formation_ids: [],
         snap_events: [],
         snap_event_counts: {},
+        skipped_attack_orders: [],
         battles: filled
     };
 }
@@ -179,14 +181,75 @@ describe('combat causality diagnostics', () => {
             battle_count: 0,
             current_objective: true,
         }]);
+        assert.deepEqual(diagnostics[0]!.current_objectives, ['op:enemy:obj1']);
         assert.deepEqual(diagnostics[0]!.participant_attack_orders, [{
             brigade_id: 'b1',
             location_osid: 'op:rs:staging',
             target_osid: 'op:enemy:obj1',
             target_is_current_objective: true,
+            resolver_seen_target_osid: null,
             battle_count: 0,
         }]);
+        assert.deepEqual(diagnostics[0]!.skipped_attack_orders, []);
         assert.ok(diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
+    it('surfaces resolver skip reasons for operation participant attack orders', () => {
+        const report = makeOsidReport([]);
+        report.skipped_attack_orders = [{
+            brigade_id: 'b1' as any,
+            target_osid: 'op:enemy:obj1' as any,
+            location_osid: 'op:rs:staging',
+            target_controller: 'RBiH' as FactionId,
+            reason: 'not_tactically_adjacent',
+        }, {
+            brigade_id: 'stray' as any,
+            target_osid: 'op:enemy:obj1' as any,
+            reason: 'not_tactically_adjacent',
+        }];
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            makeState(),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            report
+        );
+
+        assert.deepEqual(diagnostics[0]!.skipped_attack_orders, [{
+            brigade_id: 'b1',
+            location_osid: 'op:rs:staging',
+            target_osid: 'op:enemy:obj1',
+            reason: 'not_tactically_adjacent',
+            target_controller: 'RBiH',
+        }]);
+    });
+
+    it('shows whether participant attack orders survived into the resolver', () => {
+        const report = makeOsidReport([]);
+        report.orders_seen_by_brigade = {
+            b1: 'op:enemy:obj1' as any,
+        };
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            makeState(),
+            makeOrderSnapshot({ b1: 'op:enemy:obj1', b2: 'op:enemy:obj1' }, {}, { corps_1: 2 }),
+            report
+        );
+
+        assert.deepEqual(diagnostics[0]!.participant_attack_orders, [{
+            brigade_id: 'b1',
+            location_osid: 'op:rs:staging',
+            target_osid: 'op:enemy:obj1',
+            target_is_current_objective: true,
+            resolver_seen_target_osid: 'op:enemy:obj1',
+            battle_count: 0,
+        }, {
+            brigade_id: 'b2',
+            location_osid: 'op:rs:staging',
+            target_osid: 'op:enemy:obj1',
+            target_is_current_objective: true,
+            resolver_seen_target_osid: null,
+            battle_count: 0,
+        }]);
     });
 
     it('does not flag execution-phase operation that is still maneuvering into position', () => {
@@ -285,6 +348,46 @@ describe('combat causality diagnostics', () => {
         assert.equal(diagnostics[0]!.current_objective_battle_count, 1);
         assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
         assert.ok(!diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
+    it('uses the live axis objective for multi-axis operation diagnostics', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            objectives: ['op:enemy:flat_later'],
+            current_objective_index: 0,
+            axes: [{
+                axis_id: 'axis:main',
+                name: 'Main Axis',
+                assigned_brigades: ['b1'],
+                objectives: ['op:enemy:axis_now', 'op:enemy:axis_later'],
+                current_objective_index: 0,
+                status: 'executing',
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        }] as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b1: 'op:enemy:axis_now' }, {}, { corps_1: 1 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics[0]!.current_objective, 'op:enemy:axis_now');
+        assert.deepEqual(diagnostics[0]!.current_objectives, ['op:enemy:axis_now']);
+        assert.equal(diagnostics[0]!.current_objective_attack_count, 1);
+        assert.deepEqual(diagnostics[0]!.attack_order_targets, [{
+            target_osid: 'op:enemy:axis_now',
+            order_count: 1,
+            battle_count: 0,
+            current_objective: true,
+        }]);
     });
 
     it('does not flag execution stall when the operation already resolved a capture this turn', () => {

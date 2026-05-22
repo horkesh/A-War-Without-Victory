@@ -79,6 +79,15 @@ describe('Event timeline historical integrity', () => {
         expect(ceasefire.trigger.turn_min).toBeLessThan(dayton.trigger.turn_min);
     });
 
+    it('COHA expiry clears the active ceasefire suppression flag', () => {
+        const cohaBegins = allEvents.find((e: any) => e.id === 'coha_ceasefire_begins_1995');
+        const cohaExpires = allEvents.find((e: any) => e.id === 'coha_expires_1995');
+
+        expect(cohaBegins.sets_flags?.coha_active).toBe(true);
+        expect(cohaExpires.sets_flags?.coha_active).toBe(false);
+        expect(cohaExpires.sets_flags?.coha_expired).toBe(true);
+    });
+
     it('Washington Agreement requires Croat-Bosniak war', () => {
         const wa = allEvents.find((e: any) => e.id === 'washington_agreement_1994');
         expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');

@@ -140,6 +140,7 @@ import {
     type AttackResolutionOsidSnapEventType,
     type AttackResolutionOsidSnapEvent,
     type AttackResolutionOsidReport,
+    type AttackOrderSkipReason,
     type DefenderContribution,
     type IntelConfidenceBand,
     type IntelFrictionLabel,
@@ -289,9 +290,11 @@ export function resolveAttackOrdersOsid(
         casualty_attacker: 0,
         casualty_defender: 0,
         orders_by_faction: {},
+        orders_seen_by_brigade: {},
         engaged_formation_ids: [],
         snap_events: [],
         snap_event_counts: {},
+        skipped_attack_orders: [],
         battles: []
     };
 
@@ -349,6 +352,7 @@ export function resolveAttackOrdersOsid(
         const list = targetToAttackers.get(target) ?? [];
         list.push(fid);
         targetToAttackers.set(target, list);
+        (report.orders_seen_by_brigade ??= {})[fid] = target as Osid;
     }
     const targetOsids = Array.from(targetToAttackers.keys()).sort(strictCompare);
     report.unique_attack_targets = targetOsids.length;
@@ -359,6 +363,22 @@ export function resolveAttackOrdersOsid(
         report.orders_by_faction[fac] = (report.orders_by_faction[fac] ?? 0) + 1;
     }
 
+    const recordSkippedOrder = (
+        brigadeId: FormationId,
+        targetOsid: Osid,
+        reason: AttackOrderSkipReason,
+        locationOsid?: string,
+        targetController?: string | null,
+    ): void => {
+        (report.skipped_attack_orders ??= []).push({
+            brigade_id: brigadeId,
+            target_osid: targetOsid,
+            reason,
+            ...(locationOsid ? { location_osid: locationOsid } : {}),
+            ...(targetController !== undefined ? { target_controller: targetController as FactionId | null } : {}),
+        });
+    };
+
     if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
         state.military.casualty_ledger = initializeCasualtyLedger(factionIds);
@@ -368,16 +388,26 @@ export function resolveAttackOrdersOsid(
         const attackerIds = targetToAttackers.get(targetOsid)!;
         if (attackerIds.length === 0) continue;
 
-        const attackerFormations = attackerIds
-            .map(id => state.military.formations?.[id])
-            .filter((f): f is FormationState => f != null && f.status === 'active')
-            .filter((f) => {
-                const loc = (f as { location_osid?: string }).location_osid;
-                if (!loc) return false;
-                const neighbors = getTacticalAdjacentOsids(state, loc as Osid, adjacency);
-                return neighbors.includes(targetOsid);
-            })
-            .sort((a, b) => strictCompare(a.id, b.id));
+        const attackerFormations: FormationState[] = [];
+        for (const attackerId of attackerIds) {
+            const formation = state.military.formations?.[attackerId];
+            if (!formation || formation.status !== 'active') {
+                recordSkippedOrder(attackerId, targetOsid, 'missing_or_inactive_formation');
+                continue;
+            }
+            const loc = (formation as { location_osid?: string }).location_osid;
+            if (!loc) {
+                recordSkippedOrder(attackerId, targetOsid, 'no_location');
+                continue;
+            }
+            const neighbors = getTacticalAdjacentOsids(state, loc as Osid, adjacency);
+            if (!neighbors.includes(targetOsid)) {
+                recordSkippedOrder(attackerId, targetOsid, 'not_tactically_adjacent', loc);
+                continue;
+            }
+            attackerFormations.push(formation);
+        }
+        attackerFormations.sort((a, b) => strictCompare(a.id, b.id));
         if (attackerFormations.length === 0) continue;
 
         const firstAttacker = attackerFormations[0]!;
@@ -386,7 +416,12 @@ export function resolveAttackOrdersOsid(
         // Safety gate: suppress HRHB↔RBiH combat when mobilizing, ceasefire-active, or
         // post-Washington. Belt-and-suspenders if an order slips through upstream.
         const targetController = getPoliticalControllerOSID(state, targetOsid, reverseMap);
-        if (isRbihHrhbCombatBlocked(state, attackerFaction, targetController)) continue;
+        if (isRbihHrhbCombatBlocked(state, attackerFaction, targetController)) {
+            for (const attacker of attackerFormations) {
+                recordSkippedOrder(attacker.id, targetOsid, 'alliance_blocked', attacker.location_osid, targetController);
+            }
+            continue;
+        }
 
         const defenderFormations = (allFormations as FormationState[])
             .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction)
@@ -514,6 +549,15 @@ export function resolveAttackOrdersOsid(
                 }
             }
         } else {
+            for (const attacker of attackerFormations) {
+                recordSkippedOrder(
+                    attacker.id,
+                    targetOsid,
+                    'not_enemy_controlled_without_defenders',
+                    attacker.location_osid,
+                    targetController,
+                );
+            }
             continue;
         }
 

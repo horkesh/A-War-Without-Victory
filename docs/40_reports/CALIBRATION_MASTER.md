@@ -1,5 +1,14 @@
 # AWWV Calibration Master Reference
 
+## COHA expiry operation delivery (2026-05-22)
+
+- `coha_expires_1995` now clears `coha_active` while setting `coha_expired`, matching the intended Cessation of Hostilities lifecycle: combat is suppressed during the ceasefire, then re-enabled after expiry.
+- Operation combat diagnostics now expose live axis current objectives, resolver-seen participant attack targets, and resolver skip rows. This separates pre-resolution bot order evidence from the OSID resolver input boundary.
+- Fresh 188w `n1949` result: final hash `8e701775661f0995`; final flags `coha_active: false`, `coha_expired: true`; Oct 1995 painted area match 72.4%.
+- Donji Vakuf finding: accepted Donji orders now reach the resolver and record battles/captures in weeks 178-182 instead of zero-battle `attack_orders_without_battles` rows.
+- Residual: Donji still does not complete the whole painted target set, and Oct 1995 remains diagnostic-only. Next lanes remain Jajce/Mrkonjic/Krajina catalog delivery and force-trajectory wiring, not painted-target promotion.
+- Report: `docs/40_reports/implemented/20260522_COHA_EXPIRY_OPERATION_DELIVERY.md`.
+
 ## Operation attack-through path boundary (2026-05-22)
 
 - Operation attack-through candidates are now bounded to targets that reduce tactical distance to the current objective through friendly or objective-controller territory.

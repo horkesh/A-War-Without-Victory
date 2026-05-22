@@ -23,6 +23,7 @@ export interface OperationCombatDiagnostic {
     operation_type: CorpsOperation['type'];
     operation_phase: CorpsOperation['phase'];
     current_objective: string | null;
+    current_objectives: string[];
     participating_brigades: FormationId[];
     // Legacy compatibility field: now derived from final surviving participant
     // attack orders, not from pre-trim eligibility snapshots.
@@ -47,7 +48,15 @@ export interface OperationCombatDiagnostic {
         location_osid: string | null;
         target_osid: string;
         target_is_current_objective: boolean;
+        resolver_seen_target_osid: string | null;
         battle_count: number;
+    }>;
+    skipped_attack_orders: Array<{
+        brigade_id: FormationId;
+        location_osid: string | null;
+        target_osid: string;
+        reason: string;
+        target_controller: FactionId | null;
     }>;
     recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
@@ -89,11 +98,21 @@ function getFormationById(state: GameState, formationId: FormationId): Formation
     return state.military.formations?.[formationId] ?? legacyFormations?.[formationId];
 }
 
-function getCurrentObjective(operation: CorpsOperation): string | null {
-    const objectives = operation.objectives ?? [];
-    const index = operation.current_objective_index ?? 0;
-    const objective = objectives[index];
-    return typeof objective === 'string' && objective.length > 0 ? objective : null;
+function getCurrentObjectives(operation: CorpsOperation): string[] {
+    if (Array.isArray(operation.axes) && operation.axes.length > 0) {
+        const currentObjectives = new Set<string>();
+        for (const axis of operation.axes) {
+            if (axis.status !== 'executing') continue;
+            const objective = axis.objectives[axis.current_objective_index ?? 0];
+            if (typeof objective === 'string' && objective.length > 0) {
+                currentObjectives.add(objective);
+            }
+        }
+        return Array.from(currentObjectives).sort(strictCompare);
+    }
+
+    const objective = operation.objectives?.[operation.current_objective_index ?? 0];
+    return typeof objective === 'string' && objective.length > 0 ? [objective] : [];
 }
 
 export function createBotOrderDiagnosticsSnapshot(
@@ -185,7 +204,8 @@ export function buildOperationCombatDiagnostics(
             const corpsFormation = getFormationById(state, corpsId);
             const factionId = corpsFormation?.faction ?? 'unknown';
             const brigades = sortedFormationIds(operation.participating_brigades ?? []);
-            const currentObjective = getCurrentObjective(operation);
+            const currentObjectives = getCurrentObjectives(operation);
+            const currentObjective = currentObjectives[0] ?? null;
             const objectiveAttemptCount = operation.attack_attempt_count ?? 0;
             const objectiveCaptureCount = operation.objective_capture_count ?? 0;
             const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
@@ -202,12 +222,29 @@ export function buildOperationCombatDiagnostics(
             let participantBattleCount = 0;
             const attackTargetCounts = new Map<string, number>();
             const participantAttackOrders: OperationCombatDiagnostic['participant_attack_orders'] = [];
+            const participantSet = new Set(brigades);
+            const skippedAttackOrders = (osidResolution?.skipped_attack_orders ?? [])
+                .filter((skip) => participantSet.has(skip.brigade_id))
+                .sort((a, b) => {
+                    const byBrigade = strictCompare(a.brigade_id, b.brigade_id);
+                    if (byBrigade !== 0) return byBrigade;
+                    const byTarget = strictCompare(a.target_osid, b.target_osid);
+                    if (byTarget !== 0) return byTarget;
+                    return strictCompare(a.reason, b.reason);
+                })
+                .map((skip) => ({
+                    brigade_id: skip.brigade_id,
+                    location_osid: skip.location_osid ?? null,
+                    target_osid: skip.target_osid,
+                    reason: skip.reason,
+                    target_controller: skip.target_controller ?? null,
+                }));
             for (const brigadeId of brigades) {
                 const target = orderSnapshot?.attack_orders_by_brigade?.[brigadeId];
                 if (typeof target === 'string' && target.length > 0) {
                     attackAttemptCount += 1;
                     attackTargetCounts.set(target, (attackTargetCounts.get(target) ?? 0) + 1);
-                    if (currentObjective !== null && target === currentObjective) {
+                    if (currentObjectives.includes(target)) {
                         currentObjectiveAttackCount += 1;
                     }
                     const formation = getFormationById(state, brigadeId);
@@ -215,7 +252,8 @@ export function buildOperationCombatDiagnostics(
                         brigade_id: brigadeId,
                         location_osid: formation?.location_osid ?? null,
                         target_osid: target,
-                        target_is_current_objective: currentObjective !== null && target === currentObjective,
+                        target_is_current_objective: currentObjectives.includes(target),
+                        resolver_seen_target_osid: osidResolution?.orders_seen_by_brigade?.[brigadeId] ?? null,
                         battle_count: battleCountsByBrigade.get(brigadeId) ?? 0,
                     });
                 }
@@ -243,7 +281,7 @@ export function buildOperationCombatDiagnostics(
                     target_osid: targetOsid,
                     order_count: orderCount,
                     battle_count: battleCountsByTarget.get(targetOsid) ?? 0,
-                    current_objective: currentObjective !== null && targetOsid === currentObjective,
+                    current_objective: currentObjectives.includes(targetOsid),
                 }));
             const invalidationReasons: OperationCombatInvalidationReason[] = [];
             if (
@@ -293,6 +331,7 @@ export function buildOperationCombatDiagnostics(
                 operation_type: operation.type,
                 operation_phase: operation.phase,
                 current_objective: currentObjective,
+                current_objectives: currentObjectives,
                 participating_brigades: brigades,
                 eligible_attacker_count: finalOrderedAttackerCount,
                 attack_attempt_count: attackAttemptCount,
@@ -306,6 +345,7 @@ export function buildOperationCombatDiagnostics(
                 current_objective_battle_count: currentObjectiveBattleCount,
                 attack_order_targets: attackOrderTargets,
                 participant_attack_orders: participantAttackOrders,
+                skipped_attack_orders: skippedAttackOrders,
                 recovery_reason: recoveryReason,
                 invalid_for_combat_calibration: invalidationReasons.length > 0,
                 invalidation_reasons: invalidationReasons

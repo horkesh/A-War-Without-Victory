@@ -73,6 +73,7 @@
       }
     ],
     "sets_flags": {
+      "coha_active": false,
       "coha_expired": true
     },
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). ICTY Mladic Judgment (IT-09-92-T)."

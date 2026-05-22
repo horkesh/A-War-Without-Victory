@@ -42,6 +42,13 @@ export interface PublicIntelFrictionAnnotation {
     attacker_confidence_band?: IntelConfidenceBand;
 }
 
+export type AttackOrderSkipReason =
+    | 'missing_or_inactive_formation'
+    | 'no_location'
+    | 'not_tactically_adjacent'
+    | 'alliance_blocked'
+    | 'not_enemy_controlled_without_defenders';
+
 export interface AttackResolutionOsidReport {
     orders_processed: number;
     unique_attack_targets: number;
@@ -49,9 +56,17 @@ export interface AttackResolutionOsidReport {
     casualty_attacker: number;
     casualty_defender: number;
     orders_by_faction: Record<string, number>;
+    orders_seen_by_brigade?: Record<FormationId, Osid>;
     engaged_formation_ids: FormationId[];
     snap_events: AttackResolutionOsidSnapEvent[];
     snap_event_counts: Partial<Record<AttackResolutionOsidSnapEventType, number>>;
+    skipped_attack_orders?: Array<{
+        brigade_id: FormationId;
+        target_osid: Osid;
+        reason: AttackOrderSkipReason;
+        location_osid?: string;
+        target_controller?: FactionId | null;
+    }>;
     battles: Array<{
         /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
         battle_id: string;

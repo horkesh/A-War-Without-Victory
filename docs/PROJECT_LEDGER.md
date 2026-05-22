@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(events): expire COHA combat suppression
+
+**Type:** Event flag lifecycle behavior + combat/operation diagnostics + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, or operation catalog tuning changed.
+
+**Why:** Donji Vakuf accepted-operation traces showed pre-resolution participant attack orders but no resolver battles or skip rows. New resolver visibility proved the OSID resolver never saw those participant orders because `coha_active` still suppressed all combat even after `coha_expired` was set.
+
+**Change:** `coha_expires_1995` now sets `coha_active: false` alongside `coha_expired: true`. `AttackResolutionOsidReport` records `orders_seen_by_brigade`; operation diagnostics now include live axis `current_objectives`, per-participant `resolver_seen_target_osid`, and resolver `skipped_attack_orders` rows.
+
+**Verification:** `npx.cmd vitest run tests\event_timeline_integrity.test.ts tests\scenario_operation_diagnostics.test.ts --reporter=dot` passed 41/41. `npm.cmd run typecheck` passed. Fresh 188w `n1949` completed with hash `8e701775661f0995`, final flags `coha_active: false` / `coha_expired: true`, and Donji battles/captures in weeks 178-182. `node tools\compare_painted_vs_sim.cjs runs\apr1992_definitive_188w__210e69404d054959__w188_n1949 --target oct1995` passed with 72.4% area-weighted match. `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed the expected 52w weekly diagnostic hash; follow-up `npm.cmd run test:baselines` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_COHA_EXPIRY_OPERATION_DELIVERY.md`.
+
+**Roadmap delta:** Accepted late-war operation orders now reach combat after COHA expiry. Residual late-war work remains outcome/campaign delivery: Donji completion, Jajce/Mrkonjic/Krajina operation lanes, and force-trajectory wiring. Oct 1995 painted targets stay diagnostic-only.
+
+---
+
 ## [2026-05-22] fix(operations): bound attack-through to objective path
 
 **Type:** Bot operation target-selection behavior. No scenario data, painted-control targets, OOB source rows, save schema, combat odds, or force-trajectory predicates changed.

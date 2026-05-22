@@ -1142,6 +1142,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
+1. **[2026-05-22] COHA expiry must clear combat suppression**
+   Do instead: Treat `coha_active` as the live combat-suppression flag and `coha_expired` as history/evidence only; `coha_expires_1995` must set `coha_active: false` or late-war accepted operations never reach OSID combat.
 1. **[2026-05-22] Operation under-delivery needs target-level order trace before tuning**
    Do instead: Use weekly `operation_combat_diagnostics[].attack_order_targets` and `participant_attack_orders` to verify emitted targets, participant locations, current-objective match, and battle counts before changing combat odds, force trajectory, or painted targets. Donji n1944 showed non-current target orders with zero battles; fix order-target boundary first.
 1. **[2026-04-30] Late-war runs need date-specific painted targets**
