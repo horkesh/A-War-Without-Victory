@@ -43,8 +43,12 @@ export const WASH_IVP_THRESHOLD = 0.50;
 export const WASH_PATRON_CONSTRAINT = 0.55;
 /** W5: RS territorial control share threshold (fraction of total settlements). */
 export const WASH_RS_THREAT_SHARE = 0.40;
-/** W6: Combined RBiH + HRHB exhaustion threshold. */
-export const WASH_COMBINED_EXHAUSTION = 55;
+/** W6: Combined RBiH + HRHB exhaustion threshold.
+ *  2026-05-22: rescaled 55 → 5500 alongside war_exhaustion cap 100 → 10000 per
+ *  forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`. Uniform
+ *  100× rescale preserves the original "combined exhaustion at 55% of cap"
+ *  semantics that this threshold was authored against. */
+export const WASH_COMBINED_EXHAUSTION = 5500;
 
 /** Alliance value set and locked when Washington fires. */
 export const WASH_ALLIANCE_LOCK_VALUE = 0.80;

@@ -32,10 +32,14 @@ import type { GameState } from '../../state/game_state.js';
  * → WA at war_started+49 via W2 = 4. Combined with tightening
  * rbih_hrhb_war_earliest_week to ~50, lands WA at historical w101. */
 export const CEASEFIRE_MIN_WAR_DURATION = 45;
-/** C2: HRHB exhaustion threshold. */
-export const CEASEFIRE_HRHB_EXHAUSTION = 35;
-/** C3: RBiH exhaustion threshold. */
-export const CEASEFIRE_RBIH_EXHAUSTION = 30;
+/** C2: HRHB exhaustion threshold.
+ *  2026-05-22: rescaled 35 → 3500 alongside war_exhaustion cap 100 → 10000 per
+ *  forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`. */
+export const CEASEFIRE_HRHB_EXHAUSTION = 3500;
+/** C3: RBiH exhaustion threshold.
+ *  2026-05-22: rescaled 30 → 3000 alongside war_exhaustion cap 100 → 10000 per
+ *  forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`. */
+export const CEASEFIRE_RBIH_EXHAUSTION = 3000;
 /** C4: Minimum consecutive stalemate turns (0 bilateral flips). */
 export const CEASEFIRE_STALEMATE_MIN = 4;
 /** C5: IVP negotiation_momentum threshold. */

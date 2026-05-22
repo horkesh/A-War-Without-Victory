@@ -317,7 +317,10 @@ describe('washington agreement', () => {
         state.political.rbih_hrhb_state!.ceasefire_since_turn = 90;
         state.meta.turn = 90 + WASH_CEASEFIRE_DURATION + 1;
         // Set exhaustion
-        state.political.war_exhaustion = { RBiH: 30, RS: 20, HRHB: 30 };
+        // 2026-05-22: rescaled 100× alongside war_exhaustion cap 100→10000 +
+        // WASH_COMBINED_EXHAUSTION 55→5500 per forensics memo
+        // 20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md
+        state.political.war_exhaustion = { RBiH: 3000, RS: 2000, HRHB: 3000 };
         // Set IVP
         state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
@@ -545,7 +548,10 @@ describe('full alliance lifecycle', () => {
         expect(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD).toBeTruthy();
 
         // Phase 2: Set up ceasefire conditions
-        state.political.war_exhaustion = { RBiH: 35, RS: 20, HRHB: 40 };
+        // 2026-05-22: rescaled 100× alongside war_exhaustion cap 100→10000 +
+        // CEASEFIRE_HRHB_EXHAUSTION 35→3500 + CEASEFIRE_RBIH_EXHAUSTION 30→3000
+        // per forensics memo 20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md
+        state.political.war_exhaustion = { RBiH: 3500, RS: 2000, HRHB: 4000 };
         state.political.international_visibility_pressure = {
             sarajevo_siege_visibility: 0, enclave_humanitarian_pressure: 0,
             atrocity_visibility: 0, negotiation_momentum: 0.45,

@@ -1572,8 +1572,12 @@ export function rankDefendersByPower(
 // P7 — War Exhaustion → Attack Tempo Penalty
 // ═══════════════════════════════════════════════════════════════════════════
 
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 30;
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 80;
+// 2026-05-22: rescaled 30/80 → 3000/8000 alongside war_exhaustion cap 100 → 10000
+// per forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md` §6.
+// Uniform 100× rescale preserves the original 0-100 percentage-scale semantics
+// (tempo penalty starts at 30% of cap, fully applied at 80% of cap).
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 3000;
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 8000;
 const WAR_EXHAUSTION_TEMPO_MULT_MIN       = 0.85;
 
 /**
