@@ -123,10 +123,21 @@ const KUPRES_CINCAR_STAGING_ANCHORS: readonly string[] = [
 // artefact, not a historical reconstruction. Insertion order
 // (bucovaca → kupres_2 → donji_malovan → novo_selo_2) follows the
 // Tomislavgrad → Bučovača → Kupres axis described in BB v2 ch. 28.
+// Wave 22 (2026-05-23): reordered for OSID-adjacency reachability.
+// docs/40_reports/audits/20260523_SUBSEGMENT_REFRESH_INVESTIGATION.md verified
+// sub-segment refresh works correctly after bucovaca capture, but bucovaca and
+// kupres_2 are NOT OSID-adjacent per operational_contact_graph.json — they
+// share donji_malovan + goravci as common neighbors but no direct edge. The
+// previous [bucovaca, kupres_2, ...] order put an unreachable objective second,
+// the per-axis brigade brain returned no_approach_osid every turn, axis idle-
+// stalled → max_failures abort after 8 turns with only bucovaca captured.
+// New order targets bucovaca-adjacent OSIDs first (donji_malovan, goravci),
+// then kupres_2 (now adjacent via either captured shoulder), then novo_selo_2.
 const KUPRES_CINCAR_OBJECTIVES: readonly string[] = [
     'op:kupres:bucovaca',
-    'op:kupres:kupres_2',
     'op:kupres:donji_malovan',
+    'op:kupres:goravci',
+    'op:kupres:kupres_2',
     'op:kupres:novo_selo_2',
 ];
 
