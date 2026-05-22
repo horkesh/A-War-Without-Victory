@@ -601,14 +601,28 @@ export function finalizeOperationAAR(
     }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
     const objectivesHeldWithoutLoggedCapture = capturedObjectives.filter((osid) => !loggedCaptureSet.has(osid));
+    // 2026-05-22 Wave 3A.1: hoist `totalAttacks === 0` BEFORE the
+    // objectivesHeldWithoutLoggedCapture check. The previous classifier only
+    // checked totalAttacks in the deepest branch (no logged captures at all),
+    // so paper-flip ops that DO have `objectives_captured_this_turn` entries
+    // (Prijedor, Donji Vakuf, Tigar-Sloboda, APWB Pressure in 188w n1958)
+    // fell into the 'logged_capture' branch — Wave 3A's outcome downgrade
+    // never saw the 'held_without_logged_attack' provenance and stayed
+    // vacuous. Source: SCRT delta memo
+    // docs/40_reports/audits/20260522_ARC_DELTA_N1956_N1958_8_FIXES.md
+    // ("W3A VACUOUS — gate fires zero times; provenance is logged_capture not
+    // held_without_logged_attack"). Any zero-attack capture is by definition
+    // a paper-flip — the OSID was held but never engaged.
     const captureProvenance: NonNullable<OperationAAR['capture_provenance']> =
         capturedObjectives.length === 0
             ? 'no_objectives_held'
-            : objectivesHeldWithoutLoggedCapture.length === 0
-                ? 'logged_capture'
-                : objectivesLoggedCaptured.length === 0
-                    ? (totalAttacks === 0 ? 'held_without_logged_attack' : 'held_without_logged_capture')
-                    : 'mixed';
+            : totalAttacks === 0
+                ? 'held_without_logged_attack'
+                : objectivesHeldWithoutLoggedCapture.length === 0
+                    ? 'logged_capture'
+                    : objectivesLoggedCaptured.length === 0
+                        ? 'held_without_logged_capture'
+                        : 'mixed';
 
     // 4b. Paper-flip integrity: demote 'success' to 'failure' when capture provenance
     //     is `held_without_logged_attack`. An op that "captured" its objectives without
