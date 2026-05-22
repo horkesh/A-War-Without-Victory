@@ -288,7 +288,7 @@ describe('warroom region data contract', () => {
     expect(getWarroomBoardDateLabel({ label: 'Turn 0 (war)', metadata: { turn: 0, date: 'UNKNOWN' }, turn: 0 }))
       .toBe('1 Apr 1992');
     expect(getWarroomBoardDateLabel({ metadata: { turn: 7, date: 'UNKNOWN' }, turn: 7 }))
-      .toBe('Turn 7');
+      .toBe('20 May 1992');
   });
 });
 
