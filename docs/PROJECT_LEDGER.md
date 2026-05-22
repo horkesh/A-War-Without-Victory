@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type Phase 3A A/B harness
+
+**Type:** Strict-null diagnostic harness cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
+
+**Why:** After the `sim_scenario.ts` tail, the largest remaining safe non-calibration strict-null cluster was the Phase 3A A/B diagnostic harness, which contributed 31 `as_any_casts`.
+
+**Change:** `src/cli/phase3a_ab_harness.ts` now uses typed pressure/front maps, `EdgeRecord[]`, `EffectivePressureEdge[]`, and `TurnReport` instead of broad `any` widening. The stale harness fixtures were repaired for the current engine contract by adding `meta.phase: 'war'` and using canonical strategy-table faction IDs (`RBiH`, `RS`, `HRHB`) instead of placeholder IDs. A strict-null progress assertion pins the harness at zero `as_any_casts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` failed before the source edit because the new Phase 3A A/B harness cap saw 31 `as_any_casts`. Green run passed 88/88 after cleanup. `npm.cmd run typecheck` passed. `npm.cmd run sim:phase3a:ab` passed after stale fixture repair and emitted the deterministic Phase 3A A/B report files under `data\derived\_debug`. `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_any_casts 64`, `as_unknown_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`.
+
+**Artifacts:** `src/cli/phase3a_ab_harness.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_PHASE3A_AB_HARNESS_TAIL.md`.
+
+**Roadmap delta:** Removes `src/cli/phase3a_ab_harness.ts` from the remaining strict-null `as_any_casts` queue. Remaining `as_any_casts` are now confined to `src/cli/phase3abc_audit_harness.ts`, `src/state/save_migration.ts`, and `src/ui/map/data/GameStateAdapter.ts`.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type sim scenario CLI
 
 **Type:** Strict-null tooling cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.

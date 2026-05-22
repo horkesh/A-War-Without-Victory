@@ -463,3 +463,11 @@ No source phase was completed in this lane. Current worktree status shows unrela
 - Delta: top-level `as_any_casts` 122 -> 95; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` are all 0.
 - Verification: red/green strict-null assertion, focused deterministic scenario summary tests 89/89, and `npm.cmd run typecheck` PASS.
 - Remaining `as_any_casts`: `src/cli/phase3a_ab_harness.ts` (31), `src/cli/phase3abc_audit_harness.ts` (33), `src/state/save_migration.ts` (23), and `src/ui/map/data/GameStateAdapter.ts` (8). The old deferred list above is superseded for current counts by this addendum.
+
+## 2026-05-22 Phase 3A A/B Harness Tail Addendum
+
+- `src/cli/phase3a_ab_harness.ts` is now closed for `as_any_casts` and pinned by `tests/strict_null_inventory_progress.test.ts`.
+- Delta: top-level `as_any_casts` 95 -> 64; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` remain 0.
+- Verification: red/green strict-null assertion, `npm.cmd run typecheck` PASS, `npm.cmd run sim:phase3a:ab` PASS after stale fixture repair, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
+- Fixture repair: the harness mock states now declare `meta.phase: 'war'` and use canonical strategy-table faction IDs (`RBiH`, `RS`, `HRHB`) instead of placeholder IDs. This restores diagnostic harness compatibility with the current turn pipeline and bot strategy tables without calibration tuning.
+- Remaining `as_any_casts`: `src/cli/phase3abc_audit_harness.ts` (33), `src/state/save_migration.ts` (23), and `src/ui/map/data/GameStateAdapter.ts` (8). The sim-scenario addendum above is superseded for current counts by this addendum.
