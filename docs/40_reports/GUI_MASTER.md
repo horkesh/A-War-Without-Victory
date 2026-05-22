@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit label-discipline slice)
+**Updated:** 2026-05-22 (GUI visual audit MapLibre dasharray repair)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -97,6 +97,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit MapLibre dasharray repair** - tactical front stripes and supply-reach outlines now use literal `line-dasharray` values only; supply reach splits isolated vs non-isolated outlines into separate filtered layers so MapLibre can materialize both reliably. | [implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md](implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md) |
 | 2026-05-22 | **GUI visual audit label discipline** - Operational SITREP priority-front labels now route legacy raw SITREP strings through the OSID display-name map, Local Support panels no longer expose `Phase E`, and Army HQ opportunity pulse no longer exposes the `T3` reserve-crisis sentinel. | [implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md](implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md) |
 | 2026-05-18 | **Supply visibility read-model (UI-1 Batch 40)** - presidential Decision Room now emits a player-scoped supply card when player corridors are brittle/cut or player brigades are isolated at critical-supply settlements; reads only player-faction-safe slices already exposed by the adapter; no new modal, no enemy-truth leakage. | [implemented/20260518_SUPPLY_VISIBILITY_READ_MODEL_BATCH40.md](implemented/20260518_SUPPLY_VISIBILITY_READ_MODEL_BATCH40.md) |
 | 2026-05-18 | **Operation AAR per-axis Records review** - Army HQ Records -> Operation History expanded AAR rows now show per-axis objective chips from existing `axis_summaries`, distinguishing axis-captured targets, targets held elsewhere by operation end, and targets not held. | [implemented/20260518_OPERATION_AAR_BATCH17.md](implemented/20260518_OPERATION_AAR_BATCH17.md) |
