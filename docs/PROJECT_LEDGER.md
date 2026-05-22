@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(operations): require battle feedback for failed attempts
+
+**Type:** Combat resolver boundary + sector-operation lifecycle accounting + calibration diagnostics. No scenario data, painted-control targets, OOB source rows, combat odds, or outcome tuning changed.
+
+**Why:** Fresh Donji Vakuf 95 evidence showed launch feasibility was no longer the only problem. The operation could carry attack posture/orders without any resolved battle, while lifecycle accounting still consumed those turns as failed combat attempts and reported `max_failures`. The next roadmap lane needed to separate real resolved attacks from stale/unresolved order posture before any force-trajectory or combat-odds tuning.
+
+**Change:** `resolveAttackOrdersOsid(...)` now uses tactical adjacency including live `state.military.war_front_edges_osid`, matching bot/predictor attack eligibility. Multi-axis operation axes now persist optional `battles_this_turn` and `total_battles`; `advanceSectorOffensives(...)` resets axis per-turn battle counters; `updateSectorOffensiveResults(...)` only increments failed direct-objective/intermediate attack attempts when resolver battle feedback exists. Stale attack posture without a battle becomes approach/movement-only progress instead of a fake combat failure.
+
+**Verification:** Red/green focused tests: live front-contact resolver eligibility failed before the resolver tactical-adjacency patch and passed after; attack posture beside an objective without battle feedback failed before the lifecycle patch and passed after. Focused suite passed: `npx.cmd vitest run tests\attack_resolution_osid_intel_friction.test.ts tests\sector_offensive_idle_recovery.test.ts tests\sector_offensive_launch_gates.test.ts tests\bot_operation_objective_focus.test.ts tests\operation_completion_truth.test.ts tests\probe_territory_flip.test.ts tests\catastrophic_stall.test.ts --reporter=dot` (58/58). `npm.cmd run typecheck` passed. Fresh 188w `n1943` completed with final hash `5766d470125f1220`; Oct 1995 painted area match remained 71.6%; `donji_vakuf_95` surfaced/approved at turn 177 but now exits `no_logged_attempt` / `NO-OPENING-ATTACK` instead of `max_failures`. `npm.cmd run test:baselines` first failed on expected `apr1992_52w` behavior-output drift; `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed `data/derived/scenario/baselines/manifest.json`; follow-up `npm.cmd run test:baselines` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_OPERATION_BATTLE_FEEDBACK_ACCOUNTING.md`.
+
+**Roadmap delta:** Do not tune Donji combat odds or painted targets from the old `max_failures` signature. The next lane is final attack-order target tracing in weeks 180-184: compare emitted targets, participant locations, and tactical adjacency, then repair the order-target boundary that produces attack orders without resolver battles.
+
+---
+
 ## [2026-05-22] feat(opportunity): read defender trajectory in late-war weakness gates
 
 **Type:** Operation Opportunity predicate behavior and diagnostics. No scenario data, painted-control targets, OOB rows, save schema, combat math, baseline manifest, or outcome tuning changed.

@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## Operation battle-feedback accounting (2026-05-22)
+
+- Sector-operation result accounting now requires actual resolver battle feedback before posture beside an objective can increment failed combat attempts. Per-axis `battles_this_turn` / `total_battles` counters prevent one multi-axis battle from certifying another axis.
+- `resolveAttackOrdersOsid(...)` now uses tactical adjacency, including live `war_front_edges_osid`, so resolver eligibility matches the bot and predictor boundary.
+- Fresh 188w `n1943` result: final hash `5766d470125f1220`; Oct 1995 painted area match remains 71.6%. `donji_vakuf_95` still surfaces and approves at turn 177, but now exits `no_logged_attempt` / `NO-OPENING-ATTACK` instead of `max_failures`.
+- Residual: weeks 180-184 still show Donji operation attack orders without battles. Next lane is final attack-order target versus participant-location/tactical-adjacency tracing, not combat odds or painted-target tuning.
+- Report: `docs/40_reports/implemented/20260522_OPERATION_BATTLE_FEEDBACK_ACCOUNTING.md`.
+
 ## Donji Vakuf launch feasibility (2026-05-22)
 
 - Scenario-runner proof mode now marks `state.meta.headless_scenario_auto_control = true`, allowing bot brigade orders for every faction in non-interactive runs while preserving desktop/player-faction exclusion.

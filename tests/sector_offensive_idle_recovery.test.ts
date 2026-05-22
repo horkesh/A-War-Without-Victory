@@ -354,6 +354,94 @@ describe('sector offensive idle recovery', () => {
         expect(op?.movement_only_execution_turns).toBe(1);
     });
 
+    it('does not count attack posture beside an objective as a failed combat attempt without a resolved battle', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 9, phase: 'war', seed: 'posture-without-battle-feedback' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: {
+                    ...makeBrigade('b1', 'op:front:approach'),
+                    posture: 'attack',
+                },
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    war_front_edges_osid: [
+                { edge_id: 'front:1', a: 'op:front:approach', b: 'op:target:objective' },
+            ],
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 1,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Posture Without Battle',
+                        type: 'sector_attack',
+                        phase: 'execution',
+                        started_turn: 8,
+                        phase_started_turn: 8,
+                        participating_brigades: ['b1'],
+                        axes: [{
+                            axis_id: 'axis:a',
+                            name: 'Axis A',
+                            assigned_brigades: ['b1'],
+                            objectives: ['op:target:objective'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:front:approach': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        updateSectorOffensiveResults(state);
+
+        const axis = state.military.corps_command?.rs_corps?.active_operations[0]?.axes?.[0];
+        expect(axis?.attack_attempt_count).toBe(0);
+        expect(axis?.failure_count).toBe(0);
+        expect(axis?.movement_only_execution_turns).toBe(1);
+        expect(axis?.last_result).toBe('approach');
+    });
+
     it('moves a truce-blocked execution probe into one-turn political recovery instead of stalling in execution', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,

@@ -206,6 +206,7 @@ describe('catastrophic outcome stall (#39)', () => {
                 objectives: ['op:target:obj'], current_objective_index: 0,
                 status: 'executing', failure_count: 0,
                 consecutive_failures_on_current: 0, momentum: 0,
+                battles_this_turn: 1,
                 attack_attempt_count: 0, objective_capture_count: 0,
                 movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
             }],
@@ -234,6 +235,7 @@ describe('catastrophic outcome stall (#39)', () => {
                 objectives: ['op:target:obj'], current_objective_index: 0,
                 status: 'executing', failure_count: 0,
                 consecutive_failures_on_current: 0, momentum: 0,
+                battles_this_turn: 1,
                 attack_attempt_count: 0, objective_capture_count: 0,
                 movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
             }],
@@ -261,6 +263,7 @@ describe('catastrophic outcome stall (#39)', () => {
                 status: 'executing', failure_count: 1,
                 consecutive_failures_on_current: 1, momentum: 0,
                 consecutive_catastrophic_on_current: 1, // already 1 from previous turn
+                battles_this_turn: 1,
                 attack_attempt_count: 1, objective_capture_count: 0,
                 movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
             }],
@@ -287,6 +290,7 @@ describe('catastrophic outcome stall (#39)', () => {
                 status: 'executing', failure_count: 1,
                 consecutive_failures_on_current: 1, momentum: 0,
                 consecutive_catastrophic_on_current: 1, // was 1, but this turn is repulsed
+                battles_this_turn: 1,
                 attack_attempt_count: 1, objective_capture_count: 0,
                 movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
             }],

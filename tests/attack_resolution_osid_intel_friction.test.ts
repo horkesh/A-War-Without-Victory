@@ -230,6 +230,31 @@ function seedIntel(state: GameState, confidence: number): void {
 }
 
 describe('attack resolution intel execution friction', () => {
+    it('resolves attack orders across live war-front contacts outside the movement graph', () => {
+        const { state } = makeScenario();
+        state.military.war_front_edges_osid = [{
+            edge_id: 'front:rs-rbih',
+            a: 'op:rs:staging',
+            b: 'op:rbih:target',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }] as any;
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            [],
+            new Map(),
+            null,
+            undefined,
+            new Map(),
+        );
+
+        expect(report.orders_processed).toBe(1);
+        expect(report.battles).toHaveLength(1);
+        expect(report.battles[0]?.attacker_brigade).toBe('brig_rs_1');
+        expect(report.battles[0]?.target_osid).toBe('op:rbih:target');
+    });
+
     it('computes deterministic stale-intel attack and OPSEC defense multipliers', () => {
         expect(getIntelExecutionFrictionMultipliers(1, false)).toEqual({
             attackerPowerMult: 1,

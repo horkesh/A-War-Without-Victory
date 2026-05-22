@@ -110,6 +110,7 @@ import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
 // ── Retreat & displacement helpers (extracted to attack_retreat_displacement.ts) ──
@@ -373,7 +374,7 @@ export function resolveAttackOrdersOsid(
             .filter((f) => {
                 const loc = (f as { location_osid?: string }).location_osid;
                 if (!loc) return false;
-                const neighbors = adjacency.get(loc) ?? [];
+                const neighbors = getTacticalAdjacentOsids(state, loc as Osid, adjacency);
                 return neighbors.includes(targetOsid);
             })
             .sort((a, b) => strictCompare(a.id, b.id));
@@ -913,6 +914,11 @@ export function resolveAttackOrdersOsid(
         if (activeOp && activeOp.phase === 'execution') {
             activeOp.battles_this_turn = (activeOp.battles_this_turn ?? 0) + 1;
             activeOp.total_battles = (activeOp.total_battles ?? 0) + 1;
+            const activeAxis = activeOp.axes?.find(axis => axis.assigned_brigades.includes(firstAttacker.id as FormationId));
+            if (activeAxis) {
+                activeAxis.battles_this_turn = (activeAxis.battles_this_turn ?? 0) + 1;
+                activeAxis.total_battles = (activeAxis.total_battles ?? 0) + 1;
+            }
             if (flip) {
                 activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
                 activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;

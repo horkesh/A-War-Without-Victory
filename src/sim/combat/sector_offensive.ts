@@ -691,6 +691,11 @@ export function advanceSectorOffensives(
         // Reset per-turn combat feedback counters
         op.battles_this_turn = 0;
         op.territory_gained_this_turn = 0;
+        if (Array.isArray(op.axes)) {
+            for (const axis of op.axes) {
+                axis.battles_this_turn = 0;
+            }
+        }
 
         const turn = state.meta?.turn ?? 0;
         const corps = state.military.formations?.[corpsId];
@@ -1230,6 +1235,7 @@ function updateMultiAxisResults(
                 return b != null && (b.posture === 'attack' || b.posture === 'assault');
             });
             const anyAttacked = anyAttackedObjective || anyAttackedAnything;
+            const anyResolvedAxisBattle = (axis.battles_this_turn ?? 0) > 0;
             // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
             // (which is cleared by apply-brigade-movement BEFORE this step runs).
             const anyMoved = axis.assigned_brigades.some(bid => {
@@ -1237,7 +1243,7 @@ function updateMultiAxisResults(
                 return movState?.status === 'in_transit' || movState?.status === 'packing';
             });
 
-            if (anyAttackedObjective) {
+            if (anyAttackedObjective && anyResolvedAxisBattle) {
                 // Direct attack on current objective — standard failure tracking
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
@@ -1276,10 +1282,15 @@ function updateMultiAxisResults(
                     axis.consecutive_failures_on_current = 0;
                     axis.consecutive_catastrophic_on_current = 0; // reset on objective change
                 }
-            } else if (anyAttackedAnything) {
+            } else if (anyAttackedAnything && anyResolvedAxisBattle) {
                 // Intermediate attack (fighting through toward objective)
                 // Counts as approach progress, not a failure on the current objective
                 axis.attack_attempt_count += 1;
+                axis.idle_execution_turn_streak = 0;
+                axis.last_result = 'approach';
+                axis.momentum = 0;
+                axis.movement_only_execution_turns += 1;
+            } else if (anyAttacked) {
                 axis.idle_execution_turn_streak = 0;
                 axis.last_result = 'approach';
                 axis.momentum = 0;
@@ -1478,6 +1489,7 @@ function updateLegacyFlatResults(
             const b = state.military.formations?.[bid];
             return b != null && (b.posture === 'attack' || b.posture === 'assault');
         });
+        const anyResolvedBattle = (op.battles_this_turn ?? 0) > 0;
         // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
         // (which is cleared by apply-brigade-movement BEFORE this step runs).
         const anyMoved = op.participating_brigades.some(bid => {
@@ -1485,7 +1497,7 @@ function updateLegacyFlatResults(
             return movState?.status === 'in_transit' || movState?.status === 'packing';
         });
 
-        if (anyAttackedObjective) {
+        if (anyAttackedObjective && anyResolvedBattle) {
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
             // Only reset movement_only counter when no brigades are also marching.
@@ -1502,9 +1514,14 @@ function updateLegacyFlatResults(
                 op.current_objective_index = currentIdx + 1;
                 op.consecutive_failures_on_current = 0;
             }
-        } else if (anyAttackedAnything) {
+        } else if (anyAttackedAnything && anyResolvedBattle) {
             // Intermediate attack: fighting through toward objective
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
+            op.idle_execution_turn_streak = 0;
+            op.last_result = 'approach';
+            op.momentum = 0;
+            op.movement_only_execution_turns = (op.movement_only_execution_turns ?? 0) + 1;
+        } else if (anyAttackedObjective || anyAttackedAnything) {
             op.idle_execution_turn_streak = 0;
             op.last_result = 'approach';
             op.momentum = 0;

@@ -279,6 +279,10 @@ export interface OperationAxis {
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
     launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective';
+    /** Battles conducted by this axis this turn (reset each turn). */
+    battles_this_turn?: number;
+    /** Total battles conducted by this axis since operation start. */
+    total_battles?: number;
 }
 
 /** Named corps operation (multi-turn: planning → execution → recovery). */
