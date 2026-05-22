@@ -200,6 +200,21 @@ const OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8;
  */
 const MIN_LAUNCH_FORCE_RATIO_FLOOR = 0.3;
 
+/**
+ * Lower launch floor for ops that have explicitly opted into desperate-push
+ * semantics via `min_attack_outcome === 'repulsed'`. The standard 0.3 floor
+ * blocks Federation late-war ops (e.g. Mistral 1 Jun 1995) when depleted
+ * post-Cincar HVO/HV brigades face the full VRS 2nd Krajina line — force
+ * ratios fall sub-0.3 even though the op author has signalled tolerance for
+ * costly outcomes. Honoring that tolerance at the launch gate restores
+ * symmetry with the per-attack outcome predicate.
+ */
+const MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED = 0.15;
+
+function launchFloorForOp(op: { min_attack_outcome?: string }): number {
+    return op.min_attack_outcome === 'repulsed' ? MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED : MIN_LAUNCH_FORCE_RATIO_FLOOR;
+}
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 
@@ -807,7 +822,7 @@ export function advanceSectorOffensives(
 
                 if (
                     typeof prepResult.force_ratio_estimate === 'number'
-                    && prepResult.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && prepResult.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     op.force_ratio_estimate = prepResult.force_ratio_estimate;
                     beginRecovery(op, turn, 'defender_power_too_high', state);
@@ -864,7 +879,7 @@ export function advanceSectorOffensives(
             if (
                 op.force_launch !== true
                 && typeof op.force_ratio_estimate === 'number'
-                && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
@@ -941,7 +956,7 @@ export function advanceSectorOffensives(
                 if (
                     !forcedLaunch
                     && typeof op.force_ratio_estimate === 'number'
-                    && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && op.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     beginRecovery(op, turn, 'defender_power_too_high', state);
                     continue;
