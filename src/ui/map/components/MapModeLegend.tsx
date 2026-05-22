@@ -56,7 +56,11 @@ export function MapModeLegend() {
   if (!legend) return null;
 
   return (
-    <div className="absolute bottom-24 left-4 z-10 bg-panel/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10 shadow-lg" style={{ minWidth: 140 }}>
+    <div
+      data-testid="map-mode-legend"
+      className="absolute bottom-24 z-10 bg-panel/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10 shadow-lg"
+      style={{ left: 'calc(15.5rem + 1rem)', minWidth: 140 }}
+    >
       <div className="text-[9px] uppercase tracking-widest text-accent-gold/80 mb-1.5 font-semibold">{legend.title}</div>
       <div className="flex flex-col gap-1">
         {legend.stops.map((stop) => (

@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): move supply overlays off OOB sidebar
+
+**Type:** Tactical-map visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found that the Supply mode legend could overlap the left-sidebar Alliance Gauge label.
+
+**Change:** `MapModeLegend` and `SupplyPanel` now use sidebar-aware left offsets just outside the fixed 15.5rem OOB sidebar, with stable test ids. Added a static overlap regression contract in `tests/ui/supply_legend_overlap_contract.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\supply_legend_overlap_contract.test.ts --reporter=dot` failed before the patch because both overlays were still anchored inside the left OOB sidebar column. After the patch, the same focused test passed 2/2. Focused GUI audit suite `npx.cmd vitest run tests\ui\supply_legend_overlap_contract.test.ts tests\ui\command_briefing_banner_contract.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\ops_planning_draft_guard.test.ts tests\ui\map_mode_shortcut_contract.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_shell_layer.test.ts --reporter=dot` passed 61/61. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed.
+
+**Artifacts:** `src/ui/map/components/MapModeLegend.tsx`; `src/ui/map/components/SupplyPanel.tsx`; `tests/ui/supply_legend_overlap_contract.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P2-13. Remaining Batch H queue: desk-map projection polish, commander empty-state verification, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): move Command Briefing banner off counters
 
 **Type:** Tactical-map visual polish fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
