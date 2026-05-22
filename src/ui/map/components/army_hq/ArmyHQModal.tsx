@@ -89,6 +89,7 @@ export function ArmyHQModal() {
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
     const expandedCorpsId = useGameStore((s) => s.armyHQExpandedCorpsId);
     const setExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
+    const setLoadError = useGameStore((s) => s.setLoadError);
     const [pendingEmergencyPosture, setPendingEmergencyPosture] = useState<string | null>(null);
     // These remain available for future use but briefing navigation now stays inside HQ
 
@@ -160,12 +161,16 @@ export function ArmyHQModal() {
     const ipc = useIPC();
 
     const handleEmergencyPosture = useCallback(async (stance: string) => {
-        if (!ipc.isAvailable || !data) return;
+        if (!ipc.isAvailable) {
+            setLoadError('Desktop command bridge unavailable. Open the packaged desktop shell to stage emergency posture orders.');
+            return;
+        }
+        if (!data) return;
         const corpsIds = data.corpsFormations.map(c => c.id);
         for (const corpsId of corpsIds) {
             await ipc.stageCorpsStanceOrder(corpsId, stance);
         }
-    }, [ipc, data]);
+    }, [ipc, data, setLoadError]);
 
     const navigateToCorps = useCallback((corpsId: string) => {
         setActiveTab('briefing');
@@ -299,24 +304,33 @@ export function ArmyHQModal() {
 
                     {/* Right: emergency posture + situation + close */}
                     <div className="flex items-center gap-2">
-                        {!expandedCorpsId && ipc.isAvailable && (
-                            <select
-                                defaultValue=""
-                                aria-label="Emergency posture order"
-                                onChange={(e) => {
-                                    if (e.target.value) {
-                                        setPendingEmergencyPosture(e.target.value);
-                                        e.target.value = '';
-                                    }
-                                }}
-                                className="text-[9px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-2 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
-                            >
-                                <option value="" disabled>EMERGENCY POSTURE</option>
-                                <option value="defensive">ALL DEFENSIVE</option>
-                                <option value="balanced">ALL BALANCED</option>
-                                <option value="offensive">ALL OFFENSIVE</option>
-                                <option value="reorganize">ALL REORGANIZE</option>
-                            </select>
+                        {!expandedCorpsId && (
+                            <div className="flex flex-col items-end gap-1">
+                                <select
+                                    defaultValue=""
+                                    aria-label="Emergency posture order"
+                                    disabled={!ipc.isAvailable}
+                                    title={!ipc.isAvailable ? 'Desktop command bridge unavailable' : undefined}
+                                    onChange={(e) => {
+                                        if (e.target.value) {
+                                            setPendingEmergencyPosture(e.target.value);
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                    className="text-[9px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-2 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <option value="" disabled>EMERGENCY POSTURE</option>
+                                    <option value="defensive">ALL DEFENSIVE</option>
+                                    <option value="balanced">ALL BALANCED</option>
+                                    <option value="offensive">ALL OFFENSIVE</option>
+                                    <option value="reorganize">ALL REORGANIZE</option>
+                                </select>
+                                {!ipc.isAvailable && (
+                                    <div className="text-[8px] uppercase tracking-[0.16em] text-amber-300/70">
+                                        Desktop bridge unavailable
+                                    </div>
+                                )}
+                            </div>
                         )}
                         <div className="text-right">
                             <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
@@ -567,4 +581,3 @@ export function ArmyHQModal() {
         </div>
     );
 }
-

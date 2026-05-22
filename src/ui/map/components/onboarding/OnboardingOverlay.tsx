@@ -158,6 +158,30 @@ const ONBOARDING_FOCUSABLE_SELECTOR: string = [
     '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
+export interface TutorialSpotlightRect {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+}
+
+const SPOTLIGHT_PADDING = 12;
+
+export function resolveTutorialSpotlightRect(targetToken: string | null | undefined): TutorialSpotlightRect | null {
+    if (!targetToken || typeof document === 'undefined') return null;
+    const selector = '[data-tutorial-step=' + JSON.stringify(targetToken) + ']';
+    const target = document.querySelector<HTMLElement>(selector);
+    if (!target) return null;
+    const rect = target.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    return {
+        left: Math.max(0, Math.round(rect.left - SPOTLIGHT_PADDING)),
+        top: Math.max(0, Math.round(rect.top - SPOTLIGHT_PADDING)),
+        width: Math.round(rect.width + SPOTLIGHT_PADDING * 2),
+        height: Math.round(rect.height + SPOTLIGHT_PADDING * 2),
+    };
+}
+
 function getOverlayFocusables(root: HTMLElement | null): HTMLElement[] {
     if (!root) return [];
     return Array.from(root.querySelectorAll<HTMLElement>(ONBOARDING_FOCUSABLE_SELECTOR));
@@ -167,6 +191,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const { tutorialState, ipc } = props;
     const [pending, setPending] = useState(false);
     const [previewTutorialState, setPreviewTutorialState] = useState<TutorialStateShape | null>(null);
+    const [spotlightRect, setSpotlightRect] = useState<TutorialSpotlightRect | null>(null);
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E refs.
     // overlayRef: the overlay root, used by the focus trap and Tab cycle.
@@ -180,6 +205,21 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
     const completed = effectiveTutorialState?.completed_steps ?? [];
     const next = visible ? resolveNextStep(completed) : null;
     const active = visible && next !== null;
+
+    useEffect(() => {
+        if (!active || !next) {
+            setSpotlightRect(null);
+            return;
+        }
+        const update = () => setSpotlightRect(resolveTutorialSpotlightRect(next.target_ui_element));
+        update();
+        window.addEventListener('resize', update);
+        window.addEventListener('scroll', update, true);
+        return () => {
+            window.removeEventListener('resize', update);
+            window.removeEventListener('scroll', update, true);
+        };
+    }, [active, next]);
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — focus capture + restore + first-
     // focusable focus on open. Effect runs while the overlay is `active`; the
@@ -333,6 +373,42 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                 pointerEvents: 'auto',
             }}
         >
+            {spotlightRect && (
+                <>
+                    <div
+                        data-testid="onboarding-spotlight"
+                        aria-hidden="true"
+                        style={{
+                            position: 'fixed',
+                            left: spotlightRect.left,
+                            top: spotlightRect.top,
+                            width: spotlightRect.width,
+                            height: spotlightRect.height,
+                            border: '2px solid rgba(245, 158, 11, 0.95)',
+                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.42), 0 0 22px rgba(245, 158, 11, 0.55)',
+                            borderRadius: 8,
+                            pointerEvents: 'none',
+                            zIndex: Z.HARD_MODAL + 1,
+                        }}
+                    />
+                    <div
+                        data-testid="onboarding-spotlight-arrow"
+                        aria-hidden="true"
+                        style={{
+                            position: 'fixed',
+                            left: spotlightRect.left + Math.min(32, Math.max(12, spotlightRect.width / 2 - 8)),
+                            top: spotlightRect.top + spotlightRect.height + 8,
+                            width: 0,
+                            height: 0,
+                            borderLeft: '8px solid transparent',
+                            borderRight: '8px solid transparent',
+                            borderBottom: '12px solid rgba(245, 158, 11, 0.95)',
+                            pointerEvents: 'none',
+                            zIndex: Z.HARD_MODAL + 1,
+                        }}
+                    />
+                </>
+            )}
             {/*
               * LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-E — visually-hidden title
               * mirror so `aria-labelledby` resolves inside the overlay's own

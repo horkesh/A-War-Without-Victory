@@ -49,6 +49,17 @@ interface OrderInterpretationPanelProps {
     playerFaction: string;
 }
 
+type PendingOfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
+const SUPPORTED_ORDER_OVERRIDE_ACTIONS = new Set<string>();
+
+export function shouldShowOrderOverrideControl(
+    event: Pick<PendingOfficerEvent, 'overridable' | 'override_action'>,
+): boolean {
+    return event.overridable === true
+        && typeof event.override_action === 'string'
+        && SUPPORTED_ORDER_OVERRIDE_ACTIONS.has(event.override_action);
+}
+
 export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInterpretationPanelProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -73,6 +84,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
 
             {events.map((event) => {
                 const badge = BADGE_STYLES[event.type] ?? BADGE_STYLES['order_modified'];
+                const showOverride = shouldShowOrderOverrideControl(event);
                 return (
                     <div
                         key={event.event_id}
@@ -109,16 +121,21 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                             >
                                 ACCEPT
                             </button>
-                            {event.overridable && (
+                            {showOverride && (
                                 <button
                                     type="button"
-                                    onClick={() => { void handleAcknowledge(event.event_id); }}
+                                    onClick={() => { setLoadError('Order override bridge is not available yet.'); }}
                                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
                                 >
                                     OVERRIDE
                                 </button>
                             )}
                         </div>
+                        {event.overridable && !showOverride && (
+                            <div className="text-[9px] text-amber-300/70 italic">
+                                Override path unavailable until the command-authority bridge exposes a distinct override action.
+                            </div>
+                        )}
                         {event.type === 'order_refused' && event.overridable && (
                             <div className="text-[9px] text-text-secondary/60 italic">
                                 Officer morale {RELIEF_MORALE_PENALTY} if relieved

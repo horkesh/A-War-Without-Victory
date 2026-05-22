@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): surface dead-control feedback
+
+**Type:** Tactical-map / Army HQ UI correctness fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch G identified three dead-control failures: onboarding step targets had no visual spotlight, `OVERRIDE` on order interpretation acknowledged through the same path as `ACCEPT`, and presidential decision / emergency-posture controls silently no-op'd without the desktop command bridge.
+
+**Change:** `OnboardingOverlay` now resolves `data-tutorial-step` target geometry and renders a spotlight ring plus arrow for targeted steps; `OrderInterpretationPanel` hides active override controls unless a distinct supported override bridge exists and shows an unavailable note for current unsupported override events; `PresidentialAttentionPanel` disables browser/no-IPC decision/personnel buttons and shows bridge-unavailable feedback; `ArmyHQModal` keeps emergency posture visible but disabled without IPC and reports bridge absence through `setLoadError`. Added `tests/ui/gui_audit_dead_controls.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` failed before the patch on missing spotlight/override helpers and missing bridge feedback. After the patch, `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_dead_controls.test.ts tests\v092_tutorial_anchor_coverage.test.ts tests\v092_tutorial_lane_e_overlay_a11y.test.ts tests\ui\emergency_posture_confirm.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\sim\command\phase4_ui_data_layer.test.ts --reporter=dot` passed 44/44.
+
+**Artifacts:** `src/ui/map/components/onboarding/OnboardingOverlay.tsx`; `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`; `src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx`; `src/ui/map/components/army_hq/ArmyHQModal.tsx`; `tests/ui/gui_audit_dead_controls.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch G. Remaining GUI audit queue: Batch H polish/cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): scope Warroom shell chrome
 
 **Type:** Tactical-map / Warroom shell UI ownership fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
