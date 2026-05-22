@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit event modal dismissal)
+**Updated:** 2026-05-22 (GUI visual audit peace plan split meters)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit peace plan split meters** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-plan slice from the 2026-05-22 GUI visual audit: pending peace plans now resolve catalog split data through a browser-safe static import, preventing Vance-Owen territory meters from falling back to 0%. |
 | **GUI visual audit event modal dismissal** | [implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md](implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md) - Batch C event-notification slice from the 2026-05-22 GUI visual audit: non-decision event dispatches now use the shared Modal wrapper, expose a labelled dialog, and acknowledge through the same path for button, Escape, close affordance, and backdrop dismissal. |
 | **Visual QA evidence inventory + capture matrix (RC hardening)** | [audits/20260519_VISUAL_QA_EVIDENCE_INVENTORY.md](audits/20260519_VISUAL_QA_EVIDENCE_INVENTORY.md) - Inventories committed visual evidence under `implemented/visual_validation/`, marks staleness against current components, and lays out the operator-runnable capture matrix for the surfaces still missing evidence (pre-advance review modal, first-session opening brief + coachmarks, Army HQ Records -> Operation History, force-quality + osid-damage map modes, reduced-motion + focus spot-check). No fresh captures auto-run; rows name exact `capture.cjs` invocations operators can run when the Vite dev server is up. |
 | **GUI Playtest D1/D2 verified-stale closeout** | [implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md](implemented/20260518_BATCH19_AUTONOMOUS_MULTI_LANE.md), [../plans/2026-05-16-gui-playtest-defects-plan.md](../plans/2026-05-16-gui-playtest-defects-plan.md), `src/ui/map/components/PresidentialToolbar.tsx`, `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `src/ui/map/components/RootErrorBoundary.tsx`, `src/ui/map/layers/buildOsidDamageOverlay.ts`, `src/ui/map/layers/buildForceQualityOverlay.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `tests/ui/error_boundary_isolation.test.ts`, `tests/ui/osid_damage_overlay_coord_validity.test.ts`, `tests/ui/force_quality_overlay_coord_validity.test.ts` - Batch 19 audits D1 (advance-turn pre-advance gate feedback + panel-level error boundary wrapping right rail / map / sidebar / toolbar / Army HQ / Ops Planning / Decision Room / Presidential Attention) and D2 (osid-damage and force-quality glow polygon coordinate validity guards) as verified-stale: surfaces and 8/8 focused regressions already on disk and green. No source churn. |
@@ -98,6 +99,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit peace plan split meters** - pending peace plans now resolve catalog split data through a browser-safe static import, preventing Vance-Owen territory meters from falling back to 0%. | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) |
 | 2026-05-22 | **GUI visual audit event modal dismissal** - non-decision event dispatches now use the shared Modal wrapper with labelled dialog semantics; acknowledgement button, Escape, close affordance, and backdrop click all route through the same acknowledge path. | [implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md](implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md) |
 | 2026-05-22 | **GUI visual audit MapLibre dasharray repair** - tactical front stripes and supply-reach outlines now use literal `line-dasharray` values only; supply reach splits isolated vs non-isolated outlines into separate filtered layers so MapLibre can materialize both reliably. | [implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md](implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md) |
 | 2026-05-22 | **GUI visual audit label discipline** - Operational SITREP priority-front labels now route legacy raw SITREP strings through the OSID display-name map, Local Support panels no longer expose `Phase E`, and Army HQ opportunity pulse no longer exposes the `T3` reserve-crisis sentinel. | [implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md](implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md) |

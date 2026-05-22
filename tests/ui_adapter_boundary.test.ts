@@ -184,6 +184,35 @@ describe('UI Adapter Boundary Discipline', () => {
     expect(parseGameState(missingState).pendingEventDecisions).toBeUndefined();
   });
 
+  it('adapter resolves pending peace plans from a browser-safe static catalog import', () => {
+    const adapterSrc = readFile(join(SRC_ROOT, 'ui/map/data/GameStateAdapter.ts'));
+    expect(adapterSrc).not.toContain("require('../../../sim/negotiation/peace_plan_data.js')");
+
+    const rawState: any = {
+      meta: { turn: 40, phase: 'war' },
+      military: {
+        formations: {},
+        negotiation: {
+          pending_peace_plan: {
+            plan_id: 'vance_owen',
+            turn_offered: 40,
+            bot_responses: {
+              RBiH: 'accepted',
+              RS: 'rejected',
+              HRHB: 'accepted',
+            },
+          },
+        },
+      },
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+    expect(parsed.pendingPeacePlan?.planName).toContain('Vance Owen');
+    expect(parsed.pendingPeacePlan?.proposedSplit).toEqual({ RBiH: 39, RS: 43, HRHB: 18 });
+    expect(parsed.pendingPeacePlan?.institutionalModel).toBe('10_provinces');
+  });
+
   /**
    * Dayton trigger ownership: pipeline owns initiation, adapter only reads.
    *
@@ -232,4 +261,3 @@ describe('UI Adapter Boundary Discipline', () => {
     expect(adapterSrc).toMatch(/deriveOperationCaptureProvenance/);
   });
 });
-

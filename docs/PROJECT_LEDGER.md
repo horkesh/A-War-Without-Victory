@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): resolve peace plan splits in browser
+
+**Type:** Tactical-map UI adapter/browser-bundle fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified Vance-Owen peace-plan territory meters rendering as `0%`. `PeacePlanModal` already renders nonzero split data when provided; the adapter could instead fall back to `{ RBiH: 0, RS: 0, HRHB: 0 }` because it loaded peace-plan catalog data with runtime `require(...)` in the browser read path.
+
+**Change:** `GameStateAdapter` now imports `PEACE_PLANS` statically and resolves pending peace-plan display data from that browser-safe catalog import. Pending counter-offer plan names reuse the same static import, removing the nearby runtime `require(...)` pattern. Added an adapter-boundary regression that forbids the browser-unsafe require and proves `vance_owen` resolves to the catalog split `{ RBiH: 39, RS: 43, HRHB: 18 }`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui_adapter_boundary.test.ts --reporter=dot` failed before the patch because `GameStateAdapter.ts` still contained the runtime peace-plan catalog `require(...)`; after the patch, `npx.cmd vitest run tests\ui_adapter_boundary.test.ts tests\ui\peace_plan_modal.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` passed 23/23.
+
+**Artifacts:** `src/ui/map/data/GameStateAdapter.ts`; `tests/ui_adapter_boundary.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md`.
+
+**Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. Stacked stale peace modals, modal palette unification, stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+
+---
+
 ## [2026-05-22] fix(gui): unify event modal dismissal
 
 **Type:** Tactical-map modal hygiene fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
