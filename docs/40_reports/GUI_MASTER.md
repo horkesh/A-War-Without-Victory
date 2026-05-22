@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit stale state resets)
+**Updated:** 2026-05-22 (GUI visual audit Warroom shell ownership)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit Warroom shell ownership** | [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is now game-only, Warroom return affordances recognize `?view=warroom`, Army HQ close labels are de-duplicated, and Decision Room command-lane headlines are de-duplicated. |
 | **GUI visual audit stale state resets** | [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: selection messages, Army HQ reopen tab, hidden Decision Room lenses, and Inbox home overlay state now reset. |
 | **GUI visual audit modal palette unification** | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: OperationBriefingModal and CommanderSelectionModal now use dark panel tokens with a static guard against light-palette regression. |
 | **GUI visual audit peace plan dismissal scope** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. |
@@ -102,6 +103,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit Warroom shell ownership** - tactical chrome is now game-only, `?view=warroom` exposes the Warroom return affordance, Army HQ exposes one close label, and duplicate Decision Room command-lane headlines are de-duplicated. | [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) |
 | 2026-05-22 | **GUI visual audit stale state resets** - selection messages, Army HQ reopen tab, hidden Decision Room lenses, and Inbox home overlay state now reset. | [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) |
 | 2026-05-22 | **GUI visual audit modal palette unification** - OperationBriefingModal and CommanderSelectionModal now use dark panel tokens with a static guard against light-palette regression. | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) |
 | 2026-05-22 | **GUI visual audit peace plan dismissal scope** - pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) |

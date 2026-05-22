@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): scope Warroom shell chrome
+
+**Type:** Tactical-map / Warroom shell UI ownership fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch F identified shell ownership bleed: tactical map chrome could render in the Warroom, browser Warroom launches did not always show an explicit Warroom return path, Army HQ exposed duplicate close labels, and Decision Room command-loop lanes could repeat identical visible headlines.
+
+**Change:** `App.tsx` now renders `MapModeLegend`, `Minimap`, and `BottomStatusStrip` only on `appScreen === 'game'`; `shouldShowWarroomReturn(...)` recognizes `?view=warroom` alongside embedded and IPC contexts; `ArmyHQModal` leaves the explicit close label on the header control instead of duplicating it on the backdrop; and `buildCommandQuestions(...)` de-duplicates repeated Decision Room lane headlines by prefixing later duplicates with the lane label. Added `tests/ui/warroom_shell_ownership.test.ts` covering all four Batch F contracts.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` failed before the patch across all four expected Batch F contracts. After the patch, `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` passed 4/4. Focused shell suite `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts tests\warroom_shell_layer.test.ts tests\ui_shell_navigation.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\v093_a11y_lane_c_warroom_decision_room.test.ts --reporter=dot` passed 77/77. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/warroomReturn.ts`; `src/ui/map/components/army_hq/ArmyHQModal.tsx`; `src/ui/map/data/presidentialDecisionRoom.ts`; `tests/ui/warroom_shell_ownership.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch F. Remaining GUI audit queue: no-op controls, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): reset stale UI state on navigation
 
 **Type:** Tactical-map UI state hygiene fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

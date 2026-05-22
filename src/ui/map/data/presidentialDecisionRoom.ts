@@ -931,6 +931,21 @@ function buildCommandQuestion(
   };
 }
 
+function dedupeCommandQuestionHeadlines(
+  questions: PresidentialDecisionRoomCommandQuestion[],
+): PresidentialDecisionRoomCommandQuestion[] {
+  const seenHeadlines = new Set<string>();
+  return questions.map((question) => {
+    if (!seenHeadlines.has(question.headline)) {
+      seenHeadlines.add(question.headline);
+      return question;
+    }
+    const headline = `${question.label}: ${question.headline}`;
+    seenHeadlines.add(headline);
+    return { ...question, headline };
+  });
+}
+
 function buildCommandQuestions(
   cards: PresidentialDecisionRoomCard[],
   inspectNext: PresidentialDecisionRoomCard[],
@@ -940,7 +955,7 @@ function buildCommandQuestions(
   const pendingCards = cards.filter((card) => card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity');
   const frontCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
 
-  return [
+  return dedupeCommandQuestionHeadlines([
     buildCommandQuestion('urgent', 'Urgent', urgentCards, {
       fallbackHeadline: 'No urgent desk item',
       fallbackSummary: '0 urgent',
@@ -971,7 +986,7 @@ function buildCommandQuestions(
       headlineOverride: advanceReadiness.headline,
       noun: 'advance items',
     }),
-  ];
+  ]);
 }
 
 function loopStepSummary(count: number, urgentCount: number, noun: string): string {
