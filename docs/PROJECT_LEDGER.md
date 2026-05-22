@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): align map mode shortcut contract
+
+**Type:** Tactical-map keyboard/docs contract fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or map rendering layer semantics changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found map-mode drift: the live UI exposes nine modes, while older docs/comments described five, six, or seven modes, and `useKeyboardShortcuts.ts` duplicated the mode list instead of deriving it from `MAP_MODES`.
+
+**Change:** `useKeyboardShortcuts.ts` now derives numeric shortcut ownership from `src/ui/map/utils/mapModes.ts`; key `9` remains Legitimacy through the canonical list. Updated `MAP_UI_MASTER`, `TACTICAL_MAP_SYSTEM`, `AWWV_GUI_ARCHITECTURE_REWORK_v2`, `NEW_PLAYER_GUIDE`, and `VODIC_ZA_NOVE_IGRACE` to document nine modes / keys 1-9. Added `tests/ui/map_mode_shortcut_contract.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\map_mode_shortcut_contract.test.ts --reporter=dot` failed before the patch because the keyboard hook did not import `MAP_MODES` and `MAP_UI_MASTER` lacked Authority/Legitimacy. After the patch, `npx.cmd vitest run tests\ui\map_mode_shortcut_contract.test.ts --reporter=dot` passed 4/4. Focused surrounding suite `npx.cmd vitest run tests\ui\map_mode_shortcut_contract.test.ts tests\ui\map_modes_no_duplicate_labels.test.ts tests\ui\bottom_status_strip_labels.test.ts tests\ui\pause_escape_shortcuts.test.ts tests\warroom_shell_ownership.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck` and `npm.cmd run desktop:map:build` passed. The desktop build kept the repository's existing Vite warnings.
+
+**Artifacts:** `src/ui/map/hooks/useKeyboardShortcuts.ts`; `tests/ui/map_mode_shortcut_contract.test.ts`; `docs/20_engineering/MAP_UI_MASTER.md`; `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`; `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md`; `docs/00_start_here/NEW_PLAYER_GUIDE.md`; `docs/00_start_here/VODIC_ZA_NOVE_IGRACE.md`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MAP_MODE_SHORTCUT_CONTRACT_H3.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P2-1. Remaining Batch H queue: Command Briefing banner contrast/placement, Warroom calendar date/font polish, supply legend overlap, desk-map projection polish, commander empty-state verification, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): guard ops planning draft discard
 
 **Type:** Tactical-map Ops Planning UI correctness fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation launch logic changed.

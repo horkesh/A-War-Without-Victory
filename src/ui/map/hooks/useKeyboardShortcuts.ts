@@ -1,6 +1,6 @@
 /**
  * Phase C3: Keyboard shortcuts (PHASE_C_EXECUTION_PLAN.md).
- * Single keydown handler: Enter → confirm primary (e.g. modal); 1–6 → map mode; Escape → clear selection + tooltip.
+ * Single keydown handler: Enter -> confirm primary (e.g. modal); 1-9 -> map mode; Escape -> clear selection + tooltip.
  * Does not fire when focus is inside input/textarea.
  */
 import { useEffect, useRef } from 'react';
@@ -8,9 +8,10 @@ import { advanceTurnAndSync } from '../desktop/orderActions';
 import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
 import { useIPC } from '../desktop/useIPC';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
-import { useGameStore, type MapMode } from '../store/gameStore';
+import { useGameStore } from '../store/gameStore';
+import { MAP_MODES } from '../utils/mapModes';
 
-const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'casualties', 'morale', 'operations', 'defense', 'authority', 'legitimacy'];
+const MAP_MODES_BY_KEY = MAP_MODES.map((mode) => mode.id);
 
 function isFocusInInput(): boolean {
   const tag = document.activeElement?.tagName?.toUpperCase();
