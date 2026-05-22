@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Event notification 1992 historian addendum 2026-05-22:** Phase D notification content backfill now closes `drina_cleansing_decision_1992` and `concentration_camps_revealed_1992` with complete non-source recipient coverage grounded in existing row text, cited sources, and BB 1992 Drina/Prijedor context. Residual Phase D notification scope is now 3 rows / 10 blocks: `srebrenica_demilitarization_1993` plus two blocked-sensitive front-visit press options. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md`. On top of:
+
 **Event notification front-visit command-signaling addendum 2026-05-22:** Phase D notification content backfill now closes Sarajevo and Drina front-visit command-signaling options without adding new sensitive-history facts. `visit_to_front_rbih` is complete; `visit_to_front_rs` now only lacks the blocked-sensitive press option. Residual Phase D notification scope is now 5 rows / 20 blocks. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md`. On top of:
 
 **Event notification Igman/Lukavac addendum 2026-05-22:** Phase D notification content backfill closes `operation_lukavac_93` with complete non-source recipient coverage grounded in the authored event row and BB2 Operation Lukavac 93 account (BB2 pp.391-392). Residual Phase D notification scope was 6 rows / 26 blocks before the front-visit command-signaling slice. Report: `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md`. On top of:

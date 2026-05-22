@@ -10,10 +10,10 @@ Added `tools/diagnostics/event_notification_residuals.cjs`, a deterministic diag
 The diagnostic reports:
 
 ```text
-Event notification residuals: 5 rows / 20 recipient blocks
+Event notification residuals: 3 rows / 10 recipient blocks
 ```
 
-The focused test `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins that floor and the residual event-id set so future content slices must update the executable proof, not only prose trackers. The original diagnostic landed at 9 rows / 38 blocks; later historian-cleared slices updated the pinned floor to 5 rows / 20 blocks.
+The focused test `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins that floor and the residual event-id set so future content slices must update the executable proof, not only prose trackers. The original diagnostic landed at 9 rows / 38 blocks; later historian-cleared slices updated the pinned floor to 3 rows / 10 blocks.
 
 ## Behavior
 

@@ -19,6 +19,45 @@ function loadWar1995Events(): any[] {
 }
 
 describe('event notification content backfill', () => {
+    it('covers historian-cleared 1992 humanitarian rows for non-source recipients', () => {
+        const events = loadWar1992Events();
+        const cases = [
+            {
+                eventId: 'drina_cleansing_decision_1992',
+                source: 'RS',
+                responses: {
+                    systematic: ['HRHB', 'RBiH'],
+                    restrained: ['HRHB', 'RBiH'],
+                },
+            },
+            {
+                eventId: 'concentration_camps_revealed_1992',
+                source: 'RS',
+                responses: {
+                    deny: ['HRHB', 'RBiH'],
+                    obstruct: ['HRHB', 'RBiH'],
+                    cooperate: ['HRHB', 'RBiH'],
+                },
+            },
+        ];
+
+        for (const { eventId, source, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
     it('covers narrative-tone 1992 identity decisions for non-source recipients', () => {
         const events = loadWar1992Events();
         const cases = [

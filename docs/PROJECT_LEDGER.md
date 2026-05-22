@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close 1992 historian rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** Two remaining 1992 historian-required notification rows had enough support from authored event text, cited source fields, and local BB 1992 context to provide neutral non-source recipient readouts without inventing new atrocity, casualty, or outcome claims.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `drina_cleansing_decision_1992` (`systematic`, `restrained`) and `concentration_camps_revealed_1992` (`deny`, `obstruct`, `cooperate`), targeting RBiH and HRHB only. Added coverage tests, updated the residual diagnostic floor to 3 rows / 10 blocks, and propagated the new state through Phase D tracker docs, roadmap, backlog, and implemented-report indexes.
+
+**Determinism / output impact:** This is static authored notification text consumed by the existing two-level notification path. Event triggers, response IDs, effects, scenario order, save schema, and feature-flag behavior are unchanged.
+
+**Verification:** JSON parse for `war_1992.json` and `war_1993.json` passed. `node tools\diagnostics\event_notification_residuals.cjs --json` reports 3 rows / 10 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\event_notification_residuals_diagnostic.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 36/36.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md`.
+
+**Roadmap delta:** Phase D notification residual drops from 5 rows / 20 blocks to 3 rows / 10 blocks. The remaining rows are `srebrenica_demilitarization_1993` and the two blocked-sensitive front-visit press options.
+
+---
+
 ## [2026-05-22] content(notifications): close front-visit command-signaling rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

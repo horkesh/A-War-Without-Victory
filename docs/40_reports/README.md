@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest event-notification 1992 historian slice** | [implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md](implemented/20260522_EVENT_NOTIFICATION_1992_HISTORIAN_ROWS.md) - `drina_cleansing_decision_1992` and `concentration_camps_revealed_1992` now have complete non-source recipient notification coverage; Phase D residual is down to 3 rows / 10 blocks. |
 | **Latest event-notification front-visit command-signaling slice** | [implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md](implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md) - Sarajevo and Drina front-visit command-signaling options now have non-source recipient notification coverage; Phase D residual is down to 5 rows / 20 blocks. |
 | **Latest event-notification Igman/Lukavac slice** | [implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md](implemented/20260522_EVENT_NOTIFICATION_IGMAN_LUKAVAC.md) - `operation_lukavac_93` now has complete non-source recipient notification coverage; Phase D residual dropped to 6 rows / 26 blocks before the front-visit command-signaling slice. |
 | **Latest event-notification NATO/UN crisis slice** | [implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md](implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md) - `nato_ultimatum_sarajevo_1994` and `un_hostage_crisis_1995` now have complete non-source recipient notification coverage; Phase D residual dropped to 7 rows / 30 blocks before the Igman/Lukavac slice. |
