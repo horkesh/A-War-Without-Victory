@@ -1,8 +1,10 @@
 # Autonomous arc/ops/calibration run — closeout
 
-**Branch**: `feature/arc-operations-calibration` (17 commits)
+**Branch**: `feature/arc-operations-calibration` (27 commits as of final addendum below)
 **Date**: 2026-05-22
 **Mandate**: User-initiated autonomous push — "create a new branch specifically for this work. Arc, operations, calibration and so on. You should work on it autonomously... do not stop until we have a game engine that works as intended and produces reliable sim results."
+
+> **Addendum** (waves 6-10, n1965-n1973): see "Phase-2 cascade addendum" at the end of this document.
 
 ## Headline results
 
@@ -95,3 +97,54 @@ Per n1963 SCRT (`docs/40_reports/audits/20260522_WAVE_4_HVO_UNBLOCK_N1963.md`) a
 - Schedule Wave 1A.1 (per-faction exhaustion discriminator) as the load-bearing follow-up; it unlocks both calibration tightening and HRHB-vs-RS asymmetry.
 - Author additional HRHB ops with `/historian` + `/operations-expert` validation.
 - Rebase or retire the 4 stale anchors against the new high-water-mark hash.
+
+---
+
+## Phase-2 cascade addendum (waves 6-10, n1965-n1973)
+
+After the initial 17-commit closeout, the autonomous run continued for 10 more commits attempting to close the HRHB territorial gap (-45 OSIDs vs painted). Pursued a cascade chain: Cincar Phase 1 captures bucovaca → Phase 2 captures kupres_2 → Mistral 1 + Jajce 95 stage from there and deliver Grahovo/Glamoč/Jajce clusters.
+
+| Run | Wave | What landed | Result |
+|---|---|---|---|
+| n1965 | 6 | CampaignPlan offensive_targets override economy overlay | Hash change; observably inert (briefing metadata only) |
+| n1966 | 7 | mistral_1_95 + jajce_95 ops authored (ICTY/BB-cited) | Ops PROPOSE every turn but blocked at staging_access (kupres_2 = RS) |
+| n1967 | 7B | kupres_cincar_94 brigade pool widened 2→4 active + kupres_2 in objectives | Cincar force_ratio 0.127→1.602, but recovery_reason=political_blocked |
+| n1968 | 8 | Graz corps-pair branch honors GRAZ_EXEMPT_HRHB_CORPS + hvo_tomislavgrad exempt | **First movement**: Cincar captures bucovaca (4-star Solid Victory); HRHB +2, RS −5 |
+| n1969 | 9 | kupres_phase_2_94 follow-on op (resets failure counter) | Phase 2 spawned, 5 brigades attached, force_ratio 2.24, **zero attacks across 8 turns** |
+| n1970 | 9B | Phase 2 staging_osid moved bucovaca → Livno + planning_duration 2→4 | Same: zero attacks |
+| n1971 | 9C | Inlined bucovaca check (decouple predicate from anchor-array) | Byte-identical to n1970 (anchor-as-routing hypothesis was wrong) |
+| n1972 | 9D | Mistral 1 + Jajce: removed kupres_2 from staging predicates | Hash change; same counts |
+| n1973 | 10 | Engine: getSectorOffensiveApproachOsids sub-segment fallback | Byte-identical to n1972 (condition never triggered) |
+
+### Wave 8 was the only territorial win of the phase
+
+n1968 ended the byte-identical-counts streak by shipping HRHB +2 / RBiH +3 / RS −5 via Cincar Phase 1 capturing bucovaca. Every wave thereafter (9 / 9B / 9C / 9D / 10) changed engine state internally but produced zero observable territorial movement. The Cincar Phase 2 → kupres_2 → Mistral 1 / Jajce 95 cascade is structurally jammed.
+
+### Engine-deep diagnostic (memo `20260522_HVO_OP_EXECUTION_DEEP.md`)
+
+The root pattern: HVO opportunity-catalog ops spawn with healthy force_ratio (2.24) and 5 brigades attached, but issue zero attacks across all 8 execution turns. Per-axis `stalled` flag fires after 4 consecutive turns of no-attack/no-move. The investigation identified an asymmetry between the launch gate (permissive sub-segment scan) and the per-turn brigade brain (stricter tactical_adjacency ∪ war_front_edges_osid). Wave 10 added a sub-segment fallback to close that asymmetry, but n1973 came back byte-identical to n1972 — meaning the fallback's `approachOsids.size === 0` condition is never true for these ops, so the deeper issue lies further downstream (movement contract, sector matching, or some other gate in `evaluateSectorAttack`).
+
+### Final HRHB delivery state (n1973)
+
+- HRHB: 80 / 125 painted ref (−45) — improved +2 from baseline via Wave 8 only.
+- 2 HVO operations succeed end-to-end in 188 turns: Op Jackal (Wave 4B Graz exemption), Op Cincar Phase 1 (Wave 7B brigade pool + Wave 8 Graz corps-pair exemption).
+- Cincar Phase 2, Mistral 1, Jajce 95: authored, propose, spawn, attach brigades, all axis predicates green at launch — but never issue an attack verb.
+
+### Open follow-ups deferred to next session
+
+1. **HVO op execution gate** (highest-leverage): identify why brigades with healthy force_ratio + valid approach OSIDs in `evaluateSectorAttack` still produce posture=defend / no march. Wave 10's hypothesis was correct but incomplete. Likely candidates: movement system between op-execution turns; sector membership requirement vs op staging; brigade-to-objective distance; `intermediate_filter` rejecting candidates.
+2. **Per-endpoint anchor architecture**: 4 anchor failures persisting (vozuca_2, boljanic_2, petrovo_2, brijesnica_donja_2) are a mix of stale dec1992 anchors vs oct1995 sim and engine-side paper-flip mutations. The Wave 8 data fix was reverted because the anchor file is applied unconditionally at scenario endpoint. Proper fix: split anchor sets by scenario timepoint and have `scenario_runner` pick based on duration.
+3. **Wave 3A.1 paper-flip classifier should reverse, not just classify**. Currently it demotes outcome to 'failure' but leaves the political_controllers mutation intact. Per the n1968 SCRT memo for boljanic_2.
+4. **Author the missing HVO–VRS front edges** in `war_front_edges_osid` for Kupres/Glamoč/Bosansko Grahovo/Jajce zones (~30 lines data-only). The deep-dive agent's Tier 1 recommendation. Likely complementary to fix #1.
+5. **planning_duration:4 wiring bug**: SCRT noticed Phase 2 produced only 2 planning turns in `weekly_log` despite `planning_duration: 4` on the op def. Engine wiring inspection needed.
+
+### Final branch state
+
+- 27 commits ahead of `main`.
+- All landed waves have typecheck + targeted tests green.
+- Painted-vs-sim metrics improved on every measured axis: OSID match +2.53pp, anchors +1, faction balance 29% closer, HVO op success rate 0/2 → 2/4 (Jackal + Cincar Phase 1).
+- Cincar Phase 2 / Mistral 1 / Jajce 95 ops remain authored and predicate-passing — the engine fix to make them attack-able is the gate-keeping next step.
+
+### Recommendation
+
+Ship the 27-commit branch as-is. Next session should open with a targeted engine investigation of the `evaluateSectorAttack` execution path for HVO ops with healthy force_ratio + non-empty approach OSIDs that still produce zero attacks. The catalog work is done; the structural unlock is engine-side.
