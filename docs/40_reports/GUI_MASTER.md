@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit peace plan split meters)
+**Updated:** 2026-05-22 (GUI visual audit modal palette unification)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit modal palette unification** | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: `OperationBriefingModal` and `CommanderSelectionModal` now use dark panel tokens instead of the old light command-card palette. |
 | **GUI visual audit peace plan split meters** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-meter slice from the 2026-05-22 GUI visual audit: `GameStateAdapter` now resolves pending peace-plan display data through a static `PEACE_PLANS` import, so Vance-Owen meters render the catalog split instead of `0%`. |
 | **GUI visual audit peace plan dismissal scope** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. |
 | **GUI visual audit event modal dismissal** | [implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md](implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md) - Batch C event-notification slice from the 2026-05-22 GUI visual audit: non-decision event dispatches now use unified modal-style semantics, expose a labelled dialog, and acknowledge through the same path for button, Escape, close affordance, and backdrop dismissal. |
