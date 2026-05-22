@@ -519,6 +519,24 @@ const forceQualityMistral1: AxisPredicate = (state) => {
     return { green: true, reason: 'HVO/HV axis coordination supports Mistral 1' };
 };
 
+// Wave 12 (2026-05-22): `min_attack_outcome: 'repulsed'` is the catalog FLOOR.
+// `'repulsed'` maps to STALEMATE_FLOOR/REPULSED_FLOOR ≥ 0.5 (per
+// combat_math.ts:96) — below the default `'costly_victory'` (≥ 1.0) and the
+// `'stalemate'` setting (≥ 0.7). Cannot be lowered further at the catalog
+// boundary; the per-brigade attack threshold path
+// (bot_brigade_ai_osid.ts:355-359) is already at the most permissive setting.
+//
+// Live recovery_reason `defender_power_too_high` observed at t=160-162 in
+// n1974 is NOT controlled by this field. It fires from
+// sector_offensive.ts:813 / 869 / 946 against `op.force_ratio_estimate <
+// MIN_LAUNCH_FORCE_RATIO_FLOOR (=0.3)` (sector_offensive.ts:201). Historical
+// justification for accepting sub-1.0 local ratios at launch (Gotovina §54)
+// is engine-level work — would require either (a) raising
+// MIN_LAUNCH_FORCE_RATIO_FLOOR per-op via a new field, or (b) wiring
+// op.min_attack_outcome into the prep-time `MIN_LAUNCH_FORCE_RATIO_FLOOR`
+// check so 'repulsed' relaxes the launch floor from 0.3 → REPULSED_FLOOR=0.5
+// (or lower for desperate ops). Both options are out of scope for Wave 12.
+// See memo: docs/40_reports/proposals/20260522_WAVE_12_MISTRAL1_THRESHOLD_JAJCE_CORPS.md §1.
 export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
     opportunity_id: 'mistral_1_95',
     name: 'Operation Mistral 1',
@@ -531,9 +549,10 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
     planning_duration: 4,
     min_attack_outcome: 'repulsed',
     citations: [
-        'ICTY Prosecutor v. Gotovina et al., IT-06-90-T, Judgment 15 Apr 2011, §44-58 (Mistral 1 as Storm precondition)',
+        'ICTY Prosecutor v. Gotovina et al., IT-06-90-T, Judgment 15 Apr 2011, §44-58 (Mistral 1 as Storm precondition; §54 documents force-of-action at sub-1.0 local ratios)',
         'Balkan Battlegrounds v2 ch. 28 (HVO Tomislavgrad axis, HV 4th Guards Split, Jun 4-11 1995)',
         'docs/40_reports/proposals/20260522_HRHB_OP_CATALOG_PROPOSAL.md §1 (catalog gap analysis)',
+        'docs/40_reports/proposals/20260522_WAVE_12_MISTRAL1_THRESHOLD_JAJCE_CORPS.md §1 (threshold-floor verification)',
     ],
     historical_exit_class: 'decisive_success',
     prerequisites: {
@@ -567,61 +586,128 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // ═══════════════════════════════════════════════════════════════════════════
 // JAJCE_95 — Operation Jajce Recovery (Sep 1995)
 //
-// Historical record: The HVO 1st Guards "Ante Bruno Bušić" and HVO
-// Tomislavgrad operational group recaptured Jajce on 13-14 September 1995 as
-// part of the post-Mistral-2 collapse exploitation. Jajce had been lost in
-// October 1992 (Jajce Brigade destroyed; refugee column toward Travnik) — its
-// recovery in 1995 closed a major symbolic and operational loop for HVO.
+// Historical record: Jajce was recaptured on 13-14 September 1995 as part of
+// the post-Mistral-2 collapse exploitation. Jajce had been lost in October
+// 1992 (Jajce Brigade destroyed; refugee column toward Travnik). The 1995
+// recovery was Federation-coordinated:
+//   - ARBiH 7th Corps under Mehmed Alagić led the northward push from Travnik
+//     / Donji Vakuf, breaking the Komar line and clearing Vlašić plateau
+//     approaches.
+//   - ARBiH 5th Corps linked up from the Bihać direction (Sana operation).
+//   - HVO contributed (HVO 1st Guards "Ante Bruno Bušić" appears in operational
+//     accounts, but the southern HVO Tomislavgrad axis was running Mistral 2
+//     toward Drvar/Šipovo at the same time, not Jajce).
 // Sources:
-//   - Balkan Battlegrounds v2 ch. 30 (Jajce seizure 13-14 Sep 1995).
-//   - UNHCR Situation Report, 15 September 1995 (HVO control of Jajce town
-//     and 9 surrounding OSIDs).
+//   - Balkan Battlegrounds v2 ch. 30 (Jajce seizure 13-14 Sep 1995, ARBiH 7th
+//     Corps under Alagić as principal instrument).
+//   - ICTY Prosecutor v. Hadžihasanović IT-01-47-T trial record (ARBiH 7th
+//     Corps order of battle, brigade composition in central Bosnia ridge sector).
+//   - UNHCR Situation Report, 15 September 1995 (Federation control of Jajce
+//     town and 9 surrounding OSIDs).
+//
+// Wave 12 re-host (2026-05-22): the op was originally authored on
+// `hvo_tomislavgrad` for catalog-symmetry with the Mistral 2 family. That
+// placement was always weak — Tomislavgrad's front sectors do not reach Jajce
+// and the per-turn brigade brain stalls at `no_approach_osid` even after the
+// launch helper's sub-segment fallback (Wave 11) because the Tomislavgrad sub-
+// segments cover Livno/Glamoč/Šipovo, not the Bugojno/Donji Vakuf approach.
+//
+// Per user directive 2026-05-19, ARBiH 7th Corps was removed from the OOB —
+// its brigades (705th Bugojno, 717th Gornji Vakuf, 727th Travnik, 770th Donji
+// Vakuf, etc.) were rolled into ARBiH 3rd Corps in our reduced-OOB scenario.
+// This is the corps that already runs Vlašić 95 and Donji Vakuf 95 on
+// adjacent fronts and whose live front sectors (per latest_run_final_save
+// inspection) include `sector:arbih_3rd_corps:1` with friendly OSIDs
+// `op:donji_vakuf:donji_vakuf_2` / `op:donji_vakuf:komar_2` and enemy
+// `op:jajce:grdovo` / `op:donji_vakuf:torlakovac_2` — i.e., the corps's front
+// physically reaches the Jajce zone by t≥178.
+//
+// Defender corps corrected from `vrs_2nd_krajina` (Drvar/Grahovo shoulder) to
+// `vrs_1st_krajina` (the corps that actually holds Jajce per live save:
+// sector:vrs_1st_krajina:7 contains all relevant Jajce/Donji Vakuf OSIDs).
 //
 // Catalog rationale: painted Oct 1995 control shows 7 of 10 Jajce OSIDs
-// flipped HRHB. The current catalog has *zero* operations covering Jajce. This
-// op is single-axis (hvo_tomislavgrad sole), reuses the Mistral brigade pool,
-// and gates on Mistral 1 / Cincar dependency anchors being HRHB-held (Kupres
-// line, which is the launch shoulder for the Jajce push).
+// flipped Federation. With Mistral 2's Šipovo/Mrkonjić axis already running
+// hvo_tomislavgrad brigades, the Jajce push has no spare HVO Tomislavgrad
+// capacity. Re-hosting on arbih_3rd_corps:
+//   (a) puts the op on the corps whose front line is physically adjacent to
+//       the objective set,
+//   (b) uses ARBiH brigades that historically performed the operation
+//       (rolled-up 7th Corps brigades on the 3rd Corps roster),
+//   (c) leaves the Mistral 2 HVO/HV brigade pool undisturbed.
 // ═══════════════════════════════════════════════════════════════════════════
 
+const JAJCE_PRIMARY_CORPS = 'arbih_3rd_corps';
 const JAJCE_DEFENDER_WEAKNESS_FLOOR = 0.25;
 const JAJCE_READINESS_FLOOR = 0.32;
 const JAJCE_AXIS_COORDINATION_FLOOR = 0.30;
 const JAJCE_SUPPLY_PRESSURE_CEILING = 92;
+const VRS_1ST_KRAJINA_DEFENDER_CORPS = 'vrs_1st_krajina' as FormationId;
 
-// Wave 9D removed op:kupres:kupres_2 — the Cincar Phase 2 cascade has not
-// delivered Kupres town. Jajce historically launched from the Tomislavgrad
-// rear and crossed the Vlašić plateau, with Kupres as a southern flank
-// consideration rather than the primary staging base; relaxing this is
-// defensible.
+// Staging from the Bugojno/Travnik shoulder — ARBiH-held in Jan 1993 baseline
+// and persists through the late-war window. Bugojno (gracanica) is the
+// historical 7th Corps logistics line for the Donji Vakuf / Jajce push per
+// BB v2 ch. 30. Turbe (op:travnik:turbe_2) is the Donji Vakuf 95 staging
+// node and is also acceptable as a secondary anchor.
+const JAJCE_STAGING_BUGOJNO = 'op:bugojno:gracanica';
+const JAJCE_STAGING_TURBE = 'op:travnik:turbe_2';
 const JAJCE_STAGING_ANCHORS: readonly string[] = [
-    STAGING_LIVNO,
-    STAGING_TOMISLAVGRAD,
+    JAJCE_STAGING_BUGOJNO,
+    JAJCE_STAGING_TURBE,
 ];
 
+// Wave 12: objectives expanded to include the Donji Vakuf approach corridor
+// (torlakovac_2, oborci_2) as stepping-stones into the Jajce zone. The
+// adjacency graph (data/derived/operational/operational_contact_graph.json)
+// confirms:
+//   - op:donji_vakuf:torlakovac_2 → op:jajce:grdovo, op:jajce:vinac_2
+//   - op:donji_vakuf:oborci_2     → op:jajce:grdovo
+// Without these, the sub-segment fallback in `getSectorOffensiveApproachOsids`
+// cannot bridge the corps's friendly front (Donji Vakuf town) to the painted
+// Jajce objectives. `op:jajce:grdovo` is also added as the first-touch
+// objective; it sits directly on the live arbih_3rd_corps:1 sub-segment
+// per live-save inspection and is therefore the natural opening attack.
 const JAJCE_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:torlakovac_2',
+    'op:donji_vakuf:oborci_2',
+    'op:jajce:grdovo',
+    'op:jajce:vinac_2',
     'op:jajce:barevo_2',
     'op:jajce:bravnice',
-    'op:jajce:jajce_3',
     'op:jajce:jezero_2',
     'op:jajce:lupnica',
     'op:jajce:prisoje',
-    'op:jajce:vinac_2',
+    'op:jajce:jajce_3',
     'op:mrkonjic_grad:podrasnica_2',
 ];
 
+// Brigade pool: ARBiH 3rd Corps brigades that home in the Bugojno / Travnik /
+// Donji Vakuf / Gornji Vakuf zone. These are the historical 7th Corps brigades
+// (rolled into 3rd Corps in our reduced-OOB scenario per user directive
+// 2026-05-19). Composition mirrors the Vlašić 95 (skender_vakuf axis) and
+// Donji Vakuf 95 pools — these are the same brigades that historically broke
+// the Komar line in September 1995 and pushed into Jajce.
+//   - arbih_770th_slavna_mountain  — home op:donji_vakuf:donji_vakuf_2
+//   - arbih_705th_slavna_mountain  — home op:bugojno:gracanica
+//   - arbih_707th_slavna_mountain  — home op:bugojno:kopcic_2
+//   - arbih_717th_slavna_mountain  — home op:gornji_vakuf:crkvice
+//   - arbih_727th_slavna           — home op:travnik:podstinje
+//   - arbih_737th_muslim_light     — home op:travnik:travnik_2
 const JAJCE_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'jajce_recovery',
         name: 'Jajce Recovery Axis',
-        corps: SECONDARY_CORPS,
+        corps: JAJCE_PRIMARY_CORPS,
         brigades: [
-            'hvo_1st_guard_abb' as FormationId,
-            'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
-            'hrhb_kralj_tomislav_brigade' as FormationId,
+            'arbih_770th_slavna_mountain' as FormationId,
+            'arbih_705th_slavna_mountain' as FormationId,
+            'arbih_707th_slavna_mountain' as FormationId,
+            'arbih_717th_slavna_mountain' as FormationId,
+            'arbih_727th_slavna' as FormationId,
+            'arbih_737th_muslim_light' as FormationId,
         ],
         objectives: JAJCE_OBJECTIVES,
-        staging_osid: STAGING_TOMISLAVGRAD,
+        staging_osid: JAJCE_STAGING_BUGOJNO,
     },
 ];
 
@@ -631,42 +717,42 @@ const dateWindowJajce: AxisPredicate = (_state, turn) => {
     return { green: true, reason: 'within Jajce recovery Sep 1995 window' };
 };
 
-const politicalAuthorizationJajce: AxisPredicate = (state) => {
-    const alliance = state.political?.war_alliance_rbih_hrhb ?? 0;
-    const washingtonSigned = state.political?.rbih_hrhb_state?.washington_signed === true;
-    if (!washingtonSigned || alliance < FEDERATION_ALLIANCE_FLOOR) {
-        return { green: false, reason: 'Federation authorization below Jajce recovery threshold' };
-    }
-    return { green: true, reason: 'Federation authorization supports Jajce recovery' };
-};
+// Intra-RBiH op — political_authorization is n_a (mirrors Donji Vakuf 95 and
+// Vlašić 95 pattern). The Federation alliance is implicitly required because
+// the brigade pool draws from the central Bosnia line that exists because
+// of the Federation; the alliance_context predicate covers theater state.
+const politicalAuthorizationJajce: AxisPredicate = () => ({
+    green: true,
+    reason: 'not applicable for ARBiH-internal Jajce recovery',
+});
 
 const corpsReadinessJajce: AxisPredicate = (state) => {
-    if (!state.military.corps_command?.[SECONDARY_CORPS]) {
-        return { green: false, reason: 'HVO Tomislavgrad command not present for Jajce recovery' };
+    if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
+        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
     }
-    const traits = computeCorpsOperationReadiness(state, SECONDARY_CORPS as FormationId);
+    const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.operation_readiness < JAJCE_READINESS_FLOOR) {
-        return { green: false, reason: 'HVO Tomislavgrad readiness below Jajce recovery floor' };
+        return { green: false, reason: 'ARBiH 3rd Corps readiness below Jajce recovery floor' };
     }
-    return { green: true, reason: 'HVO Tomislavgrad readiness sufficient for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 3rd Corps readiness sufficient for Jajce recovery' };
 };
 
 const logisticsJajce: AxisPredicate = (state) => {
-    const pressure = getFactionLiveSupplyPressure(state, 'HRHB');
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
     if (pressure >= JAJCE_SUPPLY_PRESSURE_CEILING) {
-        return { green: false, reason: 'HRHB supply pressure too high for Jajce recovery' };
+        return { green: false, reason: 'RBiH supply pressure too high for Jajce recovery' };
     }
-    return { green: true, reason: 'HRHB supply pressure within Jajce recovery margin' };
+    return { green: true, reason: 'RBiH supply pressure within Jajce recovery margin' };
 };
 
 const stagingAccessJajce: AxisPredicate = (state) => {
     for (const osid of JAJCE_STAGING_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl !== 'HRHB') {
-            return { green: false, reason: 'Jajce staging anchors (Livno/Tomislavgrad) are not all HRHB-held' };
+        if (ctrl !== null && ctrl !== 'RBiH') {
+            return { green: false, reason: 'Bugojno/Turbe staging anchors are not RBiH-held for Jajce recovery' };
         }
     }
-    return { green: true, reason: 'Jajce staging anchors (Livno/Tomislavgrad/Kupres) are open' };
+    return { green: true, reason: 'Bugojno/Turbe staging anchors are open for Jajce recovery' };
 };
 
 const weatherSeasonJajce: AxisPredicate = (_state, turn) => {
@@ -677,11 +763,11 @@ const weatherSeasonJajce: AxisPredicate = (_state, turn) => {
 };
 
 const commanderConfidenceJajce: AxisPredicate = (state) => {
-    const commanderState = state.military.corps_command?.[SECONDARY_CORPS]?.commander_state;
+    const commanderState = state.military.corps_command?.[JAJCE_PRIMARY_CORPS]?.commander_state;
     if (!commanderState) {
-        return { green: false, reason: 'HVO Tomislavgrad commander state unavailable for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 3rd Corps commander state unavailable for Jajce recovery' };
     }
-    return { green: true, reason: 'HVO Tomislavgrad commander state present for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 3rd Corps commander state present for Jajce recovery' };
 };
 
 const enemyWeaknessJajce: AxisPredicate = (state, turn) => {
@@ -693,12 +779,15 @@ const enemyWeaknessJajce: AxisPredicate = (state, turn) => {
     if (enemyHeld === 0) {
         return { green: false, reason: 'no Jajce recovery objectives remain in enemy hands' };
     }
+    // Wave 12: defender corps corrected to VRS 1st Krajina — live save shows
+    // sector:vrs_1st_krajina:7 holds Jajce/Donji Vakuf/Mrkonjić OSIDs, not
+    // vrs_2nd_krajina (which holds the Drvar/Grahovo southern shoulder).
     const trajectory = evaluateDefenderTrajectoryWeakness(state, {
-        defenderCorpsId: VRS_KRAJINA_DEFENDER_CORPS,
+        defenderCorpsId: VRS_1ST_KRAJINA_DEFENDER_CORPS,
         defenderFaction: 'RS',
         currentTurn: turn,
         weaknessFloor: JAJCE_DEFENDER_WEAKNESS_FLOOR,
-        label: 'VRS Krajina',
+        label: 'VRS 1st Krajina',
     });
     if (trajectory.available) {
         return { green: trajectory.green, reason: trajectory.reason };
@@ -718,36 +807,37 @@ const allianceContextJajce: AxisPredicate = (state) => {
 };
 
 const forceQualityJajce: AxisPredicate = (state) => {
-    if (!state.military.corps_command?.[SECONDARY_CORPS]) {
-        return { green: false, reason: 'HVO Tomislavgrad command not present for Jajce recovery' };
+    if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
+        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
     }
-    const traits = computeCorpsOperationReadiness(state, SECONDARY_CORPS as FormationId);
+    const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.axis_coordination < JAJCE_AXIS_COORDINATION_FLOOR) {
-        return { green: false, reason: 'HVO Tomislavgrad axis coordination below Jajce recovery threshold' };
+        return { green: false, reason: 'ARBiH 3rd Corps axis coordination below Jajce recovery threshold' };
     }
-    return { green: true, reason: 'HVO Tomislavgrad axis coordination supports Jajce recovery' };
+    return { green: true, reason: 'ARBiH 3rd Corps axis coordination supports Jajce recovery' };
 };
 
 export const JAJCE_95_OPPORTUNITY: OperationOpportunityDef = {
     opportunity_id: 'jajce_95',
     name: 'Operation Jajce Recovery',
     tier: 'T1',
-    faction: 'HRHB',
-    primary_corps: SECONDARY_CORPS,
+    faction: 'RBiH',
+    primary_corps: JAJCE_PRIMARY_CORPS,
     family: 'federation_western_bosnia',
     axes: JAJCE_AXES,
-    staging_osid: STAGING_TOMISLAVGRAD,
+    staging_osid: JAJCE_STAGING_BUGOJNO,
     planning_duration: 3,
     min_attack_outcome: 'repulsed',
     citations: [
-        'Balkan Battlegrounds v2 ch. 30 (Jajce seizure 13-14 Sep 1995 by HVO 1st Guards "Ante Bruno Bušić")',
-        'UNHCR Situation Report, 15 September 1995 (HVO control of Jajce town and 9 surrounding OSIDs)',
-        'docs/40_reports/proposals/20260522_HRHB_OP_CATALOG_PROPOSAL.md §2 (catalog gap analysis)',
+        'Balkan Battlegrounds v2 ch. 30 (Jajce seizure 13-14 Sep 1995; ARBiH 7th Corps under Alagić as principal instrument)',
+        'ICTY Prosecutor v. Hadžihasanović IT-01-47-T (ARBiH 7th Corps OOB, central Bosnia ridge sector brigade composition)',
+        'UNHCR Situation Report, 15 September 1995 (Federation control of Jajce town and 9 surrounding OSIDs)',
+        'docs/40_reports/proposals/20260522_WAVE_12_MISTRAL1_THRESHOLD_JAJCE_CORPS.md (Wave 12 re-host rationale)',
     ],
     historical_exit_class: 'decisive_success',
     prerequisites: {
         date_window: 'required',
-        political_authorization: 'required',
+        political_authorization: 'n_a',
         corps_readiness: 'required',
         logistics: 'optional',
         staging_access: 'required',
