@@ -344,10 +344,15 @@ const MISTRAL_1_STAGING_ANCHORS: readonly string[] = [
     STAGING_TOMISLAVGRAD,
 ];
 
-// Kupres / Cincar line must already be HRHB-held (Operation Cincar / Kupres-94
-// previously succeeded). Mistral 1 launches FROM the Kupres-Livno line.
+// Cincar's Bučovača shoulder must already be HRHB-held (Phase 1 success).
+// Mistral 1 launches FROM the Livno-Bučovača line. Wave 9D removed
+// op:kupres:kupres_2 because the Cincar Phase 2 cascade has not been able
+// to deliver Kupres town within the engine's current movement contract;
+// Mistral 1 launching from the southern Bučovača-Livno shoulder while
+// Kupres remains in RS hands is a partial-relaxation of the historical
+// staging line but still defensible (the operational base was the
+// Tomislavgrad-Livno-Bučovača arc, not Kupres town itself).
 const MISTRAL_1_KUPRES_DEPENDENCY_ANCHORS: readonly string[] = [
-    'op:kupres:kupres_2',
     'op:kupres:bucovaca',
 ];
 
@@ -446,7 +451,7 @@ const stagingAccessMistral1: AxisPredicate = (state) => {
     for (const osid of MISTRAL_1_KUPRES_DEPENDENCY_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
         if (ctrl !== 'HRHB') {
-            return { green: false, reason: 'Kupres dependency anchors are not open for Mistral 1' };
+            return { green: false, reason: 'Bučovača (Cincar Phase 1 shoulder) is not HRHB-held for Mistral 1' };
         }
     }
     return { green: true, reason: 'Livno/Tomislavgrad staging and Kupres dependency anchors are open' };
@@ -584,10 +589,14 @@ const JAJCE_READINESS_FLOOR = 0.32;
 const JAJCE_AXIS_COORDINATION_FLOOR = 0.30;
 const JAJCE_SUPPLY_PRESSURE_CEILING = 92;
 
+// Wave 9D removed op:kupres:kupres_2 — the Cincar Phase 2 cascade has not
+// delivered Kupres town. Jajce historically launched from the Tomislavgrad
+// rear and crossed the Vlašić plateau, with Kupres as a southern flank
+// consideration rather than the primary staging base; relaxing this is
+// defensible.
 const JAJCE_STAGING_ANCHORS: readonly string[] = [
     STAGING_LIVNO,
     STAGING_TOMISLAVGRAD,
-    'op:kupres:kupres_2',
 ];
 
 const JAJCE_OBJECTIVES: readonly string[] = [
@@ -654,7 +663,7 @@ const stagingAccessJajce: AxisPredicate = (state) => {
     for (const osid of JAJCE_STAGING_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
         if (ctrl !== 'HRHB') {
-            return { green: false, reason: 'Jajce staging anchors (Livno/Tomislavgrad/Kupres) are not all HRHB-held' };
+            return { green: false, reason: 'Jajce staging anchors (Livno/Tomislavgrad) are not all HRHB-held' };
         }
     }
     return { green: true, reason: 'Jajce staging anchors (Livno/Tomislavgrad/Kupres) are open' };
