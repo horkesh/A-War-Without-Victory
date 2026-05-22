@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): guard ops planning draft discard
+
+**Type:** Tactical-map Ops Planning UI correctness fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation launch logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H found that OpsPlanningModal discarded assigned objectives/brigades on Escape or close without confirmation, and that axis IDs used a module-global counter that climbed across modal opens.
+
+**Change:** Added `src/ui/map/components/ops_modal/opsPlanningDraft.ts` for dirty-draft detection and plan-local axis ID derivation; wired OpsPlanningModal close/Escape through an in-app discard confirmation when the plan has assigned objectives or brigades; removed the module-global `nextAxisCounter`; and added `tests/ui/ops_planning_draft_guard.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` failed before the patch because the draft helper module did not exist. After the patch, `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` passed 3/3. Focused surrounding suite `npx.cmd vitest run tests\ui\ops_planning_draft_guard.test.ts tests\ui\ops_planning_target_discovery.test.ts tests\ui\stale_state_resets.test.ts tests\ui\error_boundary_isolation.test.ts tests\z_index_canonical.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck` and `npm.cmd run desktop:map:build` passed. The desktop build kept the repository's existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ops_modal/OpsPlanningModal.tsx`; `src/ui/map/components/ops_modal/opsPlanningDraft.ts`; `tests/ui/ops_planning_draft_guard.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P2-8 and P3-9. Remaining Batch H queue: map-mode docs/keyboard contract, Command Briefing banner contrast/placement, Warroom calendar date/font polish, supply legend overlap, desk-map projection polish, commander empty-state verification, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] refactor(gui): clean source-level polish residue
 
 **Type:** Tactical-map / Army HQ source-level UI polish cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
