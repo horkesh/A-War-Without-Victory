@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close 1995 late-war outcome rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** The Phase D residual review left four 1995 late-war outcome rows gated for policy review. The existing event rows support neutral observer copy as long as it describes command crisis, halt warning, ceasefire posture, and negotiation posture without asserting final settlement or downstream campaign outcomes.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `karadzic_mladic_split_1995`, `us_halts_federation_advance_1995`, `holbrooke_ceasefire_demand_oct95`, and `dayton_talks_begin_1995`. The text is framed as non-source diplomatic/intelligence readout and remains compatible with alternate simulation state.
+
+**Verification:** `node -e "JSON.parse(require('fs').readFileSync('data/scenarios/events/war_1995.json','utf8')); console.log('war_1995 json ok')"` passed. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 31/31. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1995.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1995_LATE_WAR_OUTCOME.md`; `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+**Roadmap delta:** Late-war outcome residual drops from 4 rows / 16 blocks to zero. Overall Phase D notification residual drops from 13 rows / 62 blocks to 9 rows / 46 blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close 1994 late-war diplomacy rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, or feature-flag behavior changed.

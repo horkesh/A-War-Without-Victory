@@ -812,6 +812,28 @@
         "risk_level": 0.3
       }
     ],
+    "notifications_to_other_factions": {
+      "remove_mladic": {
+        "RBiH": {
+          "headline": "Pale presses Mladic dismissal",
+          "body": "RS political leadership tries to force Mladic out during the crisis around Operation Storm. Sarajevo sees command paralysis and officer resistance, but also a possible reassertion of civilian control if Pale holds."
+        },
+        "HRHB": {
+          "headline": "RS leadership challenges Mladic",
+          "body": "Pale pushes the dismissal despite VRS officer resistance. Mostar reads a dangerous command rupture inside RS at the same moment western Bosnia is under extreme pressure."
+        }
+      },
+      "back_down": {
+        "RBiH": {
+          "headline": "Pale backs down before Mladic",
+          "body": "Karadzic retreats from the dismissal attempt and Mladic remains in command. Sarajevo sees VRS command continuity restored, but the political-military split inside RS is now exposed."
+        },
+        "HRHB": {
+          "headline": "Mladic survives Pale challenge",
+          "body": "RS political leadership backs away from removing Mladic. Mostar sees the VRS officer corps hold together, while Pale's authority over the army looks visibly weakened."
+        }
+      }
+    },
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -1254,6 +1276,28 @@
         "risk_level": 0.9
       }
     ],
+    "notifications_to_other_factions": {
+      "comply": {
+        "RS": {
+          "headline": "Federation accepts Washington halt",
+          "body": "RBiH accepts the US demand to stop short of Banja Luka and pursue peace from its current gains. Pale sees immediate pressure ease, but the Federation keeps international credibility and a strong negotiating position."
+        },
+        "HRHB": {
+          "headline": "Sarajevo accepts halt order",
+          "body": "RBiH follows Washington's demand to stop the advance and move toward negotiations. Mostar sees the military push capped for now, with the Federation's diplomatic position preserved."
+        }
+      },
+      "push_further": {
+        "RS": {
+          "headline": "Federation pushes toward Banja Luka",
+          "body": "RBiH rejects the immediate halt and seeks more ground before stopping. Pale faces a sharper battlefield threat, while Sarajevo risks losing US backing over the refugee and peace-process warning."
+        },
+        "HRHB": {
+          "headline": "Sarajevo defies Washington halt",
+          "body": "RBiH keeps pressing for additional territory despite US pressure. Mostar sees greater military leverage, but also higher diplomatic risk for the Federation coalition."
+        }
+      }
+    },
     "sets_flags": {
       "advance_halted": true
     },
@@ -1337,6 +1381,28 @@
         "risk_level": 0.8
       }
     ],
+    "notifications_to_other_factions": {
+      "accept_ceasefire": {
+        "RS": {
+          "headline": "Sarajevo accepts Holbrooke ceasefire",
+          "body": "RBiH agrees to halt the northwestern offensive and preserve the path to Dayton talks. Pale sees front pressure pause, while Sarajevo improves patron confidence and international standing."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts ceasefire demand",
+          "body": "Sarajevo accepts the two-month ceasefire framework. Mostar sees Federation momentum capped, but US support and negotiating leverage remain intact."
+        }
+      },
+      "continue_offensive": {
+        "RS": {
+          "headline": "Sarajevo keeps offensive pressure",
+          "body": "RBiH defies Holbrooke's demand and continues the northwestern offensive. Pale sees immediate military danger rise, while Sarajevo risks US support and international standing."
+        },
+        "HRHB": {
+          "headline": "RBiH continues before ceasefire",
+          "body": "Sarajevo pushes for more gains before accepting a halt. Mostar sees stronger military credibility, but also a larger diplomatic cost with Washington."
+        }
+      }
+    },
     "sets_flags": {
       "holbrooke_ceasefire_demanded": true
     },
@@ -1400,7 +1466,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RS": {
+          "headline": "Sarajevo enters Dayton in good faith",
+          "body": "RBiH commits to the peace process at Wright-Patterson. Pale sees Sarajevo strengthening international credibility while accepting that compromises will define the settlement."
+        },
+        "HRHB": {
+          "headline": "RBiH commits to Dayton talks",
+          "body": "Sarajevo enters the Dayton process in good faith. Mostar sees the Federation side aligning with the US-led talks and preserving diplomatic capital."
+        }
+      },
+      "hardline": {
+        "RS": {
+          "headline": "Sarajevo pushes hardline at Dayton",
+          "body": "RBiH uses military momentum to demand more territory and a stronger central state. Pale sees higher pressure at the table, but also greater risk that talks break down."
+        },
+        "HRHB": {
+          "headline": "RBiH seeks maximum concessions",
+          "body": "Sarajevo presses for a harder Dayton position. Mostar sees morale benefits from a tougher line, but also risk to international credibility and the talks themselves."
+        }
+      }
+    }
   },
   {
     "id": "dayton_signed_1995",

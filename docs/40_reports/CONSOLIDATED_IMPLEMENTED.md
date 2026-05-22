@@ -2,7 +2,9 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest event-notification 1994 late-war diplomacy slice:** [implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md](implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md) - `contact_group_plan_1994`, `belgrade_embargo_rs_1994`, and `carter_ceasefire_1994` now have complete non-source recipient notification coverage; Phase D residual is down to 13 rows / 62 blocks.
+**Latest event-notification 1995 late-war outcome slice:** [implemented/20260522_EVENT_NOTIFICATION_1995_LATE_WAR_OUTCOME.md](implemented/20260522_EVENT_NOTIFICATION_1995_LATE_WAR_OUTCOME.md) - `karadzic_mladic_split_1995`, `us_halts_federation_advance_1995`, `holbrooke_ceasefire_demand_oct95`, and `dayton_talks_begin_1995` now have complete non-source recipient notification coverage; Phase D residual is down to 9 rows / 46 blocks.
+
+**Latest event-notification 1994 late-war diplomacy slice:** [implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md](implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md) - `contact_group_plan_1994`, `belgrade_embargo_rs_1994`, and `carter_ceasefire_1994` now have complete non-source recipient notification coverage; Phase D residual dropped to 13 rows / 62 blocks before the 1995 late-war outcome slice.
 
 **Latest event-notification Washington-timing slice:** [implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md](implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md) - `washington_agreement_1994` and `ic_rbih_restraint_post_washington` now have complete non-source recipient notification coverage under the two-clock Washington policy; Phase D residual dropped to 16 rows / 74 blocks before the 1994 late-war diplomacy slice.
 

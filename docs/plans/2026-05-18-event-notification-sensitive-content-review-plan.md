@@ -18,7 +18,7 @@ No sensitive recipient copy is provided here.
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
 | Narrative tone required | 0 | 0 | Closed 2026-05-22 by the 1992 foundational-decision narrative-tone slice. |
 | Washington timing policy | 0 | 0 | Closed 2026-05-22 by the Washington-timing notification slice. |
-| Late-war outcome policy | 4 | 16 | `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
+| Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
 ## Prep Matrix Addendum 2026-05-21
@@ -29,9 +29,9 @@ Docs-only prep is complete:
 - Historian packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_HISTORIAN_REVIEW_PACKET.md`
 - Narrative/timing/outcome packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_NARRATIVE_TIMING_PACKET.md`
 
-The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice, 2026-05-22 narrative-tone slice, 2026-05-22 Washington-timing slice, and 2026-05-22 1994 late-war diplomacy slice, the active residual is 13 rows / 62 blocks.
+The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice, 2026-05-22 narrative-tone slice, 2026-05-22 Washington-timing slice, 2026-05-22 1994 late-war diplomacy slice, and 2026-05-22 1995 late-war outcome slice, the active residual is 9 rows / 46 blocks.
 
-First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Third implementation slice closed 2026-05-22: the two Washington-timing rows are authored under the two-clock policy. Fourth implementation slice closed 2026-05-22: the three 1994 late-war diplomacy rows are authored without asserting final outcome facts. Blocked-sensitive and other gated front-visit blocks remain out of scope.
+First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Third implementation slice closed 2026-05-22: the two Washington-timing rows are authored under the two-clock policy. Fourth implementation slice closed 2026-05-22: the three 1994 late-war diplomacy rows are authored without asserting final outcome facts. Fifth implementation slice closed 2026-05-22: the four 1995 late-war outcome rows are authored with posture/process copy that avoids unsupported final-settlement assertions. Blocked-sensitive and other gated front-visit blocks remain out of scope.
 
 Required tests for the safe slice:
 
@@ -60,7 +60,7 @@ Feature-flag-off baseline behavior must remain stable; notification text may onl
    - Recipient copy for `ic_rbih_restraint_post_washington` must not imply the formal agreement fires before its calendar/narrative event.
 
 4. Late-war outcome lane
-   - Status: 1994 proposal/pressure subset closed 2026-05-22 for `contact_group_plan_1994`, `belgrade_embargo_rs_1994`, and `carter_ceasefire_1994`; 1995 endgame/outcome rows remain gated.
+   - Status: closed 2026-05-22 for the 1994 proposal/pressure subset (`contact_group_plan_1994`, `belgrade_embargo_rs_1994`, `carter_ceasefire_1994`) and the 1995 endgame/outcome subset (`karadzic_mladic_split_1995`, `us_halts_federation_advance_1995`, `holbrooke_ceasefire_demand_oct95`, `dayton_talks_begin_1995`).
    - Review copy against late-war diplomacy and outcome policy before authoring.
    - Keep notifications compatible with alternate simulation state. Do not assert Dayton, territorial percentages, refugee outcomes, Banja Luka outcomes, or final settlement facts unless the triggering event and prerequisites already make them true.
    - Stop if a response would require policy on counterfactual end-state claims.
