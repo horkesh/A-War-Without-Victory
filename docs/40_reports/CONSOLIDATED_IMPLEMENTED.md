@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest GUI polish cleanup H1:** [implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md](implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md) - first Batch H polish slice from the 2026-05-22 GUI visual audit: dead coachmark selector fields, dev separators, raw warning glyphs, duplicated force-launch constants, and OpsMap console logs are cleaned up with static guards.
+
 **Latest GUI dead control feedback:** [implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md](implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md) - Batch G from the 2026-05-22 GUI visual audit: onboarding targets now draw a spotlight, unsupported order overrides no longer render as active no-op controls, and browser/no-IPC decision controls show bridge-unavailable feedback.
 
 **Latest GUI Warroom shell ownership:** [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is now game-only, Warroom return affordances recognize `?view=warroom`, Army HQ close labels are de-duplicated, and Decision Room command-lane headlines are de-duplicated.

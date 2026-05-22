@@ -28,6 +28,11 @@ interface AxisFeatureProperties {
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
 const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
+const OPS_MAP_DEBUG = false;
+
+function debugOpsMap(...args: unknown[]): void {
+    if (OPS_MAP_DEBUG) console.debug('[OpsMap]', ...args);
+}
 
 export class OpsMapRenderer {
     private map!: maplibregl.Map;
@@ -281,28 +286,28 @@ export class OpsMapRenderer {
     }
 
     private setupInteractions() {
-        console.log('[OpsMap] setupInteractions called, map exists:', !!this.map);
+        debugOpsMap('setupInteractions called, map exists:', !!this.map);
 
         // Raw DOM click on canvas — bypasses all MapLibre layer logic
         this.map.getCanvas().addEventListener('click', (e) => {
-            console.log('[OpsMap] CANVAS DOM click at', e.clientX, e.clientY);
+            debugOpsMap('CANVAS DOM click at', e.clientX, e.clientY);
         });
 
         // MapLibre click event
         this.map.on('click', (e) => {
-            console.log('[OpsMap] MAP click at', e.point, 'onOsidClick?', !!this.onOsidClick);
+            debugOpsMap('MAP click at', e.point, 'onOsidClick?', !!this.onOsidClick);
             const features = this.map.queryRenderedFeatures(e.point, { layers: ['osid-control-fill'] });
-            console.log('[OpsMap] osid-control-fill features:', features.length);
+            debugOpsMap('osid-control-fill features:', features.length);
             if (!this.onOsidClick) return;
             if (features.length > 0) {
                 const osid = features[0].properties?.osid;
-                console.log('[OpsMap] OSID:', osid);
+                debugOpsMap('OSID:', osid);
                 if (typeof osid === 'string' && osid) this.onOsidClick(osid);
             }
         });
 
         // Crosshair cursor everywhere on the map (always in planning mode)
         this.map.getCanvas().style.cursor = 'crosshair';
-        console.log('[OpsMap] cursor set, canvas size:', this.map.getCanvas().width, 'x', this.map.getCanvas().height);
+        debugOpsMap('cursor set, canvas size:', this.map.getCanvas().width, 'x', this.map.getCanvas().height);
     }
 }

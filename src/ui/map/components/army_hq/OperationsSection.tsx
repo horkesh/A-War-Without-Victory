@@ -15,6 +15,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
+import { FORCE_LAUNCH_COST } from '../../utils/commandAuthority';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -504,7 +505,6 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
-    const FORCE_LAUNCH_COST = 15;
     const authCurrent = gameState.commandAuthority?.current ?? 100;
     const canForceLaunch = authCurrent >= FORCE_LAUNCH_COST;
 

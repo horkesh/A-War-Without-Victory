@@ -15,9 +15,9 @@ import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
+import { COMMAND_AUTHORITY_RECOVERY_PER_TURN, FORCE_LAUNCH_COST } from '../utils/commandAuthority';
 
-const FORCE_LAUNCH_COST = 15;
-const RECOVERY_PER_TURN = 2;
+const RECOVERY_PER_TURN = COMMAND_AUTHORITY_RECOVERY_PER_TURN;
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -67,7 +67,7 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
         <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-950/30 flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">⚠ {t('operationBriefing.presidentialOverride')}</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.presidentialOverride')}</span>
             <span className="text-[9px] text-amber-300" style={{ opacity: 0.7 }}>{t('operationBriefing.costCa', { cost: caCost })}</span>
         </div>
     );
@@ -99,7 +99,7 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                     <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.presidentialDecision')}</span>
                     {outcomeCategory === 'direct_intervention' ? (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
-                            ⚠ {t('operationBriefing.directIntervention')}
+                            {t('operationBriefing.directIntervention')}
                         </span>
                     ) : outcomeCategory === 'reluctant_compliance' ? (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
@@ -348,7 +348,7 @@ function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corps
                 {/* Compound-risk notice — silence = healthy (no notice at strain 0). */}
                 {corpsStrain > 0 && (
                     <p className="text-[10px] text-amber-100 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-950/40 py-1">
-                        ⚠ {t('operationBriefing.compoundRisk', { strain: t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained') })}
+                        {t('operationBriefing.compoundRisk', { strain: t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained') })}
                     </p>
                 )}
                 <p className="text-[10px] text-amber-100 leading-relaxed">{explanation}</p>

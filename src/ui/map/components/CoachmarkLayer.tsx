@@ -10,7 +10,6 @@ export type CoachmarkId =
 
 export interface CoachmarkDef {
   id: CoachmarkId;
-  target: string;
   title: string;
   body: string;
   titleKey: MessageKey;
@@ -20,7 +19,6 @@ export interface CoachmarkDef {
 export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
   {
     id: 'decision-room',
-    target: '[data-coachmark-id="decision-room"]',
     title: 'Decision Room',
     body: 'Review pending decisions and source handoffs before you advance the week.',
     titleKey: 'coachmark.decisionRoom.title',
@@ -28,7 +26,6 @@ export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
   },
   {
     id: 'operation-opportunity',
-    target: '[data-coachmark-id="operation-opportunity"]',
     title: 'Operation Opportunity',
     body: 'Authorize, redirect, delay, or decline staff-proposed operations from their dossier.',
     titleKey: 'coachmark.operationOpportunity.title',
@@ -36,7 +33,6 @@ export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
   },
   {
     id: 'chronicle-filter',
-    target: '[data-coachmark-id="chronicle-filter"]',
     title: 'Chronicle Filters',
     body: 'Filter the campaign record when you need to reconstruct why the front changed.',
     titleKey: 'coachmark.chronicleFilter.title',
@@ -44,7 +40,6 @@ export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
   },
   {
     id: 'codex',
-    target: '[data-coachmark-id="codex"]',
     title: 'Codex',
     body: 'Open historical context and reference essays without leaving the tactical map.',
     titleKey: 'coachmark.codex.title',

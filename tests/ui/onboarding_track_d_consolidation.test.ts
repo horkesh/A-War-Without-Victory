@@ -85,7 +85,7 @@ describe('Track D onboarding consolidation', () => {
     ]);
 
     for (const coachmark of COACHMARKS) {
-      expect(coachmark.target).toBe(`[data-coachmark-id="${coachmark.id}"]`);
+      expect(Object.prototype.hasOwnProperty.call(coachmark, 'target')).toBe(false);
       expect(coachmark.title.length).toBeGreaterThan(0);
       expect(coachmark.body.length).toBeGreaterThan(0);
       expect(getCoachmarkStorageKey(coachmark.id)).toBe(`awwv.coachmark.${coachmark.id}.seen`);
