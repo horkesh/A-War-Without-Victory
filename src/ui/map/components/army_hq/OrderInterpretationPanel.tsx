@@ -79,7 +79,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
         <div className="space-y-2">
             {/* Section header */}
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary/60">
-                ORDER INTERPRETATIONS // {events.length} PENDING
+                ORDER INTERPRETATIONS - {events.length} PENDING
             </div>
 
             {events.map((event) => {

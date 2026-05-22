@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(gui): clean source-level polish residue
+
+**Type:** Tactical-map / Army HQ source-level UI polish cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H identified several low-risk source polish defects: dead coachmark selector fields, dev-style separators, raw warning glyphs, duplicated force-launch command-authority constants, and unconditional OpsMap console logging.
+
+**Change:** Removed the unused `target` field from coachmark definitions; updated the onboarding consolidation test to assert the live `data-coachmark-id` contract; replaced the order-interpretation header separator; removed raw warning glyphs from OperationBriefingModal Direct Intervention labels; added shared `src/ui/map/utils/commandAuthority.ts` constants for force-launch cost and recovery; imported those constants from both operation decision surfaces; and routed OpsMap diagnostics through disabled `debugOpsMap(...)` instead of unconditional `console.log`. Added `tests/ui/gui_audit_polish_cleanup.test.ts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` failed before the patch because the shared command-authority module did not exist. After the patch, `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts --reporter=dot` passed 5/5. Focused surrounding suite `npx.cmd vitest run tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\coachmark_layer.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\command_authority_lifecycle.test.ts tests\command_authority_interpretation_review.test.ts tests\modal_migration_2.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` passed 136/136. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed. The desktop build kept the repository's existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/CoachmarkLayer.tsx`; `src/ui/map/components/OperationBriefingModal.tsx`; `src/ui/map/components/army_hq/OperationsSection.tsx`; `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`; `src/ui/map/components/plan_ui/OpsMapRenderer.ts`; `src/ui/map/utils/commandAuthority.ts`; `tests/ui/gui_audit_polish_cleanup.test.ts`; `tests/ui/onboarding_track_d_consolidation.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md`.
+
+**Roadmap delta:** Closes Batch H1 source-polish cleanup. Remaining GUI audit Batch H queue: map-mode docs/keyboard contract, Command Briefing banner contrast/placement, OpsPlanningModal draft-discard confirmation, Warroom calendar date/font polish, supply legend overlap, desk-map projection polish, commander empty-state verification, ops axis counter cleanup, and retired-chrome deletion review.
+
+---
+
 ## [2026-05-22] fix(gui): surface dead-control feedback
 
 **Type:** Tactical-map / Army HQ UI correctness fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

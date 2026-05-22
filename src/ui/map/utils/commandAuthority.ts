@@ -1,0 +1,2 @@
+export const FORCE_LAUNCH_COST = 15;
+export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;
