@@ -3,6 +3,18 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] autonomous arc/ops/calibration push — branch `feature/arc-operations-calibration`
+
+**Type:** 17-commit autonomous run on a dedicated branch. Touches engine (`apply_effects.ts`, `political_directive_producer.ts`, `local_truces.ts`, `operation_aar.ts`, `washington_agreement.ts`, `heavy_equipment.ts`, `exhaustion.ts`, `combat_math.ts`, `bilateral_ceasefire.ts`, `war_phases.ts`, `early_war_phases.ts`), 4 catalog files (sana_95, mistral_2_95, vlasic_ridge_95, kupres_cincar), data (OOB officer + arbih_7th_corps removal, csq_separate_track_recovery turn cap), and tests.
+
+**Why:** User-initiated autonomous mandate ("do not stop until we have a game engine that works as intended and produces reliable sim results"). Forensics from n1954 showed ARBiH 0 ops, suspicious VRS brigade destructions, 70k ARBiH casualties, war_exhaustion saturating identical for all factions, war_alliance stuck at 0.10 post-WA.
+
+**Change:** Five fix waves. Wave 1 rescaled war_exhaustion 100× and floored VRS operational_heavy at 30 %. Wave 2 replaced inline faction filters with canonical `selectBotBrigadeOrderFactions` helper restoring commander_state for all 7 ARBiH corps. Wave 3 hoisted paper-flip provenance check, demoted paper-flip ops to 'failure', pushed alliance_lock floor=0.80 on WA fire, evicted contradictory ceilings, lowered defender-weakness floors for 3 ARBiH catalog ops, removed arbih_7th_corps, fixed Čuškić → Čuskić. Wave 4 lifted the previously-dead `B1_HIGH_EXHAUSTION_THRESHOLD` 500 → 12000 (Wave 1A had inadvertently activated it) and added Op Jackal's `hvo_southeast_herzegovina` to `GRAZ_EXEMPT_HRHB_CORPS`. Wave 5 swapped `applyAllianceChange` clamp order so floor wins when locks contradict, and capped csq_separate_track_recovery to turn_max=84.
+
+**Verification:** Cumulative 188-week scenario runs. n1961 (14 commits) → n1963 (Wave 4 added) → n1964 (Wave 5 added): OSID match 84.13 % → 85.96 % → **86.66 %** (+2.53 pp); anchors 22/27 → 22/27 → **23/27** (Zvornik recovered); faction count Σ\|Δ\| 130 → 102 → **92** (29 % closer to painted). Op Jackal: was `political_blocked` 0 attacks; now 5-star Brilliant Victory, 2/2 captures, 829 KIA inflicted. war_alliance at w188: 0.10 → 0.55 → **1.00**. Paper-flip detection: 0 → 5/run. `npx tsc --noEmit` clean across all commits. Targeted vitest suites green (b1_political_directive_producer 86/86, local_truces 86/86, consequence_consumers 22/22 with new regression). Closeout memo at `docs/40_reports/audits/20260522_AUTONOMOUS_ARC_RUN_CLOSEOUT.md`. Per-wave forensics in `docs/40_reports/audits/20260522_*` (8 memos).
+
+**Known follow-ups:** Wave 4A is faction-symmetric; Wave 1A.1 (per-faction exhaustion discriminator) remains the load-bearing fix. HRHB catalog has 3 ops vs ARBiH 5C alone 7 — authoring more HRHB ops requires historian validation. Four persistent anchor failures (vozuca_2, boljanic_2, petrovo_2, brijesnica_donja_2) may need anchor-set rebasing. Federation-ops gate uses floor-lock presence, not scalar alliance — separate downstream investigation.
+
 ## [2026-05-22] fix(operations): prevent idle objective skips
 
 **Type:** Sector-operation lifecycle behavior + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, operation catalog data, or scenario data changed.
