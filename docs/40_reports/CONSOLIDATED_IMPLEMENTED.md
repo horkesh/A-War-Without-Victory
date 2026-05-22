@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest strict-null Phase 3ABC audit harness tail:** [implemented/20260522_STRICT_NULL_PHASE3ABC_AUDIT_HARNESS_TAIL.md](implemented/20260522_STRICT_NULL_PHASE3ABC_AUDIT_HARNESS_TAIL.md) - `src/cli/phase3abc_audit_harness.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 31` with `as_unknown` and non-null assertion categories at zero.
+
 **Latest strict-null Phase 3A A/B harness tail:** [implemented/20260522_STRICT_NULL_PHASE3A_AB_HARNESS_TAIL.md](implemented/20260522_STRICT_NULL_PHASE3A_AB_HARNESS_TAIL.md) - `src/cli/phase3a_ab_harness.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 64` with `as_unknown` and non-null assertion categories at zero.
 
 **Latest strict-null sim scenario CLI tail:** [implemented/20260522_STRICT_NULL_SIM_SCENARIO_CLI_TAIL.md](implemented/20260522_STRICT_NULL_SIM_SCENARIO_CLI_TAIL.md) - `src/cli/sim_scenario.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 95` with `as_unknown` and non-null assertion categories at zero.

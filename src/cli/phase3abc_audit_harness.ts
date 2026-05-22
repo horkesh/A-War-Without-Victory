@@ -36,6 +36,7 @@ import {
     PHASE3A_PARAMS,
     resetEnablePhase3A,
     setEnablePhase3A,
+    type EffectivePressureEdge,
     type Phase3AAuditSummary
 } from '../sim/pressure/phase3a_pressure_eligibility.js';
 import {
@@ -48,14 +49,17 @@ import {
     resetEnablePhase3C,
     setEnablePhase3C
 } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { runTurn, type TurnReport } from '../sim/turn_pipeline.js';
 import type { GameState } from '../state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
+import type { EdgeRecord } from '../map/settlements.js';
 
 const TURNS = 40;
 const REPORT_DIR = resolve('data/derived/_debug');
 const EPS = 1e-6;
 const SEED_TOTAL_PRESSURE = 100;
+const HARNESS_FACTION_A = 'RBiH';
+const HARNESS_FACTION_B = 'RS';
 
 function canonicalEdgeId(a: string, b: string): string {
     return a < b ? `${a}__${b}` : `${b}__${a}`;
@@ -79,7 +83,7 @@ interface SeedEdgeAttribution {
 }
 
 interface BfsSeedContext {
-    seed_method: 'bfs_connected_nodes_v1' | 'weaklink_two_cluster_v1';
+    seed_method: 'bfs_connected_nodes_v1' | 'bottleneck_two_cluster_v1' | 'weaklink_two_cluster_v1';
     N: number;
     start_sid: string;
     roots: string[];
@@ -106,7 +110,7 @@ function computeEdgePressureSumAbs(state: GameState): number {
     const keys = Object.keys(fp).sort((a, b) => a.localeCompare(b));
     let sum = 0;
     for (const k of keys) {
-        const rec = (fp as any)[k];
+        const rec = fp[k];
         if (rec && typeof rec === 'object' && typeof rec.value === 'number') {
             sum += Math.abs(rec.value);
         }
@@ -120,7 +124,7 @@ function computeNonZeroEdges(state: GameState): number {
     const keys = Object.keys(fp).sort((a, b) => a.localeCompare(b));
     let c = 0;
     for (const k of keys) {
-        const rec = (fp as any)[k];
+        const rec = fp[k];
         if (rec && typeof rec === 'object' && typeof rec.value === 'number') {
             if (Math.abs(rec.value) > 0) c += 1;
         }
@@ -133,7 +137,7 @@ function computeTop1AndTop5Share(state: GameState): { top1: number; top5Share: n
     if (!fp || typeof fp !== 'object') return { top1: 0, top5Share: 0 };
     const vals: number[] = [];
     for (const k of Object.keys(fp)) {
-        const rec = (fp as any)[k];
+        const rec = fp[k];
         if (rec && typeof rec === 'object' && typeof rec.value === 'number') {
             vals.push(Math.abs(rec.value));
         }
@@ -148,13 +152,13 @@ function computeTop1AndTop5Share(state: GameState): { top1: number; top5Share: n
 
 function computeDiffAppliedFlagAndInvariant(
     state: GameState,
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number }>,
+    effectiveEdges: EffectivePressureEdge[],
     iterations: number
 ): { applied: boolean; stats?: Phase3ADiffusionResult['stats']; sum_before: number; sum_after: number } {
     const before = computeEdgePressureSumAbs(state);
     let last: Phase3ADiffusionResult | null = null;
     for (let k = 0; k < iterations; k++) {
-        last = runPhase3APressureDiffusionWithResult(state, effectiveEdges as any, { strict_namespace: true });
+        last = runPhase3APressureDiffusionWithResult(state, effectiveEdges, { strict_namespace: true });
     }
     const after = computeEdgePressureSumAbs(state);
     if (Math.abs(after - before) > EPS) {
@@ -164,7 +168,7 @@ function computeDiffAppliedFlagAndInvariant(
 }
 
 function buildBfsSeedContextFromEffectiveEdges(
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number }>,
+    effectiveEdges: EffectivePressureEdge[],
     N: number
 ): BfsSeedContext {
     const eligible = effectiveEdges
@@ -308,13 +312,13 @@ function typePriority(t: string): number {
 }
 
 function buildWeaklinkTwoClusterSeedContext(
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number; type?: string }>,
+    effectiveEdges: EffectivePressureEdge[],
     NA: number,
     NB: number
 ): BfsSeedContext {
     const candidates = effectiveEdges
         .filter((e) => e && e.eligible && typeof e.w === 'number' && e.w > 0 && typeof e.a === 'string' && typeof e.b === 'string' && e.a !== e.b)
-        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: (e as any).type ?? 'unknown' }));
+        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: e.type ?? 'unknown' }));
     if (candidates.length === 0) throw new Error('phase3abc weaklink seed: no eligible edges with w>0 found');
 
     const sorted = [...candidates].sort((e1, e2) => {
@@ -344,7 +348,7 @@ function buildWeaklinkTwoClusterSeedContext(
 }
 
 function buildTwoClusterSeedFromLink(
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number; type?: string }>,
+    effectiveEdges: EffectivePressureEdge[],
     u: string,
     v: string,
     NA: number,
@@ -352,7 +356,7 @@ function buildTwoClusterSeedFromLink(
 ): BfsSeedContext {
     const eligible = effectiveEdges
         .filter((e) => e && e.eligible && typeof e.a === 'string' && typeof e.b === 'string' && e.a !== e.b)
-        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: (e as any).type ?? 'unknown' }));
+        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: e.type ?? 'unknown' }));
     if (eligible.length === 0) throw new Error('phase3abc two-cluster seed: no eligible effective edges found');
 
     const adj = new Map<string, Set<string>>();
@@ -529,7 +533,7 @@ function buildTwoClusterSeedFromLink(
     }
 
     return {
-        seed_method: 'bottleneck_two_cluster_v1' as any, // overwritten by caller for weaklink; kept for structure compatibility
+        seed_method: 'bottleneck_two_cluster_v1',
         N: NA + NB,
         start_sid: nodes_sorted[0]!,
         roots: [u, v],
@@ -549,10 +553,10 @@ function buildTwoClusterSeedFromLink(
 }
 
 function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): void {
-    let factionA = state.factions.find((f) => f.id === 'FACTION_A');
+    let factionA = state.factions.find((f) => f.id === HARNESS_FACTION_A);
     if (!factionA) {
         factionA = {
-            id: 'FACTION_A',
+            id: HARNESS_FACTION_A,
             profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
             areasOfResponsibility: [],
             supply_sources: [],
@@ -560,10 +564,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
         };
         state.factions.push(factionA);
     }
-    let factionB = state.factions.find((f) => f.id === 'FACTION_B');
+    let factionB = state.factions.find((f) => f.id === HARNESS_FACTION_B);
     if (!factionB) {
         factionB = {
-            id: 'FACTION_B',
+            id: HARNESS_FACTION_B,
             profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
             areasOfResponsibility: [],
             supply_sources: [],
@@ -607,7 +611,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     if (total !== SEED_TOTAL_PRESSURE) throw new Error(`phase3abc seed: expected total ${SEED_TOTAL_PRESSURE}, got ${total}`);
 
     for (const eid of seed.tree_edge_ids) {
-        (state.military.front_segments as any)[eid] = {
+        state.military.front_segments[eid] = {
             edge_id: eid,
             active: true,
             created_turn: 0,
@@ -619,7 +623,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
             max_friction: 0
         };
         const v = edgeValue[eid] ?? 0;
-        (state.military.front_pressure as any)[eid] = {
+        state.military.front_pressure[eid] = {
             edge_id: eid,
             value: v,
             max_abs: v,
@@ -629,8 +633,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
 
     if (seed.seed_method === 'weaklink_two_cluster_v1' && seed.weaklink_edge) {
         const eid = canonicalEdgeId(seed.weaklink_edge.a, seed.weaklink_edge.b);
-        if (!((state.military.front_segments as any)[eid])) {
-            (state.military.front_segments as any)[eid] = {
+        if (!state.military.front_segments[eid]) {
+            state.military.front_segments[eid] = {
                 edge_id: eid,
                 active: true,
                 created_turn: 0,
@@ -642,10 +646,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
                 max_friction: 0
             };
         } else {
-            (state.military.front_segments as any)[eid].active = true;
+            state.military.front_segments[eid].active = true;
         }
-        if (!((state.military.front_pressure as any)[eid])) {
-            (state.military.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
+        if (!state.military.front_pressure[eid]) {
+            state.military.front_pressure[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
         }
     }
 }
@@ -654,24 +658,24 @@ type ScenarioId = 'A' | 'B' | 'C' | 'D';
 type ScenarioSpec = { id: ScenarioId; name: string; filename: string; build: (ctx: ScenarioBuildContext) => Promise<ScenarioBuilt> };
 type ScenarioBuilt = { initialState: GameState; seed: BfsSeedContext; postureProgram?: (state: GameState, turn: number, seed: BfsSeedContext) => void };
 type ScenarioBuildContext = {
-    enrichedEdges: Array<{ a: string; b: string }>;
-    effectiveEdgesForSeed: Array<{ a: string; b: string; eligible: boolean; w: number; type?: string }>;
+    enrichedEdges: EdgeRecord[];
+    effectiveEdgesForSeed: EffectivePressureEdge[];
 };
 
 function createBaseState(seedName: string): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: seedName },
+  meta: { turn: 0, seed: seedName, phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: HARNESS_FACTION_A,
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: [],
                 supply_sources: [],
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             },
             {
-                id: 'FACTION_B',
+                id: HARNESS_FACTION_B,
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: [],
                 supply_sources: [],
@@ -685,34 +689,34 @@ function createBaseState(seedName: string): GameState {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
-  } as any,
+  },
   displacement: {
     displacement_state: {}
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
 function setAllSeedEdgesPosture(
     state: GameState,
     seed: BfsSeedContext,
-    factionId: 'FACTION_A' | 'FACTION_B',
+    factionId: typeof HARNESS_FACTION_A | typeof HARNESS_FACTION_B,
     posture: 'hold' | 'probe' | 'push',
     weight: number
 ): void {
     if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
-    if (!(state.military.front_posture as any)[factionId]) (state.military.front_posture as any)[factionId] = { assignments: {} };
-    if (!((state.military.front_posture as any)[factionId].assignments)) (state.military.front_posture as any)[factionId].assignments = {};
-    const assignments = (state.military.front_posture as any)[factionId].assignments as Record<string, { posture: string; weight: number }>;
+    if (!state.military.front_posture[factionId]) state.military.front_posture[factionId] = { assignments: {} };
+    if (!state.military.front_posture[factionId].assignments) state.military.front_posture[factionId].assignments = {};
+    const assignments = state.military.front_posture[factionId].assignments;
 
     const edgeIds = [...seed.tree_edge_ids].sort((a, b) => a.localeCompare(b));
     for (const eid of edgeIds) {
-        assignments[eid] = { posture, weight };
+        assignments[eid] = { edge_id: eid, posture, weight };
     }
     // Include weaklink connector if present (even if it was zero-valued initially).
     if (seed.seed_method === 'weaklink_two_cluster_v1' && seed.weaklink_edge) {
         const eid = canonicalEdgeId(seed.weaklink_edge.a, seed.weaklink_edge.b);
-        assignments[eid] = { posture, weight };
+        assignments[eid] = { edge_id: eid, posture, weight };
     }
 }
 
@@ -727,8 +731,8 @@ const SCENARIOS: ScenarioSpec[] = [
             applySeedIntoFrontPressure(state, seed);
 
             // Supply present for both sides (avoid supply penalties); no posture intent => static pressure except diffusion.
-            const a = state.factions.find((f) => f.id === 'FACTION_A')!;
-            const b = state.factions.find((f) => f.id === 'FACTION_B')!;
+            const a = state.factions.find((f) => f.id === HARNESS_FACTION_A)!;
+            const b = state.factions.find((f) => f.id === HARNESS_FACTION_B)!;
             const aSrc = [...a.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             const bSrc = [...b.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             a.supply_sources = aSrc ? [aSrc] : [];
@@ -746,15 +750,15 @@ const SCENARIOS: ScenarioSpec[] = [
             const state = createBaseState('phase3abc-B-static-brittle-supply');
             applySeedIntoFrontPressure(state, seed);
 
-            // Brittle supply: FACTION_A unsupplied and pushing; FACTION_B supplied and holding.
-            const a = state.factions.find((f) => f.id === 'FACTION_A')!;
-            const b = state.factions.find((f) => f.id === 'FACTION_B')!;
+            // Brittle supply: harness faction A unsupplied and pushing; harness faction B supplied and holding.
+            const a = state.factions.find((f) => f.id === HARNESS_FACTION_A)!;
+            const b = state.factions.find((f) => f.id === HARNESS_FACTION_B)!;
             a.supply_sources = [];
             const bSrc = [...b.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             b.supply_sources = bSrc ? [bSrc] : [];
 
-            setAllSeedEdgesPosture(state, seed, 'FACTION_A', 'push', 1);
-            setAllSeedEdgesPosture(state, seed, 'FACTION_B', 'hold', 0);
+            setAllSeedEdgesPosture(state, seed, HARNESS_FACTION_A, 'push', 1);
+            setAllSeedEdgesPosture(state, seed, HARNESS_FACTION_B, 'hold', 0);
             return { initialState: state, seed };
         }
     },
@@ -768,8 +772,8 @@ const SCENARIOS: ScenarioSpec[] = [
             applySeedIntoFrontPressure(state, seed);
 
             // No additional pressure generation; diffusion should gradually leak across weaklink (if nonzero after rounding).
-            const a = state.factions.find((f) => f.id === 'FACTION_A')!;
-            const b = state.factions.find((f) => f.id === 'FACTION_B')!;
+            const a = state.factions.find((f) => f.id === HARNESS_FACTION_A)!;
+            const b = state.factions.find((f) => f.id === HARNESS_FACTION_B)!;
             const aSrc = [...a.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             const bSrc = [...b.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             a.supply_sources = aSrc ? [aSrc] : [];
@@ -786,9 +790,9 @@ const SCENARIOS: ScenarioSpec[] = [
             const state = createBaseState('phase3abc-D-spike-then-relief');
             applySeedIntoFrontPressure(state, seed);
 
-            // Both sides supplied. FACTION_A pushes for first 10 turns, then holds (relief).
-            const a = state.factions.find((f) => f.id === 'FACTION_A')!;
-            const b = state.factions.find((f) => f.id === 'FACTION_B')!;
+            // Both sides supplied. Harness faction A pushes for first 10 turns, then holds (relief).
+            const a = state.factions.find((f) => f.id === HARNESS_FACTION_A)!;
+            const b = state.factions.find((f) => f.id === HARNESS_FACTION_B)!;
             const aSrc = [...a.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             const bSrc = [...b.areasOfResponsibility].sort((x, y) => x.localeCompare(y))[0];
             a.supply_sources = aSrc ? [aSrc] : [];
@@ -796,11 +800,11 @@ const SCENARIOS: ScenarioSpec[] = [
 
             const postureProgram = (s: GameState, turn: number, sd: BfsSeedContext) => {
                 if (turn <= 10) {
-                    setAllSeedEdgesPosture(s, sd, 'FACTION_A', 'push', 1);
-                    setAllSeedEdgesPosture(s, sd, 'FACTION_B', 'hold', 0);
+                    setAllSeedEdgesPosture(s, sd, HARNESS_FACTION_A, 'push', 1);
+                    setAllSeedEdgesPosture(s, sd, HARNESS_FACTION_B, 'hold', 0);
                 } else {
-                    setAllSeedEdgesPosture(s, sd, 'FACTION_A', 'hold', 0);
-                    setAllSeedEdgesPosture(s, sd, 'FACTION_B', 'hold', 0);
+                    setAllSeedEdgesPosture(s, sd, HARNESS_FACTION_A, 'hold', 0);
+                    setAllSeedEdgesPosture(s, sd, HARNESS_FACTION_B, 'hold', 0);
                 }
             };
 
@@ -937,7 +941,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
 
     try {
         const enriched = await loadEnrichedContactGraph();
-        const edges = enriched.edges
+        const edges: EdgeRecord[] = enriched.edges
             .map((e) => ({ a: e.a, b: e.b }))
             .sort((x, y) => (x.a !== y.a ? x.a.localeCompare(y.a) : x.b.localeCompare(y.b)));
 
@@ -946,7 +950,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
         const accessors0 = buildStateAccessors(stubState);
         const eff0 = buildPressureEligibilityPhase3A(enriched, stubState, accessors0, true);
 
-        const built = await s.build({ enrichedEdges: edges, effectiveEdgesForSeed: eff0.edgesEffective as any });
+        const built = await s.build({ enrichedEdges: edges, effectiveEdgesForSeed: eff0.edgesEffective });
         let state = JSON.parse(JSON.stringify(built.initialState)) as GameState;
 
         const lines: string[] = [];
@@ -1137,10 +1141,11 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
                 exhaustionPrev.set(f.id, ex);
             }
         }
+        const phase3dPrevDamage: Record<string, { authority: number; cohesion: number; spatial: number }> = {};
 
         // Harness-only seed: set minimal Phase 3D damage for a single deterministic SID.
         if (seedPhase3DDamage) {
-            const sids = ((built as any).seed?.nodes_sorted ?? []).slice().sort((a: string, b: string) => a.localeCompare(b));
+            const sids = built.seed.nodes_sorted.slice().sort((a, b) => a.localeCompare(b));
             const sid0 = sids.length > 0 ? sids[0] : null;
             if (sid0) {
                 if (!state.political.collapse_damage) state.political.collapse_damage = { by_entity: {} };
@@ -1152,9 +1157,9 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
         for (let t = 1; t <= TURNS; t++) {
             built.postureProgram?.(state, t, built.seed);
 
-            const { nextState, report } = await runTurn(state, {
+            const { nextState, report }: { nextState: GameState; report: TurnReport } = await runTurn(state, {
                 seed: state.meta.seed,
-                settlementEdges: edges as any,
+                settlementEdges: edges,
                 applyNegotiation: false
             });
             state = nextState;
@@ -1166,7 +1171,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
 
             // Apply diffusion explicitly and enforce pressure conservation.
             const iters = built.seed.seed_method === 'weaklink_two_cluster_v1' ? 5 : 1;
-            const diffusion = computeDiffAppliedFlagAndInvariant(state, eff.edgesEffective as any, iters);
+            const diffusion = computeDiffAppliedFlagAndInvariant(state, eff.edgesEffective, iters);
 
             const pressureSum = computeEdgePressureSumAbs(state);
             const nonZeroEdges = computeNonZeroEdges(state);
@@ -1178,7 +1183,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
             let edgesGeneratingExhaustionCount = 0;
             if (phase3bEnabled) {
                 // Use Phase 3B report if available, otherwise fall back to exhaustion report
-                const phase3bReport = (report as any).phase3b_pressure_exhaustion;
+                const phase3bReport = report.phase3b_pressure_exhaustion;
                 if (phase3bReport && phase3bReport.stats) {
                     // Extract from Phase 3B report
                     const stats = phase3bReport.stats;
@@ -1218,7 +1223,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
             let phase3cStats: { eligible_authority: number; eligible_cohesion: number; eligible_spatial: number; newly_eligible_authority: number; newly_eligible_cohesion: number; newly_eligible_spatial: number; suppressed_count: number; immune_count: number } | undefined;
             let phase3cTier1Stats: { entities_evaluated: number; eligible_authority: number; eligible_cohesion: number; eligible_spatial: number; newly_eligible_authority: number; newly_eligible_cohesion: number; newly_eligible_spatial: number; suppressed_count: number; immune_count: number; max_exposure?: number; max_persistence_authority?: number; max_persistence_cohesion?: number; max_persistence_spatial?: number } | undefined;
             if (phase3cEnabled) {
-                const phase3cReport = (report as any).phase3c_exhaustion_collapse_gating;
+                const phase3cReport = report.phase3c_exhaustion_collapse_gating;
                 if (phase3cReport && phase3cReport.stats) {
                     phase3cStats = phase3cReport.stats;
                     phase3cTier1Stats = phase3cReport.stats.tier1;
@@ -1264,21 +1269,15 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
             let phase3dStats: { entities_evaluated: number; collapses_applied_count: number; collapses_max_severity: number; damage_sum_by_domain: { authority: number; cohesion: number; spatial: number } } | undefined;
             let phase3dMinPressureCapMult = 1.0;
             if (phase3dEnabled) {
-                const phase3dReport = (report as any).phase3d_collapse_resolution;
+                const phase3dReport = report.phase3d_collapse_resolution;
                 if (phase3dReport && phase3dReport.stats) {
                     phase3dStats = phase3dReport.stats;
 
                     // Invariant: collapse_damage monotonic per SID per domain
                     // Check that damage never decreases (enforced when Phase 3D is enabled)
                     if (state.political.collapse_damage?.by_entity) {
-                        // Track previous damage state (initialize on first turn)
-                        if (!(state as any)._phase3d_prev_damage) {
-                            (state as any)._phase3d_prev_damage = {};
-                        }
-                        const prevDamage = (state as any)._phase3d_prev_damage;
-
                         for (const [entityId, damage] of Object.entries(state.political.collapse_damage.by_entity)) {
-                            const prev = prevDamage[entityId] ?? { authority: 0, cohesion: 0, spatial: 0 };
+                            const prev = phase3dPrevDamage[entityId] ?? { authority: 0, cohesion: 0, spatial: 0 };
                             const cur = damage as { authority: number; cohesion: number; spatial: number };
 
                             if (cur.authority < prev.authority - EPS ||
@@ -1287,7 +1286,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
                                 throw new Error(`Invariant fail: Collapse damage decreased for ${entityId} (prev=${JSON.stringify(prev)} cur=${JSON.stringify(cur)})`);
                             }
 
-                            prevDamage[entityId] = { ...cur };
+                            phase3dPrevDamage[entityId] = { ...cur };
                         }
                     }
 
@@ -1319,7 +1318,7 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
                 if (damaged && typeof damaged === 'object') {
                     let found = false;
                     for (const sid of Object.keys(damaged).sort((a, b) => a.localeCompare(b))) {
-                        const d = (damaged as any)[sid];
+                        const d = damaged[sid];
                         const anyDamage =
                             (Number.isFinite(d?.authority) && d.authority > 0) ||
                             (Number.isFinite(d?.cohesion) && d.cohesion > 0) ||
