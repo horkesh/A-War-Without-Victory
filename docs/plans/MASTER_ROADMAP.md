@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**GUI visual audit Army HQ commander empty-state H8 addendum 2026-05-22:** Eighth Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent, while preserving sidecar state filtering when present. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md`. Remaining GUI audit work stays in Batch H: retired-chrome deletion review. On top of:
+
 **GUI visual audit Warroom desk map H7 addendum 2026-05-22:** Seventh Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md`. Remaining GUI audit work stays in Batch H: commander empty-state verification and retired-chrome deletion review. On top of:
 
 **GUI visual audit supply legend overlap H6 addendum 2026-05-22:** Sixth Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. Supply mode overlays now anchor outside the left OOB sidebar column so they do not cover Situation/Alliance content. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md`. Remaining GUI audit work stays in Batch H: desk-map projection polish, commander empty-state verification, and retired-chrome deletion review. On top of:

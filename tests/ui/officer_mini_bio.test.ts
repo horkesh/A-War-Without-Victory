@@ -72,6 +72,14 @@ function makeLoadedState(officer: NamedOfficerView): LoadedGameState {
     } as LoadedGameState;
 }
 
+function makeLoadedStateWithoutOfficerState(officer: NamedOfficerView): LoadedGameState {
+    const state = makeLoadedState(officer);
+    return {
+        ...state,
+        namedOfficerStateById: undefined,
+    } as LoadedGameState;
+}
+
 describe('officer mini-bio UI', () => {
     beforeEach(() => {
         useGameStore.setState({
@@ -110,6 +118,19 @@ describe('officer mini-bio UI', () => {
         render(createElement(ArmyHQModal));
 
         expect(screen.getByText('Service record pending staff review.')).toBeTruthy();
+    });
+
+    it('uses flattened active officer data when the sidecar officer state map is absent', () => {
+        useGameStore.setState({
+            loadedGameState: makeLoadedStateWithoutOfficerState(makeOfficer({
+                bio_short: 'Flattened officer record is sufficient for Army HQ identity.',
+            })),
+        });
+
+        render(createElement(ArmyHQModal));
+
+        expect(screen.getByText('Flattened officer record is sufficient for Army HQ identity.')).toBeTruthy();
+        expect(screen.queryByText('No commander data available')).toBeNull();
     });
 
     it('wires OOB commander rows to the same authored mini-bio fields', () => {

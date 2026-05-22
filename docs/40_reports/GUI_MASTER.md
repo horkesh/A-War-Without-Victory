@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit Warroom desk map H7)
+**Updated:** 2026-05-22 (GUI visual audit Army HQ commander empty-state H8)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit Army HQ commander empty-state H8** | [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) - eighth Batch H slice from the 2026-05-22 GUI visual audit: Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent. |
 | **GUI visual audit Warroom desk map H7** | [implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md](implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md) - seventh Batch H slice from the 2026-05-22 GUI visual audit: the Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. |
 | **GUI visual audit supply legend overlap H6** | [implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md](implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md) - sixth Batch H slice from the 2026-05-22 GUI visual audit: Supply mode overlays now anchor outside the left OOB sidebar column so they do not cover Situation/Alliance content. |
 | **GUI visual audit Command Briefing banner H5** | [implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md](implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md) - fifth Batch H slice from the 2026-05-22 GUI visual audit: the COMMAND BRIEFING banner now anchors away from the top-center counter field and uses opaque, high-contrast backing/text. |
@@ -111,6 +112,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit Army HQ commander empty-state H8** - Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent. | [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) |
 | 2026-05-22 | **GUI visual audit Warroom desk map H7** - Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. | [implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md](implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md) |
 | 2026-05-22 | **GUI visual audit supply legend overlap H6** - Supply mode overlays now anchor outside the left OOB sidebar column so they do not cover Situation/Alliance content. | [implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md](implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md) |
 | 2026-05-22 | **GUI visual audit Command Briefing banner H5** - COMMAND BRIEFING now anchors away from the top-center counter field and uses opaque, high-contrast backing/text. | [implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md](implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md) |
