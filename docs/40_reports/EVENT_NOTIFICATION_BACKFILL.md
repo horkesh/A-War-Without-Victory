@@ -28,6 +28,8 @@
 | `war_1993.json` | `visit_to_front_rbih` | RBiH | 8/10 | Safe front-visit slice complete for `visit_eastern_front` and `stay_capital_rbih`; narrative-tone slice complete for `visit_bihac` and `visit_press_rbih`; Sarajevo option remains historian-gated. |
 | `war_1993.json` | `visit_to_front_rs` | RS | 4/10 | Safe front-visit slice complete for `visit_posavina` and `stay_pale_rs`; Sarajevo/Drina/press options remain gated. |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 8/10 | Safe front-visit slice complete for `visit_posavina_hrhb` and `stay_mostar_hrhb`; narrative-tone slice complete for `visit_mostar_front` and `visit_central_bosnia`; press option remains blocked-sensitive. |
+| `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 4/4 | Historian-cleared NATO/Sarajevo slice complete from the authored Markale ultimatum row and BB1/BB2 Sarajevo exclusion-zone chronology. |
+| `war_1995.json` | `un_hostage_crisis_1995` | RS | 4/4 | Historian-cleared UN hostage-crisis slice complete from the authored hostage row and BB1 hostage-release chronology. |
 | `war_1994.json` | `washington_agreement_1994` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the formal week-102 authored Washington Agreement event only. |
 | `war_1994.json` | `ic_rbih_restraint_post_washington` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the post-Washington military window without implying an early formal-signature event. |
 | `war_1994.json` | `contact_group_plan_1994` | RBiH | 4/4 | 1994 late-war diplomacy slice complete; copy describes the proposal and pressure without asserting final settlement outcomes. |
@@ -48,8 +50,6 @@
 | `war_1993.json` | `visit_to_front_rbih` | RBiH | 8/10 |
 | `war_1993.json` | `visit_to_front_rs` | RS | 4/10 |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 8/10 |
-| `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 0/4 |
-| `war_1995.json` | `un_hostage_crisis_1995` | RS | 0/4 |
 
 ## Batch 9 Residual Gate Audit
 
@@ -60,11 +60,11 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
-| Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
+| Historian-required | 4 | 20 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93` |
 | Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
 | Front-visit mixed-sensitive | 3 | 10 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 9 event rows and 38 recipient blocks after the 2026-05-22 front-visit narrative-tone slice. The prior 1995 late-war outcome floor was 9 rows / 46 blocks.
+**Total residual:** 7 event rows and 30 recipient blocks after the 2026-05-22 NATO/UN crisis historian-cleared slice. The prior front-visit narrative-tone floor was 9 rows / 38 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
@@ -76,13 +76,13 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | `war_1993.json` | `visit_to_front_rbih` | Bihac and press narrative-tone options implemented 2026-05-22; Sarajevo front option remains historian-gated. |
 | `war_1993.json` | `visit_to_front_rs` | Front-visit text intersects Sarajevo siege lines, Drina enclaves, and international observation; recipient prose needs content review. |
 | `war_1993.json` | `visit_to_front_hrhb` | Mostar and central-Bosnia narrative-tone options implemented 2026-05-22; press option remains blocked-sensitive. |
-| `war_1994.json` | `nato_ultimatum_sarajevo_1994` | Markale/Sarajevo heavy-weapons ultimatum; siege/civilian-harm sensitivity. |
+| `war_1994.json` | `nato_ultimatum_sarajevo_1994` | Historian-cleared NATO/Sarajevo reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `washington_agreement_1994` | Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `ic_rbih_restraint_post_washington` | Post-Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `contact_group_plan_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `belgrade_embargo_rs_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `carter_ceasefire_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
-| `war_1995.json` | `un_hostage_crisis_1995` | UN hostage/human-shield crisis; sensitive-history row. |
+| `war_1995.json` | `un_hostage_crisis_1995` | Historian-cleared UN hostage-crisis reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1995.json` | `karadzic_mladic_split_1995` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1995.json` | `us_halts_federation_advance_1995` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1995.json` | `holbrooke_ceasefire_demand_oct95` | 1995 late-war outcome reconciliation implemented 2026-05-22; row is no longer residual. |

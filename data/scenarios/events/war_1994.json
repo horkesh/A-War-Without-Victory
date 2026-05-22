@@ -197,7 +197,29 @@
         ],
         "sets_flags": { "sarajevo_hwez_defied": true }
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "comply_withdraw_hwez": {
+        "RBiH": {
+          "headline": "VRS accepts Sarajevo heavy-weapons ultimatum",
+          "body": "RS agrees to pull heavy weapons back from the Sarajevo exclusion zone or place them under UN control. Sarajevo sees immediate shelling pressure ease, while the siege itself remains unresolved."
+        },
+        "HRHB": {
+          "headline": "VRS complies with NATO ultimatum",
+          "body": "RS accepts the heavy-weapons withdrawal demand around Sarajevo. Mostar sees NATO coercion work at the capital, with VRS military credibility taking a visible cost."
+        }
+      },
+      "defy_ultimatum_hwez": {
+        "RBiH": {
+          "headline": "VRS defies Sarajevo ultimatum",
+          "body": "RS keeps heavy weapons around Sarajevo despite NATO's deadline. Sarajevo faces continued siege pressure, while the risk of air strikes and wider intervention rises."
+        },
+        "HRHB": {
+          "headline": "VRS rejects NATO heavy-weapons demand",
+          "body": "RS refuses to withdraw heavy weapons from the Sarajevo exclusion zone. Mostar sees Pale preserve battlefield posture while accepting a sharper confrontation with NATO."
+        }
+      }
+    }
   },
   {
     "id": "sarajevo_exclusion_zone_1994",

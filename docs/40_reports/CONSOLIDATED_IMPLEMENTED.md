@@ -2,7 +2,9 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest event-notification residual diagnostic:** [implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md](implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md) - `tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON and a focused test pins the 9-row / 38-block residual event set.
+**Latest event-notification NATO/UN crisis slice:** [implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md](implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md) - `nato_ultimatum_sarajevo_1994` and `un_hostage_crisis_1995` now have complete non-source recipient notification coverage; Phase D residual is down to 7 rows / 30 blocks.
+
+**Latest event-notification residual diagnostic:** [implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md](implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md) - `tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON and a focused test pins the 7-row / 30-block residual event set.
 
 **Latest event-notification front-visit narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_TONE.md](implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_TONE.md) - Bihac, RBiH press, Mostar, and central-Bosnia front-visit response options now have non-source recipient notification coverage; Phase D residual is down to 9 rows / 38 blocks.
 

@@ -267,15 +267,31 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close NATO and UN crisis rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** Two residual historian-required rows had enough support from existing event text and BB chronology to author neutral observer notifications without adding new sensitive-history claims: the Sarajevo heavy-weapons ultimatum and the UN hostage crisis.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `nato_ultimatum_sarajevo_1994` and `un_hostage_crisis_1995`. The copy is limited to heavy-weapons compliance/defiance, NATO air-strike risk, hostage leverage/release, and diplomatic damage already present in the rows. BB support: BB1 pp.17, 36-37; BB2 pp.455-456.
+
+**Verification:** JSON parse for `war_1994.json` and `war_1995.json` passed. `node tools\diagnostics\event_notification_residuals.cjs` reports 7 rows / 30 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\event_notification_residuals_diagnostic.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 34/34. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`; `data/scenarios/events/war_1995.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_NATO_UN_CRISIS.md`.
+
+**Roadmap delta:** Historian-required residual drops from 6 rows / 28 blocks to 4 rows / 20 blocks. Overall Phase D notification residual drops from 9 rows / 38 blocks to 7 rows / 30 blocks.
+
+---
+
 ## [2026-05-22] diagnostic(notifications): guard residual tracker floor
 
 **Type:** Diagnostic/test tooling for event-notification content backfill. No simulation behavior, save schema, scenario mechanics, event trigger, response effect, calibration/army-arc tuning, combat math, operation behavior, notification emission behavior, or painted target changed.
 
 **Why:** The Phase D notification tracker now changes through small content slices. Without an executable residual counter, docs could drift from event JSON and reopen stale block counts.
 
-**Change:** Added `tools/diagnostics/event_notification_residuals.cjs` to compute missing non-source recipient notification blocks from `war_*.json`. Added `tests/sim/events/event_notification_residuals_diagnostic.test.ts` to pin the current 9-row / 38-block residual floor and event-id set.
+**Change:** Added `tools/diagnostics/event_notification_residuals.cjs` to compute missing non-source recipient notification blocks from `war_*.json`. Added `tests/sim/events/event_notification_residuals_diagnostic.test.ts` to pin the residual floor and event-id set. The later NATO/UN crisis slice updates that pin to 7 rows / 30 blocks.
 
-**Verification:** `node tools\diagnostics\event_notification_residuals.cjs` reports 9 rows / 38 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_residuals_diagnostic.test.ts --reporter=dot` passed 1/1.
+**Verification:** Initial diagnostic verification reported 9 rows / 38 recipient blocks and `npx.cmd vitest run tests\sim\events\event_notification_residuals_diagnostic.test.ts --reporter=dot` passed 1/1; current floor is superseded by the NATO/UN crisis slice above.
 
 **Artifacts:** `tools/diagnostics/event_notification_residuals.cjs`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md`.
 
