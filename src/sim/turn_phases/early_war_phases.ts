@@ -8,6 +8,7 @@ import { updateCapabilityProfiles } from '../../state/capability_progression.js'
 import { applyDisplacementFromFlips } from '../../state/displacement.js';
 import { GameState, type FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { selectBotBrigadeOrderFactions } from './war_phases.js';
 import { loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
 import {
@@ -205,11 +206,13 @@ export const earlyWarPhases: NamedPhase[] = [
                 : graph.edges;
             const frontEdges = computeFrontEdges(context.state, edges);
             if (frontEdges.length === 0) return;
-            const playerFaction = context.state.meta.player_faction ?? null;
-            const botFactions = (context.state.factions ?? [])
-                .map(f => f.id)
-                .filter(fid => playerFaction == null || fid !== playerFaction)
-                .sort(strictCompare);
+            // Use canonical helper so headless_scenario_auto_control is honored.
+            // Inline duplicate-filter previously missed this flag — same root cause
+            // as the war_phases.ts:1266 fix per
+            // docs/40_reports/audits/20260522_FORENSICS_COMMANDER_STATE_INIT.md
+            // §follow-up. Without this, peace-phase bot posture skipped the player
+            // faction even when the scenario explicitly requested headless auto-control.
+            const botFactions = selectBotBrigadeOrderFactions(context.state);
             runEarlyWarBotPosture(context.state, frontEdges, botFactions);
         }
     },

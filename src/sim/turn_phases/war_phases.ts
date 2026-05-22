@@ -1263,10 +1263,13 @@ export const warPhases: NamedPhase[] = [
                 const munId = rec.mun1990_id ?? rec.mun_code;
                 if (munId) sidToMun.set(sid, munId);
             }
-            const playerFaction = context.state.meta.player_faction ?? null;
-            const factions = (context.state.factions ?? []).map(f => f.id)
-                .filter(fid => playerFaction == null || fid !== playerFaction)
-                .sort(strictCompare);
+            // Use canonical helper so headless_scenario_auto_control is honored.
+            // Inline duplicate-filter previously skipped this flag, so RBiH (when
+            // configured as player_faction) had no corps_command.commander_state
+            // written across the entire run — bricking commander_confidence
+            // predicates for all ARBiH catalog opportunities. See
+            // docs/40_reports/audits/20260522_FORENSICS_COMMANDER_STATE_INIT.md.
+            const factions = selectBotBrigadeOrderFactions(context.state);
             // Pass operational reverse map + OSID edges for corps directive generation
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
