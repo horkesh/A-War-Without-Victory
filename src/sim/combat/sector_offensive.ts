@@ -237,6 +237,14 @@ const EXHAUSTION_DECAY_ACTIVE = 1;
  *   (c) Reduce to MAX_TOTAL_FAILURES = 3 for multi-axis and keep 5 for single. */
 const MAX_TOTAL_FAILURES = 8;
 
+/** Wave 20: single-axis ops abort faster. Multi-axis ops can sustain 8 failures
+ *  per axis (with multi-axis zero-progress backstop catching pathological cases),
+ *  but single-axis ops where the per-turn brain can't find a viable next attack
+ *  (e.g. Cincar Phase 1 post-bucovaca with strong VRS Kupres garrison) should
+ *  release brigades sooner. The per-axis cap fires earlier so the op enters
+ *  recovery and brigades become available for downstream cascade ops. */
+const MAX_TOTAL_FAILURES_SINGLE_AXIS = 4;
+
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
 
@@ -1354,7 +1362,10 @@ function updateMultiAxisResults(
         // Per-axis cap. The zero-progress backstop (MAX_OPERATION_ZERO_PROGRESS_FAILURES)
         // fires first for single-axis zero-capture operations; this per-axis cap remains
         // the backstop for multi-axis operations making partial progress.
-        if (axis.failure_count >= MAX_TOTAL_FAILURES) {
+        // Wave 20: single-axis ops use a tighter cap so brigades release sooner for
+        // downstream cascade ops (Cincar Phase 1 → Mistral 1).
+        const failureCap = op.axes!.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
+        if (axis.failure_count >= failureCap) {
             axis.status = 'stalled';
         }
     }
