@@ -66,8 +66,9 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
 
   return (
     <div
+      data-testid="supply-logistics-panel"
       className="absolute z-20 rounded border border-panel-border bg-panel-card/95 backdrop-blur-sm p-2.5 space-y-2 text-xs font-mono"
-      style={{ bottom: '36px', left: '12px', minWidth: '200px', direction: 'ltr' }}
+      style={{ bottom: '36px', left: 'calc(15.5rem + 12px)', minWidth: '200px', direction: 'ltr' }}
     >
       <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
         Logistics
