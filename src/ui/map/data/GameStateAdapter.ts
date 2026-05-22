@@ -88,6 +88,9 @@ function scopeToPlayerFaction<T>(record: Record<string, T> | undefined, playerFa
 const ATTACKER_WIN_OUTCOMES = ['decisive_victory', 'victory', 'costly_victory'];
 const ATTACKER_LOSS_OUTCOMES = ['repulsed', 'catastrophic'];
 
+type LooseRecord = Record<string, any>;
+type UiPoliticalFactionId = Exclude<FactionId, null>;
+
 type TutorialStateView = NonNullable<LoadedGameState['tutorial_state']>;
 
 function normalizeTutorialState(meta: Record<string, unknown>, turn: number): TutorialStateView | undefined {
@@ -113,6 +116,21 @@ function normalizeTutorialState(meta: Record<string, unknown>, turn: number): Tu
 
 function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function asLooseRecord(value: unknown): LooseRecord | undefined {
+    return value != null && typeof value === 'object' && !Array.isArray(value)
+        ? value as LooseRecord
+        : undefined;
+}
+
+function readActiveOperationRows(command: LooseRecord | undefined): LooseRecord[] {
+    if (!command) return [];
+    if (Array.isArray(command.active_operations)) {
+        return command.active_operations.filter((entry): entry is LooseRecord => Boolean(asLooseRecord(entry)));
+    }
+    const activeOperation = asLooseRecord(command.active_operation);
+    return activeOperation ? [activeOperation] : [];
 }
 
 function hasFactionArray(state: GameState): boolean {
@@ -173,7 +191,7 @@ function getAirdropAllocationValue(state: GameState, enclaveId: string): number 
 const ENCLAVE_UI_DEFINITIONS: Array<{
     id: string;
     display_name: string;
-    faction: string;
+    faction: UiPoliticalFactionId;
     osid_prefixes?: string[];
     osid_list?: string[];
 }> = [
@@ -399,12 +417,12 @@ export interface ParseGameStateOptions {
  */
 export function parseGameState(json: unknown, options?: ParseGameStateOptions): LoadedGameState {
     // Normalize: unwrap common wrappers so we always work with the flat GameState object.
-    let state = json as any;
-    if (state != null && typeof state === 'object' && !Array.isArray(state)) {
+    let state = asLooseRecord(json) ?? {};
+    if (Object.keys(state).length > 0) {
         const keys = Object.keys(state);
         if (keys.length === 1 && (keys[0] === 'state' || keys[0] === 'gameState')) {
-            const inner = state[keys[0]];
-            if (inner != null && typeof inner === 'object' && !Array.isArray(inner)) {
+            const inner = asLooseRecord(state[keys[0]]);
+            if (inner) {
                 state = inner;
             }
         }
@@ -423,6 +441,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const phase = typeof meta.phase === 'string' ? meta.phase : 'unknown';
     const metadataDate = typeof meta.date === 'string' && meta.date.length > 0 ? meta.date : 'UNKNOWN';
     const label = `Turn ${turn} (${phase})`;
+    const gameState = state as GameState;
 
     const rawMovementState = state.military.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
 
@@ -549,7 +568,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 }
             }
 
-            const ops = f.ops as any | undefined;
+            const ops = asLooseRecord(f.ops);
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
             const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
             const aorSettlementIds = brigadeAorByFormationId[id];
@@ -605,7 +624,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 ? warStory.arc : undefined;
 
             // Extract combat summary if present (corps/army_hq); brigades get a fallback below.
-            const rawCS = f.combat_summary as any | undefined;
+            const rawCS = asLooseRecord(f.combat_summary);
             let combatSummary = rawCS && typeof rawCS.battles_fought === 'number' ? {
                 battles_fought: finiteNumber(rawCS.battles_fought),
                 victories: finiteNumber(rawCS.victories),
@@ -663,7 +682,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             // Brigade first battle milestone and engagement log: use history on formation first (save has formations[id].brigade_history).
             if (f.kind === 'brigade' || f.kind === 'operational_group') {
-                const bh = (f.brigade_history as any | undefined) ?? brigadeHistoryRecord?.[id];
+                const bh = asLooseRecord(f.brigade_history) ?? brigadeHistoryRecord?.[id];
                 if (bh && typeof bh === 'object') {
                     const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
                     const normalizedEngagements = engs.map((e) => ({
@@ -734,7 +753,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             // Brigade fallback: synthesize combatSummary from brigade_history running tallies (on formation or legacy state.brigade_history).
             if (!combatSummary && (f.kind === 'brigade' || f.kind === 'operational_group')) {
-                const bh = (f.brigade_history as any | undefined) ?? brigadeHistoryRecord?.[id];
+                const bh = asLooseRecord(f.brigade_history) ?? brigadeHistoryRecord?.[id];
                 if (bh && (typeof bh.battles_fought === 'number' ? bh.battles_fought > 0 : Array.isArray(bh.engagements) && bh.engagements.length > 0)) {
                     const bf = finiteNumber(bh.battles_fought);
                     const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
@@ -932,7 +951,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             if (fv.kind !== 'corps' && fv.kind !== 'corps_asset') continue;
             const cc = rawCorpsCommand[fv.id];
             // Legacy compat: old save files used singular active_operation; new saves use active_operations[].
-            const activeOps = (Array.isArray(cc?.active_operations) ? cc.active_operations : cc?.active_operation ? [cc.active_operation] : []) as any[];
+            const activeOps = readActiveOperationRows(cc);
             for (const op of activeOps) {
             if (op && typeof op === 'object' && op.name) {
                 const participatingBrigadeIds = Array.isArray(op.participating_brigades)
@@ -1842,8 +1861,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     hardening_active: false,
                     supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, 0, false, entry),
                     airdrop_status: enclaveDef?.faction === 'RBiH' ? 'not_isolated_long_enough' : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(state, key),
-                    faction: enclaveDef?.faction as FactionId | undefined,
+                    airdrop_allocation: getAirdropAllocationValue(gameState, key),
+                    faction: enclaveDef?.faction,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             } else if (entry && typeof entry === 'object' && !Array.isArray(entry)) {
@@ -1863,8 +1882,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         : isolationTurns > 0
                             ? 'not_isolated_long_enough'
                             : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(state, key),
-                    faction: enclaveDef?.faction as FactionId | undefined,
+                    airdrop_allocation: getAirdropAllocationValue(gameState, key),
+                    faction: enclaveDef?.faction,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
             }
@@ -1880,8 +1899,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const operationalSitrep = (phase === 'war' || phase === 'phase_ii')
         && playerFaction
         && state.displacement && typeof state.displacement === 'object'
-        && hasFactionArray(state)
-        ? getOperationalSitrepView(state, playerFaction)
+        && hasFactionArray(gameState)
+        ? getOperationalSitrepView(gameState, playerFaction)
         : undefined;
     const pendingOfficerEvents = derivePendingOfficerEvents(state, playerFaction);
     const pendingEventDecisions = derivePendingEventDecisions(state);
@@ -2279,7 +2298,7 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
 
     for (const corpsId of Object.keys(cc).sort()) {
         const cmd = cc[corpsId];
-        const opsArray = (Array.isArray(cmd?.active_operations) ? cmd.active_operations : cmd?.active_operation ? [cmd.active_operation] : []) as any[];
+        const opsArray = readActiveOperationRows(cmd);
         for (const op of opsArray) {
         if (!op) continue;
 
@@ -2913,7 +2932,7 @@ function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
 function deriveHistoricalComparison(state: any): LoadedGameState['historicalComparison'] {
     return safeDerive('deriveHistoricalComparison', state, () => {
         const ledger = buildCostLedger(state as GameState);
-        return compareToHistorical(ledger, historicalBaseline as any);
+        return compareToHistorical(ledger, historicalBaseline as Parameters<typeof compareToHistorical>[1]);
     });
 }
 

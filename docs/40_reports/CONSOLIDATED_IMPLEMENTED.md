@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest strict-null GameStateAdapter tail:** [implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md](implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md) - `src/ui/map/data/GameStateAdapter.ts` now contributes zero counted `as_any_casts` and `as_factionid_casts`; top-level strict-null counted escapes are all zero except the optional `GameState` field inventory.
+
 **Latest strict-null save migration tail:** [implemented/20260522_STRICT_NULL_SAVE_MIGRATION_TAIL.md](implemented/20260522_STRICT_NULL_SAVE_MIGRATION_TAIL.md) - `src/state/save_migration.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 8`, all in `GameStateAdapter.ts`.
 
 **Latest strict-null Phase 3ABC audit harness tail:** [implemented/20260522_STRICT_NULL_PHASE3ABC_AUDIT_HARNESS_TAIL.md](implemented/20260522_STRICT_NULL_PHASE3ABC_AUDIT_HARNESS_TAIL.md) - `src/cli/phase3abc_audit_harness.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 31` with `as_unknown` and non-null assertion categories at zero.

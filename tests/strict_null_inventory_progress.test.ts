@@ -454,9 +454,8 @@ const TREATY_APPLY_NON_NULL_TAIL_FILES = [
     'src/state/treaty_apply.ts',
 ];
 
-// The Phase 5 GameStateAdapter Batch 48 ceiling pins the per-file inventory
-// count at exactly 10 retained escapes documented in
-// `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`:
+// The Phase 5 GameStateAdapter tail is closed for inventory-counted escapes.
+// The historical Batch 48 list below records the former retained sites:
 //   - 1 JSON entry boundary at L401 (`json: unknown` → `any`)
 //   - 4 `Record<string, unknown>` field widenings at L551/607/665/736
 //     (f.ops, f.combat_summary, f.brigade_history × 2 — load-bearing for
@@ -473,7 +472,7 @@ const TREATY_APPLY_NON_NULL_TAIL_FILES = [
 //     `FactionId = string` alias from `src/state/game_state.ts:45`; the
 //     `string` source value (`ENCLAVE_UI_DEFINITIONS[i].faction`) does not
 //     structurally match the literal union without the cast.
-const ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING = 10;
+const ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING = 0;
 
 const ESCAPE_CATEGORIES = [
     'as_factionid_casts',
@@ -904,7 +903,7 @@ describe('strict null inventory progress', () => {
         expect(factionIdCount).toBe(0);
     });
 
-    it('caps the Batch 48 Phase 5 GameStateAdapter adapter-local cleanup', () => {
+    it('closes the Phase 5 GameStateAdapter adapter-local escape inventory', () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
             buildInventory: (rootDir: string) => StrictNullInventory;
@@ -922,15 +921,14 @@ describe('strict null inventory progress', () => {
         // - 2 UI-local literal-union FactionId casts (enclave faction lookups
         //   against ENCLAVE_UI_DEFINITIONS[i].faction: string, target field
         //   typed as `'RS' | 'RBiH' | 'HRHB' | null | undefined`)
-        // The ceiling is enforced with `toBeLessThanOrEqual` (not exact)
-        // so future schema-tightening or GameState-contract work that
-        // removes additional sites does not require updating this test.
+        // The former Batch 48 retained sites are now closed; keep this exact
+        // zero unless a new adapter stop-gate is explicitly documented first.
         const adapterTotal = ESCAPE_CATEGORIES.reduce(
             (sum, category) => sum + phaseCount(current, category, PHASE_5_ADAPTER_BATCH_48_FILES),
             0,
         );
 
-        expect(adapterTotal).toBeLessThanOrEqual(ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING);
+        expect(adapterTotal).toBe(ACCEPTED_PHASE_5_ADAPTER_BATCH_48_REMAINING);
     });
 
     it('cleans the Batch C sector_offensive_launch_helpers slice', () => {
