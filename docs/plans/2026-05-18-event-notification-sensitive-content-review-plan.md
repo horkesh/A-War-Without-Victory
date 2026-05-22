@@ -4,6 +4,7 @@
 **Owner:** Future content pass
 **Input tracker:** `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`
 **Output target:** `notifications_to_other_factions` blocks on gated `requires_player_response` events
+**Residual diagnostic:** `node tools/diagnostics/event_notification_residuals.cjs`
 
 ## Scope
 
@@ -107,3 +108,5 @@ Feature-flag-off baseline behavior must remain stable; notification text may onl
 - `git diff --check -- data/scenarios/events docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md tests/sim/events/event_notification_content_backfill.test.ts`
 
 If a tracker consistency script is added in the future, it should assert that every row listed as complete has all non-source recipient blocks for all response options, and that every row listed as residual still has the expected missing blocks.
+
+2026-05-22 update: `tools/diagnostics/event_notification_residuals.cjs` now computes the event-JSON residual floor directly. `tests/sim/events/event_notification_residuals_diagnostic.test.ts` pins the current 9-row / 38-block floor and residual event id set.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest event-notification residual diagnostic:** [implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md](implemented/20260522_EVENT_NOTIFICATION_RESIDUAL_DIAGNOSTIC.md) - `tools/diagnostics/event_notification_residuals.cjs` computes the current missing recipient-block floor from event JSON and a focused test pins the 9-row / 38-block residual event set.
+
 **Latest event-notification front-visit narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_TONE.md](implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_TONE.md) - Bihac, RBiH press, Mostar, and central-Bosnia front-visit response options now have non-source recipient notification coverage; Phase D residual is down to 9 rows / 38 blocks.
 
 **Latest event-notification 1995 late-war outcome slice:** [implemented/20260522_EVENT_NOTIFICATION_1995_LATE_WAR_OUTCOME.md](implemented/20260522_EVENT_NOTIFICATION_1995_LATE_WAR_OUTCOME.md) - `karadzic_mladic_split_1995`, `us_halts_federation_advance_1995`, `holbrooke_ceasefire_demand_oct95`, and `dayton_talks_begin_1995` now have complete non-source recipient notification coverage; Phase D residual dropped to 9 rows / 46 blocks before the front-visit narrative-tone slice.
