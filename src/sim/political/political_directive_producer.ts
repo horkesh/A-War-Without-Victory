@@ -69,14 +69,17 @@ export const B1_PIPELINE_STEP_NAME = 'produce-political-directive';
 /**
  * war_exhaustion above this biases HONOR_TRUCE / PREPARE_RESERVE.
  *
- * Pre-Wave-1A scale (cap=100) made 500 unreachable, so this gate was dead.
- * Wave 1A rescaled war_exhaustion 100× (cap=10000), which inadvertently
- * activated the gate from t≈50 onward and forced bot factions into
- * PREPARE_RESERVE permanently — collapsing HVO offensive planning.
- * Lifted to 12000 (above cap) to restore the historically-dead behavior
- * until Wave 1A.1 ships a meaningful per-faction exhaustion discriminator.
+ * Restored to 500 by Wave 6 after Wave 4A briefly held it at 12000 (above
+ * the new 10000 cap) to dead-gate the producer. Wave 4A's dead-gate
+ * approach was faction-symmetric, which inadvertently lifted RS bot
+ * aggression along with HRHB's. The new fix (briefing.ts:586-602
+ * CampaignPlan-wins-over-economy-overlay) lets corps with authored
+ * offensive_targets escape the economy lock individually, while corps
+ * without explicit offensive_targets remain constrained. This restores
+ * the original faction-asymmetric intent: HRHB's authored offensive
+ * intent is honoured; RS without explicit offensive_targets is bounded.
  */
-export const B1_HIGH_EXHAUSTION_THRESHOLD = 12000;
+export const B1_HIGH_EXHAUSTION_THRESHOLD = 500;
 
 /** Hawkishness >= this biases PRESS_OFFENSIVE. */
 export const B1_HAWKISH_THRESHOLD = 4;
