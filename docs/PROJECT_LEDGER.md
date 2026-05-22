@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(operations): prevent idle objective skips
+
+**Type:** Sector-operation lifecycle behavior + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, operation catalog data, or scenario data changed.
+
+**Why:** Fresh Donji Vakuf 95 evidence after COHA expiry showed that an axis could move past objectives without movement, attack orders, or resolver battles. The idle branch incremented the same consecutive-failure counter used by resolved combat failures, then advanced `current_objective_index`, hiding true no-attempt delivery gaps as apparent progress.
+
+**Change:** Removed objective advancement from the no-move/no-attack idle branch for multi-axis and legacy sector operations. Resolved combat failures still use the existing failure branch to move past a defended objective; idle zero-attempt axes now remain on the current objective until the existing idle-stall/recovery path handles them. Added a red/green test for the multi-axis no-skip boundary.
+
+**Verification:** Red/green focused test `npx.cmd vitest run tests\sector_offensive_idle_recovery.test.ts -t "does not advance a multi-axis objective" --reporter=dot` passed after the fix. Focused suite `npx.cmd vitest run tests\sector_offensive_idle_recovery.test.ts tests\scenario_operation_diagnostics.test.ts tests\probe_territory_flip.test.ts --reporter=dot` passed 45/45. `npm.cmd run typecheck` passed. Fresh 188w `n1954` completed with hash `955c0e5fd25e97cc`; Oct 1995 painted area match is 72.1%; Donji Vakuf 95 remains active at turn 188 with 7 real attacks/captures through `prusac_2` and no silent skip through `jemanlici`, `korenici`, or `oborci_2`. `npm.cmd run test:baselines` first failed on expected 52w behavior-output drift; `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed the manifest; follow-up `npm.cmd run test:baselines` passed.
+
+**Artifacts:** `src/sim/combat/sector_offensive.ts`; `tests/sector_offensive_idle_recovery.test.ts`; `data/derived/scenario/baselines/manifest.json`; `docs/40_reports/implemented/20260522_OPERATION_IDLE_OBJECTIVE_SKIP.md`.
+
+**Roadmap delta:** Accepted-operation delivery is now more honest: Donji under-delivery is real remaining-turn/objective delivery work, not hidden lifecycle skip-through. Continue evidence-first delivery work before combat odds, force-trajectory tuning, or painted-target promotion.
+
+---
+
 ## [2026-05-22] fix(events): expire COHA combat suppression
 
 **Type:** Event flag lifecycle behavior + combat/operation diagnostics + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, or operation catalog tuning changed.

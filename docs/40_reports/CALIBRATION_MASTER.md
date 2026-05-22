@@ -1,5 +1,15 @@
 # AWWV Calibration Master Reference
 
+## Operation idle objective-skip repair (2026-05-22)
+
+- Sector-operation lifecycle accounting no longer advances `current_objective_index` from idle no-movement / no-attack turns.
+- Resolved combat failures still use the existing consecutive-failure objective-advance path.
+- Fresh 188w `n1954` result: final hash `955c0e5fd25e97cc`; Oct 1995 painted area match 72.1%.
+- Donji Vakuf finding: `donji_vakuf_95` remains active at turn 188 with 7 real attacks/captures through `prusac_2`; `jemanlici`, `korenici`, and `oborci_2` remain RS-held rather than being silently skipped.
+- Baseline regression required and received a manifest refresh for expected 52w behavior-output drift.
+- Residual: Donji delivery now needs real remaining-turn/objective delivery work, not lifecycle skip-through. Oct 1995 remains diagnostic-only.
+- Report: `docs/40_reports/implemented/20260522_OPERATION_IDLE_OBJECTIVE_SKIP.md`.
+
 ## COHA expiry operation delivery (2026-05-22)
 
 - `coha_expires_1995` now clears `coha_active` while setting `coha_expired`, matching the intended Cessation of Hostilities lifecycle: combat is suppressed during the ceasefire, then re-enabled after expiry.

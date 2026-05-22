@@ -1329,10 +1329,6 @@ function updateMultiAxisResults(
                     continue;
                 }
 
-                if (axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
-                    axis.current_objective_index = currentIdx + 1;
-                    axis.consecutive_failures_on_current = 0;
-                }
             }
         }
 
@@ -1560,10 +1556,6 @@ function updateLegacyFlatResults(
                 return;
             }
 
-            if ((op.consecutive_failures_on_current ?? 0) >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
-                op.current_objective_index = currentIdx + 1;
-                op.consecutive_failures_on_current = 0;
-            }
         }
     }
 
