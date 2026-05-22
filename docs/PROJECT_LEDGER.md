@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type sim scenario CLI
+
+**Type:** Strict-null tooling cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
+
+**Why:** The post-FactionId strict-null roadmap narrowed the remaining safe lane to isolated tooling/adapters. `src/cli/sim_scenario.ts` was an isolated CLI tail contributing 27 `as_any_casts` to the current inventory.
+
+**Change:** `sim_scenario.ts` now parses scenario-script JSON through local `unknown`/record guards, passes typed `EdgeRecord[]` through `runTurn(...)` and front-edge computation, and reads typed front segment, pressure, formation, and militia-pool fields without broad `any` widening. A strict-null progress assertion pins `src/cli/sim_scenario.ts` at zero `as_any_casts`.
+
+**Verification:** Red run `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` failed before the source edit because the new `sim_scenario` cap saw 27 `as_any_casts`. Green run `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts tests\sim_scenario.test.ts tests\phase10_ops_fatigue_scenario.test.ts --reporter=dot` passed 89/89. `npm.cmd run typecheck` passed. `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_any_casts 95`, `as_unknown_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`.
+
+**Artifacts:** `src/cli/sim_scenario.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_SIM_SCENARIO_CLI_TAIL.md`.
+
+**Roadmap delta:** Removes `sim_scenario.ts` from the remaining strict-null `as_any_casts` queue. Remaining `as_any_casts` are now confined to the Phase 3A/3ABC CLI harnesses, `save_migration.ts`, and `GameStateAdapter.ts`.
+
+---
+
 ## [2026-05-22] refactor(gui): remove retired tactical chrome
 
 **Type:** GUI source cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.

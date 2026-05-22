@@ -40,6 +40,19 @@ Current post-tail floor as of 2026-05-21:
 | `non_null_assertions_index` | 38 |
 | `optional_fields_game_state` | 463 |
 
+Current floor as of the 2026-05-22 `sim_scenario.ts` CLI tail:
+
+| category | count |
+|---|---:|
+| `as_factionid_casts` | 2 |
+| `as_unknown_casts` | 0 |
+| `as_any_casts` | 95 |
+| `non_null_assertions_dot` | 0 |
+| `non_null_assertions_index` | 0 |
+| `optional_fields_game_state` | 477 |
+
+The remaining `as_any_casts` are now limited to `src/cli/phase3a_ab_harness.ts`, `src/cli/phase3abc_audit_harness.ts`, `src/state/save_migration.ts`, and `src/ui/map/data/GameStateAdapter.ts`. The next non-calibration cleanup lane should choose one Phase 3 harness slice with a focused diagnostic proof; `save_migration.ts` remains a save-shape lane and `GameStateAdapter.ts` remains an adapter-contract/FactionId-unification lane.
+
 Remaining `as_unknown_casts` are no longer the next broad safe batch. They are classified as behavior-shaped or intentionally incomplete mock/adapter bridges and should move only under their owning behavior/schema plans. The active safe lane has narrowed after the validator, corps front-lines builder, UI window bridge, bot-response / interaction-layer, CLI political-side / MapKit, core singleton, and AI settings panel slices: remaining `as any` cleanup should start only from a fresh per-file classification, because the large validator leaf cluster is already closed and the next visible clusters are library boundaries, save-shape risk, diagnostic harnesses, or behavior-shaped UI contracts.
 
 ## Scope

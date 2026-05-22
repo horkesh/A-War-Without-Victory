@@ -456,3 +456,10 @@ Deferred / stop-gated (≈ 175 sites; documented per-class in the classification
 ## Source Migration Status
 
 No source phase was completed in this lane. Current worktree status shows unrelated active edits in protected source areas (`supply`, `paramilitary`, `RBiH-HRHB`, `fatigue`, and turn pipeline files), so type-only source migration is deferred to avoid conflicts.
+
+## 2026-05-22 Sim Scenario CLI Tail Addendum
+
+- `src/cli/sim_scenario.ts` is now closed for `as_any_casts` and pinned by `tests/strict_null_inventory_progress.test.ts`.
+- Delta: top-level `as_any_casts` 122 -> 95; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` are all 0.
+- Verification: red/green strict-null assertion, focused deterministic scenario summary tests 89/89, and `npm.cmd run typecheck` PASS.
+- Remaining `as_any_casts`: `src/cli/phase3a_ab_harness.ts` (31), `src/cli/phase3abc_audit_harness.ts` (33), `src/state/save_migration.ts` (23), and `src/ui/map/data/GameStateAdapter.ts` (8). The old deferred list above is superseded for current counts by this addendum.

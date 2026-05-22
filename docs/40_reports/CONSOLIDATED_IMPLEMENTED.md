@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest strict-null sim scenario CLI tail:** [implemented/20260522_STRICT_NULL_SIM_SCENARIO_CLI_TAIL.md](implemented/20260522_STRICT_NULL_SIM_SCENARIO_CLI_TAIL.md) - `src/cli/sim_scenario.ts` now contributes zero `as_any_casts`; top-level strict-null inventory is down to `as_any_casts 95` with `as_unknown` and non-null assertion categories at zero.
+
 **Latest GUI retired chrome removal H9:** [implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md](implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md) - ninth Batch H slice from the 2026-05-22 GUI visual audit: unused retired tactical chrome files were deleted after import review, with a guard keeping them off disk.
 
 **Latest GUI Army HQ commander empty-state H8:** [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) - eighth Batch H slice from the 2026-05-22 GUI visual audit: Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent.

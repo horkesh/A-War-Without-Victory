@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
-import { loadSettlementGraph } from '../map/settlements.js';
+import { loadSettlementGraph, type EdgeRecord } from '../map/settlements.js';
 import { runTurn } from '../sim/turn_pipeline.js';
 import {
     applyControlFlipProposals,
@@ -14,7 +14,7 @@ import {
 } from '../state/control_flip_proposals.js';
 import { resetDisplacementPressureCache } from '../state/displacement.js';
 import { computeFrontBreaches } from '../state/front_breaches.js';
-import type { GameState, MilitiaPoolState, MunicipalityId, PostureLevel } from '../state/game_state.js';
+import type { FormationState, GameState, MilitiaPoolState, MunicipalityId, PostureLevel } from '../state/game_state.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { computeSupplyReachability } from '../state/supply_reachability.js';
 
@@ -29,6 +29,14 @@ type ScenarioScriptFile = {
     schema: 1;
     turns: Record<string, ScenarioScriptEntry[]>;
 };
+
+type ScenarioHarnessState = GameState & {
+    formations?: Record<string, FormationState>;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
 
 export type ScenarioTurnSummary = {
     turn: number;
@@ -215,21 +223,23 @@ function parseArgs(argv: string[]): CliOptions {
 
 function parseScenarioScriptFile(jsonText: string): ScenarioScriptFile {
     const data: unknown = JSON.parse(jsonText);
-    if (!data || typeof data !== 'object') throw new Error('Invalid script: expected JSON object');
-    const schema = (data as any).schema;
-    if (schema !== 1) throw new Error(`Invalid script schema: ${(data as any).schema} (expected 1)`);
-    const turns = (data as any).turns;
-    if (!turns || typeof turns !== 'object') throw new Error('Invalid script: missing turns object');
+    if (!isRecord(data)) throw new Error('Invalid script: expected JSON object');
+    const schema = data.schema;
+    if (schema !== 1) throw new Error(`Invalid script schema: ${String(schema)} (expected 1)`);
+    const turns = data.turns;
+    if (!isRecord(turns)) throw new Error('Invalid script: missing turns object');
 
     const outTurns: Record<string, ScenarioScriptEntry[]> = {};
     for (const k of Object.keys(turns)) {
-        const v = (turns as any)[k];
+        const v = turns[k];
         if (!Array.isArray(v)) throw new Error(`Invalid script: turns["${k}"] must be an array`);
-        const entries: ScenarioScriptEntry[] = v.map((raw: any) => {
-            const faction = raw?.faction;
-            const edge_id = raw?.edge_id;
-            const posture = parsePosture(raw?.posture);
-            const weight = Number.isInteger(raw?.weight) ? (raw.weight as number) : 0;
+        const entries: ScenarioScriptEntry[] = v.map((raw) => {
+            if (!isRecord(raw)) throw new Error(`Invalid script entry for turn ${k}: expected object`);
+            const faction = raw.faction;
+            const edge_id = raw.edge_id;
+            const posture = parsePosture(raw.posture);
+            const weight = typeof raw.weight === 'number' && Number.isInteger(raw.weight) ? raw.weight : 0;
+            if (typeof edge_id !== 'string') throw new Error(`Invalid script entry edge_id for turn ${k}`);
             validateCanonicalEdgeId(edge_id);
             if (typeof faction !== 'string' || faction.length === 0) throw new Error(`Invalid script entry faction for turn ${k}`);
             return { faction, edge_id, posture, weight };
@@ -267,18 +277,18 @@ function countActiveFrontSegments(state: GameState): number {
     let count = 0;
     const keysSorted = Object.keys(segs).sort();
     for (const k of keysSorted) {
-        const seg = (segs as any)[k];
+        const seg = segs[k];
         if (seg && typeof seg === 'object' && seg.active === true) count += 1;
     }
     return count;
 }
 
 function computePressureSummary(state: GameState, activeEdgeIds: string[]): { highestAbs: number; top: Array<{ edge_id: string; value: number; abs: number }> } {
-    const pressure = state.military.front_pressure as any;
+    const pressure = state.military.front_pressure;
     const out: Array<{ edge_id: string; value: number; abs: number }> = [];
 
     for (const edge_id of activeEdgeIds) {
-        const value = Number.isInteger(pressure?.[edge_id]?.value) ? (pressure[edge_id].value as number) : 0;
+        const value = Number.isInteger(pressure[edge_id]?.value) ? pressure[edge_id].value : 0;
         out.push({ edge_id, value, abs: Math.abs(value) });
     }
 
@@ -301,7 +311,7 @@ function countFlipTargetsProposed(file: ControlFlipProposalFile): number {
 
 export async function runScenarioDeterministic(
     initialState: GameState,
-    options: { turns: number; applyBreaches: boolean; applyNegotiation: boolean; script: ScenarioScriptFile; settlementEdges: Array<{ a: string; b: string }> }
+    options: { turns: number; applyBreaches: boolean; applyNegotiation: boolean; script: ScenarioScriptFile; settlementEdges: EdgeRecord[] }
 ): Promise<{ finalState: GameState; summary: ScenarioSummaryFile }> {
     // Clear displacement pressure cache so multiple runs in the same process produce identical results.
     resetDisplacementPressureCache();
@@ -315,12 +325,12 @@ export async function runScenarioDeterministic(
 
         const { nextState, report: turnReport } = await runTurn(state, {
             seed: state.meta.seed,
-            settlementEdges: options.settlementEdges as any,
+            settlementEdges: options.settlementEdges,
             applyNegotiation: options.applyNegotiation
         });
         state = nextState;
 
-        const derivedFrontEdges = computeFrontEdges(state, options.settlementEdges as any);
+        const derivedFrontEdges = computeFrontEdges(state, options.settlementEdges);
         const breaches = computeFrontBreaches(state, derivedFrontEdges);
         const proposalsFile = computeControlFlipProposals(state, derivedFrontEdges, breaches, adjacencyMap);
         const flip_targets_proposed = countFlipTargetsProposed(proposalsFile);
@@ -334,7 +344,7 @@ export async function runScenarioDeterministic(
         const activeEdgeIdsSorted = derivedFrontEdges
             .map((e) => e.edge_id)
             .filter((edge_id) => {
-                const seg = (state.military.front_segments as any)?.[edge_id];
+                const seg = state.military.front_segments?.[edge_id];
                 return seg && typeof seg === 'object' && seg.active === true;
             })
             .sort();
@@ -342,8 +352,7 @@ export async function runScenarioDeterministic(
         const pressureSummary = computePressureSummary(state, activeEdgeIdsSorted);
 
         // Formation roster summary (scaffolding only; no effects yet)
-        const formationRec = (state as any).formations as Record<string, any> | undefined;
-        const formationsArr = formationRec && typeof formationRec === 'object' ? Object.values(formationRec) : [];
+        const formationsArr = Object.values((state as ScenarioHarnessState).formations ?? {});
         const totalFormations = formationsArr.length;
         const byFactionMap = new Map<string, number>();
         const byForceLabelMap = new Map<string, number>();
@@ -355,12 +364,11 @@ export async function runScenarioDeterministic(
         let totalFormationFatigue = 0;
         let activeFormationsCount = 0;
         for (const f of formationsArr) {
-            if (!f || typeof f !== 'object') continue;
-            const faction = typeof (f as any).faction === 'string' ? ((f as any).faction as string) : '';
-            const forceLabel = typeof (f as any).force_label === 'string' ? ((f as any).force_label as string) : null;
-            const assignment = (f as any).assignment;
-            const status = (f as any).status;
-            const ops = (f as any).ops;
+            const faction = f.faction;
+            const forceLabel = typeof f.force_label === 'string' ? f.force_label : null;
+            const assignment = f.assignment;
+            const status = f.status;
+            const ops = f.ops;
             const currentTurn = state.meta.turn;
 
             if (faction) {
@@ -388,9 +396,9 @@ export async function runScenarioDeterministic(
             // Phase 10: compute fatigue stats for active formations
             if (status === 'active') {
                 activeFormationsCount += 1;
-                const fatigue = ops && typeof ops === 'object' && Number.isInteger(ops.fatigue) ? ops.fatigue : 0;
+                const fatigue = typeof ops?.fatigue === 'number' && Number.isInteger(ops.fatigue) ? ops.fatigue : 0;
                 totalFormationFatigue += fatigue;
-                const lastSuppliedTurn = ops && typeof ops === 'object' ? ops.last_supplied_turn : null;
+                const lastSuppliedTurn = ops?.last_supplied_turn ?? null;
                 if (lastSuppliedTurn !== currentTurn) {
                     formationsUnsuppliedCount += 1;
                 }
@@ -419,12 +427,11 @@ export async function runScenarioDeterministic(
         let poolsWithFactionCount = 0;
         const militiaByFactionMap = new Map<string, { muns: number; available: number; committed: number; exhausted: number }>();
         for (const p of militiaPoolsArr) {
-            if (!p || typeof p !== 'object') continue;
-            const faction = (p as any).faction;
-            const available = Number.isInteger((p as any).available) ? ((p as any).available as number) : 0;
-            const committed = Number.isInteger((p as any).committed) ? ((p as any).committed as number) : 0;
-            const exhausted = Number.isInteger((p as any).exhausted) ? ((p as any).exhausted as number) : 0;
-            const fatigue = Number.isInteger((p as any).fatigue) ? ((p as any).fatigue as number) : 0;
+            const faction = p.faction;
+            const available = Number.isInteger(p.available) ? p.available : 0;
+            const committed = Number.isInteger(p.committed) ? p.committed : 0;
+            const exhausted = Number.isInteger(p.exhausted) ? p.exhausted : 0;
+            const fatigue = typeof p.fatigue === 'number' && Number.isInteger(p.fatigue) ? p.fatigue : 0;
 
             totalAvailable += available;
             totalCommitted += committed;
@@ -437,7 +444,7 @@ export async function runScenarioDeterministic(
                 // Determine if unsupplied from militia_fatigue report
                 const militiaFatigueReport = turnReport.militia_fatigue;
                 if (militiaFatigueReport) {
-                    const poolRecord = militiaFatigueReport.by_municipality.find((r) => r.mun_id === (p as any).mun_id && r.faction_id === faction);
+                    const poolRecord = militiaFatigueReport.by_municipality.find((r) => r.mun_id === p.mun_id && r.faction_id === faction);
                     if (poolRecord && !poolRecord.supplied) {
                         militiaPoolsUnsuppliedCount += 1;
                     }
@@ -713,4 +720,3 @@ if (isDirectRun) {
         process.exitCode = 1;
     });
 }
-
