@@ -153,6 +153,26 @@
           "headline": "Karadzic Assembly clarifies territorial reach",
           "body": "RS adoption of the Six Goals sharpens corridor and ethnic-separation claims that bear on western Herzegovina; Mostar leadership weighs patron consultation."
         }
+      },
+      "selective": {
+        "RBiH": {
+          "headline": "Pale narrows its strategic platform",
+          "body": "RS leaders signal a selective war-aim line centered on corridor security and restraint around the Drina valley and Sarajevo. Sarajevo reads the move as less openly maximalist, but still partition-minded."
+        },
+        "HRHB": {
+          "headline": "RS Assembly adopts selective goals",
+          "body": "Pale emphasizes corridor security while tempering some territorial objectives. Mostar sees a platform that may reduce immediate escalation but keeps western and central claims unsettled."
+        }
+      },
+      "aggressive": {
+        "RBiH": {
+          "headline": "RS signals maximum-force doctrine",
+          "body": "Pale adopts the Six Goals at maximum intensity despite its command warning. Sarajevo reads the decision as a severe escalation in RS war aims and international-risk exposure."
+        },
+        "HRHB": {
+          "headline": "Pale hardens territorial doctrine",
+          "body": "RS leaders choose maximum force behind the full strategic platform. Mostar assesses a more dangerous RS posture, with corridor and separation claims likely to shape every front."
+        }
       }
     },
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016), Six Strategic Goals and JCE findings. ICJ Bosnia v. Serbia (2007)."
@@ -292,6 +312,26 @@
         "HRHB": {
           "headline": "RBiH platform stresses equal citizenship",
           "body": "Sarajevo's civic line keeps a shared-state option alive on paper. Croat leaders weigh whether the pledge protects local autonomy or masks wartime centralization."
+        }
+      },
+      "bosniak_national": {
+        "RS": {
+          "headline": "Sarajevo shifts toward national framing",
+          "body": "The Presidency presents the war in narrower Bosniak national terms. Pale reads the declaration as weakening Sarajevo's civic legitimacy while sharpening the conflict's identity stakes."
+        },
+        "HRHB": {
+          "headline": "RBiH deemphasizes civic platform",
+          "body": "Sarajevo's declaration moves away from equal-citizenship language toward a Bosniak national claim. Croat leaders see greater pressure on the alliance and on local autonomy demands."
+        }
+      },
+      "pragmatic": {
+        "RS": {
+          "headline": "Sarajevo keeps civic language with narrower practice",
+          "body": "The Presidency maintains the public vocabulary of a multi-ethnic state while building Bosniak institutions more quietly. Pale assesses a legitimacy strategy with a visible internal gap."
+        },
+        "HRHB": {
+          "headline": "RBiH balances civic pledge and wartime institutions",
+          "body": "Sarajevo keeps civic language for diplomacy while consolidating Bosniak wartime structures. Croat leaders can work with the pledge for now, but watch the distance between rhetoric and practice."
         }
       }
     },
