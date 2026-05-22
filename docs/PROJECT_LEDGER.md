@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close front-visit command-signaling rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** The remaining front-visit command-signaling options could be authored from existing event text without adding new sensitive-history facts: RBiH Sarajevo visit, RS Sarajevo-line visit, and RS Drina-front visit. The blocked-sensitive RS/HRHB press options remain absent.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `visit_sarajevo` on `visit_to_front_rbih`, plus `visit_sarajevo_lines` and `visit_drina_front` on `visit_to_front_rs`. The copy is limited to visible command presence, morale signaling, siege-line/eastern-front posture, and international scrutiny already present in the event rows.
+
+**Verification:** JSON parse for `war_1993.json` passed. `node tools\diagnostics\event_notification_residuals.cjs` reports 5 rows / 20 recipient blocks. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\event_notification_residuals_diagnostic.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 35/35. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `tests/sim/events/event_notification_residuals_diagnostic.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_COMMAND.md`.
+
+**Roadmap delta:** Front-visit mixed-sensitive residual drops from 3 rows / 10 blocks to 2 rows / 4 blocks, removes the `visit_to_front_rbih` row entirely, and leaves only blocked-sensitive press options in the front-visit bucket. Overall Phase D notification residual drops from 6 rows / 26 blocks to 5 rows / 20 blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close Igman/Lukavac row
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

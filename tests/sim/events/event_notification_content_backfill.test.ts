@@ -414,4 +414,38 @@ describe('event notification content backfill', () => {
             }
         }
     });
+
+    it('covers historian-cleared front-visit command-signaling notifications for non-source recipients', () => {
+        const events = loadWar1993Events();
+        const cases = [
+            {
+                eventId: 'visit_to_front_rbih',
+                responses: {
+                    visit_sarajevo: ['HRHB', 'RS'],
+                },
+            },
+            {
+                eventId: 'visit_to_front_rs',
+                responses: {
+                    visit_sarajevo_lines: ['HRHB', 'RBiH'],
+                    visit_drina_front: ['HRHB', 'RBiH'],
+                },
+            },
+        ];
+
+        for (const { eventId, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
 });

@@ -3670,6 +3670,16 @@
       }
     ],
     "notifications_to_other_factions": {
+      "visit_sarajevo": {
+        "HRHB": {
+          "headline": "RBiH leadership visits Sarajevo front",
+          "body": "The RBiH presidency enters Sarajevo and signals solidarity with 1st Corps under siege conditions. Mostar sees a morale and international-attention move centered on the capital."
+        },
+        "RS": {
+          "headline": "RBiH leadership visits Sarajevo front",
+          "body": "The RBiH presidency appears with 1st Corps in Sarajevo. Pale sees a visible morale signal inside the besieged capital, with international press attention attached."
+        }
+      },
       "visit_eastern_front": {
         "HRHB": {
           "headline": "RBiH Leadership Tours Northeastern Front",
@@ -3946,6 +3956,26 @@
         "RBiH": {
           "headline": "RS Leadership Visits Posavina Corridor",
           "body": "The RS presidency is emphasizing the Posavina corridor and the forces holding the northern link between RS territories."
+        }
+      },
+      "visit_sarajevo_lines": {
+        "HRHB": {
+          "headline": "RS leadership visits Sarajevo lines",
+          "body": "The RS presidency appears at SRK positions overlooking Sarajevo. Mostar sees a command-presence signal around the capital and a posture that raises international pressure."
+        },
+        "RBiH": {
+          "headline": "RS leadership visits Sarajevo lines",
+          "body": "The RS presidency appears at positions overlooking Sarajevo. Sarajevo sees Pale reinforcing the siege-line posture while accepting greater international scrutiny."
+        }
+      },
+      "visit_drina_front": {
+        "HRHB": {
+          "headline": "RS leadership tours Drina Corps area",
+          "body": "The RS presidency turns public attention to the eastern front and Drina Corps positions. Mostar sees a morale signal to RS forces in the east, with international attention attached."
+        },
+        "RBiH": {
+          "headline": "RS leadership tours Drina Corps area",
+          "body": "The RS presidency visits the eastern front and Drina Corps area. Sarajevo sees Pale signaling commitment around the enclaves while taking a further international-standing cost."
         }
       },
       "stay_pale_rs": {
