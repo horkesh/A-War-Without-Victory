@@ -246,8 +246,9 @@ export async function createInitialGameState(
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {}
-  } as any,
-  political: {} as any, displacement: {} as any
+  } as GameState['military'],
+  political: {} as GameState['political'],
+  displacement: {} as GameState['displacement']
 };
     const CANONICAL_IDS = ['RBiH', 'RS', 'HRHB'] as const;
     state.factions = CANONICAL_IDS.map((id) => {
@@ -1349,8 +1350,8 @@ export async function buildScenarioStartupState(
         state.meta.recruitment_mode = scenario.recruitment_mode;
     }
 
-    if (typeof (scenario as any).max_turns === 'number') {
-        state.meta.max_turns = (scenario as any).max_turns;
+    if (typeof scenario.max_turns === 'number') {
+        state.meta.max_turns = scenario.max_turns;
     }
     if (scenario.victory_conditions) {
         state.meta.victory_conditions = scenario.victory_conditions;

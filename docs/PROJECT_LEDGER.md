@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type scenario runner startup tail
+
+**Type:** Scenario-runner type-boundary cleanup. No simulation behavior, save schema version, scenario data, baseline manifest, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** After the Phase D3 CLI cleanup, `scenario_runner.ts` still had five isolated `as any` sites: three startup scaffold casts and two reads for a scenario field the runner already supports. This was safe to close as contract/type cleanup while leaving calibration-owned behavior untouched.
+
+**Change:** Added `max_turns?: number` to the scenario input type, replaced startup scaffold casts with `GameState` property types, removed the max-turn `scenario as any` reads, and added a strict-null inventory guard pinning `scenario_runner.ts` at zero `as_any_casts`.
+
+**Verification:** `npm.cmd run typecheck` passed. `npx.cmd vitest run tests\scenario_runner_artifact_repair.test.ts tests\integration_run_summary.test.ts tests\scenario_reporting_contracts.test.ts --reporter=dot` passed 12/12. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 122`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`.
+
+**Artifacts:** `src/scenario/scenario_runner.ts`; `src/scenario/scenario_types.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_SCENARIO_RUNNER_STARTUP_TAIL.md`.
+
+**Roadmap delta:** `scenario_runner.ts` is closed for inventory-counted `as_any_casts`. Remaining strict-null `as_any_casts` are concentrated in Phase 3A/3ABC CLI harnesses, `sim_scenario.ts`, save migration, and `GameStateAdapter`.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type Phase D3 census trace reads
 
 **Type:** Audit-CLI type-boundary cleanup. No simulation behavior, save schema, scenario data, substrate regeneration, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.

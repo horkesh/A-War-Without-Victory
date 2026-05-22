@@ -61,6 +61,8 @@ export interface Scenario {
     peace_war_start_turn?: number;
     /** For start_lifecycle_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
     peace_war_start_control?: string;
+    /** Optional max-turn override copied into GameState metadata for harness/runtime limits. */
+    max_turns?: number;
     weeks: number;
     turns?: ScenarioTurn[];
     /** Phase H2.4: When true, harness injects baseline_ops for each week that has none (harness-only; off by default). */
@@ -177,4 +179,3 @@ export interface Scenario {
     /** Per-corps comms quality override for scenarios with specific radio/comms constraints. */
     comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 }
-

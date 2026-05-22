@@ -390,6 +390,10 @@ const VERDICT_SCREEN_CODEX_UNKNOWN_TAIL_FILES = [
     'src/ui/map/components/VerdictScreen.tsx',
 ];
 
+const SCENARIO_RUNNER_AS_ANY_TAIL_FILES = [
+    'src/scenario/scenario_runner.ts',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1377,6 +1381,16 @@ describe('strict null inventory progress', () => {
         const current = diagnostic.buildInventory(process.cwd());
         const unknownCount = phaseCount(current, 'as_unknown_casts', VERDICT_SCREEN_CODEX_UNKNOWN_TAIL_FILES);
         expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the scenario runner startup/max-turn as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', SCENARIO_RUNNER_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
     });
 
     it('cleans the runtime non-null assertion tail slice', () => {
