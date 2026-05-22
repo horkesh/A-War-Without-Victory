@@ -375,11 +375,20 @@ const MISTRAL_1_TARGETS: readonly string[] = [
     ...MISTRAL_1_GLAMOC_OBJECTIVES,
 ];
 
+// Wave 19A: both axes hosted on SECONDARY_CORPS (hvo_tomislavgrad). Per
+// `docs/40_reports/audits/20260522_MISTRAL_1_BRIGADE_DRAIN.md`, hvo_main_staff
+// is a corps shell with ZERO front sectors; reconcileOperationRoster at
+// final_operation_truth_reconciliation.ts:44-47 drops any brigade whose sector
+// claim ≠ host corps, and ALL 4 Mistral 1 brigades (including hvo_1st_guard_abb
+// after the t159 elite-loan to hvo_tomislavgrad) carry sector:hvo_tomislavgrad:0
+// claims. Hosting both axes on hvo_tomislavgrad lets the reconciler keep all
+// 4 brigades on the roster. The op-level primary_corps is also moved to
+// hvo_tomislavgrad below.
 const MISTRAL_1_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'mistral_1_grahovo',
         name: 'Bosansko Grahovo Axis',
-        corps: PRIMARY_CORPS,
+        corps: SECONDARY_CORPS,
         brigades: [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
@@ -542,7 +551,10 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
     name: 'Operation Mistral 1',
     tier: 'T1',
     faction: 'HRHB',
-    primary_corps: PRIMARY_CORPS,
+    // Wave 19A: hosted on hvo_tomislavgrad (SECONDARY_CORPS), not hvo_main_staff
+    // (PRIMARY_CORPS). hvo_main_staff has ZERO front sectors so the reconciler
+    // drops all foreign-sector-claim brigades — see MISTRAL_1_BRIGADE_DRAIN memo.
+    primary_corps: SECONDARY_CORPS,
     family: 'federation_western_bosnia',
     axes: MISTRAL_1_AXES,
     staging_osid: STAGING_LIVNO_MISI,
