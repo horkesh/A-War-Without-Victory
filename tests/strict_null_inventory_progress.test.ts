@@ -398,6 +398,10 @@ const SIM_SCENARIO_AS_ANY_TAIL_FILES = [
     'src/cli/sim_scenario.ts',
 ];
 
+const PHASE3A_AB_HARNESS_AS_ANY_TAIL_FILES = [
+    'src/cli/phase3a_ab_harness.ts',
+];
+
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
     'src/scenario/anomaly_detector.ts',
     'src/scenario/scenario_runner.ts',
@@ -1404,6 +1408,16 @@ describe('strict null inventory progress', () => {
         };
         const current = diagnostic.buildInventory(process.cwd());
         const anyCount = phaseCount(current, 'as_any_casts', SIM_SCENARIO_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
+    it('cleans the Phase 3A A/B harness as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', PHASE3A_AB_HARNESS_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

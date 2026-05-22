@@ -21,10 +21,12 @@ import {
     loadEnrichedContactGraph,
     resetEnablePhase3A,
     setEnablePhase3A,
+    type EffectivePressureEdge,
     type Phase3AAuditSummary
 } from '../sim/pressure/phase3a_pressure_eligibility.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { runTurn, type TurnReport } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../state/game_state.js';
+import type { EdgeRecord } from '../map/settlements.js';
 
 // Pressure seed constant
 const SEED_TOTAL_PRESSURE = 100;
@@ -46,10 +48,10 @@ const SCENARIO_REGISTRY: Array<{ id: string; name: string; factory: ScenarioFact
 function createProlongedSiegeState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'prolonged-siege-seed' },
+  meta: { turn: 0, seed: 'prolonged-siege-seed', phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_A_s1', 'MUN_A_s2'],
                 supply_sources: [], // No supply - will be unsupplied
@@ -65,14 +67,14 @@ function createProlongedSiegeState(): GameState {
     militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
-                faction: 'FACTION_A',
+                faction: 'RBiH',
                 available: 5000,
                 committed: 0,
                 exhausted: 0,
                 updated_turn: 0
             }
         }
-  } as any,
+  },
   displacement: {
     displacement_state: {
             'MUN_A': {
@@ -84,8 +86,8 @@ function createProlongedSiegeState(): GameState {
                 last_updated_turn: 0
             }
         }
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
@@ -93,17 +95,17 @@ function createProlongedSiegeState(): GameState {
 function createTemporaryEncirclementState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'temporary-encirclement-seed' },
+  meta: { turn: 0, seed: 'temporary-encirclement-seed', phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_A_s1', 'MUN_A_s2'],
                 supply_sources: [],
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             },
             {
-                id: 'FACTION_B',
+                id: 'RS',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_B_s1'],
                 supply_sources: ['MUN_B_s1'],
@@ -119,14 +121,14 @@ function createTemporaryEncirclementState(): GameState {
     militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
-                faction: 'FACTION_A',
+                faction: 'RBiH',
                 available: 5000,
                 committed: 0,
                 exhausted: 0,
                 updated_turn: 0
             }
         }
-  } as any,
+  },
   displacement: {
     displacement_state: {
             'MUN_A': {
@@ -138,8 +140,8 @@ function createTemporaryEncirclementState(): GameState {
                 last_updated_turn: 0
             }
         }
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
@@ -147,10 +149,10 @@ function createTemporaryEncirclementState(): GameState {
 function createCorridorLifelineState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'corridor-lifeline-seed' },
+  meta: { turn: 0, seed: 'corridor-lifeline-seed', phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_A_s1', 'MUN_A_s2', 'MUN_B_s1', 'MUN_B_s2'],
                 supply_sources: ['MUN_B_s1'],
@@ -166,14 +168,14 @@ function createCorridorLifelineState(): GameState {
     militia_pools: {
             'MUN_A': {
                 mun_id: 'MUN_A',
-                faction: 'FACTION_A',
+                faction: 'RBiH',
                 available: 5000,
                 committed: 0,
                 exhausted: 0,
                 updated_turn: 0
             }
         }
-  } as any,
+  },
   displacement: {
     displacement_state: {
             'MUN_A': {
@@ -185,8 +187,8 @@ function createCorridorLifelineState(): GameState {
                 last_updated_turn: 0
             }
         }
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
@@ -194,24 +196,24 @@ function createCorridorLifelineState(): GameState {
 function createMultiPocketStressState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'multi-pocket-stress-seed' },
+  meta: { turn: 0, seed: 'multi-pocket-stress-seed', phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_A_s1', 'MUN_A_s2'],
                 supply_sources: [],
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             },
             {
-                id: 'FACTION_B',
+                id: 'RS',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_B_s1', 'MUN_B_s2'],
                 supply_sources: [],
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             },
             {
-                id: 'FACTION_C',
+                id: 'HRHB',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_C_s1', 'MUN_C_s2'],
                 supply_sources: [],
@@ -225,19 +227,19 @@ function createMultiPocketStressState(): GameState {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {
-            'MUN_A': { mun_id: 'MUN_A', faction: 'FACTION_A', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
-            'MUN_B': { mun_id: 'MUN_B', faction: 'FACTION_B', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
-            'MUN_C': { mun_id: 'MUN_C', faction: 'FACTION_C', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
+            'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
+            'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
+            'MUN_C': { mun_id: 'MUN_C', faction: 'HRHB', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
         }
-  } as any,
+  },
   displacement: {
     displacement_state: {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_C': { mun_id: 'MUN_C', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
         }
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
@@ -245,17 +247,17 @@ function createMultiPocketStressState(): GameState {
 function createAsymmetricCollapseState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'asymmetric-collapse-seed' },
+  meta: { turn: 0, seed: 'asymmetric-collapse-seed', phase: 'war' },
   factions: [
             {
-                id: 'FACTION_A',
+                id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_A_s1', 'MUN_A_s2'],
                 supply_sources: [],
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null }
             },
             {
-                id: 'FACTION_B',
+                id: 'RS',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: ['MUN_B_s1', 'MUN_B_s2'],
                 supply_sources: ['MUN_B_s1'],
@@ -269,17 +271,17 @@ function createAsymmetricCollapseState(): GameState {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {
-            'MUN_A': { mun_id: 'MUN_A', faction: 'FACTION_A', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
-            'MUN_B': { mun_id: 'MUN_B', faction: 'FACTION_B', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
+            'MUN_A': { mun_id: 'MUN_A', faction: 'RBiH', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 },
+            'MUN_B': { mun_id: 'MUN_B', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 0 }
         }
-  } as any,
+  },
   displacement: {
     displacement_state: {
             'MUN_A': { mun_id: 'MUN_A', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
             'MUN_B': { mun_id: 'MUN_B', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 }
         }
-  } as any,
-        political: {} as any
+  },
+        political: {}
     };
 }
 
@@ -322,7 +324,7 @@ function computePressureSum(state: GameState): number {
     if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') return 0;
     let sum = 0;
     for (const edgeId in state.military.front_pressure) {
-        const pressure = (state.military.front_pressure as any)[edgeId];
+        const pressure = state.military.front_pressure[edgeId];
         if (pressure && typeof pressure === 'object' && typeof pressure.value === 'number') {
             sum += Math.abs(pressure.value);
         }
@@ -381,7 +383,7 @@ function computeNodePressureMap(state: GameState, seed?: BfsSeedContext): Map<st
     const fp = state.military.front_pressure;
     if (!fp || typeof fp !== 'object') return m;
     for (const edgeId in fp) {
-        const pressure = (fp as any)[edgeId];
+        const pressure = fp[edgeId];
         if (!pressure || typeof pressure !== 'object' || typeof pressure.value !== 'number') continue;
         const pair = parseEdgeId(edgeId);
         if (!pair) continue;
@@ -469,7 +471,7 @@ function computeL1DistanceFromObjects(a: Record<string, number>, b: Record<strin
 
 function extractTurnMetrics(
     state: GameState,
-    turnReport: any,
+    turnReport: TurnReport,
     phase3aAudit: Phase3AAuditSummary | undefined,
     extra?: {
         diffusion_applied?: boolean;
@@ -552,7 +554,7 @@ async function runScenario(
     enablePhase3A: boolean,
     enableDiffusion: boolean,
     turns: number,
-    settlementEdges: Array<{ a: string; b: string }>,
+    settlementEdges: EdgeRecord[],
     seed: BfsSeedContext
 ): Promise<TurnMetrics[]> {
     setEnablePhase3A(enablePhase3A);
@@ -566,7 +568,7 @@ async function runScenario(
         for (let turn = 1; turn <= turns; turn++) {
             const { nextState, report } = await runTurn(state, {
                 seed: state.meta.seed,
-                settlementEdges: settlementEdges as any,
+                settlementEdges,
                 applyNegotiation: false
             });
             state = nextState;
@@ -615,7 +617,7 @@ async function runScenario(
  */
 async function probeScenario(
     scenarioFactory: ScenarioFactory,
-    edges: Array<{ a: string; b: string }>
+    edges: EdgeRecord[]
 ): Promise<number> {
     const initialState = scenarioFactory();
     setEnablePhase3A(false);
@@ -625,7 +627,7 @@ async function probeScenario(
         for (let turn = 1; turn <= 2; turn++) {
             const { nextState } = await runTurn(state, {
                 seed: state.meta.seed,
-                settlementEdges: edges as any,
+                settlementEdges: edges,
                 applyNegotiation: false
             });
             state = nextState;
@@ -638,7 +640,7 @@ async function probeScenario(
 }
 
 function buildBfsSeedContextFromEffectiveEdges(
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number }>,
+    effectiveEdges: EffectivePressureEdge[],
     N: number
 ): BfsSeedContext {
     const eligible = effectiveEdges
@@ -799,10 +801,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     // Assign control deterministically by BFS depth parity so tree edges are front edges.
     // For bottleneck_two_cluster_v1, Cluster B is parity-flipped so the bottleneck endpoints
     // land on opposite factions.
-    let factionA = state.factions.find((f) => f.id === 'FACTION_A');
+    let factionA = state.factions.find((f) => f.id === 'RBiH');
     if (!factionA) {
         factionA = {
-            id: 'FACTION_A',
+            id: 'RBiH',
             profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
             areasOfResponsibility: [],
             supply_sources: [],
@@ -810,10 +812,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
         };
         state.factions.push(factionA);
     }
-    let factionB = state.factions.find((f) => f.id === 'FACTION_B');
+    let factionB = state.factions.find((f) => f.id === 'RS');
     if (!factionB) {
         factionB = {
-            id: 'FACTION_B',
+            id: 'RS',
             profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
             areasOfResponsibility: [],
             supply_sources: [],
@@ -871,7 +873,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     // Materialize seeded tree edges as active front segments and pressure records.
     // (Derived front edges will be recomputed in the pipeline based on AoR; we keep segments here for determinism.)
     for (const eid of seed.tree_edge_ids) {
-        (state.military.front_segments as any)[eid] = {
+        state.military.front_segments[eid] = {
             edge_id: eid,
             active: true,
             created_turn: 0,
@@ -883,7 +885,7 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
             max_friction: 0
         };
         const v = edgeValue[eid] ?? 0;
-        (state.military.front_pressure as any)[eid] = {
+        state.military.front_pressure[eid] = {
             edge_id: eid,
             value: v,
             max_abs: v,
@@ -896,8 +898,8 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
     // to re-quantize only onto intra-cluster tree edges.
     if (seed.seed_method === 'weaklink_two_cluster_v1' && seed.weaklink_edge) {
         const eid = canonicalEdgeId(seed.weaklink_edge.a, seed.weaklink_edge.b);
-        if (!((state.military.front_segments as any)[eid])) {
-            (state.military.front_segments as any)[eid] = {
+        if (!state.military.front_segments[eid]) {
+            state.military.front_segments[eid] = {
                 edge_id: eid,
                 active: true,
                 created_turn: 0,
@@ -909,10 +911,10 @@ function applySeedIntoFrontPressure(state: GameState, seed: BfsSeedContext): voi
                 max_friction: 0
             };
         } else {
-            (state.military.front_segments as any)[eid].active = true;
+            state.military.front_segments[eid].active = true;
         }
-        if (!((state.military.front_pressure as any)[eid])) {
-            (state.military.front_pressure as any)[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
+        if (!state.military.front_pressure[eid]) {
+            state.military.front_pressure[eid] = { edge_id: eid, value: 0, max_abs: 0, last_updated_turn: 0 };
         }
     }
 }
@@ -926,13 +928,13 @@ function typePriority(t: string): number {
 }
 
 function buildBottleneckTwoClusterSeedContext(
-    effectiveEdges: Array<{ a: string; b: string; eligible: boolean; w: number; type?: string }>,
+    effectiveEdges: EffectivePressureEdge[],
     NA: number,
     NB: number
 ): BfsSeedContext {
     const eligible = effectiveEdges
         .filter((e) => e && e.eligible && e.w > 0 && typeof e.a === 'string' && typeof e.b === 'string' && e.a !== e.b)
-        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: (e as any).type ?? 'unknown' }));
+        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: e.type ?? 'unknown' }));
     if (eligible.length === 0) throw new Error('Phase3A bottleneck seed: no eligible effective edges found');
 
     const bottleneck = [...eligible].sort((e1, e2) => {
@@ -1176,7 +1178,7 @@ function buildWeaklinkTwoClusterSeedContext(
     // Candidates: eligible edges with strictly positive w.
     const candidates = effectiveEdges
         .filter((e) => e && e.eligible && typeof e.w === 'number' && e.w > 0 && typeof e.a === 'string' && typeof e.b === 'string' && e.a !== e.b)
-        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: (e as any).type ?? 'unknown' }));
+        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: e.type ?? 'unknown' }));
     if (candidates.length === 0) throw new Error('Phase3A weaklink seed: no eligible edges with w>0 found');
 
     const sorted = [...candidates].sort((e1, e2) => {
@@ -1218,7 +1220,7 @@ function buildTwoClusterSeedFromLink(
     // but takes (u,v) as the chosen link.
     const eligible = effectiveEdges
         .filter((e) => e && e.eligible && typeof e.a === 'string' && typeof e.b === 'string' && e.a !== e.b)
-        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: (e as any).type ?? 'unknown' }));
+        .map((e) => ({ a: e.a, b: e.b, w: e.w, type: e.type ?? 'unknown' }));
     if (eligible.length === 0) throw new Error('Phase3A two-cluster seed: no eligible effective edges found');
 
     const adj = new Map<string, Set<string>>();
@@ -1655,11 +1657,11 @@ async function main(): Promise<void> {
             reportPath: resolve('data/derived/_debug/phase3a_pressure_ab_report_bfs.txt')
         },
         {
-            seed: buildBottleneckTwoClusterSeedContext(eff0.edgesEffective as any, 15, 10),
+            seed: buildBottleneckTwoClusterSeedContext(eff0.edgesEffective, 15, 10),
             reportPath: resolve('data/derived/_debug/phase3a_pressure_ab_report_bottleneck.txt')
         },
         {
-            seed: buildWeaklinkTwoClusterSeedContext(eff0.edgesEffective as any, 15, 10),
+            seed: buildWeaklinkTwoClusterSeedContext(eff0.edgesEffective, 15, 10),
             reportPath: resolve('data/derived/_debug/phase3a_pressure_ab_report_weaklink.txt')
         }
     ];
