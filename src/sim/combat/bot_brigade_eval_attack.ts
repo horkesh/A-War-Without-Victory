@@ -836,6 +836,30 @@ export function evaluateUncontestedOccupation(
             });
             if (sectorHasBrigades) continue;
 
+            // Wave 18: 1-hop proximity guard. Block walk-in if any active enemy
+            // brigade sits at a neighbor of the target OSID. The previous gates
+            // miss the case where the target itself has no defender but an
+            // adjacent OSID DOES — a 1km-away brigade physically covers the
+            // approach and would not let an enemy unit walk in unopposed.
+            // n1979 forensics found 81% of late-war RBiH OSID captures used
+            // this walk-in path; ARBiH brigades capturing east-Herzegovina rim
+            // OSIDs (foca/gacko/bileca/ljubinje/trebinje) when VRS defenders
+            // sat in adjacent OSIDs is unhistorical. Žepče enclave fell at
+            // t36/t62/t69 via the same path despite HVO 111th Brigade nominally
+            // present in adjacent OSIDs of the enclave.
+            const proximityBlocked = profileTime('.proximityScan', () => {
+                if (!activeFormationLocationsByFaction) return false;
+                const targetNeighbors = adjacency.get(n as Osid) ?? [];
+                for (const nn of targetNeighbors) {
+                    if (nn === loc) continue;
+                    if (hasActiveFormationAtOsid(activeFormationLocationsByFaction, controller, nn as Osid)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (proximityBlocked) continue;
+
             // Truly undefended — walk in
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
             result.attack_orders[brigade.id] = n as Osid;

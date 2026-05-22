@@ -190,7 +190,12 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
             'op:zepce:ozimica_2', 'op:zepce:viniste_2',
             'op:zepce:zepce_2',
         ],
-        resilience_start_turn: 40,
+        // Lowered 40→30 (Wave 18): first ARBiH probe arrives t36 historically;
+        // resilience bonus must be active before then. Pairs with the
+        // hrhb_111th_brigade `enclave` tag in oob_brigades.json so the existing
+        // enclave-defense bonus + local-reinforcement infrastructure actually
+        // applies to the Žepče HVO formation.
+        resilience_start_turn: 30,
         capital_osid: 'op:zepce:zepce_2',
     },
 ] as const;
