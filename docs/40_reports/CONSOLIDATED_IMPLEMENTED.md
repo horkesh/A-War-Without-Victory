@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest GUI modal palette unification:** [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: OperationBriefingModal and CommanderSelectionModal now use dark panel tokens with a static guard against light-palette regression.
+
 **Latest GUI peace plan dismissal scope:** [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals.
 
 **Latest GUI peace plan split meters:** [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-plan slice from the 2026-05-22 GUI visual audit: pending peace plans now resolve catalog split data through a browser-safe static import, preventing Vance-Owen territory meters from falling back to 0%.

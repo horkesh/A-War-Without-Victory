@@ -45,12 +45,12 @@ function getAvailabilityStatus(
 
 function getRegionalFit(officer: NamedOfficerView, targetCorpsId: string): { label: string; color: string; penalty: string } {
     if (officer.home_corps_id === targetCorpsId) {
-        return { label: 'HOME CORPS', color: 'text-green-600', penalty: 'no penalty' };
+        return { label: 'HOME CORPS', color: 'text-green-300', penalty: 'no penalty' };
     }
     if (officer.compatible_corps_ids?.includes(targetCorpsId)) {
-        return { label: 'COMPATIBLE', color: 'text-amber-600', penalty: 'small penalty' };
+        return { label: 'COMPATIBLE', color: 'text-accent-gold', penalty: 'small penalty' };
     }
-    return { label: 'OUT OF REGION', color: 'text-red-600', penalty: 'competence -2' };
+    return { label: 'OUT OF REGION', color: 'text-red-300', penalty: 'competence -2' };
 }
 
 export function CommanderSelectionModal({ isOpen, onClose, onSelect }: CommanderSelectionModalProps) {
@@ -108,11 +108,11 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="commander-selection-title"
             backdropClassName="bg-black/60"
-            panelClassName="bg-white border-2 border-neutral-400 shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col"
+            panelClassName="bg-panel-bg border-2 border-panel-border shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col text-text-primary"
         >
             <>
-                <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100">
-                    <div id="commander-selection-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Assign Operations Commander</div>
+                <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80">
+                    <div id="commander-selection-title" className="text-[10px] uppercase font-bold text-text-muted tracking-wider">Assign Operations Commander</div>
                     <div className="text-sm font-bold mt-0.5">
                         {operation?.name ?? context.operationName} - {corpsName}
                     </div>
@@ -127,14 +127,14 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                                 key={officer.id}
                                 type="button"
                                 onClick={() => onSelect?.(officer.id)}
-                                className="kbd-focus w-full text-left p-3 border-2 border-neutral-300 hover:border-amber-500 hover:bg-amber-50 transition-colors"
+                                className="kbd-focus w-full text-left p-3 border-2 border-panel-border bg-panel-card/60 hover:border-accent-gold hover:bg-panel-card transition-colors"
                             >
                                 <div className="flex items-start justify-between">
                                     <div>
                                         <div className="font-bold text-[12px]">
                                             {formatRank(officer.rank)} {officer.name}
                                         </div>
-                                        <div className="text-[9px] text-neutral-500 italic">{getArchetype(officer)}</div>
+                                        <div className="text-[9px] text-text-muted italic">{getArchetype(officer)}</div>
                                     </div>
                                     <span className={`text-[8px] uppercase font-bold ${fit.color}`}>
                                         {fit.label}
@@ -143,30 +143,30 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
 
                                 <div className="mt-1.5 flex gap-4 text-[9px]">
                                     <span>
-                                        <span className="text-neutral-500">Comp </span>
+                                        <span className="text-text-muted">Comp </span>
                                         <span className={`font-mono ${getRatingColor(officer.competence)}`}>{formatPips(officer.competence)}</span>
                                         <span className="text-neutral-400 ml-1">{getCompetenceLabel(officer.competence)}</span>
                                     </span>
                                     <span>
-                                        <span className="text-neutral-500">Agg </span>
+                                        <span className="text-text-muted">Agg </span>
                                         <span className={`font-mono ${getRatingColor(officer.aggressiveness)}`}>{formatPips(officer.aggressiveness)}</span>
                                         <span className="text-neutral-400 ml-1">{getAggressionLabel(officer.aggressiveness)}</span>
                                     </span>
                                 </div>
 
-                                <div className="mt-1 text-[9px] text-neutral-600 italic">
+                                <div className="mt-1 text-[9px] text-text-muted italic">
                                     "{personality}. Est. {prepEst} turns."
                                 </div>
 
                                 {officer.casualty_vulnerability != null && officer.casualty_vulnerability > 0.5 && (
-                                    <div className="mt-0.5 text-[9px] text-red-600 font-semibold">High casualty risk</div>
+                                    <div className="mt-0.5 text-[9px] text-red-300 font-semibold">High casualty risk</div>
                                 )}
                             </button>
                         );
                     })}
 
                     {unavailableOfficers.length > 0 && (
-                        <div className="pt-2 border-t border-neutral-200">
+                        <div className="pt-2 border-t border-panel-border">
                             <div className="text-[8px] uppercase text-neutral-400 font-bold mb-1">Unavailable</div>
                             {unavailableOfficers.map(({ officer, reason }) => (
                                 <div key={officer.id} className="px-3 py-1.5 text-neutral-400 text-[10px]">
@@ -178,15 +178,15 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                     )}
 
                     {availableOfficers.length === 0 && unavailableOfficers.length === 0 && (
-                        <div className="text-[10px] text-neutral-500 italic text-center py-8">No officers found for this faction.</div>
+                        <div className="text-[10px] text-text-muted italic text-center py-8">No officers found for this faction.</div>
                     )}
                 </div>
 
-                <div className="px-4 py-3 border-t-2 border-neutral-300 bg-neutral-50 flex justify-end">
+                <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex justify-end">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="kbd-focus px-4 py-1.5 text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 border border-neutral-400 transition-colors"
+                        className="kbd-focus px-4 py-1.5 text-[10px] uppercase font-bold bg-panel-card hover:bg-panel-border border border-panel-border transition-colors"
                     >
                         Back to Draft
                     </button>

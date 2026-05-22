@@ -39,7 +39,7 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
                 <span className="uppercase font-bold text-neutral-600">{label}</span>
                 <span className="text-neutral-500">{pct}%{thresholdLabel ? ` (need ${thresholdLabel})` : ''}</span>
             </div>
-            <div className="h-2 bg-neutral-200 rounded-sm overflow-hidden">
+            <div className="h-2 bg-panel-border rounded-sm overflow-hidden">
                 <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
             </div>
         </div>
@@ -49,13 +49,13 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
 function AssessmentBadge({ assessment }: { assessment?: string }) {
     switch (assessment) {
         case 'launch':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-100 text-green-800 border border-green-300">Recommends Launch</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">Recommends Launch</span>;
         case 'postpone':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-800 border border-amber-300">Recommends Postpone</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">Recommends Postpone</span>;
         case 'abort':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-red-100 text-red-800 border border-red-300">Recommends Abort</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">Recommends Abort</span>;
         default:
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-neutral-100 text-neutral-600 border border-neutral-300">Pending Assessment</span>;
+            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-panel-card text-text-muted border border-panel-border">Pending Assessment</span>;
     }
 }
 
@@ -65,9 +65,9 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
  */
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
-        <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-50 flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800">⚠ Presidential Override — Direct Intervention</span>
-            <span className="text-[9px] text-amber-600" style={{ opacity: 0.7 }}>Cost: {caCost} CA</span>
+        <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-950/30 flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">⚠ Presidential Override — Direct Intervention</span>
+            <span className="text-[9px] text-amber-300" style={{ opacity: 0.7 }}>Cost: {caCost} CA</span>
         </div>
     );
 }
@@ -85,8 +85,8 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     const outcomeCategory = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
 
     return (
-        <div className="mx-4 mt-3 mb-1 border border-neutral-300 bg-neutral-50">
-            <div className="px-3 py-1.5 border-b border-neutral-200 bg-neutral-100">
+        <div className="mx-4 mt-3 mb-1 border border-panel-border bg-panel-card/70">
+            <div className="px-3 py-1.5 border-b border-panel-border bg-panel-card">
                 <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Command Record</span>
             </div>
             <div className="px-3 py-2 space-y-1">
@@ -97,22 +97,22 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                 <div className="flex items-center gap-2">
                     <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Presidential Decision</span>
                     {outcomeCategory === 'direct_intervention' ? (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-800 border border-amber-400">
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
                             ⚠ Direct Intervention
                         </span>
                     ) : outcomeCategory === 'reluctant_compliance' ? (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-50 text-amber-700 border border-amber-300">
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
                             Approved Against Recommendation
                         </span>
                     ) : (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-100 text-green-800 border border-green-300">
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">
                             Ordinary Compliance
                         </span>
                     )}
                 </div>
                 {/* Reluctant compliance explanation — command chain complied under presidential direction, no CA spent */}
                 {outcomeCategory === 'reluctant_compliance' && (
-                    <div className="flex items-start gap-2 pt-1 border-t border-neutral-200 mt-1">
+                    <div className="flex items-start gap-2 pt-1 border-t border-panel-border mt-1">
                         <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">Interpretation</span>
                         <p className="text-[10px] text-amber-700 leading-snug">
                             Launched against the commander's recommendation to {assessmentAtLaunch}. The command chain complied under presidential direction.
@@ -128,7 +128,7 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                 )}
                 {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
                 {wasForce && corpsStrain > 0 && (
-                    <div className="flex items-center gap-2 pt-1 border-t border-neutral-200 mt-1">
+                    <div className="flex items-center gap-2 pt-1 border-t border-panel-border mt-1">
                         <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Strain</span>
                         <span className={`text-[10px] font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
                             {corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'} — direct interventions have damaged this command relationship
@@ -151,7 +151,7 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
 const DELEGATION_CONFIG: Record<string, { icon: string; borderClass: string; textClass: string } | null> = {
     normal_delegation: null,     // Silence = healthy
     strained_delegation: { icon: '⚡', borderClass: 'border-amber-300/40', textClass: 'text-amber-700' },
-    presidential_direction: { icon: '◆', borderClass: 'border-blue-400/40', textClass: 'text-blue-800' },
+    presidential_direction: { icon: '◆', borderClass: 'border-blue-400/40', textClass: 'text-blue-200' },
 };
 
 /** Compact delegation path indicator — one line showing who bears the decision burden.
@@ -163,7 +163,7 @@ function DelegationPathIndicator({ delegation }: { delegation: DelegationContext
     if (!config) return null;
 
     return (
-        <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-neutral-50/50`}>
+        <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-panel-card/60`}>
             <div className="flex items-start gap-2">
                 <span className={`shrink-0 text-[10px] mt-px ${config.textClass}`}>{config.icon}</span>
                 <span className={`text-[10px] leading-snug ${config.textClass}`}>{delegation.label}</span>
@@ -196,7 +196,7 @@ function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined 
     if (!config) return null;
 
     return (
-        <div className="mx-4 my-1 px-3 py-1.5 border border-neutral-200 bg-neutral-50/50">
+        <div className="mx-4 my-1 px-3 py-1.5 border border-panel-border bg-panel-card/60">
             <div className="flex items-start gap-2">
                 <span className={`shrink-0 font-bold text-[11px] mt-px ${config.color}`}>{config.arrow}</span>
                 <span className="text-[10px] text-neutral-600 leading-snug">{trend.label}</span>
@@ -206,7 +206,7 @@ function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined 
                     <span className="text-[9px] text-neutral-400 shrink-0">⏱</span>
                     <span className="text-[9px] text-neutral-500">{trend.timelineLabel}</span>
                     {trend.timelineFraction != null && (
-                        <div className="flex-1 h-1 bg-neutral-200 rounded-sm overflow-hidden max-w-[80px]">
+                        <div className="flex-1 h-1 bg-panel-border rounded-sm overflow-hidden max-w-[80px]">
                             <div
                                 className={`h-full transition-all ${trend.timelineFraction >= 0.75 ? 'bg-amber-500' : 'bg-neutral-400'}`}
                                 style={{ width: `${Math.round(trend.timelineFraction * 100)}%` }}
@@ -240,7 +240,7 @@ function RecommendationDriverSection({ explanation }: {
     if (!explanation || !explanation.recommendationReason) return null;
 
     return (
-        <div className="mx-4 my-2 px-3 py-2 border border-neutral-200 bg-neutral-50">
+        <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
             <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Recommendation Driver</div>
             <div className="flex items-start gap-2">
                 {explanation.mainBlocker && (
@@ -271,12 +271,12 @@ function RecommendationDriverSection({ explanation }: {
 type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
 
 const CONSTRAINT_BADGE_MODAL: Record<PrimaryConstraint, { label: string; className: string } | null> = {
-    siege: { label: 'SIEGE', className: 'bg-red-100 text-red-800 border-red-300' },
-    threat_pressure: { label: 'THREAT', className: 'bg-red-50 text-red-700 border-red-200' },
-    defensive_duty: { label: 'GARRISON', className: 'bg-amber-100 text-amber-800 border-amber-300' },
-    force_condition: { label: 'READINESS', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-    institutional_strain: { label: 'INSTITUTIONAL', className: 'bg-blue-50 text-blue-700 border-blue-200' },
-    plan_lifecycle: { label: 'PLANNING', className: 'bg-neutral-100 text-neutral-600 border-neutral-300' },
+    siege: { label: 'SIEGE', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
+    threat_pressure: { label: 'THREAT', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
+    defensive_duty: { label: 'GARRISON', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
+    force_condition: { label: 'READINESS', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
+    institutional_strain: { label: 'INSTITUTIONAL', className: 'bg-blue-950/40 text-blue-200 border-blue-500/50' },
+    plan_lifecycle: { label: 'PLANNING', className: 'bg-panel-card text-text-muted border-panel-border' },
     none: null,
 };
 
@@ -297,7 +297,7 @@ function OperationConstraintContext({ assessment }: {
     const badge = CONSTRAINT_BADGE_MODAL[primaryConstraint];
 
     return (
-        <div className="mx-4 my-2 px-3 py-2 border border-neutral-200 bg-neutral-50">
+        <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
             <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Corps Constraint</div>
             <div className="flex items-start gap-2">
                 {badge && (
@@ -338,22 +338,22 @@ function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corps
             : 'The commander recommends waiting. Forcing launch overrides that judgment.');
 
     return (
-        <div className="mx-4 my-3 border border-amber-400/40 bg-amber-50">
-            <div className="px-3 py-2 border-b border-amber-300/60 bg-amber-100/60 flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800">Direct Intervention</span>
+        <div className="mx-4 my-3 border border-amber-400/40 bg-amber-950/30">
+            <div className="px-3 py-2 border-b border-amber-400/50 bg-amber-950/40 flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-100">Direct Intervention</span>
                 <span className="text-[9px] uppercase font-bold tracking-wider text-amber-600">Level 3</span>
             </div>
             <div className="px-3 py-2 space-y-2">
                 {/* Compound-risk notice — silence = healthy (no notice at strain 0). */}
                 {corpsStrain > 0 && (
-                    <p className="text-[10px] text-amber-900 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-100/60 py-1">
+                    <p className="text-[10px] text-amber-100 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-950/40 py-1">
                         ⚠ This corps already carries command strain ({corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'}). A further Direct Intervention will compound institutional damage.
                     </p>
                 )}
-                <p className="text-[10px] text-amber-900 leading-relaxed">{explanation}</p>
+                <p className="text-[10px] text-amber-100 leading-relaxed">{explanation}</p>
                 <div className="flex items-center gap-4 text-[10px] font-mono tabular-nums">
                     <span className="text-neutral-600">
-                        Command Authority: <b className="text-neutral-800">{currentAuth}</b> → <b className={canAfford ? 'text-amber-700' : 'text-red-600'}>{canAfford ? remaining : currentAuth}</b> after
+                        Command Authority: <b className="text-text-primary">{currentAuth}</b> → <b className={canAfford ? 'text-amber-200' : 'text-red-300'}>{canAfford ? remaining : currentAuth}</b> after
                     </span>
                     <span className="text-neutral-500">Cost: {FORCE_LAUNCH_COST} | Recovery: +{RECOVERY_PER_TURN}/turn</span>
                 </div>
@@ -363,8 +363,8 @@ function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corps
                     disabled={!canAfford}
                     className={`w-full mt-1 px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider border transition-colors ${
                         canAfford
-                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-400 cursor-pointer'
-                            : 'bg-neutral-100 text-neutral-400 border-neutral-300 cursor-not-allowed'
+                            ? 'bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border-amber-400 cursor-pointer'
+                            : 'bg-panel-card text-neutral-400 border-panel-border cursor-not-allowed'
                     }`}
                     title={canAfford
                         ? `Spend ${FORCE_LAUNCH_COST} Command Authority to override the command chain`
@@ -463,11 +463,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="operation-briefing-title"
             backdropClassName="bg-black/60"
-            panelClassName="bg-white border-2 border-neutral-400 shadow-xl max-w-lg w-full"
+            panelClassName="bg-panel-bg border-2 border-panel-border shadow-xl max-w-lg w-full text-text-primary"
         >
             <>
                 {/* Header — operation name + stamp */}
-                <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100 relative">
+                <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80 relative">
                     <div className={`absolute top-1 right-3 opacity-15 font-black text-2xl -rotate-12 select-none uppercase ${assessment === 'launch' ? 'text-green-700' : assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
                         BRIEFING
                     </div>
@@ -494,7 +494,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Commander info */}
                 {commander && (
-                    <div className="px-4 py-2 border-b border-neutral-200 bg-neutral-50">
+                    <div className="px-4 py-2 border-b border-panel-border bg-panel-card/60">
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">Ops Commander</div>
                         <div className="flex items-center gap-3">
                             <div>
@@ -518,7 +518,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     )}
 
                     {forceBalance && (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-neutral-200">
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-panel-border">
                             <span className="text-[9px] uppercase font-bold text-neutral-600">Force Balance Estimate</span>
                             <span className={`text-[11px] font-bold ${forceBalance.toneClass}`}>
                                 {forceBalance.label}
@@ -531,7 +531,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 </div>
 
                 {/* Assessment badge */}
-                <div className="px-4 py-2 border-t border-neutral-200 flex items-center gap-3">
+                <div className="px-4 py-2 border-t border-panel-border flex items-center gap-3">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">Commander Assessment:</span>
                     <AssessmentBadge assessment={assessment} />
                     {postponements > 0 && (
@@ -585,7 +585,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 )}
 
                 {/* Action buttons */}
-                <div className="px-4 py-3 border-t-2 border-neutral-300 bg-neutral-50 flex gap-2 flex-wrap">
+                <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">
                     <button
                         type="button"
                         onClick={onLaunch}
@@ -604,14 +604,14 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         type="button"
                         onClick={onPostpone}
                         disabled={postponements >= 2}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         Postpone{postponements >= 2 ? ' (max reached)' : ''}
                     </button>
                     <button
                         type="button"
                         onClick={onAbort}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-100 hover:bg-red-200 text-red-800 border border-red-300 transition-colors"
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors"
                     >
                         Abort Operation
                     </button>
@@ -619,7 +619,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <button
                         type="button"
                         onClick={onClose}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 border border-neutral-400 transition-colors"
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-panel-card hover:bg-panel-border text-text-primary border border-panel-border transition-colors"
                     >
                         Close
                     </button>

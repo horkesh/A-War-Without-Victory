@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): unify operation modal palette
+
+**Type:** Tactical-map modal visual-system fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch D identified `OperationBriefingModal` and `CommanderSelectionModal` as light-theme leaks on consequential operation-command surfaces.
+
+**Change:** Re-skinned `OperationBriefingModal` and `CommanderSelectionModal` to use dark panel tokens (`bg-panel-bg`, `bg-panel-card`, `border-panel-border`, `text-text-primary`) across shells, headers, roster/record cards, direct-intervention cards, and action bars. Added `tests/ui/modal_palette_unification.test.ts` to require the panel token palette and forbid the old light palette tokens in both Batch D target files.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts --reporter=dot` failed before the patch because both target files lacked `bg-panel-bg` and still carried the old light palette. After the patch, `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts --reporter=dot` passed 2/2. Focused modal contracts `npx.cmd vitest run tests\ui\modal_palette_unification.test.ts tests\modal_migration_2.test.ts tests\v093_a11y_lane_a_modal_stack.test.ts --reporter=dot` passed 35/35. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/OperationBriefingModal.tsx`; `src/ui/map/components/CommanderSelectionModal.tsx`; `tests/ui/modal_palette_unification.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch D. Remaining GUI audit queue: stale-state resets, Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): scope peace plan dismissal by offer
 
 **Type:** Tactical-map UI modal-state fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
