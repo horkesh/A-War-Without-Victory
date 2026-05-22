@@ -12,9 +12,7 @@ import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_na
 import { Z } from '../../../shared/zIndex';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
 import { t } from '../../i18n';
-
-let nextAxisCounter = 0;
-function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
+import { getNextAxisId, hasOpsPlanningDraftAssignments } from './opsPlanningDraft';
 
 function generateOpName(corpsId: string, turn: number, faction: string): string {
     // Use faction-specific names if available, else all names
@@ -39,6 +37,7 @@ export function OpsPlanningModal() {
     const [highestPhase, setHighestPhase] = useState(0);
     const [g2AssessmentViewed, setG2AssessmentViewed] = useState(false);
     const [phaseGateMessage, setPhaseGateMessage] = useState<string | null>(null);
+    const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
     const phaseGateTimeoutRef = useRef<number | null>(null);
     const [centroidLookup, setCentroidLookup] = useState<Map<string, [number, number]>>(new Map());
 
@@ -60,22 +59,25 @@ export function OpsPlanningModal() {
         return '';
     }, [loadedGameState, corpsId, originSectorId]);
 
-    const [plan, setPlan] = useState<OpsPlanState>(() => ({
-        opName: '',
-        opType: 'sector_attack',
-        tempo: 'standard',
-        tolerance: 'costly_victory',
-        artilleryPreparation: false,
-        schwerpunktOsid: '',
-        axes: [{ id: makeAxisId(), name: 'Main Axis', brigadeIds: [], objectives: [], stagingOsid: undefined }],
-        activeAxisId: '',
-        defaultStagingOsid: '',
-    }));
+    const [plan, setPlan] = useState<OpsPlanState>(() => {
+        const initialAxisId = getNextAxisId([]);
+        return {
+            opName: '',
+            opType: 'sector_attack',
+            tempo: 'standard',
+            tolerance: 'costly_victory',
+            artilleryPreparation: false,
+            schwerpunktOsid: '',
+            axes: [{ id: initialAxisId, name: 'Main Axis', brigadeIds: [], objectives: [], stagingOsid: undefined }],
+            activeAxisId: initialAxisId,
+            defaultStagingOsid: '',
+        };
+    });
 
     // Reset plan when modal opens
     useEffect(() => {
         if (isOpen && corpsId) {
-            const initialAxis: AxisState = { id: makeAxisId(), name: 'Main Axis', brigadeIds: [], objectives: [] };
+            const initialAxis: AxisState = { id: getNextAxisId([]), name: 'Main Axis', brigadeIds: [], objectives: [] };
             setPlan({
                 opName: generateOpName(corpsId, loadedGameState?.turn ?? 0,
                     loadedGameState?.formations.find((f) => f.id === corpsId)?.faction ?? ''),
@@ -92,6 +94,7 @@ export function OpsPlanningModal() {
             setHighestPhase(0);
             setG2AssessmentViewed(false);
             setPhaseGateMessage(null);
+            setDiscardConfirmOpen(false);
         }
     }, [isOpen, corpsId, defaultStagingOsid, loadedGameState?.turn]);
 
@@ -102,11 +105,28 @@ export function OpsPlanningModal() {
         if (phase === 'g2_assessment') setG2AssessmentViewed(true);
     }, [phase]);
 
+    const requestCloseOpsPlanning = useCallback(() => {
+        if (discardConfirmOpen) {
+            setDiscardConfirmOpen(false);
+            return;
+        }
+        if (hasOpsPlanningDraftAssignments(plan)) {
+            setDiscardConfirmOpen(true);
+            return;
+        }
+        clearContext();
+    }, [clearContext, discardConfirmOpen, plan]);
+
+    const confirmDiscardOpsPlanning = useCallback(() => {
+        setDiscardConfirmOpen(false);
+        clearContext();
+    }, [clearContext]);
+
     // Keyboard navigation
     useEffect(() => {
         if (!isOpen) return;
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') { clearContext(); return; }
+            if (e.key === 'Escape') { requestCloseOpsPlanning(); return; }
             const currentIdx = PHASE_ORDER.indexOf(phase);
             if (e.key === 'ArrowRight' && currentIdx < highestPhase) {
                 setPhase(PHASE_ORDER[currentIdx + 1]);
@@ -121,7 +141,7 @@ export function OpsPlanningModal() {
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [isOpen, phase, highestPhase, clearContext]);
+    }, [isOpen, phase, highestPhase, requestCloseOpsPlanning]);
 
     const hasCommander = selectedOfficerId != null && selectedOfficerId.length > 0;
 
@@ -376,6 +396,46 @@ export function OpsPlanningModal() {
                 </div>
             )}
 
+            {discardConfirmOpen && (
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="ops-planning-discard-title"
+                    className="absolute top-16 right-4 z-40 w-[320px] rounded-lg border border-red-400/30
+                               bg-[rgba(20,18,15,0.96)] p-4 text-text-primary shadow-2xl backdrop-blur-xl"
+                >
+                    <div
+                        id="ops-planning-discard-title"
+                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-red-300"
+                    >
+                        {t('opsPlanning.discard.title')}
+                    </div>
+                    <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
+                        {t('opsPlanning.discard.body')}
+                    </p>
+                    <div className="mt-4 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setDiscardConfirmOpen(false)}
+                            className="rounded border border-[rgba(180,160,130,0.2)] px-3 py-1.5
+                                       text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary
+                                       hover:border-accent-gold/35 hover:text-white"
+                        >
+                            {t('opsPlanning.discard.keepPlanning')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={confirmDiscardOpsPlanning}
+                            className="rounded border border-red-400/35 bg-red-500/15 px-3 py-1.5
+                                       text-[10px] font-bold uppercase tracking-[0.14em] text-red-200
+                                       hover:bg-red-500/25"
+                        >
+                            {t('opsPlanning.discard.discardDraft')}
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Phase content */}
             {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
             {phase === 'plan' && (
@@ -414,7 +474,7 @@ export function OpsPlanningModal() {
             {/* WP4d: Enlarged close button with title */}
             <button
                 type="button"
-                onClick={clearContext}
+                onClick={requestCloseOpsPlanning}
                 title={t('opsModal.closePlanningTitle')}
                 className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
                            text-text-secondary hover:text-white rounded-full

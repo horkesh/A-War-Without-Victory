@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit polish cleanup H1)
+**Updated:** 2026-05-22 (GUI visual audit ops planning draft guard H2)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit ops planning draft guard H2** | [implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md](implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md) - second Batch H slice from the 2026-05-22 GUI visual audit: Ops Planning now confirms discard when a draft has assigned objectives or brigades, and axis IDs derive from local plan state instead of a module-global counter. |
 | **GUI visual audit polish cleanup H1** | [implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md](implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md) - first Batch H polish slice from the 2026-05-22 GUI visual audit: dead coachmark selector fields, dev separators, raw warning glyphs, duplicated force-launch constants, and OpsMap console logs are cleaned up with static guards. |
 | **GUI visual audit dead control feedback** | [implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md](implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md) - Batch G from the 2026-05-22 GUI visual audit: onboarding targets now draw a spotlight, unsupported order overrides no longer render as active no-op controls, and browser/no-IPC decision controls show bridge-unavailable feedback. |
 | **GUI visual audit Warroom shell ownership** | [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is now game-only, Warroom return affordances recognize `?view=warroom`, Army HQ close labels are de-duplicated, and Decision Room command-lane headlines are de-duplicated. |
@@ -105,6 +106,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit ops planning draft guard H2** - Ops Planning now confirms discard when a draft has assigned objectives or brigades, and axis IDs derive from local plan state instead of a module-global counter. | [implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md](implemented/20260522_GUI_AUDIT_OPS_PLANNING_DRAFT_GUARD_H2.md) |
 | 2026-05-22 | **GUI visual audit polish cleanup H1** - dead coachmark selector fields, dev separators, raw warning glyphs, duplicated force-launch constants, and OpsMap console logs are cleaned up with static guards. | [implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md](implemented/20260522_GUI_AUDIT_POLISH_CLEANUP_H1.md) |
 | 2026-05-22 | **GUI visual audit dead control feedback** - onboarding targets now draw a spotlight, unsupported order overrides no longer render as active no-op controls, and browser/no-IPC decision controls show bridge-unavailable feedback. | [implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md](implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md) |
 | 2026-05-22 | **GUI visual audit Warroom shell ownership** - tactical chrome is now game-only, `?view=warroom` exposes the Warroom return affordance, Army HQ exposes one close label, and duplicate Decision Room command-lane headlines are de-duplicated. | [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) |
