@@ -3667,6 +3667,26 @@
           "headline": "RBiH President Remains In Sarajevo",
           "body": "The RBiH presidency is staying in Sarajevo while staff officers handle front-line contact. The decision keeps political attention on capital-level command and diplomacy."
         }
+      },
+      "visit_bihac": {
+        "HRHB": {
+          "headline": "Sarajevo visits the Bihac pocket",
+          "body": "RBiH leadership directs attention to Dudakovic's isolated 5th Corps. Mostar sees a morale and cohesion signal to the western pocket, with logistics costs attached."
+        },
+        "RS": {
+          "headline": "Sarajevo visits the Bihac pocket",
+          "body": "RBiH leadership gives official attention to the isolated 5th Corps. Pale sees Sarajevo trying to reinforce morale in Bihac despite the pocket's logistical strain."
+        }
+      },
+      "visit_press_rbih": {
+        "HRHB": {
+          "headline": "Sarajevo turns front visit into press event",
+          "body": "RBiH brings foreign journalists into the visit and emphasizes the human cost of the siege. Mostar sees stronger international messaging, but less pure command presence."
+        },
+        "RS": {
+          "headline": "Sarajevo brings foreign press to front visit",
+          "body": "RBiH converts the visit into an international media event about siege conditions. Pale sees Sarajevo trading command focus for diplomatic pressure."
+        }
       }
     }
   },
@@ -4162,6 +4182,26 @@
         "RS": {
           "headline": "HRHB President Stays In Mostar",
           "body": "HRHB leadership is keeping the front visit at deputy-command level while diplomatic contacts continue in Mostar."
+        }
+      },
+      "visit_mostar_front": {
+        "RBiH": {
+          "headline": "Herceg-Bosna tours the Mostar front",
+          "body": "HRHB leadership visits HVO positions around Mostar while international attention remains on the city. Sarajevo sees a morale signal to HVO troops, but also diplomatic exposure."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna tours the Mostar front",
+          "body": "HRHB leadership puts public attention on HVO positions around Mostar. Pale sees an HVO cohesion signal in Herzegovina, with international scrutiny attached."
+        }
+      },
+      "visit_central_bosnia": {
+        "RBiH": {
+          "headline": "Herceg-Bosna visits central Bosnia garrisons",
+          "body": "HRHB leadership travels to the Vitez-Busovaca pocket and signals that the central Bosnia garrisons have not been abandoned. Sarajevo sees morale support for an embattled HVO command."
+        },
+        "RS": {
+          "headline": "Herceg-Bosna visits central Bosnia garrisons",
+          "body": "HRHB leadership gives attention to the Vitez-Busovaca pocket and its supply strain. Pale sees HVO cohesion reinforced in central Bosnia."
         }
       }
     }

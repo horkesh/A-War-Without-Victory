@@ -19,7 +19,7 @@ No sensitive recipient copy is provided here.
 | Narrative tone required | 0 | 0 | Closed 2026-05-22 by the 1992 foundational-decision narrative-tone slice. |
 | Washington timing policy | 0 | 0 | Closed 2026-05-22 by the Washington-timing notification slice. |
 | Late-war outcome policy | 0 | 0 | Closed 2026-05-22 by the 1994 diplomacy and 1995 endgame/outcome slices. |
-| Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
+| Front-visit mixed-sensitive | 3 | 10 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
 ## Prep Matrix Addendum 2026-05-21
 
@@ -29,9 +29,9 @@ Docs-only prep is complete:
 - Historian packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_HISTORIAN_REVIEW_PACKET.md`
 - Narrative/timing/outcome packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_NARRATIVE_TIMING_PACKET.md`
 
-The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice, 2026-05-22 narrative-tone slice, 2026-05-22 Washington-timing slice, 2026-05-22 1994 late-war diplomacy slice, and 2026-05-22 1995 late-war outcome slice, the active residual is 9 rows / 46 blocks.
+The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice, 2026-05-22 narrative-tone slice, 2026-05-22 Washington-timing slice, 2026-05-22 1994 late-war diplomacy slice, 2026-05-22 1995 late-war outcome slice, and 2026-05-22 front-visit narrative-tone slice, the active residual is 9 rows / 38 blocks.
 
-First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Third implementation slice closed 2026-05-22: the two Washington-timing rows are authored under the two-clock policy. Fourth implementation slice closed 2026-05-22: the three 1994 late-war diplomacy rows are authored without asserting final outcome facts. Fifth implementation slice closed 2026-05-22: the four 1995 late-war outcome rows are authored with posture/process copy that avoids unsupported final-settlement assertions. Blocked-sensitive and other gated front-visit blocks remain out of scope.
+First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Third implementation slice closed 2026-05-22: the two Washington-timing rows are authored under the two-clock policy. Fourth implementation slice closed 2026-05-22: the three 1994 late-war diplomacy rows are authored without asserting final outcome facts. Fifth implementation slice closed 2026-05-22: the four 1995 late-war outcome rows are authored with posture/process copy that avoids unsupported final-settlement assertions. Sixth implementation slice closed 2026-05-22: eight front-visit narrative-tone blocks are authored for Bihac, RBiH press, Mostar, and central-Bosnia options. Blocked-sensitive and historian-gated front-visit blocks remain out of scope.
 
 Required tests for the safe slice:
 

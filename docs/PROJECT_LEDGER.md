@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close front-visit tone rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
+
+**Why:** The Phase D front-visit residual bucket contained a narrative-tone subset that did not need new historical facts: Bihac command attention, RBiH press messaging, Mostar front signaling, and central-Bosnia garrison morale. Sarajevo siege, Drina enclave, RS press, and HRHB press options remain gated.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `visit_bihac` and `visit_press_rbih` on `visit_to_front_rbih`, plus `visit_mostar_front` and `visit_central_bosnia` on `visit_to_front_hrhb`. The text stays within command-presence, morale, logistics, media, and diplomatic-signaling facts already present in the event rows.
+
+**Verification:** `node -e "JSON.parse(require('fs').readFileSync('data/scenarios/events/war_1993.json','utf8')); console.log('war_1993 json ok')"` passed. `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 32/32. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1993.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_FRONT_VISIT_TONE.md`; `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+**Roadmap delta:** Front-visit mixed-sensitive residual drops from 18 blocks to 10 blocks. Overall Phase D notification residual drops from 9 rows / 46 blocks to 9 rows / 38 blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close 1995 late-war outcome rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
