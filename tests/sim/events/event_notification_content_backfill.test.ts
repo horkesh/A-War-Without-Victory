@@ -195,6 +195,47 @@ describe('event notification content backfill', () => {
         }
     });
 
+    it('covers historian-cleared NATO and UN crisis rows for non-source recipients', () => {
+        const war1994Events = loadWar1994Events();
+        const war1995Events = loadWar1995Events();
+        const cases = [
+            {
+                events: war1994Events,
+                eventId: 'nato_ultimatum_sarajevo_1994',
+                source: 'RS',
+                responses: {
+                    comply_withdraw_hwez: ['HRHB', 'RBiH'],
+                    defy_ultimatum_hwez: ['HRHB', 'RBiH'],
+                },
+            },
+            {
+                events: war1995Events,
+                eventId: 'un_hostage_crisis_1995',
+                source: 'RS',
+                responses: {
+                    maintain_hostages: ['HRHB', 'RBiH'],
+                    release_gradually: ['HRHB', 'RBiH'],
+                },
+            },
+        ];
+
+        for (const { events, eventId, source, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
     it('covers London Conference responses for non-RBiH recipients', () => {
         const events = loadWar1992Events();
         const event = events.find((entry) => entry.id === 'london_conference_1992');

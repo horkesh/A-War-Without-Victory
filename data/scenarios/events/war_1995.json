@@ -282,6 +282,28 @@
         "risk_level": 0.5
       }
     ],
+    "notifications_to_other_factions": {
+      "maintain_hostages": {
+        "RBiH": {
+          "headline": "VRS keeps UN hostages as leverage",
+          "body": "RS continues holding UN peacekeepers after NATO strikes near Pale. Sarajevo sees NATO pressure interrupted in the short term, but RS diplomatic isolation deepens."
+        },
+        "HRHB": {
+          "headline": "VRS maintains UN hostage pressure",
+          "body": "RS keeps UN personnel as a shield against further NATO strikes. Mostar sees the air campaign pause, while Western resolve hardens around the humiliation of UNPROFOR."
+        }
+      },
+      "release_gradually": {
+        "RBiH": {
+          "headline": "VRS trades UN hostage releases",
+          "body": "RS begins releasing hostages in exchange for guarantees and concessions. Sarajevo sees some diplomatic damage contained, but NATO hesitation remains part of the exchange."
+        },
+        "HRHB": {
+          "headline": "VRS starts phased hostage release",
+          "body": "RS uses gradual releases to seek limits on further NATO action. Mostar sees a partial de-escalation that still leaves RS credibility badly damaged."
+        }
+      }
+    },
     "dimension_shifts": [
       {
         "faction": "RS",
