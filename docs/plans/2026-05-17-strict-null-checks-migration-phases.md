@@ -453,6 +453,8 @@ Deferred / stop-gated (≈ 175 sites; documented per-class in the classification
 
 `strictNullChecks` migration is NOT closed; closing requires Batches A + B + C + save-shape/behavior lane + UI/engine FactionId unification + validator type-tightening lane.
 
+2026-05-22 update: the deferred cast/assertion list above is retained as historical classification context only. The GameStateAdapter tail closed the last visible counted escape lane, so current strict-null work is no longer broad cast/assertion cleanup; it is the 477-field optional `GameState` contract/schema/defaulting lane.
+
 ## Source Migration Status
 
 No source phase was completed in this lane. Current worktree status shows unrelated active edits in protected source areas (`supply`, `paramilitary`, `RBiH-HRHB`, `fatigue`, and turn pipeline files), so type-only source migration is deferred to avoid conflicts.
@@ -486,4 +488,11 @@ No source phase was completed in this lane. Current worktree status shows unrela
 - Delta: top-level `as_any_casts` 31 -> 8; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` remain 0.
 - Verification: `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` PASS 90/90, `npm.cmd run typecheck` PASS, `npm.cmd run test:baselines` PASS (`Baseline regression: all scenarios match.`), `git diff --check` PASS, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
 - Implementation note: the slice replaces casts on `state` / `state.military` with direct typed reads or the existing tolerant `asRecord(...)` save-boundary helper. It does not add, remove, or change migration defaults.
-- Remaining visible strict-null escapes: `src/ui/map/data/GameStateAdapter.ts` has 8 `as_any_casts` and 2 retained `as_factionid_casts`. The Phase 3ABC addendum above is superseded for current counts by this addendum.
+- Remaining visible strict-null escapes at this floor: `src/ui/map/data/GameStateAdapter.ts` has 8 `as_any_casts` and 2 retained `as_factionid_casts`. The Phase 3ABC addendum above is superseded for current counts by this addendum, and the GameStateAdapter addendum below supersedes this line for current counts.
+
+## 2026-05-22 GameStateAdapter Tail Addendum
+
+- `src/ui/map/data/GameStateAdapter.ts` is now closed for inventory-counted `as_any_casts` and `as_factionid_casts`, and the Phase 5 adapter assertion is pinned at exact zero across all counted escape/assertion categories.
+- Delta from the save-migration tail: top-level `as_any_casts` 8 -> 0 and `as_factionid_casts` 2 -> 0; `as_unknown_casts`, `non_null_assertions_dot`, and `non_null_assertions_index` remain 0.
+- Verification: `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts tests\adapter_field_completeness.test.ts tests\game_state_adapter_estimated_civilian_risk.test.ts tests\ui_adapter_boundary.test.ts tests\ui_map_game_state_adapter.test.ts --reporter=dot` PASS 148/148, `npm.cmd run typecheck` PASS, `npm.cmd run desktop:map:build` PASS with existing Vite warnings, `git diff --check` PASS, and current inventory proof from `node tools\diagnostics\strict_null_inventory.cjs`.
+- Remaining strict-null work: 477 optional `GameState` fields. This is a contract/schema/default-decision lane, not a remaining cast/assertion cleanup lane.

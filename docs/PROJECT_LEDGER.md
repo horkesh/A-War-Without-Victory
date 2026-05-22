@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(backlog): reconcile strict-null zero-count floor
+
+**Type:** Documentation-only roadmap/backlog reconciliation. No code, tests, behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, UI implementation, or turn ordering changed.
+
+**Why:** The consolidated backlog and historical strict-null phase ledger still surfaced stale current-count text from before the GameStateAdapter tail, even though the live diagnostic now reports zero counted casts/assertions and only the optional `GameState` field lane remains.
+
+**Change:** Updated `CONSOLIDATED_BACKLOG.md`, `MASTER_ROADMAP.md`, and the strict-null phase ledger to treat the visible counted strict-null escape lanes as closed at the 2026-05-22 zero-count floor and to route remaining work to the 477 optional `GameState` contract/schema queue.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, and `optional_fields_game_state 477`. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/CONSOLIDATED_BACKLOG.md`; `docs/plans/MASTER_ROADMAP.md`; `docs/plans/2026-05-17-strict-null-checks-migration-phases.md`.
+
+**Roadmap delta:** Prevents stale strict-null cast/assertion cleanup queues from resurfacing as active backlog; next strict-null work is optional `GameState` schema/defaulting review.
+
+---
+
 ## [2026-05-22] content(notifications): close 1992 narrative-tone rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, turn ordering, or feature-flag behavior changed.
