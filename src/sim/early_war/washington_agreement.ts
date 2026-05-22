@@ -272,6 +272,30 @@ function applyWashingtonEffects(state: GameState): void {
     if (!state.military.alliance_locks) {
         state.military.alliance_locks = [];
     }
+    // 2026-05-22 Wave 3F: evict ceiling locks that would block WA's 0.80 floor.
+    // Discovered via n1959 forensics
+    // (docs/40_reports/audits/20260522_FORENSICS_N1959_FED_OPS_STILL_BLOCKED.md):
+    // csq_croat_bosniak_war pushes `alliance_lock ceiling=0.10 duration=60`
+    // when HVO-ARBiH war fires (~t48-56), and other consequence events push
+    // ceilings as low as 0.10 / 0.45. Wave 3E added the WA floor=0.80 but
+    // applyAllianceChange (apply_effects.ts:170) applies ceiling AFTER floor,
+    // so an active ceiling=0.10 silently overrides our floor=0.80 on the
+    // very next `alliance_change` event, dropping alliance back to 0.10.
+    //
+    // Historical: Washington Agreement is the formal end of the Croat-Bosniak
+    // war. Any alliance ceiling locks tied to that war should be cleared on
+    // WA signature. The floor lock the engine pushes for WA's institutional
+    // commitment is preserved by keeping all FLOOR locks at or above 0.80,
+    // and all ceiling locks at or above 0.80 (otherwise they'd block the WA
+    // floor and contradict the agreement). Locks at or above 0.80 are kept
+    // (a stricter Federation lock could in principle exist; the current event
+    // catalog has none, so this is forward-compatible).
+    state.military.alliance_locks = state.military.alliance_locks.filter(lock => {
+        if (lock.mode === 'ceiling' && lock.value < WASH_ALLIANCE_LOCK_VALUE) {
+            return false;
+        }
+        return true;
+    });
     state.military.alliance_locks.push({
         mode: 'floor',
         value: WASH_ALLIANCE_LOCK_VALUE,
