@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## Operation attack-order target trace (2026-05-22)
+
+- Weekly `operation_combat_diagnostics[]` rows now include `attack_order_targets[]` and `participant_attack_orders[]` so accepted operation under-delivery can be audited at target and brigade-location level.
+- Fresh 188w `n1944` result: final hash `5766d470125f1220`, matching n1943; the change is output/reporting-only for the sim final-state hash.
+- Donji Vakuf finding: weeks 180-182 target `op:donji_vakuf:komar_2` while current objective is `op:donji_vakuf:babin_potok_2`; weeks 183-184 target `op:bugojno:brizina`, `op:skender_vakuf:donji_koricani`, and `op:teslic:blatnica_2`. All traced attack targets record zero battles and do not match the current objective.
+- Residual: repair the operation-pinned order-target boundary before combat odds, force-trajectory tuning, or painted-target promotion.
+- Report: `docs/40_reports/implemented/20260522_OPERATION_ATTACK_ORDER_TARGET_TRACE.md`.
+
 ## Operation battle-feedback accounting (2026-05-22)
 
 - Sector-operation result accounting now requires actual resolver battle feedback before posture beside an objective can increment failed combat attempts. Per-axis `battles_this_turn` / `total_battles` counters prevent one multi-axis battle from certifying another axis.

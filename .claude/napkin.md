@@ -1142,6 +1142,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
+1. **[2026-05-22] Operation under-delivery needs target-level order trace before tuning**
+   Do instead: Use weekly `operation_combat_diagnostics[].attack_order_targets` and `participant_attack_orders` to verify emitted targets, participant locations, current-objective match, and battle counts before changing combat odds, force trajectory, or painted targets. Donji n1944 showed non-current target orders with zero battles; fix order-target boundary first.
 1. **[2026-04-30] Late-war runs need date-specific painted targets**
    Do instead: Before judging Apr 1994 / Apr 1995 / Oct 1995 scenario health, create or select the matching target in `npm run paint:control` and compare with `tools/compare_painted_vs_sim.cjs <run_dir> --target <date>`; Jan 1993 is only a smoke check for late-war runs. Built-in targets must stay on the 712-OSID sim controller universe until the political-controller substrate is intentionally expanded.
 2. **[2026-03-08] NEVER override initial OSIDs — not an option**

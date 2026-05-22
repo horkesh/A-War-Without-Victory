@@ -173,6 +173,19 @@ describe('combat causality diagnostics', () => {
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0]!.attack_attempt_count, 1);
         assert.equal(diagnostics[0]!.battle_count, 0);
+        assert.deepEqual(diagnostics[0]!.attack_order_targets, [{
+            target_osid: 'op:enemy:obj1',
+            order_count: 1,
+            battle_count: 0,
+            current_objective: true,
+        }]);
+        assert.deepEqual(diagnostics[0]!.participant_attack_orders, [{
+            brigade_id: 'b1',
+            location_osid: 'op:rs:staging',
+            target_osid: 'op:enemy:obj1',
+            target_is_current_objective: true,
+            battle_count: 0,
+        }]);
         assert.ok(diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
     });
 

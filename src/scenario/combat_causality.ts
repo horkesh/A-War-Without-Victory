@@ -36,6 +36,19 @@ export interface OperationCombatDiagnostic {
     battle_count: number;
     current_objective_attack_count: number;
     current_objective_battle_count: number;
+    attack_order_targets: Array<{
+        target_osid: string;
+        order_count: number;
+        battle_count: number;
+        current_objective: boolean;
+    }>;
+    participant_attack_orders: Array<{
+        brigade_id: FormationId;
+        location_osid: string | null;
+        target_osid: string;
+        target_is_current_objective: boolean;
+        battle_count: number;
+    }>;
     recovery_reason: string | null;
     invalid_for_combat_calibration: boolean;
     invalidation_reasons: OperationCombatInvalidationReason[];
@@ -71,6 +84,11 @@ function getFormationCorpsId(formation: FormationState): FormationId | null {
     return typeof corpsId === 'string' && corpsId.length > 0 ? corpsId : null;
 }
 
+function getFormationById(state: GameState, formationId: FormationId): FormationState | undefined {
+    const legacyFormations = (state as GameState & { formations?: Record<string, FormationState> }).formations;
+    return state.military.formations?.[formationId] ?? legacyFormations?.[formationId];
+}
+
 function getCurrentObjective(operation: CorpsOperation): string | null {
     const objectives = operation.objectives ?? [];
     const index = operation.current_objective_index ?? 0;
@@ -91,7 +109,7 @@ export function createBotOrderDiagnosticsSnapshot(
         const target = orders[brigadeId];
         if (typeof target !== 'string' || target.length === 0) continue;
         attackOrdersByBrigade[brigadeId] = target;
-        const formation = state.military.formations?.[brigadeId];
+        const formation = getFormationById(state, brigadeId);
         const factionId = formation?.faction;
         if (typeof factionId === 'string' && factionId.length > 0) {
             attackOrdersByFaction[factionId] = (attackOrdersByFaction[factionId] ?? 0) + 1;
@@ -164,113 +182,134 @@ export function buildOperationCombatDiagnostics(
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const corpsState = corpsCommand[corpsId];
         for (const operation of corpsState?.active_operations ?? []) {
-        const corpsFormation = state.military.formations?.[corpsId];
-        const factionId = corpsFormation?.faction ?? 'unknown';
-        const brigades = sortedFormationIds(operation.participating_brigades ?? []);
-        const currentObjective = getCurrentObjective(operation);
-        const objectiveAttemptCount = operation.attack_attempt_count ?? 0;
-        const objectiveCaptureCount = operation.objective_capture_count ?? 0;
-        const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
-        const idleExecutionTurnStreak = operation.idle_execution_turn_streak ?? 0;
-        const operationId = `${corpsId}:${operation.name}:t${operation.started_turn}`;
-        const recoveryReason = typeof operation.recovery_reason === 'string'
-            ? operation.recovery_reason
-            : null;
-        const hadResolvedAttackThisTurn =
-            operation.last_result === 'captured' || operation.last_result === 'failed';
-        let attackAttemptCount = 0;
-        let movementOrderCount = 0;
-        let currentObjectiveAttackCount = 0;
-        let participantBattleCount = 0;
-        for (const brigadeId of brigades) {
-            const target = orderSnapshot?.attack_orders_by_brigade?.[brigadeId];
-            if (typeof target === 'string' && target.length > 0) {
-                attackAttemptCount += 1;
-                if (currentObjective !== null && target === currentObjective) {
-                    currentObjectiveAttackCount += 1;
+            const corpsFormation = getFormationById(state, corpsId);
+            const factionId = corpsFormation?.faction ?? 'unknown';
+            const brigades = sortedFormationIds(operation.participating_brigades ?? []);
+            const currentObjective = getCurrentObjective(operation);
+            const objectiveAttemptCount = operation.attack_attempt_count ?? 0;
+            const objectiveCaptureCount = operation.objective_capture_count ?? 0;
+            const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
+            const idleExecutionTurnStreak = operation.idle_execution_turn_streak ?? 0;
+            const operationId = `${corpsId}:${operation.name}:t${operation.started_turn}`;
+            const recoveryReason = typeof operation.recovery_reason === 'string'
+                ? operation.recovery_reason
+                : null;
+            const hadResolvedAttackThisTurn =
+                operation.last_result === 'captured' || operation.last_result === 'failed';
+            let attackAttemptCount = 0;
+            let movementOrderCount = 0;
+            let currentObjectiveAttackCount = 0;
+            let participantBattleCount = 0;
+            const attackTargetCounts = new Map<string, number>();
+            const participantAttackOrders: OperationCombatDiagnostic['participant_attack_orders'] = [];
+            for (const brigadeId of brigades) {
+                const target = orderSnapshot?.attack_orders_by_brigade?.[brigadeId];
+                if (typeof target === 'string' && target.length > 0) {
+                    attackAttemptCount += 1;
+                    attackTargetCounts.set(target, (attackTargetCounts.get(target) ?? 0) + 1);
+                    if (currentObjective !== null && target === currentObjective) {
+                        currentObjectiveAttackCount += 1;
+                    }
+                    const formation = getFormationById(state, brigadeId);
+                    participantAttackOrders.push({
+                        brigade_id: brigadeId,
+                        location_osid: formation?.location_osid ?? null,
+                        target_osid: target,
+                        target_is_current_objective: currentObjective !== null && target === currentObjective,
+                        battle_count: battleCountsByBrigade.get(brigadeId) ?? 0,
+                    });
                 }
+                const movementTarget = orderSnapshot?.movement_orders_by_brigade?.[brigadeId];
+                if (typeof movementTarget === 'string' && movementTarget.length > 0) {
+                    movementOrderCount += 1;
+                }
+                participantBattleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
             }
-            const movementTarget = orderSnapshot?.movement_orders_by_brigade?.[brigadeId];
-            if (typeof movementTarget === 'string' && movementTarget.length > 0) {
-                movementOrderCount += 1;
+            const operationBattleCount = battleCountsByOperation.get(operationId) ?? 0;
+            const battleCount = operationBattleCount > 0 ? operationBattleCount : participantBattleCount;
+            // Keep the legacy field name stable for downstream consumers, but bind it
+            // to the post-trim operation-local order truth the invalidation logic uses.
+            const finalOrderedAttackerCount = attackAttemptCount;
+            const currentObjectiveBattleCount = currentObjective !== null
+                ? (
+                    battleCountsByOperationObjective.get(`${operationId}|${currentObjective}`)
+                    ?? battleCountsByTarget.get(currentObjective)
+                    ?? 0
+                )
+                : 0;
+            const attackOrderTargets = Array.from(attackTargetCounts.entries())
+                .sort((a, b) => strictCompare(a[0], b[0]))
+                .map(([targetOsid, orderCount]) => ({
+                    target_osid: targetOsid,
+                    order_count: orderCount,
+                    battle_count: battleCountsByTarget.get(targetOsid) ?? 0,
+                    current_objective: currentObjective !== null && targetOsid === currentObjective,
+                }));
+            const invalidationReasons: OperationCombatInvalidationReason[] = [];
+            if (
+                operation.phase === 'execution' &&
+                !hadResolvedAttackThisTurn &&
+                attackAttemptCount === 0 &&
+                movementOrderCount === 0 &&
+                objectiveAttemptCount === 0 &&
+                objectiveCaptureCount === 0
+            ) {
+                invalidationReasons.push('execution_without_attack_orders');
             }
-            participantBattleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
-        }
-        const operationBattleCount = battleCountsByOperation.get(operationId) ?? 0;
-        const battleCount = operationBattleCount > 0 ? operationBattleCount : participantBattleCount;
-        // Keep the legacy field name stable for downstream consumers, but bind it
-        // to the post-trim operation-local order truth the invalidation logic uses.
-        const finalOrderedAttackerCount = attackAttemptCount;
-        const currentObjectiveBattleCount = currentObjective !== null
-            ? (
-                battleCountsByOperationObjective.get(`${operationId}|${currentObjective}`)
-                ?? battleCountsByTarget.get(currentObjective)
-                ?? 0
-            )
-            : 0;
-        const invalidationReasons: OperationCombatInvalidationReason[] = [];
-        if (
-            operation.phase === 'execution' &&
-            !hadResolvedAttackThisTurn &&
-            attackAttemptCount === 0 &&
-            movementOrderCount === 0 &&
-            objectiveAttemptCount === 0 &&
-            objectiveCaptureCount === 0
-        ) {
-            invalidationReasons.push('execution_without_attack_orders');
-        }
-        if (
-            operation.phase === 'execution' &&
-            !hadResolvedAttackThisTurn &&
-            brigades.length > 0 &&
-            finalOrderedAttackerCount === 0 &&
-            movementOrderCount === 0 &&
-            objectiveAttemptCount === 0 &&
-            objectiveCaptureCount === 0
-        ) {
-            invalidationReasons.push('execution_without_eligible_attackers');
-        }
-        if (operation.phase === 'execution' && attackAttemptCount > 0 && battleCount === 0) {
-            invalidationReasons.push('attack_orders_without_battles');
-        }
-        const currentTurn = state.meta?.turn ?? 0;
-        const enteredRecoveryThisTurn =
-            operation.phase === 'recovery' &&
-            typeof operation.phase_started_turn === 'number' &&
-            operation.phase_started_turn === currentTurn;
-        if (
-            enteredRecoveryThisTurn &&
-            recoveryReason === 'no_logged_attempt' &&
-            objectiveAttemptCount === 0 &&
-            attackAttemptCount === 0 &&
-            battleCount === 0 &&
-            movementOnlyExecutionTurns === 0 &&
-            movementOrderCount === 0
-        ) {
-            invalidationReasons.push('recovery_without_logged_attempt');
-        }
-        diagnostics.push({
-            corps_id: corpsId,
-            faction_id: factionId,
-            operation_name: operation.name,
-            operation_type: operation.type,
-            operation_phase: operation.phase,
-            current_objective: currentObjective,
-            participating_brigades: brigades,
-            eligible_attacker_count: finalOrderedAttackerCount,
-            attack_attempt_count: attackAttemptCount,
-            objective_attempt_count: objectiveAttemptCount,
-            objective_capture_count: objectiveCaptureCount,
-            movement_order_count: movementOrderCount,
-            movement_only_execution_turns: movementOnlyExecutionTurns,
-            idle_execution_turn_streak: idleExecutionTurnStreak,
-            battle_count: battleCount,
-            current_objective_attack_count: currentObjectiveAttackCount,
-            current_objective_battle_count: currentObjectiveBattleCount,
-            recovery_reason: recoveryReason,
-            invalid_for_combat_calibration: invalidationReasons.length > 0,
-            invalidation_reasons: invalidationReasons
-        });
+            if (
+                operation.phase === 'execution' &&
+                !hadResolvedAttackThisTurn &&
+                brigades.length > 0 &&
+                finalOrderedAttackerCount === 0 &&
+                movementOrderCount === 0 &&
+                objectiveAttemptCount === 0 &&
+                objectiveCaptureCount === 0
+            ) {
+                invalidationReasons.push('execution_without_eligible_attackers');
+            }
+            if (operation.phase === 'execution' && attackAttemptCount > 0 && battleCount === 0) {
+                invalidationReasons.push('attack_orders_without_battles');
+            }
+            const currentTurn = state.meta?.turn ?? 0;
+            const enteredRecoveryThisTurn =
+                operation.phase === 'recovery' &&
+                typeof operation.phase_started_turn === 'number' &&
+                operation.phase_started_turn === currentTurn;
+            if (
+                enteredRecoveryThisTurn &&
+                recoveryReason === 'no_logged_attempt' &&
+                objectiveAttemptCount === 0 &&
+                attackAttemptCount === 0 &&
+                battleCount === 0 &&
+                movementOnlyExecutionTurns === 0 &&
+                movementOrderCount === 0
+            ) {
+                invalidationReasons.push('recovery_without_logged_attempt');
+            }
+            diagnostics.push({
+                corps_id: corpsId,
+                faction_id: factionId,
+                operation_name: operation.name,
+                operation_type: operation.type,
+                operation_phase: operation.phase,
+                current_objective: currentObjective,
+                participating_brigades: brigades,
+                eligible_attacker_count: finalOrderedAttackerCount,
+                attack_attempt_count: attackAttemptCount,
+                objective_attempt_count: objectiveAttemptCount,
+                objective_capture_count: objectiveCaptureCount,
+                movement_order_count: movementOrderCount,
+                movement_only_execution_turns: movementOnlyExecutionTurns,
+                idle_execution_turn_streak: idleExecutionTurnStreak,
+                battle_count: battleCount,
+                current_objective_attack_count: currentObjectiveAttackCount,
+                current_objective_battle_count: currentObjectiveBattleCount,
+                attack_order_targets: attackOrderTargets,
+                participant_attack_orders: participantAttackOrders,
+                recovery_reason: recoveryReason,
+                invalid_for_combat_calibration: invalidationReasons.length > 0,
+                invalidation_reasons: invalidationReasons
+            });
         } // end for-of active_operations
     }
     return diagnostics;

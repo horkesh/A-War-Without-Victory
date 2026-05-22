@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] diagnostic(operations): trace operation attack-order targets
+
+**Type:** Scenario diagnostic/reporting output contract. No operation behavior, scenario data, painted-control targets, OOB source rows, combat math, force-trajectory tuning, or final-state save schema changed.
+
+**Why:** After battle-feedback accounting, Donji Vakuf still produced operation attack orders without resolver battles. The roadmap needed target-level evidence before changing bot target selection, combat odds, or painted-target contracts.
+
+**Change:** `operation_combat_diagnostics[]` now emits sorted `attack_order_targets[]` and `participant_attack_orders[]` fields, showing each operation participant's attack target, current brigade location, current-objective match, and battle count. Diagnostic formation lookup now supports both live `state.military.formations` and legacy top-level fixture `formations`.
+
+**Verification:** Red/green focused test coverage in `tests\scenario_operation_diagnostics.test.ts`; final focused run `npx.cmd vitest run tests\scenario_operation_diagnostics.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck` passed. Fresh 188w `n1944` completed with final hash `5766d470125f1220`, matching n1943 and confirming no final-state hash drift. `npm.cmd run test:baselines` first failed on the expected `apr1992_52w` weekly-report diagnostic hash drift; `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed the manifest and the follow-up `npm.cmd run test:baselines` passed. Donji trace now shows weeks 180-182 target `op:donji_vakuf:komar_2` while current objective is `op:donji_vakuf:babin_potok_2`, then weeks 183-184 target `op:bugojno:brizina`, `op:skender_vakuf:donji_koricani`, and `op:teslic:blatnica_2`; all zero-battle and non-current-objective.
+
+**Artifacts:** `docs/40_reports/implemented/20260522_OPERATION_ATTACK_ORDER_TARGET_TRACE.md`.
+
+**Roadmap delta:** Next behavior lane is operation-pinned order-target repair. Do not tune combat odds, force trajectory, or painted targets from this symptom until committed operation participants are kept on the current objective or a valid axis/approach target that can resolve in the tactical adjacency boundary.
+
+---
+
 ## [2026-05-22] fix(operations): require battle feedback for failed attempts
 
 **Type:** Combat resolver boundary + sector-operation lifecycle accounting + calibration diagnostics. No scenario data, painted-control targets, OOB source rows, combat odds, or outcome tuning changed.
