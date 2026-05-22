@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
+import { useGameStore } from '../store/gameStore';
 import { DiplomacyOverview } from './DiplomacyOverview';
 import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shared/playerVisibility';
 import {
@@ -21,6 +22,7 @@ import {
   getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import { getOsidDisplayName, humanizeOsid } from '../utils/osidDisplayName';
 import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
@@ -104,8 +106,44 @@ function computeIvpScore(state: LoadedGameState): number {
   return Math.max(0, Math.min(100, raw * 20));
 }
 
+function legacySitrepTokenForOsid(osid: string): string {
+  const raw = osid.startsWith('op:')
+    ? osid.split(':').slice(1).join(' ')
+    : osid.replace(/[:-]/g, ' ');
+  return raw
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function formatSitrepFrontLabel(label: string, osidDisplayNames: Record<string, string> | null): string {
+  const displayEntries = osidDisplayNames
+    ? Object.keys(osidDisplayNames)
+      .sort((a, b) => legacySitrepTokenForOsid(b).length - legacySitrepTokenForOsid(a).length || a.localeCompare(b))
+      .map((osid) => ({
+        osid,
+        legacyToken: legacySitrepTokenForOsid(osid),
+        displayName: getOsidDisplayName(osid, osidDisplayNames),
+      }))
+    : [];
+
+  return label
+    .split(/\s+-\s+/)
+    .map((segment) => {
+      const trimmed = segment.trim();
+      if (!trimmed) return trimmed;
+      if (trimmed.startsWith('op:')) return getOsidDisplayName(trimmed, osidDisplayNames);
+      const match = displayEntries.find((entry) => entry.legacyToken.toLowerCase() === trimmed.toLowerCase());
+      if (match) return match.displayName;
+      return humanizeOsid(trimmed);
+    })
+    .join(' - ');
+}
+
 export function SituationTab({ state, focusSection }: { state: LoadedGameState; focusSection?: SummaryFocusSection }) {
   const ipc = useIPC();
+  const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidAreas = useOsidAreas();
   const playerFaction = getPlayerFacingFaction(state);
   const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
@@ -191,7 +229,12 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </div>
         {sitrep.front.edges.length > 0 && (
           <div className="text-text-secondary text-[10px]">
-            {t('situation.priorityFronts', { items: sitrep.front.edges.slice(0, 2).map((edge) => edge.label).join('; ') })}
+            {t('situation.priorityFronts', {
+              items: sitrep.front.edges
+                .slice(0, 2)
+                .map((edge) => formatSitrepFrontLabel(edge.label, osidDisplayNames))
+                .join('; '),
+            })}
           </div>
         )}
         {sitrep.readiness.weakestBrigades.length > 0 && (

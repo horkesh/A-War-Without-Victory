@@ -269,6 +269,21 @@
 
 **Phase-2 cascade addendum (waves 6-10, +10 commits):** Continued the autonomous push for an HRHB territorial unlock — Cincar Phase 2 → kupres_2 → Mistral 1 + Jajce 95. Wave 6 (briefing overlay override) replaced Wave 4A's faction-blind threshold lift with the principled CampaignPlan-wins-over-economy-overlay rule. Wave 7 authored two ICTY-cited HVO ops (mistral_1_95 + jajce_95, 16 objective OSIDs); Wave 7B widened kupres_cincar_94's brigade pool 2→4 active + added kupres_2 to objectives; Wave 8 fixed the Graz corps-pair branch to honor exemption sets + exempted hvo_tomislavgrad. Result: **n1968 delivered HRHB +2 / RBiH +3 / RS −5** via Cincar Phase 1 capturing bucovaca (4-star Solid Victory). Wave 9 authored Cincar Phase 2 follow-on op; Wave 9B/9C/9D corrected staging, decoupling, and Mistral 1/Jajce kupres_2 dependency. Wave 10 unified the per-turn brigade approach view with the launch-gate sub-segment fallback (`bot_brigade_ai_osid.ts:299` engine fix). Runs n1969–n1973 produced varying hashes but byte-identical territorial counts (HRHB −45, RBiH +23, RS +22) — Cincar Phase 2 / Mistral 1 / Jajce 95 spawn with healthy force_ratio 2.24 and 5 brigades attached but issue zero attacks in execution. Engine-deep audit `docs/40_reports/audits/20260522_HVO_OP_EXECUTION_DEEP.md` identifies the asymmetry between op launch gate (sub-segment view) and per-turn brigade brain (tactical_adjacency view) but Wave 10's fallback is observably inert, meaning the real blocker is one gate further downstream. Final branch state: **27 commits, OSID 84.13→86.66% (+2.53pp), anchors 22→23, HVO ops succeeding 0/2 → 2/4** (Op Jackal + Cincar Phase 1). Cincar Phase 2 / Mistral 1 / Jajce 95 stay authored and propose-passing for a next-session engine investigation of `evaluateSectorAttack` post-launch dispatch.
 
+## [2026-05-22] fix(gui): clean audit label discipline leaks
+
+**Type:** Tactical-map player-facing UI text cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified raw/internal labels leaking into player-facing surfaces: SITREP priority fronts could show settlement slug fragments, local-support panels exposed `Phase E`, and Army HQ opportunity pulse exposed `T3 Authorized`.
+
+**Change:** `SituationTab` now formats priority-front labels through the current OSID display-name map when handed legacy SITREP labels; Local Support headings no longer include the implementation phase; and the opportunity pulse reserve-crisis metric now uses `Reserve-Crisis Authorization`. Added a jsdom regression covering all three audited surfaces.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_label_discipline.test.ts --reporter=dot` failed on all three audited strings before the patch; after the patch it passed 3/3. `npx.cmd vitest run tests\operational_sitrep_views.test.ts tests\ui\opportunity_ledger_pulse.test.ts tests\ui\operation_aar_records_review.test.ts --reporter=dot` passed 14/14. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SituationTab.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx`; `tests/ui/gui_audit_label_discipline.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md`.
+
+**Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for MapLibre render correctness, peace/event modal hygiene, palette unification, stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
+
+---
 ## [2026-05-22] refactor(strict-null): type scenario runner startup tail
 
 **Type:** Scenario-runner type-boundary cleanup. No simulation behavior, save schema version, scenario data, baseline manifest, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.

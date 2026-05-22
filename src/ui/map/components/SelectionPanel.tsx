@@ -282,7 +282,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         {playerFaction && selectedMunId && (
           <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">
             <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-              Phase E Local Support
+              Local Support
             </div>
             <div className="text-xs text-text-secondary">
               {activeSupport?.label ?? 'Local support'} target: {activeSupport ? getPlayerSafeMunicipalityName(activeSupport.mun_id) : 'none staged'}
