@@ -2,7 +2,9 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest event-notification Washington-timing slice:** [implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md](implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md) - `washington_agreement_1994` and `ic_rbih_restraint_post_washington` now have complete non-source recipient notification coverage under the two-clock Washington policy; Phase D residual is down to 16 rows / 74 blocks.
+**Latest event-notification 1994 late-war diplomacy slice:** [implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md](implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md) - `contact_group_plan_1994`, `belgrade_embargo_rs_1994`, and `carter_ceasefire_1994` now have complete non-source recipient notification coverage; Phase D residual is down to 13 rows / 62 blocks.
+
+**Latest event-notification Washington-timing slice:** [implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md](implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md) - `washington_agreement_1994` and `ic_rbih_restraint_post_washington` now have complete non-source recipient notification coverage under the two-clock Washington policy; Phase D residual dropped to 16 rows / 74 blocks before the 1994 late-war diplomacy slice.
 
 **Latest event-notification narrative-tone slice:** [implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md](implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md) - `rs_strategic_goals` and `rbih_state_identity` now have complete non-source recipient notification coverage; Phase D residual dropped to 18 rows / 82 blocks before the Washington-timing slice.
 

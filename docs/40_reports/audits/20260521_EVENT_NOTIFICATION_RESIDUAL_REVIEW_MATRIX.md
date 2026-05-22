@@ -6,7 +6,7 @@ Scope: docs-only classification for residual `notifications_to_other_factions` b
 
 Source tracker: `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`
 
-2026-05-21 closeout note: the first future safe slice identified below has now been implemented. 2026-05-22 closeout notes: the two-row narrative-tone slice (`rs_strategic_goals`, `rbih_state_identity`) and the two-row Washington-timing slice (`washington_agreement_1994`, `ic_rbih_restraint_post_washington`) are also implemented. The historical matrix below remains the pre-implementation classification for the 102-block floor; current residual after implementation is 74 blocks, with all 12 `safe` blocks, all 8 `narrative-tone` blocks, and all 8 `Washington-timing` blocks closed.
+2026-05-21 closeout note: the first future safe slice identified below has now been implemented. 2026-05-22 closeout notes: the two-row narrative-tone slice (`rs_strategic_goals`, `rbih_state_identity`), two-row Washington-timing slice (`washington_agreement_1994`, `ic_rbih_restraint_post_washington`), and three-row 1994 late-war diplomacy slice (`contact_group_plan_1994`, `belgrade_embargo_rs_1994`, `carter_ceasefire_1994`) are also implemented. The historical matrix below remains the pre-implementation classification for the 102-block floor; current residual after implementation is 62 blocks, with all 12 `safe` blocks, all 8 `narrative-tone` blocks, all 8 `Washington-timing` blocks, and 12 of 28 `late-war-outcome` blocks closed.
 
 ## Count Reconciliation
 

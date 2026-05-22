@@ -29,6 +29,9 @@
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 | Safe front-visit slice complete for `visit_posavina_hrhb` and `stay_mostar_hrhb`; Mostar/central-Bosnia/press options remain gated. |
 | `war_1994.json` | `washington_agreement_1994` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the formal week-102 authored Washington Agreement event only. |
 | `war_1994.json` | `ic_rbih_restraint_post_washington` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the post-Washington military window without implying an early formal-signature event. |
+| `war_1994.json` | `contact_group_plan_1994` | RBiH | 4/4 | 1994 late-war diplomacy slice complete; copy describes the proposal and pressure without asserting final settlement outcomes. |
+| `war_1994.json` | `belgrade_embargo_rs_1994` | RS | 4/4 | 1994 late-war diplomacy slice complete; copy describes the Belgrade-Pale split, embargo pressure, and response posture. |
+| `war_1994.json` | `carter_ceasefire_1994` | RBiH | 4/4 | 1994 late-war diplomacy slice complete; copy describes ceasefire compliance or preparation posture without asserting later battlefield outcomes. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
@@ -41,9 +44,6 @@
 | `war_1993.json` | `visit_to_front_rs` | RS | 4/10 |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 |
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 0/4 |
-| `war_1994.json` | `contact_group_plan_1994` | RBiH | 0/4 |
-| `war_1994.json` | `belgrade_embargo_rs_1994` | RS | 0/4 |
-| `war_1994.json` | `carter_ceasefire_1994` | RBiH | 0/4 |
 | `war_1995.json` | `un_hostage_crisis_1995` | RS | 0/4 |
 | `war_1995.json` | `karadzic_mladic_split_1995` | RS | 0/4 |
 | `war_1995.json` | `us_halts_federation_advance_1995` | RBiH | 0/4 |
@@ -60,10 +60,10 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
-| Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
+| Late-war outcome policy | 4 | 16 | `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 16 event rows and 74 recipient blocks after the 2026-05-22 Washington-timing slice. The prior narrative-tone floor was 18 rows / 82 blocks.
+**Total residual:** 13 event rows and 62 recipient blocks after the 2026-05-22 1994 late-war diplomacy slice. The prior Washington-timing floor was 16 rows / 74 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
@@ -78,9 +78,9 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | Markale/Sarajevo heavy-weapons ultimatum; siege/civilian-harm sensitivity. |
 | `war_1994.json` | `washington_agreement_1994` | Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `ic_rbih_restraint_post_washington` | Post-Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
-| `war_1994.json` | `contact_group_plan_1994` | Late-war diplomacy trajectory; defer to diplomacy/outcome content review. |
-| `war_1994.json` | `belgrade_embargo_rs_1994` | Late-war diplomacy/patron rupture; defer to diplomacy/outcome content review. |
-| `war_1994.json` | `carter_ceasefire_1994` | Late-war ceasefire diplomacy; defer to diplomacy/outcome content review. |
+| `war_1994.json` | `contact_group_plan_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1994.json` | `belgrade_embargo_rs_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1994.json` | `carter_ceasefire_1994` | 1994 late-war diplomacy reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1995.json` | `un_hostage_crisis_1995` | UN hostage/human-shield crisis; sensitive-history row. |
 | `war_1995.json` | `karadzic_mladic_split_1995` | Late-war command crisis tied to Operation Storm timing; defer to late-war outcome review. |
 | `war_1995.json` | `us_halts_federation_advance_1995` | Late-war outcome/refugee catastrophe counterfactual; gated by policy. |

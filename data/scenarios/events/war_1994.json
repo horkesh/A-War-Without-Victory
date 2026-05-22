@@ -620,7 +620,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RS": {
+          "headline": "Sarajevo accepts Contact Group map",
+          "body": "RBiH accepts the proposed 51/49 Contact Group framework. Pale faces a stronger international-credibility case for Sarajevo and sharper scrutiny if RS remains outside the plan."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts the Contact Group plan",
+          "body": "Sarajevo signals acceptance of the proposed territorial framework under international pressure. Mostar sees Federation diplomacy aligned for now, with the military and political burden shifting toward RS refusal."
+        }
+      },
+      "reject": {
+        "RS": {
+          "headline": "Sarajevo rejects territorial division",
+          "body": "RBiH refuses the Contact Group map rather than legitimize conquest. Pale sees the war continue, but Sarajevo risks international isolation and weaker diplomatic standing."
+        },
+        "HRHB": {
+          "headline": "RBiH rejects Contact Group division",
+          "body": "Sarajevo rejects the proposed territorial split despite international pressure. Mostar sees Federation diplomacy under strain, with the war effort continuing outside the proposed settlement."
+        }
+      }
+    }
   },
   {
     "id": "belgrade_embargo_rs_1994",
@@ -735,6 +757,28 @@
         "risk_level": 0.4
       }
     ],
+    "notifications_to_other_factions": {
+      "defiant": {
+        "RBiH": {
+          "headline": "Pale defies Belgrade embargo",
+          "body": "RS rejects Belgrade's pressure and accepts deeper isolation over the Contact Group map. Sarajevo sees a harder Pale line, but also a widening split between RS leadership and its Serbian patron."
+        },
+        "HRHB": {
+          "headline": "RS stands against Belgrade",
+          "body": "Pale chooses defiance despite the border closure and military-supply shock. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
+        }
+      },
+      "negotiate": {
+        "RBiH": {
+          "headline": "Pale seeks accommodation with Belgrade",
+          "body": "RS opens back-channel accommodation with Milosevic and signals room to revisit the Contact Group map. Sarajevo sees possible relief for RS supply pressure, but also internal strains inside Pale."
+        },
+        "HRHB": {
+          "headline": "RS moves to soften Belgrade break",
+          "body": "Pale looks for a way back toward Belgrade after the embargo. Mostar sees reduced immediate supply shock for RS if talks hold, at the cost of visible internal cohesion."
+        }
+      }
+    },
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 942 (1994). BB Vol. II Ch. 10."
   },
   {
@@ -1017,6 +1061,28 @@
         "risk_level": 0.5
       }
     ],
+    "notifications_to_other_factions": {
+      "respect": {
+        "RS": {
+          "headline": "Sarajevo honors Carter ceasefire",
+          "body": "RBiH signals compliance with the winter cessation of hostilities and uses the pause to rebuild. Pale sees lower immediate offensive pressure and improved international standing for Sarajevo."
+        },
+        "HRHB": {
+          "headline": "RBiH respects winter ceasefire",
+          "body": "Sarajevo commits to honoring the Carter pause while resupplying and rebuilding. Mostar sees the Federation side preserving diplomatic credibility during the temporary quiet."
+        }
+      },
+      "exploit": {
+        "RS": {
+          "headline": "Sarajevo prepares under ceasefire cover",
+          "body": "RBiH nominally accepts the winter pause while stockpiling and repositioning for future operations. Pale sees a stronger spring threat and some erosion in Sarajevo's international standing."
+        },
+        "HRHB": {
+          "headline": "RBiH uses the pause for force buildup",
+          "body": "Sarajevo treats the ceasefire as a chance to prepare for later offensives. Mostar sees stronger Federation military prospects, with diplomatic risk if the posture becomes too visible."
+        }
+      }
+    },
     "sets_flags": {
       "carter_ceasefire_active": true
     },
