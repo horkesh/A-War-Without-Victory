@@ -2262,7 +2262,8 @@
         "conditions": [
           { "type": "alliance_above", "value": 0.25 },
           { "type": "flag_at_least", "flag": "alliance_silent_drift", "min": 1 },
-          { "type": "flag_not_set", "flag": "rbih_hrhb_war_active" }
+          { "type": "flag_not_set", "flag": "rbih_hrhb_war_active" },
+          { "type": "flag_not_set", "flag": "washington_signed" }
         ]
       }
     },
