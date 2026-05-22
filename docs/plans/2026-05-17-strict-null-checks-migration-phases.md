@@ -47,7 +47,7 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 | 2 | Sim engine - combat | 15 remaining after Batch 47 (0 `as_factionid_casts` in combat after closeout) | 0 | >5 for combat helpers and command state | HIGH | Safe-scope CLOSED 2026-05-18; FactionId-cast closeout slice CLOSED 2026-05-20 Batch 47 (paramilitary_sweep, sector_offensive, sector_building, supply_condition); long-tail still blocked (gated/load-bearing/save-shape/cross-file refactor) — see `docs/40_reports/audits/20260518_STRICT_NULL_PHASE2_LONG_TAIL_CLASSIFICATION.md` |
 | 3 | Sim engine - early war + bot | 35 | 0 | >5 for turn pipeline / bot flow | MEDIUM | Inventory only; source deferred |
 | 4 | Scenario + IPC | 53 | 0 | 3-5 for loader/runner/desktop seams | MEDIUM | Inventory only; source deferred |
-| 5 | UI adapter | 10 remaining after Batch 48 (was 63) | 0 | >5 renderer consumers | MEDIUM | Boundary-cleanup-lane pass CLOSED 2026-05-20 Batch 48; 10 documented load-bearing escapes retained (1 JSON boundary, 4 Record-widening, 2 ternary-widening, 1 JSON-import, 2 UI-literal-union FactionId casts) |
+| 5 | UI adapter | 0 remaining after 2026-05-22 adapter tail (was 63) | 0 | >5 renderer consumers | MEDIUM | Boundary-cleanup lane CLOSED 2026-05-22; former Batch 48 retained sites now route through adapter-local helpers and typed UI faction definitions |
 | 6 | Renderer + warroom | 74 | 0 | UI-local repeated consumers | LOW | Inventory only; source deferred |
 
 ## Phase File Assignment

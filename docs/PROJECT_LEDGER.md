@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type GameStateAdapter tail
+
+**Type:** Strict-null UI adapter read-boundary cleanup. No UI presentation, save schema, simulation behavior, scenario data, calibration/army-arc tuning, combat math, operation behavior, IPC writer, or turn ordering changed.
+
+**Why:** After the save-migration tail, all remaining counted strict-null escapes were in `src/ui/map/data/GameStateAdapter.ts`: eight `as_any_casts` plus two retained `as_factionid_casts`.
+
+**Change:** `GameStateAdapter.ts` now routes its loose JSON/read-model boundary through local `asLooseRecord(...)` and `readActiveOperationRows(...)` helpers, types enclave UI definitions with the UI literal `FactionId` union, and bridges the historical-baseline JSON import with the actual `compareToHistorical(...)` parameter type. The Phase 5 adapter progress assertion is pinned at exact zero counted escapes.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts tests\adapter_field_completeness.test.ts tests\game_state_adapter_estimated_civilian_risk.test.ts tests\ui_adapter_boundary.test.ts tests\ui_map_game_state_adapter.test.ts --reporter=dot` passed 148/148. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/dynamic-import/chunk-size warnings. `git diff --check` passed. `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_factionid_casts 0`, `as_unknown_casts 0`, `as_any_casts 0`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, and `optional_fields_game_state 477`.
+
+**Artifacts:** `src/ui/map/data/GameStateAdapter.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_GAME_STATE_ADAPTER_TAIL.md`.
+
+**Roadmap delta:** Closes the visible counted strict-null escape lanes. Remaining strict-null work is the optional `GameState` field contract/schema queue.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type save migration boundary
 
 **Type:** Strict-null save-migration cleanup. No migration defaults, save schema, simulation behavior, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
