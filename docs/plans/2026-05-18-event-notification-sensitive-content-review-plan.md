@@ -17,7 +17,7 @@ No sensitive recipient copy is provided here.
 |---|---:|---:|---|
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
 | Narrative tone required | 0 | 0 | Closed 2026-05-22 by the 1992 foundational-decision narrative-tone slice. |
-| Washington timing policy | 2 | 8 | `washington_agreement_1994`; `ic_rbih_restraint_post_washington` |
+| Washington timing policy | 0 | 0 | Closed 2026-05-22 by the Washington-timing notification slice. |
 | Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
@@ -29,9 +29,9 @@ Docs-only prep is complete:
 - Historian packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_HISTORIAN_REVIEW_PACKET.md`
 - Narrative/timing/outcome packet: `docs/40_reports/audits/20260521_EVENT_NOTIFICATION_NARRATIVE_TIMING_PACKET.md`
 
-The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice and 2026-05-22 narrative-tone slice, the active residual is 18 rows / 82 blocks.
+The original matrix reconciled the tracker to event JSON at 20 rows / 102 missing recipient blocks and assigned every missing block to one of six buckets: safe (12), historian-required (34), narrative-tone (16), Washington-timing (8), late-war-outcome (28), and blocked-sensitive (4). After the 2026-05-21 safe slice, 2026-05-22 narrative-tone slice, and 2026-05-22 Washington-timing slice, the active residual is 16 rows / 74 blocks.
 
-First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Blocked-sensitive and other gated front-visit blocks remain out of scope.
+First implementation slice closed 2026-05-21: safe rows only, capped below five event rows. The twelve safe front-visit blocks for `visit_to_front_rbih`, `visit_to_front_rs`, and `visit_to_front_hrhb` are authored. Second implementation slice closed 2026-05-22: the two narrative-tone 1992 foundational-decision rows are authored. Third implementation slice closed 2026-05-22: the two Washington-timing rows are authored under the two-clock policy. Blocked-sensitive and other gated front-visit blocks remain out of scope.
 
 Required tests for the safe slice:
 
@@ -54,6 +54,7 @@ Feature-flag-off baseline behavior must remain stable; notification text may onl
    - Keep notification bodies as intelligence/diplomatic readouts, not new event narration.
 
 3. Washington timing lane
+   - Status: closed 2026-05-22 for `washington_agreement_1994` and `ic_rbih_restraint_post_washington`.
    - Preserve the established policy split: `washington_signed` / `washington_turn` is the emergent live framework predicate, while `washington_agreement_1994` is the authored week-102 historical event.
    - Recipient copy must describe formal historical-signature events only for `washington_agreement_1994`.
    - Recipient copy for `ic_rbih_restraint_post_washington` must not imply the formal agreement fires before its calendar/narrative event.

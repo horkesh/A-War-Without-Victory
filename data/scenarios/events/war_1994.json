@@ -339,7 +339,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "accept": {
+        "RS": {
+          "headline": "Sarajevo embraces the Federation",
+          "body": "RBiH leadership commits fully to the formal Washington Agreement. Pale sees a consolidated Federation front, stronger international standing for Sarajevo, and reopened Croatian supply channels against the VRS."
+        },
+        "HRHB": {
+          "headline": "Sarajevo commits to the Federation",
+          "body": "RBiH accepts the formal Washington framework without reservation. Mostar reads the move as a clear Federation commitment, with joint anti-VRS coordination and Croatian supply access now politically easier to sustain."
+        }
+      },
+      "reluctant": {
+        "RS": {
+          "headline": "Sarajevo accepts with reservations",
+          "body": "RBiH signs onto the formal Washington Agreement while keeping distance from its former Croat adversaries. Pale still faces a Federation framework, but integration looks slower and more politically brittle."
+        },
+        "HRHB": {
+          "headline": "RBiH enters Federation warily",
+          "body": "Sarajevo accepts the formal Washington settlement but signals continued caution toward former enemies. Mostar gains the Federation framework, though trust and operational integration will need time."
+        }
+      }
+    }
   },
   {
     "id": "gorazde_crisis_1994",
@@ -443,7 +465,29 @@
           }
         ]
       }
-    ]
+    ],
+    "notifications_to_other_factions": {
+      "acknowledge_pressure": {
+        "RS": {
+          "headline": "Sarajevo heeds post-Washington restraint",
+          "body": "RBiH acknowledges Western warnings against exploiting the post-Washington military window. Pale sees lower immediate offensive pressure, but also a Sarajevo leadership keeping patron confidence intact."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts restraint message",
+          "body": "Sarajevo takes the Western warning seriously and tempers talk of aggressive offensives after the Federation framework. Mostar sees less risk of destabilizing the new arrangement, with some cost to RBiH leverage."
+        }
+      },
+      "resist_patron": {
+        "RS": {
+          "headline": "Sarajevo resists Western restraint",
+          "body": "RBiH maintains its position despite warnings not to exploit the post-Washington military window. Pale reads higher offensive intent, even as Sarajevo risks fraying confidence with Western capitals."
+        },
+        "HRHB": {
+          "headline": "RBiH pushes against restraint",
+          "body": "Sarajevo signals it will not fully defer to Western caution after the Federation framework. Mostar sees greater military ambition, but also greater danger that pressure on the front could strain the new settlement."
+        }
+      }
+    }
   },
   {
     "id": "milosevic_drina_warning",

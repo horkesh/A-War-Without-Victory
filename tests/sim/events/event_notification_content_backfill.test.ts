@@ -10,6 +10,10 @@ function loadWar1993Events(): any[] {
     return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1993.json'), 'utf-8'));
 }
 
+function loadWar1994Events(): any[] {
+    return JSON.parse(readFileSync(resolve(__dirname, '..', '..', '..', 'data', 'scenarios', 'events', 'war_1994.json'), 'utf-8'));
+}
+
 describe('event notification content backfill', () => {
     it('covers narrative-tone 1992 identity decisions for non-source recipients', () => {
         const events = loadWar1992Events();
@@ -37,6 +41,42 @@ describe('event notification content backfill', () => {
         for (const { eventId, source, responses } of cases) {
             const event = events.find((entry) => entry.id === eventId);
             expect(event?.responding_faction).toBe(source);
+            expect(event?.notifications_to_other_factions).toBeDefined();
+
+            for (const [responseId, recipients] of Object.entries(responses)) {
+                const byRecipient = event.notifications_to_other_factions[responseId];
+                expect(Object.keys(byRecipient).sort()).toEqual(recipients);
+
+                for (const target of recipients) {
+                    expect(byRecipient[target].headline.trim().length).toBeGreaterThan(0);
+                    expect(byRecipient[target].body.trim().length).toBeGreaterThan(0);
+                }
+            }
+        }
+    });
+
+    it('covers Washington-timing policy rows for non-source recipients', () => {
+        const events = loadWar1994Events();
+        const cases = [
+            {
+                eventId: 'washington_agreement_1994',
+                responses: {
+                    accept: ['HRHB', 'RS'],
+                    reluctant: ['HRHB', 'RS'],
+                },
+            },
+            {
+                eventId: 'ic_rbih_restraint_post_washington',
+                responses: {
+                    acknowledge_pressure: ['HRHB', 'RS'],
+                    resist_patron: ['HRHB', 'RS'],
+                },
+            },
+        ];
+
+        for (const { eventId, responses } of cases) {
+            const event = events.find((entry) => entry.id === eventId);
+            expect(event?.responding_faction).toBe('RBiH');
             expect(event?.notifications_to_other_factions).toBeDefined();
 
             for (const [responseId, recipients] of Object.entries(responses)) {

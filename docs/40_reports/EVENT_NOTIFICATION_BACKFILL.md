@@ -6,7 +6,7 @@
 ## Policy
 - Backfill only when the existing event title, narrative, response label, response description, effects, and historical source already support the recipient text.
 - Do not invent fallback prose. Missing recipient/response blocks stay absent and are skipped by the engine.
-- Sensitive-history, Washington timing, and late-war diplomacy events remain content-review scope before authoring.
+- Sensitive-history, late-war diplomacy, and mixed-sensitive front-visit events remain content-review scope before authoring. Washington timing rows are closed under the two-clock policy.
 
 ## Implemented Coverage
 | File | Event | Source | Coverage | Status |
@@ -27,6 +27,8 @@
 | `war_1993.json` | `visit_to_front_rbih` | RBiH | 4/10 | Safe front-visit slice complete for `visit_eastern_front` and `stay_capital_rbih`; Sarajevo/Bihac/press options remain gated. |
 | `war_1993.json` | `visit_to_front_rs` | RS | 4/10 | Safe front-visit slice complete for `visit_posavina` and `stay_pale_rs`; Sarajevo/Drina/press options remain gated. |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 | Safe front-visit slice complete for `visit_posavina_hrhb` and `stay_mostar_hrhb`; Mostar/central-Bosnia/press options remain gated. |
+| `war_1994.json` | `washington_agreement_1994` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the formal week-102 authored Washington Agreement event only. |
+| `war_1994.json` | `ic_rbih_restraint_post_washington` | RBiH | 4/4 | Washington-timing slice complete; copy refers to the post-Washington military window without implying an early formal-signature event. |
 
 ## Remaining Phase D Scope
 | File | Event | Source | Coverage |
@@ -39,8 +41,6 @@
 | `war_1993.json` | `visit_to_front_rs` | RS | 4/10 |
 | `war_1993.json` | `visit_to_front_hrhb` | HRHB | 4/10 |
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | RS | 0/4 |
-| `war_1994.json` | `washington_agreement_1994` | RBiH | 0/4 |
-| `war_1994.json` | `ic_rbih_restraint_post_washington` | RBiH | 0/4 |
 | `war_1994.json` | `contact_group_plan_1994` | RBiH | 0/4 |
 | `war_1994.json` | `belgrade_embargo_rs_1994` | RS | 0/4 |
 | `war_1994.json` | `carter_ceasefire_1994` | RBiH | 0/4 |
@@ -60,11 +60,10 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
-| Washington timing policy | 2 | 8 | `washington_agreement_1994`; `ic_rbih_restraint_post_washington` |
 | Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 18 event rows and 82 recipient blocks after the 2026-05-22 narrative-tone slice. The prior safe front-visit floor was 20 rows / 90 blocks.
+**Total residual:** 16 event rows and 74 recipient blocks after the 2026-05-22 Washington-timing slice. The prior narrative-tone floor was 18 rows / 82 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |
@@ -77,8 +76,8 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | `war_1993.json` | `visit_to_front_rs` | Front-visit text intersects Sarajevo siege lines, Drina enclaves, and international observation; recipient prose needs content review. |
 | `war_1993.json` | `visit_to_front_hrhb` | Front-visit text intersects Mostar blockade, central Bosnia, and detention-camp press management; recipient prose needs content review. |
 | `war_1994.json` | `nato_ultimatum_sarajevo_1994` | Markale/Sarajevo heavy-weapons ultimatum; siege/civilian-harm sensitivity. |
-| `war_1994.json` | `washington_agreement_1994` | Washington timing reconciliation remains gated by policy. |
-| `war_1994.json` | `ic_rbih_restraint_post_washington` | Post-Washington timing and restraint policy remains gated by policy. |
+| `war_1994.json` | `washington_agreement_1994` | Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
+| `war_1994.json` | `ic_rbih_restraint_post_washington` | Post-Washington timing reconciliation implemented 2026-05-22; row is no longer residual. |
 | `war_1994.json` | `contact_group_plan_1994` | Late-war diplomacy trajectory; defer to diplomacy/outcome content review. |
 | `war_1994.json` | `belgrade_embargo_rs_1994` | Late-war diplomacy/patron rupture; defer to diplomacy/outcome content review. |
 | `war_1994.json` | `carter_ceasefire_1994` | Late-war ceasefire diplomacy; defer to diplomacy/outcome content review. |

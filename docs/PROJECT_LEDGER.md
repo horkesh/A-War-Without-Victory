@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close Washington-timing rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, or feature-flag behavior changed.
+
+**Why:** The Phase D residual review classified `washington_agreement_1994` and `ic_rbih_restraint_post_washington` as Washington-timing rows. They were safe to author once copy preserved the established two-clock policy between the formal week-102 Washington event and the separate live `washington_signed` / `washington_turn` framework predicate.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `accept` / `reluctant` on `washington_agreement_1994` and `acknowledge_pressure` / `resist_patron` on `ic_rbih_restraint_post_washington`, targeting RS and HRHB only. The formal Agreement row uses formal-signature wording; the restraint row describes the post-Washington military window without implying the formal event fired early.
+
+**Verification:** `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 29/29. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_WASHINGTON_TIMING.md`; `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+**Roadmap delta:** Washington-timing residual bucket drops from 2 rows / 8 blocks to zero. Overall Phase D notification residual drops from 18 rows / 82 blocks to 16 rows / 74 blocks.
+
+---
+
 ## [2026-05-22] docs(backlog): reconcile strict-null zero-count floor
 
 **Type:** Documentation-only roadmap/backlog reconciliation. No code, tests, behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, UI implementation, or turn ordering changed.
