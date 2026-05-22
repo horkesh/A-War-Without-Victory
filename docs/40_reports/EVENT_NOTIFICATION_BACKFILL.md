@@ -11,8 +11,8 @@
 ## Implemented Coverage
 | File | Event | Source | Coverage | Status |
 |---|---|---:|---:|---|
-| `war_1992.json` | `rs_strategic_goals` | RS | 2/6 | Existing sparse coverage for `all_six`; remaining options need historian/narrative review. |
-| `war_1992.json` | `rbih_state_identity` | RBiH | 2/6 | Existing sparse coverage for `civic`; remaining options need historian/narrative review. |
+| `war_1992.json` | `rs_strategic_goals` | RS | 6/6 | Narrative-tone slice complete for `selective` and `aggressive`; prior `all_six` coverage preserved. |
+| `war_1992.json` | `rbih_state_identity` | RBiH | 6/6 | Narrative-tone slice complete for `bosniak_national` and `pragmatic`; prior `civic` coverage preserved. |
 | `war_1992.json` | `hrhb_political_goal` | HRHB | 6/6 | Batch 4 safe backfill complete from existing authored event fields. |
 | `war_1992.json` | `london_conference_1992` | RBiH | 4/4 | Batch 5 safe backfill complete from existing conference narrative, response descriptions, and effects. |
 | `war_1993.json` | `strategic_posture_review_rbih` | RBiH | 8/8 | Batch 7 safe backfill complete from recurring posture narrative, response descriptions, effects, dimension shifts, and flags. |
@@ -60,12 +60,11 @@ Batch 9 did not author any new `notifications_to_other_factions` copy. The resid
 | Review type | Rows | Remaining recipient blocks | Events |
 |---|---:|---:|---|
 | Historian-required | 6 | 28 | `drina_cleansing_decision_1992`; `concentration_camps_revealed_1992`; `srebrenica_demilitarization_1993`; `operation_lukavac_93`; `nato_ultimatum_sarajevo_1994`; `un_hostage_crisis_1995` |
-| Narrative tone required | 2 | 8 | `rs_strategic_goals`; `rbih_state_identity` |
 | Washington timing policy | 2 | 8 | `washington_agreement_1994`; `ic_rbih_restraint_post_washington` |
 | Late-war outcome policy | 7 | 28 | `contact_group_plan_1994`; `belgrade_embargo_rs_1994`; `carter_ceasefire_1994`; `karadzic_mladic_split_1995`; `us_halts_federation_advance_1995`; `holbrooke_ceasefire_demand_oct95`; `dayton_talks_begin_1995` |
 | Front-visit mixed-sensitive | 3 | 18 | `visit_to_front_rbih`; `visit_to_front_rs`; `visit_to_front_hrhb` |
 
-**Total residual:** 20 event rows and 90 recipient blocks after the 2026-05-21 safe front-visit slice. The prior Batch 9 residual floor was 20 rows / 102 blocks. This total includes two sparse 1992 rows already listed under implemented coverage because they still have uncovered response/recipient combinations.
+**Total residual:** 18 event rows and 82 recipient blocks after the 2026-05-22 narrative-tone slice. The prior safe front-visit floor was 20 rows / 90 blocks.
 
 ## Batch 8 Gated Residual Notes
 | File | Event | Gate |

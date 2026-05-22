@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close 1992 narrative-tone rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, turn ordering, or feature-flag behavior changed.
+
+**Why:** The Phase D notification residual review classified `rs_strategic_goals` and `rbih_state_identity` as narrative-tone rows: politically charged but authorable from existing event titles, narratives, response labels, response descriptions, effects, and dimension shifts without new historian facts.
+
+**Change:** Added `notifications_to_other_factions` recipient text for the remaining response options on both rows: `selective` / `aggressive` for RS strategic goals and `bosniak_national` / `pragmatic` for RBiH state identity. The copy is framed as non-source intelligence/diplomatic readout, avoids omniscient private intent, does not add new historical claims, and stays outside sensitive-history rupture/mechanic changes.
+
+**Verification:** `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 28/28. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1992.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_NARRATIVE_TONE_1992.md`; `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+**Roadmap delta:** Narrative-tone residual bucket drops from 2 rows / 8 blocks to zero. Overall Phase D notification residual drops from 20 rows / 90 blocks to 18 rows / 82 blocks.
+
+---
+
 ## [2026-05-22] docs(backlog): close stale GUI audit queue text
 
 **Type:** Documentation-only roadmap/backlog reconciliation. No code, behavior, schema, scenario data, calibration/army-arc tuning, UI implementation, or tests changed.
