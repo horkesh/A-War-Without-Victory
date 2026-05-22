@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**GUI visual audit Warroom desk map H7 addendum 2026-05-22:** Seventh Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md`. Remaining GUI audit work stays in Batch H: commander empty-state verification and retired-chrome deletion review. On top of:
+
 **GUI visual audit supply legend overlap H6 addendum 2026-05-22:** Sixth Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. Supply mode overlays now anchor outside the left OOB sidebar column so they do not cover Situation/Alliance content. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_SUPPLY_LEGEND_OVERLAP_H6.md`. Remaining GUI audit work stays in Batch H: desk-map projection polish, commander empty-state verification, and retired-chrome deletion review. On top of:
 
 **GUI visual audit Command Briefing banner H5 addendum 2026-05-22:** Fifth Batch H slice from `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` is implemented. COMMAND BRIEFING now anchors away from the top-center counter field and uses opaque, high-contrast backing/text. Report: `docs/40_reports/implemented/20260522_GUI_AUDIT_COMMAND_BRIEFING_BANNER_H5.md`. Remaining GUI audit work stays in Batch H: supply legend overlap, desk-map projection polish, commander empty-state verification, and retired-chrome deletion review. On top of:

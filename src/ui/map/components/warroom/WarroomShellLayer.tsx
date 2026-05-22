@@ -193,7 +193,7 @@ function computeMapBounds(features: Feature[]): { minX: number; minY: number; ma
 function makeProjector(bounds: { minX: number; minY: number; maxX: number; maxY: number }) {
   const rangeX = Math.max(0.000001, bounds.maxX - bounds.minX);
   const rangeY = Math.max(0.000001, bounds.maxY - bounds.minY);
-  const scale = Math.min(92 / rangeX, 84 / rangeY);
+  const scale = Math.min(98 / rangeX, 94 / rangeY);
   const projectedW = rangeX * scale;
   const projectedH = rangeY * scale;
   const offsetX = (100 - projectedW) / 2;
@@ -331,36 +331,34 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
         ...box,
         pointerEvents: 'none',
         zIndex: 1,
-        padding: '2.4%',
+        padding: '0.9%',
       }}
     >
       <div
         style={{
           width: '100%',
           height: '100%',
-          background: 'linear-gradient(135deg, rgba(238,228,196,0.94), rgba(213,197,159,0.92))',
-          border: '1px solid rgba(68,48,30,0.42)',
-          boxShadow: '0 3px 9px rgba(0,0,0,0.24), inset 0 0 14px rgba(84,59,35,0.18)',
+          background: 'linear-gradient(135deg, rgba(242,232,198,0.98), rgba(212,194,150,0.96))',
+          border: '2px solid rgba(68,48,30,0.62)',
+          boxShadow: '0 5px 14px rgba(0,0,0,0.34), inset 0 0 18px rgba(84,59,35,0.24)',
           transform: 'rotate(-0.6deg)',
           overflow: 'hidden',
         }}
       >
         {model ? (
           // viewBox cropped to the projector's actual output region (makeProjector
-          // produces content in [4..96]×[20..80] of a 100×100 space). Cropping
-          // removes the ~40% blank padding that made the map look small on the
-          // corkboard. preserveAspectRatio="xMidYMid slice" now expands content
-          // to fill the container, cropping at the edges if container aspect
-          // doesn't match — a slight crop is preferable to large blank borders.
+          // produces content in [4..96]x[20..80] of a 100x100 space). Cropping
+          // removes the large blank padding that made the map look small on the
+          // corkboard. A slight crop is preferable to large blank borders.
           <svg viewBox="4 20 92 60" preserveAspectRatio="xMidYMid slice" style={{ display: 'block', width: '100%', height: '100%' }}>
-            <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.76)" />
-            <g fill="none" stroke="rgba(66,58,45,0.18)" strokeWidth="0.18">
+            <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.9)" />
+            <g fill="none" stroke="rgba(66,58,45,0.26)" strokeWidth="0.22">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
             </g>
-            <g fill={factionInkColor(playerFaction)} stroke="rgba(48,40,31,0.22)" strokeWidth="0.12">
+            <g fill={factionInkColor(playerFaction)} stroke="rgba(48,40,31,0.32)" strokeWidth="0.16">
               {model.territoryPaths.map((path, index) => <path key={`territory-${index}`} d={path} />)}
             </g>
-            <g fill="none" stroke="rgba(26,22,18,0.82)" strokeWidth="0.72" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1.7 1.1">
+            <g fill="none" stroke="rgba(26,22,18,0.9)" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1.7 1.1">
               {model.frontLinePaths.map((path, index) => <path key={`front-${index}`} d={path} />)}
             </g>
           </svg>
