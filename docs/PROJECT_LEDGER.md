@@ -3,6 +3,21 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type MapContainer map bridges
+
+**Type:** Tactical-map type-boundary cleanup. No simulation behavior, save schema, scenario data, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** The strict-null roadmap still had a self-contained UI map tail: `MapContainer.tsx` used broad `as any` casts at the MapLibre protocol/filter boundary and deck.gl click bridge. This was separable from Claude's calibration/army-arc lane and safe to close as type-only infrastructure work.
+
+**Change:** Replaced the remaining `MapContainer.tsx` `as any` casts with MapLibre `AddProtocolAction`, `FilterSpecification`, source/layer specification types, direct PMTiles `tilev4(...)`, and typed deck picking with an explicit numeric `stack_count` narrow. Added a strict-null inventory guard pinning `MapContainer.tsx` at zero `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_deck_counter_visibility.test.ts tests\ui_map_no_sector_demarcation_overlay.test.ts --reporter=dot` passed 4/4. `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 84/84. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 135`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`.
+
+**Artifacts:** `src/ui/map/map/MapContainer.tsx`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_MAP_CONTAINER_BRIDGE_TAIL.md`.
+
+**Roadmap delta:** Tactical map shell is now closed for inventory-counted `as_any_casts`. Remaining strict-null work is concentrated in CLI harnesses, scenario-runner diagnostics, save-migration boundary, and `GameStateAdapter`/FactionId unification; calibration/army-arc work remains reserved for Claude's branch.
+
+---
 ## [2026-05-22] fix(operations): prevent idle objective skips
 
 **Type:** Sector-operation lifecycle behavior + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, operation catalog data, or scenario data changed.
