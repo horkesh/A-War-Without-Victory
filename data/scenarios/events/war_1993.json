@@ -1253,6 +1253,38 @@
         ]
       }
     ],
+    "notifications_to_other_factions": {
+      "comply_fully": {
+        "RS": {
+          "headline": "RBiH accepts Srebrenica disarmament",
+          "body": "RBiH commanders accept full weapons surrender under UNPROFOR supervision. Pale sees Sarajevo gaining mediator credibility while the enclave's defense becomes more exposed."
+        },
+        "HRHB": {
+          "headline": "RBiH accepts Srebrenica disarmament",
+          "body": "RBiH commanders accept full weapons surrender under UNPROFOR supervision. Mostar sees Sarajevo trading enclave military capacity for stronger standing with international mediators."
+        }
+      },
+      "hide_weapons": {
+        "RS": {
+          "headline": "RBiH hedges Srebrenica disarmament",
+          "body": "RBiH commanders surrender visible stocks while preserving hidden reserves. Pale sees formal compliance language paired with an effort to keep minimum defense capability inside the enclave."
+        },
+        "HRHB": {
+          "headline": "RBiH hedges Srebrenica disarmament",
+          "body": "RBiH commanders surrender visible stocks while preserving hidden reserves. Mostar sees Sarajevo trying to satisfy UNPROFOR supervision without leaving the enclave fully exposed."
+        }
+      },
+      "refuse": {
+        "RS": {
+          "headline": "RBiH rejects Srebrenica disarmament",
+          "body": "RBiH commanders reject the demilitarization terms and keep the enclave armed. Pale sees preserved military capability at the cost of international condemnation and renewed pressure."
+        },
+        "HRHB": {
+          "headline": "RBiH rejects Srebrenica disarmament",
+          "body": "RBiH commanders reject the demilitarization terms and keep the enclave armed. Mostar sees Sarajevo accepting diplomatic damage to avoid surrendering the enclave's remaining defense."
+        }
+      }
+    },
     "sets_flags": {
       "srebrenica_demilitarized": true
     },
