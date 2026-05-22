@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): reset stale UI state on navigation
+
+**Type:** Tactical-map UI state hygiene fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch E identified UI-only confirmation and navigation state that could outlive the selected surface: sector/local-support confirmation messages, Army HQ last-tab state, hidden Decision Room lens filters, and Inbox home overlay state.
+
+**Change:** `CorpsFrontPanel` clears `sectorActionMessage` on `selectedSectorId` changes; `SelectionPanel` clears `supportMessage` on `selectedOsid` changes; `setArmyHQOpen(false)` resets `armyHQTab` to `briefing`; `PresidentialDecisionRoomPanel` clears `activeLens` to `all` when Advanced is hidden; and the `PresidentialToolbar` Inbox badge closes Army HQ, Codex, Chronicle, Operations, and Ops Planning modal before clearing selection ids. Added `tests/ui/stale_state_resets.test.ts` covering all four Batch E reset families.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\stale_state_resets.test.ts --reporter=dot` failed before the patch across all four expected stale-state cases. After the patch, `npx.cmd vitest run tests\ui\stale_state_resets.test.ts --reporter=dot` passed 4/4. Focused surrounding suite `npx.cmd vitest run tests\ui\stale_state_resets.test.ts tests\ui_presidential_decision_room_wiring.test.ts tests\ui_shell_navigation.test.ts tests\ui\records_button_behavior.test.ts tests\ui\emergency_posture_confirm.test.ts --reporter=dot` passed 33/33. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/components/CorpsFrontPanel.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`; `src/ui/map/store/gameStore.ts`; `tests/ui/stale_state_resets.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch E. Remaining GUI audit queue: Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): unify operation modal palette
 
 **Type:** Tactical-map modal visual-system fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.

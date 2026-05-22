@@ -412,6 +412,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setArmyHQOpen: (open) => set({
     armyHQOpen: open,
     ...(open ? {} : {
+      armyHQTab: 'briefing',
       armyHQExpandedCorpsId: null,
       armyHQExpandedSections: {},
       armyHQOfficerSelectionCorpsId: null,

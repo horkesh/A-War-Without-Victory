@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit modal palette unification)
+**Updated:** 2026-05-22 (GUI visual audit stale state resets)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit stale state resets** | [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: selection messages, Army HQ reopen tab, hidden Decision Room lenses, and Inbox home overlay state now reset. |
 | **GUI visual audit modal palette unification** | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: OperationBriefingModal and CommanderSelectionModal now use dark panel tokens with a static guard against light-palette regression. |
 | **GUI visual audit peace plan dismissal scope** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) - Batch C stale peace-modal slice from the 2026-05-22 GUI visual audit: pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. |
 | **GUI visual audit peace plan split meters** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-plan slice from the 2026-05-22 GUI visual audit: pending peace plans now resolve catalog split data through a browser-safe static import, preventing Vance-Owen territory meters from falling back to 0%. |
@@ -101,6 +102,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-05-22 | **GUI visual audit stale state resets** - selection messages, Army HQ reopen tab, hidden Decision Room lenses, and Inbox home overlay state now reset. | [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) |
 | 2026-05-22 | **GUI visual audit modal palette unification** - OperationBriefingModal and CommanderSelectionModal now use dark panel tokens with a static guard against light-palette regression. | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) |
 | 2026-05-22 | **GUI visual audit peace plan dismissal scope** - pending peace-plan dismissal is now scoped by `planId@turnOffered`, so dismissing one offered plan does not hide later or changed proposals. | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md) |
 | 2026-05-22 | **GUI visual audit peace plan split meters** - pending peace plans now resolve catalog split data through a browser-safe static import, preventing Vance-Owen territory meters from falling back to 0%. | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) |
