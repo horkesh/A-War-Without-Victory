@@ -111,8 +111,21 @@ const KUPRES_CINCAR_STAGING_ANCHORS: readonly string[] = [
     KUPRES_CINCAR_STAGING_TOMISLAVGRAD,
 ];
 
+// 2026-05-22 Wave 7 cascade unblock (forensics memo
+// docs/40_reports/audits/20260522_WAVE_7_OPS_NO_FIRE_N1966.md §4 + Option B
+// recommendation, and proposal memo
+// docs/40_reports/proposals/20260522_KUPRES_CINCAR_FIX.md):
+// Added op:kupres:kupres_2 as an explicit objective so a successful Cincar
+// actually flips the Kupres-town anchor that gates the downstream
+// staging_access predicate of mistral_1_95 and jajce_95. The historical
+// Operation Cincar (Nov 1994) DID take Kupres town itself per BB v2 ch. 28
+// — the previous three-objective shoulder-only definition was a calibration
+// artefact, not a historical reconstruction. Insertion order
+// (bucovaca → kupres_2 → donji_malovan → novo_selo_2) follows the
+// Tomislavgrad → Bučovača → Kupres axis described in BB v2 ch. 28.
 const KUPRES_CINCAR_OBJECTIVES: readonly string[] = [
     'op:kupres:bucovaca',
+    'op:kupres:kupres_2',
     'op:kupres:donji_malovan',
     'op:kupres:novo_selo_2',
 ];
@@ -186,6 +199,28 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// 2026-05-22 Wave 7 cascade unblock: brigade pool widened from 4 → 6 brigades.
+// SCRT diagnostic (docs/40_reports/audits/20260522_WAVE_7_OPS_NO_FIRE_N1966.md)
+// shows only 2 brigades launched at t=132 (kreimir_iv + tomislav, total 3600
+// personnel, force_ratio_estimate=0.127, total_attacks=0, recovery_reason=
+// defender_power_too_high). Root cause: hv_5th_guards_karlovac and
+// hv_7th_guards_varazdin were both status=inactive at runtime (HVO undelivery
+// investigation 20260522_HVO_UNDELIVERY_INVESTIGATION.md), and hv_4th_guards_split
+// — the principal HV loan brigade for the Cincar/Kupres axis per BB v2 ch. 28
+// — was never in the catalog pool at all. Pool now includes 4 historically
+// attestable ACTIVE-at-t=132 brigades plus the two legacy HV entries (kept for
+// when HV undelivery is fixed):
+//   - hrhb_kralj_petar_kreimir_iv_brigade — HVO Tomislavgrad, af=0 (BB v2 ch. 28)
+//   - hrhb_kralj_tomislav_brigade — HVO Tomislavgrad, af=8 (BB v2 ch. 28)
+//   - hvo_rama_brigade — HVO Tomislavgrad, af=0 (BB v2 ch. 28: Rama covered
+//     Prozor-Kupres approach for the Cincar axis; ICTY Prlić IT-04-74-T
+//     trial record on HVO Tomislavgrad operative group composition)
+//   - hv_4th_guards_split — HV loan brigade, hvo_tomislavgrad after WA+6
+//     (BB v2 ch. 28; ICTY Gotovina IT-06-90-T §44-58 confirms HV 4th Guards
+//     cross-border employment on the Livno-Kupres-Grahovo axis from late 1994)
+//   - hv_5th_guards_karlovac, hv_7th_guards_varazdin — retained for plausibility
+//     symmetry; currently inactive at runtime but become available once HV
+//     activation undelivery is resolved.
 const KUPRES_CINCAR_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'kupres_cincar_line',
@@ -194,6 +229,8 @@ const KUPRES_CINCAR_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
             'hrhb_kralj_tomislav_brigade' as FormationId,
+            'hvo_rama_brigade' as FormationId,
+            'hv_4th_guards_split' as FormationId,
             'hv_5th_guards_karlovac' as FormationId,
             'hv_7th_guards_varazdin' as FormationId,
         ],
@@ -202,6 +239,11 @@ const KUPRES_CINCAR_AXES: readonly OpportunityAxisDef[] = [
     },
 ];
 
+// 2026-05-22 Wave 7: HRHB-only (no HV loan) variant now includes hvo_rama_brigade
+// alongside the two HVO Tomislavgrad core brigades — this is the historical
+// HVO-alone composition for the Kupres approach per BB v2 ch. 28 before the
+// HV cross-border integration; with this addition the variant carries 3
+// brigades and is a more credible fallback when the HV pool is unavailable.
 const KUPRES_LINE_ONLY_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'kupres_cincar_line_only',
@@ -210,6 +252,7 @@ const KUPRES_LINE_ONLY_AXES: readonly OpportunityAxisDef[] = [
         brigades: [
             'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
             'hrhb_kralj_tomislav_brigade' as FormationId,
+            'hvo_rama_brigade' as FormationId,
         ],
         objectives: KUPRES_CINCAR_OBJECTIVES,
         staging_osid: KUPRES_CINCAR_STAGING_LIVNO,
