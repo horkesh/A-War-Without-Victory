@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(backlog): close stale GUI audit queue text
+
+**Type:** Documentation-only roadmap/backlog reconciliation. No code, behavior, schema, scenario data, calibration/army-arc tuning, UI implementation, or tests changed.
+
+**Why:** `docs/40_reports/CONSOLIDATED_BACKLOG.md` still described the 2026-05-22 GUI visual audit as an active corrective queue and repeated obsolete "Remaining Batch H queue" text, even though Batch H9 closed the queue.
+
+**Change:** Marked the GUI visual audit row as implementation-closed and updated H2-H8 slice rows to point at H9 closure instead of stale remaining-work lists.
+
+**Verification:** `rg -n "Remaining Batch H queue|ACTIVE CORRECTIVE QUEUE" docs\40_reports\CONSOLIDATED_BACKLOG.md` returns no matches. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/CONSOLIDATED_BACKLOG.md`.
+
+**Roadmap delta:** Prevents already-implemented GUI audit H2-H9 work from resurfacing as active backlog.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type GameStateAdapter tail
 
 **Type:** Strict-null UI adapter read-boundary cleanup. No UI presentation, save schema, simulation behavior, scenario data, calibration/army-arc tuning, combat math, operation behavior, IPC writer, or turn ordering changed.
