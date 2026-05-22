@@ -178,10 +178,11 @@ export const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 
-/** HRHB corps exempt from Graz — Posavina fighting + Op Jackal (east Herzegovina) */
+/** HRHB corps exempt from Graz — Posavina fighting + Op Jackal + Cincar/Mistral 1/Jajce */
 export const GRAZ_EXEMPT_HRHB_CORPS = new Set([
     'hvo_northwest_bosnia',  // Orašje pocket — Posavina corridor fighting
     'hvo_southeast_herzegovina',  // Op Jackal — east Herzegovina pair still active per brigade-level callers
+    'hvo_tomislavgrad',  // Op Cincar (Nov 1994) / Mistral 1 (Jun 1995) / Jajce 95 — documented HV-HVO bypasses of Graz against VRS Krajina (BB v2 ch. 28; ICTY Gotovina IT-06-90 §44-58)
 ]);
 
 /**
@@ -229,6 +230,12 @@ export function shouldGrazBlockAttack(
     // West pair (2KK ↔ Tomislavgrad) activates at Graz (w4).
     // East pair (VRS Herz ↔ HVO SE Herz) activates only after Op Jackal ends.
     if (isHerzegovinaTruceActive(state) && isCorpsInGrazPair(corpsId)) {
+        // Honor the per-faction exemption sets in the corps-pair branch too — a
+        // corps explicitly exempt from Graz (e.g. hvo_tomislavgrad for Op Cincar
+        // and downstream Mistral 1 / Jajce cascade) is not blocked even though it
+        // sits in a pair. Otherwise the West-pair branch would always return true.
+        if (faction === 'HRHB' && GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) return false;
+        if (faction === 'RS' && GRAZ_EXEMPT_RS_CORPS.has(corpsId)) return false;
         if (isWestHerzegovinaPair(corpsId)) {
             return true; // West truce is always active when Graz is active
         }
