@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(gui): remove retired tactical chrome
+
+**Type:** GUI source cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch H identified `_retired_chrome/MapModeToolbar.tsx` and `_retired_chrome/TopToolbar.tsx` as dead source files that could confuse future audits.
+
+**Review:** `rg` found no live `src` or `tests` imports of `_retired_chrome`, `TopToolbar`, or `MapModeToolbar`. Remaining references are historical docs/archive notes.
+
+**Change:** Deleted the two retired tactical chrome components and added `tests/ui/retired_chrome_removed.test.ts` to keep them off disk and out of App imports.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\retired_chrome_removed.test.ts --reporter=dot` failed before deletion because the retired files still existed. After deletion, the same focused test passed 1/1. Focused GUI audit suite `npx.cmd vitest run tests\ui\retired_chrome_removed.test.ts tests\ui\officer_mini_bio.test.ts tests\ui\supply_legend_overlap_contract.test.ts tests\ui\command_briefing_banner_contract.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\ops_planning_draft_guard.test.ts tests\ui\map_mode_shortcut_contract.test.ts tests\ui\warroom_shell_accessibility.test.ts tests\warroom_shell_layer.test.ts --reporter=dot` passed 66/66. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed.
+
+**Artifacts:** `tests/ui/retired_chrome_removed.test.ts`; deleted `src/ui/map/components/_retired_chrome/MapModeToolbar.tsx`; deleted `src/ui/map/components/_retired_chrome/TopToolbar.tsx`; `docs/40_reports/implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md`.
+
+**Roadmap delta:** Closes GUI audit Batch H P3-6. Batch H from the 2026-05-22 GUI visual audit is implementation-closed.
+
+---
+
 ## [2026-05-22] fix(gui): resolve Army HQ commanders from flattened data
 
 **Type:** Army HQ data-resolver/UI visibility fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or turn-advance logic changed.
