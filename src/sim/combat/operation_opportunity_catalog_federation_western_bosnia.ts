@@ -762,22 +762,22 @@ const JAJCE_RING_AXIS_BRIGADES: readonly FormationId[] = [
     'arbih_737th_muslim_light' as FormationId,
 ];
 
+// Wave 14B (2026-05-22): n1976 demonstrated that the two-axis split with one
+// unreachable axis caused the engine to drop the entire op between approval
+// and AAR (both Jajce + Mistral 1 vanished post-approval). Collapsing to a
+// single near-axis preserves the topology-honest scope (3 reachable OSIDs)
+// while keeping the brigade pool intact (all 6 brigades on one axis allows
+// the engine to satisfy front-edge feasibility from a larger attacker base).
+// The 7 deep RING OSIDs are deferred to a future op (or a dedicated follow-on
+// once the corridor opens via near-axis captures).
 const JAJCE_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'jajce_recovery_near',
         name: 'Donji Vakuf Shoulder Axis',
         corps: JAJCE_PRIMARY_CORPS,
-        brigades: JAJCE_NEAR_AXIS_BRIGADES,
+        brigades: [...JAJCE_NEAR_AXIS_BRIGADES, ...JAJCE_RING_AXIS_BRIGADES],
         objectives: JAJCE_NEAR_OBJECTIVES,
         staging_osid: JAJCE_STAGING_BUGOJNO,
-    },
-    {
-        axis_id: 'jajce_recovery_ring',
-        name: 'Jajce Ring Axis (deferred until corridor opens)',
-        corps: JAJCE_PRIMARY_CORPS,
-        brigades: JAJCE_RING_AXIS_BRIGADES,
-        objectives: JAJCE_RING_OBJECTIVES,
-        staging_osid: JAJCE_STAGING_TURBE,
     },
 ];
 
