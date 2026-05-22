@@ -254,8 +254,29 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
 function applyWashingtonEffects(state: GameState): void {
     const rhs = state.political.rbih_hrhb_state!;
 
-    // Lock alliance
+    // Lock alliance.
+    //
+    // 2026-05-22: ALSO push an `alliance_lock` floor onto state.military.alliance_locks
+    // so subsequent `alliance_change` event effects (apply_effects.ts:applyAllianceChange)
+    // clamp at the floor. Without the lock-floor, applyAllianceChange writes deltas
+    // directly without checking `washington_signed` — meaning post-WA territorial
+    // incidents, refugee pressure, or other event-driven alliance_change deltas can
+    // and do drop alliance from 0.80 back down to 0.10+ across the 188w window,
+    // bricking FEDERATION_ALLIANCE_FLOOR=0.50 catalog gates downstream (mistral_2_95,
+    // kupres_cincar_94, vlasic_ridge_95). Forensics:
+    // docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md alliance line.
+    //
+    // The peace-phase per-turn alliance_update.ts:260 already respects washington_signed
+    // and exits early; this commit closes the symmetric gap on the event-effect path.
     state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    if (!state.military.alliance_locks) {
+        state.military.alliance_locks = [];
+    }
+    state.military.alliance_locks.push({
+        mode: 'floor',
+        value: WASH_ALLIANCE_LOCK_VALUE,
+        expires_turn: state.meta.turn + 9999,
+    });
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 
