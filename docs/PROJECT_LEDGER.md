@@ -3,6 +3,21 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] fix(gui): clean audit label discipline leaks
+
+**Type:** Tactical-map player-facing UI text cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit identified raw/internal labels leaking into player-facing surfaces: SITREP priority fronts could show settlement slug fragments, local-support panels exposed `Phase E`, and Army HQ opportunity pulse exposed `T3 Authorized`.
+
+**Change:** `SituationTab` now formats priority-front labels through the current OSID display-name map when handed legacy SITREP labels; Local Support headings no longer include the implementation phase; and the opportunity pulse reserve-crisis metric now uses `Reserve-Crisis Authorization`. Added a jsdom regression covering all three audited surfaces.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\gui_audit_label_discipline.test.ts --reporter=dot` failed on all three audited strings before the patch; after the patch it passed 3/3. `npx.cmd vitest run tests\operational_sitrep_views.test.ts tests\ui\opportunity_ledger_pulse.test.ts tests\ui\operation_aar_records_review.test.ts --reporter=dot` passed 14/14. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SituationTab.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx`; `tests/ui/gui_audit_label_discipline.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md`.
+
+**Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for MapLibre render correctness, peace/event modal hygiene, palette unification, stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
+
+---
 ## [2026-05-22] refactor(strict-null): type scenario runner startup tail
 
 **Type:** Scenario-runner type-boundary cleanup. No simulation behavior, save schema version, scenario data, baseline manifest, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.

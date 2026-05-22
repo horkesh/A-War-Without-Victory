@@ -31,7 +31,7 @@ const EXIT_LABEL: Record<NonNullable<OperationOpportunityRecordView['exit_class'
     failed: 'Failed',
     aborted: 'Aborted',
     did_not_launch: 'Did Not Launch',
-    // T3 sentinel: defensive-crisis approval that committed reserves but launched no offensive.
+    // Defensive-crisis approval that committed reserves but launched no offensive.
     t3_authorized_no_offensive: 'Defensive Reserves Committed',
 };
 
@@ -179,7 +179,7 @@ function OpportunityLedgerPulseBand({ pulse }: { pulse: OpportunityLedgerPulse }
                     detail="Awaiting review"
                 />
                 <PulseMetric
-                    label="T3 Authorized"
+                    label="Reserve-Crisis Authorization"
                     value={pulse.t3_authorized}
                     detail="Reserves committed"
                 />
