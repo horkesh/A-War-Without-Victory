@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] diagnostic(strict-null): pin optional GameState contract floor
+
+**Type:** Strict-null diagnostic/test/docs guard. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** After the GameStateAdapter tail closed the last visible counted strict-null escape lanes, the remaining `optional_fields_game_state` count needed an executable contract rather than a vague "still optional" backlog note.
+
+**Change:** Added a strict-null progress assertion that pins the zero counted escape floor and the optional `GameState` domain split: 477 total optional fields, with `sim` 296, `state` 173, `derived` 8, and `unknown` 0. Added CLI test coverage for `tools/diagnostics/strict_null_inventory.cjs --field-domains`. Added report `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md` and propagated the new floor through roadmap/backlog/phase-ledger indexes.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 94/94.
+
+**Roadmap delta:** Remaining strict-null work is now explicitly the optional `GameState` field contract/schema lane. Future work must classify small owned field groups by save/default/validator readiness before promoting required fields; broad optional-field removal is not allowed.
+
+---
+
 ## [2026-05-22] content(notifications): close front-visit command-signaling rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.

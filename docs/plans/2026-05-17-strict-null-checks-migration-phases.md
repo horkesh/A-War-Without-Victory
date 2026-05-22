@@ -50,6 +50,35 @@ Phase 1 through Phase 6 remain mandatory order. No source migration phase may st
 | 5 | UI adapter | 0 remaining after 2026-05-22 adapter tail (was 63) | 0 | >5 renderer consumers | MEDIUM | Boundary-cleanup lane CLOSED 2026-05-22; former Batch 48 retained sites now route through adapter-local helpers and typed UI faction definitions |
 | 6 | Renderer + warroom | 74 | 0 | UI-local repeated consumers | LOW | Inventory only; source deferred |
 
+## 2026-05-22 Visible Escape Closeout / Optional GameState Contract Floor
+
+The visible counted strict-null escape lanes are closed:
+
+| Category | Count |
+|---|---:|
+| `as_factionid_casts` | 0 |
+| `as_unknown_casts` | 0 |
+| `as_any_casts` | 0 |
+| `non_null_assertions_dot` | 0 |
+| `non_null_assertions_index` | 0 |
+| `optional_fields_game_state` | 477 |
+
+The remaining lane is optional `GameState` contract/schema work. The guarded optional-field domain floor is:
+
+| Domain | Count |
+|---|---:|
+| `sim` | 296 |
+| `state` | 173 |
+| `derived` | 8 |
+| `scenario` | 0 |
+| `ipc` | 0 |
+| `ui_adapter` | 0 |
+| `unknown` | 0 |
+
+Guard: `tests/strict_null_inventory_progress.test.ts` pins the zero visible escape floor and domain split; `tests/strict_null_inventory.test.ts` covers the `--field-domains` CLI surface. Report: `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md`.
+
+Next strict-null source work must classify small owned optional-field groups by save/default/validator readiness before making any field required. Broad optional-field removal is forbidden.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
