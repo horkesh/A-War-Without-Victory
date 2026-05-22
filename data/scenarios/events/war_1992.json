@@ -1187,6 +1187,28 @@
         "risk_level": 0.3
       }
     ],
+    "notifications_to_other_factions": {
+      "systematic": {
+        "RBiH": {
+          "headline": "RS hardens Drina Valley campaign",
+          "body": "RS command signals full territorial consolidation in the Drina Valley. Sarajevo sees the campaign around Zvornik, Visegrad, and Foca moving onto a course that will deepen displacement and international condemnation."
+        },
+        "HRHB": {
+          "headline": "RS hardens Drina Valley campaign",
+          "body": "RS command signals full territorial consolidation in the Drina Valley. Mostar sees the eastern campaign moving toward harsher control measures and heavier international fallout."
+        }
+      },
+      "restrained": {
+        "RBiH": {
+          "headline": "RS narrows Drina Valley orders",
+          "body": "RS command frames the Drina Valley campaign around military positions and orders paramilitary restraint. Sarajevo sees a less sweeping public line, with hardliners and field commanders still able to strain implementation."
+        },
+        "HRHB": {
+          "headline": "RS narrows Drina Valley orders",
+          "body": "RS command frames the Drina Valley campaign around military positions and orders paramilitary restraint. Mostar sees a lower-intensity signal that may still fray under hardliner and field-command pressure."
+        }
+      }
+    },
     "historical_source": "ICTY Karadzic Judgment, Strategic Goal 3. BB Vol. I Ch. 8-9. Drina Valley campaign April-July 1992."
   },
   {
@@ -1515,6 +1537,38 @@
         "risk_level": 0.2
       }
     ],
+    "notifications_to_other_factions": {
+      "deny": {
+        "RBiH": {
+          "headline": "RS rejects camp allegations",
+          "body": "RS officials call the Prijedor camp footage propaganda and refuse outside investigators. Sarajevo sees Belgrade pressure rising as international attention fixes on Omarska and Trnopolje."
+        },
+        "HRHB": {
+          "headline": "RS rejects camp allegations",
+          "body": "RS officials call the Prijedor camp footage propaganda and refuse outside investigators. Mostar sees Belgrade pressure rising as international attention fixes on Omarska and Trnopolje."
+        }
+      },
+      "obstruct": {
+        "RBiH": {
+          "headline": "RS offers controlled camp access",
+          "body": "RS officials allow limited Red Cross access while controlling what outsiders can see. Sarajevo sees an attempt to buy time under growing pressure over Prijedor detention sites."
+        },
+        "HRHB": {
+          "headline": "RS offers controlled camp access",
+          "body": "RS officials allow limited Red Cross access while controlling what outsiders can see. Mostar sees an attempt to buy time under growing pressure over Prijedor detention sites."
+        }
+      },
+      "cooperate": {
+        "RBiH": {
+          "headline": "RS opens detention facilities",
+          "body": "RS officials open facilities to investigators and move toward detainee releases. Sarajevo sees a credibility move that may calm international pressure while angering RS hardliners."
+        },
+        "HRHB": {
+          "headline": "RS opens detention facilities",
+          "body": "RS officials open facilities to investigators and move toward detainee releases. Mostar sees a credibility move that may calm international pressure while angering RS hardliners."
+        }
+      }
+    },
     "historical_source": "ITN footage August 1992. ICTY Karadzic Judgment. BB Vol. I Ch. 9."
   },
   {
