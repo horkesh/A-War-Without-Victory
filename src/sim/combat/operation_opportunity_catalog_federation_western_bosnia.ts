@@ -24,7 +24,17 @@ import { getFactionLiveSupplyPressure } from './supply_condition.js';
 const PRIMARY_CORPS = 'hvo_main_staff';
 const SECONDARY_CORPS = 'hvo_tomislavgrad';
 const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
-const MISTRAL_DEFENDER_WEAKNESS_FLOOR = 0.40;
+// 2026-05-22 Wave 3B-A.2: lowered 0.40 → 0.20 mirroring the sana_95 fix
+// (commit 939c409a). Same root cause: vrs_2nd_krajina composite weakness
+// (`0.5·collapse + 0.3·(1−readiness) + 0.2·equipWeak`) stays sub-0.40
+// across the late-war window despite the force-quality substrate
+// correctly capturing the arc shape (per
+// docs/40_reports/audits/20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md
+// — VRS w188 morale 12.6/cohesion 26.5 vs RBiH 89.5/73.6). Forensics:
+// docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3
+// mistral_2_95. Re-tune empirically against painted Oct 1995 once 188w
+// deltas land.
+const MISTRAL_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
 const STAGING_LIVNO_MISI = 'op:livno:misi_2';
 const STAGING_LIVNO = 'op:livno:livno_2';
