@@ -269,6 +269,22 @@
 
 **Phase-2 cascade addendum (waves 6-10, +10 commits):** Continued the autonomous push for an HRHB territorial unlock — Cincar Phase 2 → kupres_2 → Mistral 1 + Jajce 95. Wave 6 (briefing overlay override) replaced Wave 4A's faction-blind threshold lift with the principled CampaignPlan-wins-over-economy-overlay rule. Wave 7 authored two ICTY-cited HVO ops (mistral_1_95 + jajce_95, 16 objective OSIDs); Wave 7B widened kupres_cincar_94's brigade pool 2→4 active + added kupres_2 to objectives; Wave 8 fixed the Graz corps-pair branch to honor exemption sets + exempted hvo_tomislavgrad. Result: **n1968 delivered HRHB +2 / RBiH +3 / RS −5** via Cincar Phase 1 capturing bucovaca (4-star Solid Victory). Wave 9 authored Cincar Phase 2 follow-on op; Wave 9B/9C/9D corrected staging, decoupling, and Mistral 1/Jajce kupres_2 dependency. Wave 10 unified the per-turn brigade approach view with the launch-gate sub-segment fallback (`bot_brigade_ai_osid.ts:299` engine fix). Runs n1969–n1973 produced varying hashes but byte-identical territorial counts (HRHB −45, RBiH +23, RS +22) — Cincar Phase 2 / Mistral 1 / Jajce 95 spawn with healthy force_ratio 2.24 and 5 brigades attached but issue zero attacks in execution. Engine-deep audit `docs/40_reports/audits/20260522_HVO_OP_EXECUTION_DEEP.md` identifies the asymmetry between op launch gate (sub-segment view) and per-turn brigade brain (tactical_adjacency view) but Wave 10's fallback is observably inert, meaning the real blocker is one gate further downstream. Final branch state: **27 commits, OSID 84.13→86.66% (+2.53pp), anchors 22→23, HVO ops succeeding 0/2 → 2/4** (Op Jackal + Cincar Phase 1). Cincar Phase 2 / Mistral 1 / Jajce 95 stay authored and propose-passing for a next-session engine investigation of `evaluateSectorAttack` post-launch dispatch.
 
+## [2026-05-22] fix(gui): scope Warroom shell chrome
+
+**Type:** Tactical-map / Warroom shell UI ownership fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** The 2026-05-22 GUI visual audit Batch F identified shell ownership bleed: tactical map chrome could render in the Warroom, browser Warroom launches did not always show an explicit Warroom return path, Army HQ exposed duplicate close labels, and Decision Room command-loop lanes could repeat identical visible headlines.
+
+**Change:** `App.tsx` now renders `MapModeLegend`, `Minimap`, and `BottomStatusStrip` only on `appScreen === 'game'`; `shouldShowWarroomReturn(...)` recognizes `?view=warroom` alongside embedded and IPC contexts; `ArmyHQModal` leaves the explicit close label on the header control while the backdrop uses a distinct localized dismissal label; and `buildCommandQuestions(...)` de-duplicates repeated Decision Room lane headlines by prefixing later duplicates with the lane label. Added `tests/ui/warroom_shell_ownership.test.ts` covering all four Batch F contracts.
+
+**Verification:** Red run `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts --reporter=dot` failed before the patch across all four expected Batch F contracts. After the patch, focused shell tests passed; broader verification is recorded in the current commit.
+
+**Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/warroomReturn.ts`; `src/ui/map/components/army_hq/ArmyHQModal.tsx`; `src/ui/map/data/presidentialDecisionRoom.ts`; `src/ui/map/i18n/messages.en.ts`; `src/ui/map/i18n/messages.bcs.ts`; `tests/ui/warroom_shell_ownership.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md`.
+
+**Roadmap delta:** Closes GUI visual audit Batch F. Remaining GUI audit queue: no-op controls, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+
+---
+
 ## [2026-05-22] fix(gui): reset stale UI state on navigation
 
 **Type:** Tactical-map UI state hygiene fix. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
@@ -281,7 +297,7 @@
 
 **Artifacts:** `src/ui/map/components/CorpsFrontPanel.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/PresidentialToolbar.tsx`; `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`; `src/ui/map/store/gameStore.ts`; `tests/ui/stale_state_resets.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md`.
 
-**Roadmap delta:** Closes GUI visual audit Batch E. Remaining GUI audit queue: Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+**Roadmap delta:** Closes GUI visual audit Batch E. Remaining GUI audit queue: no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
 
 ---
 
@@ -297,7 +313,7 @@
 
 **Artifacts:** `src/ui/map/components/OperationBriefingModal.tsx`; `src/ui/map/components/CommanderSelectionModal.tsx`; `tests/ui/modal_palette_unification.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md`.
 
-**Roadmap delta:** Closes GUI visual audit Batch D. Remaining GUI audit queue: stale-state resets, Warroom chrome/shell ownership, no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
+**Roadmap delta:** Closes GUI visual audit Batch D. Remaining GUI audit queue: no-op control feedback, onboarding spotlight/bridge-unavailable feedback, and polish cleanup.
 
 ---
 
@@ -313,7 +329,7 @@
 
 **Artifacts:** `src/ui/map/data/GameStateAdapter.ts`; `tests/ui_adapter_boundary.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md`.
 
-**Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. Stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+**Roadmap delta:** Closes the Vance-Owen zero-meter slice of GUI visual audit Batch C. No-op controls and onboarding/bridge feedback remain active.
 
 ---
 
@@ -329,7 +345,7 @@
 
 **Artifacts:** `src/ui/map/App.tsx`; `src/ui/map/utils/peacePlanDismissal.ts`; `tests/ui/peace_plan_dismissal_scope.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_PEACE_PLAN_DISMISSAL_SCOPE.md`.
 
-**Roadmap delta:** Closes the stale peace-plan dismissal scope slice of GUI visual audit Batch C. Stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+**Roadmap delta:** Closes the stale peace-plan dismissal scope slice of GUI visual audit Batch C. No-op controls and onboarding/bridge feedback remain active.
 
 ---
 
@@ -345,7 +361,7 @@
 
 **Artifacts:** `src/ui/map/components/EventModal.tsx`; `tests/ui/event_modal_dismissal.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_EVENT_MODAL_DISMISSAL.md`.
 
-**Roadmap delta:** Closes the event-notification dismissal/focus-semantics slice of GUI visual audit Batch C. Stale-state resets, Warroom chrome scoping, no-op controls, and onboarding/bridge feedback remain active.
+**Roadmap delta:** Closes the event-notification dismissal/focus-semantics slice of GUI visual audit Batch C. No-op controls and onboarding/bridge feedback remain active.
 
 ---
 
@@ -361,7 +377,7 @@
 
 **Artifacts:** `src/ui/map/map/MapContainer.tsx`; `tests/ui_map_maplibre_dasharray_contract.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_MAPLIBRE_DASHARRAY.md`.
 
-**Roadmap delta:** Closes the MapLibre dasharray render-correctness slice from GUI visual audit Batch A. Remaining GUI audit work stays active for stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
+**Roadmap delta:** Closes the MapLibre dasharray render-correctness slice from GUI visual audit Batch A. Remaining GUI audit work stays active for no-op control feedback and polish cleanup.
 
 ---
 
@@ -377,7 +393,7 @@
 
 **Artifacts:** `src/ui/map/components/SituationTab.tsx`; `src/ui/map/components/SelectionPanel.tsx`; `src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx`; `tests/ui/gui_audit_label_discipline.test.ts`; `docs/40_reports/implemented/20260522_GUI_AUDIT_LABEL_DISCIPLINE.md`.
 
-**Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for stale-state resets, Warroom chrome scoping, no-op control feedback, and polish cleanup.
+**Roadmap delta:** Closes the first player-truth slice of GUI visual audit Batch B. The broader 2026-05-22 GUI corrective queue remains active for no-op control feedback and polish cleanup.
 
 ---
 ## [2026-05-22] refactor(strict-null): type scenario runner startup tail

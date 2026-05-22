@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest GUI Warroom shell ownership:** [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is scoped to the game screen, browser Warroom launches expose a Warroom return path, Army HQ close labels have one owner, and duplicate Decision Room lane headlines are de-duplicated.
+
 **Latest GUI stale-state resets:** [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: selection-bound confirmations, Army HQ last-tab state, hidden Decision Room lens filters, and Inbox home overlay state now reset when their owning surface changes.
 
 **Latest GUI modal palette unification:** [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: `OperationBriefingModal` and `CommanderSelectionModal` now use dark panel tokens instead of the old light command-card palette.

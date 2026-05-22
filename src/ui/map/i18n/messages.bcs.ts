@@ -229,6 +229,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'opsPlanning.legend.attackPenalty': 'Kazna za napad',
     'armyHq.dialogTitle': 'Stab armije',
     'armyHq.close': 'Zatvori stab armije',
+    'armyHq.dismissBackdrop': 'Skloni pozadinu staba armije',
     'armyHq.backOverviewTitle': 'Nazad na pregled armije',
     'armyHq.returnFieldTitle': 'Povratak na terensko osmatranje',
     'armyHq.back': '<- NAZAD',

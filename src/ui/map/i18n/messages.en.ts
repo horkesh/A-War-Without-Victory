@@ -228,6 +228,7 @@ export const enMessages = {
     'opsPlanning.legend.attackPenalty': 'Attack penalty',
     'armyHq.dialogTitle': 'Army Headquarters',
     'armyHq.close': 'Close Army Headquarters',
+    'armyHq.dismissBackdrop': 'Dismiss Army Headquarters backdrop',
     'armyHq.backOverviewTitle': 'Back to army overview',
     'armyHq.returnFieldTitle': 'Return to field observation',
     'armyHq.back': '<- BACK',

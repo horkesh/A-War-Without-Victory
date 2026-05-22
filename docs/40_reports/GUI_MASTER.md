@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit stale-state resets)
+**Updated:** 2026-05-22 (GUI visual audit Warroom shell ownership)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **GUI visual audit Warroom shell ownership** | [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is scoped to the game screen, browser Warroom launches expose a Warroom return path, Army HQ close labels have one owner, and duplicate Decision Room lane headlines are de-duplicated. |
 | **GUI visual audit stale-state resets** | [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: UI-only confirmation and navigation states now reset when their owning selections or surfaces change. |
 | **GUI visual audit modal palette unification** | [implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md](implemented/20260522_GUI_AUDIT_MODAL_PALETTE_UNIFICATION.md) - Batch D from the 2026-05-22 GUI visual audit: `OperationBriefingModal` and `CommanderSelectionModal` now use dark panel tokens instead of the old light command-card palette. |
 | **GUI visual audit peace plan split meters** | [implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md](implemented/20260522_GUI_AUDIT_PEACE_PLAN_SPLIT_METERS.md) - Batch C peace-meter slice from the 2026-05-22 GUI visual audit: `GameStateAdapter` now resolves pending peace-plan display data through a static `PEACE_PLANS` import, so Vance-Owen meters render the catalog split instead of `0%`. |

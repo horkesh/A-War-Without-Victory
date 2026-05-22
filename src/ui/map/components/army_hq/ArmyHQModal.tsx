@@ -240,7 +240,7 @@ export function ArmyHQModal() {
             {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
             <button
                 type="button"
-                aria-label={t('armyHq.close')}
+                aria-label={t('armyHq.dismissBackdrop')}
                 className="absolute inset-0 bg-black/85 cursor-default"
                 onClick={() => setOpen(false)}
             />

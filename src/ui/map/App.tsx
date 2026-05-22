@@ -1064,14 +1064,16 @@ function App() {
         onReviewPriorities={reviewPreAdvancePriorities}
         onReviewItem={reviewPreAdvanceItem}
       />
-      <MapModeLegend />
-      <Minimap />
-      <nav
-        aria-label="Map controls and status"
-        style={{ display: 'contents' }}
-      >
-        <BottomStatusStrip />
-      </nav>
+      {appScreen === 'game' && <MapModeLegend />}
+      {appScreen === 'game' && <Minimap />}
+      {appScreen === 'game' && (
+        <nav
+          aria-label="Map controls and status"
+          style={{ display: 'contents' }}
+        >
+          <BottomStatusStrip />
+        </nav>
+      )}
 
       {/* Warroom React shell — foundation layer, activated by ?view=warroom */}
       {appScreen === 'warroom' && (
