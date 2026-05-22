@@ -2,7 +2,9 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
-**Latest GUI Warroom shell ownership:** [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is scoped to the game screen, browser Warroom launches expose a Warroom return path, Army HQ close labels have one owner, and duplicate Decision Room lane headlines are de-duplicated.
+**Latest GUI dead control feedback:** [implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md](implemented/20260522_GUI_AUDIT_DEAD_CONTROL_FEEDBACK.md) - Batch G from the 2026-05-22 GUI visual audit: onboarding targets now draw a spotlight, unsupported order overrides no longer render as active no-op controls, and browser/no-IPC decision controls show bridge-unavailable feedback.
+
+**Latest GUI Warroom shell ownership:** [implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md](implemented/20260522_GUI_AUDIT_WARROOM_SHELL_OWNERSHIP.md) - Batch F from the 2026-05-22 GUI visual audit: tactical chrome is now game-only, Warroom return affordances recognize `?view=warroom`, Army HQ close labels are de-duplicated, and Decision Room command-lane headlines are de-duplicated.
 
 **Latest GUI stale-state resets:** [implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md](implemented/20260522_GUI_AUDIT_STALE_STATE_RESETS.md) - Batch E from the 2026-05-22 GUI visual audit: selection-bound confirmations, Army HQ last-tab state, hidden Decision Room lens filters, and Inbox home overlay state now reset when their owning surface changes.
 

@@ -61,19 +61,29 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     );
 
     const handleDecisionResponse = async (eventId: string, responseId: string) => {
-        if (!ipc.isAvailable) return;
+        if (!ipc.isAvailable) {
+            setLoadError(t('attention.bridgeUnavailableDecisionError'));
+            return;
+        }
         const result = await ipc.respondToEventDecision(eventId, responseId);
         if (!result.ok) setLoadError(result.error ?? t('attention.error.recordDecision'));
     };
 
     const handleAcknowledgeOfficerEvent = async (eventId: string) => {
-        if (!ipc.isAvailable) return;
+        if (!ipc.isAvailable) {
+            setLoadError(t('attention.bridgeUnavailablePersonnelError'));
+            return;
+        }
         const result = await ipc.acknowledgeOfficerEvent(eventId);
         if (!result.ok) setLoadError(result.error ?? t('attention.error.ackPersonnel'));
     };
 
     const handleAcceptReplacement = async (event: NonNullable<LoadedGameState['pendingOfficerEvents']>[number]) => {
-        if (!ipc.isAvailable || event.type !== 'replacement_suggested' || !event.corps_id) return;
+        if (!ipc.isAvailable) {
+            setLoadError(t('attention.bridgeUnavailableReplacementError'));
+            return;
+        }
+        if (event.type !== 'replacement_suggested' || !event.corps_id) return;
         const result = await ipc.acceptOfficerReplacement({
             eventId: event.event_id,
             corpsId: event.corps_id,
@@ -125,6 +135,12 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                         </div>
                     )}
                 </div>
+
+                {!ipc.isAvailable && (pendingDecisions.length > 0 || personnelDirectives.length > 0) && (
+                    <div className="rounded border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-[10px] leading-relaxed text-amber-200">
+                        {t('attention.bridgeUnavailableReadOnly')}
+                    </div>
+                )}
 
                 {armyReserveQueue && (
                     <section className="rounded border border-panel-border bg-panel-bg p-3 space-y-2">
@@ -186,7 +202,8 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                         key={option.id}
                                         type="button"
                                         onClick={() => { void handleDecisionResponse(decision.event_id, option.id); }}
-                                        className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5"
+                                        disabled={!ipc.isAvailable}
+                                        className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {option.label}
                                     </button>
@@ -251,14 +268,16 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                             <button
                                                 type="button"
                                                 onClick={() => { void handleAcknowledgeOfficerEvent(event.event_id); }}
-                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-secondary transition-colors hover:bg-white/5"
+                                                disabled={!ipc.isAvailable}
+                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {t('attention.keepCurrent')}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => { void handleAcceptReplacement(event); }}
-                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20"
+                                                disabled={!ipc.isAvailable}
+                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {t('attention.acceptReplacement')}
                                             </button>
@@ -267,7 +286,8 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                         <button
                                             type="button"
                                             onClick={() => { void handleAcknowledgeOfficerEvent(event.event_id); }}
-                                            className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20"
+                                            disabled={!ipc.isAvailable}
+                                            className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {t('attention.acknowledge')}
                                         </button>

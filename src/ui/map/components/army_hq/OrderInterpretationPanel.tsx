@@ -11,6 +11,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { t } from '../../i18n';
 import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
@@ -49,6 +50,17 @@ interface OrderInterpretationPanelProps {
     playerFaction: string;
 }
 
+type PendingOfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
+const SUPPORTED_ORDER_OVERRIDE_ACTIONS = new Set<string>();
+
+export function shouldShowOrderOverrideControl(
+    event: Pick<PendingOfficerEvent, 'overridable' | 'override_action'>,
+): boolean {
+    return event.overridable === true
+        && typeof event.override_action === 'string'
+        && SUPPORTED_ORDER_OVERRIDE_ACTIONS.has(event.override_action);
+}
+
 export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInterpretationPanelProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -73,6 +85,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
 
             {events.map((event) => {
                 const badge = BADGE_STYLES[event.type] ?? BADGE_STYLES['order_modified'];
+                const showOverride = shouldShowOrderOverrideControl(event);
                 return (
                     <div
                         key={event.event_id}
@@ -109,16 +122,21 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                             >
                                 ACCEPT
                             </button>
-                            {event.overridable && (
+                            {showOverride && (
                                 <button
                                     type="button"
-                                    onClick={() => { void handleAcknowledge(event.event_id); }}
+                                    onClick={() => { setLoadError(t('orderInterpretation.overrideBridgeError')); }}
                                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
                                 >
                                     OVERRIDE
                                 </button>
                             )}
                         </div>
+                        {event.overridable && !showOverride && (
+                            <div className="text-[9px] text-amber-300/70 italic">
+                                {t('orderInterpretation.overrideBridgeUnavailable')}
+                            </div>
+                        )}
                         {event.type === 'order_refused' && event.overridable && (
                             <div className="text-[9px] text-text-secondary/60 italic">
                                 Officer morale {RELIEF_MORALE_PENALTY} if relieved
