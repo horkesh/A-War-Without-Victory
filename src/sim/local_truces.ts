@@ -178,9 +178,10 @@ export const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 
-/** HRHB corps exempt from Graz — Posavina fighting */
+/** HRHB corps exempt from Graz — Posavina fighting + Op Jackal (east Herzegovina) */
 export const GRAZ_EXEMPT_HRHB_CORPS = new Set([
     'hvo_northwest_bosnia',  // Orašje pocket — Posavina corridor fighting
+    'hvo_southeast_herzegovina',  // Op Jackal — east Herzegovina pair still active per brigade-level callers
 ]);
 
 /**

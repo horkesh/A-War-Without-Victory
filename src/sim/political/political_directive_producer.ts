@@ -66,8 +66,17 @@ export const B1_PIPELINE_STEP_NAME = 'produce-political-directive';
 // Producer thresholds (DDR Q2 — derivation table)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** war_exhaustion above this biases HONOR_TRUCE / PREPARE_RESERVE. */
-export const B1_HIGH_EXHAUSTION_THRESHOLD = 500;
+/**
+ * war_exhaustion above this biases HONOR_TRUCE / PREPARE_RESERVE.
+ *
+ * Pre-Wave-1A scale (cap=100) made 500 unreachable, so this gate was dead.
+ * Wave 1A rescaled war_exhaustion 100× (cap=10000), which inadvertently
+ * activated the gate from t≈50 onward and forced bot factions into
+ * PREPARE_RESERVE permanently — collapsing HVO offensive planning.
+ * Lifted to 12000 (above cap) to restore the historically-dead behavior
+ * until Wave 1A.1 ships a meaningful per-faction exhaustion discriminator.
+ */
+export const B1_HIGH_EXHAUSTION_THRESHOLD = 12000;
 
 /** Hawkishness >= this biases PRESS_OFFENSIVE. */
 export const B1_HAWKISH_THRESHOLD = 4;
