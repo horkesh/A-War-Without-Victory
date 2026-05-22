@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(strict-null): classify derived optional fields
+
+**Type:** Strict-null optional `GameState` contract classification. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** The optional `GameState` lane should progress by owned-field classification, not by unsafe count reduction. The smallest domain is the 8-field `derived` slice, which needed an explicit decision before any future promotion attempt.
+
+**Change:** Added `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`, classifying all 8 derived optional fields. Six frozen endgame/end-state snapshot fields remain save-shape risks, and two diagnostic exposure fields remain runtime optional diagnostics. Updated the strict-null optional contract guard and master roadmap with the decision.
+
+**Determinism / output impact:** Documentation/classification only. No source, schema, serialization, generated output, or runtime behavior changed.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-domains` reports `derived: 8`, `unknown: 0`, and total optional fields `477`.
+
+**Artifacts:** `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`; `docs/40_reports/implemented/20260522_STRICT_NULL_OPTIONAL_GAMESTATE_CONTRACT_GUARD.md`; `docs/plans/MASTER_ROADMAP.md`.
+
+**Roadmap delta:** The derived optional-field slice is classified as intentionally retained. Future strict-null optional-field work should move to small `state` or `sim` groups with explicit save/default/validator evidence.
+
+---
+
 ## [2026-05-22] content(notifications): close Srebrenica demilitarization row
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, painted target, or feature-flag behavior changed.
