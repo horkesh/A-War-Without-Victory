@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] content(notifications): close 1994 late-war diplomacy rows
+
+**Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, or feature-flag behavior changed.
+
+**Why:** The Phase D residual review classified seven rows as late-war outcome policy. The three 1994 rows could be authored safely because their existing event rows support proposal, patron-pressure, and ceasefire-posture copy without asserting final Dayton, territorial, refugee, or 1995 campaign outcomes.
+
+**Change:** Added `notifications_to_other_factions` recipient text for `contact_group_plan_1994`, `belgrade_embargo_rs_1994`, and `carter_ceasefire_1994`. The text is framed as non-source diplomatic/intelligence readout and remains compatible with alternate simulation state.
+
+**Verification:** `npx.cmd vitest run tests\sim\events\event_notification_content_backfill.test.ts tests\sim\events\two_level_surfacing.test.ts tests\ui\inboxItems.notifications.test.ts tests\event_timeline_integrity.test.ts --reporter=dot` passed 30/30. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `data/scenarios/events/war_1994.json`; `tests/sim/events/event_notification_content_backfill.test.ts`; `docs/40_reports/implemented/20260522_EVENT_NOTIFICATION_1994_LATE_WAR_DIPLOMACY.md`; `docs/40_reports/EVENT_NOTIFICATION_BACKFILL.md`.
+
+**Roadmap delta:** Late-war outcome residual drops from 7 rows / 28 blocks to 4 rows / 16 blocks. Overall Phase D notification residual drops from 16 rows / 74 blocks to 13 rows / 62 blocks.
+
+---
+
 ## [2026-05-22] content(notifications): close Washington-timing rows
 
 **Type:** Event-notification content backfill. No simulation behavior, save schema, scenario mechanics, calibration/army-arc tuning, combat math, operation behavior, event trigger, turn ordering, or feature-flag behavior changed.
