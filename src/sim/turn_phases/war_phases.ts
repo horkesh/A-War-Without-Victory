@@ -215,6 +215,16 @@ function getRoutineEquipmentOperationalFloor(state: GameState, formation: Format
     return timelineDecay?.floor ?? VRS_EQUIPMENT_DECAY_FLOOR;
 }
 
+export function selectBotBrigadeOrderFactions(state: GameState): FactionId[] {
+    const playerFaction = state.meta.headless_scenario_auto_control
+        ? null
+        : state.meta.player_faction ?? null;
+    return (state.factions ?? [])
+        .map(f => f.id)
+        .filter((fid): fid is FactionId => playerFaction == null || fid !== playerFaction)
+        .sort(strictCompare);
+}
+
 // ---------------------------------------------------------------------------
 // War-phase step array
 // ---------------------------------------------------------------------------
@@ -1436,9 +1446,7 @@ export const warPhases: NamedPhase[] = [
         name: 'generate-bot-brigade-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const playerFaction = context.state.meta.player_faction ?? null;
-            const factions = (context.state.factions ?? []).map(f => f.id)
-                .filter(fid => playerFaction == null || fid !== playerFaction);
+            const factions = selectBotBrigadeOrderFactions(context.state);
 
             // War phase bot brigade orders: OSID-only (no brigade_aor). When operational data present, run OSID AI.
             const od = getOperationalData(context);

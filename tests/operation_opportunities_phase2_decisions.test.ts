@@ -33,6 +33,7 @@ import {
     type AxisPredicate,
     type OperationOpportunityDef,
 } from '../src/sim/combat/operation_opportunities.js';
+import { selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
@@ -319,6 +320,17 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
             p => p.opportunity_id === def.opportunity_id);
         expect(proposal!.status).toBe('approved');
         expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
+    });
+
+    it('headless scenario bridge includes the player faction in bot brigade orders only when flagged', () => {
+        const state = buildMinimalState(176, 'RBiH', 1);
+        state.factions = [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }] as GameState['factions'];
+
+        expect(selectBotBrigadeOrderFactions(state)).toEqual(['HRHB', 'RS']);
+
+        state.meta.headless_scenario_auto_control = true;
+
+        expect(selectBotBrigadeOrderFactions(state)).toEqual(['HRHB', 'RBiH', 'RS']);
     });
 
     it('bot decisions are deterministic across two independent runs', () => {

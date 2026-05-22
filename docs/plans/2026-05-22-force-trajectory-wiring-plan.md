@@ -1,6 +1,6 @@
 # Force-Trajectory Wiring Plan — Implementation
 
-**Codex execution update (2026-05-22):** Accepted as roadmap intake. Codex verified the referenced code surfaces locally and has begun execution. W1 shipped in `fix(combat): repair war exhaustion tempo threshold`; N2 shipped in `feat(opportunity): add Donji Vakuf catalog entry`. Continue one narrow behavior lane at a time with local tests, baseline evidence, docs, ledger, and push before the next lane.
+**Codex execution update (2026-05-22):** Accepted as roadmap intake. Codex verified the referenced code surfaces locally and has begun execution. W1 shipped in `fix(combat): repair war exhaustion tempo threshold`; W2 shipped in `feat(opportunity): gate late-war ops on defender trajectory`; W2.5 shipped in `feat(opportunity): resolve headless scenario decisions`; W2.6 is now launch-boundary complete for Donji Vakuf via the live Komar contact edge and source-OOB roster. Continue one narrow behavior lane at a time with local tests, baseline evidence, docs, ledger, and push before the next lane.
 
 **Date:** 2026-05-22
 **Author:** orchestrator synthesis of five specialist memos (`docs/40_reports/audits/20260522_{TRAJECTORY_MECHANIC_GAPS,HISTORICAL_FORCE_TRAJECTORY_DATAPOINTS,CANON_TRAJECTORY_FRAME,FORCE_TRAJECTORY_ENGINE_INVENTORY,OPS_FORCE_TRAJECTORY_GATING}.md`).
@@ -43,7 +43,7 @@ The expected outcome from closing these gaps: ~6-8pp of the current 10pp Oct-199
 | W1 war-exhaustion tempo threshold repair | DONE | `combat_math.ts` thresholds are now 30/80; Army HQ readout threshold is 30; focused tests, typecheck, baseline re-bless, and diff hygiene passed. |
 | W2 defender-corps readiness predicate | DONE | `sana_95`, `sana_95_follow_on`, and `mistral_2_95` now read VRS 2nd Krajina trajectory when defender-corps evidence is present. |
 | W2.5 headless opportunity decision bridge | DONE | Non-interactive scenario runs now resolve eligible player-faction opportunities through the existing deterministic staff/bot decision path. Fresh 188w `n1938` approves Sana and Donji with linked AARs. |
-| W2.6 opening-attack launch feasibility | NEXT | Fresh 188w `n1938` proves the remaining blocker is accepted-but-not-launched delivery: Sana has `NO_OPENING_ATTACK:2`; Donji Vakuf has `NO-CONTACT-PATH:2` / `defender_power_too_high`. |
+| W2.6 opening-attack launch feasibility | DONE FOR DONJI / SANA REOPENED UPSTREAM | Fresh 188w `n1941` moves `donji_vakuf_95` from accepted/no-contact to contacted under-delivery: linked AAR, 1 attack, `UNDERDELIV:1`, `max_failures`, no reachability warnings. Sana is no longer an accepted no-launch case under broad headless auto-control; it is blocked upstream by `enemy_weakness` and `commander_confidence`, so handle Sana as a separate predicate/trajectory lane. |
 | W3 casualty-trajectory consumer | PENDING | Larger schema/output lane; defer until the accepted-operation launch boundary is diagnosed. |
 | W4 Sana readiness floor recalibration | NOT NEEDED ON CURRENT TRACE | Fresh 188w `n1936` shows `sana_95` eligible at turn 175 with the 0.40 floor still in place. |
 | W5 officer-maturity combat consumer | PENDING | `faction_officer_maturity` already feeds corps readiness; any combat-math consumer remains opt-in/default-off work. |

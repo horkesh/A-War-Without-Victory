@@ -21,7 +21,12 @@ import { isWesternTheaterRuptured } from './operation_storm_theater.js';
 import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_3rd_corps';
-const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_7th_corps';
+// The historical Donji Vakuf push is associated with the 7th Corps under
+// Alagic, but the current source OOB keeps the authored Bugojno/Komar brigade
+// pool under `arbih_3rd_corps`. Host the catalog entry where the live brigades
+// and sector truth exist; otherwise final operation reconciliation strips the
+// operation empty before launch.
+const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_3rd_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
 
 const STAGING_TRAVNIK = 'op:travnik:travnik_2';
@@ -59,30 +64,24 @@ const FEDERATION_ALLIANCE_FLOOR = 0.50;
 
 const DONJI_VAKUF_STAGING_GRACANICA = 'op:bugojno:gracanica';
 const DONJI_VAKUF_STAGING_KOPCIC = 'op:bugojno:kopcic_2';
+const DONJI_VAKUF_STAGING_TURBE = 'op:travnik:turbe_2';
 const DONJI_VAKUF_STAGING_ANCHORS: readonly string[] = [
+    DONJI_VAKUF_STAGING_TURBE,
     DONJI_VAKUF_STAGING_GRACANICA,
     DONJI_VAKUF_STAGING_KOPCIC,
 ];
 
-const DONJI_VAKUF_NORTHERN_OBJECTIVES: readonly string[] = [
-    'op:donji_vakuf:babin_potok_2',
-    'op:donji_vakuf:donji_vakuf_2',
-    'op:donji_vakuf:jemanlici',
+const DONJI_VAKUF_OBJECTIVES: readonly string[] = [
     'op:donji_vakuf:komar_2',
-    'op:donji_vakuf:korenici',
-];
-
-const DONJI_VAKUF_SOUTHERN_OBJECTIVES: readonly string[] = [
+    'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:babin_potok_2',
     'op:donji_vakuf:kutanja',
-    'op:donji_vakuf:oborci_2',
+    'op:donji_vakuf:torlakovac_2',
     'op:donji_vakuf:pribraca_2',
     'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:torlakovac_2',
-];
-
-const DONJI_VAKUF_OBJECTIVES: readonly string[] = [
-    ...DONJI_VAKUF_NORTHERN_OBJECTIVES,
-    ...DONJI_VAKUF_SOUTHERN_OBJECTIVES,
+    'op:donji_vakuf:jemanlici',
+    'op:donji_vakuf:korenici',
+    'op:donji_vakuf:oborci_2',
 ];
 
 const DONJI_VAKUF_READINESS_FLOOR = 0.36;
@@ -161,26 +160,18 @@ const VLASIC_RIDGE_PROBE_AXES: readonly OpportunityAxisDef[] = [
 
 const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
     {
-        axis_id: 'donji_vakuf_northern_line',
-        name: 'Donji Vakuf Northern Line',
+        axis_id: 'donji_vakuf_komar_line',
+        name: 'Donji Vakuf Komar Line',
         corps: DONJI_VAKUF_PRIMARY_CORPS,
         brigades: [
+            'arbih_17th_vitezka_mountain' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
+            'arbih_706th_muslim_mountain' as FormationId,
             'arbih_707th_slavna_mountain' as FormationId,
+            'arbih_727th_slavna' as FormationId,
         ],
-        objectives: DONJI_VAKUF_NORTHERN_OBJECTIVES,
-        staging_osid: DONJI_VAKUF_STAGING_GRACANICA,
-    },
-    {
-        axis_id: 'donji_vakuf_southern_line',
-        name: 'Donji Vakuf Southern Line',
-        corps: DONJI_VAKUF_PRIMARY_CORPS,
-        brigades: [
-            'arbih_717th_slavna_mountain' as FormationId,
-            'arbih_770th_slavna_mountain' as FormationId,
-        ],
-        objectives: DONJI_VAKUF_SOUTHERN_OBJECTIVES,
-        staging_osid: DONJI_VAKUF_STAGING_KOPCIC,
+        objectives: DONJI_VAKUF_OBJECTIVES,
+        staging_osid: DONJI_VAKUF_STAGING_TURBE,
     },
 ];
 
@@ -585,7 +576,7 @@ export const DONJI_VAKUF_95_OPPORTUNITY: OperationOpportunityDef = {
     primary_corps: DONJI_VAKUF_PRIMARY_CORPS,
     family: 'central_bosnia_vlasic',
     axes: DONJI_VAKUF_AXES,
-    staging_osid: DONJI_VAKUF_STAGING_GRACANICA,
+    staging_osid: DONJI_VAKUF_STAGING_TURBE,
     planning_duration: 3,
     min_attack_outcome: 'repulsed',
     citations: [

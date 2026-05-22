@@ -1350,6 +1350,8 @@ export interface StateMeta {
     enable_rbih_hrhb_dynamics?: boolean;
     /** Desktop GUI: which side the human plays (RBiH, RS, HRHB). Set when starting a new campaign from the app. Non-normative for simulation. */
     player_faction?: FactionId;
+    /** Scenario-runner proof mode: non-interactive harness auto-controls every faction, including player_faction, for bot brigade orders. */
+    headless_scenario_auto_control?: boolean;
     /** Calendar date corresponding to turn 0 for this scenario. Defaults to { year: 1991, month: 8, day: 1 } (1 September 1991) when absent. Non-normative for simulation — used by UI only. */
     scenario_start_date?: { year: number; month: number; day: number };
     /** Peace-phase Overhaul: recruitment mode from scenario config. Controls whether bottom-up TO detachment

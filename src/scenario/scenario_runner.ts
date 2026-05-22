@@ -1262,6 +1262,7 @@ export async function buildScenarioStartupState(
     // RBiH for the desktop default; tests that need event-rich coverage should
     // use explicit RS state/harness fixtures rather than editing gameplay JSON.
     state.meta.player_faction = state.meta.player_faction ?? scenario.player_faction ?? 'RBiH';
+    state.meta.headless_scenario_auto_control = true;
 
     // After state creation, political_controllers may have been promoted to OSID keys
     // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,

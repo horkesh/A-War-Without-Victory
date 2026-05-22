@@ -1,5 +1,13 @@
 # AWWV Calibration Master Reference
 
+## Donji Vakuf launch feasibility (2026-05-22)
+
+- Scenario-runner proof mode now marks `state.meta.headless_scenario_auto_control = true`, allowing bot brigade orders for every faction in non-interactive runs while preserving desktop/player-faction exclusion.
+- `donji_vakuf_95` now uses the live 3rd Corps owner, a single `op:travnik:turbe_2 -> op:donji_vakuf:komar_2` opening axis, and the documented Vlasic/Komar brigade set.
+- Fresh 188w `n1941` result: `donji_vakuf_95` approves at turn 177, reaches a linked AAR, records 1 attack, and exits `failed` / `max_failures` with `UNDERDELIV:1`; reachability warnings are 0.
+- Residual: this closes no-launch/no-contact classification for Donji Vakuf, not final outcome. All ten Donji Vakuf painted target OSIDs remain RS, and Oct 1995 painted area match remains 71.6%. Next lane is under-delivery/combat prediction, not catalog presence.
+- Report: `docs/40_reports/implemented/20260522_DONJI_VAKUF_LAUNCH_FEASIBILITY.md`.
+
 ## Headless opportunity decision bridge (2026-05-22)
 
 - Scenario harness runs are non-interactive, so player-faction Operation Opportunities no longer remain permanently pending when no IPC marks the review row.

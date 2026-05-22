@@ -17,6 +17,24 @@
 
 ---
 
+## [2026-05-22] feat(opportunity): repair Donji Vakuf launch feasibility
+
+**Type:** Scenario harness proof-mode boundary + Operation Opportunity launch geometry/roster correction + baseline-manifest refresh + calibration docs. No scenario data, painted-control targets, OOB source rows, save schema, combat math, or outcome tuning changed.
+
+**Why:** The headless opportunity decision bridge proved `donji_vakuf_95` could be approved, but fresh 188w evidence showed it still failed before real delivery. `n1938`/`n1939` classified Donji as accepted but not launched with no-contact/no-approach evidence. The roadmap W2.6 lane required separating launch feasibility from later combat under-delivery before any W3 schema or outcome tuning.
+
+**Change:** Added optional `state.meta.headless_scenario_auto_control` and a deterministic `selectBotBrigadeOrderFactions(...)` helper so non-interactive scenario runs generate bot brigade orders for every faction while desktop/player-faction runs still exclude the human side. Rehosted `donji_vakuf_95` on the live `arbih_3rd_corps` source-OOB owner, replaced the two Bugojno no-contact axes with one `op:travnik:turbe_2 -> op:donji_vakuf:komar_2` Komar line, and aligned the roster to the documented Vlasic/Komar brigade set (`17th`, `705th`, `706th`, `707th`, `727th`).
+
+**Determinism:** Deterministic behavior change for scenario-runner proof mode and deterministic catalog definition change. No randomness, wall-clock, unordered iteration, save migration, or external data dependency added. Output hashes intentionally drift for late-war 188w proof runs because player-faction bot brigade orders now run in the headless harness and Donji Vakuf's operation shape changed.
+
+**Verification:** Red first: Donji catalog test failed on missing live Travnik-Komar contact edge, then on missing 17th/706th roster members. Green focused verification: `npx.cmd vitest run tests\operation_opportunities_central_bosnia_catalog.test.ts --reporter=dot` PASS (14/14); `npx.cmd vitest run tests\operation_opportunities_phase2_decisions.test.ts tests\operation_opportunities_central_bosnia_catalog.test.ts --reporter=dot` PASS (30/30); `npm.cmd run typecheck` PASS. Fresh 188w `n1940` hash `6fe12863dac169da` moved Donji from reachability failure to `zero_eligible_axis`, proving roster was still wrong. Fresh 188w `n1941` hash `8d882f12f3c27d3e` records `donji_vakuf_95` approved at turn 177 with linked AAR, 1 attack, 0 captures, `UNDERDELIV:1`, `max_failures`, and 0 reachability warnings. `node tools\compare_painted_vs_sim.cjs runs\apr1992_definitive_188w__210e69404d054959__w188_n1941 --target oct1995` completed; area-weighted match remains 71.6%. `npm.cmd run test:baselines` first failed on the expected 52w `activity_summary.json` hash drift; `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed `data/derived/scenario/baselines/manifest.json`; follow-up `npm.cmd run test:baselines` PASS.
+
+**Residual:** This closes Donji no-launch/no-contact classification, not the historical territorial outcome. All ten Donji Vakuf target OSIDs remain RS in n1941, so the next Donji lane is contacted under-delivery/combat prediction. Sana is now blocked upstream by `enemy_weakness` and `commander_confidence` under broad headless auto-control, so treat it as a separate predicate/trajectory follow-up rather than the same no-launch symptom.
+
+**Artifacts:** `src/scenario/scenario_runner.ts`, `src/state/game_state.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/combat/operation_opportunity_catalog_central_bosnia.ts`, `tests/operation_opportunities_phase2_decisions.test.ts`, `tests/operation_opportunities_central_bosnia_catalog.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/implemented/20260522_DONJI_VAKUF_LAUNCH_FEASIBILITY.md`, `docs/40_reports/CALIBRATION_MASTER.md`, `docs/plans/2026-05-22-force-trajectory-wiring-plan.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-22] feat(opportunity): resolve headless opportunity decisions
 
 **Type:** Scenario harness decision-boundary repair + opportunity decision tests + calibration docs. No operation catalog definitions, scenario data, OOB rows, painted targets, combat math, save schema, or outcome tuning changed.

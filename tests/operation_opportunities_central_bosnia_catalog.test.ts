@@ -44,28 +44,30 @@ const VLASIC_BRIGADES = [
 ];
 
 const DONJI_VAKUF_STAGING_ANCHORS = [
+    'op:travnik:turbe_2',
     'op:bugojno:gracanica',
     'op:bugojno:kopcic_2',
 ];
 
 const DONJI_VAKUF_OBJECTIVES = [
-    'op:donji_vakuf:babin_potok_2',
-    'op:donji_vakuf:donji_vakuf_2',
-    'op:donji_vakuf:jemanlici',
     'op:donji_vakuf:komar_2',
-    'op:donji_vakuf:korenici',
+    'op:donji_vakuf:donji_vakuf_2',
+    'op:donji_vakuf:babin_potok_2',
     'op:donji_vakuf:kutanja',
-    'op:donji_vakuf:oborci_2',
+    'op:donji_vakuf:torlakovac_2',
     'op:donji_vakuf:pribraca_2',
     'op:donji_vakuf:prusac_2',
-    'op:donji_vakuf:torlakovac_2',
+    'op:donji_vakuf:jemanlici',
+    'op:donji_vakuf:korenici',
+    'op:donji_vakuf:oborci_2',
 ];
 
 const DONJI_VAKUF_BRIGADES = [
+    'arbih_17th_vitezka_mountain',
     'arbih_705th_slavna_mountain',
+    'arbih_706th_muslim_mountain',
     'arbih_707th_slavna_mountain',
-    'arbih_717th_slavna_mountain',
-    'arbih_770th_slavna_mountain',
+    'arbih_727th_slavna',
 ];
 
 const KUPRES_STAGING_ANCHORS = [
@@ -212,7 +214,8 @@ function buildDonjiVakufState(opts: {
             id,
             name: id,
             faction: 'RBiH',
-            own_corps_cmd: 'arbih_7th_corps',
+            corps_id: 'arbih_3rd_corps',
+            own_corps_cmd: 'arbih_3rd_corps',
             strength: 1350,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
             cohesion: opts.axisCoordinationLow ? 34 : 68,
@@ -251,7 +254,7 @@ function buildDonjiVakufState(opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            corps_command: { arbih_7th_corps: cmd },
+            corps_command: { arbih_3rd_corps: cmd },
             faction_officer_maturity: { RBiH: opts.axisCoordinationLow ? 1.5 : 3.5 },
             event_last_fired_turn: (opts.stormRuptured ?? true) ? { operation_storm_1995: 172 } : {},
         },
@@ -262,6 +265,16 @@ function buildDonjiVakufState(opts: {
         } as unknown as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as unknown as GameState;
+}
+
+function buildDonjiVakufSourceOobState(turn: number): GameState {
+    const state = buildDonjiVakufState({ turn });
+    for (const id of DONJI_VAKUF_BRIGADES) {
+        const formation = state.military.formations[id] as { corps_id?: string; own_corps_cmd?: string };
+        formation.corps_id = 'arbih_3rd_corps';
+        formation.own_corps_cmd = 'arbih_3rd_corps';
+    }
+    return state;
 }
 
 function buildKupresCincarState(opts: {
@@ -372,7 +385,16 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(DONJI_VAKUF_95_OPPORTUNITY.family).toBe('central_bosnia_vlasic');
         expect(DONJI_VAKUF_95_OPPORTUNITY.tier).toBe('T1');
         expect(DONJI_VAKUF_95_OPPORTUNITY.faction).toBe('RBiH');
-        expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_7th_corps');
+        expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
+    });
+
+    it('starts Donji Vakuf 95 on the live Travnik-Komar contact edge', () => {
+        const openingAxis = DONJI_VAKUF_95_OPPORTUNITY.axes[0];
+
+        expect(openingAxis.staging_osid).toBe('op:travnik:turbe_2');
+        expect(openingAxis.objectives[0]).toBe('op:donji_vakuf:komar_2');
+        expect(openingAxis.brigades).toContain('arbih_17th_vitezka_mountain');
+        expect(openingAxis.brigades).toContain('arbih_706th_muslim_mountain');
     });
 
     it('surfaces Kupres/Cincar in autumn 1994 as a dependency opportunity', () => {
@@ -551,12 +573,23 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const approved = applyOpportunityDecision(state, 178, proposalId, 'approve');
 
         expect(approved?.status).toBe('approved');
-        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].name)
+        expect(state.military.corps_command!.arbih_3rd_corps.active_operations[0].name)
             .toBe('Operation Donji Vakuf 95');
-        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].axes![0].objectives)
-            .toEqual(DONJI_VAKUF_OBJECTIVES.slice(0, 5));
-        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].axes![1].objectives)
-            .toEqual(DONJI_VAKUF_OBJECTIVES.slice(5));
+        expect(state.military.corps_command!.arbih_3rd_corps.active_operations[0].axes![0].objectives)
+            .toEqual(DONJI_VAKUF_OBJECTIVES);
+    });
+
+    it('spawns Donji Vakuf 95 against the source-OOB 3rd Corps brigade owner', () => {
+        const state = buildDonjiVakufSourceOobState(178);
+        runOpportunityEvaluationStep(state, 178);
+        const proposalId = buildProposalId('donji_vakuf_95', 178);
+
+        const approved = applyOpportunityDecision(state, 178, proposalId, 'approve');
+
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0];
+        expect(op.name).toBe('Operation Donji Vakuf 95');
+        expect(op.participating_brigades).toEqual([...DONJI_VAKUF_BRIGADES].sort());
     });
 
     it('links partial AAR exit class deterministically for failed/partial outcomes', () => {
