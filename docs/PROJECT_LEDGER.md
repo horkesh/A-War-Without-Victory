@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] refactor(strict-null): type save migration boundary
+
+**Type:** Strict-null save-migration cleanup. No migration defaults, save schema, simulation behavior, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
+
+**Why:** After the Phase 3ABC audit harness tail, `src/state/save_migration.ts` was the remaining non-UI strict-null owner, contributing 23 `as_any_casts`.
+
+**Change:** `save_migration.ts` now reads typed `GameState` fields directly where they already exist and uses the file's tolerant `asRecord(...)` boundary helper for legacy/optional save shapes instead of casting `state` or `state.military` to `any`. A strict-null progress assertion pins `save_migration.ts` at zero `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 90/90. `npm.cmd run typecheck` passed. `npm.cmd run test:baselines` passed with `Baseline regression: all scenarios match.` `node tools\diagnostics\strict_null_inventory.cjs` reports top-level `as_any_casts 8`, `as_unknown_casts 0`, `non_null_assertions_dot 0`, and `non_null_assertions_index 0`. `git diff --check` passed.
+
+**Artifacts:** `src/state/save_migration.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_SAVE_MIGRATION_TAIL.md`.
+
+**Roadmap delta:** Removes `src/state/save_migration.ts` from the remaining strict-null `as_any_casts` queue. Remaining visible strict-null escape owners are all in `src/ui/map/data/GameStateAdapter.ts`: eight `as_any_casts` plus two retained `as_factionid_casts`.
+
+---
+
 ## [2026-05-22] refactor(strict-null): type Phase 3ABC audit harness
 
 **Type:** Strict-null diagnostic harness cleanup. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, operation behavior, or turn ordering changed.
