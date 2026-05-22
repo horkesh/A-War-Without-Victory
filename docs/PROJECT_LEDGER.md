@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] docs(strict-null): classify small sim optional fields
+
+**Type:** Strict-null optional `GameState` contract classification. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** The new interface summary exposed a bounded small-sim slice that could be classified without touching large state contracts. This prevents future count-chasing from requiring directive defaults, pending decisions, or result-only diagnostic fields incorrectly.
+
+**Change:** Added `docs/40_reports/audits/20260522_STRICT_NULL_SMALL_SIM_OPTIONAL_FIELDS_CLASSIFICATION.md`, classifying the `sim` interfaces with three or fewer optional fields: `FormationSpawnDirective`, `AssignableFrontSegmentState`, `MilitiaPoolState`, `ParamilitaryRequest`, `ArmyHQOverride`, `BrigadeMovementOrder`, `CorpsFrontSubSegment`, `OperationActiveProbe`, and `SectorIntelRecord`. Updated roadmap/backlog pointers.
+
+**Determinism / output impact:** Documentation/classification only. No source, schema, serialization, generated output, or runtime behavior changed.
+
+**Verification:** `node -e "const d=require('./tools/diagnostics/strict_null_inventory.cjs'); const r=d.buildInventory(process.cwd()).optional_field_interfaces; console.log(JSON.stringify(r.by_domain.sim.filter(x=>x.count<=3), null, 2));"` reported the expected nine small sim interfaces. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/audits/20260522_STRICT_NULL_SMALL_SIM_OPTIONAL_FIELDS_CLASSIFICATION.md`.
+
+**Roadmap delta:** The small sim optional-field slice is intentionally retained. Future optional-field work should target larger owner groups only with save/default/validator evidence.
+
+---
+
 ## [2026-05-22] diagnostic(strict-null): add optional interface summary
 
 **Type:** Strict-null diagnostic/test/docs tooling. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
