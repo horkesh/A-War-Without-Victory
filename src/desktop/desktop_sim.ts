@@ -496,8 +496,9 @@ export async function validateBrigadeMovementOrder(
     const queue = [destinationSids[0]];
     const reached = new Set<string>();
     reached.add(destinationSids[0]);
-    while (queue.length > 0) {
-        const s = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const s = queue[head++]!;
         const neighbors = adj.get(s);
         if (neighbors) {
             for (const n of neighbors) {

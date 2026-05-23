@@ -147,8 +147,9 @@ function hasSupplyConnection(
     const queue: SettlementId[] = [sid];
     visited.add(sid);
 
-    while (queue.length > 0) {
-        const current = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const current = queue[head++]!;
         const neighbors = settlementAdj.get(current);
         if (!neighbors) continue;
         for (const neighbor of neighbors) {

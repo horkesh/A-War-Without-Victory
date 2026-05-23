@@ -731,8 +731,9 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             // BFS through faction-controlled OSIDs
             const visited = new Set<string>([condition.from_osid]);
             const queue = [condition.from_osid];
-            while (queue.length > 0) {
-                const current = queue.shift()!;
+            let head = 0;
+            while (head < queue.length) {
+                const current = queue[head++]!;
                 if (current === condition.to_osid) return false; // path found → not severed
                 for (const neighbor of adj.get(current) ?? []) {
                     if (visited.has(neighbor)) continue;
@@ -747,4 +748,3 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return true;
     }
 }
-
