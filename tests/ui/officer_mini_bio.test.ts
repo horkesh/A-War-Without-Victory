@@ -5,6 +5,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
+import { PersonnelContent } from '../../src/ui/map/components/army_hq/PersonnelContent.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState, NamedOfficerView } from '../../src/ui/map/data/types.js';
 
@@ -139,5 +140,20 @@ describe('officer mini-bio UI', () => {
         expect(source).toContain('commander.bio_short');
         expect(source).toContain('commander.command_style');
         expect(source).toContain('Service record pending staff review.');
+    });
+
+    it('surfaces command-style and known-for traits in the Personnel roster', () => {
+        const officer = makeOfficer({
+            command_style: 'Methodical staff work',
+            known_for: 'Opening army command',
+        });
+        useGameStore.setState({ loadedGameState: makeLoadedState(officer) });
+
+        render(createElement(PersonnelContent));
+
+        expect(screen.getByText('Doctrinal trait')).toBeTruthy();
+        expect(screen.getByText('Methodical staff work')).toBeTruthy();
+        expect(screen.getByText('Narrative trait')).toBeTruthy();
+        expect(screen.getByText('Opening army command')).toBeTruthy();
     });
 });

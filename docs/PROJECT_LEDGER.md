@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(personnel): surface officer trait chips
+
+**Type:** UI read-model/presentation enhancement. No combat math, commander behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.
+
+**Why:** The officer-character lane had authored `command_style` and `known_for` fields, but Army HQ Personnel still presented officers as compact stat rows. The remaining safe trait-surfacing work was to expose those existing fields without authoring new claims or changing commander behavior.
+
+**Change:** Army HQ Personnel active-officer rows now render `command_style` as a doctrinal trait chip and `known_for` as a narrative trait chip when those fields are present. The chips sit under the officer rank/corps line and keep the roster scan-friendly.
+
+**Determinism / output impact:** UI presentation only from existing `NamedOfficerView` fields. No save, sim, scenario, baseline, or generated artifact impact.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\officer_mini_bio.test.ts --reporter=dot` failed on missing Personnel trait text before implementation, then PASS 5/5 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_PERSONNEL_TRAIT_CHIPS.md`.
+
+**Roadmap delta:** Closes the current safe trait-surfacing sub-slice for Rating #10. Remaining officer-character work is content breadth and historian-reviewed expansion beyond the first-pass authored commanders, not UI wiring.
+
+---
+
 ## [2026-05-23] feat(chronicle): spotlight completed-operation commanders
 
 **Type:** UI read-model/presentation enhancement. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.

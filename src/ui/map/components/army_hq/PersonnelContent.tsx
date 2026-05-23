@@ -94,13 +94,23 @@ export function PersonnelContent() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     {data.activeOfficers.map(o => (
-                        <div key={o.id} className="flex items-center justify-between px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
-                            <div className="min-w-0">
+                        <div key={o.id} className="flex items-start justify-between gap-3 px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
+                            <div className="min-w-0 flex-1">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
                                     {o.rank?.replace(/_/g, ' ')}
                                     {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? 'Attached Command'}` : ''}
                                 </div>
+                                {(o.command_style || o.known_for) && (
+                                    <div className="mt-1 flex flex-wrap gap-1">
+                                        {o.command_style && (
+                                            <OfficerTraitPill label="Doctrinal trait" value={o.command_style} tone="doctrine" />
+                                        )}
+                                        {o.known_for && (
+                                            <OfficerTraitPill label="Narrative trait" value={o.known_for} tone="narrative" />
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className="flex items-center gap-2 shrink-0 tabular-nums font-mono">
                                 <span style={{ color: getRatingColor(o.competence) }}>C:{o.competence.toFixed(1)}</span>
@@ -123,6 +133,27 @@ export function PersonnelContent() {
                 )}
             </div>
         </div>
+    );
+}
+
+function OfficerTraitPill({
+    label,
+    value,
+    tone,
+}: {
+    label: string;
+    value: string;
+    tone: 'doctrine' | 'narrative';
+}) {
+    const toneClass = tone === 'doctrine'
+        ? 'border-cyan-500/35 bg-cyan-500/10 text-cyan-100'
+        : 'border-amber-500/35 bg-amber-500/10 text-amber-100';
+
+    return (
+        <span className={`inline-flex max-w-full items-center gap-1 rounded-sm border px-1.5 py-0.5 ${toneClass}`}>
+            <span className="shrink-0 text-[7px] font-bold uppercase tracking-[0.12em] opacity-75">{label}</span>
+            <span className="min-w-0 truncate text-[8px] text-text-primary">{value}</span>
+        </span>
     );
 }
 
