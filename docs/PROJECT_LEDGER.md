@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify watched-operation trace optionals
+
+**Type:** Strict-null optional `GameState` contract classification/test guard. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
+
+**Why:** `WatchedOperationTraceRow` is a diagnostic evidence row whose launch/defender/feasibility fields are intentionally sparse by row kind. The optional-field contract needed an executable guard so future count cleanup does not erase no-launch/blocked/unavailable-evidence semantics.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_WATCHED_OPERATION_TRACE_OPTIONAL_FIELDS.md`, classifying the nine optional `WatchedOperationTraceRow` fields. Extended `tests/strict_null_inventory_progress.test.ts` to assert the exact interface-domain/count/field list reported by `optional_field_interfaces`. Updated roadmap/backlog pointers.
+
+**Determinism / output impact:** Documentation/test guard only. No source schema, runtime state, generated output, serialization, baseline artifact, or scenario behavior changed.
+
+**Verification:** `node -e "const d=require('./tools/diagnostics/strict_null_inventory.cjs'); const w=d.buildInventory(process.cwd()).optional_field_interfaces.interfaces.find(x=>x.interface==='WatchedOperationTraceRow'); console.log(JSON.stringify(w, null, 2));"` reported the expected `WatchedOperationTraceRow` count/field list. `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 91/91. `npm.cmd run typecheck` passed. `git diff --check` passed.
+
+**Artifacts:** `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/audits/20260523_STRICT_NULL_WATCHED_OPERATION_TRACE_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** The watched-operation trace optional slice is intentionally retained. Future changes to these fields should be watched-operation output/schema lanes with baseline review, not broad strict-null cleanup.
+
+---
+
 ## [2026-05-22] docs(strict-null): classify small sim optional fields
 
 **Type:** Strict-null optional `GameState` contract classification. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.
