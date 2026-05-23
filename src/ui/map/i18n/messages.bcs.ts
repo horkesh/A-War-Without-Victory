@@ -45,4 +45,13 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'settings.crashDiagnostics.exportedAriaLabel': 'Izvezeni JSON dijagnostike rusenja',
     'settings.close': 'Zatvori',
     'settings.close.ariaLabel': 'Zatvori postavke',
+    'pause.title': 'Pauzirano',
+    'pause.resumeShortcut': 'ESC Nastavi',
+    'pause.resume': 'Nastavi',
+    'pause.resumeGameAriaLabel': 'Nastavi igru',
+    'pause.saveGame': 'Sacuvaj igru',
+    'pause.settings': 'Postavke',
+    'pause.mainMenu': 'Glavni meni',
+    'pause.quit': 'Izadji',
+    'pause.preservedNotice': 'Komanda je pauzirana. Stanje planiranja je sacuvano.',
 };

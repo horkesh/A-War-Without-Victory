@@ -44,6 +44,15 @@ export const enMessages = {
     'settings.close': 'Close',
     'settings.close.ariaLabel': 'Close settings',
     'settings.experimentalFallbackProbe': 'Experimental',
+    'pause.title': 'Paused',
+    'pause.resumeShortcut': 'ESC Resume',
+    'pause.resume': 'Resume',
+    'pause.resumeGameAriaLabel': 'Resume game',
+    'pause.saveGame': 'Save Game',
+    'pause.settings': 'Settings',
+    'pause.mainMenu': 'Main Menu',
+    'pause.quit': 'Quit',
+    'pause.preservedNotice': 'Command paused. Planning state is preserved.',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

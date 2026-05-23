@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize pause menu actions
+
+**Type:** Tactical-map UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for the in-game Pause Menu and wired `PauseMenu` through the existing `useLocale()` / `t(...)` localization substrate. The pause title, resume shortcut, resume overlay aria label, menu actions, and preserved-planning notice now render from the active locale with English fallback.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts --reporter=dot` failed while the menu still rendered hard-coded English after selecting BCS. Green `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\settings_screen_i18n.test.ts --reporter=dot` passed 10/10. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PauseMenu.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/pause_menu_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(audio): wire soundscape cue observer
 
 **Type:** Tactical-map UI observer wiring over the silent audio bus. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio playback, network IO, or random source changed.

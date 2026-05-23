@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS pause menu localization:** [implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md](implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md) - the in-game pause menu now renders title, shortcut, actions, overlay label, and preserved-planning notice through the existing English/BCS localization substrate.
+
 **Latest soundscape observer wiring:** [implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md](implemented/20260523_SOUNDSCAPE_OBSERVER_WIRING.md) - the tactical-map root now mounts a remount-safe observer that turns newly observed loaded-state turn summaries into silent-bus cue calls while suppressing initial hydration.
 
 **Latest soundscape cooldown suppression:** [implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md](implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md) - the silent audio bus now honors cue cooldown metadata when callers provide explicit timestamps, without adding wall-clock reads or playback IO.
