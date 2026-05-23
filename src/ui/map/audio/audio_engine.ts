@@ -19,6 +19,8 @@ interface AudioBusState {
     muted: boolean;
     lastCueId: string | null;
     currentMusicId: string | null;
+    acceptedCueCount: number;
+    lastCueAcceptedAtMsById: Record<string, number>;
     volumes: Record<AudioVolumeKind, number>;
 }
 
@@ -35,6 +37,8 @@ let state: AudioBusState = {
     muted: true,
     lastCueId: null,
     currentMusicId: null,
+    acceptedCueCount: 0,
+    lastCueAcceptedAtMsById: {},
     volumes: { ...DEFAULT_VOLUMES },
 };
 
@@ -72,11 +76,27 @@ export function setVolume(kind: AudioVolumeKind, value: number): void {
     };
 }
 
-export async function playCue(id: string): Promise<void> {
+export async function playCue(id: string, nowMs?: number): Promise<void> {
     if (!state.enabled || state.muted) return;
     const cue = getCueConfig(id);
     if (!cue) return;
-    state = { ...state, lastCueId: cue.id };
+    const normalizedNowMs = Number.isFinite(nowMs) ? Math.max(0, Math.floor(nowMs as number)) : null;
+    const previousAcceptedAtMs = state.lastCueAcceptedAtMsById[cue.id];
+    if (
+        normalizedNowMs !== null &&
+        previousAcceptedAtMs !== undefined &&
+        normalizedNowMs - previousAcceptedAtMs < cue.cooldownMs
+    ) {
+        return;
+    }
+    state = {
+        ...state,
+        lastCueId: cue.id,
+        acceptedCueCount: state.acceptedCueCount + 1,
+        lastCueAcceptedAtMsById: normalizedNowMs === null
+            ? state.lastCueAcceptedAtMsById
+            : { ...state.lastCueAcceptedAtMsById, [cue.id]: normalizedNowMs },
+    };
 }
 
 export async function playSFX(id: string): Promise<void> {
@@ -126,6 +146,7 @@ export function getCurrentMusicId(): string | null {
 export function getAudioState(): AudioBusState {
     return {
         ...state,
+        lastCueAcceptedAtMsById: { ...state.lastCueAcceptedAtMsById },
         volumes: { ...state.volumes },
     };
 }
@@ -136,6 +157,8 @@ export function resetAudioForTests(): void {
         muted: true,
         lastCueId: null,
         currentMusicId: null,
+        acceptedCueCount: 0,
+        lastCueAcceptedAtMsById: {},
         volumes: { ...DEFAULT_VOLUMES },
     };
 }

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(audio): add deterministic cue cooldown suppression
+
+**Type:** Tactical-map silent audio bus behavior. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, wall-clock read, timestamp source, or random source changed.
+
+**Change:** Extended `playCue(id, nowMs?)` to enforce per-cue cooldown metadata when callers provide explicit millisecond timestamps. The silent bus now tracks accepted cue count and per-cue accepted timestamps for deterministic tests and future observer wiring. Existing no-timestamp call sites remain compatible.
+
+**Determinism:** Cooldown acceptance depends only on the supplied `nowMs` argument and cue metadata. The bus still performs no playback, fetch, Web Audio initialization, wall-clock read, or randomness.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_bus.test.ts --reporter=dot` failed on missing accepted-cue count/cooldown memory. Green focused audio pack `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/audio_engine.ts`, `tests/ui/audio_bus.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_COOLDOWN_SUPPRESSION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(audio): add pure soundscape event adapter
 
 **Type:** Tactical-map UI/audio read-model adapter. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.
