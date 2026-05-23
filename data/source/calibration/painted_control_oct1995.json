@@ -6,8 +6,8 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 313,
-      "RBiH": 292,
+      "RS": 315,
+      "RBiH": 290,
       "HRHB": 107
     },
     "source": "painted_control_targets"
@@ -260,9 +260,9 @@
     "op:gorazde:osjecani_2": "RBiH",
     "op:gorazde:podkozara_donja_2": "RS",
     "op:gorazde:semihova_2": "RBiH",
-    "op:gorazde:slatina_2": "RBiH",
+    "op:gorazde:slatina_2": "RS",
     "op:gorazde:sopotnica": "RS",
-    "op:gorazde:ustipraca_2": "RBiH",
+    "op:gorazde:ustipraca_2": "RS",
     "op:gorazde:zorovici": "RBiH",
     "op:gornji_vakuf:crkvice": "RBiH",
     "op:gornji_vakuf:drazev_dolac": "RBiH",
