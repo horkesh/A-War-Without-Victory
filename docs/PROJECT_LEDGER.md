@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict fallback Game Over
+
+**Type:** No-verdict `VerdictScreen` fallback localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Reused the existing `gameOver.*` outcome/standings/metric/duration/action dictionary family for the `VerdictScreen` fallback path and added `gameOver.viewYourWar` for its fallback-specific action. The fallback now subscribes to the existing locale store and renders known outcome labels, final standings, OSID-control counts, active-brigade counts, campaign duration, View Your War, New Game, and Load Save through `t(...)`. Canonical faction IDs and the `A War Without Victory` product title remain untranslated.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered the fallback `VerdictScreen` in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 18/18 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 38/38. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Game Over modal
 
 **Type:** Terminal fallback Game Over UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

@@ -109,6 +109,7 @@ export const enMessages = {
     'gameOver.week.one': '{count} week',
     'gameOver.week.many': '{count} weeks',
     'gameOver.campaignLasted': 'Campaign lasted {turn} weeks ({years}, {weeks})',
+    'gameOver.viewYourWar': 'View Your War',
     'gameOver.newGame': 'New Game',
     'gameOver.loadSave': 'Load Save',
 } as const;

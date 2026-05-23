@@ -110,6 +110,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'gameOver.week.one': '{count} sedmica',
     'gameOver.week.many': '{count} sedmica',
     'gameOver.campaignLasted': 'Kampanja je trajala {turn} sedmica ({years}, {weeks})',
+    'gameOver.viewYourWar': 'Pogledaj svoj rat',
     'gameOver.newGame': 'Nova igra',
     'gameOver.loadSave': 'Ucitaj snimljenu igru',
 };

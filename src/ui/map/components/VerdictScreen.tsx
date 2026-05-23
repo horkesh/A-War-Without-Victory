@@ -30,6 +30,7 @@ import { buildGhostEntries, type BuiltGhostEntry } from '../../../sim/codex/dyna
 import { ReplayScrubber } from './replay/index.js';
 import { Z } from '../../shared/zIndex.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
+import { t, useLocale, type MessageKey } from '../i18n';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -857,14 +858,36 @@ function titleCase(s: string): string {
 // Fallback (no verdict data — simple game over display)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
-    victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures -- but at what cost?' },
-    victory_RS: { title: 'Republika Srpska Achieves Its Aims', subtitle: 'The Serb entity consolidates -- but the land is emptied.' },
-    victory_HRHB: { title: 'Herzeg-Bosnia Secures Its Territory', subtitle: 'The Croatian entity holds -- but the alliance is shattered.' },
-    timeout_stalemate: { title: 'Stalemate', subtitle: 'The war grinds to exhaustion. No side achieves its aims.' },
-    faction_collapse: { title: 'Faction Collapse', subtitle: 'A faction has been driven from the field.' },
-    ceasefire: { title: 'Ceasefire', subtitle: 'The guns fall silent -- for now.' },
+const FALLBACK_OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
+    victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
+    victory_RS: { title: 'gameOver.outcome.victory_RS.title', subtitle: 'gameOver.outcome.victory_RS.subtitle' },
+    victory_HRHB: { title: 'gameOver.outcome.victory_HRHB.title', subtitle: 'gameOver.outcome.victory_HRHB.subtitle' },
+    timeout_stalemate: { title: 'gameOver.outcome.timeout_stalemate.title', subtitle: 'gameOver.outcome.timeout_stalemate.subtitle' },
+    faction_collapse: { title: 'gameOver.outcome.faction_collapse.title', subtitle: 'gameOver.outcome.faction_collapse.subtitle' },
+    ceasefire: { title: 'gameOver.outcome.ceasefire.title', subtitle: 'gameOver.outcome.ceasefire.subtitle' },
 };
+
+function fallbackOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
+    if (!outcome) return { title: t('gameOver.fallback.title'), subtitle: '' };
+    const keys = FALLBACK_OUTCOME_LABEL_KEYS[outcome];
+    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
+}
+
+function formatFallbackOsidsControlled(count: number): string {
+    return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });
+}
+
+function formatFallbackActiveBrigades(count: number): string {
+    return t(count === 1 ? 'gameOver.activeBrigade.one' : 'gameOver.activeBrigade.many', { count });
+}
+
+function formatFallbackYearCount(count: number): string {
+    return t(count === 1 ? 'gameOver.year.one' : 'gameOver.year.many', { count });
+}
+
+function formatFallbackWeekCount(count: number): string {
+    return t(count === 1 ? 'gameOver.week.one' : 'gameOver.week.many', { count });
+}
 
 function FallbackGameOver({
     date, turn, years, weeks, factionIds, factionOsids, totalOsids, factionBrigades, outcome, ipc,
@@ -880,9 +903,8 @@ function FallbackGameOver({
     outcome?: string;
     ipc: { isAvailable: boolean; loadStateDialog?: () => void };
 }) {
-    const display = outcome
-        ? (OUTCOME_LABELS[outcome] ?? { title: outcome.replace(/_/g, ' '), subtitle: '' })
-        : { title: 'Game Over', subtitle: '' };
+    useLocale();
+    const display = fallbackOutcomeDisplay(outcome);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
@@ -902,7 +924,7 @@ function FallbackGameOver({
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">Final Standings</div>
+                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
                     {factionIds.map((fid) => {
                         const color = FACTION_HEX[fid] ?? '#888';
                         const osids = factionOsids[fid] ?? 0;
@@ -918,8 +940,8 @@ function FallbackGameOver({
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
                                 <div className="flex gap-4 text-[10px] text-text-secondary">
-                                    <span>{osids} OSIDs controlled</span>
-                                    <span>{brigades} active brigades</span>
+                                    <span>{formatFallbackOsidsControlled(osids)}</span>
+                                    <span>{formatFallbackActiveBrigades(brigades)}</span>
                                 </div>
                                 <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
@@ -928,7 +950,11 @@ function FallbackGameOver({
                         );
                     })}
                     <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
-                        Campaign lasted {turn} weeks ({years} years, {weeks} weeks)
+                        {t('gameOver.campaignLasted', {
+                            turn,
+                            years: formatFallbackYearCount(years),
+                            weeks: formatFallbackWeekCount(weeks),
+                        })}
                     </div>
                 </div>
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
@@ -936,20 +962,20 @@ function FallbackGameOver({
                         onClick={() => useGameStore.getState().setWrappedOpen(true)}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
                     >
-                        View Your War
+                        {t('gameOver.viewYourWar')}
                     </button>
                     <button
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
-                        New Game
+                        {t('gameOver.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button
                             onClick={() => ipc.loadStateDialog?.()}
                             className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
                         >
-                            Load Save
+                            {t('gameOver.loadSave')}
                         </button>
                     )}
                 </div>

@@ -22,6 +22,7 @@ import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
+import { setLocale } from '../../src/ui/map/i18n';
 
 // ── Mock store + IPC ────────────────────────────────────────────────────────
 
@@ -145,7 +146,10 @@ function renderVS() {
 
 describe('VerdictScreen interaction — faction tab switching', () => {
     beforeEach(() => { storeState = { loadedGameState: endgame() }; });
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        setLocale('en');
+    });
 
     it('default selected faction is RBiH', () => {
         renderVS();
@@ -232,7 +236,10 @@ describe('VerdictScreen interaction — faction tab switching', () => {
 // ── APP-ROUTE PROOF: Endgame reachability ───────────────────────────────────
 
 describe('VerdictScreen route — endgame reachability', () => {
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        setLocale('en');
+    });
 
     it('renders nothing when loadedGameState is null (non-game state)', () => {
         storeState = { loadedGameState: null };
@@ -258,6 +265,20 @@ describe('VerdictScreen route — endgame reachability', () => {
         storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
         renderVS();
         expect(screen.getByText('Final Standings')).toBeDefined();
+    });
+
+    it('renders localized FallbackGameOver copy when BCS is selected', () => {
+        setLocale('bcs');
+        storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
+
+        renderVS();
+
+        expect(screen.getByText('Pat pozicija')).toBeDefined();
+        expect(screen.getByText('Konacni poredak')).toBeDefined();
+        expect(screen.getByText('1 OSID pod kontrolom')).toBeDefined();
+        expect(screen.getByText('Kampanja je trajala 188 sedmica (3 godina, 32 sedmica)')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
     });
 
     it('renders verdict path when verdict present and gameOver true', () => {
