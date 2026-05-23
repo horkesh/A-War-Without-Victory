@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] tool(release): emit artifact release-log row
+
+**Type:** Release/packaging evidence tooling and docs. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized scenario output changed.
+
+**Why:** SRD-3 / PPB-1 still needed a repo-side way to reduce manual transcription risk when operators copy artifact identity into release evidence. Existing package smoke scripts emitted release-log rows, but the launch dry-run manifest did not expose a copy-ready row for the exact artifact.
+
+**Change:** `tools/release/prepare_launch_artifacts.cjs` now emits `artifactReleaseLog` when the supplied artifact exists, formatted as `launch_artifact target=<path> sizeBytes=<bytes> sha256=<sha256>`, and renders that row in markdown dry-run output. Missing artifacts keep `artifactReleaseLog: null`. Added test coverage in `tests/launch_operator_artifacts.test.ts` and report `docs/40_reports/implemented/20260523_RELEASE_ARTIFACT_RELEASE_LOG_MANIFEST.md`; updated release artifact index and launch-day operator template.
+
+**Determinism / output impact:** Tooling/docs only. The new row is derived from artifact path, file size, and SHA-256 only. No timestamps, randomness, network calls, writes, uploads, signing hooks, package metadata, or distribution approval changed.
+
+**Verification:** Red run `npx.cmd vitest run tests\launch_operator_artifacts.test.ts --reporter=dot` failed before the patch because `artifactReleaseLog` was absent. After the patch, `npx.cmd vitest run tests\launch_operator_artifacts.test.ts tests\desktop_packaging_targets.test.ts --reporter=dot` passed 9/9. `node --check tools\release\prepare_launch_artifacts.cjs`, `npm.cmd run typecheck`, and `git diff --check` passed. Markdown dry-run with a missing artifact kept `artifact release log: not available`.
+
+**Artifacts:** `tools/release/prepare_launch_artifacts.cjs`; `tests/launch_operator_artifacts.test.ts`; `docs/40_reports/implemented/20260523_RELEASE_ARTIFACT_RELEASE_LOG_MANIFEST.md`.
+
+**Roadmap delta:** SRD-3 / PPB-1 repo-side release evidence support is stronger. Clean-VM, SmartScreen, Settings -> Apps, AppData persistence, NSIS registry cleanup, signing/store/macOS, and distribution remain operator-only.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify watched-operation trace optionals
 
 **Type:** Strict-null optional `GameState` contract classification/test guard. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized output contract changed.

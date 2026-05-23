@@ -141,6 +141,7 @@ function describeArtifact(artifact) {
             exists: false,
             sizeBytes: null,
             sha256: null,
+            releaseLog: null,
             note: 'No artifact path supplied. Dry-run only.',
         };
     }
@@ -150,15 +151,18 @@ function describeArtifact(artifact) {
             exists: false,
             sizeBytes: null,
             sha256: null,
+            releaseLog: null,
             note: 'Artifact not found. Do not distribute until a real artifact is supplied and hashed.',
         };
     }
     const stat = fs.statSync(normalized.absolute);
+    const sha256 = sha256File(normalized.absolute);
     return {
         path: normalized.relative,
         exists: true,
         sizeBytes: stat.size,
-        sha256: sha256File(normalized.absolute),
+        sha256: sha256,
+        releaseLog: `launch_artifact target=${normalized.relative} sizeBytes=${stat.size} sha256=${sha256}`,
         note: 'Artifact identity recorded only; clean-VM evidence is still required.',
     };
 }
@@ -178,6 +182,7 @@ function buildLaunchArtifactPlan(options) {
         packageVersion: resolvePackageVersion(options.packageVersion),
         commit: resolveCommit(options.commit),
         artifact: artifact,
+        artifactReleaseLog: artifact.releaseLog,
         automatedGates: AUTOMATED_GATES.slice(),
         evidenceTemplates: templates,
         operatorOnlyRemaining: OPERATOR_ONLY_GATES.slice().sort(byteCompare),
@@ -207,6 +212,7 @@ function renderMarkdown(plan) {
     lines.push('- artifact: `' + (plan.artifact.path || 'not supplied') + '`');
     lines.push('- artifact exists: `' + String(plan.artifact.exists) + '`');
     lines.push('- artifact sha256: `' + (plan.artifact.sha256 || 'not available') + '`');
+    lines.push('- artifact release log: `' + (plan.artifactReleaseLog || 'not available') + '`');
     lines.push('');
     lines.push('## Policy');
     lines.push('');

@@ -37,6 +37,7 @@ When preparing a release candidate:
 | A11y RC browser evidence | operator-only (browser/axe) | `docs/40_reports/audits/20260518_A11Y_RC_BROWSER_EVIDENCE_VERIFICATION.md` | 2026-05-18 | Pending operator. |
 | BCS localization verification | historian/user-gated | `docs/40_reports/audits/20260518_BCS_LOCALIZATION_VERIFY_STALE.md` | 2026-05-18 | Pending native-speaker review. |
 | Release evidence template (per RC) | template (operator fills) | `docs/40_reports/release/20260517_RELEASE_EVIDENCE_TEMPLATE.md` | 2026-05-17 | Active. Operator instantiates per build. |
+| Launch artifact release-log manifest | repo-verified dry-run support | `tools/release/prepare_launch_artifacts.cjs`, `docs/40_reports/implemented/20260523_RELEASE_ARTIFACT_RELEASE_LOG_MANIFEST.md` | 2026-05-23 | Active. Emits copy-ready `launch_artifact target=... sizeBytes=... sha256=...` only for exact existing artifact paths; distribution approval remains false. |
 | Clean-VM operator evidence template | template (operator fills) | `docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md` | 2026-05-19 (refreshed in PPB-2) | Active. Operator instantiates per build. |
 | Latest RC evidence bundle | meta-bundle (autonomous worker) | `docs/40_reports/release/20260519_RC_EVIDENCE_BUNDLE.md` | 2026-05-19 | Active for this hardening wave. |
 | Sensitive-content notification review | historian-gated | `docs/plans/2026-05-18-event-notification-sensitive-content-review-plan.md` | 2026-05-18 | Pending. |
