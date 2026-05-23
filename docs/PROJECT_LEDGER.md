@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(audio): add soundscape cue readiness metadata
+
+**Type:** Tactical-map audio manifest/readiness metadata. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.
+
+**Change:** Added normalized cue readiness metadata to `src/ui/map/audio/sound_manifest.ts`: `cooldownMs`, `assetStatus`, and `reducedMotionPolicy`. Existing cue registrations remain concise, while `getAllAudioCues()` / `getCueConfig()` now expose a complete readiness contract for every silent placeholder cue. Current file paths are explicitly classified as `missing_placeholder`; no cue claims shipped assets.
+
+**Determinism:** UI/audio substrate only. The existing bus remains disabled and silent by default and still performs no fetch, Web Audio initialization, timestamps, or randomness.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_manifest.test.ts --reporter=dot` failed on missing cue metadata. Green `npx.cmd vitest run tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/sound_manifest.ts`, `tests/ui/audio_manifest.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] docs(launch): add traceable high concept one-pager
 
 **Type:** Documentation/launch collateral only. No runtime behavior, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.

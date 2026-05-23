@@ -7,14 +7,22 @@
  */
 
 export type AudioCueCategory = 'ui' | 'ambient' | 'music' | 'stinger';
+export type AudioCueAssetStatus = 'missing_placeholder' | 'provided';
+export type AudioCueReducedMotionPolicy = 'play' | 'suppress_motion_only';
 
 export interface AudioCueConfig {
     id: string;
     category: AudioCueCategory;
     defaultVolume: number;
+    cooldownMs: number;
+    assetStatus: AudioCueAssetStatus;
+    reducedMotionPolicy: AudioCueReducedMotionPolicy;
     filePath?: string;
     loop?: boolean;
 }
+
+type AudioCueRegistration = Omit<AudioCueConfig, 'cooldownMs' | 'assetStatus' | 'reducedMotionPolicy'> &
+    Partial<Pick<AudioCueConfig, 'cooldownMs' | 'assetStatus' | 'reducedMotionPolicy'>>;
 
 export interface SfxConfig {
     id: string;
@@ -34,15 +42,25 @@ const cueRegistry = new Map<string, AudioCueConfig>();
 const sfxRegistry = new Map<string, SfxConfig>();
 const musicRegistry = new Map<string, MusicConfig>();
 
+const DEFAULT_COOLDOWN_MS_BY_CATEGORY: Record<AudioCueCategory, number> = {
+    ui: 75,
+    ambient: 5000,
+    music: 5000,
+    stinger: 1500,
+};
+
 function clampVolume(value: number): number {
     if (!Number.isFinite(value)) return 0;
     return Math.max(0, Math.min(1, value));
 }
 
-export function registerCue(config: AudioCueConfig): void {
+export function registerCue(config: AudioCueRegistration): void {
     cueRegistry.set(config.id, {
         ...config,
         defaultVolume: clampVolume(config.defaultVolume),
+        cooldownMs: Math.max(0, Math.floor(config.cooldownMs ?? DEFAULT_COOLDOWN_MS_BY_CATEGORY[config.category])),
+        assetStatus: config.assetStatus ?? 'missing_placeholder',
+        reducedMotionPolicy: config.reducedMotionPolicy ?? 'play',
     });
 }
 

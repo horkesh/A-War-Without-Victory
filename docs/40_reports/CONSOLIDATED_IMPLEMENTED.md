@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest soundscape cue metadata readiness:** [implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md](implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md) - the tactical-map audio manifest now records cooldown, missing-asset status, and reduced-motion policy metadata for every silent placeholder cue.
+
 **Latest launch high concept:** [../50_launch/marketing/high_concept.md](../50_launch/marketing/high_concept.md) - launch-facing one-pager now separates playable-now scope, pending operator evidence, and future/gated claims with traceable evidence pointers.
 
 **Latest diplomacy actor stance prose:** [implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md](implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md) - Diplomacy actor rows now render deterministic public-safe stance prose from existing support, constraint, isolation, and sanctions bands.
