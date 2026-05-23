@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, buildTurnAftermathView, filterTurnAftermathRecords } from '../../src/ui/map/data/turnAftermath.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
   return {
@@ -56,6 +57,10 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 }
 
 describe('buildTurnAftermathView', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('returns null without a loaded next state', () => {
     expect(buildTurnAftermathView({ nextState: null })).toBeNull();
   });
@@ -266,6 +271,44 @@ describe('buildTurnAftermathView', () => {
     });
     expect(view?.nextActions.actionableCount).toBe(0);
     expect(view?.cost.severity).toBe('low');
+  });
+
+  it('localizes generated aftermath prose when BCS is selected', () => {
+    setLocale('bcs');
+
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          territory_net: { RBiH: 2 },
+          battles: [{
+            osid: 'op:test:a',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            primary_attacker_id: 'a',
+            primary_defender_id: 'b',
+            all_attacker_ids: ['a'],
+            outcome: 'victory' as never,
+            attacker_casualties: 12,
+            defender_casualties: 20,
+            territory_flipped: true,
+            was_concentrated: false,
+          }],
+          displacement_total: 80,
+          formation_destructions: [{ formation_id: 'lost', formation_name: 'Lost', faction: 'RBiH' }],
+        }),
+      }),
+    });
+
+    expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
+    expect(view?.narrativeLine).toBe('Sedmica zavrsava osvojenim prostorom, ali knjiga troska jos odreduje cijenu napredovanja.');
+    expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija unistena', '80 raseljenih']);
+    expect(view?.judgment).toEqual({
+      headline: 'Tezak potez je usao u zapis.',
+      detail: 'Registar troska poteza je kritican: 12 prijateljskih gubitaka / 1 formacija unistena / 80 raseljenih.',
+      memoryTone: 'cost',
+      primarySurface: 'chronicle',
+      secondarySurface: 'codex',
+    });
   });
 
   it('builds newest-first persistent records from turn summaries with latest-summary fallback', () => {

@@ -3,6 +3,7 @@ import type { TurnBattle, TurnSummary } from '../../../state/turn_summary.js';
 import { countActionableItems, deriveInboxItems, type InboxItem } from './inboxItems';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { t, type MessageKey } from '../i18n';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
@@ -204,18 +205,18 @@ function classifyTone(friendlyNet: number, gains: number, losses: number): TurnA
 }
 
 function buildHeadline(tone: TurnAftermathTone, friendlyNet: number, hasSummary: boolean): string {
-  if (!hasSummary) return 'Turn advanced.';
-  if (tone === 'gain') return `Net territorial gain: +${friendlyNet} OSIDs.`;
-  if (tone === 'loss') return `Net territorial loss: ${friendlyNet} OSIDs.`;
-  if (tone === 'mixed') return 'Territory changed hands without a net shift.';
-  return 'No territorial change this turn.';
+  if (!hasSummary) return t('turnAftermath.headline.advanced');
+  if (tone === 'gain') return t('turnAftermath.headline.gain', { net: `+${friendlyNet}` });
+  if (tone === 'loss') return t('turnAftermath.headline.loss', { net: friendlyNet });
+  if (tone === 'mixed') return t('turnAftermath.headline.mixed');
+  return t('turnAftermath.headline.quiet');
 }
 
 function buildNarrativeLine(tone: TurnAftermathTone): string {
-  if (tone === 'gain') return 'The week ends with ground taken, but the ledger still decides what the advance cost.';
-  if (tone === 'loss') return 'The map contracted this week; command must decide whether to stabilize or answer.';
-  if (tone === 'mixed') return 'The front traded ground without mercy, leaving staff to sort signal from noise.';
-  return 'A quiet week is still a week of depletion, waiting, and staff work.';
+  if (tone === 'gain') return t('turnAftermath.narrative.gain');
+  if (tone === 'loss') return t('turnAftermath.narrative.loss');
+  if (tone === 'mixed') return t('turnAftermath.narrative.mixed');
+  return t('turnAftermath.narrative.quiet');
 }
 
 function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | null): {
@@ -268,6 +269,10 @@ function pluralize(value: number, singular: string, plural: string = `${singular
   return value === 1 ? singular : plural;
 }
 
+function costReason(key: MessageKey, count: number): string {
+  return t(key, { count });
+}
+
 function buildTurnCost(input: {
   summary: TurnSummary | null;
   playerFaction: string | null;
@@ -312,19 +317,25 @@ function buildTurnCost(input: {
 
   const reasons: string[] = [];
   if (input.friendlyMilitaryCasualties > 0) {
-    reasons.push(`${input.friendlyMilitaryCasualties} friendly ${pluralize(input.friendlyMilitaryCasualties, 'casualty', 'casualties')}`);
+    reasons.push(costReason(
+      input.friendlyMilitaryCasualties === 1 ? 'turnAftermath.cost.reason.friendlyCasualty.one' : 'turnAftermath.cost.reason.friendlyCasualty.many',
+      input.friendlyMilitaryCasualties,
+    ));
   }
   if (input.ownFormationsDestroyed > 0) {
-    reasons.push(`${input.ownFormationsDestroyed} ${pluralize(input.ownFormationsDestroyed, 'formation')} destroyed`);
+    reasons.push(costReason(
+      input.ownFormationsDestroyed === 1 ? 'turnAftermath.cost.reason.formationDestroyed.one' : 'turnAftermath.cost.reason.formationDestroyed.many',
+      input.ownFormationsDestroyed,
+    ));
   }
   if (displacedThisTurn > 0) {
-    reasons.push(`${displacedThisTurn} displaced`);
+    reasons.push(costReason('turnAftermath.cost.reason.displaced', displacedThisTurn));
   }
   if (reasons.length === 0 && ownSupplySpent + ownHeavyMunitionsSpent > 0) {
-    reasons.push(`${ownSupplySpent + ownHeavyMunitionsSpent} supply spent`);
+    reasons.push(costReason('turnAftermath.cost.reason.supplySpent', ownSupplySpent + ownHeavyMunitionsSpent));
   }
   if (reasons.length === 0) {
-    reasons.push('No major costs recorded');
+    reasons.push(t('turnAftermath.cost.reason.none'));
   }
 
   return {
@@ -352,13 +363,13 @@ function buildStrategicSignals(
       id: `event:${event.id}`,
       kind: 'event',
       label: event.text,
-      detail: 'Historical event',
+      detail: t('turnAftermath.signal.detail.historicalEvent'),
       severity: 'notable',
     });
   }
 
   summary.notable_events.forEach((event, index) => {
-    const kindLabel = humanizeToken(event.kind) ?? 'Notable Event';
+    const kindLabel = humanizeToken(event.kind) ?? t('turnAftermath.signal.detail.notableEvent');
     const osidLabel = event.osid ? getOsidDisplayName(event.osid, osidNameMap) : null;
     const urgentKinds = new Set(['truce_broken', 'siege_formed']);
     signals.push({
@@ -374,8 +385,8 @@ function buildStrategicSignals(
     signals.push({
       id: `decoration:${award.formation_id}:${award.decoration}`,
       kind: 'decoration',
-      label: `${award.formation_name} decorated`,
-      detail: humanizeToken(String(award.decoration)) ?? 'Decoration',
+      label: t('turnAftermath.signal.label.decorated', { formation: award.formation_name }),
+      detail: humanizeToken(String(award.decoration)) ?? t('turnAftermath.signal.detail.decoration'),
       severity: 'notable',
     });
   }
@@ -386,7 +397,7 @@ function buildStrategicSignals(
     signals.push({
       id: `arc:${arc.formation_id}:${arc.from_arc}:${arc.to_arc}`,
       kind: 'arc',
-      label: `${arc.formation_name} changed arc`,
+      label: t('turnAftermath.signal.label.changedArc', { formation: arc.formation_name }),
       detail: `${from} -> ${to}`,
       severity: 'routine',
     });
@@ -398,7 +409,7 @@ function buildStrategicSignals(
     signals.push({
       id: `supply:${transition.osid}:${transition.from}:${transition.to}:${index}`,
       kind: 'supply',
-      label: `${label} supply changed`,
+      label: t('turnAftermath.signal.label.supplyChanged', { label }),
       detail: `${humanizeToken(transition.from) ?? transition.from} -> ${humanizeToken(transition.to) ?? transition.to}`,
       severity: toState.includes('critical') || toState.includes('strained') ? 'urgent' : 'routine',
     });
@@ -410,7 +421,7 @@ function buildStrategicSignals(
     signals.push({
       id: `movement:${movement.formation_id}:${movement.from_osid}:${movement.to_osid}`,
       kind: 'movement',
-      label: `${movement.formation_name} moved`,
+      label: t('turnAftermath.signal.label.moved', { formation: movement.formation_name }),
       detail: `${from} -> ${to}`,
       severity: 'routine',
     });
@@ -429,8 +440,11 @@ function buildTurnJudgment(input: {
   const { tone, friendlyNet, cost, signals, nextActions } = input;
   if (cost.severity === 'critical' || cost.severity === 'severe') {
     return {
-      headline: 'Hard turn entered the record.',
-      detail: `The turn cost register is ${cost.severity}: ${cost.reasons.slice(0, 3).join(' / ')}.`,
+      headline: t('turnAftermath.judgment.cost.headline'),
+      detail: t('turnAftermath.judgment.cost.detail', {
+        severity: t(`turnAftermath.severity.${cost.severity}` as MessageKey),
+        reasons: cost.reasons.slice(0, 3).join(' / '),
+      }),
       memoryTone: 'cost',
       primarySurface: 'chronicle',
       secondarySurface: 'codex',
@@ -439,8 +453,8 @@ function buildTurnJudgment(input: {
   const urgentSignal = signals.find((signal) => signal.severity === 'urgent') ?? signals[0];
   if (urgentSignal) {
     return {
-      headline: 'Strategic signal entered the record.',
-      detail: `${urgentSignal.label} (${urgentSignal.detail}).`,
+      headline: t('turnAftermath.judgment.signal.headline'),
+      detail: t('turnAftermath.judgment.signal.detail', { label: urgentSignal.label, detail: urgentSignal.detail }),
       memoryTone: 'signal',
       primarySurface: 'chronicle',
       secondarySurface: 'codex',
@@ -449,10 +463,10 @@ function buildTurnJudgment(input: {
   if (nextActions.actionableCount > 0) {
     const top = nextActions.topItems[0];
     return {
-      headline: 'Decision pressure carries forward.',
+      headline: t('turnAftermath.judgment.action.headline'),
       detail: top
-        ? `${nextActions.actionableCount} actionable desk items remain; first up: ${top.title}.`
-        : `${nextActions.actionableCount} actionable desk items remain.`,
+        ? t('turnAftermath.judgment.action.detailWithTop', { count: nextActions.actionableCount, title: top.title })
+        : t('turnAftermath.judgment.action.detail', { count: nextActions.actionableCount }),
       memoryTone: 'action',
       primarySurface: 'records',
       secondarySurface: 'chronicle',
@@ -461,16 +475,16 @@ function buildTurnJudgment(input: {
   if (tone === 'gain' || tone === 'loss' || tone === 'mixed') {
     const signed = friendlyNet > 0 ? `+${friendlyNet}` : String(friendlyNet);
     return {
-      headline: 'Territory changed the campaign memory.',
-      detail: `The front line recorded ${signed} net OSIDs for the player faction.`,
+      headline: t('turnAftermath.judgment.territory.headline'),
+      detail: t('turnAftermath.judgment.territory.detail', { signed }),
       memoryTone: 'territory',
       primarySurface: 'chronicle',
       secondarySurface: 'records',
     };
   }
   return {
-    headline: 'No judgment recorded yet.',
-    detail: 'No major cost, signal, action, or territorial change was recorded for this turn.',
+    headline: t('turnAftermath.judgment.quiet.headline'),
+    detail: t('turnAftermath.judgment.quiet.detail'),
     memoryTone: 'quiet',
     primarySurface: 'records',
     secondarySurface: 'codex',

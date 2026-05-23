@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Turn Aftermath localization:** [implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md) - Turn Aftermath modal chrome, metrics, empty states, enum badges, generated headlines, narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose now render through the English/BCS substrate.
+
 **Latest BCS Codex chrome localization:** [implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md) - `CodexPanel` title, essay-count line, empty/locked instructions, ghost/context labels, dynamic-section labels, pending text, and source heading now render through the English/BCS substrate.
 
 **Latest BCS Codex/Chronicle comparison localization:** [implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md](implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md) - Codex dynamic comparison notes, Chronicle endgame cards, and Chronicle Wrapped comparison bullets now render current generated historical-comparison note shapes through the shared English/BCS formatter.

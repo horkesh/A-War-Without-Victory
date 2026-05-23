@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Turn Aftermath
+
+**Type:** Turn Aftermath generated-prose and modal-chrome localization slice. No turn-summary schema, save shape, scenario data, combat math, operation behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, inbox item titles, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added `turnAftermath.*` English/BCS message keys. `TurnAftermathModal` now localizes static chrome, metrics, empty states, enum badges, signal-kind badges, and footer actions. `buildTurnAftermathView(...)` now localizes generated headlines, deterministic narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose while preserving source-authored content unchanged.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; turn summaries, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\turn_aftermath_modal_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English Turn Aftermath strings. Green rerun passed 13/13. Expanded localization/endgame pack passed 120/120. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/turnAftermath.ts`, `src/ui/map/components/TurnAftermathModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/turn_aftermath_modal_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Codex chrome
 
 **Type:** `CodexPanel` static chrome localization slice. No Codex essay catalog data, essay titles, authored essay prose, dynamic section conditions, unlock logic, Cost Ledger data, historical comparison data, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
