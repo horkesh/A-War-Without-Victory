@@ -79,6 +79,7 @@ const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
     'op:mrkonjic_grad:mrkonjic_grad_2',
     'op:mrkonjic_grad:bjelajce_2',
     'op:mrkonjic_grad:baljvine_2',
+    'op:mrkonjic_grad:podrasnica_2',
 ];
 
 const MISTRAL_TARGETS: readonly string[] = [
@@ -91,77 +92,14 @@ const MISTRAL_AXIS_COORDINATION_FLOOR = 0.35;
 const MISTRAL_SUPPLY_PRESSURE_CEILING = 90;
 const FEDERATION_ALLIANCE_FLOOR = 0.50;
 
-// Wave 25 (2026-05-23): brigade pool rebuilt + re-hosted on SECONDARY_CORPS
-// (hvo_tomislavgrad), mirroring the Wave 19A fix to Mistral 1. Per n1987 SCRT
-// memo (docs/40_reports/audits/20260523_WAVE_24_REORDER_INEFFECTIVE_N1987.md),
-// the old pool had 3 brigades INACTIVE at t175 (Kralj Petar Krešimir IV,
-// Kralj Tomislav, HV 7th Guards Varaždin — all spent in Cincar/Kupres
-// t132-141 and never recovered) and the 4th (hv_4th_guards_split) was
-// monopolized by Mistral 1 t160-t175. Net at t175: 0 participating brigades,
-// recovery_reason=brigade_attrition, 0 attacks, 0 captures.
-//
-// The op was also hosted on PRIMARY_CORPS=hvo_main_staff — a corps shell
-// with ZERO front sectors. `reconcileOperationRoster`
-// (final_operation_truth_reconciliation.ts:44-47) drops any brigade whose
-// sector claim does not match the host corps; every Cincar veteran carries
-// sector:hvo_tomislavgrad:* claims and would be dropped from a
-// hvo_main_staff-hosted op even if active. Same bug class as Wave 19A
-// (docs/40_reports/audits/20260522_MISTRAL_1_BRIGADE_DRAIN.md).
-//
-// New pool: 5 brigades, all status=active at t175 in n1987, none committed
-// to a concurrent op at the t175-t182 window. Both axes hosted on
-// SECONDARY_CORPS=hvo_tomislavgrad which actually owns front sectors.
-//
-//   DRVAR/GRAHOVO AXIS (heavy/mechanized — Drvar town demands force quality):
-//     hvo_1st_guard_abb       — KEPT. Tier-1 elite mechanized, Glasnović,
-//                                home op:livno:misi_2. BB v2 ch.28 lists
-//                                ABB as principal HVO instrument across
-//                                Sep 1995 western-Bosnia operations.
-//     hv_4th_guards_split     — KEPT. HV professional, joint HV/HVO control
-//                                per ICTY Gotovina §54.
-//     hvo_2nd_guard_mechanized— SUBSTITUTED IN (replaces inactive HV 7th
-//                                Guards). Sopta, tier-1 elite mechanized,
-//                                available_from t=84. BB v2 ch.30 records
-//                                Mostar-axis redeployment to the western
-//                                shoulder once southern HRHB front had
-//                                stabilized post-Federation.
-//
-//   ŠIPOVO/MRKONJIĆ AXIS (lighter ridge-and-cluster — rural OSIDs, no
-//   single urban centerpiece, suits lighter mobile forces):
-//     hvo_3rd_guard_jastrebovi— SUBSTITUTED IN (replaces inactive Kralj
-//                                Petar Krešimir IV). Nakić, tier-1 elite,
-//                                mechanized but lighter than 1st/2nd,
-//                                defensive_skill 4, available_from t=84.
-//                                BB v2 ch.30 records 3rd Guards rotated
-//                                into western theater Sep 1995.
-//     hvo_rama_brigade        — SUBSTITUTED IN (replaces inactive Kralj
-//                                Tomislav). Light infantry, home
-//                                op:prozor:ustirama_3 but per n1987
-//                                final_save at t188 already forward-
-//                                positioned at op:glamoc:pribelja (post-
-//                                Cincar). Closest live HVO brigade to the
-//                                Šipovo objective set. BB v2 ch.30: Rama
-//                                Brigade participated in western-shoulder
-//                                pursuit after Cincar.
-//
-// Citations:
-//   - BB v2 ch.28-30 (HVO/HV Sep 1995 western-Bosnia OOB)
-//   - ICTY Prosecutor v. Gotovina et al., IT-06-90-T, Judgment 15 Apr 2011,
-//     §44-58 (joint HV/HVO operational control)
-//   - docs/40_reports/audits/20260523_WAVE_24_REORDER_INEFFECTIVE_N1987.md
-//     (n1987 root-cause: brigade_attrition + hvo_main_staff drain)
-//   - docs/40_reports/audits/20260522_MISTRAL_1_BRIGADE_DRAIN.md (Wave 19A
-//     drain-reconciler precedent)
-//   - docs/40_reports/proposals/20260523_WAVE_25_MISTRAL2_BRIGADE_POOL.md
 const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'mistral_drvar_grahovo',
         name: 'Drvar / Grahovo Axis',
-        corps: SECONDARY_CORPS,
+        corps: PRIMARY_CORPS,
         brigades: [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
-            'hvo_2nd_guard_mechanized' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -171,8 +109,9 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         name: 'Sipovo / Mrkonjic Axis',
         corps: SECONDARY_CORPS,
         brigades: [
-            'hvo_3rd_guard_jastrebovi' as FormationId,
-            'hvo_rama_brigade' as FormationId,
+            'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
+            'hrhb_kralj_tomislav_brigade' as FormationId,
+            'hv_7th_guards_varazdin' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -183,11 +122,10 @@ const MISTRAL_DRVAR_GRAHOVO_AXIS: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'mistral_drvar_grahovo',
         name: 'Drvar / Grahovo Axis',
-        corps: SECONDARY_CORPS,
+        corps: PRIMARY_CORPS,
         brigades: [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
-            'hvo_2nd_guard_mechanized' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -200,8 +138,9 @@ const MISTRAL_SIPOVO_MRKONJIC_AXIS: readonly OpportunityAxisDef[] = [
         name: 'Sipovo / Mrkonjic Axis',
         corps: SECONDARY_CORPS,
         brigades: [
-            'hvo_3rd_guard_jastrebovi' as FormationId,
-            'hvo_rama_brigade' as FormationId,
+            'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
+            'hrhb_kralj_tomislav_brigade' as FormationId,
+            'hv_7th_guards_varazdin' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -324,13 +263,7 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     name: 'Operation Mistral 2',
     tier: 'T1',
     faction: 'HRHB',
-    // Wave 25 (2026-05-23): re-hosted on SECONDARY_CORPS (hvo_tomislavgrad)
-    // — see MISTRAL_AXES comment for the brigade-drain reconciler rationale.
-    // hvo_main_staff has ZERO front sectors, so any brigade carrying a
-    // sector:hvo_tomislavgrad:* claim is dropped from a hvo_main_staff-hosted
-    // op by reconcileOperationRoster — the exact bug that produced 0
-    // participating brigades in n1987. Same fix as Wave 19A on Mistral 1.
-    primary_corps: SECONDARY_CORPS,
+    primary_corps: PRIMARY_CORPS,
     family: 'federation_western_bosnia',
     axes: MISTRAL_AXES,
     staging_osid: STAGING_LIVNO_MISI,
@@ -340,11 +273,6 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Federation / Western Bosnia candidates',
         'docs/plans/late-war-operation-opportunity-system-design.md - T1 opportunity proposal contract and dependency model',
         'src/sim/combat/triggered_operations.ts - legacy Mistral 2 objective footprint',
-        'docs/40_reports/audits/20260523_WAVE_24_REORDER_INEFFECTIVE_N1987.md - n1987 brigade-attrition root-cause memo',
-        'docs/40_reports/audits/20260522_MISTRAL_1_BRIGADE_DRAIN.md - Wave 19A brigade-drain reconciler precedent',
-        'docs/40_reports/proposals/20260523_WAVE_25_MISTRAL2_BRIGADE_POOL.md - Wave 25 brigade pool + re-host design',
-        'Balkan Battlegrounds v2 ch. 28-30 (HVO/HV Sep 1995 western-Bosnia OOB; 1st/2nd/3rd Guards brigade footprints)',
-        'ICTY Prosecutor v. Gotovina et al., IT-06-90-T, Judgment 15 Apr 2011, §44-58 (joint HV/HVO operational control)',
     ],
     historical_exit_class: 'partial_success',
     prerequisites: {
