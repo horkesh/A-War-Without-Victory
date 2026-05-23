@@ -1300,12 +1300,13 @@ function buildSectorSliceFromSubSegment(
     template: CorpsFrontSector,
     subSegment: CorpsFrontSubSegment,
 ): CorpsFrontSector {
+    const sortedEdgeIds = [...subSegment.edge_ids].sort(strictCompare);
     return {
         ...template,
-        edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+        edge_ids: sortedEdgeIds,
         sub_segments: [{
             ...subSegment,
-            edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+            edge_ids: [...sortedEdgeIds],
             friendly_osids: [...subSegment.friendly_osids].sort(strictCompare),
             enemy_osids: [...subSegment.enemy_osids].sort(strictCompare),
             primary_brigade_ids: [],

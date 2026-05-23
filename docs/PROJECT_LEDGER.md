@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(sector): fold duplicate sector-slice edge sort
+
+**Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** EQ-1 still had a small sort-fold candidate after the split-pieces renumber elision. `buildSectorSliceFromSubSegment(...)` sorted `subSegment.edge_ids` twice while constructing one final sector slice.
+
+**Change:** `src/sim/combat/corps_front_sectors.ts` now sorts the sub-segment edge ids once into `sortedEdgeIds`, assigns it to sector-level `edge_ids`, and copies it for the nested sub-segment `edge_ids`. This preserves the old ordered values and separate-array behavior while removing one redundant comparator pass. `tests/sector_partition_instrumentation.test.ts` adds a static guard against reintroducing the duplicate sort.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. The remaining sort still uses `strictCompare`; final sector canonicalization remains unchanged.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts --reporter=dot` failed before implementation because the function sorted `subSegment.edge_ids` twice. After implementation, instrumentation/static contract passed 18/18; `npm.cmd run typecheck` passed; sector regression pack passed 66/66. Profiled 40w run with `PERF_PROFILE_SECTOR_PARTITION=true` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n1` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SECTOR_SLICE_EDGE_SORT_FOLD.md`; `docs/40_reports/SECTOR_MASTER.md`.
+
+**Roadmap delta:** EQ-1 split-pieces sort-fold candidate is closed. Remaining sector perf candidates are same-invocation BFS/component reuse, then `:voronoi-repair`.
+
+---
+
 ## [2026-05-23] perf(sector): elide final split-pieces renumber
 
 **Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

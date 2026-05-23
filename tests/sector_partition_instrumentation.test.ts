@@ -507,6 +507,21 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: buildSectorSliceFromSubSegment does not sort edge ids twice', () => {
+        const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
+        const startIdx = raw.indexOf('function buildSectorSliceFromSubSegment(');
+        const endIdx = raw.indexOf('function seedSplitPieceBrigadeBuckets(', startIdx);
+        expect(startIdx).toBeGreaterThanOrEqual(0);
+        expect(endIdx).toBeGreaterThan(startIdx);
+
+        const region = raw.slice(startIdx, endIdx);
+        const directEdgeSorts = region.match(/\[\.\.\.subSegment\.edge_ids\]\.sort\(strictCompare\)/g) ?? [];
+        expect(directEdgeSorts).toHaveLength(1);
+        expect(region).not.toMatch(/\bDate\.now\s*\(/);
+        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
+        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 
