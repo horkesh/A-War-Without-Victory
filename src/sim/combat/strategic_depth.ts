@@ -92,7 +92,10 @@ export function getStrategicDepth(corps: FormationState | undefined | null): num
 export function computeStrategicDepth(state: GameState, corpsId: FormationId): number {
     const corps = state.military.formations?.[corpsId];
     if (!corps) return 1.0;
-    if (corps.kind !== 'corps') return 1.0;
+    // Accept both legacy `corps` and the current `corps_asset` formation kinds —
+    // engine OOB tags corps formations as `corps_asset` (army_hq_overrides.ts,
+    // corps_command.ts, combat_summary_aggregator.ts use the same widened check).
+    if (corps.kind !== 'corps' && corps.kind !== 'corps_asset') return 1.0;
 
     const adjacency = collectCorpsAdjacency(state, corps);
 
@@ -129,7 +132,8 @@ export function updateStrategicDepth(state: GameState): void {
     const corpsIds = Object.keys(formations).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const f = formations[corpsId];
-        if (!f || f.kind !== 'corps') continue;
+        // Accept both `corps` and `corps_asset` (engine OOB uses `corps_asset`).
+        if (!f || (f.kind !== 'corps' && f.kind !== 'corps_asset')) continue;
         f.strategic_depth = computeStrategicDepth(state, corpsId);
     }
 }
