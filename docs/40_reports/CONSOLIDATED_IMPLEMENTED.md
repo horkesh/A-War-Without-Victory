@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS War Planning map date formatting:** [implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md](implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md) - War Planning map turn-date labels now use deterministic English/BCS short month tables keyed by active locale.
+
 **Latest BCS Warroom date formatting:** [implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md](implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md) - Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale.
 
 **Latest BCS map shared date formatting:** [implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md](implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md) - Tactical-map shared turn date labels now use deterministic English/BCS short month tables keyed by active locale.

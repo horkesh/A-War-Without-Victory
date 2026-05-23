@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize War Planning map date labels
+
+**Type:** War Planning map date-format localization slice. No map layer behavior, settlement control, turn arithmetic, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced the War Planning map hardwired English short-month array with deterministic English/BCS short month tables keyed by the active UI locale. The map's visible turn-date label now localizes its date portion while preserving the existing turn number and date math.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; map data, click behavior, draw order, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_planning_map_date_i18n.test.ts --reporter=dot` failed because `formatWarPlanningTurnDate` was not exposed yet. Green rerun passed 2/2. Related `npx.cmd vitest run tests\ui\war_planning_map_date_i18n.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 17/17. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/warroom/components/WarPlanningMap.ts`, `tests/ui/war_planning_map_date_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Warroom date labels
 
 **Type:** Warroom shared date-format localization slice. No ticker-turn conversion, scenario start-date state, turn arithmetic, faction colors, player-faction resolution, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
