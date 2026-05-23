@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify municipality optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `MunicipalityState` and `OrganizationalPenetration` are adjacent `state` optional-field groups. Current scenario init and organizational-penetration seeding often populate them, but consumers intentionally preserve sparse/minimal-state fallbacks and `jna_presence` remains an additive optional signal outside the formula output.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies the 15 combined optionals as sparse multi-phase municipality state, seeded organizational factors, placeholder authority/legitimacy fields, or additive support signals.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `MunicipalityState` and `OrganizationalPenetration` optional-field groups by classification. Future promotion requires a municipality-state schema/default/migration lane with baseline and save-roundtrip proof.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify PendingProposalReview optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
