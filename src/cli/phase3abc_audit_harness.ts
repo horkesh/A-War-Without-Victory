@@ -198,13 +198,16 @@ function buildBfsSeedContextFromEffectiveEdges(
     const nodes_bfs: string[] = [];
     const seen = new Set<string>();
     const q: string[] = [];
+    let head = 0;
     seen.add(start_sid);
     parent_by_sid[start_sid] = null;
     depth_by_sid[start_sid] = 0;
     q.push(start_sid);
 
-    while (q.length > 0 && nodes_bfs.length < N) {
-        const u = q.shift()!;
+    while (head < q.length && nodes_bfs.length < N) {
+        const u = q[head];
+        head += 1;
+        if (u === undefined) break;
         nodes_bfs.push(u);
         const neighbors = [...(adj.get(u) ?? new Set())].sort((a, b) => a.localeCompare(b));
         for (const v of neighbors) {
@@ -372,6 +375,7 @@ function buildTwoClusterSeedFromLink(
     const bfsNoCross = (start: string): { order: string[]; parent: Record<string, string | null>; depth: Record<string, number> } => {
         const seen = new Set<string>();
         const q: string[] = [];
+        let head = 0;
         const order: string[] = [];
         const parent: Record<string, string | null> = {};
         const depth: Record<string, number> = {};
@@ -379,8 +383,10 @@ function buildTwoClusterSeedFromLink(
         parent[start] = null;
         depth[start] = 0;
         q.push(start);
-        while (q.length > 0) {
-            const x = q.shift()!;
+        while (head < q.length) {
+            const x = q[head];
+            head += 1;
+            if (x === undefined) break;
             order.push(x);
             const neighbors = [...(adj.get(x) ?? new Set())].sort((a, b) => a.localeCompare(b));
             for (const y of neighbors) {
