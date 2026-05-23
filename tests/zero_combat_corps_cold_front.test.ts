@@ -76,6 +76,7 @@ describe('checkZeroCombatCorps', () => {
             political: {
                 vienna_declaration_turn: 4,
                 vienna_accepted: { RS: true, HRHB: true },
+                graz_east_herzegovina_active_turn: 24,
             },
             military: {
                 formations: {
@@ -89,21 +90,21 @@ describe('checkZeroCombatCorps', () => {
                         faction: 'HRHB',
                         corpsId: 'hvo_tomislavgrad',
                     }),
-                    hvo_rama_brigade: makeBrigade({
-                        id: 'hvo_rama_brigade',
+                    hvo_southeast_brigade: makeBrigade({
+                        id: 'hvo_southeast_brigade',
                         faction: 'HRHB',
-                        corpsId: 'hvo_tomislavgrad',
+                        corpsId: 'hvo_southeast_herzegovina',
                     }),
                 },
                 corps_front_sectors: {
-                    'sector:hvo_tomislavgrad:0': makeSector({
-                        sectorId: 'sector:hvo_tomislavgrad:0',
-                        corpsId: 'hvo_tomislavgrad',
+                    'sector:hvo_southeast_herzegovina:0': makeSector({
+                        sectorId: 'sector:hvo_southeast_herzegovina:0',
+                        corpsId: 'hvo_southeast_herzegovina',
                         faction: 'HRHB',
                         opposingFactions: ['RS'],
                         subSegments: [
-                            makeSubSeg('ss1', ['op:duvno:tomislavgrad_2'], ['op:kupres:donji_malovan']),
-                            makeSubSeg('ss2', ['op:livno:livno_2'], ['op:glamoc:vidimlije_2']),
+                            makeSubSeg('ss1', ['op:stolac:stolac_2'], ['op:nevesinje:sopilja']),
+                            makeSubSeg('ss2', ['op:capljina:capljina_2'], ['op:bileca:bileca_2']),
                         ],
                     }),
                 },

@@ -8952,3 +8952,23 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `src/sim/local_truces.ts`, `tests/operation_opportunities_catalog.test.ts`, `tests/v093_a11y_lane_e_forms_live_regions.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-23] fix(ci): refresh fast-slice contracts after merge
+
+**Type:** CI repair + scenario event ordering correction + startup artifact refresh + UI interaction fix + test contract refresh.
+
+**Change:** Reconciled the post-merge fast Vitest slice with the merged localization, HVO/HV, headless-runner, and warroom UI contracts. Moved the `hv_ammo_transfusion_post_storm_1995` event to turns 175-180 after `operation_storm_1995` so event timeline ordering and `requires_events` integrity agree. Regenerated the baked April 1992 startup snapshot for the headless `meta.player_faction === undefined` scenario-runner contract while preserving the desktop overlay player faction. Removed the settings panel click-stopper that made settings tab clicks behave like exits under the current shell close contract. Updated fast-slice expectations for Graz east-Herzegovina blocking, Western Bosnia operation catalog ownership, HV phantom spawn waves, war-phase step count, localized UI strings, camera east bounds, event-decision modal ownership, retained-artifact smoke skipping, and save-migration drift text.
+
+**Determinism:** Scenario data ordering and generated artifacts are deterministic. No randomness, timestamps, initial OSID overrides, avoided-OSID lists, new faction IDs, or operation-outcome tuning were introduced. The event timing correction only makes an existing historical modifier reachable after its declared prerequisite.
+
+**Verification:**
+- `npx.cmd vitest run tests/local_truces.test.ts tests/anomaly_detector_deployment_truth.test.ts tests/operation_opportunities_federation_western_bosnia_catalog.test.ts tests/jna_phantom_brigades.test.ts tests/war_phase_step_order.test.ts tests/graz_faction_block.test.ts tests/event_timeline_integrity.test.ts tests/zero_combat_corps_cold_front.test.ts tests/ui_opord_player_safe_labels.test.ts tests/integration_event_system.test.ts tests/startup_snapshot_contract.test.ts tests/ui/accessibility_clickable_controls.test.ts tests/ui_map_camera_constraints.test.ts tests/ui/gui_polish_typography_floor.test.ts tests/ui/officer_mini_bio.test.ts --reporter=dot` - 159/159 PASS.
+- `npm.cmd run test:vitest:fast` - reproduced the CI fast-slice failure locally; after the final two patches, `npx.cmd vitest run tests/supply_sensitive_history_smoke.test.ts tests/ui_shell_navigation.test.ts --reporter=dot` passed with 15 tests PASS and the retained-artifact smoke skipped because the required replay file is absent.
+- `npm.cmd run typecheck` - PASS.
+- `npm.cmd run desktop:map:build` - PASS.
+- `npm.cmd run test:baselines` - PASS.
+- `git diff --check` - PASS with only CRLF normalization warnings on touched tests.
+
+**Artifacts:** `data/derived/startup/apr_1992_initial_save.json`, `data/scenarios/events/war_1995.json`, `src/ui/map/components/SettingsScreen.tsx`, `tools/diagnostics/output/save_migration_drift.json`, fast-slice test contracts, `docs/PROJECT_LEDGER.md`.
+
+---

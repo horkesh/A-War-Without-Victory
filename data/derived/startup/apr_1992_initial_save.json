@@ -1095,11 +1095,11 @@
   ],
   "meta": {
     "game_over": false,
+    "headless_scenario_auto_control": true,
     "peace_scheduled_referendum_turn": null,
     "peace_scheduled_war_start_turn": null,
     "peace_war_start_control_path": null,
     "phase": "war",
-    "player_faction": "RBiH",
     "rbih_hrhb_war_earliest_turn": 26,
     "recruitment_mode": "player_choice",
     "referendum_deadline_turn": null,
@@ -1173,15 +1173,6 @@
         "og_slots": 2,
         "stance": "balanced",
         "subordinate_count": 8
-      },
-      "arbih_7th_corps": {
-        "active_ogs": [],
-        "active_operations": [],
-        "command_span": 5,
-        "corps_exhaustion": 0,
-        "og_slots": 1,
-        "stance": "balanced",
-        "subordinate_count": 0
       },
       "hvo_central_bosnia": {
         "active_ogs": [],
@@ -14510,6 +14501,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:centar_sarajevo"
         ]
@@ -15507,6 +15499,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:tuzla"
         ]
@@ -15976,6 +15969,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:zenica"
         ]
@@ -16668,6 +16662,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:jablanica"
         ]
@@ -17362,6 +17357,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:bihac"
         ]
@@ -17817,30 +17813,6 @@
           "equip:light_infantry",
           "mun:travnik",
           "placement:fixed_home_osid"
-        ]
-      },
-      "arbih_7th_corps": {
-        "activation_gated": false,
-        "activation_turn": null,
-        "assignment": null,
-        "cohesion": 60,
-        "created_turn": 0,
-        "faction": "RBiH",
-        "force_label": "ARBiH",
-        "hq_sid": "op:travnik:gluha_bukovica",
-        "id": "arbih_7th_corps",
-        "kind": "corps_asset",
-        "morale": 60,
-        "name": "7th Corps",
-        "ops": {
-          "fatigue": 0,
-          "last_supplied_turn": null
-        },
-        "personnel": 0,
-        "readiness": "active",
-        "status": "active",
-        "tags": [
-          "mun:travnik"
         ]
       },
       "arbih_7th_vitezka_muslim_liberation": {
@@ -18768,6 +18740,7 @@
         "status": "active",
         "tags": [
           "corps:hvo_central_bosnia",
+          "enclave",
           "equip:light_infantry",
           "mun:zepce",
           "placement:fixed_home_osid"
@@ -20685,6 +20658,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:vitez"
         ]
@@ -20805,6 +20779,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:orasje"
         ]
@@ -20979,6 +20954,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:citluk"
         ]
@@ -21003,6 +20979,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:duvno"
         ]
@@ -21257,6 +21234,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:nevesinje"
         ]
@@ -27536,6 +27514,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:banja_luka"
         ]
@@ -27635,6 +27614,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:titov_drvar"
         ]
@@ -27659,6 +27639,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:vlasenica"
         ]
@@ -27683,6 +27664,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:bijeljina"
         ]
@@ -27707,6 +27689,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:bileca"
         ]
@@ -27731,6 +27714,7 @@
         "personnel": 0,
         "readiness": "active",
         "status": "active",
+        "strategic_depth": 0.6,
         "tags": [
           "mun:novo_sarajevo"
         ]
@@ -31543,9 +31527,7 @@
         "available_until_turn": 80,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
-        "compatible_corps_ids": [
-          "arbih_7th_corps"
-        ],
+        "compatible_corps_ids": [],
         "competence": 3,
         "defensive_skill": 4,
         "faction": "RBiH",
@@ -31575,9 +31557,7 @@
         "available_until_turn": 120,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
-        "compatible_corps_ids": [
-          "arbih_7th_corps"
-        ],
+        "compatible_corps_ids": [],
         "competence": 5,
         "defensive_skill": 3,
         "faction": "RBiH",
@@ -31834,17 +31814,15 @@
         "available_from_turn": 0,
         "can_improve": true,
         "casualty_vulnerability": 0.1,
-        "compatible_corps_ids": [
-          "arbih_3rd_corps"
-        ],
+        "compatible_corps_ids": [],
         "competence": 3,
         "defensive_skill": 3,
         "faction": "RBiH",
-        "home_corps_id": "arbih_7th_corps",
+        "home_corps_id": "arbih_3rd_corps",
         "id": "arbih_cuskic",
         "improvement_rate": 0.05,
         "is_historical_start": false,
-        "name": "Fikret Čuškić",
+        "name": "Fikret Čuskić",
         "origin": "military",
         "override_tolerance": 3,
         "political_reliability": 4,
@@ -33788,6 +33766,30 @@
       "peace_plan_history": [],
       "pending_counter_offers": []
     },
+    "phantoms_spawned": [
+      "jna_uzice_corps_tg",
+      "jna_mostar_garrison_tg",
+      "jna_mostar_east_garrison",
+      "jna_17th_corps_tg",
+      "jna_4th_corps_tg",
+      "jna_visegrad_local_to_tg",
+      "jna_rudo_to_tg",
+      "jna_rajlovac_barracks_tg",
+      "jna_vogosca_to_tg",
+      "jna_ilijas_to_tg",
+      "jna_ilijas_garrison_det",
+      "jna_ilijas_north_to_tg",
+      "jna_nevesinje_garrison",
+      "jna_foca_paramilitaries",
+      "jna_konjic_south_tg",
+      "jna_kalinovik_to_tg",
+      "jna_2nd_md_tg",
+      "jna_9th_corps_tg",
+      "hv_116th_brigade_tg",
+      "hv_4th_guards_tg",
+      "hv_1st_guards_tg",
+      "hv_113th_brigade_tg"
+    ],
     "political_leader_data": [
       {
         "_sources": [

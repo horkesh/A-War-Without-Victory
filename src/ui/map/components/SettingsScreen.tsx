@@ -200,7 +200,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             />
             <div
                  data-testid="settings-panel"
-                 onClick={(event) => event.stopPropagation()}
                  className="relative z-10 w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
                  style={{ background: 'rgba(26, 24, 21, 0.97)' }}
             >

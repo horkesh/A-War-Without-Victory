@@ -222,12 +222,9 @@ describe('shellNavigation', () => {
     expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'event-log' })))).toBeNull();
   });
 
-  it('inbox event_modal action routes the president to Army HQ briefing (sole executor)', () => {
-    // Behavioral proof: openArmyHQTab(state, 'briefing') is the routing call
-    // App.tsx wires the 'event_modal' inbox branch to. It lands the president
-    // at PresidentialAttentionPanel, which executes ipc.respondToEventDecision.
-    // App.tsx no longer pushes decisions into an EventModal queue and no longer
-    // calls ipc.respondToEventDecision itself.
+  it('inbox event_modal action opens the blocking decision modal in App', () => {
+    // Behavioral proof: the old Army HQ briefing route remains available for
+    // other handoffs, while App.tsx owns the blocking decision modal surface.
     const state = createState('RBiH');
     const ok = openArmyHQTab(state, 'briefing');
     expect(ok).toBe(true);
@@ -241,12 +238,11 @@ describe('shellNavigation', () => {
       new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
     );
-    // App.tsx no longer executes event decisions or reads pendingEventDecisions.
-    expect(appSource).not.toContain('respondToEventDecision');
-    expect(appSource).not.toContain('pendingEventDecisions');
-    // event_modal branch routes to Army HQ briefing.
+    // event_modal branch surfaces the selected blocking event directly.
     expect(appSource).toContain("action === 'event_modal'");
-    expect(appSource).toContain("openArmyHQTab(gs, 'briefing')");
+    expect(appSource).toContain('setActiveEventDecisionId');
+    expect(appSource).toContain('pendingEventDecisions');
+    expect(appSource).toContain('respondToEventDecision');
     // Identity routing preserved — inbox passes itemId.
     expect(appSource).toContain('itemId');
   });

@@ -117,6 +117,6 @@ describe('officer mini-bio UI', () => {
 
         expect(source).toContain('commander.bio_short');
         expect(source).toContain('commander.command_style');
-        expect(source).toContain('Service record pending staff review.');
+        expect(source).toContain("t('oob.serviceRecordPending')");
     });
 });

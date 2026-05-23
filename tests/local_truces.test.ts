@@ -216,9 +216,9 @@ describe('shouldGrazBlockAttack', () => {
         assert.equal(shouldGrazBlockAttack(state, 'vrs_herzegovina', 'RS', 'op:mostar:mostar_2', 'HRHB'), true);
     });
 
-    it('does NOT block hvo_southeast_herzegovina attacking RS territory (Op Jackal exempt)', () => {
+    it('blocks hvo_southeast_herzegovina attacking RS territory after the east-Herzegovina truce activates', () => {
         const state = makeActiveState();
-        assert.equal(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:nevesinje:sopilja', 'RS'), false);
+        assert.equal(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:nevesinje:sopilja', 'RS'), true);
     });
 
     it('blocks vrs_2nd_krajina attacking HRHB territory', () => {

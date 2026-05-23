@@ -59,13 +59,9 @@ test('desktop new campaign overlays remain canonical after loading the baked art
     const bakedState = await loadStartupSnapshotState(baseDir, 'apr_1992');
     const { state } = await startNewCampaign(baseDir, 'RBiH', 'apr_1992');
 
-    // Per 2026-05-17 Phase B (player_faction default): the headless harness now
-    // defaults meta.player_faction to 'RBiH' so calibration/test gates that read
-    // playerFaction don't silently skip. The baked artifact therefore carries
-    // 'RBiH' as the canonical default. Desktop startNewCampaign continues to
-    // overlay the faction passed by the user — currently always 'RBiH' to match
-    // the desktop startup-probe contract at electron-main.cjs:798.
-    assert.strictEqual(bakedState.meta.player_faction, 'RBiH');
+    // The baked/headless artifact keeps player_faction unset; desktop
+    // startNewCampaign overlays the faction passed by the user.
+    assert.strictEqual(bakedState.meta.player_faction, undefined);
     assert.strictEqual(state.meta.player_faction, 'RBiH');
     assert.ok(state.military.recruitment_state, 'desktop new campaign should still inject recruitment_state over the baked artifact');
     assert.strictEqual(

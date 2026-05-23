@@ -238,13 +238,14 @@ function addVrsKrajinaDefenderCorps(
 
 describe('Federation / Western Bosnia operation opportunity catalog', () => {
     it('exposes Mistral 2 through its family export and the canonical catalog', () => {
-        expect(FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES).toEqual([MISTRAL_2_95_OPPORTUNITY]);
+        expect(FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES.map(op => op.opportunity_id))
+            .toEqual(['mistral_1_95', 'mistral_2_95', 'jajce_95']);
         expect(OPERATION_OPPORTUNITY_CATALOG.some(d => d.opportunity_id === 'mistral_2_95')).toBe(true);
         expect(_TRIGGERED_OPS.some(def => def.name === 'Operation Mistral 2')).toBe(false);
         expect(MISTRAL_2_95_OPPORTUNITY.family).toBe('federation_western_bosnia');
         expect(MISTRAL_2_95_OPPORTUNITY.tier).toBe('T1');
         expect(MISTRAL_2_95_OPPORTUNITY.faction).toBe('HRHB');
-        expect(MISTRAL_2_95_OPPORTUNITY.primary_corps).toBe('hvo_main_staff');
+        expect(MISTRAL_2_95_OPPORTUNITY.primary_corps).toBe('hvo_tomislavgrad');
         expect(MISTRAL_2_95_OPPORTUNITY.variants?.map(v => v.variant_id).sort())
             .toEqual(['drvar_grahovo_axis', 'sipovo_mrkonjic_axis']);
     });
@@ -323,7 +324,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         const approved = applyOpportunityDecision(state, 180, proposalId, 'approve');
 
         expect(approved?.status).toBe('approved');
-        const op = state.military.corps_command!.hvo_main_staff.active_operations[0];
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
         expect(op.name).toBe('Operation Mistral 2');
         expect(op.axes).toHaveLength(2);
         expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_drvar_grahovo', 'mistral_sipovo_mrkonjic']);

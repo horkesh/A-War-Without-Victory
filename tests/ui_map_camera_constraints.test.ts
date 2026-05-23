@@ -13,8 +13,8 @@ describe('tactical map camera constraints', () => {
 
   it('constrains panning to the operational Bosnia and Herzegovina data bounds', () => {
     expect(source).toContain('const BOSNIA_MAX_BOUNDS');
-    expect(source).toContain('[15.7243, 42.55719]');
-    expect(source).toContain('[19.62278, 45.270542]');
+    expect(source).toContain('[15.45, 42.55719]');
+    expect(source).toContain('[19.92, 45.270542]');
     expect(source).toContain('maxBounds: BOSNIA_MAX_BOUNDS');
   });
 

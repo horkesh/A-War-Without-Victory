@@ -75,8 +75,13 @@ describe('Graz faction-level RS→HRHB block (n697)', () => {
 describe('Graz faction-level HRHB→RS block (bilateral ceasefire)', () => {
     it('blocks HRHB corps attacking RS territory', () => {
         const state = makeActiveState();
-        // HVO Tomislavgrad attacking RS territory — should be blocked
-        expect(shouldGrazBlockAttack(state, 'hvo_tomislavgrad', 'HRHB', 'op:kupres:kupres_2', 'RS')).toBe(true);
+        // HVO Southeast Herzegovina attacking RS territory is blocked once the east-Herzegovina truce is active.
+        expect(shouldGrazBlockAttack(state, 'hvo_southeast_herzegovina', 'HRHB', 'op:stolac:stolac_2', 'RS')).toBe(true);
+    });
+
+    it('does NOT block HVO Tomislavgrad late-war bypasses', () => {
+        const state = makeActiveState();
+        expect(shouldGrazBlockAttack(state, 'hvo_tomislavgrad', 'HRHB', 'op:kupres:kupres_2', 'RS')).toBe(false);
     });
 
     it('does NOT block HVO Northwest Bosnia (Posavina exempt)', () => {

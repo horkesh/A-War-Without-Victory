@@ -77,16 +77,20 @@ function addReceivingBrigade(state: GameState, overrides: Partial<FormationState
     } as FormationState;
 }
 
+function defsSpawnedByTurn(turn: number): typeof _ALL_PHANTOM_DEFS {
+    return _ALL_PHANTOM_DEFS.filter((def) => ((def as { spawn_turn?: number }).spawn_turn ?? 0) <= turn);
+}
+
 describe('phantom spawn catalog', () => {
     it('spawns the full current JNA + HV phantom catalog', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);
 
         assert.equal(phantomIdsByKind(state, 'jna_phantom').length, _JNA_PHANTOM_DEFS.length);
-        assert.equal(phantomIdsByKind(state, 'hv_phantom').length, _HV_PHANTOM_DEFS.length);
+        assert.equal(phantomIdsByKind(state, 'hv_phantom').length, defsSpawnedByTurn(0).filter((def) => def.kind_tag === 'hv_phantom').length);
         assert.equal(
             phantomIdsByKind(state, 'jna_phantom').length + phantomIdsByKind(state, 'hv_phantom').length,
-            _ALL_PHANTOM_DEFS.length
+            defsSpawnedByTurn(0).length
         );
     });
 
@@ -115,7 +119,7 @@ describe('phantom spawn catalog', () => {
 
         assert.equal(
             phantomIdsByKind(state, 'jna_phantom').length + phantomIdsByKind(state, 'hv_phantom').length,
-            _ALL_PHANTOM_DEFS.length
+            defsSpawnedByTurn(0).length
         );
     });
 });
@@ -126,7 +130,7 @@ describe('withdrawal countdowns', () => {
         spawnJnaPhantomBrigades(state);
 
         const notices = getJnaWithdrawalCountdowns(state);
-        assert.equal(notices.length, _ALL_PHANTOM_DEFS.length);
+        assert.equal(notices.length, defsSpawnedByTurn(2).length);
 
         const uzice = notices.find((n) => n.phantom_id === 'jna_uzice_corps_tg');
         const ninthCorps = notices.find((n) => n.phantom_id === 'jna_9th_corps_tg');

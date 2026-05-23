@@ -150,6 +150,6 @@ describe('war-phase step ordering', () => {
         // +1 from clear-displacement-event-log (LANE-NIGHTSHIFT-V093-LANE-D-CONTENT-V2-PATH-A, 834f59f9, 2026-05-08)
         // +1 from apply-siege-morale-drain (LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1, 2026-05-08; runs after morale-drift, default-off shadow flag SIEGE_MORALE_DRAIN_ENABLED)
         // +1 from resolve-counter-offers (B3 negotiation counter-offer docket, 2026-05-17)
-        expect(stepNames.length).toBe(177);
+        expect(stepNames.length).toBe(179);
     });
 });

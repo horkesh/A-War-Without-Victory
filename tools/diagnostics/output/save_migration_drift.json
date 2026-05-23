@@ -60,7 +60,7 @@
     },
     {
       "version": 14,
-      "description": "Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH."
+      "description": "Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH. Headless harness runs are exempt — they intentionally leave player_faction undefined so the event evaluator routes every event through bot auto-respond."
     }
   ],
   "required_fields": [
