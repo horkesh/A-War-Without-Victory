@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict Dayton values
+
+**Type:** Rich `VerdictScreen` Dayton-value localization slice. No simulation behavior, combat math, operation behavior, Dayton negotiation data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.dayton.package.*`, `verdict.dayton.institution.*`, `verdict.dayton.institutionValue.*`, and `verdict.dayton.patronOverride.*` message keys. Known Dayton package IDs, institution keys/values, and patron override IDs now render localized labels, while unknown values retain raw source fallback.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Dayton output, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered raw `package_a`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility contract `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict dimension labels
 
 **Type:** Rich `VerdictScreen` dimension-label localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, dimension scores, faction grades, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

@@ -277,6 +277,14 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Institucije:')).toBeDefined();
         expect(screen.getByText('Konacna podjela:')).toBeDefined();
         expect(screen.getByText('Patronska nadjacavanja:')).toBeDefined();
+        expect(screen.queryByText('package_a')).toBeNull();
+        expect(screen.queryByText('package_b')).toBeNull();
+        expect(screen.queryByText('presidency: decentralized')).toBeNull();
+        expect(screen.queryByText('belgrade_pressure')).toBeNull();
+        expect(screen.getByText('Paket A')).toBeDefined();
+        expect(screen.getByText('Paket B')).toBeDefined();
+        expect(screen.getByText('Predsjednistvo: decentralizovano')).toBeDefined();
+        expect(screen.getByText('Pritisak iz Beograda')).toBeDefined();
         expect(screen.getByText('Poredjenje prekretnica')).toBeDefined();
         expect(screen.getByText('Historija')).toBeDefined();
         expect(screen.getByText('Ti')).toBeDefined();

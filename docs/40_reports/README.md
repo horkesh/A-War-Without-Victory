@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Verdict Dayton-value localization** | [implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md) - rich `VerdictScreen` Dayton package, institution, and patron-override values now render through stable localized mappings with raw source fallback. |
 | **Latest BCS Verdict dimension-label localization** | [implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md) - rich `VerdictScreen` negotiating-capital dimension labels now render through stable localized dimension-ID mappings with source-label fallback. |
 | **Latest BCS Verdict condemnation localization** | [implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md) - rich `VerdictScreen` known condemnation notice body text now renders through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict outcome-class localization** | [implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md) - rich `VerdictScreen` faction-tab and report outcome-class badges now render through the existing English/BCS localization substrate. |

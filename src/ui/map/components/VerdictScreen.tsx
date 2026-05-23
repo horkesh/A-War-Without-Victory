@@ -783,20 +783,20 @@ export function FactionReport({
                         {daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.dayton.packagesAccepted')} </span>
-                                {daytonResult.territorial_packages_accepted.join(', ')}
+                                {daytonResult.territorial_packages_accepted.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
                         {daytonResult.territorial_packages_rejected.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.dayton.packagesRejected')} </span>
-                                {daytonResult.territorial_packages_rejected.join(', ')}
+                                {daytonResult.territorial_packages_rejected.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
                         {Object.keys(daytonResult.institutional_choices).length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.dayton.institutions')} </span>
                                 {Object.entries(daytonResult.institutional_choices)
-                                    .map(([k, v]) => `${k}: ${v}`)
+                                    .map(([k, v]) => `${formatDaytonInstitutionLabel(k)}: ${formatDaytonInstitutionValue(v)}`)
                                     .join('; ')}
                             </div>
                         )}
@@ -811,7 +811,7 @@ export function FactionReport({
                         {daytonResult.patron_overrides_applied.length > 0 && (
                             <div className="text-faction-rs-subtle">
                                 <span className="font-semibold">{t('verdict.dayton.patronOverrides')} </span>
-                                {daytonResult.patron_overrides_applied.join(', ')}
+                                {daytonResult.patron_overrides_applied.map(formatDaytonPatronOverride).join(', ')}
                             </div>
                         )}
                     </div>
@@ -836,6 +836,40 @@ function formatDimensionLabel(dg: DimensionGrade): string {
     };
     const key = labels[dg.dimension];
     return key ? t(key) : dg.label;
+}
+
+function formatDaytonPackageLabel(id: string): string {
+    const labels: Record<string, MessageKey> = {
+        package_a: 'verdict.dayton.package.packageA',
+        package_b: 'verdict.dayton.package.packageB',
+    };
+    const key = labels[id];
+    return key ? t(key) : id;
+}
+
+function formatDaytonInstitutionLabel(key: string): string {
+    const labels: Record<string, MessageKey> = {
+        presidency: 'verdict.dayton.institution.presidency',
+    };
+    const messageKey = labels[key];
+    return messageKey ? t(messageKey) : key;
+}
+
+function formatDaytonInstitutionValue(value: string): string {
+    const labels: Record<string, MessageKey> = {
+        decentralized: 'verdict.dayton.institutionValue.decentralized',
+        centralized: 'verdict.dayton.institutionValue.centralized',
+    };
+    const key = labels[value];
+    return key ? t(key) : value;
+}
+
+function formatDaytonPatronOverride(id: string): string {
+    const labels: Record<string, MessageKey> = {
+        belgrade_pressure: 'verdict.dayton.patronOverride.belgradePressure',
+    };
+    const key = labels[id];
+    return key ? t(key) : id;
 }
 
 function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: string }) {

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Verdict Dayton-value localization:** [implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md) - rich `VerdictScreen` Dayton package, institution, and patron-override values now render through stable localized mappings with raw source fallback.
+
 **Latest BCS Verdict dimension-label localization:** [implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md) - rich `VerdictScreen` negotiating-capital dimension labels now render through stable localized dimension-ID mappings with source-label fallback.
 
 **Latest BCS Verdict condemnation localization:** [implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md) - rich `VerdictScreen` known condemnation notice body text now renders through the existing English/BCS localization substrate.
