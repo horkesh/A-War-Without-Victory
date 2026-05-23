@@ -89,6 +89,8 @@ Next strict-null source work must classify small owned optional-field groups by 
 
 2026-05-23 classification update: top-level `GameState` has five optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md`. The fields are history buffers, a transient paramilitary decision queue, and paramilitary policy/count state with known save-migration shape drift. Do not promote them in the generic strict-null cleanup lane; future reduction requires a focused top-level save-contract lane with migration and roundtrip proof.
 
+2026-05-23 classification update: `ControlEvent`, `DisplacementEvent`, and `DisplacementState` have nine combined optional fields and are classified in `docs/40_reports/audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md`. The fields are event provenance/detail enrichments layered onto required control-change, displacement-event, and municipality-level displacement counters. Do not promote them in the generic strict-null cleanup lane; future reduction requires an event-provenance schema lane with compatibility handling for older or non-combat rows.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
