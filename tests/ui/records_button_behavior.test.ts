@@ -42,6 +42,7 @@ function makeAftermathView(): TurnAftermathView {
         dateLabel: 'Turn 12',
         playerFaction: 'RS',
         headline: 'After-action report available.',
+        narrativeLine: 'The front traded ground without mercy, leaving staff to sort signal from noise.',
         tone: 'mixed',
         territory: { friendlyNet: -1, gains: 1, losses: 2, notable: [] },
         combat: {
@@ -130,6 +131,8 @@ describe('PresidentialToolbar RECORDS button', () => {
             onOpenChronicle: () => calls.push('chronicle'),
             onOpenCodex: () => calls.push('codex'),
         }));
+
+        expect(screen.getByText('The front traded ground without mercy, leaving staff to sort signal from noise.')).toBeTruthy();
 
         fireEvent.click(screen.getByRole('button', { name: 'Turn Records' }));
         fireEvent.click(screen.getByRole('button', { name: 'Chronicle' }));

@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(aftermath): add tone-authored narrative line
+
+**Type:** UI read-model/presentation enhancement. No sim behavior, turn-summary schema, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Rating #23 called out that Turn Aftermath was visually solid but still read like a report. The next bounded lift was one authored line per aftermath tone.
+
+**Change:** `TurnAftermathView` now includes a deterministic `narrativeLine` derived from the existing tone classification. The immediate Turn Aftermath modal and Army HQ Records aftermath cards both render the line.
+
+**Determinism / output impact:** UI/read-model presentation only from existing turn-summary data. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\turn_aftermath.test.ts --reporter=dot` failed on missing `narrativeLine`; focused pack `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\records_button_behavior.test.ts --reporter=dot` PASS 13/13 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md`.
+
+**Roadmap delta:** Closes the one-line authored aftermath prose slice in Rating #23. Remaining narrative lift is Chronicle chapter recap / endgame prose depth, not the immediate aftermath tone line.
+
+---
+
 ## [2026-05-23] fix(settings): own Escape above pause shortcuts
 
 **Type:** UI shell keyboard/interaction fix. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.

@@ -84,6 +84,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>
+                    <div className="mt-1 text-[11px] leading-5 text-text-primary/80">{view.narrativeLine}</div>
                 </div>
                 <div className="shrink-0 text-right">
                     <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Turn</div>
