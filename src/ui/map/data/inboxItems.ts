@@ -167,8 +167,11 @@ export function deriveInboxItems(
         }
     }
 
-    // 4. Paramilitary requests
-    const paramilitaryRequests = state.pendingParamilitaryRequests ?? [];
+    // 4. Paramilitary requests — defensive faction filter so RS-only items
+    //    never surface to RBiH/HRHB inboxes (and vice versa). Upstream may
+    //    already filter, but the inbox is presidential-scoped by contract.
+    const paramilitaryRequests = (state.pendingParamilitaryRequests ?? [])
+        .filter((request) => playerFactionMatch(request.faction, playerFaction));
     if (paramilitaryRequests.length > 0 && state.paramilitaryPolicy === 'ask') {
         const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
         const projectedCivilianRisk = paramilitaryRequests.reduce((sum, request) => sum + request.estimated_civilian_risk, 0);
