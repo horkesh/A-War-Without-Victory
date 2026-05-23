@@ -85,6 +85,7 @@ describe('buildDiplomacyView', () => {
         expect(view.playerFaction).toBe('RS');
         expect(view.patronStance?.patronLabel).toBe('Serbia');
         expect(view.patronStance?.constraintBand).toBe('high');
+        expect(view.patronStance?.stanceSummary).toBe('Serbia is constrained by sanctions and keeps the RS channel under pressure.');
         expect(view.activeProposals.map((proposal) => proposal.name)).toEqual([
             'Dayton negotiation menu',
             'Vance-Owen Peace Plan',

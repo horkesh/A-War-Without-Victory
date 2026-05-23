@@ -90,6 +90,22 @@ function getFactionPatronState(state: any, factionId: string): Record<string, an
     return asRecord(faction?.patron_state);
 }
 
+function actorStanceSummary(actor: Pick<DiplomacyActorView, 'faction' | 'patronLabel' | 'supportBand' | 'constraintBand' | 'commitmentBand' | 'isolationBand' | 'sanctionsActive'>): string {
+    if (actor.sanctionsActive) {
+        return `${actor.patronLabel} is constrained by sanctions and keeps the ${actor.faction} channel under pressure.`;
+    }
+    if (actor.constraintBand === 'high' || actor.constraintBand === 'elevated') {
+        return `${actor.patronLabel} support is ${actor.supportBand}, but constraint is ${actor.constraintBand}; expect limited room for independent bargaining.`;
+    }
+    if (actor.supportBand === 'strong' && actor.commitmentBand === 'likely') {
+        return `${actor.patronLabel} support is strong and commitment appears likely.`;
+    }
+    if (actor.isolationBand === 'high' || actor.isolationBand === 'elevated') {
+        return `${actor.patronLabel} channel is diplomatically isolated; outside pressure can bite quickly.`;
+    }
+    return `${actor.patronLabel} channel is quiet; staff sees no dominant external pressure signal.`;
+}
+
 function buildActor(state: any, faction: string, relationship: Record<string, any> | undefined): DiplomacyActorView {
     const patronState = getFactionPatronState(state, faction);
     const patronId = String(relationship?.patron_id ?? FACTION_PATRON[faction] ?? 'international_community');
@@ -99,7 +115,7 @@ function buildActor(state: any, faction: string, relationship: Record<string, an
     const constraint = percentFromRatio(patronState?.constraint_severity);
     const isolation = percentFromRatio(patronState?.diplomatic_isolation);
     const commitment = percentFromRatio(patronState?.patron_commitment);
-    return {
+    const actor: DiplomacyActorView = {
         faction,
         patronId,
         patronLabel: PATRON_LABELS[patronId] ?? patronId,
@@ -116,10 +132,13 @@ function buildActor(state: any, faction: string, relationship: Record<string, an
         ], 'unknown') as DiplomacyActorView['commitmentBand'],
         isolationBand: actorPressureBand(isolation),
         sanctionsActive: Boolean(relationship?.sanctions_active),
+        stanceSummary: '',
         events: Array.isArray(relationship?.relationship_events)
             ? relationship.relationship_events.filter((event: unknown): event is string => typeof event === 'string').sort(strictCompare)
             : [],
     };
+    actor.stanceSummary = actorStanceSummary(actor);
+    return actor;
 }
 
 function buildExternalActors(state: any): DiplomacyActorView[] {

@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(diplomacy): add actor stance prose
+
+**Type:** UI read-model/presentation enhancement. No diplomacy mechanics, negotiation resolution, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** The Diplomacy panel had active proposals, external actors, timeline, pressure, and needle hints, but actor rows still read like a compact metrics table. Rating #11's remaining practical lift was to make per-power stance readable without exposing raw thresholds or inventing new diplomatic state.
+
+**Change:** `DiplomacyActorView` now includes `stanceSummary`. `buildDiplomacyView(...)` derives deterministic public-safe summaries from existing support, constraint, commitment, isolation, sanctions, and patron labels. `DiplomacyPanel` renders that prose under each actor's qualitative bands.
+
+**Determinism / output impact:** Renderer read-model only. No saved state, scenario artifact, or baseline output changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts --reporter=dot` failed on missing `stanceSummary` / rendered text before implementation; focused pack `npx.cmd vitest run tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_player_truth.test.ts tests\ui\warroom_shell_ownership.test.ts --reporter=dot` PASS 10/10 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md`.
+
+**Roadmap delta:** Rating #11 moves from B- to B. Remaining diplomacy lift is richer per-power/treaty history and map context, not absence of a panel, route, timeline, or actor stance readout.
+
+---
+
 ## [2026-05-23] telemetry(ui): record localized boundary crashes
 
 **Type:** UI observability enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.

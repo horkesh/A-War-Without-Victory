@@ -19,6 +19,7 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
             commitmentBand: 'uncertain',
             isolationBand: 'elevated',
             sanctionsActive: true,
+            stanceSummary: 'Serbia is constrained by sanctions and keeps the RS channel under pressure.',
             events: ['belgrade_border_pressure'],
         },
         activeProposals: [
@@ -42,6 +43,7 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
                 commitmentBand: 'uncertain',
                 isolationBand: 'elevated',
                 sanctionsActive: true,
+                stanceSummary: 'Serbia is constrained by sanctions and keeps the RS channel under pressure.',
                 events: [],
             },
         ],
@@ -80,6 +82,7 @@ describe('DiplomacyPanel', () => {
 
         expect(screen.getByRole('dialog', { name: /diplomacy/i })).toBeTruthy();
         expect(screen.getAllByText('Serbia').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Serbia is constrained by sanctions and keeps the RS channel under pressure.').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Vance-Owen Peace Plan').length).toBeGreaterThan(0);
         expect(screen.getByText('Sarajevo siege visibility')).toBeTruthy();
         expect(screen.getByText('International sanctions')).toBeTruthy();
