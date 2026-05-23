@@ -66,10 +66,10 @@ function pickPhrase(phrases: MessageKey[], turn: number): string {
 // ── Generator ───────────────────────────────────────────────────────
 
 const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, total: number) => string> = {
-    cautious: (w, l, t) => {
-        if (l > w) return `We fought ${t} engagement${t > 1 ? 's' : ''} — results are concerning, with ${l} unfavorable outcome${l > 1 ? 's' : ''}.`;
-        if (w > 0) return `${t} engagement${t > 1 ? 's' : ''} this turn. ${w} went in our favor, but every battle costs us.`;
-        return `${t} engagement${t > 1 ? 's' : ''} this turn, mostly inconclusive.`;
+    cautious: (w, l, total) => {
+        if (l > w) return t('chiefOfStaff.battle.cautious.losing', { total, totalS: total > 1 ? 's' : '', lost: l, lostS: l > 1 ? 's' : '' });
+        if (w > 0) return t('chiefOfStaff.battle.cautious.winning', { total, totalS: total > 1 ? 's' : '', won: w });
+        return t('chiefOfStaff.battle.cautious.inconclusive', { total, totalS: total > 1 ? 's' : '' });
     },
     precise: (w, l, t) => `${t} engagement${t > 1 ? 's' : ''} this turn: ${w} favorable, ${l} unfavorable, ${t - w - l} inconclusive.`,
     aggressive: (w, l, t) => {
@@ -81,9 +81,9 @@ const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, tot
 
 const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: number) => string> = {
     cautious: (g, l) => {
-        if (l > 0 && g === 0) return `We lost ${l} position${l > 1 ? 's' : ''} this turn. This is deeply troubling.`;
-        if (g > 0 && l === 0) return `We gained ${g} position${g > 1 ? 's' : ''} — encouraging, but we must consolidate.`;
-        if (g > 0 && l > 0) return `Mixed results: gained ${g}, lost ${l} position${l > 1 ? 's' : ''}.`;
+        if (l > 0 && g === 0) return t('chiefOfStaff.territory.cautious.lostOnly', { lost: l, lostS: l > 1 ? 's' : '' });
+        if (g > 0 && l === 0) return t('chiefOfStaff.territory.cautious.gainedOnly', { gained: g, gainedS: g > 1 ? 's' : '' });
+        if (g > 0 && l > 0) return t('chiefOfStaff.territory.cautious.mixed', { gained: g, lost: l, lostS: l > 1 ? 's' : '' });
         return '';
     },
     precise: (g, l) => {
