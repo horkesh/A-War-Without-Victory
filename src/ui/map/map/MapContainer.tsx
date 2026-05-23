@@ -2,8 +2,16 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
-import type { GeoJSONSource } from 'maplibre-gl';
+import type {
+  AddLayerObject,
+  AddProtocolAction,
+  CanvasSourceSpecification,
+  FilterSpecification,
+  GeoJSONSource,
+  SourceSpecification,
+} from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
+import type { PickingInfo } from '@deck.gl/core';
 import type { LoadedGameState } from '../data/types';
 import { useLocale } from '../i18n';
 import {
@@ -198,6 +206,9 @@ const TACTICAL_MAP_PITCH_DEGREES = 30;
 const DEFAULT_ZOOM = 8;
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
+type MapSourceSpecification = SourceSpecification | CanvasSourceSpecification;
+type TacticalDeckPickObject = { properties?: Record<string, unknown> };
+type TacticalDeckPickingInfo = PickingInfo<TacticalDeckPickObject>;
 
 function selectFormationFromMap(formationId: string) {
   useGameStore.setState({
@@ -232,7 +243,7 @@ function safeSetLayoutVisibility(
 function safeEnsureSource(
   map: maplibregl.Map,
   id: string,
-  spec: any
+  spec: MapSourceSpecification
 ) {
   if (!map.getSource(id)) {
     map.addSource(id, spec);
@@ -241,7 +252,7 @@ function safeEnsureSource(
 
 function safeEnsureLayer(
   map: maplibregl.Map,
-  spec: any,
+  spec: AddLayerObject,
   beforeId?: string
 ) {
   if (!map.getLayer(spec.id)) {
@@ -659,10 +670,10 @@ export function MapContainer() {
     const origin = window.location.origin;
     console.log('[PMTiles] registering protocol, origin:', origin);
     // Use tilev4 (native MapLibre v4 async handler) and surface errors
-    const tileHandler = async (params: { url: string; type?: string }, abortController: AbortController) => {
+    const tileHandler: AddProtocolAction = async (params, abortController) => {
       if (params.type === 'json') console.log('[PMTiles] source metadata request:', params.url);
       try {
-        return await (pmtilesProtocol as any).tilev4(params, abortController);
+        return await pmtilesProtocol.tilev4(params, abortController);
       } catch (e) {
         // Suppress AbortError (normal during pan/zoom — tiles get cancelled)
         if (e instanceof Error && e.name === 'AbortError') throw e;
@@ -671,7 +682,7 @@ export function MapContainer() {
       }
     };
     try { maplibregl.removeProtocol('pmtiles'); } catch { /* not registered yet */ }
-    maplibregl.addProtocol('pmtiles', tileHandler as any);
+    maplibregl.addProtocol('pmtiles', tileHandler);
 
     const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
@@ -794,7 +805,7 @@ export function MapContainer() {
       const deckOverlay = new MapboxOverlay({
         interleaved: true,
         layers: [],
-        onClick: (info: any) => {
+        onClick: (info: TacticalDeckPickingInfo) => {
           const store = useGameStore.getState();
           const mapAtClick = mapRef.current;
           const formationFallback =
@@ -840,7 +851,7 @@ export function MapContainer() {
           selectFormationFromMap(clickTarget.formationId);
           // Use pre-computed stack_count from GeoJSON feature properties
           const osid = props.location_osid as string | undefined;
-          const stackCount = props.stack_count ?? 1;
+          const stackCount = typeof props.stack_count === 'number' ? props.stack_count : 1;
           if (osid && stackCount > 1) {
             store.setExpandedStackOsid(osid);
             // overlayAnchor is derived by useEffect from expandedStackOsid
@@ -849,7 +860,7 @@ export function MapContainer() {
           }
         },
       });
-      map.addControl(deckOverlay as any);
+      map.addControl(deckOverlay);
       deckOverlayRef.current = deckOverlay;
 
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -2245,19 +2256,19 @@ export function MapContainer() {
       }
 
       // 2. Highlight front edges in the sector
-      const filterExpr = ['in', ['get', 'sector_id'], ['literal', ids]] as any;
+      const filterExpr = ['in', ['get', 'sector_id'], ['literal', ids]] as FilterSpecification;
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as FilterSpecification);
         }
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as FilterSpecification);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as FilterSpecification);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as FilterSpecification);
         }
 
         // Apply static highlight opacity
@@ -2278,10 +2289,10 @@ export function MapContainer() {
             selectedCorpsFrontSectorId,
           });
           if (ringBrigadeIds.length > 0) {
-            map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['in', ['get', 'id'], ['literal', ringBrigadeIds]] as any);
+            map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['in', ['get', 'id'], ['literal', ringBrigadeIds]] as FilterSpecification);
             map.setPaintProperty(SECTOR_BRIGADE_RINGS_LAYER_ID, 'circle-stroke-color', highlightCorpsHex);
           } else {
-            map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as any);
+            map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as FilterSpecification);
           }
         }
       } catch (e) {
@@ -2295,11 +2306,11 @@ export function MapContainer() {
       const formationOnlySelected =
         !!selectedFormationId && !selectedCorpsId && !selectedCorpsFrontSectorId;
       // Use sector_id IN filter for corps (covers all brigades assigned to corps sectors)
-      const unitFilter: any = selectedCorpsId
+      const unitFilter = (selectedCorpsId
         ? ['==', ['get', 'corps_id'], selectedCorpsId]
         : selectedCorpsFrontSectorId
           ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
-          : ['==', ['get', 'sector_id'], '__none__'];
+          : ['==', ['get', 'sector_id'], '__none__']) as FilterSpecification;
 
       if (!formationOnlySelected) {
         try {
@@ -2424,9 +2435,9 @@ export function MapContainer() {
 
     // AoR sub-segment line on dedicated layers
     if (subSegId) {
-      const ssFilter = ['==', ['get', 'sub_segment_id'], subSegId];
-      map.setFilter(BRIGADE_AOR_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ssFilter] as any);
-      map.setFilter(BRIGADE_AOR_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ssFilter] as any);
+      const ssFilter = ['==', ['get', 'sub_segment_id'], subSegId] as FilterSpecification;
+      map.setFilter(BRIGADE_AOR_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ssFilter] as FilterSpecification);
+      map.setFilter(BRIGADE_AOR_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ssFilter] as FilterSpecification);
       map.setPaintProperty(BRIGADE_AOR_POS_LAYER_ID, 'line-opacity', 0.9);
       map.setPaintProperty(BRIGADE_AOR_NEG_LAYER_ID, 'line-opacity', 0.9);
     } else {

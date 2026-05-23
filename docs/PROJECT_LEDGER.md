@@ -234,6 +234,53 @@
 
 **Phase-2 cascade addendum (waves 6-10, +10 commits):** Continued the autonomous push for an HRHB territorial unlock — Cincar Phase 2 → kupres_2 → Mistral 1 + Jajce 95. Wave 6 (briefing overlay override) replaced Wave 4A's faction-blind threshold lift with the principled CampaignPlan-wins-over-economy-overlay rule. Wave 7 authored two ICTY-cited HVO ops (mistral_1_95 + jajce_95, 16 objective OSIDs); Wave 7B widened kupres_cincar_94's brigade pool 2→4 active + added kupres_2 to objectives; Wave 8 fixed the Graz corps-pair branch to honor exemption sets + exempted hvo_tomislavgrad. Result: **n1968 delivered HRHB +2 / RBiH +3 / RS −5** via Cincar Phase 1 capturing bucovaca (4-star Solid Victory). Wave 9 authored Cincar Phase 2 follow-on op; Wave 9B/9C/9D corrected staging, decoupling, and Mistral 1/Jajce kupres_2 dependency. Wave 10 unified the per-turn brigade approach view with the launch-gate sub-segment fallback (`bot_brigade_ai_osid.ts:299` engine fix). Runs n1969–n1973 produced varying hashes but byte-identical territorial counts (HRHB −45, RBiH +23, RS +22) — Cincar Phase 2 / Mistral 1 / Jajce 95 spawn with healthy force_ratio 2.24 and 5 brigades attached but issue zero attacks in execution. Engine-deep audit `docs/40_reports/audits/20260522_HVO_OP_EXECUTION_DEEP.md` identifies the asymmetry between op launch gate (sub-segment view) and per-turn brigade brain (tactical_adjacency view) but Wave 10's fallback is observably inert, meaning the real blocker is one gate further downstream. Final branch state: **27 commits, OSID 84.13→86.66% (+2.53pp), anchors 22→23, HVO ops succeeding 0/2 → 2/4** (Op Jackal + Cincar Phase 1). Cincar Phase 2 / Mistral 1 / Jajce 95 stay authored and propose-passing for a next-session engine investigation of `evaluateSectorAttack` post-launch dispatch.
 
+## [2026-05-22] refactor(strict-null): type scenario runner startup tail
+
+**Type:** Scenario-runner type-boundary cleanup. No simulation behavior, save schema version, scenario data, baseline manifest, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** After the Phase D3 CLI cleanup, `scenario_runner.ts` still had five isolated `as any` sites: three startup scaffold casts and two reads for a scenario field the runner already supports. This was safe to close as contract/type cleanup while leaving calibration-owned behavior untouched.
+
+**Change:** Added `max_turns?: number` to the scenario input type, replaced startup scaffold casts with `GameState` property types, removed the max-turn `scenario as any` reads, and added a strict-null inventory guard pinning `scenario_runner.ts` at zero `as_any_casts`.
+
+**Verification:** `npm.cmd run typecheck` passed. `npx.cmd vitest run tests\scenario_runner_artifact_repair.test.ts tests\integration_run_summary.test.ts tests\scenario_reporting_contracts.test.ts --reporter=dot` passed 12/12. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 122`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`.
+
+**Artifacts:** `src/scenario/scenario_runner.ts`; `src/scenario/scenario_types.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_SCENARIO_RUNNER_STARTUP_TAIL.md`.
+
+**Roadmap delta:** `scenario_runner.ts` is closed for inventory-counted `as_any_casts`. Remaining strict-null `as_any_casts` are concentrated in Phase 3A/3ABC CLI harnesses, `sim_scenario.ts`, save migration, and `GameStateAdapter`.
+
+---
+
+## [2026-05-22] refactor(strict-null): type Phase D3 census trace reads
+
+**Type:** Audit-CLI type-boundary cleanup. No simulation behavior, save schema, scenario data, substrate regeneration, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** After closing the tactical-map bridge tail, the strict-null inventory still had a small isolated audit CLI with broad `as any` JSON reads. The file is diagnostic-only and safe to clean while Claude works calibration/army-arc elsewhere.
+
+**Change:** Typed the Phase D3 missing-census trace input shapes for optional `political.settlements` and `political.municipalities`, replaced broad index/census/master GeoJSON property reads with optional chaining, and added a strict-null inventory guard pinning the CLI at zero `as_any_casts`.
+
+**Verification:** `npx.cmd tsc --noEmit -p tsconfig.json --pretty false` passed. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 127`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`. `npm.cmd run phaseD3:trace_missing_census_settlements` was attempted but hit the existing required-input guard because `data/derived/settlements_substrate.geojson` is absent in this checkout.
+
+**Artifacts:** `src/cli/phaseD3_trace_missing_census_settlements.ts`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_PHASED3_TRACE_CLI_TAIL.md`.
+
+**Roadmap delta:** The Phase D3 trace CLI is closed for inventory-counted `as_any_casts`. Remaining strict-null inventory stays concentrated in Phase 3A/3ABC CLI harnesses, `sim_scenario.ts`, scenario-runner diagnostics, save migration, and `GameStateAdapter`.
+
+---
+
+## [2026-05-22] refactor(strict-null): type MapContainer map bridges
+
+**Type:** Tactical-map type-boundary cleanup. No simulation behavior, save schema, scenario data, map data, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.
+
+**Why:** The strict-null roadmap still had a self-contained UI map tail: `MapContainer.tsx` used broad `as any` casts at the MapLibre protocol/filter boundary and deck.gl click bridge. This was separable from Claude's calibration/army-arc lane and safe to close as type-only infrastructure work.
+
+**Change:** Replaced the remaining `MapContainer.tsx` `as any` casts with MapLibre `AddProtocolAction`, `FilterSpecification`, source/layer specification types, direct PMTiles `tilev4(...)`, and typed deck picking with an explicit numeric `stack_count` narrow. Added a strict-null inventory guard pinning `MapContainer.tsx` at zero `as_any_casts`.
+
+**Verification:** `npx.cmd vitest run tests\ui_map_deck_counter_visibility.test.ts tests\ui_map_no_sector_demarcation_overlay.test.ts --reporter=dot` passed 4/4. `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 84/84. `node tools\diagnostics\strict_null_inventory.cjs` reports current floor `as_factionid_casts 2`, `as_unknown_casts 0`, `as_any_casts 135`, `non_null_assertions_dot 0`, `non_null_assertions_index 0`, `optional_fields_game_state 477`.
+
+**Artifacts:** `src/ui/map/map/MapContainer.tsx`; `tests/strict_null_inventory_progress.test.ts`; `docs/40_reports/implemented/20260522_STRICT_NULL_MAP_CONTAINER_BRIDGE_TAIL.md`.
+
+**Roadmap delta:** Tactical map shell is now closed for inventory-counted `as_any_casts`. Remaining strict-null work is concentrated in CLI harnesses, scenario-runner diagnostics, save-migration boundary, and `GameStateAdapter`/FactionId unification; calibration/army-arc work remains reserved for Claude's branch.
+
+---
 ## [2026-05-22] fix(operations): prevent idle objective skips
 
 **Type:** Sector-operation lifecycle behavior + baseline manifest refresh. No combat odds, OOB source rows, painted-control targets, force-trajectory predicates, operation catalog data, or scenario data changed.

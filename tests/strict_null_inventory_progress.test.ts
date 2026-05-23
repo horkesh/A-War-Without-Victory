@@ -349,6 +349,10 @@ const PHASE_D2_SETTLEMENT_RECONCILE_AS_ANY_TAIL_FILES = [
     'src/cli/phaseD2_settlement_count_reconcile_audit.ts',
 ];
 
+const PHASE_D3_TRACE_MISSING_CENSUS_AS_ANY_TAIL_FILES = [
+    'src/cli/phaseD3_trace_missing_census_settlements.ts',
+];
+
 const PHASE_F0_NULL_CONTROL_AS_ANY_TAIL_FILES = [
     'src/cli/phaseF0_null_political_control_settlements_report.ts',
 ];
@@ -374,12 +378,20 @@ const OPS_MAP_RENDERER_AS_ANY_TAIL_FILES = [
     'src/ui/map/components/plan_ui/OpsMapRenderer.ts',
 ];
 
+const MAP_CONTAINER_AS_ANY_TAIL_FILES = [
+    'src/ui/map/map/MapContainer.tsx',
+];
+
 const WARROOM_MOCK_STATE_STRICT_NULL_TAIL_FILES = [
     'src/ui/warroom/warroom.ts',
 ];
 
 const VERDICT_SCREEN_CODEX_UNKNOWN_TAIL_FILES = [
     'src/ui/map/components/VerdictScreen.tsx',
+];
+
+const SCENARIO_RUNNER_AS_ANY_TAIL_FILES = [
+    'src/scenario/scenario_runner.ts',
 ];
 
 const RUNTIME_NON_NULL_ASSERTION_TAIL_FILES = [
@@ -1267,6 +1279,16 @@ describe('strict null inventory progress', () => {
         expect(anyCount).toBe(0);
     });
 
+    it('cleans the Phase D3 missing-census trace CLI as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', PHASE_D3_TRACE_MISSING_CENSUS_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
     it('cleans the Phase F0 null-control CLI as-any tail slice', () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
@@ -1327,6 +1349,16 @@ describe('strict null inventory progress', () => {
         expect(anyCount).toBe(0);
     });
 
+    it('cleans the tactical MapContainer MapLibre/deck bridge as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', MAP_CONTAINER_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
+    });
+
     it('cleans the warroom mock-state strict-null tail slice', () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
@@ -1349,6 +1381,16 @@ describe('strict null inventory progress', () => {
         const current = diagnostic.buildInventory(process.cwd());
         const unknownCount = phaseCount(current, 'as_unknown_casts', VERDICT_SCREEN_CODEX_UNKNOWN_TAIL_FILES);
         expect(unknownCount).toBe(0);
+    });
+
+    it('cleans the scenario runner startup/max-turn as-any tail slice', () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const diagnostic = require('../tools/diagnostics/strict_null_inventory.cjs') as {
+            buildInventory: (rootDir: string) => StrictNullInventory;
+        };
+        const current = diagnostic.buildInventory(process.cwd());
+        const anyCount = phaseCount(current, 'as_any_casts', SCENARIO_RUNNER_AS_ANY_TAIL_FILES);
+        expect(anyCount).toBe(0);
     });
 
     it('cleans the runtime non-null assertion tail slice', () => {

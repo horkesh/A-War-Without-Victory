@@ -1454,7 +1454,7 @@ function updateMultiAxisResults(
         // the backstop for multi-axis operations making partial progress.
         // Wave 20: single-axis ops use a tighter cap so brigades release sooner for
         // downstream cascade ops (Cincar Phase 1 → Mistral 1).
-        const failureCap = op.axes!.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
+        const failureCap = axes.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
         if (axis.failure_count >= failureCap) {
             axis.status = 'stalled';
         }
