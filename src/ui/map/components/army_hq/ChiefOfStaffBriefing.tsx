@@ -203,9 +203,9 @@ export function generateCoSBriefing(
             const corpsName = cohesionItem.title.split(' cohesion')[0];
             const corpsId = cohesionItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('I am concerned about '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.prefix')));
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' — their cohesion is dangerously low. We should consider reorganization. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
                 segments.push(text(' reports critical cohesion. Force readiness degraded. Recommend reorganization. '));
@@ -221,9 +221,9 @@ export function generateCoSBriefing(
             const opName = opItem.title.replace(/^Op /, '').replace(/ awaits.*/, '');
             const corpsId = opItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('Operation '));
+                segments.push(text(t('chiefOfStaff.alert.operation.cautious.prefix')));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' awaits your authorization. I recommend reviewing force ratios first. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(text('Operation '));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
@@ -240,9 +240,9 @@ export function generateCoSBriefing(
             const sectorName = thinItem.title.replace(/^Thin front: /, '');
             const corpsId = thinItem.corpsId;
             if (tone === 'cautious') {
-                segments.push(text('Our line at '));
+                segments.push(text(t('chiefOfStaff.alert.defense.cautious.prefix')));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is dangerously thin. If the enemy probes there, we may not hold. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(text('Sector '));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));

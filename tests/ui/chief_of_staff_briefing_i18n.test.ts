@@ -101,4 +101,54 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).toContain('Ratni zamor suzava nas operativni prostor na cijelom ratistu.');
         expect(text).not.toContain('War exhaustion is narrowing');
     });
+
+    it('localizes cautious alert prose in BCS mode', () => {
+        setLocale('bcs');
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 1,
+            latestTurnSummary: null,
+        } as LoadedGameState;
+        const items: CommandBriefingItemView[] = [
+            {
+                id: 'cohesion',
+                kind: 'military',
+                category: 'cohesion',
+                severity: 'critical',
+                title: '1st Corps cohesion critical',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_1',
+                target: { type: 'corps', corpsId: 'corps_1' },
+            },
+            {
+                id: 'operation',
+                kind: 'military',
+                category: 'operations',
+                severity: 'critical',
+                title: 'Op River Line awaits authorization',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_1',
+                target: { type: 'operation', operationKey: 'op_1' },
+            },
+            {
+                id: 'thin',
+                kind: 'military',
+                category: 'defense',
+                severity: 'warning',
+                title: 'Thin front: Tuzla corridor',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_2',
+                target: { type: 'sector', sectorId: 'sector_1' },
+            },
+        ];
+
+        const text = flatten(generateCoSBriefing(items, state, 'RBiH'));
+
+        expect(text).toContain('Zabrinut sam zbog 1st Corps - kohezija je opasno niska. Trebamo razmotriti reorganizaciju.');
+        expect(text).toContain('Operacija River Line ceka vase odobrenje. Preporucujem prvo pregledati odnos snaga.');
+        expect(text).toContain('Nasa linija kod Tuzla corridor je opasno tanka. Ako neprijatelj ispita taj pravac, mozda necemo izdrzati.');
+        expect(text).not.toContain('I am concerned about');
+        expect(text).not.toContain('awaits your authorization');
+        expect(text).not.toContain('Our line at');
+    });
 });
