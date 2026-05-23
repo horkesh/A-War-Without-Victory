@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "description": "Per-OSID strategic priority for defender reserve allocation (synthesis §3 E-B4). 'core' = strategic heartland (capital, command nodes); 'corridor' = lifeline (Posavina, supply lines); 'periphery' = expendable frontage. __default__ in periphery means any unlisted OSID for that faction defaults to periphery. Validated against data/derived/operational/osid_areas.json.",
+  "by_faction": {
+    "RS": {
+      "core": [
+        "op:banja_luka:banja_luka_2",
+        "op:bijeljina:bijeljina_2",
+        "op:hanpijesak:han_pijesak_2",
+        "op:pale:pale",
+        "op:sokolac:sokolac_2"
+      ],
+      "corridor": [
+        "op:bosanski_brod:brod",
+        "op:brcko:brcko",
+        "op:derventa:derventa_2",
+        "op:doboj:boljanic_2",
+        "op:modrica:modrica"
+      ],
+      "periphery": ["__default__"]
+    },
+    "RBiH": {
+      "core": [
+        "op:bihac:bihac_2",
+        "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+        "op:tuzla:tuzla_2",
+        "op:zenica:zenica_2"
+      ],
+      "corridor": [],
+      "periphery": ["__default__"]
+    },
+    "HRHB": {
+      "core": [
+        "op:livno:livno_2",
+        "op:mostar:mostar_zapad_2"
+      ],
+      "corridor": [],
+      "periphery": ["__default__"]
+    }
+  }
+}

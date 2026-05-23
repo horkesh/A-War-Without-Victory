@@ -273,6 +273,80 @@ const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
+/**
+ * Synthesis §3 E-B2: Operation Una negative-control combat-power cap.
+ * Applied to predictor force_ratio_estimate (which scales linearly with
+ * attacker power) when an operation is HV-dominant and isolated. Tuned
+ * to 0.65 from the historical record: HV-only Una collapsed in 48h with
+ * roughly 1/3 of paper-strength effective power once HVO-native rear
+ * support and local guides were absent.
+ */
+const HV_UNA_NEGATIVE_CONTROL_MULT = 0.65;
+/** §3 E-B2: HV-dominance threshold (>80% of participating brigades HV-tagged). */
+const HV_UNA_DOMINANCE_THRESHOLD = 0.8;
+/** §3 E-B2: tag string written by hv_integration.spawnHvBrigade (E-B2). */
+const HV_ATTACHED_SOURCE_TAG = 'attached_source:hv';
+
+function isHvTaggedBrigade(f: FormationState | undefined): boolean {
+    if (!f?.tags) return false;
+    return f.tags.includes(HV_ATTACHED_SOURCE_TAG) || f.tags.includes('hv_origin');
+}
+
+/**
+ * Negative-control predicate for Operation Una style HV-only thrusts.
+ * Returns true when (a) >80% of the op's participating brigades are HV-tagged
+ * and (b) no HVO-native (non-HV-tagged) HRHB brigade is assigned to any
+ * sector owned by this corps. The corps-sector proxy substitutes for an
+ * explicit 2-hop BFS over operational edges, which is not threaded into
+ * advanceSectorOffensives; it is conservative — a non-HV HRHB brigade in
+ * an adjacent corps' sector would not satisfy the predicate, matching the
+ * "isolated thrust" historical signature.
+ */
+function isHvUnaNegativeControl(
+    state: GameState,
+    op: { participating_brigades: readonly FormationId[]; axes?: readonly { assigned_brigades: readonly FormationId[] }[] },
+    corpsId: FormationId,
+): boolean {
+    const formations = state.military.formations ?? {};
+    const brigadeIds = isMultiAxis(op as CorpsOperation)
+        ? getAllAxisBrigades(op as CorpsOperation)
+        : op.participating_brigades;
+    if (!brigadeIds || brigadeIds.length === 0) return false;
+
+    let hvCount = 0;
+    let total = 0;
+    for (const bid of brigadeIds) {
+        const f = formations[bid];
+        if (!f) continue;
+        total += 1;
+        if (isHvTaggedBrigade(f)) hvCount += 1;
+    }
+    if (total === 0) return false;
+    const hvShare = hvCount / total;
+    if (hvShare <= HV_UNA_DOMINANCE_THRESHOLD) return false;
+
+    // Look for an HVO-native (non-HV-tagged) brigade in any sector owned by
+    // this corps. If one exists, the op is co-deployed — no penalty.
+    const sectors = state.military.corps_front_sectors ?? {};
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const bid of sector.assigned_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+        for (const bid of sector.reserve_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+    }
+    return true;
+}
+
 function sectorContainsFriendlyOsid(
     sector: { territory_osids?: readonly string[]; sub_segments?: readonly { friendly_osids: readonly string[] }[] },
     osid: string,
@@ -815,6 +889,22 @@ export function advanceSectorOffensives(
                 // LANE-2026-05-02: thread supplyByOsid + terrainMultByOsid into preparation
                 // for honest defender-modifier-aware force-ratio estimation.
                 const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid);
+
+                // Synthesis §3 E-B2: Operation Una negative-control penalty.
+                // HV-only thrusts without HVO-native co-deployment historically
+                // collapsed in 48 hours (Op. Una, Sept 18-19 1995). When the
+                // operation's brigade roster is >80% HV-tagged AND no
+                // HVO-native HRHB brigade is present in the corps' sectors,
+                // scale the force_ratio_estimate by HV_UNA_NEGATIVE_CONTROL_MULT
+                // (effective combat-power cap × 0.65). Symmetric in shape —
+                // it just happens that the HV is the only foreign attached
+                // source in the current OOB.
+                if (
+                    typeof prepResult.force_ratio_estimate === 'number'
+                    && isHvUnaNegativeControl(state, op, corpsId)
+                ) {
+                    prepResult.force_ratio_estimate = prepResult.force_ratio_estimate * HV_UNA_NEGATIVE_CONTROL_MULT;
+                }
 
                 // Collect preparation event for turn report
                 prepEvents.push({

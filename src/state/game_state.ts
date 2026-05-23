@@ -1369,6 +1369,11 @@ export interface StateMeta {
     operation_storm_turn?: number;
     /** War phase §6.3: HV brigades have been spawned (one-shot flag, set after Washington + delay). */
     hv_brigades_spawned?: boolean;
+    /** Synthesis §3 E-B3: Cross-border Republic of Serbian Krajina (SVK) partner
+     *  presence. True from scenario init until Operation Storm fires (~turn 154);
+     *  then set false by the operation_storm_1995 event. Consumed by
+     *  strategic_depth.computeStrategicDepth for VRS 2nd Krajina Corps. */
+    svk_corps_active?: boolean;
     /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
     /** Peace-phase §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
@@ -2074,6 +2079,13 @@ sector_combat_ratings?: Record<string, SectorCombatRating>;
 sector_intel?: Record<string, SectorIntelRecord[]>;
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
 home_distance_cache?: Record<string, number>;
+/** Fall-1995 mechanic E-A3 (multi-axis simultaneity penalty): count of active
+ *  enemy offensive CorpsOperations (phase==='execution') whose objectives
+ *  include at least one OSID currently controlled by this defender corps's
+ *  faction. Built turn-start in `war_phases.ts` before combat resolution;
+ *  read in `combat_math.ts` `computeDefenderPowerBreakdown`. Keyed by defender
+ *  corps FormationId. Derived each turn (transient cache; safe to drop). */
+active_offensives_against_corps?: Record<FormationId, number>;
 /** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
  *  Keyed by brigadeId → sector_id. Persists until manually cleared. */
 brigade_sector_override?: Record<string, string>;

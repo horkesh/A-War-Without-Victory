@@ -754,7 +754,10 @@
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
-    ]
+    ],
+    "sets_flags": {
+      "svk_corps_active": false
+    }
   },
   {
     "id": "karadzic_mladic_split_1995",

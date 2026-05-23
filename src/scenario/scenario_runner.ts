@@ -23,6 +23,7 @@ import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
+import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
@@ -1717,6 +1718,10 @@ export async function buildScenarioStartupState(
         initializeCorpsCommand(state);
         spawnJnaPhantomBrigades(state);
         initializeCorpsCommand(state);
+        // Synthesis §3 E-B3: seed initial per-corps strategic_depth at scenario
+        // load so the first turn's combat / coherence reads see real depth
+        // values rather than the default 1.0.
+        initStrategicDepth(state);
         let prePlannedAdjacency;
         try {
             const preEdges = await loadOperationalEdges(baseDir);
