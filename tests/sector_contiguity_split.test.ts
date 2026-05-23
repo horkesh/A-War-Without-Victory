@@ -67,6 +67,55 @@ describe('splitNonContiguousSectors', () => {
         expect(result[0].assigned_brigade_ids).toEqual(['brig1']);
     });
 
+    it('keeps default renumbering but can preserve caller-owned intermediate ids', () => {
+        const adj = buildLinearAdjacency();
+        const subSegA = makeSubSeg('ss0', ['e1'], ['op:a:a'], ['op:x:x']);
+        const subSegB = makeSubSeg('ss1', ['e2'], ['op:e:e'], ['op:y:y']);
+        const sector = makeSector('sector:test:17', 'test_corps', [subSegA, subSegB], ['brig1']);
+        const preserveIdSector = makeSector('sector:test:17', 'test_corps', [subSegA, subSegB], ['brig1']);
+
+        const defaultResult = splitNonContiguousSectors([sector], adj);
+        expect(defaultResult.map((entry) => entry.sector_id)).toEqual([
+            'sector:test_corps:0',
+            'sector:test_corps:1',
+        ]);
+
+        const callerOwnedResult = splitNonContiguousSectors(
+            [preserveIdSector],
+            adj,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            { renumberResult: false },
+        );
+        expect(callerOwnedResult.map((entry) => entry.sector_id)).toEqual([
+            'sector:test_corps:0',
+            'sector:test_corps:1',
+        ]);
+
+        const passThroughSector = makeSector(
+            'sector:test:preserve',
+            'test_corps',
+            [makeSubSeg('ss2', ['e3'], ['op:a:a'], ['op:z:z'])],
+        );
+        const passThrough = splitNonContiguousSectors(
+            [passThroughSector],
+            adj,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            { renumberResult: false },
+        );
+        expect(passThrough[0]).toBe(passThroughSector);
+        expect(passThrough[0].sector_id).toBe('sector:test:preserve');
+    });
+
     it('splits sector with two disconnected friendly OSID groups', () => {
         const adj = buildLinearAdjacency();
         // friendly: A,B (connected) and D,E (connected) — C missing = disconnected
