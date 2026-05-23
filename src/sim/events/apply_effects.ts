@@ -30,9 +30,10 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     morale_change: 12,
     narrative: 13,
     negotiation_capital: 14,
-    patron_pressure: 15,
-    recruitment_modifier: 16,
-    supply_delta: 17,
+    offensive_ops_suppression: 15,
+    patron_pressure: 16,
+    recruitment_modifier: 17,
+    supply_delta: 18,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -111,10 +112,34 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
         case 'cost_ledger_annotation':
             applyCostLedgerAnnotation(state, effect.tag, effect.text, effect.faction);
             break;
+        case 'offensive_ops_suppression':
+            applyOffensiveOpsSuppression(state, effect.faction, effect.duration_turns, effect.reason);
+            break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
     }
+}
+
+/** Fall-1995 mechanic E-A5: push an offensive-ops suppression entry into
+ *  `state.military.offensive_ops_suppressions`. Consumer: launch-gate in
+ *  `sector_offensive.ts` reads via `isFactionOffensiveOpsSuppressed`.
+ *  See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5. */
+function applyOffensiveOpsSuppression(
+    state: GameState,
+    faction: FactionId,
+    durationTurns: number,
+    reason?: string,
+): void {
+    if (!state.military.offensive_ops_suppressions) {
+        state.military.offensive_ops_suppressions = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.offensive_ops_suppressions.push({
+        faction,
+        expires_turn: currentTurn + Math.max(0, durationTurns),
+        reason,
+    });
 }
 
 /** Apply morale delta to all active brigades of the given faction. Clamped [0, 100]. */
