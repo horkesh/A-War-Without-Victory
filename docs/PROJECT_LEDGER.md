@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] fix(settings): own Escape above pause shortcuts
+
+**Type:** UI shell keyboard/interaction fix. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Escape-to-pause was already implemented in the global shortcut hook, but Settings did not own Escape while open. When Settings was opened from Pause, Escape could be consumed by the global pause shortcut underneath instead of closing Settings cleanly.
+
+**Change:** `SettingsScreen` now registers a capture-phase Escape listener that calls its existing `onClose` callback and stops propagation before global shortcut owners run.
+
+**Determinism / output impact:** UI interaction only. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\settings_screen_shell_cleanup.test.ts --reporter=dot` failed because `onClose` was not called, then PASS 3/3 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md`.
+
+**Roadmap delta:** Closes the core Escape-tree gap in Rating #26. Remaining settings work is richer display/key-remap polish rather than missing pause/settings ownership.
+
+---
+
 ## [2026-05-23] ui(personnel): surface mobilization pool health
 
 **Type:** UI read-model/presentation enhancement. No mobilization mechanics, JNA transfer behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or sim output contract changed.

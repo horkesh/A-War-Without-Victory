@@ -85,6 +85,18 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           }
         : null;
 
+    useEffect(() => {
+        const handler = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            onClose();
+        };
+        window.addEventListener('keydown', handler, true);
+        return () => window.removeEventListener('keydown', handler, true);
+    }, [onClose]);
+
     // ─── A11y: reduce-motion toggle (Lane D) ──────────────────────────────
     // Reads localStorage on mount; falls back to OS-level
     // `prefers-reduced-motion` if no explicit user preference is stored.
