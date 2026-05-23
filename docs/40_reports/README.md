@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest command briefing supply visibility** | [implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md](implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md) - command briefing now summarizes player-faction supply-state counts and corridor risk from canonical supply reports. |
 | **Latest Personnel officer trait chips** | [implemented/20260523_PERSONNEL_TRAIT_CHIPS.md](implemented/20260523_PERSONNEL_TRAIT_CHIPS.md) - Army HQ Personnel now surfaces existing `command_style` and `known_for` fields as doctrinal/narrative trait chips without changing officer behavior. |
 | **Latest Chronicle officer spotlight** | [implemented/20260523_CHRONICLE_OFFICER_OF_WEEK.md](implemented/20260523_CHRONICLE_OFFICER_OF_WEEK.md) - Chronicle now emits player-faction completed-operation commander spotlight cards from existing AAR fields, with Personnel filtering and Army HQ Operation History linkage. |
 | **Latest command briefing truth fix** | [implemented/20260523_COMMAND_BRIEFING_CANONICAL_PATHS.md](implemented/20260523_COMMAND_BRIEFING_CANONICAL_PATHS.md) - sim-side command briefing now reads canonical active-operation, disrupted-brigade, and political enclave-resilience paths instead of the Batch C broken-tolerant fallbacks. |

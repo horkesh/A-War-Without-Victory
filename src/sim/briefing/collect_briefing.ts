@@ -46,6 +46,29 @@ export type BriefingCollectorFn = (state: GameState, faction: FactionId) => Brie
 
 const collectors: Array<{ name: string; fn: BriefingCollectorFn }> = [];
 
+type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
+type CorridorStateLevel = 'open' | 'brittle' | 'cut';
+
+interface SupplyStateByOsidBriefingReport {
+    factions?: Array<{
+        faction_id?: string;
+        by_osid?: Array<{ osid?: string; state?: string }>;
+    }>;
+}
+
+interface SupplyCorridorsOsidBriefingReport {
+    corridors?: Array<{
+        faction_id?: string;
+        edge_id?: string;
+        state?: string;
+    }>;
+}
+
+type GameStateWithSupplyReports = GameState & {
+    supply_state_by_osid?: SupplyStateByOsidBriefingReport;
+    supply_corridors_osid?: SupplyCorridorsOsidBriefingReport;
+};
+
 function getCorpsCommandFaction(
     formations: Record<FormationId, FormationState>,
     corpsId: FormationId,
@@ -68,6 +91,18 @@ function normalizeEnclaveResilienceEntry(
         resilience: entry.resilience,
         isolation_turns: entry.isolation_turns,
     };
+}
+
+function normalizeSupplyState(value: string | undefined): SupplyStateLevel | null {
+    return value === 'adequate' || value === 'strained' || value === 'critical' ? value : null;
+}
+
+function normalizeCorridorState(value: string | undefined): CorridorStateLevel | null {
+    return value === 'open' || value === 'brittle' || value === 'cut' ? value : null;
+}
+
+function formatCount(count: number, singular: string, plural = `${singular}s`): string {
+    return `${count} ${count === 1 ? singular : plural}`;
 }
 
 /**
@@ -180,6 +215,67 @@ registerBriefingCollector('military', (state, faction) => {
     }
 
     return items;
+});
+
+// Section 1b: Logistics / supply
+registerBriefingCollector('logistics', (state, faction) => {
+    const supplyState = (state as GameStateWithSupplyReports).supply_state_by_osid;
+    const corridors = (state as GameStateWithSupplyReports).supply_corridors_osid;
+    const factionSupply = supplyState?.factions
+        ?.filter(entry => entry.faction_id === faction)
+        .flatMap(entry => entry.by_osid ?? []) ?? [];
+    const factionCorridors = corridors?.corridors
+        ?.filter(entry => entry.faction_id === faction) ?? [];
+
+    let adequate = 0;
+    let strained = 0;
+    let critical = 0;
+    for (const entry of [...factionSupply].sort((a, b) => strictCompare(String(a.osid ?? ''), String(b.osid ?? '')))) {
+        const stateLevel = normalizeSupplyState(entry.state);
+        if (stateLevel === 'adequate') adequate++;
+        else if (stateLevel === 'strained') strained++;
+        else if (stateLevel === 'critical') critical++;
+    }
+
+    let brittle = 0;
+    let cut = 0;
+    for (const entry of [...factionCorridors].sort((a, b) => strictCompare(String(a.edge_id ?? ''), String(b.edge_id ?? '')))) {
+        const stateLevel = normalizeCorridorState(entry.state);
+        if (stateLevel === 'brittle') brittle++;
+        else if (stateLevel === 'cut') cut++;
+    }
+
+    if (adequate + strained + critical + brittle + cut === 0) return [];
+
+    const severity: BriefingSeverity = critical > 0 || cut > 0
+        ? 'critical'
+        : strained > 0 || brittle > 0
+            ? 'warning'
+            : 'info';
+    const title = severity === 'critical'
+        ? 'Supply lines critically exposed'
+        : severity === 'warning'
+            ? 'Supply lines under strain'
+            : 'Supply lines holding';
+    const supplyParts = [
+        formatCount(adequate, 'adequate'),
+        formatCount(strained, 'strained'),
+        formatCount(critical, 'critical'),
+    ];
+    const corridorParts = [
+        formatCount(cut, 'cut corridor'),
+        formatCount(brittle, 'brittle corridor'),
+    ];
+
+    return [{
+        id: 'log-supply',
+        section: 'logistics',
+        severity,
+        title,
+        detail: `${supplyParts.join(', ')}; ${corridorParts.join(', ')}.`,
+        actionLabel: 'Review Supply',
+        target: { kind: 'summary' },
+    }];
 });
 
 // Section 2: Diplomatic

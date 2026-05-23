@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] feat(briefing): surface supply corridor risk
+
+**Type:** Sim-side command briefing visibility enhancement. No supply mechanics, combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or baseline contract changed.
+
+**Why:** Rating #8 still listed `BRIEF-GAP-1`: supply truth existed in `supply_state_by_osid`, `supply_corridors_osid`, map overlays, and Decision Room cards, but the sim-side command briefing did not summarize player-faction supply/corridor exposure.
+
+**Change:** Added a built-in `logistics` briefing collector. It reads `supply_state_by_osid.factions[]` and `supply_corridors_osid.corridors[]`, scopes both to the requested faction, and emits one `log-supply` item with adequate/strained/critical OSID counts plus cut/brittle corridor counts. Severity is critical for any critical OSID or cut corridor, warning for strained/brittle exposure, and info for adequate-only evidence.
+
+**Determinism / output impact:** Deterministic read-model/briefing output only. Current baseline regression remains byte-matching, so no manifest refresh was required.
+
+**Verification:** Red/green `npx.cmd vitest run tests\command_briefing.test.ts --reporter=dot` failed on missing `log-supply` before implementation, then PASS 9/9 after implementation; `npx.cmd vitest run tests\command_briefing.test.ts tests\ui_player_supply_visibility.test.ts tests\ui_decision_room_supply_visibility.test.ts tests\supply_panel_contract.test.ts --reporter=dot` PASS 22/22; `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS; `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md`.
+
+**Roadmap delta:** Closes the command-briefing supply visibility portion of Rating #8. The supply map reach overlay is already implemented; remaining supply/logistics work is polish/affordance depth rather than missing read-model wiring.
+
+---
+
 ## [2026-05-23] ui(personnel): surface officer trait chips
 
 **Type:** UI read-model/presentation enhancement. No combat math, commander behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.
