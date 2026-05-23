@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(sector): index enemy personnel for sector assignment
+
+**Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** Fresh sector profiling kept `buildFactionSectors:*` as a top owner. Child-profile comparison showed repeated active-enemy formation scans inside territory assignment and sector power recomputation were measurable, deterministic, and safe to replace with an invocation-local read index.
+
+**Change:** Added `countActiveEnemyPersonnelByOsid(formations, faction)` in `src/sim/combat/brigade_assignment.ts` and reused it in `classifyBrigadesByTerritory(...)` and `recomputeSectorPowerAndThreat(...)`. Added a static regression guard in `tests/sector_partition_instrumentation.test.ts` to keep those paths on the shared enemy-personnel index.
+
+**Determinism / output impact:** Compute-only. The helper iterates sorted formation ids with `strictCompare`, uses the same active enemy combat-formation filters, and is scoped to the current call. No state shape, save schema, operation behavior, combat formula, random source, timestamp, or output contract changed. The 40w timed run preserved final hash `30abd0696b9d7e24`.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts --reporter=dot` failed before implementation because the index was absent. After implementation, instrumentation/static guard passed 20/20, sector regression pack passed 38/38, brigade assignment pack passed 57/57, and `npm.cmd run typecheck` passed. `npm.cmd run sim:scenario:run:40w:timed` passed with final hash `30abd0696b9d7e24`; `npm.cmd run test:baselines` passed with all scenarios matching. Post-change profile reported `totalWallS=89.54`, `partition-corps-front-sectors=6799.566ms`, `reconcile-final-sector-truth=7071.455ms`; child buckets reduced RS territory assignment `430.764ms -> 237.213ms`, RBiH territory assignment `378.724ms -> 244.236ms`, RS recompute-power `107.362ms -> 25.238ms`, and RBiH recompute-power `89.722ms -> 23.900ms` on normalized 95-invocation slices.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md`.
+
+**Roadmap delta:** Closes this profile-led sector assignment scan slice. Remaining sector-performance work should stay measured and focus on `ensureMinimumSectorCoverage:*`, `recoverDroppedFrontEdges:*`, and geometry invariant buckets rather than speculative cross-turn caching.
+
+---
+
 ## [2026-05-23] refactor(strict-null): centralize column movement order shape
 
 **Type:** Strict-null hygiene and movement-order contract cleanup. No scenario data, combat math, movement behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

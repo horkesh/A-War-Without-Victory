@@ -404,6 +404,27 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: sector brigade assignment reuses enemy personnel indexes', () => {
+        const raw = readFileSync(resolve('src/sim/combat/brigade_assignment.ts'), 'utf8');
+        expect(raw).toContain('function countActiveEnemyPersonnelByOsid(');
+
+        const classifyStart = raw.indexOf('export function classifyBrigadesByTerritory(');
+        const classifyEnd = raw.indexOf('export function assignCrossCorpsEnclaveDefenders(', classifyStart);
+        expect(classifyStart).toBeGreaterThanOrEqual(0);
+        expect(classifyEnd).toBeGreaterThan(classifyStart);
+        const classifyRegion = raw.slice(classifyStart, classifyEnd);
+        expect(classifyRegion).toContain('const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);');
+        expect(classifyRegion).not.toContain('const allFids = Object.keys(formations).sort(strictCompare);');
+
+        const recomputeStart = raw.indexOf('export function recomputeSectorPowerAndThreat(');
+        const recomputeEnd = raw.indexOf('export function syncSectorAssignmentsToFormations(', recomputeStart);
+        expect(recomputeStart).toBeGreaterThanOrEqual(0);
+        expect(recomputeEnd).toBeGreaterThan(recomputeStart);
+        const recomputeRegion = raw.slice(recomputeStart, recomputeEnd);
+        expect(recomputeRegion).toContain('const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);');
+        expect(recomputeRegion).not.toContain('const allFormIds = Object.keys(formations).sort(strictCompare);');
+    });
+
     it('static contract: normalizeFinalSectorBuckets has deterministic child attribution labels', () => {
         const raw = readFileSync(resolve('src/sim/combat/corps_front_sectors.ts'), 'utf8');
         const startIdx = raw.indexOf('function normalizeFinalSectorBuckets(');
