@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Chief of Staff command-strain prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No command-strain calculation, command relationship state, intervention cost, corps sorting, briefing item generation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.strain.*` message keys. The cautious, precise, and aggressive command-strain branches of `generateCoSBriefing(...)` now localize institutional warning prose while preserving existing corps-name interpolation and deterministic corps ordering.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; command-strain labels, corps data, intervention mechanics, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English command-strain prose. Green rerun passed 6/6. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Chief of Staff precise/aggressive alert prose
 
 **Type:** Army HQ Chief of Staff generated-prose localization slice. No briefing item generation, alert severity, routing target, corps link, operation readiness, defense warning derivation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

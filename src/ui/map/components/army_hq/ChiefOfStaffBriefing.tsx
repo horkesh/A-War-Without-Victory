@@ -100,18 +100,18 @@ const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: numbe
 
 // ── Strain paragraph phrases ─────────────────────────────────────────
 
-const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromised', (corpsName: string) => string>> = {
+const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromised', MessageKey>> = {
     cautious: {
-        strained: (n) => `I must note that command relations with ${n} remain under strain following recent presidential interventions. The staff are compliant but the relationship requires careful management.`,
-        compromised: (n) => `I am deeply concerned about the command relationship with ${n}. Repeated direct interventions have created serious institutional friction. The staff are executing orders, but their confidence in the chain of command has been damaged.`,
+        strained: 'chiefOfStaff.strain.cautious.strained',
+        compromised: 'chiefOfStaff.strain.cautious.compromised',
     },
     precise: {
-        strained: (n) => `Command Authority Status: ${n} command relationship is under strain. Recent direct interventions have introduced friction into the planning cycle. Staff cohesion remains functional.`,
-        compromised: (n) => `Command Authority Status: ${n} command relationship is compromised. Repeated direct interventions have created institutional friction. Recommend restoring delegated command before further operations.`,
+        strained: 'chiefOfStaff.strain.precise.strained',
+        compromised: 'chiefOfStaff.strain.precise.compromised',
     },
     aggressive: {
-        strained: (n) => `${n} staff are still with us, but the overrides have left a mark. They'll execute, but we've spent some goodwill. Worth keeping in mind before the next intervention.`,
-        compromised: (n) => `The situation with ${n} is serious. Too many overrides have damaged the command relationship. The staff are carrying out orders but operating under pressure. We need to let them run their own operations for a while.`,
+        strained: 'chiefOfStaff.strain.aggressive.strained',
+        compromised: 'chiefOfStaff.strain.aggressive.compromised',
     },
 };
 
@@ -132,7 +132,7 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
         const label: CommandStrainLabel | undefined = corps.commandStrainLabel;
         if (!label || label === 'healthy') continue;
         const corpsName = corps.name ?? corps.id;
-        const phrase = STRAIN_PHRASES[tone][label](corpsName);
+        const phrase = t(STRAIN_PHRASES[tone][label], { corpsName });
         paragraphs.push([text(phrase)]);
     }
     return paragraphs;

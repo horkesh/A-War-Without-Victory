@@ -205,4 +205,70 @@ describe('Chief of Staff briefing localization', () => {
         expect(preciseText + aggressiveText).not.toContain('Awaiting GO/NO-GO');
         expect(preciseText + aggressiveText).not.toContain('is exposed');
     });
+
+    it('localizes command-strain prose in BCS mode', () => {
+        setLocale('bcs');
+        const base = makeMockLoadedGameState();
+        const state = {
+            ...base,
+            turn: 4,
+            latestTurnSummary: null,
+            formations: [
+                ...base.formations,
+                {
+                    id: 'rbih_1_corps',
+                    faction: 'RBiH',
+                    name: '1st Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    cohesion: 70,
+                    fatigue: 10,
+                    status: 'active',
+                    createdTurn: 1,
+                    tags: [],
+                    personnel: 10000,
+                    commandStrainLabel: 'strained',
+                },
+                {
+                    id: 'rs_drina_corps',
+                    faction: 'RS',
+                    name: 'Drina Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    cohesion: 68,
+                    fatigue: 12,
+                    status: 'active',
+                    createdTurn: 1,
+                    tags: [],
+                    personnel: 12000,
+                    commandStrainLabel: 'compromised',
+                },
+                {
+                    id: 'hrhb_hvo_corps',
+                    faction: 'HRHB',
+                    name: 'HVO Main Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    cohesion: 74,
+                    fatigue: 8,
+                    status: 'active',
+                    createdTurn: 1,
+                    tags: [],
+                    personnel: 9000,
+                    commandStrainLabel: 'strained',
+                },
+            ],
+        } as LoadedGameState;
+
+        const cautiousText = flatten(generateCoSBriefing([], state, 'RBiH'));
+        const preciseText = flatten(generateCoSBriefing([], state, 'RS'));
+        const aggressiveText = flatten(generateCoSBriefing([], state, 'HRHB'));
+
+        expect(cautiousText).toContain('Moram napomenuti da su komandni odnosi sa 1st Corps i dalje pod pritiskom nakon nedavnih predsjednickih intervencija.');
+        expect(preciseText).toContain('Status komandnog autoriteta: komandni odnos sa Drina Corps je narusen.');
+        expect(aggressiveText).toContain('Stab HVO Main Corps je jos uz nas, ali su intervencije ostavile trag.');
+        expect(cautiousText + preciseText + aggressiveText).not.toContain('command relations with');
+        expect(cautiousText + preciseText + aggressiveText).not.toContain('Command Authority Status');
+        expect(cautiousText + preciseText + aggressiveText).not.toContain('overrides have left a mark');
+    });
 });

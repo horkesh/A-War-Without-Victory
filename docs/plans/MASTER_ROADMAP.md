@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Chief of Staff command strain):** Army HQ Chief of Staff now localizes command-strain institutional warning prose for cautious, precise, and aggressive tones through the English/BCS substrate while preserving corps-name interpolation and deterministic corps ordering. Precise/aggressive combat and territory prose, header, and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (Chief of Staff alert tones):** Army HQ Chief of Staff now localizes precise/aggressive cohesion, operation readiness, and thin-front alert prose through the English/BCS substrate while preserving linked corps/operation/sector labels. Command-strain prose, header, and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Chief of Staff cautious alerts):** Army HQ Chief of Staff now localizes cautious-tone cohesion, operation authorization, and thin-front alert prose through the English/BCS substrate while preserving linked corps/operation/sector labels. Precise/aggressive alert prose, command-strain prose, header, and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md`. On top of:
