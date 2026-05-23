@@ -151,8 +151,9 @@ function isMunicipalitySurrounded(
     const queue: string[] = [munSettlements[0]]; // Start from first settlement
     visited.add(munSettlements[0]);
 
-    while (queue.length > 0) {
-        const current = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const current = queue[head++]!;
         const neighbors = adjacencyMap[current] ?? [];
 
         for (const neighbor of neighbors) {

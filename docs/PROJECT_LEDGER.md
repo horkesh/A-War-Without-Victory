@@ -3,6 +3,23 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(state): use cursors in supply BFS queues
+
+**Type:** Deterministic state/supply derivation performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The state-layer supply and enclave paths still had several true FIFO BFS loops using `Array.shift()`: supply reachability, corridor bridge classification, adequate-state derivation, OSID heartland grouping, siege critical-pocket grouping, sustainability surrounded-search, and enclave component grouping. These can use the same deterministic head-cursor dequeue pattern without changing traversal or output ordering.
+
+**Change:** `src/state/supply_reachability.ts`, `src/state/supply_state_derivation.ts`, `src/state/supply_reserves.ts`, `src/state/sustainability.ts`, and `src/state/enclave_integrity.ts` now use monotonic head cursors in the targeted FIFO BFS loops. `tests/state_supply_queue_cursor.test.ts` adds static guards for those regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order, adjacency iteration, sorted output comparators, and state mutation semantics are unchanged. This preserves Engine Invariants v0.9.0 Section 4 supply propagation ordering and the stable-ordering / byte-identical rerun expectations in the Determinism Test Matrix.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\state_supply_queue_cursor.test.ts --reporter=dot` failed before implementation because all targeted state BFS regions still contained `.shift()`. After implementation, focused state/supply tests passed 65/65: `tests\state_supply_queue_cursor.test.ts`, `tests\supply_reachability.test.ts`, `tests\supply_reachability_osid.test.ts`, `tests\supply_bridge_finding_tarjan.test.ts`, `tests\supply_bridge_finding_property.test.ts`, `tests\supply_cascade_deterministic_order.test.ts`, `tests\supply_reserves_phase_b.test.ts`, `tests\sustainability.test.ts`, and `tests\enclave_integrity.test.ts`. Source grep found no `.shift()` in the five targeted state files. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n6` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n6` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_STATE_SUPPLY_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Extends the queue-cursor performance cleanup from combat/sector into state supply derivation while keeping the same rule: only true FIFO graph traversals are candidates; semantic queues, priority queues, UI buffers, and archived code remain out of scope unless separately designed.
+
+---
 ## [2026-05-23] perf(combat): use cursor in return-to-corps BFS
 
 **Type:** Deterministic bot-order evaluator performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

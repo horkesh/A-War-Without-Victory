@@ -126,8 +126,9 @@ function findComponents(
         remaining.delete(start);
         const queue: SettlementId[] = [start];
         const component: SettlementId[] = [start];
-        while (queue.length > 0) {
-            const cur = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const cur = queue[head++]!;
             const neighbors = adjacency[cur] ?? [];
             for (const n of neighbors) {
                 if (!remaining.has(n)) continue;
