@@ -181,6 +181,25 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.
         if (!moraleCollapseTrigger && criteriaCount < requiredCriteria) continue;
 
+        // LANE-WAVE-30-REDO / ENGINE-2 Clause 1 (memo
+        // docs/40_reports/proposals/20260523_ENGINE_2_BRIGADE_LIFECYCLE_DESIGN.md
+        // §Part 4). Cohesion-only dissolution prevention: when the 2-of-3 (or
+        // 3-of-3 enclave) gate is met but the failing criteria are ONLY
+        // cohesion+morale (no morale-collapse override, no structural
+        // personnel destruction), demote the brigade to readiness='degraded'
+        // and continue — do NOT mark inactive/destroyed. Preserves the two
+        // genuine destruction paths: (i) moraleCollapseTrigger (catastrophic
+        // psychological breakdown after MORALE_OVERRIDE_TURNS sustained
+        // collapse) and (ii) lowPersonnel (structural combat destruction).
+        // Wave 30 ran this guard standalone; Engine-2 reintroduces it as the
+        // first half of a combined fix whose second half (reserve-fallback
+        // reconstitution in brigade_reconstitution.ts) closes the loop on
+        // brigades that did dissolve under (i)/(ii).
+        if (!moraleCollapseTrigger && !lowPersonnel) {
+            f.readiness = 'degraded';
+            continue;
+        }
+
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
 
