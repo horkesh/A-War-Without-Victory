@@ -95,10 +95,15 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'mistral_drvar_grahovo',
         name: 'Drvar / Grahovo Axis',
-        corps: PRIMARY_CORPS,
+        // Wave 28 (2026-05-23): re-apply Wave 25 — re-host on SECONDARY_CORPS
+        // (hvo_tomislavgrad). hvo_main_staff has zero front sectors so
+        // reconcileOperationRoster drains brigades carrying non-matching
+        // sector claims (same bug Wave 19A fixed for Mistral 1).
+        corps: SECONDARY_CORPS,
         brigades: [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
+            'hvo_2nd_guard_mechanized' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -107,10 +112,14 @@ const MISTRAL_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'mistral_sipovo_mrkonjic',
         name: 'Sipovo / Mrkonjic Axis',
         corps: SECONDARY_CORPS,
+        // Wave 28: substituted 3 inactive HRHB brigades with 2 live HVO Guards
+        // brigades. Kralj Petar Krešimir IV + Kralj Tomislav + HV 7th Guards
+        // Varaždin were status='inactive' at t175 in n1987 (spent in Cincar
+        // t132-141 + never recovered). hvo_3rd_guard_jastrebovi + hvo_rama_brigade
+        // are status='active' at t175 and not committed to concurrent ops.
         brigades: [
-            'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
-            'hrhb_kralj_tomislav_brigade' as FormationId,
-            'hv_7th_guards_varazdin' as FormationId,
+            'hvo_3rd_guard_jastrebovi' as FormationId,
+            'hvo_rama_brigade' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -121,10 +130,15 @@ const MISTRAL_DRVAR_GRAHOVO_AXIS: readonly OpportunityAxisDef[] = [
     {
         axis_id: 'mistral_drvar_grahovo',
         name: 'Drvar / Grahovo Axis',
-        corps: PRIMARY_CORPS,
+        // Wave 28 (2026-05-23): re-apply Wave 25 — re-host on SECONDARY_CORPS
+        // (hvo_tomislavgrad). hvo_main_staff has zero front sectors so
+        // reconcileOperationRoster drains brigades carrying non-matching
+        // sector claims (same bug Wave 19A fixed for Mistral 1).
+        corps: SECONDARY_CORPS,
         brigades: [
             'hvo_1st_guard_abb' as FormationId,
             'hv_4th_guards_split' as FormationId,
+            'hvo_2nd_guard_mechanized' as FormationId,
         ],
         objectives: MISTRAL_DRVAR_GRAHOVO_OBJECTIVES,
         staging_osid: STAGING_LIVNO_MISI,
@@ -136,10 +150,14 @@ const MISTRAL_SIPOVO_MRKONJIC_AXIS: readonly OpportunityAxisDef[] = [
         axis_id: 'mistral_sipovo_mrkonjic',
         name: 'Sipovo / Mrkonjic Axis',
         corps: SECONDARY_CORPS,
+        // Wave 28: substituted 3 inactive HRHB brigades with 2 live HVO Guards
+        // brigades. Kralj Petar Krešimir IV + Kralj Tomislav + HV 7th Guards
+        // Varaždin were status='inactive' at t175 in n1987 (spent in Cincar
+        // t132-141 + never recovered). hvo_3rd_guard_jastrebovi + hvo_rama_brigade
+        // are status='active' at t175 and not committed to concurrent ops.
         brigades: [
-            'hrhb_kralj_petar_kreimir_iv_brigade' as FormationId,
-            'hrhb_kralj_tomislav_brigade' as FormationId,
-            'hv_7th_guards_varazdin' as FormationId,
+            'hvo_3rd_guard_jastrebovi' as FormationId,
+            'hvo_rama_brigade' as FormationId,
         ],
         objectives: MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES,
         staging_osid: STAGING_LIVNO,
@@ -262,7 +280,11 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     name: 'Operation Mistral 2',
     tier: 'T1',
     faction: 'HRHB',
-    primary_corps: PRIMARY_CORPS,
+    // Wave 28 (2026-05-23): re-applying Wave 25 — hosted on hvo_tomislavgrad
+    // (SECONDARY_CORPS), not hvo_main_staff (PRIMARY_CORPS / zero-sector shell).
+    // Mirrors Wave 19A fix for Mistral 1. Test re-application to measure
+    // spatial-accuracy impact via the new Wave 27 osid_pair_match metric.
+    primary_corps: SECONDARY_CORPS,
     family: 'federation_western_bosnia',
     axes: MISTRAL_AXES,
     staging_osid: STAGING_LIVNO_MISI,
