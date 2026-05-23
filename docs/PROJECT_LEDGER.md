@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] docs(handoff): commit Claude engine packet reports
+
+**Type:** Documentation and handoff reconciliation only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, event ordering, or UI behavior changed.
+
+**Why:** Claude's fall-1995 engine session produced handoff/research/audit documents in the working tree after the engine commits were already interleaved on `codex/localization-complete-2026-05-23`. The branch needed those docs committed before the next Codex-owned push so the n2003 baseline, headless contract, HV phantom status, and HVO catalog lane are traceable from the repository.
+
+**Change:** Added the session handoff, RS player event audit, HV expeditionary ghost design, HVO 1994/Mistral/Southern Move research dispatches, and HVO catalog synthesis proposal. Reconciled `COMBAT_MASTER.md` from the superseded n1999 headline to the adopted n2003 baseline while preserving the fall-1995 mechanics table.
+
+**Verification:** `npm.cmd run typecheck` passed before this documentation commit. `SectorsSection.tsx` exists and the `OperationsSection`/`ArmyHQCorpsCard` i18n keys are present in both English and BCS dictionaries, so the handoff-reported typecheck gaps are resolved on current disk.
+
+---
+
 ## [2026-05-23] fix(codex): sweep stale indexed essay claims
 
 **Type:** Player-facing Codex/history text correction only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, or ordering semantics changed.
