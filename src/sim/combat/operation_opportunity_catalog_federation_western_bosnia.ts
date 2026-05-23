@@ -79,7 +79,6 @@ const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
     'op:mrkonjic_grad:mrkonjic_grad_2',
     'op:mrkonjic_grad:bjelajce_2',
     'op:mrkonjic_grad:baljvine_2',
-    'op:mrkonjic_grad:podrasnica_2',
 ];
 
 const MISTRAL_TARGETS: readonly string[] = [
