@@ -12,6 +12,7 @@ import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 import type { CommandStrainLabel } from '../../data/command_strain.js';
+import { t, type MessageKey } from '../../i18n';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -40,26 +41,26 @@ function link(label: string, corpsId: string): LinkSegment { return { type: 'lin
 
 // ── Tone phrases ────────────────────────────────────────────────────
 
-const GREETINGS: Record<CoSProfile['tone'], string[]> = {
+const GREETINGS: Record<CoSProfile['tone'], MessageKey[]> = {
     cautious: [
-        'Commander, I must bring several matters to your attention.',
-        'Commander, the situation requires careful consideration.',
-        'Commander, I have concerns that need your attention.',
+        'chiefOfStaff.greeting.cautious.0',
+        'chiefOfStaff.greeting.cautious.1',
+        'chiefOfStaff.greeting.cautious.2',
     ],
     precise: [
-        'Commander, here is the current situation assessment.',
-        'Commander, reporting on operational status.',
-        'Commander, the following requires your decision.',
+        'chiefOfStaff.greeting.precise.0',
+        'chiefOfStaff.greeting.precise.1',
+        'chiefOfStaff.greeting.precise.2',
     ],
     aggressive: [
-        'Commander, we need to act on several fronts.',
-        'Commander, the situation demands decisive action.',
-        'Commander, I have updates requiring immediate attention.',
+        'chiefOfStaff.greeting.aggressive.0',
+        'chiefOfStaff.greeting.aggressive.1',
+        'chiefOfStaff.greeting.aggressive.2',
     ],
 };
 
-function pickPhrase(phrases: string[], turn: number): string {
-    return phrases[turn % phrases.length];
+function pickPhrase(phrases: MessageKey[], turn: number): string {
+    return t(phrases[turn % phrases.length]);
 }
 
 // ── Generator ───────────────────────────────────────────────────────
@@ -188,10 +189,10 @@ export function generateCoSBriefing(
         paragraphs.push([
             text(pickPhrase(GREETINGS[tone], turn) + ' '),
             text(tone === 'cautious'
-                ? 'The situation is stable for now, but we should remain vigilant.'
+                ? t('chiefOfStaff.stable.cautious')
                 : tone === 'precise'
-                    ? 'No critical issues. All sectors maintaining adequate readiness.'
-                    : 'Things are quiet — too quiet. We should be planning our next move.'),
+                    ? t('chiefOfStaff.stable.precise')
+                    : t('chiefOfStaff.stable.aggressive')),
         ]);
     } else {
         const segments: Segment[] = [text(pickPhrase(GREETINGS[tone], turn) + ' ')];

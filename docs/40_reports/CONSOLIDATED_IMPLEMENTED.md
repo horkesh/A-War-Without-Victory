@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Chief of Staff stable briefing localization:** [implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md) - Army HQ Chief of Staff stable/no-alert greeting bank and baseline prose now render through the English/BCS substrate while preserving deterministic turn-based phrase selection.
+
 **Latest BCS War Summary overview localization:** [implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md) - Army HQ War Summary overview territory, military-strength, displacement, SITREP, civilian-impact, full-faction labels, and staff-assessment prose now render through the English/BCS substrate.
 
 **Latest BCS War Summary campaign-cost localization:** [implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md) - Army HQ War Summary title, subsection tabs, campaign-cost labels/severity, and campaign-drag labels/detail copy now render through the English/BCS substrate.

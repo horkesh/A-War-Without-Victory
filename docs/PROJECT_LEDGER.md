@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Chief of Staff stable briefing
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No command-briefing item generation, alert severity, corps routing link, command-strain behavior, battle/territory summary, letter-home generation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.greeting.*` and `chiefOfStaff.stable.*` message keys. The stable/no-alert branch of `generateCoSBriefing(...)` now localizes its deterministic greeting and baseline situation prose while preserving turn-modulo phrase selection.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; briefing item derivation, command-strain derivation, combat summaries, turn summaries, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English stable briefing prose. Green rerun passed 1/1. Expanded localization/endgame pack passed 124/124. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_STABLE_BRIEFING_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize War Summary overview
 
 **Type:** Army HQ War Summary overview localization slice. No summary model math, player-safe disclosure policy, turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, SITREP derivation, war-exhaustion behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, generated artifact, network IO, timestamp, or random source changed.
