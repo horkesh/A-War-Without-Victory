@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-23 (split-pieces renumber elision)
+**Updated:** 2026-05-23 (sector slice edge sort fold)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-23: Sector slice edge sort fold (byte-intended)
+
+**Change:** `buildSectorSliceFromSubSegment(...)` now sorts `subSegment.edge_ids` once, assigns the sorted list to sector-level `edge_ids`, and gives the nested sub-segment a copied version of that same sorted list. This removes a duplicate `strictCompare` sort while preserving separate arrays and existing output shape.
+
+**Determinism:** No cache or ordering change. The one remaining sort still uses `strictCompare`; the nested array copy preserves no-aliasing behavior.
+
+**Verification:** Red static characterization failed before implementation because the helper sorted `subSegment.edge_ids` twice. After the fold, instrumentation/static contract passed 18/18, `npm.cmd run typecheck` passed, sector regression pack passed 66/66, profiled 40w hash remained `30abd0696b9d7e24`, and consistency validation passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `git diff --check` passed.
+
+**Report:** [implemented/20260523_SECTOR_SLICE_EDGE_SORT_FOLD.md](implemented/20260523_SECTOR_SLICE_EDGE_SORT_FOLD.md)
 
 ---
 
