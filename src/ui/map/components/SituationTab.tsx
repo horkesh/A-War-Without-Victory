@@ -31,6 +31,7 @@ import {
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
 import { EmptyState } from './EmptyState';
+import { t } from '../i18n';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
 
@@ -291,7 +292,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               </div>
             ))
           ) : (
-            <EmptyState message="No convoy decisions are pending." />
+            <EmptyState message={t('situation.emptyConvoys')} />
           )}
           {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
         </section>
@@ -310,21 +311,21 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               </div>
             </>
           ) : (
-            <EmptyState message="No local support order is staged this turn." />
+            <EmptyState message={t('situation.emptySupport')} />
           )}
         </section>
       )}
 
       {showSection('opsec') && (
       <section data-summary-section="opsec" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Posture</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalPosture')}</div>
         {activeOpsecSectors.length > 0 ? (
           <div className="space-y-1.5">
             {activeOpsecSectors.map((sector) => (
               <div key={sector.sector_id} className="rounded border border-panel-border bg-panel-bg/60 p-2">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-text-primary">{sector.display_name}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-accent-gold">OPSEC active</span>
+                  <span className="text-[10px] uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
                 </div>
                 <div className="text-text-secondary">
                   Pressure {getPlayerSafeThreatPresentation(sector.threat_ratio).summary} · Intel {(sector.intel_confidence * 100).toFixed(0)}%
@@ -334,18 +335,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             ))}
           </div>
         ) : (
-          <EmptyState message="No sectors are currently running OPSEC." />
+            <EmptyState message={t('situation.emptyOpsec')} />
         )}
         {fragileOperations.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-panel-border">
             <div className="text-[10px] uppercase tracking-wide text-text-secondary">
-              Flagged operation health ({fragileOperations.length} of {playerOperations.length} active operations)
+              {t('situation.flaggedHealth', { flagged: fragileOperations.length, total: playerOperations.length })}
             </div>
             {fragileOperations.map((operation) => (
               <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
                 <span>{operation.name}</span>
                 <span className="text-right">
-                  Supply {Math.round((operation.supply_readiness ?? 0) * 100)}% · Failures {operation.failure_count ?? 0}
+                  {t('situation.operationHealthLine', { supply: Math.round((operation.supply_readiness ?? 0) * 100), failures: operation.failure_count ?? 0 })}
                 </span>
               </div>
             ))}
@@ -366,7 +367,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               playerFaction={playerFaction ?? undefined}
             />
           ) : (
-            <EmptyState message="Diplomacy capital is not available in this view." />
+            <EmptyState message={t('situation.emptyCapital')} />
           )}
         </section>
       )}

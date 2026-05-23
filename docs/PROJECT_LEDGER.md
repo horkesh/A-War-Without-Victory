@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] ui(i18n): localize war summary and inbox shell
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, inbox action routing, diagnostics, OOB, or tuning changed.
+
+**Why:** After the Operations Planning extraction, top-level command shell copy still remained English-only in War Summary overview/focused SituationTab states and Presidential Inbox quiet-state chrome.
+
+**Change:** Added English/BCS dictionary keys for War Summary overview sections, selected SituationTab empty/OPSEC labels, and Presidential Inbox quiet-state/header/badge text. Routed `WarSummaryContent`, selected `SituationTab` strings, and `PresidentialInbox` shell copy through the existing `t(...)` helper with English fallback.
+
+**Verification:** `npx.cmd vitest run tests/ui/war_summary_personnel_label.test.ts tests/ui/war_summary_empty_states.test.ts tests/ui/war_summary_opsec_reconciliation.test.ts tests/ui/inbox_dedup.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 23/23. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with known Vite externalization/dynamic-import/chunk-size warnings.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_INBOX_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize operations-planning prose panels
 
 **Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.
