@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest launch high concept:** [../50_launch/marketing/high_concept.md](../50_launch/marketing/high_concept.md) - launch-facing one-pager now separates playable-now scope, pending operator evidence, and future/gated claims with traceable evidence pointers.
+
 **Latest diplomacy actor stance prose:** [implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md](implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md) - Diplomacy actor rows now render deterministic public-safe stance prose from existing support, constraint, isolation, and sanctions bands.
 
 **Latest localized crash diagnostics:** [implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md](implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md) - React error boundaries now record opt-in local crash diagnostics with the boundary zone as the UI surface, closing the console-only localized failure gap.

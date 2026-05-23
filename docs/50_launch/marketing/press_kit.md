@@ -16,6 +16,8 @@
 
 **A War Without Victory** models the Bosnian War as a constrained, negative-sum political-military campaign. The player navigates presidency-level decisions, operational pressure, diplomacy, war cost, and historical judgment through an integrated Warroom, Army HQ, tactical map, Chronicle, Codex, Cost Ledger, and verdict flow.
 
+For a one-page product framing draft, use `docs/50_launch/marketing/high_concept.md`.
+
 ## Historical Framing
 
 The game is a historical simulation and educational wargame. It does not endorse any faction, ideology, atrocity, or wartime political program.

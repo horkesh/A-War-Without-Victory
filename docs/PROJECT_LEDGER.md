@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(launch): add traceable high concept one-pager
+
+**Type:** Documentation/launch collateral only. No runtime behavior, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** Rating #38 still carried the High Concept one-pager as the remaining architecture-documentation promotion gap. Existing marketing drafts had store/press/claims material, but no single one-page product framing that separated playable-now truth from pending operator evidence and future/gated claims.
+
+**Change:** Added `docs/50_launch/marketing/high_concept.md` with a one-sentence premise, player fantasy, core loop, playable-now scope, repo-supported pending evidence, future/gated claims, historical framing, and evidence pointers. Refreshed the launch marketing README commit baseline, linked the one-pager from the press kit, updated claims inventory for current telemetry/localization truth, and promoted Rating #38 from A to A+.
+
+**Verification:** `git rev-parse HEAD` recorded baseline `7842189c8b8127c3f6f170ff18e7fd39af876027`; path/evidence references were checked with `rg`; docs-only `git diff --check` passed.
+
+**Roadmap delta:** Closes the High Concept one-pager gap for Rating #38. Remaining launch collateral work is operator-facing screenshot validation, final art/trailer/press assets, and keeping claims synchronized before publication.
+
+---
+
 ## [2026-05-23] ui(diplomacy): add actor stance prose
 
 **Type:** UI read-model/presentation enhancement. No diplomacy mechanics, negotiation resolution, sim behavior, scenario data, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
