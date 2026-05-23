@@ -80,6 +80,55 @@ describe('Codex essay localization coverage', () => {
         }
     });
 
+    it('keeps Operation Sana direction aligned with the historical south-and-east breakout', () => {
+        const sana = essays.find((essay) => essay.id === 'essay_operation_sana_1995');
+        expect(sana).toBeTruthy();
+        const corpus = JSON.stringify(sana).toLowerCase();
+
+        expect(sana?.title).toContain('South and East');
+        expect(sana?.localizations?.bcs?.title).toContain('jugu i istoku');
+        expect(sana?.content).toContain('Bosanski Petrovac fell on 15 September');
+        expect(sana?.content).toContain('Ključ two days later');
+        expect(sana?.content).toContain('fell on 10 October');
+        expect(corpus).not.toContain('sweeps west');
+        expect(corpus).not.toContain('westward sweep');
+        expect(corpus).not.toContain('cisti zapad');
+        expect(corpus).not.toContain('in mid-october, the strategically important town of ključ');
+        expect(corpus).not.toContain('on 11 october, sanski most');
+    });
+
+    it('keeps Trusina title specific to perpetrator and place', () => {
+        const trusina = essays.find((essay) => essay.id === 'essay_trusina_killings_1993');
+        expect(trusina).toBeTruthy();
+
+        expect(trusina?.title).toBe('The Trusina Killings: ARBiH Crimes in the Konjic Valley');
+        expect(trusina?.localizations?.bcs?.title).toBe('Trusina: zlocini ARBiH u konjickoj dolini');
+        expect(trusina?.title.toLowerCase()).not.toContain('all sides');
+        expect(trusina?.localizations?.bcs?.title?.toLowerCase()).not.toContain('svim stranama');
+    });
+
+    it('keeps indexed Codex core fields synced to standalone source essays', () => {
+        for (const indexed of essays) {
+            const standalonePath = resolve(
+                __dirname,
+                '..',
+                '..',
+                'data/scenarios/essays',
+                `${indexed.event_id}.json`,
+            );
+            expect(existsSync(standalonePath), `${indexed.id} missing standalone essay`).toBe(true);
+            const standalone = JSON.parse(readFileSync(
+                standalonePath,
+                'utf8',
+            )) as EssayEntry;
+
+            expect(indexed.title).toBe(standalone.title);
+            expect(indexed.category).toBe(standalone.category);
+            expect(indexed.sources).toEqual(standalone.sources);
+            expect(indexed.content).toBe(standalone.content);
+        }
+    });
+
     it('has Bosnian sidecar markdown for every Codex ghost entry', () => {
         const ghostFiles = readdirSync(ghostDir)
             .filter((name) => name.endsWith('.md'))

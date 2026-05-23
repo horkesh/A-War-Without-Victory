@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] fix(codex): sweep stale indexed essay claims
+
+**Type:** Player-facing Codex/history text correction only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, or ordering semantics changed.
+
+**Why:** The indexed Codex corpus had stale generated text diverging from the standalone source essays, including the user-reported Operation Sana westward-sweep title. Several high-risk stale phrases could misstate direction of advance, perpetrator framing, operation attribution, or chronology in player-facing history text.
+
+**Change:** Synchronized every indexed essay's `title`, `category`, `sources`, and `content` from its standalone source essay while preserving index-only dynamic sections/localizations. Corrected Operation Sana to a south-and-east 5th Corps breakout with Balkan Battlegrounds I page references and corrected Petrovac/Kljuc/Krupa/Sanski Most chronology. Corrected the Trusina title away from generic both-sides wording toward ARBiH perpetrator/place specificity. Added `docs/40_reports/audits/20260523_CODEX_HISTORICAL_ACCURACY_SWEEP.md` and broadened `tests/ui/codex_essay_localization.test.ts` so the full indexed corpus fails if it drifts from standalone source bodies.
+
+**Verification:** Source/index drift script reports all indexed core fields match standalone essays, total drift 0. Stale-phrase scan for `sweeps west|westward sweep|cisti zapad|čisti zapad|in mid-october, the strategically important town of ključ|on 11 october, sanski most|Crimes on All Sides|zlocini na svim stranama|combined HVO-ARBiH effort|formally ended on 14 September` finds only regression-test guard strings. Focused Vitest/typecheck/diff checks passed before commit.
+
+---
+
 ## [2026-05-23] refactor(i18n+oob): add structured brigade designation catalog
 
 **Type:** UI/localization data-boundary refactor only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, OOB canonical names, or ordering semantics changed.
