@@ -57,6 +57,7 @@ import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { StrategicDashboard } from './components/StrategicDashboard';
+import { AudioCueObserver } from './components/AudioCueObserver';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
@@ -714,6 +715,7 @@ function App() {
         ['--awwv-bottom-bar-clearance' as string]: '2.5rem',
       }}
     >
+      <AudioCueObserver />
       {/* LANE-NIGHTSHIFT-V093-A11Y-LANE-B: semantic landmarks.
           - <main>: MapContainer (the primary tactical-map view; landmark
             authored inside MapContainer.tsx, also tutorial spotlight target).
