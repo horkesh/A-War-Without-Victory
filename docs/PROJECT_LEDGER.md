@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Chief of Staff combat tone prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No battle outcome classification, territory-net derivation, command briefing generation, turn-summary schema, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.battle.*`, `chiefOfStaff.territory.*`, and small count-label message keys for precise/aggressive staff tones. `generateCoSBriefing(...)` now localizes generated last-turn combat and territory prose across all current staff tone branches while preserving existing win/loss/inconclusive counting and net-territory derivation.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; battle summaries, turn summaries, territory net, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English precise/aggressive combat and territory prose. Green rerun passed 7/7. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Chief of Staff command-strain prose
 
 **Type:** Army HQ Chief of Staff generated-prose localization slice. No command-strain calculation, command relationship state, intervention cost, corps sorting, briefing item generation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

@@ -63,6 +63,10 @@ function pickPhrase(phrases: MessageKey[], turn: number): string {
     return t(phrases[turn % phrases.length]);
 }
 
+function countLabel(count: number, one: MessageKey, many: MessageKey): string {
+    return t(count === 1 ? one : many);
+}
+
 // ── Generator ───────────────────────────────────────────────────────
 
 const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, total: number) => string> = {
@@ -71,11 +75,29 @@ const BATTLE_PHRASES: Record<CoSProfile['tone'], (won: number, lost: number, tot
         if (w > 0) return t('chiefOfStaff.battle.cautious.winning', { total, totalS: total > 1 ? 's' : '', won: w });
         return t('chiefOfStaff.battle.cautious.inconclusive', { total, totalS: total > 1 ? 's' : '' });
     },
-    precise: (w, l, t) => `${t} engagement${t > 1 ? 's' : ''} this turn: ${w} favorable, ${l} unfavorable, ${t - w - l} inconclusive.`,
-    aggressive: (w, l, t) => {
-        if (w > l) return `We fought ${t} battle${t > 1 ? 's' : ''} and won ${w}. Good, but we need to keep pressing.`;
-        if (l > 0) return `${t} engagement${t > 1 ? 's' : ''} — we took ${l} hit${l > 1 ? 's' : ''}. We need to hit back harder.`;
-        return `${t} engagement${t > 1 ? 's' : ''}, mostly stalemates. We need to break through.`;
+    precise: (w, l, total) => t('chiefOfStaff.battle.precise.summary', {
+        total,
+        engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+        won: w,
+        lost: l,
+        inconclusive: total - w - l,
+    }),
+    aggressive: (w, l, total) => {
+        if (w > l) return t('chiefOfStaff.battle.aggressive.winning', {
+            total,
+            battleLabel: countLabel(total, 'chiefOfStaff.count.battle.one', 'chiefOfStaff.count.battle.many'),
+            won: w,
+        });
+        if (l > 0) return t('chiefOfStaff.battle.aggressive.losing', {
+            total,
+            engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+            lost: l,
+            hitLabel: countLabel(l, 'chiefOfStaff.count.hit.one', 'chiefOfStaff.count.hit.many'),
+        });
+        return t('chiefOfStaff.battle.aggressive.stalemate', {
+            total,
+            engagementLabel: countLabel(total, 'chiefOfStaff.count.engagement.one', 'chiefOfStaff.count.engagement.many'),
+        });
     },
 };
 
@@ -88,12 +110,18 @@ const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: numbe
     },
     precise: (g, l) => {
         if (g === 0 && l === 0) return '';
-        return `Territory changes: +${g} gained, -${l} lost.`;
+        return t('chiefOfStaff.territory.precise.summary', { gained: g, lost: l });
     },
     aggressive: (g, l) => {
-        if (l > 0 && g === 0) return `We lost ${l} position${l > 1 ? 's' : ''} — unacceptable. We need to take them back.`;
-        if (g > 0 && l === 0) return `Took ${g} position${g > 1 ? 's' : ''}. Good. Keep going.`;
-        if (g > 0 && l > 0) return `Gained ${g} but lost ${l} — we need to be smarter about where we commit.`;
+        if (l > 0 && g === 0) return t('chiefOfStaff.territory.aggressive.lostOnly', {
+            lost: l,
+            positionLabel: countLabel(l, 'chiefOfStaff.count.position.one', 'chiefOfStaff.count.position.many'),
+        });
+        if (g > 0 && l === 0) return t('chiefOfStaff.territory.aggressive.gainedOnly', {
+            gained: g,
+            positionLabel: countLabel(g, 'chiefOfStaff.count.position.one', 'chiefOfStaff.count.position.many'),
+        });
+        if (g > 0 && l > 0) return t('chiefOfStaff.territory.aggressive.mixed', { gained: g, lost: l });
         return '';
     },
 };

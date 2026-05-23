@@ -79,6 +79,93 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('We lost 1 position');
     });
 
+    it('localizes precise and aggressive combat and territory prose in BCS mode', () => {
+        setLocale('bcs');
+        const makeSummary = (battles: TurnSummary['battles'], territoryNet: TurnSummary['territory_net']): TurnSummary => ({
+            turn: 5,
+            battles,
+            territory_net: territoryNet,
+            notable_flips: [],
+            displacement_total: 0,
+            displacement_by_ethnicity: {},
+            decoration_awards: [],
+            arc_transitions: [],
+            formation_spawns: [],
+            formation_destructions: [],
+            supply_deltas: {},
+            heavy_munitions_deltas: {},
+            movements: [],
+            supply_transitions: [],
+            events_fired: [],
+            notable_events: [],
+        });
+        const battle = (osid: string, attacker_faction: string, defender_faction: string, outcome: TurnSummary['battles'][number]['outcome']): TurnSummary['battles'][number] => ({
+            osid,
+            attacker_faction,
+            defender_faction,
+            primary_attacker_id: `${attacker_faction}_${osid}_attacker`,
+            primary_defender_id: `${defender_faction}_${osid}_defender`,
+            all_attacker_ids: [`${attacker_faction}_${osid}_attacker`],
+            outcome,
+            attacker_casualties: 20,
+            defender_casualties: 15,
+            territory_flipped: outcome === 'victory',
+            was_concentrated: false,
+        });
+
+        const preciseState = {
+            ...makeMockLoadedGameState(),
+            turn: 5,
+            latestTurnSummary: makeSummary([
+                battle('a', 'RS', 'RBiH', 'victory'),
+                battle('b', 'RS', 'RBiH', 'repulsed'),
+                battle('c', 'RBiH', 'RS', 'stalemate'),
+            ], { RS: 1 }),
+        } as LoadedGameState;
+        const aggressiveWinState = {
+            ...makeMockLoadedGameState(),
+            turn: 5,
+            latestTurnSummary: makeSummary([
+                battle('d', 'HRHB', 'RS', 'victory'),
+                battle('e', 'HRHB', 'RS', 'costly_victory'),
+            ], { HRHB: 2 }),
+        } as LoadedGameState;
+        const aggressiveLossState = {
+            ...makeMockLoadedGameState(),
+            turn: 5,
+            latestTurnSummary: makeSummary([
+                battle('f', 'HRHB', 'RS', 'repulsed'),
+            ], { HRHB: -1 }),
+        } as LoadedGameState;
+        const aggressiveMixedState = {
+            ...makeMockLoadedGameState(),
+            turn: 5,
+            latestTurnSummary: makeSummary([
+                battle('g', 'HRHB', 'RS', 'stalemate'),
+            ], { HRHB: 0 }),
+        } as LoadedGameState;
+
+        const preciseText = flatten(generateCoSBriefing([], preciseState, 'RS'));
+        const aggressiveWinText = flatten(generateCoSBriefing([], aggressiveWinState, 'HRHB'));
+        const aggressiveLossText = flatten(generateCoSBriefing([], aggressiveLossState, 'HRHB'));
+        const aggressiveMixedText = flatten(generateCoSBriefing([], aggressiveMixedState, 'HRHB'));
+        const combined = [preciseText, aggressiveWinText, aggressiveLossText, aggressiveMixedText].join('\n');
+
+        expect(preciseText).toContain('3 okrsaja ovaj potez: 1 povoljan, 1 nepovoljan, 1 neodlucan.');
+        expect(preciseText).toContain('Promjene teritorije: +1 zauzeto, -0 izgubljeno.');
+        expect(aggressiveWinText).toContain('Vodili smo 2 bitke i dobili 2. Dobro, ali moramo nastaviti pritisak.');
+        expect(aggressiveWinText).toContain('Zauzeli smo 2 polozaja. Dobro. Nastaviti.');
+        expect(aggressiveLossText).toContain('1 okrsaj - primili smo 1 udarac. Moramo uzvratiti jace.');
+        expect(aggressiveLossText).toContain('Izgubili smo 1 polozaj - neprihvatljivo. Moramo ga vratiti.');
+        expect(aggressiveMixedText).toContain('1 okrsaj, uglavnom zastoji. Moramo probiti liniju.');
+        expect(combined).not.toContain('engagement');
+        expect(combined).not.toContain('Territory changes');
+        expect(combined).not.toContain('We fought');
+        expect(combined).not.toContain('We lost');
+        expect(combined).not.toContain('Took');
+        expect(combined).not.toContain('Gained');
+    });
+
     it('localizes cautious exhaustion warning prose in BCS mode', () => {
         setLocale('bcs');
         const state = {
