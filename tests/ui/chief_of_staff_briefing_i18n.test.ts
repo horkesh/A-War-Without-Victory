@@ -3,6 +3,7 @@ import { generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOf
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { CommandBriefingItemView } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 
 function flatten(paragraphs: ReturnType<typeof generateCoSBriefing>): string {
@@ -76,5 +77,28 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).toContain('Izgubili smo 1 polozaj ovaj potez. To je duboko zabrinjavajuce.');
         expect(text).not.toContain('We fought');
         expect(text).not.toContain('We lost 1 position');
+    });
+
+    it('localizes cautious exhaustion warning prose in BCS mode', () => {
+        setLocale('bcs');
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 1,
+            latestTurnSummary: null,
+        } as LoadedGameState;
+        const exhaustionItem: CommandBriefingItemView = {
+            id: 'exhaustion',
+            kind: 'command',
+            category: 'exhaustion',
+            severity: 'warning',
+            title: 'War exhaustion rising',
+            detail: 'Existing source detail.',
+            target: { type: 'none' },
+        };
+
+        const text = flatten(generateCoSBriefing([exhaustionItem], state, 'RBiH'));
+
+        expect(text).toContain('Ratni zamor suzava nas operativni prostor na cijelom ratistu.');
+        expect(text).not.toContain('War exhaustion is narrowing');
     });
 });

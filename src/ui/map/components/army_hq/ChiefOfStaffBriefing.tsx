@@ -260,9 +260,9 @@ export function generateCoSBriefing(
             // Canonical corps-level readout lives in CommandRelationshipSection;
             // this line stays at army-wide narrative scope and avoids fake certainty.
             segments.push(text(
-                tone === 'cautious' ? 'War exhaustion is narrowing our offensive latitude across the theater.'
-                    : tone === 'precise' ? 'Faction war exhaustion is limiting sustainable offensive tempo. Corps-level detail in Command Relationship.'
-                        : 'The men are tired, but so is the enemy. Push through or lose initiative.',
+                tone === 'cautious' ? t('chiefOfStaff.exhaustion.cautious')
+                    : tone === 'precise' ? t('chiefOfStaff.exhaustion.precise')
+                        : t('chiefOfStaff.exhaustion.aggressive'),
             ));
             count++;
         }
