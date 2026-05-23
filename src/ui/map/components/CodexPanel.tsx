@@ -7,7 +7,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
 import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
-import { useLocale } from '../i18n';
+import { t, useLocale } from '../i18n';
 import { Z } from '../../shared/zIndex.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
@@ -26,6 +26,12 @@ function CategoryBadge({ category }: { category: string }) {
             {category}
         </span>
     );
+}
+
+function formatAvailableCount(count: number): string {
+    return count === 1
+        ? t('codex.available.one')
+        : t('codex.available.many', { count });
 }
 
 interface CodexPanelProps {
@@ -103,10 +109,10 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                 <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-700/50 bg-[#10131a]">
                     <div className="flex items-center gap-2.5">
                         <div className="text-amber-400 text-[15px] font-bold tracking-[0.13em] uppercase">
-                            Codex
+                            {t('codex.title')}
                         </div>
                         <div className="text-[9px] text-neutral-500">
-                            {availableCount === 1 ? '1 essay' : `${availableCount} essays`} available
+                            {formatAvailableCount(availableCount)}
                         </div>
                     </div>
                     <button
@@ -159,7 +165,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                     <CategoryBadge category={essay.category} />
                                                     {ghost && (
                                                         <span className="text-[7px] text-amber-500 uppercase tracking-wider">
-                                                            Ghost
+                                                            {t('codex.ghostBadge')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -178,11 +184,9 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                         {!selectedEssay ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-600 text-[13px] mb-2">Select an essay</div>
+                                    <div className="text-neutral-600 text-[13px] mb-2">{t('codex.selectEssay')}</div>
                                     <div className="text-neutral-700 text-[9px] max-w-[260px]">
-                                        Historical essays open as you experience events during the war.
-                                        Some endgame essays can also surface as historical ghosts when your war
-                                        diverges sharply from the real one.
+                                        {t('codex.emptyInstruction')}
                                     </div>
                                 </div>
                             </div>
@@ -191,7 +195,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                 <div className="text-center">
                                     <div className="text-neutral-500 text-[13px] mb-2">{selectedEssay.title}</div>
                                     <div className="text-[9px] text-neutral-600 border border-neutral-700/30 rounded-md px-2.5 py-2 bg-neutral-800/20 max-w-[300px]">
-                                        Experience this event during gameplay to unlock the full historical essay.
+                                        {t('codex.lockedInstruction')}
                                     </div>
                                 </div>
                             </div>
@@ -209,7 +213,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                         </span>
                                         {selectedResolvedEssay.isGhost && (
                                             <span className="text-[8px] uppercase text-amber-700 tracking-[0.15em] font-bold">
-                                                Ghost Entry
+                                                {t('codex.ghostEntryBadge')}
                                             </span>
                                         )}
                                     </div>
@@ -217,7 +221,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                         {selectedEssay.title}
                                     </div>
                                     <div className="text-[8px] text-neutral-500 mt-1 italic">
-                                        {selectedResolvedEssay.isGhost ? 'Historical Ghost Entry' : 'Historical Context'}
+                                        {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
                                     </div>
                                 </div>
 
@@ -238,10 +242,10 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                     >
                                                         <div className="text-[7px] uppercase tracking-[0.15em] font-bold mb-1 text-neutral-500">
                                                             {paragraph.kind === 'ghost'
-                                                                ? 'Historical Ghost'
+                                                                ? t('codex.dynamicLabel.historicalGhost')
                                                                 : paragraph.variant === 'divergence'
-                                                                    ? 'Player War Divergence'
-                                                                    : 'Dynamic Note'}
+                                                                    ? t('codex.dynamicLabel.playerWarDivergence')
+                                                                    : t('codex.dynamicLabel.dynamicNote')}
                                                         </div>
                                                         <p>{paragraph.text}</p>
                                                     </div>
@@ -250,7 +254,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                         </div>
                                     ) : (
                                         <div className="text-[9px] text-neutral-400 italic text-center py-3" style={{ fontFamily: 'Georgia, serif' }}>
-                                            Essay content pending generation.
+                                            {t('codex.contentPending')}
                                         </div>
                                     )}
                                 </div>
@@ -258,7 +262,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                 {selectedEssay.sources && selectedEssay.sources.length > 0 && (
                                     <div className="px-3 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
                                         <div className="text-[7px] uppercase text-neutral-500 font-bold tracking-[0.15em] mb-1">
-                                            Sources
+                                            {t('codex.sources')}
                                         </div>
                                         <ul className="text-[8px] text-neutral-500 space-y-0.5">
                                             {selectedEssay.sources.map((src, index) => (

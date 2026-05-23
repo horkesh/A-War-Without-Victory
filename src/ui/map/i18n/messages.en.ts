@@ -261,6 +261,21 @@ export const enMessages = {
     'warCost.sources': 'Sources: {sources}',
     'warCost.territoryVsDayton': 'Territory vs Dayton 49/51',
     'warCost.historicalDivergence': 'Historical Divergence',
+    'codex.title': 'Codex',
+    'codex.available.one': '1 essay available',
+    'codex.available.many': '{count} essays available',
+    'codex.selectEssay': 'Select an essay',
+    'codex.emptyInstruction': 'Historical essays open as you experience events during the war. Some endgame essays can also surface as historical ghosts when your war diverges sharply from the real one.',
+    'codex.lockedInstruction': 'Experience this event during gameplay to unlock the full historical essay.',
+    'codex.ghostBadge': 'Ghost',
+    'codex.ghostEntryBadge': 'Ghost Entry',
+    'codex.historicalGhostEntry': 'Historical Ghost Entry',
+    'codex.historicalContext': 'Historical Context',
+    'codex.dynamicLabel.historicalGhost': 'Historical Ghost',
+    'codex.dynamicLabel.playerWarDivergence': 'Player War Divergence',
+    'codex.dynamicLabel.dynamicNote': 'Dynamic Note',
+    'codex.contentPending': 'Essay content pending generation.',
+    'codex.sources': 'Sources',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

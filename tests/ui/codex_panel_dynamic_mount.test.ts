@@ -75,6 +75,18 @@ describe('CodexPanel dynamic essay proof', () => {
         ).toBeTruthy();
     });
 
+    it('localizes BCS empty-selection Codex chrome', () => {
+        setLocale('bcs');
+
+        renderPanel();
+
+        expect(screen.getByText('Kodeks')).toBeTruthy();
+        expect(screen.getByText('0 eseja dostupno')).toBeTruthy();
+        expect(screen.getByText('Izaberi esej')).toBeTruthy();
+        expect(screen.queryByText('Select an essay')).toBeNull();
+        expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
+    });
+
     it('renders live divergence notes inside the Dayton essay after game over', () => {
         storeState = {
             loadedGameState: {
@@ -127,6 +139,9 @@ describe('CodexPanel dynamic essay proof', () => {
         fireEvent.click(screen.getByText('1995'));
         fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
 
+        expect(screen.getAllByText('Odstupanje igracevog rata')).toHaveLength(2);
+        expect(screen.queryByText('Player War Divergence')).toBeNull();
+        expect(screen.getByText('Historijski kontekst')).toBeTruthy();
         expect(screen.queryByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeNull();
         expect(screen.getByText('Rat je trajao 6 sedmica duze od historijskih 182 sedmica.')).toBeTruthy();
         expect(screen.getByText('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.')).toBeTruthy();

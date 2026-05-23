@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Codex chrome
+
+**Type:** `CodexPanel` static chrome localization slice. No Codex essay catalog data, essay titles, authored essay prose, dynamic section conditions, unlock logic, Cost Ledger data, historical comparison data, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added `codex.*` English/BCS message keys and replaced hardcoded Codex shell labels/instructions with `t(...)`: title, essay-count line, empty-selection copy, locked-essay copy, ghost badges, context labels, dynamic-section labels, pending-content text, and source heading. Essay titles, essay bodies, source names, and category IDs remain source-authored.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; Codex unlock/visibility logic and dynamic content selection are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\codex_panel_dynamic_mount.test.ts --reporter=dot` failed while BCS mode still rendered English Codex chrome. Green rerun passed 6/6. Expanded localization/endgame pack passed 107/107. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/codex_panel_dynamic_mount.test.ts`, `docs/40_reports/implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Codex and Chronicle comparison notes
 
 **Type:** Codex/Chronicle generated historical-comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, Codex essay unlock logic, Chronicle entry selection, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
