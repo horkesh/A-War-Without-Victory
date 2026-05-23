@@ -64,11 +64,12 @@ export function getOutcomeClassStyle(oc: string | undefined): string {
 }
 
 export function formatCondemnationFlag(flag: string): string {
-    const labels: Record<string, string> = {
-        genocide_condemnation: 'Condemned for genocide \u2014 international tribunal proceedings inevitable',
-        civilian_atrocities: 'Condemned for systematic atrocities against civilian population',
+    const labels: Record<string, MessageKey> = {
+        genocide_condemnation: 'verdict.condemnation.genocide',
+        civilian_atrocities: 'verdict.condemnation.civilianAtrocities',
     };
-    return labels[flag] ?? flag.replace(/_/g, ' ');
+    const key = labels[flag];
+    return key ? t(key) : flag.replace(/_/g, ' ');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

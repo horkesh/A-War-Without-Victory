@@ -140,6 +140,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'verdict.report.stat.plansAccepted': 'Prihvaceni planovi',
     'verdict.report.stat.plansRejected': 'Odbijeni planovi',
     'verdict.report.stat.warCrimesEvents': 'Dogadjaji ratnih zlocina',
+    'verdict.condemnation.genocide': 'Osudjeno zbog genocida - medjunarodni sudski postupci su neizbjezni',
+    'verdict.condemnation.civilianAtrocities': 'Osudjeno zbog sistematskih zlocina nad civilnim stanovnistvom',
     'verdict.cinematic.notRecorded': 'Nije zabiljezeno',
     'verdict.cinematic.campaign': 'Kampanja',
     'verdict.cinematic.focus': 'Fokus',

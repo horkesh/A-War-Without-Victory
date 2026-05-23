@@ -284,6 +284,8 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         fireEvent.click(screen.getByText('VRS'));
 
         expect(screen.getByText('Medjunarodna osuda')).toBeDefined();
+        expect(screen.queryByText(/Condemned for genocide/i)).toBeNull();
+        expect(screen.getByText('Osudjeno zbog genocida - medjunarodni sudski postupci su neizbjezni')).toBeDefined();
     });
 });
 

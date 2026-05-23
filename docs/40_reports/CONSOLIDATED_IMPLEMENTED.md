@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Verdict condemnation localization:** [implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md) - rich `VerdictScreen` known condemnation notice body text now renders through the existing English/BCS localization substrate.
+
 **Latest BCS Verdict outcome-class localization:** [implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md) - rich `VerdictScreen` faction-tab and report outcome-class badges now render through the existing English/BCS localization substrate.
 
 **Latest BCS Verdict milestone localization:** [implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md) - rich `VerdictScreen` milestone-comparison chrome and fallback duration-row labels now render through the existing English/BCS localization substrate.

@@ -139,6 +139,8 @@ export const enMessages = {
     'verdict.report.stat.plansAccepted': 'Plans Accepted',
     'verdict.report.stat.plansRejected': 'Plans Rejected',
     'verdict.report.stat.warCrimesEvents': 'War Crimes Events',
+    'verdict.condemnation.genocide': 'Condemned for genocide - international tribunal proceedings inevitable',
+    'verdict.condemnation.civilianAtrocities': 'Condemned for systematic atrocities against civilian population',
     'verdict.cinematic.notRecorded': 'Not recorded',
     'verdict.cinematic.campaign': 'Campaign',
     'verdict.cinematic.focus': 'Focus',

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict condemnation notices
+
+**Type:** Rich `VerdictScreen` condemnation-notice localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, condemnation category logic, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.condemnation.*` message keys. `formatCondemnationFlag(...)` now localizes known condemnation notice body text through `t(...)` while preserving the unknown-flag fallback. This localizes existing notice categories only and adds no new sensitive-history facts.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Condemned for genocide`. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility contract `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts --reporter=dot` passed 29/29.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_CONDEMNATION_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict outcome-class badges
 
 **Type:** Rich `VerdictScreen` outcome-class localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, outcome classification data, faction grades, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
