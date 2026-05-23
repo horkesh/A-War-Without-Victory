@@ -33,6 +33,7 @@ import { useGameStore } from '../store/gameStore';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t } from '../i18n';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
@@ -160,7 +161,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                 {/* Capital budget */}
                 <div className="px-8 py-3 border-b border-[#c8b898]/40 flex items-center justify-between">
                     <div className="text-[11px] text-[#6a5a40]" style={{ fontFamily: 'Courier New, monospace' }}>
-                        <span className="font-bold text-[#2a2016]">Negotiation Capital:</span>{' '}
+                        <span className="font-bold text-[#2a2016]">{t('peace.negotiationCapital')}</span>{' '}
                         <span className={overBudget ? 'text-red-700 font-bold' : 'text-[#2a6a2a]'}>
                             {capitalSpent}
                         </span>
@@ -275,7 +276,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                             type="button"
                             onClick={() => void handleDeclineTalks()}
                             disabled={submitting}
-                            title="Submit an empty proposal — refuse to negotiate meaningfully. Always within budget."
+                            title={t('peace.declineTalksTitle')}
                             className={`px-6 py-3 rounded border-2 font-bold text-[12px] uppercase tracking-wider transition-colors ${
                                 submitting
                                     ? 'border-[#8a7a60]/30 bg-[#d8d0c4] text-[#6a5a40] cursor-wait'

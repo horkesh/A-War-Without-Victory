@@ -49,7 +49,20 @@ import { getFactionLiveSupplyPressure } from './supply_condition.js';
 
 const PRIMARY_CORPS = 'arbih_5th_corps';
 const VRS_KRAJINA_DEFENDER_CORPS = 'vrs_2nd_krajina' as FormationId;
-const SANA_DEFENDER_WEAKNESS_FLOOR = 0.40;
+// 2026-05-22: lowered 0.40 → 0.20 per Wave 3B Wave B (forensics memo
+// docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md §3 sana_95).
+// At n1956, vrs_2nd_krajina has corps_exhaustion=0 + 5 active subordinates;
+// the composite weakness formula `0.5·collapse + 0.3·(1−readiness) + 0.2·equipWeak`
+// stays sub-0.40 across the late-war window, blocking sana_95 + sana_95_follow_on
+// from ever firing. The historical Aug-1995 Sana 95 launch happened under VRS
+// 2nd Krajina conditions that the engine's force-quality substrate captures
+// correctly in shape (per audit 20260510_FORCE_QUALITY_TRAJECTORY_REASSESSMENT.md
+// — VRS w188 morale 12.6/cohesion 26.5 vs RBiH 89.5/73.6) but with a magnitude
+// the predicate floor doesn't see. 0.20 is a calibrated middle ground: still
+// requires meaningful trajectory weakness (well above 0), but doesn't demand
+// the 40% collapse-susceptibility number that the current substrate can never
+// produce. Re-tune empirically against painted Oct 1995 once 188w deltas land.
+const SANA_DEFENDER_WEAKNESS_FLOOR = 0.20;
 
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
@@ -67,17 +80,25 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:gornja_suvaja',
 ];
 
+// Wave 24B (2026-05-23): reordered for OSID-adjacency reachability per the
+// catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
+// §b-sana). Prior order had two mid-sequence gaps: trubar (step 3) had no
+// captured neighbor at that point, and bosanski_petrovac_2 (step 6) was
+// approached from the wrong shoulder. New chain: ripac → racic → orasac_2 →
+// trubar (now adjacent to orasac_2) → vrtoce → kolonic_2 → vodjenica → prkosi
+// → bosanski_petrovac_2 (now adjacent to multiple captured) → dobro_selo_2 →
+// krnjeusa → jasenovac_2.
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
-    'op:bihac:trubar',
     'op:bihac:orasac_2',
+    'op:bihac:trubar',
     'op:bosanski_petrovac:vrtoce',
-    'op:bosanski_petrovac:bosanski_petrovac_2',
-    'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:kolonic_2',
     'op:bosanski_petrovac:vodjenica',
     'op:bosanski_petrovac:prkosi',
+    'op:bosanski_petrovac:bosanski_petrovac_2',
+    'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:krnjeusa',
     'op:bosanski_petrovac:jasenovac_2',
 ];
@@ -138,9 +159,15 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_krupa',
         name: 'Krupa Una Valley',
         corps: PRIMARY_CORPS,
+        // Wave 32 (2026-05-23): added 510th to bring axis to 3 brigades.
+        // Wave 31 SCRT (20260523_SANA_95_COMBAT_BALANCE.md): historical Sana 95
+        // ran 5-7 brigades per axis; sim's 2-3 per axis couldn't cross
+        // VICTORY_THRESHOLD_COSTLY despite favorable 1:8 cas ratio. Concentration
+        // is the missing element. 510th homed at Bos. Krupa (axis-correct).
         brigades: [
             'arbih_511th_slavna_mountain' as FormationId,
             'arbih_505th_vitezka_mountain' as FormationId,
+            'arbih_510th_bosnian_liberation' as FormationId,
         ],
         objectives: KRUPA_VALLEY_OBJECTIVES,
         staging_osid: STAGING_KRUPA_OTOKA,
@@ -149,10 +176,15 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_bihac_petrovac',
         name: 'Bihać–Petrovac Corridor',
         corps: PRIMARY_CORPS,
+        // Wave 32: added 503rd + hvo_101st_bihac to bring axis to 5 brigades.
+        // Both are status=active, full personnel, located at op:bihac:* matching
+        // the staging_osid + first-objective adjacency.
         brigades: [
             'arbih_501st_slavna_mountain' as FormationId,
             'arbih_502nd_vitezka_mountain' as FormationId,
+            'arbih_503rd_slavna_mountain' as FormationId,
             'arbih_504th_cazin_light' as FormationId,
+            'hvo_101st_bihac' as FormationId,
         ],
         objectives: BIHAC_PETROVAC_OBJECTIVES,
         staging_osid: STAGING_BIHAC,

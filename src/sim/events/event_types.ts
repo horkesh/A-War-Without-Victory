@@ -240,6 +240,19 @@ export interface EventEffectDoctrineConstraint {
     duration_turns: number;
 }
 
+/** Effect: suppress new offensive operations for a faction for `duration_turns`.
+ *  Models externally-imposed stopping conditions (e.g. Holbrooke's 51:49 halt at
+ *  Banja Luka, Oct 1995). Consumer: launch-gate in `sector_offensive.ts` reads
+ *  `isFactionOffensiveOpsSuppressed` and refuses to accept new offensive ops.
+ *  See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-A5. */
+export interface EventEffectOffensiveOpsSuppression {
+    kind: 'offensive_ops_suppression';
+    faction: FactionId;
+    duration_turns: number;
+    /** Optional human-readable reason for debugging / logs. */
+    reason?: string;
+}
+
 /** Effect: lock the RBiH-HRHB alliance value at or above a floor, or at or
  *  below a ceiling, for `duration_turns`. Consumer: `alliance_change` handler
  *  clamps incoming deltas against active locks (Session 2). */
@@ -293,7 +306,9 @@ export type EventEffect =
     | EventEffectDoctrineConstraint
     | EventEffectAllianceLock
     | EventEffectBotPriorityShift
-    | EventEffectCostLedgerAnnotation;
+    | EventEffectCostLedgerAnnotation
+    // Fall-1995 mechanic E-A5
+    | EventEffectOffensiveOpsSuppression;
 
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {

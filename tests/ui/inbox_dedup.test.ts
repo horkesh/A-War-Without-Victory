@@ -7,6 +7,7 @@ import { deriveInboxItems } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { PresidentialInbox } from '../../src/ui/map/components/PresidentialInbox.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 function makeLoadedState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
     return {
@@ -56,6 +57,7 @@ function officerEvent(
 describe('Presidential Inbox officer event dedupe', () => {
     afterEach(() => {
         cleanup();
+        setLocale('en');
         useGameStore.setState(useGameStore.getInitialState());
     });
 
@@ -125,6 +127,24 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /open decision room/i }));
         expect(onAction).toHaveBeenCalledWith('army_hq_briefing', 'empty:decision-room');
+    });
+
+    it('localizes quiet inbox shell copy in BCS mode', () => {
+        setLocale('bcs');
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ turn: 12 }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByText('Predsjednicki inbox')).toBeTruthy();
+        expect(screen.getByText('Komandno dezurstvo')).toBeTruthy();
+        expect(screen.getByText('Na stolu nema naredbi koje cekaju vasu odluku.')).toBeTruthy();
+        expect(screen.getByText('Otvori sobu odluka')).toBeTruthy();
+        expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
 
     it('renders intelligence notifications with an explicit dismiss command', () => {

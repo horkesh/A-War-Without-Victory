@@ -130,9 +130,13 @@ describe('exhaustion accumulation', () => {
         expect(state.political.war_exhaustion?.RS).toBe(0);
     });
 
-    it('applies attack tempo drag inside the canonical 0-100 exhaustion range', () => {
+    it('applies attack tempo drag inside the canonical 0-10000 exhaustion range', () => {
+        // 2026-05-22: war_exhaustion rescaled 100× (cap 100→10000, tempo thresholds 30/80→3000/8000)
+        // per `docs/40_reports/audits/20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`.
+        // RBiH at 3000 = at threshold low (no penalty). RS at 5500 = midpoint (linear 0.925).
+        // HRHB at 8000 = at threshold high (full 0.85 penalty).
         const state = minimalPhaseIIState();
-        state.political.war_exhaustion = { RBiH: 30, RS: 55, HRHB: 80 };
+        state.political.war_exhaustion = { RBiH: 3000, RS: 5500, HRHB: 8000 };
 
         expect(getWarExhaustionTempoMult(state, 'RBiH')).toBe(1.0);
         expect(getWarExhaustionTempoMult(state, 'RS')).toBeCloseTo(0.925, 6);

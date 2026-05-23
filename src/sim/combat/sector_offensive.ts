@@ -200,6 +200,21 @@ const OBJECTIVE_FAILURE_COOLDOWN_TURNS = 8;
  */
 const MIN_LAUNCH_FORCE_RATIO_FLOOR = 0.3;
 
+/**
+ * Lower launch floor for ops that have explicitly opted into desperate-push
+ * semantics via `min_attack_outcome === 'repulsed'`. The standard 0.3 floor
+ * blocks Federation late-war ops (e.g. Mistral 1 Jun 1995) when depleted
+ * post-Cincar HVO/HV brigades face the full VRS 2nd Krajina line — force
+ * ratios fall sub-0.3 even though the op author has signalled tolerance for
+ * costly outcomes. Honoring that tolerance at the launch gate restores
+ * symmetry with the per-attack outcome predicate.
+ */
+const MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED = 0.15;
+
+function launchFloorForOp(op: { min_attack_outcome?: string }): number {
+    return op.min_attack_outcome === 'repulsed' ? MIN_LAUNCH_FORCE_RATIO_FLOOR_REPULSED : MIN_LAUNCH_FORCE_RATIO_FLOOR;
+}
+
 /** Corps exhaustion decay per turn when idle (no active operation). */
 const EXHAUSTION_DECAY_IDLE = 3;
 
@@ -221,6 +236,14 @@ const EXHAUSTION_DECAY_ACTIVE = 1;
  *       all remaining axes, abort regardless of failure budget.
  *   (c) Reduce to MAX_TOTAL_FAILURES = 3 for multi-axis and keep 5 for single. */
 const MAX_TOTAL_FAILURES = 8;
+
+/** Wave 20: single-axis ops abort faster. Multi-axis ops can sustain 8 failures
+ *  per axis (with multi-axis zero-progress backstop catching pathological cases),
+ *  but single-axis ops where the per-turn brain can't find a viable next attack
+ *  (e.g. Cincar Phase 1 post-bucovaca with strong VRS Kupres garrison) should
+ *  release brigades sooner. The per-axis cap fires earlier so the op enters
+ *  recovery and brigades become available for downstream cascade ops. */
+const MAX_TOTAL_FAILURES_SINGLE_AXIS = 4;
 
 /** Consecutive failures on same objective before skip. */
 const MAX_CONSECUTIVE_FAILURES_ON_CURRENT = 3;
@@ -249,6 +272,80 @@ const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
 const PLANNING_INVALIDATION_GRACE_TURNS = 2;
+
+/**
+ * Synthesis §3 E-B2: Operation Una negative-control combat-power cap.
+ * Applied to predictor force_ratio_estimate (which scales linearly with
+ * attacker power) when an operation is HV-dominant and isolated. Tuned
+ * to 0.65 from the historical record: HV-only Una collapsed in 48h with
+ * roughly 1/3 of paper-strength effective power once HVO-native rear
+ * support and local guides were absent.
+ */
+const HV_UNA_NEGATIVE_CONTROL_MULT = 0.65;
+/** §3 E-B2: HV-dominance threshold (>80% of participating brigades HV-tagged). */
+const HV_UNA_DOMINANCE_THRESHOLD = 0.8;
+/** §3 E-B2: tag string written by hv_integration.spawnHvBrigade (E-B2). */
+const HV_ATTACHED_SOURCE_TAG = 'attached_source:hv';
+
+function isHvTaggedBrigade(f: FormationState | undefined): boolean {
+    if (!f?.tags) return false;
+    return f.tags.includes(HV_ATTACHED_SOURCE_TAG) || f.tags.includes('hv_origin');
+}
+
+/**
+ * Negative-control predicate for Operation Una style HV-only thrusts.
+ * Returns true when (a) >80% of the op's participating brigades are HV-tagged
+ * and (b) no HVO-native (non-HV-tagged) HRHB brigade is assigned to any
+ * sector owned by this corps. The corps-sector proxy substitutes for an
+ * explicit 2-hop BFS over operational edges, which is not threaded into
+ * advanceSectorOffensives; it is conservative — a non-HV HRHB brigade in
+ * an adjacent corps' sector would not satisfy the predicate, matching the
+ * "isolated thrust" historical signature.
+ */
+function isHvUnaNegativeControl(
+    state: GameState,
+    op: { participating_brigades: readonly FormationId[]; axes?: readonly { assigned_brigades: readonly FormationId[] }[] },
+    corpsId: FormationId,
+): boolean {
+    const formations = state.military.formations ?? {};
+    const brigadeIds = isMultiAxis(op as CorpsOperation)
+        ? getAllAxisBrigades(op as CorpsOperation)
+        : op.participating_brigades;
+    if (!brigadeIds || brigadeIds.length === 0) return false;
+
+    let hvCount = 0;
+    let total = 0;
+    for (const bid of brigadeIds) {
+        const f = formations[bid];
+        if (!f) continue;
+        total += 1;
+        if (isHvTaggedBrigade(f)) hvCount += 1;
+    }
+    if (total === 0) return false;
+    const hvShare = hvCount / total;
+    if (hvShare <= HV_UNA_DOMINANCE_THRESHOLD) return false;
+
+    // Look for an HVO-native (non-HV-tagged) brigade in any sector owned by
+    // this corps. If one exists, the op is co-deployed — no penalty.
+    const sectors = state.military.corps_front_sectors ?? {};
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const bid of sector.assigned_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+        for (const bid of sector.reserve_brigade_ids ?? []) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.faction !== 'HRHB') continue;
+            if (!isHvTaggedBrigade(f)) return false;
+        }
+    }
+    return true;
+}
 
 function sectorContainsFriendlyOsid(
     sector: { territory_osids?: readonly string[]; sub_segments?: readonly { friendly_osids: readonly string[] }[] },
@@ -793,6 +890,22 @@ export function advanceSectorOffensives(
                 // for honest defender-modifier-aware force-ratio estimation.
                 const prepResult = tickPreparation(state, op, corpsId, faction, op.supply_readiness ?? 1.0, supplyByOsid, terrainMultByOsid);
 
+                // Synthesis §3 E-B2: Operation Una negative-control penalty.
+                // HV-only thrusts without HVO-native co-deployment historically
+                // collapsed in 48 hours (Op. Una, Sept 18-19 1995). When the
+                // operation's brigade roster is >80% HV-tagged AND no
+                // HVO-native HRHB brigade is present in the corps' sectors,
+                // scale the force_ratio_estimate by HV_UNA_NEGATIVE_CONTROL_MULT
+                // (effective combat-power cap × 0.65). Symmetric in shape —
+                // it just happens that the HV is the only foreign attached
+                // source in the current OOB.
+                if (
+                    typeof prepResult.force_ratio_estimate === 'number'
+                    && isHvUnaNegativeControl(state, op, corpsId)
+                ) {
+                    prepResult.force_ratio_estimate = prepResult.force_ratio_estimate * HV_UNA_NEGATIVE_CONTROL_MULT;
+                }
+
                 // Collect preparation event for turn report
                 prepEvents.push({
                     corps_id: corpsId,
@@ -807,7 +920,7 @@ export function advanceSectorOffensives(
 
                 if (
                     typeof prepResult.force_ratio_estimate === 'number'
-                    && prepResult.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && prepResult.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     op.force_ratio_estimate = prepResult.force_ratio_estimate;
                     beginRecovery(op, turn, 'defender_power_too_high', state);
@@ -864,7 +977,7 @@ export function advanceSectorOffensives(
             if (
                 op.force_launch !== true
                 && typeof op.force_ratio_estimate === 'number'
-                && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                && op.force_ratio_estimate < launchFloorForOp(op)
             ) {
                 beginRecovery(op, turn, 'defender_power_too_high', state);
                 continue;
@@ -941,7 +1054,7 @@ export function advanceSectorOffensives(
                 if (
                     !forcedLaunch
                     && typeof op.force_ratio_estimate === 'number'
-                    && op.force_ratio_estimate < MIN_LAUNCH_FORCE_RATIO_FLOOR
+                    && op.force_ratio_estimate < launchFloorForOp(op)
                 ) {
                     beginRecovery(op, turn, 'defender_power_too_high', state);
                     continue;
@@ -1339,7 +1452,10 @@ function updateMultiAxisResults(
         // Per-axis cap. The zero-progress backstop (MAX_OPERATION_ZERO_PROGRESS_FAILURES)
         // fires first for single-axis zero-capture operations; this per-axis cap remains
         // the backstop for multi-axis operations making partial progress.
-        if (axis.failure_count >= MAX_TOTAL_FAILURES) {
+        // Wave 20: single-axis ops use a tighter cap so brigades release sooner for
+        // downstream cascade ops (Cincar Phase 1 → Mistral 1).
+        const failureCap = axes.length === 1 ? MAX_TOTAL_FAILURES_SINGLE_AXIS : MAX_TOTAL_FAILURES;
+        if (axis.failure_count >= failureCap) {
             axis.status = 'stalled';
         }
     }

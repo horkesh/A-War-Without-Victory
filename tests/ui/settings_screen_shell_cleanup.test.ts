@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SettingsScreen } from '../../src/ui/map/components/SettingsScreen';
 
 describe('SettingsScreen shell cleanup', () => {
@@ -29,5 +29,22 @@ describe('SettingsScreen shell cleanup', () => {
         expect(screen.getByRole('button', { name: 'Accessibility' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Language' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Diagnostics' })).toBeTruthy();
+    });
+
+    it('does not close when switching tabs inside the settings panel', () => {
+        const onClose = vi.fn();
+        render(createElement(SettingsScreen, { onClose }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Language' }));
+
+        expect(onClose).not.toHaveBeenCalled();
+        expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+    });
+
+    it('keeps the panel above the click-to-close backdrop', () => {
+        render(createElement(SettingsScreen, { onClose: () => {} }));
+
+        expect(screen.getByTestId('settings-panel').className).toContain('z-10');
+        expect(screen.getByRole('button', { name: 'Close settings' }).className).toContain('z-0');
     });
 });

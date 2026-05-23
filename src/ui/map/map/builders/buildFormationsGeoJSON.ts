@@ -5,6 +5,8 @@ import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { getSectorIdForFormation } from '../../utils/sectorUtils';
 import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
+import type { Locale } from '../../i18n';
+import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 export { formationIconId };
 
@@ -52,6 +54,13 @@ export const getBrigadeType = (name: string): string => {
   return 'brigade'; // default
 }
 
+function getFormationMarkerType(formation: { id: string; kind?: string | null; name: string }): string {
+  const unitType = getFormationUnitType(formation);
+  if (unitType === 'mountain') return 'mountain';
+  if (unitType === 'motorized' || unitType === 'mechanized' || unitType === 'armored') return 'motorized';
+  return 'brigade';
+}
+
 function deriveSupplyState(formation: { status: string; fatigue: number; cohesion: number }): 'supplied' | 'strained' | 'cutoff' {
   const status = formation.status.toLowerCase();
   if (status.includes('cut') || status.includes('isolated')) return 'cutoff';
@@ -67,6 +76,7 @@ export function buildFormationsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
   expandedStackOsid: string | null = null,
+  locale: Locale = 'en',
 ): FeatureCollection<Point, FormationMarkerProperties> {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const unitsPerOsid = new Map<string, number>();
@@ -115,7 +125,8 @@ export function buildFormationsGeoJSON(
       point[1] -= stackIndex * STACK_OFFSET_LAT;
     }
 
-    const type = getBrigadeType(formation.name);
+    const type = getFormationMarkerType(formation);
+    const displayName = getLocalizedFormationName(formation, locale);
     const postureSuffix = formation.posture ? `__${formation.posture}` : '';
 
     // Status Banners: quantize Health and Morale to 10% steps
@@ -131,7 +142,7 @@ export function buildFormationsGeoJSON(
       geometry: { type: 'Point', coordinates: point },
       properties: {
         id: formation.id,
-        name: formation.name,
+        name: displayName,
         kind: formation.kind,
         faction: formation.faction,
         corps_id: formation.corps_id ?? null,

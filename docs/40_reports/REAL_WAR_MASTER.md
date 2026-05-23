@@ -1,5 +1,86 @@
 # Real War Master
 
+## Latest Review: HRHB "sue for peace" was historically anachronistic in mid-1993; Washington Agreement = Federation military integration reset (2026-05-23)
+
+**Change:** The decision event `strategic_posture_review_hrhb` (fires turn ≥ 84, mid-1993) was producing bot picks of `sue_for_peace_hrhb` (the "Accept the Federation framework" branch) — historically anachronistic. HRHB leadership under Boban in mid-1993 was hardening, not seeking Federation. The actual historical sequence:
+
+| Date | HRHB posture | Source |
+|---|---|---|
+| Jan 1993 | Gornji Vakuf clashes — HVO and ARBiH fight pitched battles | BB2 ch.9; ICTY Prlić et al. trial chamber 2013 |
+| Apr 1993 | Ahmići massacre — HVO Vitez area against Lašva Bosniaks | ICTY Kupreškić IT-95-16, Kordić IT-95-14/2 |
+| May 1993 | Vance-Owen finally signed by Karadžić-rejected; HRHB takes opportunity to consolidate territorial claims | BB2 ch.10 |
+| Jun–Oct 1993 | Stupni Do, Mostar siege of East Mostar — HVO continues offensive posture toward Croat cantonization | ICTY Prlić, Praljak |
+| Mar 1994 | **Washington Agreement** — Tuđman + Izetbegović sign; Boban replaced (Ivić Pašalić); HVO command integrated with ARBiH | BB2 ch.10; Tuđman archives |
+| Sept 1995 | Mistral 2 — HVO Guards Brigades embedded in HV OG North under Gotovina | ICTY Gotovina IT-06-90 |
+
+So "sue for peace" in mid-1993 is **not a historical option** — HRHB did the opposite (Ahmići, Stupni Do, Mostar). The Federation only came via Washington Agreement under heavy US pressure in March 1994. Engine retuning (commit `8c1e6f5e`) switched the bot to `historical` logic which picks `press_croat_objectives` (option[0]) — historically correct for mid-1993.
+
+**Washington Agreement = combat-penalty reset.** The CB-war (Nov 1992 – Mar 1994) cost HVO significant cohesion through repeated escalations (gornji_vakuf escalate, Ahmići, Stupni Do, Mostar). When Washington landed, the Federation Military Council integrated HVO + ARBiH command and rebuilt HVO cohesion under joint Croatian Army logistical support. The event handler `washington_agreement_1994` now applies `cohesion_change HRHB +15` + `morale_change HRHB +8` + `cohesion_change RBiH +5` to model this watershed integration — without the reset, HVO carries CB-war cohesion damage into the 1995 Federation offensive and cannot generate the historical Mistral 2 territorial captures (Drvar / Šipovo / Jajce). Sources: BB2 ch.10 on Federation Military Council formation; ICTY Prlić appeals 2017 on HV–HVO integration timeline.
+
+**Calibration outcome:** New 188w baseline n2003 = 79.21% match_ratio (hash `47438d249146d1af`). n1999's higher 81.18% was masking 15 RBiH events queued-pending-forever because the scenario_runner defaulted `player_faction='RBiH'` in headless runs, so the engine treated those events as awaiting non-existent player input. n2003 is the honest historical-fidelity baseline. Remaining HRHB shortfall (-21 OSIDs vs painted 107) is structural — Bosnian Croat manpower limits — and the next lever is expanding HV-attached brigade pool (currently 4) toward Mistral 2's historical 9-brigade composition (OG North + South + West under Gotovina).
+
+**Principle established (durable):** Bots default to `bot_response_logic: 'historical'` (= options[0] = historical choice). Authors must put the historical choice at options[0]. Calibration is against the historical-outcome path; player + AI variation is supported but not the calibration target. See `docs/PROJECT_LEDGER_KNOWLEDGE.md` for the durable-rule entry.
+
+---
+
+## Latest Review: Fall-1995 mechanism inventory + Goražde corrections (2026-05-23)
+
+**Change:** Six historian dispatches landed under `docs/40_reports/proposals/20260523_RESEARCH_*.md`. Inventoried 21 historical mechanisms (M1–M21) driving the Aug–Oct 1995 collapse, corrected three engine-side misattributions, and committed five new defender-side combat modifiers (E-A1 through E-B4 in `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`).
+
+**The corrected real-war picture for Fall 1995:**
+
+1. **VRS 2nd Krajina Corps collapsed by coordination failure, not by brigade attrition.** Commander Maj Gen Grujo Borić (NOT Manojlo Milovanović — he was Main Staff Chief who parachuted in for Štit-94 in Nov 1994). The corps was already "discredited" entering 1995 after the Grmeč-94 rout (BB2 p.555-556). Counter-clockwise cascade sequence (HV/HVO contact zone → 5th Corps contact zone): Grahovo/Glamoč → Šipovo (10 Sept) → Jajce (13 Sept) → Mrkonjić Grad (~13 Sept) → Ključ (17 Sept) → Drvar (~18 Sept) → Petrovac (~21 Sept) → Sanski Most (10 Oct) → Krupa (by 12 Oct). The collapse stopped at ~49% by **US (Holbrooke) + Tuđman (51:49 formula) external veto**, not by VRS defensive recovery.
+
+2. **HV–HVO were structurally one force in fall 1995**, not two coordinating armies. ICTY Prlić et al. (2013/2017) — Croatia exercised "overall control" over HVO from Jan 1993. Split Agreement (22 July 1995) made open HV deployment in BiH legal. HVO Guards Brigades (1st, 2nd, 3rd) embedded as line units in HV OG North under Maj Gen Gotovina; Mistral 2 = Maestral (same operation, different codenames). HV-only Operation Una (Sept 18–19 1995) FAILED in 48 hours — negative control showing HV is not magic without HVO co-deployment + VRS overstretch.
+
+3. **Bihać relief was exogenous to BiH-internal mechanics.** Croatian Operation Storm (4–7 Aug 1995) destroyed SVK (Krajina Serb Army) — 2KK lost its load-bearing partner force on the western siege arc. The 5-week HV ammo transfusion window (Storm to Sana 95 launch, 13 Sept) is the supply enabler — not an emergent ARBiH industrial improvement.
+
+4. **NATO Operation Deliberate Force (30 Aug – 20 Sept) is a capability suppressor**, not a casualty inflictor. 3,515 sorties, 1,026 munitions targeting VRS C2 / IADS / artillery / bridges. Combined with RRF artillery from Mt Igman (UK 19 Regt RA + French Foreign Legion), the VRS lost its lateral redeployment + counter-battery during the 3-week window where Federation ground offensives ran.
+
+5. **Sarajevo siege was never broken by ground action.** No ARBiH operation across the 1,425-day siege moved the SRK ring more than ~5 km² net. Lukavac 93 (VRS), Trebević 1993/1994, Tekbir 95 (June–July 1995, ~28-30k troops, failed when Srebrenica fell freeing VRS Drina Corps to retake Trnovo), Treskavica/Trnovo see-saw — all stalled. Siege loosened in Sept 1995 via Deliberate Force + RRF Igman artillery + 20 km TEZ enforcement, NOT 1st Corps breakout. Galić Appeal §389 + Karadžić Vol. III §4920-5031: VRS strategy at Sarajevo was **strangulation, not capture**.
+
+6. **Vozuća (Operation Uragan-95 / Farz-95, 10–20 Sept 1995):** ARBiH 2nd Corps (21st/22nd/25th Divisions) + 3rd Corps (35th/37th Divisions including 7th Muslim Brigade + El Mudžahid Detachment) closed the salient between Tuzla and Zenica. ~18,500 attackers vs ~5,000 VRS defenders (3rd/4th Ozren Light Inf + Srbac Brigade, 1st Krajina Corps right flank). ~200 km² captured, Tuzla-Zenica land bridge restored for first time since June 1992. Local force ratio (3.7:1) was actually worse than Brana-94 (5.7:1) that failed — what changed was external enablers (Deliberate Force + simultaneous Maestral 2 + Sana 95 denying VRS reserves to central Bosnia). ARBiH ~129 KIA; VRS ~500–614 KIA + 60 captured (of whom ~50 murdered by El Mudžahid — basis of Delić + Mahmuljin convictions).
+
+7. **1994 pattern is uniform**: every ARBiH offensive against a defended town (Donji Vakuf, Vlašić summit, Teslić, Bos. Krupa) stalled short. Light infantry cannot dislodge dug-in VRS with artillery support. 1995 success required exogenous enablers — Storm (4–7 Aug), Deliberate Force (30 Aug – 20 Sept), HV/HVO Mistral 2 (8–15 Sept). "Operation Tvigrad" is NOT attested in ICTY/BB/Hoare — likely a misattribution.
+
+**Goražde corrections (engine + painted data):**
+- Goražde was defended by the **Eastern Bosnian Operational Group**, later (Jan 1995) reorganised as the **Independent 81st Division** with HQ in Goražde. **NOT the 5th Corps** (5th Corps was the Bihać pocket, opposite end of the country).
+- The Goražde enclave **shrank** in May 1993: VRS 1st/2nd/4th/5th Podrinje Brigades captured Ustiprača, Međeđa, and Kaoštice. Ustiprača subsequently became the seat of post-Dayton **Novo Goražde** municipality (RS). Original municipality name was "Srpsko Goražde" (declared unconstitutional in 2004 → renamed Ustiprača temporarily).
+- Painted reference (`data/source/calibration/painted_control_oct1995.json`) corrected: faocici_2, hrancici, kolovarice, zorovici → **RBiH** (Goražde muni, FBiH); slatina_2, ustipraca_2 → **RS** (Novo Goražde muni, RS). Companion fix commit `5660c8ec` reverted the over-flip from earlier Engine #4B.
+
+**Real-war rationale for engine changes (synthesis §0):**
+
+```
+Storm (4–7 Aug, exogenous)
+  → SVK destroyed
+  → ARBiH 5th Corps western flank freed
+  → HV ammo transfusion to 5th Corps (5 wk window)
+  → ~165k refugees flood 2KK rear (paralyses logistics)
+  → 2KK frontage doubles overnight (former SVK arc)
+
+Markale II (28 Aug) → NATO Deliberate Force (30 Aug – 20 Sept, exogenous)
+  → VRS C2 + IADS + bridges suppressed (~3 wk)
+  → VRS artillery driven out of TEZs
+
+Federation theatre pulse (8–17 Sept, internal but coordinated)
+  → Mistral 2 (HV + HVO embedded) from south
+  → Sana 95 (ARBiH 5th Corps) from west
+  → Multi-axis simultaneity: 2KK cannot laterally redeploy
+  → Counter-clockwise cascade SW→S→W as listed above
+
+5th Corps Ključ crisis (mid-Sept)
+  → ARBiH formally requests HV ground rescue (ONLY such request of the war)
+  → HV Southern Move (8–11 Oct) breaks 2KK final pocket
+
+Tuđman 51:49 + Holbrooke (19 Sept – 12 Oct, exogenous)
+  → Banja Luka halt
+  → Ceasefire 12 Oct, freeze line ≈ Dayton 51:49
+```
+
+**Sim-vs-reality outcome (n1999):** match_ratio 81.18%, HRHB +14.95pp (62.62 → 77.57%). The packet captures the Mistral 2 / Sana cascade through HV-attached HRHB brigades. RBiH overshoot of +29 OSIDs (was +7) signals need for E-A5 51:49 launch-gate (deferred).
+
+---
+
 ## Latest Review: RBiH arms embargo is now a phase-keyed constraint (2026-05-17)
 
 **Change:** `LANE-V09X-EMBARGO` replaces the old single hard-coded RBiH patron-aid throttle with `resolveActiveEmbargoPhase(state)` and `EMBARGO_PHASE_CAPS`. The model now distinguishes full embargo, Croatia transit, US non-enforcement, and pending Black Flights/formal-lift phases while keeping RS and HRHB neutral under this specific mechanic. Current RBiH patron-aid multipliers are `0.60` (full embargo), `0.65` (Croatia transit / pending Black Flights), and `0.80` (US non-enforcement / pending formal lift).

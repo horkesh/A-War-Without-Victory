@@ -11,6 +11,7 @@ import type { PredictionResult } from './usePrediction';
 import { OpordDocument } from './OpordDocument';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 import { findPlayerFacingOperationByKey } from '../../../shared/playerVisibility';
+import { t } from '../../i18n';
 
 interface AuthorizePhaseProps {
     plan: OpsPlanState;
@@ -55,7 +56,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                 (o) => o.assigned_corps_id === corpsId && o.acting_commander
               );
 
-        return { corpsName: name, faction: fac, commanderName: officer?.name ?? 'N/A', date: turnToISODate(loadedGameState.turn ?? 0) };
+        return { corpsName: name, faction: fac, commanderName: officer?.name ?? t('opsPlanning.g2.notAvailable'), date: turnToISODate(loadedGameState.turn ?? 0) };
     }, [loadedGameState, corpsId, officerId]);
 
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
@@ -67,7 +68,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         setTransmitted(true);
 
         if (!ipc.isAvailable) {
-            setLoadError('Operation submission requires desktop mode.');
+            setLoadError(t('opsPlanning.authorize.error.desktop'));
             return;
         }
 
@@ -117,12 +118,12 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         if (!mountedRef.current) return;
 
         if (!opRes.ok) {
-            setLoadError(opRes.error ?? 'Failed to stage operation order.');
+            setLoadError(opRes.error ?? t('opsPlanning.authorize.error.stageFailed'));
             setIsSubmitting(false);
             return;
         }
         if (!cmdRes.ok) {
-            setLoadError(cmdRes.error ?? 'Operation staged but commander assignment failed.');
+            setLoadError(cmdRes.error ?? t('opsPlanning.authorize.error.commanderFailed'));
         }
 
         setOperationTargetOsids(allObjs);
@@ -173,7 +174,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         onClick={() => setTransmitted(true)}
                         className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
                     >
-                        Skip animation &rarr;
+                        {t('opsPlanning.authorize.skipAnimation')}
                     </button>
                 </div>
             )}
@@ -182,9 +183,9 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
             {transmitted && (
                 <div className="relative z-10 mt-4 text-center animate-[fadeIn_0.5s_ease-out]">
                     <div className="text-accent-gold font-bold text-sm uppercase tracking-[0.3em]">
-                        ZAPOVIJED PROSLIJEĐENA
+                        {t('opsPlanning.authorize.transmittedStamp')}
                     </div>
-                    <div className="text-text-secondary text-[10px] mt-1">Directive Transmitted</div>
+                    <div className="text-text-secondary text-[10px] mt-1">{t('opsPlanning.authorize.directiveTransmitted')}</div>
                 </div>
             )}
 
@@ -201,8 +202,8 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                            uppercase tracking-wider hover:bg-amber-500/30 transition-colors
                                            border border-amber-500/30 disabled:opacity-50"
                             >
-                                NAREDITI IZVIĐANJE
-                                <div className="text-[8px] font-normal mt-0.5 opacity-70">Order Probe</div>
+                                {t('opsPlanning.authorize.orderProbePrimary')}
+                                <div className="text-[8px] font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.orderProbeSub')}</div>
                             </button>
                             <button
                                 type="button"
@@ -212,7 +213,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                            uppercase tracking-wider hover:bg-[rgba(60,54,44,0.7)] transition-colors
                                            border border-[rgba(180,160,130,0.1)] disabled:opacity-50"
                             >
-                                Authorize Anyway
+                                {t('opsPlanning.authorize.authorizeAnyway')}
                             </button>
                         </>
                     ) : (
@@ -224,8 +225,8 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                        uppercase tracking-wider hover:bg-[#2d6a4f]/30 transition-colors
                                        border border-[#2d6a4f]/30 disabled:opacity-50"
                         >
-                            ODOBRITI OPERACIJU
-                            <div className="text-[8px] font-normal mt-0.5 opacity-70">Authorize Operation</div>
+                            {t('opsPlanning.authorize.authorizePrimary')}
+                            <div className="text-[8px] font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.authorizeSub')}</div>
                         </button>
                     )}
                 </div>

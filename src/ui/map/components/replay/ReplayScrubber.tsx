@@ -18,6 +18,7 @@ import type { ReplaySaveManifest } from '../../../../sim/replay/replay_manifest.
 import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
+import { t } from '../../i18n';
 
 export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
@@ -183,7 +184,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 step={1}
                 value={cursor}
                 onChange={onScrub}
-                aria-label="Replay turn scrubber"
+                aria-label={t('replay.turnScrubber')}
                 className="w-full h-1.5 accent-accent-gold cursor-pointer"
                 data-awwv-replay-input="slider"
             />
@@ -193,32 +194,32 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                     type="button"
                     onClick={() => onStep(-1)}
                     disabled={!canStep || cursor <= 0}
-                    aria-label="Previous replay turn"
+                    aria-label={t('replay.previousTurn')}
                     className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
                     data-awwv-replay-step="prev"
                 >
-                    Prev
+                    {t('replay.prev')}
                 </button>
                 <button
                     type="button"
                     onClick={onTogglePlay}
                     disabled={!canStep}
-                    aria-label={isPlaying ? 'Pause replay playback' : 'Play replay playback'}
+                    aria-label={isPlaying ? t('replay.pausePlayback') : t('replay.playPlayback')}
                     className="rounded border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 font-bold text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
                     data-awwv-replay-play-toggle="true"
                     data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
                 >
-                    {isPlaying ? 'Pause' : 'Play'}
+                    {isPlaying ? t('replay.pause') : t('replay.play')}
                 </button>
                 <button
                     type="button"
                     onClick={() => onStep(1)}
                     disabled={!canStep || cursor >= turnCount - 1}
-                    aria-label="Next replay turn"
+                    aria-label={t('replay.nextTurn')}
                     className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
                     data-awwv-replay-step="next"
                 >
-                    Next
+                    {t('replay.next')}
                 </button>
                 <span className="ml-auto normal-case tracking-normal text-text-secondary/50">
                     {REPLAY_AUTOPLAY_INTERVAL_MS} ms / turn
@@ -249,19 +250,19 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 data-awwv-replay-summary="true"
             >
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Active formations</div>
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.activeFormations')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{summary.activeFormations}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Casualties</div>
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.casualties')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalCasualties)}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Displaced</div>
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.displaced')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalDisplaced)}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">Control</div>
+                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.control')}</div>
                     <div className="mt-1 break-words font-mono leading-relaxed text-text-primary tabular-nums">
                         {summary.controlByFaction.length === 0
                             ? 'n/a'

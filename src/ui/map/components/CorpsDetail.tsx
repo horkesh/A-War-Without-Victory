@@ -20,6 +20,7 @@ import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
+import { t } from '../i18n';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -123,11 +124,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     : corpsFormation.name;
 
   const tabs = [
-    { id: 'overview' as const, label: 'Overview' },
+    { id: 'overview' as const, label: t('settlement.tab.overview') },
     { id: 'orbat'    as const, label: 'ORBAT',   count: subordinates.length },
-    { id: 'sectors'  as const, label: 'Sectors', count: corpsSectors.length },
-    { id: 'ops'      as const, label: 'Ops Snapshot', count: corpsOps.length },
-    { id: 'orders'   as const, label: 'Orders' },
+    { id: 'sectors'  as const, label: t('sectorsSection.title'), count: corpsSectors.length },
+    { id: 'ops'      as const, label: t('corpsDetail.opsSnapshot'), count: corpsOps.length },
+    { id: 'orders'   as const, label: t('corpsDetail.orders') },
   ];
 
   const handleOpenOpsPlanning = () => {
@@ -135,17 +136,17 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     if (primarySector) {
       setOpsPlanningContext(selectedCorpsId, primarySector.sector_id);
     } else {
-      setLoadError('Ops Planning requires the Corps to be assigned to a front sector.');
+      setLoadError(t('corpsDetail.opsPlanningRequiresSector'));
     }
   };
 
   const stageCorpsStance = async (stance: string) => {
     if (!ipc.isAvailable) {
-      setLoadError('Corps orders are available in desktop mode only.');
+      setLoadError(t('corpsDetail.desktopOnly'));
       return;
     }
     const result = await ipc.stageCorpsStanceOrder(selectedCorpsId, stance);
-    if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance order.');
+    if (!result.ok) setLoadError(result.error ?? t('corpsDetail.stageStanceFailed'));
   };
 
   return (
@@ -205,12 +206,12 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             {(() => {
               const commander = getFormationCommander(corpsFormation, loadedGameState);
               if (!commander) return null;
-              return <OfficerProfile officer={commander} label="Corps Commander" />;
+              return <OfficerProfile officer={commander} label={t('corpsDetail.corpsCommander')} />;
             })()}
 
             <div className="border-t border-panel-border pt-3 space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> Personnel</span>
+                <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('corpsCard.personnel')}</span>
                 <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
               </div>
               {(() => {
@@ -219,30 +220,30 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : '#f47068';
                 return (
                   <div className="flex justify-between">
-                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> Combat Eff.</span>
+                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('corpsDetail.combatEff')}</span>
                     <span className="tabular-nums">
                       <span className="text-text-primary">{agg.totalEffectiveness.toLocaleString()}</span>
                       <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
                         {agg.grade}
                       </span>
                       {agg.ineffectiveCount > 0 && (
-                        <span className="text-[9px] text-red-400 ml-1">({agg.ineffectiveCount} weak)</span>
+                        <span className="text-[9px] text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
                       )}
                     </span>
                   </div>
                 );
               })()}
               <div className="flex justify-between">
-                <span className="text-text-secondary">Brigades</span>
+                <span className="text-text-secondary">{t('corpsCard.brigades')}</span>
                 <span className="text-text-primary tabular-nums">{subordinates.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-secondary">Sectors</span>
+                <span className="text-text-secondary">{t('sectorsSection.title')}</span>
                 <span className="text-text-primary tabular-nums">{corpsSectors.length}</span>
               </div>
               {corpsFormation.corpsOgSlots != null && (
                 <div className="flex justify-between">
-                  <span className="text-text-secondary" title="Maximum simultaneous operations this corps can conduct">Op Slots</span>
+                  <span className="text-text-secondary" title={t('corpsDetail.opSlotsTitle')}>{t('corpsDetail.opSlots')}</span>
                   <span className="text-text-primary tabular-nums">
                     {corpsFormation.corpsActiveOgIds?.length ?? 0}/{corpsFormation.corpsOgSlots}
                   </span>
@@ -270,10 +271,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               };
               return (
                 <div className="border-t border-panel-border pt-3 space-y-1.5">
-                  <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">Equipment</div>
+                  <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
                   {tanks > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> Tanks</span>
+                      <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> {t('corpsCard.tanks')}</span>
                       <span className="tabular-nums">
                         <span className={equipHealthColor(tanksOp, tanks)}>{tanksOp}</span><span className="text-text-secondary">/{tanks}</span>
                       </span>
@@ -281,7 +282,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   )}
                   {arty > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-text-secondary flex items-center gap-1"><Icon name="artillery" size={12} /> Artillery</span>
+                      <span className="text-text-secondary flex items-center gap-1"><Icon name="artillery" size={12} /> {t('formationDetail.artillery')}</span>
                       <span className="tabular-nums">
                         <span className={equipHealthColor(artyOp, arty)}>{artyOp}</span><span className="text-text-secondary">/{arty}</span>
                       </span>
@@ -289,7 +290,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   )}
                   {aa > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-text-secondary">AA Systems</span>
+                      <span className="text-text-secondary">{t('formationDetail.aaSys')}</span>
                       <span className="text-text-primary tabular-nums">{aa}</span>
                     </div>
                   )}
@@ -313,7 +314,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {activeTab === 'orbat' && (
           <div className="py-1">
             {subordinates.length === 0 ? (
-              <div className="p-3 text-text-secondary italic text-xs">No subordinate brigades.</div>
+              <div className="p-3 text-text-secondary italic text-xs">{t('corpsDetail.noSubordinateBrigades')}</div>
             ) : (
               [...subordinates]
                 .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
@@ -344,7 +345,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {activeTab === 'sectors' && (
           <div className="p-3 space-y-1">
             {corpsSectors.length === 0 ? (
-              <div className="text-text-secondary italic text-xs">No sectors assigned.</div>
+              <div className="text-text-secondary italic text-xs">{t('corpsDetail.noSectorsAssigned')}</div>
             ) : (
               corpsSectors.map((s) => {
                 const sectorBrigadeIds = new Set([...s.assigned_brigade_ids, ...s.reserve_brigade_ids]);
@@ -376,7 +377,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   </div>
                   <div className="shrink-0 ml-2 text-right">
                     <div className="text-[10px] tabular-nums">
-                      <span className="text-text-secondary">Eff: </span>
+                      <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
                       <span className="text-text-primary">{sectorEff.totalEffectiveness.toLocaleString()}</span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
@@ -400,13 +401,13 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {activeTab === 'ops' && (
           <div className="p-3 space-y-2.5">
             <div className="text-[10px] uppercase tracking-widest text-text-secondary font-bold">
-              Field Snapshot
+              {t('corpsDetail.fieldSnapshot')}
             </div>
             <div className="text-[10px] text-text-secondary -mt-1">
-              Corps panels summarize live operations. Full command review belongs in Army HQ and briefing flows.
+              {t('corpsDetail.fieldSnapshotHelp')}
             </div>
             {corpsOps.length === 0 ? (
-              <div className="text-text-secondary italic text-xs">No player-facing corps operations.</div>
+              <div className="text-text-secondary italic text-xs">{t('corpsDetail.noPlayerFacingOps')}</div>
             ) : (
               corpsOps.map((op) => {
                 const phaseBg = op.phase === 'execution'
@@ -446,7 +447,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     {op.phase === 'execution' && (
                       <div className="mt-2 space-y-1">
                         <div className="flex justify-between text-[10px] text-text-secondary">
-                          <span>Momentum</span>
+                          <span>{t('operationsPanel.momentum')}</span>
                           <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
                             {momentum > 0 ? '+' : ''}{momentum.toFixed(1)}
                           </span>
@@ -465,10 +466,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     )}
 
                     <div className="flex items-center justify-between text-[10px] mt-2 pt-1.5 border-t border-panel-border/30">
-                      <span className="text-text-secondary">{op.participating_brigade_count} brigades</span>
+                      <span className="text-text-secondary">{t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                       {op.objectives && op.current_objective_index !== undefined && (
                         <span className="text-accent-gold">
-                          Obj: <span className="text-text-primary tabular-nums">{op.current_objective_index}/{op.objectives.length}</span>
+                          {t('operationsPanel.objShort')} <span className="text-text-primary tabular-nums">{op.current_objective_index}/{op.objectives.length}</span>
                         </span>
                       )}
                     </div>
@@ -483,7 +484,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 onClick={handleOpenOpsPlanning}
                 className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
-                Prepare Operation in HQ
+                {t('corpsDetail.prepareOperationInHq')}
               </button>
             </div>
           </div>
@@ -494,7 +495,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
           <div className="p-3 space-y-3">
             <div>
               <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
-                Corps Stance
+                {t('corpsDetail.corpsStance')}
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {(['defensive', 'balanced', 'offensive', 'reorganize'] as const).map((stance) => {
@@ -519,14 +520,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
             <div className="border-t border-panel-border pt-3">
               <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
-                Operations
+                {t('operationHistory.title')}
               </div>
               <button
                 type="button"
                 onClick={handleOpenOpsPlanning}
                 className="w-full text-xs font-sans px-2 py-2.5 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
-                Prepare Operation in HQ
+                {t('corpsDetail.prepareOperationInHq')}
               </button>
             </div>
           </div>

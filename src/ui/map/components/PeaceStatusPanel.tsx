@@ -12,6 +12,7 @@ import {
     getPlayerSafeMilitaryFactionName,
     getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 function ProgressBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
     const pct = Math.min(100, (value / max) * 100);
@@ -32,11 +33,11 @@ function AllianceBar({ value }: { value: number }) {
     // -1 = hostile, 0 = neutral, +1 = allied
     const pct = ((value + 1) / 2) * 100; // map [-1,1] to [0,100]
     const color = value > 0.2 ? '#22c55e' : value > -0.2 ? '#eab308' : '#ef4444';
-    const label = value > 0.5 ? 'Allied' : value > 0.2 ? 'Cooperative' : value > -0.2 ? 'Strained' : value > -0.5 ? 'Hostile' : 'Open War';
+    const label = value > 0.5 ? t('peace.allied') : value > 0.2 ? t('peace.cooperative') : value > -0.2 ? t('peace.strained') : value > -0.5 ? t('peace.hostile') : t('peace.openWar');
     return (
         <div className="space-y-0.5">
             <div className="flex justify-between text-[9px]">
-                <span className="text-text-secondary uppercase tracking-wider">Bosniak-Croat Alliance</span>
+                <span className="text-text-secondary uppercase tracking-wider">{t('peace.bosniakCroatAlliance')}</span>
                 <span style={{ color }} className="font-semibold">{label}</span>
             </div>
             <div className="h-1.5 bg-black/30 rounded-full overflow-hidden relative">
@@ -49,11 +50,11 @@ function AllianceBar({ value }: { value: number }) {
 }
 
 function getDeclarationPressureStatus(value: number, declared: boolean): string {
-    if (declared) return 'Declared';
-    if (value >= 80) return 'Critical';
-    if (value >= 50) return 'Elevated';
-    if (value >= 25) return 'Watch';
-    return 'Quiet';
+    if (declared) return t('peace.declared');
+    if (value >= 80) return t('peace.critical');
+    if (value >= 50) return t('peace.elevated');
+    if (value >= 25) return t('peace.watch');
+    return t('peace.quiet');
 }
 
 export function PeaceStatusPanel() {
@@ -93,7 +94,7 @@ export function PeaceStatusPanel() {
             <div className="bg-panel-bg/95 border border-panel-border rounded-lg shadow-2xl backdrop-blur-md">
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-panel-border bg-panel-card/50">
-                    <div className="text-[9px] font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">Pre-War Phase</div>
+                    <div className="text-[9px] font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">{t('peace.preWarPhase')}</div>
                     <div className="text-sm font-bold text-text-primary uppercase tracking-wide">
                         {date ?? `Turn ${turn}`}
                     </div>
@@ -132,12 +133,12 @@ export function PeaceStatusPanel() {
                                     </div>
                                     {isPlayer && (
                                         <span className="text-[8px] bg-accent-gold/20 text-accent-gold px-1.5 py-0.5 rounded border border-accent-gold/30 font-bold uppercase tracking-wider">
-                                            You
+                                            {t('peace.you')}
                                         </span>
                                     )}
                                     {f.declared && (
                                         <span className="text-[8px] bg-red-900/30 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30 font-bold uppercase">
-                                            Declared
+                                            {t('peace.declared')}
                                         </span>
                                     )}
                                 </div>
@@ -166,7 +167,7 @@ export function PeaceStatusPanel() {
                     {/* Events */}
                     {peaceEvents && peaceEvents.length > 0 && (
                         <div className="pt-2 border-t border-panel-border space-y-1">
-                            <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">Events This Turn</div>
+                            <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">{t('peace.eventsThisTurn')}</div>
                             {peaceEvents.map((e, i) => (
                                 <div key={i} className="text-[10px] text-text-primary bg-black/20 px-2 py-1 rounded">
                                     <span className="font-semibold text-accent-gold">{e.type.replace(/_/g, ' ')}</span>

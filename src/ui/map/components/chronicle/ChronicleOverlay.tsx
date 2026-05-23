@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore.js';
 import { generateChronicleEntries } from './generateChronicleEntries.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
-import { CHRONICLE_FILTERS, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
+import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
 import { buildChronicleChapters } from '../../data/chronicleChapters.js';
@@ -12,6 +12,7 @@ import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import type { ChronicleChapter } from '../../data/chronicleChapters.js';
 import { EmptyState } from '../EmptyState.js';
 import { Z } from '../../../shared/zIndex.js';
+import { t } from '../../i18n';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -69,7 +70,7 @@ export function ChronicleViewModeToggle({
             <div className="flex rounded-sm border border-white/10 bg-black/25 p-0.5">
                 {(['entries', 'chapters'] as const).map(option => {
                     const active = option === mode;
-                    const label = option === 'entries' ? 'Entries' : 'Chapters';
+                    const label = option === 'entries' ? t('chronicle.mode.entries') : t('chronicle.mode.chapters');
                     return (
                         <button
                             key={option}
@@ -89,10 +90,10 @@ export function ChronicleViewModeToggle({
                 })}
             </div>
             <span className="text-[9px] font-mono text-stone-500">
-                Lens: {activeFilterLabel}
+                {t('chronicle.lens', { label: activeFilterLabel })}
             </span>
             <span className="text-[9px] font-mono text-stone-600">
-                {chapterCount} chapters
+                {t('chronicle.chapterCount', { count: chapterCount })}
             </span>
         </div>
     );
@@ -110,7 +111,7 @@ function ChronicleChapterView({
     if (chapters.length === 0) {
         return (
             <div className="flex h-full items-center justify-center">
-                <p className="text-xs font-mono text-stone-600">No Chronicle chapters match this filter.</p>
+                <p className="text-xs font-mono text-stone-600">{t('chronicle.noChapters')}</p>
             </div>
         );
     }
@@ -135,7 +136,7 @@ function ChronicleChapterView({
                                 {chapter.title}
                             </h2>
                             <p className="mt-1 text-[11px] font-mono text-stone-400">
-                                {chapter.summary} | Turns {chapter.startTurn}-{chapter.endTurn}
+                                {chapter.summary} | {t('chronicle.turnRange', { start: chapter.startTurn, end: chapter.endTurn })}
                             </p>
                         </div>
                         <div className="shrink-0 text-right text-[9px] font-mono uppercase text-stone-500">
@@ -151,10 +152,10 @@ function ChronicleChapterView({
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="text-[8px] font-mono uppercase text-stone-500">
-                                        Turn {ref.turn} | {ref.type}
+                                        {t('chronicle.turnLabel', { turn: ref.turn })} | {ref.type}
                                     </span>
                                     {ref.headline && (
-                                        <span className="text-[8px] font-mono uppercase text-amber-300">Headline</span>
+                                        <span className="text-[8px] font-mono uppercase text-amber-300">{t('chronicle.headline')}</span>
                                     )}
                                 </div>
                                 <div className="mt-1 text-[11px] leading-snug text-stone-200">
@@ -166,14 +167,14 @@ function ChronicleChapterView({
                                         onClick={() => onSelectTurn(ref.turn)}
                                         className="h-6 rounded-sm border border-white/10 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-stone-300 hover:border-stone-400/60"
                                     >
-                                        Select
+                                        {t('chronicle.select')}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => onOpenTurnRecord(ref.turn)}
                                         className="h-6 rounded-sm border border-amber-400/25 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
                                     >
-                                        Open Turn Record
+                                        {t('chronicle.openTurnRecord')}
                                     </button>
                                 </div>
                             </div>
@@ -209,7 +210,9 @@ export function ChronicleOverlay() {
 
     const filteredEntries = useMemo(() => filterChronicleEntries(allEntries, activeFilter), [activeFilter, allEntries]);
 
-    const activeFilterLabel = CHRONICLE_FILTERS.find(filter => filter.id === activeFilter)?.label ?? 'All';
+    const activeFilterLabel = chronicleFilterLabel(
+        CHRONICLE_FILTERS.find(filter => filter.id === activeFilter) ?? CHRONICLE_FILTERS[0],
+    );
 
     const chapters = useMemo(() => buildChronicleChapters(filteredEntries, state), [filteredEntries, state]);
 
@@ -364,16 +367,16 @@ export function ChronicleOverlay() {
     }, [handleOpenTurnRecord]);
 
     const actionLabelForEntry = useCallback((entry: ChronicleEntry) => (
-        entry.metadata?.operationAarId ? 'Open Operation Record' : 'Open Turn Record'
+        entry.metadata?.operationAarId ? t('chronicle.openOperationRecord') : t('chronicle.openTurnRecord')
     ), []);
 
     if (!open || !state) return null;
 
     // Build turn columns
     const columns: React.ReactNode[] = [];
-    for (let t = minTurn; t <= maxTurn; t++) {
-        const width = turnWidths.get(t) ?? EMPTY_TURN_WIDTH;
-        const group = turnGroups.get(t) ?? [];
+    for (let turn = minTurn; turn <= maxTurn; turn++) {
+        const width = turnWidths.get(turn) ?? EMPTY_TURN_WIDTH;
+        const group = turnGroups.get(turn) ?? [];
         const hasEvents = group.length > 0;
 
         // Most significant event type for dot color
@@ -383,7 +386,7 @@ export function ChronicleOverlay() {
 
         columns.push(
             <div
-                key={t}
+                key={turn}
                 className="shrink-0 flex flex-col items-center relative"
                 style={{ width: `${width}px` }}
             >
@@ -407,7 +410,7 @@ export function ChronicleOverlay() {
                     className="text-[8px] font-mono text-stone-500 mt-1 select-none"
                     style={{ marginTop: RIBBON_HEIGHT + 2 }}
                 >
-                    {t % 4 === 0 || hasEvents ? turnToShortDate(t) : ''}
+                    {turn % 4 === 0 || hasEvents ? turnToShortDate(turn) : ''}
                 </div>
 
                 {/* Stem + cards */}
@@ -423,17 +426,17 @@ export function ChronicleOverlay() {
                             /* Single entry — show card directly with date */
                             <div className="flex flex-col items-center" style={{ gap: `${CARD_STACK_GAP}px` }}>
                                 <div className="text-[8px] font-mono text-stone-400 mb-1">
-                                    {turnToFullDate(t)}
+                                    {turnToFullDate(turn)}
                                 </div>
-                                <ChronicleCard key={`${t}-${group[0].type}-0`} entry={group[0]} />
+                                <ChronicleCard key={`${turn}-${group[0].type}-0`} entry={group[0]} />
                             </div>
                         ) : (
                             /* Multiple entries — expandable group */
                             <div className="flex flex-col items-center w-full" style={{ gap: `${CARD_STACK_GAP}px` }}>
                                 <button
                                     onClick={() => {
-                                        setSelectedTurn(t);
-                                        toggleWeekExpanded(t);
+                                        setSelectedTurn(turn);
+                                        toggleWeekExpanded(turn);
                                     }}
                                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[9px] font-mono text-stone-300 hover:text-amber-300 transition-colors cursor-pointer select-none"
                                     style={{
@@ -442,15 +445,15 @@ export function ChronicleOverlay() {
                                         minWidth: '140px',
                                     }}
                                 >
-                                    <span className="text-amber-400/80">{turnToFullDate(t)}</span>
+                                    <span className="text-amber-400/80">{turnToFullDate(turn)}</span>
                                     <span className="text-stone-500">—</span>
-                                    <span>{group.length} events</span>
+                                    <span>{t('chronicle.eventCount', { count: group.length })}</span>
                                     <span className="ml-auto text-[8px] text-stone-500">
-                                        {expandedWeeks.has(t) ? '\u25B2' : '\u25BC'}
+                                        {expandedWeeks.has(turn) ? '\u25B2' : '\u25BC'}
                                     </span>
                                 </button>
 
-                                {expandedWeeks.has(t) && (
+                                {expandedWeeks.has(turn) && (
                                     <div
                                         className="flex flex-col items-center"
                                         style={{
@@ -462,7 +465,7 @@ export function ChronicleOverlay() {
                                         }}
                                     >
                                         {group.map((entry, i) => (
-                                            <ChronicleCard key={`${t}-${entry.type}-${i}`} entry={entry} />
+                                            <ChronicleCard key={`${turn}-${entry.type}-${i}`} entry={entry} />
                                         ))}
                                     </div>
                                 )}
@@ -483,10 +486,10 @@ export function ChronicleOverlay() {
                         className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400/90 shrink-0"
                         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                     >
-                        War Chronicle
+                        {t('chronicle.title')}
                     </h1>
                     <span className="text-[9px] font-mono text-stone-500 shrink-0">
-                        {filteredEntries.length}/{allEntries.length} events — {turnToFullDate(minTurn)} – {turnToFullDate(maxTurn)}
+                        {t('chronicle.eventRatio', { filtered: filteredEntries.length, total: allEntries.length })} - {turnToFullDate(minTurn)} - {turnToFullDate(maxTurn)}
                     </span>
                     <div className="flex min-w-0 flex-wrap items-center gap-1.5" data-coachmark-id="chronicle-filter">
                         {CHRONICLE_FILTERS.map(filter => {
@@ -497,7 +500,7 @@ export function ChronicleOverlay() {
                                     key={filter.id}
                                     type="button"
                                     aria-pressed={active}
-                                    title={`${filter.label}: ${count}`}
+                                    title={`${chronicleFilterLabel(filter)}: ${count}`}
                                     onClick={() => setActiveFilter(filter.id)}
                                     className={[
                                         'h-6 min-w-[54px] rounded-sm border px-2 font-mono text-[8px] uppercase transition-colors',
@@ -506,7 +509,7 @@ export function ChronicleOverlay() {
                                             : 'border-white/10 bg-black/25 text-stone-500 hover:border-stone-500/60 hover:text-stone-300',
                                     ].join(' ')}
                                 >
-                                    <span>{filter.label}</span>
+                                    <span>{chronicleFilterLabel(filter)}</span>
                                     <span className="ml-1 text-stone-500">{count}</span>
                                 </button>
                             );
@@ -523,7 +526,7 @@ export function ChronicleOverlay() {
                     onClick={handleClose}
                     className="ml-3 shrink-0 text-[10px] font-mono text-stone-500 hover:text-red-400 transition-colors uppercase tracking-wider"
                 >
-                    Close [ESC]
+                    {t('chronicle.close')}
                 </button>
             </div>
 
@@ -537,8 +540,8 @@ export function ChronicleOverlay() {
                     {allEntries.length === 0 ? (
                         <div className="flex items-center justify-center h-full">
                             <EmptyState
-                                message="No chronicle entries"
-                                helpText="Advance turns to record the campaign chronicle."
+                                message={t('chronicle.emptyTitle')}
+                                helpText={t('chronicle.emptyHelp')}
                             />
                         </div>
                     ) : viewMode === 'chapters' ? (
@@ -563,7 +566,7 @@ export function ChronicleOverlay() {
                             {filteredEntries.length === 0 ? (
                                 <div className="flex items-center justify-center" style={{ minHeight: '320px' }}>
                                     <p className="text-stone-600 text-xs font-mono">
-                                        No Chronicle entries match this filter.
+                                        {t('chronicle.noEntries')}
                                     </p>
                                 </div>
                             ) : (
@@ -578,29 +581,29 @@ export function ChronicleOverlay() {
                 <aside className="w-[360px] shrink-0 bg-black/35 backdrop-blur-sm flex flex-col min-h-0">
                     <div className="px-4 py-3 border-b border-white/8">
                         <div className="text-[10px] uppercase tracking-[0.18em] text-amber-400/80 font-bold">
-                            Chronicle Dossier
+                            {t('chronicle.dossier')}
                         </div>
                         <div className="mt-1 text-[11px] text-text-primary font-semibold">
-                            {selectedTurn != null ? turnToFullDate(selectedTurn) : 'No turn selected'}
+                            {selectedTurn != null ? turnToFullDate(selectedTurn) : t('chronicle.noTurnSelected')}
                         </div>
                     </div>
                     <div className="px-4 py-3 grid grid-cols-3 gap-2 border-b border-white/8 text-[10px]">
                         <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">Events</div>
+                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.events')}</div>
                             <div className="text-text-primary font-bold">
                                 {selectedTurn != null ? (turnGroups.get(selectedTurn)?.length ?? 0) : 0}
                             </div>
                         </div>
                         <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">Headline</div>
+                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.headline')}</div>
                             <div className="text-text-primary font-bold">
                                 {selectedTurn != null
-                                    ? (turnGroups.get(selectedTurn)?.some((e) => e.headline) ? 'Yes' : 'No')
-                                    : 'No'}
+                                    ? (turnGroups.get(selectedTurn)?.some((e) => e.headline) ? t('chronicle.yes') : t('chronicle.no'))
+                                    : t('chronicle.no')}
                             </div>
                         </div>
                         <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">Lens</div>
+                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.lens')}</div>
                             <div className="text-text-primary font-bold truncate" title={activeFilterLabel}>
                                 {activeFilterLabel}
                             </div>
@@ -610,11 +613,11 @@ export function ChronicleOverlay() {
                     <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
                         {allEntries.length > 0 && filteredEntries.length === 0 ? (
                             <div className="text-[11px] text-text-secondary italic">
-                                No Chronicle entries match this filter.
+                                {t('chronicle.noEntries')}
                             </div>
                         ) : selectedTurn == null || (turnGroups.get(selectedTurn)?.length ?? 0) === 0 ? (
                             <div className="text-[11px] text-text-secondary italic">
-                                Select a turn on the timeline to inspect its event dossier.
+                                {t('chronicle.selectTurnHelp')}
                             </div>
                         ) : (
                             (turnGroups.get(selectedTurn) ?? []).map((entry, i) => (

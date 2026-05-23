@@ -43,8 +43,12 @@ export const WASH_IVP_THRESHOLD = 0.50;
 export const WASH_PATRON_CONSTRAINT = 0.55;
 /** W5: RS territorial control share threshold (fraction of total settlements). */
 export const WASH_RS_THREAT_SHARE = 0.40;
-/** W6: Combined RBiH + HRHB exhaustion threshold. */
-export const WASH_COMBINED_EXHAUSTION = 55;
+/** W6: Combined RBiH + HRHB exhaustion threshold.
+ *  2026-05-22: rescaled 55 → 5500 alongside war_exhaustion cap 100 → 10000 per
+ *  forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md`. Uniform
+ *  100× rescale preserves the original "combined exhaustion at 55% of cap"
+ *  semantics that this threshold was authored against. */
+export const WASH_COMBINED_EXHAUSTION = 5500;
 
 /** Alliance value set and locked when Washington fires. */
 export const WASH_ALLIANCE_LOCK_VALUE = 0.80;
@@ -250,8 +254,53 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
 function applyWashingtonEffects(state: GameState): void {
     const rhs = state.political.rbih_hrhb_state!;
 
-    // Lock alliance
+    // Lock alliance.
+    //
+    // 2026-05-22: ALSO push an `alliance_lock` floor onto state.military.alliance_locks
+    // so subsequent `alliance_change` event effects (apply_effects.ts:applyAllianceChange)
+    // clamp at the floor. Without the lock-floor, applyAllianceChange writes deltas
+    // directly without checking `washington_signed` — meaning post-WA territorial
+    // incidents, refugee pressure, or other event-driven alliance_change deltas can
+    // and do drop alliance from 0.80 back down to 0.10+ across the 188w window,
+    // bricking FEDERATION_ALLIANCE_FLOOR=0.50 catalog gates downstream (mistral_2_95,
+    // kupres_cincar_94, vlasic_ridge_95). Forensics:
+    // docs/40_reports/audits/20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md alliance line.
+    //
+    // The peace-phase per-turn alliance_update.ts:260 already respects washington_signed
+    // and exits early; this commit closes the symmetric gap on the event-effect path.
     state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    if (!state.military.alliance_locks) {
+        state.military.alliance_locks = [];
+    }
+    // 2026-05-22 Wave 3F: evict ceiling locks that would block WA's 0.80 floor.
+    // Discovered via n1959 forensics
+    // (docs/40_reports/audits/20260522_FORENSICS_N1959_FED_OPS_STILL_BLOCKED.md):
+    // csq_croat_bosniak_war pushes `alliance_lock ceiling=0.10 duration=60`
+    // when HVO-ARBiH war fires (~t48-56), and other consequence events push
+    // ceilings as low as 0.10 / 0.45. Wave 3E added the WA floor=0.80 but
+    // applyAllianceChange (apply_effects.ts:170) applies ceiling AFTER floor,
+    // so an active ceiling=0.10 silently overrides our floor=0.80 on the
+    // very next `alliance_change` event, dropping alliance back to 0.10.
+    //
+    // Historical: Washington Agreement is the formal end of the Croat-Bosniak
+    // war. Any alliance ceiling locks tied to that war should be cleared on
+    // WA signature. The floor lock the engine pushes for WA's institutional
+    // commitment is preserved by keeping all FLOOR locks at or above 0.80,
+    // and all ceiling locks at or above 0.80 (otherwise they'd block the WA
+    // floor and contradict the agreement). Locks at or above 0.80 are kept
+    // (a stricter Federation lock could in principle exist; the current event
+    // catalog has none, so this is forward-compatible).
+    state.military.alliance_locks = state.military.alliance_locks.filter(lock => {
+        if (lock.mode === 'ceiling' && lock.value < WASH_ALLIANCE_LOCK_VALUE) {
+            return false;
+        }
+        return true;
+    });
+    state.military.alliance_locks.push({
+        mode: 'floor',
+        value: WASH_ALLIANCE_LOCK_VALUE,
+        expires_turn: state.meta.turn + 9999,
+    });
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 

@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { CinematicVerdict } from '../../src/ui/map/components/verdict/CinematicVerdict';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 import type { FactionVerdict, GameVerdict, OutcomeClass } from '../../src/state/negotiation_types';
+import { setLocale } from '../../src/ui/map/i18n';
 
 function factionVerdict(faction: string, outcomeClass: OutcomeClass, score: number): FactionVerdict {
     return {
@@ -87,6 +88,8 @@ function makeComparison(): ComparisonResult {
 }
 
 describe('CinematicVerdict', () => {
+    afterEach(() => setLocale('en'));
+
     it('renders a cinematic verdict band over existing scoring truth and share summary', () => {
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),
@@ -105,5 +108,25 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('War lasted 12 weeks shorter');
         expect(html).toContain('A War Without Victory - Verdict');
         expect(html).not.toContain('undefined');
+    });
+
+    it('localizes the cinematic verdict shell labels in BCS mode', () => {
+        setLocale('bcs');
+
+        const html = renderToStaticMarkup(createElement(CinematicVerdict, {
+            verdict: makeVerdict(),
+            costLedger: makeCostLedger(),
+            historicalComparison: makeComparison(),
+            focusFaction: 'RBiH',
+            dateLabel: '',
+            durationLabel: '',
+        }));
+
+        expect(html).toContain('Fokus');
+        expect(html).toContain('Ishod');
+        expect(html).toContain('Signal cijene');
+        expect(html).toContain('Podijeli sazetak');
+        expect(html).toContain('Kopiraj');
+        expect(html).toContain('Nije zabiljezeno');
     });
 });

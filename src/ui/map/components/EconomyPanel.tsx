@@ -14,6 +14,7 @@ import {
     getPlayerSafeMilitaryFactionName,
     getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -69,11 +70,11 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
         : [];
 
     return (
-        <GlassPanel position="right" title="Economy" onClose={onClose} width="340px">
+        <GlassPanel position="right" title={t('economy.title')} onClose={onClose} width="340px">
             {/* Supply Reserves */}
             <section className="space-y-2 mb-4">
                 <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-                    Supply Reserves
+                    {t('economy.supplyReserves')}
                 </h3>
                 {reserves ? (
                     <div className="space-y-2">
@@ -83,21 +84,21 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             return (
                                 <div key={faction} className="space-y-0.5">
                                     <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
-                                    <ReserveGauge label="Supply" value={r?.generalSupply ?? 0} color="text-text-secondary" />
-                                    <ReserveGauge label="Ammo" value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
+                                    <ReserveGauge label={t('economy.supply')} value={r?.generalSupply ?? 0} color="text-text-secondary" />
+                                    <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
                                 </div>
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">Reserves disabled</div>
+                    <div className="text-text-secondary text-[10px] italic">{t('economy.reservesDisabled')}</div>
                 )}
             </section>
 
             {/* Production Facilities */}
             <section className="space-y-2 mb-4">
                 <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-                    Production Facilities
+                    {t('economy.productionFacilities')}
                 </h3>
                 {facilities.length > 0 ? (
                     <div className="space-y-1.5">
@@ -125,7 +126,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                     </div>
                 ) : (
                     <div className="text-text-secondary text-[10px] italic">
-                        {isPlayerFaction ? 'No friendly facilities data' : 'No facilities data'}
+                        {isPlayerFaction ? t('economy.noFriendlyFacilities') : t('economy.noFacilities')}
                     </div>
                 )}
             </section>
@@ -133,7 +134,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
             {/* Smuggling Routes */}
             <section className="space-y-2 mb-4">
                 <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-                    Smuggling Routes
+                    {t('economy.smugglingRoutes')}
                 </h3>
                 {routes.length > 0 ? (
                     <div className="space-y-1.5">
@@ -146,11 +147,11 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                                             [{getPlayerSafeMilitaryFactionName(r.faction)}]
                                         </span>
                                         {r.disrupted && (
-                                            <span className="text-red-400 text-[8px] uppercase tracking-wider">disrupted</span>
+                                            <span className="text-red-400 text-[8px] uppercase tracking-wider">{t('economy.disrupted')}</span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="text-text-secondary w-[32px] shrink-0">Cap</span>
+                                        <span className="text-text-secondary w-[32px] shrink-0">{t('economy.cap')}</span>
                                         <ConditionBar value={r.capacity} max={100} />
                                         <span className="text-text-secondary tabular-nums w-[28px] text-right">
                                             {Math.round(r.capacity)}
@@ -162,7 +163,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                     </div>
                 ) : (
                     <div className="text-text-secondary text-[10px] italic">
-                        {isPlayerFaction ? 'No friendly route data' : 'No route data'}
+                        {isPlayerFaction ? t('economy.noFriendlyRoutes') : t('economy.noRoutes')}
                     </div>
                 )}
             </section>
@@ -170,7 +171,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
             {/* Embargo Status */}
             <section className="space-y-1">
                 <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-                    Embargo Status
+                    {t('economy.embargoStatus')}
                 </h3>
                 <div className="text-[10px] text-text-secondary space-y-0.5">
                     {embargoEntries.length > 0 ? (
@@ -178,15 +179,15 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             <div key={faction} className="flex items-center gap-1">
                                 <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                 <span className="tabular-nums">
-                                    pipeline: {Math.round(status.pipeline * 100)}%
+                                    {t('economy.pipeline', { pct: Math.round(status.pipeline * 100) })}
                                 </span>
                                 <span className="tabular-nums ml-1">
-                                    smuggling: {Math.round(status.smuggling * 100)}%
+                                    {t('economy.smuggling', { pct: Math.round(status.smuggling * 100) })}
                                 </span>
                             </div>
                         ))
                     ) : (
-                        <span className="italic">{isPlayerFaction ? 'No friendly embargo data' : 'No embargo data'}</span>
+                        <span className="italic">{isPlayerFaction ? t('economy.noFriendlyEmbargo') : t('economy.noEmbargo')}</span>
                     )}
                 </div>
             </section>

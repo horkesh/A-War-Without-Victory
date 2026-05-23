@@ -43,7 +43,7 @@
   "coercion_pressure_by_municipality": {
     "prijedor": 0.9,
     "zvornik": 0.85,
-    "foca": 0.85,
+    "foca": 0.9,
     "bratunac": 0.8,
     "visegrad": 0.8,
     "vlasenica": 0.75,
@@ -52,9 +52,10 @@
     "sanski_most": 0.7,
     "kljuc": 0.65,
     "bosanski_novi": 0.65,
-    "rogatica": 0.6,
+    "rogatica": 0.8,
     "brcko": 0.6,
-    "doboj": 0.55,
+    "doboj": 0.8,
+    "trnovo": 0.75,
     "kotor_varos": 0.65,
     "teslic": 0.55,
     "srebrenica": 0.55

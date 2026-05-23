@@ -23,6 +23,7 @@ import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
+import { initStrategicDepth } from '../sim/combat/strategic_depth.js';
 import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
@@ -548,6 +549,49 @@ interface HistoricalControlDeltaRow {
     delta: number;
 }
 
+interface OsidPairMatchRow {
+    controller: string;
+    sim_count: number;
+    painted_count: number;
+    correctly_placed: number;
+    /**
+     * correctly_placed / max(sim_count, painted_count) — spatial precision for
+     * this faction. Named `accuracy_ratio` (not `accuracy`) so the suffix
+     * matches `shouldPreserveFractionalRunSummaryField` whitelist, otherwise
+     * `integerizeRunSummaryCounts` rounds it to an integer at serialization.
+     */
+    accuracy_ratio: number;
+}
+
+/**
+ * Per-OSID spatial-accuracy diagnostic — complements the faction-count delta
+ * (`HistoricalControlAlignmentDiagnostics.counts_by_controller`) which only
+ * measures whether sim and painted have the SAME TOTAL per faction, not whether
+ * they have the SAME OSIDs.
+ *
+ * Two runs can have identical count deltas while one is spatially correct
+ * (right factions in right places) and the other is spatially wrong (right
+ * counts via the wrong captures). This metric distinguishes them.
+ */
+interface OsidPairMatchDiagnostics {
+    reference_key: string;
+    /** OSIDs present in BOTH the sim final state and the painted reference. */
+    total_osids: number;
+    /** Of those, OSIDs where sim controller === painted controller. */
+    matched_osids: number;
+    /**
+     * matched_osids / total_osids ∈ [0, 1]. Named `match_ratio` (not
+     * `match_percentage`) so the suffix matches
+     * `shouldPreserveFractionalRunSummaryField` whitelist; otherwise
+     * `integerizeRunSummaryCounts` rounds it to an integer at serialization.
+     */
+    match_ratio: number;
+    /** Per-faction accuracy breakdown. */
+    per_faction: OsidPairMatchRow[];
+    /** First N OSID mismatches for debugging — capped to keep run_summary readable. */
+    sample_mismatches: Array<{ osid: string; sim: string; painted: string }>;
+}
+
 interface HistoricalControlAlignmentDiagnostics {
     reference_key: string;
     reference_total: number;
@@ -577,6 +621,110 @@ function countControllers(snapshot: ControlKey[]): Map<string, number> {
         counts.set(row.controller, (counts.get(row.controller) ?? 0) + 1);
     }
     return counts;
+}
+
+/**
+ * Pick the historical-control reference key for a scenario based on its
+ * declared duration. Scenarios that end at jan1993 (40w / 52w / 56w from
+ * apr1992) compare to the jan1993 painted snapshot; longer scenarios pick
+ * the closest later painted snapshot we maintain (apr1994 / apr1995 / oct1995).
+ *
+ * Wave 15 architectural fix: prior to this, scenario_runner hardcoded a
+ * jan1993 reference for ALL apr1992 scenarios regardless of duration, so a
+ * 188w run that ended in oct1995 was compared to a 30-month-stale snapshot.
+ * Painted snapshots come from `data/source/calibration/painted_control_*.json`.
+ */
+function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr1994' | 'apr1995' | 'oct1995' {
+    const weeks = scenario.weeks ?? 0;
+    if (weeks <= 56) return 'jan1993';   // 40w / 52w / 56w apr1992-start scenarios
+    if (weeks <= 108) return 'apr1994';  // ~104 weeks from apr1992 → apr1994
+    if (weeks <= 160) return 'apr1995';  // ~156 weeks from apr1992 → apr1995
+    return 'oct1995';                     // ~187+ weeks → oct1995 endpoint
+}
+
+/**
+ * Load a painted-control reference snapshot directly from
+ * `data/source/calibration/painted_control_{refKey}.json` as a ControlKey[].
+ *
+ * The painted files are OSID-keyed under `by_settlement_id` (keys like
+ * `op:banja_luka:banja_luka_2`). This loader bypasses the
+ * `createInitialGameState` detour used for the legacy jan1993 path —
+ * painted controls are already at OSID granularity, no municipality→OSID
+ * promotion needed.
+ */
+async function loadPaintedControlReferenceSnapshot(
+    refKey: string,
+    baseDir: string
+): Promise<ControlKey[]> {
+    const path = join(baseDir, 'data', 'source', 'calibration', `painted_control_${refKey}.json`);
+    const json = JSON.parse(await readFile(path, 'utf8')) as { by_settlement_id?: Record<string, string> };
+    const bySettlement = json.by_settlement_id ?? {};
+    const keys = Object.keys(bySettlement).sort(strictCompare);
+    return keys.map((osid) => ({
+        settlement_id: osid,
+        municipality_id: osid.startsWith('op:') ? (osid.split(':')[1] ?? null) : null,
+        controller: bySettlement[osid] ?? null,
+    }));
+}
+
+/**
+ * Compute per-OSID spatial-match diagnostic. For each OSID present in BOTH
+ * the sim final state and the painted reference, check whether the sim
+ * controller equals the painted controller. Counts matched + per-faction
+ * accuracy + samples first 20 mismatches for debugging.
+ *
+ * Wave 27 (2026-05-23) added to complement the count-delta metric. Two runs
+ * can have identical count deltas while one is spatially correct and the
+ * other isn't — this metric makes the difference visible.
+ */
+function computeOsidPairMatchDiagnostics(
+    final: ControlKey[],
+    reference: ControlKey[],
+    referenceKey: string
+): OsidPairMatchDiagnostics {
+    const refByOsid = new Map(reference.map((r) => [r.settlement_id, r.controller ?? 'null']));
+    let total = 0;
+    let matched = 0;
+    const perFaction = new Map<string, { sim: number; painted: number; matched: number }>();
+    const mismatches: Array<{ osid: string; sim: string; painted: string }> = [];
+    const finalSorted = [...final].sort((a, b) => strictCompare(a.settlement_id, b.settlement_id));
+    for (const row of finalSorted) {
+        const ref = refByOsid.get(row.settlement_id);
+        if (ref === undefined) continue;
+        total++;
+        const sim = row.controller ?? 'null';
+        const painted = ref;
+        for (const c of [sim, painted]) {
+            if (!perFaction.has(c)) perFaction.set(c, { sim: 0, painted: 0, matched: 0 });
+        }
+        perFaction.get(sim)!.sim++;
+        perFaction.get(painted)!.painted++;
+        if (sim === painted) {
+            matched++;
+            perFaction.get(sim)!.matched++;
+        } else if (mismatches.length < 20) {
+            mismatches.push({ osid: row.settlement_id, sim, painted });
+        }
+    }
+    const controllers = Array.from(perFaction.keys()).sort(strictCompare);
+    return {
+        reference_key: referenceKey,
+        total_osids: total,
+        matched_osids: matched,
+        match_ratio: total > 0 ? matched / total : 0,
+        per_faction: controllers.map((controller) => {
+            const t = perFaction.get(controller)!;
+            const denom = Math.max(t.sim, t.painted);
+            return {
+                controller,
+                sim_count: t.sim,
+                painted_count: t.painted,
+                correctly_placed: t.matched,
+                accuracy_ratio: denom > 0 ? t.matched / denom : 0,
+            };
+        }),
+        sample_mismatches: mismatches,
+    };
 }
 
 function computeHistoricalControlAlignmentDiagnostics(
@@ -1259,10 +1407,25 @@ export async function buildScenarioStartupState(
     // Harness-path player_faction fallback. The inner `createInitialGameState` call above
     // intentionally leaves player_faction undefined as the canonical faction-neutral state.
     // Scenario JSON may author a player_faction, but default historical scenario
-    // data remains faction-neutral. The legacy startup artifact still carries
-    // RBiH for the desktop default; tests that need event-rich coverage should
-    // use explicit RS state/harness fixtures rather than editing gameplay JSON.
-    state.meta.player_faction = state.meta.player_faction ?? scenario.player_faction ?? 'RBiH';
+    // data remains faction-neutral.
+    //
+    // Default to `null` (no player) for headless harness runs so the event evaluator
+    // takes the bot-auto-respond path for every faction — including the 15+ events
+    // authored with `requires_player_response: true`. The earlier 'RBiH' default
+    // caused those events to queue-pending-forever, never applying their downstream
+    // consequences (dimension shifts, additional sets_flags, mechanical effects from
+    // chosen response branches). n1999 verification surfaced 15 RBiH events stuck
+    // through the full 188-turn run.
+    //
+    // Scenario JSON can still author `player_faction` explicitly when an event-rich
+    // RBiH/RS/HRHB lens is wanted; this only changes the harness default.
+    const authoredPlayerFaction = state.meta.player_faction ?? scenario.player_faction;
+    if (authoredPlayerFaction !== undefined && authoredPlayerFaction !== null) {
+        state.meta.player_faction = authoredPlayerFaction;
+    }
+    // else: leave undefined — event evaluator's `playerFaction != null` gate then
+    // routes every event with `requires_player_response: true` through the bot
+    // auto-respond path, as a headless harness run requires.
     state.meta.headless_scenario_auto_control = true;
 
     // After state creation, political_controllers may have been promoted to OSID keys
@@ -1571,6 +1734,10 @@ export async function buildScenarioStartupState(
         initializeCorpsCommand(state);
         spawnJnaPhantomBrigades(state);
         initializeCorpsCommand(state);
+        // Synthesis §3 E-B3: seed initial per-corps strategic_depth at scenario
+        // load so the first turn's combat / coherence reads see real depth
+        // values rather than the default 1.0.
+        initStrategicDepth(state);
         let prePlannedAdjacency;
         try {
             const preEdges = await loadOperationalEdges(baseDir);
@@ -2594,17 +2761,26 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const overrideInventory = buildOverrideInventory(scenario);
         const finalControlSnapshot = extractSettlementControlSnapshot(state, graph);
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
+        let osidPairMatch: OsidPairMatchDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
         if (scenario.init_control === 'apr1992' || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'))) {
-            const referenceControlPath = resolveInitControlPath('data/scenarios/initial_control/jan1993.json', baseDir);
-            const historicalReferenceState = await createInitialGameState('harness-historical-reference', referenceControlPath, {
-                init_control_mode: 'institutional'
-            }, { baseDir, settlementGraph: graph, operationalData: operationalData ?? undefined });
-            const historicalReferenceSnapshot = extractSettlementControlSnapshot(historicalReferenceState, graph);
+            // Wave 15: pick the painted reference matching scenario duration.
+            // Loads the OSID-keyed painted_control_{key}.json directly, skipping
+            // the createInitialGameState detour used by the legacy mun1990 path.
+            const referenceKey = pickHistoricalReferenceKey(scenario);
+            const historicalReferenceSnapshot = await loadPaintedControlReferenceSnapshot(referenceKey, baseDir);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
                 finalControlSnapshot,
                 historicalReferenceSnapshot,
-                'jan1993'
+                referenceKey
+            );
+            // Wave 27: per-OSID spatial-match metric. Complements the count-delta
+            // above by measuring whether the sim has the right factions in the
+            // right OSIDs, not just the right totals.
+            osidPairMatch = computeOsidPairMatchDiagnostics(
+                finalControlSnapshot,
+                historicalReferenceSnapshot,
+                referenceKey
             );
             historicalAnchorChecks = computeHistoricalAnchorChecks(finalControlSnapshot);
         }
@@ -2678,6 +2854,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ...(historicalControlAlignment
                     ? {
                         control_alignment: historicalControlAlignment,
+                        ...(osidPairMatch ? { osid_pair_match: osidPairMatch } : {}),
                         anchor_checks: historicalAnchorChecks
                     }
                     : {}),

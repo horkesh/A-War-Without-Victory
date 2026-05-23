@@ -14,6 +14,7 @@ import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/pl
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
+import { t, type MessageKey } from '../../i18n';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -46,14 +47,14 @@ function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
     if (category === 'direct_intervention') {
         return (
             <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-amber-500/60 bg-amber-500/10 text-amber-400">
-                ⚠ Direct Intervention
+                {t('operationsSection.directIntervention')}
             </span>
         );
     }
     // reluctant_compliance
     return (
         <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-amber-400/40 bg-amber-400/5 text-amber-500/80">
-            Approved Against Recommendation
+            {t('operationsSection.approvedAgainstRecommendation')}
         </span>
     );
 }
@@ -64,12 +65,12 @@ const PHASE_BADGE: Record<string, { bg: string; text: string; border: string }> 
     recovery: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/40' },
 };
 
-const PREP_LABELS: Record<string, string> = {
-    intel_gathering: 'INTEL GATHERING',
-    force_staging: 'FORCE STAGING',
-    supply_check: 'SUPPLY CHECK',
-    assessment: 'ASSESSMENT',
-    ready: 'READY',
+const PREP_LABEL_KEYS: Record<string, MessageKey> = {
+    intel_gathering: 'operationsSection.prep.intelGathering',
+    force_staging: 'operationsSection.prep.forceStaging',
+    supply_check: 'operationsSection.prep.supplyCheck',
+    assessment: 'operationsSection.prep.assessment',
+    ready: 'operationsSection.prep.ready',
 };
 
 const AXIS_STATUS_COLOR: Record<string, string> = {
@@ -84,12 +85,12 @@ const OUTCOME_COLOR: Record<string, string> = {
     manual_termination: 'text-blue-400',
 };
 
-const OUTCOME_LABEL: Record<string, string> = {
-    completed: 'OBJECTIVES ACHIEVED',
-    max_failures: 'OPERATIONAL FAILURE',
-    orphaned_sector: 'SECTOR LOST',
-    no_logged_attempt: 'NO ENGAGEMENT',
-    manual_termination: 'STOOD DOWN',
+const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
+    completed: 'operationsSection.outcome.completed',
+    max_failures: 'operationsSection.outcome.maxFailures',
+    orphaned_sector: 'operationsSection.outcome.orphanedSector',
+    no_logged_attempt: 'operationsSection.outcome.noLoggedAttempt',
+    manual_termination: 'operationsSection.outcome.manualTermination',
 };
 
 function ReadinessBar({ label, value }: { label: string; value: number }) {
@@ -126,15 +127,15 @@ function getCommanderPersonality(officer: NamedOfficerView): string {
     const aggr = officer.aggressiveness;
     const parts: string[] = [];
 
-    if (comp >= 0.7) parts.push('HIGHLY COMPETENT');
-    else if (comp >= 0.4) parts.push('CAPABLE');
-    else parts.push('GREEN');
+    if (comp >= 0.7) parts.push(t('operationsSection.personality.highlyCompetent'));
+    else if (comp >= 0.4) parts.push(t('operationsSection.personality.capable'));
+    else parts.push(t('operationsSection.personality.green'));
 
-    if (aggr >= 0.7) parts.push('AGGRESSIVE');
-    else if (aggr >= 0.4) parts.push('BALANCED');
-    else parts.push('CAUTIOUS');
+    if (aggr >= 0.7) parts.push(t('operationsSection.personality.aggressive'));
+    else if (aggr >= 0.4) parts.push(t('operationsSection.personality.balanced'));
+    else parts.push(t('operationsSection.personality.cautious'));
 
-    if (officer.defensive_skill >= 0.7) parts.push('DEFENSIVE SPECIALIST');
+    if (officer.defensive_skill >= 0.7) parts.push(t('operationsSection.personality.defensiveSpecialist'));
     return parts.join(' / ');
 }
 
@@ -157,7 +158,7 @@ function BrigadeStatusRow({ brig }: { brig: FormationView }) {
             <span className={`w-12 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
             <span className={`w-8 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
             <span className={`w-8 text-right ${morColor}`}>{Math.round(morale)}</span>
-            {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-6 text-center">DIS</span>}
+            {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-6 text-center">{t('operationsSection.disruptedShort')}</span>}
             {!isDisrupted && <span className="w-6" />}
         </div>
     );
@@ -179,18 +180,18 @@ function CasualtyBlock({ suffered, inflicted, label }: {
             <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{label}</div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-[10px] font-mono tabular-nums">
                 <div>
-                    <span className="text-text-secondary/60 uppercase">SUFFERED: </span>
+                    <span className="text-text-secondary/60 uppercase">{t('operationsSection.suffered')} </span>
                     <span className="text-red-500 font-bold">{totalSuffered.toLocaleString()}</span>
                     <span className="text-text-secondary/40 ml-1">({suffered.killed} KIA / {suffered.wounded} WIA)</span>
                 </div>
                 <div>
-                    <span className="text-text-secondary/60 uppercase">INFLICTED: </span>
+                    <span className="text-text-secondary/60 uppercase">{t('operationsSection.inflicted')} </span>
                     <span className="text-emerald-400 font-bold">{totalInflicted.toLocaleString()}</span>
                     <span className="text-text-secondary/40 ml-1">({inflicted.killed} KIA / {inflicted.wounded} WIA)</span>
                 </div>
             </div>
             <div className="text-[10px] font-mono">
-                <span className="text-text-secondary/60 uppercase">EXCHANGE RATIO: </span>
+                <span className="text-text-secondary/60 uppercase">{t('operationsSection.exchangeRatio')} </span>
                 <span className={`font-bold ${ratioColor}`}>{ratio >= 999 ? 'INF' : ratio.toFixed(2)} : 1</span>
             </div>
         </div>
@@ -202,7 +203,7 @@ function WeeklyLogTimeline({ log, resolveObjectiveLabel }: { log: CompletedOp['w
     if (!log || log.length === 0) return null;
     return (
         <div className="space-y-1.5">
-            <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">WEEKLY OPERATIONS LOG ({log.length} TURNS)</div>
+            <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.weeklyLog', { count: log.length })}</div>
             <div className="max-h-32 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-panel-border">
                 {log.map((entry, i) => {
                     const cas = entry.casualties_suffered.killed + entry.casualties_suffered.wounded;
@@ -272,7 +273,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                 <div className="flex items-start gap-4 px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-text-secondary/60 uppercase">OPERATION CMDR:</span>
+                            <span className="text-[10px] text-text-secondary/60 uppercase">{t('operationsSection.operationCommander')}</span>
                             <span className="text-[12px] font-bold text-text-primary uppercase tracking-wider">{cmdOfficer.name}</span>
                             <span className="text-[9px] text-text-secondary/40 uppercase">{cmdOfficer.rank}</span>
                         </div>
@@ -280,14 +281,14 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             {getCommanderPersonality(cmdOfficer)}
                         </div>
                         <div className="flex gap-4 text-[9px] text-text-secondary/50 uppercase tabular-nums">
-                            <span>COMP <b className="text-text-secondary">{(cmdOfficer.competence * 100).toFixed(0)}</b></span>
-                            <span>AGGR <b className="text-text-secondary">{(cmdOfficer.aggressiveness * 100).toFixed(0)}</b></span>
-                            <span>DEF <b className="text-text-secondary">{(cmdOfficer.defensive_skill * 100).toFixed(0)}</b></span>
+                            <span>{t('operationsSection.comp')} <b className="text-text-secondary">{(cmdOfficer.competence * 100).toFixed(0)}</b></span>
+                            <span>{t('operationsSection.aggr')} <b className="text-text-secondary">{(cmdOfficer.aggressiveness * 100).toFixed(0)}</b></span>
+                            <span>{t('operationsSection.def')} <b className="text-text-secondary">{(cmdOfficer.defensive_skill * 100).toFixed(0)}</b></span>
                             {cmdOfficer.operations_commanded != null && cmdOfficer.operations_commanded > 0 && (
-                                <span>OPS <b className="text-text-secondary">{cmdOfficer.operations_commanded}</b></span>
+                                <span>{t('operationsSection.opsShort')} <b className="text-text-secondary">{cmdOfficer.operations_commanded}</b></span>
                             )}
                             {cmdOfficer.battles > 0 && (
-                                <span>BATTLES <b className="text-text-secondary">{cmdOfficer.battles}</b> ({cmdOfficer.victories}W)</span>
+                                <span>{t('operationsSection.battles')} <b className="text-text-secondary">{cmdOfficer.battles}</b> ({t('operationsSection.winsShort', { count: cmdOfficer.victories })})</span>
                             )}
                         </div>
                     </div>
@@ -297,24 +298,24 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Preparation details (planning phase) */}
             {op.phase === 'planning' && op.preparation_sub_phase && (
                 <div className="space-y-3">
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">MISSION PREPARATION STATUS</div>
+                            <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.missionPrepStatus')}</div>
                     <div className="flex flex-wrap gap-x-6 gap-y-2">
                         <div className="flex items-center gap-2">
-                            <span className="text-text-secondary/60 uppercase">PHASE:</span>
-                            <span className="font-bold text-accent-gold">{PREP_LABELS[op.preparation_sub_phase] ?? op.preparation_sub_phase.toUpperCase()}</span>
+                            <span className="text-text-secondary/60 uppercase">{t('operationsSection.phase')}</span>
+                            <span className="font-bold text-accent-gold">{PREP_LABEL_KEYS[op.preparation_sub_phase] ? t(PREP_LABEL_KEYS[op.preparation_sub_phase]) : op.preparation_sub_phase.toUpperCase()}</span>
                         </div>
                         {op.preparation_turns_elapsed != null && (
                             <div className="flex items-center gap-2">
-                                <span className="text-text-secondary/60 uppercase">TIMELINE:</span>
+                                <span className="text-text-secondary/60 uppercase">{t('operationsSection.timeline')}</span>
                                 <span className="text-text-secondary">T+{op.preparation_turns_elapsed}{op.preparation_max_turns != null ? ` / ${op.preparation_max_turns}` : ''}</span>
                             </div>
                         )}
-                        {op.has_active_probe && <span className="text-red-500 font-bold border border-red-500/30 bg-red-500/5 px-1.5 animate-pulse text-[9px]">PROBE ACTIVE</span>}
+                        {op.has_active_probe && <span className="text-red-500 font-bold border border-red-500/30 bg-red-500/5 px-1.5 animate-pulse text-[9px]">{t('operationsSection.probeActive')}</span>}
                     </div>
 
                     {op.commander_assessment && (
                         <div className="flex items-center gap-2">
-                            <span className="text-text-secondary/60 uppercase">ASSESSMENT:</span>
+                            <span className="text-text-secondary/60 uppercase">{t('operationsSection.assessment')}</span>
                             <span className={`font-bold px-2 py-0.5 border ${op.commander_assessment === 'launch' ? 'text-emerald-400 border-panel-border' :
                                     op.commander_assessment === 'abort' ? 'text-red-500 border-red-500/30' : 'text-amber-500 border-amber-500/30'
                                 }`}>{op.commander_assessment.toUpperCase()}</span>
@@ -327,15 +328,15 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     {/* Readiness bars */}
                     {op.readiness && (
                         <div className="space-y-2 max-w-sm pt-2">
-                            <ReadinessBar label="INTEL" value={op.readiness.intel} />
-                            <ReadinessBar label="SUPPLY" value={op.readiness.supply} />
-                            <ReadinessBar label="COHESN" value={op.readiness.cohesion} />
+                            <ReadinessBar label={t('operationsSection.intelShort')} value={op.readiness.intel} />
+                            <ReadinessBar label={t('operationsSection.supplyShort')} value={op.readiness.supply} />
+                            <ReadinessBar label={t('operationsSection.cohesionShort')} value={op.readiness.cohesion} />
                         </div>
                     )}
 
                     {forceBalance && (
                         <div className="pt-1 flex items-center gap-2">
-                            <span className="text-text-secondary/60 uppercase">FORCE BALANCE:</span>
+                            <span className="text-text-secondary/60 uppercase">{t('operationsSection.forceBalance')}</span>
                             <span className={`font-bold text-[12px] ${forceBalance.toneClass}`}>
                                 {forceBalance.label}
                             </span>
@@ -348,7 +349,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Objectives */}
             {objectives.length > 0 && (
                 <div className="space-y-2">
-                        <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">STRATEGIC OBJECTIVE LISTING ({objectives.length})</div>
+                        <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.strategicObjectiveListing', { count: objectives.length })}</div>
                     <div className="grid gap-1">
                         {objectives.map((obj, i) => {
                             const isCurrent = i === (op.current_objective_index ?? 0);
@@ -361,7 +362,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                                     <span className={`uppercase ${isCurrent ? 'text-amber-400 font-bold' : isComplete ? 'text-text-secondary/60 line-through' : 'text-text-secondary'}`}>
                                         {resolveObjectiveLabel(obj)}
                                     </span>
-                                    {isCurrent && <span className="ml-auto text-[9px] text-amber-400 font-bold tracking-tighter animate-pulse">PRIMARY OBJ</span>}
+                                    {isCurrent && <span className="ml-auto text-[9px] text-amber-400 font-bold tracking-tighter animate-pulse">{t('operationsSection.primaryObj')}</span>}
                                 </div>
                             );
                         })}
@@ -372,7 +373,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Axes detail (execution phase) */}
             {axes.length > 0 && (
                 <div className="space-y-3">
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">AXIS OF ADVANCE STATUS ({axes.length})</div>
+                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.axisOfAdvanceStatus', { count: axes.length })}</div>
                     <div className="grid gap-2">
                         {axes.map((axis) => (
                             <div key={axis.axis_id} className="px-3 py-2 border border-panel-border/50 bg-panel-card rounded-md">
@@ -383,9 +384,9 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary text-[10px] uppercase">
-                                    <span className="flex items-center gap-2"><b className="text-text-secondary">{axis.assigned_brigades.length}</b> UNITS DEPLOYED</span>
-                                    <span className="flex items-center gap-2">OBJ <b className="text-text-secondary">{axis.current_objective_index + 1} / {axis.objectives.length}</b></span>
-                                    <span className={`flex items-center gap-2 ${axis.momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>MOM <b className="text-current font-bold">{axis.momentum > 0 ? '+' : ''}{axis.momentum.toFixed(1)}</b></span>
+                                    <span className="flex items-center gap-2"><b className="text-text-secondary">{axis.assigned_brigades.length}</b> {t('operationsSection.unitsDeployed')}</span>
+                                    <span className="flex items-center gap-2">{t('operationsSection.objShort')} <b className="text-text-secondary">{axis.current_objective_index + 1} / {axis.objectives.length}</b></span>
+                                    <span className={`flex items-center gap-2 ${axis.momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>{t('operationsSection.momShort')} <b className="text-current font-bold">{axis.momentum > 0 ? '+' : ''}{axis.momentum.toFixed(1)}</b></span>
                                 </div>
                             </div>
                         ))}
@@ -396,14 +397,14 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Participating brigades — enhanced with per-brigade status grid */}
             {brigadeIds.length > 0 && (
                 <div className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">OPERATIONAL ORBAT ({brigadeIds.length} UNITS)</div>
+                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.operationalOrbat', { count: brigadeIds.length })}</div>
                     {/* Column headers */}
                     <div className="flex items-center gap-2 px-2 text-[8px] text-text-secondary/40 uppercase tracking-widest font-bold border-l-2 border-transparent">
-                        <span className="flex-1 min-w-0">UNIT</span>
-                        <span className="w-12 text-right">PERS</span>
-                        <span className="w-8 text-right">COH</span>
-                        <span className="w-8 text-right">MOR</span>
-                        <span className="w-6 text-center">STS</span>
+                        <span className="flex-1 min-w-0">{t('operationsSection.unit')}</span>
+                        <span className="w-12 text-right">{t('operationsSection.persShort')}</span>
+                        <span className="w-8 text-right">{t('operationsSection.cohShort')}</span>
+                        <span className="w-8 text-right">{t('operationsSection.morShort')}</span>
+                        <span className="w-6 text-center">{t('operationsSection.stsShort')}</span>
                     </div>
                     <div className="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-panel-border space-y-0">
                         {brigadeIds.map((id) => {
@@ -419,13 +420,13 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {op.phase === 'execution' && (
                 <div className="flex flex-wrap gap-x-8 gap-y-2 border-t border-panel-border/50 pt-4 text-text-secondary/60 text-[10px] uppercase tracking-widest">
                     {op.failure_count != null && op.failure_count > 0 && (
-                        <div className="flex items-center gap-2">FATIGUE: <span className="text-red-500 font-bold">{op.failure_count} / 5</span></div>
+                        <div className="flex items-center gap-2">{t('operationsSection.fatigue')} <span className="text-red-500 font-bold">{op.failure_count} / 5</span></div>
                     )}
                     {op.consecutive_failures_on_current != null && op.consecutive_failures_on_current > 0 && (
-                        <div className="flex items-center gap-2">STALLING: <span className="text-red-500 font-bold">{op.consecutive_failures_on_current} / 3</span></div>
+                        <div className="flex items-center gap-2">{t('operationsSection.stalling')} <span className="text-red-500 font-bold">{op.consecutive_failures_on_current} / 3</span></div>
                     )}
                     {op.phase_started_turn != null && (
-                        <div className="flex items-center gap-2">DEPLOYED SINCE: <span className="text-text-primary font-bold">W{op.phase_started_turn}</span></div>
+                        <div className="flex items-center gap-2">{t('operationsSection.deployedSince')} <span className="text-text-primary font-bold">{t('operationsSection.weekShort', { week: op.phase_started_turn })}</span></div>
                     )}
                 </div>
             )}
@@ -433,7 +434,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Recovery info */}
             {op.phase === 'recovery' && op.recovery_reason && (
                 <div className="text-blue-400 font-bold italic tracking-widest uppercase border border-blue-400/20 bg-blue-400/5 p-3">
-                    [ RECOVERY MODE ] REASON: {op.recovery_reason.toUpperCase().replace(/_/g, ' ')}
+                    {t('operationsSection.recoveryModeReason', { reason: op.recovery_reason.toUpperCase().replace(/_/g, ' ') })}
                 </div>
             )}
 
@@ -443,18 +444,18 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     {/* Grade banner */}
                     <div className="flex items-center justify-between px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
                         <div className="flex flex-col gap-1">
-                            <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest">AFTER-ACTION ASSESSMENT</div>
+                            <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest">{t('operationsSection.afterActionAssessment')}</div>
                             <div className="flex items-center gap-3">
                                 <StarRating stars={completedAAR.grade.stars} verdict={completedAAR.grade.verdict} />
                                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${OUTCOME_COLOR[completedAAR.outcome] ?? 'text-text-secondary'} border-current/30 bg-current/5`}>
-                                    {OUTCOME_LABEL[completedAAR.outcome] ?? completedAAR.outcome}
+                                    {OUTCOME_LABEL_KEY[completedAAR.outcome] ? t(OUTCOME_LABEL_KEY[completedAAR.outcome]) : completedAAR.outcome}
                                 </span>
                             </div>
                         </div>
                         <div className="text-right text-[9px] text-text-secondary/50 font-mono tabular-nums">
-                            <div>W{completedAAR.started_turn} - W{completedAAR.ended_turn}</div>
-                            <div>{completedAAR.duration_turns} TURNS / {completedAAR.total_attacks} ATTACKS</div>
-                            <div>{completedAAR.objectives_captured.length} / {completedAAR.objectives_targeted.length} OBJ TAKEN</div>
+                            <div>{t('operationsSection.weekRange', { start: completedAAR.started_turn, end: completedAAR.ended_turn })}</div>
+                            <div>{t('operationsSection.aarDurationAttacks', { duration: completedAAR.duration_turns, attacks: completedAAR.total_attacks })}</div>
+                            <div>{t('operationsSection.aarObjectivesTaken', { captured: completedAAR.objectives_captured.length, targeted: completedAAR.objectives_targeted.length })}</div>
                         </div>
                     </div>
 
@@ -473,19 +474,19 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     <CasualtyBlock
                         suffered={completedAAR.casualties_suffered}
                         inflicted={completedAAR.casualties_inflicted}
-                        label="CASUALTY SUMMARY"
+                        label={t('operationsSection.casualtySummary')}
                     />
 
                     {/* Equipment losses */}
                     {(completedAAR.equipment_lost.tanks > 0 || completedAAR.equipment_lost.artillery > 0 ||
                       completedAAR.equipment_destroyed.tanks > 0 || completedAAR.equipment_destroyed.artillery > 0) && (
                         <div className="flex flex-wrap gap-x-6 gap-y-1 text-[9px] font-mono tabular-nums text-text-secondary/50 uppercase">
-                            {completedAAR.equipment_lost.tanks > 0 && <span>TANKS LOST: <b className="text-red-500">{completedAAR.equipment_lost.tanks}</b></span>}
-                            {completedAAR.equipment_lost.artillery > 0 && <span>ARTY LOST: <b className="text-red-500">{completedAAR.equipment_lost.artillery}</b></span>}
-                            {completedAAR.equipment_destroyed.tanks > 0 && <span>TANKS DESTROYED: <b className="text-emerald-400">{completedAAR.equipment_destroyed.tanks}</b></span>}
-                            {completedAAR.equipment_destroyed.artillery > 0 && <span>ARTY DESTROYED: <b className="text-emerald-400">{completedAAR.equipment_destroyed.artillery}</b></span>}
-                            {completedAAR.equipment_captured.tanks > 0 && <span>TANKS CAPTURED: <b className="text-accent-gold">{completedAAR.equipment_captured.tanks}</b></span>}
-                            {completedAAR.equipment_captured.artillery > 0 && <span>ARTY CAPTURED: <b className="text-accent-gold">{completedAAR.equipment_captured.artillery}</b></span>}
+                            {completedAAR.equipment_lost.tanks > 0 && <span>{t('operationsSection.tanksLost')} <b className="text-red-500">{completedAAR.equipment_lost.tanks}</b></span>}
+                            {completedAAR.equipment_lost.artillery > 0 && <span>{t('operationsSection.artyLost')} <b className="text-red-500">{completedAAR.equipment_lost.artillery}</b></span>}
+                            {completedAAR.equipment_destroyed.tanks > 0 && <span>{t('operationsSection.tanksDestroyed')} <b className="text-emerald-400">{completedAAR.equipment_destroyed.tanks}</b></span>}
+                            {completedAAR.equipment_destroyed.artillery > 0 && <span>{t('operationsSection.artyDestroyed')} <b className="text-emerald-400">{completedAAR.equipment_destroyed.artillery}</b></span>}
+                            {completedAAR.equipment_captured.tanks > 0 && <span>{t('operationsSection.tanksCaptured')} <b className="text-accent-gold">{completedAAR.equipment_captured.tanks}</b></span>}
+                            {completedAAR.equipment_captured.artillery > 0 && <span>{t('operationsSection.artyCaptured')} <b className="text-accent-gold">{completedAAR.equipment_captured.artillery}</b></span>}
                         </div>
                     )}
 
@@ -510,25 +511,25 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     const handleForceLaunch = async (opName: string) => {
         if (!ipc.isAvailable) return;
         if (!canForceLaunch) {
-            setLoadError(`Insufficient command authority (${authCurrent}/${FORCE_LAUNCH_COST} needed)`);
+            setLoadError(t('operationsSection.insufficientAuthority', { current: authCurrent, cost: FORCE_LAUNCH_COST }));
             return;
         }
         const result = await ipc.stageOperationForceLaunch({ corpsId, operationName: opName });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to force-launch operation.');
+        if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.forceLaunch'));
     };
 
     const handleStandDown = async (opName: string) => {
         if (!ipc.isAvailable) return;
         const result = await ipc.stageOperationHalt({ corpsId, operationName: opName, digInOnHalt: true });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to stand down operation.');
+        if (!result.ok) setLoadError(result.error ?? t('operationsSection.error.standDown'));
     };
 
     return (
-        <CollapsibleSection sectionKey={`ops-${corpsId}`} title="Operations" count={operations.length}>
+        <CollapsibleSection sectionKey={`ops-${corpsId}`} title={t('operationsSection.title')} count={operations.length}>
             {operations.length === 0 ? (
                 <EmptyState
-                    message="No active operations"
-                    helpText="Awaiting orders from corps command."
+                    message={t('operationsSection.empty')}
+                    helpText={t('operationsSection.emptyHelp')}
                     density="compact"
                 />
             ) : (
@@ -539,7 +540,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         <p className={`text-[9px] font-mono italic ${
                             commandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
                         }`}>
-                            Operating under command strain
+                            {t('operationsSection.commandStrainNotice')}
                         </p>
                     )}
                     {operations.map((op) => {
@@ -572,7 +573,11 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                         : Math.min(op.readiness.supply, op.readiness.cohesion, op.readiness.intel) < 0.7
                                                             ? 'bg-amber-400'
                                                             : 'bg-emerald-400'
-                                                }`} title={`Readiness: Supply ${Math.round(op.readiness.supply * 100)}% / Cohesion ${Math.round(op.readiness.cohesion * 100)}% / Intel ${Math.round(op.readiness.intel * 100)}%`} />
+                                                }`} title={t('operationsSection.readinessTitle', {
+                                                    supply: Math.round(op.readiness.supply * 100),
+                                                    cohesion: Math.round(op.readiness.cohesion * 100),
+                                                    intel: Math.round(op.readiness.intel * 100),
+                                                })} />
                                             )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
@@ -594,16 +599,16 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                         </div>
                                     </div>
                                     <div className="text-[10px] tabular-nums font-mono flex flex-wrap gap-x-6 gap-y-1 ml-5 uppercase tracking-tighter">
-                                        <span className="text-text-secondary">UNITS: <b className="text-text-secondary">{op.participating_brigade_count}</b></span>
-                                        <span className="text-text-secondary">OBJECTIVES: <b className="text-text-secondary">{objectives.length}</b></span>
+                                        <span className="text-text-secondary">{t('operationsSection.units')} <b className="text-text-secondary">{op.participating_brigade_count}</b></span>
+                                        <span className="text-text-secondary">{t('operationsSection.objectives')} <b className="text-text-secondary">{objectives.length}</b></span>
                                         {op.phase === 'execution' && (
                                             <span className={`flex items-center gap-2 ${momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>
-                                                MOMENTUM: <b className="font-bold">{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</b>
+                                                {t('operationsSection.momentum')} <b className="font-bold">{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</b>
                                             </span>
                                         )}
                                         {commander && (
                                             <span className="text-text-secondary/60 border-l border-panel-border/50 pl-4 ml-auto">
-                                                CMDR: {commander.toUpperCase()}
+                                                {t('operationsSection.commanderShort')} {commander.toUpperCase()}
                                             </span>
                                         )}
                                     </div>
@@ -618,9 +623,9 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                     disabled={!canForceLaunch}
                                                     className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border font-mono transition-all ${canForceLaunch ? 'border-panel-border text-text-primary hover:bg-panel-bg' : 'border-panel-border/30 text-text-secondary/40 cursor-not-allowed'}`}
                                                     title={canForceLaunch
-                                                        ? `Level 3 Direct Intervention — costs ${FORCE_LAUNCH_COST} Command Authority (current: ${authCurrent})`
-                                                        : `Insufficient Command Authority (${authCurrent}/${FORCE_LAUNCH_COST} needed)`}>
-                                                    [ DIRECT INTERVENTION — {FORCE_LAUNCH_COST} AUTH ]
+                                                        ? t('operationsSection.directInterventionTitle', { cost: FORCE_LAUNCH_COST, current: authCurrent })
+                                                        : t('operationsSection.insufficientAuthority', { current: authCurrent, cost: FORCE_LAUNCH_COST })}>
+                                                    {t('operationsSection.directInterventionButton', { cost: FORCE_LAUNCH_COST })}
                                                 </button>
                                             )}
                                             {/* Review Command Decision — opens OperationBriefingModal for executing/recovery ops.
@@ -629,14 +634,14 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 <button type="button"
                                                     onClick={(e) => { e.stopPropagation(); setOperationBriefingContext({ corpsId: op.corps_id, operationName: op.name }); }}
                                                     className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border/40 text-text-secondary/70 hover:bg-panel-bg hover:text-text-secondary transition-all font-mono">
-                                                    [ REVIEW COMMAND DECISION ]
+                                                    {t('operationsSection.reviewCommandDecision')}
                                                 </button>
                                             )}
                                             {op.phase === 'execution' && (
                                                 <button type="button"
                                                     onClick={(e) => { e.stopPropagation(); void handleStandDown(op.name); }}
                                                     className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-red-500/40 text-red-500 hover:bg-red-500/20 transition-all font-mono">
-                                                    [ STAND DOWN ]
+                                                    {t('operationsSection.standDown')}
                                                 </button>
                                             )}
                                         </div>

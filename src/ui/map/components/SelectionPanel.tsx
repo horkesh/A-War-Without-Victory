@@ -10,6 +10,8 @@ import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import { useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import {
   filterPlayerFacingFormations,
   filterPlayerFacingMovementsByOsid,
@@ -25,6 +27,7 @@ interface SelectionPanelProps {
 
 export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) {
   const ipc = useIPC();
+  const [locale] = useLocale();
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
@@ -67,7 +70,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const canStageSupport = Boolean(ipc.isAvailable && playerFaction && selectedMunId && supportType);
   const formationsForDetail = formations.map((f) => ({
     id: f.id,
-    name: f.name,
+    name: getLocalizedFormationName(f, locale),
     faction: f.faction,
     personnel: f.personnel,
     kind: f.kind,
@@ -158,17 +161,23 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     const attack =
       loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)
+          ? getLocalizedFormationName(playerFacingFormations.find((fr) => fr.id === o.brigadeId)!, locale)
+          : undefined,
       })) ?? [];
     const move =
       loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)
+          ? getLocalizedFormationName(playerFacingFormations.find((fr) => fr.id === o.brigadeId)!, locale)
+          : undefined,
       })) ?? [];
     const reposition =
       loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)
+          ? getLocalizedFormationName(playerFacingFormations.find((fr) => fr.id === o.brigadeId)!, locale)
+          : undefined,
       })) ?? [];
     if (attack.length === 0 && move.length === 0 && reposition.length === 0) return undefined;
     return { attack, move, reposition };

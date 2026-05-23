@@ -13,6 +13,7 @@ import type {
 import type { FeatureCollection } from 'geojson';
 import type { PickingInfo } from '@deck.gl/core';
 import type { LoadedGameState } from '../data/types';
+import { useLocale } from '../i18n';
 import {
   useMapInteractions,
   queryPreferredFrontFeatureNearPoint,
@@ -193,8 +194,12 @@ import {
 } from './renderChurnGuards';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
+// West bound widened from 15.7243 → 15.45 (≈+25 km margin) so the camera can
+// recenter on Bihać (≈15.87°E, 44.82°N) without the city sliding off-screen.
+// Prior bound left ~12 km between Bihać and the panning edge — at default zoom
+// the city was unreachable. East/N/S bounds unchanged.
 const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [15.7243, 42.55719],
+  [15.45, 42.55719],
   [19.62278, 45.270542],
 ];
 const TACTICAL_MAP_PITCH_DEGREES = 30;
@@ -405,6 +410,7 @@ function composeDeckLayersForCurrentSelection(args: {
 }
 
 export function MapContainer() {
+  const [locale] = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
@@ -425,6 +431,7 @@ export function MapContainer() {
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
   const appliedStateRef = useRef<LoadedGameState | null>(null);
+  const appliedLocaleRef = useRef(locale);
   /** Idle/timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
   const deferredOverlayHandleRef = useRef<ReturnType<typeof requestIdleCallback> | ReturnType<typeof setTimeout> | null>(null);
   const interactionLayerSignatureRef = useRef('');
@@ -1136,6 +1143,7 @@ export function MapContainer() {
       const needsUpdate = appliedStateRef.current !== loadedGameState ||
         appliedStagedOrdersRef.current !== stagedOrders ||
         appliedExpandedStackOsidRef.current !== expandedStackOsid ||
+        appliedLocaleRef.current !== locale ||
         // selectedFormationId change should also trigger update for chain-of-command
         appliedSelectedFormationIdRef.current !== selectedFormationId;
       if (!needsUpdate) return;
@@ -1147,6 +1155,7 @@ export function MapContainer() {
       requestAnimationFrame(() => {
         if (cancelled || !mapRef.current || !state) return;
         appliedStateRef.current = state;
+        appliedLocaleRef.current = locale;
         appliedStagedOrdersRef.current = currentStagedOrders;
         appliedExpandedStackOsidRef.current = stack;
         appliedSelectedFormationIdRef.current = selectedFormationId;
@@ -1455,7 +1464,7 @@ export function MapContainer() {
               try {
                 // Only hide map-level icons if the overlay anchor is ready, ensuring no "flicker/disappearance"
                 const activeOverlayOsid = (expandedStackOsid && overlayAnchor) ? expandedStackOsid : null;
-                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid);
+                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid, locale);
                 // Order arrows removed — player is political leader, not military commander.
                 // The source stays empty; layers in awwv_map_style.json are inert.
                 const iconIds = Array.from(new Set(formationsGeoJson.features.flatMap(f => [f.properties.icon_id, f.properties.white_icon_id])));
@@ -1774,7 +1783,7 @@ export function MapContainer() {
         sourceUpdatePollRef.current = null;
       }
     };
-  }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid]);
+  }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid, locale]);
 
   // Major-mun names (game data): glyphs need local font stack; layer on top so not buried under lines.
   useEffect(() => {

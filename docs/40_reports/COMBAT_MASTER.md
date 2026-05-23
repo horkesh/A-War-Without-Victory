@@ -12,16 +12,41 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
-## Current State (n1302)
+## Current State (n1302 40w; n2003 188w)
 
 | Metric | Value |
 |---|---|
-| Calibration | **93.7% area-weighted (40w) — NEW ATH** |
-| Anchors | 25/25 |
-| Benchmarks | 6/6 |
-| Hash | 0cf989330bd36cc8 |
+| 40w calibration | **93.7% area-weighted — NEW ATH** (n1302) |
+| 40w anchors | 25/25 |
+| 40w benchmarks | 6/6 |
+| 40w hash | 0cf989330bd36cc8 |
+| 188w spatial match_ratio | **79.21%** (564/712 OSIDs; n2003 hash `47438d249146d1af`, 2026-05-23) |
+| 188w HRHB accuracy | 67.29% (honest post-headless-contract baseline; HRHB -21 OSIDs vs painted target) |
 | Attacker:defender casualty ratio | 0.814 (attack_resolution) / 0.63 (anomaly_detection) — source discrepancy unresolved |
 | Decisive victory share | ~87% of battles |
+
+---
+
+## Fall-1995 mechanics (added 2026-05-23; validated into n2003 baseline)
+
+Five new defender-side modifiers gated `if (multiplier !== 1.0)` for byte-stability on the historical (no-event, no-cascade, no-HV-attached) path. The initial n1999 81.18% run is superseded by n2003 because n1999 masked 15 stuck headless event decisions. Current document of record for calibration baseline is `docs/40_reports/CALIBRATION_MASTER.md`; Fall-1995 packet design record is `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`.
+
+| Modifier | Location | Applies to | Trigger |
+|---|---|---|---|
+| **multiAxisMult** (E-A3) | `combat_math.ts` defender power; cache built in `war_phases.ts` `build-active-offensives-cache` | Defender corps facing ≥2 simultaneous enemy offensives | 1.0× / 0.9× / 0.8× / 0.7× by enemy-offensive count (capped 4+) |
+| **cascadeMult** (E-A4) | `combat_math.ts`; writer `emitCascadePenaltiesOnFlip` in `attack_resolution_osid.ts`; reader `getCascadePenaltyForOsid` in `active_modifiers.ts` | Defender OSID adjacent to a same-faction OSID that flipped last turn | 0.85× for 1 turn |
+| **peripheryMult** (E-B4) | `combat_math.ts` `computePeripheryAbandonmentMult` | Defender OSID on faction's `periphery` tier when defending corps' `coordination_coherence < 0.6` | 0.80× |
+| **HV Una negative-control** (E-B2) | `sector_offensive.ts` predictor `force_ratio_estimate` | Operation with >80% HV-tagged brigades AND no HVO-native HRHB brigade in same corps' sectors | Force-ratio × 0.65 (op rejected at launch floor) |
+| **equipment_quality_modifier** (E-A1 / E-A2) | Existing `getActiveEquipmentQualityMultiplier` reader, new event entries in `war_1995.json` | Whole faction during event window | RS × 0.70 (NATO Deliberate Force, 4 turns); RBiH × 1.15 (HV ammo transfusion, 6 turns) |
+
+**Foundation state surfaces (added 2026-05-23):**
+- `FormationState.coordination_coherence?: number` (corps-only, [0..1], default 1.0) — central proposal, decay logic deferred to E-B1 follow-up.
+- `FormationState.strategic_depth?: number` (corps-only, [0..1], default 1.0) — recomputed each war turn in `update-strategic-depth` step from friendly-adjacent munis + distance-to-front + `state.meta.svk_corps_active`.
+- `MilitaryState.cascade_penalties?: Array<{osid, multiplier, expires_turn}>` — GC'd by `cleanupExpiredEventModifiers`.
+- `MilitaryState.offensive_ops_suppressions?: Array<{faction, expires_turn, reason?}>` — for E-A5 51:49 halt (consumer deferred).
+- `MilitaryState.active_offensives_against_corps?: Record<FormationId, number>` — turn-start cache for E-A3.
+
+**Strategic priorities (E-B4 data):** `data/source/strategic_priorities.json` is the authoritative classification of OSIDs as `core` / `corridor` / `periphery` per faction. RS core: Banja Luka, Pale, Han Pijesak, Sokolac, Bijeljina. RS corridor: Brčko, Modriča, Doboj, Derventa, Bosanski Brod (Posavina axis). RS periphery: western Bosnia (default). Reader: `getOsidPriority(osid, faction)` in `src/sim/combat/strategic_priorities.ts`. Read by `combat_math.ts` periphery penalty + `strategic_reserve.ts` priority-aware allocation.
 
 **Note on casualty ratio:** The aggregate number is faction-blind. VRS-attacks-ARBiH and ARBiH-attacks-VRS have opposing expected ratios. See "Faction-Specific Casualty Context" section below.
 

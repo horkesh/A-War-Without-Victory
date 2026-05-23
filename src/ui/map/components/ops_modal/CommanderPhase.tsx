@@ -17,6 +17,7 @@ import {
 } from '../../utils/officerCharacter';
 import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';
 import { formatCorpsDisplayName } from '../../utils/formatters';
+import { t } from '../../i18n';
 
 interface CommanderPhaseProps {
     onAdvance: () => void;
@@ -47,6 +48,13 @@ function getRegionalFit(officer: NamedOfficerView, targetCorpsId: string): { lab
 }
 
 import { FACTION_HEX_COLORS } from '../plan_ui/opsConstants';
+
+function localizeRegionalFit(label: string): string {
+    if (label === 'HOME CORPS') return t('opsPlanning.commander.regional.home');
+    if (label === 'COMPATIBLE') return t('opsPlanning.commander.regional.compatible');
+    if (label === 'OUT OF REGION') return t('opsPlanning.commander.regional.outOfRegion');
+    return label;
+}
 
 export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
     const corpsId = useGameStore((s) => s.opsPlanningCorpsId);
@@ -146,16 +154,16 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                 </div>
                 {corpsCommander && (
                     <div className="text-[10px] text-text-secondary">
-                        <span className="uppercase tracking-wider">Commanding:</span>{' '}
+                        <span className="uppercase tracking-wider">{t('opsPlanning.commander.commanding')}</span>{' '}
                         <span className="text-white">{formatRank(corpsCommander.rank)} {corpsCommander.name}</span>
                     </div>
                 )}
                 <div className="flex gap-4 text-[10px] text-text-secondary">
                     <div>
-                        <span className="text-white font-bold">{totalPersonnel.toLocaleString()}</span> personnel
+                        <span className="text-white font-bold">{totalPersonnel.toLocaleString()}</span> {t('opsPlanning.commander.personnel')}
                     </div>
                     <div>
-                        <span className="text-white font-bold">{sectorCount}</span> sectors
+                        <span className="text-white font-bold">{sectorCount}</span> {t('opsPlanning.commander.sectors')}
                     </div>
                 </div>
             </div>
@@ -165,13 +173,13 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                 <div className="bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg
                                 border border-[rgba(180,160,130,0.15)] p-4">
                     <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold mb-3">
-                        Select Operations Commander
+                        {t('opsPlanning.commander.select')}
                     </div>
 
                     {/* Available officers */}
                     {availableOfficers.length === 0 && (
                         <div className="text-[11px] text-text-secondary/60 italic py-6 text-center">
-                            No officers available for this operation. All faction officers are assigned, KIA, or otherwise unavailable.
+                            {t('opsPlanning.commander.noneAvailable')}
                         </div>
                     )}
                     <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
@@ -198,7 +206,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                             </div>
                                         </div>
                                         <div className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${fit.colorClass} bg-white/5`}>
-                                            {fit.label}
+                                            {localizeRegionalFit(fit.label)}
                                         </div>
                                     </div>
 
@@ -208,13 +216,13 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
 
                                     <div className="flex gap-3 mt-2">
                                         <div className="space-y-0.5">
-                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">Competence</div>
+                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.competence')}</div>
                                             <div className="text-[10px]" style={{ color: getRatingColor(officer.competence) }}>
                                                 {formatPips(officer.competence)} <span className="text-text-secondary">{getCompetenceLabel(officer.competence)}</span>
                                             </div>
                                         </div>
                                         <div className="space-y-0.5">
-                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">Aggressiveness</div>
+                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.aggressiveness')}</div>
                                             <div className="text-[10px]" style={{ color: getRatingColor(officer.aggressiveness) }}>
                                                 {formatPips(officer.aggressiveness)} <span className="text-text-secondary">{getAggressionLabel(officer.aggressiveness)}</span>
                                             </div>
@@ -222,12 +230,12 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                     </div>
 
                                     <div className="flex items-center gap-2 mt-2 text-[9px]">
-                                        <span className="text-text-secondary">Prep time:</span>
+                                        <span className="text-text-secondary">{t('opsPlanning.commander.prepTime')}</span>
                                         <span className={`font-bold ${prepTurns <= 3 ? 'text-green-400' : prepTurns <= 5 ? 'text-amber-400' : 'text-red-400'}`}>
-                                            {prepTurns} turns
+                                            {prepTurns} {t('opsPlanning.commander.turns')}
                                         </span>
                                         {officer.operations_commanded != null && officer.operations_commanded > 0 && (
-                                            <span className="text-text-secondary ml-auto">{officer.operations_commanded} ops commanded</span>
+                                            <span className="text-text-secondary ml-auto">{t('opsPlanning.commander.opsCommanded', { count: officer.operations_commanded })}</span>
                                         )}
                                     </div>
                                 </button>
@@ -239,11 +247,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     {pendingOfficer && (
                         <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.15)] flex items-center gap-3">
                             <span className="text-[10px] text-text-secondary flex-1 truncate">
-                                Selected: <span className="text-white font-bold">
+                                {t('opsPlanning.commander.selected')} <span className="text-white font-bold">
                                     {formatRank(pendingOfficer.officer.rank)} {pendingOfficer.officer.name}
                                 </span>
                                 <span className={`ml-1.5 text-[8px] uppercase ${pendingOfficer.fit.colorClass}`}>
-                                    ({pendingOfficer.fit.label})
+                                    ({localizeRegionalFit(pendingOfficer.fit.label)})
                                 </span>
                             </span>
                             <button
@@ -253,14 +261,14 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                            bg-accent-gold/20 text-accent-gold border border-accent-gold/30
                                            hover:bg-accent-gold/30 transition-colors"
                             >
-                                Confirm & Proceed &rarr;
+                                {t('opsPlanning.commander.confirm')}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleCancelSelection}
                                 className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
                             >
-                                Cancel
+                                {t('opsPlanning.commander.cancel')}
                             </button>
                         </div>
                     )}
@@ -269,7 +277,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     {unavailableOfficers.length > 0 && (
                         <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.08)]">
                             <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary/50 mb-2">
-                                Unavailable ({unavailableOfficers.length})
+                                {t('opsPlanning.commander.unavailable', { count: unavailableOfficers.length })}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 {unavailableOfficers.map(({ officer, reason }) => (

@@ -22,6 +22,7 @@ import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSO
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
+import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
@@ -299,7 +300,9 @@ export function getWarroomBoardDateLabel(
   if (rawDate && rawDate !== 'UNKNOWN') return rawDate.split('·')[0].trim();
   const labelDate = state?.label ? formatTurnLabel(state.label).split('·')[0].trim() : '';
   if (labelDate && !labelDate.toLowerCase().startsWith('turn ')) return labelDate;
-  return typeof state?.turn === 'number' ? `Turn ${state.turn}` : 'Date Pending';
+  return typeof state?.turn === 'number'
+    ? t('warroomShell.turnLabel', { turn: state.turn })
+    : t('warroomShell.datePending');
 }
 
 function factionInkColor(faction: string | null): string {
@@ -364,7 +367,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
               textTransform: 'uppercase',
             }}
           >
-            Map updating
+            {t('warroomShell.mapUpdating')}
           </div>
         )}
       </div>
@@ -389,13 +392,16 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
     >
       <div
         style={{
-          color: 'rgba(28, 84, 172, 0.86)',
+          // Darker, smaller, less aggressive — reads as a scribbled marker
+          // note rather than a billboarded UI label. Less luminous blue
+          // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
+          color: 'rgba(15, 32, 70, 0.92)',
           fontFamily: '"Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive',
-          fontSize: 'clamp(10px, 1.65vw, 29px)',
-          fontWeight: 700,
+          fontSize: 'clamp(7px, 1.05vw, 18px)',
+          fontWeight: 600,
           lineHeight: 1,
           transform: 'rotate(-2deg)',
-          textShadow: '0 0 1px rgba(255,255,255,0.24)',
+          textShadow: 'none',
           whiteSpace: 'nowrap',
           maxWidth: '92%',
           overflow: 'hidden',
@@ -494,9 +500,9 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
 // ── Region data by faction ─────────────────────────────────────────────────
 
 const FALLBACK_REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
-  RBiH: (fallbackRbihRegions as { regions: WarroomRegion[] }).regions,
-  RS: (fallbackRsRegions as { regions: WarroomRegion[] }).regions,
-  HRHB: (fallbackHrhbRegions as { regions: WarroomRegion[] }).regions,
+  RBiH: (fallbackRbihRegions as unknown as { regions: WarroomRegion[] }).regions,
+  RS: (fallbackRsRegions as unknown as { regions: WarroomRegion[] }).regions,
+  HRHB: (fallbackHrhbRegions as unknown as { regions: WarroomRegion[] }).regions,
 };
 
 const CANONICAL_REGION_URLS_BY_FACTION: Record<string, string> = {
@@ -630,7 +636,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             textTransform: 'uppercase',
           }}
         >
-          Warroom unavailable until a campaign side is selected.
+          {t('warroomShell.unavailable')}
         </div>
         <button
           type="button"
@@ -649,7 +655,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             boxShadow: '0 8px 22px rgba(0,0,0,0.38)',
           }}
         >
-          Open Side Picker
+          {t('warroomShell.openSidePicker')}
         </button>
       </div>
     );

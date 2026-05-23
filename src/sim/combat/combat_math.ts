@@ -34,7 +34,7 @@ import {
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import type { Osid } from './osid_adjacency.js';
 import { getHomeDistanceMult } from './home_distance.js';
-import { getActiveEquipmentQualityMultiplier } from '../events/active_modifiers.js';
+import { getActiveEquipmentQualityMultiplier, getCascadePenaltyForOsid } from '../events/active_modifiers.js';
 
 type CombatMathProfileTimer = <T>(labelSuffix: string, fn: () => T) => T;
 
@@ -58,6 +58,14 @@ export interface DefenderPowerBreakdown {
     homeMult: number;
     moraleMult: number;
     equipmentQualityMult: number;
+    /** Fall-1995 mechanic E-A3: 1.0× when defender corps faces ≤1 enemy offensive
+     *  (byte-stable historical path). 0.9× / 0.8× / 0.7× when facing 2 / 3 / 4+
+     *  simultaneous enemy offensives. Source: `state.military.active_offensives_against_corps`. */
+    multiAxisMult: number;
+    /** Fall-1995 mechanic E-A4: 1.0× when no cascade penalty active on this OSID
+     *  (byte-stable historical path). <1.0× when an adjacent OSID just flipped
+     *  this turn. Source: `getCascadePenaltyForOsid`. */
+    cascadeMult: number;
     power: number;
 }
 
@@ -1463,6 +1471,38 @@ export function computeDefenderPowerBreakdown(
         getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0)
     );
     if (eqMult !== 1.0) power *= eqMult;
+
+    // ── Fall-1995 mechanic E-A3: multi-axis simultaneity penalty ──────────
+    // When the defending corps is facing multiple simultaneous enemy
+    // offensive operations, it cannot laterally redeploy and effective
+    // power degrades by 10% per additional offensive, capped at 4+ offensives
+    // (i.e. min(n-1, 3) → 1.0× / 0.9× / 0.8× / 0.7×).
+    // Source cache: `state.military.active_offensives_against_corps` (built
+    // turn-start in war_phases.ts `build-active-offensives-cache`).
+    // Byte-stability: gated `if (multiAxisMult !== 1.0)` so the historical
+    // single-offensive path is untouched.
+    let multiAxisMult = 1.0;
+    const defenderCorpsId = formation.corps_id;
+    if (defenderCorpsId) {
+        const offensiveCount = state.military.active_offensives_against_corps?.[defenderCorpsId] ?? 0;
+        if (offensiveCount > 1) {
+            const cappedExcess = Math.min(offensiveCount - 1, 3);
+            multiAxisMult = 1.0 - 0.10 * cappedExcess;
+        }
+    }
+    if (multiAxisMult !== 1.0) power *= multiAxisMult;
+
+    // ── Fall-1995 mechanic E-A4: cascade trigger (1-turn adjacency penalty) ──
+    // When an adjacent OSID flipped to the enemy last turn, this defender OSID
+    // receives a 1-turn defender-power penalty. Penalty entries are written in
+    // attack_resolution_osid.ts on flip and GC'd by cleanupExpiredEventModifiers.
+    // Byte-stability: gated `!== 1.0` so the historical (no-cascade) path is
+    // untouched. Reader filters by expires_turn > currentTurn.
+    const cascadeMult = combatMathProfileTime(profileTime, '.cascade', () =>
+        getCascadePenaltyForOsid(state, targetOsid, state.meta.turn ?? 0)
+    );
+    if (cascadeMult !== 1.0) power *= cascadeMult;
+
     return {
         base,
         postureMult,
@@ -1483,6 +1523,8 @@ export function computeDefenderPowerBreakdown(
         homeMult,
         moraleMult: moralePenalty,
         equipmentQualityMult: eqMult,
+        multiAxisMult,
+        cascadeMult,
         power,
     };
 }
@@ -1572,8 +1614,12 @@ export function rankDefendersByPower(
 // P7 — War Exhaustion → Attack Tempo Penalty
 // ═══════════════════════════════════════════════════════════════════════════
 
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 30;
-const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 80;
+// 2026-05-22: rescaled 30/80 → 3000/8000 alongside war_exhaustion cap 100 → 10000
+// per forensics memo `20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md` §6.
+// Uniform 100× rescale preserves the original 0-100 percentage-scale semantics
+// (tempo penalty starts at 30% of cap, fully applied at 80% of cap).
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW  = 3000;
+const WAR_EXHAUSTION_TEMPO_THRESHOLD_HIGH = 8000;
 const WAR_EXHAUSTION_TEMPO_MULT_MIN       = 0.85;
 
 /**

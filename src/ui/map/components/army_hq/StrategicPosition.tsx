@@ -9,19 +9,20 @@
 
 import { useState } from 'react';
 import { DIMENSION_WEIGHTS } from '../../../../sim/events/strategic_dimensions.js';
+import { t, type MessageKey } from '../../i18n';
 
 const DIMENSION_CONFIG: Array<{
     id: string;
-    label: string;
+    labelKey: MessageKey;
     color: string;
     bgColor: string;
 }> = [
-    { id: 'military_credibility', label: 'Military Credibility', color: 'bg-red-500', bgColor: 'bg-red-500/20' },
-    { id: 'territorial_legitimacy', label: 'Territorial Legitimacy', color: 'bg-amber-500', bgColor: 'bg-amber-500/20' },
-    { id: 'international_standing', label: 'International Standing', color: 'bg-blue-400', bgColor: 'bg-blue-400/20' },
-    { id: 'patron_confidence', label: 'Patron Confidence', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/20' },
-    { id: 'internal_cohesion', label: 'Internal Cohesion', color: 'bg-purple-400', bgColor: 'bg-purple-400/20' },
-    { id: 'negotiating_leverage', label: 'Negotiating Leverage', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
+    { id: 'military_credibility', labelKey: 'strategicPosition.militaryCredibility', color: 'bg-red-500', bgColor: 'bg-red-500/20' },
+    { id: 'territorial_legitimacy', labelKey: 'strategicPosition.territorialLegitimacy', color: 'bg-amber-500', bgColor: 'bg-amber-500/20' },
+    { id: 'international_standing', labelKey: 'strategicPosition.internationalStanding', color: 'bg-blue-400', bgColor: 'bg-blue-400/20' },
+    { id: 'patron_confidence', labelKey: 'strategicPosition.patronConfidence', color: 'bg-emerald-500', bgColor: 'bg-emerald-500/20' },
+    { id: 'internal_cohesion', labelKey: 'strategicPosition.internalCohesion', color: 'bg-purple-400', bgColor: 'bg-purple-400/20' },
+    { id: 'negotiating_leverage', labelKey: 'strategicPosition.negotiatingLeverage', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
 ];
 
 /** Per-faction dimension weights — canonical source: DIMENSION_WEIGHTS in strategic_dimensions.ts */
@@ -79,14 +80,14 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg p-4">
             <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
-                STRATEGIC POSITION
+                {t('strategicPosition.title')}
             </div>
 
             {/* Composite Negotiating Capital bar — friendly-state weighted composite. */}
             <div className="mb-3 pb-2 border-b border-panel-border/50">
                 <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/90">
-                        NEGOTIATING CAPITAL
+                        {t('strategicPosition.negotiatingCapital')}
                     </span>
                     <span className={`text-[13px] font-mono font-bold tabular-nums ${compositeGradeColor(score)}`}>
                         {score}
@@ -99,13 +100,13 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                     />
                 </div>
                 <div className="text-[8px] text-text-secondary/50 mt-0.5 font-mono text-right">
-                    WEIGHTED COMPOSITE
+                    {t('strategicPosition.weightedComposite')}
                 </div>
             </div>
 
             {/* Individual dimension bars */}
             <div className="space-y-2">
-                {DIMENSION_CONFIG.map(({ id, label, color, bgColor }) => {
+                {DIMENSION_CONFIG.map(({ id, labelKey, color, bgColor }) => {
                     const dim = dimensions[id];
                     const effective = dim?.effective_value ?? 50;
                     const base = dim?.base_value ?? 50;
@@ -123,7 +124,7 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                         >
                             <div className="flex items-center justify-between mb-0.5">
                                 <span className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
-                                    {label}
+                                    {t(labelKey)}
                                     {weight != null && (
                                         <span className="text-[8px] text-text-secondary/40 ml-1 font-mono">
                                             {formatWeight(weight)}
@@ -152,12 +153,12 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                             {isHovered && (
                                 <div className="absolute z-50 left-0 top-full mt-1 bg-panel-bg border border-panel-border rounded px-2 py-1.5 shadow-lg whitespace-nowrap pointer-events-none">
                                     <div className="text-[9px] font-mono text-text-secondary space-y-0.5">
-                                        <div>Base: <span className="text-text-primary font-bold">{Math.round(base)}</span></div>
-                                        <div>Events: <span className={eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod >= 0 ? '+' : ''}{Math.round(eventMod)}</span></div>
-                                        <div>Effective: <span className={`font-bold ${gradeColor(effective)}`}>{Math.round(effective)}</span></div>
+                                        <div>{t('strategicPosition.base')} <span className="text-text-primary font-bold">{Math.round(base)}</span></div>
+                                        <div>{t('strategicPosition.events')} <span className={eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod >= 0 ? '+' : ''}{Math.round(eventMod)}</span></div>
+                                        <div>{t('strategicPosition.effective')} <span className={`font-bold ${gradeColor(effective)}`}>{Math.round(effective)}</span></div>
                                         {weight != null && (
                                             <div className="border-t border-panel-border/50 pt-0.5 mt-0.5">
-                                                Weight: <span className="text-amber-400">{formatWeight(weight)}</span>
+                                                {t('strategicPosition.weight')} <span className="text-amber-400">{formatWeight(weight)}</span>
                                             </div>
                                         )}
                                     </div>

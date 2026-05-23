@@ -1,3 +1,5 @@
+import { t } from '../../i18n';
+
 interface CommandTopBarProps {
     opName: string;
     onNameChange: (val: string) => void;
@@ -38,10 +40,10 @@ export function CommandTopBar({
                     )}
                     <div className="flex flex-col">
                         <h2 className="text-[11px] font-bold text-accent-gold uppercase tracking-[0.3em] drop-shadow-[0_0_8px_rgba(200,165,110,0.4)]">
-                            {corpsDisplayName ?? 'Operations Command'}
+                            {corpsDisplayName ?? t('planUi.operationsCommand')}
                         </h2>
                         <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider">
-                            Sector: {sectorName}
+                            {t('formationDetail.sector')} {sectorName}
                         </span>
                     </div>
                 </div>
@@ -50,25 +52,25 @@ export function CommandTopBar({
 
                 <div className="flex items-center gap-6">
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="command-topbar-directive-name" className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Directive Name</label>
+                        <label htmlFor="command-topbar-directive-name" className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.directiveName')}</label>
                         <input
                             id="command-topbar-directive-name"
                             type="text"
                             value={opName}
                             onChange={(e) => onNameChange(e.target.value)}
-                            placeholder="Unnamed Directive..."
+                            placeholder={t('planUi.unnamedDirective')}
                             className="bg-black/40 border border-white/10 rounded px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:border-accent-gold focus:outline-none transition-all w-[240px]"
                         />
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Command Authority</label>
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.commandAuthority')}</label>
                         <button
                             onClick={onCommanderClick}
                             className="h-[31px] min-w-[180px] bg-black/40 border border-white/10 rounded px-3 flex items-center justify-between hover:border-accent-gold transition-all group"
                         >
                             <span className="text-xs font-bold text-slate-300 group-hover:text-white">
-                                {commanderId ? (commanderName ?? commanderId) : "Select Authority"}
+                                {commanderId ? (commanderName ?? commanderId) : t('planUi.selectAuthority')}
                             </span>
                             <span className="text-[9px] text-accent-gold opacity-50">&#9660;</span>
                         </button>

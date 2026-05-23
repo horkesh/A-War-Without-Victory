@@ -4,6 +4,8 @@
  */
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
+import { t, useLocale } from '../../i18n';
+import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface BrigadeCardProps {
     brigade: FormationView;
@@ -23,34 +25,32 @@ function getMarchColor(turns: number | null): string {
 
 // WP2c: Verbal cohesion descriptor
 function getCohesionLabel(coh: number): { text: string; color: string } {
-    if (coh >= 70) return { text: 'STRONG', color: 'text-green-400' };
-    if (coh >= 40) return { text: 'ADEQUATE', color: 'text-amber-400' };
-    return { text: 'CRITICAL', color: 'text-red-400' };
+    if (coh >= 70) return { text: t('opsModal.strong'), color: 'text-green-400' };
+    if (coh >= 40) return { text: t('opsModal.adequate'), color: 'text-amber-400' };
+    return { text: t('peace.critical').toUpperCase(), color: 'text-red-400' };
 }
 
 // WP2d: Fatigue descriptor
 function getFatigueLabel(fat: number): { text: string; color: string } {
-    if (fat <= 2) return { text: 'FRESH', color: 'text-green-400' };
-    if (fat <= 5) return { text: 'TIRED', color: 'text-amber-400' };
-    return { text: 'EXHAUSTED', color: 'text-red-400' };
+    if (fat <= 2) return { text: t('opsModal.fresh'), color: 'text-green-400' };
+    if (fat <= 5) return { text: t('opsModal.tired'), color: 'text-amber-400' };
+    return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
 }
 
-// WP2e: Parse unit type from brigade name
-function parseUnitType(name: string): string | null {
-    const lower = name.toLowerCase();
-    if (lower.includes('motorized') || lower.includes('motorizov')) return 'MOTORIZED';
-    if (lower.includes('mechanized') || lower.includes('mehanizirane')) return 'MECHANIZED';
-    if (lower.includes('mountain') || lower.includes('brdsk') || lower.includes('planin')) return 'MOUNTAIN';
-    if (lower.includes('light infantry') || lower.includes('lahk')) return 'LIGHT INFANTRY';
-    if (lower.includes('guards') || lower.includes('gardijsk')) return 'GUARDS';
-    if (lower.includes('artillery') || lower.includes('artiljerij')) return 'ARTILLERY';
-    if (lower.includes('special') || lower.includes('posebn')) return 'SPECIAL';
-    if (lower.includes('infantry') || lower.includes('p\u0159\u0161')) return 'INFANTRY';
-    // DECISION NEEDED: No unit_type field on FormationView — parsing from name as fallback per spec 2e
-    return null;
-}
+const UNIT_TYPE_LABEL: Record<string, string> = {
+    armored: 'ARMORED',
+    guards: 'GUARDS',
+    infantry: 'INFANTRY',
+    light: 'LIGHT',
+    light_infantry: 'LIGHT INFANTRY',
+    mechanized: 'MECHANIZED',
+    motorized: 'MOTORIZED',
+    mountain: 'MOUNTAIN',
+};
 
 export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
+    const [locale] = useLocale();
+    const brigadeName = getLocalizedFormationName(brigade, locale);
     const personnel = brigade.personnel ?? 0;
     const isCombatIneffective = personnel < 400;
     const isDisrupted = !!brigade.disrupted_turns;
@@ -61,7 +61,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
     const fatigue = brigade.fatigue ?? 0;
     const cohLabel = getCohesionLabel(cohesion);
     const fatLabel = getFatigueLabel(fatigue);
-    const unitType = parseUnitType(brigade.name);
+    const unitType = UNIT_TYPE_LABEL[getFormationUnitType(brigade)] ?? null;
 
     return (
         <button
@@ -69,7 +69,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
             // WP2f: title attribute on card
-            title={`${brigade.name}\nPersonnel: ${personnel.toLocaleString()}\nTanks: ${tanks} \u00B7 Artillery: ${arty}\nCohesion: ${Math.round(cohesion)} \u00B7 Fatigue: ${Math.round(fatigue)}\nMarch: ${marchTurns === 0 ? 'In position' : marchTurns === null || marchTurns === 99 ? 'Unknown' : `${marchTurns} turns`}`}
+            title={`${brigadeName}\nPersonnel: ${personnel.toLocaleString()}\nTanks: ${tanks} \u00B7 Artillery: ${arty}\nCohesion: ${Math.round(cohesion)} \u00B7 Fatigue: ${Math.round(fatigue)}\nMarch: ${marchTurns === 0 ? 'In position' : marchTurns === null || marchTurns === 99 ? 'Unknown' : `${marchTurns} turns`}`}
             className={`
                 relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
                 ${isUnavailable
@@ -89,7 +89,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             {isAutoProposed && isAssigned && (
                 <div className="absolute top-1 right-1 text-[7px] font-bold uppercase tracking-wider
                                 px-1 py-0.5 rounded bg-accent-gold/15 text-accent-gold">
-                    Suggested
+                    {t('opsModal.suggested')}
                 </div>
             )}
 
@@ -97,14 +97,14 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             {isUnavailable && (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-red-400/60 rotate-[-15deg]">
-                        {isCombatIneffective ? 'COMBAT INEFFECTIVE' : 'DISRUPTED'}
+                        {isCombatIneffective ? t('opsModal.combatIneffective') : t('formationDetail.disrupted')}
                     </span>
                 </div>
             )}
 
             {/* Brigade name */}
             <div className="text-[10px] font-bold text-white truncate" style={{ fontFamily: "'Courier New', monospace" }}>
-                {brigade.name}
+                {brigadeName}
             </div>
 
             {/* WP2e: Unit type indicator */}
@@ -121,9 +121,9 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
 
             {/* WP2a: Equipment labels — always show both, spelled out */}
             <div className="flex gap-2 mt-1.5 text-[9px] text-text-secondary">
-                <span>TANKS <span className="text-white font-bold">{tanks}</span></span>
+                <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{tanks}</span></span>
                 <span className="text-text-secondary/30">&middot;</span>
-                <span>ARTY <span className="text-white font-bold">{arty}</span></span>
+                <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{arty}</span></span>
             </div>
 
             {/* Cohesion bar */}
@@ -140,8 +140,8 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                 {/* WP2b: Cohesion/Fatigue readability — 9px, full opacity */}
                 {/* WP2c/2d: Verbal descriptors with colors */}
                 <div className="flex justify-between text-[9px] text-text-secondary mt-0.5">
-                    <span>COH {Math.round(cohesion)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
-                    <span>FAT {Math.round(fatigue)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
+                    <span>{t('tacticalCard.cohShort').toUpperCase()} {Math.round(cohesion)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
+                    <span>{t('tacticalCard.fatShort').toUpperCase()} {Math.round(fatigue)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
                 </div>
             </div>
 

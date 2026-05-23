@@ -31,6 +31,7 @@ import {
     formatPreAdvanceGateBlockTitle,
 } from '../data/preAdvanceCommandReview';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 /**
  * Pre-Advance review-queue severity tone derived directly from the canonical
@@ -74,14 +75,14 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
         <div
             className="flex items-center gap-1.5"
             role="group"
-            aria-label={`Command Authority: ${current}/${max}`}
+            aria-label={t('presidentialToolbar.commandAuthorityValue', { current, max })}
             aria-describedby="command-authority-description"
-            title={`Command Authority: ${current}/${max}\nSpent on Level 3 overrides (force-launch, manual orders).\nRecovers +2 per turn.`}
+            title={t('presidentialToolbar.commandAuthorityTitle', { current, max })}
         >
             <span id="command-authority-description" className="sr-only">
-                Command Authority is the president's override resource. Level 3 overrides spend it, and it recovers by 2 per turn.
+                {t('presidentialToolbar.commandAuthorityDescription')}
             </span>
-            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>
+            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
             <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
@@ -263,33 +264,33 @@ export function PresidentialToolbar({
                                 void ipc.focusWarroom();
                             }}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
-                            title="Return to president's desk"
+                            title={t('presidentialToolbar.returnToDesk')}
                         >
-                            WARROOM
+                            {t('presidentialToolbar.warroom')}
                         </button>
                     )}
                     <button
                         onClick={() => openChronicle(useGameStore.getState())}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
-                        title="Campaign timeline"
+                        title={t('presidentialToolbar.campaignTimeline')}
                     >
-                        CHRONICLE
+                        {t('presidentialToolbar.chronicle')}
                     </button>
                     {loadedGameState ? (
                         <span
                             className="font-mono text-[12px] text-text-primary tracking-wider uppercase"
-                            title="Current date — use CHRONICLE to review timeline"
+                            title={t('presidentialToolbar.currentDateTitle')}
                         >
                             {formatTurnLabel(loadedGameState.label)}
                         </span>
                     ) : (
                         <div className="font-mono text-[10px] text-text-secondary italic uppercase">
-                            No state loaded
+                            {t('presidentialToolbar.noStateLoaded')}
                         </div>
                     )}
                     {devMode && (
                         <span className="px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full">
-                            DEV
+                            {t('presidentialToolbar.dev')}
                         </span>
                     )}
                     <div className="flex items-center gap-1 border-l border-white/10 pl-2">
@@ -297,25 +298,25 @@ export function PresidentialToolbar({
                             onClick={onOpenSummary}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Field situation briefing"
+                            title={t('presidentialToolbar.fieldSituationBriefing')}
                         >
-                            SUMMARY
+                            {t('presidentialToolbar.summary')}
                         </button>
                         <button
                             onClick={onOpenRecords}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Open Army HQ Records: after-action reports"
+                            title={t('presidentialToolbar.openRecordsTitle')}
                         >
-                            RECORDS
+                            {t('presidentialToolbar.records')}
                         </button>
                         <button
                             onClick={onOpenOpsHistory}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Active operations"
+                            title={t('presidentialToolbar.activeOperations')}
                         >
-                            OPS
+                            {t('presidentialToolbar.ops')}
                         </button>
                     </div>
                 </div>
@@ -330,18 +331,18 @@ export function PresidentialToolbar({
                             onClick={onOpenEventLog}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Event log"
+                            title={t('presidentialToolbar.eventLog')}
                         >
-                            EVENTS
+                            {t('presidentialToolbar.events')}
                         </button>
                         <button
                             onClick={onOpenCodex}
                             disabled={!loadedGameState}
                             data-coachmark-id="codex"
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Historical reference"
+                            title={t('presidentialToolbar.historicalReference')}
                         >
-                            CODEX
+                            {t('presidentialToolbar.codex')}
                         </button>
                     </div>
                     {/*
@@ -365,9 +366,9 @@ export function PresidentialToolbar({
                         }`}
                         title={
                             preAdvanceSeverityTone === 'blocking'
-                                ? 'Pre-Advance review queue: blocking items unresolved'
+                                ? t('presidentialToolbar.preAdvanceBlocking')
                                 : preAdvanceSeverityTone === 'urgent'
-                                    ? 'Pre-Advance review queue: pending items above urgent threshold'
+                                    ? t('presidentialToolbar.preAdvanceUrgent')
                                     : undefined
                         }
                     >
@@ -391,10 +392,10 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleOpenHQ}
                             className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors"
-                            title="Open Army HQ presidential attention queue"
+                            title={t('presidentialToolbar.openAttentionQueue')}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
-                            {pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}
+                            {t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
                         </button>
                     )}
 
@@ -420,7 +421,7 @@ export function PresidentialToolbar({
                             className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors"
                         >
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
-                            TENSIONS RISING
+                            {t('presidentialToolbar.tensionsRising')}
                         </button>
                     )}
                     {/* Command Authority + Advance Turn */}
@@ -442,7 +443,7 @@ export function PresidentialToolbar({
                                 : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'
                         }`}
                     >
-                        {advancing ? 'ADVANCING...' : 'ADVANCE TURN →'}
+                        {advancing ? t('presidentialToolbar.advancing') : t('presidentialToolbar.advanceTurn')}
                     </button>
                 </div>
             </div>
@@ -452,11 +453,11 @@ export function PresidentialToolbar({
                 onClick={handleOpenHQ}
                 className="fixed top-0.5 left-1/2 -translate-x-1/2 group flex flex-col items-center pointer-events-auto"
                 style={{ zIndex: Z.SHELL_FLOATING }}
-                aria-label={`${armyName ?? 'Army'} HQ [H]`}
-                title="Visit Army HQ [H]"
+                aria-label={t('presidentialToolbar.armyHqLabel', { army: armyName ?? t('presidentialToolbar.army') })}
+                title={t('presidentialToolbar.visitArmyHq')}
             >
                 <span className="text-[9px] font-mono font-bold uppercase tracking-[0.18em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
-                    {armyName ?? playerFaction ?? 'COMMAND'}
+                    {armyName ?? playerFaction ?? t('presidentialToolbar.command')}
                 </span>
                 {crestUrl && (
                     <img
@@ -474,18 +475,18 @@ export function PresidentialToolbar({
             {/* Dev tools strip — compact, below main toolbar */}
             {devMode && (
                 <div className="fixed top-12 left-0 right-0 z-10 flex items-center gap-2 px-4 py-1 bg-[#0a0a14]/90 border-b border-amber-500/20">
-                    <span className="text-[8px] font-mono text-amber-500/60 uppercase tracking-widest mr-2">DEV</span>
-                    <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">LOAD</button>
-                    <button onClick={handleLoadLatest} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">LATEST</button>
+                    <span className="text-[8px] font-mono text-amber-500/60 uppercase tracking-widest mr-2">{t('presidentialToolbar.dev')}</span>
+                    <button onClick={() => fileInputRef.current?.click()} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">{t('presidentialToolbar.load')}</button>
+                    <button onClick={handleLoadLatest} disabled={loading} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">{t('presidentialToolbar.latest')}</button>
                     <input
                         type="text" value={runIdInput} onChange={(e) => setRunIdInput(e.target.value)}
                         placeholder="RUN_ID" onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
-                        aria-label="Dev: load run by ID"
+                        aria-label={t('presidentialToolbar.loadRunById')}
                         className="w-20 px-1 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-amber-400/40 focus:outline-none"
                     />
-                    <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">SYNC</button>
-                    <button onClick={handleSave} disabled={!loadedGameState || !ipc.isAvailable} className={`px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 border border-white/10 rounded transition-colors disabled:opacity-30 ${saveFlash ? 'text-green-400 border-green-500/30' : 'text-text-secondary hover:text-text-primary hover:border-white/20'}`}>{saveFlash ? 'SAVED!' : 'SAVE'}</button>
-                    <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoadFile} aria-label="Dev: load save file" className="hidden" />
+                    <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className="px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 text-text-secondary border border-white/10 rounded hover:text-text-primary hover:border-white/20 transition-colors disabled:opacity-30">{t('presidentialToolbar.sync')}</button>
+                    <button onClick={handleSave} disabled={!loadedGameState || !ipc.isAvailable} className={`px-2 py-0.5 text-[9px] font-mono uppercase bg-black/40 border border-white/10 rounded transition-colors disabled:opacity-30 ${saveFlash ? 'text-green-400 border-green-500/30' : 'text-text-secondary hover:text-text-primary hover:border-white/20'}`}>{saveFlash ? t('presidentialToolbar.saved') : t('presidentialToolbar.save')}</button>
+                    <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoadFile} aria-label={t('presidentialToolbar.loadSaveFile')} className="hidden" />
                 </div>
             )}
 
@@ -496,7 +497,7 @@ export function PresidentialToolbar({
                         {loadError}
                     </span>
                     <button onClick={() => setLoadError(null)} className="text-red-200/50 hover:text-red-200 text-[10px] font-mono uppercase">
-                        DISMISS
+                        {t('presidentialToolbar.dismiss')}
                     </button>
                 </div>
             )}

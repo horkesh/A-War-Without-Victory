@@ -534,10 +534,49 @@
         "delta": 10
       },
       {
+        "kind": "equipment_quality_modifier",
+        "faction": "RS",
+        "multiplier": 0.70,
+        "duration_turns": 4
+      },
+      {
         "kind": "narrative",
         "text": "NATO launches Operation Deliberate Force. Sustained air strikes devastate VRS military infrastructure across Bosnia."
       }
     ]
+  },
+  {
+    "id": "hv_ammo_transfusion_post_storm_1995",
+    "title": "HV Cross-border Ammunition Transfusion to ARBiH 5th Corps",
+    "narrative": "Within days of Operation Storm, Croatian Army logistics begin transferring captured SVK depot stocks across the border to ARBiH 5th Corps. The five-week window between Storm and the launch of Operation Sana sees the besieged Bihać pocket resupplied for the first time since 1992. Ammunition (7.62mm, 82/120mm mortar, 122mm D-30 howitzer), fuel, and small numbers of captured T-55s and BM-21s flow eastward. The transfusion ends the three-year ammunition rationing that had crippled 5th Corps offensive options.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 159,
+      "turn_max": 162,
+      "phase": "war",
+      "requires_events": [
+        "operation_storm_1995"
+      ]
+    },
+    "once": true,
+    "effect": {
+      "kind": "equipment_quality_modifier",
+      "faction": "RBiH",
+      "multiplier": 1.15,
+      "duration_turns": 6
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "narrative",
+        "text": "Croatian Army logistics transfer captured SVK depot stocks to ARBiH 5th Corps across the Lika-Petrovo border. Three years of ammunition rationing ends overnight."
+      }
+    ],
+    "historical_source": "Balkan Battlegrounds Vol. 2 p.644; ICTY Karadžić IT-95-5/18-T Exh. P03978; Tanner 2001 ch.13."
   },
   {
     "id": "federation_ground_offensive_1995",
@@ -715,7 +754,10 @@
         "kind": "narrative",
         "text": "Operation Storm shatters the Republic of Serbian Krajina. The strategic balance in the western Balkans shifts decisively against Serb forces."
       }
-    ]
+    ],
+    "sets_flags": {
+      "svk_corps_active": false
+    }
   },
   {
     "id": "karadzic_mladic_split_1995",

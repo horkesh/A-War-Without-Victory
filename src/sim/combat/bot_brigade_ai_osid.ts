@@ -319,6 +319,30 @@ export function getSectorOffensiveApproachOsids(
             break;
         }
     }
+    // Wave 10 fallback: tactical_adjacency ∪ war_front_edges_osid is under-authored
+    // for HVO–VRS deep targets (Kupres / Glamoč / Jajce zones). When the stricter
+    // graph yields no friendly approach OSIDs, fall through to the corps's front
+    // sector sub-segment scan — the permissive check used by the launch gate
+    // (sector_offensive.ts collectAdjacentFriendlyOsids). Without this fallback
+    // the launch gate passes but per-turn brigade brain stalls, producing
+    // spawned-no-attack ops with no_logged_attempt recovery_reason.
+    if (approachOsids.size === 0 && state.military.corps_front_sectors && brigadeId) {
+        const corpsId = state.military.formations?.[brigadeId]?.corps_id;
+        if (corpsId) {
+            for (const objective of objectives.slice(currentIdx)) {
+                for (const sector of Object.values(state.military.corps_front_sectors)) {
+                    if (sector.corps_id !== corpsId) continue;
+                    for (const subSegment of sector.sub_segments) {
+                        if (!subSegment.enemy_osids.includes(objective as string)) continue;
+                        for (const fo of subSegment.friendly_osids) {
+                            approachOsids.add(fo as Osid);
+                        }
+                    }
+                }
+                if (approachOsids.size > 0) break;
+            }
+        }
+    }
     return approachOsids;
 }
 

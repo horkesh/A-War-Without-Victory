@@ -4,6 +4,7 @@ import { generateWrappedSlides } from './generateWrappedSlides.js';
 import { WrappedSlideComponent } from './WrappedSlide.js';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels.js';
 import { Z } from '../../../shared/zIndex.js';
+import { t } from '../../i18n';
 
 export function WrappedOverlay() {
     const open = useGameStore(s => s.wrappedOpen);
@@ -86,13 +87,13 @@ export function WrappedOverlay() {
                 type="button"
                 className="absolute left-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
                 onClick={handleClick}
-                aria-label="Previous campaign wrapped slide"
+                aria-label={t('wrapped.previousSlide')}
             />
             <button
                 type="button"
                 className="absolute right-0 top-0 z-10 h-full w-1/2 cursor-pointer border-0 bg-transparent p-0"
                 onClick={handleClick}
-                aria-label="Next campaign wrapped slide"
+                aria-label={t('wrapped.nextSlide')}
             />
             <WrappedSlideComponent
                 slide={slides[currentSlide]}
@@ -111,7 +112,7 @@ export function WrappedOverlay() {
                         }}
                         className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors cursor-pointer"
                     >
-                        View Chronicle
+                        {t('wrapped.viewChronicle')}
                     </button>
                     <button
                         onClick={(e) => {

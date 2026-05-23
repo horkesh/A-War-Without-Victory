@@ -100,6 +100,30 @@ export function applyDefinitionFlags(state: GameState, flags: Record<string, str
     }
 }
 
+/** Append a structured entry to `state.military.event_decision_log` recording
+ *  which response option was selected for an event, and which pick path made
+ *  the choice. Exported because `resolve_decision.ts` calls this when the
+ *  player responds via IPC. See game_state.ts `event_decision_log` docstring. */
+export function recordEventDecision(
+    state: GameState,
+    eventId: string,
+    responseId: string,
+    decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player',
+    faction: FactionId | null,
+    currentTurn: number,
+): void {
+    if (!state.military.event_decision_log) {
+        state.military.event_decision_log = [];
+    }
+    state.military.event_decision_log.push({
+        event_id: eventId,
+        response_id: responseId,
+        decision_source: decisionSource,
+        faction,
+        turn: currentTurn,
+    });
+}
+
 /** Record fire counts and last-fired turn for an event. */
 function recordEventFiring(state: GameState, eventId: string, currentTurn: number): void {
     if (!state.military.event_fire_counts) {
@@ -245,8 +269,10 @@ export function evaluateEvents(
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.
                 // Political personality path for dimension-weighted logic types.
                 let chosen: EventResponseOption;
+                let decisionSource: 'bot_political' | 'bot_v1' | 'bot_ai_default';
                 if (isTwoLevelNotificationsEnabled()) {
                     chosen = applyAIDefaultResponse(state, def);
+                    decisionSource = 'bot_ai_default';
                 } else if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
                     const personality = getPoliticalPersonality(respondingFaction);
                     const assessment = computePoliticalAssessment(state, respondingFaction, personality);
@@ -255,13 +281,16 @@ export function evaluateEvents(
                     // Apply flags and dimension shifts from the chosen response option
                     applyDefinitionFlags(state, chosen.sets_flags);
                     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+                    decisionSource = 'bot_political';
                 } else {
                     chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
                     applyEventEffects(state, chosen.effects ?? []);
                     // Apply flags and dimension shifts from the chosen response option
                     applyDefinitionFlags(state, chosen.sets_flags);
                     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+                    decisionSource = 'bot_v1';
                 }
+                recordEventDecision(state, def.id, chosen.id, decisionSource, respondingFaction, currentTurn);
                 if (isTwoLevelNotificationsEnabled() && respondingFaction !== null) {
                     emitEventNotifications(
                         state,

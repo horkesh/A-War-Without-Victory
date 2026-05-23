@@ -766,6 +766,27 @@ export interface FormationState {
     war_story?: BrigadeWarStory;
     /** Corps/Army aggregate combat summary — computed each war turn from subordinate brigade_histories. */
     combat_summary?: CombatSummary;
+
+    // --- Fall-1995 mechanics (corps-level only — used when kind === 'corps') ---
+    /**
+     * Corps operational coordination coherence [0,1]. Default 1.0 (full coherence).
+     * Decays under multi-front simultaneous pressure, adjacent-OSID losses, severed C2
+     * (NATO Deliberate Force / similar), and parallel-command-crisis events.
+     * Thresholds:
+     *  - < 0.7: corps cannot launch new offensive ops
+     *  - < 0.5: brigades cannot be assigned to defend OSIDs > 1 hop from current location
+     *  - < 0.3: corps "fragments" — brigades retreat independently
+     * Models the operational-level coordination failure that destroyed VRS 2KK in Sept 1995
+     * (per `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` §3 E-B1).
+     */
+    coordination_coherence?: number;
+    /**
+     * Strategic depth [0,1]. Default 1.0. Computed from friendly-adjacent municipalities,
+     * distance to nearest non-friendly front, and partner-force presence (e.g. SVK arc for
+     * VRS 2KK pre-Storm). Storm event drops 2KK strategic_depth ~0.7 → ~0.1.
+     * Used as input to coordination_coherence decay rate. See synthesis §3 E-B3.
+     */
+    strategic_depth?: number;
 }
 
 export interface FrontPostureAssignment {
@@ -1348,6 +1369,11 @@ export interface StateMeta {
     operation_storm_turn?: number;
     /** War phase §6.3: HV brigades have been spawned (one-shot flag, set after Washington + delay). */
     hv_brigades_spawned?: boolean;
+    /** Synthesis §3 E-B3: Cross-border Republic of Serbian Krajina (SVK) partner
+     *  presence. True from scenario init until Operation Storm fires (~turn 154);
+     *  then set false by the operation_storm_1995 event. Consumed by
+     *  strategic_depth.computeStrategicDepth for VRS 2nd Krajina Corps. */
+    svk_corps_active?: boolean;
     /** Peace-phase §4.8 (historical fidelity): Earliest turn when RBiH–HRHB open war can begin. When turn < this value, RBiH–HRHB treated as allied for flips and alliance cannot drop below ALLIED_THRESHOLD. Default 26 when absent (October 1992 for April 1992 start). */
     rbih_hrhb_war_earliest_turn?: number | null;
     /** Peace-phase §4.8: When false, alliance value is not updated (RBiH–HRHB remain at init_alliance_rbih_hrhb). Set from scenario.enable_rbih_hrhb_dynamics. */
@@ -2053,6 +2079,13 @@ sector_combat_ratings?: Record<string, SectorCombatRating>;
 sector_intel?: Record<string, SectorIntelRecord[]>;
 /** Home distance cache: formationId → BFS hop distance from home_osid to location_osid. Derived each turn. */
 home_distance_cache?: Record<string, number>;
+/** Fall-1995 mechanic E-A3 (multi-axis simultaneity penalty): count of active
+ *  enemy offensive CorpsOperations (phase==='execution') whose objectives
+ *  include at least one OSID currently controlled by this defender corps's
+ *  faction. Built turn-start in `war_phases.ts` before combat resolution;
+ *  read in `combat_math.ts` `computeDefenderPowerBreakdown`. Keyed by defender
+ *  corps FormationId. Derived each turn (transient cache; safe to drop). */
+active_offensives_against_corps?: Record<FormationId, number>;
 /** Player-issued permanent sector assignments. Overrides bot assignment in classifyBrigadesByTerritory.
  *  Keyed by brigadeId → sector_id. Persists until manually cleared. */
 brigade_sector_override?: Record<string, string>;
@@ -2172,6 +2205,20 @@ negotiation?: import('./negotiation_types.js').NegotiationState;
 fired_event_ids?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
+/** Structured audit trail of every event-decision resolution — bot or player.
+ *  Append-only; one entry per resolution. Distinguishes the three pick paths
+ *  (`bot_political`, `bot_v1`, `player`) so replay + Chronicle UI can show
+ *  "VRS chose `aggressive` branch on turn 1 for rs_strategic_goals". The
+ *  existing `fired_events[]` records that the event fired; this records WHICH
+ *  option won. Writers: `recordEventDecision` in evaluate_events.ts (bot paths)
+ *  and resolve_decision.ts (player path). Reader: Chronicle / audit surfaces. */
+event_decision_log?: Array<{
+    event_id: string;
+    response_id: string;
+    decision_source: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player';
+    faction: FactionId | null;
+    turn: number;
+}>;
 /** Informational event notifications for non-source factions. Never blocks turn advance. */
 pending_event_notifications?: import('../sim/events/event_types.js').EventNotification[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
@@ -2202,6 +2249,27 @@ equipment_quality_modifiers?: Array<{
     multiplier: number;
     expires_turn: number;
 }>;
+/** Fall-1995 mechanic E-A4: cascade-pressure penalties on OSIDs adjacent to a
+ *  just-lost OSID. Applied one turn after a control flip; defender power on these
+ *  OSIDs is multiplied by `multiplier` (typically 0.85) until `expires_turn`.
+ *  Models the counter-clockwise collapse pattern (VRS 2KK Sept 1995). Reader:
+ *  `getCascadePenaltyForOsid` in active_modifiers.ts. Writer: control-flip resolution
+ *  in `attack_resolution_osid.ts`. */
+cascade_penalties?: Array<{
+    osid: string;
+    multiplier: number;
+    expires_turn: number;
+}>;
+/** Fall-1995 mechanic E-A5: external-stopping-condition suppression of offensive
+ *  ops for a faction (e.g. Holbrooke's 51:49 halt at Banja Luka). When active,
+ *  the faction cannot launch new offensive operations through the planning gate.
+ *  Reader: `isFactionOffensiveOpsSuppressed` in active_modifiers.ts. Writer:
+ *  `applyOffensiveOpsSuppression` in apply_effects.ts. */
+offensive_ops_suppressions?: Array<{
+    faction: FactionId;
+    expires_turn: number;
+    reason?: string;
+}>;
 /** Active alliance floor/ceiling locks on the RBiH-HRHB alliance value. */
 alliance_locks?: Array<{
     mode: 'floor' | 'ceiling';
@@ -2226,6 +2294,15 @@ event_last_fired_turn?: Record<string, number>;
 event_flags?: Record<string, string | number | boolean>;
 /** Event IDs unlocked by event chains (enables_events). */
 enabled_event_ids?: string[];
+/** Phantom brigade IDs that have ever been spawned by `spawnJnaPhantomBrigades`.
+ *  Prevents re-spawn after withdrawal — when a phantom withdraws, its formation
+ *  entry is removed from `formations[]` entirely, so the spawn function's
+ *  `if (formations[def.id])` skip-check fails on subsequent turns and would
+ *  re-spawn (and JNA phantoms with `capture_osids` would re-flip controllers).
+ *  This marker is the canonical "has been spawned" set. Append-only; never
+ *  cleared. See `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`
+ *  + n2004 regression diagnosis. */
+phantoms_spawned?: string[];
 /** Event-imposed constraints on military operations. */
 event_constraints?: import('../sim/events/event_constraints.js').EventConstraints;
 /** AI commander decision log for replay determinism. */

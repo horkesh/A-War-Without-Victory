@@ -1,5 +1,45 @@
 # AWWV Calibration Master Reference
 
+## Historical-default baseline — n2003 79.21% (2026-05-23)
+
+- **NEW 188w baseline: n2003 hash `47438d249146d1af`; spatial match_ratio 79.21%** (564/712 OSIDs). +0.70pp over n2002 (78.51%).
+- Per-faction accuracy (sim vs painted target): HRHB 67.29% (86 vs 107, Δ -21), RBiH 79.07% (301 vs 290, Δ +11), RS 78.15% (325 vs 315, Δ +10).
+- **Supersedes n1999 (81.18%) as the calibration reference**, even though headline match_ratio is lower: n1999 silently failed to apply 15 RBiH event consequences (Carter ceasefire, Washington Agreement, Contact Group, US 51:49 halt, etc.) because the scenario_runner defaulted player_faction='RBiH' in headless runs, queueing those events forever. n2003 ships the headless-undefined-player_faction contract (3 sites) and historical-default bot retunings — its score is honest historical fidelity.
+
+**Headless contract (3 commits):**
+- `f7c8baed` scenario_runner.ts:1412 — leaves player_faction undefined when no value authored
+- `b875f95a` save_migration.ts v14 — skips backfill when headless_scenario_auto_control=true
+- `0b7d0d93` validateGameState.ts — mirrors the migration exemption
+
+Together: in headless harness runs, `playerFaction != null` evaluates false, all events route through bot auto-respond paths, no decisions queue-pending-forever.
+
+**Historical-default retunings (commit `8c1e6f5e`):**
+- `gornji_vakuf_clashes_1993`: `capital_based` → `historical` (escalate, historical Jan 1993)
+- `strategic_posture_review_hrhb`: `strategic_weighted` → `historical` (press_croat_objectives, historical mid-1993)
+- `ic_rbih_restraint_post_washington`: `strategic_weighted` → `historical` (acknowledge_pressure, historical post-Washington)
+- `washington_agreement_1994` effects extended: morale_change HRHB +3→+8, +cohesion_change HRHB +15, +cohesion_change RBiH +5 (Federation military integration models the CB-war combat-penalty reset)
+
+**Principle established:** Bots default to `historical` (options[0] = historical choice). Calibration is for the historical-outcome path. Non-historical paths are player + AI variation; engine handles them as designed but they are not the calibration target.
+
+**Strategic-depth corps_asset filter fix (commit `a018f79b`):** E-B3 strategic_depth now populates on all corps (16 in n2003); was 0 in n1999/n2002 due to `kind === 'corps'` filter missing engine OOB's `'corps_asset'` tagging.
+
+**Audit trail (commit `73f36de4`):** New `state.military.event_decision_log[]` records `{event_id, response_id, decision_source, faction, turn}` for every event-decision resolution. n2003 has 37 entries (RBiH 15 + RS 16 + HRHB 6) across decision_source `bot_v1` and `bot_political`.
+
+**Open shortfall:** HRHB -21 OSIDs vs painted 107. Washington reset gave +3 OSID partial recovery from n2002. Remaining gap is structural (Bosnian Croat manpower limits) — next lever is expanding HV-attached brigade pool from 4 → 6-8 brigades to match Mistral 2 OG North + South + West composition (~9 HV brigades historically).
+
+## Fall-1995 mechanics packet — n1999 81.18% (2026-05-23, superseded by n2003)
+
+- **New 188w baseline: n1999 hash `914e6c7700f91b22`; spatial match_ratio 81.18% (578/712 OSIDs).** +2.67pp / +19 matches over n1998 (78.51%).
+- Per-faction accuracy n1998 → n1999:
+  - HRHB **62.62 → 77.57** (+14.95pp) — single biggest correction in any Phase since metric introduction
+  - RS **76.05 → 78.10** (+2.05pp); sim count 334 → 296 reflects 2KK collapse (painted 315)
+  - RBiH **80.13 → 78.06** (−2.07pp) — overshoots by 29 OSIDs (was +7); deferred E-A5 51:49 halt would cap this
+- 5 new combat-math modifiers + 2 new scenario events + 5 new state surfaces. See `docs/PROJECT_LEDGER.md` entry of same date for full mechanism list (E-A1 through E-B4).
+- Calibration architecture: painted file is reference-only — does NOT affect sim determinism. Goražde companion fix `5660c8ec` reverted slatina_2 + ustipraca_2 to RS (Novo Goražde muni, RS post-Dayton; VRS 1st/2nd/4th/5th Podrinje Brigades captured May 1993).
+- 40w window untouched: all new events fire turn ≥ 159, byte-stable on the calibration window. All consumers gated `if (multiplier !== 1.0)`.
+- Tier B follow-ups for next iteration: E-A5 launch-gate consumer (cap RBiH overshoot), E-A6 Sloboda 95 scripted op (Velika Kladuša rear-clearing precondition for Sana 95), E-B1 corps coherence decay logic (most invasive; unblocks fragmenting behavior).
+- Report: `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` + 6 research dispatches at `docs/40_reports/proposals/20260523_RESEARCH_*.md`.
+
 ## Operation idle objective-skip repair (2026-05-22)
 
 - Sector-operation lifecycle accounting no longer advances `current_objective_index` from idle no-movement / no-attack turns.

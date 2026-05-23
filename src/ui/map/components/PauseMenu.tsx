@@ -2,6 +2,7 @@
  * In-game pause menu — triggered by Escape when no other modal is open.
  */
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 interface PauseMenuProps {
     onResume: () => void;
@@ -19,7 +20,7 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
                 type="button"
                 className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onResume}
-                aria-label="Resume game"
+                aria-label={t('pause.resumeAria')}
             />
             <div className="w-[320px] rounded-lg border border-[#8a7a60]/35 shadow-2xl p-4 flex flex-col gap-2"
                  style={{
@@ -28,20 +29,20 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
                  }}>
                 <div className="flex items-center justify-between border-b border-[#8a7a60]/20 pb-2 mb-1">
                     <div className="text-[11px] uppercase tracking-[0.2em] text-[#c4a35a] font-bold">
-                        Paused
+                        {t('pause.paused')}
                     </div>
                     <div className="text-[9px] uppercase tracking-[0.16em] text-[#d5c9bc]/65">
-                        ESC Resume
+                        {t('pause.escResume')}
                     </div>
                 </div>
-                <PauseButton onClick={onResume}>Resume</PauseButton>
-                <PauseButton onClick={onSave}>Save Game</PauseButton>
-                <PauseButton onClick={onSettings}>Settings</PauseButton>
-                <PauseButton onClick={onMainMenu}>Main Menu</PauseButton>
+                <PauseButton onClick={onResume}>{t('pause.resume')}</PauseButton>
+                <PauseButton onClick={onSave}>{t('pause.saveGame')}</PauseButton>
+                <PauseButton onClick={onSettings}>{t('pause.settings')}</PauseButton>
+                <PauseButton onClick={onMainMenu}>{t('pause.mainMenu')}</PauseButton>
                 <div className="h-px bg-[#8a7a60]/20 my-1" />
-                <PauseButton onClick={onQuit} danger>Quit</PauseButton>
+                <PauseButton onClick={onQuit} danger>{t('pause.quit')}</PauseButton>
                 <div className="pt-1 text-[9px] text-[#d5c9bc]/55 text-center">
-                    Command paused. Planning state is preserved.
+                    {t('pause.statePreserved')}
                 </div>
             </div>
         </div>

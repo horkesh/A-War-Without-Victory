@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
 import { useGameStore } from '../../store/gameStore';
+import { t, type MessageKey } from '../../i18n';
 
-const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; label: string }> = [
-    { id: 'all', label: 'All' },
-    { id: 'hard', label: 'Hard turns' },
-    { id: 'signals', label: 'Signals' },
-    { id: 'actions', label: 'Actions' },
-    { id: 'territory', label: 'Territory' },
+const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; labelKey: MessageKey }> = [
+    { id: 'all', labelKey: 'records.filter.all' },
+    { id: 'hard', labelKey: 'records.filter.hard' },
+    { id: 'signals', labelKey: 'records.filter.signals' },
+    { id: 'actions', labelKey: 'records.filter.actions' },
+    { id: 'territory', labelKey: 'records.filter.territory' },
 ];
 
 function formatSigned(value: number): string {
@@ -80,43 +81,43 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                             {view.tone}
                         </span>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
-                            Cost {view.cost.severity}
+                            {t('records.costSeverity', { severity: view.cost.severity })}
                         </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>
                 </div>
                 <div className="shrink-0 text-right">
-                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Turn</div>
+                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.turn')}</div>
                     <div className="text-[13px] font-bold tabular-nums text-text-primary">{view.turn}</div>
                 </div>
             </div>
 
             <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
                 <RecordMetric
-                    label="Territory"
+                    label={t('aar.section.territory')}
                     value={formatSigned(view.territory.friendlyNet)}
-                    detail={`${view.territory.gains} gained / ${view.territory.losses} lost`}
+                    detail={t('records.detail.territoryDelta', { gains: view.territory.gains, losses: view.territory.losses })}
                 />
                 <RecordMetric
-                    label="Battles"
+                    label={t('combatRecord.battles')}
                     value={String(view.combat.friendlyBattleCount)}
-                    detail={`${view.combat.battleCount} theater-wide`}
+                    detail={t('records.detail.theaterWide', { count: view.combat.battleCount })}
                 />
                 <RecordMetric
-                    label="Cost"
+                    label={t('records.metric.cost')}
                     value={String(view.cost.friendlyMilitaryCasualties)}
-                    detail={`${view.cost.displacedThisTurn} displaced`}
+                    detail={t('records.detail.displaced', { count: view.cost.displacedThisTurn })}
                 />
                 <RecordMetric
-                    label={isLatest ? 'Desk' : 'Archive'}
+                    label={isLatest ? t('records.metric.desk') : t('records.metric.archive')}
                     value={isLatest ? String(view.nextActions.actionableCount) : '-'}
-                    detail={isLatest ? `${view.nextActions.blockingCount} blocking` : 'Closed turn'}
+                    detail={isLatest ? t('records.detail.blocking', { count: view.nextActions.blockingCount }) : t('records.detail.closedTurn')}
                 />
             </div>
 
             {signalPreview.length > 0 && (
                 <div className="mt-2 rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                    <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">Strategic signals</div>
+                    <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.strategicSignals')}</div>
                     <div className="grid gap-1.5 md:grid-cols-3">
                         {signalPreview.map((signal) => (
                             <div key={signal.id} className={`min-w-0 rounded border px-2 py-1 ${signalClass(signal.severity)}`}>
@@ -132,14 +133,14 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                     {firstFlip && (
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Lead territorial note</div>
+                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadTerritorialNote')}</div>
                             <div className="truncate text-[11px] font-semibold text-text-primary">{firstFlip.label}</div>
                             <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{firstFlip.direction}</div>
                         </div>
                     )}
                     {firstAction && (
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Lead desk item</div>
+                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadDeskItem')}</div>
                             <div className="truncate text-[11px] font-semibold text-text-primary">{firstAction.title}</div>
                             <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{firstAction.type.replace(/_/g, ' ')}</div>
                         </div>
@@ -191,7 +192,7 @@ export function TurnAftermathRecordsPanel() {
     if (records.length === 0) {
         return (
             <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
-                No turn aftermath records have been written for this campaign yet.
+                {t('records.emptyCampaign')}
             </div>
         );
     }
@@ -215,7 +216,7 @@ export function TurnAftermathRecordsPanel() {
                                     : 'border-panel-border/60 bg-panel-card/60 text-text-secondary hover:border-white/20 hover:text-text-primary'
                             }`}
                         >
-                            {option.label} <span className="ml-1 tabular-nums opacity-75">{count}</span>
+                            {t(option.labelKey)} <span className="ml-1 tabular-nums opacity-75">{count}</span>
                         </button>
                     );
                 })}
@@ -224,7 +225,7 @@ export function TurnAftermathRecordsPanel() {
             <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Campaign pulse</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.campaignPulse')}</div>
                         <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{pulse.windowLabel}</div>
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{pulse.briefing}</div>
                     </div>
@@ -233,17 +234,17 @@ export function TurnAftermathRecordsPanel() {
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
-                    <RecordMetric label="Signals" value={String(pulse.signalCount)} detail={`${pulse.eventCount} events`} />
-                    <RecordMetric label="Decorations" value={String(pulse.decorationCount)} detail="Archive window" />
-                    <RecordMetric label="Hard Turns" value={String(pulse.hardTurnCount)} detail="Severe / critical" />
-                    <RecordMetric label="Theater Cost" value={String(pulse.totalTheaterMilitaryCasualties)} detail={`${pulse.totalDisplaced} displaced`} />
+                    <RecordMetric label={t('records.filter.signals')} value={String(pulse.signalCount)} detail={t('records.detail.events', { count: pulse.eventCount })} />
+                    <RecordMetric label={t('records.metric.decorations')} value={String(pulse.decorationCount)} detail={t('records.detail.archiveWindow')} />
+                    <RecordMetric label={t('records.filter.hard')} value={String(pulse.hardTurnCount)} detail={t('records.detail.severeCritical')} />
+                    <RecordMetric label={t('records.metric.theaterCost')} value={String(pulse.totalTheaterMilitaryCasualties)} detail={t('records.detail.displaced', { count: pulse.totalDisplaced })} />
                 </div>
             </section>
 
             <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2" data-testid="campaign-cost-spine">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Campaign cost so far</div>
+                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.campaignCostSoFar')}</div>
                         <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{campaignCost.headline}</div>
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{campaignCost.briefing}</div>
                     </div>
@@ -252,18 +253,18 @@ export function TurnAftermathRecordsPanel() {
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
-                    <RecordMetric label="Window" value={String(campaignCost.recordCount)} detail={campaignCost.windowLabel} />
-                    <RecordMetric label="Friendly Cost" value={String(campaignCost.totalFriendlyMilitaryCasualties)} detail={`${campaignCost.averageFriendlyMilitaryCasualties.toFixed(1)} per turn`} />
-                    <RecordMetric label="Exchange" value={formatRatio(campaignCost.casualtyExchangeRatio)} detail={`${campaignCost.totalOpposingMilitaryCasualties} opposing`} />
-                    <RecordMetric label="Displaced" value={String(campaignCost.totalDisplaced)} detail="Archived turns" />
-                    <RecordMetric label="Lost Formations" value={String(campaignCost.totalOwnFormationsDestroyed)} detail={`${campaignCost.hardTurnCount} hard turns`} />
-                    <RecordMetric label="Net OSIDs" value={formatSigned(campaignCost.netFriendlyTerritory)} detail={`${campaignCost.totalTheaterMilitaryCasualties} theater casualties`} />
+                    <RecordMetric label={t('records.metric.window')} value={String(campaignCost.recordCount)} detail={campaignCost.windowLabel} />
+                    <RecordMetric label={t('records.metric.friendlyCost')} value={String(campaignCost.totalFriendlyMilitaryCasualties)} detail={t('records.detail.perTurn', { count: campaignCost.averageFriendlyMilitaryCasualties.toFixed(1) })} />
+                    <RecordMetric label={t('records.metric.exchange')} value={formatRatio(campaignCost.casualtyExchangeRatio)} detail={t('records.detail.opposing', { count: campaignCost.totalOpposingMilitaryCasualties })} />
+                    <RecordMetric label={t('warSummary.label.displaced')} value={String(campaignCost.totalDisplaced)} detail={t('records.detail.archivedTurns')} />
+                    <RecordMetric label={t('records.metric.lostFormations')} value={String(campaignCost.totalOwnFormationsDestroyed)} detail={t('records.detail.hardTurns', { count: campaignCost.hardTurnCount })} />
+                    <RecordMetric label={t('records.metric.netOsids')} value={formatSigned(campaignCost.netFriendlyTerritory)} detail={t('records.detail.theaterCasualties', { count: campaignCost.totalTheaterMilitaryCasualties })} />
                 </div>
                 {(campaignCost.topDrivers.length > 0 || campaignCost.mostCostlyTurn) && (
                     <div className="mt-2 grid gap-2 lg:grid-cols-[1.2fr_0.8fr]">
                         {campaignCost.topDrivers.length > 0 && (
                             <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                                <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">Cost drivers</div>
+                                <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.costDrivers')}</div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {campaignCost.topDrivers.map((driver) => (
                                         <span key={driver} className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[9px] text-text-secondary">
@@ -275,7 +276,7 @@ export function TurnAftermathRecordsPanel() {
                         )}
                         {campaignCost.mostCostlyTurn && (
                             <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                                <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">Costliest turn</div>
+                                <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.costliestTurn')}</div>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2">
                                     <span className="text-[11px] font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
                                     <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
@@ -283,7 +284,11 @@ export function TurnAftermathRecordsPanel() {
                                     </span>
                                 </div>
                                 <div className="mt-1 text-[9px] text-text-secondary">
-                                    {campaignCost.mostCostlyTurn.friendlyMilitaryCasualties} casualties / {campaignCost.mostCostlyTurn.displacedThisTurn} displaced / {campaignCost.mostCostlyTurn.ownFormationsDestroyed} formations
+                                    {t('records.detail.casualtiesDisplacedFormations', {
+                                        casualties: campaignCost.mostCostlyTurn.friendlyMilitaryCasualties,
+                                        displaced: campaignCost.mostCostlyTurn.displacedThisTurn,
+                                        formations: campaignCost.mostCostlyTurn.ownFormationsDestroyed,
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -293,27 +298,27 @@ export function TurnAftermathRecordsPanel() {
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Archive</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.archive')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.recordCount}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Net Territory</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.netTerritory')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{formatSigned(summary.netFriendlyTerritory)}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Casualties</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('situation.casualties')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalFriendlyMilitaryCasualties}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Displaced</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('warSummary.label.displaced')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalDisplaced}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Lost Formations</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.lostFormations')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-red-300">{summary.totalOwnFormationsDestroyed}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">Hard Turns</div>
+                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.filter.hard')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-amber-300">{summary.criticalTurns + summary.severeTurns}</div>
                 </div>
             </div>
@@ -321,7 +326,7 @@ export function TurnAftermathRecordsPanel() {
             <div className="space-y-2">
                 {visibleRecords.length === 0 ? (
                     <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
-                        No aftermath records match this review filter.
+                        {t('records.noFilterMatches')}
                     </div>
                 ) : visibleRecords.map((record) => (
                     <TurnAftermathRecordCard

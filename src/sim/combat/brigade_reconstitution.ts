@@ -87,6 +87,21 @@ export interface ReconstitutionEntry {
     turns_since_destruction: number;
     /** Set when reconstituted from displaced population at a receiving municipality. */
     refugee_mun?: string;
+    /**
+     * ENGINE-2 Clause 2 (memo
+     * docs/40_reports/proposals/20260523_ENGINE_2_BRIGADE_LIFECYCLE_DESIGN.md
+     * §Part 4): true when the brigade was reconstituted via Path C
+     * (faction strategic reserve fallback) instead of Path A (home pool)
+     * or Path B (refugee pool). Provides traceability for the
+     * reserve-drain accounting introduced by Engine-2.
+     */
+    via_reserve?: boolean;
+    /**
+     * ENGINE-2 Clause 2: when via_reserve is true, this captures the OSID
+     * the reserve-reconstituted brigade was spawned at (home OSID if
+     * friendly, otherwise the first sorted same-corps friendly OSID).
+     */
+    reserve_spawn_osid?: string;
 }
 
 export interface ReconstitutionReport {
@@ -324,15 +339,104 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
             // Historical: 28th Division reformed in Tuzla from Srebrenica survivors;
             // Ključ refugees reformed in Travnik; Ilidža Bosniaks joined Sarajevo units.
             const refugee = findRefugeeMunicipality(state, homeMun, faction, poolFaction, RECONSTITUTION_MIN_POOL, corpsId);
-            if (!refugee) continue;
-            reconMun = refugee.mun;
-            locationOsid = refugee.osid;
-            const poolKey = militiaPoolKey(reconMun, poolFaction);
-            pool = pools[poolKey];
-            isRefugee = true;
+            if (refugee) {
+                reconMun = refugee.mun;
+                locationOsid = refugee.osid;
+                const poolKey = militiaPoolKey(reconMun, poolFaction);
+                pool = pools[poolKey];
+                isRefugee = true;
+            }
+            // If !refugee, fall through to Path C (reserve fallback) below.
         }
 
-        if (!locationOsid || !pool || pool.available < RECONSTITUTION_MIN_POOL) continue;
+        // ENGINE-2 Clause 2 — Path C (faction strategic reserve fallback).
+        // Reference: docs/40_reports/proposals/20260523_ENGINE_2_BRIGADE_LIFECYCLE_DESIGN.md §Part 4.
+        //
+        // When BOTH Path A (home OSID pool) and Path B (refugee destination
+        // pool) fail to provide ≥ RECONSTITUTION_MIN_POOL manpower, draw from
+        // the faction-wide strategic reserve. Half of every dissolved
+        // brigade's personnel flows into state.military.strategic_reserves
+        // via brigade_dissolution.ts:188-193 — without this Path C the reserve
+        // is a sink with no exit door. Path C closes the loop and rescues
+        // already-dead brigades when municipal pools are demographically
+        // exhausted (HRHB at t188: every municipality available=0, reserve
+        // is the only remaining manpower source).
+        //
+        // Spawn placement: prefer home OSID if friendly-controlled, else the
+        // first sorted same-corps friendly OSID (deterministic via
+        // strictCompare). All faction-symmetric; mechanism reads the same
+        // strategic_reserves[faction] number regardless of faction id.
+        if (!locationOsid || !pool || pool.available < RECONSTITUTION_MIN_POOL) {
+            const reserves = state.military.strategic_reserves ?? {};
+            const reserveAvailable = reserves[faction] ?? 0;
+            if (reserveAvailable < RECONSTITUTION_MIN_POOL) continue;
+
+            const maxPersC = f.max_personnel ?? 2000;
+            const targetPersonnelC = Math.floor(maxPersC * RECONSTITUTION_PERSONNEL_FRACTION);
+            const reserveDraw = Math.min(targetPersonnelC, reserveAvailable);
+            if (reserveDraw < RECONSTITUTION_MIN_POOL) continue;
+
+            // Choose spawn OSID: home if friendly, else first sorted same-corps
+            // friendly OSID. If the brigade's corps has zero friendly territory
+            // and home is hostile, no spawn is possible — brigade stays
+            // destroyed (historically accurate: a corps with no held ground
+            // cannot reform a destroyed brigade).
+            const homeFriendly = f.home_osid != null
+                && state.political.political_controllers?.[f.home_osid] === faction;
+            let spawnOsidC: string | undefined;
+            if (homeFriendly && f.home_osid) {
+                spawnOsidC = f.home_osid;
+            } else {
+                const territoryOsids = corpsTerritoryOsids(state, corpsId);
+                const pc = state.political.political_controllers ?? {};
+                const sameCorpsFriendly: string[] = [];
+                for (const osid of territoryOsids) {
+                    if (pc[osid] === faction) sameCorpsFriendly.push(osid);
+                }
+                sameCorpsFriendly.sort(strictCompare);
+                spawnOsidC = sameCorpsFriendly[0];
+            }
+            if (!spawnOsidC) continue;
+
+            // Drain reserve (mutation), then reactivate the brigade.
+            (state.military.strategic_reserves as Record<string, number>)[faction]
+                = reserveAvailable - reserveDraw;
+
+            f.status = 'active';
+            f.lifecycle_status = undefined;
+            f.personnel = reserveDraw;
+            const reconHistC = ensureBrigadeHistory(f);
+            if (reserveDraw > reconHistC.peak_personnel) reconHistC.peak_personnel = reserveDraw;
+
+            f.cohesion = RECONSTITUTION_COHESION;
+            // No refugee morale bonus on reserve path — these are cadre cadre
+            // dispersed from the faction-wide reserve, not motivated refugees.
+            f.morale = RECONSTITUTION_MORALE[faction];
+            f.readiness = 'forming';
+            f.location_osid = spawnOsidC;
+            f.entrenchment_turns = 0;
+            f.disrupted_turns = 0;
+            f.defense_streak = 0;
+            f.destruction_turn = undefined;
+            f.officer_quality = Math.max(0.05, (f.officer_quality ?? 0.3) - RECONSTITUTION_OFFICER_QUALITY_PENALTY);
+
+            reconByCorps.set(corpsId, corpsCount + 1);
+
+            report.reconstituted_brigades.push({
+                id: fid,
+                name: f.name ?? fid,
+                faction,
+                corps_id: corpsId,
+                home_mun: homeMun,
+                personnel_spawned: reserveDraw,
+                pool_drawn: reserveDraw,
+                turns_since_destruction: destructionTurn != null ? turn - destructionTurn : 0,
+                via_reserve: true,
+                reserve_spawn_osid: spawnOsidC,
+            });
+            report.reconstituted_count++;
+            continue;
+        }
 
         // Calculate personnel
         const maxPers = f.max_personnel ?? 2000;

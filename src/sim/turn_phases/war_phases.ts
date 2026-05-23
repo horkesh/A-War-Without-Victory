@@ -139,7 +139,7 @@ import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
-import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
+import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
 import { checkTriggeredOperations } from '../combat/triggered_operations.js';
@@ -866,6 +866,19 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Spawn turn-gated phantom brigades (e.g. HV 1995 expeditionary wave that
+        // arrives post-Split Agreement turn ≈ 150). Idempotent — defs already
+        // spawned at scenario init or earlier turn are skipped. See
+        // `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`.
+        // Runs BEFORE withdrawals each turn so a phantom can't spawn and withdraw
+        // in the same turn (defensive, though spawn_turn < withdrawal_turn by author).
+        name: 'phantom-brigade-spawn',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            spawnJnaPhantomBrigades(context.state);
+        }
+    },
+    {
         name: 'jna-phantom-withdrawals',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1263,10 +1276,13 @@ export const warPhases: NamedPhase[] = [
                 const munId = rec.mun1990_id ?? rec.mun_code;
                 if (munId) sidToMun.set(sid, munId);
             }
-            const playerFaction = context.state.meta.player_faction ?? null;
-            const factions = (context.state.factions ?? []).map(f => f.id)
-                .filter(fid => playerFaction == null || fid !== playerFaction)
-                .sort(strictCompare);
+            // Use canonical helper so headless_scenario_auto_control is honored.
+            // Inline duplicate-filter previously skipped this flag, so RBiH (when
+            // configured as player_faction) had no corps_command.commander_state
+            // written across the entire run — bricking commander_confidence
+            // predicates for all ARBiH catalog opportunities. See
+            // docs/40_reports/audits/20260522_FORENSICS_COMMANDER_STATE_INIT.md.
+            const factions = selectBotBrigadeOrderFactions(context.state);
             // Pass operational reverse map + OSID edges for corps directive generation
             const od = getOperationalData(context);
             const reverseMap = od?.opData?.operationalToCanonical ?? null;
@@ -1619,6 +1635,86 @@ export const warPhases: NamedPhase[] = [
                     break; // One warning per turn is enough
                 }
             }
+        }
+    },
+    {
+        // ── Fall-1995 mechanic E-A3: multi-axis simultaneity penalty ──────
+        // Build the turn-start cache `active_offensives_against_corps`:
+        // map<defender corps FormationId, count of enemy CorpsOperations whose
+        //   phase==='execution' and whose objectives include at least one OSID
+        //   controlled by the defender corps's faction>.
+        // Consumer: `computeDefenderPowerBreakdown` in combat_math.ts applies a
+        //   multiplier (1.0× / 0.9× / 0.8× / 0.7× capped) to defender power.
+        // Determinism: iterates corps_command keys via strictCompare; multiplier
+        //   itself is a deterministic function of the count.
+        // Byte-stability: when no corps has >1 enemy offensives against it, the
+        //   cache contains only 0/1 values and combat_math gates the multiplier
+        //   `if (multiplier !== 1.0)` — historical (single-offensive) path is
+        //   untouched.
+        // See docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md §3 E-A3.
+        name: 'build-active-offensives-cache',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const corpsCommand = context.state.military.corps_command;
+            const formations = context.state.military.formations ?? {};
+            const pc = context.state.political.political_controllers ?? {};
+            const cache: Record<string, number> = {};
+            if (!corpsCommand) {
+                context.state.military.active_offensives_against_corps = cache;
+                return;
+            }
+
+            // Pre-build a list of "active enemy offensives": each entry is
+            // {attackerFaction, objectives: string[]}. Sorted iteration of
+            // corps_command keys for determinism.
+            const activeOffensives: Array<{ attackerFaction: FactionId; objectives: string[] }> = [];
+            const attackerCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
+            for (const attackerCorpsId of attackerCorpsIds) {
+                const attackerCmd = corpsCommand[attackerCorpsId];
+                if (!attackerCmd) continue;
+                const attackerCorps = formations[attackerCorpsId];
+                if (!attackerCorps) continue;
+                const attackerFaction = attackerCorps.faction;
+                for (const op of attackerCmd.active_operations) {
+                    if (op.phase !== 'execution') continue;
+                    // Treat sector_attack/general_offensive/feint as "offensive";
+                    // probes are non-territorial and excluded. (Feints exert
+                    // distraction pressure consistent with the E-A3 model.)
+                    if (op.type === 'reorganization' || op.type === 'strategic_defense' || op.type === 'probe') continue;
+                    const objectives: string[] = [];
+                    if (op.objectives) for (const o of op.objectives) objectives.push(o);
+                    if (op.axes) {
+                        for (const axis of op.axes) {
+                            if (axis.objectives) for (const o of axis.objectives) objectives.push(o);
+                        }
+                    }
+                    if (objectives.length === 0) continue;
+                    activeOffensives.push({ attackerFaction, objectives });
+                }
+            }
+
+            // For each defender corps, count how many active enemy offensives
+            // target at least one OSID currently controlled by that corps's faction.
+            const defenderCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
+            for (const defenderCorpsId of defenderCorpsIds) {
+                const defenderCorps = formations[defenderCorpsId];
+                if (!defenderCorps) continue;
+                const defenderFaction = defenderCorps.faction;
+                let count = 0;
+                for (const off of activeOffensives) {
+                    if (off.attackerFaction === defenderFaction) continue;
+                    let targetsDefender = false;
+                    for (const osid of off.objectives) {
+                        if (pc[osid] === defenderFaction) {
+                            targetsDefender = true;
+                            break;
+                        }
+                    }
+                    if (targetsDefender) count++;
+                }
+                if (count > 0) cache[defenderCorpsId] = count;
+            }
+            context.state.military.active_offensives_against_corps = cache;
         }
     },
     {

@@ -4,14 +4,16 @@ import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { Icon } from './icons/Icon';
+import { t, useLocale, type MessageKey } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
-const STATUS_BADGE: Record<string, { class: string; label: string }> = {
-  assigned: { class: 'text-text-secondary border-text-secondary/40', label: 'ASSIGNED' },
-  reserve: { class: 'text-blue-400 border-blue-400/40', label: 'RESERVE' },
-  'in-combat': { class: 'text-red-400 border-red-400/50', label: 'IN COMBAT' },
-  active: { class: 'text-text-secondary border-text-secondary/30', label: 'ACTIVE' },
-  disrupted: { class: 'text-red-400 border-red-400/50', label: 'DISRUPTED' },
-  forming: { class: 'text-amber-400 border-amber-400/40', label: 'FORMING' },
+const STATUS_BADGE: Record<string, { class: string; labelKey: MessageKey }> = {
+  assigned: { class: 'text-text-secondary border-text-secondary/40', labelKey: 'brigadeRow.status.assigned' },
+  reserve: { class: 'text-blue-400 border-blue-400/40', labelKey: 'brigadeRow.status.reserve' },
+  'in-combat': { class: 'text-red-400 border-red-400/50', labelKey: 'brigadeRow.status.inCombat' },
+  active: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.active' },
+  disrupted: { class: 'text-red-400 border-red-400/50', labelKey: 'brigadeRow.status.disrupted' },
+  forming: { class: 'text-amber-400 border-amber-400/40', labelKey: 'brigadeRow.status.forming' },
 };
 
 const STANCE_STRIPE: Record<string, string> = {
@@ -46,6 +48,8 @@ const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
 };
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
+  const [locale] = useLocale();
+  const formationName = getLocalizedFormationName(formation, locale);
   const cohesion = Math.round(Math.max(0, Math.min(100, formation.cohesion ?? 0)));
   const filledSegments = Math.ceil(cohesion / 20);
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
@@ -85,13 +89,13 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       onMouseLeave={(e) => onHoverChange?.(false, e)}
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
-      title={`Supply: ${supplyState.toUpperCase()} | Fatigue: ${fat} | Cohesion: ${cohesion}%`}
+      title={t('brigadeRow.title', { supply: supplyState.toUpperCase(), fatigue: fat, cohesion })}
     >
       {/* Supply dot */}
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
 
       {/* Brigade name */}
-      <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
+      <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formationName}</span>
 
       {/* Prestige pip */}
       {prestigeTier > 0 && (() => {
@@ -106,14 +110,14 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
 
       {/* Personnel count */}
       {formation.personnel != null && (
-        <span className="shrink-0 text-[10px] tabular-nums text-text-secondary flex items-center gap-0.5" title={`Personnel: ${formation.personnel.toLocaleString()}`}>
+        <span className="shrink-0 text-[10px] tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
           <Icon name="personnel" size={9} />
           {formation.personnel >= 1000 ? `${(formation.personnel / 1000).toFixed(1)}k` : formation.personnel}
         </span>
       )}
 
       {/* Cohesion bar */}
-      <div className="flex items-center gap-0.5 shrink-0" aria-label={`cohesion ${cohesion}`}>
+      <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion })}>
         {Array.from({ length: 5 }, (_, idx) => (
           <span
             key={idx}
@@ -123,7 +127,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       </div>
 
       {/* Fatigue */}
-      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={`fatigue ${fat}`}>
+      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fat })}>
         <Icon name="fatigue" size={8} />
         {fat}
       </div>
@@ -133,7 +137,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
         className={`shrink-0 text-[8px] uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
         style={{ transform: 'rotate(-1.5deg)' }}
       >
-        {badge.label}
+        {t(badge.labelKey)}
       </span>
     </button>
   );

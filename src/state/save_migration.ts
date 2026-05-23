@@ -529,10 +529,17 @@ registerMigration({
 
 registerMigration({
     version: 14,
-    description: 'Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH.',
+    description: 'Loaded gameplay player_faction contract default for legacy saves. Sensitive: yes; default RBiH. Headless harness runs are exempt — they intentionally leave player_faction undefined so the event evaluator routes every event through bot auto-respond.',
     migrate: (state) => {
         const meta = asRecord((state as any).meta);
         if (!meta) return;
+        // Headless harness exemption: when scenario_runner has marked this as a
+        // headless run, do not backfill player_faction. Backfilling to 'RBiH'
+        // causes events with `responding_faction: 'RBiH'` and
+        // `requires_player_response: true` to queue-pending-forever (the engine
+        // thinks a player will respond, but there's no player in a headless
+        // run). n1999 verification surfaced 15+ such stuck events.
+        if (meta.headless_scenario_auto_control === true) return;
         if (!isCanonicalPlayerFaction(meta.player_faction)) {
             meta.player_faction = 'RBiH';
         }

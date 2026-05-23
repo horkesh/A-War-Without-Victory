@@ -9,6 +9,22 @@ export const DEGRADED_EFFECTIVENESS = 0.5;
 export const REPAIR_COST_DEGRADED = 3.0;
 export const REPAIR_COST_NON_OPERATIONAL = 10.0;
 
+/** Minimum operational_heavy fraction maintained per formation after the degrade
+ *  cascade, by drawing from degraded_heavy back into operational_heavy.
+ *
+ *  2026-05-22 forensics finding (`20260522_FORENSICS_VRS_EQUIPMENT_OVERSHOOT.md`):
+ *  without this floor the integer-count cascade in `updateHeavyEquipmentState`
+ *  drives `operational_heavy` to literal zero by ~turn 30-45 per brigade
+ *  (130+ turn overshoot past historical Dayton residual). The repair path
+ *  immediately below is structurally dead at realistic VRS maintenance scores
+ *  (maintenanceScore=0.1476 → floor(1.476)=1 action → floor(1/3)=0 repairs/turn),
+ *  so the only one-way ratchet has no escape. 30% matches the historical
+ *  Dayton-era VRS heavy-equipment operational fraction per BB1/BB2 sources.
+ *  The floor restores from `degraded_heavy` only — not from `non_operational_heavy` —
+ *  which preserves the cascade ordering (operational → degraded → non_operational)
+ *  while preventing the operational tier from extincting.  */
+export const OPERATIONAL_HEAVY_FLOOR_FRACTION = 0.30;
+
 function postureTempo(posture: PostureLevel | undefined): number {
     switch (posture) {
         case 'push':
@@ -100,6 +116,19 @@ export function updateHeavyEquipmentState(
             const shift = Math.min(eq.degraded_heavy, remainingDegrade);
             eq.degraded_heavy -= shift;
             eq.non_operational_heavy += shift;
+        }
+
+        // 2026-05-22: floor-restore clamp from degraded_heavy. Forensics finding
+        // `20260522_FORENSICS_VRS_EQUIPMENT_OVERSHOOT.md` §6 — without this the
+        // integer-count cascade drives operational_heavy to literal zero
+        // ~turn 30-45 per brigade, a 130+ turn overshoot past historical
+        // Dayton residual. Floor pulls only from degraded_heavy (not from
+        // non_operational_heavy) to preserve cascade-ordering semantics.
+        const operationalFloor = Math.floor(eq.total_heavy * OPERATIONAL_HEAVY_FLOOR_FRACTION);
+        if (eq.operational_heavy < operationalFloor && eq.degraded_heavy > 0) {
+            const restore = Math.min(operationalFloor - eq.operational_heavy, eq.degraded_heavy);
+            eq.operational_heavy += restore;
+            eq.degraded_heavy -= restore;
         }
 
         const maintenanceActions = Math.floor(maintenanceScore * 10);

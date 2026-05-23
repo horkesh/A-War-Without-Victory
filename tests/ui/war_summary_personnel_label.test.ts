@@ -4,6 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 const storeState: { loadedGameState: LoadedGameState | null } = {
     loadedGameState: null,
@@ -50,6 +51,7 @@ function stateWithMobilizedPool(): LoadedGameState {
 afterEach(() => {
     cleanup();
     storeState.loadedGameState = null;
+    setLocale('en');
 });
 
 describe('War Summary personnel labels', () => {
@@ -72,5 +74,20 @@ describe('War Summary personnel labels', () => {
         expect(screen.getByText('82.5k')).toBeTruthy();
         expect(screen.getByText('35.5k')).toBeTruthy();
         expect(screen.getByText('118.0k')).toBeTruthy();
+    });
+
+    it('localizes overview labels in BCS mode', () => {
+        setLocale('bcs');
+        storeState.loadedGameState = stateWithMobilizedPool();
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        expect(screen.getByText('Pregled rata')).toBeTruthy();
+        expect(screen.getByText('Teritorija')).toBeTruthy();
+        expect(screen.getByText('Vojna snaga')).toBeTruthy();
+        expect(screen.getByText('Ljudstvo pod oruzjem')).toBeTruthy();
+        expect(screen.getByText('Mobilizacijski bazen')).toBeTruthy();
+        expect(screen.getByText('Mobilizirano ukupno')).toBeTruthy();
+        expect(screen.queryByText('Personnel at arms')).toBeNull();
     });
 });

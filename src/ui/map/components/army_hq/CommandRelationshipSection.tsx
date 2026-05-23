@@ -32,6 +32,7 @@ import { useGameStore } from '../../store/gameStore';
 import { isExhaustionContributingToStrain } from '../../data/command_strain';
 import type { CorpsDelegationSummary } from '../../data/command_strain';
 import type { FrictionEventView } from '../../data/types';
+import { t } from '../../i18n';
 
 const COMPROMISED_THRESHOLD = 6;
 
@@ -107,7 +108,7 @@ export function CommandRelationshipSection({
     const isCompromised = commandStrain >= COMPROMISED_THRESHOLD;
     const strainColor = isCompromised ? 'text-red-400' : 'text-amber-400';
     const strainBg = isCompromised ? 'bg-red-900/20 border-red-500/30' : 'bg-amber-900/20 border-amber-500/30';
-    const labelText = isCompromised ? 'Compromised' : commandStrain > 0 ? 'Strained' : 'Healthy';
+    const labelText = isCompromised ? t('commandRelationship.compromised') : commandStrain > 0 ? t('commandRelationship.strained') : t('commandRelationship.healthy');
 
     const hasCooldown = typeof stabilizationCooldownUntil === 'number' && currentTurn < stabilizationCooldownUntil;
     const costLabel = stabilizationCostCA != null && stabilizationCostCA > 0
@@ -115,12 +116,12 @@ export function CommandRelationshipSection({
         : '';
     const stanceConstraintText =
         unresolvedCount > 0 && exhaustionContributing
-            ? 'Offensive posture unavailable — stabilize the command relationship and reduce operational tempo first.'
+            ? t('commandRelationship.stanceConstraint.frictionExhaustion')
             : unresolvedCount > 0
-                ? 'Offensive posture unavailable — stabilize the command relationship first.'
+                ? t('commandRelationship.stanceConstraint.friction')
                 : exhaustionContributing
-                    ? 'Offensive posture unavailable — reduce operational tempo and let the corps recover first.'
-                    : 'Offensive posture unavailable — command conditions are not yet stable enough.';
+                    ? t('commandRelationship.stanceConstraint.exhaustion')
+                    : t('commandRelationship.stanceConstraint.default');
 
     // ── IPC handlers ────────────────────────────────────────────────────
     const handleAcknowledgeFriction = async (event: FrictionEventView) => {
@@ -131,19 +132,19 @@ export function CommandRelationshipSection({
             eventTurn: event.turn,
             eventType: event.compositeKey.split(':')[2] ?? '',
         });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to acknowledge friction event.');
+        if (!result.ok) setLoadError(result.error ?? t('commandRelationship.error.ackFriction'));
     };
 
     const handleStabilize = async () => {
         if (!ipc.isAvailable) return;
         const result = await ipc.stabilizeCommandRelationship({ corpsId });
-        if (!result.ok) setLoadError(result.error ?? 'Failed to stabilize command relationship.');
+        if (!result.ok) setLoadError(result.error ?? t('commandRelationship.error.stabilize'));
     };
 
     // ── Title with inline strain indicator ───────────────────────────────
     const sectionTitle = commandStrain > 0
-        ? `Command Relationship — ${labelText}`
-        : 'Command Relationship';
+        ? t('commandRelationship.titleWithLabel', { label: labelText })
+        : t('commandRelationship.title');
 
     return (
         <CollapsibleSection
@@ -156,7 +157,7 @@ export function CommandRelationshipSection({
                 {commandStrain > 0 && (
                     <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-bold tracking-wider uppercase ${strainColor}`}>
-                            Strain: {labelText}
+                            {t('commandRelationship.strain', { label: labelText })}
                         </span>
                         <span className={`text-[10px] font-bold tabular-nums font-mono px-1.5 py-0.5 border ${strainBg} ${strainColor}`}>
                             {commandStrain}
@@ -170,7 +171,7 @@ export function CommandRelationshipSection({
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-blue-400/70 shrink-0">◆</span>
                         <span className="text-[10px] text-text-secondary font-mono">
-                            Active operations: {delegationSummaryLabel}
+                            {t('commandRelationship.activeOperations', { label: delegationSummaryLabel })}
                         </span>
                     </div>
                 )}
@@ -178,7 +179,7 @@ export function CommandRelationshipSection({
                 {/* 2. Recovery forecast — only when strain > 0 and forecast available */}
                 {commandStrain > 0 && recoveryForecast && (
                     <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider shrink-0">Recovery:</span>
+                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
                         <span className="text-[10px] text-text-secondary font-mono">
                             {recoveryForecast}
                         </span>
@@ -190,7 +191,7 @@ export function CommandRelationshipSection({
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-amber-500/70 shrink-0">▲</span>
                         <span className="text-[10px] text-text-secondary font-mono">
-                            Corps exhaustion ({Math.round(corpsExhaustion)}%) is straining the command relationship
+                            {t('commandRelationship.corpsExhaustion', { value: Math.round(corpsExhaustion) })}
                         </span>
                     </div>
                 )}
@@ -207,7 +208,7 @@ export function CommandRelationshipSection({
                     <div className="flex items-start gap-1.5" data-testid="faction-campaign-drag">
                         <span className="text-[9px] text-amber-500/70 mt-0.5 shrink-0">▲</span>
                         <span className="text-[10px] text-text-secondary font-mono leading-snug">
-                            National war strain ({Math.round(factionWarExhaustion!)}) is narrowing the latitude this corps has for sustained offensive tempo.
+                            {t('commandRelationship.nationalWarStrain', { value: Math.round(factionWarExhaustion!) })}
                         </span>
                     </div>
                 )}
@@ -226,7 +227,7 @@ export function CommandRelationshipSection({
                 {unresolvedCount > 0 && (
                     <div className="flex flex-col gap-1 pt-1 border-t border-panel-border/50">
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider">
-                            Unresolved Friction
+                            {t('commandRelationship.unresolvedFriction')}
                         </span>
                         {unresolvedEvents.map(event => (
                             <div
@@ -239,16 +240,16 @@ export function CommandRelationshipSection({
                                         {event.typeLabel}
                                     </span>
                                     <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
-                                        Wk {event.turn}
+                                        {t('commandRelationship.week', { turn: event.turn })}
                                     </span>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); void handleAcknowledgeFriction(event); }}
                                     className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
-                                    title="Acknowledge this friction event to reduce command strain over time."
+                                    title={t('commandRelationship.ackTitle')}
                                 >
-                                    Acknowledge
+                                    {t('commandRelationship.acknowledge')}
                                 </button>
                             </div>
                         ))}
@@ -269,15 +270,15 @@ export function CommandRelationshipSection({
                             }`}
                             title={
                                 hasCooldown
-                                    ? `Stabilization on cooldown — resumes turn ${stabilizationCooldownUntil ?? ''}`
-                                    : `Resolve all command friction at once. Costs ${stabilizationCostCA ?? 0} Command Authority.`
+                                    ? t('commandRelationship.cooldownTitle', { turn: stabilizationCooldownUntil ?? '' })
+                                    : t('commandRelationship.stabilizeTitle', { cost: stabilizationCostCA ?? 0 })
                             }
                         >
-                            Stabilize Command Relationship{costLabel}
+                            {t('commandRelationship.stabilize')}{costLabel}
                         </button>
                         {hasCooldown && (
                             <p className="text-[9px] text-text-secondary/50 italic px-1">
-                                Stabilization on cooldown — resumes turn {stabilizationCooldownUntil}.
+                                {t('commandRelationship.cooldown', { turn: stabilizationCooldownUntil ?? '' })}
                             </p>
                         )}
                     </div>

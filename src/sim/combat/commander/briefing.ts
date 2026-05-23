@@ -583,8 +583,21 @@ function collectCampaignIntent(
 
     // C1 OVERLAY: if A3 persisted a directive for this corps, it REPLACES
     // the CampaignPlan-derived role; else fall back to frontPriority.role.
-    const role: CommanderBriefing['campaign_role'] =
+    //
+    // Wave 6 exception: an 'economy' overlay (degenerate political default
+    // when the faction's verb is PREPARE_RESERVE / BALANCE_FRONTS) does NOT
+    // override a CampaignPlan that explicitly assigned offensive targets to
+    // this corps. The plan represents authored campaign intent and outranks
+    // a derived political role. Faction-symmetric in code but practically
+    // asymmetric: HRHB campaign plans carry offensive_targets for hvo
+    // corps; RS plans without explicit offensive_targets remain constrained.
+    let role: CommanderBriefing['campaign_role'] =
         overlay?.role ?? frontPriority?.role ?? null;
+    if (overlay?.role === 'economy'
+        && frontPriority?.role != null
+        && (frontPriority.offensive_targets?.length ?? 0) > 0) {
+        role = frontPriority.role;
+    }
 
     return {
         role,

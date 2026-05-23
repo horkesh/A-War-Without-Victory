@@ -264,6 +264,58 @@ function buildPublicIntelFrictionAnnotation(
 
 // Types and pushSnapEvent imported from attack_resolution_types.ts above.
 
+/**
+ * Fall-1995 mechanic E-A4: cascade trigger writer.
+ *
+ * When OSID `targetOsid` flips from `prevController` to a new faction in
+ * turn T, every front-edge-adjacent OSID Y still owned by `prevController`
+ * receives a 1-turn defender-power penalty applied in turn T+1.
+ *
+ * Models the counter-clockwise collapse pattern in VRS 2nd Krajina Corps
+ * Sept 1995: adjacent-OSID loss demoralizes/destabilizes the remaining
+ * defenders before they can entrench or reposition.
+ *
+ * Determinism: adjacent OSIDs are iterated in sorted order via strictCompare.
+ * GC: `cleanupExpiredEventModifiers` (in active_modifiers.ts) drops entries
+ *   when `expires_turn <= currentTurn`. The reader filter
+ *   `getCascadePenaltyForOsid` uses `expires_turn > currentTurn`, so
+ *   `expires_turn = turn + 2` means the penalty is active exactly on
+ *   turn `turn+1` and is GC'd at start of turn `turn+2`.
+ * Byte-stability: writes only on a flip with a non-null `prevController`.
+ *
+ * Singular ownership: this writer is the only path that emits cascade entries
+ * for E-A4. Reader: `getCascadePenaltyForOsid` (active_modifiers.ts) consumed
+ * in `computeDefenderPowerBreakdown` (combat_math.ts).
+ *
+ * See docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md §3 E-A4.
+ *
+ * Exported for unit-test isolation; production caller is the OSID-flip site
+ * in `resolveAttackOrdersOsid` below.
+ */
+export function emitCascadePenaltiesOnFlip(
+    state: GameState,
+    targetOsid: string,
+    prevController: FactionId | null,
+    adjacency: ReadonlyMap<string, readonly string[]> | Map<string, string[]>,
+    multiplier: number = 0.85,
+): void {
+    if (!prevController) return;
+    const currentTurn = state.meta?.turn ?? 0;
+    const neighbors = adjacency.get(targetOsid) ?? [];
+    const sortedNeighbors = [...neighbors].sort(strictCompare);
+    const pcMap = state.political?.political_controllers ?? {};
+    const penaltyList = (state.military.cascade_penalties ??= []);
+    for (const neighborOsid of sortedNeighbors) {
+        if (neighborOsid === targetOsid) continue;
+        if (pcMap[neighborOsid] !== prevController) continue;
+        penaltyList.push({
+            osid: neighborOsid,
+            multiplier,
+            expires_turn: currentTurn + 2,
+        });
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Main resolver
 // ═══════════════════════════════════════════════════════════════════════════
@@ -950,6 +1002,9 @@ export function resolveAttackOrdersOsid(
                 battle_id: battleId,
                 attacker_brigade: firstAttacker.id as string,
             } satisfies ControlEvent);
+
+            // Fall-1995 mechanic E-A4: cascade trigger (writer extracted for testability).
+            emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
         }
 
         // ── Increment operation combat feedback counters ──────────────

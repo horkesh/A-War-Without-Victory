@@ -34,6 +34,7 @@ import {
 import type { FormationState, GameState, MilitiaPoolState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
+import { getOsidPriority, priorityRank } from './strategic_priorities.js';
 
 /**
  * Pool.available above this flows to faction reserve after reinforcement.
@@ -167,8 +168,24 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
     const formations = state.military.formations ?? {};
     const currentTurn = state.meta?.turn ?? 0;
 
-    const formationIds = Object.keys(formations).sort(strictCompare);
-    for (const id of formationIds) {
+    // Synthesis §3 E-B4: priority-aware allocation order.
+    // Sort formations so core-tier receivers draw first, corridor second,
+    // periphery last. Within a tier, fall back to strictCompare on id for
+    // deterministic ordering. Iteration order does NOT change rates — only
+    // which brigades drain a limited reserve first when supply is short.
+    const sortedFormationIds = Object.keys(formations).sort((a, b) => {
+        const fa = formations[a] as FormationState | undefined;
+        const fb = formations[b] as FormationState | undefined;
+        const oa = fa?.location_osid;
+        const ob = fb?.location_osid;
+        const fnA = fa?.recruit_pool_faction ?? fa?.faction;
+        const fnB = fb?.recruit_pool_faction ?? fb?.faction;
+        const ra = (oa && fnA) ? priorityRank(getOsidPriority(oa, fnA)) : 2;
+        const rb = (ob && fnB) ? priorityRank(getOsidPriority(ob, fnB)) : 2;
+        if (ra !== rb) return ra - rb;
+        return strictCompare(a, b);
+    });
+    for (const id of sortedFormationIds) {
         const f = formations[id] as FormationState | undefined;
         if (!f) continue;
 

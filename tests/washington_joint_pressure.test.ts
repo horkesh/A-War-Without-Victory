@@ -35,7 +35,9 @@ function makeState(washingtonSigned = false): GameState {
                 d: 'RBiH',
             },
             war_alliance_rbih_hrhb: washingtonSigned ? 0.8 : -0.4,
-            war_exhaustion: { RBiH: 35, HRHB: 30 },
+            // 2026-05-22: rescaled 100× (cap 100→10000, WASH_COMBINED_EXHAUSTION 55→5500)
+            // per forensics memo 20260522_FORENSICS_WAR_EXHAUSTION_CONVERGENCE.md
+            war_exhaustion: { RBiH: 3500, HRHB: 3000 },
             international_visibility_pressure: { negotiation_momentum: 0.8 },
             rbih_hrhb_state: {
                 war_started_turn: 45,

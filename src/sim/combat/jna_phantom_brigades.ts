@@ -62,6 +62,11 @@ interface PhantomDef {
     no_equipment_handoff?: boolean;
     /** Kind tag for the formation. Defaults to 'jna_phantom'. */
     kind_tag?: FormationState['kind'];
+    /** Turn at which this phantom becomes eligible to spawn. Absent → spawns at scenario start
+     *  (turn 0), preserving the existing JNA + 1992 HV Op-Jackal behaviour. Set on second-wave
+     *  HV expeditionary brigades that arrive after the Split Agreement (22 July 1995, ≈ turn 150)
+     *  per `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`. */
+    spawn_turn?: number;
 }
 
 const JNA_PHANTOM_DEFS: PhantomDef[] = [
@@ -317,19 +322,162 @@ const HV_PHANTOM_DEFS: PhantomDef[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** All phantom defs (JNA + HV). */
-const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS];
+/**
+ * HV (Croatian Army) 1995 expeditionary phantom brigades — second wave.
+ *
+ * Historical: post-Split Agreement (22 July 1995, ≈ turn 150) HV deployed openly
+ * inside BiH under Tuđman + Izetbegović + Zubak + Silajdžić consent. Three
+ * operational groups under HV Maj Gen Ante Gotovina ran Mistral 2 (8–15 Sept)
+ * and Southern Move (8–11 Oct). HVO Guards Brigades were embedded as line units
+ * (those remain HRHB-native — see `data/source/oob_brigades.json`); the
+ * brigades below are the HV regulars + home guard regiments that joined them.
+ *
+ * Sources: ICTY Gotovina IT-06-90 trial chamber (HV order of battle for Mistral 2,
+ * Summer '95, Southern Move); BB Vol. II ch.12–13; Tanner, *Croatia* ch.13.
+ *
+ * Spawn turn 150 (≈ Split Agreement window). Withdraw turn 188 (Dayton ceasefire)
+ * or earlier on `holbrooke_us_belgrade_channel_1995` flag (dynamic trigger handled
+ * in `processJnaWithdrawals`). Equipment returns to Croatia (no handoff to HVO).
+ *
+ * Coexists with the permanent 4-brigade pool in `hv_integration.ts` (which models
+ * post-Washington 1994 Federation Military Council integration). The two pools
+ * are distinct: hv_integration = permanent; phantoms = short-window expeditionary.
+ *
+ * See: `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`.
+ */
+const HV_PHANTOM_DEFS_1995: PhantomDef[] = [
+    // ── OG North (main effort, Mistral 2 + Southern Move) ────────────────
+    {
+        id: 'hv_4th_guards_brigade_1995' as FormationId,
+        name: 'HV 4th Guards Brigade (Split, OG North)',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 40, artillery: 30, apcs: 12,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_7th_guards_brigade_1995' as FormationId,
+        name: 'HV 7th Guards Brigade (Varaždin, OG North)',
+        corps_id: 'hvo_central_bosnia' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:tomislavgrad:tomislavgrad_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 30, artillery: 25, apcs: 10,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_1st_guards_brigade_1995' as FormationId,
+        name: 'HV 1st Croatian Guards Brigade Tigrovi (Zagreb, OG North)',
+        corps_id: 'hvo_central_bosnia' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 25, artillery: 25, apcs: 10,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    // ── OG South (flank + Southern Move main effort 8-11 Oct) ────────────
+    {
+        id: 'hv_126th_hgr_1995' as FormationId,
+        name: 'HV 126th Home Guard Regiment (Sinj, OG South)',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 12, artillery: 15, apcs: 8,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_141st_reserve_brigade_1995' as FormationId,
+        name: 'HV 141st Reserve Infantry Brigade (OG South)',
+        corps_id: 'hvo_southeast_herzegovina' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:tomislavgrad:tomislavgrad_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 8, artillery: 10, apcs: 6,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    // ── OG West (Drvar axis) ──────────────────────────────────────────────
+    {
+        id: 'hv_7th_hgr_1995' as FormationId,
+        name: 'HV 7th Home Guard Regiment (OG West)',
+        corps_id: 'hvo_tomislavgrad' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 10, artillery: 10, apcs: 6,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_112th_infantry_1995' as FormationId,
+        name: 'HV 112th Infantry Brigade (OG West)',
+        corps_id: 'hvo_tomislavgrad' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 6, artillery: 8, apcs: 4,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+    {
+        id: 'hv_134th_hgr_1995' as FormationId,
+        name: 'HV 134th Home Guard Regiment (OG West)',
+        corps_id: 'hvo_tomislavgrad' as FormationId,
+        faction: 'HRHB',
+        location_osid: 'op:livno:livno_2',
+        spawn_turn: 150,
+        withdrawal_turn: 188,
+        tanks: 5, artillery: 8, apcs: 4,
+        no_equipment_handoff: true,
+        kind_tag: 'hv_phantom',
+    },
+];
+
+const ALL_PHANTOM_DEFS: PhantomDef[] = [...JNA_PHANTOM_DEFS, ...HV_PHANTOM_DEFS, ...HV_PHANTOM_DEFS_1995];
 
 /**
  * Spawn phantom brigades into the game state.
- * Called once at scenario start (turn 0, before first runTurn).
+ * Called at scenario start (turn 0) AND each war-phase turn (so spawn_turn-gated
+ * defs like the 1995 HV expeditionary wave can land at their authored turn).
+ * Each def is idempotent: spawn check is `if (state.military.formations[def.id])`.
  * Handles both JNA (VRS) and HV (HRHB) phantoms.
  */
 export function spawnJnaPhantomBrigades(state: GameState): void {
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
 
+    // Phantoms that have ever been spawned. When a phantom withdraws its
+    // formation entry is removed entirely, so `formations[def.id]` alone is
+    // NOT sufficient to gate re-spawn — without this set, the spawn step (now
+    // running each war turn for turn-gated 1995 HV defs) would re-spawn
+    // long-withdrawn JNA / 1992 HV phantoms each turn and (worse) re-flip
+    // their `capture_osids` controllers back. n2004 verified this regression.
+    const spawned = (state.military.phantoms_spawned ??= []);
+    const spawnedSet = new Set(spawned);
+
     for (const def of ALL_PHANTOM_DEFS) {
-        if (state.military.formations[def.id]) continue; // already spawned
+        if (spawnedSet.has(def.id)) continue;                 // never re-spawn
+        if (state.military.formations[def.id]) continue;      // belt-and-braces — already in dict
+
+        // Spawn-turn gate: defs with `spawn_turn` field only spawn when current
+        // turn ≥ spawn_turn. Defs without it default to turn 0 (legacy behaviour,
+        // preserves all existing JNA + 1992 HV Op-Jackal phantoms).
+        const spawnTurn = def.spawn_turn ?? 0;
+        if (turn < spawnTurn) continue;
 
         const faction: FactionId = def.faction ?? 'RS';
         const kindTag = def.kind_tag ?? 'jna_phantom';
@@ -363,6 +511,10 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         } as FormationState;
 
         state.military.formations[def.id] = formation;
+        // Mark as spawned so subsequent turns of the war-phase phantom-spawn
+        // step skip this def even after the formation is removed on withdrawal.
+        spawned.push(def.id);
+        spawnedSet.add(def.id);
 
         // Ghost phantoms flip political control of target OSIDs at spawn
         if (def.capture_osids) {
@@ -428,9 +580,15 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
         // HV phantoms withdraw dynamically when Graz east Herzegovina truce activates
         // (Op Jackal complete → HV returns to Croatia), or at withdrawal_turn fallback.
+        // SCOPE: this dynamic trigger applies ONLY to the 1992 Op-Jackal HV phantoms
+        // (created at scenario init, turn 0). 1995 HV expeditionary phantoms have
+        // `created_turn >= 150` (post-Split Agreement) and must NOT be evicted by the
+        // long-past Graz Accords (May 1992). n2005 verified the prior shared-trigger
+        // semantics caused the 1995 brigades to spawn-and-withdraw in the same turn.
         const isHvPhantom = phantom.kind === 'hv_phantom';
+        const isHv1992OpJackal = isHvPhantom && (phantom.created_turn ?? 0) < 100;
         const grazEastActive = state.political.graz_east_herzegovina_active_turn != null;
-        const hvShouldWithdraw = isHvPhantom && grazEastActive;
+        const hvShouldWithdraw = isHv1992OpJackal && grazEastActive;
 
         if (!hvShouldWithdraw && (phantom.withdrawal_turn == null || turn < phantom.withdrawal_turn)) continue;
 

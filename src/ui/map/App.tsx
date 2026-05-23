@@ -37,6 +37,7 @@ import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
+import { EventDecisionModal } from './components/EventDecisionModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
 import { DiplomacyPanel } from './components/DiplomacyPanel';
@@ -274,6 +275,12 @@ function App() {
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [peacePlanDismissed, setPeacePlanDismissed] = useState(false);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
+  /** Active blocking event decision id surfaced as a modal. `null` = no modal.
+   *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
+   *  below when a new turn surfaces pending decisions for the player faction. */
+  const [activeEventDecisionId, setActiveEventDecisionId] = useState<string | null>(null);
+  /** Last turn we evaluated for auto-launch. Prevents re-launching on every render. */
+  const [lastAutoLaunchTurn, setLastAutoLaunchTurn] = useState<number>(-1);
   const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
@@ -422,6 +429,27 @@ function App() {
     });
     return () => { stale = true; };
   }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
+
+  // v0.9 presidential design: auto-launch the EventDecisionModal for the first
+  // blocking event decision when a new turn surfaces one. Memory:
+  // [[player_identity_and_command]] — "Goal is to play as president, making such
+  // decisions that then impact the war through different modifiers." The modal
+  // is dismissible only via response, so the IPC respond path is the only exit.
+  // Once-per-turn gate via `lastAutoLaunchTurn` prevents re-launch on every render.
+  useEffect(() => {
+    const turn = loadedGameState?.turn ?? -1;
+    if (turn < 0) return;
+    if (turn === lastAutoLaunchTurn) return;
+    if (activeEventDecisionId !== null) return;
+    const decisions = loadedGameState?.pendingEventDecisions ?? [];
+    if (decisions.length === 0) {
+      setLastAutoLaunchTurn(turn);
+      return;
+    }
+    const first = decisions.find((d) => d.faction === playerFaction);
+    if (first) setActiveEventDecisionId(first.event_id);
+    setLastAutoLaunchTurn(turn);
+  }, [loadedGameState?.turn, loadedGameState?.pendingEventDecisions, playerFaction, activeEventDecisionId, lastAutoLaunchTurn]);
 
   // Auto-dismiss non-decision events after 4 seconds
   useEffect(() => {
@@ -777,10 +805,15 @@ function App() {
             openArmyHQTab(gs, 'personnel');
           }
           if (action === 'event_modal') {
-            // Presidential event decisions are executed inside PresidentialAttentionPanel
-            // (Army HQ briefing tab). Route the president to that surface; do not execute
-            // here. Inbox is navigation-only for this family; the panel owns IPC.
-            openArmyHQTab(gs, 'briefing');
+            // Surface the blocking event decision directly as a modal. The inbox
+            // item id is `event:<event_id>` (see inboxItems.ts:101); strip the
+            // prefix to get the engine event id. PresidentialAttentionPanel still
+            // owns the long-form Army HQ briefing surface for review/history, but
+            // the inbox-click path now produces an immediate "decide now" modal
+            // matching the v0.9 presidential design intent (memory:
+            // [[player_identity_and_command]]). IPC respond path is shared.
+            const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
+            setActiveEventDecisionId(eventId);
           }
           if (action === 'army_hq_opportunity') {
             openArmyHQTab(gs, 'briefing');
@@ -974,6 +1007,33 @@ function App() {
         isOpen={paramilitaryReviewOpen}
         onClose={() => setParamilitaryReviewOpen(false)}
       />
+      {/* v0.9 presidential blocking decision modal.
+          Source: state.military.pending_event_decisions[] filtered by player faction.
+          Surfaced (a) automatically when a new turn brings a new decision (see
+          auto-launch effect above), or (b) when the player clicks the inbox item
+          (event_modal action handler routes here). The modal is non-dismissible;
+          the only exit is to respond, which calls ipc.respondToEventDecision and
+          the engine clears the entry from pending_event_decisions. */}
+      {activeEventDecisionId !== null && (() => {
+        const decision = (loadedGameState?.pendingEventDecisions ?? [])
+          .find((d) => d.event_id === activeEventDecisionId && d.faction === playerFaction);
+        if (!decision) {
+          // Decision already resolved or filtered out for current faction — clear state.
+          setActiveEventDecisionId(null);
+          return null;
+        }
+        return (
+          <EventDecisionModal
+            decision={decision}
+            onRespond={async (eventId, responseId) => {
+              if (ipc.isAvailable) {
+                await ipc.respondToEventDecision(eventId, responseId);
+              }
+              setActiveEventDecisionId(null);
+            }}
+          />
+        );
+      })()}
       <ConvoyDecisionModal
         convoy={loadedGameState?.pendingConvoyDecisions?.find((convoy) => convoy.id === selectedConvoyDecisionId) ?? null}
         onClose={() => setSelectedConvoyDecisionId(null)}

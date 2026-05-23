@@ -167,8 +167,12 @@ export function validateGameStateShape(
             }
             // player_faction is required for current loaded gameplay state. Scenario JSON may remain neutral;
             // legacy saves receive the desktop default through save migration v14.
+            // Headless harness exemption: scenario_runner sets headless_scenario_auto_control=true and
+            // leaves player_faction undefined so the event evaluator routes all events through bot
+            // auto-respond. Don't require player_faction in this case (matches save-migration v14 exemption).
             const requirePlayerFaction = stateVersion >= 14 || (options.requireVersion !== undefined && options.requireVersion >= 14);
-            if (requirePlayerFaction) {
+            const isHeadlessHarness = m.headless_scenario_auto_control === true;
+            if (requirePlayerFaction && !isHeadlessHarness) {
                 if (!isCanonicalPlayerFaction(m.player_faction)) {
                     errors.push('meta.player_faction is required and must be one of: RBiH, RS, HRHB');
                 }

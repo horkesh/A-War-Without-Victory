@@ -1,8 +1,239 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] docs(handoff): commit Claude engine packet reports
+
+**Type:** Documentation and handoff reconciliation only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, event ordering, or UI behavior changed.
+
+**Why:** Claude's fall-1995 engine session produced handoff/research/audit documents in the working tree after the engine commits were already interleaved on `codex/localization-complete-2026-05-23`. The branch needed those docs committed before the next Codex-owned push so the n2003 baseline, headless contract, HV phantom status, and HVO catalog lane are traceable from the repository.
+
+**Change:** Added the session handoff, RS player event audit, HV expeditionary ghost design, HVO 1994/Mistral/Southern Move research dispatches, and HVO catalog synthesis proposal. Reconciled `COMBAT_MASTER.md` from the superseded n1999 headline to the adopted n2003 baseline while preserving the fall-1995 mechanics table.
+
+**Verification:** `npm.cmd run typecheck` passed before this documentation commit. `SectorsSection.tsx` exists and the `OperationsSection`/`ArmyHQCorpsCard` i18n keys are present in both English and BCS dictionaries, so the handoff-reported typecheck gaps are resolved on current disk.
+
+---
+
+## [2026-05-23] fix(codex): sweep stale indexed essay claims
+
+**Type:** Player-facing Codex/history text correction only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, or ordering semantics changed.
+
+**Why:** The indexed Codex corpus had stale generated text diverging from the standalone source essays, including the user-reported Operation Sana westward-sweep title. Several high-risk stale phrases could misstate direction of advance, perpetrator framing, operation attribution, or chronology in player-facing history text.
+
+**Change:** Synchronized every indexed essay's `title`, `category`, `sources`, and `content` from its standalone source essay while preserving index-only dynamic sections/localizations. Corrected Operation Sana to a south-and-east 5th Corps breakout with Balkan Battlegrounds I page references and corrected Petrovac/Kljuc/Krupa/Sanski Most chronology. Corrected the Trusina title away from generic both-sides wording toward ARBiH perpetrator/place specificity. Added `docs/40_reports/audits/20260523_CODEX_HISTORICAL_ACCURACY_SWEEP.md` and broadened `tests/ui/codex_essay_localization.test.ts` so the full indexed corpus fails if it drifts from standalone source bodies.
+
+**Verification:** Source/index drift script reports all indexed core fields match standalone essays, total drift 0. Stale-phrase scan for `sweeps west|westward sweep|cisti zapad|čisti zapad|in mid-october, the strategically important town of ključ|on 11 october, sanski most|Crimes on All Sides|zlocini na svim stranama|combined HVO-ARBiH effort|formally ended on 14 September` finds only regression-test guard strings. Focused Vitest/typecheck/diff checks passed before commit.
+
+---
+
+## [2026-05-23] refactor(i18n+oob): add structured brigade designation catalog
+
+**Type:** UI/localization data-boundary refactor only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, OOB canonical names, or ordering semantics changed.
+
+**Why:** Brigade display localization needed a durable canonical designation layer instead of treating localized names as ad hoc string substitutions. The same layer also lets UI surfaces classify unit type/echelon without parsing English formation names.
+
+**Change:** Added `data/source/oob_brigade_designations.json` with one row per `data/source/oob_brigades.json` brigade id, including a stable `designation_code`, Bosnian display label, English gloss, `unit_type`, and `echelon`. Extended `src/ui/map/data/formationNameLocalizations.ts` with `getFormationDesignation(...)` and `getFormationUnitType(...)`, and made BCS label resolution prefer the catalog. Map marker classification, stack expansion formation icons, and ops-planning unit-type labels now use structured unit type. Enabled TypeScript JSON imports via `resolveJsonModule`; Warroom fallback JSON casts were made explicit after the compiler began typing imported JSON.
+
+**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 5/5. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `git diff --check` passed with CRLF normalization warnings only.
+
+---
+
+## [2026-05-23] fix(ui): keep settings tabs clickable and expose startup language
+
+**Type:** UI shell/i18n preference fix only. No simulation behavior, scenario data, save schema, event routing, Codex unlock logic, diagnostics, OOB, or tuning changed.
+
+**Why:** In Electron, the Settings modal's click-to-close backdrop could sit above the visible panel and intercept tab clicks, closing Settings instead of changing tabs. Language selection also required reaching Settings, which blocked first-run BCS selection from the initial screen.
+
+**Change:** Put the Settings panel on an explicit `relative z-10` layer above the backdrop `z-0` button and stop panel click propagation. Added a compact main-menu language selector backed by the existing `useLocale()`/`awwv.locale` store, so BCS can be selected before starting or loading a campaign.
+
+**Verification:** `npx.cmd vitest run tests/ui/settings_screen_shell_cleanup.test.ts tests/ui/main_menu_language.test.ts tests/ui/settings_screen_i18n.test.ts --reporter=dot` passed 8/8. `npx.cmd vitest run tests/ui/settings_screen_shell_cleanup.test.ts tests/ui/main_menu_language.test.ts tests/ui/settings_screen_i18n.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 15/15. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+---
+
+## [2026-05-23] feat(i18n): localize brigade names in BCS UI
+
+**Type:** UI/localization display boundary only. No simulation behavior, scenario data, save schema, OOB canonical names, generated saves, combat outputs, or tuning changed.
+
+**Why:** The BCS localization pass still rendered source OOB brigade names in English across major map, ORBAT, Army HQ, corps-front, reserve, ops-planning, tooltip, and attack-confirmation surfaces. User explicitly requested all brigade names localized in Bosnian, with no Croatian or Serbian-ekavian leakage.
+
+**Change:** Added `getLocalizedFormationName(...)` in `src/ui/map/data/formationNameLocalizations.ts`, with researched exact overrides for non-derivable unit names and deterministic Bosnian grammar/adjective replacements for the remaining source OOB rows. Wired the helper into brigade map markers and the main player-facing brigade display surfaces while preserving English `formation.name` as canonical state. Added `tests/brigade_name_localization.test.ts` to verify all 249 `data/source/oob_brigades.json` brigade rows resolve to BCS labels and reject English/Croatian/ekavian unit terminology. Implementation report: `docs/40_reports/implemented/20260523_BCS_BRIGADE_NAME_LOCALIZATION.md`.
+
+**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 3/3. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-23] feat(events+ui+calibration): n2003 baseline — historical-default bot decisions + headless contract + presidential modal
+
+**Type:** Multi-commit session shipping (a) the headless undefined-player_faction contract across 3 sites, (b) structured event-decision audit trail, (c) UI surfacing of blocking decisions as auto-pop modals, (d) historical-default retunings of 3 events + Washington Agreement HRHB cohesion reset, and (e) strategic_depth corps_asset filter fix. New 188w baseline at **n2003 hash `47438d249146d1af`, match_ratio 79.21%**. Eight commits on `codex/localization-complete-2026-05-23`.
+
+**Why:** n1999 verification surfaced multiple bugs:
+1. 15 RBiH events with `requires_player_response: true` and `responding_faction: 'RBiH'` were queueing-pending-forever because `scenario_runner.ts:1412` defaulted player_faction='RBiH' in headless runs. Their downstream consequences (dimension shifts, sets_flags, mechanical effects) never applied — silent no-ops across the 188-turn run.
+2. `strategic_depth.ts` filtered corps formations by `kind === 'corps'` but engine OOB tags corps as `'corps_asset'`. E-B3 was dead code.
+3. Inbox click on `event_modal` action silently switched to Army HQ Briefing tab instead of opening EventDecisionModal — looked like "items don't open" from the RS-player POV.
+4. Paramilitary inbox items missing playerFactionMatch filter.
+5. Three events used political-scoring `bot_response_logic` that produced non-historical bot picks (notably `sue_for_peace_hrhb` at turn 89 mid-1993, ahistorical until Washington Agreement March 1994). User directive resolved: "By default, bots should select historical outcomes and we are calibrating for that."
+
+**Change — engine/state:**
+- `73f36de4` — Structured `state.military.event_decision_log[]` with `chosen_response_id` + `decision_source` discriminator (`bot_political` / `bot_v1` / `bot_ai_default` / `player`). Writers at all 4 pick sites.
+- `a018f79b` — `strategic_depth.ts` accepts both `kind === 'corps'` and `kind === 'corps_asset'` at both gate sites; E-B3 now writes to ~16 corps formations per turn (was 0).
+- `f7c8baed` — `scenario_runner.ts:1412` leaves player_faction undefined when neither state.meta nor scenario file authored one (was defaulting to 'RBiH').
+- `b875f95a` — `save_migration.ts` v14 skips player_faction backfill when `headless_scenario_auto_control === true`.
+- `0b7d0d93` — `validateGameState.ts` mirrors the migration v14 headless exemption.
+
+**Change — UI:**
+- `446acb91` — Three desktop GUI fixes for the RS player event-system flow:
+  - Auto-launch `EventDecisionModal` on turn entry when `pending_event_decisions[]` has an unhandled blocking decision for the player faction (was: no auto-pop, decisions silently queued).
+  - Inbox `event_modal` action opens the modal directly (was: silent Army HQ Briefing tab switch).
+  - Paramilitary inbox items defensive-filtered through `playerFactionMatch`.
+
+**Change — data (events + calibration):**
+- `8c1e6f5e` — Three events switched to `bot_response_logic: 'historical'` (= always pick options[0]) per user directive that historical defaults are the calibration target:
+  - `gornji_vakuf_clashes_1993`: `capital_based` → `historical` (options[0] = escalate; HVO did escalate Gornji Vakuf in Jan 1993)
+  - `strategic_posture_review_hrhb`: `strategic_weighted` → `historical` (options[0] = press_croat_objectives; HRHB pressed objectives through 1993 until Washington Agreement). Previously the political scoring picked `sue_for_peace_hrhb` which has `available_from_fire: 3` gate that isn't enforced — ahistorical for mid-1993.
+  - `ic_rbih_restraint_post_washington`: `strategic_weighted` → `historical` (options[0] = acknowledge_pressure; RBiH did accept Washington-era US restraint).
+- Washington Agreement (washington_agreement_1994) effects extended to model Federation military integration as a CB-war combat-penalty reset:
+  - `morale_change HRHB`: +3 → +8 (rebuilding HVO cohesion after CB war)
+  - new `cohesion_change HRHB`: +15 (reset prior CB-war cohesion damage from gornji_vakuf escalate + earlier CB-war events)
+  - new `cohesion_change RBiH`: +5 (Federation supply integration boost)
+- Player agency preserved: `sue_for_peace_hrhb` option restored to `strategic_posture_review_hrhb` after inadvertent deletion in earlier draft. Bot just defaults away from it via `historical` logic; player can still select it.
+
+**Verification (n2003 vs n2002):**
+- match_ratio: 78.51% → **79.21%** (+0.70pp; was 81.18% in n1999 but masking 15 stuck events)
+- HRHB: 64.49% → 67.29% (+2.80pp); sim 83 → 86 (Washington reset partial recovery)
+- RBiH: 78.93% → 79.07% (+0.14pp); sim 299 → 301
+- RS:   76.97% → 78.15% (+1.18pp); sim 330 → 325
+- 0 stuck pending decisions ✓
+- 37 entries in event_decision_log ✓
+- All 4 retuned events picking historical options[0] ✓
+- Headless contract working: player_faction undefined, headless_scenario_auto_control true ✓
+- strategic_depth populated on all 16 corps ✓
+
+**Scenario-creator-runner-tester verdict:** Adopt n2003 as new baseline. The headline drop from n1999 81.18% to n2003 79.21% reflects honest historical fidelity — n1999 was overshooting RBiH territory by +29 OSIDs because the Carter ceasefire, Washington Agreement, Contact Group, and US 51:49 halt were all silently no-op (15 events queued forever). n2003 RBiH overshoot is now +11. The remaining HRHB shortfall (-21 OSIDs vs painted 107) is structural (Bosnian Croat manpower limits) not authoring — next lever flagged as expanding HV-attached brigade pool from 4 → 6-8 brigades (Mistral 2 OG North + South + West historical composition).
+
+**Authoritative principle established (durable):** Bots default to `historical` (options[0] = historical choice). Calibration is for the historical-outcome path. Non-historical paths exist for player + AI variation; engine handles them as designed but they are not the calibration target. See [[corresponding KNOWLEDGE entry]].
+
+**Reports:** 
+- `docs/40_reports/audits/20260523_RS_PLAYER_EVENT_SYSTEM_AUDIT.md` (Presidential Inbox audit)
+- `docs/40_reports/proposals/20260523_RESEARCH_*.md` (still-relevant Fall-1995 research dispatches)
+
+---
+
+## [2026-05-23] ui(i18n): add Bosnian Codex entry localization contract
+
+**Type:** UI/data localization extraction only. No simulation behavior, scenario data, save schema, event firing, Codex unlock predicates, dynamic-section predicates, diagnostics, OOB, or tuning changed.
+
+**Why:** BCS localization had reached the Codex shell, but the actual Codex essay titles/bodies and dynamic inserts were still rendered from English data. Ghost-entry Markdown also had no Bosnian sidecar coverage.
+
+**Change:** Made `resolveCodexEssay(...)` locale-aware for title, category, canonical body, ghost summary, dynamic-section content, and sources. Routed `CodexPanel` through `useLocale()` so selected and sidebar entries use the active locale. Added `localizations.bcs` payloads for all 96 indexed Codex essays and all 61 dynamic inserts in `data/scenarios/essays/essay_index.json`. Added `data/codex/ghost_entries_bcs/` sidecars for all 20 ghost Markdown entries.
+
+**Verification:** `npx.cmd vitest run tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 5/5. `npx.cmd vitest run tests/ui_i18n.test.ts tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 91/91. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-23] feat(engine): Fall-1995 mechanics packet — 81.18% match_ratio (n1999)
+
+**Type:** Multi-commit engine packet on `feature/arc-operations-calibration`. Three commits (`91613eb2`, `d6c134ff`, `5083c85d`). Adds 5 first-class state surfaces + 5 new combat-math modifiers + 2 new scenario events + 4 historian research dispatches + engine synthesis doc.
+
+**Why:** Calibration n1998 stalled at 78.51% area-weighted because the engine could not reproduce the Aug–Oct 1995 collapse of VRS 2nd Krajina Corps. Synthesis dispatch (3 historian reports + 1 architecture pass) identified 21 historical mechanisms (M1–M21) across external shocks (Storm, Deliberate Force, HV ammo transfusion), defender overstretch, multi-axis simultaneity, and counter-clockwise cascade collapse. See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`.
+
+**Change — implemented (synthesis §3 codes):**
+- **E-A1** NATO Deliberate Force capability suppression — `equipment_quality_modifier` (RS × 0.70, 4 turns) layered onto existing `nato_deliberate_force_1995` event.
+- **E-A2** HV cross-border ammo transfusion — new event `hv_ammo_transfusion_post_storm_1995` (RBiH × 1.15, 6 turns).
+- **E-A3** Multi-axis simultaneity defender penalty — new `state.military.active_offensives_against_corps` cache built turn-start in `war_phases.ts`; consumer in `combat_math.ts` defender power (1.0× / 0.9× / 0.8× / 0.7× by enemy-offensive count, capped 4+).
+- **E-A4** Cascade trigger via adjacent OSID loss — new `state.military.cascade_penalties[]` array; writer `emitCascadePenaltiesOnFlip` in `attack_resolution_osid.ts`; reader `getCascadePenaltyForOsid` in `active_modifiers.ts`; consumer in `combat_math.ts` (1-turn 0.85× on adjacent same-faction OSIDs).
+- **E-B2** HV Una negative-control predicate in `sector_offensive.ts` — 0.65× force_ratio cap on HV-dominant ops without HVO co-deployment (Op Una Sept 18–19 1995 historical failure).
+- **E-B3** Strategic depth per corps — new `FormationState.strategic_depth` field, new `src/sim/combat/strategic_depth.ts`, new `war_phases` step `update-strategic-depth`; new `state.meta.svk_corps_active` flag.
+- **E-B4** Strategic priority tiering — new `data/source/strategic_priorities.json` (RS core: Banja Luka / Pale / Han Pijesak / Sokolac / Bijeljina; periphery: western Bosnia); new `src/sim/combat/strategic_priorities.ts` loader + lookup; periphery-abandonment penalty (defender × 0.80 when corps coherence < 0.6); priority-aware reserve allocation in `strategic_reserve.ts`.
+- **Foundation:** new `FormationState.coordination_coherence` + `strategic_depth` (corps-only); new `MilitaryState.cascade_penalties` + `offensive_ops_suppressions`; new `EventEffectOffensiveOpsSuppression` kind; handler + reader; cleanup GC extended.
+
+**Change — deferred (not in this packet):**
+- E-A5 51:49 launch-gate consumer for the externally-imposed Holbrooke/Tuđman halt.
+- E-A6 Sloboda 95 / Velika Kladuša rear-clearing as scripted op (precondition for Sana 95).
+- E-B1 corps coherence decay logic + threshold gates (Agent B failed delivery).
+
+**Verification:** `npx tsc --noEmit` clean. 194/194 tests pass across 8 combat-math suites including 7 new tests in `tests/fall_1995_multi_axis_and_cascade.test.ts`. New test file `tests/fall_1995_hv_depth_priority.test.ts` (274 lines). All consumers gated `if (multiplier !== 1.0)` for byte-stability on the historical (no-event, no-cascade, no-HV-attached) path; 40w calibration window untouched (events fire turn ≥ 159).
+
+**Outcome (n1999 vs n1998):**
+- match_ratio: 78.51% → **81.18%** (+2.67pp, +19 matches).
+- HRHB accuracy: 62.62% → **77.57%** (+14.95pp) — Mistral 2 cascade through HV-attached brigades finally lands historically.
+- RS accuracy: 76.05% → 78.10% (+2.05pp); sim count 334 → 296 reflects 2KK collapse (vs painted 315).
+- RBiH accuracy: 80.13% → 78.06% (−2.07pp) — RBiH overshoots by 29 OSIDs (was +7); deferred E-A5 51:49 halt would cap this.
+- Hash: `b4be504c` → `914e6c77`.
+
+**Research dispatches (companion docs at `docs/40_reports/proposals/`):**
+- `20260523_RESEARCH_ARBIH_FALL_1995.md` (Sana 95, Una 95, 7th Corps, 1st Corps Treskavica).
+- `20260523_RESEARCH_HVO_HV_FALL_1995.md` (Maestral 2 = Mistral 2; HV-HVO embedded under Gotovina; Op Una negative control).
+- `20260523_RESEARCH_VRS_2KK_COLLAPSE.md` (counter-clockwise cascade Grahovo→Glamoč→Šipovo→Jajce→Mrkonjić→Ključ→Drvar→Petrovac→Sanski Most→Krupa; commander correction Borić not Milovanović).
+- `20260523_RESEARCH_VOZUCA_1995.md` (Uragan-95 / Farz-95; ARBiH 2nd+3rd Corps; ~200 km², Tuzla-Zenica land bridge restored).
+- `20260523_RESEARCH_SARAJEVO_DEBLOCKADE.md` (no ARBiH ground op ever broke SRK ring in 1,425 days; siege ended via Deliberate Force + RRF Igman artillery, not ground action).
+- `20260523_RESEARCH_ARBIH_1994_OPS.md` (Grmeč-94 + Štit-94 + Pauk; 1994 pattern: every ARBiH offensive against defended town stalled — light infantry cannot dislodge dug-in VRS with artillery; 1995 needed external enablers).
+
+**Goražde painted-control corrections (companion fix `5660c8ec`):** ICTY + Wikipedia confirm Goražde was held by Independent 81st Division / East Bosnian Operational Group (NOT 5th Corps; 5th Corps was Bihać). Engine #4B's earlier 6-OSID flip RS→RBiH at Goražde: 4 correct (faocici_2 / hrancici / kolovarice / zorovici — Goražde municipality, FBiH); 2 reverted to RS (slatina_2 / ustipraca_2 — Novo Goražde municipality, RS post-Dayton; ustipraca_2 captured by VRS 1st/2nd/4th/5th Podrinje Brigades in May 1993, became seat of Novo Goražde).
+
+**Authorization note:** User explicitly overrode the standing "one change per calibration run" rule for this session: "This time we will not be doing one change then run. Implement all of those." Bundled packet ships intentionally.
+
+**Reports:** `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` + 6 research dispatches.
+
+---
+
+## [2026-05-23] ui(i18n): localize war summary and inbox shell
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, inbox action routing, diagnostics, OOB, or tuning changed.
+
+**Why:** After the Operations Planning extraction, top-level command shell copy still remained English-only in War Summary overview/focused SituationTab states and Presidential Inbox quiet-state chrome.
+
+**Change:** Added English/BCS dictionary keys for War Summary overview sections, selected SituationTab empty/OPSEC labels, and Presidential Inbox quiet-state/header/badge text. Routed `WarSummaryContent`, selected `SituationTab` strings, and `PresidentialInbox` shell copy through the existing `t(...)` helper with English fallback.
+
+**Verification:** `npx.cmd vitest run tests/ui/war_summary_personnel_label.test.ts tests/ui/war_summary_empty_states.test.ts tests/ui/war_summary_opsec_reconciliation.test.ts tests/ui/inbox_dedup.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 23/23. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with known Vite externalization/dynamic-import/chunk-size warnings.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_INBOX_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize operations-planning prose panels
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.
+
+**Why:** The first Operations Planning localization slice still left prose-heavy planning surfaces in English or mixed copy: CommanderPhase officer cards, OPORD body sections, G-2 narrative fallback prose, and map legend body text.
+
+**Change:** Added English/BCS dictionary keys for CommanderPhase labels, OPORD section/body strings, G-2 narrative labels/fallback prose, map legend rows, and common operation-document plurals. Routed CommanderPhase, OpordDocument, NarrativeTab, and MapLegendTab through the existing `t(...)` helper while preserving stable ids, operation names, axis names, settlement labels, and payload structure. Added focused BCS render coverage to `tests/ui/ops_planning_target_discovery.test.ts`.
+
+**Verification:** `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts --reporter=dot` passed 17/17. Related i18n suite `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui/settings_screen_i18n.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with known Vite externalization/dynamic-import/chunk-size warnings.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_LOCALIZATION.md`.
+
+---
+
+## [2026-05-23] ui(i18n): localize operations-planning phase chrome
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.
+
+**Why:** The BCS localization plan had only the Settings first pass on this branch, while Operations Planning remained English-only across phase status, objective planning, parameter controls, G-2 clipboard labels, phase-gate feedback, and authorization buttons.
+
+**Change:** Added English/BCS dictionary keys for Operations Planning phase chrome, gate messages, PlanParameters controls, G-2 labels, and authorization action text. Routed PlanPhase, ObjectiveList, PlanParameters, G2Phase, AuthorizePhase, and phaseGate through the existing `t(...)` helper with English fallback. Added focused BCS render/function coverage to `tests/ui/ops_planning_target_discovery.test.ts`.
+
+**Verification:** Red/green focused suite `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts --reporter=dot` passed 14/14 after implementation. Broader verification is recorded on the implementation report for this slice.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_LOCALIZATION.md`.
+
+---
 <!-- Older entries archived to:
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-22] autonomous arc/ops/calibration push — branch `feature/arc-operations-calibration`
+
+**Type:** 17-commit autonomous run on a dedicated branch. Touches engine (`apply_effects.ts`, `political_directive_producer.ts`, `local_truces.ts`, `operation_aar.ts`, `washington_agreement.ts`, `heavy_equipment.ts`, `exhaustion.ts`, `combat_math.ts`, `bilateral_ceasefire.ts`, `war_phases.ts`, `early_war_phases.ts`), 4 catalog files (sana_95, mistral_2_95, vlasic_ridge_95, kupres_cincar), data (OOB officer + arbih_7th_corps removal, csq_separate_track_recovery turn cap), and tests.
+
+**Why:** User-initiated autonomous mandate ("do not stop until we have a game engine that works as intended and produces reliable sim results"). Forensics from n1954 showed ARBiH 0 ops, suspicious VRS brigade destructions, 70k ARBiH casualties, war_exhaustion saturating identical for all factions, war_alliance stuck at 0.10 post-WA.
+
+**Change:** Five fix waves. Wave 1 rescaled war_exhaustion 100× and floored VRS operational_heavy at 30 %. Wave 2 replaced inline faction filters with canonical `selectBotBrigadeOrderFactions` helper restoring commander_state for all 7 ARBiH corps. Wave 3 hoisted paper-flip provenance check, demoted paper-flip ops to 'failure', pushed alliance_lock floor=0.80 on WA fire, evicted contradictory ceilings, lowered defender-weakness floors for 3 ARBiH catalog ops, removed arbih_7th_corps, fixed Čuškić → Čuskić. Wave 4 lifted the previously-dead `B1_HIGH_EXHAUSTION_THRESHOLD` 500 → 12000 (Wave 1A had inadvertently activated it) and added Op Jackal's `hvo_southeast_herzegovina` to `GRAZ_EXEMPT_HRHB_CORPS`. Wave 5 swapped `applyAllianceChange` clamp order so floor wins when locks contradict, and capped csq_separate_track_recovery to turn_max=84.
+
+**Verification:** Cumulative 188-week scenario runs. n1961 (14 commits) → n1963 (Wave 4 added) → n1964 (Wave 5 added): OSID match 84.13 % → 85.96 % → **86.66 %** (+2.53 pp); anchors 22/27 → 22/27 → **23/27** (Zvornik recovered); faction count Σ\|Δ\| 130 → 102 → **92** (29 % closer to painted). Op Jackal: was `political_blocked` 0 attacks; now 5-star Brilliant Victory, 2/2 captures, 829 KIA inflicted. war_alliance at w188: 0.10 → 0.55 → **1.00**. Paper-flip detection: 0 → 5/run. `npx tsc --noEmit` clean across all commits. Targeted vitest suites green (b1_political_directive_producer 86/86, local_truces 86/86, consequence_consumers 22/22 with new regression). Closeout memo at `docs/40_reports/audits/20260522_AUTONOMOUS_ARC_RUN_CLOSEOUT.md`. Per-wave forensics in `docs/40_reports/audits/20260522_*` (8 memos).
+
+**Known follow-ups:** Wave 4A is faction-symmetric; Wave 1A.1 (per-faction exhaustion discriminator) remains the load-bearing fix. HRHB catalog has 3 ops vs ARBiH 5C alone 7 — authoring more HRHB ops requires historian validation. Four persistent anchor failures (vozuca_2, boljanic_2, petrovo_2, brijesnica_donja_2) may need anchor-set rebasing. Federation-ops gate uses floor-lock presence, not scalar alliance — separate downstream investigation.
+
+**Phase-4 closeout addendum (waves 15-18, +4 commits, final state 38 commits):** Wave 15 fixed a foundational metric error — `scenario_runner.ts:2598` had hardcoded `jan1993` as the historical-control reference for ALL apr1992-start scenarios. A 188w run ending in oct1995 was being compared to a 30-month-stale snapshot. New helpers `pickHistoricalReferenceKey(scenario)` + `loadPaintedControlReferenceSnapshot` pick the right painted snapshot by scenario.weeks (≤56 jan1993, ≤108 apr1994, ≤160 apr1995, >160 oct1995). Revealed sim was already ~35% closer to truth than prior metric showed (n1979: Σ\|Δ\| 48 vs jan1993-stale 74). Wave 18 traced the remaining anomaly to `evaluateUncontestedOccupation` — 81% of late-war RS→RBiH flips were :null-defender walk-ins with zero combat/terrain/morale check. Added 1-hop proximity guard (block walk-in if active enemy brigade at neighbor); tagged `hrhb_111th_brigade` as `enclave` in `oob_brigades.json` to activate existing enclave-defense infrastructure; lowered Žepče `resilience_start_turn` 40→30 to cover the first ARBiH probe at t36. n1980: Žepče enclave preserved through Washington Agreement (user historical constraint met); RBiH overshoot cut 50% (+24→+12); RS over-attrition reversed (-10→+13); HRHB regressed -14→-25 (faction-symmetric guard blocks HVO autonomous walk-ins too). Σ\|Δ\| flat 48→50 but mechanism quality dramatically improved. Closeout memo `docs/40_reports/audits/20260522_AUTONOMOUS_ARC_RUN_CLOSEOUT.md` Phase-4 addendum has full detail.
+
+**Phase-2 cascade addendum (waves 6-10, +10 commits):** Continued the autonomous push for an HRHB territorial unlock — Cincar Phase 2 → kupres_2 → Mistral 1 + Jajce 95. Wave 6 (briefing overlay override) replaced Wave 4A's faction-blind threshold lift with the principled CampaignPlan-wins-over-economy-overlay rule. Wave 7 authored two ICTY-cited HVO ops (mistral_1_95 + jajce_95, 16 objective OSIDs); Wave 7B widened kupres_cincar_94's brigade pool 2→4 active + added kupres_2 to objectives; Wave 8 fixed the Graz corps-pair branch to honor exemption sets + exempted hvo_tomislavgrad. Result: **n1968 delivered HRHB +2 / RBiH +3 / RS −5** via Cincar Phase 1 capturing bucovaca (4-star Solid Victory). Wave 9 authored Cincar Phase 2 follow-on op; Wave 9B/9C/9D corrected staging, decoupling, and Mistral 1/Jajce kupres_2 dependency. Wave 10 unified the per-turn brigade approach view with the launch-gate sub-segment fallback (`bot_brigade_ai_osid.ts:299` engine fix). Runs n1969–n1973 produced varying hashes but byte-identical territorial counts (HRHB −45, RBiH +23, RS +22) — Cincar Phase 2 / Mistral 1 / Jajce 95 spawn with healthy force_ratio 2.24 and 5 brigades attached but issue zero attacks in execution. Engine-deep audit `docs/40_reports/audits/20260522_HVO_OP_EXECUTION_DEEP.md` identifies the asymmetry between op launch gate (sub-segment view) and per-turn brigade brain (tactical_adjacency view) but Wave 10's fallback is observably inert, meaning the real blocker is one gate further downstream. Final branch state: **27 commits, OSID 84.13→86.66% (+2.53pp), anchors 22→23, HVO ops succeeding 0/2 → 2/4** (Op Jackal + Cincar Phase 1). Cincar Phase 2 / Mistral 1 / Jajce 95 stay authored and propose-passing for a next-session engine investigation of `evaluateSectorAttack` post-launch dispatch.
+
 ## [2026-05-22] refactor(strict-null): type scenario runner startup tail
 
 **Type:** Scenario-runner type-boundary cleanup. No simulation behavior, save schema version, scenario data, baseline manifest, painted-control target, combat math, operation delivery, or calibration/army-arc tuning changed.

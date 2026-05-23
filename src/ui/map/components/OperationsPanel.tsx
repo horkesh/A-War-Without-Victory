@@ -16,6 +16,7 @@ import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { getPlayerSafeBrigadeName, getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
+import { t } from '../i18n';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -27,12 +28,12 @@ function compareOperations(a: OperationView, b: OperationView): number {
 
 function getOperationHealthSummary(operation: OperationView): { label: string; className: string } {
   if ((operation.supply_readiness ?? 1) < 0.4 || (operation.consecutive_failures_on_current ?? 0) >= 2) {
-    return { label: 'Fragile', className: 'text-red-300' };
+    return { label: t('operationsPanel.health.fragile'), className: 'text-red-300' };
   }
   if ((operation.supply_readiness ?? 1) < 0.6 || (operation.failure_count ?? 0) > 0) {
-    return { label: 'Strained', className: 'text-amber-300' };
+    return { label: t('operationsPanel.health.strained'), className: 'text-amber-300' };
   }
-  return { label: 'Stable', className: 'text-green-300' };
+  return { label: t('operationsPanel.health.stable'), className: 'text-green-300' };
 }
 
 export function OperationsPanel() {
@@ -231,9 +232,9 @@ export function OperationsPanel() {
     >
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
         <div className="flex flex-col">
-          <span>Field Ops Snapshot</span>
+          <span>{t('operationsPanel.title')}</span>
           <span className="text-[9px] font-mono text-text-secondary normal-case tracking-[0.12em]">
-            Army HQ owns command review. This panel stays map-facing.
+            {t('operationsPanel.subtitle')}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -242,11 +243,11 @@ export function OperationsPanel() {
             disabled={!selectedOperation}
             className="kbd-focus rounded border border-accent-gold/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
           >
-            HQ Review
+            {t('operationsPanel.hqReview')}
           </button>
           <button
           onClick={close}
-          aria-label="Close operations panel"
+          aria-label={t('operationsPanel.closePanel')}
           className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
         >
           ✕
@@ -256,7 +257,7 @@ export function OperationsPanel() {
 
       {operations.length === 0 ? (
         <div className="p-4 text-xs text-text-secondary italic">
-          No active operations.
+          {t('operationHistory.noActive')}
         </div>
       ) : (
         <div className="grid grid-cols-12 min-h-0 flex-1">
@@ -265,7 +266,7 @@ export function OperationsPanel() {
             <div
               className="p-1.5 space-y-1"
               role="listbox"
-              aria-label="Operations list"
+              aria-label={t('operationsPanel.operationsListAria')}
             >
               {operations.map((op, index) => {
                 const id = getOperationId(op);
@@ -282,7 +283,7 @@ export function OperationsPanel() {
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    aria-label={`${op.name}, ${op.phase}, ${op.participating_brigade_count} brigades`}
+                    aria-label={t('operationsPanel.operationCardAria', { name: op.name, phase: op.phase, brigades: op.participating_brigade_count })}
                     ref={(el) => {
                       operationCardRefs.current[index] = el;
                     }}
@@ -309,15 +310,15 @@ export function OperationsPanel() {
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1 text-[9px]">
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
-                        Turn {opPhaseTurn}
+                        {t('operationsPanel.turnCount', { turn: opPhaseTurn })}
                       </span>
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
-                        {op.participating_brigade_count} bde
+                        {t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
                       </span>
                       <span className={`px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 tabular-nums ${
                         opSupplyPct == null ? 'text-text-secondary' : opSupplyPct < 30 ? 'text-red-300' : opSupplyPct < 70 ? 'text-amber-300' : 'text-green-300'
                       }`}>
-                        {opSupplyPct == null ? 'Supply N/A' : `Supply ${opSupplyPct}%`}
+                        {opSupplyPct == null ? t('operationsPanel.supplyNA') : t('operationsPanel.supplyPct', { pct: opSupplyPct })}
                       </span>
                     </div>
                   </button>
@@ -357,40 +358,40 @@ export function OperationsPanel() {
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-panel-border">
                   <div>
-                    <span className="text-text-secondary">Type: </span>
+                    <span className="text-text-secondary">{t('operationsPanel.type')} </span>
                     <span className="text-text-primary">{formatOperationType(selectedOperation.type)}</span>
                   </div>
                   <div>
-                    <span className="text-text-secondary">Phase: </span>
+                    <span className="text-text-secondary">{t('operationsPanel.phase')} </span>
                     <span className="text-text-primary">
-                      {toTitleCase(selectedOperation.phase)}{phaseTurnCount != null ? ` - Turn ${phaseTurnCount}` : ''}
+                      {toTitleCase(selectedOperation.phase)}{phaseTurnCount != null ? ` - ${t('operationsPanel.turnCount', { turn: phaseTurnCount })}` : ''}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary">Brigades: </span>
+                    <span className="text-text-secondary">{t('operationsPanel.brigades')} </span>
                     <span className="text-text-primary tabular-nums">{selectedOperation.participating_brigade_count}</span>
                   </div>
                   <div>
-                    <span className="text-text-secondary">Started: </span>
+                    <span className="text-text-secondary">{t('operationsPanel.started')} </span>
                     <span className="text-text-primary text-[11px] whitespace-nowrap">{turnToDateString(selectedOperation.started_turn)}</span>
                   </div>
                   {selectedOperation.momentum != null && (
                     <div>
-                      <span className="text-text-secondary">Momentum: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.momentum')} </span>
                       <span className={`tabular-nums ${momentumTone}`}>{selectedOperation.momentum}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-text-secondary">Supply: </span>
+                    <span className="text-text-secondary">{t('operationsPanel.supply')} </span>
                     {supplyPct != null ? (
                       <span className={`tabular-nums ${supplyPct < 30 ? 'text-red-400 font-semibold' : supplyPct < 70 ? 'text-amber-300' : 'text-green-400'}`}>{supplyPct}%</span>
                     ) : (
-                      <span className="text-text-secondary italic" title="Supply readiness not yet assessed">N/A</span>
+                      <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('operationsPanel.na')}</span>
                     )}
                   </div>
                   {selectedOperation.consecutive_failures_on_current != null && (
                     <div>
-                      <span className="text-text-secondary">Failures: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.failures')} </span>
                       <span className={selectedOperation.consecutive_failures_on_current >= 2 ? 'text-red-300 tabular-nums' : 'text-text-primary tabular-nums'}>
                         {selectedOperation.consecutive_failures_on_current}
                       </span>
@@ -398,37 +399,37 @@ export function OperationsPanel() {
                   )}
                   {cohesionPct != null && (
                     <div>
-                      <span className="text-text-secondary">Avg cohesion: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.avgCohesion')} </span>
                       <span className="text-text-primary tabular-nums">{cohesionPct}%</span>
                     </div>
                   )}
                   {avgPersonnelPct != null && (
                     <div>
-                      <span className="text-text-secondary">Avg health: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.avgHealth')} </span>
                       <span className="text-text-primary tabular-nums">{avgPersonnelPct}%</span>
                     </div>
                   )}
                   {selectedOperation.tempo && (
                     <div>
-                      <span className="text-text-secondary">Tempo: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.tempo')} </span>
                       <span className={`inline-block px-1 py-0.5 rounded text-[10px] font-semibold uppercase ${
                         selectedOperation.tempo === 'all_out' ? 'bg-red-700/60 text-red-200' :
                         selectedOperation.tempo === 'methodical' ? 'bg-blue-700/60 text-blue-200' :
                         'bg-neutral-600/60 text-neutral-300'
                       }`}>
-                        {selectedOperation.tempo === 'all_out' ? 'All Out' : toTitleCase(selectedOperation.tempo)}
+                        {selectedOperation.tempo === 'all_out' ? t('operationsPanel.allOut') : toTitleCase(selectedOperation.tempo)}
                       </span>
                     </div>
                   )}
                   {selectedOperation.min_attack_outcome && (
                     <div>
-                      <span className="text-text-secondary">Minimum: </span>
+                      <span className="text-text-secondary">{t('operationsPanel.minimum')} </span>
                       <span className="text-text-primary">{selectedOperation.min_attack_outcome.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
                     </div>
                   )}
                   {(selectedOperation.postponement_count ?? 0) > 0 && (
                     <div>
-                      <span className="text-text-secondary">Postponed </span>
+                      <span className="text-text-secondary">{t('operationsPanel.postponed')} </span>
                       <span className="text-amber-300 tabular-nums">&times;{selectedOperation.postponement_count}</span>
                     </div>
                   )}
@@ -441,7 +442,7 @@ export function OperationsPanel() {
                   if (!commander) return null;
                   return (
                     <div className="pt-2 border-t border-panel-border">
-                      <OfficerProfile officer={commander} label="Operation Commander" />
+                      <OfficerProfile officer={commander} label={t('operationsPanel.operationCommander')} />
                     </div>
                   );
                 })()}
@@ -449,7 +450,7 @@ export function OperationsPanel() {
                 {/* Participating Brigades */}
                 {selectedOperation.participating_brigade_ids && selectedOperation.participating_brigade_ids.length > 0 && (
                   <div className="pt-2 border-t border-panel-border">
-                    <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Allocated Assets</div>
+                    <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.allocatedAssets')}</div>
                     <div className="flex flex-wrap gap-1">
                       {selectedOperation.participating_brigade_ids.map(bId => {
                         const bName = getPlayerSafeBrigadeName(
@@ -474,10 +475,10 @@ export function OperationsPanel() {
 
                 {/* AAR Strip */}
                 <div className="pt-1 border-t border-panel-border">
-                  <div className="text-[11px] text-accent-gold mb-1 uppercase tracking-wide font-semibold">AAR Strip</div>
+                  <div className="text-[11px] text-accent-gold mb-1 uppercase tracking-wide font-semibold">{t('operationsPanel.aarStrip')}</div>
                   <div className="rounded border border-panel-border bg-panel-card/70 p-2 space-y-1.5">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-text-secondary">Objective Progress</span>
+                      <span className="text-text-secondary">{t('operationsPanel.objectiveProgress')}</span>
                       <span className="text-text-primary tabular-nums">
                         {selectedObjectiveCount > 0 ? `${Math.min(selectedObjectiveIndex + 1, selectedObjectiveCount)}/${selectedObjectiveCount}` : '—'}
                       </span>
@@ -490,26 +491,26 @@ export function OperationsPanel() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-[10px]">
                       <div className="rounded border border-panel-border bg-panel-bg/70 px-1.5 py-1">
-                        <span className="text-text-secondary">Momentum: </span>
+                        <span className="text-text-secondary">{t('operationsPanel.momentum')} </span>
                         <span className={`tabular-nums ${momentumTone}`}>
                           {selectedOperation.momentum != null ? selectedOperation.momentum : '—'}
                         </span>
                       </div>
                       <div className="rounded border border-panel-border bg-panel-bg/70 px-1.5 py-1">
-                        <span className="text-text-secondary">Supply: </span>
+                        <span className="text-text-secondary">{t('operationsPanel.supply')} </span>
                         {supplyPct != null ? (
                           <span className={`tabular-nums ${supplyPct < 30 ? 'text-red-400 font-semibold' : supplyPct < 70 ? 'text-amber-300' : 'text-green-400'}`}>{supplyPct}%</span>
                         ) : (
-                          <span className="text-text-secondary italic" title="Supply readiness not yet assessed">N/A</span>
+                          <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('operationsPanel.na')}</span>
                         )}
                       </div>
                     </div>
                     {readiness && (
                       <div className="space-y-1">
                         {([
-                          ['Supply', readiness.supply],
-                          ['Cohesion', readiness.cohesion],
-                          ['Intel', readiness.intel],
+                          [t('operationsPanel.supply'), readiness.supply],
+                          [t('operationsPanel.cohesion'), readiness.cohesion],
+                          [t('operationsPanel.intel'), readiness.intel],
                         ] as Array<[string, number]>).map(([label, value]) => (
                           <div key={label} className="space-y-0.5">
                             <div className="flex items-center justify-between text-[10px]">
@@ -528,12 +529,12 @@ export function OperationsPanel() {
 
                 {/* Objectives */}
                 <div className="pt-1 border-t border-panel-border">
-                  <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Objectives</div>
+                  <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.objectives')}</div>
                   {selectedOperation.objectives && selectedOperation.objectives.length > 0 ? (
                     <div
                       className="space-y-1"
                       role="listbox"
-                      aria-label="Operation objectives"
+                      aria-label={t('operationsPanel.objectivesAria')}
                     >
                       {selectedOperation.objectives.map((obj, index) => {
                         const isDone = index < selectedObjectiveIndex;
@@ -545,7 +546,7 @@ export function OperationsPanel() {
                             type="button"
                             role="option"
                             aria-selected={isCurrent}
-                            aria-label={`${isCurrent ? 'Current objective' : isDone ? 'Completed objective' : 'Objective'}: ${objectiveName}`}
+                            aria-label={`${isCurrent ? t('operationsPanel.currentObjective') : isDone ? t('operationsPanel.completedObjective') : t('operationsPanel.objective')}: ${objectiveName}`}
                             ref={(el) => {
                               objectiveButtonRefs.current[index] = el;
                             }}
@@ -571,12 +572,12 @@ export function OperationsPanel() {
                                   <div className="text-[11px] text-text-primary truncate">{objectiveName}</div>
                                   {isCurrent && (
                                     <span className="text-[9px] text-accent-gold font-bold uppercase tracking-tighter animate-pulse shadow-sm px-1 bg-accent-gold/10 rounded border border-accent-gold/30">
-                                      Schwerpunkt
+                                      {t('operationsPanel.schwerpunkt')}
                                     </span>
                                   )}
                                 </div>
                                 <div className="text-[10px] text-text-secondary truncate">
-                                  Objective {index + 1}/{selectedOperation.objectives?.length ?? 0}{selectedOperation.schwerpunkt_osid === obj ? ' - Main Axis' : ''}
+                                  {t('operationsPanel.objectiveIndex', { index: index + 1, total: selectedOperation.objectives?.length ?? 0 })}{selectedOperation.schwerpunkt_osid === obj ? ` - ${t('operationsPanel.mainAxis')}` : ''}
                                 </div>
                               </div>
                             </div>
@@ -585,7 +586,7 @@ export function OperationsPanel() {
                       })}
                     </div>
                   ) : (
-                    <div className="text-xs text-text-secondary italic">No objective chain recorded.</div>
+                    <div className="text-xs text-text-secondary italic">{t('operationsPanel.noObjectiveChain')}</div>
                   )}
                 </div>
 
@@ -597,15 +598,15 @@ export function OperationsPanel() {
                       setIsOpen(false);
                       setSelectedCorpsId(selectedOperation.corps_id);
                     }}
-                    aria-label={`Open corps orders for ${selectedOperationCorpsLabel ?? 'this corps'}`}
+                    aria-label={t('operationsPanel.openCorpsOrdersAria', { corps: selectedOperationCorpsLabel ?? t('operationsPanel.thisCorps') })}
                     className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover"
                   >
-                    Open Corps Orders
+                    {t('operationsPanel.openCorpsOrders')}
                   </button>
                 </div>
               </>
             ) : (
-              <div className="text-xs text-text-secondary italic">Select an operation.</div>
+              <div className="text-xs text-text-secondary italic">{t('operationsPanel.selectOperation')}</div>
             )}
           </div>
         </div>

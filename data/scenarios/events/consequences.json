@@ -2256,6 +2256,7 @@
     "category": "diplomatic",
     "trigger": {
       "turn_min": 60,
+      "turn_max": 84,
       "phase": "war",
       "condition": {
         "type": "and",

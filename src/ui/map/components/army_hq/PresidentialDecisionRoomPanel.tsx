@@ -12,6 +12,7 @@ import {
 } from '../../data/presidentialDecisionRoom';
 import { useGameStore } from '../../store/gameStore';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
+import { t } from '../../i18n';
 
 function severityClass(severity: PresidentialDecisionRoomSeverity): string {
   if (severity === 'blocking') return 'border-red-400/45 bg-red-500/10 text-red-300';
@@ -21,14 +22,14 @@ function severityClass(severity: PresidentialDecisionRoomSeverity): string {
 }
 
 function categoryLabel(category: PresidentialDecisionRoomCard['category']): string {
-  if (category === 'decision') return 'Decision';
-  if (category === 'counter_offer') return 'Counter';
-  if (category === 'opportunity') return 'Opportunity';
-  if (category === 'operational') return 'SITREP';
-  if (category === 'briefing') return 'Briefing';
-  if (category === 'turn') return 'Turn';
-  if (category === 'cost') return 'Cost';
-  return 'Memory';
+  if (category === 'decision') return t('decisionRoom.category.decision');
+  if (category === 'counter_offer') return t('decisionRoom.category.counter');
+  if (category === 'opportunity') return t('decisionRoom.category.opportunity');
+  if (category === 'operational') return t('decisionRoom.category.operational');
+  if (category === 'briefing') return t('decisionRoom.category.briefing');
+  if (category === 'turn') return t('decisionRoom.category.turn');
+  if (category === 'cost') return t('decisionRoom.category.cost');
+  return t('decisionRoom.category.memory');
 }
 
 function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'urgent' }) {
@@ -64,10 +65,10 @@ function LensButton({
     >
       <span className="min-w-0">
         <span className="block truncate text-[9px] font-bold uppercase tracking-[0.11em]">
-          {isAllLens ? 'All' : lens.label}
+          {isAllLens ? t('decisionRoom.lens.all') : lens.label}
         </span>
         <span className="block text-[8px] uppercase tracking-[0.08em] text-text-muted">
-          {lens.count} item{lens.count === 1 ? '' : 's'}
+          {t('decisionRoom.itemCount', { count: lens.count })}
         </span>
       </span>
       <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${lens.urgentCount > 0
@@ -177,7 +178,7 @@ function PriorityCard({
                 ? 'border-amber-400/35 bg-amber-400/15 text-amber-200'
                 : 'border-panel-border/60 bg-panel-bg/60 text-text-muted hover:border-amber-400/30 hover:text-amber-300'}`}
             >
-              Dossier
+              {t('decisionRoom.dossierButton')}
             </button>
           </div>
           <div className="mt-1 truncate text-[12px] font-bold text-text-primary">{card.title}</div>
@@ -220,7 +221,7 @@ function PriorityDossier({
   if (!dossier) {
     return (
       <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-        No priority dossier selected.
+        {t('decisionRoom.noPriorityDossier')}
       </div>
     );
   }
@@ -234,7 +235,7 @@ function PriorityDossier({
     <section className="rounded border border-amber-400/25 bg-panel-card/65 px-3 py-2 shadow-[inset_3px_0_0_rgba(251,191,36,0.45)]">
       <div className="mb-1 flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">Priority Dossier</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">{t('decisionRoom.priorityDossier')}</div>
           <div className="mt-1 text-[12px] font-bold leading-snug text-text-primary">{dossier.title}</div>
         </div>
         <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase ${severityClass(dossier.severity)}`}>
@@ -246,24 +247,24 @@ function PriorityDossier({
 
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         <div className="rounded border border-panel-border/55 bg-panel-bg/60 px-2 py-1">
-          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">Source</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">{t('decisionRoom.source')}</div>
           <div className="mt-0.5 truncate text-[10px] font-semibold text-text-primary">{dossier.sourceOwner}</div>
           <div className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{dossier.sourceLabel}</div>
         </div>
         <div className="rounded border border-panel-border/55 bg-panel-bg/60 px-2 py-1">
-          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">Advance</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">{t('decisionRoom.advance')}</div>
           <div className={`mt-0.5 truncate text-[10px] font-semibold ${dossier.advanceSensitive ? 'text-amber-300' : 'text-text-primary'}`}>
             {dossier.advanceLabel}
           </div>
           <div className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">
-            {dossier.sourceHandoff?.summary ?? 'No handoff'}
+            {dossier.sourceHandoff?.summary ?? t('decisionRoom.noHandoff')}
           </div>
         </div>
       </div>
 
       {dossier.evidence.length > 0 && (
         <div className="mt-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Evidence</div>
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionRoom.evidence')}</div>
           <div className="flex flex-wrap gap-1.5">
             {dossier.evidence.map((entry) => (
               <span key={entry} className="min-w-0 max-w-full truncate rounded border border-panel-border/55 bg-panel-bg/60 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.08em] text-text-secondary">
@@ -276,7 +277,7 @@ function PriorityDossier({
 
       {relatedCards.length > 0 && (
         <div className="mt-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">Same Surface</div>
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionRoom.sameSurface')}</div>
           <div className="space-y-1">
             {relatedCards.map((card) => (
               <button
@@ -403,8 +404,8 @@ export function PresidentialDecisionRoomPanel() {
     >
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 border-b border-panel-border pb-1">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">Presidential Decision Room</div>
-          <div className="text-[13px] font-bold uppercase tracking-[0.05em] text-text-primary">Strategic Priorities</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">{t('decisionRoom.title')}</div>
+          <div className="text-[13px] font-bold uppercase tracking-[0.05em] text-text-primary">{t('decisionRoom.subtitle')}</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -413,7 +414,7 @@ export function PresidentialDecisionRoomPanel() {
             className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"
             aria-pressed={showAdvanced}
           >
-            {showAdvanced ? 'Hide Advanced' : 'View Advanced'}
+            {showAdvanced ? t('decisionRoom.hideAdvanced') : t('decisionRoom.viewAdvanced')}
           </button>
           <div className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${view.advanceReadiness.blockedByExistingSystems ? 'border-red-400/35 bg-red-500/10 text-red-300' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'}`}>
             {view.advanceReadiness.headline}
@@ -423,17 +424,17 @@ export function PresidentialDecisionRoomPanel() {
 
       {showAdvanced && (
         <div className="mb-2 rounded border border-panel-border/55 bg-panel-bg/35 p-2" data-testid="decision-room-advanced">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Advanced Desk</div>
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.advancedDesk')}</div>
           <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            <MetricCell label="Urgent" value={view.metrics.urgentCount} tone={view.metrics.urgentCount > 0 ? 'urgent' : 'neutral'} />
-            <MetricCell label="Pending" value={view.metrics.pendingReviews} tone={view.metrics.pendingReviews > 0 ? 'urgent' : 'neutral'} />
-            <MetricCell label="Ops" value={view.metrics.opportunities} />
-            <MetricCell label="Hard Turns" value={view.metrics.hardTurns} />
-            <MetricCell label="Advance Review" value={view.metrics.advanceReviewCount} />
+            <MetricCell label={t('decisionRoom.metric.urgent')} value={view.metrics.urgentCount} tone={view.metrics.urgentCount > 0 ? 'urgent' : 'neutral'} />
+            <MetricCell label={t('decisionRoom.metric.pending')} value={view.metrics.pendingReviews} tone={view.metrics.pendingReviews > 0 ? 'urgent' : 'neutral'} />
+            <MetricCell label={t('decisionRoom.metric.ops')} value={view.metrics.opportunities} />
+            <MetricCell label={t('decisionRoom.metric.hardTurns')} value={view.metrics.hardTurns} />
+            <MetricCell label={t('decisionRoom.metric.advanceReview')} value={view.metrics.advanceReviewCount} />
           </div>
           {view.loopSteps.length > 0 && (
             <div>
-              <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Product Loop</div>
+              <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.productLoop')}</div>
               <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
                 {view.loopSteps.map((step) => (
                   <ProductLoopStep key={step.id} step={step} />
@@ -446,7 +447,7 @@ export function PresidentialDecisionRoomPanel() {
 
       {view.commandQuestions.length > 0 && (
         <div className="mb-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Command Loop</div>
+          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.commandLoop')}</div>
           <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-5">
             {view.commandQuestions.map((question) => (
               <CommandQuestionLane key={question.id} question={question} />
@@ -495,11 +496,11 @@ export function PresidentialDecisionRoomPanel() {
 
           {showAdvanced && (
           <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Inspect Next</div>
+            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.inspectNext')}</div>
             <div className="space-y-1.5">
               {inspectNext.length === 0 ? (
                 <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  No inspection handoffs queued.
+                  {t('decisionRoom.noInspectionHandoffs')}
                 </div>
               ) : inspectNext.map((card) => (
                 <CompactLink key={card.id} card={card} />
@@ -510,11 +511,11 @@ export function PresidentialDecisionRoomPanel() {
 
           {showAdvanced && (
           <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Source Handoffs</div>
+            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.sourceHandoffs')}</div>
             <div className="space-y-1.5">
               {view.sourceHandoffs.length === 0 ? (
                 <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  No source handoffs available.
+                  {t('decisionRoom.noSourceHandoffs')}
                 </div>
               ) : view.sourceHandoffs.map((handoff) => (
                 <SourceHandoffLink key={handoff.id} handoff={handoff} />
@@ -524,11 +525,11 @@ export function PresidentialDecisionRoomPanel() {
           )}
 
           <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">Review Before Advance</div>
+            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.reviewBeforeAdvance')}</div>
             <div className="space-y-1.5">
               {view.advanceReadiness.items.length === 0 ? (
                 <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  No live desk item will be buried by the next turn.
+                  {t('decisionRoom.noBuriedItems')}
                 </div>
               ) : view.advanceReadiness.items.map((card) => (
                 <CompactLink key={`advance:${card.id}`} card={card} />

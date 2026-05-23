@@ -15,6 +15,7 @@
  */
 
 import { CollapsibleSection } from './CollapsibleSection';
+import { t, type MessageKey } from '../../i18n';
 
 type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
 
@@ -31,13 +32,13 @@ interface CorpsSituationSectionProps {
     } | undefined;
 }
 
-const CONSTRAINT_BADGE: Record<PrimaryConstraint, { label: string; color: string } | null> = {
-    siege: { label: 'SIEGE', color: 'text-red-400 bg-red-900/30 border-red-500/40' },
-    threat_pressure: { label: 'THREAT', color: 'text-red-300 bg-red-900/20 border-red-500/30' },
-    defensive_duty: { label: 'GARRISON', color: 'text-amber-400 bg-amber-900/20 border-amber-500/30' },
-    force_condition: { label: 'READINESS', color: 'text-amber-300 bg-amber-900/20 border-amber-500/30' },
-    institutional_strain: { label: 'INSTITUTIONAL', color: 'text-blue-400 bg-blue-900/20 border-blue-500/30' },
-    plan_lifecycle: { label: 'PLANNING', color: 'text-neutral-300 bg-neutral-800/40 border-neutral-600/30' },
+const CONSTRAINT_BADGE: Record<PrimaryConstraint, { labelKey: MessageKey; color: string } | null> = {
+    siege: { labelKey: 'corpsSituation.constraint.siege', color: 'text-red-400 bg-red-900/30 border-red-500/40' },
+    threat_pressure: { labelKey: 'corpsSituation.constraint.threat', color: 'text-red-300 bg-red-900/20 border-red-500/30' },
+    defensive_duty: { labelKey: 'corpsSituation.constraint.garrison', color: 'text-amber-400 bg-amber-900/20 border-amber-500/30' },
+    force_condition: { labelKey: 'corpsSituation.constraint.readiness', color: 'text-amber-300 bg-amber-900/20 border-amber-500/30' },
+    institutional_strain: { labelKey: 'corpsSituation.constraint.institutional', color: 'text-blue-400 bg-blue-900/20 border-blue-500/30' },
+    plan_lifecycle: { labelKey: 'corpsSituation.constraint.planning', color: 'text-neutral-300 bg-neutral-800/40 border-neutral-600/30' },
     none: null,
 };
 
@@ -73,14 +74,14 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
     const showDetail = detailCount > 0 && (detailCount > 1 || dominantReason === null);
 
     return (
-        <CollapsibleSection sectionKey="situation-assessment" title="Situation Assessment" defaultOpen>
+        <CollapsibleSection sectionKey="situation-assessment" title={t('corpsSituation.title')} defaultOpen>
             <div className="px-3 py-2 space-y-1.5 text-xs">
                 {/* Wave 2: Dominant reason banner with constraint badge */}
                 {dominantReason && (
                     <div className="flex items-start gap-2">
                         {badge && (
                             <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.color}`}>
-                                {badge.label}
+                                {t(badge.labelKey)}
                             </span>
                         )}
                         <span className="text-neutral-200 font-medium leading-snug">{dominantReason}</span>

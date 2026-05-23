@@ -34,6 +34,7 @@ import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presid
 import { Z } from '../../../shared/zIndex';
 import { Modal } from '../../../shared/Modal';
 import { playCue } from '../../audio/audio_engine';
+import { t } from '../../i18n';
 // LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of Army HQ
 // pushback (CO objections + Mladić-class autonomous-launch warnings).
 // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
@@ -58,13 +59,13 @@ function statusClass(status: PreAdvanceCommandReviewStatus): string {
 }
 
 function categoryLabel(category: PreAdvanceCommandReviewItem['category']): string {
-  if (category === 'decision') return 'Decision';
-  if (category === 'opportunity') return 'Opportunity';
-  if (category === 'operational') return 'SITREP';
-  if (category === 'turn') return 'Turn';
-  if (category === 'briefing') return 'Briefing';
-  if (category === 'cost') return 'Cost';
-  return 'Memory';
+  if (category === 'decision') return t('decisionRoom.category.decision');
+  if (category === 'opportunity') return t('decisionRoom.category.opportunity');
+  if (category === 'operational') return t('decisionRoom.category.operational');
+  if (category === 'turn') return t('decisionRoom.category.turn');
+  if (category === 'briefing') return t('decisionRoom.category.briefing');
+  if (category === 'cost') return t('decisionRoom.category.cost');
+  return t('decisionRoom.category.memory');
 }
 
 function MetricCell({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) {
@@ -284,9 +285,9 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
               <div id="advance-turn-title" className="text-[10px] font-bold uppercase tracking-wider text-accent-gold">
-                End of Turn
+                {t('advanceTurn.title')}
               </div>
-              <div className="mt-0.5 text-sm font-bold text-text-primary">Advance to next turn?</div>
+              <div className="mt-0.5 text-sm font-bold text-text-primary">{t('advanceTurn.confirmQuestion')}</div>
             </div>
             <div className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
               {review.headline}
@@ -296,25 +297,25 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
 
         <div className="space-y-3 px-4 py-3">
           <div className="text-[11px] leading-snug text-text-secondary">
-            All pending orders will be processed. This cannot be undone.
+            {t('advanceTurn.warning')}
           </div>
 
           <section>
             <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-text-muted">
-              Review Before Advance
+              {t('decisionRoom.reviewBeforeAdvance')}
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <MetricCell label="Urgent" value={review.metrics.urgentCount} urgent={review.metrics.urgentCount > 0} />
-              <MetricCell label="Pending" value={review.metrics.pendingReviews} urgent={review.metrics.pendingReviews > 0} />
-              <MetricCell label="Ops" value={review.metrics.opportunities} />
-              <MetricCell label="Hard Turns" value={review.metrics.hardTurns} />
+              <MetricCell label={t('decisionRoom.metric.urgent')} value={review.metrics.urgentCount} urgent={review.metrics.urgentCount > 0} />
+              <MetricCell label={t('decisionRoom.metric.pending')} value={review.metrics.pendingReviews} urgent={review.metrics.pendingReviews > 0} />
+              <MetricCell label={t('decisionRoom.metric.ops')} value={review.metrics.opportunities} />
+              <MetricCell label={t('decisionRoom.metric.hardTurns')} value={review.metrics.hardTurns} />
             </div>
           </section>
 
           <section className="space-y-1.5">
             {review.items.length === 0 ? (
               <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-[11px] text-text-secondary">
-                No live desk item will be buried by the next turn.
+                {t('decisionRoom.noBuriedItems')}
               </div>
             ) : review.items.map((item) => (
               <ReviewItemRow
@@ -345,7 +346,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
             disabled={advancing}
             className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-[10px] font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:opacity-50"
           >
-            {advancing ? 'Advancing...' : 'Advance Turn'}
+            {advancing ? t('advanceTurn.advancing') : t('advanceTurn.advance')}
           </button>
           {review.canReviewPriorities && (
             <button
@@ -354,7 +355,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
               disabled={advancing}
               className="border border-amber-400/35 bg-amber-400/10 px-3 py-1.5 text-[10px] font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:opacity-50"
             >
-              Review Priorities
+              {t('advanceTurn.reviewPriorities')}
             </button>
           )}
           <button
@@ -363,7 +364,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem }: AdvanceTu
             disabled={advancing}
             className="border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-[10px] font-bold uppercase text-text-secondary transition-colors hover:bg-panel-hover hover:text-text-primary disabled:opacity-50"
           >
-            Cancel
+            {t('armyHq.cancel')}
           </button>
         </div>
       </>

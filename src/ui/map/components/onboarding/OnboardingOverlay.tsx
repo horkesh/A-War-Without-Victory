@@ -40,6 +40,7 @@ import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent }
 import { OnboardingStep } from './OnboardingStep';
 import { ONBOARDING_STEPS, resolveNextStep } from './onboardingSteps';
 import { Z } from '../../../shared/zIndex';
+import { t } from '../../i18n';
 
 /** Minimal tutorial-state shape mirrored from `StateMeta.tutorial_state`. */
 export interface TutorialStateShape {
@@ -357,7 +358,7 @@ export function OnboardingOverlay(props: OnboardingOverlayProps): JSX.Element | 
                     border: 0,
                 }}
             >
-                {next.title}
+                {t(next.titleKey)}
             </h2>
             <OnboardingStep
                 step={next}
@@ -416,7 +417,7 @@ export function OnboardingRestartButton(props: OnboardingRestartButtonProps): JS
                 cursor: pending || !ipc ? 'wait' : 'pointer',
             }}
         >
-            Restart Tutorial
+            {t('onboarding.restart')}
         </button>
     );
 }
