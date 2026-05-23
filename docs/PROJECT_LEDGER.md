@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize tactical-map shared date labels
+
+**Type:** Tactical-map shared date-format localization slice. No turn arithmetic, date baseline, scenario start date, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced `turnToDateString(...)`'s hardwired English short month formatting with deterministic English/BCS short month tables keyed by the active UI locale. Tactical-map consumers such as Turn Aftermath, Chronicle, Formation Detail history moments, and Decision Room hard-turn card titles inherit localized month labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; turn-to-date arithmetic and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\turn_aftermath.test.ts --reporter=dot` failed while BCS mode still emitted `24 Jun 1992`. Green rerun passed 13/13. Related `npx.cmd vitest run tests\ui\turn_aftermath.test.ts tests\ui\turn_aftermath_modal_i18n.test.ts tests\ui\presidential_decision_room.test.ts --reporter=dot` passed 27/27. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/utils/formatters.ts`, `tests/ui/turn_aftermath.test.ts`, `docs/40_reports/implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Decision Room owned card prose
 
 **Type:** Presidential Decision Room generated-card prose localization slice. No card synthesis, card ordering, severity ranking, source grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

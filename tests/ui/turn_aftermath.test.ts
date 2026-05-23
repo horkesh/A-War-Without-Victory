@@ -299,6 +299,7 @@ describe('buildTurnAftermathView', () => {
       }),
     });
 
+    expect(view?.dateLabel).toBe('24 jun 1992');
     expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
     expect(view?.narrativeLine).toBe('Sedmica zavrsava osvojenim prostorom, ali knjiga troska jos odreduje cijenu napredovanja.');
     expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija unistena', '80 raseljenih']);

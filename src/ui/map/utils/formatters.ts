@@ -1,3 +1,10 @@
+import { getActiveLocale, type Locale } from '../i18n';
+
+const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+};
+
 /**
  * Formats a raw turn number into a human-readable date string (DD MMM YYYY).
  * Baseline: 1 Apr 1992 (Scenario start).
@@ -5,7 +12,8 @@
 export function turnToDateString(turn: number): string {
     const startDate = new Date('1992-04-01T00:00:00Z');
     startDate.setDate(startDate.getDate() + turn * 7);
-    return startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const month = SHORT_MONTHS_BY_LOCALE[getActiveLocale()][startDate.getUTCMonth()];
+    return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
 }
 
 /**
