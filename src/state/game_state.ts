@@ -2294,6 +2294,15 @@ event_last_fired_turn?: Record<string, number>;
 event_flags?: Record<string, string | number | boolean>;
 /** Event IDs unlocked by event chains (enables_events). */
 enabled_event_ids?: string[];
+/** Phantom brigade IDs that have ever been spawned by `spawnJnaPhantomBrigades`.
+ *  Prevents re-spawn after withdrawal — when a phantom withdraws, its formation
+ *  entry is removed from `formations[]` entirely, so the spawn function's
+ *  `if (formations[def.id])` skip-check fails on subsequent turns and would
+ *  re-spawn (and JNA phantoms with `capture_osids` would re-flip controllers).
+ *  This marker is the canonical "has been spawned" set. Append-only; never
+ *  cleared. See `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`
+ *  + n2004 regression diagnosis. */
+phantoms_spawned?: string[];
 /** Event-imposed constraints on military operations. */
 event_constraints?: import('../sim/events/event_constraints.js').EventConstraints;
 /** AI commander decision log for replay determinism. */

@@ -460,8 +460,18 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
     if (!state.military.formations) state.military.formations = {};
     const turn = state.meta?.turn ?? 0;
 
+    // Phantoms that have ever been spawned. When a phantom withdraws its
+    // formation entry is removed entirely, so `formations[def.id]` alone is
+    // NOT sufficient to gate re-spawn — without this set, the spawn step (now
+    // running each war turn for turn-gated 1995 HV defs) would re-spawn
+    // long-withdrawn JNA / 1992 HV phantoms each turn and (worse) re-flip
+    // their `capture_osids` controllers back. n2004 verified this regression.
+    const spawned = (state.military.phantoms_spawned ??= []);
+    const spawnedSet = new Set(spawned);
+
     for (const def of ALL_PHANTOM_DEFS) {
-        if (state.military.formations[def.id]) continue; // already spawned
+        if (spawnedSet.has(def.id)) continue;                 // never re-spawn
+        if (state.military.formations[def.id]) continue;      // belt-and-braces — already in dict
 
         // Spawn-turn gate: defs with `spawn_turn` field only spawn when current
         // turn ≥ spawn_turn. Defs without it default to turn 0 (legacy behaviour,
@@ -501,6 +511,10 @@ export function spawnJnaPhantomBrigades(state: GameState): void {
         } as FormationState;
 
         state.military.formations[def.id] = formation;
+        // Mark as spawned so subsequent turns of the war-phase phantom-spawn
+        // step skip this def even after the formation is removed on withdrawal.
+        spawned.push(def.id);
+        spawnedSet.add(def.id);
 
         // Ghost phantoms flip political control of target OSIDs at spawn
         if (def.capture_osids) {
