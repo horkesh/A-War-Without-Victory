@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(combat): use head cursors in movement BFS queues
+
+**Type:** Deterministic combat movement performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** After the sector queue-cursor pass, several FIFO BFS helpers in combat movement still used `Array.shift()`. These helpers preserve deterministic sorted neighbor expansion, so a head cursor removes dequeue reindexing without changing traversal order.
+
+**Change:** `src/sim/combat/bot_brigade_movement_ai.ts` now uses head cursors in `findNearestFrontOsid(...)`, `findNearestOsidByPattern(...)`, `computeHopsToFront(...)`, and `findFrontDestinationForColumnMarch(...)`. `src/sim/combat/brigade_movement.ts` does the same in `shortestPathThroughFriendly(...)`. `tests/combat_movement_queue_cursor.test.ts` adds static guards against `.shift()` in those FIFO BFS regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order and sorted neighbor ordering are unchanged, so FIFO traversal order is identical.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\combat_movement_queue_cursor.test.ts --reporter=dot` failed before implementation because the target movement BFS regions still contained `.shift()`. After implementation, focused movement tests passed 18/18: `tests\combat_movement_queue_cursor.test.ts`, `tests\brigade_deploy_orders.test.ts`, `tests\interior_movement_corps_boundary.test.ts`, and `tests\bot_operation_objective_focus.test.ts`. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n3` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n3` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMBAT_MOVEMENT_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Closes a narrow non-calibration engine-quality slice adjacent to EQ-1 queue-cursor work. Remaining broad performance work should still be profile-led; do not treat non-FIFO queues or semantic operation queues as automatic cursor candidates.
+
+---
+
 ## [2026-05-23] perf(sector): use head cursors in split BFS queues
 
 **Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
