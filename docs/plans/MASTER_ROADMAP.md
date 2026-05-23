@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Warroom date labels):** Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale while preserving scenario-start-date arithmetic and ticker-turn conversion. War Planning map and Settlement Timeline local helpers remain follow-up date-formatting targets. Report: `docs/40_reports/implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md`. On top of:
+
 **Localization addendum 2026-05-23 (map shared date labels):** Tactical-map shared turn date labels now use deterministic English/BCS short month tables keyed by active locale while preserving turn arithmetic and date baselines. Warroom-local date helpers and remaining surface-specific date helpers remain follow-up localization targets. Report: `docs/40_reports/implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md`. On top of:
 
 **Localization addendum 2026-05-23 (Decision Room card prose):** Decision Room-owned generated card titles, explanations, evidence rows, source owners/labels, and action labels now render through the English/BCS substrate for review, paramilitary, manifest, counter-offer, opportunity fallback/evidence, supply/SITREP, hard-turn, campaign-cost, and Chronicle memory cards. Source-provided external prose remains a follow-up localization target. Report: `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md`. On top of:

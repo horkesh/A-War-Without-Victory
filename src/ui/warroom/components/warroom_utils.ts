@@ -10,15 +10,33 @@
 import type { FactionId, GameState, OrganizationalPenetration } from '../../../state/game_state.js';
 import { factionAccentTriple } from '../../shared/factionPalette.js';
 import { requirePlayerFaction } from '../../map/data/playerFactionMatch.js';
+import { getActiveLocale, type Locale } from '../../map/i18n/index.js';
 
 /** Months in title case (January, February, …). */
-const MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-] as const;
+const MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
+    en: [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+    ],
+    bcs: [
+        'januar', 'februar', 'mart', 'april', 'maj', 'jun',
+        'jul', 'august', 'septembar', 'oktobar', 'novembar', 'decembar',
+    ],
+};
 
 /** Months in uppercase (JANUARY, FEBRUARY, …). */
-const MONTHS_UPPER = MONTHS.map(m => m.toUpperCase());
+const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    bcs: ['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'],
+};
+
+function monthName(monthIndex: number): string {
+    return MONTHS_BY_LOCALE[getActiveLocale()][monthIndex];
+}
+
+function shortMonthName(monthIndex: number): string {
+    return SHORT_MONTHS_BY_LOCALE[getActiveLocale()][monthIndex];
+}
 
 /** Default game start date: 1 September 1991 (Phase 0). */
 const DEFAULT_START = { year: 1991, month: 8 /* 0-indexed */, day: 1 };
@@ -60,7 +78,7 @@ export function toTickerTurn(turn: number): number {
 export function turnToDateString(turn: number): string {
     const d = new Date(_activeStart.year, _activeStart.month, _activeStart.day);
     d.setDate(d.getDate() + turn * 7);
-    return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    return `${d.getDate()} ${monthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
 /**
@@ -70,7 +88,7 @@ export function turnToDateString(turn: number): string {
 export function turnToMonthYear(turn: number): string {
     const d = new Date(_activeStart.year, _activeStart.month, _activeStart.day);
     d.setMonth(d.getMonth() + Math.floor(turn / 4));
-    return `${MONTHS_UPPER[d.getMonth()]} ${d.getFullYear()}`;
+    return `${monthName(d.getMonth()).toUpperCase()} ${d.getFullYear()}`;
 }
 
 /**
@@ -80,7 +98,8 @@ export function turnToWeekString(turn: number): string {
     const d = new Date(_activeStart.year, _activeStart.month, _activeStart.day);
     d.setDate(d.getDate() + turn * 7);
     const week = Math.floor((d.getDate() - 1) / 7) + 1;
-    return `Week ${week}, ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    const weekPrefix = getActiveLocale() === 'bcs' ? 'Sedmica' : 'Week';
+    return `${weekPrefix} ${week}, ${monthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
 /**
@@ -98,10 +117,9 @@ export function turnToCalendarMonthYear(turn: number): { month: number; year: nu
  * Uses the abbreviated month name.
  */
 export function turnToShortLabel(turn: number): string {
-    const SHORT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const d = new Date(_activeStart.year, _activeStart.month, _activeStart.day);
     d.setDate(d.getDate() + turn * 7);
-    return `${SHORT_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+    return `${shortMonthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
 /**

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Warroom date formatting** | [implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md](implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md) - Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale. |
 | **Latest BCS map shared date formatting** | [implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md](implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md) - Tactical-map shared turn date labels now use deterministic English/BCS short month tables keyed by active locale. |
 | **Latest BCS Decision Room card prose localization** | [implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md) - Decision Room owned generated card titles, explanations, evidence, source owners, and action labels now render through the English/BCS substrate while source-provided external prose remains a separate localization target. |
 | **Latest BCS Decision Room read-model chrome localization** | [implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md) - Decision Room category lenses, command lanes, product-loop labels/fallbacks, count summaries, source-handoff labels, and handoff actions now render through the English/BCS substrate. |
