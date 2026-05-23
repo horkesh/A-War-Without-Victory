@@ -363,11 +363,23 @@ const MISTRAL_1_GRAHOVO_OBJECTIVES: readonly string[] = [
     'op:bosansko_grahovo:ugarci',
 ];
 
+// Wave 23A (2026-05-23): reordered for OSID-adjacency reachability after Wave 22's
+// Cincar success now puts Kupres area under HRHB control. Per n1985 SCRT memo
+// (docs/40_reports/audits/20260523_WAVE_22_CINCAR_BREAKTHROUGH_N1985.md §(d)):
+//   - vidimlije_2 is adjacent to donji_malovan + kupres_2 + novo_selo_2 (all
+//     HRHB after Cincar) AND pre-existing livno:priluka_2 / zastinje. Reachable.
+//   - glamoc_2 is adjacent to livno:priluka_2 (pre-existing HRHB). Reachable.
+//   - halapic + stekerovci_2 have ZERO HRHB neighbors — deep-interior, only
+//     reachable after vidimlije_2/glamoc_2 fall.
+// Previous order put halapic + stekerovci_2 FIRST, brigade brain returned
+// no_approach_osid every turn for the unreachable head of the list (same bug
+// class Wave 22 fixed for Cincar). New order targets reachable Glamoč shoulder
+// first, then chains inward.
 const MISTRAL_1_GLAMOC_OBJECTIVES: readonly string[] = [
-    'op:glamoc:halapic',
-    'op:glamoc:stekerovci_2',
     'op:glamoc:vidimlije_2',
     'op:glamoc:glamoc_2',
+    'op:glamoc:halapic',
+    'op:glamoc:stekerovci_2',
 ];
 
 const MISTRAL_1_TARGETS: readonly string[] = [
