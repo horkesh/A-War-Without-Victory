@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildPreAdvanceCommandReviewView } from '../../src/ui/map/data/preAdvanceCommandReview.js';
 import { buildPresidentialDecisionRoomView } from '../../src/ui/map/data/presidentialDecisionRoom.js';
 import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionSummaryView } from '../../src/ui/map/data/types.js';
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
   return {
@@ -141,6 +142,10 @@ function makePlayerDecisionSummary(overrides: Partial<PlayerDecisionSummaryView>
 }
 
 describe('buildPreAdvanceCommandReviewView', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('projects the Decision Room advance-readiness list for the turn confirmation flow', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -338,5 +343,33 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
     expect(view.canReviewPriorities).toBe(false);
+  });
+
+  it('localizes advance readiness headlines in BCS mode', () => {
+    setLocale('bcs');
+
+    const clearView = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+      }),
+    });
+    const reviewView = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        presidentialReviewQueue: {
+          pendingCount: 1,
+          criticalCount: 1,
+          eventDecisionCount: 1,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+      }),
+    });
+    const unavailableView = buildPreAdvanceCommandReviewView({ state: null });
+
+    expect(clearView.headline).toBe('Spremno za napredovanje');
+    expect(reviewView.headline).toBe('Pregled prije napredovanja');
+    expect(unavailableView.headline).toBe('Nema ucitanog stanja');
   });
 });

@@ -160,4 +160,28 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('Nijedna ziva stavka stola nece biti zatrpana sljedecim potezom.')).toBeTruthy();
     expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
   });
+
+  it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
+    setLocale('bcs');
+    setLoadedState(makeState({
+      presidentialReviewQueue: {
+        pendingCount: 2,
+        criticalCount: 1,
+        eventDecisionCount: 2,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+    }));
+
+    render(createElement(PresidentialToolbar, {
+      pendingReviews: 2,
+      pressureWarning: false,
+    }));
+
+    const button = screen.getByRole('button', { name: /rijesite 2 odluke na cekanju za nastavak/i });
+
+    expect(button.getAttribute('title')).toBe('Rijesite 2 odluke na cekanju za nastavak. Otvara pregled sobe odluka.');
+    expect(screen.queryByText(/Resolve 2 pending decisions to continue/i)).toBeNull();
+  });
 });

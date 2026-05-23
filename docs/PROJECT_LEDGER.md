@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Decision Room advance readiness
+
+**Type:** Decision Room/pre-advance read-model localization slice. No Decision Room card selection, advance-gate blocking logic, source-handoff grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.advance.*`, `decisionRoom.empty.*`, and `preAdvance.gate.*` message keys. The Decision Room advance-readiness headline, active-dossier advance badge, no-state/no-player readiness labels, and pre-advance pending-decision gate title now localize through the shared substrate.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; card archives, readiness item order, blocker counts, source handoffs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still emitted English readiness headlines and gate titles. Green `npx.cmd vitest run tests\ui\pre_advance_command_review.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\presidential_decision_room.test.ts --reporter=dot` passed 27/27. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/data/preAdvanceCommandReview.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/pre_advance_command_review.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Warroom status bar chrome
 
 **Type:** Warroom status bar UI chrome localization slice. No Warroom navigation, advance gating, pre-advance review selection, docket ordering, source-handoff grouping, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

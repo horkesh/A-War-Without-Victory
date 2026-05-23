@@ -9,6 +9,7 @@ import {
   type PresidentialDecisionRoomSourceHandoff,
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
+import { t } from '../i18n';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
 
@@ -81,8 +82,10 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
 
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
   const count = view.blockingDecisionCount;
-  const noun = count === 1 ? 'decision' : 'decisions';
-  return `Resolve ${count} pending ${noun} to continue. Opens Decision Room review.`;
+  return t('preAdvance.gate.blockedTitle', {
+    count,
+    decisionLabel: t(count === 1 ? 'preAdvance.gate.decision.one' : 'preAdvance.gate.decision.many'),
+  });
 }
 
 export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewInput): PreAdvanceCommandReviewView {

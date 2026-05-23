@@ -8,6 +8,7 @@ import {
 } from './turnAftermath';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
+import { t } from '../i18n';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -734,7 +735,11 @@ function buildAdvanceReadiness(
       || (state.pendingParamilitaryRequests?.length ?? 0) > 0;
 
   return {
-    headline: items.length > 0 || blockedByExistingSystems ? 'Review before advance' : 'Clear to advance',
+    headline: t(
+      items.length > 0 || blockedByExistingSystems
+        ? 'decisionRoom.advance.reviewBeforeAdvance'
+        : 'decisionRoom.advance.clearToAdvance',
+    ),
     blockedByExistingSystems,
     items,
   };
@@ -1180,7 +1185,11 @@ function buildActiveDossier(
     sourceHandoff,
     relatedCardIds,
     advanceSensitive,
-    advanceLabel: advanceSensitive ? 'Review before advance' : 'Not in advance review',
+    advanceLabel: t(
+      advanceSensitive
+        ? 'decisionRoom.advance.reviewBeforeAdvance'
+        : 'decisionRoom.advance.notInAdvanceReview',
+    ),
   };
 }
 
@@ -1190,7 +1199,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   if (!state) {
     return {
       hasPlayerFaction: false,
-      emptyState: 'No game state loaded.',
+      emptyState: t('decisionRoom.empty.noGameState'),
       cards: [],
       lenses: [],
       commandQuestions: [],
@@ -1199,7 +1208,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       activeDossier: null,
       inspectNext: [],
       advanceReadiness: {
-        headline: 'No state loaded',
+        headline: t('decisionRoom.advance.noStateLoaded'),
         blockedByExistingSystems: false,
         items: [],
       },
@@ -1215,7 +1224,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   if (!playerFaction) {
     return {
       hasPlayerFaction: false,
-      emptyState: 'No player faction loaded.',
+      emptyState: t('decisionRoom.empty.noPlayerFaction'),
       cards: [],
       lenses: [],
       commandQuestions: [],
@@ -1224,7 +1233,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       activeDossier: null,
       inspectNext: [],
       advanceReadiness: {
-        headline: 'No player faction loaded',
+        headline: t('decisionRoom.advance.noPlayerFaction'),
         blockedByExistingSystems: false,
         items: [],
       },
