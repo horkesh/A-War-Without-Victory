@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] fix(ui): keep settings tabs clickable and expose startup language
+
+**Type:** UI shell/i18n preference fix only. No simulation behavior, scenario data, save schema, event routing, Codex unlock logic, diagnostics, OOB, or tuning changed.
+
+**Why:** In Electron, the Settings modal's click-to-close backdrop could sit above the visible panel and intercept tab clicks, closing Settings instead of changing tabs. Language selection also required reaching Settings, which blocked first-run BCS selection from the initial screen.
+
+**Change:** Put the Settings panel on an explicit `relative z-10` layer above the backdrop `z-0` button and stop panel click propagation. Added a compact main-menu language selector backed by the existing `useLocale()`/`awwv.locale` store, so BCS can be selected before starting or loading a campaign.
+
+**Verification:** `npx.cmd vitest run tests/ui/settings_screen_shell_cleanup.test.ts tests/ui/main_menu_language.test.ts tests/ui/settings_screen_i18n.test.ts --reporter=dot` passed 8/8. `npx.cmd vitest run tests/ui/settings_screen_shell_cleanup.test.ts tests/ui/main_menu_language.test.ts tests/ui/settings_screen_i18n.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 15/15. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+---
+
 ## [2026-05-23] feat(events+ui+calibration): n2003 baseline — historical-default bot decisions + headless contract + presidential modal
 
 **Type:** Multi-commit session shipping (a) the headless undefined-player_faction contract across 3 sites, (b) structured event-decision audit trail, (c) UI surfacing of blocking decisions as auto-pop modals, (d) historical-default retunings of 3 events + Washington Agreement HRHB cohesion reset, and (e) strategic_depth corps_asset filter fix. New 188w baseline at **n2003 hash `47438d249146d1af`, match_ratio 79.21%**. Eight commits on `codex/localization-complete-2026-05-23`.

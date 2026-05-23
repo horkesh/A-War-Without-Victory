@@ -4,7 +4,7 @@
  * and secondary actions (Load, Settings, Credits).
  */
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
+import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -17,6 +17,8 @@ interface MainMenuProps {
 }
 
 export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSettings, onCredits, onQuit }: MainMenuProps) {
+    const [locale, setLocale] = useLocale();
+
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center"
              style={{
@@ -24,6 +26,24 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
                  background: 'radial-gradient(ellipse at center, #1a1816 0%, #0d0c0a 100%)',
                  fontFamily: 'Georgia, "Times New Roman", serif',
              }}>
+            <label className="absolute top-4 right-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-[#8a7a60]"
+                   style={{ fontFamily: 'Courier New, monospace' }}>
+                <span>{t('settings.language.label')}</span>
+                <select
+                    className="rounded border border-[#8a7a60]/25 bg-[#1a1816] px-2 py-1 text-[11px] text-[#d5c9bc] outline-none hover:border-[#c4a35a]/40 focus:border-[#c4a35a]/60"
+                    aria-label={t('settings.language.ariaLabel')}
+                    value={locale}
+                    onChange={(event) => setLocale(event.target.value as Locale)}
+                >
+                    {SUPPORTED_LOCALES.map((option) => (
+                        <option key={option} value={option}>
+                            {option === 'en'
+                                ? t('settings.language.option.en')
+                                : t('settings.language.option.bcs')}
+                        </option>
+                    ))}
+                </select>
+            </label>
 
             {/* Title */}
             <div className="text-center mb-12">

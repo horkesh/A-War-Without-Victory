@@ -194,11 +194,14 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
              style={{ zIndex: Z.MODAL_HARD }}>
             <button
                 type="button"
-                className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
+                className="absolute inset-0 z-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onClose}
                 aria-label={t('settings.close.ariaLabel')}
             />
-            <div className="w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
+            <div
+                 data-testid="settings-panel"
+                 onClick={(event) => event.stopPropagation()}
+                 className="relative z-10 w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
                  style={{ background: 'rgba(26, 24, 21, 0.97)' }}
             >
 
