@@ -7,7 +7,7 @@
 
 **Change:** Added `data/source/oob_brigade_designations.json` with one row per `data/source/oob_brigades.json` brigade id, including a stable `designation_code`, Bosnian display label, English gloss, `unit_type`, and `echelon`. Extended `src/ui/map/data/formationNameLocalizations.ts` with `getFormationDesignation(...)` and `getFormationUnitType(...)`, and made BCS label resolution prefer the catalog. Map marker classification, stack expansion formation icons, and ops-planning unit-type labels now use structured unit type. Enabled TypeScript JSON imports via `resolveJsonModule`; Warroom fallback JSON casts were made explicit after the compiler began typing imported JSON.
 
-**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 5/5. `npm.cmd run typecheck` passed.
+**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 5/5. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `git diff --check` passed with CRLF normalization warnings only.
 
 ---
 

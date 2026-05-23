@@ -57,6 +57,8 @@
 ## Verification
 - `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 5/5.
 - `npm.cmd run typecheck` passed.
+- `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+- `git diff --check` passed with CRLF normalization warnings only.
 
 ## Follow-Up
 - Audit remaining report/history prose surfaces that serialize `formation_name` into saved turn summaries; those are intentionally left canonical for now because changing them would affect persisted output contracts.
