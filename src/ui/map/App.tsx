@@ -1028,6 +1028,8 @@ function App() {
               if (isWarroomLocalCommand(command)) {
                 if (command.kind === 'strategic-overview') {
                   useGameStore.getState().setStrategicDashboardOpen(true);
+                } else if (command.kind === 'diplomacy') {
+                  setDiplomacyOpen(true);
                 } else if (command.kind === 'event-log') {
                   setEventLogOpen(true);
                 }

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Warroom diplomacy route** | [implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md](implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md) - the Warroom diplomatic telephone now opens the existing read-only Diplomacy panel instead of Army HQ Summary, with a Warroom shell mapping guard. |
 | **Latest strict-null FactionState optional classification** | [audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md) - `FactionState` optionals are classified as subsystem-specific profile, negotiation, command-capacity, and Phase 0 lifecycle fields. |
 | **Latest strict-null event provenance optional classification** | [audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md) - `ControlEvent`, `DisplacementEvent`, and `DisplacementState` optionals are provenance/detail fields pending an event-schema lane. |
 | **Latest strict-null GameState top-level optional classification** | [audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md) - top-level history, decision queue, and paramilitary policy/count optionals are classified pending a focused save-contract lane. |

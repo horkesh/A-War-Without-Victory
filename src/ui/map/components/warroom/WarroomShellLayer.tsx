@@ -97,8 +97,7 @@ export function regionToShellHandoff(regionId: string): WarroomNavigationCommand
     case 'desk_radio':
       return { kind: 'event-log' };
     case 'diplomatic_telephone':
-      // Diplomacy routes to Army HQ summary until a dedicated diplomacy surface exists.
-      return { kind: 'army-hq', tab: 'summary' };
+      return { kind: 'diplomacy' };
     default:
       return undefined;
   }

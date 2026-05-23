@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(warroom): route diplomacy telephone to panel
+
+**Type:** UI navigation/routing fix. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.
+
+**Why:** The dedicated read-only Diplomacy panel exists and is already backed by canonical diplomacy/patron/IVP read models, but the Warroom `diplomatic_telephone` hotspot still routed to Army HQ Summary with a stale placeholder comment.
+
+**Change:** Added `diplomacy` as a Warroom-local command, routed `diplomatic_telephone` to that command, and had `App.tsx` open `DiplomacyPanel` while staying in the Warroom shell. Added a Warroom shell regression asserting the hotspot maps to `{ kind: 'diplomacy' }`.
+
+**Determinism / output impact:** UI navigation only. No sim path, save shape, scenario data, or generated run artifact changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\warroom_shell_ownership.test.ts tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_player_truth.test.ts --reporter=dot` PASS 10/10.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md`.
+
+**Roadmap delta:** Closes the stale Warroom diplomacy-placeholder routing slice. The broader AAA Track E diplomacy-panel enrichment remains open.
+
+---
+
 ## [2026-05-23] docs(roadmap): close stale GUI visual audit row
 
 **Type:** Roadmap/status reconciliation. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
