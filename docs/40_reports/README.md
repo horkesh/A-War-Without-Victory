@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Presidential Inbox chrome localization** | [implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md) - Presidential Inbox panel title, situation divider, severity/type badges, notification dismiss, update chip, opening briefs, quiet state, and toolbar badge titles now render through the English/BCS substrate. |
 | **Latest BCS Decision Room panel chrome localization** | [implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md) - Army HQ Decision Room panel title, advanced toggle/metrics, loop headings, dossier labels, source handoff headings, and review-before-advance section labels now render through the English/BCS substrate. |
 | **Latest BCS Decision Room advance-readiness localization** | [implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_ADVANCE_READINESS_LOCALIZATION.md) - Decision Room advance-readiness headlines, active-dossier advance badge, and pre-advance pending-decision gate title now render through the English/BCS substrate. |
 | **Latest BCS Warroom status bar localization** | [implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md](implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md) - Warroom status bar phase, priority, advance, docket panel, empty-state, urgency-title, and category badge labels now render through the English/BCS substrate. |

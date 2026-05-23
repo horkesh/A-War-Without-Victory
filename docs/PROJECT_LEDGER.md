@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Presidential Inbox chrome
+
+**Type:** Presidential Inbox UI chrome localization slice. No Inbox item derivation, decision routing, opening-brief dismissal state, actionable-item counting, notification semantics, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `inbox.*` message keys. `PresidentialInbox` now localizes its panel title, situation divider, severity/type badges, notification dismiss affordance, update chip, three-faction opening briefs, quiet-inbox capsule, and toolbar badge titles.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; derived item arrays, button actions, dismissal state, source IDs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\inbox_dedup.test.ts --reporter=dot` failed while BCS mode still rendered English Inbox opening/quiet chrome. Green rerun passed 6/6. Related `npx.cmd vitest run tests\ui\inbox_dedup.test.ts tests\ui\onboarding_track_d_consolidation.test.ts tests\ui\inbox_items.test.ts --reporter=dot` passed 46/46. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PresidentialInbox.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/inbox_dedup.test.ts`, `tests/ui/onboarding_track_d_consolidation.test.ts`, `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Decision Room panel chrome
 
 **Type:** Army HQ Decision Room UI chrome localization slice. No Decision Room card synthesis, command-loop lane selection, product-loop ordering, advance-readiness selection, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
