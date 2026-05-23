@@ -20,7 +20,7 @@ import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
-import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
+import type { BrigadePosture, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { areRbihHrhbAllied, isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
@@ -298,6 +298,80 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                             .includes(currentObjective);
                     }).length
                 );
+
+                // ── ENGINE-1 Option A: axis-pooled prediction ────────────────
+                // If solo prediction does NOT clear the probe threshold, build a
+                // deterministic sibling pool of other axis brigades that are also
+                // tactically adjacent to currentObjective and call the predictor a
+                // SECOND time with additionalAttackers=pool. The predictor already
+                // supports this at combat_predictor.ts:253,272-275,463-465. If the
+                // POOLED prediction clears the threshold, emit attack orders for
+                // ALL pool members so the resolver can group them (resolver groups
+                // by target OSID at attack_resolution_osid.ts:347-358 and sums
+                // power at :597-614 with coordPenalty + getConcentrationBonus).
+                //
+                // Faction-symmetric (RBiH/RS/HRHB identical), deterministic
+                // (sorted by strictCompare), no new state, no new tunables.
+                // Design memo: docs/40_reports/proposals/20260523_ENGINE_1_COMBAT_CONCENTRATION_DESIGN.md
+                const soloOutcomeClears = isOutcomeSufficientForAttack(predictedOutcome, probeThreshold);
+                let pooledPool: FormationId[] = [];
+                let pooledOutcomeClears = false;
+                if (!soloOutcomeClears && adjacentOperationParticipants > 1) {
+                    pooledPool = sectorAttackProfileTime('.sectorAttack.executionAxisPool', () => {
+                        const candidates: FormationId[] = [];
+                        for (const sid of axisBrigades) {
+                            if (sid === brigade.id) continue;
+                            if (sid in result.attack_orders) continue;
+                            if (sid in result.column_march_orders) continue;
+                            const sibling = state.military.formations?.[sid];
+                            if (!sibling || sibling.status !== 'active') continue;
+                            const siblingLoc = sibling.location_osid;
+                            if (!siblingLoc) continue;
+                            const siblingDisrupted =
+                                ((sibling as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0;
+                            if (siblingDisrupted) continue;
+                            const transit = state.military.brigade_movement_state?.[sid];
+                            if (transit && transit.stance === 'column' && transit.status === 'in_transit') continue;
+                            if (!getTacticalAdjacentOsids(state, siblingLoc as Osid, adjacency).includes(currentObjective)) continue;
+                            candidates.push(sid);
+                        }
+                        candidates.sort(strictCompare);
+                        // Cap pool so total attackers on this OSID stays ≤ MAX_ATTACKERS_PER_TARGET.
+                        const headroom = Math.max(0, MAX_ATTACKERS_PER_TARGET - alreadyAssigned - 1);
+                        return candidates.slice(0, headroom);
+                    });
+                    if (pooledPool.length > 0) {
+                        const pooledPrediction = sectorAttackProfileTime(
+                            '.sectorAttack.executionDirectObjective.predictPooled',
+                            () => {
+                                const combatOfficerLookup = getOfficerCombatLookup?.() ?? officerCombatLookup;
+                                return predictCombatOutcome(
+                                    state,
+                                    brigade.id,
+                                    currentObjective as Osid,
+                                    adjacency,
+                                    reverseMap,
+                                    terrainCache,
+                                    'attack',
+                                    pooledPool,
+                                    supplyStateByOsid,
+                                    osidPopulationMap,
+                                    undefined,
+                                    ethnicMap,
+                                    SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX,
+                                    combatOfficerLookup,
+                                );
+                            },
+                        );
+                        if (pooledPrediction != null) {
+                            pooledOutcomeClears = isOutcomeSufficientForAttack(
+                                pooledPrediction.predicted_outcome,
+                                probeThreshold,
+                            );
+                        }
+                    }
+                }
+                // Legacy heuristic kept as a defensive fallback (e.g. predictor returns null).
                 const concentratedOutcome = adjacentOperationParticipants > 1
                     ? estimateConcentratedOutcome(
                         directObjectiveAttack.prediction.power_ratio,
@@ -305,7 +379,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     )
                     : null;
                 const canDirectAttackObjective =
-                    isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
+                    soloOutcomeClears ||
+                    pooledOutcomeClears ||
                     (concentratedOutcome != null &&
                         isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold));
                 if (canDirectAttackObjective && brigade.corps_id) {
@@ -317,7 +392,32 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = currentObjective;
                     result.attack_scores[brigade.id] = 900;
-                    chosenTargets.set(currentObjective, alreadyAssigned + 1);
+                    let newAssignedCount = alreadyAssigned + 1;
+                    // ENGINE-1: when pooled outcome is the path to threshold, also emit
+                    // orders for every eligible sibling in the pool so the resolver
+                    // groups them all together and applies coordPenalty + concentration
+                    // bonus over the true attacker set. Without this, only the current
+                    // brigade attacks and the resolver sees N=1 — defeating the point of
+                    // the pooled prediction.
+                    if (pooledOutcomeClears && !soloOutcomeClears) {
+                        for (const sid of pooledPool) {
+                            if (newAssignedCount >= MAX_ATTACKERS_PER_TARGET) break;
+                            if (sid in result.attack_orders) continue;
+                            const sibling = state.military.formations?.[sid];
+                            if (!sibling || sibling.status !== 'active') continue;
+                            const siblingPosture: BrigadePosture =
+                                (sibling.cohesion ?? 0) >= 60 ? 'assault' : 'attack';
+                            result.posture_orders.push({ brigade_id: sid, posture: siblingPosture });
+                            result.attack_orders[sid] = currentObjective;
+                            result.attack_scores[sid] = 900;
+                            if (sibling.corps_id) {
+                                result.eligible_attackers_by_corps[sibling.corps_id] =
+                                    (result.eligible_attackers_by_corps[sibling.corps_id] ?? 0) + 1;
+                            }
+                            newAssignedCount += 1;
+                        }
+                    }
+                    chosenTargets.set(currentObjective, newAssignedCount);
                     return true;
                 }
             }
