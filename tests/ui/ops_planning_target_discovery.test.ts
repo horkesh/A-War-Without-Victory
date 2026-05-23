@@ -5,11 +5,13 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { OpsPlanState } from '../../src/ui/map/components/ops_modal/types.js';
+import { CommanderPhase } from '../../src/ui/map/components/ops_modal/CommanderPhase.js';
 import { PlanPhase } from '../../src/ui/map/components/ops_modal/PlanPhase.js';
 import { ObjectiveList } from '../../src/ui/map/components/ops_modal/ObjectiveList.js';
 import { PlanParameters } from '../../src/ui/map/components/ops_modal/PlanParameters.js';
 import { G2Phase } from '../../src/ui/map/components/ops_modal/G2Phase.js';
 import { AuthorizePhase } from '../../src/ui/map/components/ops_modal/AuthorizePhase.js';
+import { OpordDocument } from '../../src/ui/map/components/ops_modal/OpordDocument.js';
 import type { PredictionResult } from '../../src/ui/map/components/ops_modal/usePrediction.js';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage } from '../../src/ui/map/components/ops_modal/phaseGate.js';
 import { chooseOpsPlanningSector } from '../../src/ui/map/components/ops_modal/stagingChoice.js';
@@ -74,6 +76,33 @@ function makeState(): LoadedGameState {
         latestTurnSummary: null,
         turnSummaries: [],
         player_faction: 'RS',
+        namedOfficerData: [
+            {
+                id: 'officer_alpha',
+                name: 'Petar Testic',
+                rank: 'colonel',
+                faction: 'RS',
+                status: 'active',
+                assigned_corps_id: 'rs_1st_krajina',
+                acting_commander: true,
+                home_corps_id: 'rs_1st_krajina',
+                compatible_corps_ids: ['rs_1st_krajina'],
+                competence: 0.72,
+                aggressiveness: 0.58,
+                operations_commanded: 2,
+            },
+            {
+                id: 'officer_beta',
+                name: 'Milan Testic',
+                rank: 'major',
+                faction: 'RS',
+                status: 'active',
+                home_corps_id: 'rs_1st_krajina',
+                compatible_corps_ids: ['rs_1st_krajina'],
+                competence: 0.62,
+                aggressiveness: 0.44,
+            },
+        ],
     } as unknown as LoadedGameState;
 }
 
@@ -345,6 +374,79 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Sektorski napad')).toBeTruthy();
         expect(screen.getByText('Uravnotezen pristup')).toBeTruthy();
         expect(screen.queryByText('What kind of operation?')).toBeNull();
+    });
+
+    it('localizes CommanderPhase chrome and officer metadata in BCS mode', () => {
+        setLocale('bcs');
+        useGameStore.setState({
+            loadedGameState: makeState(),
+            opsPlanningCorpsId: 'rs_1st_krajina',
+        });
+
+        render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
+
+        expect(screen.getByText('Izaberi operativnog komandanta')).toBeTruthy();
+        expect(screen.getByText('Komanduje:')).toBeTruthy();
+        expect(screen.getByText('ljudstva')).toBeTruthy();
+        expect(screen.getByText('sektora')).toBeTruthy();
+        expect(screen.getAllByText('Maticni korpus').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Kompetencija').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Agresivnost').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Vrijeme pripreme:').length).toBeGreaterThan(0);
+        expect(screen.getByText('2 operacije komandovao')).toBeTruthy();
+        expect(screen.queryByText('Select Operations Commander')).toBeNull();
+    });
+
+    it('localizes OPORD body prose in BCS mode', () => {
+        setLocale('bcs');
+        render(createElement(OpordDocument, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: makePrediction(),
+            commanderName: 'Petar Testic',
+            corpsName: '1st Krajina Corps',
+            faction: 'RS',
+            date: '1992-04-01',
+            isStamped: false,
+            osidDisplayNames: { enemy_front: 'Enemy Front' },
+        }));
+
+        expect(screen.getByText(/ZADACA/)).toBeTruthy();
+        expect(screen.getByText(/Sektorski napad/)).toBeTruthy();
+        expect(screen.getByText(/Tempo: Standardno/)).toBeTruthy();
+        expect(screen.getByText(/Minimalni ishod: Prihvati skupo/)).toBeTruthy();
+        expect(screen.getByText(/Operativni komandant:/)).toBeTruthy();
+        expect(screen.getByText(/Procijenjeni gubici: 120/)).toBeTruthy();
+        expect(screen.queryByText(/Minimum outcome:/)).toBeNull();
+    });
+
+    it('localizes G2 narrative and map legend prose in BCS mode', () => {
+        setLocale('bcs');
+        useGameStore.setState({ loadedGameState: makeState() });
+
+        render(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: makePrediction(),
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        expect(screen.getByText('Brza procjena')).toBeTruthy();
+        expect(screen.getByText('Odnos snaga')).toBeTruthy();
+        expect(screen.getByText('Preporuka')).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: /legenda karte/i }));
+
+        expect(screen.getByText('Teritorija')).toBeTruthy();
+        expect(screen.getByText('Frontovi')).toBeTruthy();
+        expect(screen.getByText('Oznake operacije')).toBeTruthy();
+        expect(screen.getByText('Cilj')).toBeTruthy();
+        expect(screen.queryByText('Territory')).toBeNull();
     });
 
     it('CorpsDetail defaults ops planning to a forward sector before falling back to index zero', () => {

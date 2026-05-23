@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] ui(i18n): localize operations-planning prose panels
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.
+
+**Why:** The first Operations Planning localization slice still left prose-heavy planning surfaces in English or mixed copy: CommanderPhase officer cards, OPORD body sections, G-2 narrative fallback prose, and map legend body text.
+
+**Change:** Added English/BCS dictionary keys for CommanderPhase labels, OPORD section/body strings, G-2 narrative labels/fallback prose, map legend rows, and common operation-document plurals. Routed CommanderPhase, OpordDocument, NarrativeTab, and MapLegendTab through the existing `t(...)` helper while preserving stable ids, operation names, axis names, settlement labels, and payload structure. Added focused BCS render coverage to `tests/ui/ops_planning_target_discovery.test.ts`.
+
+**Verification:** `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts --reporter=dot` passed 17/17. Related i18n suite `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui/settings_screen_i18n.test.ts tests/ui_i18n.test.ts --reporter=dot` passed 25/25. `npm.cmd run typecheck` passed. `npm.cmd run desktop:map:build` passed with known Vite externalization/dynamic-import/chunk-size warnings.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize operations-planning phase chrome
 
 **Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.

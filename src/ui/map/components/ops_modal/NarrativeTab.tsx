@@ -5,6 +5,7 @@
 import type { PredictionResult } from './usePrediction';
 import { FACTION_ARMY_HEADERS } from './types';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
+import { t } from '../../i18n';
 
 interface NarrativeTabProps {
     prediction: PredictionResult;
@@ -45,14 +46,14 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
             {/* Classified stamp */}
             <div className="absolute top-4 right-4 rotate-[-12deg] text-red-600/20 text-2xl font-bold uppercase tracking-[0.3em]
                             border-2 border-red-600/20 px-3 py-1 rounded pointer-events-none select-none">
-                OGRANI\u010CENO
+                {t('opsPlanning.narrative.classified')}
             </div>
 
             {/* Header block — WP3b: darkened text colors for WCAG AA */}
             <div className="text-center mb-6 space-y-0.5">
                 <div className="text-[9px] uppercase tracking-[0.3em] text-[#3a3228]">{headers.republic}</div>
                 <div className="text-[9px] uppercase tracking-[0.3em] text-[#3a3228]">{headers.army}</div>
-                <div className="text-[10px] font-bold text-[#1a1610] mt-2">{corpsName} \u2014 G-2 Odjel</div>
+                <div className="text-[10px] font-bold text-[#1a1610] mt-2">{corpsName} \u2014 {t('opsPlanning.narrative.g2Office')}</div>
                 <div className="text-[9px] text-[#4a4238]">
                     Ref: G2/{date.replace(/-/g, '')}/OPS \u2022 {date}
                 </div>
@@ -62,15 +63,15 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
 
             {/* WP3d: Quick Assessment summary box */}
             <div className="mb-4 p-3 rounded border border-[#c0b090] bg-[#f0ead8]">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-[#1a1610] mb-2">Quick Assessment</div>
+                <div className="text-[9px] font-bold uppercase tracking-wider text-[#1a1610] mb-2">{t('opsPlanning.narrative.quickAssessment')}</div>
                 <div className="grid grid-cols-2 gap-1 text-[9px]">
-                    <span className="text-[#3a3228]">Force Balance</span>
+                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.forceBalance')}</span>
                     <span className={`font-bold uppercase ${forceBalance.toneClass}`}>{forceBalance.label}</span>
-                    <span className="text-[#3a3228]">Intel Confidence</span>
+                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.intelConfidence')}</span>
                     <span className="font-bold text-[#1a1610]">{Math.round(prediction.overall.intelConfidence * 100)}%</span>
-                    <span className="text-[#3a3228]">Predicted</span>
+                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.predicted')}</span>
                     <span className="font-bold text-[#1a1610]">{prediction.overall.predictedOutcome}</span>
-                    <span className="text-[#3a3228]">Recommendation</span>
+                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.recommendation')}</span>
                     <span className="font-bold text-[#1a1610]">{prediction.overall.recommendedAction}</span>
                 </div>
             </div>
@@ -92,29 +93,32 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                 <div className="space-y-4">
                     <div>
                         <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            1. NEPRIJATELJ \u2014 Enemy Forces
+                            {t('opsPlanning.narrative.enemyTitle')}
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
-                            Enemy forces in the area of operations are assessed as presenting a{' '}
-                            <span className="font-bold">{forceBalance.summary}</span>.
-                            Intel confidence: <span className="font-bold">{(prediction.overall.intelConfidence * 100).toFixed(0)}%</span>.
+                            {t('opsPlanning.narrative.enemyLine', {
+                                summary: forceBalance.summary,
+                                confidence: (prediction.overall.intelConfidence * 100).toFixed(0),
+                            })}
                         </div>
                     </div>
                     <div>
                         <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            2. VLASTITE SNAGE \u2014 Own Forces
+                            {t('opsPlanning.narrative.ownTitle')}
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
-                            Estimated casualties for the planned operation: <span className="font-bold">{prediction.overall.estimatedCasualties.toLocaleString()}</span>.
-                            Predicted outcome: <span className="font-bold">{prediction.overall.predictedOutcome}</span>.
+                            {t('opsPlanning.narrative.ownLine', {
+                                casualties: prediction.overall.estimatedCasualties.toLocaleString(),
+                                outcome: prediction.overall.predictedOutcome,
+                            })}
                         </div>
                     </div>
                     <div>
                         <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            3. PROCJENA \u2014 Assessment
+                            {t('opsPlanning.narrative.assessmentTitle')}
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
-                            Recommended action: <span className="font-bold">{prediction.overall.recommendedAction}</span>.
+                            {t('opsPlanning.narrative.assessmentLine', { action: prediction.overall.recommendedAction })}
                         </div>
                     </div>
                 </div>
@@ -122,7 +126,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
 
             {/* Signature */}
             <div className="border-t border-[#c0b090] mt-6 pt-3">
-                <div className="text-[9px] text-[#4a4238]">Na\u010Delnik G-2</div>
+                <div className="text-[9px] text-[#4a4238]">{t('opsPlanning.narrative.g2Chief')}</div>
                 <div className="text-[10px] font-bold text-[#1a1610] mt-1">{commanderName}</div>
             </div>
         </div>

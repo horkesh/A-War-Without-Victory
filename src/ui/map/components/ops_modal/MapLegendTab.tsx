@@ -4,6 +4,7 @@
  * selection states, and terrain modifiers with defense bonuses.
  * Uses parchment styling to match NarrativeTab and RawIntelTab.
  */
+import { t } from '../../i18n';
 
 interface LegendItemProps {
     swatch: React.ReactNode;
@@ -56,20 +57,20 @@ export function MapLegendTab() {
             {/* Territory Colors */}
             <div>
                 <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
-                    Territory
+                    {t('opsPlanning.legend.territory')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
                         swatch={<ColorSwatch color="rgba(255,255,255,0.08)" border="rgba(255,255,255,0.25)" />}
-                        label="Corps AO (own territory)"
+                        label={t('opsPlanning.legend.corpsAo')}
                     />
                     <LegendItem
                         swatch={<ColorSwatch color="rgba(200,60,60,0.12)" border="rgba(200,60,60,0.3)" dashed />}
-                        label="Targetable enemy territory"
+                        label={t('opsPlanning.legend.targetableEnemy')}
                     />
                     <LegendItem
                         swatch={<ColorSwatch color="rgba(0,0,0,0.45)" />}
-                        label="Out of range (dimmed)"
+                        label={t('opsPlanning.legend.outOfRangeDimmed')}
                     />
                 </div>
             </div>
@@ -77,18 +78,18 @@ export function MapLegendTab() {
             {/* Front Lines */}
             <div>
                 <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
-                    Front Lines
+                    {t('opsPlanning.legend.frontLines')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
                         swatch={<LineSwatch color="rgba(255,220,120,0.8)" width={3} />}
-                        label="This corps' front"
-                        detail="Gold highlight"
+                        label={t('opsPlanning.legend.thisCorpsFront')}
+                        detail={t('opsPlanning.legend.goldHighlight')}
                     />
                     <LegendItem
                         swatch={<LineSwatch color="rgba(0,0,0,0.65)" width={2} />}
-                        label="Other fronts"
-                        detail="Dark line"
+                        label={t('opsPlanning.legend.otherFronts')}
+                        detail={t('opsPlanning.legend.darkLine')}
                     />
                 </div>
             </div>
@@ -96,23 +97,23 @@ export function MapLegendTab() {
             {/* Operation Markers */}
             <div>
                 <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
-                    Operation Markers
+                    {t('opsPlanning.legend.operationMarkers')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
                         swatch={<ColorSwatch color="#8b0000" border="#1a1a1a" dashed />}
-                        label="Objective"
-                        detail="Dark red fill"
+                        label={t('opsPlanning.legend.objective')}
+                        detail={t('opsPlanning.legend.darkRedFill')}
                     />
                     <LegendItem
                         swatch={<div className="text-accent-gold text-[14px] leading-none">&#9733;</div>}
-                        label="Schwerpunkt (main effort)"
-                        detail="Gold star"
+                        label={t('opsPlanning.legend.schwerpunkt')}
+                        detail={t('opsPlanning.legend.goldStar')}
                     />
                     <LegendItem
                         swatch={<ColorSwatch color="#2d6a4f" border="#40916c" />}
-                        label="Staging area"
-                        detail="Green fill"
+                        label={t('opsPlanning.legend.stagingArea')}
+                        detail={t('opsPlanning.legend.greenFill')}
                     />
                 </div>
             </div>
@@ -120,18 +121,18 @@ export function MapLegendTab() {
             {/* Selection States */}
             <div>
                 <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
-                    Selection
+                    {t('opsPlanning.legend.selection')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
                         swatch={<div className="w-4 h-3 rounded-sm bg-[#3a5a3a] border border-[#56d364]" />}
-                        label="Selectable"
-                        detail="Bright, pointer cursor"
+                        label={t('opsPlanning.legend.selectable')}
+                        detail={t('opsPlanning.legend.pointerCursor')}
                     />
                     <LegendItem
                         swatch={<div className="w-4 h-3 rounded-sm bg-[rgba(0,0,0,0.45)]" />}
-                        label="Out of range"
-                        detail="Dimmed, no cursor"
+                        label={t('opsPlanning.legend.outOfRange')}
+                        detail={t('opsPlanning.legend.noCursor')}
                     />
                 </div>
             </div>
@@ -139,33 +140,33 @@ export function MapLegendTab() {
             {/* Terrain Modifiers */}
             <div>
                 <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
-                    Terrain Defense Modifiers
+                    {t('opsPlanning.legend.terrainDefense')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
                         swatch={<span className="text-[12px]">&#9968;</span>}
-                        label="Mountain"
-                        detail="+50% defense"
+                        label={t('opsPlanning.legend.mountain')}
+                        detail={t('opsPlanning.legend.defense50')}
                     />
                     <LegendItem
                         swatch={<span className="text-[12px]">&#9651;</span>}
-                        label="Hilly"
-                        detail="+30% defense"
+                        label={t('opsPlanning.legend.hilly')}
+                        detail={t('opsPlanning.legend.defense30')}
                     />
                     <LegendItem
                         swatch={<span className="text-[12px]">&#127795;</span>}
-                        label="Rolling/Forest"
-                        detail="+15% defense"
+                        label={t('opsPlanning.legend.rollingForest')}
+                        detail={t('opsPlanning.legend.defense15')}
                     />
                     <LegendItem
                         swatch={<span className="text-[12px]">&#9866;</span>}
-                        label="Flat"
-                        detail="No bonus"
+                        label={t('opsPlanning.legend.flat')}
+                        detail={t('opsPlanning.legend.noBonus')}
                     />
                     <LegendItem
                         swatch={<span className="text-[12px] text-blue-500">&#126;</span>}
-                        label="River crossing"
-                        detail="Attack penalty"
+                        label={t('opsPlanning.legend.riverCrossing')}
+                        detail={t('opsPlanning.legend.attackPenalty')}
                     />
                 </div>
             </div>
