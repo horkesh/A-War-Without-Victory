@@ -181,22 +181,6 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.
         if (!moraleCollapseTrigger && criteriaCount < requiredCriteria) continue;
 
-        // Wave 30 (2026-05-23): cohesion-only dissolution prevention. When the
-        // dissolution criteria fire but personnel is ADEQUATE (≥ both
-        // personnelThreshold and absFloor), the brigade is combat-fatigued, not
-        // structurally destroyed. Demote `readiness='degraded'` and continue —
-        // the existing per-turn cohesion drift + pool reinforcement will recover
-        // it. Without this, post-Cincar HVO Guards brigades hit cohesion≤20 +
-        // morale≤15 at t165 and are permanently orphaned at
-        // lifecycle_status='destroyed', blocking Mistral 2's t175 brigade pool.
-        // Morale-collapse override still triggers full dissolution (catastrophic
-        // psychological collapse is a real destruction path).
-        // Per docs/40_reports/audits/20260523_BRIGADE_LIFECYCLE_INVESTIGATION.md
-        if (!moraleCollapseTrigger && !lowPersonnel) {
-            f.readiness = 'degraded';
-            continue;
-        }
-
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
 
