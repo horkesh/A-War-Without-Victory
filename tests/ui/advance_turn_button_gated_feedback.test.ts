@@ -8,6 +8,7 @@ import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
 import { WarroomStatusBar } from '../../src/ui/map/components/warroom/WarroomStatusBar.js';
 import { advanceTurnAndSync } from '../../src/ui/map/desktop/orderActions.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 vi.mock('../../src/ui/map/desktop/orderActions.js', () => ({
   advanceTurnAndSync: vi.fn(async () => undefined),
@@ -66,6 +67,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
   afterEach(() => {
     cleanup();
+    setLocale('en');
     delete (window as unknown as { awwv?: unknown }).awwv;
     useGameStore.setState({
       loadedGameState: null,
@@ -137,5 +139,25 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(onReviewPriorities).toHaveBeenCalledTimes(1);
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
+  });
+
+  it('Warroom status bar localizes priority and advance chrome in BCS mode', () => {
+    setLocale('bcs');
+    setLoadedState(makeState());
+
+    render(createElement(WarroomStatusBar, { onReviewPriorities: vi.fn() }));
+
+    expect(screen.getByText('RAT')).toBeTruthy();
+    expect(screen.getByText('PRIORITETI')).toBeTruthy();
+    expect(screen.getByText('NAPRIJED')).toBeTruthy();
+    expect(screen.queryByText('WAR')).toBeNull();
+    expect(screen.queryByText('PRIORITIES')).toBeNull();
+    expect(screen.queryByText('ADVANCE')).toBeNull();
+
+    fireEvent.click(screen.getByText('PRIORITETI'));
+
+    expect(screen.getByText('Pregled prije napredovanja')).toBeTruthy();
+    expect(screen.getByText('Nijedna ziva stavka stola nece biti zatrpana sljedecim potezom.')).toBeTruthy();
+    expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
   });
 });

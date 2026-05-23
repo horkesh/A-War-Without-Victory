@@ -21,6 +21,7 @@ import {
 import { formatPreAdvanceGateBlockTitle } from '../../data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import { Z } from '../../../shared/zIndex';
+import { t } from '../../i18n';
 
 export interface WarroomStatusBarProps {
   onReviewPriorities?: () => void;
@@ -43,13 +44,13 @@ function docketBadgeClass(tone: WarroomPriorityDocketTone): string {
 }
 
 function categoryLabel(category: WarroomPriorityDocketItem['category']): string {
-  if (category === 'decision') return 'Decision';
-  if (category === 'opportunity') return 'Opportunity';
-  if (category === 'operational') return 'SITREP';
-  if (category === 'turn') return 'Turn';
-  if (category === 'briefing') return 'Briefing';
-  if (category === 'cost') return 'Cost';
-  return 'Memory';
+  if (category === 'decision') return t('warroom.status.category.decision');
+  if (category === 'opportunity') return t('warroom.status.category.opportunity');
+  if (category === 'operational') return t('warroom.status.category.operational');
+  if (category === 'turn') return t('warroom.status.category.turn');
+  if (category === 'briefing') return t('warroom.status.category.briefing');
+  if (category === 'cost') return t('warroom.status.category.cost');
+  return t('warroom.status.category.memory');
 }
 
 function PriorityDocketPanel({
@@ -69,7 +70,7 @@ function PriorityDocketPanel({
     <div className="absolute bottom-full right-0 mb-2 w-[min(26rem,calc(100vw-2rem))] rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50">
       <div className="flex min-w-0 items-start justify-between gap-3 border-b border-amber-900/45 pb-2">
         <div className="min-w-0">
-          <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">Review Before Advance</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">{t('warroom.status.reviewBeforeAdvance')}</div>
           <div className="mt-0.5 truncate text-[12px] font-bold uppercase tracking-[0.08em] text-amber-100">{docket.headline}</div>
           <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-amber-300/70">{docket.summary}</div>
         </div>
@@ -81,7 +82,7 @@ function PriorityDocketPanel({
       <div className="mt-2 space-y-1.5">
         {docket.items.length === 0 ? (
           <div className="rounded border border-amber-900/45 bg-black/40 px-2 py-2 text-[10px] leading-snug text-amber-200/75">
-            No live desk item will be buried by the next turn.
+            {t('warroom.status.emptyDeskItem')}
           </div>
         ) : docket.items.map((item) => (
           <button
@@ -112,7 +113,7 @@ function PriorityDocketPanel({
 
       <div className="mt-2 border-t border-amber-900/45 pt-2">
         <div className="flex items-center justify-between gap-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">Source Handoffs</div>
+          <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">{t('warroom.status.sourceHandoffs')}</div>
           <div className="truncate text-[8px] uppercase tracking-[0.08em] text-amber-300/60">
             {docket.sourceHandoffSummary}
           </div>
@@ -140,7 +141,7 @@ function PriorityDocketPanel({
           type="button"
           onClick={onOpenBoard}
           disabled={!canReviewPriorities}
-          aria-label="Open Decision Room"
+          aria-label={t('warroom.docket.openDecisionRoom')}
           className="rounded border border-amber-700/60 bg-amber-950/45 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.11em] text-amber-300 transition-colors hover:bg-amber-900/45 disabled:cursor-default disabled:border-neutral-700 disabled:bg-neutral-950/45 disabled:text-neutral-500"
         >
           {docket.openBoardLabel}
@@ -174,7 +175,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const advanceBlocked = docket.status === 'blocked';
   const advanceGateTitle = advanceBlocked
     ? formatPreAdvanceGateBlockTitle(docket)
-    : 'Advance turn';
+    : t('warroom.status.advanceTurn');
 
   const handleOpenBoard = () => {
     setPriorityDocketOpen(false);
@@ -227,7 +228,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
             : 'border-amber-700 text-amber-500 bg-amber-950/40'
         }`}
       >
-        {isWar ? 'WAR' : 'PEACE'}
+        {isWar ? t('warroom.status.phase.war') : t('warroom.status.phase.peace')}
       </span>
 
       {/* Decision Room priority pulse */}
@@ -235,13 +236,19 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         type="button"
         onClick={() => setPriorityDocketOpen((open) => !open)}
         disabled={!canReviewPriorities}
-        title={`Review priorities: ${advanceReviewCount} advance item${advanceReviewCount === 1 ? '' : 's'}, ${urgentCount} urgent, ${pendingReviewCount} pending review${pendingReviewCount === 1 ? '' : 's'}`}
+        title={t('warroom.status.reviewPrioritiesTitle', {
+          advanceReviewCount,
+          advanceItemLabel: t(advanceReviewCount === 1 ? 'warroom.docket.advanceItem.one' : 'warroom.docket.advanceItem.many'),
+          urgentCount,
+          pendingReviewCount,
+          pendingReviewLabel: t(pendingReviewCount === 1 ? 'warroom.status.pendingReview.one' : 'warroom.status.pendingReview.many'),
+        })}
         className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
         aria-expanded={priorityDocketOpen}
       >
-        <span>PRIORITIES</span>
+        <span>{t('warroom.status.priorities')}</span>
         <span className="tabular-nums">{advanceReviewCount}</span>
-        {urgentCount > 0 && <span className="text-[8px]">URG {urgentCount}</span>}
+        {urgentCount > 0 && <span className="text-[8px]">{t('warroom.status.urgentShort')} {urgentCount}</span>}
         {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
       </button>
 
@@ -257,7 +264,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         title={advanceGateTitle}
         aria-label={advanceBlocked ? advanceGateTitle : undefined}
       >
-        ADVANCE
+        {t('warroom.status.advance')}
       </button>
     </div>
   );

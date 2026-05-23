@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Warroom status bar chrome
+
+**Type:** Warroom status bar UI chrome localization slice. No Warroom navigation, advance gating, pre-advance review selection, docket ordering, source-handoff grouping, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warroom.status.*` message keys. `WarroomStatusBar` now localizes phase badges, priority pulse label/title, urgent badge, advance action/title, docket panel headings, empty-state copy, source-handoff heading, and docket category badges.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; docket metrics, item/source order, navigation callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still rendered English Warroom status-bar chrome. Green rerun passed 4/4. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Warroom priority docket summary
 
 **Type:** Warroom priority docket read-model localization slice. No pre-advance review selection, docket ordering, source-handoff grouping, blocking decision logic, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

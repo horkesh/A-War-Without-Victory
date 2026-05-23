@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Warroom status bar localization:** [implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md](implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md) - Warroom status bar phase, priority, advance, docket panel, empty-state, urgency-title, and category badge labels now render through the English/BCS substrate.
+
 **Latest BCS Warroom priority docket localization:** [implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md](implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md) - Warroom priority docket summary, source-handoff summary, and open-Decision-Room label now render through the English/BCS substrate.
 
 **Latest BCS Letter Home localization:** [implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md](implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md) - Chief of Staff Letter Home now passes active locale into the deterministic generator, and all 25 shipped casualty vignette templates carry BCS prose.

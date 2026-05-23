@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Warroom status bar):** Warroom status bar phase, priority, advance, docket panel, empty-state, urgency-title, and category badge labels now render through the English/BCS substrate while preserving navigation callbacks, advance gating, docket ordering, and source handoffs. Decision Room card/readiness prose and source handoff labels remain follow-up localization targets. Report: `docs/40_reports/implemented/20260523_BCS_WARROOM_STATUS_BAR_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (Warroom priority docket):** Warroom priority docket summary, source-handoff summary, and open-Decision-Room label now render through the English/BCS substrate while preserving pre-advance review selection, item ordering, and navigation targets. Decision Room card/readiness prose and broader Warroom panel labels remain follow-up localization targets. Report: `docs/40_reports/implemented/20260523_BCS_WARROOM_PRIORITY_DOCKET_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Letter Home):** Chief of Staff Letter Home now passes the active UI locale into the deterministic casualty-vignette generator, and all 25 shipped Letter Home templates carry BCS prose while preserving deterministic template/name/age selection. Shared date formatting and broader non-Army-HQ surfaces remain follow-up localization targets. Report: `docs/40_reports/implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md`. On top of:
