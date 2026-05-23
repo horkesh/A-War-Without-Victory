@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Chief of Staff alert-tone localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md) - Army HQ Chief of Staff precise/aggressive cohesion, operation, and thin-front alert prose now renders through the English/BCS substrate. |
 | **Latest BCS Chief of Staff alert localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_LOCALIZATION.md) - Army HQ Chief of Staff cautious-tone cohesion, operation, and thin-front alert prose now renders through the English/BCS substrate. |
 | **Latest BCS Chief of Staff exhaustion localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_EXHAUSTION_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_EXHAUSTION_LOCALIZATION.md) - Army HQ Chief of Staff war-exhaustion warning prose now renders through the English/BCS substrate for all briefing tones. |
 | **Latest BCS Chief of Staff combat/territory localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TERRITORY_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TERRITORY_LOCALIZATION.md) - Army HQ Chief of Staff cautious-tone battle and territory summary prose now renders through the English/BCS substrate while preserving existing summary derivation. |

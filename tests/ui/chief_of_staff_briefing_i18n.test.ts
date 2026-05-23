@@ -151,4 +151,58 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('awaits your authorization');
         expect(text).not.toContain('Our line at');
     });
+
+    it('localizes precise and aggressive alert prose in BCS mode', () => {
+        setLocale('bcs');
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 1,
+            latestTurnSummary: null,
+        } as LoadedGameState;
+        const items: CommandBriefingItemView[] = [
+            {
+                id: 'cohesion',
+                kind: 'military',
+                category: 'cohesion',
+                severity: 'critical',
+                title: '1st Corps cohesion critical',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_1',
+                target: { type: 'corps', corpsId: 'corps_1' },
+            },
+            {
+                id: 'operation',
+                kind: 'military',
+                category: 'operations',
+                severity: 'critical',
+                title: 'Op River Line awaits authorization',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_1',
+                target: { type: 'operation', operationKey: 'op_1' },
+            },
+            {
+                id: 'thin',
+                kind: 'military',
+                category: 'defense',
+                severity: 'warning',
+                title: 'Thin front: Tuzla corridor',
+                detail: 'Existing source detail.',
+                corpsId: 'corps_2',
+                target: { type: 'sector', sectorId: 'sector_1' },
+            },
+        ];
+
+        const preciseText = flatten(generateCoSBriefing(items, state, 'RS'));
+        const aggressiveText = flatten(generateCoSBriefing(items, state, 'HRHB'));
+
+        expect(preciseText).toContain('1st Corps prijavljuje kriticnu koheziju. Spremnost snaga je degradirana. Preporucujem reorganizaciju.');
+        expect(preciseText).toContain('Operacija River Line je zavrsila pripremu. Ceka odluku KRENI/STANI.');
+        expect(preciseText).toContain('Sektor Tuzla corridor ima premalo ljudstva u odnosu na sirinu fronta. Ranjivost: visoka.');
+        expect(aggressiveText).toContain('1st Corps je u nevolji. Moramo ih ojacati ili povuci.');
+        expect(aggressiveText).toContain('River Line je spremna za pokretanje. Sto duze cekamo, neprijatelj se vise priprema.');
+        expect(aggressiveText).toContain('Tuzla corridor je izlozen - jedan pritisak i linija puca. Trebaju nam brigade tamo odmah.');
+        expect(preciseText + aggressiveText).not.toContain('reports critical cohesion');
+        expect(preciseText + aggressiveText).not.toContain('Awaiting GO/NO-GO');
+        expect(preciseText + aggressiveText).not.toContain('is exposed');
+    });
 });

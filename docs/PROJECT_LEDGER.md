@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Chief of Staff precise/aggressive alert prose
+
+**Type:** Army HQ Chief of Staff generated-prose localization slice. No briefing item generation, alert severity, routing target, corps link, operation readiness, defense warning derivation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.alert.*.precise.*` and `chiefOfStaff.alert.*.aggressive.*` message keys. The precise/aggressive cohesion, operation readiness, and thin-front warning branches of `generateCoSBriefing(...)` now localize generated alert prose while preserving linked corps/operation/sector labels.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference remains UI state; briefing items, routing targets, command state, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still emitted English precise/aggressive alert prose. Green rerun passed 5/5. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_ALERT_TONE_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Chief of Staff cautious alert prose
 
 **Type:** Army HQ Chief of Staff generated-prose localization slice. No briefing item generation, alert severity, routing target, corps link, operation readiness, defense warning derivation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

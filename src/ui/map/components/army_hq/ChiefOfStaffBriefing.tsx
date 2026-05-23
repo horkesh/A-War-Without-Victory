@@ -208,10 +208,10 @@ export function generateCoSBriefing(
                 segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' reports critical cohesion. Force readiness degraded. Recommend reorganization. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
-                segments.push(text(' is in trouble. We need to reinforce them or pull them back. '));
+                segments.push(text(t('chiefOfStaff.alert.cohesion.aggressive.suffix')));
             }
             count++;
         }
@@ -225,12 +225,12 @@ export function generateCoSBriefing(
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
                 segments.push(text(t('chiefOfStaff.alert.operation.cautious.suffix')));
             } else if (tone === 'precise') {
-                segments.push(text('Operation '));
+                segments.push(text(t('chiefOfStaff.alert.operation.precise.prefix')));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' has completed preparation. Awaiting GO/NO-GO decision. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
-                segments.push(text(' is ready to launch. The longer we wait, the more the enemy prepares. '));
+                segments.push(text(t('chiefOfStaff.alert.operation.aggressive.suffix')));
             }
             count++;
         }
@@ -244,12 +244,12 @@ export function generateCoSBriefing(
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
                 segments.push(text(t('chiefOfStaff.alert.defense.cautious.suffix')));
             } else if (tone === 'precise') {
-                segments.push(text('Sector '));
+                segments.push(text(t('chiefOfStaff.alert.defense.precise.prefix')));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is undermanned relative to frontage. Vulnerability: high. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.precise.suffix')));
             } else {
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
-                segments.push(text(' is exposed — one push and the line breaks. We need brigades there now. '));
+                segments.push(text(t('chiefOfStaff.alert.defense.aggressive.suffix')));
             }
             count++;
         }
