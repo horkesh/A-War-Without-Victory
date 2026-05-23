@@ -1406,10 +1406,25 @@ export async function buildScenarioStartupState(
     // Harness-path player_faction fallback. The inner `createInitialGameState` call above
     // intentionally leaves player_faction undefined as the canonical faction-neutral state.
     // Scenario JSON may author a player_faction, but default historical scenario
-    // data remains faction-neutral. The legacy startup artifact still carries
-    // RBiH for the desktop default; tests that need event-rich coverage should
-    // use explicit RS state/harness fixtures rather than editing gameplay JSON.
-    state.meta.player_faction = state.meta.player_faction ?? scenario.player_faction ?? 'RBiH';
+    // data remains faction-neutral.
+    //
+    // Default to `null` (no player) for headless harness runs so the event evaluator
+    // takes the bot-auto-respond path for every faction — including the 15+ events
+    // authored with `requires_player_response: true`. The earlier 'RBiH' default
+    // caused those events to queue-pending-forever, never applying their downstream
+    // consequences (dimension shifts, additional sets_flags, mechanical effects from
+    // chosen response branches). n1999 verification surfaced 15 RBiH events stuck
+    // through the full 188-turn run.
+    //
+    // Scenario JSON can still author `player_faction` explicitly when an event-rich
+    // RBiH/RS/HRHB lens is wanted; this only changes the harness default.
+    const authoredPlayerFaction = state.meta.player_faction ?? scenario.player_faction;
+    if (authoredPlayerFaction !== undefined && authoredPlayerFaction !== null) {
+        state.meta.player_faction = authoredPlayerFaction;
+    }
+    // else: leave undefined — event evaluator's `playerFaction != null` gate then
+    // routes every event with `requires_player_response: true` through the bot
+    // auto-respond path, as a headless harness run requires.
     state.meta.headless_scenario_auto_control = true;
 
     // After state creation, political_controllers may have been promoted to OSID keys
