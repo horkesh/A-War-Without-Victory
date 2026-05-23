@@ -116,8 +116,9 @@ function bfsReachable(
     const visited = new Set<Osid>();
     const queue: Osid[] = [source];
     visited.add(source);
-    while (queue.length > 0) {
-        const curr = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const curr = queue[head++]!;
         const neighbors = adjacency.get(curr) ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
@@ -481,9 +482,10 @@ function analyzeFactionGraphOptimized(
             const bfsQueue: Osid[] = [enemyOsid];
             clusterSet.add(enemyOsid);
             let tooLarge = false;
+            let head = 0;
 
-            while (bfsQueue.length > 0) {
-                const curr = bfsQueue.shift()!;
+            while (head < bfsQueue.length) {
+                const curr = bfsQueue[head++]!;
                 cluster.push(curr);
                 if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
                 for (const n of (adjacency.get(curr) ?? [])) {
@@ -701,9 +703,10 @@ function analyzeFactionGraphLegacy(
             const bfsQueue: Osid[] = [enemyOsid];
             clusterSet.add(enemyOsid);
             let tooLarge = false;
+            let head = 0;
 
-            while (bfsQueue.length > 0) {
-                const curr = bfsQueue.shift()!;
+            while (head < bfsQueue.length) {
+                const curr = bfsQueue[head++]!;
                 cluster.push(curr);
                 if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
                 for (const n of (adjacency.get(curr) ?? [])) {

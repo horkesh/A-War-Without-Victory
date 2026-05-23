@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-05-23: Combat Graph BFS Queue Cursor
+
+**Change:** Six FIFO BFS helpers in combat graph and rear-pocket support now use head cursors instead of `Array.shift()`: `bfsReachable(...)`, optimized/legacy `analyzeFactionGraph(...)` pocket clustering, `isSettlementSetContiguous(...)`, `consolidateRearPockets(...)`, and `buildFriendlyComponentsLocal(...)`.
+
+**Determinism:** Queue insertion order and neighbor expansion are unchanged. Existing optimized-vs-legacy graph parity remains covered by 10,000-trial deterministic tests.
+
+**Report:** [implemented/20260523_COMBAT_GRAPH_BFS_QUEUE_CURSOR.md](implemented/20260523_COMBAT_GRAPH_BFS_QUEUE_CURSOR.md)
+
+---
+
 ## 2026-05-23: Combat Movement BFS Queue Cursor
 
 **Change:** Five FIFO BFS helpers in combat movement now use head cursors instead of `Array.shift()`: four bot brigade movement helpers in `src/sim/combat/bot_brigade_movement_ai.ts` and `shortestPathThroughFriendly(...)` in `src/sim/combat/brigade_movement.ts`.

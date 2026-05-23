@@ -381,8 +381,9 @@ export function buildFriendlyComponentsLocal(
         const comp = nextComponent++;
         const queue = [seed];
         componentOf.set(seed, comp);
-        while (queue.length > 0) {
-            const curr = queue.shift()!;
+        let head = 0;
+        while (head < queue.length) {
+            const curr = queue[head++]!;
             for (const n of (adjacency.get(curr as Osid) ?? [])) {
                 if (componentOf.has(n)) continue;
                 if (!friendlyOsids.has(n)) continue;
