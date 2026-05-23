@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest localized crash diagnostics** | [implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md](implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md) - React error boundaries now record opt-in local crash diagnostics with the boundary zone as the UI surface. |
 | **Latest Chronicle chapter prose summary** | [implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md](implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md) - Chronicle chapters now summarize source entries with deterministic prose from dominant thread, headline count, and month range. |
 | **Latest Turn Aftermath narrative line** | [implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md](implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md) - Turn Aftermath now adds one deterministic authored line per tone and renders it in the modal plus Army HQ Records. |
 | **Latest Settings Escape ownership** | [implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md](implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md) - Settings now closes on Escape without letting the global pause shortcut reopen Pause underneath. |

@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] telemetry(ui): record localized boundary crashes
+
+**Type:** UI observability enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or generated scenario output changed.
+
+**Why:** The existing crash diagnostics queue covered global browser/window crashes and Settings export/consent, but localized React error boundaries only wrote console errors. That meant the UI could survive a panel crash without leaving an opt-in player-exportable diagnostic record tied to the failed surface.
+
+**Change:** Added a shared `recordCrashDiagnostic(...)` helper in `src/ui/map/services/telemetry/crashCapture.ts`, reused it from the global installer, and called it from `RootErrorBoundary.componentDidCatch(...)` with the boundary `zone` as `uiSurface`. The map entrypoint now uses the shared crash-diagnostics app-version constant.
+
+**Determinism / output impact:** UI/localStorage diagnostics only and default-off behind the existing consent key. No scenario artifacts, saves, or baseline outputs changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\error_boundary_isolation.test.ts --reporter=dot` failed on an empty queue before implementation; focused pack `npx.cmd vitest run tests\ui\error_boundary_isolation.test.ts tests\telemetry_queue.test.ts tests\ui_settings_telemetry_controls.test.ts --reporter=dot` PASS 9/9 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md`.
+
+**Roadmap delta:** Rating #39 moves from C+ to B-. Crash reporting is no longer absent, but post-launch observability still needs opt-in upload/aggregation and anonymized playtest telemetry.
+
+---
+
 ## [2026-05-23] ui(chronicle): write prose chapter summaries
 
 **Type:** UI read-model/presentation enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.

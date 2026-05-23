@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest localized crash diagnostics:** [implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md](implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md) - React error boundaries now record opt-in local crash diagnostics with the boundary zone as the UI surface, closing the console-only localized failure gap.
+
 **Latest sector enemy-personnel index:** [implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md](implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md) - sector brigade assignment now builds one deterministic enemy-personnel-by-OSID index per invocation instead of rescanning all formations per sector for territory assignment and threat recomputation.
 
 **Latest brigade movement order helper:** [implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md](implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md) - column-march movement producers now use a shared typed helper instead of repeated local `destination_sids` shape casts, while preserving optional `stance` semantics.

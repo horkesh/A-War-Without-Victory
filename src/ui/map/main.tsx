@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
-import { installCrashDiagnosticsCapture } from './services/telemetry/crashCapture';
+import { CRASH_DIAGNOSTICS_APP_VERSION, installCrashDiagnosticsCapture } from './services/telemetry/crashCapture';
 
 installCrashDiagnosticsCapture({
-    appVersion: '0.9.6-alpha.1',
+    appVersion: CRASH_DIAGNOSTICS_APP_VERSION,
     uiSurface: 'tactical_map',
 });
 
@@ -12,4 +12,3 @@ installCrashDiagnosticsCapture({
 // (addProtocol, map.on('load'), canvas management) is incompatible with
 // React 18 StrictMode's mount-cleanup-remount cycle in development.
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
-
