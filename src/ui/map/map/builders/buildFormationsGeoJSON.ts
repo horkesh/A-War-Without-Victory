@@ -6,7 +6,7 @@ import { formationIconId } from './formationIconId';
 import { getSectorIdForFormation } from '../../utils/sectorUtils';
 import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
 import type { Locale } from '../../i18n';
-import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 export { formationIconId };
 
@@ -52,6 +52,13 @@ export const getBrigadeType = (name: string): string => {
   if (lower.includes('motorized') || lower.includes('mechanized')) return 'motorized';
   if (lower.includes('artillery')) return 'artillery';
   return 'brigade'; // default
+}
+
+function getFormationMarkerType(formation: { id: string; kind?: string | null; name: string }): string {
+  const unitType = getFormationUnitType(formation);
+  if (unitType === 'mountain') return 'mountain';
+  if (unitType === 'motorized' || unitType === 'mechanized' || unitType === 'armored') return 'motorized';
+  return 'brigade';
 }
 
 function deriveSupplyState(formation: { status: string; fatigue: number; cohesion: number }): 'supplied' | 'strained' | 'cutoff' {
@@ -118,7 +125,7 @@ export function buildFormationsGeoJSON(
       point[1] -= stackIndex * STACK_OFFSET_LAT;
     }
 
-    const type = getBrigadeType(formation.name);
+    const type = getFormationMarkerType(formation);
     const displayName = getLocalizedFormationName(formation, locale);
     const postureSuffix = formation.posture ? `__${formation.posture}` : '';
 

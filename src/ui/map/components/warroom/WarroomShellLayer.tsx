@@ -497,9 +497,9 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
 // ── Region data by faction ─────────────────────────────────────────────────
 
 const FALLBACK_REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
-  RBiH: (fallbackRbihRegions as { regions: WarroomRegion[] }).regions,
-  RS: (fallbackRsRegions as { regions: WarroomRegion[] }).regions,
-  HRHB: (fallbackHrhbRegions as { regions: WarroomRegion[] }).regions,
+  RBiH: (fallbackRbihRegions as unknown as { regions: WarroomRegion[] }).regions,
+  RS: (fallbackRsRegions as unknown as { regions: WarroomRegion[] }).regions,
+  HRHB: (fallbackHrhbRegions as unknown as { regions: WarroomRegion[] }).regions,
 };
 
 const CANONICAL_REGION_URLS_BY_FACTION: Record<string, string> = {

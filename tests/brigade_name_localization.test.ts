@@ -2,7 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, test } from 'vitest';
 import {
+  BRIGADE_DESIGNATION_CATALOG,
   getLocalizedFormationName,
+  getFormationDesignation,
+  getFormationUnitType,
 } from '../src/ui/map/data/formationNameLocalizations';
 
 interface OobBrigadeRow {
@@ -42,6 +45,21 @@ const forbiddenBosnianLeaks = [
 ];
 
 describe('BCS brigade name localizations', () => {
+  test('provide one structured designation row per source OOB brigade id', () => {
+    const ids = new Set(oobRows.map((row) => row.id));
+    const catalogIds = new Set(BRIGADE_DESIGNATION_CATALOG.map((row) => row.id));
+    const missing = [...ids].filter((id) => !catalogIds.has(id));
+    const extras = [...catalogIds].filter((id) => !ids.has(id));
+    const codes = BRIGADE_DESIGNATION_CATALOG.map((row) => row.designation_code);
+    const duplicateCodes = codes.filter((code, index) => codes.indexOf(code) !== index);
+
+    expect(missing).toEqual([]);
+    expect(extras).toEqual([]);
+    expect(duplicateCodes).toEqual([]);
+    expect(BRIGADE_DESIGNATION_CATALOG.every((row) => row.echelon === 'brigade' || row.echelon === 'battalion' || row.echelon === 'regiment' || row.echelon === 'unit_group')).toBe(true);
+    expect(BRIGADE_DESIGNATION_CATALOG.every((row) => row.english_gloss.length > 0 && row.official_bcs.length > 0)).toBe(true);
+  });
+
   test('cover every source OOB brigade id', () => {
     const missing = oobRows
       .filter((row) => getLocalizedFormationName({
@@ -91,5 +109,15 @@ describe('BCS brigade name localizations', () => {
       kind: 'brigade',
       name: 'Unknown Brigade',
     }, 'en')).toBe('Unknown Brigade');
+  });
+
+  test('exposes canonical designation codes and unit types for UI logic', () => {
+    expect(getFormationDesignation('arbih_503rd_slavna_mountain')?.designation_code).toBe('AWWV-BDE-ARBIH-503RD-SLAVNA-MOUNTAIN');
+    expect(getFormationDesignation('rs_skelani_battalion')?.echelon).toBe('battalion');
+    expect(getFormationUnitType({
+      id: 'rs_1st_sarajevo_mechanized',
+      kind: 'brigade',
+      name: '1st Sarajevo Mechanized',
+    })).toBe('mechanized');
   });
 });

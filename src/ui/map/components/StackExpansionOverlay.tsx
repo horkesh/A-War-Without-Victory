@@ -5,7 +5,7 @@ import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcon
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
 import { t, useLocale } from '../i18n';
-import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { getFormationUnitType, getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -27,7 +27,9 @@ const FormationIconCanvas: React.FC<{ formation: FormationView; className?: stri
         if (!ctx) return;
 
         const iconId = formationIconId(
-            formation.kind === 'corps' || formation.kind === 'army_hq' || formation.kind === 'corps_asset' ? formation.kind : (formation.name.toLowerCase().includes('mountain') ? 'mountain' : 'brigade'),
+            formation.kind === 'corps' || formation.kind === 'army_hq' || formation.kind === 'corps_asset'
+                ? formation.kind
+                : getFormationUnitType(formation) === 'mountain' ? 'mountain' : 'brigade',
             formation.faction,
             formation.posture
         );

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] refactor(i18n+oob): add structured brigade designation catalog
+
+**Type:** UI/localization data-boundary refactor only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, OOB canonical names, or ordering semantics changed.
+
+**Why:** Brigade display localization needed a durable canonical designation layer instead of treating localized names as ad hoc string substitutions. The same layer also lets UI surfaces classify unit type/echelon without parsing English formation names.
+
+**Change:** Added `data/source/oob_brigade_designations.json` with one row per `data/source/oob_brigades.json` brigade id, including a stable `designation_code`, Bosnian display label, English gloss, `unit_type`, and `echelon`. Extended `src/ui/map/data/formationNameLocalizations.ts` with `getFormationDesignation(...)` and `getFormationUnitType(...)`, and made BCS label resolution prefer the catalog. Map marker classification, stack expansion formation icons, and ops-planning unit-type labels now use structured unit type. Enabled TypeScript JSON imports via `resolveJsonModule`; Warroom fallback JSON casts were made explicit after the compiler began typing imported JSON.
+
+**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 5/5. `npm.cmd run typecheck` passed.
+
+---
+
 ## [2026-05-23] fix(ui): keep settings tabs clickable and expose startup language
 
 **Type:** UI shell/i18n preference fix only. No simulation behavior, scenario data, save schema, event routing, Codex unlock logic, diagnostics, OOB, or tuning changed.

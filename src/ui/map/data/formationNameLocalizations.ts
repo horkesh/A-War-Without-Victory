@@ -1,9 +1,47 @@
 import type { Locale } from '../i18n';
+import brigadeDesignationCatalog from '../../../../data/source/oob_brigade_designations.json';
 
 interface FormationNameInput {
   id: string;
   kind?: string | null;
   name: string;
+}
+
+export type FormationUnitType =
+  | 'armored'
+  | 'battalion'
+  | 'brigade'
+  | 'guards'
+  | 'infantry'
+  | 'liberation'
+  | 'light'
+  | 'light_infantry'
+  | 'mechanized'
+  | 'motorized'
+  | 'mountain'
+  | 'regiment'
+  | 'unit_group';
+
+export interface BrigadeDesignationCatalogRow {
+  id: string;
+  faction: 'RBiH' | 'RS' | 'HRHB';
+  designation_code: string;
+  english_gloss: string;
+  official_bcs: string;
+  unit_type: FormationUnitType;
+  echelon: 'brigade' | 'battalion' | 'regiment' | 'unit_group';
+  source_basis: string;
+}
+
+export const BRIGADE_DESIGNATION_CATALOG =
+  brigadeDesignationCatalog.rows as BrigadeDesignationCatalogRow[];
+
+const DESIGNATION_BY_ID = new Map(
+  BRIGADE_DESIGNATION_CATALOG.map((designation) => [designation.id, designation]),
+);
+
+export function getFormationDesignation(id: string): BrigadeDesignationCatalogRow | undefined {
+  return DESIGNATION_BY_ID.get(id);
 }
 
 const EXACT_BCS_NAMES: Record<string, string> = {
@@ -203,5 +241,23 @@ export function getLocalizedFormationName(
 ): string {
   if (locale !== 'bcs') return formation.name;
   if (formation.kind && !['brigade', 'operational_group'].includes(formation.kind)) return formation.name;
-  return EXACT_BCS_NAMES[formation.id] ?? localizeGenericBrigadeName(formation.name);
+  return DESIGNATION_BY_ID.get(formation.id)?.official_bcs
+    ?? EXACT_BCS_NAMES[formation.id]
+    ?? localizeGenericBrigadeName(formation.name);
+}
+
+export function getFormationUnitType(formation: FormationNameInput): FormationUnitType {
+  const catalogType = DESIGNATION_BY_ID.get(formation.id)?.unit_type;
+  if (catalogType) return catalogType;
+  const lower = formation.name.toLowerCase();
+  if (lower.includes('mechanized')) return 'mechanized';
+  if (lower.includes('motorized')) return 'motorized';
+  if (lower.includes('armored')) return 'armored';
+  if (lower.includes('mountain')) return 'mountain';
+  if (lower.includes('light infantry')) return 'light_infantry';
+  if (lower.includes('infantry')) return 'infantry';
+  if (lower.includes('light')) return 'light';
+  if (lower.includes('guard')) return 'guards';
+  if (lower.includes('liberation')) return 'liberation';
+  return 'brigade';
 }

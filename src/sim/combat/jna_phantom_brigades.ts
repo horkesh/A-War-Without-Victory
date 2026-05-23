@@ -580,9 +580,15 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
 
         // HV phantoms withdraw dynamically when Graz east Herzegovina truce activates
         // (Op Jackal complete → HV returns to Croatia), or at withdrawal_turn fallback.
+        // SCOPE: this dynamic trigger applies ONLY to the 1992 Op-Jackal HV phantoms
+        // (created at scenario init, turn 0). 1995 HV expeditionary phantoms have
+        // `created_turn >= 150` (post-Split Agreement) and must NOT be evicted by the
+        // long-past Graz Accords (May 1992). n2005 verified the prior shared-trigger
+        // semantics caused the 1995 brigades to spawn-and-withdraw in the same turn.
         const isHvPhantom = phantom.kind === 'hv_phantom';
+        const isHv1992OpJackal = isHvPhantom && (phantom.created_turn ?? 0) < 100;
         const grazEastActive = state.political.graz_east_herzegovina_active_turn != null;
-        const hvShouldWithdraw = isHvPhantom && grazEastActive;
+        const hvShouldWithdraw = isHv1992OpJackal && grazEastActive;
 
         if (!hvShouldWithdraw && (phantom.withdrawal_turn == null || turn < phantom.withdrawal_turn)) continue;
 

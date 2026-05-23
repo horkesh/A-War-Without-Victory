@@ -5,7 +5,7 @@
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
 import { t, useLocale } from '../../i18n';
-import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface BrigadeCardProps {
     brigade: FormationView;
@@ -37,20 +37,16 @@ function getFatigueLabel(fat: number): { text: string; color: string } {
     return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
 }
 
-// WP2e: Parse unit type from brigade name
-function parseUnitType(name: string): string | null {
-    const lower = name.toLowerCase();
-    if (lower.includes('motorized') || lower.includes('motorizov')) return 'MOTORIZED';
-    if (lower.includes('mechanized') || lower.includes('mehanizirane')) return 'MECHANIZED';
-    if (lower.includes('mountain') || lower.includes('brdsk') || lower.includes('planin')) return 'MOUNTAIN';
-    if (lower.includes('light infantry') || lower.includes('lahk')) return 'LIGHT INFANTRY';
-    if (lower.includes('guards') || lower.includes('gardijsk')) return 'GUARDS';
-    if (lower.includes('artillery') || lower.includes('artiljerij')) return 'ARTILLERY';
-    if (lower.includes('special') || lower.includes('posebn')) return 'SPECIAL';
-    if (lower.includes('infantry') || lower.includes('p\u0159\u0161')) return 'INFANTRY';
-    // DECISION NEEDED: No unit_type field on FormationView — parsing from name as fallback per spec 2e
-    return null;
-}
+const UNIT_TYPE_LABEL: Record<string, string> = {
+    armored: 'ARMORED',
+    guards: 'GUARDS',
+    infantry: 'INFANTRY',
+    light: 'LIGHT',
+    light_infantry: 'LIGHT INFANTRY',
+    mechanized: 'MECHANIZED',
+    motorized: 'MOTORIZED',
+    mountain: 'MOUNTAIN',
+};
 
 export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
     const [locale] = useLocale();
@@ -65,7 +61,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
     const fatigue = brigade.fatigue ?? 0;
     const cohLabel = getCohesionLabel(cohesion);
     const fatLabel = getFatigueLabel(fatigue);
-    const unitType = parseUnitType(brigade.name);
+    const unitType = UNIT_TYPE_LABEL[getFormationUnitType(brigade)] ?? null;
 
     return (
         <button
