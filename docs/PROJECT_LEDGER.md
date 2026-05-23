@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify Tier1 eligibility optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, collapse thresholds, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `Tier1EntityEligibilityState` contributes five counted optionals, but inspection shows the persisted collapse eligibility contract already has required `domains`, `persistence`, `suppressed`, and `immune` fields. The counted fields are nested diagnostic-detail fields under `debug` / `debug.gates`.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies `debug`, `gates`, `authority`, `cohesion`, and `spatial` as optional diagnostic gate detail rather than missing required Phase 3C/3D state.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `Tier1EntityEligibilityState` optional-field group by classification. Future promotion requires a Tier-1 diagnostic-output/schema lane, not generic strict-null cleanup.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify municipality optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest strict-null Tier1 eligibility optional classification** | [audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md) - `Tier1EntityEligibilityState` optionals are classified as diagnostic gate detail, not missing required collapse eligibility state. |
 | **Latest strict-null municipality optional classification** | [audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md) - `MunicipalityState` and `OrganizationalPenetration` optionals are classified as sparse multi-phase state fields pending a migration/defaulting lane. |
 | **Latest strict-null PendingProposalReview optional classification** | [audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md) - the nine proposal-review optionals are classified as pending/resolved state-machine fields or proposal-family-specific payloads, not safe generic promotion targets. |
 | **Latest strict-null CapabilityProfile optional classification** | [audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md) - the four `CapabilityProfile` optionals are classified as sparse faction-specific profile fields or backward-compatible neutral defaults, not safe generic promotion targets. |

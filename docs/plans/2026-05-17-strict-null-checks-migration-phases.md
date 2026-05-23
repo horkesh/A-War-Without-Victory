@@ -85,6 +85,8 @@ Next strict-null source work must classify small owned optional-field groups by 
 
 2026-05-23 classification update: `MunicipalityState` and `OrganizationalPenetration` have 15 combined optional fields and are classified in `docs/40_reports/audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md`. The fields are sparse multi-phase municipality state, seeded organizational factors, placeholder authority/legitimacy fields, and additive `jna_presence` support. Do not promote them in the generic strict-null cleanup lane; a future reduction requires a municipality-state migration/defaulting lane plus baseline/roundtrip proof.
 
+2026-05-23 classification update: `Tier1EntityEligibilityState` has five optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md`. The fields are diagnostic gate detail under `debug` / `debug.gates`; required Tier-1 collapse eligibility state is already represented by `domains`, `persistence`, `suppressed`, and `immune`. Do not promote these fields in the generic strict-null cleanup lane; richer Tier-1 explainability belongs in a diagnostic-output/schema lane.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
