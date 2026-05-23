@@ -10,6 +10,7 @@ import { BrigadeTray } from './BrigadeTray';
 import { autoProposeBrigades, estimateMarchTurns } from './autoPropose';
 import type { ProposedBrigade } from './autoPropose';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { t } from '../../i18n';
 
 interface PlanPhaseProps {
     plan: OpsPlanState;
@@ -100,7 +101,7 @@ export function PlanPhase({
     const allObjectives = plan.axes.flatMap((a) => a.objectives);
     const selectedAxis = activeAxis;
     const selectedStaging = selectedAxis?.stagingOsid ?? plan.defaultStagingOsid;
-    const selectedAxisName = selectedAxis?.name ?? 'Main Axis';
+    const selectedAxisName = selectedAxis?.name ?? t('opsPlanning.phase.mainAxis');
     const selectedAxisObjectives = selectedAxis?.objectives.length ?? 0;
     const selectedAxisBrigades = selectedAxis?.brigadeIds.length ?? 0;
     const [suggestionMessage, setSuggestionMessage] = useState<string | null>(null);
@@ -109,7 +110,7 @@ export function PlanPhase({
         if (!selectedAxis) return;
         const objective = [...availableObjectiveOsids, ...selectedAxis.objectives].sort()[0];
         if (!objective) {
-            setSuggestionMessage('No viable objective in range from this staging area.');
+            setSuggestionMessage(t('opsPlanning.phase.noViableObjective'));
             return;
         }
         const objectiveNames = selectedAxis.objectives.includes(objective)
@@ -123,7 +124,7 @@ export function PlanPhase({
             selectedStaging,
         );
         if (proposed.length === 0) {
-            setSuggestionMessage('No viable brigades are ready for this plan.');
+            setSuggestionMessage(t('opsPlanning.phase.noViableBrigades'));
             return;
         }
 
@@ -141,7 +142,10 @@ export function PlanPhase({
         });
         setAutoProposed(proposed);
         const label = getOsidDisplayName(objective, osidDisplayNames);
-        setSuggestionMessage(`Suggested ${label} with ${proposed.length} brigade${proposed.length === 1 ? '' : 's'}.`);
+        setSuggestionMessage(t(
+            proposed.length === 1 ? 'opsPlanning.phase.suggested.one' : 'opsPlanning.phase.suggested.many',
+            { label, count: proposed.length },
+        ));
     }, [
         availableObjectiveOsids,
         centroidLookup,
@@ -161,7 +165,7 @@ export function PlanPhase({
                 <div className="rounded-lg border border-[rgba(180,160,130,0.16)] bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
                     <div className="flex items-center justify-between mb-2">
                         <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
-                            Plan Status
+                            {t('opsPlanning.phase.planStatus')}
                         </div>
                         <button
                             type="button"
@@ -172,9 +176,9 @@ export function PlanPhase({
                                        transition-colors hover:bg-accent-gold/22 disabled:cursor-not-allowed
                                        disabled:border-[rgba(180,160,130,0.14)] disabled:bg-[rgba(180,160,130,0.05)]
                                        disabled:text-text-secondary/35"
-                            title={canSuggestPlan ? 'Suggest a deterministic first axis' : 'Select a commander first'}
+                            title={canSuggestPlan ? t('opsPlanning.phase.suggestTitle') : t('opsPlanning.phase.suggestNeedsCommander')}
                         >
-                            Suggest Plan
+                            {t('opsPlanning.phase.suggestPlan')}
                         </button>
                     </div>
                     {suggestionMessage && (
@@ -184,21 +188,21 @@ export function PlanPhase({
                     )}
                     <div className="grid grid-cols-2 gap-2">
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Axis</div>
+                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
                             <div className="text-[10px] font-bold text-white truncate">{selectedAxisName}</div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Staging</div>
+                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.staging')}</div>
                             <div className="text-[10px] font-bold text-white truncate">
-                                {selectedStaging ? selectedStaging : 'Select on map'}
+                                {selectedStaging ? selectedStaging : t('opsPlanning.phase.selectOnMap')}
                             </div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Objectives</div>
+                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
                             <div className="text-[10px] font-bold text-white">{selectedAxisObjectives}</div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">Brigades</div>
+                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
                             <div className="text-[10px] font-bold text-white">{selectedAxisBrigades}</div>
                         </div>
                     </div>
@@ -236,7 +240,7 @@ export function PlanPhase({
                                hover:bg-accent-gold/25 hover:shadow-[0_0_20px_rgba(196,163,90,0.2)]
                                shadow-lg backdrop-blur-sm"
                 >
-                    G2 Assessment →
+                    {t('opsPlanning.phase.g2Assessment')}
                 </button>
             </div>
         </div>

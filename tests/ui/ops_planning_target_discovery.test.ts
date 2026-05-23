@@ -7,8 +7,13 @@ import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { OpsPlanState } from '../../src/ui/map/components/ops_modal/types.js';
 import { PlanPhase } from '../../src/ui/map/components/ops_modal/PlanPhase.js';
 import { ObjectiveList } from '../../src/ui/map/components/ops_modal/ObjectiveList.js';
+import { PlanParameters } from '../../src/ui/map/components/ops_modal/PlanParameters.js';
+import { G2Phase } from '../../src/ui/map/components/ops_modal/G2Phase.js';
+import { AuthorizePhase } from '../../src/ui/map/components/ops_modal/AuthorizePhase.js';
+import type { PredictionResult } from '../../src/ui/map/components/ops_modal/usePrediction.js';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage } from '../../src/ui/map/components/ops_modal/phaseGate.js';
 import { chooseOpsPlanningSector } from '../../src/ui/map/components/ops_modal/stagingChoice.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -72,9 +77,24 @@ function makeState(): LoadedGameState {
     } as unknown as LoadedGameState;
 }
 
+function makePrediction(overrides: Partial<PredictionResult['overall']> = {}): PredictionResult {
+    return {
+        overall: {
+            intelConfidence: 0.8,
+            forceRatio: 1.4,
+            estimatedCasualties: 120,
+            predictedOutcome: 'victory',
+            recommendedAction: 'launch',
+            ...overrides,
+        },
+        perAxis: [],
+    };
+}
+
 describe('ops planning target discovery', () => {
     afterEach(() => {
         cleanup();
+        setLocale('en');
         useGameStore.setState(useGameStore.getInitialState());
     });
 
@@ -181,6 +201,106 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('3')).toBeTruthy();
     });
 
+    it('localizes PlanPhase status chrome in BCS mode', () => {
+        setLocale('bcs');
+        useGameStore.setState({ loadedGameState: makeState(), osidDisplayNames: null });
+
+        render(createElement(PlanPhase, {
+            plan: makePlan(),
+            onUpdate: vi.fn(),
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+            centroidLookup: new Map(),
+            availableObjectiveOsids: [],
+            canSuggestPlan: false,
+            canAdvanceToG2: false,
+        }));
+
+        expect(screen.getByText('Status plana')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /predlozi plan/i })).toBeTruthy();
+        expect(screen.getAllByText('Osa').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Polaziste').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Ciljevi').length).toBeGreaterThan(0);
+        expect(screen.getAllByText('Brigade').length).toBeGreaterThan(0);
+        expect(screen.getByRole('button', { name: /procjena G-2/i })).toBeTruthy();
+        expect(screen.queryByText('Plan Status')).toBeNull();
+    });
+
+    it('localizes ObjectiveList empty-state chrome in BCS mode', () => {
+        setLocale('bcs');
+
+        render(createElement(ObjectiveList, {
+            plan: makePlan(),
+            onUpdate: vi.fn(),
+            osidDisplayNames: null,
+            onAdvance: vi.fn(),
+            availableObjectiveCount: 3,
+        }));
+
+        expect(screen.getByText('Planiranje')).toBeTruthy();
+        expect(screen.getByText('Dostupno')).toBeTruthy();
+        expect(screen.getByText('Kliknite neprijateljsku teritoriju na karti za dodavanje ciljeva')).toBeTruthy();
+        expect(screen.getByText('Polaziste')).toBeTruthy();
+        expect(screen.queryByText('Available')).toBeNull();
+    });
+
+    it('localizes G2Phase clipboard chrome in BCS mode', () => {
+        setLocale('bcs');
+        useGameStore.setState({ loadedGameState: makeState() });
+
+        render(createElement(G2Phase, {
+            plan: makePlan(),
+            prediction: null,
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        expect(screen.getByText('Snimak G-2')).toBeTruthy();
+        expect(screen.getByText('Prije odobrenja')).toBeTruthy();
+        expect(screen.getByText('Korpus')).toBeTruthy();
+        expect(screen.getByText('Datum')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /procjena/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /legenda karte/i })).toBeTruthy();
+        expect(screen.getByText('Dovrsite plan za izradu procjene')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /nastavi na odobrenje/i })).toBeTruthy();
+        expect(screen.queryByText('G2 Snapshot')).toBeNull();
+    });
+
+    it('localizes AuthorizePhase action chrome in BCS mode', () => {
+        setLocale('bcs');
+        useGameStore.setState({ loadedGameState: makeState(), osidDisplayNames: null });
+
+        const lowIntelPlan = makePlan({
+            axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+        });
+        const { unmount } = render(createElement(AuthorizePhase, {
+            plan: lowIntelPlan,
+            prediction: makePrediction({ intelConfidence: 0.2 }),
+            corpsId: 'rs_1st_krajina',
+            officerId: null,
+            originSectorId: 'sector_1',
+        }));
+
+        expect(screen.getByRole('button', { name: /narediti izvidjanje/i })).toBeTruthy();
+        expect(screen.getByText('Naredi izvidjanje')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /odobri svejedno/i })).toBeTruthy();
+        unmount();
+
+        render(createElement(AuthorizePhase, {
+            plan: lowIntelPlan,
+            prediction: makePrediction({ intelConfidence: 0.8 }),
+            corpsId: 'rs_1st_krajina',
+            officerId: null,
+            originSectorId: 'sector_1',
+        }));
+
+        expect(screen.getByRole('button', { name: /odobriti operaciju/i })).toBeTruthy();
+        expect(screen.getByText('Odobri operaciju')).toBeTruthy();
+        expect(screen.queryByText('Authorize Operation')).toBeNull();
+    });
+
     it('phase gate messages name the missing prerequisite instead of silently rejecting the tab', () => {
         expect(getOpsPhaseGateMessage('plan', false, makePlan(), false)).toBe('Select a commander first.');
         expect(getOpsPhaseGateMessage('g2_assessment', true, makePlan(), false))
@@ -194,6 +314,37 @@ describe('ops planning target discovery', () => {
         expect(getOpsPhaseAdvanceMessage('plan', true, makePlan({
             axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: [], objectives: ['enemy_front'] }],
         }), false)).toBe('Add at least 1 objective and 1 brigade to your axis.');
+    });
+
+    it('localizes phase gate messages in BCS mode', () => {
+        setLocale('bcs');
+        expect(getOpsPhaseGateMessage('plan', false, makePlan(), false)).toBe('Prvo izaberite komandanta.');
+        expect(getOpsPhaseGateMessage('g2_assessment', true, makePlan(), false))
+            .toBe('Dodajte najmanje 1 cilj i 1 brigadu na svoju osu.');
+        expect(getOpsPhaseGateMessage('authorize', true, makePlan({
+            axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+        }), false)).toBe('Prvo pregledajte procjenu G-2.');
+    });
+
+    it('localizes PlanParameters chrome in BCS mode', () => {
+        setLocale('bcs');
+        render(createElement(PlanParameters, {
+            plan: makePlan(),
+            onUpdate: vi.fn(),
+        }));
+
+        expect(screen.getByText('Naziv')).toBeTruthy();
+        expect(screen.getByText('Tip')).toBeTruthy();
+        expect(screen.getByText('Kakva vrsta operacije?')).toBeTruthy();
+        expect(screen.getByText('Tempo')).toBeTruthy();
+        expect(screen.getByText('Brzina naspram gubitaka')).toBeTruthy();
+        expect(screen.getByText('Tolerancija')).toBeTruthy();
+        expect(screen.getByText('Kada brigade prestaju napadati?')).toBeTruthy();
+        expect(screen.getByText('Podrska')).toBeTruthy();
+        expect(screen.getByText('Prednapadna vatrena podrska')).toBeTruthy();
+        expect(screen.getByText('Sektorski napad')).toBeTruthy();
+        expect(screen.getByText('Uravnotezen pristup')).toBeTruthy();
+        expect(screen.queryByText('What kind of operation?')).toBeNull();
     });
 
     it('CorpsDetail defaults ops planning to a forward sector before falling back to index zero', () => {

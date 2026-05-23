@@ -1,4 +1,17 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] ui(i18n): localize operations-planning phase chrome
+
+**Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, operation payload contract, diagnostics, OOB, or tuning changed.
+
+**Why:** The BCS localization plan had only the Settings first pass on this branch, while Operations Planning remained English-only across phase status, objective planning, parameter controls, G-2 clipboard labels, phase-gate feedback, and authorization buttons.
+
+**Change:** Added English/BCS dictionary keys for Operations Planning phase chrome, gate messages, PlanParameters controls, G-2 labels, and authorization action text. Routed PlanPhase, ObjectiveList, PlanParameters, G2Phase, AuthorizePhase, and phaseGate through the existing `t(...)` helper with English fallback. Added focused BCS render/function coverage to `tests/ui/ops_planning_target_discovery.test.ts`.
+
+**Verification:** Red/green focused suite `npx.cmd vitest run tests/ui/ops_planning_target_discovery.test.ts --reporter=dot` passed 14/14 after implementation. Broader verification is recorded on the implementation report for this slice.
+
+**Report:** `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_LOCALIZATION.md`.
+
+---
 <!-- Older entries archived to:
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
