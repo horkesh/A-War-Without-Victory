@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] fix(briefing): read canonical command signals
+
+**Type:** Sim-side command briefing truth fix. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, UI ownership, or save schema changed.
+
+**Why:** Strict-null Batch C deliberately preserved three broken-tolerant command briefing reads for byte identity: active operations looked for a non-existent `CorpsCommandState.faction`, disrupted brigade warnings looked under `FormationOpsState`, and enclave alerts looked under `state.military.enclave_resilience`. Those paths hid canonical player-facing staff signals from `state.military.last_briefing`.
+
+**Change:** `assembleCommandBriefing(...)` now counts active operations by joining each `corps_command` row to the owning corps/army-HQ formation faction, reads disrupted brigade warnings from `FormationState.disrupted_turns`, and reads prolonged enclave isolation from `state.political.enclave_resilience`. Added regression coverage for all three canonical paths.
+
+**Determinism / output impact:** Deterministic read-model/output change only. `apr1992_52w` baseline drift is intentionally limited to `final_save.json` and `run_summary.json` because serialized `last_briefing` now contains enclave warnings; activity/control/end-report/formation/watched-operation/weekly-report hashes remain unchanged.
+
+**Verification:** Red/green `npx.cmd vitest run tests\command_briefing.test.ts --reporter=dot`; `npx.cmd vitest run tests\command_briefing.test.ts tests\sim\command\phase4_ui_data_layer.test.ts tests\ui_map_game_state_adapter.test.ts tests\warroom_player_visibility.test.ts --reporter=dot` PASS 60/60; `npm.cmd run typecheck` PASS; `npm.cmd run test:baselines` PASS after surgical manifest refresh for the two intentional 52-week briefing hashes.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMMAND_BRIEFING_CANONICAL_PATHS.md`.
+
+**Roadmap delta:** Closes the three `collect_briefing.ts` latent path bugs documented during strict-null Batch C.
+
+---
+
 ## [2026-05-23] ui(diplomacy): add timeline and needle signals
 
 **Type:** UI read-model/presentation enhancement. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.
