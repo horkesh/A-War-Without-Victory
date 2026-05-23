@@ -21,7 +21,8 @@ import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
-import { t, type MessageKey } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -54,6 +55,7 @@ interface ArmyReservePanelProps {
 }
 
 export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
+    const [locale] = useLocale();
     const ipc = useIPC();
     const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
     const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -88,7 +90,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     const activeLoans = elites.filter((brigade) => brigade.eliteLoanState?.on_loan);
     const corpsNameById = loadedGameState.formations
         .filter((formation) => formation.kind === 'corps' || formation.kind === 'corps_asset')
-        .map((formation) => ({ id: formation.id, name: formation.name }));
+        .map((formation) => ({ id: formation.id, name: getLocalizedFormationName(formation, locale) }));
 
     function getCorpsName(corpsId: string): string {
         return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
@@ -169,7 +171,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     >
                                         <div className="flex items-center justify-between">
                                             <span className="text-text-primary font-semibold truncate">
-                                                {brigade.name}
+                                                {getLocalizedFormationName(brigade, locale)}
                                             </span>
                                             {ls.permanently_degraded ? (
                                                 <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
@@ -243,7 +245,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         className="bg-black/15 border border-panel-border/30 rounded px-2 py-1.5"
                                     >
                                         <div className="flex items-center justify-between gap-2">
-                                            <span className="text-text-primary truncate">{brigade.name}</span>
+                                            <span className="text-text-primary truncate">{getLocalizedFormationName(brigade, locale)}</span>
                                             <span className="text-[10px] text-text-secondary shrink-0">
                                                 {ls.turns_deployed}w
                                             </span>
@@ -423,7 +425,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     const brigadeTracker = tracker[brigade.id]!;
                                     return (
                                         <div key={brigade.id} className="bg-black/10 border border-panel-border/30 rounded p-2 space-y-1.5">
-                                            <div className="text-text-primary font-semibold">{brigade.name}</div>
+                                            <div className="text-text-primary font-semibold">{getLocalizedFormationName(brigade, locale)}</div>
                                             <div className="grid grid-cols-3 gap-1 text-[10px]">
                                                 <div className="text-center">
                                                     <div className="text-text-secondary">{t('armyReserve.loans')}</div>

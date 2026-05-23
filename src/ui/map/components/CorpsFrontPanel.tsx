@@ -11,7 +11,8 @@ import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playe
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
-import { t, type MessageKey } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -140,6 +141,7 @@ interface CorpsFrontPanelProps {
 
 export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const ipc = useIPC();
+  const [locale] = useLocale();
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
@@ -576,7 +578,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={t('corpsFront.assignedBrigadeAria', { name: f.name, personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -594,7 +596,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             setHoveredSectorId(selectedSectorId);
                           }}
                         >
-                          <span className="truncate mr-2 font-medium">{f.name}</span>
+                          <span className="truncate mr-2 font-medium">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
                             {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
                           </span>
@@ -613,7 +615,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={t('corpsFront.reserveBrigadeAria', { name: f.name, personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -631,7 +633,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             setHoveredSectorId(selectedSectorId);
                           }}
                         >
-                          <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
+                          <span className="truncate mr-2 text-neutral-600 italic leading-none">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
                             {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
                           </span>
@@ -652,7 +654,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={t('corpsFront.unassignedBrigadeAria', { name: f.name })}
+                          aria-label={t('corpsFront.unassignedBrigadeAria', { name: getLocalizedFormationName(f, locale) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-red-50 transition-colors text-left px-1 py-0.5 rounded border border-red-200/60"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -666,7 +668,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           }}
                           onMouseLeave={() => { setHoveredOsids([]); }}
                         >
-                          <span className="truncate mr-2 text-red-700 leading-none">{f.name}</span>
+                          <span className="truncate mr-2 text-red-700 leading-none">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-red-400 text-[9px] tabular-nums shrink-0 leading-none">{t('corpsFront.unassignedShort')}</span>
                         </button>
                       ))}

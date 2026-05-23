@@ -13,7 +13,8 @@ import { formatPersonnel } from '../../utils/formatters';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface SectorsSectionProps {
     corpsId: string;
@@ -44,6 +45,7 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
 };
 
 function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector: CorpsFrontSectorView; sectorBattles: TurnBattle[]; formationMap: Map<string, FormationView> }) {
+    const [locale] = useLocale();
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const frontIds = sector.assigned_brigade_ids;
     const reserveIds = sector.reserve_brigade_ids;
@@ -96,7 +98,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                             return (
                                 <div key={id}>
                                     <div className="flex items-center gap-3">
-                                        <span className="truncate flex-1 min-w-0 text-text-secondary">{b.name}</span>
+                                        <span className="truncate flex-1 min-w-0 text-text-secondary">{getLocalizedFormationName(b, locale)}</span>
                                         <span className="text-text-secondary tabular-nums w-12 text-right shrink-0">
                                             {formatPersonnel(b.personnel ?? 0)}
                                         </span>
@@ -126,7 +128,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                             if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation', { id })}</div>;
                             return (
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
-                                    <span className="truncate flex-1 min-w-0 font-bold">{b.name}</span>
+                                    <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
                                     <span className="tabular-nums w-12 text-right shrink-0">
                                         {formatPersonnel(b.personnel ?? 0)}
                                     </span>

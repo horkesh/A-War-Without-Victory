@@ -5,6 +5,7 @@ import { Protocol } from 'pmtiles';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import type { LoadedGameState } from '../data/types';
+import { useLocale } from '../i18n';
 import {
   useMapInteractions,
   queryPreferredFrontFeatureNearPoint,
@@ -394,6 +395,7 @@ function composeDeckLayersForCurrentSelection(args: {
 }
 
 export function MapContainer() {
+  const [locale] = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
@@ -414,6 +416,7 @@ export function MapContainer() {
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
   const appliedStateRef = useRef<LoadedGameState | null>(null);
+  const appliedLocaleRef = useRef(locale);
   /** Idle/timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
   const deferredOverlayHandleRef = useRef<ReturnType<typeof requestIdleCallback> | ReturnType<typeof setTimeout> | null>(null);
   const interactionLayerSignatureRef = useRef('');
@@ -1125,6 +1128,7 @@ export function MapContainer() {
       const needsUpdate = appliedStateRef.current !== loadedGameState ||
         appliedStagedOrdersRef.current !== stagedOrders ||
         appliedExpandedStackOsidRef.current !== expandedStackOsid ||
+        appliedLocaleRef.current !== locale ||
         // selectedFormationId change should also trigger update for chain-of-command
         appliedSelectedFormationIdRef.current !== selectedFormationId;
       if (!needsUpdate) return;
@@ -1136,6 +1140,7 @@ export function MapContainer() {
       requestAnimationFrame(() => {
         if (cancelled || !mapRef.current || !state) return;
         appliedStateRef.current = state;
+        appliedLocaleRef.current = locale;
         appliedStagedOrdersRef.current = currentStagedOrders;
         appliedExpandedStackOsidRef.current = stack;
         appliedSelectedFormationIdRef.current = selectedFormationId;
@@ -1444,7 +1449,7 @@ export function MapContainer() {
               try {
                 // Only hide map-level icons if the overlay anchor is ready, ensuring no "flicker/disappearance"
                 const activeOverlayOsid = (expandedStackOsid && overlayAnchor) ? expandedStackOsid : null;
-                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid);
+                const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid, locale);
                 // Order arrows removed — player is political leader, not military commander.
                 // The source stays empty; layers in awwv_map_style.json are inert.
                 const iconIds = Array.from(new Set(formationsGeoJson.features.flatMap(f => [f.properties.icon_id, f.properties.white_icon_id])));
@@ -1763,7 +1768,7 @@ export function MapContainer() {
         sourceUpdatePollRef.current = null;
       }
     };
-  }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid]);
+  }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid, locale]);
 
   // Major-mun names (game data): glyphs need local font stack; layer on top so not buried under lines.
   useEffect(() => {

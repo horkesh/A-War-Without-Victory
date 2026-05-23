@@ -21,7 +21,8 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSettlementName,
 } from '../utils/playerSafeText';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -262,6 +263,7 @@ function DefensePreviewContent({
   sectors: CorpsFrontSectorView[] | undefined;
   formations: FormationView[] | undefined;
 }) {
+  const [locale] = useLocale();
   const info = useMemo(() => {
     if (!sectors || !formations) return null;
     const formationMap = new Map(formations.map(f => [f.id, f]));
@@ -290,7 +292,7 @@ function DefensePreviewContent({
       const isHome = !!(munFromOsid(f.home_osid) && munFromOsid(f.home_osid) === targetMun);
       if (atOsid) physicalCount++;
       else reactiveCount++;
-      brigades.push({ id: bid, name: f.name, atOsid, isHome });
+      brigades.push({ id: bid, name: getLocalizedFormationName(f, locale), atOsid, isHome });
     }
 
     return {
@@ -300,7 +302,7 @@ function DefensePreviewContent({
       reactiveCount,
       brigades: brigades.sort((a, b) => (a.atOsid === b.atOsid ? 0 : a.atOsid ? -1 : 1)),
     };
-  }, [osid, sectors, formations]);
+  }, [osid, sectors, formations, locale]);
 
   if (!info) return null;
 

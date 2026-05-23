@@ -14,7 +14,8 @@ import { formatRank } from '../utils/officerCharacter';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -61,6 +62,7 @@ function SectorStrengthBadge({ strengthClass }: { strengthClass: string }) {
  * Left sidebar: Collapsible accordion sections — Situation, Army, Sectors.
  */
 export function OOBSidebar() {
+  const [locale] = useLocale();
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -395,7 +397,7 @@ export function OOBSidebar() {
                                 </div>
                                 <div className="mt-0.5 flex flex-wrap gap-1">
                                   {hqBrigades.map(b => (
-                                    <span key={b.id} className="text-[9px] text-accent-gold/70 truncate">{b.name}</span>
+                                    <span key={b.id} className="text-[9px] text-accent-gold/70 truncate">{getLocalizedFormationName(b, locale)}</span>
                                   ))}
                                 </div>
                               </button>

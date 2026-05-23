@@ -10,7 +10,8 @@ import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface OrbatSectionProps {
     corpsId: string;
@@ -215,6 +216,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
 }
 
 export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
+    const [locale] = useLocale();
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const sorted = useMemo(() => [...brigades].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })), [brigades]);
 
@@ -262,7 +264,7 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
 
                                 {/* Name */}
                                 <span className="text-[12px] font-bold text-text-secondary flex-1 min-w-0 uppercase tracking-tight">
-                                    {b.name}
+                                    {getLocalizedFormationName(b, locale)}
                                 </span>
 
                                 {/* Personnel */}

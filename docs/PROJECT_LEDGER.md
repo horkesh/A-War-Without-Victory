@@ -11,6 +11,18 @@
 
 ---
 
+## [2026-05-23] feat(i18n): localize brigade names in BCS UI
+
+**Type:** UI/localization display boundary only. No simulation behavior, scenario data, save schema, OOB canonical names, generated saves, combat outputs, or tuning changed.
+
+**Why:** The BCS localization pass still rendered source OOB brigade names in English across major map, ORBAT, Army HQ, corps-front, reserve, ops-planning, tooltip, and attack-confirmation surfaces. User explicitly requested all brigade names localized in Bosnian, with no Croatian or Serbian-ekavian leakage.
+
+**Change:** Added `getLocalizedFormationName(...)` in `src/ui/map/data/formationNameLocalizations.ts`, with researched exact overrides for non-derivable unit names and deterministic Bosnian grammar/adjective replacements for the remaining source OOB rows. Wired the helper into brigade map markers and the main player-facing brigade display surfaces while preserving English `formation.name` as canonical state. Added `tests/brigade_name_localization.test.ts` to verify all 249 `data/source/oob_brigades.json` brigade rows resolve to BCS labels and reject English/Croatian/ekavian unit terminology. Implementation report: `docs/40_reports/implemented/20260523_BCS_BRIGADE_NAME_LOCALIZATION.md`.
+
+**Verification:** `npx.cmd vitest run tests/brigade_name_localization.test.ts --reporter=dot` passed 3/3. `npm.cmd run typecheck` passed.
+
+---
+
 ## [2026-05-23] feat(events+ui+calibration): n2003 baseline — historical-default bot decisions + headless contract + presidential modal
 
 **Type:** Multi-commit session shipping (a) the headless undefined-player_faction contract across 3 sites, (b) structured event-decision audit trail, (c) UI surfacing of blocking decisions as auto-pop modals, (d) historical-default retunings of 3 events + Washington Agreement HRHB cohesion reset, and (e) strategic_depth corps_asset filter fix. New 188w baseline at **n2003 hash `47438d249146d1af`, match_ratio 79.21%**. Eight commits on `codex/localization-complete-2026-05-23`.

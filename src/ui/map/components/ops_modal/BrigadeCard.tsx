@@ -4,7 +4,8 @@
  */
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface BrigadeCardProps {
     brigade: FormationView;
@@ -52,6 +53,8 @@ function parseUnitType(name: string): string | null {
 }
 
 export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
+    const [locale] = useLocale();
+    const brigadeName = getLocalizedFormationName(brigade, locale);
     const personnel = brigade.personnel ?? 0;
     const isCombatIneffective = personnel < 400;
     const isDisrupted = !!brigade.disrupted_turns;
@@ -70,7 +73,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
             // WP2f: title attribute on card
-            title={`${brigade.name}\nPersonnel: ${personnel.toLocaleString()}\nTanks: ${tanks} \u00B7 Artillery: ${arty}\nCohesion: ${Math.round(cohesion)} \u00B7 Fatigue: ${Math.round(fatigue)}\nMarch: ${marchTurns === 0 ? 'In position' : marchTurns === null || marchTurns === 99 ? 'Unknown' : `${marchTurns} turns`}`}
+            title={`${brigadeName}\nPersonnel: ${personnel.toLocaleString()}\nTanks: ${tanks} \u00B7 Artillery: ${arty}\nCohesion: ${Math.round(cohesion)} \u00B7 Fatigue: ${Math.round(fatigue)}\nMarch: ${marchTurns === 0 ? 'In position' : marchTurns === null || marchTurns === 99 ? 'Unknown' : `${marchTurns} turns`}`}
             className={`
                 relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
                 ${isUnavailable
@@ -105,7 +108,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
 
             {/* Brigade name */}
             <div className="text-[10px] font-bold text-white truncate" style={{ fontFamily: "'Courier New', monospace" }}>
-                {brigade.name}
+                {brigadeName}
             </div>
 
             {/* WP2e: Unit type indicator */}

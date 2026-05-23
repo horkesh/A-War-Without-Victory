@@ -6,9 +6,11 @@ import { useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 export function PersonnelContent() {
+    const [locale] = useLocale();
     const state = useGameStore((s) => s.loadedGameState);
     const faction = useGameStore((s) => s.selectedArmyId);
 
@@ -78,7 +80,7 @@ export function PersonnelContent() {
                                 <div className="px-3 py-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
                                     {corpsBrigades.map(b => (
                                         <div key={b.id} className="flex items-center justify-between text-[10px] py-0.5">
-                                            <span className="text-text-secondary truncate mr-2">{b.name}</span>
+                                            <span className="text-text-secondary truncate mr-2">{getLocalizedFormationName(b, locale)}</span>
                                             <span className="text-text-primary tabular-nums shrink-0">{formatPersonnel(b.personnel ?? 0)}</span>
                                         </div>
                                     ))}

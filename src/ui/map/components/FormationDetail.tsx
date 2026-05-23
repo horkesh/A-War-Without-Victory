@@ -17,7 +17,8 @@ import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -60,6 +61,7 @@ interface FormationDetailProps {
 
 export function FormationDetail({ railSlot }: FormationDetailProps) {
   const ipc = useIPC();
+  const [locale] = useLocale();
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
@@ -96,6 +98,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   }
 
   const isBrigade = formation.kind === 'brigade';
+  const formationName = getLocalizedFormationName(formation, locale);
 
   // Home-distance helpers
   const hops = formation.homeHops;
@@ -194,7 +197,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         {activeTab === 'overview' && (
           <>
             <div className={`font-mono text-sm font-medium ${FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}`}>
-              {formation.name}
+              {formationName}
             </div>
 
             {/* Parent assignment (brigades) — corps or army HQ */}

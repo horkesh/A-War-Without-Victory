@@ -5,6 +5,8 @@ import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { getSectorIdForFormation } from '../../utils/sectorUtils';
 import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
+import type { Locale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 export { formationIconId };
 
@@ -67,6 +69,7 @@ export function buildFormationsGeoJSON(
   state: LoadedGameState,
   controlledOsidGeoJson: FeatureCollection,
   expandedStackOsid: string | null = null,
+  locale: Locale = 'en',
 ): FeatureCollection<Point, FormationMarkerProperties> {
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const unitsPerOsid = new Map<string, number>();
@@ -116,6 +119,7 @@ export function buildFormationsGeoJSON(
     }
 
     const type = getBrigadeType(formation.name);
+    const displayName = getLocalizedFormationName(formation, locale);
     const postureSuffix = formation.posture ? `__${formation.posture}` : '';
 
     // Status Banners: quantize Health and Morale to 10% steps
@@ -131,7 +135,7 @@ export function buildFormationsGeoJSON(
       geometry: { type: 'Point', coordinates: point },
       properties: {
         id: formation.id,
-        name: formation.name,
+        name: displayName,
         kind: formation.kind,
         faction: formation.faction,
         corps_id: formation.corps_id ?? null,

@@ -1,6 +1,7 @@
 import type { FormationView } from '../data/types';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 
 function getFitnessColor(personnel: number, cohesion: number, fatigue: number): string {
     if (personnel < 400 || cohesion < 20 || fatigue > 70) return '#c24040';
@@ -17,7 +18,8 @@ interface TacticalCardProps {
 }
 
 export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLabelColor }: TacticalCardProps) {
-    const name = getPlayerSafeBrigadeName(formation.name);
+    const [locale] = useLocale();
+    const name = getPlayerSafeBrigadeName(getLocalizedFormationName(formation, locale));
     const pers = formation.personnel ?? 0;
     const fat = formation.fatigue ?? 0;
     const coh = formation.cohesion ?? 0;

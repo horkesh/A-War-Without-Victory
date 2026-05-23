@@ -4,7 +4,8 @@ import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { Icon } from './icons/Icon';
-import { t, type MessageKey } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const STATUS_BADGE: Record<string, { class: string; labelKey: MessageKey }> = {
   assigned: { class: 'text-text-secondary border-text-secondary/40', labelKey: 'brigadeRow.status.assigned' },
@@ -47,6 +48,8 @@ const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
 };
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
+  const [locale] = useLocale();
+  const formationName = getLocalizedFormationName(formation, locale);
   const cohesion = Math.round(Math.max(0, Math.min(100, formation.cohesion ?? 0)));
   const filledSegments = Math.ceil(cohesion / 20);
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
@@ -92,7 +95,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
 
       {/* Brigade name */}
-      <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formation.name}</span>
+      <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formationName}</span>
 
       {/* Prestige pip */}
       {prestigeTier > 0 && (() => {
