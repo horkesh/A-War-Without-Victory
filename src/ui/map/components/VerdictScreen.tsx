@@ -763,31 +763,31 @@ export function FactionReport({
                 >
                     <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
                         <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
-                            Dayton Agreement
+                            {t('verdict.dayton.title')}
                         </span>
                         <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                            Tap to toggle
+                            {t('verdict.report.tapToToggle')}
                         </span>
                     </summary>
                     <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
-                        Dayton Agreement
+                        {t('verdict.dayton.title')}
                     </div>
                     <div className="space-y-2 text-[11px] text-text-secondary">
                         {daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
-                                <span className="text-text-primary font-semibold">Packages Accepted: </span>
+                                <span className="text-text-primary font-semibold">{t('verdict.dayton.packagesAccepted')} </span>
                                 {daytonResult.territorial_packages_accepted.join(', ')}
                             </div>
                         )}
                         {daytonResult.territorial_packages_rejected.length > 0 && (
                             <div>
-                                <span className="text-text-primary font-semibold">Packages Rejected: </span>
+                                <span className="text-text-primary font-semibold">{t('verdict.dayton.packagesRejected')} </span>
                                 {daytonResult.territorial_packages_rejected.join(', ')}
                             </div>
                         )}
                         {Object.keys(daytonResult.institutional_choices).length > 0 && (
                             <div>
-                                <span className="text-text-primary font-semibold">Institutions: </span>
+                                <span className="text-text-primary font-semibold">{t('verdict.dayton.institutions')} </span>
                                 {Object.entries(daytonResult.institutional_choices)
                                     .map(([k, v]) => `${k}: ${v}`)
                                     .join('; ')}
@@ -795,7 +795,7 @@ export function FactionReport({
                         )}
                         {daytonResult.final_territory_split && (
                             <div>
-                                <span className="text-text-primary font-semibold">Final Split: </span>
+                                <span className="text-text-primary font-semibold">{t('verdict.dayton.finalSplit')} </span>
                                 {Object.entries(daytonResult.final_territory_split)
                                     .map(([k, v]) => `${k} ${(v as number).toFixed(1)}%`)
                                     .join(', ')}
@@ -803,7 +803,7 @@ export function FactionReport({
                         )}
                         {daytonResult.patron_overrides_applied.length > 0 && (
                             <div className="text-faction-rs-subtle">
-                                <span className="font-semibold">Patron Overrides: </span>
+                                <span className="font-semibold">{t('verdict.dayton.patronOverrides')} </span>
                                 {daytonResult.patron_overrides_applied.join(', ')}
                             </div>
                         )}

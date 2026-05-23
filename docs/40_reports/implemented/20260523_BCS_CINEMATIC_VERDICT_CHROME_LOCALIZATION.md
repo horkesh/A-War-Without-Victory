@@ -28,4 +28,4 @@ This is presentation-only. It does not change verdict scene selection, generated
 
 ## Remaining Work
 
-Verdict localization still needs smaller slices for generated scene prose, share-summary body, source-provided dimension label mapping, milestone rows, Dayton detail labels, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.
+Verdict localization still needs smaller slices for generated scene prose, share-summary body, source-provided dimension/package/institution label mapping, milestone rows, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.

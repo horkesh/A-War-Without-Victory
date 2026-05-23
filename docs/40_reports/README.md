@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Verdict Dayton-label localization** | [implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md) - rich `VerdictScreen` FactionReport Dayton detail labels now render through the existing English/BCS localization substrate. |
 | **Latest BCS Cinematic Verdict chrome localization** | [implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md) - `CinematicVerdict` static metric labels, campaign/not-recorded fallback text, share-summary heading, and copy button now render through the existing English/BCS localization substrate. |
 | **Latest BCS War Cost Summary localization** | [implemented/20260523_BCS_WAR_COST_SUMMARY_LOCALIZATION.md](implemented/20260523_BCS_WAR_COST_SUMMARY_LOCALIZATION.md) - `WarCostSummary` static labels, section headings, opportunity labels, exit-class labels, source prefix, and helper formatter strings now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict report-label localization** | [implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md) - the rich `VerdictScreen` FactionReport static headings, mobile report toggles, and final-stat row labels now render through the existing English/BCS localization substrate. |

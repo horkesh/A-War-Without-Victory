@@ -92,6 +92,13 @@ function endgame(ov?: Partial<LoadedGameState>): LoadedGameState {
             outcome_type: 'termination',
             outcome_label: 'Stalemate',
             turn: 188, date: '1995-10-01', duration_weeks: 188,
+            dayton_result: {
+                territorial_packages_accepted: ['package_a'],
+                territorial_packages_rejected: ['package_b'],
+                institutional_choices: { presidency: 'decentralized' },
+                final_territory_split: { RS: 49, Federation: 51 },
+                patron_overrides_applied: ['belgrade_pressure'],
+            },
             faction_verdicts: {
                 RBiH: makeFV('RBiH', {
                     grade: 'A', pyrrhic_score: 65,
@@ -255,6 +262,12 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Signal cijene')).toBeDefined();
         expect(screen.getByText('Sazetak za dijeljenje')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
+        expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Prihvaceni paketi:')).toBeDefined();
+        expect(screen.getByText('Odbijeni paketi:')).toBeDefined();
+        expect(screen.getByText('Institucije:')).toBeDefined();
+        expect(screen.getByText('Konacna podjela:')).toBeDefined();
+        expect(screen.getByText('Patronska nadjacavanja:')).toBeDefined();
 
         fireEvent.click(screen.getByText('VRS'));
 
