@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Letter Home):** Chief of Staff Letter Home now passes the active UI locale into the deterministic casualty-vignette generator, and all 25 shipped Letter Home templates carry BCS prose while preserving deterministic template/name/age selection. Shared date formatting and broader non-Army-HQ surfaces remain follow-up localization targets. Report: `docs/40_reports/implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (Chief of Staff header):** Army HQ Chief of Staff now localizes the briefing stamp, daily-briefing label, and staff title chrome through the English/BCS substrate while preserving rank/name rendering and existing date formatting. Letter-home prose remains a follow-up localization/content-review slice; shared date formatting remains broader i18n work. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Chief of Staff combat tones):** Army HQ Chief of Staff now localizes precise/aggressive combat and territory summary prose through the English/BCS substrate while preserving battle counting and territory-net derivation. Header chrome and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md`. On top of:

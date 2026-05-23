@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Letter Home localization** | [implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md](implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md) - Chief of Staff Letter Home now passes active locale into the deterministic generator, and all 25 shipped casualty vignette templates carry BCS prose. |
 | **Latest BCS Chief of Staff header localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md) - Army HQ Chief of Staff briefing stamp, daily-briefing label, and staff title chrome now render through the English/BCS substrate. |
 | **Latest BCS Chief of Staff combat-tone localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md) - Army HQ Chief of Staff precise/aggressive combat and territory summary prose now renders through the English/BCS substrate. |
 | **Latest BCS Chief of Staff command-strain localization** | [implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md](implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md) - Army HQ Chief of Staff command-strain institutional warning prose now renders through the English/BCS substrate for all briefing tones. |

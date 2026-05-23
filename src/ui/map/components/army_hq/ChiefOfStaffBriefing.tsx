@@ -12,7 +12,7 @@ import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 import type { CommandStrainLabel } from '../../data/command_strain.js';
-import { t, type MessageKey } from '../../i18n';
+import { getActiveLocale, t, type MessageKey } from '../../i18n';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -337,6 +337,7 @@ function buildLetterHomeInput(state: LoadedGameState, faction: string): LetterHo
     return {
         turn,
         faction,
+        locale: getActiveLocale(),
         factionKilled,
         factionWounded,
         factionMissing,

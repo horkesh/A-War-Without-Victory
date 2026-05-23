@@ -16,6 +16,7 @@ interface LetterTemplate {
     id: string;
     casualty_type: string;
     text_template: string;
+    text_template_bcs?: string;
     required_fields: string[];
 }
 
@@ -91,7 +92,12 @@ const FACTION_ETHNICITY: Record<string, string> = {
     HRHB: 'croatian',
 };
 
-const RANKS = ['Private', 'Corporal', 'Sergeant'];
+type LetterHomeLocale = 'en' | 'bcs';
+
+const RANKS: Record<LetterHomeLocale, string[]> = {
+    en: ['Private', 'Corporal', 'Sergeant'],
+    bcs: ['Redov', 'Kaplar', 'Vodnik'],
+};
 
 /** Faction-appropriate rear municipalities for displacement_municipality placeholder. */
 const REAR_MUNICIPALITIES: Record<string, string[]> = {
@@ -131,6 +137,8 @@ export interface LetterHomeInput {
     formationLookup: Map<string, BattleFormationInfo>;
     /** Template data (loaded from JSON). */
     templateData: LetterHomeData;
+    /** Optional presentation locale for localized template prose. */
+    locale?: LetterHomeLocale;
 }
 
 /**
@@ -142,6 +150,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
         turn, faction,
         factionKilled, factionWounded, factionMissing,
         factionBattles, formationLookup, templateData,
+        locale = 'en',
     } = input;
 
     // Skip if no battles this turn for this faction
@@ -226,8 +235,9 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     const age = computeAge(turn, totalKIA);
 
     // Rank
-    const rankIdx = deterministicHash(turn, totalKIA, 5) % RANKS.length;
-    const rank = RANKS[rankIdx];
+    const rankPool = RANKS[locale] ?? RANKS.en;
+    const rankIdx = deterministicHash(turn, totalKIA, 5) % rankPool.length;
+    const rank = rankPool[rankIdx];
 
     // Municipality from brigade home_osid
     let municipality = 'unknown';
@@ -239,7 +249,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     }
 
     // Brigade display name
-    let brigadeName = 'his unit';
+    let brigadeName = locale === 'bcs' ? 'njegova jedinica' : 'his unit';
     if (primaryBrigadeId) {
         const info = formationLookup.get(primaryBrigadeId);
         if (info?.name) {
@@ -248,7 +258,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     }
 
     // Circumstance from battle OSID
-    let circumstance = 'the front line';
+    let circumstance = locale === 'bcs' ? 'linija fronta' : 'the front line';
     if (battleOsid) {
         circumstance = municipalityFromOsid(battleOsid);
     }
@@ -264,7 +274,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     const hospital = hospitals[hospitalIdx];
 
     // Substitute placeholders
-    let text = template.text_template;
+    let text = locale === 'bcs' && template.text_template_bcs ? template.text_template_bcs : template.text_template;
     text = text.replace(/\{name\}/g, fullName);
     text = text.replace(/\{age\}/g, String(age));
     text = text.replace(/\{municipality\}/g, municipality);

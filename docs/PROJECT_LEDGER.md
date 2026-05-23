@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] content(i18n): localize Letter Home templates
+
+**Type:** Chief of Staff Letter Home authored-template localization slice. No casualty selection, template selection, deterministic hashing, battle casualty split, formation lookup, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added optional `LetterHomeInput.locale` and optional `text_template_bcs` support in `generateLetterHome(...)`. `ChiefOfStaffBriefing` now passes the active UI locale into the generator, and all 25 shipped `data/templates/letter_home_templates.json` casualty vignette templates include BCS prose.
+
+**Determinism:** Deterministic template selection, name selection, age selection, rank index selection, and placeholder substitution order are unchanged. Locale changes only which authored template string is substituted after the same deterministic template ID is selected.
+
+**Verification:** Red `npx.cmd vitest run tests\letter_home_i18n.test.ts --reporter=dot` failed while BCS requests still used English template prose. Green `npx.cmd vitest run tests\letter_home_i18n.test.ts tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` passed 9/9. Catalog check confirmed all 25 Letter Home templates include `text_template_bcs`. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/sim/letter_home.ts`, `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `data/templates/letter_home_templates.json`, `tests/letter_home_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_LETTER_HOME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Chief of Staff header chrome
 
 **Type:** Army HQ Chief of Staff UI chrome localization slice. No Chief of Staff identity, faction profile selection, briefing generation, date calculation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
