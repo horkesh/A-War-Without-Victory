@@ -48,8 +48,9 @@ export function isSettlementSetContiguous(
     const queue = [sids[0]];
     const reached = new Set<SettlementId>();
     reached.add(sids[0]);
-    while (queue.length > 0) {
-        const s = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const s = queue[head++]!;
         const neighbors = adj.get(s);
         if (neighbors) {
             for (const n of neighbors) {

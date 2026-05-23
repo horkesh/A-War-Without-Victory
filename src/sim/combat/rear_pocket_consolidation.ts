@@ -103,9 +103,10 @@ export function consolidateRearPockets(
         clusterSet.add(osid);
         let tooLarge = false;
         let hasDefender = false;
+        let head = 0;
 
-        while (bfsQueue.length > 0) {
-            const curr = bfsQueue.shift()!;
+        while (head < bfsQueue.length) {
+            const curr = bfsQueue[head++]!;
             cluster.push(curr);
             if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
             if (defendedOsids.has(curr)) hasDefender = true;

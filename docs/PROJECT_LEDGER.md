@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(combat): use head cursors in graph BFS queues
+
+**Type:** Deterministic combat graph performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** After the movement queue-cursor slice, several FIFO BFS helpers in graph analysis, rear-pocket cleanup, settlement contiguity, and retreat-local friendly component construction still used `Array.shift()`. These loops can use the same deterministic head-cursor pattern without changing traversal order.
+
+**Change:** `src/sim/combat/osid_graph_analysis.ts` now uses head cursors in `bfsReachable(...)` and both optimized/legacy pocket-cluster BFS loops. `src/sim/combat/war_adjacency.ts` updates `isSettlementSetContiguous(...)`; `src/sim/combat/rear_pocket_consolidation.ts` updates rear-pocket cluster BFS; `src/sim/combat/attack_retreat_displacement.ts` updates `buildFriendlyComponentsLocal(...)`. `tests/combat_graph_queue_cursor.test.ts` adds static guards against `.shift()` in those FIFO BFS regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order and neighbor ordering are unchanged. Both optimized and legacy `analyzeFactionGraph(...)` paths were updated so the existing direct parity test still proves structural equivalence over 10,000 deterministic trials.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\combat_graph_queue_cursor.test.ts --reporter=dot` failed before implementation because the target graph/rear-pocket BFS regions still contained `.shift()`. After implementation, focused graph/rear-pocket tests passed 47/47: `tests\combat_graph_queue_cursor.test.ts`, `tests\analyze_faction_graph_dedupe.test.ts`, `tests\sarajevo_core_defense.test.ts`, and `tests\paramilitary_sweep.test.ts`. Source grep found no `.shift()` in the four target files. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n4` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n4` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMBAT_GRAPH_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Closes another narrow non-calibration engine-quality cursor slice. Remaining `.shift()` sites must still be reviewed individually; semantic queues, priority queues, undo/ticker buffers, and archived UI are not automatic candidates.
+
+---
+
 ## [2026-05-23] perf(combat): use head cursors in movement BFS queues
 
 **Type:** Deterministic combat movement performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
