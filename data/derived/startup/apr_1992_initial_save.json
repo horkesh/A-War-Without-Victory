@@ -1095,6 +1095,7 @@
   ],
   "meta": {
     "game_over": false,
+    "headless_scenario_auto_control": true,
     "peace_scheduled_referendum_turn": null,
     "peace_scheduled_war_start_turn": null,
     "peace_war_start_control_path": null,

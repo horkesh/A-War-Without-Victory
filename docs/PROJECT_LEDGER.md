@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] build(desktop): refresh apr-1992 startup snapshot
+
+**Type:** Desktop packaging artifact refresh. No code, scenario source data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The prior map/scenario cursor slice exposed a pre-existing desktop release blocker: `tests\startup_snapshot_contract.test.ts` and `tests\desktop_sim_bundle_smoke.test.ts` failed because `data\derived\startup\apr_1992_initial_save.json` had drifted from the canonical builder. Desktop packaging requires this baked startup artifact to match builder truth before bundling.
+
+**Change:** Refreshed `data/derived/startup/apr_1992_initial_save.json` using the canonical writer `npm.cmd run desktop:startup-snapshot:build`.
+
+**Determinism / output impact:** Generated artifact refresh only. The artifact is rebuilt by `tools/scenario_runner/build_startup_snapshot.ts --write` and checked by the matching `--check` path. No timestamps, random fields, pipeline entrypoint changes, or runtime code changes were introduced.
+
+**Verification:** `npm.cmd run desktop:startup-snapshot:build` passed and wrote the artifact. `npm.cmd run desktop:startup-snapshot:check` passed. `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\desktop_sim_bundle_smoke.test.ts tests\desktop_startup_snapshot_guardrails.test.ts --reporter=dot` passed 9/9. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DESKTOP_STARTUP_SNAPSHOT_REFRESH.md`.
+
+**Roadmap delta:** Closes the stale baked-startup artifact blocker discovered while proving the desktop movement-order cursor slice. Desktop startup/bundle checks are available again for future desktop lanes.
+
+---
+
 ## [2026-05-23] perf(map/scenario): use cursors in FIFO BFS queues
 
 **Type:** Deterministic map/scenario/desktop/event graph traversal performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
