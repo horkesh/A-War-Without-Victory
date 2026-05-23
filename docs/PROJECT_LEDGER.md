@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize War Cost divergence notes
+
+**Type:** `WarCostSummary` historical-divergence note localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warCost.divergence.*` message keys. `formatHistoricalDivergenceNote(...)` now localizes known generated duration-note shapes and known Srebrenica comparison notes in the War Cost section, while preserving unknown authored notes unchanged.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `War lasted 6 weeks longer` in the War Cost section. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Helper contract `npx.cmd vitest run tests\ui\war_cost_summary.test.ts --reporter=dot` passed 13/13.
+
+**Artifacts:** `src/ui/map/components/WarCostSummary.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `tests/ui/war_cost_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict Dayton values
 
 **Type:** Rich `VerdictScreen` Dayton-value localization slice. No simulation behavior, combat math, operation behavior, Dayton negotiation data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS War Cost divergence-note localization:** [implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md](implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md) - `WarCostSummary` known generated historical divergence-note shapes now render through localized mappings with raw source-note fallback.
+
 **Latest BCS Verdict Dayton-value localization:** [implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_VALUES_LOCALIZATION.md) - rich `VerdictScreen` Dayton package, institution, and patron-override values now render through stable localized mappings with raw source fallback.
 
 **Latest BCS Verdict dimension-label localization:** [implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DIMENSION_LABELS_LOCALIZATION.md) - rich `VerdictScreen` negotiating-capital dimension labels now render through stable localized dimension-ID mappings with source-label fallback.

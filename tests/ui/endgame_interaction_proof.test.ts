@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
@@ -242,7 +242,10 @@ describe('VerdictScreen interaction — faction tab switching', () => {
     it('renders localized rich verdict chrome when BCS is selected', () => {
         setLocale('bcs');
 
-        renderVS();
+        const { container } = renderVS();
+        const warCostSection = container.querySelector('[data-tutorial-step="cost-ledger"]');
+        expect(warCostSection).toBeDefined();
+        const warCost = within(warCostSection as HTMLElement);
 
         expect(screen.getByRole('button', { name: 'Izvjestaj' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Obracun' })).toBeDefined();
@@ -264,6 +267,10 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
+        expect(warCost.queryByText('War lasted 6 weeks longer')).toBeNull();
+        expect(warCost.queryByText('Srebrenica genocide occurred')).toBeNull();
+        expect(warCost.getByText('Rat je trajao 6 sedmica duze.')).toBeDefined();
+        expect(warCost.getByText('Genocid u Srebrenici se dogodio.')).toBeDefined();
         expect(screen.getByText('Fokus')).toBeDefined();
         expect(screen.getByText('Ishod')).toBeDefined();
         expect(screen.getByText('Signal cijene')).toBeDefined();

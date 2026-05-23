@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest';
 import {
     formatDurationDelta,
     formatCasualtyRatio,
+    formatHistoricalDivergenceNote,
     formatTerritoryDivergence,
 } from '../../src/ui/map/components/WarCostSummary';
 
@@ -88,5 +89,19 @@ describe('formatTerritoryDivergence', () => {
     it('reports within historical range for zero delta', () => {
         const result = formatTerritoryDivergence('RS', 0);
         expect(result).toBe('RS: within historical range');
+    });
+});
+
+describe('formatHistoricalDivergenceNote', () => {
+    it('preserves English generated duration notes by default', () => {
+        expect(formatHistoricalDivergenceNote('War lasted 12 weeks shorter than the historical 188 weeks'))
+            .toBe('War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(formatHistoricalDivergenceNote('War lasted exactly the historical 188 weeks'))
+            .toBe('War lasted exactly the historical 188 weeks');
+    });
+
+    it('preserves unknown source-authored notes as fallback', () => {
+        expect(formatHistoricalDivergenceNote('A source-authored divergence note'))
+            .toBe('A source-authored divergence note');
     });
 });
