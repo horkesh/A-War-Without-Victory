@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize War Summary campaign cost
+
+**Type:** Army HQ War Summary localization slice. No summary model math, turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, war-exhaustion behavior, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warSummary.*` message keys. `WarSummaryContent` now localizes its title, no-state fallback, subsection tabs, Campaign Cost labels, localized campaign-cost severity value, and Campaign Drag labels/detail copy.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; War Summary overview model derivation, campaign-cost classification, turn summaries, war-exhaustion values, combat results, event firing, operation outcomes, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English campaign-cost chrome. Green rerun passed 1/1. Expanded localization/endgame pack passed 123/123. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/WarSummaryContent.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/war_summary_campaign_cost_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Turn Aftermath archive
 
 **Type:** Turn Aftermath campaign archive localization slice. No turn-summary schema, save shape, scenario data, combat math, operation behavior, campaign-cost classification, momentum classification, calibration/army-arc tuning, source-authored event text, settlement labels, formation names, inbox item titles, generated artifact, network IO, timestamp, or random source changed.

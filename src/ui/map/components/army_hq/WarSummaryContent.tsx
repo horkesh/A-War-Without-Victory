@@ -12,16 +12,21 @@ import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { SituationTab } from '../SituationTab';
 import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
 import { buildTurnAftermathCampaignCost } from '../../data/turnAftermath';
+import { t, type MessageKey } from '../../i18n';
 
-const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
-    ['overview', 'Overview'],
-    ['ivp', 'IVP'],
-    ['convoys', 'Convoys'],
-    ['casualties', 'Casualties'],
-    ['support', 'Support'],
-    ['opsec', 'OPSEC'],
-    ['capital', 'Capital'],
+const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
+    ['overview', 'warSummary.section.overview'],
+    ['ivp', 'warSummary.section.ivp'],
+    ['convoys', 'warSummary.section.convoys'],
+    ['casualties', 'warSummary.section.casualties'],
+    ['support', 'warSummary.section.support'],
+    ['opsec', 'warSummary.section.opsec'],
+    ['capital', 'warSummary.section.capital'],
 ];
+
+function enumLabel(prefix: string, value: string): string {
+    return t(`${prefix}.${value}` as MessageKey);
+}
 
 interface WarSummaryContentProps {
     focusSection?: SummaryFocusSection;
@@ -35,7 +40,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
         setActiveSection(focusSection);
     }, [focusSection]);
 
-    if (!loadedGameState) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
+    if (!loadedGameState) return <div className="text-text-secondary italic text-[12px] py-8 text-center">{t('warSummary.noGameState')}</div>;
 
     const { label, casualtyLedger, civilianCasualties } = loadedGameState;
 
@@ -64,7 +69,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
             {/* Header */}
             <div className="mb-4">
                 <div className="text-[13px] font-bold text-amber-400 tracking-[0.08em] uppercase">
-                    War Summary
+                    {t('warSummary.title')}
                 </div>
                 <div className="text-[11px] text-text-secondary mt-0.5">
                     {formatTurnLabel(label)}
@@ -84,7 +89,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
                     >
-                        {sectionLabel}
+                        {t(sectionLabel)}
                     </button>
                 ))}
             </div>
@@ -153,22 +158,22 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             </SummarySection>
 
                             {campaignCost.recordCount > 0 && (
-                                <SummarySection title="Campaign Cost">
+                                <SummarySection title={t('warSummary.campaignCost.title')}>
                                     <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-cost">
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Severity</span>
-                                            <span className="text-text-primary uppercase tabular-nums">{campaignCost.severity}</span>
+                                            <span className="text-text-secondary">{t('warSummary.campaignCost.severity')}</span>
+                                            <span className="text-text-primary uppercase tabular-nums">{enumLabel('turnAftermath.severity', campaignCost.severity)}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Friendly casualties</span>
+                                            <span className="text-text-secondary">{t('warSummary.campaignCost.friendlyCasualties')}</span>
                                             <span className="text-text-primary tabular-nums">{fmtK(campaignCost.totalFriendlyMilitaryCasualties)}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Displaced</span>
+                                            <span className="text-text-secondary">{t('warSummary.campaignCost.displaced')}</span>
                                             <span className="text-text-primary tabular-nums">{fmtK(campaignCost.totalDisplaced)}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Net OSIDs</span>
+                                            <span className="text-text-secondary">{t('warSummary.campaignCost.netOsids')}</span>
                                             <span className="text-text-primary tabular-nums">{campaignCost.netFriendlyTerritory >= 0 ? '+' : ''}{campaignCost.netFriendlyTerritory}</span>
                                         </div>
                                     </div>
@@ -176,14 +181,14 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             )}
 
                             {hasElevatedWarExhaustion && (
-                                <SummarySection title="Campaign Drag">
+                                <SummarySection title={t('warSummary.campaignDrag.title')}>
                                     <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-drag">
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">War exhaustion</span>
+                                            <span className="text-text-secondary">{t('warSummary.campaignDrag.warExhaustion')}</span>
                                             <span className="text-text-primary tabular-nums">{Math.round(playerWarExhaustion!)}</span>
                                         </div>
                                         <div className="text-[10px] text-text-secondary leading-snug">
-                                            Corps-level command strain is tracked per corps in Army HQ → Command Relationship.
+                                            {t('warSummary.campaignDrag.commandStrainDetail')}
                                         </div>
                                     </div>
                                 </SummarySection>
