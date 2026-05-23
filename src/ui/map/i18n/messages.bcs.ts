@@ -542,4 +542,11 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'turnAftermath.campaignCost.driver.hardTurn.one': '{count} tezak potez',
     'turnAftermath.campaignCost.driver.hardTurn.many': '{count} teska poteza',
     'turnAftermath.campaignCost.driver.casualtyExchange': '{ratio} razmjena gubitaka',
+    'warroom.docket.advanceItem.one': 'stavka za napredovanje',
+    'warroom.docket.advanceItem.many': 'stavke za napredovanje',
+    'warroom.docket.sourceHandoff.one': 'izvorni prijenos',
+    'warroom.docket.sourceHandoff.many': 'izvorna prijenosa',
+    'warroom.docket.summary': '{advanceReviewCount} {advanceItemLabel} / {urgentCount} hitno / {pendingReviews} na cekanju',
+    'warroom.docket.sourceHandoffSummary': '{sourceHandoffCount} {sourceHandoffLabel} / {urgentCount} hitno',
+    'warroom.docket.openDecisionRoom': 'Otvori sobu odluka',
 };

@@ -541,6 +541,13 @@ export const enMessages = {
     'turnAftermath.campaignCost.driver.hardTurn.one': '{count} hard turn',
     'turnAftermath.campaignCost.driver.hardTurn.many': '{count} hard turns',
     'turnAftermath.campaignCost.driver.casualtyExchange': '{ratio} casualty exchange',
+    'warroom.docket.advanceItem.one': 'advance item',
+    'warroom.docket.advanceItem.many': 'advance items',
+    'warroom.docket.sourceHandoff.one': 'source handoff',
+    'warroom.docket.sourceHandoff.many': 'source handoffs',
+    'warroom.docket.summary': '{advanceReviewCount} {advanceItemLabel} / {urgentCount} urgent / {pendingReviews} pending',
+    'warroom.docket.sourceHandoffSummary': '{sourceHandoffCount} {sourceHandoffLabel} / {urgentCount} urgent',
+    'warroom.docket.openDecisionRoom': 'Open Decision Room',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;
