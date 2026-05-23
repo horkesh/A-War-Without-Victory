@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-05-23: Combat Movement BFS Queue Cursor
+
+**Change:** Five FIFO BFS helpers in combat movement now use head cursors instead of `Array.shift()`: four bot brigade movement helpers in `src/sim/combat/bot_brigade_movement_ai.ts` and `shortestPathThroughFriendly(...)` in `src/sim/combat/brigade_movement.ts`.
+
+**Determinism:** Queue insertion order and sorted neighbor expansion are unchanged. This is a compute-only dequeue optimization; no combat math, operation behavior, save schema, calibration, or output contract changed.
+
+**Report:** [implemented/20260523_COMBAT_MOVEMENT_BFS_QUEUE_CURSOR.md](implemented/20260523_COMBAT_MOVEMENT_BFS_QUEUE_CURSOR.md)
+
+---
+
 ## Purpose
 
 Single source of truth for combat resolution design decisions, factor implementations, known gaps, and lessons learned. Read this before touching any file in `src/sim/combat/`.

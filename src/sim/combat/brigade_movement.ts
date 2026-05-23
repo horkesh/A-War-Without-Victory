@@ -84,9 +84,10 @@ export function shortestPathThroughFriendly(
     const queue: SettlementId[] = [fromSid];
     const visited = new Set<SettlementId>([fromSid]);
     const parent = new Map<SettlementId, SettlementId>();
+    let head = 0;
 
-    while (queue.length > 0) {
-        const current = queue.shift()!;
+    while (head < queue.length) {
+        const current = queue[head++]!;
         const neighbors = adj.get(current);
         if (!neighbors) continue;
         const sorted = [...neighbors].sort(strictCompare);

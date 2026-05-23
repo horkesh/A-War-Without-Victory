@@ -128,9 +128,10 @@ export function findNearestFrontOsid(
     const controllerCache = new Map<Osid, FactionId | null>();
     const visited = new Set<Osid>([loc]);
     const queue: Array<{ osid: Osid; firstStep: Osid | null }> = [{ osid: loc, firstStep: null }];
+    let head = 0;
 
-    while (queue.length > 0) {
-        const { osid, firstStep } = queue.shift()!;
+    while (head < queue.length) {
+        const { osid, firstStep } = queue[head++]!;
         const neighbors = (adjacency.get(osid) ?? []).slice().sort(strictCompare);
 
         for (const n of neighbors) {
@@ -179,8 +180,9 @@ export function findNearestOsidByPattern(
         queue.push({ osid: n, firstStep: n });
     }
 
-    while (queue.length > 0) {
-        const { osid, firstStep } = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const { osid, firstStep } = queue[head++]!;
         for (const n of (adjacency.get(osid) ?? []).slice().sort(strictCompare)) {
             if (visited.has(n)) continue;
             visited.add(n);
@@ -207,9 +209,10 @@ export function computeHopsToFront(
 ): number {
     const visited = new Set<Osid>([loc]);
     const queue: Array<{ osid: Osid; depth: number }> = [{ osid: loc, depth: 0 }];
+    let head = 0;
 
-    while (queue.length > 0) {
-        const { osid, depth } = queue.shift()!;
+    while (head < queue.length) {
+        const { osid, depth } = queue[head++]!;
         const analysis = graphAnalysis.osid_analysis.get(osid);
         // Front = any OSID with enemy neighbors (not 'interior' or 'quiet' deep)
         if (depth > 0 && analysis && analysis.enemy_neighbors.length > 0) {
@@ -251,6 +254,7 @@ export function findFrontDestinationForColumnMarch(
     // Distribution: skip destinations already assigned to ≥2 brigades (prevents stacking)
     const visited = new Set<Osid>([loc]);
     const queue: Array<{ osid: Osid; depth: number }> = [{ osid: loc, depth: 0 }];
+    let head = 0;
 
     let bestTarget: Osid | null = null;
     let bestPriority = Infinity; // lower = better
@@ -266,8 +270,8 @@ export function findFrontDestinationForColumnMarch(
     /** Max brigades that can march to the same front OSID. */
     const MAX_COLUMN_MARCH_PER_OSID = 2;
 
-    while (queue.length > 0) {
-        const { osid, depth } = queue.shift()!;
+    while (head < queue.length) {
+        const { osid, depth } = queue[head++]!;
 
         // Early exit: if we've found a target and gone 2 BFS layers past it, stop
         // (allow some depth to find better-priority targets at similar distance)
