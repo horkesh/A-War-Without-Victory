@@ -8,7 +8,7 @@ import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
 import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
 import { Z } from '../../shared/zIndex.js';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
@@ -35,6 +35,7 @@ interface CodexPanelProps {
 
 export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const [locale] = useLocale();
     const [selectedEssayId, setSelectedEssayId] = useState<string | null>(null);
     const [expandedYear, setExpandedYear] = useState<number | null>(1992);
 
@@ -69,8 +70,8 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
             costLedger: loadedGameState?.costLedger,
             gameOver: loadedGameState?.gameOver,
         };
-        return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context)]));
-    }, [essays, firedEventIds, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
+        return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context, locale)]));
+    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
 
     const visibleEssaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();
@@ -155,7 +156,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                 }`}
                                             >
                                                 <div className="flex items-center gap-2 mb-0.5">
-                                                    <CategoryBadge category={essay.category} />
+                                                    <CategoryBadge category={resolvedEssays.get(essay.id)?.category ?? essay.category} />
                                                     {ghost && (
                                                         <span className="text-[7px] text-amber-500 uppercase tracking-wider">
                                                             {t('codex.ghost')}
@@ -163,7 +164,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                     )}
                                                 </div>
                                                 <div className="text-[10px] leading-snug text-neutral-200">
-                                                    {essay.title}
+                                                    {resolvedEssays.get(essay.id)?.title ?? essay.title}
                                                 </div>
                                             </button>
                                         );
@@ -186,7 +187,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                         ) : !selectedResolvedEssay?.isUnlocked ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-500 text-[13px] mb-2">{selectedEssay.title}</div>
+                                    <div className="text-neutral-500 text-[13px] mb-2">{selectedResolvedEssay?.title ?? selectedEssay.title}</div>
                                     <div className="text-[9px] text-neutral-600 border border-neutral-700/30 rounded-md px-2.5 py-2 bg-neutral-800/20 max-w-[300px]">
                                         {t('codex.lockedHelp')}
                                     </div>
@@ -200,7 +201,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
 
                                 <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8] rounded-t-lg">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <CategoryBadge category={selectedEssay.category} />
+                                        <CategoryBadge category={selectedResolvedEssay.category} />
                                         <span className="text-[8px] uppercase text-neutral-500 tracking-[0.15em]">
                                             {selectedEssay.year}
                                         </span>
@@ -211,7 +212,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                         )}
                                     </div>
                                     <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
-                                        {selectedEssay.title}
+                                        {selectedResolvedEssay.title}
                                     </div>
                                     <div className="text-[8px] text-neutral-500 mt-1 italic">
                                         {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
@@ -252,13 +253,13 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                     )}
                                 </div>
 
-                                {selectedEssay.sources && selectedEssay.sources.length > 0 && (
+                                {selectedResolvedEssay.sources && selectedResolvedEssay.sources.length > 0 && (
                                     <div className="px-3 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
                                         <div className="text-[7px] uppercase text-neutral-500 font-bold tracking-[0.15em] mb-1">
                                             {t('codex.sources')}
                                         </div>
                                         <ul className="text-[8px] text-neutral-500 space-y-0.5">
-                                            {selectedEssay.sources.map((src, index) => (
+                                            {selectedResolvedEssay.sources.map((src, index) => (
                                                 <li key={index} className="leading-snug">{src}</li>
                                             ))}
                                         </ul>

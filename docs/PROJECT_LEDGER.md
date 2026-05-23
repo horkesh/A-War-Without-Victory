@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] ui(i18n): add Bosnian Codex entry localization contract
+
+**Type:** UI/data localization extraction only. No simulation behavior, scenario data, save schema, event firing, Codex unlock predicates, dynamic-section predicates, diagnostics, OOB, or tuning changed.
+
+**Why:** BCS localization had reached the Codex shell, but the actual Codex essay titles/bodies and dynamic inserts were still rendered from English data. Ghost-entry Markdown also had no Bosnian sidecar coverage.
+
+**Change:** Made `resolveCodexEssay(...)` locale-aware for title, category, canonical body, ghost summary, dynamic-section content, and sources. Routed `CodexPanel` through `useLocale()` so selected and sidebar entries use the active locale. Added `localizations.bcs` payloads for all 96 indexed Codex essays and all 61 dynamic inserts in `data/scenarios/essays/essay_index.json`. Added `data/codex/ghost_entries_bcs/` sidecars for all 20 ghost Markdown entries.
+
+**Verification:** `npx.cmd vitest run tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 5/5. `npx.cmd vitest run tests/ui_i18n.test.ts tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 91/91. `npm.cmd run typecheck` passed.
+
+---
+
 ## [2026-05-23] ui(i18n): localize war summary and inbox shell
 
 **Type:** UI localization extraction only. No simulation behavior, scenario data, save schema, inbox action routing, diagnostics, OOB, or tuning changed.
