@@ -79,6 +79,12 @@ export const enMessages = {
     'credits.sources.basedOnPrefix': 'Based on',
     'credits.sources.additional': 'Additional sources: ICTY trial records, UNPROFOR reports, academic publications',
     'credits.dedication': 'This game is dedicated to the memory of all who suffered in the Bosnian War, 1992-1995.',
+    'sidePicker.title': 'Choose your faction',
+    'sidePicker.forcesSuffix': 'Forces',
+    'sidePicker.loadSaveFileAriaLabel': 'Load save file',
+    'sidePicker.loadSaveFromDisk': 'Load Save from Disk',
+    'sidePicker.continueLastRun': 'Continue (Last Run)',
+    'sidePicker.close': 'Close',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

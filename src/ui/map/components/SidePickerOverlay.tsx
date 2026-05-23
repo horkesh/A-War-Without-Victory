@@ -4,6 +4,7 @@ import { AWWV_APP_VERSION } from '../utils/appVersion';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { Icon } from './icons/Icon';
+import { t, useLocale } from '../i18n';
 
 interface SidePickerOverlayProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export function SidePickerOverlay({
   onClose,
   onSelectFaction,
 }: SidePickerOverlayProps) {
+  const [locale] = useLocale();
+
   return (
     <Modal
       isOpen={isOpen}
@@ -34,7 +37,7 @@ export function SidePickerOverlay({
       <>
         <div className="px-4 py-3 border-b border-panel-border bg-panel-bg">
           <h2 id="side-picker-title" className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Choose your faction
+            {t('sidePicker.title', undefined, locale)}
           </h2>
         </div>
         <div className="p-4 space-y-2">
@@ -57,7 +60,7 @@ export function SidePickerOverlay({
               <div className="flex flex-col">
                 <span className="text-sm font-semibold tracking-wide">{faction}</span>
                 {getArmyName(faction) && (
-                  <span className="text-[10px] text-text-secondary uppercase">{getArmyName(faction)} Forces</span>
+                  <span className="text-[10px] text-text-secondary uppercase">{getArmyName(faction)} {t('sidePicker.forcesSuffix', undefined, locale)}</span>
                 )}
               </div>
             </button>
@@ -67,7 +70,7 @@ export function SidePickerOverlay({
               type="file"
               id="map-file-input"
               accept=".json"
-              aria-label="Load save file"
+              aria-label={t('sidePicker.loadSaveFileAriaLabel', undefined, locale)}
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
@@ -93,7 +96,7 @@ export function SidePickerOverlay({
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded border border-dashed border-panel-border bg-panel-bg hover:bg-panel-hover text-text-secondary hover:text-interactive transition-all text-xs uppercase tracking-wider font-semibold"
             >
               <Icon name="locked" size={13} />
-              <span>Load Save from Disk</span>
+              <span>{t('sidePicker.loadSaveFromDisk', undefined, locale)}</span>
             </button>
             <button
               type="button"
@@ -102,7 +105,7 @@ export function SidePickerOverlay({
               className="w-full flex items-center justify-center gap-2 px-3 py-2.5 mt-2 rounded border border-interactive/30 bg-interactive/10 hover:bg-interactive/20 text-interactive transition-all text-xs uppercase tracking-wider font-semibold"
             >
               <Icon name="transit" size={13} />
-              <span>Continue (Last Run)</span>
+              <span>{t('sidePicker.continueLastRun', undefined, locale)}</span>
             </button>
           </div>
         </div>
@@ -115,7 +118,7 @@ export function SidePickerOverlay({
             onClick={onClose}
             className="px-3 py-1.5 text-xs font-sans text-text-secondary hover:text-interactive hover:bg-panel-hover rounded border border-panel-border"
           >
-            Close
+            {t('sidePicker.close', undefined, locale)}
           </button>
         </div>
       </>

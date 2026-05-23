@@ -80,4 +80,10 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'credits.sources.basedOnPrefix': 'Zasnovano na',
     'credits.sources.additional': 'Dodatni izvori: ICTY sudski zapisi, izvjestaji UNPROFOR-a, akademske publikacije',
     'credits.dedication': 'Ova igra je posvecena sjecanju na sve koji su patili u Bosanskom ratu, 1992-1995.',
+    'sidePicker.title': 'Izaberi frakciju',
+    'sidePicker.forcesSuffix': 'snage',
+    'sidePicker.loadSaveFileAriaLabel': 'Ucitaj snimljenu igru',
+    'sidePicker.loadSaveFromDisk': 'Ucitaj snimljenu igru sa diska',
+    'sidePicker.continueLastRun': 'Nastavi (zadnje pokretanje)',
+    'sidePicker.close': 'Zatvori',
 };
