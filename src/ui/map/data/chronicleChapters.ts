@@ -178,6 +178,45 @@ function uniqueMonthLabelsByTurn(entries: ChronicleEntry[]): string[] {
         .map(([label]) => label);
 }
 
+function chronicleTypeLabel(type: ChronicleEntry['type']): string {
+    const labels: Partial<Record<ChronicleEntry['type'], string>> = {
+        combat: 'combat',
+        cost: 'cost',
+        diplomatic: 'diplomacy',
+        humanitarian: 'humanitarian pressure',
+        military: 'military affairs',
+        narrative: 'campaign memory',
+        personnel: 'personnel',
+        political: 'politics',
+    };
+    return labels[type] ?? String(type).replace(/_/g, ' ');
+}
+
+function chapterMonthRange(monthLabels: readonly string[]): string {
+    if (monthLabels.length === 0) return 'the recorded window';
+    if (monthLabels.length === 1) return monthLabels[0];
+    return `${monthLabels[0]}-${monthLabels[monthLabels.length - 1]}`;
+}
+
+function buildChapterSummary(entries: readonly ChronicleEntry[], monthLabels: readonly string[]): string {
+    const typeCounts = new Map<ChronicleEntry['type'], number>();
+    let headlineCount = 0;
+    for (const entry of entries) {
+        typeCounts.set(entry.type, (typeCounts.get(entry.type) ?? 0) + 1);
+        if (entry.headline) headlineCount += 1;
+    }
+
+    const dominantType = Array.from(typeCounts.entries())
+        .sort((a, b) => b[1] - a[1] || strictCompare(chronicleTypeLabel(a[0]), chronicleTypeLabel(b[0])))[0]?.[0] ?? 'narrative';
+    const entryCount = entries.length;
+    const entryPhrase = `${entryCount} sourced ${entryCount === 1 ? 'entry' : 'entries'}`;
+    const headlinePhrase = headlineCount === 0
+        ? 'no headline records'
+        : `${headlineCount} headline ${headlineCount === 1 ? 'record' : 'records'}`;
+    const verb = entryCount === 1 ? 'makes' : 'make';
+    return `Across ${chapterMonthRange(monthLabels)}, ${entryPhrase} ${verb} ${chronicleTypeLabel(dominantType)} the dominant thread; ${headlinePhrase} anchor the chapter.`;
+}
+
 export function buildChronicleChapters(entries: ChronicleEntry[], state: any): ChronicleChapter[] {
     const playerFaction = playerFactionFromState(state);
     if (!playerFaction || entries.length === 0) return [];
@@ -195,7 +234,8 @@ export function buildChronicleChapters(entries: ChronicleEntry[], state: any): C
         const startTurn = Math.min(...chapterEntries.map(({ entry }) => entry.turn));
         const endTurn = Math.max(...chapterEntries.map(({ entry }) => entry.turn));
         const sourceEntryIds = chapterEntries.map(({ sourceEntryId }) => sourceEntryId);
-        const monthLabels = uniqueMonthLabelsByTurn(chapterEntries.map(({ entry }) => entry));
+        const entriesInChapter = chapterEntries.map(({ entry }) => entry);
+        const monthLabels = uniqueMonthLabelsByTurn(entriesInChapter);
         const signals = {
             atrocity: chapterEntries.some(({ entry }) => signalFromEntry(entry, 'atrocity')),
             rupture: chapterEntries.some(({ entry }) => signalFromEntry(entry, 'rupture')),
@@ -206,7 +246,7 @@ export function buildChronicleChapters(entries: ChronicleEntry[], state: any): C
             playerFaction,
             boundaryKind: window.kind,
             title: window.title,
-            summary: `${chapterEntries.length} sourced ${chapterEntries.length === 1 ? 'entry' : 'entries'}`,
+            summary: buildChapterSummary(entriesInChapter, monthLabels),
             startTurn,
             endTurn,
             monthLabels,

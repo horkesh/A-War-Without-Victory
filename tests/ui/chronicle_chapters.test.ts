@@ -48,6 +48,20 @@ describe('buildChronicleChapters', () => {
         expect(chapters[0].sourceEntryIds).toEqual(['chronicle-rbih-2']);
         expect(chapters[1].sourceEntryIds).toEqual(['chronicle-rbih-14']);
         expect(chapters[0].sourceAftermathTurns).toEqual([2]);
+        expect(chapters[0].summary).toBe('Across Apr 1992, 1 sourced entry makes politics the dominant thread; no headline records anchor the chapter.');
+    });
+
+    it('writes deterministic prose summaries from chapter entry types and headline count', () => {
+        const chapters = buildChronicleChapters(
+            [
+                entry(1, 'Cost of the week', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
+                entry(2, 'Front line holds', { type: 'combat' } as Partial<ChronicleEntry>),
+                entry(7, 'Another costly week', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
+            ],
+            { player_faction: 'RBiH', military: { war_timeline: timeline } },
+        );
+
+        expect(chapters[0].summary).toBe('Across Apr 1992-May 1992, 3 sourced entries make cost the dominant thread; 2 headline records anchor the chapter.');
     });
 
     it('uses the selected player faction instead of all-faction timeline windows', () => {

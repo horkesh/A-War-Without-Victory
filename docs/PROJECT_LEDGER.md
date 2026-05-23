@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(chronicle): write prose chapter summaries
+
+**Type:** UI read-model/presentation enhancement. No sim behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
+
+**Why:** Chronicle chapter mode already existed, but its chapter summaries were generic entry counts. Rating #31 still correctly described the Chronicle as too ledger-like.
+
+**Change:** `buildChronicleChapters(...)` now derives deterministic prose summaries from source entry count, dominant entry type, headline count, and month range. Sensitive-history signal flags still come only from source entries; the prose summary does not invent atrocity/rupture labels.
+
+**Determinism / output impact:** UI read-model only from existing Chronicle entries. No saved state or generated run artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\chronicle_chapters.test.ts --reporter=dot` failed on generic summaries; focused pack `npx.cmd vitest run tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_guardrails.test.ts --reporter=dot` PASS 9/9 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md`.
+
+**Roadmap delta:** Advances Rating #31 by making existing Chronicle chapters read less like raw entry counts. Larger session-end chapter recap remains a future synthesis layer.
+
+---
+
 ## [2026-05-23] ui(aftermath): add tone-authored narrative line
 
 **Type:** UI read-model/presentation enhancement. No sim behavior, turn-summary schema, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or output contract changed.
