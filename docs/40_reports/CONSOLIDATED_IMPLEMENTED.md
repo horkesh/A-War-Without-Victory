@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Decision Room read-model chrome localization:** [implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_READ_MODEL_CHROME_LOCALIZATION.md) - Decision Room category lenses, command lanes, product-loop labels/fallbacks, count summaries, source-handoff labels, and handoff actions now render through the English/BCS substrate.
+
 **Latest BCS Presidential Inbox chrome localization:** [implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_INBOX_CHROME_LOCALIZATION.md) - Presidential Inbox panel title, situation divider, severity/type badges, notification dismiss, update chip, opening briefs, quiet state, and toolbar badge titles now render through the English/BCS substrate.
 
 **Latest BCS Decision Room panel chrome localization:** [implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md](implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md) - Army HQ Decision Room panel title, advanced toggle/metrics, loop headings, dossier labels, source handoff headings, and review-before-advance section labels now render through the English/BCS substrate.

@@ -8,7 +8,7 @@ import {
 } from './turnAftermath';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 
 export type PresidentialDecisionRoomCategory =
   | 'decision'
@@ -187,15 +187,15 @@ const CATEGORY_RANK: Record<PresidentialDecisionRoomCategory, number> = {
   memory: 7,
 };
 
-const CATEGORY_LABEL: Record<PresidentialDecisionRoomCategory, string> = {
-  decision: 'Decision',
-  counter_offer: 'Counter',
-  opportunity: 'Opportunity',
-  operational: 'SITREP',
-  briefing: 'Briefing',
-  turn: 'Turn',
-  cost: 'Cost',
-  memory: 'Memory',
+const CATEGORY_LABEL_KEY: Record<PresidentialDecisionRoomCategory, MessageKey> = {
+  decision: 'decisionRoom.category.decision',
+  counter_offer: 'decisionRoom.category.counterOffer',
+  opportunity: 'decisionRoom.category.opportunity',
+  operational: 'decisionRoom.category.operational',
+  briefing: 'decisionRoom.category.briefing',
+  turn: 'decisionRoom.category.turn',
+  cost: 'decisionRoom.category.cost',
+  memory: 'decisionRoom.category.memory',
 };
 
 const CATEGORY_ORDER = (Object.keys(CATEGORY_RANK) as PresidentialDecisionRoomCategory[])
@@ -762,17 +762,24 @@ interface SourceHandoffAccumulator extends SourceHandoffDescriptor {
 }
 
 function armyHqTabLabel(tab: ArmyHQTab): string {
-  if (tab === 'briefing') return 'Army HQ Briefing';
-  if (tab === 'summary') return 'Army HQ Summary';
-  if (tab === 'records') return 'Army HQ Records';
-  return 'Army HQ Personnel';
+  if (tab === 'briefing') return t('decisionRoom.source.armyHqBriefing');
+  if (tab === 'summary') return t('decisionRoom.source.armyHqSummary');
+  if (tab === 'records') return t('decisionRoom.source.armyHqRecords');
+  return t('decisionRoom.source.armyHqPersonnel');
 }
 
 function armyHqRecordsLabel(recordsSubTab: ArmyHQRecordsSubTab): string {
-  if (recordsSubTab === 'aftermath') return 'Army HQ Records';
-  if (recordsSubTab === 'aar') return 'Army HQ AAR Records';
-  if (recordsSubTab === 'ops') return 'Army HQ Operations Records';
-  return 'Army HQ Opportunity Records';
+  if (recordsSubTab === 'aftermath') return t('decisionRoom.source.armyHqRecords');
+  if (recordsSubTab === 'aar') return t('decisionRoom.source.armyHqAarRecords');
+  if (recordsSubTab === 'ops') return t('decisionRoom.source.armyHqOperationsRecords');
+  return t('decisionRoom.source.armyHqOpportunityRecords');
+}
+
+function armyHqTabActionLabel(tab: ArmyHQTab): string {
+  if (tab === 'briefing') return t('decisionRoom.action.openBriefing');
+  if (tab === 'summary') return t('decisionRoom.action.openSummary');
+  if (tab === 'records') return t('decisionRoom.action.openRecords');
+  return t('decisionRoom.action.openPersonnel');
 }
 
 function describeSourceHandoffTarget(
@@ -782,50 +789,52 @@ function describeSourceHandoffTarget(
     return {
       id: `army-hq-${target.tab}`,
       label: armyHqTabLabel(target.tab),
-      actionLabel: `Open ${target.tab === 'briefing' ? 'Briefing' : target.tab === 'summary' ? 'Summary' : target.tab === 'records' ? 'Records' : 'Personnel'}`,
+      actionLabel: armyHqTabActionLabel(target.tab),
     };
   }
   if (target.kind === 'army-hq-records') {
     return {
       id: `army-hq-records-${target.recordsSubTab}`,
       label: armyHqRecordsLabel(target.recordsSubTab),
-      actionLabel: 'Open Records',
+      actionLabel: t('decisionRoom.action.openRecords'),
     };
   }
   if (target.kind === 'army-hq-aftermath-record') {
     return {
       id: 'turn-aftermath-records',
-      label: 'Turn Aftermath Records',
-      actionLabel: 'Open Turn Record',
+      label: t('decisionRoom.source.turnAftermathRecords'),
+      actionLabel: t('decisionRoom.action.openTurnRecord'),
     };
   }
   if (target.kind === 'army-hq-corps-briefing') {
     return {
       id: 'army-hq-corps-briefings',
-      label: 'Corps Briefings',
-      actionLabel: 'Inspect Corps',
+      label: t('decisionRoom.source.corpsBriefings'),
+      actionLabel: t('decisionRoom.action.inspectCorps'),
     };
   }
   if (target.kind === 'counter-offer') {
     return {
       id: 'counter-offer-docket',
-      label: 'Counter-offer docket',
-      actionLabel: 'Review Counter',
+      label: t('decisionRoom.source.counterOfferDocket'),
+      actionLabel: t('decisionRoom.action.reviewCounter'),
     };
   }
   if (target.kind === 'chronicle') {
     return {
       id: 'chronicle',
-      label: 'Chronicle',
-      actionLabel: 'Open Chronicle',
+      label: t('decisionRoom.source.chronicle'),
+      actionLabel: t('decisionRoom.action.openChronicle'),
     };
   }
   return null;
 }
 
 function sourceHandoffSummary(count: number, urgentCount: number): string {
-  const itemText = `${count} ${pluralize(count, 'item')}`;
-  return urgentCount > 0 ? `${itemText} / ${urgentCount} urgent` : itemText;
+  const itemLabel = t(count === 1 ? 'decisionRoom.noun.item.one' : 'decisionRoom.noun.item.many');
+  return urgentCount > 0
+    ? t('decisionRoom.summary.withUrgent', { count, noun: itemLabel, urgentCount })
+    : t('decisionRoom.summary.countOnly', { count, noun: itemLabel });
 }
 
 export function buildPresidentialDecisionRoomSourceHandoffs(
@@ -883,26 +892,32 @@ function buildLens(
     count: cards.length,
     urgentCount: cards.filter(isUrgentCard).length,
     topCardId: topCard?.id ?? null,
-    actionLabel: topCard?.actionLabel ?? 'Review',
+    actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.review'),
     navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
   };
 }
 
 function buildLenses(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRoomLens[] {
   if (cards.length === 0) return [];
-  const lenses: PresidentialDecisionRoomLens[] = [buildLens('all', 'All', cards)];
+  const lenses: PresidentialDecisionRoomLens[] = [buildLens('all', t('decisionRoom.panel.lens.all'), cards)];
   for (const category of CATEGORY_ORDER) {
     const categoryCards = cards.filter((card) => card.category === category);
     if (categoryCards.length === 0) continue;
-    lenses.push(buildLens(category, CATEGORY_LABEL[category], categoryCards));
+    lenses.push(buildLens(category, t(CATEGORY_LABEL_KEY[category]), categoryCards));
   }
   return lenses;
 }
 
-function questionSummary(totalCount: number, urgentCount: number, noun: string): string {
-  if (totalCount === 0) return `0 ${noun}`;
-  if (urgentCount > 0) return `${totalCount} ${noun} / ${urgentCount} urgent`;
-  return `${totalCount} ${noun}`;
+function localizedNoun(nounKey: MessageKey, count: number): string {
+  return t(nounKey, { count });
+}
+
+function summaryCount(totalCount: number, urgentCount: number, nounKey: MessageKey): string {
+  const noun = localizedNoun(nounKey, totalCount);
+  if (urgentCount > 0 && totalCount > 0) {
+    return t('decisionRoom.summary.withUrgent', { count: totalCount, noun, urgentCount });
+  }
+  return t('decisionRoom.summary.countOnly', { count: totalCount, noun });
 }
 
 function buildCommandQuestion(
@@ -915,7 +930,7 @@ function buildCommandQuestion(
     fallbackActionLabel?: string;
     limit?: number;
     headlineOverride?: string;
-    noun?: string;
+    nounKey?: MessageKey;
   },
 ): PresidentialDecisionRoomCommandQuestion {
   const visibleCards = cards.slice(0, options.limit ?? 3);
@@ -926,12 +941,12 @@ function buildCommandQuestion(
     label,
     headline: options.headlineOverride ?? topCard?.title ?? options.fallbackHeadline,
     summary: cards.length > 0
-      ? questionSummary(cards.length, urgentCount, options.noun ?? 'items')
+      ? summaryCount(cards.length, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
       : options.fallbackSummary,
     count: cards.length,
     urgentCount,
     cardIds: visibleCards.map((card) => card.id),
-    actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel ?? 'Review',
+    actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel ?? t('decisionRoom.action.review'),
     navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
   };
 }
@@ -945,7 +960,7 @@ function dedupeCommandQuestionHeadlines(
       seenHeadlines.add(question.headline);
       return question;
     }
-    const headline = `${question.label}: ${question.headline}`;
+    const headline = t('decisionRoom.duplicateHeadline', { label: question.label, headline: question.headline });
     seenHeadlines.add(headline);
     return { ...question, headline };
   });
@@ -961,43 +976,41 @@ function buildCommandQuestions(
   const frontCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
 
   return dedupeCommandQuestionHeadlines([
-    buildCommandQuestion('urgent', 'Urgent', urgentCards, {
-      fallbackHeadline: 'No urgent desk item',
-      fallbackSummary: '0 urgent',
-      noun: 'urgent',
+    buildCommandQuestion('urgent', t('decisionRoom.command.urgent'), urgentCards, {
+      fallbackHeadline: t('decisionRoom.command.noUrgentDeskItem'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.urgent'),
+      nounKey: 'decisionRoom.noun.urgent',
     }),
-    buildCommandQuestion('pending', 'Decisions', pendingCards, {
-      fallbackHeadline: 'No pending decision',
-      fallbackSummary: '0 decisions',
-      noun: 'decisions',
+    buildCommandQuestion('pending', t('decisionRoom.command.decisions'), pendingCards, {
+      fallbackHeadline: t('decisionRoom.command.noPendingDecision'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.decision.many'),
+      nounKey: 'decisionRoom.noun.decision.many',
     }),
-    buildCommandQuestion('fronts', 'Fronts', frontCards, {
-      fallbackHeadline: 'No front alarm',
-      fallbackSummary: '0 front cues',
-      noun: 'front cues',
+    buildCommandQuestion('fronts', t('decisionRoom.command.fronts'), frontCards, {
+      fallbackHeadline: t('decisionRoom.command.noFrontAlarm'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.frontCue.many'),
+      nounKey: 'decisionRoom.noun.frontCue.many',
     }),
-    buildCommandQuestion('inspect', 'Inspect', inspectNext, {
-      fallbackHeadline: 'No inspection handoff',
-      fallbackSummary: '0 handoffs',
-      fallbackActionLabel: 'Inspect',
+    buildCommandQuestion('inspect', t('decisionRoom.command.inspect'), inspectNext, {
+      fallbackHeadline: t('decisionRoom.command.noInspectionHandoff'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.handoff.many'),
+      fallbackActionLabel: t('decisionRoom.action.inspect'),
       limit: 5,
-      noun: 'handoffs',
+      nounKey: 'decisionRoom.noun.handoff.many',
     }),
-    buildCommandQuestion('advance', 'Advance', advanceReadiness.items, {
+    buildCommandQuestion('advance', t('decisionRoom.command.advance'), advanceReadiness.items, {
       fallbackHeadline: advanceReadiness.headline,
-      fallbackSummary: '0 advance items',
-      fallbackActionLabel: 'Review Advance',
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.advanceItem.many'),
+      fallbackActionLabel: t('decisionRoom.action.reviewAdvance'),
       limit: 4,
       headlineOverride: advanceReadiness.headline,
-      noun: 'advance items',
+      nounKey: 'decisionRoom.noun.advanceItem.many',
     }),
   ]);
 }
 
-function loopStepSummary(count: number, urgentCount: number, noun: string): string {
-  if (count === 0) return `0 ${noun}`;
-  if (urgentCount > 0) return `${count} ${noun} / ${urgentCount} urgent`;
-  return `${count} ${noun}`;
+function loopStepSummary(count: number, urgentCount: number, nounKey: MessageKey): string {
+  return summaryCount(count, urgentCount, nounKey);
 }
 
 function buildCardLoopStep(
@@ -1009,7 +1022,7 @@ function buildCardLoopStep(
     fallbackSummary: string;
     fallbackActionLabel: string;
     fallbackNavigationTarget?: PresidentialDecisionRoomNavigationTarget;
-    noun?: string;
+    nounKey?: MessageKey;
   },
 ): PresidentialDecisionRoomLoopStep {
   const topCard = cards[0] ?? null;
@@ -1019,7 +1032,7 @@ function buildCardLoopStep(
     label,
     headline: topCard?.title ?? options.fallbackHeadline,
     summary: cards.length > 0
-      ? loopStepSummary(cards.length, urgentCount, options.noun ?? 'items')
+      ? loopStepSummary(cards.length, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
       : options.fallbackSummary,
     count: cards.length,
     urgentCount,
@@ -1038,15 +1051,15 @@ function buildReportLoopStep(
   const urgentCount = turnCards.filter(isUrgentCard).length;
   return {
     id: 'report',
-    label: 'Report',
-    headline: turnCards[0]?.title ?? (latestTurn != null ? `Latest turn record: T${latestTurn}` : 'No turn records yet'),
+    label: t('decisionRoom.loop.report'),
+    headline: turnCards[0]?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { turn: latestTurn }) : t('decisionRoom.loop.noTurnRecordsYet')),
     summary: recordCount > 0
-      ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}${urgentCount > 0 ? ` / ${urgentCount} urgent` : ''}`
-      : '0 records',
+      ? summaryCount(recordCount, urgentCount, 'decisionRoom.noun.recordedTurn.many')
+      : summaryCount(0, 0, 'decisionRoom.noun.record.many'),
     count: recordCount,
     urgentCount,
     cardIds: turnCards.map((card) => card.id),
-    actionLabel: 'Turn Records',
+    actionLabel: t('decisionRoom.action.turnRecords'),
     navigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
   };
 }
@@ -1056,12 +1069,12 @@ function buildCostLoopStep(
   costCards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLoopStep {
   const recordCount = state.turnSummaries?.length ?? 0;
-  const cardStep = buildCardLoopStep('cost', 'Cost', costCards, {
-    fallbackHeadline: recordCount > 0 ? 'Campaign cost archive available' : 'No campaign cost yet',
-    fallbackSummary: recordCount > 0 ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}` : '0 cost records',
-    fallbackActionLabel: 'Turn Records',
+  const cardStep = buildCardLoopStep('cost', t('decisionRoom.loop.cost'), costCards, {
+    fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.campaignCostArchiveAvailable') : t('decisionRoom.loop.noCampaignCostYet'),
+    fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.costRecord.many'),
+    fallbackActionLabel: t('decisionRoom.action.turnRecords'),
     fallbackNavigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
-    noun: 'cost items',
+    nounKey: 'decisionRoom.noun.costItem.many',
   });
   if (costCards.length > 0) return cardStep;
   return {
@@ -1075,12 +1088,12 @@ function buildJudgeLoopStep(
   memoryCards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLoopStep {
   const recordCount = state.turnSummaries?.length ?? 0;
-  const cardStep = buildCardLoopStep('judge', 'Judge', memoryCards, {
-    fallbackHeadline: recordCount > 0 ? 'Chronicle memory available' : 'No campaign memory yet',
-    fallbackSummary: recordCount > 0 ? `${recordCount} recorded ${pluralize(recordCount, 'turn')}` : '0 memory records',
-    fallbackActionLabel: 'Show Chronicle',
+  const cardStep = buildCardLoopStep('judge', t('decisionRoom.loop.judge'), memoryCards, {
+    fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.chronicleMemoryAvailable') : t('decisionRoom.loop.noCampaignMemoryYet'),
+    fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.memoryRecord.many'),
+    fallbackActionLabel: t('decisionRoom.action.showChronicle'),
     fallbackNavigationTarget: recordCount > 0 ? { kind: 'chronicle' } : { kind: 'none' },
-    noun: 'memory items',
+    nounKey: 'decisionRoom.noun.memoryItem.many',
   });
   if (memoryCards.length > 0) return cardStep;
   return {
@@ -1093,12 +1106,12 @@ function buildNextLoopStep(cards: PresidentialDecisionRoomCard[]): PresidentialD
   const nextCards = cards.filter((card) =>
     card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity' || isUrgentCard(card),
   );
-  return buildCardLoopStep('next', 'Next', nextCards.length > 0 ? nextCards : cards.slice(0, 1), {
-    fallbackHeadline: 'Return to the briefing',
-    fallbackSummary: '0 next actions',
-    fallbackActionLabel: 'Briefing',
+  return buildCardLoopStep('next', t('decisionRoom.loop.next'), nextCards.length > 0 ? nextCards : cards.slice(0, 1), {
+    fallbackHeadline: t('decisionRoom.loop.returnToBriefing'),
+    fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.nextAction.many'),
+    fallbackActionLabel: t('decisionRoom.action.briefing'),
     fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
-    noun: 'next items',
+    nounKey: 'decisionRoom.noun.nextItem.many',
   });
 }
 
@@ -1115,33 +1128,33 @@ function buildLoopSteps(
   const memoryCards = cards.filter((card) => card.category === 'memory');
 
   return [
-    buildCardLoopStep('brief', 'Brief', briefCards, {
-      fallbackHeadline: 'Open strategic briefing',
-      fallbackSummary: '0 brief cues',
-      fallbackActionLabel: 'War Summary',
+    buildCardLoopStep('brief', t('decisionRoom.loop.brief'), briefCards, {
+      fallbackHeadline: t('decisionRoom.loop.openStrategicBriefing'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.briefCue.many'),
+      fallbackActionLabel: t('decisionRoom.action.warSummary'),
       fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
-      noun: 'brief cues',
+      nounKey: 'decisionRoom.noun.briefCue.many',
     }),
-    buildCardLoopStep('inspect', 'Inspect', inspectNext, {
-      fallbackHeadline: 'No inspection handoff',
-      fallbackSummary: '0 handoffs',
-      fallbackActionLabel: 'Inspect',
-      noun: 'handoffs',
+    buildCardLoopStep('inspect', t('decisionRoom.loop.inspect'), inspectNext, {
+      fallbackHeadline: t('decisionRoom.command.noInspectionHandoff'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.handoff.many'),
+      fallbackActionLabel: t('decisionRoom.action.inspect'),
+      nounKey: 'decisionRoom.noun.handoff.many',
     }),
-    buildCardLoopStep('decide', 'Decide', decideCards, {
-      fallbackHeadline: 'No pending decision',
-      fallbackSummary: '0 decisions',
-      fallbackActionLabel: 'Review Queue',
+    buildCardLoopStep('decide', t('decisionRoom.loop.decide'), decideCards, {
+      fallbackHeadline: t('decisionRoom.command.noPendingDecision'),
+      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.decision.many'),
+      fallbackActionLabel: t('decisionRoom.action.reviewQueue'),
       fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
-      noun: 'decisions',
+      nounKey: 'decisionRoom.noun.decision.many',
     }),
     {
-      ...buildCardLoopStep('execute', 'Execute', advanceReadiness.items, {
+      ...buildCardLoopStep('execute', t('decisionRoom.loop.execute'), advanceReadiness.items, {
         fallbackHeadline: advanceReadiness.headline,
-        fallbackSummary: '0 advance items',
-        fallbackActionLabel: 'Review Advance',
+        fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.advanceItem.many'),
+        fallbackActionLabel: t('decisionRoom.action.reviewAdvance'),
         fallbackNavigationTarget: { kind: 'none' },
-        noun: 'advance items',
+        nounKey: 'decisionRoom.noun.advanceItem.many',
       }),
       headline: advanceReadiness.headline,
     },

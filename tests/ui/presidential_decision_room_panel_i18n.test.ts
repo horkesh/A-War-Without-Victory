@@ -66,7 +66,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     expect(screen.getByRole('button', { name: 'Sakrij napredno' })).toBeTruthy();
     expect(screen.getByText('Napredni sto')).toBeTruthy();
-    expect(screen.getByText('Hitno')).toBeTruthy();
+    expect(screen.getAllByText('Hitno').length).toBeGreaterThan(0);
     expect(screen.getByText('Pregled za napredovanje')).toBeTruthy();
     expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
   });
