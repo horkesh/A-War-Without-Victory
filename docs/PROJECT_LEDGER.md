@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(sector): use head cursors in split BFS queues
+
+**Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** EQ-1 still had local BFS queue-shift hotspots in sector split/build code. `Array.shift()` preserves FIFO semantics but reindexes the queue on each pop; these loops can use the existing deterministic head-cursor pattern without changing traversal order.
+
+**Change:** `src/sim/combat/sector_splitting.ts` `mergeUndersizedSectors(...)` friendly component precompute and `src/sim/combat/sector_building.ts` `walkEdgeChain(...)` now use `let head = 0; while (head < queue.length) { ... queue[head++] ... }`. `tests/sector_partition_instrumentation.test.ts` adds static guards against `.shift()` in those sector split BFS regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order and neighbor ordering are unchanged, so FIFO traversal order is identical.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts --reporter=dot` failed before implementation because the target sector BFS regions still contained `.shift()`. After implementation, focused sector tests passed 31/31; `npm.cmd run typecheck` passed; sector regression pack passed 67/67. Profiled 40w run with `PERF_PROFILE_SECTOR_PARTITION=true` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n2` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SECTOR_BFS_QUEUE_CURSOR.md`; `docs/40_reports/SECTOR_MASTER.md`.
+
+**Roadmap delta:** Another EQ-1 split-pieces compute-only sublane is closed. Remaining large sector perf work is same-invocation component/BFS reuse, then `:voronoi-repair`.
+
+---
+
 ## [2026-05-23] perf(sector): fold duplicate sector-slice edge sort
 
 **Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

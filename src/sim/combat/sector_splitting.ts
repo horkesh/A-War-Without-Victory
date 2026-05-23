@@ -493,8 +493,9 @@ export function mergeUndersizedSectors(
             if (friendlyCompOf.has(start)) continue;
             const visited = new Set<string>([start]);
             const queue = [start];
-            while (queue.length > 0) {
-                const cur = queue.shift()!;
+            let head = 0;
+            while (head < queue.length) {
+                const cur = queue[head++]!;
                 for (const nb of (caseAdj.get(cur as Osid) ?? [])) {
                     if (!visited.has(nb) && friendlyOsids.has(nb)) {
                         visited.add(nb);

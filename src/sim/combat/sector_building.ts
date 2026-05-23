@@ -453,8 +453,9 @@ export function walkEdgeChain(
     const queue: string[] = [start];
     visited.add(start);
 
-    while (queue.length > 0) {
-        const eid = queue.shift()!;
+    let head = 0;
+    while (head < queue.length) {
+        const eid = queue[head++]!;
         chain.push(eid);
         const neighbors = (adj.get(eid) ?? []).filter(n => edgeSet.has(n) && !visited.has(n));
         neighbors.sort(strictCompare);
