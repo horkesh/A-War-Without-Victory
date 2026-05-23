@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Verdict outcome-class localization** | [implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md) - rich `VerdictScreen` faction-tab and report outcome-class badges now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict milestone localization** | [implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_MILESTONE_LOCALIZATION.md) - rich `VerdictScreen` milestone-comparison chrome and fallback duration-row labels now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict scene-prose localization** | [implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md) - deterministic verdict scene headlines, subheadlines, and default Cost Ledger fallback/totals prose now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict share-summary localization** | [implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md) - verdict share-summary wrapper text and outcome-class labels now render through the existing English/BCS localization substrate. |

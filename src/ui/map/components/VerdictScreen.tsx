@@ -37,16 +37,17 @@ import { t, useLocale, type MessageKey } from '../i18n';
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function formatOutcomeClass(oc: string | undefined): string {
-    const labels: Record<string, string> = {
-        strategic_success: 'Strategic Success',
-        survival: 'Survival',
-        negotiated_escape: 'Negotiated Escape',
-        pyrrhic_success: 'Pyrrhic Success',
-        hollow_victory: 'Hollow Victory',
-        failure: 'Failure',
-        collapse: 'Collapse',
+    const labels: Record<string, MessageKey> = {
+        strategic_success: 'verdict.outcome.strategicSuccess',
+        survival: 'verdict.outcome.survival',
+        negotiated_escape: 'verdict.outcome.negotiatedEscape',
+        pyrrhic_success: 'verdict.outcome.pyrrhicSuccess',
+        hollow_victory: 'verdict.outcome.hollowVictory',
+        failure: 'verdict.outcome.failure',
+        collapse: 'verdict.outcome.collapse',
     };
-    return labels[oc ?? ''] ?? 'Unknown';
+    const key = labels[oc ?? ''];
+    return key ? t(key) : t('verdict.outcome.unknown');
 }
 
 export function getOutcomeClassStyle(oc: string | undefined): string {

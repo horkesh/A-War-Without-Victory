@@ -262,6 +262,8 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Signal cijene')).toBeDefined();
         expect(screen.getByText('Sazetak za dijeljenje')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
+        expect(screen.queryByText('Survival')).toBeNull();
+        expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Prihvaceni paketi:')).toBeDefined();
         expect(screen.getByText('Odbijeni paketi:')).toBeDefined();

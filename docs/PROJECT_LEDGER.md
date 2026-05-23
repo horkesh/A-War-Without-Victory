@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict outcome-class badges
+
+**Type:** Rich `VerdictScreen` outcome-class localization slice. No simulation behavior, combat math, operation behavior, verdict scoring, outcome classification data, faction grades, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Reused existing English/BCS `verdict.outcome.*` message keys. `VerdictScreen.formatOutcomeClass(...)` now renders localized outcome-class labels for faction-tab badges and the selected-faction report badge instead of using a component-local English label map.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict output, scoring output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered two `Survival` badges. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Compatibility pack `npx.cmd vitest run tests\ui\endgame_presentation_proof.test.ts tests\ui\verdict_share_summary.test.ts --reporter=dot` passed 32/32.
+
+**Artifacts:** `src/ui/map/components/VerdictScreen.tsx`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_OUTCOME_CLASS_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict milestone comparison
 
 **Type:** Rich `VerdictScreen` milestone-comparison localization slice. No simulation behavior, combat math, operation behavior, milestone comparison truth, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
