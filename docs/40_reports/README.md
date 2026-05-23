@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Settlement Timeline localization** | [implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md](implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md) - Settlement timeline dates, empty state, and component-owned casualty row now render through deterministic English/BCS localization. |
 | **Latest BCS War Planning map date formatting** | [implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md](implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md) - War Planning map turn-date labels now use deterministic English/BCS short month tables keyed by active locale. |
 | **Latest BCS Warroom date formatting** | [implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md](implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md) - Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale. |
 | **Latest BCS map shared date formatting** | [implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md](implemented/20260523_BCS_MAP_SHARED_DATE_FORMATTING.md) - Tactical-map shared turn date labels now use deterministic English/BCS short month tables keyed by active locale. |

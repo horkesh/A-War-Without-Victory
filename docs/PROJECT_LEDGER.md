@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Settlement Timeline chrome
+
+**Type:** Settlement Timeline localization slice. No event collection, event ordering, settlement control, battle data, casualty values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Replaced the Settlement Timeline hardwired English short-month array with deterministic English/BCS short month tables keyed by the active UI locale. The no-events empty state and component-owned casualty row label now render through the English/BCS message substrate. Event titles/details remain source-authored.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; timeline grouping, event arrays, casualty values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\settlement_timeline_i18n.test.ts --reporter=dot` failed first because `formatSettlementTimelineTurnDate` was not exposed; the casualty-row addition then failed while BCS mode still emitted English casualty labels. Green rerun passed 3/3. Related `npx.cmd vitest run tests\ui\settlement_timeline_i18n.test.ts tests\ui\war_planning_map_date_i18n.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SettlementTimeline.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/settlement_timeline_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize War Planning map date labels
 
 **Type:** War Planning map date-format localization slice. No map layer behavior, settlement control, turn arithmetic, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

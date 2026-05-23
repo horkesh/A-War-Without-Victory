@@ -51,6 +51,8 @@ export const enMessages = {
     'settings.close': 'Close',
     'settings.close.ariaLabel': 'Close settings',
     'settings.experimentalFallbackProbe': 'Experimental',
+    'settlementTimeline.empty': 'No recorded events at this settlement.',
+    'settlementTimeline.casualties': 'Casualties: {attacker} att / {defender} def',
     'pause.title': 'Paused',
     'pause.resumeShortcut': 'ESC Resume',
     'pause.resume': 'Resume',

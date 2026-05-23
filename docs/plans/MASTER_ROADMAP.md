@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Settlement Timeline):** Settlement timeline date labels, no-events empty state, and component-owned casualty row now render through deterministic English/BCS localization while event titles/details remain source-authored. Report: `docs/40_reports/implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (War Planning map date labels):** War Planning map turn-date labels now use deterministic English/BCS short month tables keyed by active locale while preserving turn/date arithmetic and map interaction behavior. Settlement Timeline remains the next local date-helper target. Report: `docs/40_reports/implemented/20260523_BCS_WAR_PLANNING_MAP_DATE_FORMATTING.md`. On top of:
 
 **Localization addendum 2026-05-23 (Warroom date labels):** Warroom date, month-year, week, and short toolbar labels now use deterministic English/BCS month tables keyed by active locale while preserving scenario-start-date arithmetic and ticker-turn conversion. War Planning map and Settlement Timeline local helpers remain follow-up date-formatting targets. Report: `docs/40_reports/implemented/20260523_BCS_WARROOM_DATE_FORMATTING.md`. On top of:

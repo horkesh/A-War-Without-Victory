@@ -52,6 +52,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'settings.crashDiagnostics.exportedAriaLabel': 'Izvezeni JSON dijagnostike rusenja',
     'settings.close': 'Zatvori',
     'settings.close.ariaLabel': 'Zatvori postavke',
+    'settlementTimeline.empty': 'Nema zabiljezenih dogadjaja za ovo naselje.',
+    'settlementTimeline.casualties': 'Gubici: {attacker} nap / {defender} odb',
     'pause.title': 'Pauzirano',
     'pause.resumeShortcut': 'ESC Nastavi',
     'pause.resume': 'Nastavi',
