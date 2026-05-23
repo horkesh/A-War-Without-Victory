@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize operations planning parameters
+
+**Type:** Operations-planning chrome localization slice. No operation plan state, phase-gate logic, commander selection, objective discovery, brigade assignment, artillery-preparation behavior, operation submission, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `opsPlanning.*` message keys and routed phase-gate prerequisite messages plus `PlanParameters` operation name label, type/tempo/tolerance/support group labels/descriptions, pill labels/subtitles/title tooltips, artillery-preparation toggle, and support detail copy through the localization substrate.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; phase gate conditions, plan mutations, objective/brigade lists, artillery-preparation values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\ops_planning_target_discovery.test.ts --reporter=dot` failed while BCS mode still returned English phase-gate messages and rendered English PlanParameters chrome. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\ops_planning_target_discovery.test.ts tests\ui\accessibility_form_labels.test.ts tests\ui\gui_polish_typography_floor.test.ts tests\ui\ops_planning_draft_guard.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ops_modal/phaseGate.ts`, `src/ui/map/components/ops_modal/PlanParameters.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/ops_planning_target_discovery.test.ts`, `tests/ui/gui_polish_typography_floor.test.ts`, `docs/40_reports/implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize convoy decision chrome
 
 **Type:** Humanitarian convoy decision localization slice. No convoy lifecycle evaluation, decision staging IPC, player-decision gating, pending convoy queues, supply effects, IVP effects, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

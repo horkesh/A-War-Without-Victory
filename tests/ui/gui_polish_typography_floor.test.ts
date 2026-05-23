@@ -20,7 +20,7 @@ describe('GUI polish typography floor', () => {
   it('makes the PresidentialToolbar AUTH gauge discoverable beyond a title tooltip', () => {
     const toolbar = read('src/ui/map/components/PresidentialToolbar.tsx');
 
-    expect(toolbar).toContain('aria-label={`Command Authority: ${current}/${max}`');
+    expect(toolbar).toContain("t('toolbar.commandAuthority.ariaLabel', { current, max })");
     expect(toolbar).toContain('aria-describedby="command-authority-description"');
     expect(toolbar).toContain('id="command-authority-description"');
     expect(toolbar).not.toContain('<span className="text-[8px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>');

@@ -6,10 +6,12 @@ import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { OpsPlanState } from '../../src/ui/map/components/ops_modal/types.js';
 import { PlanPhase } from '../../src/ui/map/components/ops_modal/PlanPhase.js';
+import { PlanParameters } from '../../src/ui/map/components/ops_modal/PlanParameters.js';
 import { ObjectiveList } from '../../src/ui/map/components/ops_modal/ObjectiveList.js';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage } from '../../src/ui/map/components/ops_modal/phaseGate.js';
 import { chooseOpsPlanningSector } from '../../src/ui/map/components/ops_modal/stagingChoice.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -75,6 +77,7 @@ function makeState(): LoadedGameState {
 describe('ops planning target discovery', () => {
     afterEach(() => {
         cleanup();
+        setLocale('en');
         useGameStore.setState(useGameStore.getInitialState());
     });
 
@@ -194,6 +197,42 @@ describe('ops planning target discovery', () => {
         expect(getOpsPhaseAdvanceMessage('plan', true, makePlan({
             axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: [], objectives: ['enemy_front'] }],
         }), false)).toBe('Add at least 1 objective and 1 brigade to your axis.');
+    });
+
+    it('localizes phase gate messages in BCS mode', () => {
+        setLocale('bcs');
+        const planned = makePlan({
+            axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+        });
+
+        expect(getOpsPhaseGateMessage('plan', false, makePlan(), false)).toBe('Prvo izaberite komandanta.');
+        expect(getOpsPhaseGateMessage('g2_assessment', true, makePlan(), false))
+            .toBe('Dodajte najmanje 1 cilj i 1 brigadu na osu.');
+        expect(getOpsPhaseGateMessage('authorize', true, planned, false)).toBe('Prvo pregledajte procjenu G-2.');
+        expect(getOpsPhaseAdvanceMessage('plan', true, makePlan({
+            axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: [], objectives: ['enemy_front'] }],
+        }), false)).toBe('Dodajte najmanje 1 cilj i 1 brigadu na osu.');
+    });
+
+    it('localizes operation parameter strip chrome in BCS mode', () => {
+        setLocale('bcs');
+
+        render(createElement(PlanParameters, { plan: makePlan(), onUpdate: vi.fn() }));
+
+        expect(screen.getByLabelText('Naziv')).toBeTruthy();
+        expect(screen.getByText('Tip')).toBeTruthy();
+        expect(screen.getByText('Vrsta operacije')).toBeTruthy();
+        expect(screen.getByText('Jedan sektorski pritisak')).toBeTruthy();
+        expect(screen.getByText('Tempo')).toBeTruthy();
+        expect(screen.getByText('Brzina prema gubicima')).toBeTruthy();
+        expect(screen.getByText('Uravnotezen pristup')).toBeTruthy();
+        expect(screen.getByText('Tolerancija')).toBeTruthy();
+        expect(screen.getByText('Kada brigade prestaju napadati?')).toBeTruthy();
+        expect(screen.getByText('Nastavi kroz gubitke (1.0x)')).toBeTruthy();
+        expect(screen.getByText('Podrska')).toBeTruthy();
+        expect(screen.getByText('Prednapadna vatrena podrska')).toBeTruthy();
+        expect(screen.getByText('Bez bombardovanja')).toBeTruthy();
+        expect(screen.queryByText('What kind of operation?')).toBeNull();
     });
 
     it('CorpsDetail defaults ops planning to a forward sector before falling back to index zero', () => {

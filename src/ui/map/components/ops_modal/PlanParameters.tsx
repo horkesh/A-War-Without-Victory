@@ -4,7 +4,7 @@
  * Each group in a visually distinct bordered box.
  */
 import type { OpType, Tempo, Tolerance, OpsPlanState } from './types';
-import { OP_TYPE_LABELS, TEMPO_LABELS, TOLERANCE_LABELS } from './types';
+import { t, type MessageKey } from '../../i18n';
 
 interface PlanParametersProps {
     plan: OpsPlanState;
@@ -12,42 +12,59 @@ interface PlanParametersProps {
 }
 
 // WP1b: Per-pill subtitles
-const PILL_SUBTITLES: Record<string, string> = {
+const PILL_SUBTITLE_KEYS: Record<string, MessageKey> = {
     // OpType
-    sector_attack: 'One sector push',
-    general_offensive: 'Corps-wide assault',
-    strategic_defense: 'Hold and absorb',
-    reorganization: 'Rest and refit',
-    feint: 'Fake attack, draw reserves',
-    probe: 'Recon in force',
+    sector_attack: 'opsPlanning.param.subtitle.sectorAttack',
+    general_offensive: 'opsPlanning.param.subtitle.generalOffensive',
+    strategic_defense: 'opsPlanning.param.subtitle.strategicDefense',
+    reorganization: 'opsPlanning.param.subtitle.reorganization',
+    feint: 'opsPlanning.param.subtitle.feint',
+    probe: 'opsPlanning.param.subtitle.probe',
     // Tempo
-    methodical: 'Slower, fewer losses',
-    standard: 'Balanced approach',
-    all_out: 'Fast, heavy casualties',
+    methodical: 'opsPlanning.param.subtitle.methodical',
+    standard: 'opsPlanning.param.subtitle.standard',
+    all_out: 'opsPlanning.param.subtitle.allOut',
     // Tolerance
-    decisive_victory: 'Only if overwhelming (2.0x)',
-    victory: 'Only if clear win (1.5x)',
-    costly_victory: 'Continue through losses (1.0x)',
-    stalemate: 'Continue through draws (0.7x)',
-    repulsed: '\u26A0 Attack into defeat (0.5x)',
+    decisive_victory: 'opsPlanning.param.subtitle.decisiveVictory',
+    victory: 'opsPlanning.param.subtitle.victory',
+    costly_victory: 'opsPlanning.param.subtitle.costlyVictory',
+    stalemate: 'opsPlanning.param.subtitle.stalemate',
+    repulsed: 'opsPlanning.param.subtitle.repulsed',
 };
 
 // WP1c: title attributes for each pill
-const PILL_TITLES: Record<string, string> = {
-    sector_attack: 'Sector Attack \u2014 Commits 3-8 brigades to push on a single sector front. Lowest risk. 4-8 turns typical.',
-    general_offensive: 'General Offensive \u2014 Corps-wide multi-axis assault. High risk, high reward. All sectors engaged.',
-    strategic_defense: 'Strategic Defense \u2014 Hold current positions and absorb enemy attacks. Minimal offensive action.',
-    reorganization: 'Reorganization \u2014 Pull back to rest and refit. No combat operations. Recovers cohesion and fatigue.',
-    feint: 'Feint \u2014 Simulated attack to draw enemy reserves away from the real schwerpunkt.',
-    probe: 'Probe \u2014 Reconnaissance in force. Tests enemy strength with limited commitment.',
-    methodical: 'Methodical \u2014 Deliberate pace with thorough preparation. Lower casualties but slower progress.',
-    standard: 'Standard \u2014 Normal operational tempo. Balanced between speed and losses.',
-    all_out: 'All-Out \u2014 Maximum speed and aggression. Heavy casualties expected.',
-    decisive_victory: 'Decisive Only \u2014 Brigades only attack when force ratio exceeds 2.0x. Very conservative.',
-    victory: 'Victory Required \u2014 Brigades attack when force ratio exceeds 1.5x. Conservative.',
-    costly_victory: 'Accept Costly \u2014 Brigades continue attacking through costly outcomes (1.0x ratio). Standard tolerance.',
-    stalemate: 'Accept Stalemate \u2014 Brigades press even through inconclusive outcomes (0.7x ratio). Aggressive.',
-    repulsed: 'REGARDLESS \u2014 Brigades attack even into predicted defeat (0.5x ratio). Expect heavy losses. Last resort only.',
+const PILL_TITLE_KEYS: Record<string, MessageKey> = {
+    sector_attack: 'opsPlanning.param.title.sectorAttack',
+    general_offensive: 'opsPlanning.param.title.generalOffensive',
+    strategic_defense: 'opsPlanning.param.title.strategicDefense',
+    reorganization: 'opsPlanning.param.title.reorganization',
+    feint: 'opsPlanning.param.title.feint',
+    probe: 'opsPlanning.param.title.probe',
+    methodical: 'opsPlanning.param.title.methodical',
+    standard: 'opsPlanning.param.title.standard',
+    all_out: 'opsPlanning.param.title.allOut',
+    decisive_victory: 'opsPlanning.param.title.decisiveVictory',
+    victory: 'opsPlanning.param.title.victory',
+    costly_victory: 'opsPlanning.param.title.costlyVictory',
+    stalemate: 'opsPlanning.param.title.stalemate',
+    repulsed: 'opsPlanning.param.title.repulsed',
+};
+
+const PILL_LABEL_KEYS: Record<string, MessageKey> = {
+    sector_attack: 'opsPlanning.param.label.sectorAttack',
+    general_offensive: 'opsPlanning.param.label.generalOffensive',
+    strategic_defense: 'opsPlanning.param.label.strategicDefense',
+    reorganization: 'opsPlanning.param.label.reorganization',
+    feint: 'opsPlanning.param.label.feint',
+    probe: 'opsPlanning.param.label.probe',
+    methodical: 'opsPlanning.param.label.methodical',
+    standard: 'opsPlanning.param.label.standard',
+    all_out: 'opsPlanning.param.label.allOut',
+    decisive_victory: 'opsPlanning.param.label.decisiveVictory',
+    victory: 'opsPlanning.param.label.victory',
+    costly_victory: 'opsPlanning.param.label.costlyVictory',
+    stalemate: 'opsPlanning.param.label.stalemate',
+    repulsed: 'opsPlanning.param.label.repulsed',
 };
 
 function pillClass(isActive: boolean): string {
@@ -105,7 +122,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                     htmlFor="plan-params-op-name"
                     className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-secondary/60"
                 >
-                    Name
+                    {t('opsPlanning.param.name')}
                 </label>
                 <input
                     id="plan-params-op-name"
@@ -119,62 +136,62 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
             </div>
 
             {/* Operation type */}
-            <ParamGroup label="Type" description="What kind of operation?">
-                {OP_TYPES.map((t) => (
+            <ParamGroup label={t('opsPlanning.param.group.type')} description={t('opsPlanning.param.group.typeDescription')}>
+                {OP_TYPES.map((opType) => (
                     <button
-                        key={t}
+                        key={opType}
                         type="button"
-                        onClick={() => onUpdate({ opType: t })}
-                        title={PILL_TITLES[t]}
+                        onClick={() => onUpdate({ opType })}
+                        title={t(PILL_TITLE_KEYS[opType])}
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
-                            ${pillClass(plan.opType === t)}`}
+                            ${pillClass(plan.opType === opType)}`}
                     >
-                        <span>{OP_TYPE_LABELS[t]}</span>
+                        <span>{t(PILL_LABEL_KEYS[opType])}</span>
                         <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
-                            {PILL_SUBTITLES[t]}
+                            {t(PILL_SUBTITLE_KEYS[opType])}
                         </span>
                     </button>
                 ))}
             </ParamGroup>
 
             {/* Tempo */}
-            <ParamGroup label="Tempo" description="Speed vs. casualties tradeoff">
-                {TEMPOS.map((t) => (
+            <ParamGroup label={t('opsPlanning.param.group.tempo')} description={t('opsPlanning.param.group.tempoDescription')}>
+                {TEMPOS.map((tempo) => (
                     <button
-                        key={t}
+                        key={tempo}
                         type="button"
-                        onClick={() => onUpdate({ tempo: t })}
-                        title={PILL_TITLES[t]}
+                        onClick={() => onUpdate({ tempo })}
+                        title={t(PILL_TITLE_KEYS[tempo])}
                         className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
-                            ${pillClass(plan.tempo === t)}`}
+                            ${pillClass(plan.tempo === tempo)}`}
                     >
-                        <span>{TEMPO_LABELS[t]}</span>
+                        <span>{t(PILL_LABEL_KEYS[tempo])}</span>
                         <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
-                            {PILL_SUBTITLES[t]}
+                            {t(PILL_SUBTITLE_KEYS[tempo])}
                         </span>
                     </button>
                 ))}
             </ParamGroup>
 
             {/* Tolerance */}
-            <ParamGroup label="Tolerance" description="When do brigades stop attacking?">
-                {TOLERANCES.map((t) => {
-                    const isDanger = t === 'repulsed';
-                    const isActive = plan.tolerance === t;
+            <ParamGroup label={t('opsPlanning.param.group.tolerance')} description={t('opsPlanning.param.group.toleranceDescription')}>
+                {TOLERANCES.map((tolerance) => {
+                    const isDanger = tolerance === 'repulsed';
+                    const isActive = plan.tolerance === tolerance;
                     return (
                         <button
-                            key={t}
+                            key={tolerance}
                             type="button"
-                            onClick={() => onUpdate({ tolerance: t })}
-                            title={PILL_TITLES[t]}
+                            onClick={() => onUpdate({ tolerance })}
+                            title={t(PILL_TITLE_KEYS[tolerance])}
                             className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
                                 ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
                         >
-                            <span>{TOLERANCE_LABELS[t]}</span>
+                            <span>{t(PILL_LABEL_KEYS[tolerance])}</span>
                             <span className={`text-[9px] font-normal normal-case tracking-normal ${
                                 isDanger ? 'text-red-400/70' : 'text-text-secondary/50'
                             }`}>
-                                {PILL_SUBTITLES[t]}
+                                {t(PILL_SUBTITLE_KEYS[tolerance])}
                             </span>
                         </button>
                     );
@@ -182,27 +199,27 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
             </ParamGroup>
 
             {/* Artillery prep toggle */}
-            <ParamGroup label="Support" description="Pre-assault fire support">
+            <ParamGroup label={t('opsPlanning.param.group.support')} description={t('opsPlanning.param.group.supportDescription')}>
                 <div className="flex flex-col items-center">
                     <button
                         type="button"
                         onClick={() => onUpdate({ artilleryPreparation: !plan.artilleryPreparation })}
                         title={plan.artilleryPreparation
-                            ? 'Artillery Preparation ON \u2014 Bombardment before assault. ~200 rounds expended, +15% attack power.'
-                            : 'Artillery Preparation OFF \u2014 No pre-assault bombardment. Saves ammunition but no fire support bonus.'}
+                            ? t('opsPlanning.param.artyOnTitle')
+                            : t('opsPlanning.param.artyOffTitle')}
                         className={`px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all
                             ${plan.artilleryPreparation
                                 ? 'bg-red-500/15 text-red-400 border border-red-400/30 shadow-[0_0_6px_rgba(239,68,68,0.12)]'
                                 : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]'
                             }`}
                     >
-                        {plan.artilleryPreparation ? '\u25C6 ARTY PREP' : '\u25C7 ARTY PREP'}
+                        {plan.artilleryPreparation ? t('opsPlanning.param.artyOn') : t('opsPlanning.param.artyOff')}
                     </button>
                     {/* WP1e: Artillery prep info text */}
                     <span className={`text-[9px] mt-0.5 ${
                         plan.artilleryPreparation ? 'text-red-400/60' : 'text-text-secondary/40'
                     }`}>
-                        {plan.artilleryPreparation ? '~200 rounds \u00B7 +15% attack' : 'No bombardment'}
+                        {plan.artilleryPreparation ? t('opsPlanning.param.artyOnDetail') : t('opsPlanning.param.artyOffDetail')}
                     </span>
                 </div>
             </ParamGroup>

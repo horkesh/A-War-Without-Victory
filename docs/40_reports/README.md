@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Operations Planning parameter localization** | [implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md](implemented/20260523_BCS_OPS_PLANNING_PARAMETER_LOCALIZATION.md) - Ops phase-gate messages and PlanParameters operation-name/type/tempo/tolerance/support chrome now render through English/BCS localization. |
 | **Latest BCS Convoy Decision chrome localization** | [implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md) - Humanitarian convoy decision modal chrome/prose and War Summary inline convoy action buttons now render through English/BCS localization. |
 | **Latest BCS War Summary situation chrome localization** | [implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md) - War Summary non-overview convoy, local-support, OPSEC, and diplomacy headings/empty states plus OPSEC operation-health labels now render through English/BCS localization. |
 | **Latest BCS Presidential Toolbar chrome localization** | [implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md) - Tactical-map toolbar primary labels, titles, advance copy, current-turn suffix, and command-authority accessibility text now render through English/BCS localization. |

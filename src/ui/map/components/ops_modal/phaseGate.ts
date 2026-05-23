@@ -1,4 +1,5 @@
 import type { OpsPhase, OpsPlanState } from './types';
+import { t } from '../../i18n';
 
 export function planHasObjectiveAndBrigade(plan: OpsPlanState): boolean {
     return plan.axes.some((axis) => axis.objectives.length > 0 && axis.brigadeIds.length > 0);
@@ -23,10 +24,10 @@ export function getOpsPhaseGateMessage(
     g2AssessmentViewed: boolean,
 ): string | null {
     if (target === 'commander') return null;
-    if (target === 'plan' && !hasCommander) return 'Select a commander first.';
+    if (target === 'plan' && !hasCommander) return t('opsPlanning.gate.selectCommander');
     if ((target === 'g2_assessment' || target === 'authorize') && !planHasObjectiveAndBrigade(plan)) {
-        return 'Add at least 1 objective and 1 brigade to your axis.';
+        return t('opsPlanning.gate.addObjectiveAndBrigade');
     }
-    if (target === 'authorize' && !g2AssessmentViewed) return 'Review the G-2 assessment first.';
+    if (target === 'authorize' && !g2AssessmentViewed) return t('opsPlanning.gate.reviewG2');
     return null;
 }
