@@ -498,6 +498,14 @@ interface StrictNullInventory {
         domain_counts: Record<string, number>;
         unknown_justifications: unknown[];
     };
+    optional_field_interfaces: {
+        interfaces: Array<{
+            interface: string;
+            domain: string;
+            count: number;
+            fields: string[];
+        }>;
+    };
 }
 
 function phaseCount(inventory: StrictNullInventory, category: EscapeCategory, files: readonly string[]): number {
@@ -532,6 +540,26 @@ describe('strict null inventory progress', () => {
             unknown: 0,
         });
         expect(current.optional_field_domains.unknown_justifications).toEqual([]);
+
+        const watchedOperationTrace = current.optional_field_interfaces.interfaces.find(
+            (entry) => entry.interface === 'WatchedOperationTraceRow',
+        );
+        expect(watchedOperationTrace).toEqual({
+            interface: 'WatchedOperationTraceRow',
+            domain: 'sim',
+            count: 9,
+            fields: [
+                'breakdown',
+                'launch_attacker_power',
+                'launch_defender_count',
+                'launch_defender_ids',
+                'launch_defender_power',
+                'launch_defender_power_by_id',
+                'launch_feasibility_ratio',
+                'launch_objective_osid',
+                'launch_primary_defender_id',
+            ],
+        });
     });
 
     it('keeps Phase 1 state-schema escape hatches at or below the accepted deferred ceiling', () => {
