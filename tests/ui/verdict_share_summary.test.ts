@@ -137,7 +137,8 @@ describe('buildVerdictShareSummary', () => {
         expect(text).toContain('Ishod: RBiH - Pirov uspjeh (Ocjena C, Pirov rezultat 49.0)');
         expect(text).toContain('Rat zavrsen: Dayton reckoning, sedmica 188');
         expect(text).toContain('Knjiga cijene: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.');
-        expect(text).toContain('Historijsko poredjenje: War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(text).not.toContain('Historijsko poredjenje: War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(text).toContain('Historijsko poredjenje: Rat je trajao 12 sedmica krace od historijskih 188 sedmica.');
         expect(text).toContain('Ishodi frakcija: RBiH Pirov uspjeh; RS Neuspjeh; HRHB Pregovaracki izlaz');
     });
 });

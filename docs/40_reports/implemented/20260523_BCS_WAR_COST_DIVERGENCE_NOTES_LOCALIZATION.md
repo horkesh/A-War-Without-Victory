@@ -15,7 +15,7 @@ This is presentation-only. It does not change `compareToHistorical(...)`, diverg
 - Added `warCost.divergence.*` message keys to the English/BCS dictionaries.
 - Added `formatHistoricalDivergenceNote(...)` to localize known generated duration notes and known Srebrenica comparison notes.
 - Kept unknown authored notes unchanged.
-- Scoped UI proof to the `WarCostSummary` section so CinematicVerdict source callouts remain a separate localization/content-review lane.
+- Scoped the first UI proof to the `WarCostSummary` section; the follow-up CinematicVerdict comparison path is tracked in `20260523_BCS_CINEMATIC_VERDICT_COMPARISON_LOCALIZATION.md`.
 
 ## Verification
 
@@ -25,4 +25,4 @@ This is presentation-only. It does not change `compareToHistorical(...)`, diverg
 
 ## Remaining Work
 
-Localization still needs smaller slices for CinematicVerdict comparison callouts, Cost Ledger finding prose, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.
+Localization still needs smaller slices for Cost Ledger finding prose, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.

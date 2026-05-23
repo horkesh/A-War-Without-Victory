@@ -131,6 +131,8 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('Ishod je sacuvao nesto stvarno, ali knjiga cijene upravlja zavrsnim sjecanjem.');
         expect(html).toContain('Ukupna cijena rata');
         expect(html).toContain('46,500 poginulih vojnika i 38,000 poginulih civila zabiljezeno u Knjizi cijene.');
+        expect(html).not.toContain('War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(html).toContain('Rat je trajao 12 sedmica krace od historijskih 188 sedmica.');
         expect(html).toContain('Pirov uspjeh');
         expect(html).toContain('A War Without Victory - Presuda');
     });

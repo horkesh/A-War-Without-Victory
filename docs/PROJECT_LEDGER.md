@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Cinematic Verdict comparison notes
+
+**Type:** `CinematicVerdict` / verdict share-summary historical comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Moved `formatHistoricalDivergenceNote(...)` into a shared UI data utility, preserved the existing `WarCostSummary` export, and reused the formatter for `CinematicVerdict` visible comparison callouts plus `buildVerdictShareSummary(...)` comparison lines. Unknown authored notes remain raw fallback.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` failed while BCS mode still rendered `War lasted 12 weeks shorter than the historical 188 weeks` in the Cinematic Verdict comparison/share-summary path. Green `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 2/2. Focused pack `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\war_cost_summary.test.ts --reporter=dot` passed 18/18. Expanded localization/endgame pack passed 60/60. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/historicalDivergenceNotes.ts`, `src/ui/map/components/WarCostSummary.tsx`, `src/ui/map/components/verdict/CinematicVerdict.tsx`, `src/ui/map/data/verdictShareSummary.ts`, `tests/ui/cinematic_verdict.test.ts`, `tests/ui/verdict_share_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_CINEMATIC_VERDICT_COMPARISON_LOCALIZATION.md`, `docs/40_reports/implemented/20260523_BCS_WAR_COST_DIVERGENCE_NOTES_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize War Cost divergence notes
 
 **Type:** `WarCostSummary` historical-divergence note localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

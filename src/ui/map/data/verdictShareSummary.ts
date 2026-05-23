@@ -7,6 +7,7 @@ import {
     getVerdictFactionOrder,
     type VerdictSceneInput,
 } from './verdictScene.js';
+import { formatHistoricalDivergenceNote } from './historicalDivergenceNotes.js';
 import { t } from '../i18n';
 
 export interface VerdictShareSummaryInput extends VerdictSceneInput {
@@ -42,6 +43,7 @@ function formatCostLine(input: VerdictShareSummaryInput): string {
 function formatComparisonLine(input: VerdictShareSummaryInput): string {
     if (!input.historicalComparison) return t('verdict.share.comparisonMissing');
     const callout = input.historicalComparison.divergence_notes
+        .map(formatHistoricalDivergenceNote)
         .find(note => note.trim().length > 0)
         ?? t('verdict.share.noDivergenceNotes');
     return t('verdict.share.comparisonLine', { callout });
