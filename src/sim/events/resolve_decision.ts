@@ -5,7 +5,7 @@
 
 import type { GameState } from '../../state/game_state.js';
 import { applyEventEffects } from './apply_effects.js';
-import { applyDefinitionDimensionShifts, applyDefinitionFlags } from './evaluate_events.js';
+import { applyDefinitionDimensionShifts, applyDefinitionFlags, recordEventDecision } from './evaluate_events.js';
 import { emitEventNotifications, isTwoLevelNotificationsEnabled } from './emit_notifications.js';
 
 /**
@@ -38,6 +38,16 @@ export function resolveEventDecision(state: GameState, eventId: string, response
     // Apply flags and dimension shifts from the chosen response option
     applyDefinitionFlags(state, chosen.sets_flags);
     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
+
+    // Audit-trail entry — player path. Pairs with bot paths in evaluate_events.ts.
+    recordEventDecision(
+        state,
+        eventId,
+        chosen.id,
+        'player',
+        decision.faction,
+        state.meta.turn ?? decision.turn_fired,
+    );
 
     if (isTwoLevelNotificationsEnabled()) {
         emitEventNotifications(

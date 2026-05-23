@@ -2205,6 +2205,20 @@ negotiation?: import('./negotiation_types.js').NegotiationState;
 fired_event_ids?: string[];
 /** Pending event decisions awaiting player response. */
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
+/** Structured audit trail of every event-decision resolution — bot or player.
+ *  Append-only; one entry per resolution. Distinguishes the three pick paths
+ *  (`bot_political`, `bot_v1`, `player`) so replay + Chronicle UI can show
+ *  "VRS chose `aggressive` branch on turn 1 for rs_strategic_goals". The
+ *  existing `fired_events[]` records that the event fired; this records WHICH
+ *  option won. Writers: `recordEventDecision` in evaluate_events.ts (bot paths)
+ *  and resolve_decision.ts (player path). Reader: Chronicle / audit surfaces. */
+event_decision_log?: Array<{
+    event_id: string;
+    response_id: string;
+    decision_source: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player';
+    faction: FactionId | null;
+    turn: number;
+}>;
 /** Informational event notifications for non-source factions. Never blocks turn advance. */
 pending_event_notifications?: import('../sim/events/event_types.js').EventNotification[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
