@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(personnel): surface mobilization pool health
+
+**Type:** UI read-model/presentation enhancement. No mobilization mechanics, JNA transfer behavior, scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, painted targets, event content, turn ordering, or sim output contract changed.
+
+**Why:** Rating #9 listed early-war/militia/formation emergence as deep but player-invisible. The selected faction's `mobilizationSummary` already exists in the loaded-state adapter, but Army HQ Personnel did not show pool health.
+
+**Change:** Army HQ Personnel now renders a selected-faction Mobilization section with available, committed, exhausted, strategic reserve, exhaustion percentage, and largest available pools. The new section uses deterministic `en-US` whole-number formatting so host locale does not alter test/UI punctuation.
+
+**Determinism / output impact:** UI presentation only from existing loaded-state data. No saved state, scenario outputs, or baseline artifacts changed.
+
+**Verification:** Red/green `npx.cmd vitest run tests\ui\officer_mini_bio.test.ts --reporter=dot` failed on missing `MOBILIZATION` before implementation, then PASS 6/6 after implementation.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_PERSONNEL_MOBILIZATION_VISIBILITY.md`.
+
+**Roadmap delta:** Advances Rating #9 by moving core mobilization pool health into the Army HQ Personnel owner. Remaining early-war visibility work is recent-emergence/JNA equipment-transfer explanation, not the basic pool-health readout.
+
+---
+
 ## [2026-05-23] feat(briefing): surface supply corridor risk
 
 **Type:** Sim-side command briefing visibility enhancement. No supply mechanics, combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or baseline contract changed.

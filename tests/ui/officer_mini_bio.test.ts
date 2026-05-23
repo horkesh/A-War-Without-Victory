@@ -58,6 +58,20 @@ function makeLoadedState(officer: NamedOfficerView): LoadedGameState {
         corpsFrontSectors: [],
         operations: [],
         factionReserves: { RS: { generalSupply: 80, heavyMunitions: 70 } },
+        mobilizationSummary: {
+            RS: {
+                faction: 'RS',
+                total_available: 1234,
+                total_committed: 456,
+                total_exhausted: 310,
+                exhaustion_pct: 25.1,
+                strategic_reserve: 88,
+                top_pools: [
+                    { mun_id: 'sarajevo', available: 800 },
+                    { mun_id: 'bijeljina', available: 434 },
+                ],
+            },
+        },
         namedOfficerData: [officer],
         namedOfficerStateById: {
             [officer.id]: {
@@ -155,5 +169,25 @@ describe('officer mini-bio UI', () => {
         expect(screen.getByText('Methodical staff work')).toBeTruthy();
         expect(screen.getByText('Narrative trait')).toBeTruthy();
         expect(screen.getByText('Opening army command')).toBeTruthy();
+    });
+
+    it('surfaces mobilization pool health in the Personnel roster', () => {
+        useGameStore.setState({ loadedGameState: makeLoadedState(makeOfficer()) });
+
+        render(createElement(PersonnelContent));
+
+        expect(screen.getByText('MOBILIZATION')).toBeTruthy();
+        expect(screen.getByText('Available Pool')).toBeTruthy();
+        expect(screen.getByText('1,234')).toBeTruthy();
+        expect(screen.getByText('Committed')).toBeTruthy();
+        expect(screen.getByText('456')).toBeTruthy();
+        expect(screen.getByText('Exhausted')).toBeTruthy();
+        expect(screen.getByText('310')).toBeTruthy();
+        expect(screen.getByText('Strategic Reserve')).toBeTruthy();
+        expect(screen.getByText('88')).toBeTruthy();
+        expect(screen.getByText('Exhaustion')).toBeTruthy();
+        expect(screen.getByText('25.1%')).toBeTruthy();
+        expect(screen.getByText('Sarajevo')).toBeTruthy();
+        expect(screen.getByText('Bijeljina')).toBeTruthy();
     });
 });

@@ -23,6 +23,7 @@ export function PersonnelContent() {
         const activeOfficers = officers.filter(o => o.status === 'active');
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
         const reserves = state.factionReserves?.[faction];
+        const mobilization = state.mobilizationSummary?.[faction];
 
         const brigadesByCorps = new Map<string, typeof brigades>();
         for (const b of brigades) {
@@ -40,6 +41,7 @@ export function PersonnelContent() {
             activeOfficers,
             reserveOfficers,
             reserves,
+            mobilization,
             brigadesByCorps,
         };
     }, [state, faction]);
@@ -59,6 +61,34 @@ export function PersonnelContent() {
                     <StatCard label="Supply Reserve" value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
                 </div>
             </div>
+
+            {data.mobilization && (
+                <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                    <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                        MOBILIZATION
+                    </div>
+                    <div className="grid grid-cols-5 gap-3">
+                        <StatCard label="Available Pool" value={formatWholeNumber(data.mobilization.total_available)} />
+                        <StatCard label="Committed" value={formatWholeNumber(data.mobilization.total_committed)} />
+                        <StatCard label="Exhausted" value={formatWholeNumber(data.mobilization.total_exhausted)} />
+                        <StatCard label="Strategic Reserve" value={formatWholeNumber(data.mobilization.strategic_reserve)} />
+                        <StatCard label="Exhaustion" value={`${data.mobilization.exhaustion_pct.toFixed(1)}%`} />
+                    </div>
+                    {data.mobilization.top_pools.length > 0 && (
+                        <div className="mt-3 pt-2 border-t border-panel-border/50">
+                            <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">Largest Available Pools</div>
+                            <div className="grid grid-cols-2 gap-1.5">
+                                {data.mobilization.top_pools.map((pool) => (
+                                    <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[10px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
+                                        <span className="text-text-secondary truncate">{formatPoolName(pool.mun_id)}</span>
+                                        <span className="text-text-primary tabular-nums font-mono shrink-0">{formatWholeNumber(pool.available)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
@@ -134,6 +164,18 @@ export function PersonnelContent() {
             </div>
         </div>
     );
+}
+
+function formatPoolName(munId: string): string {
+    return munId
+        .split(/[_-]+/)
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
+function formatWholeNumber(value: number): string {
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
 }
 
 function OfficerTraitPill({
