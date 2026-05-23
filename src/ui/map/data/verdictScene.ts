@@ -118,19 +118,19 @@ function selectTone(input: VerdictSceneInput, focusFaction: string | undefined):
 
 function headlineForTone(tone: VerdictSceneTone): string {
     switch (tone) {
-        case 'early_peace': return 'Early peace, not an untouched country';
-        case 'catastrophic': return 'Verdict under condemnation';
-        case 'pyrrhic': return 'Pyrrhic success, measured against the bill';
-        case 'somber': return 'A war measured by its costs';
+        case 'early_peace': return t('verdict.scene.headline.earlyPeace');
+        case 'catastrophic': return t('verdict.scene.headline.catastrophic');
+        case 'pyrrhic': return t('verdict.scene.headline.pyrrhic');
+        case 'somber': return t('verdict.scene.headline.somber');
     }
 }
 
 function subheadlineForTone(tone: VerdictSceneTone): string {
     switch (tone) {
-        case 'early_peace': return 'The settlement shortened the war path, but the ledger still records what happened.';
-        case 'catastrophic': return 'The verdict is shaped by collapse, rupture, or condemnation before any score can redeem it.';
-        case 'pyrrhic': return 'The outcome preserved something real, but the cost ledger controls the final memory.';
-        case 'somber': return 'The conclusion reads the verdict, the cost ledger, and the historical comparison without changing them.';
+        case 'early_peace': return t('verdict.scene.subheadline.earlyPeace');
+        case 'catastrophic': return t('verdict.scene.subheadline.catastrophic');
+        case 'pyrrhic': return t('verdict.scene.subheadline.pyrrhic');
+        case 'somber': return t('verdict.scene.subheadline.somber');
     }
 }
 
@@ -149,8 +149,8 @@ function formatInteger(value: number): string {
 function selectCostEmphasis(costLedger: CostLedger | undefined): VerdictCostEmphasis {
     if (!costLedger) {
         return {
-            title: 'No cost ledger packet available',
-            text: 'The verdict scene has no cost ledger packet to summarize.',
+            title: t('verdict.scene.costMissing.title'),
+            text: t('verdict.scene.costMissing.text'),
             severity: 'none',
             category: 'none',
             source: 'none',
@@ -169,8 +169,11 @@ function selectCostEmphasis(costLedger: CostLedger | undefined): VerdictCostEmph
     }
 
     return {
-        title: 'War cost totals',
-        text: `${formatInteger(costLedger.total_military_killed)} military killed and ${formatInteger(costLedger.total_civilian_killed)} civilian killed recorded by the Cost Ledger.`,
+        title: t('verdict.scene.costTotals.title'),
+        text: t('verdict.scene.costTotals.text', {
+            militaryKilled: formatInteger(costLedger.total_military_killed),
+            civilianKilled: formatInteger(costLedger.total_civilian_killed),
+        }),
         severity: 'record',
         category: 'human_cost',
         source: 'totals',

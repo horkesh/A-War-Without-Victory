@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict scene prose
+
+**Type:** Deterministic verdict scene-prose localization slice. No simulation behavior, combat math, operation behavior, verdict scene tone/focus selection, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.scene.*` message keys. `buildVerdictScene(...)` now localizes deterministic tone headlines, tone subheadlines, missing Cost Ledger fallback text, default war-cost-total title, and default war-cost-total sentence. Cost Ledger finding titles/text and historical divergence notes remain source-authored content.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, tone selection, focus selection, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts --reporter=dot` failed while BCS mode still rendered `Pyrrhic success, measured against the bill`. Green `npx.cmd vitest run tests\ui\cinematic_verdict.test.ts tests\ui\verdict_scene.test.ts tests\ui\verdict_share_summary.test.ts --reporter=dot` passed 8/8 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 47/47. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/verdictScene.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/cinematic_verdict.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict share summary
 
 **Type:** Verdict share-summary wrapper/outcome-label localization slice. No simulation behavior, combat math, operation behavior, verdict scene selection, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

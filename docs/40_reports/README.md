@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Verdict scene-prose localization** | [implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SCENE_PROSE_LOCALIZATION.md) - deterministic verdict scene headlines, subheadlines, and default Cost Ledger fallback/totals prose now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict share-summary localization** | [implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md) - verdict share-summary wrapper text and outcome-class labels now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict Dayton-label localization** | [implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_DAYTON_LABELS_LOCALIZATION.md) - rich `VerdictScreen` FactionReport Dayton detail labels now render through the existing English/BCS localization substrate. |
 | **Latest BCS Cinematic Verdict chrome localization** | [implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md) - `CinematicVerdict` static metric labels, campaign/not-recorded fallback text, share-summary heading, and copy button now render through the existing English/BCS localization substrate. |

@@ -29,4 +29,4 @@ This is presentation-only. It does not change verdict scene selection, Cost Ledg
 
 ## Remaining Work
 
-Verdict localization still needs smaller slices for generated scene prose, Cost Ledger finding prose, historical divergence-note prose, source-provided dimension/package/institution label mapping, milestone rows, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.
+Verdict localization still needs smaller slices for Cost Ledger finding prose, historical divergence-note prose, source-provided dimension/package/institution label mapping, milestone rows, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.

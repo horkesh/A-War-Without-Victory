@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { CinematicVerdict } from '../../src/ui/map/components/verdict/CinematicVerdict';
+import { setLocale } from '../../src/ui/map/i18n';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 import type { FactionVerdict, GameVerdict, OutcomeClass } from '../../src/state/negotiation_types';
@@ -87,6 +88,10 @@ function makeComparison(): ComparisonResult {
 }
 
 describe('CinematicVerdict', () => {
+    afterEach(() => {
+        setLocale('en');
+    });
+
     it('renders a cinematic verdict band over existing scoring truth and share summary', () => {
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),
@@ -105,5 +110,28 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('War lasted 12 weeks shorter');
         expect(html).toContain('A War Without Victory - Verdict');
         expect(html).not.toContain('undefined');
+    });
+
+    it('renders localized BCS generated scene chrome while preserving source findings', () => {
+        setLocale('bcs');
+
+        const html = renderToStaticMarkup(createElement(CinematicVerdict, {
+            verdict: makeVerdict(),
+            costLedger: {
+                ...makeCostLedger(),
+                findings: [],
+            },
+            historicalComparison: makeComparison(),
+            focusFaction: 'RBiH',
+            dateLabel: '1995-10-01',
+            durationLabel: '3y 32w',
+        }));
+
+        expect(html).toContain('Pirov uspjeh, izmjeren prema racunu');
+        expect(html).toContain('Ishod je sacuvao nesto stvarno, ali knjiga cijene upravlja zavrsnim sjecanjem.');
+        expect(html).toContain('Ukupna cijena rata');
+        expect(html).toContain('46,500 poginulih vojnika i 38,000 poginulih civila zabiljezeno u Knjizi cijene.');
+        expect(html).toContain('Pirov uspjeh');
+        expect(html).toContain('A War Without Victory - Presuda');
     });
 });
