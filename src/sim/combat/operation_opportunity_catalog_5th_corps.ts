@@ -159,9 +159,15 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_krupa',
         name: 'Krupa Una Valley',
         corps: PRIMARY_CORPS,
+        // Wave 32 (2026-05-23): added 510th to bring axis to 3 brigades.
+        // Wave 31 SCRT (20260523_SANA_95_COMBAT_BALANCE.md): historical Sana 95
+        // ran 5-7 brigades per axis; sim's 2-3 per axis couldn't cross
+        // VICTORY_THRESHOLD_COSTLY despite favorable 1:8 cas ratio. Concentration
+        // is the missing element. 510th homed at Bos. Krupa (axis-correct).
         brigades: [
             'arbih_511th_slavna_mountain' as FormationId,
             'arbih_505th_vitezka_mountain' as FormationId,
+            'arbih_510th_bosnian_liberation' as FormationId,
         ],
         objectives: KRUPA_VALLEY_OBJECTIVES,
         staging_osid: STAGING_KRUPA_OTOKA,
@@ -170,10 +176,15 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_bihac_petrovac',
         name: 'Bihać–Petrovac Corridor',
         corps: PRIMARY_CORPS,
+        // Wave 32: added 503rd + hvo_101st_bihac to bring axis to 5 brigades.
+        // Both are status=active, full personnel, located at op:bihac:* matching
+        // the staging_osid + first-objective adjacency.
         brigades: [
             'arbih_501st_slavna_mountain' as FormationId,
             'arbih_502nd_vitezka_mountain' as FormationId,
+            'arbih_503rd_slavna_mountain' as FormationId,
             'arbih_504th_cazin_light' as FormationId,
+            'hvo_101st_bihac' as FormationId,
         ],
         objectives: BIHAC_PETROVAC_OBJECTIVES,
         staging_osid: STAGING_BIHAC,
