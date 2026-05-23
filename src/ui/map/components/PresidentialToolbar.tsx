@@ -26,6 +26,7 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import { t } from '../i18n/index.js';
 import {
     buildPreAdvanceCommandReviewView,
     formatPreAdvanceGateBlockTitle,
@@ -70,18 +71,19 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
     const pct = max > 0 ? Math.round((current / max) * 100) : 0;
     const color = pct >= 60 ? 'text-emerald-400' : pct >= 30 ? 'text-amber-400' : 'text-red-400';
     const barColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
+    const authorityLabel = t('toolbar.commandAuthority.ariaLabel', { current, max });
     return (
         <div
             className="flex items-center gap-1.5"
             role="group"
-            aria-label={`Command Authority: ${current}/${max}`}
+            aria-label={authorityLabel}
             aria-describedby="command-authority-description"
-            title={`Command Authority: ${current}/${max}\nSpent on Level 3 overrides (force-launch, manual orders).\nRecovers +2 per turn.`}
+            title={t('toolbar.commandAuthority.title', { current, max })}
         >
             <span id="command-authority-description" className="sr-only">
-                Command Authority is the president's override resource. Level 3 overrides spend it, and it recovers by 2 per turn.
+                {t('toolbar.commandAuthority.description')}
             </span>
-            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>
+            <span className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('toolbar.commandAuthority.label')}</span>
             <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
@@ -164,8 +166,8 @@ export function PresidentialToolbar({
     const advanceGateTitle = advanceBlocked
         ? formatPreAdvanceGateBlockTitle(preAdvanceReview)
         : !ipc.isAvailable
-            ? 'Advance turn requires the desktop app.'
-            : 'Advance turn';
+            ? t('toolbar.advance.requiresDesktop')
+            : t('toolbar.advance.title');
 
     const handleAdvanceTurn = useCallback(async () => {
         if (advanceBlocked) {
@@ -263,28 +265,28 @@ export function PresidentialToolbar({
                                 void ipc.focusWarroom();
                             }}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
-                            title="Return to president's desk"
+                            title={t('toolbar.returnWarroomTitle')}
                         >
-                            WARROOM
+                            {t('toolbar.warroom')}
                         </button>
                     )}
                     <button
                         onClick={() => openChronicle(useGameStore.getState())}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
-                        title="Campaign timeline"
+                        title={t('toolbar.chronicleTitle')}
                     >
-                        CHRONICLE
+                        {t('toolbar.chronicle')}
                     </button>
                     {loadedGameState ? (
                         <span
                             className="font-mono text-[12px] text-text-primary tracking-wider uppercase"
-                            title="Current date — use CHRONICLE to review timeline"
+                            title={t('toolbar.currentDateTitle')}
                         >
                             {formatTurnLabel(loadedGameState.label)}
                         </span>
                     ) : (
                         <div className="font-mono text-[10px] text-text-secondary italic uppercase">
-                            No state loaded
+                            {t('toolbar.noStateLoaded')}
                         </div>
                     )}
                     {devMode && (
@@ -297,25 +299,25 @@ export function PresidentialToolbar({
                             onClick={onOpenSummary}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Field situation briefing"
+                            title={t('toolbar.summaryTitle')}
                         >
-                            SUMMARY
+                            {t('toolbar.summary')}
                         </button>
                         <button
                             onClick={onOpenRecords}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Open Army HQ Records: after-action reports"
+                            title={t('toolbar.recordsTitle')}
                         >
-                            RECORDS
+                            {t('toolbar.records')}
                         </button>
                         <button
                             onClick={onOpenOpsHistory}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Active operations"
+                            title={t('toolbar.opsTitle')}
                         >
-                            OPS
+                            {t('toolbar.ops')}
                         </button>
                     </div>
                 </div>
@@ -330,18 +332,18 @@ export function PresidentialToolbar({
                             onClick={onOpenEventLog}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Event log"
+                            title={t('toolbar.eventsTitle')}
                         >
-                            EVENTS
+                            {t('toolbar.events')}
                         </button>
                         <button
                             onClick={onOpenCodex}
                             disabled={!loadedGameState}
                             data-coachmark-id="codex"
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                            title="Historical reference"
+                            title={t('toolbar.codexTitle')}
                         >
-                            CODEX
+                            {t('toolbar.codex')}
                         </button>
                     </div>
                     {/*
@@ -365,9 +367,9 @@ export function PresidentialToolbar({
                         }`}
                         title={
                             preAdvanceSeverityTone === 'blocking'
-                                ? 'Pre-Advance review queue: blocking items unresolved'
+                                ? t('toolbar.preAdvanceSeverity.blocking')
                                 : preAdvanceSeverityTone === 'urgent'
-                                    ? 'Pre-Advance review queue: pending items above urgent threshold'
+                                    ? t('toolbar.preAdvanceSeverity.urgent')
                                     : undefined
                         }
                     >
@@ -396,7 +398,7 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleOpenHQ}
                             className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors"
-                            title="Open Army HQ presidential attention queue"
+                            title={t('toolbar.attentionQueueTitle')}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
                             {pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}
@@ -447,7 +449,7 @@ export function PresidentialToolbar({
                                 : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'
                         }`}
                     >
-                        {advancing ? 'ADVANCING...' : 'ADVANCE TURN →'}
+                        {advancing ? t('toolbar.advance.advancing') : t('toolbar.advance')}
                     </button>
                 </div>
             </div>
@@ -457,8 +459,8 @@ export function PresidentialToolbar({
                 onClick={handleOpenHQ}
                 className="fixed top-0.5 left-1/2 -translate-x-1/2 group flex flex-col items-center pointer-events-auto"
                 style={{ zIndex: Z.SHELL_FLOATING }}
-                aria-label={`${armyName ?? 'Army'} HQ [H]`}
-                title="Visit Army HQ [H]"
+                aria-label={t('toolbar.armyHqAriaLabel', { army: armyName ?? t('toolbar.armyFallback') })}
+                title={t('toolbar.armyHqTitle')}
             >
                 <span className="text-[9px] font-mono font-bold uppercase tracking-[0.18em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
                     {armyName ?? playerFaction ?? 'COMMAND'}

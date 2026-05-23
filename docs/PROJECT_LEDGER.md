@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Presidential Toolbar chrome
+
+**Type:** Tactical-map toolbar chrome localization slice. No advance gating, IPC behavior, inbox routing, Decision Room routing, Army HQ routing, dev tools, command authority values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS toolbar message keys and routed `PresidentialToolbar` primary labels, titles, no-state text, normal advance copy, pre-advance severity tooltip text, Army HQ visit affordance text, and Command Authority accessibility text through the localization substrate. `formatTurnLabel(...)` now localizes the `Turn {n}` suffix while preserving date arithmetic and English output.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; action callbacks, routing targets, turn math, command authority values, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` failed while BCS mode still rendered English toolbar labels. Green rerun passed 6/6. Related `npx.cmd vitest run tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\bottom_status_strip_labels.test.ts tests\ui\presidential_toolbar_severity_pip.test.ts tests\ui\warroom_date_i18n.test.ts tests\ui\turn_aftermath.test.ts --reporter=dot` passed 30/30. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/PresidentialToolbar.tsx`, `src/ui/map/utils/formatters.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Settlement Timeline chrome
 
 **Type:** Settlement Timeline localization slice. No event collection, event ordering, settlement control, battle data, casualty values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

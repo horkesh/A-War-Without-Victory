@@ -184,4 +184,31 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(button.getAttribute('title')).toBe('Rijesite 2 odluke na cekanju za nastavak. Otvara pregled sobe odluka.');
     expect(screen.queryByText(/Resolve 2 pending decisions to continue/i)).toBeNull();
   });
+
+  it('toolbar localizes primary shell chrome in BCS mode', () => {
+    setLocale('bcs');
+    setLoadedState(makeState({
+      commandAuthority: { current: 4, max: 8, spentThisTurn: 0, lifetimeSpent: 0 },
+    }));
+
+    render(createElement(PresidentialToolbar, {
+      pendingReviews: 0,
+      pressureWarning: false,
+    }));
+
+    expect(screen.getByText('HRONIKA')).toBeTruthy();
+    expect(screen.getByText('SAZETAK')).toBeTruthy();
+    expect(screen.getByText('ZAPISI')).toBeTruthy();
+    expect(screen.getByText('DOGADJAJI')).toBeTruthy();
+    expect(screen.getByText('KODEKS')).toBeTruthy();
+    expect(screen.getByText('OVLAST')).toBeTruthy();
+    expect(screen.getByText(/Potez 40/)).toBeTruthy();
+    expect(screen.getByText(/NAPRIJED/)).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Komandno ovlastenje: 4/8' })).toBeTruthy();
+    expect(screen.getByTitle('Hronologija kampanje')).toBeTruthy();
+    expect(screen.getByTitle('Posjeti Stab armije [H]')).toBeTruthy();
+    expect(screen.queryByText('CHRONICLE')).toBeNull();
+    expect(screen.queryByText('SUMMARY')).toBeNull();
+    expect(screen.queryByText('EVENTS')).toBeNull();
+  });
 });

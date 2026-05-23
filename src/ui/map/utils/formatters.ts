@@ -1,4 +1,4 @@
-import { getActiveLocale, type Locale } from '../i18n';
+import { getActiveLocale, t, type Locale } from '../i18n';
 
 const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -22,9 +22,9 @@ export function turnToDateString(turn: number): string {
 export function formatTurnLabel(label: string): string {
     const match = label.match(/Turn\s+(\d+)/i);
     if (!match) return label;
-    const t = parseInt(match[1], 10);
-    const dateStr = turnToDateString(t);
-    return label.replace(match[0], `${dateStr} \u00B7 Turn ${t}`);
+    const turn = parseInt(match[1], 10);
+    const dateStr = turnToDateString(turn);
+    return label.replace(match[0], `${dateStr} \u00B7 ${t('toolbar.turnLabel', { turn })}`);
 }
 
 /**
