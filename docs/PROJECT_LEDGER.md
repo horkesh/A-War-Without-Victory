@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Cinematic Verdict chrome
+
+**Type:** `CinematicVerdict` static-chrome localization slice. No simulation behavior, combat math, operation behavior, Cost Ledger generation, historical comparison math, verdict scene selection, share-summary body generation, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.cinematic.*` message keys and routed CinematicVerdict static metric labels, campaign/not-recorded fallback text, share-summary heading, and copy button through `t(...)`. `CinematicVerdict` now subscribes to the existing locale store. Generated scene headline/subheadline/cost emphasis text, comparison callouts, and share-summary body remain source-generated authored content.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict scene output, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` failed while BCS mode still rendered `Focus` in English. Green `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts --reporter=dot` passed 19/19 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 39/39. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/verdict/CinematicVerdict.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/endgame_interaction_proof.test.ts`, `docs/40_reports/implemented/20260523_BCS_CINEMATIC_VERDICT_CHROME_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize War Cost Summary
 
 **Type:** `WarCostSummary` localization slice. No simulation behavior, combat math, operation behavior, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

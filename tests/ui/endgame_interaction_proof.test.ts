@@ -250,6 +250,11 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
         expect(screen.getByText('Trajanje rata')).toBeDefined();
         expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
+        expect(screen.getByText('Fokus')).toBeDefined();
+        expect(screen.getByText('Ishod')).toBeDefined();
+        expect(screen.getByText('Signal cijene')).toBeDefined();
+        expect(screen.getByText('Sazetak za dijeljenje')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
 
         fireEvent.click(screen.getByText('VRS'));
 

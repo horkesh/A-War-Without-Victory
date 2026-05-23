@@ -29,4 +29,4 @@ This is presentation-only. It does not change Cost Ledger generation, historical
 
 ## Remaining Work
 
-Verdict localization still needs smaller slices for cinematic verdict chrome/copy, source-provided dimension label mapping, milestone rows, share summary copy, Dayton detail labels, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.
+Verdict localization still needs smaller slices for generated cinematic verdict prose, source-provided dimension label mapping, milestone rows, share summary body, Dayton detail labels, authored verdict prose, and broader Chronicle/Army HQ/Decision Room/event prose.

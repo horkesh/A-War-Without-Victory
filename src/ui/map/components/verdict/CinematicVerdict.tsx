@@ -3,6 +3,7 @@ import type { ComparisonResult } from '../../../../sim/endgame/endgame_compariso
 import type { GameVerdict } from '../../../../state/negotiation_types.js';
 import { buildVerdictScene, type VerdictSceneTone } from '../../data/verdictScene.js';
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
+import { t, useLocale } from '../../i18n';
 
 export interface CinematicVerdictProps {
     verdict: GameVerdict;
@@ -28,7 +29,7 @@ const TONE_ACCENT: Record<VerdictSceneTone, string> = {
 };
 
 function metricText(value: string | undefined): string {
-    return value && value.trim().length > 0 ? value : 'Not recorded';
+    return value && value.trim().length > 0 ? value : t('verdict.cinematic.notRecorded');
 }
 
 export function CinematicVerdict({
@@ -39,6 +40,7 @@ export function CinematicVerdict({
     dateLabel,
     durationLabel,
 }: CinematicVerdictProps) {
+    useLocale();
     const scene = buildVerdictScene({
         verdict,
         costLedger,
@@ -81,9 +83,9 @@ export function CinematicVerdict({
                         {scene.subheadline}
                     </p>
                     <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-3">
-                        <VerdictMetric label="Focus" value={scene.focusFaction ?? 'Campaign'} accent={accent} />
-                        <VerdictMetric label="Outcome" value={scene.focusOutcomeLabel} accent={accent} />
-                        <VerdictMetric label="Cost Signal" value={scene.costEmphasis.severity.toString()} accent={accent} />
+                        <VerdictMetric label={t('verdict.cinematic.focus')} value={scene.focusFaction ?? t('verdict.cinematic.campaign')} accent={accent} />
+                        <VerdictMetric label={t('verdict.cinematic.outcome')} value={scene.focusOutcomeLabel} accent={accent} />
+                        <VerdictMetric label={t('verdict.cinematic.costSignal')} value={scene.costEmphasis.severity.toString()} accent={accent} />
                     </div>
                 </div>
 
@@ -107,14 +109,14 @@ export function CinematicVerdict({
                     <div className="mt-2 border-t border-panel-border/70 pt-2 sm:mt-4 sm:pt-3">
                         <div className="flex items-center justify-between gap-3">
                             <div className="text-[10px] font-semibold text-text-primary">
-                                Share Summary
+                                {t('verdict.cinematic.shareSummary')}
                             </div>
                             <button
                                 type="button"
                                 onClick={copySummary}
                                 className="shrink-0 border border-panel-border px-3 py-1 text-[10px] font-semibold text-text-secondary hover:bg-white/5"
                             >
-                                Copy
+                                {t('verdict.cinematic.copy')}
                             </button>
                         </div>
                         <pre className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-[10px] leading-relaxed text-text-secondary/85 sm:block">
