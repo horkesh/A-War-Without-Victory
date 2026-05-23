@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+
+## [2026-05-23] build(desktop): refresh apr-1992 startup snapshot
+
+**Type:** Desktop packaging artifact refresh. No code, scenario source data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The map/scenario cursor slice exposed a pre-existing desktop release blocker: the baked `apr_1992` startup artifact had drifted from canonical builder truth. Desktop packaging requires this artifact to match the builder before bundling.
+
+**Change:** Refreshed `data/derived/startup/apr_1992_initial_save.json` using the canonical writer and added `docs/40_reports/implemented/20260523_DESKTOP_STARTUP_SNAPSHOT_REFRESH.md`.
+
+**Determinism / output impact:** Generated artifact refresh only. No timestamps, random fields, pipeline entrypoint changes, or runtime code changes were introduced.
+
+**Verification:** `npm.cmd run desktop:startup-snapshot:check`; `npx.cmd vitest run tests\startup_snapshot_contract.test.ts tests\desktop_sim_bundle_smoke.test.ts tests\desktop_startup_snapshot_guardrails.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `data/derived/startup/apr_1992_initial_save.json`; `docs/40_reports/implemented/20260523_DESKTOP_STARTUP_SNAPSHOT_REFRESH.md`.
+
+---
 ## [2026-05-23] docs(strict-null): classify FactionState optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
