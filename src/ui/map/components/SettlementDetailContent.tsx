@@ -16,7 +16,8 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
 } from '../utils/playerSafeText';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -178,6 +179,7 @@ export function SettlementDetailContent({
   historicalEventsByTurn,
   initialControlBySettlement,
 }: SettlementDetailContentProps) {
+  const [locale] = useLocale();
   const name = getOsidDisplayName(osid, osidDisplayNames);
   const props = osidPropertiesMap?.[osid] ?? {};
   const municipality = str(props.mun1990_name || props.mun1990_id);
@@ -695,7 +697,7 @@ export function SettlementDetailContent({
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
                   <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-text-primary font-medium truncate">{f.name}</span>
+                      <span className="text-[10px] text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
                       {isPanel && f.readiness && (
                         <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
                           {f.readiness}

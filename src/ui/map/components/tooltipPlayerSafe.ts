@@ -7,6 +7,8 @@ import type {
 import { getPlayerFacingFaction, filterPlayerVisibleMapFormations } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import type { Locale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 export interface PlayerSafeFormationTooltipModel {
   classification: 'own' | 'enemy_contact';
@@ -45,6 +47,7 @@ function isOwnFormation(formation: Pick<FormationView, 'faction'>, playerFaction
 export function getPlayerSafeSettlementTooltipFormations(
   state: LoadedGameState | null | undefined,
   osid: string,
+  locale: Locale = 'en',
 ): Array<Pick<FormationView, 'id' | 'name' | 'faction' | 'personnel' | 'kind'>> {
   if (!state?.formations) return [];
   const playerFaction = getPlayerFacingFaction(state);
@@ -52,7 +55,7 @@ export function getPlayerSafeSettlementTooltipFormations(
     .filter((formation) => formation.location_osid === osid && isOwnFormation(formation, playerFaction))
     .map((formation) => ({
       id: formation.id,
-      name: formation.name,
+      name: getLocalizedFormationName(formation, locale),
       faction: formation.faction,
       personnel: formation.personnel,
       kind: formation.kind,
@@ -65,6 +68,7 @@ export function buildPlayerSafeFormationTooltipModel(args: {
   attackOrders: Array<{ brigadeId: string; targetSettlementId: string }> | undefined;
   osidDisplayNames: Record<string, string> | null;
   playerFaction: string | null;
+  locale?: Locale;
 }): PlayerSafeFormationTooltipModel {
   const formation = args.formations?.find((entry) => entry.id === args.formationId);
   if (!formation) {
@@ -112,7 +116,7 @@ export function buildPlayerSafeFormationTooltipModel(args: {
 
   return {
     classification: 'own',
-    title: formation.name,
+    title: getLocalizedFormationName(formation, args.locale ?? 'en'),
     subtitle: corps?.name ?? null,
     personnel: formation.personnel ?? null,
     cohesion: formation.cohesion ?? null,
@@ -132,6 +136,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   fogOfWar: LoadedGameState['fogOfWar'] | undefined;
   corpsFrontSectors: CorpsFrontSectorView[] | undefined;
   playerFaction: string | null;
+  locale?: Locale;
 }): PlayerSafeFrontTooltipModel {
   const edge = args.frontEdgesOsid?.find((entry) => entry.edge_id === args.edgeId);
   const sideA = edge?.side_a ?? '?';
@@ -154,7 +159,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   ));
   const ownFormations = formationsOnEdge.filter((formation) => isOwnFormation(formation, args.playerFaction));
   const enemyContacts = formationsOnEdge.filter((formation) => !isOwnFormation(formation, args.playerFaction));
-  const ownFormationLabels = ownFormations.map((formation) => `${formation.name} (${formation.posture ?? '—'})`);
+  const ownFormationLabels = ownFormations.map((formation) => `${getLocalizedFormationName(formation, args.locale ?? 'en')} (${formation.posture ?? '—'})`);
 
   return {
     title: `Front: ${sideA} — ${sideB}`,

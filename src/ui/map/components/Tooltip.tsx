@@ -101,6 +101,7 @@ function FormationTooltipContent({
   attackOrders: { brigadeId: string; targetSettlementId: string }[] | undefined;
   osidDisplayNames: Record<string, string> | null;
 }) {
+  const [locale] = useLocale();
   const formation = formations?.find((f) => f.id === formationId);
   const playerFaction = getPlayerFacingFaction(useGameStore.getState().loadedGameState);
   const model = buildPlayerSafeFormationTooltipModel({
@@ -109,6 +110,7 @@ function FormationTooltipContent({
     attackOrders,
     osidDisplayNames,
     playerFaction,
+    locale,
   });
   if (!formation) return <div className="text-[11px] text-text-secondary">{t('tooltip.unknownFormation')}</div>;
 
@@ -199,6 +201,7 @@ function FrontTooltipContent({
   formations: FormationView[] | undefined;
   corpsFrontSectors?: CorpsFrontSectorView[];
 }) {
+  const [locale] = useLocale();
   // Strip faction suffix from composite hover ID to match canonical edge IDs
   const baseEdgeId = stripFactionSuffix(edgeId);
 
@@ -213,6 +216,7 @@ function FrontTooltipContent({
     fogOfWar: useGameStore.getState().loadedGameState?.fogOfWar,
     corpsFrontSectors,
     playerFaction,
+    locale,
   });
   const persistenceLine = sector ? `${sector.edge_ids.length} edges` : '—';
 

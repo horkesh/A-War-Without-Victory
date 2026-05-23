@@ -3,7 +3,8 @@ import { useGameStore, type StagedOrder } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 function formationName(formationId: string, formationNamesById: Map<string, string>): string {
   return getPlayerSafeBrigadeName(formationNamesById.get(formationId));
@@ -20,6 +21,7 @@ function orderTargetLabel(order: StagedOrder, osidDisplayNames: Record<string, s
  * Docks to the left command rail when orders exist; hidden when empty.
  */
 export function OrderQueue() {
+  const [locale] = useLocale();
   const [collapsed, setCollapsed] = useState(false);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const removeStagedOrder = useGameStore((s) => s.removeStagedOrder);
@@ -30,7 +32,7 @@ export function OrderQueue() {
   const formationNamesById = new Map<string, string>();
   if (loadedGameState?.formations) {
     for (const f of loadedGameState.formations) {
-      formationNamesById.set(f.id, f.name);
+      formationNamesById.set(f.id, getLocalizedFormationName(f, locale));
     }
   }
 

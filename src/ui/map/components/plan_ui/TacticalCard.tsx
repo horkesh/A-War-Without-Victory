@@ -1,5 +1,6 @@
 import { FormationView } from '../../data/types';
-import { t } from '../../i18n';
+import { t, useLocale } from '../../i18n';
+import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface TacticalCardProps {
     formation: FormationView;
@@ -8,6 +9,8 @@ interface TacticalCardProps {
 }
 
 export function TacticalCard({ formation, onClick, active }: TacticalCardProps) {
+    const [locale] = useLocale();
+    const formationName = getLocalizedFormationName(formation, locale);
     const personnel = formation.personnel ?? 0;
     const tanks = formation.composition?.tanks ?? 0;
     const cohesion = formation.cohesion ?? 50;
@@ -23,7 +26,7 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
         >
             <div className="flex justify-between items-start mb-2">
                 <div className="flex flex-col">
-                    <div className="text-[10px] font-black text-white leading-none mb-0.5 group-hover:text-accent-gold transition-colors">{formation.name}</div>
+                    <div className="text-[10px] font-black text-white leading-none mb-0.5 group-hover:text-accent-gold transition-colors">{formationName}</div>
                     <div className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">{t('planUi.factionBrigade', { faction: formation.faction })}</div>
                 </div>
                 {/* NATO Symbol Placeholder */}

@@ -4,7 +4,8 @@ import { FACTION_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -56,6 +57,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
     onClose,
     onSelect,
 }) => {
+    const [locale] = useLocale();
     const [isMounted, setIsMounted] = useState(false);
 
     /* Animation states */
@@ -107,6 +109,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                     const radius = Math.min(300, baseRadius + total * 12);
                     const tx = Math.cos(angle) * radius;
                     const ty = Math.sin(angle) * radius;
+                    const name = getLocalizedFormationName(f, locale);
 
                     // Staggered delay for each unit
                     const delay = i * 60;
@@ -129,7 +132,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                     e.stopPropagation();
                                     onSelect(f.id);
                                 }}
-                                aria-label={t('stackExpansion.selectAria', { name: f.name })}
+                                aria-label={t('stackExpansion.selectAria', { name })}
                             >
                                 {/* Shield Glow */}
                                 <div
@@ -143,7 +146,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 />
 
                                 <div className="bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono text-white whitespace-nowrap shadow-xl group-hover:bg-accent-gold group-hover:text-black transition-colors">
-                                    {f.name}
+                                    {name}
                                 </div>
                             </button>
                         </div>

@@ -13,7 +13,8 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
-import { t, type MessageKey } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
+import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -289,6 +290,7 @@ interface AARPanelProps {
 }
 
 export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
+    const [locale] = useLocale();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -297,7 +299,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
     const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
     const formationNameById = new Map(
-        (loadedGameState.formations ?? []).map((formation) => [formation.id, formation.name] as const),
+        (loadedGameState.formations ?? []).map((formation) => [formation.id, getLocalizedFormationName(formation, locale)] as const),
     );
 
     const body = (
@@ -358,7 +360,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                     {summary.decoration_awards.length > 0 && (
                                         <div className="mb-1.5">
                                             <div className="text-[9px] uppercase tracking-wide text-accent-gold mb-1">{t('aar.decorationsAwarded')}</div>
-                                            {summary.decoration_awards.map((a) => <DecorationRow key={`${a.formation_id}-${a.decoration.tier}`} award={a} />)}
+                                            {summary.decoration_awards.map((a) => <DecorationRow key={`${a.formation_id}-${a.decoration.tier}`} award={{ ...a, formation_name: formationNameById.get(a.formation_id) ?? a.formation_name }} />)}
                                         </div>
                                     )}
                                     {summary.arc_transitions.length > 0 && (
