@@ -3,6 +3,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t } from '../i18n';
 
 /** Attacker formation summary for the confirmation modal. */
 export interface AttackConfirmationAttacker {
@@ -98,13 +99,13 @@ export function AttackConfirmation({
             id="attack-confirmation-title"
             className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold"
           >
-            Confirm attack
+            {t('attackConfirm.title')}
           </h2>
         </div>
 
         <div className="p-4 space-y-3 text-sm">
           <div>
-            <span className="text-text-secondary">Attacker: </span>
+            <span className="text-text-secondary">{t('attackConfirm.attacker')}: </span>
             <span className={FACTION_COLORS_SUBTLE[attacker.faction] ?? 'text-text-primary'}>
               {attacker.name}
             </span>
@@ -112,21 +113,21 @@ export function AttackConfirmation({
           </div>
 
           <div>
-            <span className="text-text-secondary">Target: </span>
+            <span className="text-text-secondary">{t('attackConfirm.target')}: </span>
             <span className="text-text-primary">
               {targetDisplayName}
             </span>
           </div>
 
           <div>
-            <span className="text-text-secondary">Defender: </span>
+            <span className="text-text-secondary">{t('attackConfirm.defender')}: </span>
             {defender ? (
               <>
                 <span className={FACTION_COLORS_SUBTLE[defender.faction] ?? 'text-text-primary'}>
                   {defender.name}
                 </span>
                 <span className="text-text-secondary ml-1">
-                  ({getPlayerSafeMilitaryFactionName(defender.faction)} / strength: {typeof defender.strength === 'number' ? defender.strength.toLocaleString() : defender.strength})
+                  ({getPlayerSafeMilitaryFactionName(defender.faction)} / {t('attackConfirm.strength')}: {typeof defender.strength === 'number' ? defender.strength.toLocaleString() : defender.strength})
                 </span>
               </>
             ) : (
@@ -135,12 +136,12 @@ export function AttackConfirmation({
           </div>
 
           <div>
-            <span className="text-text-secondary">Terrain: </span>
+            <span className="text-text-secondary">{t('attackConfirm.terrain')}: </span>
             <span className="text-text-primary">{terrainSummary}</span>
           </div>
 
           <div>
-            <span className="text-text-secondary">Odds: </span>
+            <span className="text-text-secondary">{t('attackConfirm.odds')}: </span>
             <span className="text-text-primary">{combatOdds}</span>
           </div>
         </div>
@@ -151,7 +152,7 @@ export function AttackConfirmation({
             onClick={onCancel}
             className="px-3 py-1.5 text-text-secondary hover:text-interactive hover:bg-panel-hover rounded border border-panel-border text-xs font-sans"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             ref={confirmRef}
@@ -159,7 +160,7 @@ export function AttackConfirmation({
             onClick={onConfirm}
             className="px-3 py-1.5 bg-interactive text-white hover:bg-panel-hover rounded border border-panel-border text-xs font-sans"
           >
-            Confirm
+            {t('common.confirm')}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportunityProposalView } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { t } from '../../i18n';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
 type OpportunityResolveOptions = { redirectVariantId?: string };
@@ -105,11 +106,11 @@ function DossierCard({
 }) {
     const requiredSummary =
         proposal.required_axes_total != null
-            ? `${proposal.required_axes_green ?? 0}/${proposal.required_axes_total} required`
-            : 'No required axes';
+            ? t('opportunity.requiredAxes', { green: proposal.required_axes_green ?? 0, total: proposal.required_axes_total })
+            : t('opportunity.noRequiredAxes');
     const optionalSummary =
         proposal.optional_axes_total != null
-            ? `${proposal.optional_axes_green ?? 0}/${proposal.optional_axes_total} optional`
+            ? t('opportunity.optionalAxes', { green: proposal.optional_axes_green ?? 0, total: proposal.optional_axes_total })
             : null;
     const canAct = Boolean(proposal.review_id && proposal.available_actions.some((action) => action.enabled));
     const footprintOsids = [
@@ -124,11 +125,11 @@ function DossierCard({
                     <div className="text-[11px] font-bold text-text-primary truncate">{proposal.display_name}</div>
                     <div className="mt-1 flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em]">
                         <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-amber-300">
-                            {proposal.recommendation ? `Recommend ${proposal.recommendation}` : statusLabel(proposal.status)}
+                            {proposal.recommendation ? t('opportunity.recommend', { recommendation: proposal.recommendation }) : statusLabel(proposal.status)}
                         </span>
                         {proposal.expires_turn != null && (
                             <span className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-text-secondary">
-                                Expires w{proposal.expires_turn}
+                                {t('opportunity.expiresWeek', { week: proposal.expires_turn })}
                             </span>
                         )}
                     </div>
@@ -147,7 +148,7 @@ function DossierCard({
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
                         <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
-                            Map Footprint
+                            {t('opportunity.mapFootprint')}
                         </div>
                         <div className="flex items-center gap-1.5">
                             <button
@@ -156,21 +157,21 @@ function DossierCard({
                                 disabled={footprintOsids.length === 0}
                                 className="rounded border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
                             >
-                                Highlight
+                                {t('opportunity.highlight')}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClearFootprint}
                                 className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:bg-panel-hover"
                             >
-                                Clear
+                                {t('opportunity.clear')}
                             </button>
                         </div>
                     </div>
                     {proposal.objectives.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5">
                             <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
-                                Objectives
+                                {t('opportunity.objectives')}
                             </span>
                             {proposal.objectives.map((objective) => (
                                 <FootprintPill key={`${proposal.proposal_id}:obj:${objective.osid}`} label={objective.label} />
@@ -180,7 +181,7 @@ function DossierCard({
                     {proposal.staging.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5">
                             <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
-                                Staging
+                                {t('opportunity.staging')}
                             </span>
                             {proposal.staging.map((staging) => (
                                 <FootprintPill key={`${proposal.proposal_id}:stage:${staging.osid}`} label={staging.label} muted />
@@ -201,7 +202,7 @@ function DossierCard({
             {proposal.force_quality_traits.length > 0 && (
                 <div className="space-y-1.5">
                     <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
-                        Force Quality
+                        {t('opportunity.forceQuality')}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5">
                         {proposal.force_quality_traits.map((trait) => (
@@ -214,7 +215,7 @@ function DossierCard({
             {canAct && proposal.redirect_variants.length > 0 && (
                 <div className="space-y-1.5">
                     <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
-                        Redirect Options
+                        {t('opportunity.redirectOptions')}
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {proposal.redirect_variants.map((variant) => {
@@ -296,7 +297,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                     : {}),
             });
             if (!result.ok) {
-                setLoadError(result.error ?? `Failed to ${decision === 'approve' ? 'authorize' : decision} opportunity.`);
+                setLoadError(result.error ?? t('opportunity.resolveFailed', { decision: decision === 'approve' ? t('opportunity.authorizeVerb') : decision }));
             }
         } finally {
             setBusyProposalId(null);
@@ -307,7 +308,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
         <section className="space-y-2" data-coachmark-id="operation-opportunity">
             <div className="flex items-center justify-between gap-3 border-b border-panel-border pb-1">
                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
-                    Operational Opportunities
+                    {t('opportunity.operationalOpportunities')}
                 </div>
                 <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-300">
                     {proposals.length}

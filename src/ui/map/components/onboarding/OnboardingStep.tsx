@@ -9,6 +9,7 @@
  */
 
 import type { OnboardingStepDef } from './onboardingSteps';
+import { t } from '../../i18n';
 
 export interface OnboardingStepProps {
     step: OnboardingStepDef;
@@ -52,10 +53,10 @@ export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
                     marginBottom: 4,
                 }}
             >
-                Step {indexOneBased} of {total}
+                {t('onboarding.stepCount', { index: indexOneBased, total })}
             </div>
-            <h2 style={{ margin: '0 0 12px 0', fontSize: 18 }}>{step.title}</h2>
-            <p style={{ margin: '0 0 20px 0', lineHeight: 1.5, fontSize: 14 }}>{step.body}</p>
+            <h2 style={{ margin: '0 0 12px 0', fontSize: 18 }}>{t(step.titleKey)}</h2>
+            <p style={{ margin: '0 0 20px 0', lineHeight: 1.5, fontSize: 14 }}>{t(step.bodyKey)}</p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                 <button
                     type="button"
@@ -71,7 +72,7 @@ export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
                         cursor: disabled ? 'wait' : 'pointer',
                     }}
                 >
-                    Skip Tutorial
+                    {t('onboarding.skip')}
                 </button>
                 <button
                     type="button"
@@ -88,7 +89,7 @@ export function OnboardingStep(props: OnboardingStepProps): JSX.Element {
                         cursor: disabled ? 'wait' : 'pointer',
                     }}
                 >
-                    {isLast ? 'Finish' : 'Next'}
+                    {isLast ? t('onboarding.finish') : t('onboarding.next')}
                 </button>
             </div>
         </div>

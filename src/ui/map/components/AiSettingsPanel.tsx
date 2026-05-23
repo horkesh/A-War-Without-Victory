@@ -1,16 +1,17 @@
 /**
- * AiSettingsPanel — right-side panel for AI Commander configuration.
+ * AiSettingsPanel - right-side panel for AI Commander configuration.
  * API key input, mode selector with cost estimates.
  */
 import { useState } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { useIPC } from '../desktop/useIPC';
+import { t, type MessageKey } from '../i18n';
 
 const MODES = [
-    { id: 'commander', label: 'Commander', cost: '~$0.15/turn', desc: 'Opus 4 — full strategic reasoning' },
-    { id: 'officer', label: 'Officer', cost: '~$0.05/turn', desc: 'Sonnet 4 — balanced cost/quality' },
-    { id: 'recruit', label: 'Recruit', cost: '~$0.01/turn', desc: 'Haiku 4 — fast, economical' },
-    { id: 'cadet', label: 'Cadet', cost: 'Free', desc: 'Formula-only — no AI calls' },
+    { id: 'commander', labelKey: 'aiSettings.mode.commander', cost: '~$0.15/turn', descKey: 'aiSettings.mode.commanderDesc' },
+    { id: 'officer', labelKey: 'aiSettings.mode.officer', cost: '~$0.05/turn', descKey: 'aiSettings.mode.officerDesc' },
+    { id: 'recruit', labelKey: 'aiSettings.mode.recruit', cost: '~$0.01/turn', descKey: 'aiSettings.mode.recruitDesc' },
+    { id: 'cadet', labelKey: 'aiSettings.mode.cadet', cost: t('aiSettings.free'), descKey: 'aiSettings.mode.cadetDesc' },
 ] as const;
 
 export interface AiSettingsPanelProps {
@@ -28,7 +29,7 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
             try {
                 await ipc.setAiCommanderConfig({ mode, anthropic_api_key: apiKey || undefined });
             } catch {
-                // IPC not yet implemented — silent fallback
+                // IPC is optional in non-desktop hosts.
             }
         }
         setSaved(true);
@@ -36,15 +37,14 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
     };
 
     return (
-        <GlassPanel position="right" title="AI Commander" width="300px" onClose={onClose}>
+        <GlassPanel position="right" title={t('aiSettings.title')} width="300px" onClose={onClose}>
             <div className="space-y-5">
-                {/* API Key */}
                 <div className="space-y-1.5">
                     <label
                         htmlFor="ai-settings-api-key"
                         className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]"
                     >
-                        Anthropic API Key
+                        {t('aiSettings.apiKey')}
                     </label>
                     <input
                         id="ai-settings-api-key"
@@ -56,47 +56,48 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
                     />
                 </div>
 
-                {/* Mode selector */}
                 <div className="space-y-2">
                     <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
-                        AI Mode
+                        {t('aiSettings.mode')}
                     </div>
-                    {MODES.map((m) => (
-                        <label
-                            key={m.id}
-                            className={`flex items-start gap-2.5 p-2 rounded border cursor-pointer transition-all ${
-                                mode === m.id
-                                    ? 'border-[#c4a04a]/40 bg-[#c4a04a]/5'
-                                    : 'border-white/5 bg-black/20 hover:border-white/10'
-                            }`}
-                        >
-                            <input
-                                type="radio"
-                                name="ai-mode"
-                                value={m.id}
-                                aria-label={`AI mode: ${m.label}`}
-                                checked={mode === m.id}
-                                onChange={() => setMode(m.id)}
-                                className="mt-0.5 accent-[#c4a04a]"
-                            />
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-mono text-[#d4d0c8] font-medium">
-                                        {m.label}
-                                    </span>
-                                    <span className="text-[9px] font-mono text-[#c4a04a]">
-                                        {m.cost}
+                    {MODES.map((m) => {
+                        const label = t(m.labelKey as MessageKey);
+                        return (
+                            <label
+                                key={m.id}
+                                className={`flex items-start gap-2.5 p-2 rounded border cursor-pointer transition-all ${
+                                    mode === m.id
+                                        ? 'border-[#c4a04a]/40 bg-[#c4a04a]/5'
+                                        : 'border-white/5 bg-black/20 hover:border-white/10'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="ai-mode"
+                                    value={m.id}
+                                    aria-label={t('aiSettings.modeAria', { label })}
+                                    checked={mode === m.id}
+                                    onChange={() => setMode(m.id)}
+                                    className="mt-0.5 accent-[#c4a04a]"
+                                />
+                                <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-mono text-[#d4d0c8] font-medium">
+                                            {label}
+                                        </span>
+                                        <span className="text-[9px] font-mono text-[#c4a04a]">
+                                            {m.cost}
+                                        </span>
+                                    </div>
+                                    <span className="text-[9px] text-[#8a8578] leading-snug">
+                                        {t(m.descKey as MessageKey)}
                                     </span>
                                 </div>
-                                <span className="text-[9px] text-[#8a8578] leading-snug">
-                                    {m.desc}
-                                </span>
-                            </div>
-                        </label>
-                    ))}
+                            </label>
+                        );
+                    })}
                 </div>
 
-                {/* Save button */}
                 <button
                     onClick={handleSave}
                     className={`w-full px-4 py-2 text-[10px] font-mono uppercase tracking-[0.15em] rounded transition-all ${
@@ -105,7 +106,7 @@ export function AiSettingsPanel({ onClose }: AiSettingsPanelProps) {
                             : 'bg-black/40 hover:bg-[#c4a04a]/20 text-[#d4d0c8] border border-white/10 hover:border-[#c4a04a]/40'
                     }`}
                 >
-                    {saved ? 'Saved!' : 'Save'}
+                    {saved ? t('aiSettings.saved') : t('aiSettings.save')}
                 </button>
             </div>
         </GlassPanel>

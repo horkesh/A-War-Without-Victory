@@ -23,6 +23,7 @@ import styleJson from '../../map/awwv_map_style.json';
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeSettlementName } from '../../utils/playerSafeText';
+import { t } from '../../i18n';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -346,34 +347,34 @@ export function OpsMap({
 
                     // Build terrain tooltip content
                     const sid = props.sid as string | undefined;
-                    const name = (props.settlement_name as string | undefined) ?? getPlayerSafeSettlementName(hoveredOsid, 'Selected settlement');
+                    const name = (props.settlement_name as string | undefined) ?? getPlayerSafeSettlementName(hoveredOsid, t('opsModal.selectedSettlement'));
                     const terrain = sid ? terrainDataRef.current.get(sid) : undefined;
                     const controller = controlDataRef.current[hoveredOsid] ?? '—';
                     const controllerLabel = controller === '—'
                         ? controller
-                        : getPlayerSafePoliticalFactionName(controller, 'Unknown authority');
+                        : getPlayerSafePoliticalFactionName(controller, t('opsModal.unknownAuthority'));
                     const selLabel = isSelectable
-                        ? '<span style="color:#56d364">selectable</span>'
-                        : '<span style="color:#f47068">out of range</span>';
+                        ? `<span style="color:#56d364">${t('opsModal.selectable')}</span>`
+                        : `<span style="color:#f47068">${t('opsModal.outOfRange')}</span>`;
 
                     let html = `<div style="font-size:12px;line-height:1.5;">`;
                     html += `<strong>${name}</strong> ${selLabel}<br>`;
-                    html += `<span style="color:#8b9bb0">Held by: </span>${controllerLabel}<br>`;
+                    html += `<span style="color:#8b9bb0">${t('opsModal.heldBy')} </span>${controllerLabel}<br>`;
                     if (terrain) {
                         const elev = Math.round(terrain.elevation_mean_m);
                         const slope = Math.round(terrain.slope_index * 100);
                         const friction = terrain.terrain_friction_index;
-                        const terrainType = friction > 0.5 ? 'Mountain' : friction > 0.3 ? 'Hilly' : friction > 0.15 ? 'Rolling' : 'Flat';
+                        const terrainType = friction > 0.5 ? t('opsModal.mountain') : friction > 0.3 ? t('opsModal.hilly') : friction > 0.15 ? t('opsModal.rolling') : t('opsModal.flat');
                         const defBonus = friction > 0.5 ? '+50%' : friction > 0.3 ? '+30%' : friction > 0.15 ? '+15%' : '—';
-                        html += `<span style="color:#8b9bb0">Elevation: </span>${elev}m`;
+                        html += `<span style="color:#8b9bb0">${t('opsModal.elevation')} </span>${elev}m`;
                         html += ` <span style="color:#6b7d93">(${terrainType})</span><br>`;
-                        html += `<span style="color:#8b9bb0">Slope: </span>${slope}%`;
-                        html += ` <span style="color:#8b9bb0">Def bonus: </span>${defBonus}<br>`;
+                        html += `<span style="color:#8b9bb0">${t('opsModal.slope')} </span>${slope}%`;
+                        html += ` <span style="color:#8b9bb0">${t('opsModal.defBonus')} </span>${defBonus}<br>`;
                         if (terrain.river_crossing_penalty > 0) {
-                            html += `<span style="color:#58a6ff">River crossing penalty</span><br>`;
+                            html += `<span style="color:#58a6ff">${t('opsModal.riverCrossingPenalty')}</span><br>`;
                         }
                         if (terrain.road_access_index < 0.5) {
-                            html += `<span style="color:#e8a838">Poor road access</span><br>`;
+                            html += `<span style="color:#e8a838">${t('opsModal.poorRoadAccess')}</span><br>`;
                         }
                     }
                     html += `</div>`;
@@ -485,7 +486,7 @@ export function OpsMap({
                 <div className="absolute bottom-4 left-4 z-20 pointer-events-auto
                                 bg-[rgba(20,18,15,0.85)] backdrop-blur-sm rounded-md
                                 border border-[rgba(180,160,130,0.15)] px-3 py-2 text-[8px]">
-                    <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">Legend</div>
+                    <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">{t('opsModal.legend')}</div>
                     <div className="space-y-0.5 text-text-secondary">
                         <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> Objective &middot; <span className="text-accent-gold">&#9733;</span> Schwerpunkt &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> Staging</div>
                         <div><span className="inline-block w-3 h-0.5 bg-[rgba(255,220,120,0.8)] mr-1" /> Corps front &middot; Bright = selectable &middot; Dim = out of range</div>

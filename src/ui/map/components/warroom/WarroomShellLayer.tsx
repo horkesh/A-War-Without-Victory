@@ -22,6 +22,7 @@ import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSO
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel } from '../../utils/formatters';
 import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
+import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
@@ -299,7 +300,9 @@ export function getWarroomBoardDateLabel(
   if (rawDate && rawDate !== 'UNKNOWN') return rawDate.split('·')[0].trim();
   const labelDate = state?.label ? formatTurnLabel(state.label).split('·')[0].trim() : '';
   if (labelDate && !labelDate.toLowerCase().startsWith('turn ')) return labelDate;
-  return typeof state?.turn === 'number' ? `Turn ${state.turn}` : 'Date Pending';
+  return typeof state?.turn === 'number'
+    ? t('warroomShell.turnLabel', { turn: state.turn })
+    : t('warroomShell.datePending');
 }
 
 function factionInkColor(faction: string | null): string {
@@ -364,7 +367,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
               textTransform: 'uppercase',
             }}
           >
-            Map updating
+            {t('warroomShell.mapUpdating')}
           </div>
         )}
       </div>
@@ -630,7 +633,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             textTransform: 'uppercase',
           }}
         >
-          Warroom unavailable until a campaign side is selected.
+          {t('warroomShell.unavailable')}
         </div>
         <button
           type="button"
@@ -649,7 +652,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker }: WarroomShell
             boxShadow: '0 8px 22px rgba(0,0,0,0.38)',
           }}
         >
-          Open Side Picker
+          {t('warroomShell.openSidePicker')}
         </button>
       </div>
     );

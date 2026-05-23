@@ -168,8 +168,8 @@ describe('Presidential Decision Room wiring', () => {
 
     expect(panel).toContain('showAdvanced');
     expect(panel).toContain('setShowAdvanced');
-    expect(panel).toContain('View Advanced');
-    expect(panel).toContain('Hide Advanced');
+    expect(panel).toContain("t('decisionRoom.viewAdvanced')");
+    expect(panel).toContain("t('decisionRoom.hideAdvanced')");
     expect(panel).toContain('data-testid="decision-room-advanced"');
     expect(panel).toContain('{showAdvanced && view.lenses.length > 0');
     expect(panel).toContain('{showAdvanced && (');
@@ -183,7 +183,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(model).toContain('buildCommandQuestions');
     expect(panel).toContain('CommandQuestionLane');
     expect(panel).toContain('view.commandQuestions.map');
-    expect(panel).toContain('Command Loop');
+    expect(panel).toContain("t('decisionRoom.commandLoop')");
     expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(question.navigationTarget)');
     expect(panel).not.toContain('commandLoopQueue');
   });
@@ -199,7 +199,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(model).toContain('buildJudgeLoopStep');
     expect(panel).toContain('ProductLoopStep');
     expect(panel).toContain('view.loopSteps.map');
-    expect(panel).toContain('Product Loop');
+    expect(panel).toContain("t('decisionRoom.productLoop')");
     expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(step.navigationTarget)');
     expect(panel).not.toContain('productLoopQueue');
     expect(panel).not.toContain('historyOwner');
@@ -214,7 +214,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(model).toContain('buildPresidentialDecisionRoomSourceHandoffs');
     expect(panel).toContain('SourceHandoffLink');
     expect(panel).toContain('view.sourceHandoffs.map');
-    expect(panel).toContain('Source Handoffs');
+    expect(panel).toContain("t('decisionRoom.sourceHandoffs')");
     expect(panel).toContain('openPresidentialDecisionRoomNavigationTarget(handoff.navigationTarget)');
     expect(panel).not.toContain('sourceHandoffQueue');
     expect(panel).not.toContain('sourceHandoffLedger');
@@ -232,7 +232,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain('PriorityDossier');
     expect(panel).toContain('view.activeDossier');
     expect(panel).toContain('onSelectCard');
-    expect(panel).toContain('Priority Dossier');
+    expect(panel).toContain("t('decisionRoom.priorityDossier')");
     expect(panel).not.toContain('priorityDossierQueue');
     expect(panel).not.toContain('priorityDossierLedger');
   });

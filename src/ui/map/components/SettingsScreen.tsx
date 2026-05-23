@@ -254,7 +254,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     ariaLabel="Toggle soundscape audio"
                                 />
                             </SettingRow>
-                            <SettingRow label="Master Volume" description="Overall level for optional audio">
+                            <SettingRow label={t('settings.masterVolume.label')} description={t('settings.masterVolume.description')}>
                                 <input
                                     type="range"
                                     min="0"
@@ -262,7 +262,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     step="5"
                                     value={Math.round(audioPreferences.masterVolume * 100)}
                                     onChange={(event) => setMasterVolumePercent(event.target.value)}
-                                    aria-label="Master volume"
+                                    aria-label={t('settings.masterVolume.aria')}
                                     className="w-28 accent-[#c4a35a]"
                                 />
                             </SettingRow>

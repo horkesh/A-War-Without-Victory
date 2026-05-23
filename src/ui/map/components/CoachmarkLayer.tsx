@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Z } from '../../shared/zIndex';
+import { t, type MessageKey } from '../i18n';
 
 export type CoachmarkId =
   | 'decision-room'
@@ -12,6 +13,8 @@ export interface CoachmarkDef {
   target: string;
   title: string;
   body: string;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
 }
 
 export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
@@ -20,24 +23,32 @@ export const COACHMARKS: ReadonlyArray<CoachmarkDef> = Object.freeze([
     target: '[data-coachmark-id="decision-room"]',
     title: 'Decision Room',
     body: 'Review pending decisions and source handoffs before you advance the week.',
+    titleKey: 'coachmark.decisionRoom.title',
+    bodyKey: 'coachmark.decisionRoom.body',
   },
   {
     id: 'operation-opportunity',
     target: '[data-coachmark-id="operation-opportunity"]',
     title: 'Operation Opportunity',
     body: 'Authorize, redirect, delay, or decline staff-proposed operations from their dossier.',
+    titleKey: 'coachmark.operationOpportunity.title',
+    bodyKey: 'coachmark.operationOpportunity.body',
   },
   {
     id: 'chronicle-filter',
     target: '[data-coachmark-id="chronicle-filter"]',
     title: 'Chronicle Filters',
     body: 'Filter the campaign record when you need to reconstruct why the front changed.',
+    titleKey: 'coachmark.chronicleFilter.title',
+    bodyKey: 'coachmark.chronicleFilter.body',
   },
   {
     id: 'codex',
     target: '[data-coachmark-id="codex"]',
     title: 'Codex',
     body: 'Open historical context and reference essays without leaving the tactical map.',
+    titleKey: 'coachmark.codex.title',
+    bodyKey: 'coachmark.codex.body',
   },
 ]);
 
@@ -130,10 +141,10 @@ export function CoachmarkLayer(): JSX.Element | null {
       className="rounded border border-amber-400/35 bg-[#16140f]/95 px-3 py-2 text-[#f3ead0] shadow-2xl"
     >
       <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">
-        {active.coachmark.title}
+        {t(active.coachmark.titleKey)}
       </div>
       <div className="mt-1 text-[11px] leading-snug text-[#d7cab7]">
-        {active.coachmark.body}
+        {t(active.coachmark.bodyKey)}
       </div>
     </div>
   );

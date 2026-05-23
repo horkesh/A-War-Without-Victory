@@ -23,6 +23,7 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { playCue } from '../audio/audio_engine';
+import { t } from '../i18n';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -167,7 +168,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         ))}
                     </div>
                     <div className="text-[11px] text-[#6a5a40] mt-2">
-                        <span className="font-bold text-[#2a2016]">Institutional model:</span>{' '}
+                        <span className="font-bold text-[#2a2016]">{t('peace.institutionalModel')}</span>{' '}
                         {INSTITUTIONAL_LABELS[plan.institutionalModel] ?? plan.institutionalModel.replace(/_/g, ' ')}
                     </div>
                 </div>

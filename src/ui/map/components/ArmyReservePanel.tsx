@@ -21,22 +21,33 @@ import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
+import { t, type MessageKey } from '../i18n';
 
-const REASON_LABELS: Record<string, string> = {
-    offensive_support: 'Offensive Support',
-    defensive_gap: 'Defensive Gap',
-    exploitation: 'Exploitation',
-    enclave_relief: 'Enclave Relief',
+const REASON_LABEL_KEYS: Record<string, MessageKey> = {
+    offensive_support: 'armyReserve.reason.offensiveSupport',
+    defensive_gap: 'armyReserve.reason.defensiveGap',
+    exploitation: 'armyReserve.reason.exploitation',
+    enclave_relief: 'armyReserve.reason.enclaveRelief',
 };
 
-const RECALL_LABELS: Record<string, string> = {
-    op_complete: 'Op Complete',
-    need_expired: 'Need Expired',
-    player_recall: 'Player Recall',
-    casualty_threshold: 'Casualties',
-    morale_collapse: 'Morale Collapse',
-    permanent_degradation: 'Degraded',
+const RECALL_LABEL_KEYS: Record<string, MessageKey> = {
+    op_complete: 'armyReserve.recall.opComplete',
+    need_expired: 'armyReserve.recall.needExpired',
+    player_recall: 'armyReserve.recall.playerRecall',
+    casualty_threshold: 'armyReserve.recall.casualties',
+    morale_collapse: 'armyReserve.recall.moraleCollapse',
+    permanent_degradation: 'armyReserve.status.degraded',
 };
+
+function reserveReasonLabel(reason: string): string {
+    const key = REASON_LABEL_KEYS[reason];
+    return key ? t(key) : reason;
+}
+
+function recallReasonLabel(reason: string): string {
+    const key = RECALL_LABEL_KEYS[reason];
+    return key ? t(key) : reason;
+}
 
 interface ArmyReservePanelProps {
     railSlot: 'primary' | 'secondary';
@@ -120,14 +131,14 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border/60 bg-black/30 shrink-0">
                 <div>
-                    <div className="text-[11px] font-bold text-text-primary tracking-wide uppercase">Army Reserve</div>
+                    <div className="text-[11px] font-bold text-text-primary tracking-wide uppercase">{t('armyReserve.title')}</div>
                     <div className="text-[10px] text-text-secondary">{armyHq.name}</div>
                 </div>
                 <button
                     type="button"
                     onClick={() => useGameStore.setState({ selectedArmyHqId: null, selectedFormationId: null })}
                     className="text-text-secondary hover:text-text-primary text-lg leading-none px-1"
-                    aria-label="Close"
+                    aria-label={t('armyReserve.close')}
                 >×</button>
             </div>
 
@@ -136,12 +147,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                 {/* ── Reserve Pool ─────────────────────────────────────── */}
                 <section>
                     <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
-                        Reserve Pool ({elites.length})
+                        {t('armyReserve.reservePool', { count: elites.length })}
                     </div>
                     {elites.length === 0 ? (
                         <EmptyState
-                            message="No elite formations"
-                            helpText="Reserve pool currently empty."
+                            message={t('armyReserve.noEliteFormations')}
+                            helpText={t('armyReserve.reservePoolEmpty')}
                             density="compact"
                         />
                     ) : (
@@ -161,20 +172,20 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 {brigade.name}
                                             </span>
                                             {ls.permanently_degraded ? (
-                                                <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">Degraded</span>
+                                                <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
                                             ) : ls.on_loan ? (
-                                                <span className="px-1.5 py-0.5 bg-[#d4a855]/20 text-[#d4a855] text-[9px] font-bold rounded border border-[#d4a855]/30 uppercase shrink-0">On Loan</span>
+                                                <span className="px-1.5 py-0.5 bg-[#d4a855]/20 text-[#d4a855] text-[9px] font-bold rounded border border-[#d4a855]/30 uppercase shrink-0">{t('armyReserve.status.onLoan')}</span>
                                             ) : ls.in_cooldown ? (
-                                                <span className="px-1.5 py-0.5 bg-white/10 text-text-secondary text-[9px] font-bold rounded border border-white/20 uppercase shrink-0">Cooldown</span>
+                                                <span className="px-1.5 py-0.5 bg-white/10 text-text-secondary text-[9px] font-bold rounded border border-white/20 uppercase shrink-0">{t('armyReserve.status.cooldown')}</span>
                                             ) : (
-                                                <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[9px] font-bold rounded border border-[#55d48a]/30 uppercase shrink-0">Ready</span>
+                                                <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[9px] font-bold rounded border border-[#55d48a]/30 uppercase shrink-0">{t('armyReserve.status.ready')}</span>
                                             )}
                                         </div>
 
                                         {/* Personnel bar */}
                                         <div className="space-y-0.5">
                                             <div className="flex justify-between text-[10px] text-text-secondary">
-                                                <span>Personnel</span>
+                                                <span>{t('armyReserve.personnel')}</span>
                                                 <span>{brigade.personnel?.toLocaleString() ?? '—'}</span>
                                             </div>
                                             <div className="h-1 bg-black/30 rounded-full overflow-hidden">
@@ -195,13 +206,13 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     onClick={(e) => { e.stopPropagation(); void handleRecall(brigade.id); }}
                                                     className="px-2 py-0.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[10px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
                                                 >
-                                                    Terminate
+                                                    {t('armyReserve.terminate')}
                                                 </button>
                                             </div>
                                         )}
                                         {!ls.on_loan && ls.base_osid && (
                                             <div className="text-[10px] text-text-secondary">
-                                                Base: {getOsidDisplayName(ls.base_osid, osidDisplayNames)}
+                                                {t('armyReserve.base', { base: getOsidDisplayName(ls.base_osid, osidDisplayNames) })}
                                             </div>
                                         )}
                                     </button>
@@ -214,12 +225,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                 {/* ── Active Loans Snapshot ─────────────────────────────── */}
                 <section>
                     <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
-                        Active Loans ({activeLoans.length})
+                        {t('armyReserve.activeLoans', { count: activeLoans.length })}
                     </div>
                     {activeLoans.length === 0 ? (
                         <EmptyState
-                            message="No active deployments"
-                            helpText="No elite formations are presently committed to corps."
+                            message={t('armyReserve.noActiveDeployments')}
+                            helpText={t('armyReserve.noActiveDeploymentsHelp')}
                             density="compact"
                         />
                     ) : (
@@ -251,7 +262,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                 {pendingRequests.length > 0 && (
                     <section>
                         <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
-                            Pending Requests ({pendingRequests.length})
+                            {t('armyReserve.pendingRequests', { count: pendingRequests.length })}
                         </div>
                         {reserveAttentionSummary && (
                             <div className="mb-2 rounded border border-panel-border/40 bg-black/20 px-2 py-1.5">
@@ -288,7 +299,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     borderColor: `${priorityColor(req.priority)}40`,
                                                 }}
                                             >
-                                                {REASON_LABELS[req.reason] ?? req.reason}
+                                                {reserveReasonLabel(req.reason)}
                                             </span>
                                             <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase ${
                                                 req.severityBand === 'critical'
@@ -298,7 +309,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 {severityCopy.label}
                                             </span>
                                             <span className="text-[10px] text-text-secondary">
-                                                ~{req.travel_hops <= 1 ? '&lt;1' : Math.ceil(req.travel_hops / 2)}w travel
+                                                {t('armyReserve.travelWeeks', { weeks: req.travel_hops <= 1 ? '<1' : Math.ceil(req.travel_hops / 2) })}
                                             </span>
                                         </div>
                                     </div>
@@ -343,7 +354,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
 
                                     {req.suggested_brigade_id && (
                                         <div className="text-[10px] text-text-secondary">
-                                            Suggested: <span className="text-text-primary">{
+                                            {t('armyReserve.suggested')}: <span className="text-text-primary">{
                                                 getPlayerSafeBrigadeName(
                                                     loadedGameState.formations.find(f => f.id === req.suggested_brigade_id)?.name,
                                                 )
@@ -352,12 +363,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     )}
                                     {req.why_needed && (
                                         <div className="text-[10px] text-text-secondary">
-                                            <span className="text-text-primary font-semibold">Corps CO (WHY):</span> {req.why_needed}
+                                            <span className="text-text-primary font-semibold">{t('armyReserve.corpsWhy')}:</span> {req.why_needed}
                                         </div>
                                     )}
                                     {req.how_to_use && (
                                         <div className="text-[10px] text-text-secondary">
-                                            <span className="text-text-primary font-semibold">Corps CO (HOW):</span> {req.how_to_use}
+                                            <span className="text-text-primary font-semibold">{t('armyReserve.corpsHow')}:</span> {req.how_to_use}
                                         </div>
                                     )}
 
@@ -376,7 +387,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             onClick={() => void handleApprove(req.request_id, req.suggested_brigade_id)}
                                             className="flex-1 px-2 py-1 bg-[#55d48a]/20 border border-[#55d48a]/40 rounded text-[10px] text-[#55d48a] font-bold hover:bg-[#55d48a]/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
-                                            APPROVE
+                                            {t('armyReserve.approve')}
                                         </button>
                                         <button
                                             type="button"
@@ -385,7 +396,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             }}
                                             className="px-2 py-1 bg-black/30 border border-panel-border/40 rounded text-[10px] text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
                                         >
-                                            DECLINE
+                                            {t('armyReserve.decline')}
                                         </button>
                                     </div>
                                     </div>
@@ -404,41 +415,41 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                             className="flex items-center gap-1.5 text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 hover:opacity-100 transition-opacity mb-2"
                         >
                             <span>{historyOpen ? '▾' : '▸'}</span>
-                            Campaign History
+                            {t('armyReserve.campaignHistory')}
                         </button>
                         {historyOpen && (
                             <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                                 {elites.filter(b => (tracker[b.id]?.total_loans ?? 0) > 0).map(brigade => {
-                                    const t = tracker[brigade.id]!;
+                                    const brigadeTracker = tracker[brigade.id]!;
                                     return (
                                         <div key={brigade.id} className="bg-black/10 border border-panel-border/30 rounded p-2 space-y-1.5">
                                             <div className="text-text-primary font-semibold">{brigade.name}</div>
                                             <div className="grid grid-cols-3 gap-1 text-[10px]">
                                                 <div className="text-center">
-                                                    <div className="text-text-secondary">Loans</div>
-                                                    <div className="text-text-primary font-bold">{t.total_loans}</div>
+                                                    <div className="text-text-secondary">{t('armyReserve.loans')}</div>
+                                                    <div className="text-text-primary font-bold">{brigadeTracker.total_loans}</div>
                                                 </div>
                                                 <div className="text-center">
-                                                    <div className="text-text-secondary">Weeks</div>
-                                                    <div className="text-text-primary font-bold">{t.total_turns_deployed}</div>
+                                                    <div className="text-text-secondary">{t('armyReserve.weeks')}</div>
+                                                    <div className="text-text-primary font-bold">{brigadeTracker.total_turns_deployed}</div>
                                                 </div>
                                                 <div className="text-center">
-                                                    <div className="text-text-secondary">KIA</div>
-                                                    <div className="text-[#d45555] font-bold">{t.total_casualties_taken.toLocaleString()}</div>
+                                                    <div className="text-text-secondary">{t('armyReserve.kia')}</div>
+                                                    <div className="text-[#d45555] font-bold">{brigadeTracker.total_casualties_taken.toLocaleString()}</div>
                                                 </div>
                                             </div>
-                                            {t.episodes.length > 0 && (
+                                            {brigadeTracker.episodes.length > 0 && (
                                                 <div className="space-y-1 pt-1 border-t border-panel-border/20">
-                                                    {t.episodes.map(ep => (
+                                                    {brigadeTracker.episodes.map(ep => (
                                                         <div key={ep.episode_id} className="text-[10px] text-text-secondary flex items-center justify-between gap-2">
                                                             <span>
                                                                 <span className="text-text-primary">{getCorpsName(ep.corps_id)}</span>
-                                                                {' '}— {REASON_LABELS[ep.reason] ?? ep.reason}
+                                                                {' '} - {reserveReasonLabel(ep.reason)}
                                                             </span>
                                                             <span className="shrink-0 tabular-nums">
                                                                 w{ep.loan_start_turn}
                                                                 {ep.loan_end_turn != null ? `–${ep.loan_end_turn}` : '+'}
-                                                                {ep.recall_reason ? ` (${RECALL_LABELS[ep.recall_reason] ?? ep.recall_reason})` : ''}
+                                                                {ep.recall_reason ? ` (${recallReasonLabel(ep.recall_reason)})` : ''}
                                                             </span>
                                                         </div>
                                                     ))}

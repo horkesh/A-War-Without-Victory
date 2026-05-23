@@ -1,4 +1,5 @@
 import { FormationView } from '../../data/types';
+import { t } from '../../i18n';
 
 interface TacticalCardProps {
     formation: FormationView;
@@ -23,7 +24,7 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
             <div className="flex justify-between items-start mb-2">
                 <div className="flex flex-col">
                     <div className="text-[10px] font-black text-white leading-none mb-0.5 group-hover:text-accent-gold transition-colors">{formation.name}</div>
-                    <div className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">{formation.faction} BRIGADE</div>
+                    <div className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">{t('planUi.factionBrigade', { faction: formation.faction })}</div>
                 </div>
                 {/* NATO Symbol Placeholder */}
                 <div className="w-5 h-4 bg-slate-700/50 rounded-sm border border-white/10 flex items-center justify-center text-[8px] text-slate-400">
@@ -34,12 +35,12 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
             <div className="flex-1 space-y-2">
                 <div className="flex justify-between items-end">
                     <div className="flex flex-col">
-                        <span className="text-[8px] text-slate-500 uppercase font-bold">Personnel</span>
+                        <span className="text-[8px] text-slate-500 uppercase font-bold">{t('formationDetail.personnel')}</span>
                         <span className="text-xs font-mono text-slate-200">{personnel.toLocaleString()}</span>
                     </div>
                     {tanks > 0 && (
                         <div className="flex flex-col items-end">
-                            <span className="text-[8px] text-slate-500 uppercase font-bold">Armor</span>
+                            <span className="text-[8px] text-slate-500 uppercase font-bold">{t('planUi.armor')}</span>
                             <span className="text-xs font-mono text-slate-200">{tanks}</span>
                         </div>
                     )}
@@ -47,7 +48,7 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
 
                 <div className="space-y-1">
                     <div className="flex justify-between text-[7px] uppercase font-bold">
-                        <span className="text-slate-500">Cohesion</span>
+                        <span className="text-slate-500">{t('formationDetail.cohesion')}</span>
                         <span className={cohesion < 30 ? 'text-red-400' : 'text-slate-400'}>{Math.round(cohesion)}%</span>
                     </div>
                     <div className="h-1 bg-black/40 rounded-full overflow-hidden">
@@ -57,7 +58,7 @@ export function TacticalCard({ formation, onClick, active }: TacticalCardProps) 
 
                 <div className="space-y-1">
                     <div className="flex justify-between text-[7px] uppercase font-bold">
-                        <span className="text-slate-500">Fatigue</span>
+                        <span className="text-slate-500">{t('formationDetail.fatigue')}</span>
                         <span className={fatigue > 70 ? 'text-red-400' : 'text-slate-400'}>{fatigue}%</span>
                     </div>
                     <div className="h-1 bg-black/40 rounded-full overflow-hidden">

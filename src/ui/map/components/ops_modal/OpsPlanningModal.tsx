@@ -11,6 +11,7 @@ import { usePrediction } from './usePrediction';
 import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';
 import { Z } from '../../../shared/zIndex';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
+import { t } from '../../i18n';
 
 let nextAxisCounter = 0;
 function makeAxisId(): string { return `axis_${++nextAxisCounter}`; }
@@ -414,7 +415,7 @@ export function OpsPlanningModal() {
             <button
                 type="button"
                 onClick={clearContext}
-                title="Close operations planning (ESC) — draft will be lost"
+                title={t('opsModal.closePlanningTitle')}
                 className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
                            text-text-secondary hover:text-white rounded-full
                            bg-[rgba(20,18,15,0.6)] hover:bg-[rgba(20,18,15,0.9)]

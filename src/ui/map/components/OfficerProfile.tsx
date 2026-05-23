@@ -19,6 +19,7 @@ import {
     getComplianceModifierColor,
 } from '../utils/officerCharacter';
 import { WarCrimesBadge } from './WarCrimesBadge';
+import { t } from '../i18n';
 
 interface OfficerProfileProps {
     officer: NamedOfficerView;
@@ -43,7 +44,7 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
                 <span
                     className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
-                    title={origin.label === 'JNA' ? "Yugoslav People's Army (JNA) — pre-war military service" : undefined}
+                    title={origin.label === 'JNA' ? t('officerProfile.jnaTitle') : undefined}
                 >
                     {origin.label}
                 </span>
@@ -55,7 +56,7 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 <div className="min-w-0 flex-1">
                     <div className="text-xs font-bold text-accent-gold truncate">
                         {rank} {officer.name}
-                        {officer.acting_commander && <span className="text-[9px] text-text-secondary ml-1 font-normal">(Acting)</span>}
+                        {officer.acting_commander && <span className="text-[9px] text-text-secondary ml-1 font-normal">{t('officerProfile.acting')}</span>}
                     </div>
                     <div className="text-[9px] text-text-secondary italic">{archetype}</div>
                 </div>
@@ -63,23 +64,23 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
 
             {/* Stat pips */}
             <div className="space-y-0.5">
-                <StatRow label="Competence" value={officer.competence} descriptor={getCompetenceLabel(officer.competence)} />
+                <StatRow label={t('officerProfile.competence')} value={officer.competence} descriptor={getCompetenceLabel(officer.competence)} />
                 {(!compact || emphasis === 'aggression') && (
-                    <StatRow label="Aggression" value={officer.aggressiveness} descriptor={getAggressionLabel(officer.aggressiveness)} />
+                    <StatRow label={t('officerProfile.aggression')} value={officer.aggressiveness} descriptor={getAggressionLabel(officer.aggressiveness)} />
                 )}
                 {(!compact || emphasis === 'defense') && (
-                    <StatRow label="Defense" value={officer.defensive_skill} descriptor={getDefenseLabel(officer.defensive_skill)} />
+                    <StatRow label={t('officerProfile.defense')} value={officer.defensive_skill} descriptor={getDefenseLabel(officer.defensive_skill)} />
                 )}
                 {!compact && (
-                    <StatRow label="Loyalty" value={officer.political_reliability} descriptor={getReliabilityLabel(officer.political_reliability)} />
+                    <StatRow label={t('officerProfile.loyalty')} value={officer.political_reliability} descriptor={getReliabilityLabel(officer.political_reliability)} />
                 )}
                 {!compact && officer.effective_compliance_modifier !== undefined && (
                     <div className="flex items-center gap-2 text-[9px]">
-                        <span className="text-text-secondary w-[62px] shrink-0">Modifier</span>
+                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.modifier')}</span>
                         <span className={`font-mono tracking-tight ${getComplianceModifierColor(officer.effective_compliance_modifier)}`}>
                             {getComplianceModifierTextFromValue(officer.effective_compliance_modifier)}
                         </span>
-                        <span className="text-text-secondary/60">compliance</span>
+                        <span className="text-text-secondary/60">{t('officerProfile.compliance')}</span>
                     </div>
                 )}
             </div>
@@ -96,17 +97,17 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
             {(officer.operations_commanded != null && officer.operations_commanded > 0) && (
                 <div className="space-y-0.5 pt-0.5 border-t border-panel-border/20">
                     <div className="flex items-center gap-2 text-[9px]">
-                        <span className="text-text-secondary w-[62px] shrink-0">Ops Led</span>
+                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.opsLed')}</span>
                         <span className="font-mono text-accent-gold">{officer.operations_commanded}</span>
                         {officer.initial_competence != null && officer.competence > officer.initial_competence && (
                             <span className="text-green-400 text-[8px]">
-                                +{(officer.competence - officer.initial_competence).toFixed(1)} comp
+                                {t('officerProfile.competenceGain', { value: (officer.competence - officer.initial_competence).toFixed(1) })}
                             </span>
                         )}
                     </div>
                     {officer.experience_points != null && officer.experience_points > 0 && (
                         <div className="flex items-center gap-1 text-[9px]">
-                            <span className="text-text-secondary w-[62px] shrink-0">XP</span>
+                            <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.xp')}</span>
                             <div className="flex-1 h-1 bg-black/40 rounded overflow-hidden">
                                 <div
                                     className="h-full bg-accent-gold/70 rounded"
@@ -126,7 +127,7 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                         ? 'bg-red-900/30 border border-red-500/40 text-red-400'
                         : 'bg-amber-900/30 border border-amber-500/40 text-amber-400'
                 }`}>
-                    {officer.casualty_vulnerability >= 0.15 ? 'HIGH RISK' : 'MODERATE RISK'}
+                    {officer.casualty_vulnerability >= 0.15 ? t('officerProfile.highRisk') : t('officerProfile.moderateRisk')}
                 </div>
             )}
 

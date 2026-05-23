@@ -14,6 +14,7 @@ import { formatRank } from '../utils/officerCharacter';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
+import { t } from '../i18n';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -224,9 +225,9 @@ export function OOBSidebar() {
         style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
       >
         <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
-          Command
+          {t('oob.command')}
         </div>
-        <div className="px-2.5 py-2 text-[11px] text-text-secondary italic">Load a save to see army and situation views.</div>
+        <div className="px-2.5 py-2 text-[11px] text-text-secondary italic">{t('oob.loadSaveHelp')}</div>
       </div>
     );
   }
@@ -238,7 +239,7 @@ export function OOBSidebar() {
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
       <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
-        Command
+        {t('oob.command')}
       </div>
 
       {/* Main Container — must be relative and flex-grow to fill the remaining sidebar height */}
@@ -251,7 +252,7 @@ export function OOBSidebar() {
         >
           {/* ── Situation ── */}
           <AccordionHeader
-            label="Situation"
+            label={t('inbox.situation')}
             expanded={expandedSections.situation}
             onToggle={() => toggleSection('situation')}
           />
@@ -261,7 +262,7 @@ export function OOBSidebar() {
 
           {/* ── Army ── */}
           <AccordionHeader
-            label="Army"
+            label={t('oob.army')}
             count={totalFormations}
             expanded={expandedSections.army}
             onToggle={() => toggleSection('army')}
@@ -269,7 +270,7 @@ export function OOBSidebar() {
           {expandedSections.army && (
             <div className="p-2 space-y-2">
               {!armyByFaction || armyByFaction.size === 0 ? (
-                <div className="text-xs text-text-secondary italic">No formations.</div>
+                <div className="text-xs text-text-secondary italic">{t('oob.noFormations')}</div>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f))).map((faction, factionIndex) => {
                   const formations = armyByFaction.get(faction) ?? [];
@@ -336,7 +337,7 @@ export function OOBSidebar() {
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
                               className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline truncate`}
-                              title={`View ${getPlayerSafeMilitaryFactionName(faction)} army summary`}
+                              title={t('oob.viewArmySummary', { faction: getPlayerSafeMilitaryFactionName(faction) })}
                             >
                               {getArmyName(faction) ? `${getArmyName(faction)} / ${getPlayerSafeMilitaryFactionName(faction)}` : getPlayerSafeMilitaryFactionName(faction)}
                             </button>
@@ -346,14 +347,14 @@ export function OOBSidebar() {
                             if (commander) {
                               return (
                                 <div className="text-[9px] text-text-secondary pl-6">
-                                  <div>CO:</div>
+                                  <div>{t('oob.co')}</div>
                                   <div className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</div>
                                   <div className="mt-0.5 leading-snug text-text-secondary">
-                                    {commander.bio_short ?? 'Service record pending staff review.'}
+                                    {commander.bio_short ?? t('oob.serviceRecordPending')}
                                   </div>
                                   {commander.command_style && (
                                     <div className="mt-0.5 text-[8px] uppercase tracking-wide text-text-secondary/80">
-                                      Style: <span className="normal-case tracking-normal text-text-secondary">{commander.command_style}</span>
+                                      {t('oob.style')} <span className="normal-case tracking-normal text-text-secondary">{commander.command_style}</span>
                                     </div>
                                   )}
                                 </div>
@@ -363,7 +364,7 @@ export function OOBSidebar() {
                           })()}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-text-secondary tabular-nums text-[9px]">{formations.length + reserves.length} formations</span>
+                          <span className="text-text-secondary tabular-nums text-[9px]">{t('oob.formationCount', { count: formations.length + reserves.length })}</span>
                           <span
                             className="text-text-secondary group-hover/faction:text-text-primary transition-colors"
                           >
@@ -388,9 +389,9 @@ export function OOBSidebar() {
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">Reserve HQ / {hqName}</span>
+                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">{t('oob.reserveHq', { name: hqName })}</span>
                                   </div>
-                                  <span className="text-[10px] text-text-secondary tabular-nums shrink-0">{hqBrigades.length} units</span>
+                                  <span className="text-[10px] text-text-secondary tabular-nums shrink-0">{t('oob.unitCount', { count: hqBrigades.length })}</span>
                                 </div>
                                 <div className="mt-0.5 flex flex-wrap gap-1">
                                   {hqBrigades.map(b => (
@@ -460,7 +461,7 @@ export function OOBSidebar() {
 
           {/* ── Operations ── */}
           <AccordionHeader
-            label="Mobilization"
+            label={t('oob.mobilization')}
             count={mobilizationSummary ? Object.keys(mobilizationSummary).length : undefined}
             expanded={expandedSections.mobilization}
             onToggle={() => toggleSection('mobilization')}
@@ -468,7 +469,7 @@ export function OOBSidebar() {
           {expandedSections.mobilization && (
             <div className="p-2 space-y-1.5 text-[11px]">
               {!mobilizationSummary ? (
-                <div className="text-text-secondary italic px-1">No mobilization data.</div>
+                <div className="text-text-secondary italic px-1">{t('oob.noMobilizationData')}</div>
               ) : (
                 FACTION_ORDER.filter((faction) => faction === playerFaction && Boolean(mobilizationSummary[faction])).map((faction) => {
                   const summary = mobilizationSummary[faction]!;
@@ -478,20 +479,20 @@ export function OOBSidebar() {
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-                        <span className="text-text-secondary">Available</span>
+                        <span className="text-text-secondary">{t('oob.available')}</span>
                         <span className="text-text-primary tabular-nums">{summary.total_available.toLocaleString()}</span>
-                        <span className="text-text-secondary">Committed</span>
+                        <span className="text-text-secondary">{t('oob.committed')}</span>
                         <span className="text-text-primary tabular-nums">{summary.total_committed.toLocaleString()}</span>
-                        <span className="text-text-secondary">Exhausted</span>
+                        <span className="text-text-secondary">{t('oob.exhausted')}</span>
                         <span className="text-text-primary tabular-nums">{summary.total_exhausted.toLocaleString()}</span>
-                        <span className="text-text-secondary">Exhaustion</span>
+                        <span className="text-text-secondary">{t('corpsDetail.exhaustion')}</span>
                         <span className="text-text-primary tabular-nums">{summary.exhaustion_pct.toFixed(1)}%</span>
-                        <span className="text-text-secondary">Strategic reserve</span>
+                        <span className="text-text-secondary">{t('oob.strategicReserve')}</span>
                         <span className="text-text-primary tabular-nums">{summary.strategic_reserve.toLocaleString()}</span>
                       </div>
                       {summary.top_pools.length > 0 && (
                         <div className="pt-1 border-t border-panel-border/50">
-                          <div className="text-[10px] uppercase tracking-wide text-text-secondary mb-1">Top pools</div>
+                          <div className="text-[10px] uppercase tracking-wide text-text-secondary mb-1">{t('oob.topPools')}</div>
                           <div className="space-y-1">
                             {summary.top_pools.map((pool) => (
                               <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-[11px]">
@@ -510,7 +511,7 @@ export function OOBSidebar() {
           )}
 
           <AccordionHeader
-            label="Operations"
+            label={t('operationHistory.title')}
             count={totalOperations > 0 ? totalOperations : undefined}
             expanded={expandedSections.operations}
             onToggle={() => toggleSection('operations')}
@@ -518,7 +519,7 @@ export function OOBSidebar() {
           {expandedSections.operations && (
             <div className="p-2 space-y-1.5 text-[11px]">
               {!operationsByFaction ? (
-                <div className="text-text-secondary italic px-1">No active operations.</div>
+                <div className="text-text-secondary italic px-1">{t('operationHistory.noActive')}</div>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && operationsByFaction.has(f)).map((faction) => {
                   const ops = operationsByFaction.get(faction)!;
@@ -551,20 +552,20 @@ export function OOBSidebar() {
                                 {toTitleCase(op.phase)}
                               </span>
                               {op.momentum != null && (
-                                <span className="text-text-secondary">Mom: {op.momentum}</span>
+                                <span className="text-text-secondary">{t('operationsSection.momShort')} {op.momentum}</span>
                               )}
                             </div>
                             <div className="text-[10px] tabular-nums flex items-center gap-1 flex-wrap">
-                              {objTotal > 0 && <span className="text-text-secondary">Obj: {objCurrent}/{objTotal}</span>}
-                              <span className="text-text-secondary">{objTotal > 0 ? ' · ' : ''}Supply:{' '}</span>
+                              {objTotal > 0 && <span className="text-text-secondary">{t('operationsPanel.objShort')} {objCurrent}/{objTotal}</span>}
+                              <span className="text-text-secondary">{objTotal > 0 ? ' - ' : ''}{t('operationsPanel.supply')} </span>
                               {op.supply_readiness != null ? (
                                 <span className={op.supply_readiness < 0.3 ? 'text-red-400 font-semibold' : op.supply_readiness < 0.7 ? 'text-amber-400' : 'text-green-400'}>
                                   {(op.supply_readiness * 100).toFixed(0)}%
                                 </span>
                               ) : (
-                                <span className="text-text-secondary italic" title="Supply readiness not yet assessed for this operation">N/A</span>
+                                <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('operationsPanel.na')}</span>
                               )}
-                              <span className="text-text-secondary"> · {op.participating_brigade_count} brigades</span>
+                              <span className="text-text-secondary"> - {t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                             </div>
                           </button>
                         );
@@ -578,7 +579,7 @@ export function OOBSidebar() {
 
           {/* ── Sectors ── */}
           <AccordionHeader
-            label="Sectors"
+            label={t('sectorsSection.title')}
             count={totalSectors > 0 ? totalSectors : undefined}
             expanded={expandedSections.sectors}
             onToggle={() => toggleSection('sectors')}
@@ -586,7 +587,7 @@ export function OOBSidebar() {
           {expandedSections.sectors && (
             <div className="p-2.5 space-y-1.5 text-[11px]">
               {!sectorsByFaction ? (
-                <div className="text-text-secondary italic px-1">No sector data.</div>
+                <div className="text-text-secondary italic px-1">{t('oob.noSectorData')}</div>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && sectorsByFaction.has(f)).map((faction) => {
                   const sectors = sectorsByFaction.get(faction)!;

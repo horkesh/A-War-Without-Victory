@@ -21,6 +21,7 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSettlementName,
 } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -66,13 +67,13 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
         {battle.was_concentrated && <span className="ml-1 text-text-muted">({battle.all_attacker_ids.length}× concentrated)</span>}
       </div>
       <div className="grid grid-cols-2 gap-x-3 text-[10px] tabular-nums">
-        <div className="text-text-secondary">Attacker losses</div>
+        <div className="text-text-secondary">{t('tooltip.attackerLosses')}</div>
         <div className="text-text-primary">−{battle.attacker_casualties.toLocaleString()}</div>
-        <div className="text-text-secondary">Defender losses</div>
+        <div className="text-text-secondary">{t('tooltip.defenderLosses')}</div>
         <div className="text-text-primary">−{battle.defender_casualties.toLocaleString()}</div>
       </div>
       {battle.territory_flipped && (
-        <div className="mt-1 text-[9px] text-amber-400">Territory captured</div>
+        <div className="mt-1 text-[9px] text-amber-400">{t('tooltip.territoryCaptured')}</div>
       )}
       {battle.execution_friction && (
         <div className="mt-1 text-[9px] text-amber-300">
@@ -82,7 +83,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
             : ''}
         </div>
       )}
-      <div className="mt-1.5 text-[9px] text-text-muted italic">Click for After-Action Report</div>
+      <div className="mt-1.5 text-[9px] text-text-muted italic">{t('tooltip.clickForAar')}</div>
     </div>
   );
 }
@@ -108,7 +109,7 @@ function FormationTooltipContent({
     osidDisplayNames,
     playerFaction,
   });
-  if (!formation) return <div className="text-[11px] text-text-secondary">Unknown formation</div>;
+  if (!formation) return <div className="text-[11px] text-text-secondary">{t('tooltip.unknownFormation')}</div>;
 
   if (model.classification === 'enemy_contact') {
     return (
@@ -119,7 +120,7 @@ function FormationTooltipContent({
         {model.subtitle && (
           <div className="text-[11px] text-text-secondary mb-1">{model.subtitle}</div>
         )}
-        <div className="text-[11px] text-text-secondary">Staff confirms visible enemy presence.</div>
+        <div className="text-[11px] text-text-secondary">{t('tooltip.enemyPresenceConfirmed')}</div>
         {model.statusLine && (
           <div className="text-[10px] text-text-muted mt-1">{model.statusLine}</div>
         )}
@@ -149,7 +150,7 @@ function FormationTooltipContent({
         </div>
       )}
       <div className="flex items-center gap-2 text-[11px] mb-1">
-        <span className="text-text-secondary">Cohesion:</span>
+        <span className="text-text-secondary">{t('tooltip.cohesion')}</span>
         <div className="flex gap-0.5">
           {Array.from({ length: 5 }, (_, i) => (
             <span
@@ -310,14 +311,14 @@ function DefensePreviewContent({
 
   return (
     <div className="mt-2 pt-2 border-t border-panel-border/40">
-      <div className="text-[9px] text-text-muted uppercase tracking-wide mb-1">Defense Preview</div>
+      <div className="text-[9px] text-text-muted uppercase tracking-wide mb-1">{t('tooltip.defensePreview')}</div>
       <div className="text-[10px] text-text-secondary flex gap-2">
-        <span>Sector stance: <span className="text-text-primary">{STANCE_LABEL[info.stance] ?? info.stance}</span></span>
+        <span>{t('tooltip.sectorStance')} <span className="text-text-primary">{STANCE_LABEL[info.stance] ?? info.stance}</span></span>
       </div>
       <div className="text-[10px] text-text-secondary mt-0.5">
         {info.physicalCount > 0
           ? <span><span className="text-text-primary">{info.physicalCount}</span> at OSID</span>
-          : <span className="text-amber-400">No brigades at OSID</span>
+          : <span className="text-amber-400">{t('tooltip.noBrigadesAtOsid')}</span>
         }
         {info.reactiveCount > 0 && (
           <span className="ml-2"><span className="text-text-primary">{info.reactiveCount}</span> reactive</span>
@@ -328,7 +329,7 @@ function DefensePreviewContent({
           {info.brigades.slice(0, 5).map(b => (
             <div key={b.id} className="text-[9px] text-text-muted flex items-center gap-1">
               <span className="text-text-secondary">{b.atOsid ? '⊕' : '↷'}</span>
-              {b.isHome && <span title="Home municipality">⌂</span>}
+              {b.isHome && <span title={t('tooltip.homeMunicipality')}>⌂</span>}
               <span className="truncate">{b.name}</span>
             </div>
           ))}

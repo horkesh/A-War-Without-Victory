@@ -1,5 +1,6 @@
 import type { FormationView } from '../data/types';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 function getFitnessColor(personnel: number, cohesion: number, fatigue: number): string {
     if (personnel < 400 || cohesion < 20 || fatigue > 70) return '#c24040';
@@ -55,11 +56,11 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
                 <div className="flex justify-between items-end mt-1.5">
                     {/* Stats */}
                     <div className="flex gap-2 text-[10px] text-text-secondary font-mono">
-                        <span title="Personnel" className="flex items-center gap-0.5">
+                        <span title={t('formationDetail.personnel')} className="flex items-center gap-0.5">
                             <span className="opacity-50">#</span>{pers.toLocaleString()}
                         </span>
                         {(tanks > 0 || arty > 0) && (
-                            <span title="Heavy Equipment" className="flex items-center gap-0.5 text-interactive/80">
+                            <span title={t('corpsDetail.equipment')} className="flex items-center gap-0.5 text-interactive/80">
                                 {tanks > 0 && <span>{tanks}T</span>}
                                 {tanks > 0 && arty > 0 && <span className="opacity-30">/</span>}
                                 {arty > 0 && <span>{arty}A</span>}
@@ -69,14 +70,14 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
 
                     {/* Bars */}
                     <div className="flex flex-col gap-1 w-12 shrink-0">
-                        <div className="flex items-center gap-1 group/bar" title={`Cohesion: ${Math.round(coh)}%`}>
-                            <span className="text-[7px] text-text-secondary uppercase w-4 leading-none text-right">Coh</span>
+                        <div className="flex items-center gap-1 group/bar" title={t('tacticalCard.cohesionTitle', { value: Math.round(coh) })}>
+                            <span className="text-[7px] text-text-secondary uppercase w-4 leading-none text-right">{t('tacticalCard.cohShort')}</span>
                             <div className="h-1 flex-1 bg-black/50 rounded-full overflow-hidden">
                                 <div className={`h-full ${coh > 60 ? 'bg-green-500' : coh > 30 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${Math.min(100, Math.max(0, coh))}%` }} />
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 group/bar" title={`Fatigue: ${Math.round(fat)}%`}>
-                            <span className="text-[7px] text-text-secondary w-4 leading-none text-right uppercase">Fat</span>
+                        <div className="flex items-center gap-1 group/bar" title={t('tacticalCard.fatigueTitle', { value: Math.round(fat) })}>
+                            <span className="text-[7px] text-text-secondary w-4 leading-none text-right uppercase">{t('tacticalCard.fatShort')}</span>
                             <div className="h-1 flex-1 bg-black/50 rounded-full overflow-hidden">
                                 <div className={`h-full ${fat > 70 ? 'bg-red-500' : fat > 40 ? 'bg-yellow-500' : 'bg-orange-500'}`} style={{ width: `${Math.min(100, Math.max(0, fat))}%` }} />
                             </div>

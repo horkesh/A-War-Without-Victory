@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
+import { t } from '../../i18n';
 
 export function PersonnelContent() {
     const state = useGameStore((s) => s.loadedGameState);
@@ -44,25 +45,25 @@ export function PersonnelContent() {
         };
     }, [state, faction]);
 
-    if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
+    if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">{t('personnel.noGameState')}</div>;
 
     return (
         <div className="space-y-4">
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
-                    FORCE OVERVIEW
+                    {t('personnel.forceOverview')}
                 </div>
                 <div className="grid grid-cols-4 gap-3">
-                    <StatCard label="Total Personnel" value={data.totalPersonnel.toLocaleString()} />
-                    <StatCard label="Active Brigades" value={String(data.brigades.length)} />
-                    <StatCard label="Corps" value={String(data.corpsFormations.length)} />
-                    <StatCard label="Supply Reserve" value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
+                    <StatCard label={t('personnel.totalPersonnel')} value={data.totalPersonnel.toLocaleString()} />
+                    <StatCard label={t('personnel.activeBrigades')} value={String(data.brigades.length)} />
+                    <StatCard label={t('personnel.corps')} value={String(data.corpsFormations.length)} />
+                    <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
                 </div>
             </div>
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
-                    ORDER OF BATTLE
+                    {t('personnel.orderOfBattle')}
                 </div>
                 <div className="space-y-2">
                     {data.corpsFormations.map(corps => {
@@ -72,7 +73,7 @@ export function PersonnelContent() {
                             <div key={corps.id} className="border border-panel-border/50 rounded-md overflow-hidden">
                                 <div className="flex items-center justify-between px-3 py-2 bg-panel-bg">
                                     <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{corps.name}</span>
-                                    <span className="text-[10px] text-text-secondary tabular-nums">{corpsBrigades.length} brg - {formatPersonnel(corpsPers)}</span>
+                                    <span className="text-[10px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: corpsBrigades.length, personnel: formatPersonnel(corpsPers) })}</span>
                                 </div>
                                 <div className="px-3 py-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
                                     {corpsBrigades.map(b => (
@@ -90,7 +91,7 @@ export function PersonnelContent() {
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
-                    OFFICER ROSTER ({data.activeOfficers.length} active, {data.reserveOfficers.length} reserve)
+                    {t('personnel.officerRoster', { active: data.activeOfficers.length, reserve: data.reserveOfficers.length })}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     {data.activeOfficers.map(o => (
@@ -99,7 +100,7 @@ export function PersonnelContent() {
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
                                     {o.rank?.replace(/_/g, ' ')}
-                                    {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? 'Attached Command'}` : ''}
+                                    {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 tabular-nums font-mono">
@@ -111,7 +112,7 @@ export function PersonnelContent() {
                 </div>
                 {data.reserveOfficers.length > 0 && (
                     <div className="mt-2.5 pt-2 border-t border-panel-border/50">
-                        <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">RESERVE POOL</div>
+                        <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">{t('personnel.reservePool')}</div>
                         <div className="flex flex-wrap gap-1.5">
                             {data.reserveOfficers.map(o => (
                                 <span key={o.id} className="text-[9px] px-2 py-0.5 border border-panel-border/40 rounded text-text-secondary bg-panel-bg">

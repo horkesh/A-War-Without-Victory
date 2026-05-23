@@ -5,6 +5,7 @@ import {
 } from './opsConstants';
 import { ReadinessBar } from './ReadinessBar';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
+import { t } from '../../i18n';
 
 interface AxisPredictionView {
   axisId: string;
@@ -55,16 +56,16 @@ export function AxisAssessmentCard({ prediction, axisName, colorIndex }: AxisAss
         <div className="px-3 pb-3 pt-1 border-t border-[rgba(180,160,130,0.06)] space-y-2">
           <div className="grid grid-cols-2 gap-3 text-[10px]">
             <div>
-              <span className="text-text-secondary uppercase tracking-wider">Force Balance</span>
+              <span className="text-text-secondary uppercase tracking-wider">{t('planUi.forceBalance')}</span>
               <div className={`font-bold uppercase ${forceBalance.toneClass}`}>{forceBalance.label}</div>
               <div className="text-text-secondary text-[9px] uppercase">{forceBalance.summary}</div>
             </div>
             <div>
-              <span className="text-text-secondary uppercase tracking-wider">Terrain</span>
+              <span className="text-text-secondary uppercase tracking-wider">{t('planUi.terrain')}</span>
               <div className="text-text-primary font-bold uppercase">{prediction.terrain}</div>
             </div>
             <div>
-              <span className="text-text-secondary uppercase tracking-wider">Entrenchment</span>
+              <span className="text-text-secondary uppercase tracking-wider">{t('planUi.entrenchment')}</span>
               <div className="text-text-primary font-bold uppercase">{prediction.entrenchment}</div>
             </div>
           </div>

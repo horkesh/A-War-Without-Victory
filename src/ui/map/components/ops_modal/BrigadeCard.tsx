@@ -4,6 +4,7 @@
  */
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
+import { t } from '../../i18n';
 
 interface BrigadeCardProps {
     brigade: FormationView;
@@ -23,16 +24,16 @@ function getMarchColor(turns: number | null): string {
 
 // WP2c: Verbal cohesion descriptor
 function getCohesionLabel(coh: number): { text: string; color: string } {
-    if (coh >= 70) return { text: 'STRONG', color: 'text-green-400' };
-    if (coh >= 40) return { text: 'ADEQUATE', color: 'text-amber-400' };
-    return { text: 'CRITICAL', color: 'text-red-400' };
+    if (coh >= 70) return { text: t('opsModal.strong'), color: 'text-green-400' };
+    if (coh >= 40) return { text: t('opsModal.adequate'), color: 'text-amber-400' };
+    return { text: t('peace.critical').toUpperCase(), color: 'text-red-400' };
 }
 
 // WP2d: Fatigue descriptor
 function getFatigueLabel(fat: number): { text: string; color: string } {
-    if (fat <= 2) return { text: 'FRESH', color: 'text-green-400' };
-    if (fat <= 5) return { text: 'TIRED', color: 'text-amber-400' };
-    return { text: 'EXHAUSTED', color: 'text-red-400' };
+    if (fat <= 2) return { text: t('opsModal.fresh'), color: 'text-green-400' };
+    if (fat <= 5) return { text: t('opsModal.tired'), color: 'text-amber-400' };
+    return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
 }
 
 // WP2e: Parse unit type from brigade name
@@ -89,7 +90,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             {isAutoProposed && isAssigned && (
                 <div className="absolute top-1 right-1 text-[7px] font-bold uppercase tracking-wider
                                 px-1 py-0.5 rounded bg-accent-gold/15 text-accent-gold">
-                    Suggested
+                    {t('opsModal.suggested')}
                 </div>
             )}
 
@@ -97,7 +98,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             {isUnavailable && (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-red-400/60 rotate-[-15deg]">
-                        {isCombatIneffective ? 'COMBAT INEFFECTIVE' : 'DISRUPTED'}
+                        {isCombatIneffective ? t('opsModal.combatIneffective') : t('formationDetail.disrupted')}
                     </span>
                 </div>
             )}
@@ -121,9 +122,9 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
 
             {/* WP2a: Equipment labels — always show both, spelled out */}
             <div className="flex gap-2 mt-1.5 text-[9px] text-text-secondary">
-                <span>TANKS <span className="text-white font-bold">{tanks}</span></span>
+                <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{tanks}</span></span>
                 <span className="text-text-secondary/30">&middot;</span>
-                <span>ARTY <span className="text-white font-bold">{arty}</span></span>
+                <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{arty}</span></span>
             </div>
 
             {/* Cohesion bar */}
@@ -140,8 +141,8 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                 {/* WP2b: Cohesion/Fatigue readability — 9px, full opacity */}
                 {/* WP2c/2d: Verbal descriptors with colors */}
                 <div className="flex justify-between text-[9px] text-text-secondary mt-0.5">
-                    <span>COH {Math.round(cohesion)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
-                    <span>FAT {Math.round(fatigue)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
+                    <span>{t('tacticalCard.cohShort').toUpperCase()} {Math.round(cohesion)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
+                    <span>{t('tacticalCard.fatShort').toUpperCase()} {Math.round(fatigue)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
                 </div>
             </div>
 

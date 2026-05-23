@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import type { CommandBriefingItemView, SummaryFocusSection } from '../data/types';
 import { useGameStore } from '../store/gameStore';
+import { t } from '../i18n';
 
 interface CommandBriefingLayerProps {
   onOpenSummary: (focus?: SummaryFocusSection) => void;
@@ -109,7 +110,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
         {/* Header line with persistent alert count */}
         <div className="flex items-center justify-center gap-3 mb-3">
           <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-accent-gold">
-            COMMAND BRIEFING
+            {t('commandBriefing.title')}
           </span>
           <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-red-600 text-white text-[11px] font-bold tabular-nums">
             {commandBriefing.items.length}
@@ -123,7 +124,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
             className="absolute right-4 top-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-red-950/50 border border-red-500/30 text-red-400 hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-300 transition-all"
           >
             <span className="text-[14px] font-bold leading-none">&times;</span>
-            <span className="text-[8px] font-mono font-bold uppercase tracking-wider">DISMISS</span>
+            <span className="text-[8px] font-mono font-bold uppercase tracking-wider">{t('commandBriefing.dismiss')}</span>
           </button>
         </div>
         {/* Item cards — taller, severity-colored */}

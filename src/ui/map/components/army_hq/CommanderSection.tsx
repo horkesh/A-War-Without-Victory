@@ -10,6 +10,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { CollapsibleSection } from './CollapsibleSection';
 import { getRatingColor } from '../../utils/officerCharacter';
+import { t } from '../../i18n';
 
 interface CommanderSectionProps {
     corps: FormationView;
@@ -48,7 +49,7 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
         if (!ipc.isAvailable) return;
         const result = await ipc.assignCommander(officerId, corps.id);
         if (!result.ok) {
-            setLoadError(result.error ?? 'Failed to assign commander.');
+            setLoadError(result.error ?? t('commanderSection.error.assign'));
         }
         setPickerCorpsId(null);
     };
@@ -57,27 +58,27 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
         if (!ipc.isAvailable || !commander) return;
         const result = await ipc.dismissOfficer(commander.id);
         if (!result.ok) {
-            setLoadError(result.error ?? 'Failed to dismiss officer.');
+            setLoadError(result.error ?? t('commanderSection.error.dismiss'));
         }
     };
 
     return (
-        <CollapsibleSection sectionKey={`cmd-${corps.id}`} title="Commander" defaultOpen={true}>
+        <CollapsibleSection sectionKey={`cmd-${corps.id}`} title={t('commanderSection.title')} defaultOpen={true}>
             {commander ? (
                 <div className="space-y-4">
                     {isActing && (
                         <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
-                            [!] ACTING COMMANDER // NO PERMANENT DEPLOYMENT
+                            {t('commanderSection.actingCommander')}
                         </div>
                     )}
                     {commander.is_cowed && (
                         <div className="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/5 px-3 py-1.5 border border-blue-500/20">
-                            [✓] DEFERRED COMPLIANCE // FULL COOPERATION ASSURED
+                            {t('commanderSection.deferredCompliance')}
                         </div>
                     )}
                     {!isActing && !commander.is_cowed && commander.political_reliability <= 2 && (
                         <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
-                            [!] LOW LOYALTY // ORDER FRICTION ELEVATED
+                            {t('commanderSection.lowLoyalty')}
                         </div>
                     )}
                     <OfficerProfile officer={commander} label="" compact={false} />
@@ -87,7 +88,7 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                             onClick={() => setPickerCorpsId(showPicker ? null : corps.id)}
                             className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
                         >
-                            {showPicker ? 'CANCEL' : 'REASSIGN COMMANDER'}
+                            {showPicker ? t('common.cancel') : t('commanderSection.reassign')}
                         </button>
                         {!isActing && !showPicker && (
                             <button
@@ -95,7 +96,7 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                                 onClick={() => { void handleDismiss(); }}
                                 className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-red-500/40 text-red-500 hover:bg-red-500/10 transition-all font-mono"
                             >
-                                DISMISS
+                                {t('commanderSection.dismiss')}
                             </button>
                         )}
                     </div>
@@ -103,14 +104,14 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
             ) : (
                 <div className="space-y-4">
                     <div className="text-[12px] text-red-500/80 font-mono italic p-3 bg-red-500/5 border border-red-500/20">
-                        [!] VACANCY DETECTED: NO COMMANDER ASSIGNED
+                        {t('commanderSection.vacancy')}
                     </div>
                     <button
                         type="button"
                         onClick={() => setPickerCorpsId(showPicker ? null : corps.id)}
                         className="text-[11px] font-bold uppercase tracking-widest px-4 py-1.5 border border-amber-500/40 text-amber-500 hover:bg-amber-500/10 transition-all font-mono"
                     >
-                        {showPicker ? 'CANCEL' : 'ASSIGN FROM POOL'}
+                        {showPicker ? t('common.cancel') : t('commanderSection.assignFromPool')}
                     </button>
                 </div>
             )}
@@ -119,10 +120,10 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
             {showPicker && (
                 <div className="mt-6 border-t border-panel-border pt-4 space-y-2">
                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary/60 mb-2">
-                        READING PERSONNEL POOL // {availableOfficers.length} MATCHES
+                        {t('commanderSection.readingPool', { count: availableOfficers.length })}
                     </div>
                     {availableOfficers.length === 0 ? (
-                        <div className="text-[11px] text-text-secondary/60 italic font-mono">NO COMPATIBLE OFFICERS DETECTED</div>
+                        <div className="text-[11px] text-text-secondary/60 italic font-mono">{t('commanderSection.noCompatible')}</div>
                     ) : (
                         <div className="max-h-[250px] overflow-y-auto space-y-1 pr-2 custom-scrollbar">
                             {availableOfficers.map((officer) => {
@@ -140,7 +141,7 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                                             </span>
                                             {isHome && (
                                                 <span className="text-[9px] font-bold text-panel-bg bg-amber-400 px-1.5 py-0.5 tracking-tighter">
-                                                    HOME
+                                                    {t('commanderSection.home')}
                                                 </span>
                                             )}
                                         </div>

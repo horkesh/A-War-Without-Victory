@@ -13,6 +13,7 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
+import { t, type MessageKey } from '../i18n';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -32,13 +33,13 @@ const ARC_COLOR: Record<string, string> = {
 };
 
 // --- Outcome display ---
-const OUTCOME_LABEL: Record<string, string> = {
-    decisive_victory: 'Decisive',
-    victory: 'Victory',
-    costly_victory: 'Costly',
-    stalemate: 'Stalemate',
-    repulsed: 'Repulsed',
-    catastrophic: 'Collapse',
+const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
+    decisive_victory: 'aar.outcome.decisive',
+    victory: 'aar.outcome.victory',
+    costly_victory: 'aar.outcome.costly',
+    stalemate: 'aar.outcome.stalemate',
+    repulsed: 'aar.outcome.repulsed',
+    catastrophic: 'aar.outcome.collapse',
 };
 const OUTCOME_COLOR: Record<string, string> = {
     decisive_victory: 'text-green-300',
@@ -48,22 +49,22 @@ const OUTCOME_COLOR: Record<string, string> = {
     repulsed: 'text-red-400',
     catastrophic: 'text-red-600',
 };
-const INTEL_FRICTION_LABEL: Record<string, string> = {
-    stale_intel: 'Stale intel',
-    defender_opsec: 'Defender OPSEC',
+const INTEL_FRICTION_LABEL_KEY: Record<string, MessageKey> = {
+    stale_intel: 'aar.friction.staleIntel',
+    defender_opsec: 'aar.friction.defenderOpsec',
 };
 
 // --- Notable event labels ---
-const NOTABLE_LABEL: Record<TurnNotableEvent['kind'], string> = {
-    graz_accords_activated: 'Graz Accords',
-    truce_broken: 'Truce Broken',
-    washington_agreement: 'Washington Agreement',
-    rbih_hrhb_framework_activated: 'RBiH-HRHB Framework',
-    operation_storm: 'Operation Storm',
-    ceasefire_activated: 'Ceasefire',
-    siege_formed: 'Siege Formed',
-    siege_broken: 'Siege Broken',
-    first_battle: 'First Battle',
+const NOTABLE_LABEL_KEY: Record<TurnNotableEvent['kind'], MessageKey> = {
+    graz_accords_activated: 'aar.notable.graz',
+    truce_broken: 'aar.notable.truceBroken',
+    washington_agreement: 'aar.notable.washington',
+    rbih_hrhb_framework_activated: 'aar.notable.framework',
+    operation_storm: 'aar.notable.storm',
+    ceasefire_activated: 'aar.notable.ceasefire',
+    siege_formed: 'aar.notable.siegeFormed',
+    siege_broken: 'aar.notable.siegeBroken',
+    first_battle: 'aar.notable.firstBattle',
 };
 
 // ---------------------------------------------------------------------------
@@ -125,7 +126,7 @@ function DefenderBreakdown({ contributions, onSelectFormation, formationNameById
                 className="text-[9px] text-text-muted hover:text-interactive transition-colors"
                 onClick={() => setExpanded(!expanded)}
             >
-                {expanded ? '▾' : '▸'} {sorted.length} defenders
+                {expanded ? '▾' : '▸'} {t('aar.defenders', { count: sorted.length })}
             </button>
             {expanded && (
                 <div className="mt-0.5 space-y-px">
@@ -134,7 +135,7 @@ function DefenderBreakdown({ contributions, onSelectFormation, formationNameById
                         return (
                         <div key={c.brigade_id} className="text-[9px] text-text-muted tabular-nums flex items-center gap-1">
                             <span className="text-text-secondary w-3 text-right">{c.distance_hops === 0 ? '⊕' : `${c.distance_hops}↷`}</span>
-                            {c.is_home_municipality && <span title="Home municipality">⌂</span>}
+                            {c.is_home_municipality && <span title={t('aar.homeMunicipality')}>⌂</span>}
                             {onSelectFormation ? (
                                 <button
                                     type="button"
@@ -169,7 +170,7 @@ function BattleRow({
     formationNameById: Map<string, string>;
 }) {
     const label = getOsidDisplayName(battle.osid, osidDisplayNames);
-    const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? battle.outcome;
+    const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : battle.outcome;
     const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-text-secondary';
     const countLabel = battle.was_concentrated ? `${battle.all_attacker_ids.length}×` : null;
     const primaryAttackerLabel = getPlayerSafeBrigadeName(formationNameById.get(battle.primary_attacker_id));
@@ -186,20 +187,20 @@ function BattleRow({
                     <FactionTag faction={battle.defender_faction} />
                     {countLabel && <span className="text-[9px] text-text-muted font-mono">{countLabel}</span>}
                     <span className="text-text-primary capitalize truncate">{label}</span>
-                    {battle.territory_flipped && <span className="text-amber-400 text-[9px]">⬡ flip</span>}
+                    {battle.territory_flipped && <span className="text-amber-400 text-[9px]">⬡ {t('aar.flip')}</span>}
                 </div>
                 <span className={`${outcomeColor} font-mono text-[10px] shrink-0 ml-2`}>{outcomeLabel}</span>
             </div>
             {(battle.attacker_casualties > 0 || battle.defender_casualties > 0) && (
                 <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
-                    att −{battle.attacker_casualties.toLocaleString()}  ·  def −{battle.defender_casualties.toLocaleString()}
+                    {t('aar.attackerShort')} −{battle.attacker_casualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{battle.defender_casualties.toLocaleString()}
                 </div>
             )}
             {battle.execution_friction && (
                 <div className="text-[9px] text-amber-300 mt-0.5 ml-6">
-                    {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? label).join(' / ')}
+                    {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL_KEY[label] ? t(INTEL_FRICTION_LABEL_KEY[label]) : label).join(' / ')}
                     {battle.execution_friction.attacker_confidence_band
-                        ? ` (${battle.execution_friction.attacker_confidence_band} confidence)`
+                        ? ` (${t('aar.confidenceBand', { band: battle.execution_friction.attacker_confidence_band })})`
                         : ''}
                 </div>
             )}
@@ -214,7 +215,7 @@ function BattleRow({
                     </button>
                     {battle.primary_defender_id && (
                         <>
-                            <span>vs</span>
+                            <span>{t('aar.vs')}</span>
                             <button
                                 type="button"
                                 className="hover:text-interactive transition-colors"
@@ -261,7 +262,7 @@ function DecorationRow({ award }: { award: DecorationAward }) {
 
 function TerritoryNet({ net }: { net: Partial<Record<string, number>> }) {
     const entries = Object.entries(net).sort(([a], [b]) => a.localeCompare(b));
-    if (!entries.length) return <span className="text-text-muted text-[11px]">No changes</span>;
+    if (!entries.length) return <span className="text-text-muted text-[11px]">{t('aar.noChanges')}</span>;
     return (
         <div className="flex gap-4 text-[11px] tabular-nums">
             {entries.map(([faction, delta]) => (
@@ -303,13 +304,13 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                 <div className={embedded ? "text-[11px]" : "p-3 overflow-auto text-[11px] flex-1"}>
                     {!summary ? (
                         <div className="text-text-muted text-center py-8">
-                            No report yet — advance a turn to generate the first AAR.
+                            {t('aar.noReport')}
                         </div>
                     ) : (
                         <>
                             {/* Combat */}
                             {summary.battles.length > 0 && (
-                                <Section title="Combat" count={summary.battles.length}>
+                                <Section title={t('aar.section.combat')} count={summary.battles.length}>
                                     {summary.battles.map((b) => (
                                         <BattleRow
                                             key={b.osid}
@@ -324,7 +325,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
                             {/* Territory */}
                             {Object.keys(summary.territory_net).length > 0 && (
-                                <Section title="Territory">
+                                <Section title={t('aar.section.territory')}>
                                     <div className="mb-1.5">
                                         <TerritoryNet net={summary.territory_net} />
                                     </div>
@@ -350,25 +351,25 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             {/* Unit Events */}
                             {(summary.decoration_awards.length > 0 || summary.arc_transitions.length > 0 ||
                               summary.formation_spawns.length > 0 || summary.formation_destructions.length > 0) && (
-                                <Section title="Unit Events" count={
+                                <Section title={t('aar.section.unitEvents')} count={
                                     summary.decoration_awards.length + summary.arc_transitions.length +
                                     summary.formation_spawns.length + summary.formation_destructions.length
                                 }>
                                     {summary.decoration_awards.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-[9px] uppercase tracking-wide text-accent-gold mb-1">Decorations Awarded</div>
+                                            <div className="text-[9px] uppercase tracking-wide text-accent-gold mb-1">{t('aar.decorationsAwarded')}</div>
                                             {summary.decoration_awards.map((a) => <DecorationRow key={`${a.formation_id}-${a.decoration.tier}`} award={a} />)}
                                         </div>
                                     )}
                                     {summary.arc_transitions.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-1">Arc Changes</div>
+                                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-1">{t('aar.arcChanges')}</div>
                                             {summary.arc_transitions.map((t) => <ArcRow key={t.formation_id} t={t} />)}
                                         </div>
                                     )}
                                     {summary.formation_spawns.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-[9px] uppercase tracking-wide text-green-400 mb-1">Formations Activated</div>
+                                            <div className="text-[9px] uppercase tracking-wide text-green-400 mb-1">{t('aar.formationsActivated')}</div>
                                             {summary.formation_spawns.map((s) => (
                                                 <div key={s.formation_id} className="text-[11px] py-0.5 flex gap-2">
                                                     <FactionTag faction={s.faction} />
@@ -379,7 +380,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                     )}
                                     {summary.formation_destructions.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-[9px] uppercase tracking-wide text-red-400 mb-1">Formations Destroyed</div>
+                                            <div className="text-[9px] uppercase tracking-wide text-red-400 mb-1">{t('aar.formationsDestroyed')}</div>
                                             {summary.formation_destructions.map((d) => (
                                                 <div key={d.formation_id} className="text-[11px] py-0.5 flex gap-2">
                                                     <FactionTag faction={d.faction} />
@@ -393,7 +394,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
                             {/* Faction Pulse */}
                             {(Object.keys(summary.supply_deltas).length > 0 || Object.keys(summary.heavy_munitions_deltas).length > 0) && (
-                                <Section title="Faction Pulse" defaultOpen={false}>
+                                <Section title={t('aar.section.factionPulse')} defaultOpen={false}>
                                     {(['RS', 'RBiH', 'HRHB'] as const).map((faction) => {
                                         const sup = summary.supply_deltas[faction];
                                         const mun = summary.heavy_munitions_deltas[faction];
@@ -404,7 +405,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                                 <div className="text-[10px] tabular-nums flex gap-3 text-text-secondary">
                                                     {sup != null && (
                                                         <span>
-                                                            Supply{' '}
+                                                            {t('aar.supply')}{' '}
                                                             <span className={sup > 0 ? 'text-green-400' : 'text-red-400'}>
                                                                 {sup > 0 ? '+' : ''}{sup.toFixed(1)}
                                                             </span>
@@ -412,7 +413,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                                     )}
                                                     {mun != null && (
                                                         <span>
-                                                            Munitions{' '}
+                                                            {t('aar.munitions')}{' '}
                                                             <span className={mun > 0 ? 'text-green-400' : 'text-red-400'}>
                                                                 {mun > 0 ? '+' : ''}{mun.toFixed(1)}
                                                             </span>
@@ -427,15 +428,15 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
                             {/* Displacement */}
                             {summary.displacement_total > 0 && (
-                                <Section title="Displacement" defaultOpen={false}>
+                                <Section title={t('aar.section.displacement')} defaultOpen={false}>
                                     <div className="space-y-0.5 text-[11px]">
                                         <div className="flex justify-between">
-                                            <span className="text-text-secondary">Total displaced</span>
+                                            <span className="text-text-secondary">{t('aar.totalDisplaced')}</span>
                                             <span className="tabular-nums text-text-primary">{summary.displacement_total.toLocaleString()}</span>
                                         </div>
                                         {summary.displacement_hotspot && (
                                             <div className="flex justify-between">
-                                                <span className="text-text-secondary">Hotspot</span>
+                                                <span className="text-text-secondary">{t('aar.hotspot')}</span>
                                                 <span className="text-amber-400">{toTitleCase(summary.displacement_hotspot)}</span>
                                             </div>
                                         )}
@@ -454,11 +455,11 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
                             {/* Notable Events */}
                             {summary.notable_events.length > 0 && (
-                                <Section title="Notable Events" count={summary.notable_events.length}>
+                                <Section title={t('aar.section.notableEvents')} count={summary.notable_events.length}>
                                     {summary.notable_events.map((e) => (
                                         <div key={e.kind + (e.faction ?? '') + (e.osid ?? '')} className="text-[11px] py-0.5 flex gap-2 items-start">
                                             <span className="text-accent-gold text-[9px] uppercase tracking-wide shrink-0 mt-0.5">
-                                                {NOTABLE_LABEL[e.kind] ?? e.kind}
+                                                {NOTABLE_LABEL_KEY[e.kind] ? t(NOTABLE_LABEL_KEY[e.kind]) : e.kind}
                                             </span>
                                             <span className="text-text-secondary">{e.description}</span>
                                         </div>
@@ -474,8 +475,8 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                              summary.decoration_awards.length === 0 &&
                              summary.arc_transitions.length === 0 && (
                                 <EmptyState
-                                    message="Quiet turn"
-                                    helpText="No significant events recorded this turn."
+                                    message={t('aar.quietTurn')}
+                                    helpText={t('aar.noSignificantEvents')}
                                 />
                             )}
                         </>
@@ -490,17 +491,17 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
             {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
             <button
                 type="button"
-                aria-label="Close After-Action Report"
+                aria-label={t('aar.close')}
                 className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
                 onClick={onClose}
             />
             <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(100vh-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
                     <div>
-                        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">After-Action Report</span>
+                        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">{t('aar.title')}</span>
                         {summary && <span className="text-[10px] text-text-secondary ml-2 font-mono">{formatTurnLabel(loadedGameState.label)}</span>}
                     </div>
-                    <button type="button" onClick={onClose} aria-label="Close After-Action Report" className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
+                    <button type="button" onClick={onClose} aria-label={t('aar.close')} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
                 </div>
                 <div className="p-3 overflow-auto text-[11px] flex-1">
                     {body}

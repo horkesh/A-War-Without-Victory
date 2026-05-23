@@ -11,15 +11,16 @@ import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playe
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
+import { t, type MessageKey } from '../i18n';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
   switch (strengthClass) {
-    case 'fortress': return <span className="text-green-700 font-bold bg-green-100 px-1 rounded">FORTRESS</span>;
-    case 'strong': return <span className="text-green-600 font-semibold">STRONG</span>;
-    case 'adequate': return <span className="text-amber-600 font-semibold">ADEQUATE</span>;
-    case 'thin': return <span className="text-orange-600 font-semibold">THIN</span>;
-    case 'critical': return <span className="text-red-600 font-bold bg-red-100 px-1 rounded">CRITICAL</span>;
+    case 'fortress': return <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.strength.fortress')}</span>;
+    case 'strong': return <span className="text-green-600 font-semibold">{t('corpsFront.strength.strong')}</span>;
+    case 'adequate': return <span className="text-amber-600 font-semibold">{t('corpsFront.strength.adequate')}</span>;
+    case 'thin': return <span className="text-orange-600 font-semibold">{t('corpsFront.strength.thin')}</span>;
+    case 'critical': return <span className="text-red-600 font-bold bg-red-100 px-1 rounded">{t('corpsFront.strength.critical')}</span>;
     default: return <span className="text-neutral-400">—</span>;
   }
 }
@@ -51,7 +52,7 @@ function FuzzyIntel({
   fuzzyThreshold?: number;
 }) {
   if (confidence < redactThreshold) {
-    return <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>;
+    return <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>;
   }
 
   if (value == null) return <span className="text-neutral-400">—</span>;
@@ -76,16 +77,16 @@ function FuzzyIntel({
 
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 type SectorStanceType = typeof SECTOR_STANCES[number];
-const STANCE_LABELS: Record<SectorStanceType, string> = {
-  fortify: 'Fortify', defend: 'Defend', elastic: 'Elastic',
-  active_defense: 'Active Def', screening: 'Screening',
+const STANCE_LABEL_KEYS: Record<SectorStanceType, MessageKey> = {
+  fortify: 'corpsFront.stance.fortify', defend: 'corpsFront.stance.defend', elastic: 'corpsFront.stance.elastic',
+  active_defense: 'corpsFront.stance.activeDefense', screening: 'corpsFront.stance.screening',
 };
-const STANCE_DESCRIPTIONS: Record<SectorStanceType, string> = {
-  fortify: 'All hands digging. Max entrenchment. +30% reactive.',
-  defend: 'Standard defense. Moderate entrenchment. +15% reactive.',
-  elastic: 'Defense in depth. Large reserve for counterattack.',
-  active_defense: 'Aggressive patrolling, raids. -15% reactive.',
-  screening: 'Tripwire. No entrenchment. -50% reactive.',
+const STANCE_DESCRIPTION_KEYS: Record<SectorStanceType, MessageKey> = {
+  fortify: 'corpsFront.stance.fortify.desc',
+  defend: 'corpsFront.stance.defend.desc',
+  elastic: 'corpsFront.stance.elastic.desc',
+  active_defense: 'corpsFront.stance.activeDefense.desc',
+  screening: 'corpsFront.stance.screening.desc',
 };
 const CORPS_STANCE_ALLOWED: Record<string, readonly SectorStanceType[]> = {
   offensive: ['active_defense', 'elastic', 'defend'],
@@ -98,6 +99,10 @@ const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'as
 const PREP_LABELS: Record<string, string> = {
   intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
 };
+
+function stanceLabel(stance: SectorStanceType): string {
+  return t(STANCE_LABEL_KEYS[stance]);
+}
 
 function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed: number; maxTurns: number }) {
   const idx = PREP_SUB_PHASES.indexOf(subPhase as typeof PREP_SUB_PHASES[number]);
@@ -230,31 +235,31 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const allowedStances = new Set(CORPS_STANCE_ALLOWED[corpsStance] ?? SECTOR_STANCES);
   const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
   const currentStanceSource = sector.stance_source ?? 'bot';
-  const sectorStanceLabel = STANCE_LABELS[currentSectorStance] ?? currentSectorStance.replace(/_/g, ' ');
+  const sectorStanceLabel = stanceLabel(currentSectorStance);
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
-  const logisticsPriorityTitle = 'Biases per-edge supply between 0.5x starvation and 1.5x saturation; default 1.0 neutral.';
+  const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
 
   const issueSectorStance = async (stance: SectorStanceType) => {
     const result = await ipc.stageSectorStanceOrder(sector.sector_id, stance);
-    setSectorActionMessage(result.ok ? `Sector stance staged: ${STANCE_LABELS[stance]}` : (result.error ?? 'Failed to stage sector stance'));
+    setSectorActionMessage(result.ok ? t('corpsFront.sectorStanceStaged', { stance: stanceLabel(stance) }) : (result.error ?? t('corpsFront.stageStanceFailed')));
   };
 
   const resetToAI = async () => {
     const result = await ipc.resetSectorStanceToBot(sector.sector_id);
-    setSectorActionMessage(result.ok ? 'Stance returned to AI control' : (result.error ?? 'Failed to reset stance'));
+    setSectorActionMessage(result.ok ? t('corpsFront.stanceReturnedAi') : (result.error ?? t('corpsFront.resetStanceFailed')));
   };
 
   const issueLogisticsPriority = async (priority: number) => {
     const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
     const effectivePriority = Math.max(0.5, Math.min(1.5, priority));
-    setSectorActionMessage(result.ok ? `Priority staged: ${effectivePriority.toFixed(1)}x` : (result.error ?? 'Failed to stage logistics priority'));
+    setSectorActionMessage(result.ok ? t('corpsFront.priorityStaged', { priority: effectivePriority.toFixed(1) }) : (result.error ?? t('corpsFront.stagePriorityFailed')));
   };
 
   const toggleOpsec = async () => {
     const result = await ipc.stageOpsecToggle(sector.sector_id, !(sector.opsec_active ?? false));
     setSectorActionMessage(result.ok
-      ? `OPSEC ${(sector.opsec_active ?? false) ? 'disabled' : 'enabled'}.`
-      : (result.error ?? 'Failed to toggle OPSEC'));
+      ? t((sector.opsec_active ?? false) ? 'corpsFront.opsecDisabled' : 'corpsFront.opsecEnabled')
+      : (result.error ?? t('corpsFront.opsecToggleFailed')));
   };
 
   return (
@@ -270,7 +275,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             style={{ backgroundColor: corpsColor }}
           />
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Sector Intelligence
+            {t('corpsFront.title')}
           </span>
           {sector.opsec_active && (
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-500/50 text-amber-400">
@@ -280,7 +285,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         </div>
         <button
           onClick={() => setSelectedSectorId(null)}
-          aria-label="Close sector intelligence panel"
+          aria-label={t('corpsFront.close')}
           className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
         >
           ✕
@@ -293,13 +298,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
       <div className="flex-1 overflow-auto bg-[#f0e8d8]/95 text-neutral-800 font-mono text-[11px] shadow-inner relative flex flex-col">
         {/* Background watermark */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center -rotate-12 select-none">
-          <span className="text-8xl font-black tracking-widest uppercase">SECRET</span>
+          <span className="text-8xl font-black tracking-widest uppercase">{t('corpsFront.secret')}</span>
         </div>
 
         {/* Threat Warning Banner */}
         {sector.offensive_signs && (
           <div className="bg-red-600 text-white font-bold p-2 text-center text-[10px] sm:text-xs uppercase tracking-widest animate-pulse shadow-md relative z-10 border-y border-red-800">
-            ⚠️ IMMINENT ENEMY OFFENSIVE DETECTED ⚠️
+            {t('corpsFront.offensiveDetected')}
           </div>
         )}
 
@@ -307,42 +312,42 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         <div className="p-4 pb-3 border-b-2 border-neutral-300 relative z-10 shrink-0">
           <div className="flex justify-between items-start mb-2">
             <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold mb-0.5">Subject</span>
+              <span className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold mb-0.5">{t('corpsFront.subject')}</span>
               <span className="font-bold text-[14px] uppercase tracking-wide">
                 {sector.display_name}
               </span>
             </div>
             <div className="flex flex-col items-end text-[9px] text-neutral-500">
-              <div className="uppercase"><span className="font-bold">Date:</span> {loadedGameState.metadata?.date ?? 'UNKNOWN'}</div>
-              <div className="uppercase"><span className="font-bold">Turn:</span> {loadedGameState.metadata?.turn ?? 'UNKNOWN'}</div>
+              <div className="uppercase"><span className="font-bold">{t('corpsFront.date')}:</span> {loadedGameState.metadata?.date ?? t('corpsFront.unknown')}</div>
+              <div className="uppercase"><span className="font-bold">{t('corpsFront.turn')}:</span> {loadedGameState.metadata?.turn ?? t('corpsFront.unknown')}</div>
             </div>
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
-            <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
-            <div><span className="font-bold text-neutral-800">CORPS STANCE:</span> {corpsStance}</div>
-            <div><span className="font-bold text-neutral-800">SECTOR STANCE:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ' (MANUAL)' : ''}</div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.faction')}:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance}</div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
             <div>
-              <span className="font-bold text-neutral-800">OPSEC:</span>{' '}
+              <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
               <span className={sector.opsec_active ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
-                {sector.opsec_active ? 'Active' : 'Inactive'}
+                {sector.opsec_active ? t('corpsFront.active') : t('corpsFront.inactive')}
               </span>
             </div>
             <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
-              <span><span className="font-bold text-neutral-800">CONFIDENCE:</span> {(sector.intel_confidence * 100).toFixed(0)}%</span>
-              {sector.intel_confidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">LOW</span>}
-              {sector.intel_confidence >= 0.3 && sector.intel_confidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">MED</span>}
-              {sector.intel_confidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">HIGH</span>}
+              <span><span className="font-bold text-neutral-800">{t('corpsFront.confidence')}:</span> {(sector.intel_confidence * 100).toFixed(0)}%</span>
+              {sector.intel_confidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">{t('corpsFront.low')}</span>}
+              {sector.intel_confidence >= 0.3 && sector.intel_confidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">{t('corpsFront.med')}</span>}
+              {sector.intel_confidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.high')}</span>}
             </div>
           </div>
         </div>
 
         {/* Tabs: one section visible at a time (no stacking) */}
-        <div className="shrink-0 border-b border-neutral-300 bg-neutral-100/80 relative z-10 flex flex-wrap gap-0" role="tablist" aria-label="Sector intelligence sections">
+        <div className="shrink-0 border-b border-neutral-300 bg-neutral-100/80 relative z-10 flex flex-wrap gap-0" role="tablist" aria-label={t('corpsFront.sections')}>
           {([
-            ['overview', 'Overview'],
+            ['overview', t('corpsFront.tab.overview')],
             ['forces', 'ORBAT'],
-            ['logistics', 'Logistics'],
-            ['ops', 'Ops Snapshot'],
+            ['logistics', t('corpsFront.tab.logistics')],
+            ['ops', t('corpsFront.tab.opsSnapshot')],
           ] as const).map(([tabId, label]) => (
             <button
               key={tabId}
@@ -370,49 +375,49 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 {/* Combat Power Summary */}
                 <div className="mb-2 p-2 bg-neutral-100 border border-neutral-300 rounded">
                   <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1 flex justify-between">
-                    <span>Combat Power Assessment</span>
-                    <span className="text-[8px] font-normal text-neutral-400 normal-case">Baseline: 1.0 = Standard Brigade</span>
+                    <span>{t('corpsFront.combatPowerAssessment')}</span>
+                    <span className="text-[8px] font-normal text-neutral-400 normal-case">{t('corpsFront.standardBrigadeBaseline')}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Strength</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.strength')}</span>
                       <div className="font-medium">
                         {sector.intel_confidence < 0.3 ? (
-                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>
+                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
                         ) : (
                           <StrengthBadge strengthClass={sector.combat_strength_class} />
                         )}
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Personnel</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('armyReserve.personnel')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={sector.combat_personnel} confidence={sector.intel_confidence} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={`Equivalency: ~${((sector.combat_offensive_power ?? 0) / 1000).toFixed(1)} Standard Brigades`}>
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Offensive Power</span>
+                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((sector.combat_offensive_power ?? 0) / 1000).toFixed(1) })}>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.offensivePower')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={sector.combat_offensive_power} confidence={sector.intel_confidence} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={`Equivalency: ~${((sector.combat_defensive_power ?? sector.defensive_power ?? 0) / 1000).toFixed(1)} Standard Brigades`}>
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Defensive Power</span>
+                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((sector.combat_defensive_power ?? sector.defensive_power ?? 0) / 1000).toFixed(1) })}>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defensivePower')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={sector.combat_defensive_power ?? sector.defensive_power} confidence={sector.intel_confidence} />
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Def/Edge</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defPerEdge')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={sector.combat_defense_per_edge} confidence={sector.intel_confidence} />
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Force Balance</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.forceBalance')}</span>
                       <div className="pt-0.5">
                         {sector.intel_confidence < 0.4 ? (
-                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">REDACTED</span>
+                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
                         ) : (
                           <ThreatBadge ratio={sector.threat_ratio} />
                         )}
@@ -423,22 +428,22 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
                 {/* Unit Condition */}
                 <div className="mb-2 p-2 bg-neutral-100 border border-neutral-300 rounded">
-                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1">Unit Condition</div>
+                  <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1.5 border-b border-neutral-300 pb-1">{t('corpsFront.unitCondition')}</div>
                   <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Morale</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.morale')}</span>
                       <div className={`font-medium tabular-nums ${(sector.combat_morale_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_morale_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
                         <FuzzyIntel value={sector.combat_morale_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Cohesion</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.cohesion')}</span>
                       <div className={`font-medium tabular-nums ${(sector.combat_cohesion_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_cohesion_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
                         <FuzzyIntel value={sector.combat_cohesion_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] uppercase font-bold text-neutral-500">Fatigue</span>
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.fatigue')}</span>
                       <div className={`font-medium tabular-nums ${(sector.combat_fatigue_avg ?? 0) > 20 ? 'text-red-600' : (sector.combat_fatigue_avg ?? 0) > 10 ? 'text-amber-600' : ''}`}>
                         <FuzzyIntel value={sector.combat_fatigue_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
@@ -449,38 +454,38 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 {/* Sector Details */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Front Length</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.frontLength')}</span>
                     <span className="font-medium">
-                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">REDACTED</span> : `~${sector.length_edges} km`}
+                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : `~${sector.length_edges} km`}
                     </span>
-                    <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? 'Contiguous' : `${sector.sub_segment_count} Segments`}]</span>
+                    <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? t('corpsFront.contiguous') : t('corpsFront.segments', { count: sector.sub_segment_count })}]</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Brigades</span>
-                    <span className="font-medium">{sector.assigned_brigade_ids.length} Front / {sector.reserve_brigade_ids.length} Reserve</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.brigades')}</span>
+                    <span className="font-medium">{t('corpsFront.frontReserveBrigades', { front: sector.assigned_brigade_ids.length, reserve: sector.reserve_brigade_ids.length })}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Sector Stance</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.sectorStance')}</span>
                     <span className="font-medium uppercase">
                       {sectorStanceLabel}
-                      {currentStanceSource === 'player' && <span className="ml-1 text-[8px] text-amber-700 bg-amber-100 px-0.5 rounded font-bold">MANUAL</span>}
+                      {currentStanceSource === 'player' && <span className="ml-1 text-[8px] text-amber-700 bg-amber-100 px-0.5 rounded font-bold">{t('corpsFront.manual')}</span>}
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>Supply Priority</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>
                     <span className="font-medium" title={logisticsPriorityTitle}>
-                      {effectiveLogisticsPriority.toFixed(1)}x{effectiveLogisticsPriority === 1 ? ' (neutral)' : ''}
+                      {effectiveLogisticsPriority.toFixed(1)}x{effectiveLogisticsPriority === 1 ? ` (${t('corpsFront.neutral')})` : ''}
                     </span>
                   </div>
                   <div className="flex flex-col col-span-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">Linked Settlements</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.linkedSettlements')}</span>
                     <span className="font-medium">{sectorFriendlyOsids.length}</span>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-dashed border-neutral-300 space-y-2">
                   <div>
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Sector Stance Orders</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">{t('corpsFront.sectorStanceOrders')}</span>
                     <div className="grid grid-cols-3 gap-1">
                       {SECTOR_STANCES.map((stance) => {
                         const isAllowed = allowedStances.has(stance);
@@ -491,7 +496,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             type="button"
                             disabled={!isAllowed}
                             onClick={() => void issueSectorStance(stance)}
-                            title={isAllowed ? STANCE_DESCRIPTIONS[stance] : `Not allowed under ${corpsStance} corps stance`}
+                            title={isAllowed ? t(STANCE_DESCRIPTION_KEYS[stance]) : t('corpsFront.stanceNotAllowed', { stance: corpsStance })}
                             className={`kbd-focus px-1.5 py-1 rounded border text-[9px] font-bold uppercase transition-colors ${!isAllowed
                                 ? 'border-neutral-200 bg-neutral-100 text-neutral-300 cursor-not-allowed'
                                 : isActive
@@ -499,7 +504,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                                   : 'border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-neutral-700'
                               }`}
                           >
-                            {STANCE_LABELS[stance]}
+                            {stanceLabel(stance)}
                           </button>
                         );
                       })}
@@ -510,19 +515,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         onClick={() => void resetToAI()}
                         className="kbd-focus mt-1 w-full px-2 py-0.5 rounded border border-neutral-300 bg-neutral-50 hover:bg-neutral-300/50 text-[9px] text-neutral-600 font-semibold uppercase"
                       >
-                        Return to AI Control
+                        {t('corpsFront.returnAiControl')}
                       </button>
                     )}
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1" title={logisticsPriorityTitle}>Reinforcement Priority</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1" title={logisticsPriorityTitle}>{t('corpsFront.reinforcementPriority')}</span>
                     <div className="flex gap-1">
                       {[0.5, 1, 1.5].map((priority) => (
                         <button
                           key={priority}
                           type="button"
                           onClick={() => void issueLogisticsPriority(priority)}
-                          title={priority === 1 ? `${logisticsPriorityTitle} Current order is neutral.` : logisticsPriorityTitle}
+                          title={priority === 1 ? t('corpsFront.neutralPriorityTitle', { title: logisticsPriorityTitle }) : logisticsPriorityTitle}
                           className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-[10px] font-bold"
                         >
                           {priority.toFixed(1)}x
@@ -535,7 +540,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     onClick={() => void toggleOpsec()}
                     className="kbd-focus w-full rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 px-2 py-1 text-[10px] font-bold uppercase"
                   >
-                    {sector.opsec_active ? 'Disable OPSEC' : 'Enable OPSEC'}
+                    {sector.opsec_active ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
                   </button>
                   {sectorActionMessage && (
                     <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>
@@ -544,7 +549,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
                 {sector.opposing_factions.length > 0 && (
                   <div className="pt-2 border-t border-dashed border-neutral-300">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">Identified Hostiles</span>
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 block mb-1">{t('corpsFront.identifiedHostiles')}</span>
                     <div className="flex flex-wrap gap-2">
                       {sector.opposing_factions.map((f) => (
                         <span key={f} className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${FACTION_COLORS[f]?.replace('text-', 'bg-').replace('-400', '-900') ?? 'bg-neutral-800'} text-white`}>
@@ -564,14 +569,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 {assignedFormations.length > 0 && (
                   <div className="mb-4">
                     <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
-                      Active Frontline Elements ({assignedFormations.length})
+                      {t('corpsFront.activeFrontlineElements', { count: assignedFormations.length })}
                     </div>
                     <div className="space-y-[1px] max-h-[200px] overflow-auto">
                       {assignedFormations.map((f) => (
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={`Assigned brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                          aria-label={t('corpsFront.assignedBrigadeAria', { name: f.name, personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -591,7 +596,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 font-medium">{f.name}</span>
                           <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
-                            {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
+                            {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
                           </span>
                         </button>
                       ))}
@@ -601,14 +606,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 {reserveFormations.length > 0 && (
                   <div className="pt-2">
                     <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
-                      Deployed Reserves ({reserveFormations.length})
+                      {t('corpsFront.deployedReserves', { count: reserveFormations.length })}
                     </div>
                     <div className="space-y-[1px] max-h-[120px] overflow-auto opacity-80 hover:opacity-100 transition-opacity">
                       {reserveFormations.map((f) => (
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={`Reserve brigade ${f.name}${f.personnel != null ? `, personnel ${f.personnel.toLocaleString()}` : ''}`}
+                          aria-label={t('corpsFront.reserveBrigadeAria', { name: f.name, personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -628,7 +633,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
-                            {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
+                            {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
                           </span>
                         </button>
                       ))}
@@ -639,15 +644,15 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 {unresolvedFormations.length > 0 && (
                   <div className="pt-2">
                     <div className="text-[9px] uppercase font-bold text-red-600 mb-1 border-b border-red-200 pb-1 flex items-center gap-1">
-                      <span>Unassigned ({unresolvedFormations.length})</span>
-                      <span className="normal-case font-normal text-red-500 text-[8px]">— not placed in any sector this turn</span>
+                      <span>{t('corpsFront.unassigned', { count: unresolvedFormations.length })}</span>
+                      <span className="normal-case font-normal text-red-500 text-[8px]">- {t('corpsFront.notPlacedThisTurn')}</span>
                     </div>
                     <div className="space-y-[1px] max-h-[100px] overflow-auto">
                       {unresolvedFormations.map((f) => (
                         <button
                           key={f.id}
                           type="button"
-                          aria-label={`Unassigned brigade ${f.name} — not placed in any sector`}
+                          aria-label={t('corpsFront.unassignedBrigadeAria', { name: f.name })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-red-50 transition-colors text-left px-1 py-0.5 rounded border border-red-200/60"
                           onClick={() => useGameStore.setState({
                             selectedCorpsId,
@@ -662,7 +667,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           onMouseLeave={() => { setHoveredOsids([]); }}
                         >
                           <span className="truncate mr-2 text-red-700 leading-none">{f.name}</span>
-                          <span className="text-red-400 text-[9px] tabular-nums shrink-0 leading-none">UNASSIGNED</span>
+                          <span className="text-red-400 text-[9px] tabular-nums shrink-0 leading-none">{t('corpsFront.unassignedShort')}</span>
                         </button>
                       ))}
                     </div>
@@ -676,35 +681,35 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             {activeTab === 'logistics' && (
               <div className="p-4 relative z-10 space-y-1">
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Total Manpower</span>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.totalManpower')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : totalSectorPersonnel.toLocaleString()}
+                    {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : totalSectorPersonnel.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Reserve Ratio</span>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.reserveRatio')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(reserveRatio * 100)}%`}
+                    {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : `${Math.round(reserveRatio * 100)}%`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                  <span className="text-[10px] uppercase font-bold text-neutral-500">Ops Supply Readiness</span>
+                  <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.opsSupplyReadiness')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">REDACTED</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
+                    {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
                   </span>
                 </div>
                 {entrenchmentSummary && (
                   <>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                      <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Entrenchment</span>
-                      <span className="font-medium">{entrenchmentSummary.avgEntrenchment.toFixed(1)} turns</span>
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.avgEntrenchment')}</span>
+                      <span className="font-medium">{t('corpsFront.turnsValue', { count: entrenchmentSummary.avgEntrenchment.toFixed(1) })}</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                      <span className="text-[10px] uppercase font-bold text-neutral-500">Avg Dig-in</span>
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.avgDigIn')}</span>
                       <span className="font-medium">{Math.round(entrenchmentSummary.avgDigIn * 100)}%</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
-                      <span className="text-[10px] uppercase font-bold text-neutral-500">Dig-in Posture</span>
+                      <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.digInPosture')}</span>
                       <span className="font-medium">{entrenchmentSummary.digInCount}/{entrenchmentSummary.totalCount}</span>
                     </div>
                   </>
@@ -716,12 +721,12 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <div role="tabpanel" id="sector-intel-panel-ops" aria-labelledby="sector-intel-tab-ops" hidden={activeTab !== 'ops'} className="p-4 relative z-10">
             {activeTab === 'ops' && (
               <div className="p-4 relative z-10 space-y-3">
-                <div className="text-[9px] uppercase font-bold text-neutral-500">Field Snapshot</div>
+                <div className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.fieldSnapshot')}</div>
                 <div className="text-[10px] text-neutral-500 -mt-2">
-                  Sector panels summarize live directives. Full command review belongs in Army HQ and operation briefings.
+                  {t('corpsFront.fieldSnapshotHelp')}
                 </div>
                 {relatedOperations.length === 0 ? (
-                  <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
+                  <div className="text-[10px] text-neutral-500 italic uppercase">{t('corpsFront.noActiveDirectives')}</div>
                 ) : (
                   relatedOperations.map((op) => {
                     const phaseBg = getOperationPhaseBadgeClass(op.phase);
@@ -738,35 +743,35 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         </div>
 
                         <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
-                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">OP. REDACTED</span> : op.name}</span>
+                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.name}</span>
                           <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{op.phase}</span>
                         </div>
 
-                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">Forces Committed</div>
-                        <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">REDACTED</span> : `${op.participating_brigade_count} Brigades`}</div>
+                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">{t('corpsFront.forcesCommitted')}</div>
+                        <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.brigadeCount', { count: op.participating_brigade_count })}</div>
 
                         {op.supply_readiness != null && (
                           <>
-                            <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">Supply Status</div>
-                            <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">REDACTED</span> : `${Math.round(op.supply_readiness * 100)}% Readiness`}</div>
+                            <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">{t('corpsFront.supplyStatus')}</div>
+                            <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.readinessPct', { pct: Math.round(op.supply_readiness * 100) })}</div>
                           </>
                         )}
 
                         {op.preparation_sub_phase && op.phase === 'planning' && (
                           <div className="mt-2 pt-2 border-t border-neutral-200 border-dashed">
-                            <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">Preparation</div>
+                            <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">{t('corpsFront.preparation')}</div>
                             <PreparationProgressBar subPhase={op.preparation_sub_phase} turnsElapsed={op.preparation_turns_elapsed ?? 0} maxTurns={op.preparation_max_turns ?? 8} />
                             {op.commander_assessment && (
                               <div className={`text-[9px] mt-1 font-bold uppercase ${op.commander_assessment === 'launch' ? 'text-green-700' : op.commander_assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
-                                Cdr Assessment: {op.commander_assessment}
+                                {t('corpsFront.cdrAssessment', { assessment: op.commander_assessment })}
                               </div>
                             )}
                             {op.has_active_probe && (
-                              <div className="text-[9px] mt-0.5 text-blue-700 font-semibold uppercase">Probe in progress</div>
+                              <div className="text-[9px] mt-0.5 text-blue-700 font-semibold uppercase">{t('corpsFront.probeInProgress')}</div>
                             )}
                             {forceBalance && (
                               <div className="text-[9px] mt-0.5 text-neutral-600 uppercase">
-                                Force Balance: <span className={forceBalance.toneClass}>{forceBalance.label}</span> <span className="text-neutral-500">{forceBalance.summary}</span>
+                                {t('corpsFront.forceBalance')}: <span className={forceBalance.toneClass}>{forceBalance.label}</span> <span className="text-neutral-500">{forceBalance.summary}</span>
                               </div>
                             )}
                             {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
@@ -778,7 +783,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                                     : 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800 border-neutral-400'
                                   }`}
                               >
-                                {op.preparation_sub_phase === 'assessment' ? 'Assessment Ready \u2014 Review' : 'Review Briefing'}
+                                {op.preparation_sub_phase === 'assessment' ? t('corpsFront.assessmentReadyReview') : t('corpsFront.reviewBriefing')}
                               </button>
                             )}
                           </div>
@@ -788,11 +793,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
                             <button
                               type="button"
-                              aria-label={`Focus map on objective ${osidDisplayNames?.[objective] ?? objective}`}
+                              aria-label={t('corpsFront.focusObjectiveAria', { objective: osidDisplayNames?.[objective] ?? objective })}
                               onClick={() => panToOsid?.(objective)}
                               className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                             >
-                              <span className="text-[11px]">⌖</span> Focus Obj: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">REDACT</span> : (osidDisplayNames?.[objective] ?? objective)}
+                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : (osidDisplayNames?.[objective] ?? objective)}
                             </button>
                           </div>
                         )}
@@ -810,7 +815,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     }}
                     className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
                   >
-                    Draft New Directive in HQ
+                    {t('corpsFront.draftNewDirective')}
                   </button>
                 </div>
               </div>

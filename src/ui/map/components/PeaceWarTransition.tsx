@@ -6,6 +6,7 @@ import { GlassPanel } from './GlassPanel';
 import type { LoadedGameState } from '../data/types';
 import { Z } from '../../shared/zIndex';
 import { turnToDateString } from '../utils/formatters';
+import { t } from '../i18n';
 
 interface PeaceWarTransitionProps {
     onDismiss: () => void;
@@ -68,13 +69,13 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
     const factionOrder = ['RBiH', 'RS', 'HRHB'];
 
     return (
-        <GlassPanel position="overlay" title="WAR BEGINS" width="560px" onClose={onDismiss} zIndex={Z.MODAL_HARD}>
+        <GlassPanel position="overlay" title={t('peace.warBegins')} width="560px" onClose={onDismiss} zIndex={Z.MODAL_HARD}>
             {/* Date */}
             <div className="text-center mb-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-[#8a8578] mb-1">Date</div>
+                <div className="text-[10px] uppercase tracking-[0.3em] text-[#8a8578] mb-1">{t('peace.date')}</div>
                 <div className="text-lg font-bold text-[#e8e0d4] tracking-wide">{date}</div>
                 <div className="text-[11px] text-[#8a8578] mt-1">
-                    The referendum has been held. Armed conflict is now inevitable.
+                    {t('peace.referendumHeld')}
                 </div>
             </div>
 
@@ -97,7 +98,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                                 </span>
                                 {isPlayer && (
                                     <span className="text-[8px] bg-[#c4a04a]/20 text-[#c4a04a] px-1.5 py-0.5 rounded border border-[#c4a04a]/30 font-bold uppercase tracking-wider">
-                                        You
+                                        {t('peace.you')}
                                     </span>
                                 )}
                             </div>
@@ -106,10 +107,10 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                             </p>
                             {summary && (
                                 <div className="flex gap-4 text-[9px] font-mono text-[#8a8578]">
-                                    <span>{summary.brigades} brigades</span>
-                                    <span>{formatNumber(summary.personnel)} pers</span>
-                                    <span>{summary.tanks} tanks</span>
-                                    <span>{summary.artillery} arty</span>
+                                    <span>{t('peace.brigadeCount', { count: summary.brigades })}</span>
+                                    <span>{t('peace.personnelShort', { count: formatNumber(summary.personnel) })}</span>
+                                    <span>{t('peace.tankCount', { count: summary.tanks })}</span>
+                                    <span>{t('peace.artyCount', { count: summary.artillery })}</span>
                                 </div>
                             )}
                         </div>
@@ -123,7 +124,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                     onClick={onDismiss}
                     className="px-8 py-2.5 bg-[#c4a04a]/20 hover:bg-[#c4a04a]/30 text-[#c4a04a] border border-[#c4a04a]/40 rounded font-bold uppercase tracking-[0.2em] text-sm transition-all duration-200 hover:shadow-[0_0_12px_rgba(196,160,74,0.2)]"
                 >
-                    Begin
+                    {t('peace.begin')}
                 </button>
             </div>
         </GlassPanel>

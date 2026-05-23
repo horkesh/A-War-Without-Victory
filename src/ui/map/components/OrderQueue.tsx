@@ -3,6 +3,7 @@ import { useGameStore, type StagedOrder } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 function formationName(formationId: string, formationNamesById: Map<string, string>): string {
   return getPlayerSafeBrigadeName(formationNamesById.get(formationId));
@@ -81,14 +82,14 @@ export function OrderQueue() {
               onClick={() => clearStagedOrders()}
               className="text-[10px] font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border hover:bg-panel-hover"
             >
-              Clear all
+              {t('orderQueue.clearAll')}
             </button>
           )}
           <button
             type="button"
             onClick={() => setCollapsed(true)}
             className="text-text-secondary hover:text-interactive text-xs leading-none p-0.5"
-            aria-label="Collapse"
+            aria-label={t('orderQueue.collapse')}
           >
             ▼
           </button>

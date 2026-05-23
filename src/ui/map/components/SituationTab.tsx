@@ -136,8 +136,8 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const focusedMode = !!focusSection && focusSection !== 'overview';
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
-  if (alliance < -0.25) alerts.push('Bosniak-Croat alliance under strain');
-  if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
+  if (alliance < -0.25) alerts.push(t('situation.alertAllianceStrain'));
+  if (ivpScore >= 60) alerts.push(t('situation.alertIvpElevated'));
 
   useEffect(() => {
     if (!focusedMode || !focusSection) return;
@@ -149,14 +149,16 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
   const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
     const result = await ipc.stageConvoyDecision(convoyId, decision);
-    setConvoyMessage(result.ok ? `Convoy order staged: ${decision}.` : (result.error ?? 'Failed to stage convoy decision.'));
+    setConvoyMessage(result.ok
+      ? t('situation.convoyStaged', { decision })
+      : (result.error ?? t('situation.convoyStageFailed')));
   };
 
   return (
     <div className="p-3 space-y-3 text-xs">
       {!focusedMode && (
       <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Territory</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.section.territory')}</div>
         {playerFaction ? (
           <div className="flex items-center justify-between">
             <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
@@ -165,33 +167,36 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             </span>
           </div>
         ) : (
-          <div className="text-text-secondary">Territory summary unavailable.</div>
+          <div className="text-text-secondary">{t('situation.territoryUnavailable')}</div>
         )}
       </section>
       )}
 
       {!focusedMode && sitrep && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational SITREP</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
         <div className="text-text-secondary">{sitrep.headline}</div>
         <div className="text-text-secondary">
-          Fronts: {sitrep.front.engagedCount} engaged, {sitrep.front.exposedCount} exposed
+          {t('situation.frontsLine', { engaged: sitrep.front.engagedCount, exposed: sitrep.front.exposedCount })}
         </div>
         <div className="text-text-secondary">
-          Sustainment: {sitrep.sustainment.criticalCount} critical, {sitrep.sustainment.strainedCount} strained
-          {sitrep.sustainment.collapsedMunicipalities.length > 0 ? `, ${sitrep.sustainment.collapsedMunicipalities.length} collapsed` : ''}
+          {t('situation.sustainmentLine', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}
+          {sitrep.sustainment.collapsedMunicipalities.length > 0 ? t('situation.sustainmentCollapsed', { count: sitrep.sustainment.collapsedMunicipalities.length }) : ''}
         </div>
         <div className="text-text-secondary">
-          Operations: {sitrep.operations.activeCount} active command{sitrep.operations.activeCount === 1 ? '' : 's'}
+          {t('situation.operationsLine', {
+            count: sitrep.operations.activeCount,
+            commandWord: t(sitrep.operations.activeCount === 1 ? 'situation.command.one' : 'situation.command.many'),
+          })}
         </div>
         {sitrep.front.edges.length > 0 && (
           <div className="text-text-secondary text-[10px]">
-            Priority fronts: {sitrep.front.edges.slice(0, 2).map((edge) => edge.label).join('; ')}
+            {t('situation.priorityFronts', { items: sitrep.front.edges.slice(0, 2).map((edge) => edge.label).join('; ') })}
           </div>
         )}
         {sitrep.readiness.weakestBrigades.length > 0 && (
           <div className="text-text-secondary text-[10px]">
-            Weakest brigades: {sitrep.readiness.weakestBrigades.slice(0, 2).map((brigade) => brigade.label).join('; ')}
+            {t('situation.weakestBrigades', { items: sitrep.readiness.weakestBrigades.slice(0, 2).map((brigade) => brigade.label).join('; ') })}
           </div>
         )}
       </section>
@@ -199,10 +204,10 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('casualties') && (
       <section data-summary-section="casualties" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Casualties</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.casualties')}</div>
         {playerFaction ? (() => {
           const row = state.casualtyLedger?.[playerFaction];
-          const military = row ? `${row.killed} KIA / ${row.wounded} WIA / ${row.missing_captured} MIA` : 'No data';
+          const military = row ? `${row.killed} KIA / ${row.wounded} WIA / ${row.missing_captured} MIA` : t('situation.noData');
           return (
             <div className="flex items-center justify-between gap-2">
               <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
@@ -210,14 +215,14 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             </div>
           );
         })() : (
-          <div className="text-text-secondary">Casualty summary unavailable.</div>
+          <div className="text-text-secondary">{t('situation.casualtyUnavailable')}</div>
         )}
       </section>
       )}
 
       {!focusedMode && (
       <section data-summary-section="alliance" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (Bosniak-Croat)</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.allianceGauge')}</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
         </div>
@@ -227,11 +232,11 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('ivp') && (
       <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">International Pressure (IVP)</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.ivp')}</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-accent-gold/80" style={{ width: `${ivpScore}%` }} />
         </div>
-        <div className="text-text-secondary">Composite IVP: {ivpScore.toFixed(0)}</div>
+        <div className="text-text-secondary">{t('situation.compositeIvp', { score: ivpScore.toFixed(0) })}</div>
         <div className="text-text-secondary text-[10px] space-y-0.5">
           {getIvpComponentContributions(state.internationalVisibilityPressure).map((row) => (
             <div key={row.key} className="flex justify-between gap-2 tabular-nums">
@@ -246,25 +251,29 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           Thresholds: {Math.round(DRINA_BLOCKADE_THRESHOLD * 100)}% Drina · {Math.round(INTERNATIONAL_SANCTIONS_THRESHOLD * 100)}% sanctions · {Math.round(NATO_INTERVENTION_THRESHOLD * 100)}% NATO threat
         </div>
         <div className="text-text-secondary">
-          Consequences:{' '}
+          {t('situation.consequences')}{' '}
           {state.ivpConsequencesActive?.length
             ? sortIvpConsequenceIds(state.ivpConsequencesActive).map(formatIvpConsequenceLabel).join('; ')
-            : 'none'}
+            : t('situation.none')}
         </div>
         {state.sarajevoTunnelOperational && (
-          <div className="text-text-secondary">Sarajevo tunnel operational.</div>
+          <div className="text-text-secondary">{t('situation.sarajevoTunnel')}</div>
         )}
       </section>
       )}
 
       {showSection('convoys') && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.humanitarianConvoys')}</div>
           {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 ? (
             state.pendingConvoyDecisions.map((convoy) => (
               <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
                 <div className="text-text-secondary">
-                  {getPlayerSafeEnclaveName(convoy.target_enclave)} via {getPlayerSafeCorridorLabel(convoy.route_faction)}, {convoy.supply_amount.toFixed(2)} supply
+                  {t('situation.convoyLine', {
+                    target: getPlayerSafeEnclaveName(convoy.target_enclave),
+                    route: getPlayerSafeCorridorLabel(convoy.route_faction),
+                    supply: convoy.supply_amount.toFixed(2),
+                  })}
                 </div>
                 <div className="flex gap-1">
                   <button
@@ -272,21 +281,21 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                     onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Allow
+                    {t('situation.allow')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'block')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Block
+                    {t('situation.block')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Divert
+                    {t('situation.divert')}
                   </button>
                 </div>
               </div>
@@ -300,14 +309,14 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('support') && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.localSupport')}</div>
           {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn ? (
             <>
               <div className="text-text-secondary">
                 {activeMunicipalitySupport.label.replace(/\bRBiH\b/g, playerPoliticalLabel ?? 'friendly authorities')}
               </div>
               <div className="text-text-secondary">
-                Target municipality: {getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id)}
+                {t('situation.targetMunicipality', { name: getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id) })}
               </div>
             </>
           ) : (
@@ -358,7 +367,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
       {showSection('capital') && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.diplomacy')}</div>
           {state.strategicDimensions || state.patronOverrideAuthority ? (
             <DiplomacyOverview
               strategicDimensions={state.strategicDimensions}
@@ -374,9 +383,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {!focusedMode && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.alerts')}</div>
         {((sitrep?.alerts.length ?? 0) === 0) && alerts.length === 0 ? (
-          <div className="text-text-secondary">No active alerts.</div>
+          <div className="text-text-secondary">{t('situation.noAlerts')}</div>
         ) : (
           <>
             {(sitrep?.alerts ?? []).map((alert) => (

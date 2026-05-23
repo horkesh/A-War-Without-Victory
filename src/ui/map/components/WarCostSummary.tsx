@@ -6,6 +6,7 @@
 
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
+import { t } from '../i18n';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Formatting helpers (exported for testing)
@@ -62,29 +63,29 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
     return (
         <div data-tutorial-step="cost-ledger" className="p-6 space-y-4 border-t border-panel-border">
             <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
-                War Cost &amp; Historical Comparison
+                {t('warCost.title')}
             </div>
 
             {/* Key figures */}
             <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
                 <CostRow
-                    label="Total Military Killed"
+                    label={t('warCost.totalMilitaryKilled')}
                     value={costLedger.total_military_killed.toLocaleString()}
                 />
                 <CostRow
-                    label="Total Civilian Killed"
+                    label={t('warCost.totalCivilianKilled')}
                     value={costLedger.total_civilian_killed.toLocaleString()}
                 />
                 <CostRow
-                    label="War Duration"
-                    value={`${costLedger.war_duration_weeks} weeks`}
+                    label={t('warCost.warDuration')}
+                    value={t('warCost.weeksValue', { weeks: costLedger.war_duration_weeks })}
                 />
                 <CostRow
-                    label="vs Historical Duration"
+                    label={t('warCost.vsHistoricalDuration')}
                     value={formatDurationDelta(comparison.duration_delta_weeks, costLedger.war_duration_weeks - comparison.duration_delta_weeks)}
                 />
                 <CostRow
-                    label="Military Casualties vs History"
+                    label={t('warCost.militaryCasualtiesVsHistory')}
                     value={formatCasualtyRatio(comparison.casualty_ratio)}
                 />
             </div>
@@ -93,19 +94,19 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {opportunityLedger && opportunityLedger.total_decisions > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
-                        Opportunity Decisions
+                        {t('warCost.opportunityDecisions')}
                     </div>
                     <div className="grid grid-cols-3 gap-2 mb-3">
                         <OpportunityMetric
-                            label="Decisions"
+                            label={t('warCost.decisions')}
                             value={String(opportunityLedger.total_decisions)}
                         />
                         <OpportunityMetric
-                            label="Completed"
+                            label={t('warCost.completed')}
                             value={String(opportunityLedger.completed)}
                         />
                         <OpportunityMetric
-                            label="Successes"
+                            label={t('warCost.successes')}
                             value={String(opportunityLedger.successes)}
                         />
                     </div>
@@ -129,7 +130,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                     </span>
                                     {entry.total_attacks > 0 && (
                                         <span className="ml-2">
-                                            {entry.total_attacks} attacks
+                                            {t('warCost.attacks', { count: entry.total_attacks })}
                                         </span>
                                     )}
                                 </div>
@@ -143,7 +144,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {costLedger.findings && costLedger.findings.length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
-                        Prosecutorial Findings
+                        {t('warCost.prosecutorialFindings')}
                     </div>
                     <div className="space-y-2">
                         {costLedger.findings.map((finding) => (
@@ -162,7 +163,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                 <div>{finding.text}</div>
                                 {finding.sources.length > 0 && (
                                     <div className="mt-1 text-[9px] text-text-secondary/75">
-                                        Sources: {finding.sources.join('; ')}
+                                        {t('warCost.sources')}: {finding.sources.join('; ')}
                                     </div>
                                 )}
                             </div>
@@ -175,7 +176,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {Object.keys(comparison.territory_divergence).length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
-                        Territory vs Dayton 49/51
+                        {t('warCost.territoryVsDayton')}
                     </div>
                     <div className="space-y-1">
                         {Object.entries(comparison.territory_divergence).map(([key, delta]) => (
@@ -191,7 +192,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {comparison.divergence_notes.length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
-                        Historical Divergence
+                        {t('warCost.historicalDivergence')}
                     </div>
                     <div className="space-y-1">
                         {comparison.divergence_notes.map((note, i) => (

@@ -1,21 +1,23 @@
 export type TempoType = 'slow' | 'normal' | 'fast';
+import { t } from '../../i18n';
+import type { MessageKey } from '../../i18n/messages.en';
 
 interface TempoSelectorProps {
     value: TempoType;
     onChange: (tempo: TempoType) => void;
 }
 
-const OPTIONS: { id: TempoType; label: string; desc: string }[] = [
-    { id: 'slow', label: 'Methodical', desc: 'low casualties, slow pace' },
-    { id: 'normal', label: 'Standard', desc: 'balanced approach' },
-    { id: 'fast', label: 'All-Out', desc: 'high intensity, rapid gain' },
+const OPTIONS: { id: TempoType; labelKey: MessageKey; descKey: MessageKey }[] = [
+    { id: 'slow', labelKey: 'planUi.methodical', descKey: 'planUi.methodicalDesc' },
+    { id: 'normal', labelKey: 'planUi.standard', descKey: 'planUi.standardDesc' },
+    { id: 'fast', labelKey: 'planUi.allOut', descKey: 'planUi.allOutDesc' },
 ];
 
 export function TempoSelector({ value, onChange }: TempoSelectorProps) {
     const current = value;
     return (
         <div className="space-y-2">
-            <label className="text-[10px] font-bold text-accent-gold uppercase tracking-[0.2em]">Operational Tempo</label>
+            <label className="text-[10px] font-bold text-accent-gold uppercase tracking-[0.2em]">{t('planUi.operationalTempo')}</label>
             <div className="flex bg-black/40 border border-white/10 rounded p-1">
                 {OPTIONS.map((opt) => (
                     <button
@@ -26,13 +28,13 @@ export function TempoSelector({ value, onChange }: TempoSelectorProps) {
                             : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <span className="text-[10px] font-black uppercase tracking-tight">{opt.label}</span>
+                        <span className="text-[10px] font-black uppercase tracking-tight">{t(opt.labelKey)}</span>
                     </button>
                 ))}
             </div>
             <div className="px-1">
                 <p className="text-[9px] text-slate-500 italic uppercase tracking-tighter text-center">
-                    {OPTIONS.find(o => o.id === current)?.desc}
+                    {t(OPTIONS.find(o => o.id === current)?.descKey ?? 'planUi.standardDesc')}
                 </p>
             </div>
         </div>

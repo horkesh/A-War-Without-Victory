@@ -5,6 +5,7 @@
 import type { FormationView } from '../../data/types';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
+import { t } from '../../i18n';
 
 interface CombatRecordSectionProps {
     corpsId: string;
@@ -15,21 +16,21 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
     const cs = corps.combatSummary;
 
     return (
-        <CollapsibleSection sectionKey={`combat-${corpsId}`} title="Combat Record">
+        <CollapsibleSection sectionKey={`combat-${corpsId}`} title={t('combatRecord.title')}>
             {!cs || cs.battles_fought === 0 ? (
                 <EmptyState
-                    message="No combat record"
-                    helpText="Corps has not fought a battle yet."
+                    message={t('combatRecord.emptyTitle')}
+                    helpText={t('combatRecord.emptyHelp')}
                     density="compact"
                 />
             ) : (
                 <div className="space-y-1 text-[11px] tabular-nums" style={{ fontFamily: 'Courier New, monospace' }}>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Battles</span>
+                        <span className="text-text-secondary">{t('combatRecord.battles')}</span>
                         <span className="text-text-primary font-bold">{cs.battles_fought}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Record</span>
+                        <span className="text-text-secondary">{t('combatRecord.record')}</span>
                         <span>
                             <span className="text-green-700 font-bold">{cs.victories}W</span>
                             {' / '}
@@ -39,23 +40,23 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                         </span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Win Rate</span>
+                        <span className="text-text-secondary">{t('combatRecord.winRate')}</span>
                         <span className="text-text-primary font-bold">{(cs.win_rate * 100).toFixed(0)}%</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Casualties Taken</span>
+                        <span className="text-text-secondary">{t('combatRecord.casualtiesTaken')}</span>
                         <span className="text-red-700">{cs.total_casualties_taken.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Casualties Inflicted</span>
+                        <span className="text-text-secondary">{t('combatRecord.casualtiesInflicted')}</span>
                         <span className="text-green-700">{cs.total_casualties_inflicted.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Exchange Ratio</span>
+                        <span className="text-text-secondary">{t('combatRecord.exchangeRatio')}</span>
                         <span className="text-text-primary">{cs.casualty_exchange_ratio.toFixed(2)}:1</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Positions</span>
+                        <span className="text-text-secondary">{t('combatRecord.positions')}</span>
                         <span>
                             <span className="text-green-700">+{cs.total_osids_captured}</span>
                             {' / '}

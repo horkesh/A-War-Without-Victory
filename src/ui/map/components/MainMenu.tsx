@@ -4,6 +4,7 @@
  * and secondary actions (Load, Settings, Credits).
  */
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -27,21 +28,21 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
             {/* Title */}
             <div className="text-center mb-12">
                 <div className="text-[10px] uppercase tracking-[0.5em] text-[#8a7a60]/60 mb-2">
-                    Pyrrhic Games presents
+                    {t('mainMenu.presents')}
                 </div>
                 <h1 className="text-[36px] font-bold text-[#c4a35a] tracking-wider leading-tight"
                     style={{ textShadow: '0 2px 20px rgba(196, 163, 90, 0.3)' }}>
-                    A War Without Victory
+                    {t('mainMenu.title')}
                 </h1>
                 <div className="text-[13px] text-[#8a7a60] mt-2 tracking-wide italic">
-                    Bosnia-Herzegovina, 1992–1995
+                    {t('mainMenu.subtitle')}
                 </div>
             </div>
 
             {/* Primary actions */}
             <div className="flex flex-col gap-3 w-64 mb-6">
-                <MenuButton onClick={onNewGame} primary>New Game</MenuButton>
-                {hasSave && <MenuButton onClick={onContinue} primary>Continue</MenuButton>}
+                <MenuButton onClick={onNewGame} primary>{t('mainMenu.newGame')}</MenuButton>
+                {hasSave && <MenuButton onClick={onContinue} primary>{t('mainMenu.continue')}</MenuButton>}
             </div>
 
             {/* Divider */}
@@ -49,10 +50,10 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
 
             {/* Secondary actions */}
             <div className="flex flex-col gap-2 w-48">
-                <MenuButton onClick={onLoadGame}>Load Game</MenuButton>
-                <MenuButton onClick={onSettings}>Settings</MenuButton>
-                <MenuButton onClick={onCredits}>Credits</MenuButton>
-                <MenuButton onClick={onQuit}>Quit</MenuButton>
+                <MenuButton onClick={onLoadGame}>{t('mainMenu.loadGame')}</MenuButton>
+                <MenuButton onClick={onSettings}>{t('mainMenu.settings')}</MenuButton>
+                <MenuButton onClick={onCredits}>{t('mainMenu.credits')}</MenuButton>
+                <MenuButton onClick={onQuit}>{t('mainMenu.quit')}</MenuButton>
             </div>
 
             {/* Version */}

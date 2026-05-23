@@ -4,6 +4,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
+import { t } from '../i18n';
 
 interface StackExpansionOverlayProps {
     osid: string;
@@ -82,7 +83,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                 type="button"
                 className={`absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md transition-opacity duration-500 ease-out ${isMounted ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
-                aria-label="Close formation stack"
+                aria-label={t('stackExpansion.closeAria')}
             />
 
             {/* Orbital content */}
@@ -128,7 +129,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                     e.stopPropagation();
                                     onSelect(f.id);
                                 }}
-                                aria-label={`Select ${f.name}`}
+                                aria-label={t('stackExpansion.selectAria', { name: f.name })}
                             >
                                 {/* Shield Glow */}
                                 <div
@@ -160,10 +161,10 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                             transition: 'opacity 0.3s 0.5s'
                         }}
                         onClick={onClose}
-                        aria-label="Dismiss formation stack expansion"
+                        aria-label={t('stackExpansion.dismissAria')}
                     >
                         <div className="bg-black/80 border border-white/20 hover:border-accent-gold/50 px-3 py-1 rounded-full text-[9px] text-white/60 tracking-widest font-bold uppercase transition-all hover:scale-105 active:scale-95 whitespace-nowrap shadow-2xl">
-                            Dismiss Expansion
+                            {t('stackExpansion.dismiss')}
                         </div>
                     </button>
                 )}

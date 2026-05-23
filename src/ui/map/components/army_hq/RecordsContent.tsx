@@ -7,12 +7,13 @@ import { OperationHistoryPanel } from '../OperationHistoryPanel';
 import { useGameStore } from '../../store/gameStore';
 import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
 import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
+import { t, type MessageKey } from '../../i18n';
 
 const SUB_TABS = [
-    { id: 'aftermath' as const, label: 'TURN AFTERMATH' },
-    { id: 'aar' as const, label: 'AFTER-ACTION REPORT' },
-    { id: 'ops' as const, label: 'OPERATION HISTORY' },
-    { id: 'opportunities' as const, label: 'OPPORTUNITIES' },
+    { id: 'aftermath' as const, labelKey: 'recordsContent.tab.aftermath' },
+    { id: 'aar' as const, labelKey: 'recordsContent.tab.aar' },
+    { id: 'ops' as const, labelKey: 'recordsContent.tab.ops' },
+    { id: 'opportunities' as const, labelKey: 'recordsContent.tab.opportunities' },
 ];
 
 export function RecordsContent() {
@@ -24,7 +25,7 @@ export function RecordsContent() {
         <div>
             {/* Sub-tab selector */}
             <div className="flex gap-1.5 mb-4">
-                {SUB_TABS.map(({ id, label }) => (
+                {SUB_TABS.map(({ id, labelKey }) => (
                     <button
                         key={id}
                         type="button"
@@ -35,22 +36,22 @@ export function RecordsContent() {
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
                     >
-                        {label}
+                        {t(labelKey as MessageKey)}
                     </button>
                 ))}
             </div>
 
             <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-2">
-                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">Codex</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">{t('codex.title')}</div>
                 <div className="mt-1 text-[11px] text-text-secondary">
-                    Historical essays and reference material live in the separate Codex shell.
+                    {t('recordsContent.codexHelp')}
                 </div>
                 <button
                     type="button"
                     onClick={() => setCodexOpen(true)}
                     className="mt-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border border-panel-border bg-panel-card text-text-secondary transition-all hover:text-text-primary hover:bg-white/5"
                 >
-                    Open Codex
+                    {t('recordsContent.openCodex')}
                 </button>
             </div>
 

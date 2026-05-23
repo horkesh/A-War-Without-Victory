@@ -17,6 +17,7 @@ import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import { t } from '../i18n';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -46,7 +47,7 @@ const ZERO_BRIGADE_COMBAT_SUMMARY: NonNullable<FormationView['combatSummary']> =
 type DetailTab = 'overview' | 'record' | 'orders';
 
 function formatHistoryMomentDate(turn: number): string {
-  if (!Number.isFinite(turn) || turn <= 0) return 'Undated';
+  if (!Number.isFinite(turn) || turn <= 0) return t('formationDetail.undated');
   return turnToDateString(turn);
 }
 
@@ -131,9 +132,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const sectorOverrideId = formation.sectorOverrideId;
 
   const tabs: { id: DetailTab; label: string }[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'record', label: 'Record' },
-    { id: 'orders', label: 'Orders' },
+    { id: 'overview', label: t('formationDetail.overview') },
+    { id: 'record', label: t('formationDetail.record') },
+    { id: 'orders', label: t('formationDetail.orders') },
   ];
 
   return (
@@ -148,10 +149,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
           )}
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Formation
+            {t('formationDetail.formation')}
           </span>
           {isBrigade && decorations.length > 0 && (
-            <div className="flex items-center gap-px ml-0.5" title={`${decorations.length} decoration${decorations.length !== 1 ? 's' : ''} earned`}>
+            <div className="flex items-center gap-px ml-0.5" title={t('formationDetail.decorationsEarned', { count: decorations.length })}>
               {decorations.slice(0, 5).map((dec, i) => (
                 <span key={`${dec.tier}-${dec.type}-${i}`} className={`text-[8px] leading-none select-none ${getPrestigeTierColor(dec.tier === 'tier_3' ? 1 : dec.tier === 'tier_2' ? 2 : 3)}`}>★</span>
               ))}
@@ -229,7 +230,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">
-                      {isArmyHq ? 'Subordinated to:' : 'Corps:'}
+                      {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
                     </span>
                     <span className="text-accent-blue font-bold uppercase group-hover:underline">{parent.name}</span>
                   </div>
@@ -256,19 +257,19 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">Sector:</span>
+                      <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
                         {currentSector.display_name}
                       </span>
                       {sectorOverrideId && (
                         <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[9px] uppercase rounded border border-accent-gold/30 font-bold">
-                          Override
+                          {t('formationDetail.override')}
                         </span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-text-secondary italic">
-                        {currentSector.assigned_brigade_ids.includes(formation.id) ? 'Frontline' : 'Reserve'}
+                        {currentSector.assigned_brigade_ids.includes(formation.id) ? t('formationDetail.frontline') : t('formationDetail.reserve')}
                       </span>
                       <div className="w-1.5 h-1.5 rounded-full bg-accent-gold/40 group-hover:bg-accent-gold transition-colors" />
                     </div>
@@ -280,8 +281,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 if (corpsSectors.length > 0) {
                   return (
                     <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center justify-between text-[10px]">
-                      <span className="text-text-secondary uppercase">Operational Sectors:</span>
-                      <span className="text-text-primary font-bold">{corpsSectors.length} ACTIVE</span>
+                      <span className="text-text-secondary uppercase">{t('formationDetail.operationalSectors')}</span>
+                      <span className="text-text-primary font-bold">{t('formationDetail.activeCount', { count: corpsSectors.length })}</span>
                     </div>
                   );
                 }
@@ -291,26 +292,26 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
-              <span className="text-text-secondary">Posture:</span>
+              <span className="text-text-secondary">{t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{formatPosture(formation.posture ?? 'hold')}</span>
-              <span className="text-text-secondary ml-1">Readiness:</span>
+              <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
               <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
             </div>
 
             {/* Stranded (Isolated) indicator */}
             {formation.strandedStatus === 'holding' && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-900/30 border border-red-500/30">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Isolated</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">{t('formationDetail.isolated')}</span>
                 {formation.strandedSinceTurn != null && (
                   <span className="text-[9px] text-red-400/60">
-                    since {turnToDateString(formation.strandedSinceTurn)}
+                    {t('formationDetail.sinceDate', { date: turnToDateString(formation.strandedSinceTurn) })}
                   </span>
                 )}
               </div>
             )}
             {formation.strandedStatus === 'reconnected' && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-900/30 border border-green-500/30">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-green-400">Reconnected</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-green-400">{t('formationDetail.reconnected')}</span>
               </div>
             )}
 
@@ -319,7 +320,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               const commander = getFormationCommander(formation, loadedGameState);
               if (commander) {
                 const isArmy = formation.kind === 'army_hq' || formation.kind === 'army';
-                const label = isArmy ? 'Army Commander' : 'Corps Commander';
+                const label = isArmy ? t('formationDetail.armyCommander') : t('formationDetail.corpsCommander');
                 return (
                   <div className="pt-2 border-t border-panel-border">
                     <OfficerProfile officer={commander} label={label} compact emphasis={isArmy ? 'defense' : 'aggression'} />
@@ -329,7 +330,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               if (isBrigade && formation.officer_quality != null) {
                 return (
                   <div className="pt-2 border-t border-panel-border flex items-center justify-between text-xs">
-                    <span className="text-text-secondary">Officer Cadre Quality</span>
+                    <span className="text-text-secondary">{t('formationDetail.officerCadreQuality')}</span>
                     <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
                       {Math.round(formation.officer_quality * 100)}%
                     </span>
@@ -350,7 +351,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 : 'text-amber-600 border-amber-600/30 bg-amber-900/20';
               return (
                 <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                  <span className="text-xs text-text-secondary">Unit Distinction</span>
+                  <span className="text-xs text-text-secondary">{t('formationDetail.unitDistinction')}</span>
                   <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider rounded border ${tierColor}`}>
                     ★ {displayName}
                   </span>
@@ -360,7 +361,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {formation.honor && (
               <div className="pt-1 flex items-center justify-between text-xs">
-                <span className="text-text-secondary">Historical Honor</span>
+                <span className="text-text-secondary">{t('formationDetail.historicalHonor')}</span>
                 <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[10px] font-semibold uppercase tracking-wider rounded border border-accent-gold/30">
                   {formation.honor}
                 </span>
@@ -370,11 +371,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* TO&E */}
             {formation.composition && (
               <div className="pt-2 border-t border-panel-border space-y-2">
-                <div className="text-xs text-text-secondary">TO&E (Equipment)</div>
+                <div className="text-xs text-text-secondary">{t('formationDetail.toeEquipment')}</div>
                 <div className="space-y-1.5 text-xs">
                   {formation.composition.tanks > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">Tanks</span>
+                      <span className="text-text-secondary w-16">{t('formationDetail.tanks')}</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
                           <div style={{ width: `${formation.composition.tank_condition.operational * 100}%` }} className="bg-[#55d48a]" />
@@ -387,7 +388,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                   {formation.composition.artillery > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">Artillery</span>
+                      <span className="text-text-secondary w-16">{t('formationDetail.artillery')}</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
                           <div style={{ width: `${formation.composition.artillery_condition.operational * 100}%` }} className="bg-[#55d48a]" />
@@ -400,7 +401,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                   {formation.composition.aa_systems > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">AA Sys</span>
+                      <span className="text-text-secondary w-16">{t('formationDetail.aaSysShort')}</span>
                       <div className="flex-1 flex items-center gap-2">
                         <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
                           <div style={{ width: '100%' }} className="bg-[#55d48a]" />
@@ -411,7 +412,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                   {formation.equipment_decay != null && (
                     <div className="flex justify-between items-center text-[11px] pt-1">
-                      <span className="text-text-secondary">Overall Supply Effectiveness</span>
+                      <span className="text-text-secondary">{t('formationDetail.overallSupplyEffectiveness')}</span>
                       <span className="text-text-primary font-mono">{Math.round(formation.equipment_decay * 100)}%</span>
                     </div>
                   )}
@@ -421,7 +422,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
-              <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> Cohesion</span>
+              <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
               <span className="text-text-primary tabular-nums flex items-center gap-1">
                 {(() => {
                   const c = formation.cohesion;
@@ -440,7 +441,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </span>
               {formation.morale != null && (
                 <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> Morale</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> {t('formationDetail.morale')}</span>
                   <span className="text-text-primary tabular-nums flex items-center gap-1">
                     {(() => {
                       const m = formation.morale!;
@@ -459,12 +460,12 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
-              <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> Fatigue</span>
+              <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
               <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
               {formation.personnel != null && (
                 <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> Personnel</span>
-                  <span className="text-text-primary tabular-nums">{formation.personnel.toLocaleString()} men</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
+                  <span className="text-text-primary tabular-nums">{t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })}</span>
                 </>
               )}
               {formation.kind === 'brigade' && formation.personnel != null && (() => {
@@ -478,7 +479,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   : '';
                 return (
                   <>
-                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> Effectiveness</span>
+                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
                     <span className="tabular-nums font-semibold" style={{ color }}>
                       {Math.round(eff.value).toLocaleString()}
                       <span className="text-[9px] font-normal text-text-secondary">{worstLabel}</span>
@@ -488,33 +489,33 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               })()}
               {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
                 <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> Entrenched</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.entrenchment_turns!)} turn{Math.round(formation.entrenchment_turns!) !== 1 ? 's' : ''}</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> {t('formationDetail.entrenched')}</span>
+                  <span className="text-text-primary tabular-nums">{t('formationDetail.turnCount', { count: Math.round(formation.entrenchment_turns!).toString() })}</span>
                 </>
               )}
               {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
                 <>
-                  <span className="text-text-secondary">Dig-in Progress</span>
+                  <span className="text-text-secondary">{t('formationDetail.digInProgress')}</span>
                   <span className="text-text-primary tabular-nums">{Math.round(formation.dig_in_progress * 100)}%</span>
                 </>
               )}
               {formation.disrupted_turns != null && formation.disrupted_turns > 0 && (
                 <>
-                  <span className="font-bold uppercase flex items-center gap-1" style={{ color: '#d45555' }}><Icon name="disrupted" size={12} /> DISRUPTED</span>
+                  <span className="font-bold uppercase flex items-center gap-1" style={{ color: '#d45555' }}><Icon name="disrupted" size={12} /> {t('formationDetail.disrupted')}</span>
                   <span className="tabular-nums font-semibold" style={{ color: '#d45555' }}>
-                    {formation.disrupted_turns} turn{formation.disrupted_turns !== 1 ? 's' : ''} remaining
+                    {t('formationDetail.turnsRemaining', { count: formation.disrupted_turns.toString() })}
                   </span>
                 </>
               )}
               {formation.kind === 'corps' && formation.corpsExhaustion != null && (
                 <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> Exhaustion</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.exhaustion')}</span>
                   <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion * 100)}%</span>
                 </>
               )}
               {formation.kind === 'corps' && formation.corpsCommandSpan != null && (
                 <>
-                  <span className="text-text-secondary">Command Span</span>
+                  <span className="text-text-secondary">{t('formationDetail.commandSpan')}</span>
                   <span className="text-text-primary tabular-nums">{formation.corpsCommandSpan.toFixed(1)}x</span>
                 </>
               )}
@@ -522,7 +523,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {formation.movementStatus && formation.movementStatus !== 'deployed' && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                <span className="text-text-secondary uppercase font-bold text-[10px]">Movement:</span>
+                <span className="text-text-secondary uppercase font-bold text-[10px]">{t('formationDetail.movement')}</span>
                 <span className={`px-2 py-0.5 text-[11px] font-bold uppercase rounded border ${
                   formation.movementStatus === 'in_transit'
                     ? 'bg-accent-blue/20 text-accent-blue border-accent-blue/40'
@@ -538,7 +539,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {formation.location_osid && (
               <div className="text-xs min-w-0">
-                <span className="text-text-secondary">Location: </span>
+                <span className="text-text-secondary">{t('formationDetail.location')} </span>
                 <span className="text-text-primary break-all">
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
                 </span>
@@ -547,7 +548,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {isBrigade && (
               <div className="text-xs min-w-0">
-                <span className="text-text-secondary">Home municipality: </span>
+                <span className="text-text-secondary">{t('formationDetail.homeMunicipality')} </span>
                 <span className="text-text-primary break-all">
                       {formation.municipalityId ? getPlayerSafeMunicipalityName(formation.municipalityId, '—') : '—'}
                 </span>
@@ -557,7 +558,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Narrative arc badge (brief — full history on Record tab) */}
             {formation.narrativeArc && (
               <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                <span className="text-xs text-text-secondary">Narrative Arc</span>
+                <span className="text-xs text-text-secondary">{t('formationDetail.narrativeArc')}</span>
                 <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${
                   formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
                   : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
@@ -579,22 +580,22 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Campaign Losses — top of Record tab */}
             {isBrigade && (
               <div className="p-2 bg-black/20 rounded border border-panel-border/40 space-y-1.5">
-                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Campaign Losses</div>
+                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
-                    <div className="text-[10px] text-text-secondary uppercase">KIA</div>
+                    <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d45555' }}>
                       {(formation.campaignKia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.30)).toLocaleString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-text-secondary uppercase">WIA</div>
+                    <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d4d455' }}>
                       {(formation.campaignWia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.55)).toLocaleString()}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-text-secondary uppercase">MIA/POW</div>
+                    <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
                     <div className="text-sm font-mono font-bold text-text-secondary">
                       {(formation.campaignMia ?? Math.round((formation.combatSummary?.total_casualties_taken ?? 0) * 0.15)).toLocaleString()}
                     </div>
@@ -605,16 +606,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {formation.last_repulsed_from && (
               <div className="text-[11px] text-text-secondary min-w-0">
-                <span>Last repulsed from: </span>
+                <span>{t('formationDetail.lastRepulsedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
-                <span> (wk {formation.last_repulsed_from.turn})</span>
+                <span> {t('formationDetail.weekParen', { week: formation.last_repulsed_from.turn.toString() })}</span>
               </div>
             )}
             {formation.last_retreat_from && (
               <div className="text-[11px] text-text-secondary min-w-0">
-                <span>Retreated from: </span>
+                <span>{t('formationDetail.retreatedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
-                <span> (wk {formation.last_retreat_from.turn})</span>
+                <span> {t('formationDetail.weekParen', { week: formation.last_retreat_from.turn.toString() })}</span>
               </div>
             )}
 
@@ -626,13 +627,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <>
                       {formation.brigade_history.longest_victory_streak > 0 && (
                         <>
-                          <span className="text-text-secondary">Highest win streak</span>
+                          <span className="text-text-secondary">{t('formationDetail.highestWinStreak')}</span>
                           <span className="text-accent-gold tabular-nums font-semibold">{formation.brigade_history.longest_victory_streak}</span>
                         </>
                       )}
                       {formation.brigade_history.turns_under_siege > 0 && (
                         <>
-                          <span className="text-text-secondary">Turns under siege</span>
+                          <span className="text-text-secondary">{t('formationDetail.turnsUnderSiege')}</span>
                           <span className="text-text-primary tabular-nums">{formation.brigade_history.turns_under_siege}</span>
                         </>
                       )}
@@ -644,16 +645,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   (formation.brigade_history.total_equipment_destroyed.tanks > 0 ||
                     formation.brigade_history.total_equipment_destroyed.artillery > 0) && (
                     <div className="mt-2 p-1.5 border border-dashed border-[#55d48a]/30 bg-[#55d48a]/5 rounded flex justify-between items-center">
-                      <span className="text-[10px] text-[#55d48a] uppercase font-semibold">Equipment Destroyed</span>
+                      <span className="text-[10px] text-[#55d48a] uppercase font-semibold">{t('formationDetail.equipmentDestroyed')}</span>
                       <div className="flex gap-2 text-xs font-mono">
                         {formation.brigade_history.total_equipment_destroyed.tanks > 0 && (
-                          <span title="Tanks/APCs Knocked Out">🛻 {formation.brigade_history.total_equipment_destroyed.tanks}</span>
+                          <span title={t('formationDetail.tanksApcsKnockedOut')}>🛻 {formation.brigade_history.total_equipment_destroyed.tanks}</span>
                         )}
                         {formation.brigade_history.total_equipment_destroyed.artillery > 0 && (
-                          <span title="Artillery Destroyed">💥 {formation.brigade_history.total_equipment_destroyed.artillery}</span>
+                          <span title={t('formationDetail.artilleryDestroyed')}>💥 {formation.brigade_history.total_equipment_destroyed.artillery}</span>
                         )}
                         {formation.brigade_history.total_equipment_destroyed.aa_systems > 0 && (
-                          <span title="AA Systems Destroyed">🎯 {formation.brigade_history.total_equipment_destroyed.aa_systems}</span>
+                          <span title={t('formationDetail.aaSystemsDestroyed')}>🎯 {formation.brigade_history.total_equipment_destroyed.aa_systems}</span>
                         )}
                       </div>
                     </div>
@@ -661,7 +662,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
                 {formation.recent_engagements && formation.recent_engagements.length > 0 && (
                   <div className="pt-2">
-                    <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
+                    <div className="text-xs text-text-secondary mb-1">{t('formationDetail.recentEngagements')}</div>
                     <div className="space-y-1">
                       {[...formation.recent_engagements]
                         .sort((a, b) => a.turn - b.turn)
@@ -669,7 +670,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
                           <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
-                          <span className="text-text-secondary"> as {engagement.role} @ </span>
+                          <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: engagement.role })} </span>
                           <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
                           {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}
                         </div>
@@ -688,7 +689,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {formation.narrativeArc && (
               <div className="pt-3 border-t border-panel-border space-y-2 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Unit History</span>
+                  <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.unitHistory')}</span>
                   <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded border ${
                     formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
                     : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
@@ -730,43 +731,43 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Elite loan status (elite brigades only) */}
             {formation.eliteLoanState && (
               <div className="space-y-2 pb-3 border-b border-panel-border">
-                <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">Army Reserve Status</span>
+                <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.armyReserveStatus')}</span>
                 {formation.eliteLoanState.permanently_degraded ? (
                   <div className="px-2 py-1.5 bg-[#d45555]/10 border border-[#d45555]/30 rounded text-[11px] text-[#d45555] font-semibold">
-                    DEGRADED — Elite status permanently lost
+                    {t('formationDetail.eliteDegraded')}
                   </div>
                 ) : formation.eliteLoanState.on_loan ? (
                   <div className="space-y-1.5">
                     <div className="px-2 py-1.5 bg-[#d4a855]/10 border border-[#d4a855]/40 rounded text-[11px] space-y-0.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[#d4a855] font-bold uppercase text-[10px]">On Loan</span>
+                        <span className="text-[#d4a855] font-bold uppercase text-[10px]">{t('formationDetail.onLoan')}</span>
                         <span className="text-text-secondary text-[10px]">
-                          {formation.eliteLoanState.turns_deployed}w deployed
+                          {t('formationDetail.weeksDeployed', { weeks: formation.eliteLoanState.turns_deployed.toString() })}
                         </span>
                       </div>
                       <div className="text-text-secondary">
                         → {getPlayerFacingCorpsName(
                           formation.eliteLoanState.loaned_to_corps,
                           loadedGameState.formations,
-                          'Assigned command',
+                          t('formationDetail.assignedCommand'),
                         )}
                       </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? 'Recall failed'); })}
+                      onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? t('formationDetail.recallFailed')); })}
                       className="w-full px-2 py-1.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[11px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
                     >
-                      RECALL TO RESERVE
+                      {t('formationDetail.recallToReserve')}
                     </button>
                   </div>
                 ) : formation.eliteLoanState.in_cooldown ? (
                   <div className="px-2 py-1.5 bg-black/20 border border-panel-border/40 rounded text-[11px] text-text-secondary">
-                    COOLDOWN — returning to readiness
+                    {t('formationDetail.cooldownReturning')}
                   </div>
                 ) : (
                   <div className="px-2 py-1.5 bg-[#55d48a]/10 border border-[#55d48a]/30 rounded text-[11px] text-[#55d48a] font-semibold">
-                    READY — available for deployment
+                    {t('formationDetail.readyForDeployment')}
                   </div>
                 )}
               </div>
@@ -777,10 +778,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <div className="space-y-2">
                 {/* Layer 1: badge */}
                 <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                  <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Field Effectiveness</span>
+                  <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.fieldEffectiveness')}</span>
                   {isHome ? (
                     <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[10px] font-bold rounded border border-[#55d48a]/30 uppercase">
-                      Home Turf
+                      {t('formationDetail.homeTurf')}
                     </span>
                   ) : (
                     <span
@@ -790,7 +791,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         : 'bg-[#d45555]/10 text-[#d45555] border-[#d45555]/30'
                       }`}
                     >
-                      {effPct}% Eff{isElite ? ' (elite)' : ''}
+                      {t('formationDetail.effPercent', { percent: effPct.toString(), elite: isElite ? t('formationDetail.eliteParen') : '' })}
                     </span>
                   )}
                 </div>
@@ -799,19 +800,19 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 {!isHome && hops != null && (
                   <div className="px-2 py-1.5 bg-black/10 rounded border border-panel-border/20 text-[11px] space-y-1">
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary">Power at home (100%)</span>
+                      <span className="text-text-secondary">{t('formationDetail.powerAtHome')}</span>
                       <span className="text-[#55d48a] font-mono font-semibold">
                         {formation.personnel != null ? Math.round(formation.personnel).toLocaleString() : '—'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary">Power here ({effPct}%)</span>
+                      <span className="text-text-secondary">{t('formationDetail.powerHere', { percent: effPct.toString() })}</span>
                       <span className={`font-mono font-semibold ${effPct >= 90 ? 'text-[#d4d455]' : 'text-[#d45555]'}`}>
                         {formation.personnel != null ? Math.round(formation.personnel * (effPct / 100)).toLocaleString() : '—'}
                       </span>
                     </div>
                     <div className="text-[10px] text-text-secondary pt-0.5">
-                      {hops} hop{hops !== 1 ? 's' : ''} from home — unit cohesion and motivation degrade with distance.
+                      {t('formationDetail.hopsFromHome', { hops: hops.toString() })}
                     </div>
                   </div>
                 )}
@@ -822,7 +823,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {isBrigade && sameSectorList.length > 0 && (
               <div className="pt-2 border-t border-panel-border space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">Sector Assignment</span>
+                  <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.sectorAssignment')}</span>
                   {sectorOverrideId && (
                     <button
                       type="button"
@@ -833,7 +834,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       )}
                       className="text-[10px] text-[#d45555] hover:underline"
                     >
-                      Clear Override
+                      {t('formationDetail.clearOverride')}
                     </button>
                   )}
                 </div>
@@ -863,10 +864,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                           <span className="font-semibold truncate">{sector.display_name}</span>
                           <div className="flex items-center gap-1.5 shrink-0 ml-2">
                             {isCurrentOverride && (
-                              <span className="text-[9px] bg-accent-gold/20 text-accent-gold px-1 rounded border border-accent-gold/30 font-bold uppercase">Override</span>
+                              <span className="text-[9px] bg-accent-gold/20 text-accent-gold px-1 rounded border border-accent-gold/30 font-bold uppercase">{t('formationDetail.override')}</span>
                             )}
                             {isCurrentAutomatic && (
-                              <span className="text-[9px] text-text-secondary italic">current</span>
+                              <span className="text-[9px] text-text-secondary italic">{t('formationDetail.current')}</span>
                             )}
                             <span className="text-[10px] text-text-secondary">{sector.assigned_brigade_ids.length}b</span>
                           </div>
@@ -876,7 +877,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   })}
                 </div>
                 <div className="text-[10px] text-text-secondary px-1">
-                  Override is permanent. The sector commander will order the brigade to its new frontline position.
+                  {t('formationDetail.overridePermanentHelp')}
                 </div>
               </div>
             )}
@@ -885,7 +886,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Non-brigade: corps stance info placeholder */}
             {!isBrigade && formation.corpsStance && (
               <div className="text-xs space-y-1">
-                <span className="text-text-secondary">Corps Stance: </span>
+                <span className="text-text-secondary">{t('formationDetail.corpsStance')} </span>
                 <span className="text-text-primary font-semibold">{toTitleCase(formation.corpsStance)}</span>
               </div>
             )}
