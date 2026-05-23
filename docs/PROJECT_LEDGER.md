@@ -3,6 +3,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(roadmap): close stale GUI visual audit row
+
+**Type:** Roadmap/status reconciliation. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/README.md`, and the top-of-roadmap addenda already record the 2026-05-22 GUI visual audit queue as implemented through Batch H9, but the older master roadmap report table still described `docs/40_reports/GUI_VISUAL_AUDIT_2026-05-22.md` as a new active corrective queue.
+
+**Change:** Updated the master roadmap report table to mark the GUI visual audit implementation-closed and point readers at the implemented 20260522 GUI audit reports plus the audit-focused UI guard suite.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\gui_audit_label_discipline.test.ts tests\ui\gui_audit_dead_controls.test.ts tests\ui\warroom_shell_ownership.test.ts tests\ui\modal_palette_unification.test.ts tests\ui\stale_state_resets.test.ts tests\ui\gui_audit_polish_cleanup.test.ts tests\ui\command_briefing_banner_contract.test.ts tests\ui\supply_legend_overlap_contract.test.ts tests\ui\retired_chrome_removed.test.ts tests\ui_map_maplibre_dasharray_contract.test.ts --reporter=dot` PASS 30/30; `git diff --check`.
+
+**Roadmap delta:** Removes the stale active label for the closed GUI visual audit queue so future roadmap work can move to still-open non-calibration lanes.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify FactionState optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
