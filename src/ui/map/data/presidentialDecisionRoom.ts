@@ -251,37 +251,37 @@ function compareCandidates(a: CandidateCard, b: CandidateCard): number {
 function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCard, 'actionLabel' | 'navigationTarget'> {
   if (item.target.type === 'corps' && item.target.corpsId) {
     return {
-      actionLabel: 'Inspect Corps',
+      actionLabel: t('decisionRoom.action.inspectCorps'),
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: item.target.corpsId },
     };
   }
   if (item.target.type === 'operation') {
     const corpsId = item.target.operationKey?.split('|')[0] ?? item.corpsId ?? null;
     return {
-      actionLabel: 'Inspect Corps',
+      actionLabel: t('decisionRoom.action.inspectCorps'),
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId },
     };
   }
   if (item.target.type === 'sector' && item.corpsId) {
     return {
-      actionLabel: 'Inspect Corps',
+      actionLabel: t('decisionRoom.action.inspectCorps'),
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: item.corpsId },
     };
   }
   if (item.target.type === 'summary') {
     return {
-      actionLabel: 'War Summary',
+      actionLabel: t('decisionRoom.action.warSummary'),
       navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
     };
   }
   if (item.target.type === 'officer_events') {
     return {
-      actionLabel: 'Personnel',
+      actionLabel: t('decisionRoom.action.personnel'),
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
     };
   }
   return {
-    actionLabel: item.actionLabel ?? 'Review Briefing',
+    actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
     navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
   };
 }
@@ -290,23 +290,23 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const queue = state.presidentialReviewQueue;
   if (!queue || queue.pendingCount <= 0) return;
 
-  const evidence: string[] = [`${queue.pendingCount} pending`];
-  if (queue.eventDecisionCount > 0) evidence.push(`${queue.eventDecisionCount} event ${pluralize(queue.eventDecisionCount, 'decision')}`);
-  if (queue.commandInterpretationCount > 0) evidence.push(`${queue.commandInterpretationCount} command ${pluralize(queue.commandInterpretationCount, 'reaction')}`);
-  if (queue.personnelDirectiveCount > 0) evidence.push(`${queue.personnelDirectiveCount} personnel`);
-  if (queue.operationOpportunityCount > 0) evidence.push(`${queue.operationOpportunityCount} op ${pluralize(queue.operationOpportunityCount, 'dossier')}`);
+  const evidence: string[] = [t('decisionRoom.card.review.evidence.pending', { count: queue.pendingCount })];
+  if (queue.eventDecisionCount > 0) evidence.push(t('decisionRoom.card.review.evidence.eventDecision', { count: queue.eventDecisionCount }));
+  if (queue.commandInterpretationCount > 0) evidence.push(t('decisionRoom.card.review.evidence.commandReaction', { count: queue.commandInterpretationCount }));
+  if (queue.personnelDirectiveCount > 0) evidence.push(t('decisionRoom.card.review.evidence.personnel', { count: queue.personnelDirectiveCount }));
+  if (queue.operationOpportunityCount > 0) evidence.push(t('decisionRoom.card.review.evidence.opDossier', { count: queue.operationOpportunityCount }));
 
   cards.push({
     id: 'review:pending',
     category: 'decision',
     severity: toDecisionSeverity(state),
-    title: 'Presidential reviews pending',
+    title: t('decisionRoom.card.review.title'),
     explanation: queue.eventDecisionCount > 0
-      ? 'A decision queue item needs your response before the next turn can proceed.'
-      : 'Army HQ has unresolved command review work on the desk.',
-    sourceOwner: 'Presidential review queue',
-    sourceLabel: 'Army HQ Briefing',
-    actionLabel: 'Review Queue',
+      ? t('decisionRoom.card.review.explanation.blocking')
+      : t('decisionRoom.card.review.explanation.openWork'),
+    sourceOwner: t('decisionRoom.card.review.sourceOwner'),
+    sourceLabel: t('decisionRoom.source.armyHqBriefing'),
+    actionLabel: t('decisionRoom.action.reviewQueue'),
     evidence,
     navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     urgencySort: queue.eventDecisionCount > 0 ? 0 : 10,
@@ -323,15 +323,15 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     id: 'paramilitary:pending',
     category: 'decision',
     severity: 'blocking',
-    title: 'Paramilitary authorization pending',
-    explanation: 'Paramilitary deployment requests require an explicit presidential decision before the turn should advance.',
-    sourceOwner: 'Presidential Inbox',
-    sourceLabel: 'Paramilitary review',
-    actionLabel: 'Open Inbox',
+    title: t('decisionRoom.card.paramilitary.title'),
+    explanation: t('decisionRoom.card.paramilitary.explanation'),
+    sourceOwner: t('decisionRoom.card.paramilitary.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.paramilitary.sourceLabel'),
+    actionLabel: t('decisionRoom.action.openInbox'),
     evidence: [
-      `${requests.length} deployment ${pluralize(requests.length, 'request')}`,
-      `estimated strength ${totalStrength}`,
-      'war crimes risk',
+      t('decisionRoom.card.paramilitary.evidence.deploymentRequests', { count: requests.length }),
+      t('decisionRoom.card.paramilitary.evidence.estimatedStrength', { strength: totalStrength }),
+      t('decisionRoom.card.paramilitary.evidence.warCrimesRisk'),
     ],
     navigationTarget: { kind: 'inbox' },
     urgencySort: 0,
@@ -345,28 +345,28 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
 
   const existingIds = new Set(cards.map((card) => card.id));
   const cardSpecs: Record<string, {
-    title: string;
-    explanation: string;
-    sourceLabel: string;
-    actionLabel: string;
+    titleKey: MessageKey;
+    explanationKey: MessageKey;
+    sourceLabelKey: MessageKey;
+    actionLabelKey: MessageKey;
   }> = {
     peace_plan: {
-      title: 'Peace plan response pending',
-      explanation: 'A formal peace proposal still needs presidential review before the turn advances.',
-      sourceLabel: 'Peace proposal',
-      actionLabel: 'Open Inbox',
+      titleKey: 'decisionRoom.card.manifest.peacePlan.title',
+      explanationKey: 'decisionRoom.card.manifest.peacePlan.explanation',
+      sourceLabelKey: 'decisionRoom.card.manifest.peacePlan.sourceLabel',
+      actionLabelKey: 'decisionRoom.action.openInbox',
     },
     dayton_negotiation: {
-      title: 'Dayton negotiation pending',
-      explanation: 'The Dayton negotiation package requires a submitted presidential position.',
-      sourceLabel: 'Dayton talks',
-      actionLabel: 'Open Inbox',
+      titleKey: 'decisionRoom.card.manifest.dayton.title',
+      explanationKey: 'decisionRoom.card.manifest.dayton.explanation',
+      sourceLabelKey: 'decisionRoom.card.manifest.dayton.sourceLabel',
+      actionLabelKey: 'decisionRoom.action.openInbox',
     },
     convoy_decision: {
-      title: 'Humanitarian convoy decision pending',
-      explanation: 'A convoy request still needs an allow, block, or divert decision on the owning surface.',
-      sourceLabel: 'Convoy review',
-      actionLabel: 'Open Inbox',
+      titleKey: 'decisionRoom.card.manifest.convoy.title',
+      explanationKey: 'decisionRoom.card.manifest.convoy.explanation',
+      sourceLabelKey: 'decisionRoom.card.manifest.convoy.sourceLabel',
+      actionLabelKey: 'decisionRoom.action.openInbox',
     },
   };
 
@@ -382,12 +382,12 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
       id,
       category: 'decision',
       severity: 'blocking',
-      title: spec.title,
-      explanation: spec.explanation,
-      sourceOwner: 'Presidential decision manifest',
-      sourceLabel: spec.sourceLabel,
-      actionLabel: spec.actionLabel,
-      evidence: [`${blockingCount} pending ${pluralize(blockingCount, 'item')}`],
+      title: t(spec.titleKey),
+      explanation: t(spec.explanationKey),
+      sourceOwner: t('decisionRoom.card.manifest.sourceOwner'),
+      sourceLabel: t(spec.sourceLabelKey),
+      actionLabel: t(spec.actionLabelKey),
+      evidence: [t('decisionRoom.card.manifest.evidence.pendingItems', { count: blockingCount })],
       navigationTarget: { kind: 'inbox' },
       urgencySort: -1,
       sourceSort: `manifest:${family.id}`,
@@ -406,18 +406,18 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
     const evidence = [
       formatCounterOfferSplit(offer.proposedSplit),
       offer.rider,
-      offer.sourceCitation ? `Source ${offer.sourceCitation}` : null,
+      offer.sourceCitation ? t('decisionRoom.card.counterOffer.evidence.source', { source: offer.sourceCitation }) : null,
     ].filter((entry): entry is string => Boolean(entry));
 
     cards.push({
       id: `counter-offer:${offer.id}`,
       category: 'counter_offer',
       severity: 'blocking',
-      title: `Counter-offer from ${offer.author}`,
-      explanation: `${offer.planName} has a cited counter-proposal that needs presidential review before the docket is clean.`,
-      sourceOwner: 'Negotiation counter-offer docket',
+      title: t('decisionRoom.card.counterOffer.title', { author: offer.author }),
+      explanation: t('decisionRoom.card.counterOffer.explanation', { planName: offer.planName }),
+      sourceOwner: t('decisionRoom.source.counterOfferDocket'),
       sourceLabel: offer.planName,
-      actionLabel: 'Review Counter',
+      actionLabel: t('decisionRoom.action.reviewCounter'),
       evidence,
       navigationTarget: { kind: 'counter-offer', counterOfferId: offer.id },
       urgencySort: offer.createdTurn,
@@ -440,13 +440,13 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
   for (const opportunity of opportunities) {
     const expires = opportunity.expires_turn ?? LARGE_SORT;
     const required = opportunity.required_axes_total != null
-      ? `${opportunity.required_axes_green ?? 0}/${opportunity.required_axes_total} required axes`
+      ? t('decisionRoom.card.opportunity.evidence.requiredAxes', { green: opportunity.required_axes_green ?? 0, total: opportunity.required_axes_total })
       : null;
     const optional = opportunity.optional_axes_total != null
-      ? `${opportunity.optional_axes_green ?? 0}/${opportunity.optional_axes_total} optional axes`
+      ? t('decisionRoom.card.opportunity.evidence.optionalAxes', { green: opportunity.optional_axes_green ?? 0, total: opportunity.optional_axes_total })
       : null;
     const evidence = [
-      opportunity.expires_turn != null ? `Expires T${opportunity.expires_turn}` : 'Live dossier',
+      opportunity.expires_turn != null ? t('decisionRoom.card.opportunity.evidence.expires', { turn: opportunity.expires_turn }) : t('decisionRoom.card.opportunity.evidence.liveDossier'),
       required,
       optional,
     ].filter((entry): entry is string => Boolean(entry));
@@ -458,10 +458,10 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
         ? 'critical'
         : 'warning',
       title: opportunity.display_name,
-      explanation: opportunity.recommendation ?? opportunity.description ?? 'An operation opportunity dossier is ready for presidential review.',
-      sourceOwner: 'Operation opportunity dossiers',
-      sourceLabel: 'Army HQ Opportunity',
-      actionLabel: 'Review Dossier',
+      explanation: opportunity.recommendation ?? opportunity.description ?? t('decisionRoom.card.opportunity.fallbackExplanation'),
+      sourceOwner: t('decisionRoom.card.opportunity.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.opportunity.sourceLabel'),
+      actionLabel: t('decisionRoom.action.reviewDossier'),
       evidence,
       navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
       urgencySort: expires,
@@ -483,11 +483,11 @@ function addSupplyVisibilityCard(state: LoadedGameState, cards: CandidateCard[])
     title: view.headline,
     explanation:
       view.severity === 'critical'
-        ? 'Supply truth shows formations isolated or settlements at critical supply. Inspect the operational SITREP and map supply mode before advancing.'
-        : 'Supply truth shows brittle or cut corridors that could fail under further pressure. Review the operational SITREP.',
-    sourceOwner: 'Supply derivation',
-    sourceLabel: 'Operational SITREP',
-    actionLabel: 'War Summary',
+        ? t('decisionRoom.card.supply.explanation.critical')
+        : t('decisionRoom.card.supply.explanation.warning'),
+    sourceOwner: t('decisionRoom.card.supply.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.sitrep.title'),
+    actionLabel: t('decisionRoom.action.warSummary'),
     evidence: view.evidence,
     navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
     urgencySort: cardSeverity === 'critical' ? 0 : 5,
@@ -511,9 +511,9 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
     severity: cardSeverity,
     title: view.headline,
     explanation: view.rationale,
-    sourceOwner: 'Army HQ pushback',
-    sourceLabel: 'Decision Room',
-    actionLabel: 'Review Pushback',
+    sourceOwner: t('decisionRoom.card.pushback.sourceOwner'),
+    sourceLabel: t('decisionRoom.panel.title'),
+    actionLabel: t('decisionRoom.action.reviewPushback'),
     evidence: view.evidence,
     navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     urgencySort: cardSeverity === 'blocking' ? 0 : 5,
@@ -536,14 +536,14 @@ function addSitrepCards(state: LoadedGameState, cards: CandidateCard[]): void {
       id: `sitrep:${alert.id}`,
       category: 'operational',
       severity: alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info',
-      title: 'Operational SITREP',
+      title: t('decisionRoom.card.sitrep.title'),
       explanation: alert.text,
-      sourceOwner: 'Operational SITREP',
-      sourceLabel: 'War Summary',
-      actionLabel: 'War Summary',
+      sourceOwner: t('decisionRoom.card.sitrep.title'),
+      sourceLabel: t('decisionRoom.action.warSummary'),
+      actionLabel: t('decisionRoom.action.warSummary'),
       evidence: [
-        `${state.operationalSitrep?.front.exposedCount ?? 0} exposed fronts`,
-        `${state.operationalSitrep?.sustainment.criticalCount ?? 0} critical sustainment`,
+        t('decisionRoom.card.sitrep.evidence.exposedFronts', { count: state.operationalSitrep?.front.exposedCount ?? 0 }),
+        t('decisionRoom.card.sitrep.evidence.criticalSustainment', { count: state.operationalSitrep?.sustainment.criticalCount ?? 0 }),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
       urgencySort: 0,
@@ -571,7 +571,7 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       severity: item.severity === 'critical' ? 'critical' : item.severity === 'warning' ? 'warning' : 'info',
       title: item.title,
       explanation: item.detail,
-      sourceOwner: 'Command briefing',
+      sourceOwner: t('decisionRoom.card.briefing.sourceOwner'),
       sourceLabel: humanize(item.kind),
       actionLabel: action.actionLabel,
       evidence: [item.category ? humanize(item.category) : humanize(item.kind)],
@@ -616,15 +616,15 @@ function addHardTurnCards(
       id: `turn:${record.turn}:hard-turn`,
       category: 'turn',
       severity: costToCardSeverity(record.cost.severity),
-      title: `Hard turn: ${record.dateLabel}`,
+      title: t('decisionRoom.card.hardTurn.title', { dateLabel: record.dateLabel }),
       explanation: record.cost.reasons.slice(0, 3).join(' / '),
-      sourceOwner: 'Turn Aftermath records',
-      sourceLabel: `Turn ${record.turn}`,
-      actionLabel: 'Open Turn Record',
+      sourceOwner: t('decisionRoom.card.hardTurn.sourceOwner'),
+      sourceLabel: t('decisionRoom.card.hardTurn.sourceLabel', { turn: record.turn }),
+      actionLabel: t('decisionRoom.action.openTurnRecord'),
       evidence: [
-        `Net ${formatSigned(record.territory.friendlyNet)}`,
-        `${record.cost.friendlyMilitaryCasualties} casualties`,
-        `${record.cost.displacedThisTurn} displaced`,
+        t('decisionRoom.card.hardTurn.evidence.net', { net: formatSigned(record.territory.friendlyNet) }),
+        t('decisionRoom.card.hardTurn.evidence.casualties', { count: record.cost.friendlyMilitaryCasualties }),
+        t('decisionRoom.card.hardTurn.evidence.displaced', { count: record.cost.displacedThisTurn }),
       ],
       navigationTarget: { kind: 'army-hq-aftermath-record', turn: record.turn },
       urgencySort: -record.turn,
@@ -647,13 +647,13 @@ function addCampaignCostCard(
     severity: costToCardSeverity(campaignCost.severity),
     title: campaignCost.headline,
     explanation: campaignCost.briefing,
-    sourceOwner: 'Active campaign cost',
-    sourceLabel: 'Turn Aftermath archive',
-    actionLabel: 'Turn Records',
+    sourceOwner: t('decisionRoom.card.campaignCost.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.campaignCost.sourceLabel'),
+    actionLabel: t('decisionRoom.action.turnRecords'),
     evidence: [
-      `${campaignCost.recordCount} turns`,
-      `${campaignCost.totalFriendlyMilitaryCasualties} casualties`,
-      `${campaignCost.totalDisplaced} displaced`,
+      t('decisionRoom.card.campaignCost.evidence.turns', { count: campaignCost.recordCount }),
+      t('decisionRoom.card.campaignCost.evidence.casualties', { count: campaignCost.totalFriendlyMilitaryCasualties }),
+      t('decisionRoom.card.campaignCost.evidence.displaced', { count: campaignCost.totalDisplaced }),
     ],
     navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
     urgencySort: 0,
@@ -669,12 +669,12 @@ function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void 
     id: 'chronicle:review-memory',
     category: 'memory',
     severity: 'info',
-    title: 'Chronicle memory updated',
-    explanation: 'Review campaign memory and cost markers from the archive.',
-    sourceOwner: 'Chronicle',
-    sourceLabel: 'Campaign memory',
-    actionLabel: 'Show Chronicle',
-    evidence: [`${turnCount} recorded ${pluralize(turnCount, 'turn')}`],
+    title: t('decisionRoom.card.chronicle.title'),
+    explanation: t('decisionRoom.card.chronicle.explanation'),
+    sourceOwner: t('decisionRoom.source.chronicle'),
+    sourceLabel: t('decisionRoom.card.chronicle.sourceLabel'),
+    actionLabel: t('decisionRoom.action.showChronicle'),
+    evidence: [t('decisionRoom.card.chronicle.evidence.recordedTurns', { count: turnCount })],
     navigationTarget: { kind: 'chronicle' },
     urgencySort: -((state.latestTurnSummary?.turn ?? state.turn) ?? 0),
     sourceSort: 'chronicle',

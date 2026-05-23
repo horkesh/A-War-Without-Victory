@@ -509,6 +509,45 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.loopSteps.map((step) => step.label)).not.toContain('Execute');
   });
 
+  it('localizes Decision Room generated decision card prose in BCS mode', () => {
+    setLocale('bcs');
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 1,
+          eventDecisionCount: 1,
+          commandInterpretationCount: 1,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 1,
+        },
+        playerDecisionSummary: makePlayerDecisionSummary(),
+        pendingParamilitaryRequests: [
+          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+        ],
+        operationalSitrep: makeSitrep(),
+        latestTurnSummary: makeSummary({
+          turn: 24,
+          territory_net: { RBiH: -1 },
+          displacement_total: 1600,
+        }),
+        turnSummaries: [makeSummary({ turn: 23, territory_net: { RBiH: 1 } })],
+      }),
+    });
+
+    const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
+
+    expect(cardsById['review:pending'].title).toBe('Predsjednicki pregledi na cekanju');
+    expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednicki red pregleda');
+    expect(cardsById['review:pending'].evidence).toContain('2 na cekanju');
+    expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na cekanju');
+    expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zlocina');
+    expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na cekanju');
+    expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni SITREP');
+    expect(cardsById['chronicle:review-memory'].title).toBe('Pamcenje Hronike azurirano');
+    expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
+  });
+
   it('builds the full presidential product loop as handoffs to existing owners', () => {
     const state = makeState({
       presidentialReviewQueue: {

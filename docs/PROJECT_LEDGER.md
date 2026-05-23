@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Decision Room owned card prose
+
+**Type:** Presidential Decision Room generated-card prose localization slice. No card synthesis, card ordering, severity ranking, source grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.card.*` message keys and routed Decision Room-owned card titles, explanations, evidence rows, source owners, source labels, and action labels through the localization substrate. Source-provided external prose such as command briefing item text, live SITREP alert text, opportunity recommendations/descriptions, campaign-cost generated briefing lines, and Turn Aftermath cost reasons remains unchanged and separately scoped.
+
+**Determinism:** Renderer/read-model presentation only. Locale preference changes strings only; card IDs, card arrays, sort keys, grouping order, navigation targets, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts --reporter=dot` failed while BCS mode still emitted English Decision Room card titles. Green rerun passed 13/13. Related `npx.cmd vitest run tests\ui\presidential_decision_room.test.ts tests\ui\presidential_decision_room_panel_i18n.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 30/30. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/presidentialDecisionRoom.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_CARD_PROSE_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Decision Room read-model chrome
 
 **Type:** Presidential Decision Room read-model chrome localization slice. No card synthesis, card ordering, severity ranking, source-handoff grouping, navigation target, advance-readiness selection, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
