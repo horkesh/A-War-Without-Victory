@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Decision Room panel chrome
+
+**Type:** Army HQ Decision Room UI chrome localization slice. No Decision Room card synthesis, command-loop lane selection, product-loop ordering, advance-readiness selection, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `decisionRoom.panel.*` and `decisionRoom.category.counterOffer` message keys. `PresidentialDecisionRoomPanel` now localizes its title/header, advanced toggle, advanced desk metrics, command/product loop headings, lens/count chrome, dossier labels, source/advance/evidence labels, source handoff headings, inspection/review empty states, and category badge labels where the panel owns the label.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; Decision Room read-model arrays, sort order, navigation callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\presidential_decision_room_panel_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English Decision Room panel chrome. Green rerun passed 1/1. Related `npx.cmd vitest run tests\ui\presidential_decision_room_panel_i18n.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 28/28. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/presidential_decision_room_panel_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_DECISION_ROOM_PANEL_CHROME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Decision Room advance readiness
 
 **Type:** Decision Room/pre-advance read-model localization slice. No Decision Room card selection, advance-gate blocking logic, source-handoff grouping, navigation target, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
