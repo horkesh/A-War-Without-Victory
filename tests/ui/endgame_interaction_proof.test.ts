@@ -246,6 +246,10 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Teritorija')).toBeDefined();
+        expect(screen.getByText('Cijena rata i historijsko poredjenje')).toBeDefined();
+        expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
+        expect(screen.getByText('Trajanje rata')).toBeDefined();
+        expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
 
         fireEvent.click(screen.getByText('VRS'));
 

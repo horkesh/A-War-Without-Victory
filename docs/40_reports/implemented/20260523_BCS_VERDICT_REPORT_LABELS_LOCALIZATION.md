@@ -28,4 +28,4 @@ This is presentation-only. It does not change verdict generation, score math, Co
 
 ## Remaining Work
 
-Verdict localization still needs smaller slices for cinematic verdict copy, source-provided dimension label mapping, WarCostSummary labels/body, milestone rows, share summary copy, Dayton detail labels, and authored verdict prose.
+Verdict localization still needs smaller slices for cinematic verdict copy, source-provided dimension label mapping, milestone rows, share summary copy, Dayton detail labels, and authored verdict prose.
