@@ -16,7 +16,7 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "HRHB",
-    "bot_response_logic": "capital_based",
+    "bot_response_logic": "historical",
     "pressure": {
       "base_rate": 2,
       "threshold": 4,
@@ -3171,7 +3171,7 @@
     "once": true,
     "requires_player_response": true,
     "responding_faction": "HRHB",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
     "pressure": {
       "base_rate": 1,
       "threshold": 11,

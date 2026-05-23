@@ -300,11 +300,21 @@
       {
         "kind": "morale_change",
         "faction": "HRHB",
-        "delta": 3
+        "delta": 8
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": 15
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 5
       },
       {
         "kind": "narrative",
-        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established."
+        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established. HVO units rebuild cohesion under Federation military integration; HRHB-RBiH supply pipelines open."
       }
     ],
     "response_options": [
@@ -381,7 +391,7 @@
     },
     "once": true,
     "responding_faction": "RBiH",
-    "bot_response_logic": "strategic_weighted",
+    "bot_response_logic": "historical",
     "requires_player_response": true,
     "priority": 50,
     "auto_resolve_turns": 2,
