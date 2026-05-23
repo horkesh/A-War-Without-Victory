@@ -251,6 +251,13 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
         expect(screen.getByText('Pirov rezultat')).toBeDefined();
         expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
+        expect(screen.queryByText('Military Credibility')).toBeNull();
+        expect(screen.getByText('Vojni kredibilitet')).toBeDefined();
+        expect(screen.getByText('Teritorijalni legitimitet')).toBeDefined();
+        expect(screen.getByText('Medjunarodni polozaj')).toBeDefined();
+        expect(screen.getByText('Povjerenje patrona')).toBeDefined();
+        expect(screen.getByText('Unutrasnja kohezija')).toBeDefined();
+        expect(screen.getByText('Pregovaracka poluga')).toBeDefined();
         expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Teritorija')).toBeDefined();
         expect(screen.getByText('Cijena rata i historijsko poredjenje')).toBeDefined();

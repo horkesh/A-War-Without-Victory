@@ -825,6 +825,19 @@ export function FactionReport({
 // Sub-components
 // ═══════════════════════════════════════════════════════════════════════════
 
+function formatDimensionLabel(dg: DimensionGrade): string {
+    const labels: Record<string, MessageKey> = {
+        military_credibility: 'verdict.dimension.militaryCredibility',
+        territorial_legitimacy: 'verdict.dimension.territorialLegitimacy',
+        international_standing: 'verdict.dimension.internationalStanding',
+        patron_confidence: 'verdict.dimension.patronConfidence',
+        internal_cohesion: 'verdict.dimension.internalCohesion',
+        negotiating_leverage: 'verdict.dimension.negotiatingLeverage',
+    };
+    const key = labels[dg.dimension];
+    return key ? t(key) : dg.label;
+}
+
 function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: string }) {
     const gradeColor = GRADE_COLORS[dg.grade] ?? '#9a9080';
     const barWidth = Math.max(2, Math.min(100, dg.score));
@@ -832,7 +845,7 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
     return (
         <div className="flex items-center gap-3">
             <div className="w-[140px] text-[10px] text-text-secondary truncate">
-                {dg.label}
+                {formatDimensionLabel(dg)}
             </div>
             <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
                 <div
