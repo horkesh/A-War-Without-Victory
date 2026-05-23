@@ -2,6 +2,7 @@ import type { CostLedger, CostLedgerFinding, CostLedgerFindingCategory, CostLedg
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
 import type { GameVerdict, OutcomeClass } from '../../../state/negotiation_types.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { t, type MessageKey } from '../i18n';
 
 export type VerdictSceneTone = 'somber' | 'pyrrhic' | 'catastrophic' | 'early_peace';
 
@@ -33,14 +34,14 @@ export interface VerdictSceneInput {
 
 const CANONICAL_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 
-const OUTCOME_LABELS: Record<OutcomeClass, string> = {
-    strategic_success: 'Strategic Success',
-    survival: 'Survival',
-    negotiated_escape: 'Negotiated Escape',
-    pyrrhic_success: 'Pyrrhic Success',
-    hollow_victory: 'Hollow Victory',
-    failure: 'Failure',
-    collapse: 'Collapse',
+const OUTCOME_LABELS: Record<OutcomeClass, MessageKey> = {
+    strategic_success: 'verdict.outcome.strategicSuccess',
+    survival: 'verdict.outcome.survival',
+    negotiated_escape: 'verdict.outcome.negotiatedEscape',
+    pyrrhic_success: 'verdict.outcome.pyrrhicSuccess',
+    hollow_victory: 'verdict.outcome.hollowVictory',
+    failure: 'verdict.outcome.failure',
+    collapse: 'verdict.outcome.collapse',
 };
 
 const FINDING_SEVERITY_RANK: Record<CostLedgerFindingSeverity, number> = {
@@ -58,7 +59,7 @@ const FINDING_CATEGORY_RANK: Record<CostLedgerFindingCategory, number> = {
 };
 
 export function formatVerdictOutcomeClass(outcomeClass: OutcomeClass | undefined): string {
-    return outcomeClass ? OUTCOME_LABELS[outcomeClass] : 'Unknown';
+    return outcomeClass ? t(OUTCOME_LABELS[outcomeClass]) : t('verdict.outcome.unknown');
 }
 
 function getFactionOrderKey(faction: string): number {

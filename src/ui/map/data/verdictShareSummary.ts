@@ -7,6 +7,7 @@ import {
     getVerdictFactionOrder,
     type VerdictSceneInput,
 } from './verdictScene.js';
+import { t } from '../i18n';
 
 export interface VerdictShareSummaryInput extends VerdictSceneInput {
     verdict?: GameVerdict;
@@ -16,48 +17,50 @@ export interface VerdictShareSummaryInput extends VerdictSceneInput {
 
 function formatOutcomeLine(input: VerdictShareSummaryInput): string {
     const scene = buildVerdictScene(input);
-    if (!input.verdict || !scene.focusFaction) return 'Outcome: No verdict packet available';
+    if (!input.verdict || !scene.focusFaction) return t('verdict.share.outcomeMissing');
 
     const factionVerdict = input.verdict.faction_verdicts[scene.focusFaction];
-    return [
-        `Outcome: ${scene.focusFaction} - ${scene.focusOutcomeLabel}`,
-        `(Grade ${factionVerdict.grade}, Pyrrhic Score ${factionVerdict.pyrrhic_score.toFixed(1)})`,
-    ].join(' ');
+    return t('verdict.share.outcomeLine', {
+        faction: scene.focusFaction,
+        outcome: scene.focusOutcomeLabel,
+        grade: factionVerdict.grade,
+        score: factionVerdict.pyrrhic_score.toFixed(1),
+    });
 }
 
 function formatWarEndLine(verdict: GameVerdict | undefined): string {
-    if (!verdict) return 'War ended: Unknown end state';
-    return `War ended: ${verdict.outcome_label}, week ${verdict.duration_weeks}`;
+    if (!verdict) return t('verdict.share.warEndedMissing');
+    return t('verdict.share.warEndedLine', { outcome: verdict.outcome_label, week: verdict.duration_weeks });
 }
 
 function formatCostLine(input: VerdictShareSummaryInput): string {
-    if (!input.costLedger) return 'Cost Ledger: No cost ledger packet available';
+    if (!input.costLedger) return t('verdict.share.costMissing');
     const scene = buildVerdictScene(input);
-    return `Cost Ledger: ${scene.costEmphasis.title} - ${scene.costEmphasis.text}`;
+    return t('verdict.share.costLine', { title: scene.costEmphasis.title, text: scene.costEmphasis.text });
 }
 
 function formatComparisonLine(input: VerdictShareSummaryInput): string {
-    if (!input.historicalComparison) return 'Historical comparison: No historical comparison packet available';
+    if (!input.historicalComparison) return t('verdict.share.comparisonMissing');
     const callout = input.historicalComparison.divergence_notes
         .find(note => note.trim().length > 0)
-        ?? 'No divergence notes available';
-    return `Historical comparison: ${callout}`;
+        ?? t('verdict.share.noDivergenceNotes');
+    return t('verdict.share.comparisonLine', { callout });
 }
 
 function formatFactionOutcomes(verdict: GameVerdict | undefined): string {
     const factions = getVerdictFactionOrder(verdict);
-    if (factions.length === 0 || !verdict) return 'Faction outcomes: No faction verdicts available';
+    if (factions.length === 0 || !verdict) return t('verdict.share.factionOutcomesMissing');
 
     const outcomes = factions.map((faction) => {
         const factionVerdict = verdict.faction_verdicts[faction];
         return `${faction} ${formatVerdictOutcomeClass(factionVerdict.outcome_class)}`;
     });
-    return `Faction outcomes: ${outcomes.join('; ')}`;
+    return t('verdict.share.factionOutcomesLine', { outcomes: outcomes.join('; ') });
 }
 
 export function buildVerdictShareSummary(input: VerdictShareSummaryInput): string {
     return [
-        'A War Without Victory - Verdict',
+        t('verdict.share.title'),
         formatOutcomeLine(input),
         formatWarEndLine(input.verdict),
         formatCostLine(input),

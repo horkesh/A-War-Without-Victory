@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildVerdictShareSummary } from '../../src/ui/map/data/verdictShareSummary';
+import { setLocale } from '../../src/ui/map/i18n';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 import type { FactionVerdict, GameVerdict, OutcomeClass } from '../../src/state/negotiation_types';
@@ -84,6 +86,10 @@ function makeComparison(): ComparisonResult {
 }
 
 describe('buildVerdictShareSummary', () => {
+    afterEach(() => {
+        setLocale('en');
+    });
+
     it('generates deterministic plain text with outcome, cost ledger, and historical comparison', () => {
         const input = {
             verdict: makeVerdict(),
@@ -115,5 +121,23 @@ describe('buildVerdictShareSummary', () => {
             'Historical comparison: No historical comparison packet available',
             'Faction outcomes: No faction verdicts available',
         ].join('\n'));
+    });
+
+    it('generates localized BCS wrapper text while preserving source-authored prose', () => {
+        setLocale('bcs');
+
+        const text = buildVerdictShareSummary({
+            verdict: makeVerdict(),
+            costLedger: makeCostLedger(),
+            historicalComparison: makeComparison(),
+            focusFaction: 'RBiH',
+        });
+
+        expect(text).toContain('A War Without Victory - Presuda');
+        expect(text).toContain('Ishod: RBiH - Pirov uspjeh (Ocjena C, Pirov rezultat 49.0)');
+        expect(text).toContain('Rat zavrsen: Dayton reckoning, sedmica 188');
+        expect(text).toContain('Knjiga cijene: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.');
+        expect(text).toContain('Historijsko poredjenje: War lasted 12 weeks shorter than the historical 188 weeks');
+        expect(text).toContain('Ishodi frakcija: RBiH Pirov uspjeh; RS Neuspjeh; HRHB Pregovaracki izlaz');
     });
 });

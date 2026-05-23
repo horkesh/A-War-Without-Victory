@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Verdict share summary
+
+**Type:** Verdict share-summary wrapper/outcome-label localization slice. No simulation behavior, combat math, operation behavior, verdict scene selection, Cost Ledger generation, historical comparison math, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `verdict.share.*` and `verdict.outcome.*` message keys. `buildVerdictShareSummary(...)` now localizes deterministic wrapper lines, missing-packet fallbacks, grade/score labels, and faction-outcomes labels; `formatVerdictOutcomeClass(...)` now uses localized outcome-class labels. Cost Ledger finding prose, historical divergence notes, source verdict outcome labels, faction IDs, and source-provided prose remain unchanged.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state; no save/state schema, verdict scene selection, Cost Ledger output, historical comparison output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\verdict_share_summary.test.ts --reporter=dot` failed while BCS mode still rendered `A War Without Victory - Verdict`. Green `npx.cmd vitest run tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 7/7 after implementation. Expanded localization/endgame pack `npx.cmd vitest run tests\ui\endgame_interaction_proof.test.ts tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts tests\ui\verdict_share_summary.test.ts tests\ui\verdict_scene.test.ts tests\ui\cinematic_verdict.test.ts --reporter=dot` passed 46/46. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/verdictShareSummary.ts`, `src/ui/map/data/verdictScene.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/verdict_share_summary.test.ts`, `docs/40_reports/implemented/20260523_BCS_VERDICT_SHARE_SUMMARY_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Verdict Dayton labels
 
 **Type:** Rich `VerdictScreen` FactionReport Dayton-label localization slice. No simulation behavior, combat math, operation behavior, Dayton negotiation result data, patron override logic, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
