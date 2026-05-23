@@ -194,13 +194,13 @@ import {
 } from './renderChurnGuards';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
-// West bound widened from 15.7243 → 15.45 (≈+25 km margin) so the camera can
-// recenter on Bihać (≈15.87°E, 44.82°N) without the city sliding off-screen.
-// Prior bound left ~12 km between Bihać and the panning edge — at default zoom
-// the city was unreachable. East/N/S bounds unchanged.
+// Bounds widened both west and east so the camera can recenter on Bihać
+// (≈15.87°E, 44.82°N) AND on the Drina-valley settlements (~19.55°E in the
+// Bijeljina / Brčko / east Foča area) without those cities sliding off-screen.
+// Originally 15.7243→19.62278; widened to 15.45→19.92 (~30 km margin each side).
 const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
   [15.45, 42.55719],
-  [19.62278, 45.270542],
+  [19.92, 45.270542],
 ];
 const TACTICAL_MAP_PITCH_DEGREES = 30;
 const DEFAULT_ZOOM = 8;

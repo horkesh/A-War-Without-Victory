@@ -340,7 +340,13 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
         }}
       >
         {model ? (
-          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', width: '100%', height: '100%' }}>
+          // viewBox cropped to the projector's actual output region (makeProjector
+          // produces content in [4..96]×[20..80] of a 100×100 space). Cropping
+          // removes the ~40% blank padding that made the map look small on the
+          // corkboard. preserveAspectRatio="xMidYMid slice" now expands content
+          // to fill the container, cropping at the edges if container aspect
+          // doesn't match — a slight crop is preferable to large blank borders.
+          <svg viewBox="4 20 92 60" preserveAspectRatio="xMidYMid slice" style={{ display: 'block', width: '100%', height: '100%' }}>
             <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.76)" />
             <g fill="none" stroke="rgba(66,58,45,0.18)" strokeWidth="0.18">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
