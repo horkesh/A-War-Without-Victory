@@ -1,4 +1,39 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] fix(ui): warroom corkboard map + whiteboard date + reachable map bounds
+
+**Type:** UI tuning only. No simulation behavior, scenario data, save schema, save migration, event ordering, OOB, combat outputs, or calibration values changed. Affects desktop GUI and main map camera limits only.
+
+**Why:** User feedback on warroom + main map:
+1. Bihać region (≈15.87°E) was unreachable on the main map — recent pan-bound tightening left only ~12 km between the city and the west pan limit, so the camera could not recenter on it.
+2. Drina valley front (~19.55°E around Bijeljina/Brčko/east Foča) had the same problem on the east side (~5 km margin).
+3. Whiteboard date on the warroom backplate read as a UI label rather than a hand-scribbled marker.
+4. Corkboard map appeared small inside its frame, leaving large empty padding.
+
+**Change — commits `3a5590bd` (first pass) and `7f5c7fd5` (follow-up):**
+
+- `src/ui/map/map/MapContainer.tsx` — `BOSNIA_MAX_BOUNDS` widened both west and east:
+  - West: 15.7243°E → 15.45°E (≈+30 km margin so Bihać can be centered)
+  - East: 19.62278°E → 19.92°E (≈+30 km margin so Drina-valley OSIDs can be centered)
+  - N/S bounds unchanged
+- `src/ui/map/components/warroom/WarroomShellLayer.tsx` — `WarroomDateBoard` style:
+  - `color: rgba(28,84,172,0.86)` → `rgba(15,32,70,0.92)` (dark navy ink)
+  - `fontSize: clamp(10px, 1.65vw, 29px)` → `clamp(7px, 1.05vw, 18px)` (smaller)
+  - `fontWeight: 700` → `600`
+  - `textShadow` removed (was a faint white glow)
+- `src/ui/map/components/warroom/WarroomShellLayer.tsx` — `WarroomProjectedMap` SVG viewBox cropped to actual projected content:
+  - `viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"` → `viewBox="4 20 92 60" preserveAspectRatio="xMidYMid slice"`
+  - The projector only draws into a 92×60 inner region of a 100×100 viewBox (because Bosnia is wider than tall and `makeProjector` uses `min(92/rangeX, 84/rangeY)` as scale). Prior config wasted ~40% of the container as blank padding. Cropped viewBox + slice makes the map fill the container edge-to-edge.
+- `data/ui/hq_rbih_clickable_regions.json` `desk_map` region — bounds expanded ~15% (854×576/602×325 → 809×552/693×374) with polygon scaled accordingly. Stays within the corkboard area in the warroom backplate art.
+- `data/ui/hq_rs_clickable_regions.json` `desk_map` region — same ~15% expansion (925×502/518×315 → 886×479/596×362).
+
+**Verification:** Typecheck clean on changed files (pre-existing `OperationsSection.tsx` + `ArmyHQCorpsCard.tsx` i18n surface errors are unrelated, see `SESSION_HANDOFF_2026-05-23.md` §1). No engine, sim, scenario, or save-shape changes. JSON validated for both region files.
+
+**Branch note:** Commit `3a5590bd` landed on `codex/localization-complete-2026-05-23`; commit `7f5c7fd5` landed on `main` because an external process switched branches between commits. Both commits are isolated UI tweaks and apply cleanly to either branch — flagged for Codex during merge per `SESSION_HANDOFF_2026-05-23.md`.
+
+**Reports:** `docs/40_reports/SESSION_HANDOFF_2026-05-23.md` (companion session-end doc covers full session context).
+
+---
+
 ## [2026-05-23] docs(handoff): commit Claude engine packet reports
 
 **Type:** Documentation and handoff reconciliation only. No simulation behavior, scenario data, save schema, generated saves, combat outputs, calibration values, event ordering, or UI behavior changed.
