@@ -478,8 +478,9 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         const parent = new Map<string, string>();
         const queue: string[] = [loc];
         let targetFound: string | null = null;
-        while (queue.length > 0 && !targetFound) {
-            const curr = queue.shift()!;
+        let head = 0;
+        while (head < queue.length && !targetFound) {
+            const curr = queue[head++]!;
             const neighbors = adjacency.get(curr as Osid) ?? [];
             for (const n of neighbors) {
                 if (visited.has(n)) continue;

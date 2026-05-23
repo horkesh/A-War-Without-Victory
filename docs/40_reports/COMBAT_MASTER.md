@@ -6,6 +6,16 @@
 
 ---
 
+## 2026-05-23: Combat Evaluator BFS Queue Cursor
+
+**Change:** `evaluateReturnToCorps(...)` in `src/sim/combat/bot_brigade_eval_front.ts` now uses a head cursor for its friendly-territory BFS back to own-corps territory.
+
+**Determinism:** Queue insertion order, adjacency iteration, target selection, and walk-back behavior are unchanged. This is compute-only and does not alter movement-order semantics.
+
+**Report:** [implemented/20260523_COMBAT_EVALUATOR_BFS_QUEUE_CURSOR.md](implemented/20260523_COMBAT_EVALUATOR_BFS_QUEUE_CURSOR.md)
+
+---
+
 ## 2026-05-23: Combat Graph BFS Queue Cursor
 
 **Change:** Six FIFO BFS helpers in combat graph and rear-pocket support now use head cursors instead of `Array.shift()`: `bfsReachable(...)`, optimized/legacy `analyzeFactionGraph(...)` pocket clustering, `isSettlementSetContiguous(...)`, `consolidateRearPockets(...)`, and `buildFriendlyComponentsLocal(...)`.

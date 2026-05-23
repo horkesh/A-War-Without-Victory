@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(combat): use cursor in return-to-corps BFS
+
+**Type:** Deterministic bot-order evaluator performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** The remaining live combat FIFO queue-shift candidate was the return-to-corps evaluator BFS in `bot_brigade_eval_front.ts`. This path searches friendly territory for a first step back toward own-corps territory; it can use the same deterministic head-cursor dequeue pattern without changing traversal or parent-map semantics.
+
+**Change:** `src/sim/combat/bot_brigade_eval_front.ts` now uses `let head = 0; while (head < queue.length && !targetFound) { const curr = queue[head++]!; ... }` in the return-to-corps BFS. `tests/combat_movement_queue_cursor.test.ts` adds a static guard for that region.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or output-schema change. Queue insertion order, adjacency iteration, target selection, and walk-back behavior are unchanged.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\combat_movement_queue_cursor.test.ts --reporter=dot` failed before implementation because the return-to-corps BFS region still contained `.shift()`. After implementation, focused evaluator tests passed 36/36: `tests\combat_movement_queue_cursor.test.ts`, `tests\brigade_front_distribution.test.ts`, and `tests\brigade_home_return.test.ts`. Source grep found no `.shift()` in `src\sim\combat\bot_brigade_eval_front.ts`. `npm.cmd run typecheck` passed. Fresh 40w run `runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n5` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with all scenarios matching. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_COMBAT_EVALUATOR_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Closes the last reviewed live combat FIFO BFS queue-shift site. Remaining live `src/sim/combat` `.shift()` sites are semantic queues or priority-style queues and should not be converted without a separate design/profiling pass.
+
+---
+
 ## [2026-05-23] perf(combat): use head cursors in graph BFS queues
 
 **Type:** Deterministic combat graph performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
