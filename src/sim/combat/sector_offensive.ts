@@ -55,7 +55,6 @@ import type {
     FormationState,
     GameState,
     OperationAxis,
-    SettlementId,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -68,6 +67,7 @@ import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
 import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
+import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
@@ -361,10 +361,7 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
 
         // Issue column march toward home_osid (the movement system will BFS there)
         const movementOrders = state.military.brigade_movement_orders ?? (state.military.brigade_movement_orders = {});
-        movementOrders[bid] = {
-            destination_sids: [homeOsid as SettlementId],
-            stance: 'column',
-        } as { destination_sids: SettlementId[] };
+        movementOrders[bid] = createColumnMovementOrder(homeOsid);
     }
 }
 

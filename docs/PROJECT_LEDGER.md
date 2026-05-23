@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] refactor(strict-null): centralize column movement order shape
+
+**Type:** Strict-null hygiene and movement-order contract cleanup. No scenario data, combat math, movement behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** `BrigadeMovementOrder.stance` is intentionally optional, but column-march producers repeated local `destination_sids` shape casts. That duplicated the movement-order boundary and made future optional-field review noisier without changing any runtime semantics.
+
+**Change:** Added `createColumnMovementOrder(destination)` in `src/sim/combat/brigade_movement_order_helpers.ts`, returning the existing `BrigadeMovementOrder` payload with `destination_sids: [destination]` and `stance: 'column'`. Updated `brigade_front_distribution.ts`, `brigade_home_return.ts`, `commander_march_correction.ts`, and `sector_offensive.ts` to use the helper. Added `tests/brigade_movement_order_helper.test.ts` to prevent reintroducing those local column-order casts.
+
+**Determinism / output impact:** Type-boundary cleanup only. The emitted movement-order fields and values are unchanged, and the optional `stance` contract remains intact. No pathfinding, staging, operation lifecycle, save/default, randomness, timestamp, cache, or output-schema behavior changed.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\brigade_movement_order_helper.test.ts --reporter=dot` failed before implementation because movement producers still contained local `destination_sids` shape casts. After implementation, the focused movement/sector pack passed 61/61: `tests\brigade_movement_order_helper.test.ts`, `tests\osid_column_movement.test.ts`, `tests\seam_a_isolation_guard.test.ts`, `tests\sector_frontline_truth.test.ts`, and `tests\tooth_guard.test.ts`. Strict-null guard passed 92/92 with `tests\strict_null_inventory_progress.test.ts`; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` all passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md`.
+
+**Roadmap delta:** Keeps `BrigadeMovementOrder.stance` optional while centralizing column-order construction for future optional-field review. Any future requirement to make `stance` mandatory still needs save/default/migration evidence.
+
+---
+
 ## [2026-05-23] refactor(strict-null): narrow active formation spawn directive
 
 **Type:** Strict-null hygiene and directive-boundary type cleanup. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
