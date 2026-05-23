@@ -112,6 +112,11 @@ export const enMessages = {
     'gameOver.viewYourWar': 'View Your War',
     'gameOver.newGame': 'New Game',
     'gameOver.loadSave': 'Load Save',
+    'verdict.lowerSection.report': 'Report',
+    'verdict.lowerSection.reckoning': 'Reckoning',
+    'verdict.lowerSection.codex': 'Codex',
+    'verdict.lowerSection.replay': 'Replay',
+    'verdict.footer.tagline': 'The least bad version of a tragedy',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

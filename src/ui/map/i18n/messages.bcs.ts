@@ -113,4 +113,9 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'gameOver.viewYourWar': 'Pogledaj svoj rat',
     'gameOver.newGame': 'Nova igra',
     'gameOver.loadSave': 'Ucitaj snimljenu igru',
+    'verdict.lowerSection.report': 'Izvjestaj',
+    'verdict.lowerSection.reckoning': 'Obracun',
+    'verdict.lowerSection.codex': 'Kodeks',
+    'verdict.lowerSection.replay': 'Repriza',
+    'verdict.footer.tagline': 'Najmanje losa verzija tragedije',
 };

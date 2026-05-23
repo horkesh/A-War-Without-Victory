@@ -266,11 +266,11 @@ const GRADE_COLORS: Record<string, string> = {
 
 type VerdictLowerSection = 'report' | 'reckoning' | 'codex' | 'replay';
 
-const LOWER_SECTION_LABELS: Record<VerdictLowerSection, string> = {
-    report: 'Report',
-    reckoning: 'Reckoning',
-    codex: 'Codex',
-    replay: 'Replay',
+const LOWER_SECTION_LABEL_KEYS: Record<VerdictLowerSection, MessageKey> = {
+    report: 'verdict.lowerSection.report',
+    reckoning: 'verdict.lowerSection.reckoning',
+    codex: 'verdict.lowerSection.codex',
+    replay: 'verdict.lowerSection.replay',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -281,6 +281,7 @@ export function VerdictScreen() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
+    useLocale();
     const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
     const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
 
@@ -400,7 +401,7 @@ export function VerdictScreen() {
                                             }`}
                                             aria-pressed={active}
                                         >
-                                            {LOWER_SECTION_LABELS[section]}
+                                            {t(LOWER_SECTION_LABEL_KEYS[section])}
                                         </button>
                                     );
                                 })}
@@ -530,27 +531,27 @@ export function VerdictScreen() {
                 {/* Footer */}
                 <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
                     <div className="mb-2 text-center text-[9px] italic text-text-secondary/60 sm:mb-3">
-                        The least bad version of a tragedy
+                        {t('verdict.footer.tagline')}
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <button
                             onClick={() => useGameStore.getState().setWrappedOpen(true)}
                             className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
-                            View Your War
+                            {t('gameOver.viewYourWar')}
                         </button>
                         <button
                             onClick={() => window.location.reload()}
                             className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
-                            New Game
+                            {t('gameOver.newGame')}
                         </button>
                         {ipc.isAvailable && (
                             <button
                                 onClick={() => ipc.loadStateDialog?.()}
                                 className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                             >
-                                Load Save
+                                {t('gameOver.loadSave')}
                             </button>
                         )}
                     </div>

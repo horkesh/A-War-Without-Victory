@@ -231,6 +231,18 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
         expect(screen.getByText(/War Cost/)).toBeDefined();
     });
+
+    it('renders localized rich verdict chrome when BCS is selected', () => {
+        setLocale('bcs');
+
+        renderVS();
+
+        expect(screen.getByRole('button', { name: 'Izvjestaj' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Obracun' })).toBeDefined();
+        expect(screen.getByText('Najmanje losa verzija tragedije')).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
+    });
 });
 
 // ── APP-ROUTE PROOF: Endgame reachability ───────────────────────────────────
