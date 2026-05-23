@@ -547,6 +547,39 @@ interface HistoricalControlDeltaRow {
     delta: number;
 }
 
+interface OsidPairMatchRow {
+    controller: string;
+    sim_count: number;
+    painted_count: number;
+    correctly_placed: number;
+    /** correctly_placed / max(sim_count, painted_count) — spatial precision for this faction. */
+    accuracy: number;
+}
+
+/**
+ * Per-OSID spatial-accuracy diagnostic — complements the faction-count delta
+ * (`HistoricalControlAlignmentDiagnostics.counts_by_controller`) which only
+ * measures whether sim and painted have the SAME TOTAL per faction, not whether
+ * they have the SAME OSIDs.
+ *
+ * Two runs can have identical count deltas while one is spatially correct
+ * (right factions in right places) and the other is spatially wrong (right
+ * counts via the wrong captures). This metric distinguishes them.
+ */
+interface OsidPairMatchDiagnostics {
+    reference_key: string;
+    /** OSIDs present in BOTH the sim final state and the painted reference. */
+    total_osids: number;
+    /** Of those, OSIDs where sim controller === painted controller. */
+    matched_osids: number;
+    /** matched_osids / total_osids ∈ [0, 1]. */
+    match_percentage: number;
+    /** Per-faction accuracy breakdown. */
+    per_faction: OsidPairMatchRow[];
+    /** First N OSID mismatches for debugging — capped to keep run_summary readable. */
+    sample_mismatches: Array<{ osid: string; sim: string; painted: string }>;
+}
+
 interface HistoricalControlAlignmentDiagnostics {
     reference_key: string;
     reference_total: number;
@@ -620,6 +653,66 @@ async function loadPaintedControlReferenceSnapshot(
         municipality_id: osid.startsWith('op:') ? (osid.split(':')[1] ?? null) : null,
         controller: bySettlement[osid] ?? null,
     }));
+}
+
+/**
+ * Compute per-OSID spatial-match diagnostic. For each OSID present in BOTH
+ * the sim final state and the painted reference, check whether the sim
+ * controller equals the painted controller. Counts matched + per-faction
+ * accuracy + samples first 20 mismatches for debugging.
+ *
+ * Wave 27 (2026-05-23) added to complement the count-delta metric. Two runs
+ * can have identical count deltas while one is spatially correct and the
+ * other isn't — this metric makes the difference visible.
+ */
+function computeOsidPairMatchDiagnostics(
+    final: ControlKey[],
+    reference: ControlKey[],
+    referenceKey: string
+): OsidPairMatchDiagnostics {
+    const refByOsid = new Map(reference.map((r) => [r.settlement_id, r.controller ?? 'null']));
+    let total = 0;
+    let matched = 0;
+    const perFaction = new Map<string, { sim: number; painted: number; matched: number }>();
+    const mismatches: Array<{ osid: string; sim: string; painted: string }> = [];
+    const finalSorted = [...final].sort((a, b) => strictCompare(a.settlement_id, b.settlement_id));
+    for (const row of finalSorted) {
+        const ref = refByOsid.get(row.settlement_id);
+        if (ref === undefined) continue;
+        total++;
+        const sim = row.controller ?? 'null';
+        const painted = ref;
+        for (const c of [sim, painted]) {
+            if (!perFaction.has(c)) perFaction.set(c, { sim: 0, painted: 0, matched: 0 });
+        }
+        perFaction.get(sim)!.sim++;
+        perFaction.get(painted)!.painted++;
+        if (sim === painted) {
+            matched++;
+            perFaction.get(sim)!.matched++;
+        } else if (mismatches.length < 20) {
+            mismatches.push({ osid: row.settlement_id, sim, painted });
+        }
+    }
+    const controllers = Array.from(perFaction.keys()).sort(strictCompare);
+    return {
+        reference_key: referenceKey,
+        total_osids: total,
+        matched_osids: matched,
+        match_percentage: total > 0 ? matched / total : 0,
+        per_faction: controllers.map((controller) => {
+            const t = perFaction.get(controller)!;
+            const denom = Math.max(t.sim, t.painted);
+            return {
+                controller,
+                sim_count: t.sim,
+                painted_count: t.painted,
+                correctly_placed: t.matched,
+                accuracy: denom > 0 ? t.matched / denom : 0,
+            };
+        }),
+        sample_mismatches: mismatches,
+    };
 }
 
 function computeHistoricalControlAlignmentDiagnostics(
@@ -2637,6 +2730,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const overrideInventory = buildOverrideInventory(scenario);
         const finalControlSnapshot = extractSettlementControlSnapshot(state, graph);
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
+        let osidPairMatch: OsidPairMatchDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
         if (scenario.init_control === 'apr1992' || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'))) {
             // Wave 15: pick the painted reference matching scenario duration.
@@ -2645,6 +2739,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             const referenceKey = pickHistoricalReferenceKey(scenario);
             const historicalReferenceSnapshot = await loadPaintedControlReferenceSnapshot(referenceKey, baseDir);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
+                finalControlSnapshot,
+                historicalReferenceSnapshot,
+                referenceKey
+            );
+            // Wave 27: per-OSID spatial-match metric. Complements the count-delta
+            // above by measuring whether the sim has the right factions in the
+            // right OSIDs, not just the right totals.
+            osidPairMatch = computeOsidPairMatchDiagnostics(
                 finalControlSnapshot,
                 historicalReferenceSnapshot,
                 referenceKey
@@ -2721,6 +2823,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ...(historicalControlAlignment
                     ? {
                         control_alignment: historicalControlAlignment,
+                        ...(osidPairMatch ? { osid_pair_match: osidPairMatch } : {}),
                         anchor_checks: historicalAnchorChecks
                     }
                     : {}),
