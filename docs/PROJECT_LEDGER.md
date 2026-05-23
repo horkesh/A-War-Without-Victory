@@ -1,4 +1,60 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-23] feat(events+ui+calibration): n2003 baseline — historical-default bot decisions + headless contract + presidential modal
+
+**Type:** Multi-commit session shipping (a) the headless undefined-player_faction contract across 3 sites, (b) structured event-decision audit trail, (c) UI surfacing of blocking decisions as auto-pop modals, (d) historical-default retunings of 3 events + Washington Agreement HRHB cohesion reset, and (e) strategic_depth corps_asset filter fix. New 188w baseline at **n2003 hash `47438d249146d1af`, match_ratio 79.21%**. Eight commits on `codex/localization-complete-2026-05-23`.
+
+**Why:** n1999 verification surfaced multiple bugs:
+1. 15 RBiH events with `requires_player_response: true` and `responding_faction: 'RBiH'` were queueing-pending-forever because `scenario_runner.ts:1412` defaulted player_faction='RBiH' in headless runs. Their downstream consequences (dimension shifts, sets_flags, mechanical effects) never applied — silent no-ops across the 188-turn run.
+2. `strategic_depth.ts` filtered corps formations by `kind === 'corps'` but engine OOB tags corps as `'corps_asset'`. E-B3 was dead code.
+3. Inbox click on `event_modal` action silently switched to Army HQ Briefing tab instead of opening EventDecisionModal — looked like "items don't open" from the RS-player POV.
+4. Paramilitary inbox items missing playerFactionMatch filter.
+5. Three events used political-scoring `bot_response_logic` that produced non-historical bot picks (notably `sue_for_peace_hrhb` at turn 89 mid-1993, ahistorical until Washington Agreement March 1994). User directive resolved: "By default, bots should select historical outcomes and we are calibrating for that."
+
+**Change — engine/state:**
+- `73f36de4` — Structured `state.military.event_decision_log[]` with `chosen_response_id` + `decision_source` discriminator (`bot_political` / `bot_v1` / `bot_ai_default` / `player`). Writers at all 4 pick sites.
+- `a018f79b` — `strategic_depth.ts` accepts both `kind === 'corps'` and `kind === 'corps_asset'` at both gate sites; E-B3 now writes to ~16 corps formations per turn (was 0).
+- `f7c8baed` — `scenario_runner.ts:1412` leaves player_faction undefined when neither state.meta nor scenario file authored one (was defaulting to 'RBiH').
+- `b875f95a` — `save_migration.ts` v14 skips player_faction backfill when `headless_scenario_auto_control === true`.
+- `0b7d0d93` — `validateGameState.ts` mirrors the migration v14 headless exemption.
+
+**Change — UI:**
+- `446acb91` — Three desktop GUI fixes for the RS player event-system flow:
+  - Auto-launch `EventDecisionModal` on turn entry when `pending_event_decisions[]` has an unhandled blocking decision for the player faction (was: no auto-pop, decisions silently queued).
+  - Inbox `event_modal` action opens the modal directly (was: silent Army HQ Briefing tab switch).
+  - Paramilitary inbox items defensive-filtered through `playerFactionMatch`.
+
+**Change — data (events + calibration):**
+- `8c1e6f5e` — Three events switched to `bot_response_logic: 'historical'` (= always pick options[0]) per user directive that historical defaults are the calibration target:
+  - `gornji_vakuf_clashes_1993`: `capital_based` → `historical` (options[0] = escalate; HVO did escalate Gornji Vakuf in Jan 1993)
+  - `strategic_posture_review_hrhb`: `strategic_weighted` → `historical` (options[0] = press_croat_objectives; HRHB pressed objectives through 1993 until Washington Agreement). Previously the political scoring picked `sue_for_peace_hrhb` which has `available_from_fire: 3` gate that isn't enforced — ahistorical for mid-1993.
+  - `ic_rbih_restraint_post_washington`: `strategic_weighted` → `historical` (options[0] = acknowledge_pressure; RBiH did accept Washington-era US restraint).
+- Washington Agreement (washington_agreement_1994) effects extended to model Federation military integration as a CB-war combat-penalty reset:
+  - `morale_change HRHB`: +3 → +8 (rebuilding HVO cohesion after CB war)
+  - new `cohesion_change HRHB`: +15 (reset prior CB-war cohesion damage from gornji_vakuf escalate + earlier CB-war events)
+  - new `cohesion_change RBiH`: +5 (Federation supply integration boost)
+- Player agency preserved: `sue_for_peace_hrhb` option restored to `strategic_posture_review_hrhb` after inadvertent deletion in earlier draft. Bot just defaults away from it via `historical` logic; player can still select it.
+
+**Verification (n2003 vs n2002):**
+- match_ratio: 78.51% → **79.21%** (+0.70pp; was 81.18% in n1999 but masking 15 stuck events)
+- HRHB: 64.49% → 67.29% (+2.80pp); sim 83 → 86 (Washington reset partial recovery)
+- RBiH: 78.93% → 79.07% (+0.14pp); sim 299 → 301
+- RS:   76.97% → 78.15% (+1.18pp); sim 330 → 325
+- 0 stuck pending decisions ✓
+- 37 entries in event_decision_log ✓
+- All 4 retuned events picking historical options[0] ✓
+- Headless contract working: player_faction undefined, headless_scenario_auto_control true ✓
+- strategic_depth populated on all 16 corps ✓
+
+**Scenario-creator-runner-tester verdict:** Adopt n2003 as new baseline. The headline drop from n1999 81.18% to n2003 79.21% reflects honest historical fidelity — n1999 was overshooting RBiH territory by +29 OSIDs because the Carter ceasefire, Washington Agreement, Contact Group, and US 51:49 halt were all silently no-op (15 events queued forever). n2003 RBiH overshoot is now +11. The remaining HRHB shortfall (-21 OSIDs vs painted 107) is structural (Bosnian Croat manpower limits) not authoring — next lever flagged as expanding HV-attached brigade pool from 4 → 6-8 brigades (Mistral 2 OG North + South + West historical composition).
+
+**Authoritative principle established (durable):** Bots default to `historical` (options[0] = historical choice). Calibration is for the historical-outcome path. Non-historical paths exist for player + AI variation; engine handles them as designed but they are not the calibration target. See [[corresponding KNOWLEDGE entry]].
+
+**Reports:** 
+- `docs/40_reports/audits/20260523_RS_PLAYER_EVENT_SYSTEM_AUDIT.md` (Presidential Inbox audit)
+- `docs/40_reports/proposals/20260523_RESEARCH_*.md` (still-relevant Fall-1995 research dispatches)
+
+---
+
 ## [2026-05-23] ui(i18n): add Bosnian Codex entry localization contract
 
 **Type:** UI/data localization extraction only. No simulation behavior, scenario data, save schema, event firing, Codex unlock predicates, dynamic-section predicates, diagnostics, OOB, or tuning changed.
@@ -8,6 +64,52 @@
 **Change:** Made `resolveCodexEssay(...)` locale-aware for title, category, canonical body, ghost summary, dynamic-section content, and sources. Routed `CodexPanel` through `useLocale()` so selected and sidebar entries use the active locale. Added `localizations.bcs` payloads for all 96 indexed Codex essays and all 61 dynamic inserts in `data/scenarios/essays/essay_index.json`. Added `data/codex/ghost_entries_bcs/` sidecars for all 20 ghost Markdown entries.
 
 **Verification:** `npx.cmd vitest run tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 5/5. `npx.cmd vitest run tests/ui_i18n.test.ts tests/ui/codex_essay_resolver.test.ts tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_localization.test.ts --reporter=dot` passed 91/91. `npm.cmd run typecheck` passed.
+
+---
+
+## [2026-05-23] feat(engine): Fall-1995 mechanics packet — 81.18% match_ratio (n1999)
+
+**Type:** Multi-commit engine packet on `feature/arc-operations-calibration`. Three commits (`91613eb2`, `d6c134ff`, `5083c85d`). Adds 5 first-class state surfaces + 5 new combat-math modifiers + 2 new scenario events + 4 historian research dispatches + engine synthesis doc.
+
+**Why:** Calibration n1998 stalled at 78.51% area-weighted because the engine could not reproduce the Aug–Oct 1995 collapse of VRS 2nd Krajina Corps. Synthesis dispatch (3 historian reports + 1 architecture pass) identified 21 historical mechanisms (M1–M21) across external shocks (Storm, Deliberate Force, HV ammo transfusion), defender overstretch, multi-axis simultaneity, and counter-clockwise cascade collapse. See `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md`.
+
+**Change — implemented (synthesis §3 codes):**
+- **E-A1** NATO Deliberate Force capability suppression — `equipment_quality_modifier` (RS × 0.70, 4 turns) layered onto existing `nato_deliberate_force_1995` event.
+- **E-A2** HV cross-border ammo transfusion — new event `hv_ammo_transfusion_post_storm_1995` (RBiH × 1.15, 6 turns).
+- **E-A3** Multi-axis simultaneity defender penalty — new `state.military.active_offensives_against_corps` cache built turn-start in `war_phases.ts`; consumer in `combat_math.ts` defender power (1.0× / 0.9× / 0.8× / 0.7× by enemy-offensive count, capped 4+).
+- **E-A4** Cascade trigger via adjacent OSID loss — new `state.military.cascade_penalties[]` array; writer `emitCascadePenaltiesOnFlip` in `attack_resolution_osid.ts`; reader `getCascadePenaltyForOsid` in `active_modifiers.ts`; consumer in `combat_math.ts` (1-turn 0.85× on adjacent same-faction OSIDs).
+- **E-B2** HV Una negative-control predicate in `sector_offensive.ts` — 0.65× force_ratio cap on HV-dominant ops without HVO co-deployment (Op Una Sept 18–19 1995 historical failure).
+- **E-B3** Strategic depth per corps — new `FormationState.strategic_depth` field, new `src/sim/combat/strategic_depth.ts`, new `war_phases` step `update-strategic-depth`; new `state.meta.svk_corps_active` flag.
+- **E-B4** Strategic priority tiering — new `data/source/strategic_priorities.json` (RS core: Banja Luka / Pale / Han Pijesak / Sokolac / Bijeljina; periphery: western Bosnia); new `src/sim/combat/strategic_priorities.ts` loader + lookup; periphery-abandonment penalty (defender × 0.80 when corps coherence < 0.6); priority-aware reserve allocation in `strategic_reserve.ts`.
+- **Foundation:** new `FormationState.coordination_coherence` + `strategic_depth` (corps-only); new `MilitaryState.cascade_penalties` + `offensive_ops_suppressions`; new `EventEffectOffensiveOpsSuppression` kind; handler + reader; cleanup GC extended.
+
+**Change — deferred (not in this packet):**
+- E-A5 51:49 launch-gate consumer for the externally-imposed Holbrooke/Tuđman halt.
+- E-A6 Sloboda 95 / Velika Kladuša rear-clearing as scripted op (precondition for Sana 95).
+- E-B1 corps coherence decay logic + threshold gates (Agent B failed delivery).
+
+**Verification:** `npx tsc --noEmit` clean. 194/194 tests pass across 8 combat-math suites including 7 new tests in `tests/fall_1995_multi_axis_and_cascade.test.ts`. New test file `tests/fall_1995_hv_depth_priority.test.ts` (274 lines). All consumers gated `if (multiplier !== 1.0)` for byte-stability on the historical (no-event, no-cascade, no-HV-attached) path; 40w calibration window untouched (events fire turn ≥ 159).
+
+**Outcome (n1999 vs n1998):**
+- match_ratio: 78.51% → **81.18%** (+2.67pp, +19 matches).
+- HRHB accuracy: 62.62% → **77.57%** (+14.95pp) — Mistral 2 cascade through HV-attached brigades finally lands historically.
+- RS accuracy: 76.05% → 78.10% (+2.05pp); sim count 334 → 296 reflects 2KK collapse (vs painted 315).
+- RBiH accuracy: 80.13% → 78.06% (−2.07pp) — RBiH overshoots by 29 OSIDs (was +7); deferred E-A5 51:49 halt would cap this.
+- Hash: `b4be504c` → `914e6c77`.
+
+**Research dispatches (companion docs at `docs/40_reports/proposals/`):**
+- `20260523_RESEARCH_ARBIH_FALL_1995.md` (Sana 95, Una 95, 7th Corps, 1st Corps Treskavica).
+- `20260523_RESEARCH_HVO_HV_FALL_1995.md` (Maestral 2 = Mistral 2; HV-HVO embedded under Gotovina; Op Una negative control).
+- `20260523_RESEARCH_VRS_2KK_COLLAPSE.md` (counter-clockwise cascade Grahovo→Glamoč→Šipovo→Jajce→Mrkonjić→Ključ→Drvar→Petrovac→Sanski Most→Krupa; commander correction Borić not Milovanović).
+- `20260523_RESEARCH_VOZUCA_1995.md` (Uragan-95 / Farz-95; ARBiH 2nd+3rd Corps; ~200 km², Tuzla-Zenica land bridge restored).
+- `20260523_RESEARCH_SARAJEVO_DEBLOCKADE.md` (no ARBiH ground op ever broke SRK ring in 1,425 days; siege ended via Deliberate Force + RRF Igman artillery, not ground action).
+- `20260523_RESEARCH_ARBIH_1994_OPS.md` (Grmeč-94 + Štit-94 + Pauk; 1994 pattern: every ARBiH offensive against defended town stalled — light infantry cannot dislodge dug-in VRS with artillery; 1995 needed external enablers).
+
+**Goražde painted-control corrections (companion fix `5660c8ec`):** ICTY + Wikipedia confirm Goražde was held by Independent 81st Division / East Bosnian Operational Group (NOT 5th Corps; 5th Corps was Bihać). Engine #4B's earlier 6-OSID flip RS→RBiH at Goražde: 4 correct (faocici_2 / hrancici / kolovarice / zorovici — Goražde municipality, FBiH); 2 reverted to RS (slatina_2 / ustipraca_2 — Novo Goražde municipality, RS post-Dayton; ustipraca_2 captured by VRS 1st/2nd/4th/5th Podrinje Brigades in May 1993, became seat of Novo Goražde).
+
+**Authorization note:** User explicitly overrode the standing "one change per calibration run" rule for this session: "This time we will not be doing one change then run. Implement all of those." Bundled packet ships intentionally.
+
+**Reports:** `docs/40_reports/proposals/20260523_ENGINE_SYNTHESIS_FALL_1995.md` + 6 research dispatches.
 
 ---
 
