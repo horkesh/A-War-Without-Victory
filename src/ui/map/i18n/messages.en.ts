@@ -68,6 +68,17 @@ export const enMessages = {
     'mainMenu.settings': 'Settings',
     'mainMenu.credits': 'Credits',
     'mainMenu.quit': 'Quit',
+    'credits.title': 'Credits',
+    'credits.close': 'Close',
+    'credits.closeAriaLabel': 'Close credits',
+    'credits.section.studio': 'Studio',
+    'credits.section.design': 'Design & Development',
+    'credits.section.sources': 'Historical Sources',
+    'credits.section.technology': 'Technology',
+    'credits.design.subtitle': 'Strategic simulation of the 1992-1995 Bosnian War',
+    'credits.sources.basedOnPrefix': 'Based on',
+    'credits.sources.additional': 'Additional sources: ICTY trial records, UNPROFOR reports, academic publications',
+    'credits.dedication': 'This game is dedicated to the memory of all who suffered in the Bosnian War, 1992-1995.',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;
