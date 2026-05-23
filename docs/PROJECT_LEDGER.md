@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(sector): elide final split-pieces renumber
+
+**Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** EQ-1 carried a split-pieces follow-up: `splitNonContiguousSectors(...)` always sorted and renumbered, even when the final geometry pass immediately sorted again and reassigned canonical sector/sub-segment ids. That internal call path paid redundant compute without owning the observable ids.
+
+**Change:** `src/sim/combat/sector_splitting.ts` now exposes default-preserving `SplitNonContiguousSectorsOptions` with `renumberResult?: boolean`; all callers keep the old sorted/renumbered behavior unless explicitly opting out. `src/sim/combat/corps_front_sectors.ts` final `enforceFinalSectorGeometryInvariants:split-pieces` call passes `{ renumberResult: false }` because it owns deterministic id assignment immediately afterward. `tests/sector_contiguity_split.test.ts` now guards both default renumbering and caller-owned intermediate id preservation.
+
+**Determinism / output impact:** Invocation-local compute elision only. No cross-run cache, no timestamps, no randomness, and no iteration-order relaxation. The final geometry caller still sorts the pieces and overwrites every emitted sector id and sub-segment id before writing sectors back.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\sector_contiguity_split.test.ts --reporter=dot` failed before implementation because pass-through `sector_id` was still mutated. After implementation, focused split test passed 12/12; sector regression pack passed 65/65; `npm.cmd run typecheck` passed. Profiled 40w run with `PERF_PROFILE_SECTOR_PARTITION=true` completed at final hash `30abd0696b9d7e24`; `node tools\validate_run_consistency.cjs runs\apr1992_definitive_40w__3649b3861a87e6ea__w40_n0` passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with no manifest update. `git diff --check` passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SECTOR_SPLIT_PIECES_RENUMBER_ELISION.md`; `docs/40_reports/SECTOR_MASTER.md`.
+
+**Roadmap delta:** EQ-1 split-pieces has another compute-only slice closed. Remaining sector perf candidates are same-invocation BFS/component reuse, sort-folding around `buildSectorSliceFromSubSegment(...)`, then `:voronoi-repair`.
+
+---
+
 ## [2026-05-23] tool(release): emit artifact release-log row
 
 **Type:** Release/packaging evidence tooling and docs. No simulation behavior, save schema, migration, scenario data, UI behavior, calibration/army-arc tuning, combat math, operation behavior, event content, turn ordering, painted target, or serialized scenario output changed.

@@ -977,6 +977,7 @@ function enforceFinalSectorGeometryInvariants(
                     undefined,
                     caseBSplitAdj,
                     centroids,
+                    { renumberResult: false },
                 ).sort((a, b) =>
                     strictCompare(a.edge_ids[0] ?? a.sector_id, b.edge_ids[0] ?? b.sector_id)
                     || strictCompare(a.sector_id, b.sector_id),

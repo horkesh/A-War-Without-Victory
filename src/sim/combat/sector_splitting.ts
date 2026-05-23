@@ -18,6 +18,14 @@ import {
 } from './corps_front_sectors_constants.js';
 import { buildEdgeAdjacency, buildEdgeAdjacencyStrictCaseB, isCaseBBridge, isOsidAdjacent, isSegmentAdjacent } from './sector_edge_adjacency.js';
 
+export interface SplitNonContiguousSectorsOptions {
+    /**
+     * Defaults to true for public/back-compat callers. Set false only when the
+     * caller immediately applies its own deterministic sector-id assignment.
+     */
+    renumberResult?: boolean;
+}
+
 /**
  * Split sectors whose front edges span disconnected fronts.
  *
@@ -44,6 +52,7 @@ export function splitNonContiguousSectors(
     friendlyOsids?: Set<string>,
     strictAdj?: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
+    options: SplitNonContiguousSectorsOptions = {},
 ): CorpsFrontSector[] {
     const result: CorpsFrontSector[] = [];
 
@@ -339,10 +348,12 @@ export function splitNonContiguousSectors(
         }
     }
 
-    // Renumber sector IDs deterministically
-    result.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-    for (let i = 0; i < result.length; i++) {
-        result[i]!.sector_id = `sector:${result[i]!.corps_id}:${i}`;
+    if (options.renumberResult !== false) {
+        // Renumber sector IDs deterministically.
+        result.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        for (let i = 0; i < result.length; i++) {
+            result[i]!.sector_id = `sector:${result[i]!.corps_id}:${i}`;
+        }
     }
 
     return result;

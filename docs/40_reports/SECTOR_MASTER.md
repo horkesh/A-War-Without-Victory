@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-21 (zero-assigned coverage attribution)
+**Updated:** 2026-05-23 (split-pieces renumber elision)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-23: Split-pieces renumber elision (byte-intended)
+
+**Change:** `splitNonContiguousSectors(...)` now accepts default-preserving options, with `{ renumberResult: false }` used only by `enforceFinalSectorGeometryInvariants:split-pieces`. Public/default callers still get sorted and renumbered sectors. The final-geometry caller already sorts contiguous pieces and then overwrites every sector/sub-segment id, so the inner sort/renumber was redundant compute in this call path.
+
+**Determinism:** The option is invocation-local and adds no cache. The final-geometry caller owns canonical id assignment after the call, preserving observable sector ids. Focused tests now guard both default renumbering and caller-owned id preservation.
+
+**Verification:** Focused split test passed 12/12. Sector regression pack passed 65/65. `npm.cmd run typecheck` passed. A profiled 40w scenario with `PERF_PROFILE_SECTOR_PARTITION=true` completed at hash `30abd0696b9d7e24`; consistency validation passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `npm.cmd run test:baselines` passed with no manifest update. `git diff --check` passed.
+
+**Report:** [implemented/20260523_SECTOR_SPLIT_PIECES_RENUMBER_ELISION.md](implemented/20260523_SECTOR_SPLIT_PIECES_RENUMBER_ELISION.md)
 
 ---
 
