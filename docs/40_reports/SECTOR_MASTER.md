@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-23 (sector slice edge sort fold)
+**Updated:** 2026-05-23 (sector BFS queue cursor)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-23: Sector BFS queue cursor (byte-intended)
+
+**Change:** `mergeUndersizedSectors(...)` friendly component precompute and `walkEdgeChain(...)` now use `head` cursor queues instead of `Array.shift()`. FIFO order and neighbor insertion order are unchanged, but repeated array reindexing is avoided.
+
+**Determinism:** No cache or ordering change. Neighbor ordering remains the same; the cursor consumes the same queue entries in the same order as `shift()`.
+
+**Verification:** Red static characterization failed before implementation because both sector split BFS regions still contained `.shift()`. After implementation, focused sector tests passed 31/31, `npm.cmd run typecheck` passed, sector regression pack passed 67/67, profiled 40w hash remained `30abd0696b9d7e24`, and consistency validation passed with 0 unresolved assignments, 0 false owners, 0 disconnected sectors, 0 empty contested sectors, 0 missed legal floor donors, and 0 wide undefended front gaps. `git diff --check` passed.
+
+**Report:** [implemented/20260523_SECTOR_BFS_QUEUE_CURSOR.md](implemented/20260523_SECTOR_BFS_QUEUE_CURSOR.md)
 
 ---
 

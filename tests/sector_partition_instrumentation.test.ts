@@ -522,6 +522,29 @@ describe('sector-partition instrumentation — env-flag gating', () => {
         expect(region).not.toMatch(/\bperformance\.now\s*\(/);
     });
 
+    it('static contract: sector split BFS queues use head cursors, not shift', () => {
+        const splittingRaw = readFileSync(resolve('src/sim/combat/sector_splitting.ts'), 'utf8');
+        const mergeStart = splittingRaw.indexOf('export function mergeUndersizedSectors(');
+        const mergeEnd = splittingRaw.indexOf('\n}\n', mergeStart);
+        expect(mergeStart).toBeGreaterThanOrEqual(0);
+        expect(mergeEnd).toBeGreaterThan(mergeStart);
+        const mergeRegion = splittingRaw.slice(mergeStart, mergeEnd);
+
+        const buildingRaw = readFileSync(resolve('src/sim/combat/sector_building.ts'), 'utf8');
+        const walkStart = buildingRaw.indexOf('export function walkEdgeChain(');
+        const walkEnd = buildingRaw.indexOf('\n}\n', walkStart);
+        expect(walkStart).toBeGreaterThanOrEqual(0);
+        expect(walkEnd).toBeGreaterThan(walkStart);
+        const walkRegion = buildingRaw.slice(walkStart, walkEnd);
+
+        expect(mergeRegion).not.toContain('.shift()');
+        expect(walkRegion).not.toContain('.shift()');
+        expect(mergeRegion).not.toMatch(/\bDate\.now\s*\(/);
+        expect(walkRegion).not.toMatch(/\bDate\.now\s*\(/);
+        expect(mergeRegion).not.toMatch(/\bperformance\.now\s*\(/);
+        expect(walkRegion).not.toMatch(/\bperformance\.now\s*\(/);
+    });
+
     it('per-faction shape: every perFaction row carries faction + perCorps array sorted by corpsId', () => {
         __sectorPartitionPerfTestHooks.openInvocation();
 
