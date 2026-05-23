@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Convoy Decision chrome localization** | [implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md) - Humanitarian convoy decision modal chrome/prose and War Summary inline convoy action buttons now render through English/BCS localization. |
 | **Latest BCS War Summary situation chrome localization** | [implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md) - War Summary non-overview convoy, local-support, OPSEC, and diplomacy headings/empty states plus OPSEC operation-health labels now render through English/BCS localization. |
 | **Latest BCS Presidential Toolbar chrome localization** | [implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md](implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md) - Tactical-map toolbar primary labels, titles, advance copy, current-turn suffix, and command-authority accessibility text now render through English/BCS localization. |
 | **Latest BCS Settlement Timeline localization** | [implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md](implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md) - Settlement timeline dates, empty state, and component-owned casualty row now render through deterministic English/BCS localization. |

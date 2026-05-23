@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Convoy Decision chrome):** The humanitarian convoy decision modal and War Summary inline convoy decision buttons now render their component-owned chrome/prose through the English/BCS substrate while preserving convoy lifecycle, IPC staging, and player-decision gating behavior. Report: `docs/40_reports/implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (War Summary situation chrome):** Army HQ War Summary non-overview convoy, local-support, OPSEC, and diplomacy headings/empty states plus OPSEC operation-health labels now render through the English/BCS substrate while preserving model math, operation filtering, and all decision/simulation behavior. Report: `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Presidential Toolbar chrome):** Tactical-map toolbar primary labels, titles, no-state text, normal advance copy, current-turn suffix, Army HQ visit affordance, pre-advance severity tooltips, and Command Authority accessibility text now render through the English/BCS substrate while preserving all routing and advance behavior. Report: `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md`. On top of:

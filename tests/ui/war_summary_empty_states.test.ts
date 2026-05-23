@@ -34,6 +34,18 @@ function stateForEmptySummary(): LoadedGameState {
     } as LoadedGameState;
 }
 
+function stateForPendingConvoySummary(): LoadedGameState {
+    return {
+        ...stateForEmptySummary(),
+        pendingConvoyDecisions: [{
+            id: 'convoy:srebrenica:rs',
+            target_enclave: 'Srebrenica',
+            route_faction: 'RS',
+            supply_amount: 0.4,
+        }],
+    } as LoadedGameState;
+}
+
 afterEach(() => {
     cleanup();
     setLocale('en');
@@ -71,5 +83,17 @@ describe('War Summary empty states', () => {
         render(createElement(WarSummaryContent, { focusSection: section }));
 
         expect(screen.getByText(message)).toBeTruthy();
+    });
+
+    it('localizes convoy action buttons in BCS mode', () => {
+        setLocale('bcs');
+        storeState.loadedGameState = stateForPendingConvoySummary();
+
+        render(createElement(WarSummaryContent, { focusSection: 'convoys' }));
+
+        expect(screen.getByRole('button', { name: 'Dozvoli' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Blokiraj' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Preusmjeri' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Allow' })).toBeNull();
     });
 });

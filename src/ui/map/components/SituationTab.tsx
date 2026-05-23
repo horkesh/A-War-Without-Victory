@@ -310,21 +310,21 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                     onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Allow
+                    {t('convoyDecision.inline.allow')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'block')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Block
+                    {t('convoyDecision.inline.block')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
                     className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
-                    Divert
+                    {t('convoyDecision.inline.divert')}
                   </button>
                 </div>
               </div>

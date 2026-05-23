@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize convoy decision chrome
+
+**Type:** Humanitarian convoy decision localization slice. No convoy lifecycle evaluation, decision staging IPC, player-decision gating, pending convoy queues, supply effects, IVP effects, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `convoyDecision.*` message keys and routed the standalone convoy decision modal title, close action, route/supply/staged fields, decision-state labels, summary prose, action labels/details, staging fallback, and fallback error copy through the localization substrate. War Summary inline convoy decision buttons now use the same message family.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; staged decisions, convoy IDs, convoy queue ownership, IPC callbacks, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\convoy_decision_modal_i18n.test.ts tests\ui\war_summary_empty_states.test.ts --reporter=dot` failed while BCS mode still rendered English modal chrome and inline convoy buttons. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\convoy_decision_modal_i18n.test.ts tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` passed 13/13. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/ConvoyDecisionModal.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/convoy_decision_modal_i18n.test.ts`, `tests/ui/war_summary_empty_states.test.ts`, `docs/40_reports/implemented/20260523_BCS_CONVOY_DECISION_CHROME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize War Summary situation chrome
 
 **Type:** Army HQ War Summary situation-tab localization slice. No War Summary model math, convoy staging IPC, municipality-support data, OPSEC sector derivation, operation state, diplomacy capital data, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
