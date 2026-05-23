@@ -80,17 +80,25 @@ const KRUPA_VALLEY_OBJECTIVES = [
     'op:bosanska_krupa:gornja_suvaja',
 ];
 
+// Wave 24B (2026-05-23): reordered for OSID-adjacency reachability per the
+// catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
+// §b-sana). Prior order had two mid-sequence gaps: trubar (step 3) had no
+// captured neighbor at that point, and bosanski_petrovac_2 (step 6) was
+// approached from the wrong shoulder. New chain: ripac → racic → orasac_2 →
+// trubar (now adjacent to orasac_2) → vrtoce → kolonic_2 → vodjenica → prkosi
+// → bosanski_petrovac_2 (now adjacent to multiple captured) → dobro_selo_2 →
+// krnjeusa → jasenovac_2.
 const BIHAC_PETROVAC_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
-    'op:bihac:trubar',
     'op:bihac:orasac_2',
+    'op:bihac:trubar',
     'op:bosanski_petrovac:vrtoce',
-    'op:bosanski_petrovac:bosanski_petrovac_2',
-    'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:kolonic_2',
     'op:bosanski_petrovac:vodjenica',
     'op:bosanski_petrovac:prkosi',
+    'op:bosanski_petrovac:bosanski_petrovac_2',
+    'op:bosanski_petrovac:dobro_selo_2',
     'op:bosanski_petrovac:krnjeusa',
     'op:bosanski_petrovac:jasenovac_2',
 ];

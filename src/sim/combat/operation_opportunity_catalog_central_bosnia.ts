@@ -33,10 +33,15 @@ const STAGING_TRAVNIK = 'op:travnik:travnik_2';
 const STAGING_TURBE = 'op:travnik:turbe_2';
 const STAGING_CUKLE = 'op:travnik:cukle_2';
 
+// Wave 24C (2026-05-23): reordered for OSID-adjacency reachability per the
+// catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
+// §c-vlasic). gornje_krcevine has no baseline-HRHB/RBiH neighbor — axis aborts
+// at step 1 with 0 captures. paklarevo is adjacent to STAGING_TURBE, captures
+// expose varosluk, then varosluk exposes gornje_krcevine.
 const VLASIC_TRAVNIK_RIDGE_OBJECTIVES: readonly string[] = [
-    'op:travnik:gornje_krcevine',
     'op:travnik:paklarevo',
     'op:travnik:varosluk',
+    'op:travnik:gornje_krcevine',
 ];
 
 const VLASIC_SKENDER_VAKUF_OBJECTIVES: readonly string[] = [

@@ -61,6 +61,12 @@ const MISTRAL_DRVAR_GRAHOVO_OBJECTIVES: readonly string[] = [
     'op:bosansko_grahovo:ugarci',
 ];
 
+// Wave 24A (2026-05-23): reordered Mrkonjić sub-sequence per catalog-sweep
+// audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md §b-mistral2).
+// Prior order placed mrkonjic_grad_2 (the town) at step 7 — but its only
+// shoulder approaches at that point are RS-held majdan_2 + podrasnica_2.
+// Reorder takes the shoulder OSIDs first, then the town becomes adjacent to
+// captured friendly OSIDs and falls naturally. Šipovo prefix unchanged.
 const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
     'op:sipovo:brdjani',
     'op:sipovo:gornji_mujdzici_2',
@@ -68,10 +74,11 @@ const MISTRAL_SIPOVO_MRKONJIC_OBJECTIVES: readonly string[] = [
     'op:sipovo:volari_2',
     'op:sipovo:pribeljci_2',
     'op:mrkonjic_grad:gerzovo_2',
+    'op:mrkonjic_grad:majdan_2',
+    'op:mrkonjic_grad:podrasnica_2',
     'op:mrkonjic_grad:mrkonjic_grad_2',
     'op:mrkonjic_grad:bjelajce_2',
     'op:mrkonjic_grad:baljvine_2',
-    'op:mrkonjic_grad:majdan_2',
     'op:mrkonjic_grad:podrasnica_2',
 ];
 
