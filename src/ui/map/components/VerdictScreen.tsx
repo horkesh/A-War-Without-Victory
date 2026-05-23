@@ -626,6 +626,7 @@ export function FactionReport({
     personnel: number;
     daytonResult?: import('../../../state/negotiation_types.js').DaytonResult;
 }) {
+    useLocale();
     const color = FACTION_HEX[verdict.faction] ?? '#888';
     const cap = verdict.capital_breakdown;
 
@@ -634,7 +635,7 @@ export function FactionReport({
             {/* Pyrrhic Score Hero — always-visible primary signal, NOT collapsible. */}
             <div data-testid="faction-report-score" className="text-center py-4">
                 <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary mb-1">
-                    Pyrrhic Score
+                    {t('verdict.report.pyrrhicScore')}
                 </div>
                 <div className="text-[48px] font-bold tabular-nums leading-none"
                      style={{ color }}>
@@ -657,7 +658,7 @@ export function FactionReport({
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
                     <div className="mt-3 p-3 rounded bg-red-950/40 border border-red-800/40">
                         <div className="text-[9px] uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
-                            International Condemnation
+                            {t('verdict.report.internationalCondemnation')}
                         </div>
                         {verdict.condemnation_flags.map((flag: string, i: number) => (
                             <div key={i} className="text-[10px] text-red-300/90 leading-relaxed">
@@ -686,14 +687,14 @@ export function FactionReport({
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
                     <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
-                        Capital Dimensions
+                        {t('verdict.report.capitalDimensions')}
                     </span>
                     <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                        {verdict.dimension_grades.length} bars
+                        {t('verdict.report.dimensionBars', { count: verdict.dimension_grades.length })}
                     </span>
                 </summary>
                 <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
-                    Capital Dimensions
+                    {t('verdict.report.capitalDimensions')}
                 </div>
                 <div className="space-y-2">
                     {verdict.dimension_grades.map((dg) => (
@@ -710,43 +711,43 @@ export function FactionReport({
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
                     <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
-                        Final Statistics
+                        {t('verdict.report.finalStatistics')}
                     </span>
                     <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
-                        Tap to toggle
+                        {t('verdict.report.tapToToggle')}
                     </span>
                 </summary>
                 <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
-                    Final Statistics
+                    {t('verdict.report.finalStatistics')}
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
-                    <StatRow label="Territory" value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} OSIDs)`} />
+                    <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} OSIDs)`} />
                     {cap && (
                         <>
-                            <StatRow label="Territory (km2)" value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
-                            <StatRow label="Active Brigades" value={String(brigadeCount)} />
-                            <StatRow label="Personnel" value={personnel.toLocaleString()} />
-                            <StatRow label="Casualties Inflicted" value={cap.military_casualties_inflicted.toLocaleString()} />
-                            <StatRow label="Casualties Taken" value={cap.military_casualties_taken.toLocaleString()} />
-                            <StatRow label="Civilians Protected" value={cap.civilians_under_protection.toLocaleString()} />
-                            <StatRow label="Refugees Created" value={cap.refugees_created.toLocaleString()} />
-                            <StatRow label="Refugees Received" value={cap.refugees_received.toLocaleString()} />
-                            <StatRow label="Operations Launched" value={String(cap.operations_launched)} />
-                            <StatRow label="Operations Successful" value={String(cap.operations_successful)} />
+                            <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
+                            <StatRow label={t('verdict.report.stat.activeBrigades')} value={String(brigadeCount)} />
+                            <StatRow label={t('verdict.report.stat.personnel')} value={personnel.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={cap.military_casualties_inflicted.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={cap.military_casualties_taken.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={cap.civilians_under_protection.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={cap.refugees_created.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={cap.refugees_received.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.operationsLaunched')} value={String(cap.operations_launched)} />
+                            <StatRow label={t('verdict.report.stat.operationsSuccessful')} value={String(cap.operations_successful)} />
                             {cap.enclaves_held.length > 0 && (
-                                <StatRow label="Enclaves Held" value={cap.enclaves_held.map(titleCase).join(', ')} />
+                                <StatRow label={t('verdict.report.stat.enclavesHeld')} value={cap.enclaves_held.map(titleCase).join(', ')} />
                             )}
                             {cap.enclaves_lost.length > 0 && (
-                                <StatRow label="Enclaves Lost" value={cap.enclaves_lost.map(titleCase).join(', ')} />
+                                <StatRow label={t('verdict.report.stat.enclavesLost')} value={cap.enclaves_lost.map(titleCase).join(', ')} />
                             )}
                             {cap.peace_plans_accepted.length > 0 && (
-                                <StatRow label="Plans Accepted" value={cap.peace_plans_accepted.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.join(', ')} />
                             )}
                             {cap.peace_plans_rejected.length > 0 && (
-                                <StatRow label="Plans Rejected" value={cap.peace_plans_rejected.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.join(', ')} />
                             )}
                             {cap.war_crimes_events > 0 && (
-                                <StatRow label="War Crimes Events" value={String(cap.war_crimes_events)} />
+                                <StatRow label={t('verdict.report.stat.warCrimesEvents')} value={String(cap.war_crimes_events)} />
                             )}
                         </>
                     )}

@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS Verdict report-label localization** | [implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_REPORT_LABELS_LOCALIZATION.md) - the rich `VerdictScreen` FactionReport static headings, mobile report toggles, and final-stat row labels now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict chrome localization** | [implemented/20260523_BCS_VERDICT_CHROME_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_CHROME_LOCALIZATION.md) - the rich `VerdictScreen` mobile lower-section tabs and footer chrome now render through the existing English/BCS localization substrate. |
 | **Latest BCS Verdict fallback localization** | [implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md](implemented/20260523_BCS_VERDICT_FALLBACK_LOCALIZATION.md) - the no-verdict `VerdictScreen` fallback now renders outcome, final standings, metric rows, campaign duration, and footer actions through the existing English/BCS localization substrate. |
 | **Latest BCS Game Over localization** | [implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md](implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md) - the fallback Game Over modal now renders outcome, final standings, faction metric lines, campaign duration, and footer actions through the existing English/BCS localization substrate. |

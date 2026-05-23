@@ -242,6 +242,14 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Najmanje losa verzija tragedije')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
+        expect(screen.getByText('Pirov rezultat')).toBeDefined();
+        expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('Zavrsna statistika').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Teritorija')).toBeDefined();
+
+        fireEvent.click(screen.getByText('VRS'));
+
+        expect(screen.getByText('Medjunarodna osuda')).toBeDefined();
     });
 });
 
