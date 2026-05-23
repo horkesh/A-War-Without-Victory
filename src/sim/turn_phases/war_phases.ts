@@ -139,7 +139,7 @@ import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
-import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
+import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
 import { checkTriggeredOperations } from '../combat/triggered_operations.js';
@@ -863,6 +863,19 @@ export const warPhases: NamedPhase[] = [
                 terrainData = { by_sid: {} };
             }
             processBrigadeMovement(context.state, edges, terrainData);
+        }
+    },
+    {
+        // Spawn turn-gated phantom brigades (e.g. HV 1995 expeditionary wave that
+        // arrives post-Split Agreement turn ≈ 150). Idempotent — defs already
+        // spawned at scenario init or earlier turn are skipped. See
+        // `docs/40_reports/proposals/20260523_HV_EXPEDITIONARY_GHOST_DESIGN.md`.
+        // Runs BEFORE withdrawals each turn so a phantom can't spawn and withdraw
+        // in the same turn (defensive, though spawn_turn < withdrawal_turn by author).
+        name: 'phantom-brigade-spawn',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            spawnJnaPhantomBrigades(context.state);
         }
     },
     {
