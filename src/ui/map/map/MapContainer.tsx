@@ -186,8 +186,12 @@ import {
 } from './renderChurnGuards';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
+// West bound widened from 15.7243 → 15.45 (≈+25 km margin) so the camera can
+// recenter on Bihać (≈15.87°E, 44.82°N) without the city sliding off-screen.
+// Prior bound left ~12 km between Bihać and the panning edge — at default zoom
+// the city was unreachable. East/N/S bounds unchanged.
 const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
-  [15.7243, 42.55719],
+  [15.45, 42.55719],
   [19.62278, 45.270542],
 ];
 const TACTICAL_MAP_PITCH_DEGREES = 30;

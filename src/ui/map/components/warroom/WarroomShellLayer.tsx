@@ -392,13 +392,16 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
     >
       <div
         style={{
-          color: 'rgba(28, 84, 172, 0.86)',
+          // Darker, smaller, less aggressive — reads as a scribbled marker
+          // note rather than a billboarded UI label. Less luminous blue
+          // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
+          color: 'rgba(15, 32, 70, 0.92)',
           fontFamily: '"Segoe Print", "Bradley Hand ITC", "Comic Sans MS", cursive',
-          fontSize: 'clamp(10px, 1.65vw, 29px)',
-          fontWeight: 700,
+          fontSize: 'clamp(7px, 1.05vw, 18px)',
+          fontWeight: 600,
           lineHeight: 1,
           transform: 'rotate(-2deg)',
-          textShadow: '0 0 1px rgba(255,255,255,0.24)',
+          textShadow: 'none',
           whiteSpace: 'nowrap',
           maxWidth: '92%',
           overflow: 'hidden',

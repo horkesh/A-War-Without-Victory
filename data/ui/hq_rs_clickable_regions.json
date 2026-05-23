@@ -113,27 +113,27 @@
       "id": "desk_map",
       "type": "dynamic_render",
       "bounds": {
-        "x": 925,
-        "y": 502,
-        "width": 518,
-        "height": 315
+        "x": 886,
+        "y": 479,
+        "width": 596,
+        "height": 362
       },
       "polygon": [
         [
-          925,
-          502
+          886,
+          478
         ],
         [
-          928,
-          817
+          890,
+          841
         ],
         [
-          1443,
-          817
+          1482,
+          841
         ],
         [
-          1438,
-          502
+          1476,
+          478
         ]
       ],
       "action": "open_operational_map",
