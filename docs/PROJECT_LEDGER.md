@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify FactionState optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `FactionState` contributes ten counted optionals, but inspection shows they span independent faction subsystems: patron, embargo, maintenance, capability progression, command capacity, negotiation, and Phase 0 declaration/capital lifecycle. Core faction identity is already required.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies the fields as subsystem-specific schema/default/migration work rather than generic optional-promotion targets.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `FactionState` optional-field group by classification. Future promotion requires subsystem-specific schema/default/migration proof.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify event provenance optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, displacement math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.

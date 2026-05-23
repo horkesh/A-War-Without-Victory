@@ -91,6 +91,8 @@ Next strict-null source work must classify small owned optional-field groups by 
 
 2026-05-23 classification update: `ControlEvent`, `DisplacementEvent`, and `DisplacementState` have nine combined optional fields and are classified in `docs/40_reports/audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md`. The fields are event provenance/detail enrichments layered onto required control-change, displacement-event, and municipality-level displacement counters. Do not promote them in the generic strict-null cleanup lane; future reduction requires an event-provenance schema lane with compatibility handling for older or non-combat rows.
 
+2026-05-23 classification update: `FactionState` has ten optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md`. The fields are subsystem-specific profile, negotiation, command-capacity, and Phase 0 lifecycle fields. Do not promote them in the generic strict-null cleanup lane; future reduction requires subsystem-specific schema/default/migration work.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.
