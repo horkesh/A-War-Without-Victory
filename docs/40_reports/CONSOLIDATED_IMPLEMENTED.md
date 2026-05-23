@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest formation-spawn directive narrowing:** [implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md](implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md) - active formation-spawn directive reads now use a local narrowing helper instead of caller-side non-null assertions, while preserving the optional directive contract.
+
 **Latest CLI harness BFS queue cursor:** [implemented/20260523_CLI_HARNESS_BFS_QUEUE_CURSOR.md](implemented/20260523_CLI_HARNESS_BFS_QUEUE_CURSOR.md) - Phase 3A A/B and Phase 3ABC diagnostic harness seed-builder BFS loops now use head cursors instead of `Array.shift()` while preserving deterministic report hashes.
 
 **Latest event-notification blocked residual classification:** [implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md](implemented/20260522_EVENT_NOTIFICATION_BLOCKED_RESIDUAL_CLASSIFICATION.md) - The final 2 rows / 4 missing notification blocks are now diagnostically classified as blocked-sensitive, with 0 unclassified residual blocks.

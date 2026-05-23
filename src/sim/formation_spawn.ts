@@ -31,7 +31,7 @@ import {
 } from '../state/formation_constants.js';
 import { computeBaseCohesion } from '../state/formation_lifecycle.js';
 import { resolveFormationName } from '../state/formation_naming.js';
-import type { FormationState, GameState, MilitiaPoolState } from '../state/game_state.js';
+import type { FormationSpawnDirective, FormationState, GameState, MilitiaPoolState } from '../state/game_state.js';
 import { militiaPoolKey } from '../state/militia_pool_key.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { MunicipalityPopulation1991Map } from './early_war/pool_population.js';
@@ -840,13 +840,20 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
 }
 
 /**
+ * Returns the formation spawn directive when it is active for the current turn.
+ */
+export function getActiveFormationSpawnDirective(state: GameState): FormationSpawnDirective | null {
+    const directive = state.military.formation_spawn_directive;
+    if (!directive) return null;
+    const turn = state.meta?.turn;
+    if (typeof turn !== 'number') return null;
+    if (directive.turn !== undefined && directive.turn !== null && directive.turn !== turn) return null;
+    return directive;
+}
+
+/**
  * Returns true if formation spawn directive is active for the current turn.
  */
 export function isFormationSpawnDirectiveActive(state: GameState): boolean {
-    const directive = state.military.formation_spawn_directive;
-    if (!directive) return false;
-    const turn = state.meta?.turn;
-    if (typeof turn !== 'number') return false;
-    if (directive.turn !== undefined && directive.turn !== null && directive.turn !== turn) return false;
-    return true;
+    return getActiveFormationSpawnDirective(state) !== null;
 }

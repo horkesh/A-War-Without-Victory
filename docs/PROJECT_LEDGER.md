@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] refactor(strict-null): narrow active formation spawn directive
+
+**Type:** Strict-null hygiene and directive-boundary type cleanup. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** `FormationSpawnDirective` is intentionally optional, but two callers re-read `state.military.formation_spawn_directive!` after a boolean active check. That pattern is unnecessary and weakens the optional-field boundary even though the fields should not be promoted to required.
+
+**Change:** Added `getActiveFormationSpawnDirective(state)` in `src/sim/formation_spawn.ts`, returning the active directive or `null` with the same turn/default semantics as `isFormationSpawnDirectiveActive(...)`. Updated `src/sim/turn_phases/early_war_phases.ts` and `src/sim/run_early_war_browser.ts` to consume that narrowed local. Added `tests/formation_spawn_directive_narrowing.test.ts` to prevent reintroducing `formation_spawn_directive!` in those callers.
+
+**Determinism / output impact:** Compute/type-boundary cleanup only. Active-directive semantics, formation-kind defaulting, spawn behavior, save shape, and output fields are unchanged. No cache, timestamp, randomness, or iteration-order changes were introduced.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\formation_spawn_directive_narrowing.test.ts --reporter=dot` failed before implementation because both callers still contained `formation_spawn_directive!`. After implementation, the focused formation-spawn pack passed 14/14: `tests\formation_spawn_directive_narrowing.test.ts`, `tests\militia_rework.test.ts`, `tests\early_war_turn_structure.test.ts`, and `tests\wia_trickleback.test.ts`. Strict-null guard passed 92/92 with `tests\strict_null_inventory_progress.test.ts`; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` all passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md`.
+
+**Roadmap delta:** Keeps the small sim optional-field classification intact while tightening the active directive read boundary. Future optional-field reduction still requires save/default/migration review rather than broad promotion.
+
+---
+
 ## [2026-05-23] perf(cli): use cursors in Phase 3 harness BFS queues
 
 **Type:** Deterministic diagnostic-harness performance cleanup and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

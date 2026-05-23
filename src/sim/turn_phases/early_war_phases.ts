@@ -11,6 +11,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { evaluateEvents } from '../events/evaluate_events.js';
 import {
+    getActiveFormationSpawnDirective,
     isFormationSpawnDirectiveActive,
     reinforceBrigadesFromPools,
     spawnFormationsFromPools
@@ -138,8 +139,8 @@ export const earlyWarPhases: NamedPhase[] = [
     {
         name: 'formation-spawn',
         run: async (context) => {
-            if (!isFormationSpawnDirectiveActive(context.state)) return;
-            const directive = context.state.military.formation_spawn_directive!;
+            const directive = getActiveFormationSpawnDirective(context.state);
+            if (!directive) return;
             const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
             let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
             try {
