@@ -4,6 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState, OperationView } from '../../src/ui/map/data/types.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 vi.mock('../../src/ui/map/desktop/useIPC', () => ({
     useIPC: () => ({ stageConvoyDecision: vi.fn() }),
@@ -47,6 +48,7 @@ function stateWithFilteredOpsecOperations(): LoadedGameState {
 
 afterEach(() => {
     cleanup();
+    setLocale('en');
 });
 
 describe('War Summary OPSEC reconciliation', () => {
@@ -56,5 +58,15 @@ describe('War Summary OPSEC reconciliation', () => {
         expect(screen.getByText('Flagged operation health (2 of 5 active operations)')).toBeTruthy();
         expect(screen.getByText('Una Push')).toBeTruthy();
         expect(screen.getByText('Vrbas Hold')).toBeTruthy();
+    });
+
+    it('localizes operation health labels in BCS mode', () => {
+        setLocale('bcs');
+
+        render(createElement(SituationTab, { state: stateWithFilteredOpsecOperations(), focusSection: 'opsec' }));
+
+        expect(screen.getByText('Zdravlje oznacenih operacija (2 od 5 aktivnih operacija)')).toBeTruthy();
+        expect(screen.getByText('Snabdijevanje 40% · Neuspjesi 0')).toBeTruthy();
+        expect(screen.queryByText('Flagged operation health (2 of 5 active operations)')).toBeNull();
     });
 });

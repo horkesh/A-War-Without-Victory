@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (War Summary situation chrome):** Army HQ War Summary non-overview convoy, local-support, OPSEC, and diplomacy headings/empty states plus OPSEC operation-health labels now render through the English/BCS substrate while preserving model math, operation filtering, and all decision/simulation behavior. Report: `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (Presidential Toolbar chrome):** Tactical-map toolbar primary labels, titles, no-state text, normal advance copy, current-turn suffix, Army HQ visit affordance, pre-advance severity tooltips, and Command Authority accessibility text now render through the English/BCS substrate while preserving all routing and advance behavior. Report: `docs/40_reports/implemented/20260523_BCS_PRESIDENTIAL_TOOLBAR_CHROME_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Settlement Timeline):** Settlement timeline date labels, no-events empty state, and component-owned casualty row now render through deterministic English/BCS localization while event titles/details remain source-authored. Report: `docs/40_reports/implemented/20260523_BCS_SETTLEMENT_TIMELINE_LOCALIZATION.md`. On top of:

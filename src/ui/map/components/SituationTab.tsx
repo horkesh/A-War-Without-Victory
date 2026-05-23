@@ -33,6 +33,7 @@ import {
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
 import { EmptyState } from './EmptyState';
+import { t } from '../i18n';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
 
@@ -296,7 +297,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('convoys') && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.situation.section.convoys')}</div>
           {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 ? (
             state.pendingConvoyDecisions.map((convoy) => (
               <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
@@ -329,7 +330,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               </div>
             ))
           ) : (
-            <EmptyState message="No convoy decisions are pending." />
+            <EmptyState message={t('warSummary.situation.empty.convoys')} />
           )}
           {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
         </section>
@@ -337,7 +338,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('support') && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Local Support</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.situation.section.support')}</div>
           {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn ? (
             <>
               <div className="text-text-secondary">
@@ -348,14 +349,14 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               </div>
             </>
           ) : (
-            <EmptyState message="No local support order is staged this turn." />
+            <EmptyState message={t('warSummary.situation.empty.support')} />
           )}
         </section>
       )}
 
       {showSection('opsec') && (
       <section data-summary-section="opsec" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Posture</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.situation.section.opsec')}</div>
         {activeOpsecSectors.length > 0 ? (
           <div className="space-y-1.5">
             {activeOpsecSectors.map((sector) => (
@@ -372,18 +373,21 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             ))}
           </div>
         ) : (
-          <EmptyState message="No sectors are currently running OPSEC." />
+          <EmptyState message={t('warSummary.situation.empty.opsec')} />
         )}
         {fragileOperations.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-panel-border">
             <div className="text-[10px] uppercase tracking-wide text-text-secondary">
-              Flagged operation health ({fragileOperations.length} of {playerOperations.length} active operations)
+              {t('warSummary.situation.opsec.flaggedHealth', { flagged: fragileOperations.length, total: playerOperations.length })}
             </div>
             {fragileOperations.map((operation) => (
               <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
                 <span>{operation.name}</span>
                 <span className="text-right">
-                  Supply {Math.round((operation.supply_readiness ?? 0) * 100)}% · Failures {operation.failure_count ?? 0}
+                  {t('warSummary.situation.opsec.operationHealth', {
+                    supply: Math.round((operation.supply_readiness ?? 0) * 100),
+                    failures: operation.failure_count ?? 0,
+                  })}
                 </span>
               </div>
             ))}
@@ -395,7 +399,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
       {showSection('capital') && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
+          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.situation.section.capital')}</div>
           {state.strategicDimensions || state.patronOverrideAuthority ? (
             <DiplomacyOverview
               strategicDimensions={state.strategicDimensions}
@@ -404,7 +408,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               playerFaction={playerFaction ?? undefined}
             />
           ) : (
-            <EmptyState message="Diplomacy capital is not available in this view." />
+            <EmptyState message={t('warSummary.situation.empty.capital')} />
           )}
         </section>
       )}

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize War Summary situation chrome
+
+**Type:** Army HQ War Summary situation-tab localization slice. No War Summary model math, convoy staging IPC, municipality-support data, OPSEC sector derivation, operation state, diplomacy capital data, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `warSummary.situation.*` message keys and routed component-owned convoy, local-support, OPSEC, and diplomacy section headings/empty states through the localization substrate. OPSEC flagged-operation-health count and per-operation supply/failure summaries now localize while preserving existing operation filtering and player-safe disclosure.
+
+**Determinism:** Renderer presentation only. Locale preference changes strings only; convoy decisions, support orders, OPSEC sector lists, operation filtering, counts, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts --reporter=dot` failed while BCS mode still rendered English empty states and OPSEC labels. Green rerun passed 10/10. Related `npx.cmd vitest run tests\ui\war_summary_empty_states.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\war_summary_campaign_cost_i18n.test.ts tests\ui\war_summary_personnel_label.test.ts tests\ui\gui_audit_label_discipline.test.ts --reporter=dot` passed 16/16. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/SituationTab.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/war_summary_empty_states.test.ts`, `tests/ui/war_summary_opsec_reconciliation.test.ts`, `docs/40_reports/implemented/20260523_BCS_WAR_SUMMARY_SITUATION_CHROME_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Presidential Toolbar chrome
 
 **Type:** Tactical-map toolbar chrome localization slice. No advance gating, IPC behavior, inbox routing, Decision Room routing, Army HQ routing, dev tools, command authority values, scenario data, save shape, simulation output, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.

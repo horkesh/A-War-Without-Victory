@@ -4,6 +4,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 const storeState: { loadedGameState: LoadedGameState | null } = {
     loadedGameState: null,
@@ -35,6 +36,7 @@ function stateForEmptySummary(): LoadedGameState {
 
 afterEach(() => {
     cleanup();
+    setLocale('en');
     storeState.loadedGameState = null;
 });
 
@@ -50,6 +52,20 @@ describe('War Summary empty states', () => {
         ['support', 'No local support order is staged this turn.'],
         ['capital', 'Diplomacy capital is not available in this view.'],
     ] as const)('renders an EmptyState for the empty %s section', (section, message) => {
+        storeState.loadedGameState = stateForEmptySummary();
+
+        render(createElement(WarSummaryContent, { focusSection: section }));
+
+        expect(screen.getByText(message)).toBeTruthy();
+    });
+
+    it.each([
+        ['convoys', 'Nema odluka o konvojima na cekanju.'],
+        ['support', 'Nijedna naredba lokalne podrske nije pripremljena ovaj potez.'],
+        ['opsec', 'Nijedan sektor trenutno ne vodi OPSEC.'],
+        ['capital', 'Diplomatski kapital nije dostupan u ovom prikazu.'],
+    ] as const)('localizes the empty %s section in BCS mode', (section, message) => {
+        setLocale('bcs');
         storeState.loadedGameState = stateForEmptySummary();
 
         render(createElement(WarSummaryContent, { focusSection: section }));
