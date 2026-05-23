@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Main Menu localization:** [implemented/20260523_BCS_MAIN_MENU_LOCALIZATION.md](implemented/20260523_BCS_MAIN_MENU_LOCALIZATION.md) - the full-screen Main Menu now renders publisher line, theater/date line, primary actions, and secondary actions through the existing English/BCS localization substrate.
+
 **Latest BCS Settings Audio localization:** [implemented/20260523_BCS_SETTINGS_AUDIO_LOCALIZATION.md](implemented/20260523_BCS_SETTINGS_AUDIO_LOCALIZATION.md) - the Settings Audio tab, soundscape row, master-volume row, and associated aria labels now render through the existing English/BCS localization substrate.
 
 **Latest BCS pause menu localization:** [implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md](implemented/20260523_BCS_PAUSE_MENU_LOCALIZATION.md) - the in-game pause menu now renders title, shortcut, actions, overlay label, and preserved-planning notice through the existing English/BCS localization substrate.

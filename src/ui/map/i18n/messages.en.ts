@@ -60,6 +60,14 @@ export const enMessages = {
     'pause.mainMenu': 'Main Menu',
     'pause.quit': 'Quit',
     'pause.preservedNotice': 'Command paused. Planning state is preserved.',
+    'mainMenu.presentedBy': 'Pyrrhic Games presents',
+    'mainMenu.theater': 'Bosnia-Herzegovina, 1992-1995',
+    'mainMenu.newGame': 'New Game',
+    'mainMenu.continue': 'Continue',
+    'mainMenu.loadGame': 'Load Game',
+    'mainMenu.settings': 'Settings',
+    'mainMenu.credits': 'Credits',
+    'mainMenu.quit': 'Quit',
 } as const;
 
 export type MessageKey = keyof typeof enMessages;

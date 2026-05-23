@@ -1,9 +1,11 @@
 /**
- * Main Menu — full-screen landing page.
+ * Main Menu - full-screen landing page.
  * Two-tier layout: primary actions (New Game, Continue, Tutorial)
  * and secondary actions (Load, Settings, Credits).
  */
+import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
+import { t, useLocale } from '../i18n';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -16,6 +18,8 @@ interface MainMenuProps {
 }
 
 export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSettings, onCredits, onQuit }: MainMenuProps) {
+    const [locale] = useLocale();
+
     return (
         <div className="fixed inset-0 flex flex-col items-center justify-center"
              style={{
@@ -27,21 +31,21 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
             {/* Title */}
             <div className="text-center mb-12">
                 <div className="text-[10px] uppercase tracking-[0.5em] text-[#8a7a60]/60 mb-2">
-                    Pyrrhic Games presents
+                    {t('mainMenu.presentedBy', undefined, locale)}
                 </div>
                 <h1 className="text-[36px] font-bold text-[#c4a35a] tracking-wider leading-tight"
                     style={{ textShadow: '0 2px 20px rgba(196, 163, 90, 0.3)' }}>
                     A War Without Victory
                 </h1>
                 <div className="text-[13px] text-[#8a7a60] mt-2 tracking-wide italic">
-                    Bosnia-Herzegovina, 1992–1995
+                    {t('mainMenu.theater', undefined, locale)}
                 </div>
             </div>
 
             {/* Primary actions */}
             <div className="flex flex-col gap-3 w-64 mb-6">
-                <MenuButton onClick={onNewGame} primary>New Game</MenuButton>
-                {hasSave && <MenuButton onClick={onContinue} primary>Continue</MenuButton>}
+                <MenuButton onClick={onNewGame} primary>{t('mainMenu.newGame', undefined, locale)}</MenuButton>
+                {hasSave && <MenuButton onClick={onContinue} primary>{t('mainMenu.continue', undefined, locale)}</MenuButton>}
             </div>
 
             {/* Divider */}
@@ -49,10 +53,10 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
 
             {/* Secondary actions */}
             <div className="flex flex-col gap-2 w-48">
-                <MenuButton onClick={onLoadGame}>Load Game</MenuButton>
-                <MenuButton onClick={onSettings}>Settings</MenuButton>
-                <MenuButton onClick={onCredits}>Credits</MenuButton>
-                <MenuButton onClick={onQuit}>Quit</MenuButton>
+                <MenuButton onClick={onLoadGame}>{t('mainMenu.loadGame', undefined, locale)}</MenuButton>
+                <MenuButton onClick={onSettings}>{t('mainMenu.settings', undefined, locale)}</MenuButton>
+                <MenuButton onClick={onCredits}>{t('mainMenu.credits', undefined, locale)}</MenuButton>
+                <MenuButton onClick={onQuit}>{t('mainMenu.quit', undefined, locale)}</MenuButton>
             </div>
 
             {/* Version */}
@@ -64,7 +68,7 @@ export function MainMenu({ hasSave, onNewGame, onContinue, onLoadGame, onSetting
     );
 }
 
-function MenuButton({ children, onClick, primary }: { children: React.ReactNode; onClick: () => void; primary?: boolean }) {
+function MenuButton({ children, onClick, primary }: { children: ReactNode; onClick: () => void; primary?: boolean }) {
     return (
         <button
             type="button"

@@ -61,4 +61,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'pause.mainMenu': 'Glavni meni',
     'pause.quit': 'Izadji',
     'pause.preservedNotice': 'Komanda je pauzirana. Stanje planiranja je sacuvano.',
+    'mainMenu.presentedBy': 'Pyrrhic Games predstavlja',
+    'mainMenu.theater': 'Bosna i Hercegovina, 1992-1995',
+    'mainMenu.newGame': 'Nova igra',
+    'mainMenu.continue': 'Nastavi',
+    'mainMenu.loadGame': 'Ucitaj igru',
+    'mainMenu.settings': 'Postavke',
+    'mainMenu.credits': 'Zasluge',
+    'mainMenu.quit': 'Izadji',
 };
