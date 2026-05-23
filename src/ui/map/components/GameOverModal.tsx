@@ -1,10 +1,10 @@
 /**
- * Game Over Modal — shown when state.meta.game_over is true.
+ * Game Over Modal - shown when state.meta.game_over is true.
  * Displays outcome, faction standings, and options (New Game / Load).
  *
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Terminal modal: `dismissible={false}`
- * (no ESC, no click-outside) — the only valid close path is starting a new
+ * (no ESC, no click-outside) - the only valid close path is starting a new
  * game (`window.location.reload()`) or loading a save (which replaces the
  * game state and clears `gameOver`). No `onClose` callback exists or is
  * needed.
@@ -14,33 +14,52 @@ import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
+import { t, useLocale, type MessageKey } from '../i18n';
 
-const OUTCOME_LABELS: Record<string, { title: string; subtitle: string }> = {
-    victory_RBiH: { title: 'Republic of Bosnia and Herzegovina Prevails', subtitle: 'The multi-ethnic state endures — but at what cost?' },
-    victory_RS: { title: 'Republika Srpska Achieves Its Aims', subtitle: 'The Serb entity consolidates — but the land is emptied.' },
-    victory_HRHB: { title: 'Herzeg-Bosnia Secures Its Territory', subtitle: 'The Croatian entity holds — but the alliance is shattered.' },
-    timeout_stalemate: { title: 'Stalemate', subtitle: 'The war grinds to exhaustion. No side achieves its aims. Another such victory and all are undone.' },
-    faction_collapse: { title: 'Faction Collapse', subtitle: 'A faction has been driven from the field.' },
-    ceasefire: { title: 'Ceasefire', subtitle: 'The guns fall silent — for now.' },
+const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
+    victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
+    victory_RS: { title: 'gameOver.outcome.victory_RS.title', subtitle: 'gameOver.outcome.victory_RS.subtitle' },
+    victory_HRHB: { title: 'gameOver.outcome.victory_HRHB.title', subtitle: 'gameOver.outcome.victory_HRHB.subtitle' },
+    timeout_stalemate: { title: 'gameOver.outcome.timeout_stalemate.title', subtitle: 'gameOver.outcome.timeout_stalemate.subtitle' },
+    faction_collapse: { title: 'gameOver.outcome.faction_collapse.title', subtitle: 'gameOver.outcome.faction_collapse.subtitle' },
+    ceasefire: { title: 'gameOver.outcome.ceasefire.title', subtitle: 'gameOver.outcome.ceasefire.subtitle' },
 };
 
 function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
-    if (!outcome) return { title: 'Game Over', subtitle: '' };
-    return OUTCOME_LABELS[outcome] ?? { title: outcome.replace(/_/g, ' '), subtitle: '' };
+    if (!outcome) return { title: t('gameOver.fallback.title'), subtitle: '' };
+    const keys = OUTCOME_LABEL_KEYS[outcome];
+    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
+}
+
+function formatOsidsControlled(count: number): string {
+    return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });
+}
+
+function formatActiveBrigades(count: number): string {
+    return t(count === 1 ? 'gameOver.activeBrigade.one' : 'gameOver.activeBrigade.many', { count });
+}
+
+function formatYearCount(count: number): string {
+    return t(count === 1 ? 'gameOver.year.one' : 'gameOver.year.many', { count });
+}
+
+function formatWeekCount(count: number): string {
+    return t(count === 1 ? 'gameOver.week.one' : 'gameOver.week.many', { count });
 }
 
 export function GameOverModal() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const ipc = useIPC();
+    useLocale();
 
     if (!loadedGameState?.gameOver) return null;
     const isOpen = true;
 
     const { title, subtitle } = getOutcomeDisplay(loadedGameState.gameOutcome);
     const turn = loadedGameState.turn ?? 0;
-    const date = loadedGameState.metadata?.date ?? `Turn ${turn}`;
+    const date = loadedGameState.metadata?.date ?? t('gameOver.fallback.turn', { turn });
 
-    // Gather territory stats from controlBySettlement
+    // Gather territory stats from controlBySettlement.
     const controllers = loadedGameState.controlBySettlement ?? {};
     const factionOsids: Record<string, number> = {};
     for (const controller of Object.values(controllers)) {
@@ -50,7 +69,7 @@ export function GameOverModal() {
     }
     const totalOsids = Object.keys(controllers).length || 1;
 
-    // Gather formation counts
+    // Gather formation counts.
     const formations = loadedGameState.formations ?? [];
     const factionBrigades: Record<string, number> = {};
     for (const f of formations) {
@@ -74,7 +93,7 @@ export function GameOverModal() {
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
-                        {date} — A War Without Victory
+                        {date} - A War Without Victory
                     </div>
                     <div id="game-over-title" className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
                         {title}
@@ -86,7 +105,7 @@ export function GameOverModal() {
 
                 {/* Faction Standings */}
                 <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">Final Standings</div>
+                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
                     {factionIds.map((fid) => {
                         const color = FACTION_COLORS[fid as keyof typeof FACTION_COLORS] ?? '#888';
                         const osids = factionOsids[fid] ?? 0;
@@ -102,8 +121,8 @@ export function GameOverModal() {
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
                                 <div className="flex gap-4 text-[10px] text-text-secondary">
-                                    <span>{osids} OSIDs controlled</span>
-                                    <span>{brigades} active brigades</span>
+                                    <span>{formatOsidsControlled(osids)}</span>
+                                    <span>{formatActiveBrigades(brigades)}</span>
                                 </div>
                                 <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
@@ -113,7 +132,11 @@ export function GameOverModal() {
                     })}
 
                     <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
-                        Campaign lasted {turn} weeks ({Math.floor(turn / 52)} years, {turn % 52} weeks)
+                        {t('gameOver.campaignLasted', {
+                            turn,
+                            years: formatYearCount(Math.floor(turn / 52)),
+                            weeks: formatWeekCount(turn % 52),
+                        })}
                     </div>
                 </div>
 
@@ -123,14 +146,14 @@ export function GameOverModal() {
                         onClick={() => window.location.reload()}
                         className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
-                        New Game
+                        {t('gameOver.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button
                             onClick={() => ipc.loadStateDialog?.()}
                             className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
                         >
-                            Load Save
+                            {t('gameOver.loadSave')}
                         </button>
                     )}
                 </div>

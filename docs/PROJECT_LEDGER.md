@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Game Over modal
+
+**Type:** Terminal fallback Game Over UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS message keys for known game-over outcomes, final standings, OSID-control counts, active-brigade counts, campaign duration, New Game, and Load Save. `GameOverModal` now subscribes to the existing locale store and renders these strings through `t(...)`; canonical faction IDs and the `A War Without Victory` product title remain untranslated. The modal date separator is normalized to ASCII ` - `.
+
+**Determinism:** Renderer presentation only. Locale preference remains browser-local UI state; no save/state schema or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\game_over_i18n.test.ts --reporter=dot` failed while the modal still rendered hard-coded English and one-count metric labels. Green `npx.cmd vitest run tests\ui\game_over_i18n.test.ts --reporter=dot` passed 2/2 after implementation. Focused localization pack `npx.cmd vitest run tests\ui\game_over_i18n.test.ts tests\ui\side_picker_i18n.test.ts tests\ui\credits_screen_i18n.test.ts tests\ui\main_menu_i18n.test.ts tests\ui\settings_screen_i18n.test.ts tests\ui\pause_menu_i18n.test.ts tests\ui_i18n.test.ts --reporter=dot` passed 20/20. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/GameOverModal.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/game_over_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize side picker shell
 
 **Type:** New-campaign side-picker UI localization slice. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

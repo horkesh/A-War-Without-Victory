@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Game Over localization:** [implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md](implemented/20260523_BCS_GAME_OVER_LOCALIZATION.md) - the fallback Game Over modal now renders outcome, final standings, faction metric lines, campaign duration, and footer actions through the existing English/BCS localization substrate.
+
 **Latest BCS Side Picker localization:** [implemented/20260523_BCS_SIDE_PICKER_LOCALIZATION.md](implemented/20260523_BCS_SIDE_PICKER_LOCALIZATION.md) - the new-campaign side picker now renders its title, force suffix, load/continue controls, file input label, and close action through the existing English/BCS localization substrate.
 
 **Latest BCS Credits localization:** [implemented/20260523_BCS_CREDITS_LOCALIZATION.md](implemented/20260523_BCS_CREDITS_LOCALIZATION.md) - the Credits screen now renders title, section headings, source framing, dedication, and close affordances through the existing English/BCS localization substrate.
