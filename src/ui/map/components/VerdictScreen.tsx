@@ -157,24 +157,28 @@ function statusFromDelta(deltaWeeks: number | null): MilestoneComparisonStatus {
 }
 
 function formatMilestoneStatus(status: MilestoneComparisonStatus): string {
-    const labels: Record<MilestoneComparisonStatus, string> = {
-        early: 'Early',
-        late: 'Late',
-        on_time: 'On Time',
-        absent: 'Absent',
+    const labels: Record<MilestoneComparisonStatus, MessageKey> = {
+        early: 'verdict.milestone.status.early',
+        late: 'verdict.milestone.status.late',
+        on_time: 'verdict.milestone.status.onTime',
+        absent: 'verdict.milestone.status.absent',
     };
-    return labels[status];
+    return t(labels[status]);
 }
 
 function formatWeekLabel(week: number | null): string {
-    return week === null ? 'Not recorded' : `W${week}`;
+    return week === null
+        ? t('verdict.milestone.notRecorded')
+        : t('verdict.milestone.weekLabel', { week });
 }
 
 function formatDeltaLabel(deltaWeeks: number | null): string {
-    if (deltaWeeks === null) return 'No player match';
-    if (deltaWeeks === 0) return 'On historical week';
-    const direction = deltaWeeks < 0 ? 'early' : 'late';
-    return `${Math.abs(deltaWeeks)}w ${direction}`;
+    if (deltaWeeks === null) return t('verdict.milestone.noPlayerMatch');
+    if (deltaWeeks === 0) return t('verdict.milestone.onHistoricalWeek');
+    const direction = deltaWeeks < 0
+        ? t('verdict.milestone.direction.early')
+        : t('verdict.milestone.direction.late');
+    return t('verdict.milestone.delta', { weeks: Math.abs(deltaWeeks), direction });
 }
 
 function rowFromMilestone(milestone: MilestoneComparison): EndgameMilestoneRow {
@@ -216,20 +220,20 @@ export function buildMilestoneComparisonRows(
     const historicalWeek = costLedger.war_duration_weeks - comparison.duration_delta_weeks;
     const deltaWeeks = comparison.duration_delta_weeks;
     const status = statusFromDelta(deltaWeeks);
-    const timingPhrase = deltaWeeks < 0
-        ? `${Math.abs(deltaWeeks)} weeks earlier`
-        : `${deltaWeeks} weeks later`;
+    const timingDirection = deltaWeeks < 0
+        ? t('verdict.milestone.summary.direction.earlier')
+        : t('verdict.milestone.summary.direction.later');
 
     return [rowFromMilestone({
         id: 'war_duration',
-        label: 'War Duration',
+        label: t('verdict.milestone.warDuration'),
         historical_week: historicalWeek,
         player_week: costLedger.war_duration_weeks,
         delta_weeks: deltaWeeks,
         status,
         summary: deltaWeeks === 0
-            ? 'The campaign reached its end on the historical reference week.'
-            : `The campaign ended ${timingPhrase} than the historical reference.`,
+            ? t('verdict.milestone.summary.onTime')
+            : t('verdict.milestone.summary.delta', { weeks: Math.abs(deltaWeeks), direction: timingDirection }),
     })];
 }
 
@@ -566,11 +570,12 @@ export function VerdictScreen() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow[] }) {
+    useLocale();
     return (
         <div className="px-6 pb-5 space-y-2"
              data-awwv-milestone-comparison={rows.length}>
             <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
-                Milestone Comparison
+                {t('verdict.milestone.title')}
             </div>
             <div className="space-y-2">
                 {rows.map(row => (
@@ -586,10 +591,10 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
                                 {row.summary}
                             </div>
                         </div>
-                        <MilestoneCell label="History" value={row.historicalWeekLabel} />
-                        <MilestoneCell label="You" value={row.playerWeekLabel} />
-                        <MilestoneCell label="Delta" value={row.deltaLabel} />
-                        <MilestoneCell label="Status" value={row.statusLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.history')} value={row.historicalWeekLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.you')} value={row.playerWeekLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.delta')} value={row.deltaLabel} />
+                        <MilestoneCell label={t('verdict.milestone.cell.status')} value={row.statusLabel} />
                     </div>
                 ))}
             </div>

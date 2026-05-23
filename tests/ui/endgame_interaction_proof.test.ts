@@ -255,7 +255,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Teritorija')).toBeDefined();
         expect(screen.getByText('Cijena rata i historijsko poredjenje')).toBeDefined();
         expect(screen.getByText('Ukupno poginulih vojnika')).toBeDefined();
-        expect(screen.getByText('Trajanje rata')).toBeDefined();
+        expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
         expect(screen.getByText('Fokus')).toBeDefined();
         expect(screen.getByText('Ishod')).toBeDefined();
@@ -268,6 +268,16 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Institucije:')).toBeDefined();
         expect(screen.getByText('Konacna podjela:')).toBeDefined();
         expect(screen.getByText('Patronska nadjacavanja:')).toBeDefined();
+        expect(screen.getByText('Poredjenje prekretnica')).toBeDefined();
+        expect(screen.getByText('Historija')).toBeDefined();
+        expect(screen.getByText('Ti')).toBeDefined();
+        expect(screen.getByText('Razlika')).toBeDefined();
+        expect(screen.getByText('Status')).toBeDefined();
+        expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(2);
+        expect(screen.getByText('S188')).toBeDefined();
+        expect(screen.getByText('6s kasno')).toBeDefined();
+        expect(screen.getByText('Kasno')).toBeDefined();
+        expect(screen.getByText('Kampanja je zavrsila 6 sedmica kasnije od historijske reference.')).toBeDefined();
 
         fireEvent.click(screen.getByText('VRS'));
 
