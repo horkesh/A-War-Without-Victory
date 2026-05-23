@@ -1,5 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
+**Localization addendum 2026-05-23 (Chief of Staff header):** Army HQ Chief of Staff now localizes the briefing stamp, daily-briefing label, and staff title chrome through the English/BCS substrate while preserving rank/name rendering and existing date formatting. Letter-home prose remains a follow-up localization/content-review slice; shared date formatting remains broader i18n work. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md`. On top of:
+
 **Localization addendum 2026-05-23 (Chief of Staff combat tones):** Army HQ Chief of Staff now localizes precise/aggressive combat and territory summary prose through the English/BCS substrate while preserving battle counting and territory-net derivation. Header chrome and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMBAT_TONE_LOCALIZATION.md`. On top of:
 
 **Localization addendum 2026-05-23 (Chief of Staff command strain):** Army HQ Chief of Staff now localizes command-strain institutional warning prose for cautious, precise, and aggressive tones through the English/BCS substrate while preserving corps-name interpolation and deterministic corps ordering. Precise/aggressive combat and territory prose, header, and letter-home prose remain follow-up localization/content-review slices. Report: `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_COMMAND_STRAIN_LOCALIZATION.md`. On top of:

@@ -1,5 +1,8 @@
+// @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import { generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
+import { createElement } from 'react';
+import { cleanup, render, screen } from '@testing-library/react';
+import { ChiefOfStaffBriefing, generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -15,6 +18,7 @@ function flatten(paragraphs: ReturnType<typeof generateCoSBriefing>): string {
 describe('Chief of Staff briefing localization', () => {
     afterEach(() => {
         setLocale('en');
+        cleanup();
     });
 
     it('localizes stable no-alert briefing prose in BCS mode', () => {
@@ -357,5 +361,27 @@ describe('Chief of Staff briefing localization', () => {
         expect(cautiousText + preciseText + aggressiveText).not.toContain('command relations with');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('Command Authority Status');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('overrides have left a mark');
+    });
+
+    it('localizes Chief of Staff header chrome in BCS mode', () => {
+        setLocale('bcs');
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 1,
+            latestTurnSummary: null,
+        } as LoadedGameState;
+
+        const { container } = render(createElement(ChiefOfStaffBriefing, {
+            briefingItems: [],
+            gameState: state,
+            faction: 'RS',
+        }));
+
+        expect(screen.getByText(/Dnevni brifing/)).toBeTruthy();
+        expect(screen.getByText('BRIFING')).toBeTruthy();
+        expect(screen.getAllByText('Nacelnik Glavnog staba').length).toBeGreaterThan(0);
+        expect(container.textContent).not.toContain('Daily Briefing');
+        expect(container.textContent).not.toContain('BRIEFING');
+        expect(container.textContent).not.toContain('Chief of Main Staff');
     });
 });

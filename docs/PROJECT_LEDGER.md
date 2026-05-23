@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Chief of Staff header chrome
+
+**Type:** Army HQ Chief of Staff UI chrome localization slice. No Chief of Staff identity, faction profile selection, briefing generation, date calculation, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Added English/BCS `chiefOfStaff.header.*` and `chiefOfStaff.title.*` message keys. `ChiefOfStaffBriefing` now localizes the paper stamp, daily-briefing label, visible staff title, and footer staff title while preserving rank/name rendering and existing date formatting.
+
+**Determinism:** Renderer presentation only. Locale preference remains UI state; profile selection, generated briefing paragraphs, and persisted saves are unchanged.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts --reporter=dot` failed while BCS mode still rendered English header chrome. Green rerun passed 8/8. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/components/army_hq/ChiefOfStaffBriefing.tsx`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `tests/ui/chief_of_staff_briefing_i18n.test.ts`, `docs/40_reports/implemented/20260523_BCS_CHIEF_OF_STAFF_HEADER_LOCALIZATION.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Chief of Staff combat tone prose
 
 **Type:** Army HQ Chief of Staff generated-prose localization slice. No battle outcome classification, territory-net derivation, command briefing generation, turn-summary schema, scenario data, save shape, calibration/army-arc tuning, generated artifact, network IO, timestamp, or random source changed.
