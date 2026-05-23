@@ -330,4 +330,44 @@ describe('generateChronicleEntries', () => {
         expect(ghostEntry?.title).toBe('Historical rupture absent');
         expect(ghostEntry?.detail).toContain('Srebrenica enclave survived in your war');
     });
+
+    it('creates a personnel spotlight for a named commander who completes an operation', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 24,
+            turnSummaries: [makeTurnSummary(24)],
+            operationHistory: [{
+                operation_id: 'op-vitez-relief',
+                operation_name: 'Vitez Relief',
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                started_turn: 20,
+                ended_turn: 24,
+                outcome: 'partial',
+                commander_name: 'Enver Hadzihasanovic',
+                commander_rank: 'General',
+                objectives_targeted: ['op:vitez:vitez_1', 'op:vitez:vitez_2'],
+                objectives_captured: ['op:vitez:vitez_1'],
+                total_attacks: 4,
+                casualties_suffered: { killed: 20, wounded: 50 },
+                casualties_inflicted: { killed: 35, wounded: 90 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                grade: { stars: 3, verdict: 'costly partial success', factors: {} },
+                duration_turns: 4,
+                weekly_log: [],
+            }],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+        const spotlight = entries.find(e => (e.type as string) === 'personnel');
+
+        expect(spotlight).toBeDefined();
+        expect(spotlight?.headline).toBe(true);
+        expect(spotlight?.title).toBe('Officer of the Week: General Enver Hadzihasanovic');
+        expect(spotlight?.detail).toContain('Vitez Relief');
+        expect(spotlight?.detail).toContain('1/2 objectives');
+        expect(spotlight?.metadata?.operationAarId).toBe('op-vitez-relief');
+    });
 });

@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] feat(chronicle): spotlight completed-operation commanders
+
+**Type:** UI read-model/presentation enhancement. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, save schema, or sim output contract changed.
+
+**Why:** The officer/personnel AAA+++ lane already had mini-bios and compact operation AAR Chronicle cards, but the explicit "Officer of the Week" Chronicle beat was still missing from the player-facing campaign record.
+
+**Change:** `generateChronicleEntries(...)` now emits a `personnel` Chronicle card for each player-faction completed operation AAR with a named commander. The card title uses the existing commander rank/name, details the operation name/outcome/objective count/attacks/star grade, and preserves `metadata.operationAarId` so the existing Chronicle dossier action opens the owning Army HQ Operation History row. Chronicle card styling, timeline dot colors, and filters now recognize the `personnel` category.
+
+**Determinism / output impact:** Deterministic UI projection only from existing `operationHistory` fields. No new runtime state, save migration, or baseline artifact refresh is required.
+
+**Verification:** Red/green `npx.cmd vitest run tests\chronicle_entries.test.ts --reporter=dot` failed on the missing personnel spotlight before implementation, then PASS 16/16 after implementation; `npx.cmd vitest run tests\chronicle_entries.test.ts tests\ui_chronicle_review_tools.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_chapter_ui.test.ts tests\ui\chronicle_chapter_guardrails.test.ts tests\ui_chronicle_operation_aar_link.test.ts --reporter=dot` PASS 32/32; `npm.cmd run typecheck` PASS; `npm.cmd run desktop:map:build` PASS with existing Vite warnings; `git diff --check` PASS.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_CHRONICLE_OFFICER_OF_WEEK.md`.
+
+**Roadmap delta:** Advances Rating #10 officer/personnel character layer by closing the Chronicle "Officer of the Week" card sub-item. Remaining officer-character lift is authored trait surfacing, not operation-history spotlight wiring.
+
+---
+
 ## [2026-05-23] fix(briefing): read canonical command signals
 
 **Type:** Sim-side command briefing truth fix. No combat math, operation behavior, scenario data, calibration/army-arc tuning, painted targets, event content, turn ordering, UI ownership, or save schema changed.

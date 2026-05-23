@@ -1,4 +1,4 @@
-export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost';
+export type ChronicleCardType = 'combat' | 'political' | 'humanitarian' | 'military' | 'diplomatic' | 'narrative' | 'cost' | 'personnel';
 
 export interface ChronicleEntry {
     id?: string;
@@ -21,6 +21,8 @@ export interface ChronicleEntry {
         aftermathId?: string;
         operationAarId?: string;
         operationOutcome?: string;
+        officerName?: string;
+        officerRank?: string;
         costLedgerRef?: string;
         codexRef?: string;
         sensitiveSignals?: Array<'atrocity' | 'rupture'>;
@@ -30,6 +32,7 @@ export interface ChronicleEntry {
 import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
+    getPlayerSafeOfficerName,
     getPlayerSafeSettlementName,
 } from '../../utils/playerSafeText.js';
 
@@ -249,6 +252,57 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
     return entries;
 }
 
+function buildOfficerSpotlightEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
+    if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
+
+    const entries: ChronicleEntry[] = [];
+    for (const op of state.operationHistory) {
+        if (op?.faction !== playerFaction) continue;
+
+        const commanderName = getPlayerSafeOfficerName(
+            typeof op.commander_name === 'string' ? op.commander_name : null,
+            '',
+        );
+        if (!commanderName) continue;
+
+        const commanderRank = typeof op.commander_rank === 'string' && op.commander_rank.trim().length > 0
+            ? op.commander_rank.trim()
+            : undefined;
+        const displayName = commanderRank ? `${commanderRank} ${commanderName}` : commanderName;
+        const targeted = Array.isArray(op.objectives_targeted) ? op.objectives_targeted.length : 0;
+        const captured = Array.isArray(op.objectives_captured) ? op.objectives_captured.length : 0;
+        const attacks = Number(op.total_attacks ?? 0);
+        const stars = Number(op.grade?.stars ?? 0);
+        const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
+        const operationName = getPlayerSafeDisplayLabel(op.operation_name, 'Operation');
+
+        entries.push({
+            id: typeof op.operation_id === 'string' ? `officer-week-${op.operation_id}` : undefined,
+            turn: Number(op.ended_turn ?? state.turn ?? 0),
+            type: 'personnel',
+            headline: captured > 0 || outcome === 'success' || outcome === 'partial',
+            title: `Officer of the Week: ${displayName}`,
+            detail: [
+                operationName,
+                formatOperationOutcome(outcome),
+                `${captured}/${targeted} objectives`,
+                `${attacks} attacks`,
+                `${stars} ${stars === 1 ? 'star' : 'stars'}`,
+            ].join(' | '),
+            metadata: {
+                corpsId: typeof op.corps_id === 'string' ? op.corps_id : undefined,
+                operationAarId: typeof op.operation_id === 'string' ? op.operation_id : undefined,
+                operationName,
+                operationOutcome: outcome,
+                officerName: commanderName,
+                officerRank: commanderRank,
+            },
+        });
+    }
+
+    return entries;
+}
+
 export function generateChronicleEntries(state: any): ChronicleEntry[] {
     if (!state || !state.turnSummaries || !Array.isArray(state.turnSummaries)) {
         return [];
@@ -366,6 +420,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
 
     entries.push(...buildEndgameComparisonEntries(state));
     entries.push(...buildOperationHistoryEntries(state, playerFaction));
+    entries.push(...buildOfficerSpotlightEntries(state, playerFaction));
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }

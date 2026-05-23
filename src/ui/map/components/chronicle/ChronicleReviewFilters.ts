@@ -10,6 +10,7 @@ export const CHRONICLE_FILTERS: Array<{ id: ChronicleFilterId; label: string }> 
     { id: 'political', label: 'Political' },
     { id: 'humanitarian', label: 'Humanitarian' },
     { id: 'military', label: 'Military' },
+    { id: 'personnel', label: 'Personnel' },
     { id: 'diplomatic', label: 'Diplomatic' },
     { id: 'narrative', label: 'Narrative' },
 ];
@@ -22,6 +23,7 @@ function emptyEntryCounts(): Record<ChronicleFilterId, number> {
         political: 0,
         humanitarian: 0,
         military: 0,
+        personnel: 0,
         diplomatic: 0,
         narrative: 0,
         cost: 0,
