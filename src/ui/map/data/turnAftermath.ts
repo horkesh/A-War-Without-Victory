@@ -265,10 +265,6 @@ function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, st
   };
 }
 
-function pluralize(value: number, singular: string, plural: string = `${singular}s`): string {
-  return value === 1 ? singular : plural;
-}
-
 function costReason(key: MessageKey, count: number): string {
   return t(key, { count });
 }
@@ -685,17 +681,27 @@ function buildCampaignBriefing(
   summary: TurnAftermathLedgerSummary,
   signalCount: number,
 ): string {
-  if (summary.recordCount === 0) return 'No archived turn records are available.';
+  if (summary.recordCount === 0) return t('turnAftermath.campaign.briefing.noRecords');
   if (momentum === 'advancing') {
-    return `Archive window is moving forward: ${summary.netFriendlyTerritory >= 0 ? '+' : ''}${summary.netFriendlyTerritory} net OSIDs with ${signalCount} strategic signals.`;
+    return t('turnAftermath.campaign.briefing.advancing', {
+      net: `${summary.netFriendlyTerritory >= 0 ? '+' : ''}${summary.netFriendlyTerritory}`,
+      signals: signalCount,
+    });
   }
   if (momentum === 'bleeding') {
-    return `Archive window is costly: ${summary.netFriendlyTerritory} net OSIDs, ${summary.totalFriendlyMilitaryCasualties} friendly casualties, ${summary.totalDisplaced} displaced.`;
+    return t('turnAftermath.campaign.briefing.bleeding', {
+      net: summary.netFriendlyTerritory,
+      casualties: summary.totalFriendlyMilitaryCasualties,
+      displaced: summary.totalDisplaced,
+    });
   }
   if (momentum === 'contested') {
-    return `Archive window is contested: little net ground movement, but ${summary.totalFriendlyMilitaryCasualties} friendly casualties and ${signalCount} strategic signals.`;
+    return t('turnAftermath.campaign.briefing.contested', {
+      casualties: summary.totalFriendlyMilitaryCasualties,
+      signals: signalCount,
+    });
   }
-  return 'Archive window is quiet: no major movement or costs in the visible records.';
+  return t('turnAftermath.campaign.briefing.quiet');
 }
 
 function classifyCampaignCost(
@@ -736,11 +742,11 @@ function buildCampaignCostHeadline(
   severity: TurnAftermathCostSeverity,
   summary: TurnAftermathLedgerSummary,
 ): string {
-  if (summary.recordCount === 0) return 'No campaign cost records yet.';
-  if (severity === 'critical') return 'Campaign cost is critical.';
-  if (severity === 'severe') return 'Campaign cost is severe.';
-  if (severity === 'moderate') return 'Campaign cost is accumulating.';
-  return 'Campaign cost is light.';
+  if (summary.recordCount === 0) return t('turnAftermath.campaignCost.headline.noRecords');
+  if (severity === 'critical') return t('turnAftermath.campaignCost.headline.critical');
+  if (severity === 'severe') return t('turnAftermath.campaignCost.headline.severe');
+  if (severity === 'moderate') return t('turnAftermath.campaignCost.headline.moderate');
+  return t('turnAftermath.campaignCost.headline.low');
 }
 
 function buildCampaignCostBriefing(input: {
@@ -750,20 +756,33 @@ function buildCampaignCostBriefing(input: {
   casualtyExchangeRatio: number | null;
 }): string {
   const { severity, summary, casualtyExchangeRatio } = input;
-  if (summary.recordCount === 0) return 'No archived turn records are available.';
+  if (summary.recordCount === 0) return t('turnAftermath.campaign.briefing.noRecords');
   const exchange = casualtyExchangeRatio == null
-    ? 'no clear casualty exchange'
-    : `${casualtyExchangeRatio.toFixed(2)} opposing casualties per friendly casualty`;
+    ? t('turnAftermath.campaignCost.exchange.none')
+    : t('turnAftermath.campaignCost.exchange.ratio', { ratio: casualtyExchangeRatio.toFixed(2) });
   const territory = summary.netFriendlyTerritory >= 0
     ? `+${summary.netFriendlyTerritory}`
     : String(summary.netFriendlyTerritory);
   if (severity === 'critical' || severity === 'severe') {
-    return `${summary.recordCount} recorded turns: ${summary.totalFriendlyMilitaryCasualties} friendly casualties, ${summary.totalDisplaced} displaced, ${territory} net OSIDs, ${exchange}.`;
+    return t('turnAftermath.campaignCost.briefing.hard', {
+      turns: summary.recordCount,
+      casualties: summary.totalFriendlyMilitaryCasualties,
+      displaced: summary.totalDisplaced,
+      territory,
+      exchange,
+    });
   }
   if (severity === 'moderate') {
-    return `${summary.recordCount} recorded turns: cost is present but not dominant, with ${territory} net OSIDs and ${exchange}.`;
+    return t('turnAftermath.campaignCost.briefing.moderate', {
+      turns: summary.recordCount,
+      territory,
+      exchange,
+    });
   }
-  return `${summary.recordCount} recorded turns: no major costs recorded, with ${territory} net OSIDs.`;
+  return t('turnAftermath.campaignCost.briefing.low', {
+    turns: summary.recordCount,
+    territory,
+  });
 }
 
 function buildCampaignCostDrivers(input: {
@@ -775,38 +794,46 @@ function buildCampaignCostDrivers(input: {
   const { summary, totalOpposingMilitaryCasualties, casualtyExchangeRatio } = input;
   if (summary.totalFriendlyMilitaryCasualties > 0) {
     drivers.push({
-      label: `${summary.totalFriendlyMilitaryCasualties} friendly casualties`,
+      label: t('turnAftermath.campaignCost.driver.friendlyCasualties', { count: summary.totalFriendlyMilitaryCasualties }),
       weight: summary.totalFriendlyMilitaryCasualties * 10,
     });
   }
   if (totalOpposingMilitaryCasualties > 0) {
     drivers.push({
-      label: `${totalOpposingMilitaryCasualties} opposing casualties`,
+      label: t('turnAftermath.campaignCost.driver.opposingCasualties', { count: totalOpposingMilitaryCasualties }),
       weight: totalOpposingMilitaryCasualties * 6,
     });
   }
   if (summary.totalDisplaced > 0) {
     drivers.push({
-      label: `${summary.totalDisplaced} displaced`,
+      label: t('turnAftermath.campaignCost.driver.displaced', { count: summary.totalDisplaced }),
       weight: summary.totalDisplaced,
     });
   }
   if (summary.totalOwnFormationsDestroyed > 0) {
     drivers.push({
-      label: `${summary.totalOwnFormationsDestroyed} own ${pluralize(summary.totalOwnFormationsDestroyed, 'formation')} destroyed`,
+      label: t(
+        summary.totalOwnFormationsDestroyed === 1
+          ? 'turnAftermath.campaignCost.driver.ownFormationDestroyed.one'
+          : 'turnAftermath.campaignCost.driver.ownFormationDestroyed.many',
+        { count: summary.totalOwnFormationsDestroyed },
+      ),
       weight: summary.totalOwnFormationsDestroyed * 2500,
     });
   }
   const hardTurnCount = summary.criticalTurns + summary.severeTurns;
   if (hardTurnCount > 0) {
     drivers.push({
-      label: `${hardTurnCount} hard ${pluralize(hardTurnCount, 'turn')}`,
+      label: t(
+        hardTurnCount === 1 ? 'turnAftermath.campaignCost.driver.hardTurn.one' : 'turnAftermath.campaignCost.driver.hardTurn.many',
+        { count: hardTurnCount },
+      ),
       weight: hardTurnCount * 1500,
     });
   }
   if (casualtyExchangeRatio != null && casualtyExchangeRatio < 0.75 && summary.totalFriendlyMilitaryCasualties > 0) {
     drivers.push({
-      label: `${casualtyExchangeRatio.toFixed(2)} casualty exchange`,
+      label: t('turnAftermath.campaignCost.driver.casualtyExchange', { ratio: casualtyExchangeRatio.toFixed(2) }),
       weight: 1200,
     });
   }
@@ -847,7 +874,7 @@ export function buildTurnAftermathCampaignPulse(records: readonly TurnAftermathV
   const oldest = records[records.length - 1]?.dateLabel ?? null;
   const windowLabel = latest && oldest
     ? latest === oldest ? latest : `${oldest} - ${latest}`
-    : 'No records';
+    : t('turnAftermath.records.noRecords');
 
   return {
     recordCount: summary.recordCount,
@@ -888,7 +915,7 @@ export function buildTurnAftermathCampaignCost(input: TurnAftermathRecordsInput)
   const oldest = records[records.length - 1]?.dateLabel ?? null;
   const windowLabel = latest && oldest
     ? latest === oldest ? latest : `${oldest} - ${latest}`
-    : 'No records';
+    : t('turnAftermath.records.noRecords');
   const mostCostlyRecord = records.reduce<TurnAftermathView | null>((best, record) => {
     if (!best) return record;
     const score = campaignCostScore(record);

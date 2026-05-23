@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS Turn Aftermath archive localization:** [implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md) - Turn Aftermath campaign pulse/cost archive prose, cost-driver labels, Army HQ Records filters, metric labels/details, badges, and empty states now render through the English/BCS substrate.
+
 **Latest BCS Turn Aftermath localization:** [implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md) - Turn Aftermath modal chrome, metrics, empty states, enum badges, generated headlines, narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose now render through the English/BCS substrate.
 
 **Latest BCS Codex chrome localization:** [implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md](implemented/20260523_BCS_CODEX_CHROME_LOCALIZATION.md) - `CodexPanel` title, essay-count line, empty/locked instructions, ghost/context labels, dynamic-section labels, pending text, and source heading now render through the English/BCS substrate.

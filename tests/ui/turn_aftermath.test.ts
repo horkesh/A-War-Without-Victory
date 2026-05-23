@@ -458,6 +458,69 @@ describe('buildTurnAftermathView', () => {
     });
   });
 
+  it('localizes campaign pulse and campaign cost archive prose when BCS is selected', () => {
+    setLocale('bcs');
+
+    const turn18 = makeSummary({
+      turn: 18,
+      territory_net: { RBiH: -2 },
+      displacement_total: 4000,
+      formation_destructions: [{ formation_id: 'arbih_lost_a', formation_name: 'Lost A', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:a',
+        attacker_faction: 'RBiH',
+        defender_faction: 'RS',
+        primary_attacker_id: 'a',
+        primary_defender_id: 'b',
+        all_attacker_ids: ['a'],
+        outcome: 'defeat' as never,
+        attacker_casualties: 40,
+        defender_casualties: 10,
+        territory_flipped: false,
+        was_concentrated: false,
+      }],
+    });
+    const turn19 = makeSummary({ turn: 19, territory_net: { RBiH: 1 } });
+    const turn20 = makeSummary({
+      turn: 20,
+      territory_net: { RBiH: 3 },
+      displacement_total: 1200,
+      formation_destructions: [{ formation_id: 'arbih_lost_b', formation_name: 'Lost B', faction: 'RBiH' }],
+      battles: [{
+        osid: 'op:test:b',
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        primary_attacker_id: 'c',
+        primary_defender_id: 'd',
+        all_attacker_ids: ['c'],
+        outcome: 'breakthrough' as never,
+        attacker_casualties: 40,
+        defender_casualties: 120,
+        territory_flipped: true,
+        was_concentrated: false,
+      }],
+    });
+    const state = makeState({
+      turn: 20,
+      latestTurnSummary: turn20,
+      turnSummaries: [turn18, turn19],
+    });
+
+    const records = buildTurnAftermathRecordViews({ state });
+    const pulse = buildTurnAftermathCampaignPulse(records);
+    const cost = buildTurnAftermathCampaignCost({ state });
+
+    expect(pulse.briefing).toBe('Arhivski prozor je miran: nema vecih pomjeranja ili troskova u vidljivim zapisima.');
+    expect(cost.headline).toBe('Cijena kampanje je kriticna.');
+    expect(cost.briefing).toBe('3 zabiljezena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 neto OSID-a, 0.31 protivnickih gubitaka po prijateljskom gubitku.');
+    expect(cost.topDrivers).toEqual([
+      '5200 raseljenih',
+      '2 vlastite formacije unistene',
+      '2 teska poteza',
+      '160 prijateljskih gubitaka',
+    ]);
+  });
+
   it('returns a quiet active campaign cost shell without archived records', () => {
     const cost = buildTurnAftermathCampaignCost({
       state: makeState({ latestTurnSummary: null, turnSummaries: [] }),
