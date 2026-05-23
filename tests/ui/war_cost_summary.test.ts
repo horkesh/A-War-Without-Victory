@@ -9,13 +9,18 @@
  * Tests pure formatting functions only — no React rendering.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import {
     formatDurationDelta,
     formatCasualtyRatio,
     formatHistoricalDivergenceNote,
     formatTerritoryDivergence,
 } from '../../src/ui/map/components/WarCostSummary';
+import { setLocale } from '../../src/ui/map/i18n';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // formatDurationDelta
@@ -103,5 +108,16 @@ describe('formatHistoricalDivergenceNote', () => {
     it('preserves unknown source-authored notes as fallback', () => {
         expect(formatHistoricalDivergenceNote('A source-authored divergence note'))
             .toBe('A source-authored divergence note');
+    });
+
+    it('localizes generated territory and casualty notes in BCS', () => {
+        setLocale('bcs');
+
+        expect(formatHistoricalDivergenceNote('Federation controlled 54.0% territory vs historical 51%'))
+            .toBe('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');
+        expect(formatHistoricalDivergenceNote('RS controlled 47.5% territory vs historical 49%'))
+            .toBe('RS je kontrolisao 47.5% teritorije naspram historijskih 49%.');
+        expect(formatHistoricalDivergenceNote('Total military casualties were 72% of historical levels'))
+            .toBe('Ukupni vojni gubici bili su 72% historijskog nivoa.');
     });
 });

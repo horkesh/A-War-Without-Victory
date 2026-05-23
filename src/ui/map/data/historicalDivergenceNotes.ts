@@ -23,6 +23,25 @@ export function formatHistoricalDivergenceNote(note: string): string {
         return t('warCost.divergence.duration.exact', { historicalWeeks: Number(exactMatch[1]) });
     }
 
+    const territoryMatch = /^(.+) controlled ([\d.]+)% territory vs historical ([\d.]+)%$/.exec(note);
+    if (territoryMatch) {
+        const rawLabel = territoryMatch[1] ?? '';
+        const label = rawLabel === 'Federation' ? t('warCost.federation') : rawLabel;
+        const messageKey = rawLabel === 'Federation'
+            ? 'warCost.divergence.territoryControlledFederation'
+            : 'warCost.divergence.territoryControlled';
+        return t(messageKey, {
+            label,
+            playerPct: territoryMatch[2] ?? '',
+            historicalPct: territoryMatch[3] ?? '',
+        });
+    }
+
+    const casualtyMatch = /^Total military casualties were (\d+)% of historical levels$/.exec(note);
+    if (casualtyMatch) {
+        return t('warCost.divergence.casualtyTotal', { casualtyPct: Number(casualtyMatch[1]) });
+    }
+
     const knownNotes: Record<string, string> = {
         'Srebrenica genocide occurred': t('warCost.divergence.srebrenicaOccurred'),
         'Srebrenica genocide occurred as in the historical war': t('warCost.divergence.srebrenicaOccurredHistorical'),

@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(i18n): localize Codex and Chronicle comparison notes
+
+**Type:** Codex/Chronicle generated historical-comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, Codex essay unlock logic, Chronicle entry selection, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.
+
+**Change:** Expanded `formatHistoricalDivergenceNote(...)` to cover current generated duration, territory-control, military-casualty, and Srebrenica comparison-note shapes. Codex `{comparison_notes}`, Chronicle card details, and Chronicle Wrapped bullets now reuse the formatter. `getActiveLocale()` now preserves in-memory locale in non-browser/server-render contexts instead of resetting to English when no `window.localStorage` exists.
+
+**Determinism:** Renderer/data presentation only. Locale preference remains browser-local UI state in browser contexts; non-browser render paths now honor explicit in-memory locale selection. No save/state schema, Cost Ledger output, historical comparison output, verdict output, or sim output changed.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\war_cost_summary.test.ts tests\ui\codex_panel_dynamic_mount.test.ts tests\ui\chronicle_endgame_mount.test.ts --reporter=dot` failed while BCS mode still rendered raw generated English comparison notes and non-browser locale lookup reset to English. Green rerun passed 22/22. Expanded localization/endgame pack passed 106/106. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed; build retained existing Vite warnings.
+
+**Artifacts:** `src/ui/map/data/historicalDivergenceNotes.ts`, `src/ui/map/i18n/index.ts`, `src/ui/map/i18n/messages.en.ts`, `src/ui/map/i18n/messages.bcs.ts`, `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/components/codex/codexEssayResolver.ts`, `src/ui/map/components/chronicle/ChronicleCard.tsx`, `src/ui/map/components/chronicle/WrappedSlide.tsx`, `tests/ui/war_cost_summary.test.ts`, `tests/ui/codex_panel_dynamic_mount.test.ts`, `tests/ui/chronicle_endgame_mount.test.ts`, `docs/40_reports/implemented/20260523_BCS_CODEX_CHRONICLE_COMPARISON_LOCALIZATION.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(i18n): localize Cinematic Verdict comparison notes
 
 **Type:** `CinematicVerdict` / verdict share-summary historical comparison localization slice. No simulation behavior, combat math, operation behavior, `compareToHistorical(...)`, divergence-note generation, Cost Ledger data, verdict scoring, scenario data, calibration/army-arc tuning, save schema, generated artifact, network IO, timestamp, or random source changed.

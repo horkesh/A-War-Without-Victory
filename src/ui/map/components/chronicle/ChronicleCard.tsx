@@ -1,5 +1,7 @@
 import React from 'react';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
+import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
+import { useLocale } from '../../i18n';
 
 /** Paper card accent colors — left border + category badge. */
 const CARD_ACCENT: Record<ChronicleCardType, { border: string; badge: string; badgeText: string }> = {
@@ -33,8 +35,10 @@ interface ChronicleCardProps {
  * monospace detail. Styled like a filed intelligence report.
  */
 export const ChronicleCard = React.memo(function ChronicleCard({ entry }: ChronicleCardProps) {
+    useLocale();
     const accent = CARD_ACCENT[entry.type];
     const label = entry.ghost ? 'GHOST' : CARD_LABELS[entry.type];
+    const detail = entry.detail ? formatHistoricalDivergenceNote(entry.detail) : '';
 
     return (
         <div
@@ -68,9 +72,9 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
                 </div>
 
                 {/* Detail */}
-                {entry.detail && (
+                {detail && (
                     <div className={`text-[9px] font-mono mt-1 leading-tight ${entry.ghost ? 'text-amber-200/55 italic' : 'text-stone-400/70'}`}>
-                        {entry.detail}
+                        {detail}
                     </div>
                 )}
             </div>

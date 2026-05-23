@@ -7,6 +7,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameStore } from '../store/gameStore.js';
 import essayIndex from '../../../../data/scenarios/essays/essay_index.json';
 import { resolveCodexEssay, type EssayEntry } from './codex/codexEssayResolver.js';
+import { useLocale } from '../i18n';
 import { Z } from '../../shared/zIndex.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
@@ -34,6 +35,7 @@ interface CodexPanelProps {
 
 export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const locale = useLocale();
     const [selectedEssayId, setSelectedEssayId] = useState<string | null>(null);
     const [expandedYear, setExpandedYear] = useState<number | null>(1992);
 
@@ -69,7 +71,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
             gameOver: loadedGameState?.gameOver,
         };
         return new Map(essays.map((essay) => [essay.id, resolveCodexEssay(essay, context)]));
-    }, [essays, firedEventIds, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
+    }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver]);
 
     const visibleEssaysByYear = useMemo(() => {
         const grouped = new Map<number, EssayEntry[]>();
