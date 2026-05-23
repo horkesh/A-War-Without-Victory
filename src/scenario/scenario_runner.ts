@@ -552,8 +552,13 @@ interface OsidPairMatchRow {
     sim_count: number;
     painted_count: number;
     correctly_placed: number;
-    /** correctly_placed / max(sim_count, painted_count) — spatial precision for this faction. */
-    accuracy: number;
+    /**
+     * correctly_placed / max(sim_count, painted_count) — spatial precision for
+     * this faction. Named `accuracy_ratio` (not `accuracy`) so the suffix
+     * matches `shouldPreserveFractionalRunSummaryField` whitelist, otherwise
+     * `integerizeRunSummaryCounts` rounds it to an integer at serialization.
+     */
+    accuracy_ratio: number;
 }
 
 /**
@@ -572,8 +577,13 @@ interface OsidPairMatchDiagnostics {
     total_osids: number;
     /** Of those, OSIDs where sim controller === painted controller. */
     matched_osids: number;
-    /** matched_osids / total_osids ∈ [0, 1]. */
-    match_percentage: number;
+    /**
+     * matched_osids / total_osids ∈ [0, 1]. Named `match_ratio` (not
+     * `match_percentage`) so the suffix matches
+     * `shouldPreserveFractionalRunSummaryField` whitelist; otherwise
+     * `integerizeRunSummaryCounts` rounds it to an integer at serialization.
+     */
+    match_ratio: number;
     /** Per-faction accuracy breakdown. */
     per_faction: OsidPairMatchRow[];
     /** First N OSID mismatches for debugging — capped to keep run_summary readable. */
@@ -699,7 +709,7 @@ function computeOsidPairMatchDiagnostics(
         reference_key: referenceKey,
         total_osids: total,
         matched_osids: matched,
-        match_percentage: total > 0 ? matched / total : 0,
+        match_ratio: total > 0 ? matched / total : 0,
         per_faction: controllers.map((controller) => {
             const t = perFaction.get(controller)!;
             const denom = Math.max(t.sim, t.painted);
@@ -708,7 +718,7 @@ function computeOsidPairMatchDiagnostics(
                 sim_count: t.sim,
                 painted_count: t.painted,
                 correctly_placed: t.matched,
-                accuracy: denom > 0 ? t.matched / denom : 0,
+                accuracy_ratio: denom > 0 ? t.matched / denom : 0,
             };
         }),
         sample_mismatches: mismatches,
