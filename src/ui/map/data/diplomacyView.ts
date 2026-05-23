@@ -10,8 +10,10 @@ import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
     DiplomacyActorView,
+    DiplomacyNeedleHintView,
     DiplomacyPressureReasonView,
     DiplomacyProposalView,
+    DiplomacyTimelineEntryView,
     DiplomacyView,
     PlayerKnowledgeConfidence,
 } from './types';
@@ -198,6 +200,70 @@ function buildConsequences(state: any): DiplomacyView['activeConsequences'] {
     }));
 }
 
+function buildNegotiationTimeline(
+    activeProposals: DiplomacyProposalView[],
+    externalActors: DiplomacyActorView[],
+    activeConsequences: DiplomacyView['activeConsequences'],
+): DiplomacyTimelineEntryView[] {
+    const proposalEntries: DiplomacyTimelineEntryView[] = activeProposals.map((proposal) => ({
+        id: `proposal:${proposal.id}`,
+        label: proposal.name,
+        detail: proposal.statusLabel,
+        turn: proposal.turnOffered,
+        confidence: proposal.confidence,
+    }));
+    const relationshipEntries: DiplomacyTimelineEntryView[] = externalActors.flatMap((actor) => actor.events.map((event) => ({
+        id: `patron:${actor.faction}:${event}`,
+        label: `${actor.patronLabel}: ${event.replace(/_/g, ' ')}`,
+        detail: `${actor.faction} channel relationship signal.`,
+        turn: undefined,
+        confidence: 'likely' as const,
+    })));
+    const consequenceEntries: DiplomacyTimelineEntryView[] = activeConsequences.map((item) => ({
+        id: `consequence:${item.id}`,
+        label: item.label,
+        detail: 'Active international-pressure consequence.',
+        turn: undefined,
+        confidence: 'known' as const,
+    }));
+
+    return [...proposalEntries, ...relationshipEntries, ...consequenceEntries]
+        .sort((a, b) => (a.turn ?? 9999) - (b.turn ?? 9999) || strictCompare(a.label, b.label) || strictCompare(a.id, b.id));
+}
+
+function buildNeedleHints(
+    patronStance: DiplomacyActorView | undefined,
+    pressureReasons: DiplomacyPressureReasonView[],
+    activeProposals: DiplomacyProposalView[],
+): DiplomacyNeedleHintView[] {
+    const hints: DiplomacyNeedleHintView[] = [];
+    if (patronStance && (patronStance.constraintBand === 'high' || patronStance.constraintBand === 'elevated')) {
+        hints.push({
+            id: `patron-constraint:${patronStance.faction}`,
+            label: `Ease ${patronStance.patronLabel} constraint`,
+            detail: `${patronStance.patronLabel} pressure is ${patronStance.constraintBand}; staff expects less room for independent bargaining until that channel softens.`,
+            confidence: 'likely',
+        });
+    }
+    for (const reason of pressureReasons.filter((entry) => entry.band === 'high' || entry.band === 'medium').slice(0, 3)) {
+        hints.push({
+            id: `pressure:${reason.key}`,
+            label: `Reduce ${reason.label}`,
+            detail: `${reason.label} is ${reason.band}; this is one of the visible signals shaping external pressure.`,
+            confidence: reason.confidence,
+        });
+    }
+    if (activeProposals.length > 0) {
+        hints.push({
+            id: 'proposal-resolution',
+            label: 'Resolve the active proposal packet',
+            detail: `${activeProposals.length} proposal surface${activeProposals.length === 1 ? ' is' : 's are'} awaiting review; leaving it open keeps the diplomatic agenda unresolved.`,
+            confidence: 'known',
+        });
+    }
+    return hints.sort((a, b) => strictCompare(a.label, b.label) || strictCompare(a.id, b.id));
+}
+
 export function buildDiplomacyView(state: unknown, playerFaction?: string | null): DiplomacyView {
     const s = asRecord(state) ?? {};
     const externalActors = buildExternalActors(s);
@@ -208,6 +274,8 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const activeProposals = buildActiveProposals(s);
     const pressureReasons = buildPressureReasons(s);
     const activeConsequences = buildConsequences(s);
+    const negotiationTimeline = buildNegotiationTimeline(activeProposals, externalActors, activeConsequences);
+    const needleHints = buildNeedleHints(patronStance, pressureReasons, activeProposals);
 
     return {
         playerFaction: actorFaction ?? null,
@@ -221,5 +289,7 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
         externalActors,
         pressureReasons,
         activeConsequences,
+        negotiationTimeline,
+        needleHints,
     };
 }

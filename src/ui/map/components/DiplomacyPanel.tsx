@@ -1,4 +1,12 @@
-import type { DiplomacyActorView, DiplomacyPressureReasonView, DiplomacyProposalView, DiplomacyView, PlayerKnowledgeConfidence } from '../data/types';
+import type {
+    DiplomacyActorView,
+    DiplomacyNeedleHintView,
+    DiplomacyPressureReasonView,
+    DiplomacyProposalView,
+    DiplomacyTimelineEntryView,
+    DiplomacyView,
+    PlayerKnowledgeConfidence,
+} from '../data/types';
 
 interface DiplomacyPanelProps {
     view: DiplomacyView;
@@ -72,6 +80,42 @@ function PressureRow({ reason }: { reason: DiplomacyPressureReasonView }) {
             <span className={`text-[10px] font-mono font-bold uppercase tracking-[0.12em] ${tone}`}>
                 {titleCase(reason.band)} - {confidenceLabel(reason.confidence)}
             </span>
+        </li>
+    );
+}
+
+function TimelineRow({ entry }: { entry: DiplomacyTimelineEntryView }) {
+    return (
+        <li className="flex gap-3 border-b border-white/8 py-2 last:border-b-0">
+            <div className="w-14 shrink-0 text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-amber-300">
+                {entry.turn != null ? `T${entry.turn}` : confidenceLabel(entry.confidence)}
+            </div>
+            <div className="min-w-0">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
+                    {entry.label}
+                </div>
+                <div className="mt-1 text-[10px] leading-4 text-text-secondary">
+                    {entry.detail}
+                </div>
+            </div>
+        </li>
+    );
+}
+
+function NeedleHintRow({ hint }: { hint: DiplomacyNeedleHintView }) {
+    return (
+        <li className="rounded border border-amber-400/20 bg-amber-400/8 p-3">
+            <div className="flex items-start justify-between gap-3">
+                <div className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
+                    {hint.label}
+                </div>
+                <span className="shrink-0 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300">
+                    {confidenceLabel(hint.confidence)}
+                </span>
+            </div>
+            <p className="mt-2 text-[11px] leading-5 text-text-secondary">
+                {hint.detail}
+            </p>
         </li>
     );
 }
@@ -156,6 +200,30 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                                     </div>
                                 ) : null}
                             </div>
+                        </section>
+                    ) : null}
+
+                    {view.negotiationTimeline.length > 0 ? (
+                        <section aria-label="Negotiation timeline">
+                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                Negotiation Timeline
+                            </div>
+                            <div className="rounded border border-white/10 bg-black/20 px-3">
+                                <ul>
+                                    {view.negotiationTimeline.map((entry) => <TimelineRow key={entry.id} entry={entry} />)}
+                                </ul>
+                            </div>
+                        </section>
+                    ) : null}
+
+                    {view.needleHints.length > 0 ? (
+                        <section aria-label="What would move the needle">
+                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                What Moves The Needle
+                            </div>
+                            <ul className="space-y-2">
+                                {view.needleHints.map((hint) => <NeedleHintRow key={hint.id} hint={hint} />)}
+                            </ul>
                         </section>
                     ) : null}
 

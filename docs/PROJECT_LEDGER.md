@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(diplomacy): add timeline and needle signals
+
+**Type:** UI read-model/presentation enhancement. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.
+
+**Why:** AAA Track E calls for the diplomacy surface to show not only patron stance and proposals, but also a negotiation timeline and a player-safe explanation of which visible signals are moving the diplomatic room.
+
+**Change:** Added `DiplomacyTimelineEntryView` and `DiplomacyNeedleHintView` to the diplomacy UI contract. `buildDiplomacyView(...)` now derives timeline rows from active proposals, patron relationship events, and active IVP consequences, and derives qualitative needle hints from elevated patron constraint, high/medium IVP reasons, and unresolved active proposals. `DiplomacyPanel` renders both sections without exposing raw thresholds or formulas.
+
+**Determinism / output impact:** UI read-model projection only. No sim path, save shape, scenario data, or generated run artifact changed.
+
+**Verification:** `npx.cmd vitest run tests\ui\diplomacy_panel.test.ts tests\ui\diplomacy_view.test.ts tests\ui\diplomacy_player_truth.test.ts tests\ui\warroom_shell_ownership.test.ts --reporter=dot` PASS 10/10.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_DIPLOMACY_PANEL_TIMELINE_NEEDLE.md`.
+
+**Roadmap delta:** Advances AAA Track E diplomacy-panel enrichment. Remaining Track E work is richer per-power stance detail and deeper treaty/actor history when canonical state carries those signals.
+
+---
+
 ## [2026-05-23] ui(warroom): route diplomacy telephone to panel
 
 **Type:** UI navigation/routing fix. No scenario data, combat math, operation behavior, save schema, calibration/army-arc tuning, event content, turn ordering, painted targets, or sim output contract changed.

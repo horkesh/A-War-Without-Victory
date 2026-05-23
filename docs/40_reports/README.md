@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest diplomacy panel timeline** | [implemented/20260523_DIPLOMACY_PANEL_TIMELINE_NEEDLE.md](implemented/20260523_DIPLOMACY_PANEL_TIMELINE_NEEDLE.md) - Diplomacy now shows a negotiation timeline and qualitative what-moves-the-needle hints derived from existing proposal, patron, IVP, and consequence signals. |
 | **Latest Warroom diplomacy route** | [implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md](implemented/20260523_WARROOM_DIPLOMACY_TELEPHONE_ROUTE.md) - the Warroom diplomatic telephone now opens the existing read-only Diplomacy panel instead of Army HQ Summary, with a Warroom shell mapping guard. |
 | **Latest strict-null FactionState optional classification** | [audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_FACTIONSTATE_OPTIONAL_FIELDS.md) - `FactionState` optionals are classified as subsystem-specific profile, negotiation, command-capacity, and Phase 0 lifecycle fields. |
 | **Latest strict-null event provenance optional classification** | [audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_EVENT_PROVENANCE_OPTIONAL_FIELDS.md) - `ControlEvent`, `DisplacementEvent`, and `DisplacementState` optionals are provenance/detail fields pending an event-schema lane. |

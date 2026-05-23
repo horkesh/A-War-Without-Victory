@@ -380,6 +380,21 @@ export interface DiplomacyPressureReasonView {
     confidence: PlayerKnowledgeConfidence;
 }
 
+export interface DiplomacyTimelineEntryView {
+    id: string;
+    label: string;
+    detail: string;
+    turn?: number;
+    confidence: PlayerKnowledgeConfidence;
+}
+
+export interface DiplomacyNeedleHintView {
+    id: string;
+    label: string;
+    detail: string;
+    confidence: PlayerKnowledgeConfidence;
+}
+
 export interface DiplomacyView {
     playerFaction: string | null;
     hasSignals: boolean;
@@ -388,6 +403,8 @@ export interface DiplomacyView {
     externalActors: DiplomacyActorView[];
     pressureReasons: DiplomacyPressureReasonView[];
     activeConsequences: Array<{ id: string; label: string }>;
+    negotiationTimeline: DiplomacyTimelineEntryView[];
+    needleHints: DiplomacyNeedleHintView[];
 }
 
 export interface PendingConvoyDecisionView {
@@ -1246,4 +1263,3 @@ export interface LoadedGameState {
         proposed_value?: string;
     }>;
 }
-
