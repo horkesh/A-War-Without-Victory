@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest BCS War Summary overview localization** | [implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_OVERVIEW_LOCALIZATION.md) - Army HQ War Summary overview territory, military-strength, displacement, SITREP, civilian-impact, full-faction labels, and staff-assessment prose now render through the English/BCS substrate. |
 | **Latest BCS War Summary campaign-cost localization** | [implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md](implemented/20260523_BCS_WAR_SUMMARY_CAMPAIGN_COST_LOCALIZATION.md) - Army HQ War Summary title, subsection tabs, campaign-cost labels/severity, and campaign-drag labels/detail copy now render through the English/BCS substrate. |
 | **Latest BCS Turn Aftermath archive localization** | [implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_ARCHIVE_LOCALIZATION.md) - Turn Aftermath campaign pulse/cost archive prose, cost-driver labels, Army HQ Records filters, metric labels/details, badges, and empty states now render through the English/BCS substrate. |
 | **Latest BCS Turn Aftermath localization** | [implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md](implemented/20260523_BCS_TURN_AFTERMATH_LOCALIZATION.md) - Turn Aftermath modal chrome, metrics, empty states, enum badges, generated headlines, narrative lines, cost reasons, strategic-signal wrapper labels, and judgment prose now render through the English/BCS substrate. |

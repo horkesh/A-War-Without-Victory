@@ -78,11 +78,21 @@ describe('War Summary campaign cost localization', () => {
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         const campaignCost = screen.getByTestId('war-summary-campaign-cost');
+        expect(screen.getByText('Teritorija')).toBeTruthy();
+        expect(screen.getByText('Prijateljska kontrola')).toBeTruthy();
+        expect(screen.getByText('Neprijateljska kontrola sazimlje se kroz stabske procjene i izvjestaje s fronta, ne kao tacni frakcijski ukupni iznosi.')).toBeTruthy();
+        expect(screen.getByText('Vojna snaga')).toBeTruthy();
+        expect(screen.getByText('Ljudstvo pod oruzjem')).toBeTruthy();
+        expect(screen.getByText('Raseljavanje')).toBeTruthy();
+        expect(screen.getByText('Raseljeni na ratistu')).toBeTruthy();
+        expect(screen.getByText('Vlastiti raseljeni')).toBeTruthy();
+        expect(screen.getByText('Neprijateljsko raseljavanje nije razlozeno ovdje kao tacni frakcijski ukupni iznosi u igracu sigurnom modu.')).toBeTruthy();
         expect(screen.getByText('Cijena kampanje')).toBeTruthy();
         expect(within(campaignCost).getByText('Ozbiljnost')).toBeTruthy();
         expect(within(campaignCost).getByText('Prijateljski gubici')).toBeTruthy();
         expect(within(campaignCost).getByText('Raseljeni')).toBeTruthy();
         expect(within(campaignCost).getByText('Neto OSID-i')).toBeTruthy();
         expect(screen.queryByText('Campaign Cost')).toBeNull();
+        expect(screen.queryByText('Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.')).toBeNull();
     });
 });

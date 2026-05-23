@@ -98,34 +98,34 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     {playerFaction ? (
                         <>
-                            <SummarySection title="Territory">
+                            <SummarySection title={t('warSummary.overview.territory')}>
                                 <PlayerFactionHeader faction={playerFaction} />
                                 <div className="mt-2 space-y-1 text-[12px]">
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-text-secondary">Friendly control</span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.friendlyControl')}</span>
                                         <span className="text-text-primary tabular-nums">{fmtPct(areaPct[playerFaction] ?? 0)}</span>
                                     </div>
                                     <div className="text-[10px] text-text-secondary leading-snug">
-                                        Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.
+                                        {t('warSummary.overview.enemyControlDetail')}
                                     </div>
                                 </div>
                             </SummarySection>
 
-                            <SummarySection title="Military Strength">
+                            <SummarySection title={t('warSummary.overview.militaryStrength')}>
                                 <PlayerFactionHeader faction={playerFaction} />
                                 <div className="mt-2 space-y-1 text-[12px]">
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-text-secondary">Personnel at arms</span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.personnelAtArms')}</span>
                                         <span className="text-text-primary tabular-nums">{formatPersonnel(atArmsByFaction[playerFaction] ?? 0)}</span>
                                     </div>
                                     {(mobilizedPoolByFaction[playerFaction] ?? 0) > 0 && (
                                         <>
                                             <div className="flex items-center justify-between gap-3">
-                                                <span className="text-text-secondary">Mobilized pool</span>
+                                                <span className="text-text-secondary">{t('warSummary.overview.mobilizedPool')}</span>
                                                 <span className="text-text-primary tabular-nums">{formatPersonnel(mobilizedPoolByFaction[playerFaction] ?? 0)}</span>
                                             </div>
                                             <div className="flex items-center justify-between gap-3">
-                                                <span className="text-text-secondary">Mobilized total</span>
+                                                <span className="text-text-secondary">{t('warSummary.overview.mobilizedTotal')}</span>
                                                 <span className="text-text-primary tabular-nums">{formatPersonnel(mobilizedTotalByFaction[playerFaction] ?? 0)}</span>
                                             </div>
                                         </>
@@ -141,18 +141,18 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 </div>
                             </SummarySection>
 
-                            <SummarySection title="Displacement">
+                            <SummarySection title={t('warSummary.overview.displacement')}>
                                 <div className="space-y-1 text-[12px]">
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-text-secondary">Theater-wide displaced</span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.theaterWideDisplaced')}</span>
                                         <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-text-secondary">Own-side displaced</span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.ownSideDisplaced')}</span>
                                         <span className="text-text-primary tabular-nums">{fmtK(displacedByFaction[playerFaction] ?? 0)}</span>
                                     </div>
                                     <div className="text-[10px] text-text-secondary leading-snug">
-                                        Enemy displacement is not broken out here as exact faction totals in player-safe mode.
+                                        {t('warSummary.overview.enemyDisplacementDetail')}
                                     </div>
                                 </div>
                             </SummarySection>
@@ -195,19 +195,19 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             )}
 
                             {sitrep && (
-                                <SummarySection title="Operational SITREP">
+                                <SummarySection title={t('warSummary.overview.operationalSitrep')}>
                                     <div className="space-y-1 text-[12px]">
                                         <div className="text-text-secondary leading-snug">{sitrep.headline}</div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Fronts</span>
-                                            <span className="text-text-primary tabular-nums">{sitrep.front.engagedCount} engaged / {sitrep.front.exposedCount} exposed</span>
+                                            <span className="text-text-secondary">{t('warSummary.overview.fronts')}</span>
+                                            <span className="text-text-primary tabular-nums">{t('warSummary.overview.frontsDetail', { engaged: sitrep.front.engagedCount, exposed: sitrep.front.exposedCount })}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Sustainment</span>
-                                            <span className="text-text-primary tabular-nums">{sitrep.sustainment.criticalCount} critical / {sitrep.sustainment.strainedCount} strained</span>
+                                            <span className="text-text-secondary">{t('warSummary.overview.sustainment')}</span>
+                                            <span className="text-text-primary tabular-nums">{t('warSummary.overview.sustainmentDetail', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-text-secondary">Active operations</span>
+                                            <span className="text-text-secondary">{t('warSummary.overview.activeOperations')}</span>
                                             <span className="text-text-primary tabular-nums">{sitrep.operations.activeCount}</span>
                                         </div>
                                         {sitrep.alerts.length > 0 && (
@@ -221,11 +221,11 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                         </>
                     ) : (
                         <>
-                            <SummarySection title="Territory">
+                            <SummarySection title={t('warSummary.overview.territory')}>
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr>
-                                            <th className="text-[10px] text-text-secondary font-semibold text-left py-1">Faction</th>
+                                            <th className="text-[10px] text-text-secondary font-semibold text-left py-1">{t('warSummary.overview.faction')}</th>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
                                                 <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
                                                     <div className="flex flex-col items-end gap-0.5">
@@ -238,7 +238,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td className="text-[11px] text-text-secondary py-0.5">Area-weighted</td>
+                                            <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.overview.areaWeighted')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
                                                 <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtPct(areaPct[f])}</td>
                                             ))}
@@ -247,7 +247,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 </table>
                             </SummarySection>
 
-                            <SummarySection title="Military Strength">
+                            <SummarySection title={t('warSummary.overview.militaryStrength')}>
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr>
@@ -261,7 +261,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td className="text-[11px] text-text-secondary py-0.5">At arms</td>
+                                            <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.overview.atArms')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
                                                 <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(atArmsByFaction[f] ?? 0)}</td>
                                             ))}
@@ -269,13 +269,13 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                         {WAR_SUMMARY_FACTIONS.some((f) => (mobilizedPoolByFaction[f] ?? 0) > 0) && (
                                             <>
                                                 <tr>
-                                                    <td className="text-[11px] text-text-secondary py-0.5">Mobilized pool</td>
+                                                    <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.overview.mobilizedPool')}</td>
                                                     {WAR_SUMMARY_FACTIONS.map((f) => (
                                                         <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedPoolByFaction[f] ?? 0)}</td>
                                                     ))}
                                                 </tr>
                                                 <tr>
-                                                    <td className="text-[11px] text-text-secondary py-0.5">Mobilized total</td>
+                                                    <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.overview.mobilizedTotal')}</td>
                                                     {WAR_SUMMARY_FACTIONS.map((f) => (
                                                         <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedTotalByFaction[f] ?? atArmsByFaction[f] ?? 0)}</td>
                                                     ))}
@@ -298,10 +298,10 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 </table>
                             </SummarySection>
 
-                            <SummarySection title="Displacement">
+                            <SummarySection title={t('warSummary.overview.displacement')}>
                                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
                                     <div>
-                                        <span className="text-text-secondary">Total displaced: </span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.totalDisplaced')}: </span>
                                         <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
                                     </div>
                                     {WAR_SUMMARY_FACTIONS.map((f) => {
@@ -328,14 +328,14 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             totalFled += entry.fled_abroad ?? 0;
                         }
                         return (
-                            <SummarySection title="Civilian Impact">
+                            <SummarySection title={t('warSummary.overview.civilianImpact')}>
                                 <div className="flex gap-6 text-[12px]">
                                     <div>
-                                        <span className="text-text-secondary">Killed: </span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.killed')}: </span>
                                         <span className="text-red-400 font-semibold tabular-nums">{fmtK(totalKilled)}</span>
                                     </div>
                                     <div>
-                                        <span className="text-text-secondary">Fled abroad: </span>
+                                        <span className="text-text-secondary">{t('warSummary.overview.fledAbroad')}: </span>
                                         <span className="text-text-primary tabular-nums">{fmtK(totalFled)}</span>
                                     </div>
                                 </div>
