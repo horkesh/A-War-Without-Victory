@@ -1,7 +1,8 @@
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = process.cwd();
@@ -21,6 +22,7 @@ const tool = require(TOOL_PATH) as {
         packageVersion: string;
         commit: string;
         artifact: { path: string | null; exists: boolean; sha256: string | null };
+        artifactReleaseLog: string | null;
         policy: {
             exactArtifactOnly: boolean;
             cleanVmRequiredBeforeDistribution: boolean;
@@ -50,12 +52,36 @@ describe('launch/operator artifact support', () => {
         expect(manifest.mode).toBe('dry-run');
         expect(manifest.artifact.exists).toBe(false);
         expect(manifest.artifact.sha256).toBeNull();
+        expect(manifest.artifactReleaseLog).toBeNull();
         expect(manifest.policy.exactArtifactOnly).toBe(true);
         expect(manifest.policy.cleanVmRequiredBeforeDistribution).toBe(true);
         expect(manifest.policy.distributionApproved).toBe(false);
         expect(manifest.policy.noCleanVmEvidenceClaimed).toBe(true);
         expect(manifest.operatorOnlyRemaining).toContain('clean_vm_windows_install_launch_save_load_uninstall');
         expect(manifest.operatorOnlyRemaining).toContain('tester_distribution_and_feedback_intake');
+    });
+
+    it('dry-run manifest emits a copy-ready deterministic artifact release log when the artifact exists', () => {
+        const tmp = mkdtempSync(join(tmpdir(), 'awwv-launch-artifact-'));
+        try {
+            const artifactPath = join(tmp, 'AWWV Test Artifact.exe');
+            const artifactBytes = Buffer.from('awwv deterministic launch artifact fixture\n', 'utf8');
+            writeFileSync(artifactPath, artifactBytes);
+
+            const output = runDryRun(['--artifact', artifactPath, '--commit', 'TEST_SHA', '--package-version', '0.0.0-test']);
+            const manifest = JSON.parse(output);
+
+            expect(manifest.artifact.exists).toBe(true);
+            expect(manifest.artifact.sizeBytes).toBe(artifactBytes.length);
+            expect(manifest.artifact.sha256).toMatch(/^[a-f0-9]{64}$/);
+            expect(manifest.artifactReleaseLog).toBe(
+                `launch_artifact target=${manifest.artifact.path} sizeBytes=${artifactBytes.length} sha256=${manifest.artifact.sha256}`,
+            );
+            expect(manifest.artifactReleaseLog).not.toMatch(/Date|time|T\d{2}:/);
+            expect(manifest.policy.distributionApproved).toBe(false);
+        } finally {
+            rmSync(tmp, { recursive: true, force: true });
+        }
     });
 
     it('exports a plan builder with existing template coverage', () => {

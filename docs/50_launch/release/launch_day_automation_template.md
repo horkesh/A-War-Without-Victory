@@ -27,6 +27,7 @@ Expected dry-run posture:
 - `cleanVmRequiredBeforeDistribution` is `true`
 - `noCleanVmEvidenceClaimed` is `true`
 - artifact `sha256` is present only when the artifact file exists
+- artifact `artifactReleaseLog` is present only when the artifact file exists and can be pasted into release evidence
 
 ## Automated Gate Commands
 
@@ -43,6 +44,8 @@ npm.cmd run desktop:package:win:nsis
 npm.cmd run desktop:package:win:nsis:smoke -- --report-only
 npm.cmd run launch:artifacts:dry-run -- --artifact dist-packaged\<artifact-name> --format markdown
 ```
+
+Copy the dry-run `launch_artifact target=... sizeBytes=... sha256=...` row into the release evidence for the exact artifact. Do not use a smoke or dry-run row from a different build.
 
 ## Fill Evidence
 
