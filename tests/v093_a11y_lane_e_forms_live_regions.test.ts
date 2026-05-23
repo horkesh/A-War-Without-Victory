@@ -64,9 +64,9 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
     it('T2 — PresidentialToolbar dev inputs carry aria-label', () => {
         const src = read(PRESIDENTIAL_TOOLBAR_PATH);
         // dev RUN_ID text input
-        expect(src).toContain('aria-label="Dev: load run by ID"');
+        expect(src).toContain("aria-label={t('presidentialToolbar.loadRunById')}");
         // hidden file picker
-        expect(src).toContain('aria-label="Dev: load save file"');
+        expect(src).toContain("aria-label={t('presidentialToolbar.loadSaveFile')}");
     });
 
     it('T3 — retired TopToolbar dev inputs carry aria-label', () => {
@@ -77,7 +77,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
 
     it('T4 — SidePickerOverlay hidden file-picker carries aria-label', () => {
         const src = read(SIDE_PICKER_PATH);
-        expect(src).toContain('aria-label="Load save file"');
+        expect(src).toContain("aria-label={t('sidePicker.loadSaveAria')}");
     });
 
     it('T5 — CommandTopBar Directive Name label is htmlFor-bound', () => {
@@ -97,7 +97,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         // The visible "Stance" span carries an icon and is kept as a
         // styled section header; the <select> itself must carry the
         // programmatic label.
-        expect(src).toContain('aria-label="Corps stance"');
+        expect(src).toContain("aria-label={t('corpsCard.stanceAria')}");
     });
 
     it('T8 — EnclaveDashboard allocation input is htmlFor-bound (per-enclave id)', () => {
@@ -198,7 +198,7 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         // pre-existing aria-label is part of the form-input
         // accessibility contract; pin it to catch silent regressions.
         const src = read(REPLAY_SCRUBBER_PATH);
-        expect(src).toContain('aria-label="Replay turn scrubber"');
+        expect(src).toContain("aria-label={t('replay.turnScrubber')}");
     });
 
     it('T12 — Faction-symmetric: no faction names appear in any Lane E label/aria string changes', () => {

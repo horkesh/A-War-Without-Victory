@@ -178,10 +178,9 @@ export const GRAZ_EXEMPT_RS_CORPS = new Set([
     'vrs_1st_krajina',
 ]);
 
-/** HRHB corps exempt from Graz — Posavina fighting + Op Jackal + Cincar/Mistral 1/Jajce */
+/** HRHB corps exempt from Graz — Posavina fighting + Cincar/Mistral 1/Jajce */
 export const GRAZ_EXEMPT_HRHB_CORPS = new Set([
     'hvo_northwest_bosnia',  // Orašje pocket — Posavina corridor fighting
-    'hvo_southeast_herzegovina',  // Op Jackal — east Herzegovina pair still active per brigade-level callers
     'hvo_tomislavgrad',  // Op Cincar (Nov 1994) / Mistral 1 (Jun 1995) / Jajce 95 — documented HV-HVO bypasses of Graz against VRS Krajina (BB v2 ch. 28; ICTY Gotovina IT-06-90 §44-58)
 ]);
 

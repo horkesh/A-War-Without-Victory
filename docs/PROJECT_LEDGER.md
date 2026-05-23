@@ -8933,3 +8933,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 **Artifacts:** `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
 
 ---
+
+## [2026-05-23] fix(ci): restore merged baseline regression gates
+
+**Type:** CI repair + truce predicate correction + test contract refresh + baseline-output manifest refresh.
+
+**Change:** Removed `hvo_southeast_herzegovina` from the HRHB Graz exemption set so the east-Herzegovina HVO/RS pair is blocked by the activated Graz east-Herzegovina truce window instead of remaining globally exempt through brigade-level probe callers. Refreshed the Sana 95 catalog test expectations to the current Wave 32 concentration (`sana_krupa` 3 brigades, `sana_bihac_petrovac` 5 brigades) and pinned the a11y Lane E source checks to the localized `t(...)` aria-label contract instead of stale literal-English JSX strings. Refreshed the 52-week baseline manifest after the deterministic truce predicate correction changed the 52w output hashes.
+
+**Determinism:** The truce change is a deterministic set-membership correction. No randomness, timestamps, initial OSID overrides, avoided-OSID lists, or faction-ID model changes were introduced. Baseline regression was regenerated once with `UPDATE_BASELINES=1` and then rerun normally to prove stability against the refreshed manifest.
+
+**Verification:**
+- `npx.cmd vitest run tests/commander/elite_formation_utilization.test.ts tests/operation_opportunities_catalog.test.ts tests/sector_offensive_idle_recovery.test.ts tests/v093_a11y_lane_e_forms_live_regions.test.ts --reporter=dot` - 107/107 PASS.
+- `npm.cmd run typecheck` - PASS.
+- `npm.cmd run test:baselines` - PASS after manifest refresh.
+- `npm.cmd run desktop:map:build` - PASS.
+- `git diff --check` - PASS with only the existing CRLF normalization warning on `tests/v093_a11y_lane_e_forms_live_regions.test.ts`.
+
+**Artifacts:** `src/sim/local_truces.ts`, `tests/operation_opportunities_catalog.test.ts`, `tests/v093_a11y_lane_e_forms_live_regions.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER.md`.
+
+---
