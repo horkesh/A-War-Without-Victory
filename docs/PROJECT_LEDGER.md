@@ -3,6 +3,20 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] ui(audio): add pure soundscape event adapter
+
+**Type:** Tactical-map UI/audio read-model adapter. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.
+
+**Change:** Added `src/ui/map/audio/audio_event_adapter.ts` with `buildAudioCueEventsForState(previous, next)`. The adapter emits stable cue requests for newly observed completed turns, battles, territory-flipping battles, fired historical events, and completed operation AARs. It sorts event/operation requests by stable ids, filters through the cue manifest, and suppresses duplicate cue requests when the same turn is observed again.
+
+**Determinism:** Pure function over already-loaded UI state. It returns cue request data only and never calls `playCue(...)`.
+
+**Verification:** Red `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts --reporter=dot` failed because the adapter module did not exist. Green focused audio pack `npx.cmd vitest run tests\ui\audio_event_adapter.test.ts tests\ui\audio_manifest.test.ts tests\ui\audio_bus.test.ts tests\ui\audio_hook_points.test.ts tests\ui\audio_preferences.test.ts tests\ui\settings_audio_preferences.test.ts --reporter=dot` passed 15/15. `npm.cmd run typecheck`, `npm.cmd run desktop:map:build`, and `git diff --check` passed.
+
+**Artifacts:** `src/ui/map/audio/audio_event_adapter.ts`, `tests/ui/audio_event_adapter.test.ts`, `docs/40_reports/implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, `docs/plans/MASTER_ROADMAP.md`.
+
+---
+
 ## [2026-05-23] ui(audio): add soundscape cue readiness metadata
 
 **Type:** Tactical-map audio manifest/readiness metadata. No simulation behavior, combat math, operation behavior, scenario data, calibration/army-arc tuning, save schema, generated artifact, browser audio IO, network IO, timestamp, or random source changed.

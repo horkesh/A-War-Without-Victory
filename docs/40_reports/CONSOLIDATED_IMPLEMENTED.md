@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest soundscape event adapter:** [implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md](implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md) - a pure UI adapter now maps newly observed turn summaries, decisive battles, fired events, and completed operation AARs to stable cue requests without playback side effects.
+
 **Latest soundscape cue metadata readiness:** [implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md](implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md) - the tactical-map audio manifest now records cooldown, missing-asset status, and reduced-motion policy metadata for every silent placeholder cue.
 
 **Latest launch high concept:** [../50_launch/marketing/high_concept.md](../50_launch/marketing/high_concept.md) - launch-facing one-pager now separates playable-now scope, pending operator evidence, and future/gated claims with traceable evidence pointers.

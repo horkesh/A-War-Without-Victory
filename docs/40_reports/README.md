@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest soundscape event adapter** | [implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md](implemented/20260523_SOUNDSCAPE_EVENT_ADAPTER.md) - a pure UI adapter now maps newly observed turn summaries, decisive battles, fired events, and completed operation AARs to stable cue requests without playback side effects. |
 | **Latest soundscape cue metadata readiness** | [implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md](implemented/20260523_SOUNDSCAPE_CUE_METADATA_READINESS.md) - the tactical-map audio manifest now records cooldown, missing-asset status, and reduced-motion policy metadata for every silent placeholder cue. |
 | **Latest diplomacy actor stance prose** | [implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md](implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md) - Diplomacy actor rows now render deterministic public-safe stance prose from existing support, constraint, isolation, and sanctions bands. |
 | **Latest localized crash diagnostics** | [implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md](implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md) - React error boundaries now record opt-in local crash diagnostics with the boundary zone as the UI surface. |
