@@ -87,6 +87,8 @@ Next strict-null source work must classify small owned optional-field groups by 
 
 2026-05-23 classification update: `Tier1EntityEligibilityState` has five optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md`. The fields are diagnostic gate detail under `debug` / `debug.gates`; required Tier-1 collapse eligibility state is already represented by `domains`, `persistence`, `suppressed`, and `immune`. Do not promote these fields in the generic strict-null cleanup lane; richer Tier-1 explainability belongs in a diagnostic-output/schema lane.
 
+2026-05-23 classification update: top-level `GameState` has five optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md`. The fields are history buffers, a transient paramilitary decision queue, and paramilitary policy/count state with known save-migration shape drift. Do not promote them in the generic strict-null cleanup lane; future reduction requires a focused top-level save-contract lane with migration and roundtrip proof.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.

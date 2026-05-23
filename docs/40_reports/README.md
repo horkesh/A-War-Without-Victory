@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest strict-null GameState top-level optional classification** | [audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md) - top-level history, decision queue, and paramilitary policy/count optionals are classified pending a focused save-contract lane. |
 | **Latest strict-null Tier1 eligibility optional classification** | [audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_TIER1_ELIGIBILITY_OPTIONAL_FIELDS.md) - `Tier1EntityEligibilityState` optionals are classified as diagnostic gate detail, not missing required collapse eligibility state. |
 | **Latest strict-null municipality optional classification** | [audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_MUNICIPALITY_OPTIONAL_FIELDS.md) - `MunicipalityState` and `OrganizationalPenetration` optionals are classified as sparse multi-phase state fields pending a migration/defaulting lane. |
 | **Latest strict-null PendingProposalReview optional classification** | [audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md) - the nine proposal-review optionals are classified as pending/resolved state-machine fields or proposal-family-specific payloads, not safe generic promotion targets. |

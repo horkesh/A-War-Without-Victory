@@ -3,6 +3,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify GameState top-level optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** Top-level `GameState` contributes five counted optionals. Inspection shows they are persisted history buffers, a transient paramilitary decision queue, and paramilitary policy/count fields whose save-migration default shape already needs focused reconciliation before any requiredness change.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies `turn_summaries`, `operation_history`, `pending_paramilitary_requests`, `paramilitary_policy`, and `paramilitary_deployment_count` as top-level save-contract fields requiring a dedicated schema lane rather than generic optional promotion.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_GAMESTATE_TOP_LEVEL_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the top-level `GameState` optional-field group by classification. Future promotion requires a top-level save-contract/migration lane with roundtrip proof.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify Tier1 eligibility optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, collapse thresholds, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
