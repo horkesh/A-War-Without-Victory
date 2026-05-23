@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest strict-null PendingProposalReview optional classification** | [audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md) - the nine proposal-review optionals are classified as pending/resolved state-machine fields or proposal-family-specific payloads, not safe generic promotion targets. |
 | **Latest strict-null CapabilityProfile optional classification** | [audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md) - the four `CapabilityProfile` optionals are classified as sparse faction-specific profile fields or backward-compatible neutral defaults, not safe generic promotion targets. |
 | **Latest sector enemy-personnel index** | [implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md](implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md) - sector brigade assignment now builds one deterministic enemy-personnel-by-OSID index per invocation instead of rescanning all formations per sector for territory assignment and threat recomputation. |
 | **Latest brigade movement order helper** | [implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md](implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md) - column-march movement producers now use a shared typed helper instead of repeated local `destination_sids` shape casts, while preserving optional `stance` semantics. |
