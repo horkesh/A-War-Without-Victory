@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] docs(ratings): retire stale save-continue gap
+
+**Type:** Documentation truth reconciliation only. No simulation behavior, save schema, UI behavior, scenario data, generated artifact, or test contract changed.
+
+**Why:** `GAME_STATE_RATING_MASTER.md` row 1 still listed save/load replay equivalence and save-continue hash-chain as missing, but `docs/40_reports/implemented/20260519_SAVE_REPLAY_DETERMINISM_PROOF.md` and `tests/scenario_continue_from_save_equivalence.test.ts` already close SRD-1/SRD-2 with final-save/hash and replay-tail equivalence.
+
+**Change:** Updated the Determinism + turn pipeline grade from A to A+ and narrowed the remaining gap to cross-host packaged-build determinism evidence.
+
+**Verification:** `npx.cmd vitest run tests\scenario_continue_from_save_equivalence.test.ts --reporter=dot` passed 2/2; `git diff --check` passed. No baseline run was needed because no runtime/source files changed.
+
+---
+
 ## [2026-05-24] docs(strict-null): reconcile zero escape floor
 
 **Type:** Documentation truth reconciliation only. No simulation behavior, save schema, UI behavior, scenario data, calibration/army-arc tuning, generated artifact, or test contract changed.
