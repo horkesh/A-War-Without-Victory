@@ -9319,6 +9319,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(gui): research presidential UI redesign direction
+
+**Type:** Planning research + GUI product direction.
+
+**Change:** Added a living planning document for the presidential UI redesign investigation. The plan audits the current Warroom / Army HQ Briefing / Presidential Inbox / Decision Room composition, identifies navigation and player-truth leak risks, compares relevant EU/HoI/AGEOD/Civil War II interface patterns, and recommends a new presidential desk shell over existing read models rather than an immediate full GUI rewrite.
+
+**Determinism:** Documentation-only. No simulation code, data, generated baselines, or UI runtime files changed.
+
+**Verification:** Not run; docs-only planning artifact.
+
+**Artifacts:** `docs/plans/2026-05-24-presidential-ui-redesign-research.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-23] fix(ci): refresh fast-slice contracts after merge
 
 **Type:** CI repair + scenario event ordering correction + startup artifact refresh + UI interaction fix + test contract refresh.
