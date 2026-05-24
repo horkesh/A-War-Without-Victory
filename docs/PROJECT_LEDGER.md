@@ -267,6 +267,22 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(cli): use cursors in Phase 3 harness BFS queues
+
+**Type:** Deterministic diagnostic-harness performance cleanup and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** After the map/scenario cursor slice, the remaining reviewed true-FIFO queue-shift sites were in Phase 3A A/B and Phase 3ABC audit CLI harness seed builders. These are diagnostic harnesses rather than live sim phases, but they still traverse deterministic BFS queues and can avoid repeated `Array.shift()` reindexing without changing seed order or report outputs.
+
+**Change:** `src/cli/phase3a_ab_harness.ts` now uses head cursors in three seed-builder BFS loops. `src/cli/phase3abc_audit_harness.ts` now uses head cursors in two seed-builder BFS loops. `tests/cli_harness_queue_cursor.test.ts` adds static guards for those regions.
+
+**Determinism / output impact:** Compute-only. No cache, timestamps, randomness, iteration-order relaxation, or serialized output fields were introduced. Queue insertion order, sorted-neighbor expansion, parent/depth maps, and cluster selection semantics are unchanged.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\cli_harness_queue_cursor.test.ts --reporter=dot` failed before implementation because the targeted harness regions still contained `.shift()`. After implementation, the focused guard passed 2/2. `npm.cmd run sim:phase3a:ab` passed all three seed report variants. `npm.cmd run phase3:abc_audit` passed with deterministic hashes A `af234629acd600274dc686878045016f67183ff175a9a35f5c24e48288bcdbdb`, B `60e29e56aea11572ebcfdd814bbe34135682fe5113033212b0900518b588c924`, C `10b78029c549b2df04cda0ed6e1386ad2a5d41b8044df69b760573a04a05de64`, and D `23544920575e8dfdf2a46c82574e511cec6242dc94e37576ee3b6ef0953774be`.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_CLI_HARNESS_BFS_QUEUE_CURSOR.md`.
+
+**Roadmap delta:** Closes the reviewed true-FIFO CLI harness queue-shift tail. Remaining `.shift()` sites are semantic queues, priority queues, UI buffers, test examples, painter undo history, or archived/report code unless separately proven otherwise.
+
 ## [2026-05-23] perf(map/scenario): use cursors in FIFO BFS queues
 
 **Type:** Deterministic map/scenario/desktop/event graph traversal performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
