@@ -10212,6 +10212,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] fix(desktop): refresh April 1992 startup snapshot after sector ownership fix
+
+**Type:** Generated startup artifact refresh.
+
+**Change:** Refreshed `data/derived/startup/apr_1992_initial_save.json` from canonical builder truth after the startup deep-rear sector ownership fix. The baked Electron `apr_1992` New Campaign artifact now matches the builder: `hrhb_herceg_stjepan_brigade` and `rs_17th_klju_light_infantry` are sector-owned as rear brigades, and `unresolved_sector_brigades` is empty. Active brigade totals remain unchanged at 184 (RBiH 78, HRHB 29, RS 77).
+
+**Determinism:** Generated with `npm.cmd run desktop:startup-snapshot:build`. No scenario source, save schema, OOB, or live-turn behavior changed.
+
+**Verification:** Snapshot count inspection - PASS: 184 active brigades, 138 front assigned, 16 reserve, 27 rear, `unresolved=[]`. `npm.cmd run desktop:startup-snapshot:check` - PASS. `npx.cmd vitest run tests/startup_snapshot_contract.test.ts tests/desktop_campaign_start_contract.test.ts --reporter=dot` - PASS (2 files / 8 tests).
+
+**Artifacts:** `data/derived/startup/apr_1992_initial_save.json`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): close active plan hardening pass
 
 **Type:** Roadmap/process planning.

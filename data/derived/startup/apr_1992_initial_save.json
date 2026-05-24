@@ -7675,6 +7675,7 @@
         "rear_brigade_ids": [
           "hrhb_6th_brigade_ranko_boban",
           "hrhb_grude_brigade",
+          "hrhb_herceg_stjepan_brigade",
           "hrhb_iroki_brijeg_brigade",
           "hrhb_itluk_brigade",
           "hrhb_ljubuki_brigade",
@@ -7750,6 +7751,7 @@
           "op:posusje:posusje_2",
           "op:posusje:sutina_2",
           "op:posusje:vir_2",
+          "op:prozor:ljubunci_2",
           "op:stolac:prenj"
         ],
         "threat_ratio": 0
@@ -9796,7 +9798,9 @@
         "opposing_factions": [
           "RBiH"
         ],
-        "rear_brigade_ids": [],
+        "rear_brigade_ids": [
+          "rs_17th_klju_light_infantry"
+        ],
         "reserve_brigade_ids": [],
         "sector_id": "sector:vrs_2nd_krajina:2",
         "sector_stance": "defend",
@@ -9827,6 +9831,7 @@
           "op:glamoc:halapic",
           "op:glamoc:pribelja",
           "op:glamoc:stekerovci_2",
+          "op:kljuc:cadjavica",
           "op:kupres:novo_selo_2"
         ],
         "threat_ratio": 0
@@ -19415,7 +19420,11 @@
       "hrhb_herceg_stjepan_brigade": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:hvo_southeast_herzegovina:0"
+        },
         "cohesion": 62,
         "composition": {
           "aa_systems": 0,
@@ -22292,7 +22301,11 @@
       "rs_17th_klju_light_infantry": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "rear",
+          "sector_id": "sector:vrs_2nd_krajina:2"
+        },
         "cohesion": 67,
         "composition": {
           "aa_systems": 2,
@@ -34117,9 +34130,7 @@
       }
     },
     "theatres": {},
-    "unresolved_sector_brigades": [
-      "rs_17th_klju_light_infantry"
-    ],
+    "unresolved_sector_brigades": [],
     "war_front_edges_osid": [
       {
         "a": "op:banja_luka:banja_luka_2",
