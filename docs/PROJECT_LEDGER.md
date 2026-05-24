@@ -9333,6 +9333,34 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(gui): scope broader GUI shell reorganization
+
+**Type:** GUI architecture planning scope.
+
+**Change:** Added a broader GUI shell reorganization scope that separates the immediate Presidential blocker-flow fix from the larger layout/ownership cleanup. The scope defines one-shell, one-right-rail, decision-modal, Warroom-object, and surface-ownership rules, then phases the work from blocker fix through layout inventory, shell state model, President's Desk MVP, tactical rail cleanup, Warroom hotspot cleanup, and visual asset pass.
+
+**Determinism:** Documentation-only. No runtime code changed in this entry.
+
+**Verification:** Not run; planning scope only.
+
+**Artifacts:** `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
+## [2026-05-24] docs(gui): plan presidential blocker flow simplification
+
+**Type:** Implementation plan for GUI decision-flow simplification.
+
+**Change:** Added an execution plan to simplify the confusing Presidential Inbox / Decision Room / advance-blocker loop. The plan keeps existing decision modals and read models, but introduces a direct blocker read model and routes blocking decisions to their owning modal or panel instead of making the player infer the blocker from the broad Decision Room.
+
+**Determinism:** Documentation-only. No runtime code changed in this entry.
+
+**Verification:** Not run; planning artifact only.
+
+**Artifacts:** `docs/plans/2026-05-24-presidential-blocker-flow-plan.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-23] fix(ci): refresh fast-slice contracts after merge
 
 **Type:** CI repair + scenario event ordering correction + startup artifact refresh + UI interaction fix + test contract refresh.
