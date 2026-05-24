@@ -37,9 +37,10 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, SettlementId } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
+import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -257,10 +258,7 @@ function disperseStackedRearBrigadesForSector(
             if (!state.military.brigade_movement_orders) {
                 state.military.brigade_movement_orders = {};
             }
-            state.military.brigade_movement_orders[bid] = {
-                destination_sids: [best.target as SettlementId],
-                stance: 'column',
-            } as { destination_sids: SettlementId[] };
+            state.military.brigade_movement_orders[bid] = createColumnMovementOrder(best.target);
             activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
         }
     }
@@ -374,10 +372,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
             if (!state.military.brigade_movement_orders) {
                 state.military.brigade_movement_orders = {};
             }
-            state.military.brigade_movement_orders[best.bid] = {
-                destination_sids: [best.target as SettlementId],
-                stance: 'column',
-            } as { destination_sids: SettlementId[] };
+            state.military.brigade_movement_orders[best.bid] = createColumnMovementOrder(best.target);
             activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
         }
         used.add(best.bid);
@@ -490,10 +485,7 @@ function deconflictSharedFrontOsidStacks(
                 if (!state.military.brigade_movement_orders) {
                     state.military.brigade_movement_orders = {};
                 }
-                state.military.brigade_movement_orders[entry.claim.bid] = {
-                    destination_sids: [entry.target.target as SettlementId],
-                    stance: 'column',
-                } as { destination_sids: SettlementId[] };
+                state.military.brigade_movement_orders[entry.claim.bid] = createColumnMovementOrder(entry.target.target);
             }
             activeCounts.set(osid, Math.max(0, (activeCounts.get(osid) ?? 0) - 1));
             activeCounts.set(entry.target.target, (activeCounts.get(entry.target.target) ?? 0) + 1);
@@ -673,10 +665,7 @@ export function distributeBrigadesToFront(
                         state.military.brigade_movement_orders = {};
                     }
                     const movementOrders = state.military.brigade_movement_orders;
-                    movementOrders[bid] = {
-                        destination_sids: [target as SettlementId],
-                        stance: 'column',
-                    } as { destination_sids: SettlementId[] };
+                    movementOrders[bid] = createColumnMovementOrder(target);
                     osidCount.set(target, (osidCount.get(target) ?? 0) + 1);
                 }
                 // If dist > MAX_REDISTRIBUTION_DISTANCE or Infinity: skip

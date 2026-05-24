@@ -267,6 +267,60 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] perf(sector): index enemy personnel for sector assignment
+
+**Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** Fresh sector profiling kept `buildFactionSectors:*` as a top owner. Child-profile comparison showed repeated active-enemy formation scans inside territory assignment and sector power recomputation were measurable, deterministic, and safe to replace with an invocation-local read index.
+
+**Change:** Added `countActiveEnemyPersonnelByOsid(formations, faction)` in `src/sim/combat/brigade_assignment.ts` and reused it in `classifyBrigadesByTerritory(...)` and `recomputeSectorPowerAndThreat(...)`. Added a static regression guard in `tests/sector_partition_instrumentation.test.ts` to keep those paths on the shared enemy-personnel index.
+
+**Determinism / output impact:** Compute-only. The helper iterates sorted formation ids with `strictCompare`, uses the same active enemy combat-formation filters, and is scoped to the current call. No state shape, save schema, operation behavior, combat formula, random source, timestamp, or output contract changed. The 40w timed run preserved final hash `30abd0696b9d7e24`.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\sector_partition_instrumentation.test.ts --reporter=dot` failed before implementation because the index was absent. After implementation, instrumentation/static guard passed 20/20, sector regression pack passed 38/38, brigade assignment pack passed 57/57, and `npm.cmd run typecheck` passed. `npm.cmd run sim:scenario:run:40w:timed` passed with final hash `30abd0696b9d7e24`; `npm.cmd run test:baselines` passed with all scenarios matching. Post-change profile reported `totalWallS=89.54`, `partition-corps-front-sectors=6799.566ms`, `reconcile-final-sector-truth=7071.455ms`; child buckets reduced RS territory assignment `430.764ms -> 237.213ms`, RBiH territory assignment `378.724ms -> 244.236ms`, RS recompute-power `107.362ms -> 25.238ms`, and RBiH recompute-power `89.722ms -> 23.900ms` on normalized 95-invocation slices.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md`.
+
+**Roadmap delta:** Closes this profile-led sector assignment scan slice. Remaining sector-performance work should stay measured and focus on `ensureMinimumSectorCoverage:*`, `recoverDroppedFrontEdges:*`, and geometry invariant buckets rather than speculative cross-turn caching.
+
+---
+
+## [2026-05-23] refactor(strict-null): centralize column movement order shape
+
+**Type:** Strict-null hygiene and movement-order contract cleanup. No scenario data, combat math, movement behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** `BrigadeMovementOrder.stance` is intentionally optional, but column-march producers repeated local `destination_sids` shape casts. That duplicated the movement-order boundary and made future optional-field review noisier without changing any runtime semantics.
+
+**Change:** Added `createColumnMovementOrder(destination)` in `src/sim/combat/brigade_movement_order_helpers.ts`, returning the existing `BrigadeMovementOrder` payload with `destination_sids: [destination]` and `stance: 'column'`. Updated `brigade_front_distribution.ts`, `brigade_home_return.ts`, `commander_march_correction.ts`, and `sector_offensive.ts` to use the helper. Added `tests/brigade_movement_order_helper.test.ts` to prevent reintroducing those local column-order casts.
+
+**Determinism / output impact:** Type-boundary cleanup only. The emitted movement-order fields and values are unchanged, and the optional `stance` contract remains intact. No pathfinding, staging, operation lifecycle, save/default, randomness, timestamp, cache, or output-schema behavior changed.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\brigade_movement_order_helper.test.ts --reporter=dot` failed before implementation because movement producers still contained local `destination_sids` shape casts. After implementation, the focused movement/sector pack passed 61/61: `tests\brigade_movement_order_helper.test.ts`, `tests\osid_column_movement.test.ts`, `tests\seam_a_isolation_guard.test.ts`, `tests\sector_frontline_truth.test.ts`, and `tests\tooth_guard.test.ts`. Strict-null guard passed 92/92 with `tests\strict_null_inventory_progress.test.ts`; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` all passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md`.
+
+**Roadmap delta:** Keeps `BrigadeMovementOrder.stance` optional while centralizing column-order construction for future optional-field review. Any future requirement to make `stance` mandatory still needs save/default/migration evidence.
+
+---
+
+## [2026-05-23] refactor(strict-null): narrow active formation spawn directive
+
+**Type:** Strict-null hygiene and directive-boundary type cleanup. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.
+
+**Why:** `FormationSpawnDirective` is intentionally optional, but two callers re-read `state.military.formation_spawn_directive!` after a boolean active check. That pattern is unnecessary and weakens the optional-field boundary even though the fields should not be promoted to required.
+
+**Change:** Added `getActiveFormationSpawnDirective(state)` in `src/sim/formation_spawn.ts`, returning the active directive or `null` with the same turn/default semantics as `isFormationSpawnDirectiveActive(...)`. Updated `src/sim/turn_phases/early_war_phases.ts` and `src/sim/run_early_war_browser.ts` to consume that narrowed local. Added `tests/formation_spawn_directive_narrowing.test.ts` to prevent reintroducing `formation_spawn_directive!` in those callers.
+
+**Determinism / output impact:** Compute/type-boundary cleanup only. Active-directive semantics, formation-kind defaulting, spawn behavior, save shape, and output fields are unchanged. No cache, timestamp, randomness, or iteration-order changes were introduced.
+
+**Verification:** Red characterization `npx.cmd vitest run tests\formation_spawn_directive_narrowing.test.ts --reporter=dot` failed before implementation because both callers still contained `formation_spawn_directive!`. After implementation, the focused formation-spawn pack passed 14/14: `tests\formation_spawn_directive_narrowing.test.ts`, `tests\militia_rework.test.ts`, `tests\early_war_turn_structure.test.ts`, and `tests\wia_trickleback.test.ts`. Strict-null guard passed 92/92 with `tests\strict_null_inventory_progress.test.ts`; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` all passed.
+
+**Artifacts:** `docs/40_reports/implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md`.
+
+**Roadmap delta:** Keeps the small sim optional-field classification intact while tightening the active directive read boundary. Future optional-field reduction still requires save/default/migration review rather than broad promotion.
+
+---
+
 ## [2026-05-23] perf(cli): use cursors in Phase 3 harness BFS queues
 
 **Type:** Deterministic diagnostic-harness performance cleanup and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

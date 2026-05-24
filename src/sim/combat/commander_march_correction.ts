@@ -35,9 +35,10 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { FactionId, GameState, SettlementId } from '../../state/game_state.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 import { bfsDistance } from './sector_utils.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 
 export function correctMarchOrders(state: GameState, adjacency: Map<string, string[]>): void {
     const formations = state.military.formations ?? {};
@@ -110,10 +111,7 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
 
         // Override the march order
         if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
-        state.military.brigade_movement_orders[bid] = {
-            destination_sids: [bestOsid as SettlementId],
-            stance: 'column',
-        } as { destination_sids: SettlementId[] };
+        state.military.brigade_movement_orders[bid] = createColumnMovementOrder(bestOsid);
     }
 }
 
@@ -213,9 +211,6 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
 
         // Issue corrected march order (consumed by osid-column-movement next turn)
         if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
-        state.military.brigade_movement_orders[bid] = {
-            destination_sids: [bestOsid as SettlementId],
-            stance: 'column',
-        } as { destination_sids: SettlementId[] };
+        state.military.brigade_movement_orders[bid] = createColumnMovementOrder(bestOsid);
     }
 }

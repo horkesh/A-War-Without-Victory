@@ -168,6 +168,25 @@ function countActiveBrigadesByOsid(
     return counts;
 }
 
+function countActiveEnemyPersonnelByOsid(
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+): Map<string, number> {
+    const personnelByOsid = new Map<string, number>();
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[fid];
+        if (!formation || formation.faction === faction || formation.status !== 'active') continue;
+        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        const locationOsid = formation.location_osid;
+        if (!locationOsid) continue;
+        personnelByOsid.set(
+            locationOsid,
+            (personnelByOsid.get(locationOsid) ?? 0) + (formation.personnel ?? 0),
+        );
+    }
+    return personnelByOsid;
+}
+
 function classifySectorPosition(
     locationOsid: string | undefined,
     frontSet: Set<string>,
@@ -334,16 +353,13 @@ export function classifyBrigadesByTerritory(
     // ── Pre-compute enemy personnel per sector for budget-aware Phase 1 ──
     const preEnemyPers = new Map<string, number>();
     {
-        const allFids = Object.keys(formations).sort(strictCompare);
+        const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);
         for (const s of sectors) {
             const enemyOsids = new Set<string>();
             for (const ss of s.sub_segments) for (const eo of ss.enemy_osids) enemyOsids.add(eo);
             let ep = 0;
-            for (const fid of allFids) {
-                const f = formations[fid];
-                if (!f || f.faction === faction || f.status !== 'active') continue;
-                if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-                if (f.location_osid && enemyOsids.has(f.location_osid)) ep += f.personnel ?? 0;
+            for (const osid of enemyOsids) {
+                ep += enemyPersonnelByOsid.get(osid) ?? 0;
             }
             preEnemyPers.set(s.sector_id, ep);
         }
@@ -2162,7 +2178,7 @@ export function recomputeSectorPowerAndThreat(
     faction: FactionId,
     state: GameState,
 ): void {
-    const allFormIds = Object.keys(formations).sort(strictCompare);
+    const enemyPersonnelByOsid = countActiveEnemyPersonnelByOsid(formations, faction);
     for (const s of sectors) {
         s.density = s.length_edges > 0
             ? s.assigned_brigade_ids.length / s.length_edges : 0;
@@ -2175,12 +2191,8 @@ export function recomputeSectorPowerAndThreat(
             for (const eo of ss.enemy_osids) enemyOsids.add(eo);
         }
         let enemyPower = 0;
-        for (const fid of allFormIds) {
-            const f = formations[fid];
-            if (!f || f.faction === faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            if (!f.location_osid || !enemyOsids.has(f.location_osid)) continue;
-            enemyPower += f.personnel ?? 0;
+        for (const osid of enemyOsids) {
+            enemyPower += enemyPersonnelByOsid.get(osid) ?? 0;
         }
         s.threat_ratio = s.defensive_power > 0
             ? enemyPower / s.defensive_power

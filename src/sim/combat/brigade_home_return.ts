@@ -31,9 +31,10 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsCommandState, FormationId, FormationState, GameState, OperationAxis, SettlementId } from '../../state/game_state.js';
+import type { CorpsCommandState, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import type { TurnContext } from '../turn_pipeline_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -364,10 +365,7 @@ export function evaluateHomeReturn(
                 state.military.brigade_movement_orders = {};
             }
             const movementOrders = state.military.brigade_movement_orders;
-            movementOrders[order.brigade_id] = {
-                destination_sids: [order.target_osid as SettlementId],
-                stance: 'column',
-            } as { destination_sids: SettlementId[] };
+            movementOrders[order.brigade_id] = createColumnMovementOrder(order.target_osid);
         }
     }
 }

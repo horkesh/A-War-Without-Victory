@@ -1,8 +1,20 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-05-23 (sector BFS queue cursor)
+**Updated:** 2026-05-23 (sector enemy-personnel index)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
+
+---
+
+## 2026-05-23: Sector enemy-personnel index (byte-identical)
+
+**Change:** `src/sim/combat/brigade_assignment.ts` now builds one invocation-local active enemy-personnel-by-OSID index in `classifyBrigadesByTerritory(...)` and `recomputeSectorPowerAndThreat(...)`. Sectors now sum their local `enemy_osids` from the index instead of rescanning all formations per sector.
+
+**Determinism:** The helper iterates formation ids with `strictCompare`, applies the same active enemy combat-formation filters, and keeps the map inside the current function call. No cross-turn cache, save field, combat formula, operation behavior, or output contract changed.
+
+**Verification:** Red static characterization failed before implementation because the reusable index was absent. After implementation, instrumentation/static guard passed 20/20, sector regression pack passed 38/38, brigade assignment pack passed 57/57, `npm.cmd run typecheck` passed, `npm.cmd run sim:scenario:run:40w:timed` preserved hash `30abd0696b9d7e24`, and `npm.cmd run test:baselines` passed with all scenarios matching. Post-change profile reported `partition-corps-front-sectors=6799.566ms` and `reconcile-final-sector-truth=7071.455ms`; normalized child buckets reduced RS territory assignment `430.764ms -> 237.213ms`, RBiH territory assignment `378.724ms -> 244.236ms`, RS recompute-power `107.362ms -> 25.238ms`, and RBiH recompute-power `89.722ms -> 23.900ms`.
+
+**Report:** [implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md](implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md)
 
 ---
 

@@ -9,7 +9,7 @@ import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { cloneGameState } from '../state/clone.js';
 import type { GameState } from '../state/game_state.js';
 import {
-    isFormationSpawnDirectiveActive,
+    getActiveFormationSpawnDirective,
     spawnFormationsFromPools,
     type SpawnFormationsReport
 } from './formation_spawn.js';
@@ -103,8 +103,8 @@ export async function runPhaseITurn(
 
     report.pool_population = runPoolPopulation(working, graph.settlements);
 
-    if (isFormationSpawnDirectiveActive(working)) {
-        const directive = working.military.formation_spawn_directive!;
+    const directive = getActiveFormationSpawnDirective(working);
+    if (directive) {
         const kind = directive.kind === 'both' || directive.kind === 'militia' ? 'brigade' : (directive.kind ?? 'brigade');
         report.formation_spawn = spawnFormationsFromPools(working, {
             factionFilter: null,
@@ -143,4 +143,3 @@ export async function runPhaseITurn(
 
     return { nextState: working, report };
 }
-
