@@ -10202,7 +10202,7 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 **Type:** Roadmap planning + command-board wiring.
 
-**Change:** Added a fully actionable event-system upgrade plan and wired it into the Command Board and Master Roadmap. The plan treats the current event substrate as valid but under-target for the intended presidential-core role, then sequences taxonomy audit, loader/order/cap hardening, crisis-brief read-model work, president-impact acceptance diagnostics, and emergence-first historical pressure/dilemma authoring waves. Calendar windows are documented as guardrails only, with live-state pressure preferred for ordinary war, diplomacy, enclave, patron, alliance, and command crises.
+**Change:** Added and then expanded a fully actionable event-system upgrade plan and wired it into the Command Board and Master Roadmap. The plan treats the current event substrate as valid but under-target for the intended presidential-core role, then sequences taxonomy audit, loader/order/cap hardening, crisis-brief read-model work, president-impact acceptance diagnostics, and emergence-first historical pressure/dilemma authoring waves. The expansion adds an external-agent execution contract, exact phase boundaries, first-slice file targets, tests to write first, UI read-model shape, historical authoring packet order, save-schema and determinism gates, roadmap/board update rules, and a copy-ready external-agent prompt. Calendar windows are documented as guardrails only, with live-state pressure preferred for ordinary war, diplomacy, enclave, patron, alliance, and command crises.
 
 **Determinism:** Documentation-only. No simulation code, event data, generated artifacts, saves, baselines, or UI runtime files changed.
 
