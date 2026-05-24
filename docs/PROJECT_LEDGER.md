@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify PendingProposalReview optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** `PendingProposalReview` is a small `state` optional-field group, but its optionals encode a real queue state machine rather than missing defaults: pending rows omit resolution fields, proposal families use different payloads, and operation-opportunity rich decisions carry structured options only when needed.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies the nine optionals as pending/resolved state fields, legacy binary compatibility, or proposal-family-specific payload/options.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_PENDING_PROPOSAL_REVIEW_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `PendingProposalReview` optional-field group by classification. Future promotion requires a proposal-state schema/default/migration lane, likely a discriminated union by proposal family and resolution state.
+
+---
+
 ## [2026-05-23] docs(strict-null): classify CapabilityProfile optionals
 
 **Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
