@@ -20,7 +20,7 @@ Do not restate procedures already defined in `docs/10_canon/context.md`. This fi
 
 ## Paradox (agent team)
 
-The collective identity for subagents in this repo is **Pyrrhic**. For **big-picture or team coordination** (strategic priority, convening roles, aligning roadmap and ledger), invoke **orchestrator**; Product Manager is the Orchestrator's deputy for scope and sequencing. For other non-trivial tasks, read `.cursor/AGENT_TEAM_ROSTER.md` (Pyrrhic roster). Invoke the listed specialist(s) by reading and following the corresponding `.cursor/skills/<name>/SKILL.md`. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
+The collective identity for subagents in this repo is **Pyrrhic**. For **big-picture or team coordination** (strategic priority, convening roles, aligning roadmap and ledger), invoke **orchestrator**; Product Manager is the Orchestrator's deputy for scope and sequencing. For other non-trivial tasks, use the skills exposed by the current runtime and the repo briefs in `.claude/agents/`. In desktop Codex, custom skills are loaded from `C:\Users\User\.codex\skills`; in Claude-oriented repo flows, `.claude/skills/` and `.claude/agents/` are the shipped reference layer. Use clarification-first for high-risk items (cross-phase, canon, architecture, determinism); document handoffs when passing between roles.
 
 ## Process QA (validates others — eliminates micromanagement)
 
@@ -39,7 +39,8 @@ If the guard fails, treat it as a local checkout hygiene issue unless a content 
 
 ## See Also
 
-- `.cursor/AGENT_TEAM_ROSTER.md` - Pyrrhic roster and handoffs
+- `.claude/agents/README.md` - repo-shipped Pyrrhic agent briefs and handoffs
+- `docs/plans/COMMAND_BOARD.md` - current roadmap/backlog ownership and active lanes
 - `docs/00_start_here/docs_index.md` - Docs entrypoint
 - `docs/10_canon/context.md` - Complete workflow and process rules
 - `docs/10_canon/CANON.md` - Canon document index

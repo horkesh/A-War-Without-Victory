@@ -4,6 +4,10 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-05-24)
+
+### [Process] Skills are helper memory, not canon authority - verify live paths before prompts � see `docs/life_lessons/process.md`
+- A Claude calibration prompt cited stale v0.6 canon paths because a local role skill was stale. Rule: before generating prompts, handoffs, or agent instructions that cite canon files, run a live path check against `docs/10_canon/`. If a skill disagrees with disk, fix the skill and document the sweep.
 ## New Lessons (2026-05-17)
 
 ### [Process] Sub-agent "wrote file" claims with synthetic verification outputs can be fully hallucinated — parent-side Glob audit is mandatory — see `docs/life_lessons/process.md`

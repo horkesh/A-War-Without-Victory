@@ -14,7 +14,7 @@ description: Owns Lua bindings and scripting surface. Use when working on Lua AP
 - If scripting contract is unclear, STOP AND ASK.
 
 ## Required reading (when relevant)
-- `docs/10_canon/Systems_Manual_v0_5_0.md` for scriptable systems
+- `docs/10_canon/Systems_Manual_v0_9_0.md` for scriptable systems
 - `docs/20_engineering/CODE_CANON.md` for entrypoints
 
 ## Interaction rules

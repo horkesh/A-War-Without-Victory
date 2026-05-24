@@ -10150,6 +10150,22 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): refresh stale skill and agent references
+
+**Type:** Process/tooling documentation + local skill maintenance.
+
+**Change:** Audited live Codex skills, repo-shipped Claude skills, Claude agent briefs, and the repo agent workflow after a stale `game-designer` skill caused a prompt to cite obsolete v0.6 canon files. Updated live Codex skill files under `C:\Users\User\.codex\skills` and repo `.claude/skills` files to use current v0.9 canon paths where applicable, route scenario/report setup through `.claude/napkin.md`, `docs/life_lessons.md`, `docs/plans/COMMAND_BOARD.md`, and `GAME_STATE_RATING_MASTER.md`, and stop treating `.cursor` rosters as current. Added an audit report and life lesson that skills are helper memory, not canon authority.
+
+**Determinism:** Documentation/process-only. No runtime code, scenario data, generated artifacts, or simulation outputs changed.
+
+**Verification:** Stale-reference scans over `C:\Users\User\.codex\skills`, `.claude/skills`, `.claude/agents`, and `docs/20_engineering/AGENT_WORKFLOW.md` show no remaining dangerous v0.5/v0.6/v0.7 canon path references in active skill bodies; remaining hits are explicit compatibility/example mentions. `git diff --check` passed.
+
+**Roadmap delta:** Supports the command-board upkeep rule by keeping role skills aligned with current canon and roadmap dispatch sources.
+
+**Artifacts:** `docs/40_reports/audits/20260524_SKILL_AGENT_STALE_CONTENT_SWEEP.md`, `.claude/skills/*`, `docs/20_engineering/AGENT_WORKFLOW.md`, `docs/life_lessons.md`, `docs/life_lessons/process.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(roadmap): add command-board dispatch layer
 
 **Type:** Roadmap/process documentation.

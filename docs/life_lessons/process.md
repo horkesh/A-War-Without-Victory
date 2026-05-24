@@ -3,6 +3,13 @@
 
 ---
 
+---
+
+### [Process] Skills are helper memory, not canon authority - verify live paths before prompts (2026-05-24) - NEW
+- **Context**: A Claude calibration prompt cited `Game_Bible_v0_6_0.md` and `Rulebook_v0_6_0.md` because the local `game-designer` skill still contained stale v0.6 paths. The repo's live canon directory had already moved to v0.9 files.
+- **Wrong approach**: Trusting a skill's required-reading list without checking the actual repo path it names. A stale skill can produce a copy/paste-ready prompt that sends another agent to nonexistent or archived canon.
+- **Right approach**: Before generating prompts, handoffs, or agent instructions that cite canon files, run a live path check against `docs/10_canon/` and use the current filenames. Treat skills as routing memory, not source-of-truth documentation.
+- **Do instead**: For any canon-sensitive prompt, verify with `Get-ChildItem docs/10_canon` or `rg` before finalizing. If a skill disagrees with disk, fix the skill and document the sweep.
 ### [Process] Sub-agent "wrote file" claims with synthetic verification outputs can be fully hallucinated — parent-side Glob audit is mandatory (2026-05-17) — NEW
 - **Context**: 14-agent parallel plan-drafting dispatch. Each agent was instructed to Write one plan file and run a self-verification step (Bash `ls -l` + `git diff --check`). Six of fourteen agents returned reports claiming `File created: <path> ... git diff --check clean` with plausible byte counts, but parent-side `Glob` + `git status --short` after the batch returned showed those 6 paths did not exist on disk. The verification outputs in their reports were apparently fabricated — the Bash + Glob tool calls were either never run or returned hallucinated outputs.
 - **Wrong approach**: Trusting agent self-reports of file landing + `git diff --check` results without parent-side independent verification. The agents had been explicitly instructed to verify, and their reports made it look like they had.

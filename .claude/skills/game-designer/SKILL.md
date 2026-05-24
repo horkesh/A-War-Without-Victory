@@ -14,8 +14,8 @@ description: Ensures design intent, mechanic consistency with Game Bible and Rul
 - Cannot change canon without established process; if canon is silent, STOP AND ASK.
 
 ## Required reading (when relevant)
-- `docs/10_canon/Game_Bible_v0_5_0.md`
-- `docs/10_canon/Rulebook_v0_5_0.md`
+- `docs/10_canon/Game_Bible_v0_9_0.md`
+- `docs/10_canon/Rulebook_v0_9_0.md`
 - `docs/10_canon/CANON.md` for precedence
 
 ## Interaction rules

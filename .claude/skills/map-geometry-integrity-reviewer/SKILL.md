@@ -14,8 +14,8 @@ Validate map data, geometry integrity, and spatial outputs.
 ## Required reading
 - `docs/life_lessons/data_pipeline.md` — data pipeline, geometry lessons
 - `docs/life_lessons/ui_map.md` — map and rendering lessons
-- `docs/DETERMINISM_TEST_MATRIX.md`
-- `docs/10_canon/Engine_Invariants_v0_5_0.md`
+- `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - Any map or geometry docs relevant to the change scope.
 
 ## Review checklist

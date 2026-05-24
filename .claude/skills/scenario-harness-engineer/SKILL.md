@@ -12,9 +12,9 @@ Review and optimize scenario runner and pipeline integrity.
 - Focused on harness, preflight, diagnostics, and artifacts.
 
 ## Required reading
-- `docs/DETERMINISM_TEST_MATRIX.md`
-- `docs/10_canon/Engine_Invariants_v0_5_0.md`
-- `docs/CODE_CANON.md`
+- `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
+- `docs/20_engineering/CODE_CANON.md`
 - Relevant phase specs for the scenario scope.
 
 ## Review checklist

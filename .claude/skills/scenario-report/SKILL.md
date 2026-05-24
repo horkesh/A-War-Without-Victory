@@ -25,7 +25,7 @@ Run a scenario to completion, collect all harness artifacts, then have the **Orc
 
 ## Workflow (Orchestrator-led)
 
-1. **Setup** — Read `.agent/napkin.md`, `.agent/skills-catalog.md`, `.claude/AGENT_TEAM_ROSTER.md`. Optionally awwv-read-first for scenario/harness.
+1. **Setup** — Read `.claude/napkin.md`, `docs/life_lessons.md`, `docs/plans/COMMAND_BOARD.md`, and `docs/40_reports/GAME_STATE_RATING_MASTER.md`. Optionally awwv-read-first for scenario/harness.
 2. **Run** — Execute a **new** scenario run (do not reuse a previous run). Example: `npm run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_52w.json --weeks 52 --unique --video --map --out runs`. Document run_id and artifact paths from this run.
 3. **Collect** — Capture run_id and paths to all artifacts (see Artifacts below).
 4. **Convene** — Dispatch to each relevant Pyrrhic role (via Task tool or equivalent) with run_id and artifact paths; ask: "From your specialization: what works as intended, what does not, what needs changing, tuning, or investigating?" **Subagent types:** Use **formation-expert**, **scenario-creator-runner-tester**, and **historian** when available. Historian assesses historical plausibility from the BB KB (citation-backed). If your Task tooling cannot target those roles explicitly, use a general-purpose agent with a combined prompt covering Formation (brigades, militia, pools, OOB, recruitment), Scenario (historical anchors, init_control, ahistorical outcomes), and Historian (BB KB, citation-backed plausibility) and clearly label the response sections by domain.

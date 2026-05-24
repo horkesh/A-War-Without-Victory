@@ -18,10 +18,10 @@ description: Implements and maintains phase logic, state, and simulation behavio
 - If phase spec or canon is silent, STOP AND ASK.
 
 ## Required reading (when relevant)
-- `docs/10_canon/Phase_Specifications_v0_5_0.md`
-- `docs/10_canon/Phase_0_Specification_v0_5_0.md`, `docs/10_canon/Phase_I_Specification_v0_5_0.md`, `docs/10_canon/Phase_II_Specification_v0_5_0.md`
-- `docs/10_canon/Systems_Manual_v0_5_0.md`
-- `docs/10_canon/Engine_Invariants_v0_5_0.md`
+- `docs/10_canon/Phase_Specifications_v0_9_0.md`
+- `docs/10_canon/War_Specification_v0_9_0.md`
+- `docs/10_canon/Systems_Manual_v0_9_0.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
 
 ## Interaction rules
 - Map each behavioral change to phase spec and Systems Manual clauses.

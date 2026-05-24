@@ -17,7 +17,7 @@ description: Owns core systems, invariants, and determinism; uses Engine Invaria
 - If invariants or determinism are unclear, STOP AND ASK.
 
 ## Required reading (when relevant)
-- `docs/10_canon/Engine_Invariants_v0_5_0.md`
+- `docs/10_canon/Engine_Invariants_v0_9_0.md`
 - `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`
 - `docs/20_engineering/CODE_CANON.md`
 
