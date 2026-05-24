@@ -134,6 +134,7 @@ export interface TurnAftermathView {
   dateLabel: string;
   playerFaction: string | null;
   headline: string;
+  narrativeLine: string;
   tone: TurnAftermathTone;
   territory: {
     friendlyNet: number;
@@ -208,6 +209,13 @@ function buildHeadline(tone: TurnAftermathTone, friendlyNet: number, hasSummary:
   if (tone === 'loss') return `Net territorial loss: ${friendlyNet} OSIDs.`;
   if (tone === 'mixed') return 'Territory changed hands without a net shift.';
   return 'No territorial change this turn.';
+}
+
+function buildNarrativeLine(tone: TurnAftermathTone): string {
+  if (tone === 'gain') return 'The week ends with ground taken, but the ledger still decides what the advance cost.';
+  if (tone === 'loss') return 'The map contracted this week; command must decide whether to stabilize or answer.';
+  if (tone === 'mixed') return 'The front traded ground without mercy, leaving staff to sort signal from noise.';
+  return 'A quiet week is still a week of depletion, waiting, and staff work.';
 }
 
 function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | null): {
@@ -538,6 +546,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     dateLabel: turnToDateString(turn),
     playerFaction,
     headline: buildHeadline(tone, friendlyNet, summary != null),
+    narrativeLine: buildNarrativeLine(tone),
     tone,
     territory: {
       friendlyNet,

@@ -360,6 +360,7 @@ export interface DiplomacyActorView {
     commitmentBand: 'likely' | 'uncertain' | 'limited' | 'unknown';
     isolationBand: 'high' | 'elevated' | 'limited' | 'quiet';
     sanctionsActive: boolean;
+    stanceSummary: string;
     events: string[];
 }
 

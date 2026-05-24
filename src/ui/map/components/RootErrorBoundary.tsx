@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { t } from '../i18n';
+import { CRASH_DIAGNOSTICS_APP_VERSION, recordCrashDiagnostic } from '../services/telemetry/crashCapture';
 
 type RootErrorBoundaryProps = {
   zone: string;
@@ -30,6 +31,12 @@ export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErr
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error(`[RootErrorBoundary] ${this.props.zone} failed to render`, error, info.componentStack);
+    recordCrashDiagnostic({
+      appVersion: CRASH_DIAGNOSTICS_APP_VERSION,
+      uiSurface: this.props.zone,
+      errorCategory: 'unhandled_error',
+      stack: `${error.stack ?? error.message}\n${info.componentStack}`,
+    });
   }
 
   render() {

@@ -11,18 +11,38 @@ interface InstallCrashCaptureOptions {
     target?: Window;
 }
 
-export function installCrashDiagnosticsCapture(options: InstallCrashCaptureOptions): (() => void) | null {
+interface RecordCrashDiagnosticOptions extends InstallCrashCaptureOptions {
+    errorCategory: CrashDiagnosticsErrorCategory;
+    stack: unknown;
+}
+
+export const CRASH_DIAGNOSTICS_APP_VERSION = '0.9.6-alpha.1';
+
+export function recordCrashDiagnostic(options: RecordCrashDiagnosticOptions) {
     const target = options.target ?? (typeof window !== 'undefined' ? window : undefined);
     if (!target) return null;
 
     const queue = createCrashDiagnosticsQueue({ storage: target.localStorage });
+    return queue.recordCrash({
+        appVersion: options.appVersion,
+        platform: resolvePlatform(target),
+        osFamily: resolveOsFamily(target),
+        uiSurface: options.uiSurface ?? 'tactical_map',
+        errorCategory: options.errorCategory,
+        stack: options.stack,
+    });
+}
+
+export function installCrashDiagnosticsCapture(options: InstallCrashCaptureOptions): (() => void) | null {
+    const target = options.target ?? (typeof window !== 'undefined' ? window : undefined);
+    if (!target) return null;
+
     const record = (errorCategory: CrashDiagnosticsErrorCategory, stack: unknown) => {
-        queue.recordCrash({
+        recordCrashDiagnostic({
             appVersion: options.appVersion,
-            platform: resolvePlatform(target),
-            osFamily: resolveOsFamily(target),
             uiSurface: options.uiSurface ?? 'tactical_map',
             errorCategory,
+            target,
             stack,
         });
     };

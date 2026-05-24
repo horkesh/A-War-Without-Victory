@@ -98,6 +98,7 @@ export function TurnAftermathModal({
               </span>
             </div>
             <div className="mt-1 text-sm text-text-secondary">{view.headline}</div>
+            <div className="mt-2 max-w-2xl text-[13px] leading-5 text-text-primary/85">{view.narrativeLine}</div>
           </div>
           <button
             type="button"

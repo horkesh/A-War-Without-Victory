@@ -14,8 +14,9 @@
 | Diplomacy panel | Implemented as read-only route-openable panel | `docs/40_reports/implemented/20260517_DIPLOMACY_PANEL.md` |
 | Officer mini-bios | Implemented for first-pass opening commanders | `docs/40_reports/implemented/20260517_OFFICER_CHARACTER_MINI_BIOS.md` |
 | Soundscape | Stub/composer brief implemented; full audio assets not yet implemented | `docs/40_reports/implemented/20260517_SOUNDSCAPE_KICKOFF_AUDIO_STUB.md` |
-| BCS localization | Planned, not implemented | `docs/plans/2026-05-17-bcs-localization-plan.md` |
-| Opt-in telemetry/crash reporting | Privacy-gated, not implemented | `docs/40_reports/audits/20260517_TELEMETRY_CONSENT_POLICY_DECISION.md` |
+| BCS localization | First-pass Settings substrate implemented; full BCS localization not launch-claimable | `docs/40_reports/implemented/20260517_BCS_LOCALIZATION_FIRST_PASS.md`; `docs/plans/2026-05-17-bcs-localization-plan.md` |
+| Opt-in telemetry/crash reporting | Default-off local crash diagnostics implemented; upload/aggregation not launch-claimable | `docs/40_reports/implemented/20260518_TELEMETRY_LOCAL_FIRST_CRASH_DIAGNOSTICS.md`; `docs/40_reports/implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md` |
+| High Concept one-pager | Drafted for internal launch/press alignment | `docs/50_launch/marketing/high_concept.md` |
 
 ## Cut Or Future Claims
 

@@ -92,6 +92,7 @@ function dirtyStoreState(): void {
             dateLabel: '6 May 1992',
             playerFaction: 'RBiH',
             headline: 'Test aftermath',
+            narrativeLine: 'A quiet week is still a week of depletion, waiting, and staff work.',
             tone: 'quiet',
             territory: { friendlyNet: 0, gains: 0, losses: 0, notable: [] },
             combat: { battleCount: 0, friendlyBattleCount: 0, friendlyCasualties: 0, opposingCasualties: 0, territoryFlipsFromBattles: 0 },

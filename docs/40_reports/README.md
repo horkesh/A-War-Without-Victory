@@ -10,6 +10,10 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest diplomacy actor stance prose** | [implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md](implemented/20260523_DIPLOMACY_ACTOR_STANCE_PROSE.md) - Diplomacy actor rows now render deterministic public-safe stance prose from existing support, constraint, isolation, and sanctions bands. |
+| **Latest localized crash diagnostics** | [implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md](implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md) - React error boundaries now record opt-in local crash diagnostics with the boundary zone as the UI surface. |
+| **Latest Chronicle chapter prose summary** | [implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md](implemented/20260523_CHRONICLE_CHAPTER_PROSE_SUMMARY.md) - Chronicle chapters now summarize source entries with deterministic prose from dominant thread, headline count, and month range. |
+| **Latest Turn Aftermath narrative line** | [implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md](implemented/20260523_TURN_AFTERMATH_NARRATIVE_LINE.md) - Turn Aftermath now adds one deterministic authored line per tone and renders it in the modal plus Army HQ Records. |
 | **Latest Settings Escape ownership** | [implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md](implemented/20260523_SETTINGS_ESCAPE_OWNERSHIP.md) - Settings now closes on Escape without letting the global pause shortcut reopen Pause underneath. |
 | **Latest Personnel mobilization visibility** | [implemented/20260523_PERSONNEL_MOBILIZATION_VISIBILITY.md](implemented/20260523_PERSONNEL_MOBILIZATION_VISIBILITY.md) - Army HQ Personnel now surfaces selected-faction mobilization pool health from existing `mobilizationSummary` data. |
 | **Latest command briefing supply visibility** | [implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md](implemented/20260523_COMMAND_BRIEFING_SUPPLY_VISIBILITY.md) - command briefing now summarizes player-faction supply-state counts and corridor risk from canonical supply reports. |

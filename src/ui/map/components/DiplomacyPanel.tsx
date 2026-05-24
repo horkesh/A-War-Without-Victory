@@ -46,6 +46,9 @@ function ActorRow({ actor, primary = false }: { actor: DiplomacyActorView; prima
                 <span>{t('diplomacy.commitment')} <b className="text-text-primary">{titleCase(actor.commitmentBand)}</b></span>
                 <span>{t('diplomacy.isolation')} <b className="text-text-primary">{titleCase(actor.isolationBand)}</b></span>
             </div>
+            <p className="mt-3 text-[11px] leading-5 text-text-secondary">
+                {actor.stanceSummary}
+            </p>
         </div>
     );
 }

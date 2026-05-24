@@ -22,6 +22,7 @@ describe('DiplomacyPanel player truth', () => {
                 commitmentBand: 'likely',
                 isolationBand: 'elevated',
                 sanctionsActive: false,
+                stanceSummary: 'Serbia support is steady, but constraint is high; expect limited room for independent bargaining.',
                 events: [],
             },
             activeProposals: [

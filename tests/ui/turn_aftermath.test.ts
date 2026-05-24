@@ -186,6 +186,7 @@ describe('buildTurnAftermathView', () => {
     expect(view?.dateLabel).toBe('24 Jun 1992');
     expect(view?.tone).toBe('gain');
     expect(view?.headline).toContain('+2');
+    expect(view?.narrativeLine).toBe('The week ends with ground taken, but the ledger still decides what the advance cost.');
     expect(view?.territory).toMatchObject({ friendlyNet: 2, gains: 1, losses: 1 });
     expect(view?.territory.notable.map((flip) => flip.label)).toEqual([
       'Kulen Vakuf (Bihac)',
@@ -247,8 +248,10 @@ describe('buildTurnAftermathView', () => {
 
     expect(loss?.tone).toBe('loss');
     expect(loss?.headline).toContain('-3');
+    expect(loss?.narrativeLine).toBe('The map contracted this week; command must decide whether to stabilize or answer.');
     expect(quiet?.tone).toBe('quiet');
     expect(quiet?.headline).toContain('No territorial change');
+    expect(quiet?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
   });
 
   it('falls back to a quiet shell when the save has no latest turn summary yet', () => {
