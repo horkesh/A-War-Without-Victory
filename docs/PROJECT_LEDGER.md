@@ -267,6 +267,24 @@
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q1.md` (Jan–Mar 2026 + 2026-04-02 stray)
      - `docs/PROJECT_LEDGER_ARCHIVE_2026Q2.md` (April 2026; archived 2026-05-08)
 -->
+## [2026-05-23] docs(strict-null): classify CapabilityProfile optionals
+
+**Type:** Strict-null optional-field contract classification. No code, scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted targets, or output contract changed.
+
+**Why:** The optional `GameState` contract floor is now the only remaining strict-null inventory lane. `CapabilityProfile` is a small four-field `state` group, but its optionals are not safe generic promotion targets because they encode faction-specific profile shape and old-save neutral-reader behavior.
+
+**Change:** Added `docs/40_reports/audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md` and updated the 40_reports index, consolidated backlog, strict-null phase ledger, and master roadmap. The audit classifies `equipment_access`, `equipment_operational`, and `croatian_support` as sparse faction-specific profile fields, and `doctrine_effectiveness` as a writer-present field that still has backward-compatible neutral readers.
+
+**Determinism / output impact:** Documentation/process only. No runtime code or serialized state shape changed. The strict-null inventory remains at zero counted casts/assertions and 477 optional `GameState` fields.
+
+**Verification:** `node tools\diagnostics\strict_null_inventory.cjs --field-interfaces`; `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot`; `git diff --check`.
+
+**Artifacts:** `docs/40_reports/audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md`.
+
+**Roadmap delta:** Burns down the `CapabilityProfile` optional-field group by classification. Future promotion requires a capability-profile schema/default/migration lane, not generic strict-null cleanup.
+
+---
+
 ## [2026-05-23] perf(sector): index enemy personnel for sector assignment
 
 **Type:** Deterministic sector performance optimization and regression guard. No scenario data, combat math, operation behavior, save schema, UI behavior, calibration/army-arc tuning, event content, turn ordering, painted target, or output contract changed.

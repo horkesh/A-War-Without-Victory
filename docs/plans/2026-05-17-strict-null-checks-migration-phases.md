@@ -79,6 +79,8 @@ Guard: `tests/strict_null_inventory_progress.test.ts` pins the current counted e
 
 Next strict-null source work must classify small owned optional-field groups by save/default/validator readiness before making any field required. Broad optional-field removal is forbidden.
 
+2026-05-23 classification update: `CapabilityProfile` has four optional fields and is classified in `docs/40_reports/audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md`. `equipment_access`, `equipment_operational`, and `croatian_support` are intentionally sparse faction-specific profile fields; `doctrine_effectiveness` has current writers but retains backward-compatible neutral readers. Do not promote these fields in the generic strict-null cleanup lane. A future capability-profile schema redesign may replace this sparse shape, but that would be behavior/schema work with save/default review.
+
 ## Phase File Assignment
 
 Each listed file is assigned to exactly one phase. Files outside this first strict-null lane remain tracked by the baseline artifact and should be assigned by a later ledger expansion before they are migrated.

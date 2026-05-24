@@ -10,6 +10,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest strict-null CapabilityProfile optional classification** | [audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md](audits/20260523_STRICT_NULL_CAPABILITY_PROFILE_OPTIONAL_FIELDS.md) - the four `CapabilityProfile` optionals are classified as sparse faction-specific profile fields or backward-compatible neutral defaults, not safe generic promotion targets. |
 | **Latest sector enemy-personnel index** | [implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md](implemented/20260523_SECTOR_ENEMY_PERSONNEL_INDEX.md) - sector brigade assignment now builds one deterministic enemy-personnel-by-OSID index per invocation instead of rescanning all formations per sector for territory assignment and threat recomputation. |
 | **Latest brigade movement order helper** | [implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md](implemented/20260523_BRIGADE_MOVEMENT_ORDER_HELPER.md) - column-march movement producers now use a shared typed helper instead of repeated local `destination_sids` shape casts, while preserving optional `stance` semantics. |
 | **Latest formation-spawn directive narrowing** | [implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md](implemented/20260523_FORMATION_SPAWN_DIRECTIVE_NARROWING.md) - active formation-spawn directive reads now use a local narrowing helper instead of caller-side non-null assertions, while preserving the optional directive contract. |
