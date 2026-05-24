@@ -249,10 +249,10 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
       {/* Advance-turn affordance */}
       <button
         type="button"
-        className={`ml-1 rounded border px-2 py-0.5 text-[9px] font-bold tracking-widest transition-colors cursor-pointer ${
+        className={`ml-1 rounded border px-3 py-1 text-[11px] font-bold uppercase tracking-widest shadow-sm transition-colors cursor-pointer ${
           advanceBlocked
-            ? 'border-red-700/70 bg-red-950/35 text-red-300 hover:bg-red-900/40'
-            : 'border-amber-700/60 text-amber-500 hover:bg-amber-900/30 hover:text-amber-300'
+            ? 'border-red-700/80 bg-red-950/55 text-red-200 shadow-red-950/30 hover:bg-red-900/55'
+            : 'border-amber-700/75 bg-amber-950/35 text-amber-300 shadow-amber-950/25 hover:bg-amber-900/40 hover:text-amber-100'
         }`}
         onClick={handleAdvance}
         title={advanceGateTitle}

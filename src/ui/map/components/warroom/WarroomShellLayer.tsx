@@ -419,7 +419,7 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
           // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
           color: 'rgba(15, 32, 70, 0.92)',
           fontFamily: '"Segoe Print", "Segoe UI", Arial, sans-serif',
-          fontSize: 'clamp(7px, 1.05vw, 18px)',
+          fontSize: '14px',
           fontWeight: 600,
           lineHeight: 1.05,
           transform: 'rotate(-1.4deg)',

@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] ui(warroom): tighten calendar and advance affordance
+
+**Type:** UI polish/read-model presentation only. No simulation behavior, save schema, scenario data, generated artifact, combat math, event ordering, or advance-turn logic changed.
+
+**Why:** The Warroom rating row still carried stale blockers that had already been closed, but current source retained two real polish residues: the wall-calendar label used viewport-scaled type and the Warroom advance button had less command weight than the tactical affordance.
+
+**Change:** Replaced the Warroom calendar's `vw`-scaled font size with a stable 14px label guarded by the existing calendar accessibility test, strengthened the Warroom advance button's size/contrast/shadow classes, and updated GUI/rating documentation to reflect current Warroom truth.
+
+**Verification:** `npx.cmd vitest run tests\ui\warroom_shell_accessibility.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --reporter=dot` passed 14/14; `npm.cmd run typecheck` passed; `git diff --check` passed. No baseline run was needed because this is presentation-only UI work.
+
+**Artifacts:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`; `src/ui/map/components/warroom/WarroomStatusBar.tsx`; `tests/ui/warroom_shell_accessibility.test.ts`; `docs/40_reports/GUI_MASTER.md`; `docs/40_reports/GAME_STATE_RATING_MASTER.md`.
+
+---
+
 ## [2026-05-24] docs(gui): mark visual audit superseded
 
 **Type:** Documentation truth reconciliation only. No UI behavior, simulation behavior, save schema, scenario data, generated artifact, or test contract changed.

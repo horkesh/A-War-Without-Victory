@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-05-22 (GUI visual audit retired chrome removal H9)
+**Updated:** 2026-05-24 (Warroom calendar/advance polish)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Warroom calendar/advance polish** | [GAME_STATE_RATING_MASTER.md](GAME_STATE_RATING_MASTER.md) row 18 - the Warroom shell no longer carries the stale no-state/hotspot/Comic-Sans blockers, the wall-calendar label avoids viewport-scaled type, and the Warroom advance affordance has stronger command weight. |
 | **GUI visual audit retired chrome removal H9** | [implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md](implemented/20260522_GUI_AUDIT_RETIRED_CHROME_REMOVAL_H9.md) - ninth Batch H slice from the 2026-05-22 GUI visual audit: unused retired tactical chrome files were deleted after import review, with a guard keeping them off disk. |
 | **GUI visual audit Army HQ commander empty-state H8** | [implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md](implemented/20260522_GUI_AUDIT_ARMY_HQ_COMMANDER_EMPTY_STATE_H8.md) - eighth Batch H slice from the 2026-05-22 GUI visual audit: Army HQ commander lookup now falls back to active flattened officer data when sidecar state rows are absent. |
 | **GUI visual audit Warroom desk map H7** | [implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md](implemented/20260522_GUI_AUDIT_WARROOM_DESK_MAP_H7.md) - seventh Batch H slice from the 2026-05-22 GUI visual audit: the Warroom desk-map projection now fills more of its hotspot and uses stronger paper/frame/ink contrast. |
