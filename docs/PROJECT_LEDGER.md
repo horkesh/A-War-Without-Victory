@@ -1,4 +1,18 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] chore(warroom): sync public clickable-region mirrors
+
+**Type:** Warroom public-asset mirror synchronization. No simulation behavior, save schema, scenario data, calibration/army-arc tuning, combat math, or operation logic changed.
+
+**Why:** `npm.cmd run desktop:package:probe` runs the Warroom asset staging script, which copies canonical `data/ui/hq_*_clickable_regions.json` into the tracked `src/ui/warroom/public/data/ui/` mirror. The probe exposed that the RBiH and RS public mirrors were stale against the canonical desk-map hotspot geometry.
+
+**Change:** Synchronized `src/ui/warroom/public/data/ui/hq_rbih_clickable_regions.json` and `src/ui/warroom/public/data/ui/hq_rs_clickable_regions.json` with their canonical `data/ui/` source files.
+
+**Verification:** `Compare-Object` reported no differences between each canonical source file and its public mirror after staging. The preceding exact `npm.cmd run desktop:package:probe` reproduction passed locally, including packaged `awwv://warroom/index.html` load and operational/sandbox tactical window checks.
+
+**Artifacts:** `src/ui/warroom/public/data/ui/hq_rbih_clickable_regions.json`; `src/ui/warroom/public/data/ui/hq_rs_clickable_regions.json`; `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-23] fix(ui): warroom corkboard map + whiteboard date + reachable map bounds
 
 **Type:** UI tuning only. No simulation behavior, scenario data, save schema, save migration, event ordering, OOB, combat outputs, or calibration values changed. Affects desktop GUI and main map camera limits only.
