@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] docs(strict-null): reconcile zero escape floor
+
+**Type:** Documentation truth reconciliation only. No simulation behavior, save schema, UI behavior, scenario data, calibration/army-arc tuning, generated artifact, or test contract changed.
+
+**Why:** Current disk truth from `node tools/diagnostics/strict_null_inventory.cjs` reports zero counted `as_factionid_casts`, `as_unknown_casts`, `as_any_casts`, dot non-null assertions, and index non-null assertions, but consolidated backlog/report text still carried the earlier three-unknown-cast floor.
+
+**Change:** Updated the strict-null backlog rows and optional GameState contract report to mark the counted escape lanes closed and leave the 486 optional `GameState` fields as the active remaining schema-contract lane.
+
+**Verification:** `npx.cmd vitest run tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 91/91; `git diff --check` passed. No baseline run was needed because no runtime/source files changed.
+
+---
+
 ## [2026-05-24] refactor(strict-null): type warroom fallback regions
 
 **Type:** Strict-null UI boundary cleanup. No simulation behavior, combat math, operation tuning, scenario data, OOB data, save schema, calibration constants, event ordering, or Warroom navigation behavior changed.
