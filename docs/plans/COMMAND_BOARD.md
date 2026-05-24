@@ -6,6 +6,8 @@
 
 **Controlling sources:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-05-18-autonomous-remaining-work-coverage-matrix.md`, `docs/40_reports/CONSOLIDATED_BACKLOG.md`, `docs/40_reports/GAME_STATE_RATING_MASTER.md`, and `docs/PROJECT_LEDGER.md`.
 
+**Plan standard:** active, gated, operator, and owned-elsewhere plan packets should comply with `docs/plans/PLAN_EXECUTION_STANDARD.md`; the current hardening queue lives at `docs/plans/2026-05-24-active-plan-hardening-pass.md`.
+
 ## Status Legend
 
 | Status | Meaning |
@@ -58,6 +60,7 @@
 6. Every lane closeout must update this command board, the coverage matrix or relevant plan, the rating/backlog doc if its status changed, and `docs/PROJECT_LEDGER.md`.
 7. A lane is not closed until its verification command/proof is named in the implementation report or ledger entry.
 8. Planning rows must stay actionable: owner lane, next action, verification, and stop gate are required. A vague aspiration belongs in backlog history, not this board.
+9. Any plan used for external-agent handoff must satisfy `docs/plans/PLAN_EXECUTION_STANDARD.md` or be marked for hardening before dispatch.
 
 ## Keeping This Current
 

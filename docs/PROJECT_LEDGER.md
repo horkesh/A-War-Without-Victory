@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): add executable plan standard
+
+**Type:** Roadmap/process planning.
+
+**Change:** Added `PLAN_EXECUTION_STANDARD.md` as the required format for active, gated, operator, and owned-elsewhere plan handoffs. Added an active hardening matrix for upgrading command-board plans into external-agent execution packets, and updated the Command Board maintenance rules to require the standard before external dispatch.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/PLAN_EXECUTION_STANDARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/plans/COMMAND_BOARD.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
+
+---
+
 ## [2026-05-24] docs(events): plan presidential-core event upgrade
 
 **Type:** Roadmap planning + command-board wiring.
