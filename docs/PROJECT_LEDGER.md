@@ -10198,6 +10198,20 @@ All ten `as FactionId*` removals are no-ops under the current `type FactionId = 
 
 ---
 
+## [2026-05-24] docs(process): harden branch CI release hygiene plan
+
+**Type:** Roadmap/process planning.
+
+**Change:** Added an execution-grade branch/CI/release hygiene plan that consolidates current-tip proof, CI polling, dirty-file classification, merge/branch acceptance evidence, and operator-only release proof boundaries. Updated the Command Board and active plan hardening matrix to point the P0 branch/CI row at the new packet.
+
+**Determinism:** Documentation-only. No runtime code, scenario data, generated artifacts, saves, or baselines changed.
+
+**Verification:** `git diff --check` - PASS.
+
+**Artifacts:** `docs/plans/2026-05-24-branch-ci-release-hygiene-execution-plan.md`, `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-05-24-active-plan-hardening-pass.md`, `docs/PROJECT_LEDGER.md`.
+
+---
+
 ## [2026-05-24] docs(process): classify active plan hardening lanes
 
 **Type:** Roadmap/process planning.

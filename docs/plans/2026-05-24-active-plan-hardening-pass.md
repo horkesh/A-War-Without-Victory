@@ -33,7 +33,7 @@ Tasks:
 
 | Lane | Active handoff source | Current classification | Next hardening action |
 | --- | --- | --- | --- |
-| Branch/CI/release hygiene | `docs/plans/2026-05-20-release-evidence-ci-proof-packet-plan.md`, `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md` | needs expansion | Merge into one current-tip execution packet with explicit dirty-file, CI-poll, proof freshness, and operator-only gates. |
+| Branch/CI/release hygiene | `docs/plans/2026-05-24-branch-ci-release-hygiene-execution-plan.md` | execution-grade | Use for current-tip proof, CI polling, dirty-file classification, and merge/branch acceptance packets. |
 | GUI polish / presidential shell | `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/plans/2026-05-24-presidential-blocker-flow-plan.md`, `docs/plans/2026-05-24-presidential-ui-redesign-research.md` | owned-elsewhere acceptance packet | Prepare review/merge packet only; do not rewrite GUI implementation while GUI branch is active. |
 | Calibration / army arc / HVO-HV operations | calibration branch prompt, `docs/40_reports/CALIBRATION_MASTER.md`, HVO synthesis reports | owned-elsewhere acceptance packet | Prepare verification/merge acceptance criteria; do not author calibration while external branch owns it. |
 | Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | execution-grade | Use as the template for other lane upgrades. |
@@ -62,7 +62,7 @@ Stop gate:
 
 | Lane | Candidate plan(s) | Hardening action |
 | --- | --- | --- |
-| Branch/CI/release hygiene | `docs/plans/2026-05-20-release-evidence-ci-proof-packet-plan.md`, `docs/plans/2026-05-18-autonomous-merge-pr-evidence-plan.md` | Convert to execution packet for current-tip proof, CI polling, dirty-worktree handling, and merge acceptance. |
+| Branch/CI/release hygiene | `docs/plans/2026-05-24-branch-ci-release-hygiene-execution-plan.md` | Execution-grade. Continue using as the P0 hygiene packet. |
 | GUI polish / presidential shell | `docs/plans/2026-05-24-gui-shell-reorganization-scope.md`, `docs/plans/2026-05-24-presidential-blocker-flow-plan.md`, `docs/plans/2026-05-24-presidential-ui-redesign-research.md` | Keep owned-elsewhere warning; add merge/review packet and collision-safe file targets. |
 | Calibration / army arc / HVO-HV operations | external calibration branch prompt plus `docs/40_reports/CALIBRATION_MASTER.md` and HVO synthesis docs | Do not rewrite calibration work while owned elsewhere; prepare verification/merge acceptance packet only. |
 | Event system presidential core upgrade | `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md` | Already execution-grade. Keep as template. |
