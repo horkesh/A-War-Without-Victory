@@ -4,6 +4,8 @@
 **Method:** Source-level audit (3 focused passes over `src/ui/map`, `src/ui/warroom`, `src/desktop`, GUI docs) + live click-through driven through Claude in Chrome against the running dev server.
 **Constraint honored:** No code, scenario, OOB, or calibration changes were made. The only runtime intervention was hiding two IPC-locked peace overlays via DevTools `display:none` so surfaces behind them could be inspected; this is reverted by a page reload and touches no repo files. Working tree unchanged by this audit.
 
+**Implementation status (2026-05-24):** SUPERSEDED BY IMPLEMENTED FIX PACKETS. The findings below remain as the original audit evidence, but the actionable batches A-H are now tracked as closed in `docs/40_reports/GUI_MASTER.md` and the implementation reports under `docs/40_reports/implemented/20260522_GUI_AUDIT_*.md`. Do not reopen these findings from this audit alone; verify current source/tests first. The closed packets include MapLibre dasharray repair, label discipline, peace/event modal hygiene, modal palette unification, stale-state resets, Warroom shell ownership, dead-control feedback, and H1-H9 polish cleanup.
+
 > Severity key: **P0** broken/blocking · **P1** serious usability or player-truth issue · **P2** polish/clarity · **P3** optional enhancement.
 > Provenance tags per finding: **[live]** observed in the running app · **[source]** found by code inspection · **[live+source]** both · **[verify]** needs confirmation.
 

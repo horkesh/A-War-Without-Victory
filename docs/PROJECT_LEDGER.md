@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-05-24] docs(gui): mark visual audit superseded
+
+**Type:** Documentation truth reconciliation only. No UI behavior, simulation behavior, save schema, scenario data, generated artifact, or test contract changed.
+
+**Why:** `GUI_VISUAL_AUDIT_2026-05-22.md` still read as an active punch-list even though `GUI_MASTER.md` and the implemented 2026-05-22 GUI audit packets already close batches A-H through H9. Leaving the original audit unmarked risks agents redoing closed GUI work.
+
+**Change:** Added a status note to the original visual audit stating that the findings are preserved as original evidence, while actionable implementation status now lives in `GUI_MASTER.md` and `implemented/20260522_GUI_AUDIT_*.md`.
+
+**Verification:** `npx.cmd vitest run tests\ui\gui_audit_label_discipline.test.ts --reporter=dot` passed 3/3; `git diff --check` passed. No baseline run was needed because no runtime/source files changed.
+
+---
+
 ## [2026-05-24] docs(ratings): retire stale save-continue gap
 
 **Type:** Documentation truth reconciliation only. No simulation behavior, save schema, UI behavior, scenario data, generated artifact, or test contract changed.
