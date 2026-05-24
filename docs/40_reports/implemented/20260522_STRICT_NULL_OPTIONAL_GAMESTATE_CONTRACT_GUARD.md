@@ -40,6 +40,8 @@ Optional-field domain floor:
 
 This is not a signal to promote optional fields wholesale. The 486 fields remain a save-shape/defaulting review problem. Future work should classify and migrate small owned groups only when loaders, migrations, validators, and baseline behavior prove the required shape.
 
+2026-05-22 follow-up: the derived 8-field slice is classified in `docs/40_reports/audits/20260522_STRICT_NULL_DERIVED_OPTIONAL_FIELDS_CLASSIFICATION.md`. All 8 fields remain intentionally optional today: six are save-shape risks on frozen endgame/end-state snapshots, and two are runtime optional diagnostics.
+
 ## Verification
 
 - `npx.cmd vitest run tests\strict_null_inventory.test.ts tests\strict_null_inventory_progress.test.ts --reporter=dot` passed 94/94.
