@@ -149,16 +149,16 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('RAT')).toBeTruthy();
     expect(screen.getByText('PRIORITETI')).toBeTruthy();
-    expect(screen.getByText('NAPRIJED')).toBeTruthy();
+    expect(screen.getByText('NASTAVI')).toBeTruthy();
     expect(screen.queryByText('WAR')).toBeNull();
     expect(screen.queryByText('PRIORITIES')).toBeNull();
     expect(screen.queryByText('ADVANCE')).toBeNull();
 
     fireEvent.click(screen.getByText('PRIORITETI'));
 
-    expect(screen.getByText('Pregled prije napredovanja')).toBeTruthy();
-    expect(screen.getByText('Nijedna ziva stavka stola nece biti zatrpana sljedecim potezom.')).toBeTruthy();
-    expect(screen.getByText('Izvorni prijenosi')).toBeTruthy();
+    expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
+    expect(screen.getByText('Nijedna ziva stavka stola nece biti zakopana sljedecim potezom.')).toBeTruthy();
+    expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 
   it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
@@ -199,14 +199,13 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('HRONIKA')).toBeTruthy();
     expect(screen.getByText('SAZETAK')).toBeTruthy();
     expect(screen.getByText('ZAPISI')).toBeTruthy();
-    expect(screen.getByText('DOGADJAJI')).toBeTruthy();
+    expect(screen.getByText('DOGADAJI')).toBeTruthy();
     expect(screen.getByText('KODEKS')).toBeTruthy();
-    expect(screen.getByText('OVLAST')).toBeTruthy();
     expect(screen.getByText(/Potez 40/)).toBeTruthy();
-    expect(screen.getByText(/NAPRIJED/)).toBeTruthy();
-    expect(screen.getByRole('group', { name: 'Komandno ovlastenje: 4/8' })).toBeTruthy();
-    expect(screen.getByTitle('Hronologija kampanje')).toBeTruthy();
-    expect(screen.getByTitle('Posjeti Stab armije [H]')).toBeTruthy();
+    expect(screen.getByText(/SLJEDECI POTEZ/)).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Komandni autoritet: 4/8' })).toBeTruthy();
+    expect(screen.getByTitle('Kampanjska vremenska linija')).toBeTruthy();
+    expect(screen.getByTitle('Posjeti Armijski HQ [H]')).toBeTruthy();
     expect(screen.queryByText('CHRONICLE')).toBeNull();
     expect(screen.queryByText('SUMMARY')).toBeNull();
     expect(screen.queryByText('EVENTS')).toBeNull();

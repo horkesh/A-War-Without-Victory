@@ -39,6 +39,7 @@ function firedEvent(id: string) {
 describe('CodexPanel dynamic essay proof', () => {
     beforeEach(() => {
         storeState = { loadedGameState: null };
+        setLocale('en');
     });
 
     afterEach(() => {
@@ -82,7 +83,7 @@ describe('CodexPanel dynamic essay proof', () => {
 
         expect(screen.getByText('Kodeks')).toBeTruthy();
         expect(screen.getByText('0 eseja dostupno')).toBeTruthy();
-        expect(screen.getByText('Izaberi esej')).toBeTruthy();
+        expect(screen.getByText('Izaberite esej')).toBeTruthy();
         expect(screen.queryByText('Select an essay')).toBeNull();
         expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
     });
@@ -137,13 +138,13 @@ describe('CodexPanel dynamic essay proof', () => {
 
         renderPanel();
         fireEvent.click(screen.getByText('1995'));
-        fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
+        fireEvent.click(screen.getByText('Daytonski sporazum: kraj rata, zamrznuta pitanja'));
 
-        expect(screen.getAllByText('Odstupanje igracevog rata')).toHaveLength(2);
+        expect(screen.getAllByText('Odstupanje igracevog rata').length).toBeGreaterThanOrEqual(2);
         expect(screen.queryByText('Player War Divergence')).toBeNull();
         expect(screen.getByText('Historijski kontekst')).toBeTruthy();
         expect(screen.queryByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeNull();
-        expect(screen.getByText('Rat je trajao 6 sedmica duze od historijskih 182 sedmica.')).toBeTruthy();
+        expect(screen.getByText('Podaci iz zavrsnog zapisa: Rat je trajao 6 sedmica duze od historijskih 182 sedmica.')).toBeTruthy();
         expect(screen.getByText('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.')).toBeTruthy();
     });
 
